@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<div id="root"></div>
+<div id="user" {% if app.user %} data-user="{{ app.user|serialize('json') }}" {% endif %} ></div>
+
+<noscript>
+    <p>
+        JavaScript semble être désactivé sur votre navigateur, ce qui est nécessaire pour le bon fonctionnement de ce site. Veuillez
+        activer JavaScript sur votre navigateur.
+    </p>
+</noscript>
+{% endblock %}

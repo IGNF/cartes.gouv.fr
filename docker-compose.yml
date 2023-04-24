@@ -1,0 +1,24 @@
+version: "3.4"
+
+networks:
+    cartesgouvfr_network:
+
+
+services:
+    app:
+        image: IGNF/cartes.gouv.fr:latest
+        build:
+            context: .
+            dockerfile: .docker/Dockerfile
+            args:
+                - http_proxy
+                - https_proxy
+                - HTTP_PROXY
+                - HTTPS_PROXY
+        ports:
+            - "9090:8000"
+        env_file:
+            - .env.local
+        networks:
+            - cartesgouvfr_network
+        restart: unless-stopped

@@ -1,0 +1,33 @@
+version: "3.4"
+
+networks:
+    web_dev:
+        external: true
+
+services:
+    app_dev:
+        build:
+            context: .
+            dockerfile: .docker/dev.Dockerfile
+            args:
+                - http_proxy
+                - https_proxy
+                - HTTP_PROXY
+                - HTTPS_PROXY
+        working_dir: /opt/cartesgouvfr-site
+        volumes:
+            - .:/opt/cartesgouvfr-site
+        extra_hosts:
+            - host.docker.internal:host-gateway
+        ports:
+            - "9091:8000"
+        env_file:
+            - .env.local
+        networks:
+            - web_dev
+        restart: unless-stopped
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.cartesgouvfr.rule=Host(`cartesgouvfr-dev.docker.localhost`)"
+            - "traefik.http.routers.cartesgouvfr.entrypoints=websecure"
+            - "traefik.http.services.validator-api-service.loadbalancer.server.port=8000"
