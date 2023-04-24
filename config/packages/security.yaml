@@ -1,0 +1,33 @@
+security:
+    providers:
+        # used to reload user from session & other features (e.g. switch_user)
+        app_user_provider:
+            id: App\Security\UserProvider
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+        main:
+            lazy: true
+            # provider: app_user_provider
+
+            # activate different ways to authenticate
+            # https://symfony.com/doc/current/security.html#the-firewall
+            custom_authenticators:
+                - App\Security\KeycloakAuthenticator
+            logout:
+                path: cartesgouvfr_security_logout
+                # where to redirect after logout
+                target: cartesgouvfr_app
+
+            # https://symfony.com/doc/current/security/impersonating_user.html
+            # switch_user: true
+
+    # Easy way to control access for large sections of your site
+    # Note: Only the *first* access control that matches will be used
+    access_control:
+        # - { path: ^/mon-compte, roles: ROLE_USER }
+        # - { path: ^/, roles: PUBLIC_ACCESS }
+
+when@test:
+    security:

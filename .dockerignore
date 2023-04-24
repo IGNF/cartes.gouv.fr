@@ -1,0 +1,6 @@
+var
+.git
+/vendor/
+/node_modules/
+
+docker-compose*.yml

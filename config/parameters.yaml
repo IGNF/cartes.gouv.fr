@@ -1,0 +1,38 @@
+parameters:
+    app_env: "%env(resolve:APP_ENV)%"
+
+    public_path: "%env(resolve:ENCORE_PUBLIC_PATH)%"
+
+    iam_url: "%env(resolve:IAM_URL)%"
+    iam_realm: "%env(resolve:IAM_REALM)%"
+    iam_client_id: "%env(resolve:IAM_CLIENT_ID)%"
+    iam_client_secret: "%env(resolve:IAM_CLIENT_SECRET)%"
+
+    api_plage_url: "%env(resolve:API_PLAGE_URL)%"
+    api_plage_annexe_url: "%env(resolve:API_PLAGE_ANNEXE_URL)%"
+
+    http_proxy: "%env(resolve:HTTP_PROXY)%"
+
+    oneup_uploader_gallery_path: "%kernel.project_dir%/var/data/uploaded_files"
+
+    support_contact_mail: "%env(resolve:SUPPORT_CONTACT_EMAIL)%"
+    mailer_sender_address: "%env(resolve:MAILER_SENDER_ADDRESS)%"
+
+    api_plage_storages:
+        storage_postgresql: "%env(resolve:API_PLAGE_STORAGE_POSTGRESQL)%"
+        storage_filesystem: "%env(resolve:API_PLAGE_STORAGE_FILESYSTEM)%"
+        storage_s3: "%env(resolve:API_PLAGE_STORAGE_S3)%"
+
+    api_plage_endpoint: "%env(resolve:API_PLAGE_ENDPOINT_TMS)%"
+
+    api_plage_checks:
+        check_standard: "%env(resolve:API_PLAGE_CHECK_STANDARD)%"
+        check_vector: "%env(resolve:API_PLAGE_CHECK_VECTOR)%"
+
+    api_plage_processings:
+        int_vect_files_db: "%env(resolve:API_PLAGE_PROC_INT_VECT_FILES_DB)%"
+        create_vect_pyr: "%env(resolve:API_PLAGE_PROC_CREATE_VECT_PYR)%"
+
+    service_account:
+        username: "%env(resolve:SERVICE_ACCOUNT)%"
+        password: "%env(resolve:SERVICE_ACCOUNT_PASSWORD)%"
