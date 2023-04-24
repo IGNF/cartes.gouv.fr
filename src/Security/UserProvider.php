@@ -31,7 +31,7 @@ class UserProvider implements UserProviderInterface
         $this->entrepotApiService = $entrepotApiService;
     }
 
-    public function loadUser()
+    public function loadUser(): User
     {
         /** @var KeycloakClient */
         $keycloakClient = $this->clientRegistry->getClient('keycloak');
@@ -73,8 +73,10 @@ class UserProvider implements UserProviderInterface
      * this method.
      *
      * @throws UserNotFoundException if the user is not found
+     *
+     * @SuppressWarnings(UnusedFormalParameter)
      */
-    public function loadUserByIdentifier($identifier): UserInterface
+    public function loadUserByIdentifier(string $identifier): UserInterface
     {
         return $this->loadUser();
     }
@@ -82,7 +84,7 @@ class UserProvider implements UserProviderInterface
     /**
      * @deprecated since Symfony 5.3, loadUserByIdentifier() is used instead
      */
-    public function loadUserByUsername($username): UserInterface
+    public function loadUserByUsername(string $username): UserInterface
     {
         return $this->loadUserByIdentifier($username);
     }

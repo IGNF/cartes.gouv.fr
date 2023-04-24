@@ -7,6 +7,7 @@ use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use KnpU\OAuth2ClientBundle\Client\Provider\KeycloakClient;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -14,7 +15,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class SecurityController extends AbstractController
 {
     #[Route('/login', name: 'cartesgouvfr_security_login', methods: ['GET'], options: ['expose' => true])]
-    public function login(Request $request, ClientRegistry $clientRegistry)
+    public function login(Request $request, ClientRegistry $clientRegistry): RedirectResponse
     {
         // if ('test' == $params->get('app_env')) {
         //     return $this->testLogin($tokenStorage, $request, $urlGenerator);
@@ -31,12 +32,12 @@ class SecurityController extends AbstractController
     }
 
     #[Route('/login/check', name: 'cartesgouvfr_security_login_check', methods: ['GET'])]
-    public function loginCheck()
+    public function loginCheck(): void
     {
     }
 
     #[Route('/logout', name: 'cartesgouvfr_security_logout', methods: ['GET'])]
-    public function logout()
+    public function logout(): void
     {
     }
 

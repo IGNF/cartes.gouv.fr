@@ -21,6 +21,10 @@ class User implements UserInterface
     private \DateTimeInterface $accountCreationDate;
     private \DateTimeInterface $lastApiCallDate;
 
+    /**
+     * @param array<mixed> $keycloakUserInfo
+     * @param array<mixed> $apiUserInfo
+     */
     public function __construct(array $keycloakUserInfo = [], array $apiUserInfo = [])
     {
         $this->email = $keycloakUserInfo['email'];
@@ -68,7 +72,7 @@ class User implements UserInterface
     /**
      * @see UserInterface
      */
-    public function eraseCredentials()
+    public function eraseCredentials(): void
     {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
@@ -89,6 +93,9 @@ class User implements UserInterface
         return $this->lastName;
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function getCommunitiesMember(): array
     {
         return $this->communitiesMember;
