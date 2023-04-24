@@ -26,7 +26,10 @@ class EntrepotApiService
         ]);
     }
 
-    public function getUserMe()
+    /**
+     * @return array<mixed>
+     */
+    public function getUserMe(): array
     {
         $options = [
             'headers' => [
@@ -41,7 +44,7 @@ class EntrepotApiService
         return $response->toArray(false);
     }
 
-    private function getToken()
+    private function getToken(): string
     {
         /** @var SessionInterface */
         $session = $this->requestStack->getSession();
