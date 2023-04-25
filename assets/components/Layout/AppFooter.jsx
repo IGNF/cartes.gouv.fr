@@ -1,6 +1,6 @@
 import Footer from "@codegouvfr/react-dsfr/Footer";
 import React from "react";
-import { routes } from "../../router";
+import { routes } from "../../router/router";
 
 const AppFooter = () => {
     return (
