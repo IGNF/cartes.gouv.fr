@@ -1,29 +1,20 @@
+import React, { Suspense, lazy, useContext } from "react";
+
 import Routing from "fos-router";
-import React, { Suspense, useContext } from "react";
-import { createRouter, defineRoute } from "type-route";
+import { UserContext } from "../contexts/UserContext";
+import { protectedRoutes, useRoute } from "./router";
 
-import { UserContext } from "./contexts/UserContext";
+import AppLayout from "../components/Layout/AppLayout";
+import Loading from "../components/Layout/Loading";
+import { defaultNavItems } from "../config/navItems";
+import Home from "../pages/Home";
+import PageNotFound from "../pages/error/PageNotFound";
 
-import Loading from "./components/Layout/Loading";
-import Home from "./pages/Home";
-import PageNotFound from "./pages/error/PageNotFound";
+const Docs = lazy(() => import("../pages/Docs"));
+const MyAccount = lazy(() => import("../pages/MyAccount"));
+const DatastoreList = lazy(() => import("../pages/datastores/DatastoreList"));
 
-const Docs = React.lazy(() => import("./pages/Docs"));
-const MyAccount = React.lazy(() => import("./pages/MyAccount"));
-const DatastoreList = React.lazy(() => import("./pages/datastores/DatastoreList"));
-
-const routeDefs = {
-    home: defineRoute("/"),
-    my_account: defineRoute("/mon-compte"),
-    datastores_list: defineRoute("/datastores"),
-    docs: defineRoute("/docs"),
-};
-
-export const { RouteProvider, useRoute, routes } = createRouter(routeDefs);
-
-const protectedRoutes = ["my_account", "datastores_list"];
-
-export function RouterRenderer() {
+function RouterRenderer() {
     const route = useRoute();
     const { user } = useContext(UserContext);
 
@@ -56,5 +47,17 @@ export function RouterRenderer() {
             break;
     }
 
-    return <Suspense fallback={<Loading />}>{content}</Suspense>;
+    return (
+        <Suspense
+            fallback={
+                <AppLayout navItems={defaultNavItems}>
+                    <Loading />
+                </AppLayout>
+            }
+        >
+            {content}
+        </Suspense>
+    );
 }
+
+export default RouterRenderer;
