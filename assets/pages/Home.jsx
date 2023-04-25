@@ -4,16 +4,18 @@ import { Tile } from "@codegouvfr/react-dsfr/Tile";
 import Routing from "fos-router";
 import React, { useContext } from "react";
 
+import AppLayout from "../components/Layout/AppLayout";
+import { defaultNavItems } from "../config/navItems";
 import { UserContext } from "../contexts/UserContext";
-import { routes } from "../router";
+import { routes } from "../router/router";
 
 const Home = () => {
     const { user } = useContext(UserContext);
 
     return (
-        <div>
+        <AppLayout navItems={defaultNavItems}>
             <h1 className={fr.cx("fr-mt-4w")}>
-                Transformez vos données géographiques en tuiles vectorielles simplement et diffusez-les n'importe où
+                {"Transformez vos données géographiques en tuiles vectorielles simplement et diffusez-les n'importe où"}
             </h1>
 
             {user == null ? (
@@ -81,7 +83,7 @@ const Home = () => {
                 accusantium magni ex?
             </p>
             <p>...</p>
-        </div>
+        </AppLayout>
     );
 };
 

@@ -1,14 +1,16 @@
-import Button from "@codegouvfr/react-dsfr/Button";
 import React, { useContext } from "react";
+
+import AppLayout from "../components/Layout/AppLayout";
+import BtnBackToHome from "../components/Layout/BtnBackToHome";
+import { defaultNavItems } from "../config/navItems";
 import { UserContext } from "../contexts/UserContext";
 import functions from "../functions";
-import { routes } from "../router";
 
 const MyAccount = () => {
     const { user } = useContext(UserContext);
 
     return (
-        <>
+        <AppLayout navItems={defaultNavItems}>
             <h1>Mon compte</h1>
             <p>
                 <strong>Prénom</strong> : {user.firstName}
@@ -26,8 +28,8 @@ const MyAccount = () => {
                 <strong>Identifiant technique</strong> : {user.id}
             </p>
 
-            <Button linkProps={routes.home().link}>Retour à l'accueil</Button>
-        </>
+            <BtnBackToHome />
+        </AppLayout>
     );
 };
 
