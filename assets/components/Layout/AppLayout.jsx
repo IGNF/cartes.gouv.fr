@@ -1,16 +1,25 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import React from "react";
+import PropTypes from "prop-types";
+import React, { memo } from "react";
+
 import AppFooter from "./AppFooter";
 import AppHeader from "./AppHeader";
 
-const AppLayout = ({ children }) => {
+const AppLayout = memo(function AppLayout({ children, navItems = [] }) {
     return (
         <>
-            <AppHeader />
-            <div className={fr.cx("fr-container")}>{children}</div>
+            <AppHeader navItems={navItems} />
+            <main role="main">
+                <div className={fr.cx("fr-container")}>{children}</div>
+            </main>
             <AppFooter />
         </>
     );
+});
+
+AppLayout.propTypes = {
+    children: PropTypes.node,
+    navItems: PropTypes.arrayOf(PropTypes.object),
 };
 
 export default AppLayout;

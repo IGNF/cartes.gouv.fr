@@ -1,13 +1,15 @@
-import Button from "@codegouvfr/react-dsfr/Button";
 import React from "react";
-import { routes } from "../../router";
+
+import AppLayout from "../../components/Layout/AppLayout";
+import BtnBackToHome from "../../components/Layout/BtnBackToHome";
+import { defaultNavItems } from "../../config/navItems";
 
 const DatastoreList = () => {
     return (
-        <>
+        <AppLayout navItems={defaultNavItems}>
             <h1>Mes espaces de travail</h1>
-            <Button linkProps={routes.home().link}>Retour à l'accueil</Button>
-        </>
+            <BtnBackToHome />
+        </AppLayout>
     );
 };
 

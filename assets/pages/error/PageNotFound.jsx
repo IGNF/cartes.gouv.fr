@@ -1,13 +1,14 @@
 import React from "react";
-import { routes } from "../../router";
-import Button from "@codegouvfr/react-dsfr/Button";
+
+import AppLayout from "../../components/Layout/AppLayout";
+import BtnBackToHome from "../../components/Layout/BtnBackToHome";
 
 const PageNotFound = () => {
     return (
-        <>
+        <AppLayout>
             <h1>404, page non trouvée</h1>
-            <Button linkProps={routes.home().link}>Retour à l'accueil</Button>
-        </>
+            <BtnBackToHome />
+        </AppLayout>
     );
 };
 

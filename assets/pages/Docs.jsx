@@ -1,15 +1,15 @@
 import React from "react";
 
-import { routes } from "../router";
-import Button from "@codegouvfr/react-dsfr/Button";
+import AppLayout from "../components/Layout/AppLayout";
+import BtnBackToHome from "../components/Layout/BtnBackToHome";
+import { defaultNavItems } from "../config/navItems";
 
 const Docs = () => {
     return (
-        <div>
+        <AppLayout navItems={defaultNavItems}>
             <h1>Docs</h1>
-
-            <Button linkProps={routes.home().link}>Retour à l'accueil</Button>
-        </div>
+            <BtnBackToHome />
+        </AppLayout>
     );
 };
 

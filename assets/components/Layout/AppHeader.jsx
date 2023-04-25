@@ -2,35 +2,12 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Header from "@codegouvfr/react-dsfr/Header";
 import React, { useContext } from "react";
 import { UserContext } from "../../contexts/UserContext";
-import { routes } from "../../router";
+import { routes } from "../../router/router";
 
-const AppHeader = () => {
+import PropTypes from "prop-types";
+
+const AppHeader = ({ navItems = [] }) => {
     const { user } = useContext(UserContext);
-
-    const navItems = [
-        {
-            text: "Comment ça marche ?",
-            linkProps: routes.docs().link,
-        },
-        {
-            text: "Qu'est-ce qu'un flux de tuiles vectorielles ?",
-            linkProps: routes.docs().link,
-        },
-        {
-            text: "Plugin Géotuileur",
-            linkProps: {
-                href: "/plugin-qgis",
-            },
-        },
-        {
-            text: "À propos",
-            linkProps: {
-                href: "https://www.ign.fr/geoplateforme/la-geoplateforme-en-bref",
-                target: "_blank",
-                rel: "noopener",
-            },
-        },
-    ];
 
     const quickAccessItems = [];
 
@@ -85,6 +62,10 @@ const AppHeader = () => {
             navigation={navItems}
         />
     );
+};
+
+AppHeader.propTypes = {
+    navItems: PropTypes.array,
 };
 
 export default AppHeader;
