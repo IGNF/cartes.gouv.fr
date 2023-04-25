@@ -1,19 +1,18 @@
 import React from "react";
-import AppLayout from "./components/Layout/AppLayout";
 
+import ErrorBoundary from "./components/ErrorBoundary";
 import { UserContextProvider } from "./contexts/UserContext";
-import { RouteProvider, RouterRenderer } from "./router";
+import RouterRenderer from "./router/RouterRenderer";
+import { RouteProvider } from "./router/router";
 
 const App = () => {
     return (
         <>
             <UserContextProvider>
                 <RouteProvider>
-                    <AppLayout>
-                        <main role="main">
-                            <RouterRenderer />
-                        </main>
-                    </AppLayout>
+                    <ErrorBoundary>
+                        <RouterRenderer />
+                    </ErrorBoundary>
                 </RouteProvider>
             </UserContextProvider>
         </>
