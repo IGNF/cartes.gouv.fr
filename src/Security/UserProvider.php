@@ -58,7 +58,7 @@ class UserProvider implements UserProviderInterface
         /** @var KeycloakResourceOwner */
         $keycloakUser = $keycloakClient->fetchUserFromToken($accessToken);
 
-        $apiUser = $this->entrepotApiService->getUserMe();
+        $apiUser = $this->entrepotApiService->user->getMe();
 
         $user = new User($keycloakUser->toArray(), $apiUser);
 
