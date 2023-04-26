@@ -20,7 +20,7 @@ services:
         extra_hosts:
             - host.docker.internal:host-gateway
         ports:
-            - "9091:8000"
+            - "9092:8000"
         env_file:
             - .env.local
         networks:

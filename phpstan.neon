@@ -6,6 +6,8 @@ parameters:
     level: 6
     paths:
         - src
+    ignoreErrors:
+        - '#return type has no value type specified in iterable type array#'
     # excludes_analyse:
     #     - tests/bootstrap.php
     # bootstrapFiles:
