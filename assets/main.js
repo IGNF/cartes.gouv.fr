@@ -9,10 +9,10 @@
 // import './styles/app.css';
 
 // start the Stimulus application
+import { startReactDsfr } from "@codegouvfr/react-dsfr/spa";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
-import { startReactDsfr } from "@codegouvfr/react-dsfr/spa";
 
 startReactDsfr({ defaultColorScheme: "light" });
 
