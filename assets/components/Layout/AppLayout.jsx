@@ -9,7 +9,7 @@ const AppLayout = memo(function AppLayout({ children, navItems = [] }) {
     return (
         <>
             <AppHeader navItems={navItems} />
-            <main role="main">
+            <main role="main" className={fr.cx("fr-py-2w")}>
                 <div className={fr.cx("fr-container")}>{children}</div>
             </main>
             <AppFooter />
