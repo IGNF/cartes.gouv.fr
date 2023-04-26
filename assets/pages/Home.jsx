@@ -14,9 +14,7 @@ const Home = () => {
 
     return (
         <AppLayout navItems={defaultNavItems}>
-            <h1 className={fr.cx("fr-mt-4w")}>
-                {"Transformez vos données géographiques en tuiles vectorielles simplement et diffusez-les n'importe où"}
-            </h1>
+            <h1>{"Transformez vos données géographiques en tuiles vectorielles simplement et diffusez-les n'importe où"}</h1>
 
             {user == null ? (
                 <Button linkProps={{ href: Routing.generate("cartesgouvfr_security_login") }}>Commencer</Button>
