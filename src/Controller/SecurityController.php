@@ -2,19 +2,17 @@
 
 namespace App\Controller;
 
-use App\Security\User;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use KnpU\OAuth2ClientBundle\Client\Provider\KeycloakClient;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
+#[Route(name: 'cartesgouvfr_security_')]
 class SecurityController extends AbstractController
 {
-    #[Route('/login', name: 'cartesgouvfr_security_login', methods: ['GET'], options: ['expose' => true])]
+    #[Route('/login', name: 'login', methods: ['GET'], options: ['expose' => true])]
     public function login(Request $request, ClientRegistry $clientRegistry): RedirectResponse
     {
         // if ('test' == $params->get('app_env')) {
@@ -31,30 +29,13 @@ class SecurityController extends AbstractController
         return $client->redirect(['openid', 'profile', 'email']);
     }
 
-    #[Route('/login/check', name: 'cartesgouvfr_security_login_check', methods: ['GET'])]
+    #[Route('/login/check', name: 'login_check', methods: ['GET'])]
     public function loginCheck(): void
     {
     }
 
-    #[Route('/logout', name: 'cartesgouvfr_security_logout', methods: ['GET'])]
+    #[Route('/logout', name: 'logout', methods: ['GET'])]
     public function logout(): void
     {
     }
-
-    // #[Route('/get-user', name: 'get_user', methods: ['GET'], options: ['expose' => true], condition: 'request.isXmlHttpRequest()')]
-    // public function getUserInfo(): JsonResponse
-    // {
-    //     /** @var User */
-    //     $user = $this->getUser();
-
-    //     if (null != $user) {
-    //         return new JsonResponse([
-    //             'first_name' => $user->getFirstName(),
-    //             'last_name' => $user->getLastName(),
-    //             'email' => $user->getEmail(),
-    //         ]);
-    //     }
-
-    //     return new JsonResponse(['error' => 'not_authenticated'], Response::HTTP_UNAUTHORIZED);
-    // }
 }

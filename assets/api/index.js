@@ -1,4 +1,5 @@
-import users from "./users";
+import datastore from "./datastore";
+import user from "./user";
 
 /**
  * @param {RequestInfo} url
@@ -35,5 +36,6 @@ export async function jsonFetch(url, params = {}) {
 }
 
 export default {
-    users,
+    user,
+    datastore,
 };
