@@ -9,7 +9,7 @@
     </description>
 
     <!-- see https://phpmd.org/rules/index.html for available rules -->
-    <!-- TODO uncomment progressively and fix 'make check-rules' issues -->
+    <!-- TODO uncomment progressively and fix 'composer check-rules' issues -->
 
     <!--
     <rule ref="rulesets/cleancode.xml">
