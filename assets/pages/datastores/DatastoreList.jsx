@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 
 import api from "../../api";
 import AppLayout from "../../components/Layout/AppLayout";
-import BtnBackToHome from "../../components/Layout/BtnBackToHome";
+import BtnBackToHome from "../../components/Utils/BtnBackToHome";
 import { defaultNavItems } from "../../config/navItems";
 
 const DatastoreTile = ({ datastore }) => {

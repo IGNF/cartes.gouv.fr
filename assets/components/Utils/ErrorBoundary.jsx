@@ -1,13 +1,13 @@
+import { fr } from "@codegouvfr/react-dsfr";
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import PropTypes from "prop-types";
 import React from "react";
 import { ErrorBoundary as BaseErrorBoundary } from "react-error-boundary";
-import { fr } from "@codegouvfr/react-dsfr";
 
-import { defaultNavItems } from "../config/navItems";
-import { routes } from "../router/router";
-import AppLayout from "./Layout/AppLayout";
+import { defaultNavItems } from "../../config/navItems";
+import { routes } from "../../router/router";
+import AppLayout from "../Layout/AppLayout";
 
 function Fallback({ error, resetErrorBoundary }) {
     return (

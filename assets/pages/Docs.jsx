@@ -1,7 +1,7 @@
 import React from "react";
 
 import AppLayout from "../components/Layout/AppLayout";
-import BtnBackToHome from "../components/Layout/BtnBackToHome";
+import BtnBackToHome from "../components/Utils/BtnBackToHome";
 import { defaultNavItems } from "../config/navItems";
 
 const Docs = () => {
