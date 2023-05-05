@@ -1,0 +1,15 @@
+{
+    "recommendations": [
+        "bmewburn.vscode-intelephense-client",
+        "xdebug.php-debug",
+        "mehedidracula.php-namespace-resolver",
+        "neilbrayfield.php-docblocker",
+        "ecodes.vscode-phpmd",
+        "junstyle.php-cs-fixer",
+        "MehediDracula.php-constructor",
+        "DEVSENSE.composer-php-vscode",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "pflannery.vscode-versionlens"
+    ]
+}
