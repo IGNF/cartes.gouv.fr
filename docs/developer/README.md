@@ -29,27 +29,3 @@ Le portail est construit sur le framework PHP Symfony. Il nécessite l'installat
 ## Commandes utiles
 
 Quelques commandes composer et yarn ont été configurées comme raccourcis pour certaines tâches courantes. Voir [composer.json](./../../composer.json) et [package.json](./../../package.json) à la racine du projet.
-
-## Divers
-
-### Extensions VSCode
-
-Voici une liste d'extensions VSCode recommandées qui permettent une bonne expérience développeur.
-
-**PHP** :
-
--   **PHP Intelephense** : https://marketplace.visualstudio.com/items?itemName=bmewburn.vscode-intelephense-client
--   **PHP Debug** : https://marketplace.visualstudio.com/items?itemName=xdebug.php-debug
--   **PHP Namespace Resolver** : https://marketplace.visualstudio.com/items?itemName=MehediDracula.php-namespace-resolver
--   **PHP DocBlocker** : https://marketplace.visualstudio.com/items?itemName=neilbrayfield.php-docblocker
--   **PHP Mess Detector** : https://marketplace.visualstudio.com/items?itemName=ecodes.vscode-phpmd
--   **php cs fixer** : https://marketplace.visualstudio.com/items?itemName=junstyle.php-cs-fixer
--   **PHP Getters & Setters** : https://marketplace.visualstudio.com/items?itemName=phproberto.vscode-php-getters-setters
--   **PHP Constructor** : https://marketplace.visualstudio.com/items?itemName=MehediDracula.php-constructor
--   **Composer** : https://marketplace.visualstudio.com/items?itemName=DEVSENSE.composer-php-vscode
-
-**JavaScript** :
-
--   **ESLint** : https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint
--   **Prettier - Code formatter** : https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode
--   **Version Lens** : https://marketplace.visualstudio.com/items?itemName=pflannery.vscode-versionlens
