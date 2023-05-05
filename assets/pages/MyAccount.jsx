@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 
 import AppLayout from "../components/Layout/AppLayout";
-import BtnBackToHome from "../components/Layout/BtnBackToHome";
+import BtnBackToHome from "../components/Utils/BtnBackToHome";
 import { defaultNavItems } from "../config/navItems";
 import { UserContext } from "../contexts/UserContext";
 import functions from "../functions";
@@ -22,7 +22,7 @@ const MyAccount = () => {
                 <strong>Email</strong> : {user.email}
             </p>
             <p>
-                <strong>Date d'inscription</strong> : {functions.date.format(user.accountCreationDate)}
+                <strong>{"Date d'inscription"}</strong> : {functions.date.format(user.accountCreationDate)}
             </p>
             <p>
                 <strong>Identifiant technique</strong> : {user.id}
