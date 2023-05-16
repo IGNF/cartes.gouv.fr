@@ -13,6 +13,7 @@ import { protectedRoutes, useRoute } from "./router";
 const Docs = lazy(() => import("../pages/Docs"));
 const MyAccount = lazy(() => import("../pages/MyAccount"));
 const DatastoreList = lazy(() => import("../pages/datastores/DatastoreList"));
+const DatastoreDashboard = lazy(() => import("../pages/datastores/DatastoreDashboard"));
 
 function RouterRenderer() {
     const route = useRoute();
@@ -33,14 +34,17 @@ function RouterRenderer() {
         case "home":
             content = <Home />;
             break;
+        case "docs":
+            content = <Docs />;
+            break;
         case "my_account":
             content = <MyAccount />;
             break;
-        case "datastores_list":
+        case "datastore_list":
             content = <DatastoreList />;
             break;
-        case "docs":
-            content = <Docs />;
+        case "datastore_dashboard":
+            content = <DatastoreDashboard datastoreId={route.params.datastoreId} />;
             break;
         default:
             content = <PageNotFound />;
