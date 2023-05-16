@@ -19,13 +19,13 @@ const Home = () => {
             {user == null ? (
                 <Button linkProps={{ href: Routing.generate("cartesgouvfr_security_login") }}>Commencer</Button>
             ) : (
-                <Button linkProps={routes.datastores_list().link}>Commencer</Button>
+                <Button linkProps={routes.datastore_list().link}>Commencer</Button>
             )}
 
             <h2 className={fr.cx("fr-mt-4w")}>Comment ça marche ?</h2>
             <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
                 <div
-                    className="fr-col"
+                    className={fr.cx("fr-col")}
                     style={{
                         width: 300,
                     }}
@@ -40,7 +40,7 @@ const Home = () => {
                     />
                 </div>
                 <div
-                    className="fr-col"
+                    className={fr.cx("fr-col")}
                     style={{
                         width: 300,
                     }}
@@ -55,7 +55,7 @@ const Home = () => {
                     />
                 </div>
                 <div
-                    className="fr-col"
+                    className={fr.cx("fr-col")}
                     style={{
                         width: 300,
                     }}

@@ -11,7 +11,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class DatastoreController extends AbstractController
 {
     public function __construct(
-        public readonly EntrepotApiService $entrepotApiService
+        private EntrepotApiService $entrepotApiService
     ) {
     }
 
