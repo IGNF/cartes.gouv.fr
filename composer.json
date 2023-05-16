@@ -10,8 +10,6 @@
         "friendsofsymfony/jsrouting-bundle": "^3.2",
         "knpuniversity/oauth2-client-bundle": "^2.14",
         "phpdocumentor/reflection-docblock": "^5.3",
-        "phpmd/phpmd": "^2.13",
-        "phpstan/phpdoc-parser": "^1.18",
         "stevenmaguire/oauth2-keycloak": "^4.0",
         "symfony/asset": "6.2.*",
         "symfony/console": "6.2.*",
@@ -45,6 +43,7 @@
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.16",
+        "phpmd/phpmd": "^2.13",
         "phpstan/phpstan": "^1.10",
         "symfony/browser-kit": "6.2.*",
         "symfony/css-selector": "6.2.*",
