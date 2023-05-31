@@ -17,8 +17,14 @@ const routeDefs = {
         },
         (p) => `/datastores/${p.datastoreId}`
     ),
+    datastore_data_new: defineRoute(
+        {
+            datastoreId: param.path.string,
+        },
+        (p) => `/datastores/${p.datastoreId}/data/new`
+    ),
 };
 
 export const { RouteProvider, useRoute, routes } = createRouter(routeDefs);
 
-export const protectedRoutes = ["my_account", "datastore_list"];
+export const protectedRoutes = ["my_account", "datastore_list", "datastore_dashboard", "datastore_add_data"];

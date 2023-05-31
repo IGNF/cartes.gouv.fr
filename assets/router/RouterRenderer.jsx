@@ -14,6 +14,7 @@ const Docs = lazy(() => import("../pages/Docs"));
 const MyAccount = lazy(() => import("../pages/MyAccount"));
 const DatastoreList = lazy(() => import("../pages/datastores/DatastoreList"));
 const DatastoreDashboard = lazy(() => import("../pages/datastores/DatastoreDashboard"));
+const DataNewForm = lazy(() => import("../pages/data/DataNewForm"));
 
 function RouterRenderer() {
     const route = useRoute();
@@ -45,6 +46,9 @@ function RouterRenderer() {
             break;
         case "datastore_dashboard":
             content = <DatastoreDashboard datastoreId={route.params.datastoreId} />;
+            break;
+        case "datastore_data_new":
+            content = <DataNewForm datastoreId={route.params.datastoreId} />;
             break;
         default:
             content = <PageNotFound />;
