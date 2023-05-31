@@ -1,7 +1,7 @@
 import Routing from "fos-router";
 import { jsonFetch } from "./index";
 
-const get = () => {
+const getMe = () => {
     const url = Routing.generate("cartesgouvfr_api_user_me");
     return jsonFetch(url);
 };
@@ -12,6 +12,6 @@ const getDatastoresList = () => {
 };
 
 export default {
-    get,
+    getMe,
     getDatastoresList,
 };
