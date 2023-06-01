@@ -21,4 +21,7 @@ module.exports = {
     settings: {
         react: { version: "detect" },
     },
+    globals: {
+        Routing: true,
+    },
 };
