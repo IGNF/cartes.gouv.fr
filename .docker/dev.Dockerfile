@@ -56,14 +56,14 @@ COPY --from=composer /usr/bin/composer /usr/bin/composer
 
 #----------------------------------------------------------------------
 # Install Nodejs
-# https://github.com/nodejs/docker-node/blob/main/16/bullseye/Dockerfile
+# https://github.com/nodejs/docker-node/blob/main/18/bullseye/Dockerfile
 # https://stackoverflow.com/a/63108753
 #----------------------------------------------------------------------
-COPY --from=node:16 /usr/local/lib/node_modules /usr/local/lib/node_modules
-COPY --from=node:16 /usr/local/bin/node /usr/local/bin/node
-RUN ln -s /usr/local/bin/node /usr/local/bin/nodejs \
-    && ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm
-RUN npm i -g npm yarn
+COPY --from=node:18 /usr/local/lib/node_modules /usr/local/lib/node_modules
+COPY --from=node:18 /usr/local/bin/node /usr/local/bin/node
+RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm
+RUN npm i -g yarn pnpm npx
+# RUN yarn set version stable
 
 #----------------------------------------------------------------------
 # APT Cache Cleanup
