@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Exception\AppException;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use KnpU\OAuth2ClientBundle\Client\Provider\KeycloakClient;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -34,8 +35,14 @@ class SecurityController extends AbstractController
     {
     }
 
-    #[Route('/logout', name: 'logout', methods: ['GET'])]
+    #[Route('/logout', name: 'logout', methods: ['GET'], options: ['expose' => true])]
     public function logout(): void
     {
+    }
+
+    #[Route('/signup', name: 'signup', methods: ['GET'], options: ['expose' => true])]
+    public function signup(): RedirectResponse
+    {
+        throw new AppException('not yet implemented');
     }
 }

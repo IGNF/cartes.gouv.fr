@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-<div id="root"></div>
+<div id="root" data-app-root="{{ app_root }}"></div>
 <div id="user" {% if app.user %} data-user="{{ app.user|serialize('json') }}" {% endif %} ></div>
 
 <noscript>

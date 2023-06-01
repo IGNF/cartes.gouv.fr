@@ -1,7 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Tile } from "@codegouvfr/react-dsfr/Tile";
-import Routing from "fos-router";
 import React, { useContext } from "react";
 
 import AppLayout from "../components/Layout/AppLayout";
