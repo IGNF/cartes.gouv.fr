@@ -1,4 +1,3 @@
-import Routing from "fos-router";
 import { jsonFetch } from "./index";
 
 /**
