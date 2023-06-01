@@ -5,13 +5,13 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>{% block title %}cartes.gouv.fr{% endblock %}</title>
 
-        <link rel="apple-touch-icon" href="/dsfr/favicon/apple-touch-icon.png" />
-        <link rel="icon" href="/dsfr/favicon/favicon.svg" type="image/svg+xml" />
-        <link rel="shortcut icon" href="/dsfr/favicon/favicon.ico" type="image/x-icon" />
-        <link rel="manifest" href="/dsfr/favicon/manifest.webmanifest" crossorigin="use-credentials" />
+        <link rel="apple-touch-icon" href="{{ asset('dsfr/favicon/apple-touch-icon.png') }}" />
+        <link rel="icon" href="{{ asset('dsfr/favicon/favicon.svg') }}" type="image/svg+xml" />
+        <link rel="shortcut icon" href="{{ asset('dsfr/favicon/favicon.ico') }}" type="image/x-icon" />
+        <link rel="manifest" href="{{ asset('dsfr/favicon/manifest.webmanifest') }}" crossorigin="use-credentials" />
 
-        <link rel="stylesheet" href="/dsfr/dsfr.min.css" />
-        <link rel="stylesheet" href="/dsfr/utility/icons/icons.min.css" />
+        <link rel="stylesheet" href="{{ asset('dsfr/dsfr.min.css') }}" />
+        <link rel="stylesheet" href="{{ asset('dsfr/utility/icons/icons.min.css') }}" />
 
         {% set fonts_list = [
             "Marianne-Regular",
@@ -20,7 +20,7 @@
         ] %}
 
         {% for font_name in fonts_list %}
-            <link rel="preload" href="/dsfr/fonts/{{font_name}}.woff2" as="font" crossorigin="anonymous" />
+            <link rel="preload" href="{{ asset('dsfr/fonts/' ~ font_name ~ '.woff2') }}" as="font" crossorigin="anonymous" />
         {% endfor %}
 
         {% block stylesheets %}
@@ -33,5 +33,8 @@
     </head>
     <body>
         {% block body %}{% endblock %}
+
+        <script src="{{ asset('bundles/fosjsrouting/js/router.min.js') }}"></script>
+        <script src="{{ path('fos_js_routing_js', { callback: 'fos.Router.setData' }) }}"></script>
     </body>
 </html>

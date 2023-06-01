@@ -16,14 +16,14 @@ const AppHeader = ({ navItems = [] }) => {
         quickAccessItems.push({
             iconId: "fr-icon-lock-line",
             linkProps: {
-                href: "/login",
+                href: Routing.generate("cartesgouvfr_security_login"),
             },
             text: "Se connecter",
         });
         quickAccessItems.push({
             iconId: "fr-icon-account-line",
             linkProps: {
-                href: "/signup",
+                href: Routing.generate("cartesgouvfr_security_signup"),
                 disabled: true,
             },
             text: "S’enregistrer",
@@ -38,7 +38,7 @@ const AppHeader = ({ navItems = [] }) => {
         quickAccessItems.push({
             iconId: fr.cx("fr-icon-logout-box-r-line"),
             linkProps: {
-                href: "/logout",
+                href: Routing.generate("cartesgouvfr_security_logout"),
             },
             text: "Se déconnecter",
         });
