@@ -5,6 +5,7 @@ namespace App\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class AppController extends AbstractController
 {
@@ -13,10 +14,16 @@ class AppController extends AbstractController
         name: 'cartesgouvfr_app',
         priority: -1,
         defaults: ['reactRouting' => null],
-        requirements: ['reactRouting' => '.+']
+        requirements: ['reactRouting' => '.+'],
+        options: ['expose' => true]
     )]
-    public function app(): Response
+    public function app(UrlGeneratorInterface $urlGenerator): Response
     {
-        return $this->render('app.html.twig');
+        $appRoot = $urlGenerator->generate('cartesgouvfr_app', [], UrlGeneratorInterface::ABSOLUTE_PATH);
+        $appRoot = substr($appRoot, 0, -1);
+
+        return $this->render('app.html.twig', [
+            'app_root' => $appRoot,
+        ]);
     }
 }
