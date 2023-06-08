@@ -14,7 +14,8 @@ parameters:
     http_proxy: "%env(resolve:HTTP_PROXY)%"
 
     oneup_uploader_gallery_path: "%kernel.project_dir%/var/data/uploaded_files"
-
+    upload_path: "%kernel.project_dir%/var/data/uploaded_files"
+    
     support_contact_mail: "%env(resolve:SUPPORT_CONTACT_EMAIL)%"
     mailer_sender_address: "%env(resolve:MAILER_SENDER_ADDRESS)%"
 
