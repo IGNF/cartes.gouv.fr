@@ -29,4 +29,4 @@ const routeDefs = {
 
 export const { RouteProvider, useRoute, routes } = createRouter(routeDefs);
 
-export const protectedRoutes = ["my_account", "datastore_list", "datastore_dashboard", "datastore_add_data"];
+export const protectedRoutes = ["my_account", "datastore_list", "datastore_dashboard", "datastore_data_new"];
