@@ -39,7 +39,9 @@
         "symfony/webpack-encore-bundle": "^1.16",
         "symfony/yaml": "6.2.*",
         "twig/extra-bundle": "^2.12|^3.0",
-        "twig/twig": "^2.12|^3.0"
+        "twig/intl-extra": "^3.6",
+        "twig/twig": "^2.12|^3.0",
+        "willdurand/js-translation-bundle": "^5.0"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.16",
@@ -93,6 +95,7 @@
         "check-rules": [
             "php bin/console lint:twig --show-deprecations templates/",
             "php bin/console lint:container",
+            "php bin/console lint:yaml translations",
             "vendor/bin/phpmd src text ./phpmd.xml",
             "vendor/bin/phpstan analyse -c phpstan.neon --xdebug"
         ],
