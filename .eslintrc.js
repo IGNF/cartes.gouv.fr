@@ -23,5 +23,6 @@ module.exports = {
     },
     globals: {
         Routing: true,
+        Translator: true,
     },
 };

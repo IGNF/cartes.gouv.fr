@@ -8,10 +8,10 @@
 // any CSS you import will output into a single css file (app.css in this case)
 // import './styles/app.css';
 
-// start the Stimulus application
 import { startReactDsfr } from "@codegouvfr/react-dsfr/spa";
 import React from "react";
 import ReactDOM from "react-dom/client";
+
 import App from "./App";
 
 startReactDsfr({ defaultColorScheme: "light" });

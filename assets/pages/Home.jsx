@@ -13,12 +13,12 @@ const Home = () => {
 
     return (
         <AppLayout navItems={defaultNavItems}>
-            <h1>{"Transformez vos données géographiques en tuiles vectorielles simplement et diffusez-les n'importe où"}</h1>
+            <h1>{Translator.trans("home.heading")}</h1>
 
             {user == null ? (
-                <Button linkProps={{ href: Routing.generate("cartesgouvfr_security_login") }}>Commencer</Button>
+                <Button linkProps={{ href: Routing.generate("cartesgouvfr_security_login") }}>{Translator.trans("home.start")}</Button>
             ) : (
-                <Button linkProps={routes.datastore_list().link}>Commencer</Button>
+                <Button linkProps={routes.datastore_list().link}>{Translator.trans("home.start")}</Button>
             )}
 
             <h2 className={fr.cx("fr-mt-4w")}>Comment ça marche ?</h2>
