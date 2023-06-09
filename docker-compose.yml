@@ -6,19 +6,22 @@ networks:
 
 services:
     app:
-        image: IGNF/cartes.gouv.fr:latest
+        image: ignf/cartes.gouv.fr:latest
         build:
             context: .
             dockerfile: .docker/Dockerfile
             args:
-                - http_proxy
-                - https_proxy
                 - HTTP_PROXY
                 - HTTPS_PROXY
-        ports:
-            - "9090:8000"
         env_file:
             - .env.local
+        environment:
+            - HTTP_PROXY=${HTTP_PROXY}
+            - HTTPS_PROXY=${HTTPS_PROXY}
+            - http_proxy=${HTTP_PROXY}
+            - https_proxy=${HTTPS_PROXY}
+        ports:
+            - "9090:8000"
         networks:
             - cartesgouvfr_network
         restart: unless-stopped
