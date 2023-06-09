@@ -4,7 +4,7 @@ import { Input } from "@codegouvfr/react-dsfr/Input";
 import { Select } from "@codegouvfr/react-dsfr/Select";
 import { yupResolver } from "@hookform/resolvers/yup";
 import PropTypes from "prop-types";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 import * as yup from "yup";
@@ -14,8 +14,10 @@ import { defaultProjections } from "../../config/projections";
 // import Autocomplete from "../../components/Utils/Autocomplete";
 import BtnBackToDashboard from "../../components/Utils/BtnBackToDashboard";
 import MapWrapper from "../../components/Utils/MapWrapper";
+import Progress from "../../components/Utils/Progress";
 
 import "./../../sass/components/zoom-range-map.scss";
+
 
 const maxFileSize = 2000000000; // 2 GB
 const fileExtensions = ["csv", "gpkg", "zip"];
@@ -48,7 +50,14 @@ const DataNewForm = ({ datastoreId }) => {
     const uploadChunk = Routing.generate("cartesgouvfr_app_upload_chunk");
     const uploadComplete = Routing.generate("cartesgouvfr_app_upload_complete");
 
-    const [showDataInfos, setshowDataInfos] = useState(false);
+    // Progress
+    const [showProgress, setShowProgress] = useState(false);
+    const [percent, setPercent] = useState(0);
+    useEffect(() => {
+        setPercent(0);
+    }, [showProgress]);
+
+    const [showDataInfos, setShowDataInfos] = useState(false);
     const [srid, setSrid] = useState("");
     const [projections, setProjections] = useState(defaultProjections);
 
@@ -91,7 +100,7 @@ const DataNewForm = ({ datastoreId }) => {
     const handleFileChanged = (e) => {
         errors.data_file = null;
         const file = e.currentTarget.files[0];
-        setshowDataInfos(false);
+        setShowDataInfos(false);
 
         const extension = getExtension(file.name);
         if (!fileExtensions.includes(extension)) {
@@ -101,8 +110,10 @@ const DataNewForm = ({ datastoreId }) => {
         }
 
         uuid = uuidv4();
+        setShowProgress(true);
         const chunks = createFileChunk(file);
 
+        let numBytes = 0;
         const promises = chunks.map((chunkProps, index) => {
             const chunkFile = new File([chunkProps.chunk], "chunk");
             const formData = new FormData();
@@ -113,7 +124,16 @@ const DataNewForm = ({ datastoreId }) => {
             return fetch(uploadChunk, {
                 method: "POST",
                 body: formData,
-            }).then(() => {});
+            }).then(response => {
+                if (!response.ok) {
+                    return response.text().then((text) => {
+                        throw new Error(text);
+                    });
+                } else return response.json();    
+            }).then(data => {
+                numBytes += data.numBytes;
+                setPercent((numBytes / file.size) * 100);
+            });
         });
 
         Promise.all(promises)
@@ -146,12 +166,17 @@ const DataNewForm = ({ datastoreId }) => {
                                 })
                                 .catch((err) => console.error(err));
                         }
-                        setshowDataInfos(true);
+                        setShowDataInfos(true);
+                        setShowProgress(false);
                     })
-                    .catch((err) => console.error(err));
+                    .catch((err) => {
+                        console.error(err);
+                        setShowProgress(false);
+                    });
             })
             .catch((err) => {
                 uuid = "";
+                setShowProgress(false);
                 console.error(err.message);
             });
     };
@@ -159,7 +184,6 @@ const DataNewForm = ({ datastoreId }) => {
     return (
         <AppLayout>
             <h2>Créer une fiche de données</h2>
-
             <Input
                 label="Nom de votre fiche de donnée"
                 hintText="Ce nom vous permettra d’identifier votre donnée dans la géoplateforme, soyez aussi clair que possible."
@@ -174,7 +198,9 @@ const DataNewForm = ({ datastoreId }) => {
                 stateRelatedMessage={errors?.data_file?.message}
                 nativeInputProps={{ ...register("data_file"), type: "file", onChange: handleFileChanged }}
             />
-
+            {showProgress && (
+                <Progress label={"Upload en cours ..."} value={percent}/>
+            )}
             {showDataInfos && (
                 <>
                     <div className={fr.cx("fr-mt-2v")}>
@@ -185,7 +211,6 @@ const DataNewForm = ({ datastoreId }) => {
                             state={errors.data_technical_name ? "error" : "default"}
                             stateRelatedMessage={errors?.data_technical_name?.message}
                         />
-                        {/* <Autocomplete minChar={3} /> */}
                         <Select
                             label="Projection de vos données"
                             placeholder="Selectionnez une Projection"
