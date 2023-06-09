@@ -27,7 +27,7 @@ const Progress = ({label, value}) => {
 };
 
 Progress.propTypes = {
-    label: PropTypes.string.isRequired,
+    label: PropTypes.string,
     value: PropTypes.number
 };
 
