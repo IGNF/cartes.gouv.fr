@@ -10,10 +10,15 @@ services:
             context: .
             dockerfile: .docker/dev.Dockerfile
             args:
-                - http_proxy
-                - https_proxy
                 - HTTP_PROXY
                 - HTTPS_PROXY
+        env_file:
+            - .env.local
+        environment:
+            - HTTP_PROXY=${HTTP_PROXY}
+            - HTTPS_PROXY=${HTTPS_PROXY}
+            - http_proxy=${HTTP_PROXY}
+            - https_proxy=${HTTPS_PROXY}
         working_dir: /opt/cartesgouvfr-site
         volumes:
             - .:/opt/cartesgouvfr-site
@@ -21,8 +26,6 @@ services:
             - host.docker.internal:host-gateway
         ports:
             - "9092:8000"
-        env_file:
-            - .env.local
         networks:
             - web_dev
         restart: unless-stopped
