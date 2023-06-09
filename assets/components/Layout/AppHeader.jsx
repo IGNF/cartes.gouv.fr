@@ -11,22 +11,33 @@ const AppHeader = ({ navItems = [] }) => {
 
     const quickAccessItems = [];
 
+    quickAccessItems.push({
+        iconId: fr.cx("fr-icon-arrow-right-line"),
+        linkProps: {
+            href: "#",
+            className: "fr-btn--icon-right",
+        },
+        text: "Portail cartographique",
+    });
+
+    quickAccessItems.push({
+        iconId: fr.cx("fr-icon-arrow-right-line"),
+        className: "fr-btn--icon-right",
+        linkProps: {
+            href: "#",
+            className: "fr-btn--icon-right",
+        },
+        text: "Catalogue",
+    });
+
     if (user == null) {
         // utilisateur n'est pas connecté
         quickAccessItems.push({
-            iconId: "fr-icon-lock-line",
+            iconId: "fr-icon-account-line",
             linkProps: {
                 href: Routing.generate("cartesgouvfr_security_login"),
             },
             text: "Se connecter",
-        });
-        quickAccessItems.push({
-            iconId: "fr-icon-account-line",
-            linkProps: {
-                href: Routing.generate("cartesgouvfr_security_signup"),
-                disabled: true,
-            },
-            text: "S’enregistrer",
         });
     } else {
         // utilisateur est connecté
@@ -59,6 +70,9 @@ const AppHeader = ({ navItems = [] }) => {
             }}
             serviceTitle="cartes.gouv.fr"
             quickAccessItems={quickAccessItems}
+            renderSearchInput={({ className, id, name, placeholder, type }) => 
+                <input className={className} id={id} name={name} placeholder={placeholder} type={type} />
+            }
             navigation={navItems}
         />
     );

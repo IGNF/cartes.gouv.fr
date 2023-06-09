@@ -10,6 +10,11 @@ import PageNotFound from "../pages/error/PageNotFound";
 import { protectedRoutes, useRoute } from "./router";
 
 const Docs = lazy(() => import("../pages/Docs"));
+const Sitemap = lazy(() => import("../pages/footer/Sitemap"));
+const Accessibility = lazy(() => import("../pages/footer/Accessibility"));
+const LegalNotice = lazy(() => import("../pages/footer/LegalNotice"));
+const PersonalData = lazy(() => import("../pages/footer/PersonalData"));
+const Cookies = lazy(() => import("../pages/footer/Cookies"));
 const MyAccount = lazy(() => import("../pages/MyAccount"));
 const DatastoreList = lazy(() => import("../pages/datastores/DatastoreList"));
 const DatastoreDashboard = lazy(() => import("../pages/datastores/DatastoreDashboard"));
@@ -36,6 +41,21 @@ function RouterRenderer() {
             break;
         case "docs":
             content = <Docs />;
+            break;
+        case "sitemap":
+            content = <Sitemap />;
+            break;
+        case "accessibility":
+            content = <Accessibility />;
+            break;
+        case "legal_notice":
+            content = <LegalNotice />;
+            break;
+        case "personal_data":
+            content = <PersonalData />;
+            break;
+        case "cookies":
+            content = <Cookies />;
             break;
         case "my_account":
             content = <MyAccount />;

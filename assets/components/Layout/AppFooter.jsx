@@ -1,11 +1,15 @@
 import Footer from "@codegouvfr/react-dsfr/Footer";
+import { headerFooterDisplayItem } from "@codegouvfr/react-dsfr/Display";
 import React from "react";
 import { routes } from "../../router/router";
 
 const AppFooter = () => {
     return (
         <Footer
-            accessibility="fully compliant"
+            accessibility="non compliant"
+            accessibilityLinkProps={{
+                ...routes.accessibility().link
+            }}
             brandTop={
                 <>
                     République
@@ -14,29 +18,30 @@ const AppFooter = () => {
                 </>
             }
             contentDescription="
-    Ce message est à remplacer par les informations de votre site.
+            Texte optionnel 3 lignes maximum.
 
-    Comme exemple de contenu, vous pouvez indiquer les informations 
-    suivantes : Le site officiel d’information administrative pour les entreprises.
-    Retrouvez toutes les informations et démarches administratives nécessaires à la création, 
-    à la gestion et au développement de votre entreprise.
-    "
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+            Consectetur et vel quam auctor semper. Cras si amet mollis dolor. 
+            "
             cookiesManagementLinkProps={{
-                href: "#",
+                ...routes.cookies().link
             }}
             homeLinkProps={{
                 ...routes.home().link,
                 title: "Accueil - cartes.gouv.fr",
             }}
             personalDataLinkProps={{
-                href: "#",
+                ...routes.personal_data().link
             }}
             termsLinkProps={{
-                href: "#",
+                ...routes.legal_notice().link
             }}
             websiteMapLinkProps={{
-                href: "#",
+                ...routes.sitemap().link
             }}
+            bottomItems={[
+                headerFooterDisplayItem
+            ]}
         />
     );
 };
