@@ -5,7 +5,13 @@ const app_root = document.getElementById("root").dataset?.appRoot;
 const routeDefs = {
     // routes non protégées
     home: defineRoute(app_root === "" ? "/" : app_root),
-    docs: defineRoute(`${app_root}/docs`),
+    docs: defineRoute(`${app_root}/documentation`),
+    sitemap: defineRoute(`${app_root}/plan-du-site`),
+    accessibility: defineRoute(`${app_root}/accessibilite`),
+    legal_notice: defineRoute(`${app_root}/mentions-legales`),
+    cgu: defineRoute(`${app_root}/conditions-generales-d-utilisation`),
+    personal_data: defineRoute(`${app_root}/donnees-personnelles`),
+    cookies: defineRoute(`${app_root}/gestion-des-cookies`),
 
     // routes protégées
     // utilisateur
