@@ -11,11 +11,9 @@ import * as yup from "yup";
 
 import AppLayout from "../../components/Layout/AppLayout";
 import { defaultProjections } from "../../config/projections";
-// import Autocomplete from "../../components/Utils/Autocomplete";
 import BtnBackToDashboard from "../../components/Utils/BtnBackToDashboard";
 import MapWrapper from "../../components/Utils/MapWrapper";
 import Progress from "../../components/Utils/Progress";
-
 import "./../../sass/components/zoom-range-map.scss";
 
 
