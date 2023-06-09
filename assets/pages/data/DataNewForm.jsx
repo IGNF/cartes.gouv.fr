@@ -12,7 +12,9 @@ import * as yup from "yup";
 import AppLayout from "../../components/Layout/AppLayout";
 import { defaultProjections } from "../../config/projections";
 // import Autocomplete from "../../components/Utils/Autocomplete";
+import BtnBackToDashboard from "../../components/Utils/BtnBackToDashboard";
 import MapWrapper from "../../components/Utils/MapWrapper";
+
 import "./../../sass/components/zoom-range-map.scss";
 
 const maxFileSize = 2000000000; // 2 GB
@@ -210,6 +212,7 @@ const DataNewForm = ({ datastoreId }) => {
                 </>
             )}
             <Button onClick={handleSubmit(onSubmit)}>Soumettre</Button>
+            <BtnBackToDashboard datastoreId={datastoreId} className={fr.cx("fr-ml-2w")} />
         </AppLayout>
     );
 };
