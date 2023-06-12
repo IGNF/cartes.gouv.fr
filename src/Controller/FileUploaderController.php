@@ -9,7 +9,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
-class UploadController extends AbstractController
+#[Route('/_file_uploader', name: 'cartesgouvfr_file_uploader_')]
+class FileUploaderController extends AbstractController
 {
     private const VALID_FILE_EXTENSIONS = ['csv', 'gpkg'];
 
@@ -17,9 +18,9 @@ class UploadController extends AbstractController
     {
     }
 
-    #[Route('/upload_chunk', name: 'cartesgouvfr_app_upload_chunk',
+    #[Route('/upload_chunk', name: 'upload_chunk',
         methods: ['POST'],
-        // condition: "request.isXmlHttpRequest()",
+        condition: 'request.isXmlHttpRequest()',
         options: ['expose' => true]
     )]
     public function uploadChunk(Request $request): JsonResponse
@@ -41,9 +42,9 @@ class UploadController extends AbstractController
         return new JsonResponse(['index' => $index, 'numBytes' => $size]);
     }
 
-    #[Route('/upload_complete', name: 'cartesgouvfr_app_upload_complete',
+    #[Route('/upload_complete', name: 'upload_complete',
         methods: ['POST'],
-        // condition: 'request.isXmlHttpRequest()',
+        condition: 'request.isXmlHttpRequest()',
         options: ['expose' => true]
     )]
     public function uploadComplete(Request $request): JsonResponse

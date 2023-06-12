@@ -1,9 +1,18 @@
 const DEFAULT_CHUNK_SIZE = 16000000; // 16 MB
 
 export default class FileUploader {
-    #_urlUploadChunk = Routing.generate("cartesgouvfr_app_upload_chunk");
-    #_urlUploadComplete = Routing.generate("cartesgouvfr_app_upload_complete");
+    #_urlUploadChunk = Routing.generate("cartesgouvfr_file_uploader_upload_chunk");
+    #_urlUploadComplete = Routing.generate("cartesgouvfr_file_uploader_upload_complete");
 
+    /**
+     * Envoie le fichier en morceaux (voir FileUploadController)
+     *
+     * @param {string} uuid
+     * @param {File} file
+     * @param {Function} setProgressValue
+     * @param {number} maxChunkSize
+     * @returns
+     */
     uploadFile = async (uuid, file, setProgressValue = undefined, maxChunkSize = DEFAULT_CHUNK_SIZE) => {
         let numBytes = 0;
 
@@ -18,6 +27,9 @@ export default class FileUploader {
             return fetch(this.#_urlUploadChunk, {
                 method: "POST",
                 body: formData,
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                },
             })
                 .then(async (response) => {
                     if (!response.ok) {
@@ -61,12 +73,25 @@ export default class FileUploader {
         });
     };
 
+    /**
+     * Déclare la fin du téléversement et demande la reconstitution de tous les morceaux
+     *
+     * @param {string} uuid
+     * @param {File} file
+     * @returns
+     */
     uploadComplete = (uuid, file) => {
         const formData = new FormData();
         formData.append("uuid", uuid);
         formData.append("originalFilename", file.name);
 
-        return fetch(this.#_urlUploadComplete, { method: "POST", body: formData }).then(async (response) => {
+        return fetch(this.#_urlUploadComplete, {
+            method: "POST",
+            body: formData,
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+            },
+        }).then(async (response) => {
             if (!response.ok) {
                 const text = await response.text();
                 throw new Error(text);
