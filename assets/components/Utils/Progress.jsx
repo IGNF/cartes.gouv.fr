@@ -8,7 +8,6 @@ const Progress = ({label, value, max = 100}) => {
 
     useEffect(() => {
         let percentage = Math.floor((value / max) * 100);
-        console.log(percentage);
         setPercent(`${percentage}%`);
     }, [value]);
     return (

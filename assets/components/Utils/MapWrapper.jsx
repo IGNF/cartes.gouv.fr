@@ -8,6 +8,7 @@ import WMTSCapabilities from "ol/format/WMTSCapabilities";
 import { optionsFromCapabilities } from "ol/source/WMTS";
 import TileLayer from "ol/layer/Tile";
 import WMTS from "ol/source/WMTS";
+import "./../../sass/components/zoom-range.scss";
 
 
 const MapWrapper = (props) => {
