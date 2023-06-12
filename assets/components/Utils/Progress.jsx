@@ -7,8 +7,9 @@ const Progress = ({label, value, max = 100}) => {
     const [percent, setPercent] = useState("");
 
     useEffect(() => {
-        let percent = Math.floor(value / max) * 100;
-        setPercent(`${percent}%`);
+        let percentage = Math.floor((value / max) * 100);
+        console.log(percentage);
+        setPercent(`${percentage}%`);
     }, [value]);
     return (
         <div className={fr.cx("fr-my-2v")}>
