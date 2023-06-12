@@ -4,18 +4,17 @@ import { Input } from "@codegouvfr/react-dsfr/Input";
 import { Select } from "@codegouvfr/react-dsfr/Select";
 import { yupResolver } from "@hookform/resolvers/yup";
 import PropTypes from "prop-types";
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 import * as yup from "yup";
 
-import AppLayout from "../../components/Layout/AppLayout";
-import { defaultProjections } from "../../config/projections";
-import BtnBackToDashboard from "../../components/Utils/BtnBackToDashboard";
 import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
+import AppLayout from "../../components/Layout/AppLayout";
+import BtnBackToDashboard from "../../components/Utils/BtnBackToDashboard";
 import MapWrapper from "../../components/Utils/MapWrapper";
 import Progress from "../../components/Utils/Progress";
-
+import { defaultProjections } from "../../config/projections";
 
 const maxFileSize = 2000000000; // 2 GB
 const fileExtensions = ["csv", "gpkg", "zip"];
@@ -45,8 +44,8 @@ const DataNewForm = ({ datastoreId }) => {
     let uuid = "";
 
     const maxChunkSize = 16000000; // 16 MB
-    const uploadChunk = Routing.generate("cartesgouvfr_app_upload_chunk");
-    const uploadComplete = Routing.generate("cartesgouvfr_app_upload_complete");
+    const urlUploadChunk = Routing.generate("cartesgouvfr_app_upload_chunk");
+    const urlUploadComplete = Routing.generate("cartesgouvfr_app_upload_complete");
 
     // Progress
     const [showProgress, setShowProgress] = useState(false);
@@ -85,16 +84,59 @@ const DataNewForm = ({ datastoreId }) => {
         console.log(formData);
     };
 
-    const createFileChunk = (file) => {
-        const fileChunkList = [];
+    const uploadFile = async (uuid, file, maxChunkSize) => {
+        let numBytes = 0;
 
-        let cur = 0;
-        while (cur < file.size) {
-            const chunk = file.slice(cur, cur + maxChunkSize);
-            fileChunkList.push({ chunk: chunk, size: chunk.size });
-            cur += maxChunkSize;
-        }
-        return fileChunkList;
+        const uploadChunk = async (index, chunk) => {
+            const chunkFile = new File([chunk], "chunk");
+
+            const formData = new FormData();
+            formData.append("uuid", uuid);
+            formData.append("index", index);
+            formData.append("chunk", chunkFile, `${uuid}_${index}`);
+
+            return fetch(urlUploadChunk, {
+                method: "POST",
+                body: formData,
+            })
+                .then(async (response) => {
+                    if (!response.ok) {
+                        const text = await response.text();
+                        return { status: "error", msg: text };
+                    } else {
+                        return response.json();
+                    }
+                })
+                .then((data) => {
+                    return { status: "ok", numBytes: data.numBytes };
+                })
+                .catch((err) => {
+                    return { status: "error", msg: err.message };
+                });
+        };
+
+        return new Promise((resolve, reject) => {
+            (async function () {
+                let index = 1,
+                    start = 0;
+
+                while (start < file.size) {
+                    const chunk = file.slice(start, start + maxChunkSize);
+
+                    let response = await uploadChunk(index, chunk);
+                    if (response.status === "error") {
+                        reject(new Error(response.msg));
+                    }
+
+                    numBytes += response.numBytes;
+                    setProgressValue(numBytes);
+
+                    index += 1;
+                    start += maxChunkSize;
+                }
+                resolve();
+            })();
+        });
     };
 
     const handleFileChanged = (e) => {
@@ -113,74 +155,43 @@ const DataNewForm = ({ datastoreId }) => {
         setShowProgress(true);
         setProgressMax(file.size);
 
-        const chunks = createFileChunk(file);
+        // const chunks = createFileChunk(file);
 
-        let numBytes = 0;
-        const promises = chunks.map((chunkProps, index) => {
-            const chunkFile = new File([chunkProps.chunk], "chunk");
+        uploadFile(uuid, file, maxChunkSize).then(() => {
             const formData = new FormData();
-
             formData.append("uuid", uuid);
-            formData.append("chunk", chunkFile, `${uuid}_${index}`);
-            formData.append("index", index);
-            return fetch(uploadChunk, {
-                method: "POST",
-                body: formData,
-            }).then(response => {
-                if (!response.ok) {
-                    return response.text().then((text) => {
+            formData.append("originalFilename", file.name);
+
+            fetch(urlUploadComplete, { method: "POST", body: formData })
+                .then(async (response) => {
+                    if (!response.ok) {
+                        const text = await response.text();
                         throw new Error(text);
-                    });
-                } else return response.json();    
-            }).then(data => {
-                numBytes += data.numBytes;
-                setProgressValue(numBytes);
-            });
+                    } else return response.json();
+                })
+                .then((data) => {
+                    const srid = data?.srid;
+
+                    if (srid in projections) {
+                        setSrid(srid);
+                    } else {
+                        getProjFromEpsg(srid)
+                            .then((proj) => {
+                                const projectionsClone = { ...projections };
+                                projectionsClone[srid] = proj.name;
+                                setProjections(projectionsClone);
+                                setSrid(srid);
+                            })
+                            .catch((err) => console.error(err));
+                    }
+                    setShowDataInfos(true);
+                    setShowProgress(false);
+                })
+                .catch((err) => {
+                    console.error(err);
+                    setShowProgress(false);
+                });
         });
-
-        Promise.all(promises)
-            .then(() => {
-                // Tout s'est bien passe, on merge tous les fichiers
-                const formData = new FormData();
-                formData.append("uuid", uuid);
-                formData.append("originalFilename", file.name);
-
-                fetch(uploadComplete, { method: "POST", body: formData })
-                    .then((response) => {
-                        if (!response.ok) {
-                            return response.text().then((text) => {
-                                throw new Error(text);
-                            });
-                        } else return response.json();
-                    })
-                    .then((data) => {
-                        const srid = data?.srid;
-
-                        if (srid in projections) {
-                            setSrid(srid);
-                        } else {
-                            getProjFromEpsg(srid)
-                                .then((proj) => {
-                                    const projectionsClone = { ...projections };
-                                    projectionsClone[srid] = proj.name;
-                                    setProjections(projectionsClone);
-                                    setSrid(srid);
-                                })
-                                .catch((err) => console.error(err));
-                        }
-                        setShowDataInfos(true);
-                        setShowProgress(false);
-                    })
-                    .catch((err) => {
-                        console.error(err);
-                        setShowProgress(false);
-                    });
-            })
-            .catch((err) => {
-                uuid = "";
-                setShowProgress(false);
-                console.error(err.message);
-            });
     };
 
     return (
@@ -200,9 +211,7 @@ const DataNewForm = ({ datastoreId }) => {
                 stateRelatedMessage={errors?.data_file?.message}
                 nativeInputProps={{ ...register("data_file"), type: "file", onChange: handleFileChanged }}
             />
-            {showProgress && (
-                <Progress label={"Upload en cours ..."} value={progressValue} max={progressMax} />
-            )}
+            {showProgress && <Progress label={"Upload en cours ..."} value={progressValue} max={progressMax} />}
             {showDataInfos && (
                 <>
                     <div className={fr.cx("fr-mt-2v")}>
@@ -238,15 +247,15 @@ const DataNewForm = ({ datastoreId }) => {
                                 {
                                     label: "Vecteur",
                                     nativeInputProps: {
-                                        value: "vector"
-                                    }
+                                        value: "vector",
+                                    },
                                 },
                                 {
                                     label: "Raster",
                                     nativeInputProps: {
-                                        value: "raster"
-                                    }
-                                }
+                                        value: "raster",
+                                    },
+                                },
                             ]}
                             orientation="horizontal"
                         />
