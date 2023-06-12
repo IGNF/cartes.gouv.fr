@@ -2,6 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { Select } from "@codegouvfr/react-dsfr/Select";
+import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
 import { yupResolver } from "@hookform/resolvers/yup";
 import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
@@ -9,10 +10,8 @@ import { useForm } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 import * as yup from "yup";
 
-import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
 import AppLayout from "../../components/Layout/AppLayout";
 import BtnBackToDashboard from "../../components/Utils/BtnBackToDashboard";
-import MapWrapper from "../../components/Utils/MapWrapper";
 import Progress from "../../components/Utils/Progress";
 import { defaultProjections } from "../../config/projections";
 
@@ -37,6 +36,10 @@ const schema = yup
                 const file = value[0] || null;
                 return file && file.size <= maxFileSize;
             }),
+        data_technical_name: yup.string().required("Le nom technique de la donnée est obligatoire"),
+        data_srid: yup.string().required("La projection (srid) est obligatoire"),
+        data_format: yup.string().required("Le format de donnée est obligatoire"),
+        data_upload_path: yup.string()
     })
     .required();
 
@@ -51,15 +54,25 @@ const DataNewForm = ({ datastoreId }) => {
     const [showProgress, setShowProgress] = useState(false);
     const [progressValue, setProgressValue] = useState(0);
     const [progressMax, setProgressMax] = useState(0);
+ 
+    const [showDataInfos, setShowDataInfos] = useState(false);
+    const [projections, setProjections] = useState(defaultProjections);
+    
+    const [srid, setSrid] = useState("");   // srid
 
     useEffect(() => {
         setProgressValue(0);
     }, [showProgress]);
 
-    const [showDataInfos, setShowDataInfos] = useState(false);
-    const [srid, setSrid] = useState("");
-    const [projections, setProjections] = useState(defaultProjections);
-
+    useEffect(() => {
+        if (! showDataInfos) {
+            setFormValue("data_name", "");
+            setFormValue("data_upload_path", "");
+            setFormValue("data_technical_name", "");
+            setFormValue("data_format", "");
+        }
+    }, [showDataInfos]);
+   
     const getProjFromEpsg = (srid) => {
         const match = srid.match(/EPSG:(\d+)/);
         if (!match) return;
@@ -77,6 +90,7 @@ const DataNewForm = ({ datastoreId }) => {
         register,
         handleSubmit,
         formState: { errors },
+        setValue: setFormValue
     } = useForm({ resolver: yupResolver(schema) });
 
     const onSubmit = (formData) => {
@@ -192,6 +206,50 @@ const DataNewForm = ({ datastoreId }) => {
                     setShowProgress(false);
                 });
         });
+        Promise.all(promises)
+            .then(() => {
+                // Tout s'est bien passe, on merge tous les fichiers
+                const formData = new FormData();
+                formData.append("uuid", uuid);
+                formData.append("originalFilename", file.name);
+
+                fetch(uploadComplete, { method: "POST", body: formData })
+                    .then((response) => {
+                        if (!response.ok) {
+                            return response.text().then((text) => {
+                                throw new Error(text);
+                            });
+                        } else return response.json();
+                    })
+                    .then((data) => {
+                        const srid = data?.srid;
+
+                        if (srid in projections) {
+                            setSrid(srid);
+                        } else {
+                            getProjFromEpsg(srid)
+                                .then((proj) => {
+                                    const projectionsClone = { ...projections };
+                                    projectionsClone[srid] = proj.name;
+                                    setProjections(projectionsClone);
+                                    setSrid(srid);
+                                })
+                                .catch((err) => console.error(err));
+                        }
+                        setShowDataInfos(true);
+                        setShowProgress(false);
+                        setFormValue("data_upload_path", data.filename);
+                    })
+                    .catch((err) => {
+                        console.error(err);
+                        setShowProgress(false);
+                    });
+            })
+            .catch((err) => {
+                uuid = "";
+                setShowProgress(false);
+                console.error(err.message);
+            });
     };
 
     return (
@@ -202,7 +260,9 @@ const DataNewForm = ({ datastoreId }) => {
                 hintText="Ce nom vous permettra d’identifier votre donnée dans la géoplateforme, soyez aussi clair que possible."
                 state={errors.data_name ? "error" : "default"}
                 stateRelatedMessage={errors?.data_name?.message}
-                nativeInputProps={register("data_name")}
+                nativeInputProps={{
+                    ...register("data_name")
+                }}
             />
             <Input
                 label="Déposez votre fichier de données"
@@ -221,12 +281,16 @@ const DataNewForm = ({ datastoreId }) => {
                             hintText="Ce nom technique est invisible par votre utilisateur final. Il apparaitra uniquement dans votre espace de travail"
                             state={errors.data_technical_name ? "error" : "default"}
                             stateRelatedMessage={errors?.data_technical_name?.message}
+                            nativeInputProps={{
+                                ...register("data_technical_name")
+                            }}
                         />
                         <Select
                             label="Projection de vos données"
                             placeholder="Selectionnez une Projection"
                             nativeSelectProps={{
-                                onChange: (event) => setSrid(event.target.value),
+                                ...register("data_srid"),
+                                onChange: (e) => setSrid(e.target.value),
                                 value: srid,
                             }}
                         >
@@ -241,27 +305,41 @@ const DataNewForm = ({ datastoreId }) => {
                             ))}
                         </Select>
                         <RadioButtons
+                            state={errors.data_format ? "error" : "default"}
+                            stateRelatedMessage={errors?.data_format?.message}
                             legend="Format du fichier déposé"
-                            name="radio"
                             options={[
                                 {
                                     label: "Vecteur",
                                     nativeInputProps: {
+<<<<<<< HEAD
                                         value: "vector",
                                     },
+=======
+                                        ...register("data_format"),
+                                        value: "vector"
+                                    }
+>>>>>>> 3a0b046 (feat: formulaire complété)
                                 },
                                 {
                                     label: "Raster",
                                     nativeInputProps: {
+<<<<<<< HEAD
                                         value: "raster",
                                     },
                                 },
+=======
+                                        ...register("data_format"),
+                                        value: "raster"
+                                    }
+                                }
+>>>>>>> 3a0b046 (feat: formulaire complété)
                             ]}
                             orientation="horizontal"
                         />
-                    </div>
-                    <div className={fr.cx("fr-mt-2v")}>
-                        <MapWrapper id={"map"} zoom={5} className={"zoom-range-map"} />
+                        <Input nativeInputProps={{
+                            ...register("data_upload_path"), type: "hidden" 
+                        }} />
                     </div>
                 </>
             )}
