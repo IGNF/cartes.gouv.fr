@@ -12,9 +12,9 @@ import * as yup from "yup";
 import AppLayout from "../../components/Layout/AppLayout";
 import { defaultProjections } from "../../config/projections";
 import BtnBackToDashboard from "../../components/Utils/BtnBackToDashboard";
+import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
 import MapWrapper from "../../components/Utils/MapWrapper";
 import Progress from "../../components/Utils/Progress";
-import "./../../sass/components/zoom-range-map.scss";
 
 
 const maxFileSize = 2000000000; // 2 GB
@@ -50,9 +50,11 @@ const DataNewForm = ({ datastoreId }) => {
 
     // Progress
     const [showProgress, setShowProgress] = useState(false);
-    const [percent, setPercent] = useState(0);
+    const [progressValue, setProgressValue] = useState(0);
+    const [progressMax, setProgressMax] = useState(0);
+
     useEffect(() => {
-        setPercent(0);
+        setProgressValue(0);
     }, [showProgress]);
 
     const [showDataInfos, setShowDataInfos] = useState(false);
@@ -109,6 +111,8 @@ const DataNewForm = ({ datastoreId }) => {
 
         uuid = uuidv4();
         setShowProgress(true);
+        setProgressMax(file.size);
+
         const chunks = createFileChunk(file);
 
         let numBytes = 0;
@@ -130,7 +134,7 @@ const DataNewForm = ({ datastoreId }) => {
                 } else return response.json();    
             }).then(data => {
                 numBytes += data.numBytes;
-                setPercent((numBytes / file.size) * 100);
+                setProgressValue(numBytes);
             });
         });
 
@@ -197,7 +201,7 @@ const DataNewForm = ({ datastoreId }) => {
                 nativeInputProps={{ ...register("data_file"), type: "file", onChange: handleFileChanged }}
             />
             {showProgress && (
-                <Progress label={"Upload en cours ..."} value={percent}/>
+                <Progress label={"Upload en cours ..."} value={progressValue} max={progressMax} />
             )}
             {showDataInfos && (
                 <>
@@ -227,8 +231,26 @@ const DataNewForm = ({ datastoreId }) => {
                                 </option>
                             ))}
                         </Select>
+                        <RadioButtons
+                            legend="Format du fichier déposé"
+                            name="radio"
+                            options={[
+                                {
+                                    label: "Vecteur",
+                                    nativeInputProps: {
+                                        value: "vector"
+                                    }
+                                },
+                                {
+                                    label: "Raster",
+                                    nativeInputProps: {
+                                        value: "raster"
+                                    }
+                                }
+                            ]}
+                            orientation="horizontal"
+                        />
                     </div>
-
                     <div className={fr.cx("fr-mt-2v")}>
                         <MapWrapper id={"map"} zoom={5} className={"zoom-range-map"} />
                     </div>
