@@ -16,9 +16,10 @@ import Progress from "../../components/Utils/Progress";
 import ZoomRange from "../../components/Utils/ZoomRange";
 import { defaultProjections } from "../../config/projections";
 import FileUploader from "../../modules/FileUploader";
+import { jsonFetch } from "../../modules/jsonFetch";
 
 const maxFileSize = 2000000000; // 2 GB
-const fileExtensions = ["csv", "gpkg", "zip"];
+const fileExtensions = ["gpkg", "zip"];
 
 const getExtension = (filename) => {
     if (!filename) return "";
@@ -31,7 +32,6 @@ const schema = yup
         data_file: yup
             .mixed()
             .test("is-missing", "Aucun fichier téléversé", (value) => {
-                console.log(value);
                 return value.length > 0;
             })
             .test("is-too-big", `La taille maximale pour un fichier est de ${maxFileSize}`, (value) => {
@@ -77,13 +77,7 @@ const DataNewForm = ({ datastoreId }) => {
         const match = srid.match(/EPSG:(\d+)/);
         if (!match) return;
 
-        return fetch(`https://epsg.io/${match[1]}.json`).then((response) => {
-            if (!response.ok) {
-                return response.text().then((text) => {
-                    throw new Error(text);
-                });
-            } else return response.json();
-        });
+        return jsonFetch(`https://epsg.io/${match[1]}.json`, {}, false, false);
     };
 
     const {
@@ -91,6 +85,7 @@ const DataNewForm = ({ datastoreId }) => {
         handleSubmit,
         formState: { errors },
         setValue: setFormValue,
+        setError: setFormError,
     } = useForm({ resolver: yupResolver(schema) });
 
     const onSubmit = (formData) => {
@@ -107,6 +102,7 @@ const DataNewForm = ({ datastoreId }) => {
         if (!fileExtensions.includes(extension)) {
             e.currentTarget.value = "";
             // TODO Envoyer une erreur propre
+            setFormError("data_file", { message: `L'extension du fichier ${file.name} n'est pas correcte` });
             return;
         }
 
@@ -114,32 +110,40 @@ const DataNewForm = ({ datastoreId }) => {
         setShowProgress(true);
         setProgressMax(file.size);
 
-        fileUploader.uploadFile(uuid, file, setProgressValue).then(() => {
-            fileUploader
-                .uploadComplete(uuid, file)
-                .then((data) => {
-                    const srid = data?.srid;
+        fileUploader
+            .uploadFile(uuid, file, setProgressValue)
+            .then(() => {
+                fileUploader
+                    .uploadComplete(uuid, file)
+                    .then((data) => {
+                        const srid = data?.srid;
 
-                    if (srid in projections) {
-                        setSrid(srid);
-                    } else {
-                        getProjFromEpsg(srid)
-                            .then((proj) => {
-                                const projectionsClone = { ...projections };
-                                projectionsClone[srid] = proj.name;
-                                setProjections(projectionsClone);
-                                setSrid(srid);
-                            })
-                            .catch((err) => console.error(err));
-                    }
-                    setShowDataInfos(true);
-                    setShowProgress(false);
-                })
-                .catch((err) => {
-                    console.error(err);
-                    setShowProgress(false);
-                });
-        });
+                        if (srid in projections) {
+                            setSrid(srid);
+                        } else {
+                            getProjFromEpsg(srid)
+                                .then((proj) => {
+                                    const projectionsClone = { ...projections };
+                                    projectionsClone[srid] = proj.name;
+                                    setProjections(projectionsClone);
+                                    setSrid(srid);
+                                })
+                                .catch((err) => console.error(err));
+                        }
+                        setShowDataInfos(true);
+                        setShowProgress(false);
+                    })
+                    .catch((err) => {
+                        console.error(err);
+                        setShowProgress(false);
+                        setFormError("data_file", { message: err?.data.msg });
+                    });
+            })
+            .catch((err) => {
+                console.error(err);
+                setShowProgress(false);
+                setFormError("data_file", { message: err?.data.msg });
+            });
     };
 
     return (

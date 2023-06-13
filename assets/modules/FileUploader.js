@@ -1,3 +1,5 @@
+import { jsonFetch } from "./jsonFetch";
+
 const DEFAULT_CHUNK_SIZE = 16000000; // 16 MB
 
 export default class FileUploader {
@@ -24,53 +26,75 @@ export default class FileUploader {
             formData.append("index", index);
             formData.append("chunk", chunkFile, `${uuid}_${index}`);
 
-            return fetch(this.#_urlUploadChunk, {
-                method: "POST",
-                body: formData,
-                headers: {
-                    "X-Requested-With": "XMLHttpRequest",
+            return jsonFetch(
+                this.#_urlUploadChunk,
+                {
+                    method: "POST",
+                    body: formData,
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                    },
                 },
-            })
-                .then(async (response) => {
-                    if (!response.ok) {
-                        const text = await response.text();
-                        return { status: "error", msg: text };
-                    } else {
-                        return response.json();
-                    }
-                })
-                .then((data) => {
-                    return { status: "ok", numBytes: data.numBytes };
-                })
-                .catch((err) => {
-                    return { status: "error", msg: err.message };
-                });
+                true,
+                true
+            );
+            // .then((response) => {
+            //     if (!response.ok) {
+            //         const text = await response.text();
+            //         return { status: "error", msg: text };
+            //     } else {
+            //         return response.json();
+            //     }
+            // })
+            // .then((data) => {
+            //     return { status: "ok", numBytes: data.numBytes };
+            // })
+            // .catch((err) => {
+            //     return { status: "error", msg: err.message };
+            // });
         };
 
-        return new Promise((resolve, reject) => {
-            (async function () {
-                let index = 1,
-                    start = 0;
+        let index = 1,
+            start = 0;
 
-                while (start < file.size) {
-                    const chunk = file.slice(start, start + maxChunkSize);
+        while (start < file.size) {
+            const chunk = file.slice(start, start + maxChunkSize);
 
-                    let response = await uploadChunk(index, chunk);
-                    if (response.status === "error") {
-                        reject(new Error(response.msg));
-                    }
+            let response = await uploadChunk(index, chunk);
 
-                    numBytes += response.numBytes;
-                    if (setProgressValue) {
-                        setProgressValue(numBytes);
-                    }
+            numBytes += response.numBytes;
+            if (setProgressValue) {
+                setProgressValue(numBytes);
+            }
 
-                    index += 1;
-                    start += maxChunkSize;
-                }
-                resolve();
-            })();
-        });
+            index += 1;
+            start += maxChunkSize;
+        }
+
+        // return new Promise((resolve, reject) => {
+        //     (async function () {
+        //         let index = 1,
+        //             start = 0;
+
+        //         while (start < file.size) {
+        //             const chunk = file.slice(start, start + maxChunkSize);
+
+        //             let response = await uploadChunk(index, chunk);
+        //             if (response.status === "error") {
+        //                 reject(new Error(response.msg));
+        //             }
+
+        //             numBytes += response.numBytes;
+        //             if (setProgressValue) {
+        //                 setProgressValue(numBytes);
+        //             }
+
+        //             index += 1;
+        //             start += maxChunkSize;
+        //         }
+        //         resolve();
+        //     })();
+        // });
     };
 
     /**
@@ -81,21 +105,17 @@ export default class FileUploader {
      * @returns
      */
     uploadComplete = (uuid, file) => {
-        const formData = new FormData();
-        formData.append("uuid", uuid);
-        formData.append("originalFilename", file.name);
-
-        return fetch(this.#_urlUploadComplete, {
-            method: "POST",
-            body: formData,
-            headers: {
-                "X-Requested-With": "XMLHttpRequest",
+        return jsonFetch(
+            this.#_urlUploadComplete,
+            {
+                method: "POST",
+                body: {
+                    uuid: uuid,
+                    originalFilename: file.name,
+                },
             },
-        }).then(async (response) => {
-            if (!response.ok) {
-                const text = await response.text();
-                throw new Error(text);
-            } else return response.json();
-        });
+            false,
+            true
+        );
     };
 }

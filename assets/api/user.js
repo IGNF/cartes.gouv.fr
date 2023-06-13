@@ -1,4 +1,4 @@
-import { jsonFetch } from "./index";
+import { jsonFetch } from "../modules/jsonFetch";
 
 const getMe = () => {
     const url = Routing.generate("cartesgouvfr_api_user_me");
