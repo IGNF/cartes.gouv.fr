@@ -13,6 +13,7 @@ import * as yup from "yup";
 import AppLayout from "../../components/Layout/AppLayout";
 import BtnBackToDashboard from "../../components/Utils/BtnBackToDashboard";
 import Progress from "../../components/Utils/Progress";
+import ZoomRange from "../../components/Utils/ZoomRange";
 import { defaultProjections } from "../../config/projections";
 import FileUploader from "../../modules/FileUploader";
 
@@ -144,6 +145,7 @@ const DataNewForm = ({ datastoreId }) => {
     return (
         <AppLayout>
             <h2>Créer une fiche de données</h2>
+            <ZoomRange min={5} max={20} initialMinValue={8} initialMaxValue={14} />
             <Input
                 label="Nom de votre fiche de donnée"
                 hintText="Ce nom vous permettra d’identifier votre donnée dans la géoplateforme, soyez aussi clair que possible."
