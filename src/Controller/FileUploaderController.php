@@ -7,12 +7,13 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/_file_uploader', name: 'cartesgouvfr_file_uploader_')]
 class FileUploaderController extends AbstractController
 {
-    private const VALID_FILE_EXTENSIONS = ['csv', 'gpkg'];
+    private const VALID_FILE_EXTENSIONS = ['gpkg'];
 
     public function __construct(private ParameterBagInterface $parameterBag)
     {
@@ -36,7 +37,7 @@ class FileUploaderController extends AbstractController
             $this->createDirectory($directory);
             $chunk->move($directory, $chunk->getClientOriginalName());
         } catch (\Exception $e) {
-            return new JsonResponse($e->getMessage(), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+            return new JsonResponse(['msg' => $e->getMessage()], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
 
         return new JsonResponse(['index' => $index, 'numBytes' => $size]);
@@ -49,15 +50,21 @@ class FileUploaderController extends AbstractController
     )]
     public function uploadComplete(Request $request): JsonResponse
     {
-        $uuid = $request->get('uuid');
-        $originalFilename = $request->get('originalFilename');
-
-        $directory = $this->parameterBag->get('upload_path')."/$uuid";
-        $files = array_filter(scandir($directory), function ($filename) use ($directory) {
-            return !is_dir("$directory/$filename");
-        });
-
         try {
+            $content = json_decode($request->getContent(), true);
+
+            if (!array_key_exists('uuid', $content) || !array_key_exists('originalFilename', $content)) {
+                throw new \Exception('Les paramètres [uuid] et [originalFilename] sont obligatoires');
+            }
+
+            $uuid = $content['uuid'];
+            $originalFilename = $content['originalFilename'];
+
+            $directory = $this->parameterBag->get('upload_path')."/$uuid";
+            $files = array_filter(scandir($directory), function ($filename) use ($directory) {
+                return !is_dir("$directory/$filename");
+            });
+
             // Tri des fichiers
             usort($files, [$this, 'sortFiles']);
 
@@ -67,7 +74,7 @@ class FileUploaderController extends AbstractController
             // Verification du fichier
             return $this->validate($filepath, $uuid);
         } catch (\Exception $e) {
-            return new JsonResponse($e->getMessage(), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+            return new JsonResponse(['msg' => $e->getMessage()], $e->getCode());
         }
     }
 
@@ -90,7 +97,7 @@ class FileUploaderController extends AbstractController
 
             $final = fopen($filepath, 'ab');
             if (false === fwrite($final, $buff)) {
-                throw new \Exception('Merging files failed.');
+                throw new \Exception('Merging files failed.', Response::HTTP_INTERNAL_SERVER_ERROR);
             }
             fclose($final);
 
@@ -132,7 +139,7 @@ class FileUploaderController extends AbstractController
     private function getIndex(string $filename)
     {
         if (!preg_match("/\w{8}-\w{4}-\w{4}-\w{4}-\w{12}_(\d+)/", $filename, $matches)) {
-            throw new \Exception('Filename has no index');
+            throw new \Exception('Filename has no index', Response::HTTP_BAD_REQUEST);
         }
 
         return intval($matches[1]);
@@ -154,7 +161,7 @@ class FileUploaderController extends AbstractController
         $filename = $file->getFilename();
 
         if (!$file->getSize()) {
-            throw new \Exception("Le fichier $filename ne doit pas être vide");
+            throw new \Exception("Le fichier $filename ne doit pas être vide", Response::HTTP_BAD_REQUEST);
         }
 
         $extension = strtolower($file->getExtension());
@@ -162,7 +169,7 @@ class FileUploaderController extends AbstractController
         $validExtensions = array_merge(self::VALID_FILE_EXTENSIONS, ['zip']);
         if (!in_array($extension, $validExtensions)) {
             $filename = $file->getFilename();
-            throw new \Exception("L'extension du fichier $filename n'est pas correcte");
+            throw new \Exception("L'extension du fichier $filename n'est pas correcte", Response::HTTP_BAD_REQUEST);
         }
 
         if ('zip' == $extension) {
@@ -174,7 +181,7 @@ class FileUploaderController extends AbstractController
         $srids = $this->getSrids($file);    // seulement les gpkg et archives gpkg
         $unicity = array_unique($srids);
         if (!empty($unicity) && 1 != count($unicity)) {
-            throw new \Exception('Ce fichier contient des données dans des systèmes de projection différents');
+            throw new \Exception('Ce fichier contient des données dans des systèmes de projection différents', Response::HTTP_BAD_REQUEST);
         }
 
         // Si c'est un fichier csv, on le zippe
@@ -199,7 +206,7 @@ class FileUploaderController extends AbstractController
 
         $zip = new \ZipArchive();
         if (!$zip->open($file->getPathname())) {
-            throw new \Exception("L'ouverture de l'archive $filename a echoué");
+            throw new \Exception("L'ouverture de l'archive $filename a echoué", Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
         $numDeletedFiles = 0;
@@ -216,7 +223,7 @@ class FileUploaderController extends AbstractController
         $zip->close();
 
         if ($numDeletedFiles == $numFiles) {
-            throw new \Exception("L'archive ne contient aucun fichier acceptable");
+            throw new \Exception("L'archive ne contient aucun fichier acceptable", Response::HTTP_BAD_REQUEST);
         }
     }
 
@@ -245,7 +252,7 @@ class FileUploaderController extends AbstractController
 
         $zip = new \ZipArchive();
         if (!$zip->open($file->getPathname())) {
-            throw new \Exception("L'ouverture de l'archive $filename a echoué");
+            throw new \Exception("L'ouverture de l'archive $filename a echoué", Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
         $numFiles = 0;
@@ -257,7 +264,7 @@ class FileUploaderController extends AbstractController
 
             // Prevent ZipSlip path traversal (S6096)
             if (false !== strpos($filename, '../') || '/' === substr($filename, 0, 1)) {
-                throw new \Exception();
+                throw new \Exception('Archive corrompu', Response::HTTP_BAD_REQUEST);
             }
 
             // C'est un dossier
@@ -267,7 +274,7 @@ class FileUploaderController extends AbstractController
 
             ++$numFiles;
             if ($numFiles > $maxFiles) {
-                throw new \Exception("Le nombre de fichiers excède $maxFiles");
+                throw new \Exception("Le nombre de fichiers excède $maxFiles", Response::HTTP_BAD_REQUEST);
             }
 
             $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
@@ -276,13 +283,13 @@ class FileUploaderController extends AbstractController
 
             $size = $stats['size'];
             if ($size > $maxSize) {
-                throw new \Exception(sprintf("La taille du fichier $filename excède %s GB", $maxSize / $oneGiga));
+                throw new \Exception(sprintf("La taille du fichier $filename excède %s GB", $maxSize / $oneGiga), Response::HTTP_BAD_REQUEST);
             }
 
             if ($stats['comp_size']) {
                 $ratio = $stats['size'] / $stats['comp_size'];
                 if ($ratio > $maxRatio) {
-                    throw new \Exception("Le taux de compression excède $maxRatio");
+                    throw new \Exception("Le taux de compression excède $maxRatio", Response::HTTP_BAD_REQUEST);
                 }
             }
         }
@@ -290,7 +297,7 @@ class FileUploaderController extends AbstractController
         $zip->close();
         $unicity = array_unique($extensions);
         if (1 != count($unicity)) {
-            throw new \Exception(sprintf("L'archive ne doit contenir qu'un seul type de fichier (%s)", implode(' ou ', self::VALID_FILE_EXTENSIONS)));
+            throw new \Exception(sprintf("L'archive ne doit contenir qu'un seul type de fichier (%s)", implode(' ou ', self::VALID_FILE_EXTENSIONS)), Response::HTTP_BAD_REQUEST);
         }
     }
 
@@ -314,7 +321,7 @@ class FileUploaderController extends AbstractController
 
         $fs->remove($filename);
         if (false == $res) {
-            throw new \Exception("La création de l'archive a échoué.");
+            throw new \Exception("La création de l'archive a échoué.", Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -358,12 +365,12 @@ class FileUploaderController extends AbstractController
         // Extracting zip file
         $zip = new \ZipArchive();
         if (!$zip->open($file->getPathname())) {
-            throw new \Exception("l'ouverture du fichier ZIP a échoué");
+            throw new \Exception("l'ouverture du fichier ZIP a échoué", Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
         $folder = "$dirname/$filename";
         if (!$zip->extractTo($folder)) {
-            throw new \Exception("l'extraction du fichier ZIP a échoué");
+            throw new \Exception("l'extraction du fichier ZIP a échoué", Response::HTTP_INTERNAL_SERVER_ERROR);
         }
         $zip->close();
 
