@@ -13,7 +13,14 @@ import WMTS from "ol/source/WMTS";
 import "./../../sass/components/zoom-range.scss";
 
 
-const ZoomRange = ({min, max, initialMinValue, initialMaxValue, center}) => {
+const ZoomRange = ({
+    min, 
+    max, 
+    initialMinValue, 
+    initialMaxValue, 
+    center,
+    minFixed=false,
+    maxFixed=false}) => {
     const mapCenter = center ?? [2.35, 48.85];  // Paris
  
     const minZoomMapElement = useRef();
@@ -100,7 +107,15 @@ const ZoomRange = ({min, max, initialMinValue, initialMaxValue, center}) => {
                 <div ref={minZoomMapElement} className="ui-top-zoom-level"></div>
                 <div ref={maxZoomMapElement} className="ui-bottom-zoom-level"></div>
             </div>
-            <RangeSlider min={min} max={max} initialMinValue={initialMinValue} initialMaxValue={initialMaxValue} onChange={handleOnChange}/>
+            <RangeSlider 
+                min={min} 
+                max={max} 
+                initialMinValue={initialMinValue} 
+                initialMaxValue={initialMaxValue} 
+                minFixed={minFixed} 
+                maxFixed={maxFixed} 
+                onChange={handleOnChange}
+            />
         </div>
     );
 };
@@ -110,7 +125,9 @@ ZoomRange.propTypes = {
     max: PropTypes.number.isRequired,           //  Le zoom max
     initialMinValue: PropTypes.number,          // La valeur initiale du zoom min 
     initialMaxValue: PropTypes.number,          // La valeur initiale du zoom max
-    center: PropTypes.arrayOf(PropTypes.number)
+    center: PropTypes.arrayOf(PropTypes.number),
+    minFixed: PropTypes.bool,
+    maxFixed: PropTypes.bool
 };
 
 export default ZoomRange;
