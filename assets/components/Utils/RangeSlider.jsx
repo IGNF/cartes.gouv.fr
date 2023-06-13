@@ -3,7 +3,14 @@ import React, { useState, useEffect } from "react";
 import "./../../sass/components/range-slider.scss";
 
 
-const RangeSlider = ({ min, max, initialMinValue, initialMaxValue, onChange }) => {
+const RangeSlider = ({ 
+    min, 
+    max, 
+    initialMinValue, 
+    initialMaxValue,
+    minFixed=false,
+    maxFixed=false,
+    onChange=null}) => {
     const [minValue, setMinValue] = useState(initialMinValue?? min);
     const [maxValue, setMaxValue] = useState(initialMaxValue?? max);
     
@@ -61,6 +68,7 @@ const RangeSlider = ({ min, max, initialMinValue, initialMaxValue, onChange }) =
                     min={min}
                     max={max}
                     onChange={handleMinChange}
+                    disabled={minFixed}
                 />
                 <input
                     className="input"
@@ -69,6 +77,7 @@ const RangeSlider = ({ min, max, initialMinValue, initialMaxValue, onChange }) =
                     min={min}
                     max={max}
                     onChange={handleMaxChange}
+                    disabled={maxFixed}
                 />
             </div>
             <div className="control-wrapper">
@@ -91,6 +100,8 @@ RangeSlider.propTypes = {
     max: PropTypes.number.isRequired, 
     initialMinValue: PropTypes.number, 
     initialMaxValue: PropTypes.number,
+    minFixed: PropTypes.bool,
+    maxFixed: PropTypes.bool,
     onChange: PropTypes.func
 };
 

@@ -145,7 +145,7 @@ const DataNewForm = ({ datastoreId }) => {
     return (
         <AppLayout>
             <h2>Créer une fiche de données</h2>
-            <ZoomRange min={5} max={20} initialMinValue={8} initialMaxValue={14} />
+            <ZoomRange min={5} max={20} initialMinValue={8} initialMaxValue={14} maxFixed={true} />
             <Input
                 label="Nom de votre fiche de donnée"
                 hintText="Ce nom vous permettra d’identifier votre donnée dans la géoplateforme, soyez aussi clair que possible."
