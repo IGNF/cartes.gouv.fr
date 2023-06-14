@@ -3,18 +3,16 @@ import React from "react";
 import AppLayout from "../../components/Layout/AppLayout";
 import { defaultNavItems } from "../../config/navItems";
 
-const Docs = () => {
+const Accessibility = () => {
     return (
         <AppLayout navItems={defaultNavItems}>
             <div className="fr-grid-row">
                 <div className="fr-col-12 fr-col-md-8 fr-py-12v">
                     <h1>Accessibilité&nbsp;: non conforme</h1>
-                    <p>Dans l’attente de l’audit de conformité 
-                        <abbr title="Référentiel général d'amélioration de l'accessibilité">RGAA</abbr>, vous pouvez nous aider à améliorer l’accessibilité 
+                    <p>Dans l’attente de l’audit de conformité <abbr title="Référentiel général d'amélioration de l'accessibilité">RGAA</abbr>, vous pouvez nous aider à améliorer l’accessibilité 
                         du site cartes.gouv.fr en nous signalant les problèmes éventuels que vous rencontrez&nbsp;:</p>
                     <ul>
-                        <li>Envoyer un message par le biais du
-                            <a href="#">formulaire de contact en ligne</a></li>
+                        <li>Envoyer un message par le biais du <a href="#">formulaire de contact en ligne</a></li>
                         <li>ou contacter l’IGN par courrier ou par téléphone&nbsp;:<br/>
                             Institut national de l’information géographique et forestière<br/>
                             73 avenue de Paris, 94 165 Saint-Mandé Cedex<br/>
@@ -41,4 +39,4 @@ const Docs = () => {
     );
 };
 
-export default Docs;
+export default Accessibility;
