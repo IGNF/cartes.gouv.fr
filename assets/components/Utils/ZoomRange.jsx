@@ -19,8 +19,9 @@ const ZoomRange = ({
     initialMinValue, 
     initialMaxValue, 
     center,
-    minFixed=false,
-    maxFixed=false}) => {
+    onChange = null,
+    minFixed = false,
+    maxFixed = false}) => {
     const mapCenter = center ?? [2.35, 48.85];  // Paris
  
     const minZoomMapElement = useRef();
@@ -35,6 +36,9 @@ const ZoomRange = ({
         }
         if (value.maxValue != maxZoomMap.getView().getZoom()) {
             maxZoomMap.getView().setZoom(value.maxValue);    
+        }
+        if (onChange) {
+            onChange(value);
         }
     };
 
@@ -121,13 +125,14 @@ const ZoomRange = ({
 };
 
 ZoomRange.propTypes = {
-    min: PropTypes.number.isRequired,           // Le zoom min
-    max: PropTypes.number.isRequired,           //  Le zoom max
-    initialMinValue: PropTypes.number,          // La valeur initiale du zoom min 
-    initialMaxValue: PropTypes.number,          // La valeur initiale du zoom max
-    center: PropTypes.arrayOf(PropTypes.number),
-    minFixed: PropTypes.bool,
-    maxFixed: PropTypes.bool
+    min: PropTypes.number.isRequired,               // La valeur minimale possible pour le zoom
+    max: PropTypes.number.isRequired,               // La valeur maximale possible pour le zoom
+    initialMinValue: PropTypes.number,              // La valeur min initiale du zoom
+    initialMaxValue: PropTypes.number,              // La valeur max initiale du zoom
+    center: PropTypes.arrayOf(PropTypes.number),    // Le centre de la carte en lon/lat
+    onChange: PropTypes.func,                       // function callback du parent
+    minFixed: PropTypes.bool,                       // Est-ce que la valeur du zoom min est fixe
+    maxFixed: PropTypes.bool                        // Est-ce que la valeur du zoom max est fixe
 };
 
 export default ZoomRange;
