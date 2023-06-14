@@ -3,7 +3,7 @@ import React from "react";
 import AppLayout from "../../components/Layout/AppLayout";
 import { defaultNavItems } from "../../config/navItems";
 
-const Docs = () => {
+const Cookies = () => {
     return (
         <AppLayout navItems={defaultNavItems}>
             <h1>Gestion des cookies</h1>
@@ -11,4 +11,4 @@ const Docs = () => {
     );
 };
 
-export default Docs;
+export default Cookies;

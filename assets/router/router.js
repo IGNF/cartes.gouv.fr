@@ -6,6 +6,8 @@ const routeDefs = {
     // routes non protégées
     home: defineRoute(app_root === "" ? "/" : app_root),
     docs: defineRoute(`${app_root}/documentation`),
+    contact: defineRoute(`${app_root}/nous-ecrire`),
+    news: defineRoute(`${app_root}/actualites`),
     sitemap: defineRoute(`${app_root}/plan-du-site`),
     accessibility: defineRoute(`${app_root}/accessibilite`),
     legal_notice: defineRoute(`${app_root}/mentions-legales`),

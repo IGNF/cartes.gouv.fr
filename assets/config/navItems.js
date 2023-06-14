@@ -1,4 +1,4 @@
-//import { routes } from "../router/router";
+import { routes } from "../router/router";
 
 export const defaultNavItems = [
     {
@@ -132,9 +132,7 @@ export const defaultNavItems = [
                 text: "Niveau de service"
             },
             {
-                linkProps: {
-                    href: "#",
-                },
+                linkProps: routes.docs().link,
                 text: "Documentation"
             },
             {
@@ -144,9 +142,7 @@ export const defaultNavItems = [
                 text: "Didacticiels"
             },
             {
-                linkProps: {
-                    href: "#",
-                },
+                linkProps: routes.contact().link,
                 text: "Contacter l'assistance"
             },
             {
