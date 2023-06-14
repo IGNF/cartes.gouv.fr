@@ -2,6 +2,7 @@
 
 namespace App\Controller\Api;
 
+use App\Constants\UploadTypes;
 use App\Exception\AppException;
 use App\Services\EntrepotApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -23,13 +24,34 @@ class UploadController extends AbstractController
     }
 
     #[Route('/', name: 'add', methods: ['POST'])]
-    public function add(Request $request): JsonResponse
+    public function add(string $datastoreId, Request $request): JsonResponse
     {
         try {
             $content = json_decode($request->getContent(), true);
             dump($content);
 
-            return $this->json($content);
+            // déclaration de livraison
+            // TODO : nom de la fiche de donnée, qu'est-ce qu'on fait ?
+            $uploadData = [
+                'name' => $content['data_technical_name'],
+                'description' => $content['data_technical_name'],
+                'type' => UploadTypes::VECTOR,
+                'srs' => $content['data_srid'],
+            ];
+            $upload = $this->entrepotApiService->upload->add($datastoreId, $uploadData);
+
+            // ajouts tags sur la livraison
+            $tags = [
+                'data_upload_path' => $content['data_upload_path'],
+                // statut des checks et du processing intégration
+            ];
+            $this->entrepotApiService->upload->addTags($datastoreId, $upload['_id'], $tags);
+
+            // attente intégration en stored_data VECTOR-DB
+
+            $upload = $this->entrepotApiService->upload->get($datastoreId, $upload['_id']);
+
+            return $this->json($upload);
         } catch (AppException $ex) {
             return $this->json($ex->getDetails(), $ex->getCode());
         } catch (\Exception $ex) {

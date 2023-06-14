@@ -1,6 +1,6 @@
 {
     "dependencies": {
-        "@codegouvfr/react-dsfr": "^0.51.0",
+        "@codegouvfr/react-dsfr": "^0.63.1",
         "@hookform/resolvers": "^3.1.0",
         "@symfony/webpack-encore": "^4.3.0",
         "autoprefixer": "^10.4.14",
@@ -41,6 +41,7 @@
         "dev": "encore dev",
         "watch": "encore dev --watch",
         "build": "encore production --progress",
+        "prebuild": "only-include-used-icons",
         "postinstall": "copy-dsfr-to-public",
         "lint": "eslint assets/",
         "lint:watch": "esw assets/ --watch",
