@@ -1,9 +1,11 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
+import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
 import { Select } from "@codegouvfr/react-dsfr/Select";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { format as datefnsFormat } from "date-fns";
 import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -13,7 +15,6 @@ import * as yup from "yup";
 import AppLayout from "../../components/Layout/AppLayout";
 import BtnBackToDashboard from "../../components/Utils/BtnBackToDashboard";
 import Progress from "../../components/Utils/Progress";
-import ZoomRange from "../../components/Utils/ZoomRange";
 import { defaultProjections } from "../../config/projections";
 import FileUploader from "../../modules/FileUploader";
 import { jsonFetch } from "../../modules/jsonFetch";
@@ -32,15 +33,15 @@ const schema = yup
         data_file: yup
             .mixed()
             .test("is-missing", "Aucun fichier téléversé", (value) => {
-                return value.length > 0;
+                return value?.length > 0;
             })
             .test("is-too-big", `La taille maximale pour un fichier est de ${maxFileSize}`, (value) => {
-                const file = value[0] || null;
+                const file = value?.[0] || null;
                 return file && file.size <= maxFileSize;
             }),
         data_technical_name: yup.string().required("Le nom technique de la donnée est obligatoire"),
         data_srid: yup.string().required("La projection (srid) est obligatoire"),
-        data_format: yup.string().required("Le format de donnée est obligatoire"),
+        data_type: yup.string().required("Le format de donnée est obligatoire"),
         data_upload_path: yup.string(),
     })
     .required();
@@ -60,6 +61,11 @@ const DataNewForm = ({ datastoreId }) => {
 
     const [srid, setSrid] = useState(""); // srid
 
+    const modal = createModal({
+        id: "terms-modal",
+        isOpenedByDefault: false,
+    });
+
     useEffect(() => {
         setProgressValue(0);
     }, [showProgress]);
@@ -69,7 +75,7 @@ const DataNewForm = ({ datastoreId }) => {
             setFormValue("data_name", "");
             setFormValue("data_upload_path", "");
             setFormValue("data_technical_name", "");
-            setFormValue("data_format", "");
+            setFormValue("data_type", "");
         }
     }, [showDataInfos]);
 
@@ -83,7 +89,7 @@ const DataNewForm = ({ datastoreId }) => {
     const {
         register,
         handleSubmit,
-        formState: { errors },
+        formState: { errors, isValid },
         setValue: setFormValue,
         setError: setFormError,
     } = useForm({ resolver: yupResolver(schema) });
@@ -91,6 +97,19 @@ const DataNewForm = ({ datastoreId }) => {
     const onSubmit = (formData) => {
         console.log(errors);
         console.log(formData);
+
+        delete formData["data_file"];
+
+        if (isValid) {
+            const url = Routing.generate("cartesgouvfr_api_upload_add", { datastoreId: datastoreId });
+            jsonFetch(url, {
+                method: "POST",
+                body: formData,
+            }).then((response) => {
+                modal.open();
+                console.log(response);
+            });
+        }
     };
 
     const handleFileChanged = (e) => {
@@ -101,7 +120,6 @@ const DataNewForm = ({ datastoreId }) => {
         const extension = getExtension(file.name);
         if (!fileExtensions.includes(extension)) {
             e.currentTarget.value = "";
-            // TODO Envoyer une erreur propre
             setFormError("data_file", { message: `L'extension du fichier ${file.name} n'est pas correcte` });
             return;
         }
@@ -130,6 +148,11 @@ const DataNewForm = ({ datastoreId }) => {
                                 })
                                 .catch((err) => console.error(err));
                         }
+
+                        setFormValue("data_technical_name", getDataTechNameSuggestion(file.name));
+                        setFormValue("data_type", "vector"); // TODO : vector pour l'instant
+                        setFormValue("data_upload_path", data?.filename);
+
                         setShowDataInfos(true);
                         setShowProgress(false);
                     })
@@ -146,10 +169,17 @@ const DataNewForm = ({ datastoreId }) => {
             });
     };
 
+    const getDataTechNameSuggestion = (fileName) => {
+        let dataTechName = fileName.replace(/ /g, "_");
+        dataTechName = dataTechName.replace(/\./g, "_");
+        dataTechName += "_" + datefnsFormat(new Date(), "dd-MM-yyyy");
+
+        return dataTechName;
+    };
+
     return (
         <AppLayout>
             <h2>Créer une fiche de données</h2>
-            <ZoomRange min={5} max={20} initialMinValue={8} initialMaxValue={14} maxFixed={true} />
             <Input
                 label="Nom de votre fiche de donnée"
                 hintText="Ce nom vous permettra d’identifier votre donnée dans la géoplateforme, soyez aussi clair que possible."
@@ -200,21 +230,21 @@ const DataNewForm = ({ datastoreId }) => {
                             ))}
                         </Select>
                         <RadioButtons
-                            state={errors.data_format ? "error" : "default"}
-                            stateRelatedMessage={errors?.data_format?.message}
+                            state={errors.data_type ? "error" : "default"}
+                            stateRelatedMessage={errors?.data_type?.message}
                             legend="Format du fichier déposé"
                             options={[
                                 {
                                     label: "Vecteur",
                                     nativeInputProps: {
-                                        ...register("data_format"),
+                                        ...register("data_type"),
                                         value: "vector",
                                     },
                                 },
                                 {
                                     label: "Raster",
                                     nativeInputProps: {
-                                        ...register("data_format"),
+                                        ...register("data_type"),
                                         value: "raster",
                                     },
                                 },
@@ -232,6 +262,26 @@ const DataNewForm = ({ datastoreId }) => {
             )}
             <Button onClick={handleSubmit(onSubmit)}>Soumettre</Button>
             <BtnBackToDashboard datastoreId={datastoreId} className={fr.cx("fr-ml-2w")} />
+
+            {/* modal */}
+            <modal.Component
+                title="Vos données vecteur sont en cours de dépôt"
+                iconId="fr-icon-refresh-line"
+                buttons={[
+                    {
+                        linkProps: { href: "https://example.com", target: "_blank" },
+                        doClosesModal: false, //Default true, clicking a button close the modal.
+                        children: "Learn more",
+                    },
+                    {
+                        iconId: "ri-check-line",
+                        onClick: () => console.log("terms accepted"),
+                        children: "Ok",
+                    },
+                ]}
+            >
+                Etapes.....
+            </modal.Component>
         </AppLayout>
     );
 };

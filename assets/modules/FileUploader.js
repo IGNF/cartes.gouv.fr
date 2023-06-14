@@ -38,20 +38,6 @@ export default class FileUploader {
                 true,
                 true
             );
-            // .then((response) => {
-            //     if (!response.ok) {
-            //         const text = await response.text();
-            //         return { status: "error", msg: text };
-            //     } else {
-            //         return response.json();
-            //     }
-            // })
-            // .then((data) => {
-            //     return { status: "ok", numBytes: data.numBytes };
-            // })
-            // .catch((err) => {
-            //     return { status: "error", msg: err.message };
-            // });
         };
 
         let index = 1,
@@ -70,31 +56,6 @@ export default class FileUploader {
             index += 1;
             start += maxChunkSize;
         }
-
-        // return new Promise((resolve, reject) => {
-        //     (async function () {
-        //         let index = 1,
-        //             start = 0;
-
-        //         while (start < file.size) {
-        //             const chunk = file.slice(start, start + maxChunkSize);
-
-        //             let response = await uploadChunk(index, chunk);
-        //             if (response.status === "error") {
-        //                 reject(new Error(response.msg));
-        //             }
-
-        //             numBytes += response.numBytes;
-        //             if (setProgressValue) {
-        //                 setProgressValue(numBytes);
-        //             }
-
-        //             index += 1;
-        //             start += maxChunkSize;
-        //         }
-        //         resolve();
-        //     })();
-        // });
     };
 
     /**
