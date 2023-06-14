@@ -10,7 +10,12 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/_file_uploader', name: 'cartesgouvfr_file_uploader_')]
+#[Route(
+    '/_file_uploader',
+    name: 'cartesgouvfr_file_uploader_',
+    condition: 'request.isXmlHttpRequest()',
+    options: ['expose' => true],
+)]
 class FileUploaderController extends AbstractController
 {
     private const VALID_FILE_EXTENSIONS = ['gpkg'];
@@ -19,11 +24,7 @@ class FileUploaderController extends AbstractController
     {
     }
 
-    #[Route('/upload_chunk', name: 'upload_chunk',
-        methods: ['POST'],
-        condition: 'request.isXmlHttpRequest()',
-        options: ['expose' => true]
-    )]
+    #[Route('/upload_chunk', name: 'upload_chunk', methods: ['POST'])]
     public function uploadChunk(Request $request): JsonResponse
     {
         $uuid = $request->get('uuid');
@@ -43,18 +44,14 @@ class FileUploaderController extends AbstractController
         return new JsonResponse(['index' => $index, 'numBytes' => $size]);
     }
 
-    #[Route('/upload_complete', name: 'upload_complete',
-        methods: ['POST'],
-        condition: 'request.isXmlHttpRequest()',
-        options: ['expose' => true]
-    )]
+    #[Route('/upload_complete', name: 'upload_complete', methods: ['POST'])]
     public function uploadComplete(Request $request): JsonResponse
     {
         try {
             $content = json_decode($request->getContent(), true);
 
             if (!array_key_exists('uuid', $content) || !array_key_exists('originalFilename', $content)) {
-                throw new \Exception('Les paramètres [uuid] et [originalFilename] sont obligatoires');
+                throw new \Exception('Les paramètres [uuid] et [originalFilename] sont obligatoires', Response::HTTP_BAD_REQUEST);
             }
 
             $uuid = $content['uuid'];

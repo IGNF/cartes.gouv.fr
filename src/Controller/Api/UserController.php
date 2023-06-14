@@ -7,8 +7,12 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
-// TODO: , condition: 'request.isXmlHttpRequest()'
-#[Route('/api/user', name: 'cartesgouvfr_api_user_', options: ['expose' => true])]
+#[Route(
+    '/api/user',
+    name: 'cartesgouvfr_api_user_',
+    options: ['expose' => true],
+    condition: 'request.isXmlHttpRequest()'
+)]
 class UserController extends AbstractController
 {
     public function __construct(

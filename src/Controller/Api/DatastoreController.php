@@ -7,7 +7,12 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/api/datastore', name: 'cartesgouvfr_api_datastore_', options: ['expose' => true])]
+#[Route(
+    '/api/datastore',
+    name: 'cartesgouvfr_api_datastore_',
+    options: ['expose' => true],
+    condition: 'request.isXmlHttpRequest()'
+)]
 class DatastoreController extends AbstractController
 {
     public function __construct(
