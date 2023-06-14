@@ -15,7 +15,7 @@ class EntrepotApiException extends HttpException
     public function __construct(string $message, int $statusCode = -1, array $details = [], \Throwable $previous = null)
     {
         $this->details = $details;
-        $this->code = $statusCode;
+        $this->code = $this->$statusCode = $statusCode;
         parent::__construct($statusCode, $message, $previous);
     }
 
