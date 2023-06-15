@@ -155,27 +155,19 @@ class UploadApiService extends AbstractEntrepotApiService
     }
 
     /**
-     * @param string $datastoreId
-     * @param string $uploadId
-     * @param array  $tags
-     *
-     * @return void
+     * @param array<mixed> $tags
      */
-    public function addTags($datastoreId, $uploadId, $tags)
+    public function addTags(string $datastoreId, string $uploadId, $tags): array
     {
-        $this->request('POST', "datastores/$datastoreId/uploads/$uploadId/tags", $tags);
+        return $this->request('POST', "datastores/$datastoreId/uploads/$uploadId/tags", $tags);
     }
 
     /**
-     * @param string $datastoreId
-     * @param string $uploadId
-     * @param array  $tags
-     *
-     * @return void
+     * @param array<string> $tags
      */
-    public function removeTags($datastoreId, $uploadId, $tags)
+    public function removeTags(string $datastoreId, string $uploadId, $tags): array
     {
-        $this->request('DELETE', "datastores/$datastoreId/uploads/$uploadId/tags", [], [
+        return $this->request('DELETE', "datastores/$datastoreId/uploads/$uploadId/tags", [], [
             'tags' => $tags,
         ]);
     }
