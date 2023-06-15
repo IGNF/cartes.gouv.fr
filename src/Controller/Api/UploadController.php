@@ -40,17 +40,14 @@ class UploadController extends AbstractController
             ];
             $upload = $this->entrepotApiService->upload->add($datastoreId, $uploadData);
 
-            // ajouts tags sur la livraison
+            // ajout tags sur la livraison
             $tags = [
                 'data_upload_path' => $content['data_upload_path'],
                 // statut des checks et du processing intégration
             ];
-            $this->entrepotApiService->upload->addTags($datastoreId, $upload['_id'], $tags);
+            $upload = $this->entrepotApiService->upload->addTags($datastoreId, $upload['_id'], $tags);
 
-            // attente intégration en stored_data VECTOR-DB
-
-            $upload = $this->entrepotApiService->upload->get($datastoreId, $upload['_id']);
-
+            // retourne l'upload au frontend, qui se chargera de lancer l'intégration VECTOR-DB
             return $this->json($upload);
         } catch (AppException $ex) {
             return $this->json($ex->getDetails(), $ex->getCode());
