@@ -1,13 +1,12 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
-import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
 import { Select } from "@codegouvfr/react-dsfr/Select";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { format as datefnsFormat } from "date-fns";
 import PropTypes from "prop-types";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 import * as yup from "yup";
@@ -15,6 +14,7 @@ import * as yup from "yup";
 import AppLayout from "../../components/Layout/AppLayout";
 import BtnBackToDashboard from "../../components/Utils/BtnBackToDashboard";
 import Progress from "../../components/Utils/Progress";
+import Wait from "../../components/Utils/Wait";
 import { defaultProjections } from "../../config/projections";
 import FileUploader from "../../modules/FileUploader";
 import { jsonFetch } from "../../modules/jsonFetch";
@@ -30,15 +30,6 @@ const getExtension = (filename) => {
 const schema = yup
     .object({
         data_name: yup.string().required("Le nom de la donnée est obligatoire"),
-        data_file: yup
-            .mixed()
-            .test("is-missing", "Aucun fichier téléversé", (value) => {
-                return value?.length > 0;
-            })
-            .test("is-too-big", `La taille maximale pour un fichier est de ${maxFileSize}`, (value) => {
-                const file = value?.[0] || null;
-                return file && file.size <= maxFileSize;
-            }),
         data_technical_name: yup.string().required("Le nom technique de la donnée est obligatoire"),
         data_srid: yup.string().required("La projection (srid) est obligatoire"),
         data_type: yup.string().required("Le format de donnée est obligatoire"),
@@ -61,10 +52,10 @@ const DataNewForm = ({ datastoreId }) => {
 
     const [srid, setSrid] = useState(""); // srid
 
-    const modal = createModal({
-        id: "terms-modal",
-        isOpenedByDefault: false,
-    });
+    const [dataFileError, setDataFileError] = useState(null);
+    const dataFileRef = useRef();
+
+    const [showWait, setShowWait] = useState(true);
 
     useEffect(() => {
         setProgressValue(0);
@@ -91,36 +82,52 @@ const DataNewForm = ({ datastoreId }) => {
         handleSubmit,
         formState: { errors, isValid },
         setValue: setFormValue,
-        setError: setFormError,
     } = useForm({ resolver: yupResolver(schema) });
 
     const onSubmit = (formData) => {
         console.log(errors);
         console.log(formData);
 
-        delete formData["data_file"];
+        const dataFile = dataFileRef.current?.files?.[0];
 
-        if (isValid) {
+        if (isValid && validateDataFile(dataFile)) {
             const url = Routing.generate("cartesgouvfr_api_upload_add", { datastoreId: datastoreId });
             jsonFetch(url, {
                 method: "POST",
                 body: formData,
             }).then((response) => {
-                modal.open();
                 console.log(response);
+                setShowWait(true);
             });
         }
     };
 
-    const handleFileChanged = (e) => {
-        errors.data_file = null;
-        const file = e.currentTarget.files[0];
-        setShowDataInfos(false);
+    const validateDataFile = (file) => {
+        if (!file) {
+            setDataFileError("Aucun fichier téléversé");
+            return false;
+        }
 
         const extension = getExtension(file.name);
         if (!fileExtensions.includes(extension)) {
-            e.currentTarget.value = "";
-            setFormError("data_file", { message: `L'extension du fichier ${file.name} n'est pas correcte` });
+            setDataFileError(`L'extension du fichier ${file.name} n'est pas correcte`);
+            return false;
+        }
+
+        if (file.size > maxFileSize) {
+            setDataFileError(`La taille maximale pour un fichier est de ${maxFileSize}`);
+            return false;
+        }
+
+        return true;
+    };
+
+    const postDataFile = (e) => {
+        setDataFileError(null);
+        setShowDataInfos(false);
+
+        const file = e.currentTarget.files?.[0];
+        if (!validateDataFile(file)) {
             return;
         }
 
@@ -149,9 +156,9 @@ const DataNewForm = ({ datastoreId }) => {
                                 .catch((err) => console.error(err));
                         }
 
-                        setFormValue("data_technical_name", getDataTechNameSuggestion(file.name));
-                        setFormValue("data_type", "vector"); // TODO : vector pour l'instant
-                        setFormValue("data_upload_path", data?.filename);
+                        setFormValue("data_technical_name", getDataTechNameSuggestion(file.name), { shouldValidate: true });
+                        setFormValue("data_type", "vector", { shouldValidate: true }); // TODO : vector pour l'instant
+                        setFormValue("data_upload_path", data?.filename, { shouldValidate: true });
 
                         setShowDataInfos(true);
                         setShowProgress(false);
@@ -159,13 +166,13 @@ const DataNewForm = ({ datastoreId }) => {
                     .catch((err) => {
                         console.error(err);
                         setShowProgress(false);
-                        setFormError("data_file", { message: err?.data.msg });
+                        setDataFileError(err?.data.msg);
                     });
             })
             .catch((err) => {
                 console.error(err);
                 setShowProgress(false);
-                setFormError("data_file", { message: err?.data.msg });
+                setDataFileError(err?.data.msg);
             });
     };
 
@@ -189,12 +196,13 @@ const DataNewForm = ({ datastoreId }) => {
                     ...register("data_name"),
                 }}
             />
+            {/* A remplacer par le composant Upload quand il sera prêt (https://react-dsfr-components.etalab.studio/?path=/docs/components-upload--default) */}
             <Input
                 label="Déposez votre fichier de données"
                 hintText="Formats de fichiers autorisés : archive zip contenant un Geopackage (recommandé) ou un CSV..."
-                state={errors.data_file ? "error" : "default"}
-                stateRelatedMessage={errors?.data_file?.message}
-                nativeInputProps={{ ...register("data_file"), type: "file", onChange: handleFileChanged }}
+                state={dataFileError === null ? "default" : "error"}
+                stateRelatedMessage={dataFileError}
+                nativeInputProps={{ type: "file", onChange: postDataFile, className: fr.cx("fr-upload"), ref: dataFileRef }}
             />
             {showProgress && <Progress label={"Upload en cours ..."} value={progressValue} max={progressMax} />}
             {showDataInfos && (
@@ -260,28 +268,41 @@ const DataNewForm = ({ datastoreId }) => {
                     </div>
                 </>
             )}
-            <Button onClick={handleSubmit(onSubmit)}>Soumettre</Button>
+            <Button
+                onClick={() => {
+                    const dataFile = dataFileRef.current?.files?.[0];
+                    validateDataFile(dataFile);
+                    handleSubmit(onSubmit)();
+                }}
+            >
+                Soumettre
+            </Button>
             <BtnBackToDashboard datastoreId={datastoreId} className={fr.cx("fr-ml-2w")} />
 
-            {/* modal */}
-            <modal.Component
-                title="Vos données vecteur sont en cours de dépôt"
-                iconId="fr-icon-refresh-line"
-                buttons={[
-                    {
-                        linkProps: { href: "https://example.com", target: "_blank" },
-                        doClosesModal: false, //Default true, clicking a button close the modal.
-                        children: "Learn more",
-                    },
-                    {
-                        iconId: "ri-check-line",
-                        onClick: () => console.log("terms accepted"),
-                        children: "Ok",
-                    },
-                ]}
-            >
-                Etapes.....
-            </modal.Component>
+            <Button onClick={() => setShowWait(true)}>Afficher attente</Button>
+            <Wait show={showWait}>
+                <div className={fr.cx("fr-grid-row")}>
+                    <div className={fr.cx("fr-col-1")}>
+                        <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg")} />
+                    </div>
+                    <div className={fr.cx("fr-col-11")}>
+                        <h6 className={fr.cx("fr-h6")}>Vos données vecteur sont en cours de dépôt</h6>
+                    </div>
+                </div>
+                <div className={fr.cx("fr-grid-row", "fr-px-4w")}>
+                    <ul>
+                        <li>Etape 1</li>
+                        <li>Etape 2</li>
+                        <li>Etape 3</li>
+                        <li>Etape 4</li>
+                    </ul>
+                </div>
+                <div className={fr.cx("fr-grid-row")}>
+                    <Button onClick={() => setShowWait(false)} iconPosition="right">
+                        Continuer
+                    </Button>
+                </div>
+            </Wait>
         </AppLayout>
     );
 };
