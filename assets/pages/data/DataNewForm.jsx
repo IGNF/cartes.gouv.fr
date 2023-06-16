@@ -9,33 +9,22 @@ import PropTypes from "prop-types";
 import React, { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
-import * as yup from "yup";
 
+import api from "../../api";
 import AppLayout from "../../components/Layout/AppLayout";
 import BtnBackToDashboard from "../../components/Utils/BtnBackToDashboard";
 import Progress from "../../components/Utils/Progress";
 import Wait from "../../components/Utils/Wait";
 import { defaultProjections } from "../../config/projections";
+import functions from "../../functions";
 import FileUploader from "../../modules/FileUploader";
 import { jsonFetch } from "../../modules/jsonFetch";
+import schemas from "../../validation/schemas";
+
+import "./../../sass/components/spinner.scss";
 
 const maxFileSize = 2000000000; // 2 GB
 const fileExtensions = ["gpkg", "zip"];
-
-const getExtension = (filename) => {
-    if (!filename) return "";
-    return filename.split(".").pop().toLowerCase();
-};
-
-const schema = yup
-    .object({
-        data_name: yup.string().required("Le nom de la donnée est obligatoire"),
-        data_technical_name: yup.string().required("Le nom technique de la donnée est obligatoire"),
-        data_srid: yup.string().required("La projection (srid) est obligatoire"),
-        data_type: yup.string().required("Le format de donnée est obligatoire"),
-        data_upload_path: yup.string(),
-    })
-    .required();
 
 const fileUploader = new FileUploader();
 
@@ -70,19 +59,12 @@ const DataNewForm = ({ datastoreId }) => {
         }
     }, [showDataInfos]);
 
-    const getProjFromEpsg = (srid) => {
-        const match = srid.match(/EPSG:(\d+)/);
-        if (!match) return;
-
-        return jsonFetch(`https://epsg.io/${match[1]}.json`, {}, false, false);
-    };
-
     const {
         register,
         handleSubmit,
         formState: { errors, isValid },
         setValue: setFormValue,
-    } = useForm({ resolver: yupResolver(schema) });
+    } = useForm({ resolver: yupResolver(schemas.dataNewForm) });
 
     const onSubmit = (formData) => {
         console.log(errors);
@@ -108,7 +90,7 @@ const DataNewForm = ({ datastoreId }) => {
             return false;
         }
 
-        const extension = getExtension(file.name);
+        const extension = functions.path.getFileExtension(file.name);
         if (!fileExtensions.includes(extension)) {
             setDataFileError(`L'extension du fichier ${file.name} n'est pas correcte`);
             return false;
@@ -146,7 +128,8 @@ const DataNewForm = ({ datastoreId }) => {
                         if (srid in projections) {
                             setSrid(srid);
                         } else {
-                            getProjFromEpsg(srid)
+                            api.epsg
+                                .getProjFromEpsg(srid)
                                 .then((proj) => {
                                     const projectionsClone = { ...projections };
                                     projectionsClone[srid] = proj.name;
@@ -283,7 +266,7 @@ const DataNewForm = ({ datastoreId }) => {
             <Wait show={showWait}>
                 <div className={fr.cx("fr-grid-row")}>
                     <div className={fr.cx("fr-col-1")}>
-                        <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg")} />
+                        <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "icons-spin")} />
                     </div>
                     <div className={fr.cx("fr-col-11")}>
                         <h6 className={fr.cx("fr-h6")}>Vos données vecteur sont en cours de dépôt</h6>
