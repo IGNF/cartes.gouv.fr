@@ -7,7 +7,7 @@ const Wait = ({ children, show }) => {
         show && (
             <div
                 style={{
-                    position: "absolute",
+                    position: "fixed",
                     backgroundColor: "rgba(0,0,0,0.6)",
                     zIndex: 1000,
                     top: 0,

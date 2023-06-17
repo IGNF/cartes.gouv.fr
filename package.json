@@ -45,7 +45,8 @@
         "postinstall": "copy-dsfr-to-public",
         "lint": "eslint assets/",
         "lint:watch": "esw assets/ --watch",
-        "format": "prettier --write assets/"
+        "format": "prettier --write assets/",
+        "clean": "rm -rf public/build"
     },
     "browserslist": [
         "defaults"

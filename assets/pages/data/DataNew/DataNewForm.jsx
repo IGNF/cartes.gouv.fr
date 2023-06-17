@@ -10,18 +10,15 @@ import React, { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 
-import api from "../../api";
-import AppLayout from "../../components/Layout/AppLayout";
-import BtnBackToDashboard from "../../components/Utils/BtnBackToDashboard";
-import Progress from "../../components/Utils/Progress";
-import Wait from "../../components/Utils/Wait";
-import { defaultProjections } from "../../config/projections";
-import functions from "../../functions";
-import FileUploader from "../../modules/FileUploader";
-import { jsonFetch } from "../../modules/jsonFetch";
-import schemas from "../../validation/schemas";
-
-import "./../../sass/components/spinner.scss";
+import api from "../../../api";
+import AppLayout from "../../../components/Layout/AppLayout";
+import BtnBackToDashboard from "../../../components/Utils/BtnBackToDashboard";
+import Progress from "../../../components/Utils/Progress";
+import { defaultProjections } from "../../../config/projections";
+import functions from "../../../functions";
+import FileUploader from "../../../modules/FileUploader";
+import schemas from "../../../validation/schemas";
+import DataNewIntegration from "./DataNewIntegration";
 
 const maxFileSize = 2000000000; // 2 GB
 const fileExtensions = ["gpkg", "zip"];
@@ -44,7 +41,15 @@ const DataNewForm = ({ datastoreId }) => {
     const [dataFileError, setDataFileError] = useState(null);
     const dataFileRef = useRef();
 
-    const [showWait, setShowWait] = useState(true);
+    const [uploadCreatedSuccessfully, setUploadCreatedSuccessfully] = useState(false);
+    const [uploadId, setUploadId] = useState(null);
+
+    const {
+        register,
+        handleSubmit,
+        formState: { errors, isValid },
+        setValue: setFormValue,
+    } = useForm({ resolver: yupResolver(schemas.dataNewForm) });
 
     useEffect(() => {
         setProgressValue(0);
@@ -59,13 +64,6 @@ const DataNewForm = ({ datastoreId }) => {
         }
     }, [showDataInfos]);
 
-    const {
-        register,
-        handleSubmit,
-        formState: { errors, isValid },
-        setValue: setFormValue,
-    } = useForm({ resolver: yupResolver(schemas.dataNewForm) });
-
     const onSubmit = (formData) => {
         console.log(errors);
         console.log(formData);
@@ -73,13 +71,10 @@ const DataNewForm = ({ datastoreId }) => {
         const dataFile = dataFileRef.current?.files?.[0];
 
         if (isValid && validateDataFile(dataFile)) {
-            const url = Routing.generate("cartesgouvfr_api_upload_add", { datastoreId: datastoreId });
-            jsonFetch(url, {
-                method: "POST",
-                body: formData,
-            }).then((response) => {
+            api.upload.add(datastoreId, formData).then((response) => {
                 console.log(response);
-                setShowWait(true);
+                setUploadCreatedSuccessfully(true);
+                setUploadId(response?._id);
             });
         }
     };
@@ -262,30 +257,7 @@ const DataNewForm = ({ datastoreId }) => {
             </Button>
             <BtnBackToDashboard datastoreId={datastoreId} className={fr.cx("fr-ml-2w")} />
 
-            <Button onClick={() => setShowWait(true)}>Afficher attente</Button>
-            <Wait show={showWait}>
-                <div className={fr.cx("fr-grid-row")}>
-                    <div className={fr.cx("fr-col-1")}>
-                        <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "icons-spin")} />
-                    </div>
-                    <div className={fr.cx("fr-col-11")}>
-                        <h6 className={fr.cx("fr-h6")}>Vos données vecteur sont en cours de dépôt</h6>
-                    </div>
-                </div>
-                <div className={fr.cx("fr-grid-row", "fr-px-4w")}>
-                    <ul>
-                        <li>Etape 1</li>
-                        <li>Etape 2</li>
-                        <li>Etape 3</li>
-                        <li>Etape 4</li>
-                    </ul>
-                </div>
-                <div className={fr.cx("fr-grid-row")}>
-                    <Button onClick={() => setShowWait(false)} iconPosition="right">
-                        Continuer
-                    </Button>
-                </div>
-            </Wait>
+            {uploadCreatedSuccessfully && <DataNewIntegration datastoreId={datastoreId} uploadId={uploadId} />}
         </AppLayout>
     );
 };

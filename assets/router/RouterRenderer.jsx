@@ -20,7 +20,7 @@ const Cookies = lazy(() => import("../pages/footer/Cookies"));
 const MyAccount = lazy(() => import("../pages/MyAccount"));
 const DatastoreList = lazy(() => import("../pages/datastores/DatastoreList"));
 const DatastoreDashboard = lazy(() => import("../pages/datastores/DatastoreDashboard"));
-const DataNewForm = lazy(() => import("../pages/data/DataNewForm"));
+const DataNewForm = lazy(() => import("../pages/data/DataNew/DataNewForm"));
 
 function RouterRenderer() {
     const route = useRoute();
