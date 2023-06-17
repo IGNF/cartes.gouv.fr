@@ -2,3 +2,10 @@
 home:
     heading: "Transformez vos données géographiques en tuiles vectorielles simplement et diffusez-les n'importe où"
     start: "Commencer"
+
+data:
+    new_integration:
+        steps:
+            send_files_api: Chargement des fichiers
+            wait_checks: Vérifications standard et vecteur
+            integration_processing: Intégration en base de données
