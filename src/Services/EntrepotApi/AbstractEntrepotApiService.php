@@ -13,8 +13,6 @@ use Symfony\Component\HttpClient\Exception\JsonException;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use Symfony\Component\Mime\Part\DataPart;
-use Symfony\Component\Mime\Part\Multipart\FormDataPart;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
@@ -52,15 +50,12 @@ abstract class AbstractEntrepotApiService
      */
     protected function postFile(string $url, string $filepath, array $query = []): array
     {
-        $formFields = [
-            'filename' => DataPart::fromPath($filepath),
+        $fileHandle = fopen($filepath, 'r');
+        $body = [
+            'filename' => $fileHandle,
         ];
-        $formData = new FormDataPart($formFields);
 
-        $headers = $formData->getPreparedHeaders()->toArray();
-        $headers['Content-Type'] = substr($headers[0], 14);
-
-        return $this->request('POST', $url, $formData->bodyToIterable(), $query, $headers, true);
+        return $this->request('POST', $url, $body, $query, [], true);
     }
 
     /**
@@ -106,13 +101,13 @@ abstract class AbstractEntrepotApiService
     /**
      * Fonction générique qui sert à appeler l'API. On s'attend à ce que l'API retourne un string JSON ou un corps vide dans la plupart du temps, sauf dans certains cas connus comme pour les fichiers de logs, alors l'API doit retourner du texte simple. Déclenche une exception en cas de "Bad Request", avec le détail de l'erreur retournée par l'API.
      *
-     * @param iterable<mixed> $body
-     * @param iterable<mixed> $query
-     * @param iterable<mixed> $headers
+     * @param array<mixed> $body
+     * @param array<mixed> $query
+     * @param array<mixed> $headers
      *
      * @SuppressWarnings(BooleanArgumentFlag)
      */
-    protected function request(string $method, string $url, iterable $body = [], iterable $query = [], iterable $headers = [], bool $fileUpload = false, bool $expectJson = true, bool $includeHeaders = false): mixed
+    protected function request(string $method, string $url, array $body = [], array $query = [], array $headers = [], bool $fileUpload = false, bool $expectJson = true, bool $includeHeaders = false): mixed
     {
         $options = $this->prepareOptions($body, $query, $headers, $fileUpload);
 

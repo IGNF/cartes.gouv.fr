@@ -2,7 +2,7 @@
 
 namespace App\Services\EntrepotApi;
 
-use App\Constants\UploadStatuses;
+use App\Constants\EntrepotApi\UploadStatuses;
 use App\Exception\AppException;
 use App\Exception\EntrepotApiException;
 
@@ -13,7 +13,7 @@ class UploadApiService extends AbstractEntrepotApiService
      */
     public function getAll(string $datastoreId, array $query = []): array
     {
-        $query['sort'] = 'date:desc'; // sort by creation date in descending order
+        $query['sort'] = 'date:desc'; // trier par la date de création dans l'ordre descendant
 
         return $this->requestAll("datastores/$datastoreId/uploads", $query);
     }
@@ -28,7 +28,7 @@ class UploadApiService extends AbstractEntrepotApiService
      *
      * @param array<mixed> $uploadData
      *
-     * @return array<mixed> API response
+     * @return array<mixed>
      */
     public function add(string $datastoreId, $uploadData)
     {
@@ -170,5 +170,30 @@ class UploadApiService extends AbstractEntrepotApiService
         return $this->request('DELETE', "datastores/$datastoreId/uploads/$uploadId/tags", [], [
             'tags' => $tags,
         ]);
+    }
+
+    public function getCheckExecutions(string $datastoreId, string $uploadId): array
+    {
+        return $this->request('GET', "datastores/$datastoreId/uploads/$uploadId/checks");
+    }
+
+    public function getChecks(string $datastoreId): array
+    {
+        return $this->request('GET', "datastores/$datastoreId/checks");
+    }
+
+    public function getCheck(string $datastoreId, string $checkId): array
+    {
+        return $this->request('GET', "datastores/$datastoreId/checks/$checkId");
+    }
+
+    public function getCheckExecution(string $datastoreId, string $checkExecutionId): array
+    {
+        return $this->request('GET', "datastores/$datastoreId/checks/executions/$checkExecutionId");
+    }
+
+    public function getCheckExecutionLogs(string $datastoreId, string $checkExecutionId): string
+    {
+        return $this->request('GET', "datastores/$datastoreId/checks/executions/$checkExecutionId/logs", [], [], [], false, false);
     }
 }
