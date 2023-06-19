@@ -14,11 +14,14 @@ import api from "../../../api";
 import AppLayout from "../../../components/Layout/AppLayout";
 import BtnBackToDashboard from "../../../components/Utils/BtnBackToDashboard";
 import Progress from "../../../components/Utils/Progress";
+import Wait from "../../../components/Utils/Wait";
 import { defaultProjections } from "../../../config/projections";
 import functions from "../../../functions";
 import FileUploader from "../../../modules/FileUploader";
 import schemas from "../../../validation/schemas";
 import DataNewIntegration from "./DataNewIntegration";
+
+import "./../../../sass/components/spinner.scss";
 
 const maxFileSize = 2000000000; // 2 GB
 const fileExtensions = ["gpkg", "zip"];
@@ -41,6 +44,7 @@ const DataNewForm = ({ datastoreId }) => {
     const [dataFileError, setDataFileError] = useState(null);
     const dataFileRef = useRef();
 
+    const [uploadCreationInProgress, setUploadCreationInProgress] = useState(false);
     const [uploadCreatedSuccessfully, setUploadCreatedSuccessfully] = useState(false);
     const [uploadId, setUploadId] = useState(null);
 
@@ -71,6 +75,8 @@ const DataNewForm = ({ datastoreId }) => {
         const dataFile = dataFileRef.current?.files?.[0];
 
         if (isValid && validateDataFile(dataFile)) {
+            setUploadCreationInProgress(true);
+
             api.upload.add(datastoreId, formData).then((response) => {
                 console.log(response);
                 setUploadCreatedSuccessfully(true);
@@ -257,7 +263,16 @@ const DataNewForm = ({ datastoreId }) => {
             </Button>
             <BtnBackToDashboard datastoreId={datastoreId} className={fr.cx("fr-ml-2w")} />
 
-            {uploadCreatedSuccessfully && <DataNewIntegration datastoreId={datastoreId} uploadId={uploadId} />}
+            {uploadCreationInProgress && (
+                <Wait show={true}>
+                    {uploadCreatedSuccessfully ? (
+                        <DataNewIntegration datastoreId={datastoreId} uploadId={uploadId} />
+                    ) : (
+                        <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "icons-spin")} />
+                        // TODO : afficher un message "création de la fiche de donnée / upload en cours" ??
+                    )}
+                </Wait>
+            )}
         </AppLayout>
     );
 };

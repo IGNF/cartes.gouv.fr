@@ -4,7 +4,6 @@ import PropTypes from "prop-types";
 import React, { useEffect, useRef, useState } from "react";
 
 import api from "../../../api";
-import Wait from "../../../components/Utils/Wait";
 
 import "./../../../sass/components/spinner.scss";
 
@@ -13,9 +12,9 @@ const DataNewIntegration = ({ datastoreId, uploadId }) => {
     const [integrationCurrentStep, setIntegrationCurrentStep] = useState(null);
 
     const abortController = useRef(new AbortController());
-    const [requestInProgress, setRequestInProgress] = useState(false);
 
     const refreshInterval = useRef();
+    const requestInProgress = useRef(false);
 
     useEffect(() => {
         refreshInterval.current = setInterval(refresh, 5000);
@@ -37,29 +36,32 @@ const DataNewIntegration = ({ datastoreId, uploadId }) => {
         }
 
         // stopper si toutes les étapes ont terminé
-        if (Object.keys(integrationProgress).length === integrationCurrentStep + 1) {
-            console.debug("stopping, all steps completed");
+        if (Object.keys(integrationProgress).length === integrationCurrentStep) {
+            console.debug("stopping, all steps completed successfully");
             clearInterval(refreshInterval.current);
             return;
         }
     }, [integrationProgress]);
 
     const refresh = () => {
-        if (requestInProgress) return;
+        if (requestInProgress.current === true) {
+            console.debug("skipping, request already in progress");
+            return;
+        }
 
-        setRequestInProgress(true);
+        requestInProgress.current = true;
         const signal = abortController.current.signal;
         api.upload
             .integrationProgressPing(datastoreId, uploadId, { signal })
             .then((response) => {
-                setIntegrationProgress({ ...JSON.parse(response?.integration_progress) });
+                setIntegrationProgress(JSON.parse(response?.integration_progress));
                 setIntegrationCurrentStep(parseInt(response?.integration_current_step));
             })
             .catch((error) => {
                 console.error(error);
             })
             .finally(() => {
-                setRequestInProgress(false);
+                requestInProgress.current = false;
             });
     };
 
@@ -84,35 +86,33 @@ const DataNewIntegration = ({ datastoreId, uploadId }) => {
     };
 
     return (
-        <Wait show={true}>
-            <div className={fr.cx("fr-container")}>
-                <div className={fr.cx("fr-grid-row")}>
-                    <div className={fr.cx("fr-col-1")}>
-                        <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "icons-spin")} />
-                    </div>
-                    <div className={fr.cx("fr-col-11")}>
-                        <h6 className={fr.cx("fr-h6")}>Vos données vecteur sont en cours de dépôt</h6>
-                    </div>
+        <div className={fr.cx("fr-container")}>
+            <div className={fr.cx("fr-grid-row")}>
+                <div className={fr.cx("fr-col-1")}>
+                    <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "icons-spin")} />
                 </div>
-                <div className={fr.cx("fr-grid-row", "fr-px-4w")}>
-                    <div className={fr.cx("fr-col", "fr-col--middle")}>
-                        {Object.entries(integrationProgress).map(([step, status]) => (
-                            <div className={fr.cx("fr-grid-row")} key={step}>
-                                <p>
-                                    {getStepIcon(status)}
-                                    &nbsp;{Translator.trans(`data.new_integration.steps.${step}`)} : {status}
-                                </p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-                <div className={fr.cx("fr-grid-row", "fr-grid-row--right")}>
-                    <Button onClick={() => {}} disabled={true}>
-                        Continuer
-                    </Button>
+                <div className={fr.cx("fr-col-11")}>
+                    <h6 className={fr.cx("fr-h6")}>Vos données vecteur sont en cours de dépôt</h6>
                 </div>
             </div>
-        </Wait>
+            <div className={fr.cx("fr-grid-row", "fr-px-4w")}>
+                <div className={fr.cx("fr-col", "fr-col--middle")}>
+                    {Object.entries(integrationProgress).map(([step, status]) => (
+                        <div className={fr.cx("fr-grid-row")} key={step}>
+                            <p>
+                                {getStepIcon(status)}
+                                &nbsp;{Translator.trans(`data.new_integration.steps.${step}`)} : {status}
+                            </p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+            <div className={fr.cx("fr-grid-row", "fr-grid-row--right")}>
+                <Button onClick={() => {}} disabled={true}>
+                    Continuer
+                </Button>
+            </div>
+        </div>
     );
 };
 
