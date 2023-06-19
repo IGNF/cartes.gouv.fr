@@ -33,4 +33,4 @@ services:
             - "traefik.enable=true"
             - "traefik.http.routers.cartesgouvfr.rule=Host(`cartesgouvfr-dev.docker.localhost`)"
             - "traefik.http.routers.cartesgouvfr.entrypoints=websecure"
-            - "traefik.http.services.validator-api-service.loadbalancer.server.port=8000"
+            - "traefik.http.services.cartesgouvfr.loadbalancer.server.port=8000"
