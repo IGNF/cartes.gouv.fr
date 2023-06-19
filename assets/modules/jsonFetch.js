@@ -39,16 +39,21 @@ export async function jsonFetch(url, params = {}, isFileUpload = false, isXMLHtt
                 ...params,
             };
 
-            const response = await fetch(url, params);
-            if (response.status === 204) {
-                resolve(null);
-            }
-            const data = await response.json();
+            try {
+                const response = await fetch(url, params);
 
-            if (response.ok) {
-                resolve(data);
-            } else {
-                reject(new JsonFetchError(response.status, data));
+                if (response.status === 204) {
+                    resolve(null);
+                }
+                const data = await response.json();
+
+                if (response.ok) {
+                    resolve(data);
+                } else {
+                    reject(new JsonFetchError(response.status, data));
+                }
+            } catch (error) {
+                reject(new JsonFetchError(500, error));
             }
         })();
     });
