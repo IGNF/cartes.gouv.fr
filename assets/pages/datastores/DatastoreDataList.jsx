@@ -5,12 +5,11 @@ import React, { useEffect, useState } from "react";
 
 import api from "../../api";
 import AppLayout from "../../components/Layout/AppLayout";
-import BtnBackToDatastoreList from "../../components/Utils/BtnBackToDatastoreList";
 import LoadingText from "../../components/Utils/LoadingText";
 import { routes } from "../../router/router";
 import { datastoreNavItems } from "../../config/datastoreNavItems";
 
-const DatastoreDashboard = ({ datastoreId }) => {
+const DatastoreDataList = ({ datastoreId }) => {
     const [datastore, setDatastore] = useState(null);
 
     useEffect(() => {
@@ -28,21 +27,25 @@ const DatastoreDashboard = ({ datastoreId }) => {
                 <LoadingText />
             ) : (
                 <>
-                    <h1>Espace de travail {datastore?.name || datastoreId}</h1>
+                    <h1>Données {datastore?.name || datastoreId}</h1>
 
-                    <Button linkProps={routes.datastore_data_new({ datastoreId }).link} className={fr.cx("fr-mr-2v")}>
-                        Ajouter une fiche de données
+                    <Button
+                        linkProps={routes.datastore_data_new({ datastoreId }).link}
+                        className={fr.cx("fr-mr-2v")}
+                        iconId={fr.cx("fr-icon-add-line")}
+                    >
+                        Créer une fiche de données
                     </Button>
 
-                    <BtnBackToDatastoreList />
+                    <p>A venir : tableau des fiches de données</p>
                 </>
             )}
         </AppLayout>
     );
 };
 
-DatastoreDashboard.propTypes = {
+DatastoreDataList.propTypes = {
     datastoreId: PropTypes.string.isRequired,
 };
 
-export default DatastoreDashboard;
+export default DatastoreDataList;

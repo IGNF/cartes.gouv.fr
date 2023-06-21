@@ -27,6 +27,12 @@ const routeDefs = {
         },
         (p) => `${app_root}/datastores/${p.datastoreId}`
     ),
+    datastore_data_list: defineRoute(
+        {
+            datastoreId: param.path.string,
+        },
+        (p) => `${app_root}/datastores/${p.datastoreId}/data`
+    ),
     datastore_data_new: defineRoute(
         {
             datastoreId: param.path.string,
