@@ -110,20 +110,20 @@ const Home = () => {
                                         <p>
                                             {user == null ? (
                                                 <Button
-                                                    linkProps={{ href: Routing.generate("cartesgouvfr_security_login") }}>
-                                                    {Translator.trans("home.start")}
+                                                    linkProps={{ href: Routing.generate("cartesgouvfr_security_login") }}
+                                                    iconId={fr.cx("fr-icon-account-circle-line")}
+                                                >
+                                                    Se connecter
                                                 </Button>
                                             ) : (
                                                 <Button
-                                                    linkProps={routes.datastore_list().link}>
+                                                    linkProps={routes.datastore_list().link}
+                                                    iconId={fr.cx("fr-icon-arrow-right-line")}
+                                                    className={fr.cx("fr-btn--icon-right")}
+                                                >
                                                     {Translator.trans("home.start")}
                                                 </Button>
                                             )}
-                                            <a href="" className={fr.cx("fr-btn fr-btn--tertiary-no-outline")}>
-                                                <span className={fr.cx("fr-badge  fr-badge--blue fr-badge--sm fr-badge--no-icon fr-mr-1w fr-badge-nowrap")}>
-                                                    Se connecter pour accéder</span>
-                                                <span className={fr.cx("fr-icon-logout-box-r-line")} aria-hidden="true"></span>
-                                            </a>
                                         </p>
                                     </div>
                                     <div className={fr.cx("fr-col-lg-3", "fr-col-md-6", "fr-col-12", "fr-text--center")}>
