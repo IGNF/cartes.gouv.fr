@@ -1,12 +1,12 @@
 import React, { useContext } from "react";
 
-import AppLayout from "../components/Layout/AppLayout";
-import BtnBackToHome from "../components/Utils/BtnBackToHome";
-import { defaultNavItems } from "../config/navItems";
-import { UserContext } from "../contexts/UserContext";
-import functions from "../functions";
+import AppLayout from "../../components/Layout/AppLayout";
+import BtnBackToHome from "../../components/Utils/BtnBackToHome";
+import { defaultNavItems } from "../../config/navItems";
+import { UserContext } from "../../contexts/UserContext";
+import functions from "../../functions";
 
-const MyAccount = () => {
+const Me = () => {
     const { user } = useContext(UserContext);
 
     return (
@@ -33,4 +33,4 @@ const MyAccount = () => {
     );
 };
 
-export default MyAccount;
+export default Me;

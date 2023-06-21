@@ -17,7 +17,7 @@ const Accessibility = lazy(() => import("../pages/footer/Accessibility"));
 const LegalNotice = lazy(() => import("../pages/footer/LegalNotice"));
 const PersonalData = lazy(() => import("../pages/footer/PersonalData"));
 const Cookies = lazy(() => import("../pages/footer/Cookies"));
-const MyAccount = lazy(() => import("../pages/MyAccount"));
+const Me = lazy(() => import("../pages/users/Me"));
 const DatastoreList = lazy(() => import("../pages/datastores/DatastoreList"));
 const DatastoreDashboard = lazy(() => import("../pages/datastores/DatastoreDashboard"));
 const DatastoreDataList = lazy(() => import("../pages/datastores/DatastoreDataList"));
@@ -67,7 +67,7 @@ function RouterRenderer() {
             content = <Cookies />;
             break;
         case "my_account":
-            content = <MyAccount />;
+            content = <Me />;
             break;
         case "datastore_list":
             content = <DatastoreList />;
