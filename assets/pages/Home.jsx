@@ -16,6 +16,8 @@ import hp from "../img/hp.jpg";
 const Home = () => {
     const { user } = useContext(UserContext);
 
+    const app_root = document.getElementById("root").dataset?.appRoot;
+
     return (
         <AppLayout navItems={defaultNavItems}>
 
@@ -70,7 +72,7 @@ const Home = () => {
                             "content":
                                 <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-text--center")}>
                                     <div className={fr.cx("fr-col-lg-3", "fr-col-md-6", "fr-col-12", "fr-text--center")}>
-                                        <img src="dsfr/artwork/pictograms/digital/internet.svg"
+                                        <img src={`${app_root}/dsfr/artwork/pictograms/digital/internet.svg`}
                                             className={fr.cx("fin-service-picto", "svg-fin-fc-finger")}
                                             role="presentation"/>
                                         <h4 className={fr.cx("fr-text--lead")}>Consommez des services</h4>
@@ -88,7 +90,7 @@ const Home = () => {
                                     </div>
 
                                     <div className={fr.cx("fr-col-lg-3", "fr-col-md-6", "fr-col-12", "fr-text--center")}>
-                                        <img src="dsfr/artwork/pictograms/environment/human-cooperation.svg"
+                                        <img src={`${app_root}/dsfr/artwork/pictograms/environment/human-cooperation.svg`}
                                             className={fr.cx("fin-service-pict", "svg-fin-majorite")}
                                             role="presentation"/>
                                         <h4 className={fr.cx("fr-text--lead")}>Stocker et partager des géodonnées</h4>
@@ -98,7 +100,7 @@ const Home = () => {
                                     </div>
 
                                     <div className={fr.cx("fr-col-lg-3", "fr-col-md-6", "fr-col-12", "fr-text--center")}>
-                                        <img src="dsfr/artwork/pictograms/digital/data-visualization.svg"
+                                        <img src={`${app_root}/dsfr/artwork/pictograms/digital/data-visualization.svg`}
                                             className={fr.cx("fin-service-picto", "svg-fin-procuration")}
                                             role="presentation"/>
                                         <h4 className={fr.cx("fr-text--lead")}>Effectuer des traitements</h4>
@@ -125,7 +127,7 @@ const Home = () => {
                                         </p>
                                     </div>
                                     <div className={fr.cx("fr-col-lg-3", "fr-col-md-6", "fr-col-12", "fr-text--center")}>
-                                        <img src="dsfr/artwork/pictograms/map/map.svg"
+                                        <img src={`${app_root}/dsfr/artwork/pictograms/map/map.svg`}
                                             className={fr.cx("fin-service-picto", "svg-fin-service-picto")}
                                             role="presentation"/>
                                         <h4 className={fr.cx("fr-text--lead")}>Lorem ipsum dolor</h4>
@@ -141,7 +143,7 @@ const Home = () => {
                                 <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-text--center")}>
 
                                     <div className={fr.cx("fr-col-lg-3", "fr-col-12", "fr-text--center")}>
-                                        <img src="dsfr/artwork/pictograms/digital/data-visualization.svg"
+                                        <img src={`${app_root}/dsfr/artwork/pictograms/digital/data-visualization.svg`}
                                             className={fr.cx("fin-service-picto", "svg-fin-procuration")}
                                             role="presentation"/>
                                         <h4 className={fr.cx("fr-text--lead")}>Consectetur adipiscing elit</h4>
@@ -159,7 +161,7 @@ const Home = () => {
                                     </div>
 
                                     <div className={fr.cx("fr-col-lg-3", "fr-col-12", "fr-text--center")}>
-                                        <img src="dsfr/artwork/pictograms/map/map.svg"
+                                        <img src={`${app_root}/dsfr/artwork/pictograms/map/map.svg`}
                                             className={fr.cx("fin-service-picto", "svg-fin-service-picto")}
                                             role="presentation"/>
                                         <h4 className={fr.cx("fr-text--lead")}>Sit amet</h4>
@@ -169,7 +171,7 @@ const Home = () => {
                                     </div>
 
                                     <div className={fr.cx("fr-col-lg-3", "fr-col-12", "fr-text--center")}>
-                                        <img src="dsfr/artwork/pictograms/digital/internet.svg"
+                                        <img src={`${app_root}/dsfr/artwork/pictograms/digital/internet.svg`}
                                             className={fr.cx("fin-service-picto", "svg-fin-fc-finger")}
                                             role="presentation"/>
                                         <h4 className={fr.cx("fr-text--lead")}>Dolor sit amet consectetur</h4>
@@ -181,7 +183,7 @@ const Home = () => {
                                         <p></p>
                                     </div>
                                     <div className={fr.cx("fr-col-lg-3", "fr-col-12", "fr-text--center")}>
-                                        <img src="dsfr/artwork/pictograms/environment/human-cooperation.svg"
+                                        <img src={`${app_root}/dsfr/artwork/pictograms/environment/human-cooperation.svg`}
                                             className={fr.cx("fin-service-picto", "svg-fin-majorite")}
                                             role="presentation"/>
                                         <h4 className={fr.cx("fr-text--lead")}>Adipiscing elits</h4>
