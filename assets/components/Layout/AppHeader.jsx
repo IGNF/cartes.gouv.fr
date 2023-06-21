@@ -44,7 +44,7 @@ const AppHeader = ({ navItems = [] }) => {
         quickAccessItems.push({
             iconId: fr.cx("fr-icon-account-line"),
             linkProps: routes.my_account().link,
-            text: "Mon compte",
+            text: `${user.firstName} ${user.lastName}`,
         });
         quickAccessItems.push({
             iconId: fr.cx("fr-icon-logout-box-r-line"),

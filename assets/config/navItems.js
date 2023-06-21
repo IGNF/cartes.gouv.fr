@@ -113,9 +113,7 @@ export const defaultNavItems = [
     },
     {
         text: "Actualités",
-        linkProps: {
-            href: "#",
-        }
+        linkProps: routes.news().link
     },
     {
         text: "Agenda",
