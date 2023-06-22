@@ -1,0 +1,56 @@
+name: Code lint & style
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  js:
+    name: JavaScript lint & style
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Use Node.js 18.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+          cache: yarn
+
+      - name: Install JavaScript dependencies
+        run: yarn install
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Format
+        run: yarn format
+
+  php:
+    name: PHP lint & style
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+      
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Cache Composer packages
+        id: composer-cache
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
+
+      - name: Install PHP dependencies
+        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
+      - name: Check code rules
+        run: composer check-rules
