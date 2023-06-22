@@ -39,14 +39,15 @@
     "scripts": {
         "dev-server": "encore dev-server",
         "dev": "encore dev",
-        "watch": "encore dev --watch",
+        "watch": "yarn dev --watch",
         "build": "encore production --progress",
         "prebuild": "only-include-used-icons",
         "postinstall": "copy-dsfr-to-public",
         "lint": "eslint assets/",
         "lint:watch": "esw assets/ --watch",
         "format": "prettier --write assets/",
-        "clean": "rm -rf public/build"
+        "clean": "rm -rf public/build",
+        "predev": "yarn clean"
     },
     "browserslist": [
         "defaults"

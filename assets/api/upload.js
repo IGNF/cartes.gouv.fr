@@ -24,7 +24,7 @@ const add = (datastoreId, formData) => {
 const integrationProgressPing = (datastoreId, uploadId, otherOptions = {}) => {
     const url = Routing.generate("cartesgouvfr_api_upload_integration_progress", { datastoreId, uploadId });
     return jsonFetch(url, {
-        method: "POST",
+        method: "GET",
         ...otherOptions,
     });
 };
