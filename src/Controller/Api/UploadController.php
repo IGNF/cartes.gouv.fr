@@ -39,7 +39,6 @@ class UploadController extends AbstractController
             $content = json_decode($request->getContent(), true);
 
             // déclaration de livraison
-            // TODO : nom de la fiche de donnée, qu'est-ce qu'on fait ?
             $uploadData = [
                 'name' => $content['data_technical_name'],
                 'description' => $content['data_technical_name'],
@@ -51,6 +50,7 @@ class UploadController extends AbstractController
             // ajout tags sur la livraison
             $tags = [
                 UploadTags::DATA_UPLOAD_PATH => $content['data_upload_path'],
+                UploadTags::DATA_NAME => $content['data_name'],
                 // statut des checks et du processing intégration
             ];
             $upload = $this->entrepotApiService->upload->addTags($datastoreId, $upload['_id'], $tags);
@@ -64,7 +64,7 @@ class UploadController extends AbstractController
         }
     }
 
-    #[Route('/{uploadId}/integration_progress', name: 'integration_progress', methods: ['POST'])]
+    #[Route('/{uploadId}/integration_progress', name: 'integration_progress', methods: ['GET'])]
     public function integrationProgress(string $datastoreId, string $uploadId): JsonResponse
     {
         // lecture dernier état des étapes de l'intégration
@@ -75,15 +75,19 @@ class UploadController extends AbstractController
             UploadTags::INT_STEP_WAIT_CHECKS => JobStatuses::WAITING,
             UploadTags::INT_STEP_PROCESSING => JobStatuses::WAITING,
         ];
-        $integCurrentStep = isset($upload['tags'][UploadTags::INTEGRATION_CURRENT_STEP]) ? intval($upload['tags'][UploadTags::INTEGRATION_CURRENT_STEP]) : 0;
+        $integCurrentStep = isset($upload['tags'][UploadTags::INTEGRATION_CURRENT_STEP]) ? intval($upload['tags'][UploadTags::INTEGRATION_CURRENT_STEP]) : -1;
         $integProgress = isset($upload['tags'][UploadTags::INTEGRATION_PROGRESS]) ? json_decode($upload['tags'][UploadTags::INTEGRATION_PROGRESS], true) : $defaultIntegProgress;
 
         $integCurrStepClone = $integCurrentStep;
         $integProgressClone = $integProgress;
 
         try {
-            // faire des trucs ici
-            [$integCurrentStep, $integProgress] = $this->runIntegrationStep($datastoreId, $upload, $integProgress, $integCurrentStep);
+            // exécuter les étapes de l'intégration, sauf la première fois que cette route est appelée
+            if (-1 === $integCurrentStep) {
+                ++$integCurrentStep;
+            } else {
+                [$integCurrentStep, $integProgress] = $this->runIntegrationStep($datastoreId, $upload, $integProgress, $integCurrentStep);
+            }
 
             $uploadTags = [
                 UploadTags::INTEGRATION_CURRENT_STEP => $integCurrentStep,
@@ -92,7 +96,6 @@ class UploadController extends AbstractController
 
             // mise à jour état des étapes de l'intégration si changement
             if ($integCurrStepClone !== $integCurrentStep || $integProgressClone !== $integProgress) {
-                $uploadTags['changed'] = true;
                 $upload = $this->entrepotApiService->upload->addTags($datastoreId, $uploadId, $uploadTags);
             }
 
@@ -178,38 +181,42 @@ class UploadController extends AbstractController
                                 ],
                             ];
 
-                            $processingExec = $this->entrepotApiService->processing->addExecution($datastoreId, $procExecBody);
-                            $vectorDb = $processingExec['output']['stored_data'];
+                            // TODO : désactivé le temps de debug
 
-                            // ajout tags sur l'upload
-                            $this->entrepotApiService->upload->addTags($datastoreId, $upload['_id'], [
-                                'vectordb_id' => $vectorDb['_id'],
-                                'proc_int_id' => $processingExec['_id'],
-                            ]);
+                            // $processingExec = $this->entrepotApiService->processing->addExecution($datastoreId, $procExecBody);
+                            // $vectorDb = $processingExec['output']['stored_data'];
 
-                            // ajout tags sur la stored_data
-                            $this->entrepotApiService->storedData->addTags($datastoreId, $vectorDb['_id'], [
-                                'upload_id' => $upload['_id'],
-                                'proc_int_id' => $processingExec['_id'],
-                            ]);
+                            // // ajout tags sur l'upload
+                            // $this->entrepotApiService->upload->addTags($datastoreId, $upload['_id'], [
+                            //     'vectordb_id' => $vectorDb['_id'],
+                            //     'proc_int_id' => $processingExec['_id'],
+                            // ]);
 
-                            // TODO : mise à jour ?
+                            // // ajout tags sur la stored_data
+                            // $this->entrepotApiService->storedData->addTags($datastoreId, $vectorDb['_id'], [
+                            //     'upload_id' => $upload['_id'],
+                            //     'proc_int_id' => $processingExec['_id'],
+                            // ]);
 
-                            $this->entrepotApiService->processing->launchExecution($datastoreId, $processingExec['_id']);
+                            // // TODO : mise à jour ?
+
+                            // $this->entrepotApiService->processing->launchExecution($datastoreId, $processingExec['_id']);
                             $currentStepStatus = JobStatuses::IN_PROGRESS;
                             break;
 
                         case JobStatuses::IN_PROGRESS:
-                            $processingExec = $this->entrepotApiService->processing->getExecution($datastoreId, $upload['tags']['proc_int_id']);
-                            $vectordb = $this->entrepotApiService->storedData->get($datastoreId, $upload['tags']['vectordb_id']);
+                            // TODO : désactivé le temps de debug
 
-                            if (!in_array($processingExec['status'], [ProcessingStatuses::CREATED, ProcessingStatuses::WAITING, ProcessingStatuses::PROGRESS])) {
-                                if (ProcessingStatuses::SUCCESS == $processingExec['status'] && StoredDataStatuses::GENERATED == $vectordb['status']) {
-                                    $currentStepStatus = JobStatuses::SUCCESSFUL;
-                                } else {
-                                    $currentStepStatus = JobStatuses::FAILED;
-                                }
-                            }
+                            // $processingExec = $this->entrepotApiService->processing->getExecution($datastoreId, $upload['tags']['proc_int_id']);
+                            // $vectordb = $this->entrepotApiService->storedData->get($datastoreId, $upload['tags']['vectordb_id']);
+
+                            // if (!in_array($processingExec['status'], [ProcessingStatuses::CREATED, ProcessingStatuses::WAITING, ProcessingStatuses::PROGRESS])) {
+                            //     if (ProcessingStatuses::SUCCESS == $processingExec['status'] && StoredDataStatuses::GENERATED == $vectordb['status']) {
+                            //         $currentStepStatus = JobStatuses::SUCCESSFUL;
+                            //     } else {
+                            //         $currentStepStatus = JobStatuses::FAILED;
+                            //     }
+                            // }
                             break;
                         case JobStatuses::SUCCESSFUL:
                             $currentStep++;
@@ -219,6 +226,7 @@ class UploadController extends AbstractController
             }
         } catch (\Throwable $th) {
             $currentStepStatus = JobStatuses::FAILED;
+            throw $th;
         }
 
         $progress[$currentStepName] = $currentStepStatus;
