@@ -1,4 +1,3 @@
 {
     "prettier.requireConfig": true,
-    "prettier.prettierPath": "${workspaceFolder}/bin/prettier"
 }
