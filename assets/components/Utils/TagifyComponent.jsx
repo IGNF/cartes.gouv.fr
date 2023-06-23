@@ -107,8 +107,6 @@ TagifyComponent.propTypes = {
     label: PropTypes.string.isRequired,
     hintText: PropTypes.string.isRequired,
     errorMessage: PropTypes.string.isRequired,
-    //tagifyRef: PropTypes.object.isRequired,
-    /*maxTags: PropTypes.number.isRequired, */
     whiteList: PropTypes.arrayOf(PropTypes.string).isRequired,
     name: PropTypes.string.isRequired,
 };

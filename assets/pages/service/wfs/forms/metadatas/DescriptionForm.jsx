@@ -5,8 +5,6 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Input } from "@codegouvfr/react-dsfr/Input";
-import Tagify from "@yaireo/tagify";
-import "@yaireo/tagify/src/tagify.scss";
 import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { removeDiacritics } from "../../../../../utils";
 import { format as datefnsFormat } from "date-fns";
