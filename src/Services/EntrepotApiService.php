@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Services\EntrepotApi\AnnexeApiService;
+use App\Services\EntrepotApi\CommunityApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\ProcessingApiService;
@@ -20,6 +21,7 @@ class EntrepotApiService
         public readonly StoredDataApiService $storedData,
         public readonly ConfigurationApiService $configuration,
         public readonly AnnexeApiService $annexe,
+        public readonly CommunityApiService $community,
     ) {
         $this->user->setEntrepotApiService($this);
         $this->datastore->setEntrepotApiService($this);
@@ -28,5 +30,6 @@ class EntrepotApiService
         $this->storedData->setEntrepotApiService($this);
         $this->configuration->setEntrepotApiService($this);
         $this->annexe->setEntrepotApiService($this);
+        $this->community->setEntrepotApiService($this);
     }
 }
