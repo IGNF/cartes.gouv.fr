@@ -40,16 +40,25 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
         $this->requestStack = $requestStack;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function start(Request $request, AuthenticationException $authException = null): Response
     {
         return new RedirectResponse($this->router->generate(self::LOGIN_ROUTE), Response::HTTP_TEMPORARY_REDIRECT);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function supports(Request $request): ?bool
     {
         return self::LOGIN_CHECK_ROUTE === $request->attributes->get('_route');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function authenticate(Request $request): Passport
     {
         /** @var OAuth2ClientInterface|KeycloakClient */
@@ -65,6 +74,9 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
         return new SelfValidatingPassport($userBadge);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
         // if ($request->getSession()->get('side_login', false)) {
@@ -87,6 +99,9 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
         return new RedirectResponse($this->router->generate(self::SUCCESS_ROUTE));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
     {
         $message = strtr($exception->getMessageKey(), $exception->getMessageData());
