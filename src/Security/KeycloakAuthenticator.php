@@ -41,6 +41,7 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
     }
 
     /**
+     * //
      * {@inheritDoc}
      */
     public function start(Request $request, AuthenticationException $authException = null): Response
@@ -49,6 +50,7 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
     }
 
     /**
+     * //
      * {@inheritDoc}
      */
     public function supports(Request $request): ?bool
@@ -57,6 +59,7 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
     }
 
     /**
+     * //
      * {@inheritDoc}
      */
     public function authenticate(Request $request): Passport
@@ -75,6 +78,7 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
     }
 
     /**
+     * //
      * {@inheritDoc}
      */
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
@@ -100,6 +104,7 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
     }
 
     /**
+     * //
      * {@inheritDoc}
      */
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response

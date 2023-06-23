@@ -10,7 +10,9 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route(name: 'cartesgouvfr_security_')]
+#[Route(
+    name: 'cartesgouvfr_security_',
+)]
 class SecurityController extends AbstractController
 {
     #[Route('/login', name: 'login', methods: ['GET'], options: ['expose' => true])]
