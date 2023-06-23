@@ -18,7 +18,7 @@ use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 
-class UserProvider implements UserProviderInterface
+class KeycloakUserProvider implements UserProviderInterface
 {
     private ClientRegistry $clientRegistry;
     private RequestStack $requestStack;
