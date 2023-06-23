@@ -20,6 +20,9 @@ class SecurityController extends AbstractController
         //     return $this->testLogin($tokenStorage, $request, $urlGenerator);
         // }
 
+        $referer = $request->headers->get('referer');
+        $request->getSession()->set('referer', $referer);
+
         /** @var KeycloakClient */
         $client = $clientRegistry->getClient('keycloak');
 
