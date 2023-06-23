@@ -39,8 +39,17 @@ const routeDefs = {
         },
         (p) => `${app_root}/datastores/${p.datastoreId}/data/new`
     ),
+
+    // Creer et publier un service WFS
+    datastore_wfs_service_new: defineRoute(
+        {
+            datastoreId: param.path.string,
+            storedDataId: param.path.string,
+        },
+        (p) => `${app_root}/datastores/${p.datastoreId}/data/${p.storedDataId}/service/wfs/new`
+    ),
 };
 
 export const { RouteProvider, useRoute, routes } = createRouter(routeDefs);
 
-export const protectedRoutes = ["my_account", "datastore_list", "datastore_dashboard", "datastore_data_new"];
+export const protectedRoutes = ["my_account", "datastore_list", "datastore_dashboard", "datastore_data_new", "datastore_wfs_service_new"];

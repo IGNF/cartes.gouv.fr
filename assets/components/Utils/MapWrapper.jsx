@@ -13,7 +13,7 @@ import "./../../sass/components/zoom-range.scss";
 
 const MapWrapper = (props) => {
     const [ map, setMap ] = useState();
-
+    
     // get ref to div element - OpenLayers will render into this div
     const mapElement = useRef();
 
