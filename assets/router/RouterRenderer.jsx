@@ -7,7 +7,7 @@ import { UserContext } from "../contexts/UserContext";
 import Home from "../pages/Home";
 import Redirect from "../pages/Redirect";
 import PageNotFound from "../pages/error/PageNotFound";
-import { protectedRoutes, useRoute } from "./router";
+import { publicRoutes, useRoute } from "./router";
 
 const Docs = lazy(() => import("../pages/Docs"));
 const Contact = lazy(() => import("../pages/Contact"));
@@ -24,12 +24,11 @@ const DatastoreDataList = lazy(() => import("../pages/datastores/DatastoreDataLi
 const DataNewForm = lazy(() => import("../pages/data/DataNew/DataNewForm"));
 const WfsServiceNew = lazy(() => import("../pages/service/wfs/WfsServiceNew"));
 
-
 function RouterRenderer() {
     const route = useRoute();
     const { user } = useContext(UserContext);
 
-    if (protectedRoutes.includes(route.name)) {
+    if (!publicRoutes.includes(route.name)) {
         // vérifier si l'utilisateur est authentifié et éventuellement ses droits à la ressource demandée
         if (user == null) {
             // window.location.href = Routing.generate("cartesgouvfr_security_login");
@@ -84,7 +83,7 @@ function RouterRenderer() {
             content = <DataNewForm datastoreId={route.params.datastoreId} />;
             break;
         case "datastore_wfs_service_new":
-            content = <WfsServiceNew datastoreId={route.params.datastoreId} storedDataId={route.params.storedDataId}/>;
+            content = <WfsServiceNew datastoreId={route.params.datastoreId} storedDataId={route.params.storedDataId} />;
             break;
         default:
             content = <PageNotFound />;
