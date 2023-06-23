@@ -44,7 +44,7 @@
         "willdurand/js-translation-bundle": "^5.0"
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": "^3.16",
+        "friendsofphp/php-cs-fixer": "^3.18",
         "phpmd/phpmd": "^2.13",
         "phpstan/phpstan": "^1.10",
         "symfony/browser-kit": "6.3.*",
@@ -101,8 +101,8 @@
         ],
         "check-todolist": "grep -rn \"TODO\" ./src ./templates ./tests ./assets",
         "fix-style": [
-            "vendor/bin/php-cs-fixer fix src --rules \"@Symfony\" --using-cache=no",
-            "vendor/bin/php-cs-fixer fix tests --rules \"@Symfony\" --using-cache=no"
+            "vendor/bin/php-cs-fixer fix src",
+            "vendor/bin/php-cs-fixer fix tests"
         ]
     },
     "conflict": {

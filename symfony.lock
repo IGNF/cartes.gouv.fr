@@ -9,7 +9,7 @@
         }
     },
     "friendsofphp/php-cs-fixer": {
-        "version": "3.16",
+        "version": "3.18",
         "recipe": {
             "repo": "github.com/symfony/recipes",
             "branch": "main",
