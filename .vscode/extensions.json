@@ -6,10 +6,11 @@
         "neilbrayfield.php-docblocker",
         "ecodes.vscode-phpmd",
         "junstyle.php-cs-fixer",
-        "MehediDracula.php-constructor",
-        "DEVSENSE.composer-php-vscode",
+        "mehedidracula.php-constructor",
+        "devsense.composer-php-vscode",
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
-        "pflannery.vscode-versionlens"
+        "pflannery.vscode-versionlens",
+        "rvest.vs-code-prettier-eslint"
     ]
 }
