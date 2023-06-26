@@ -1,13 +1,7 @@
-import { fr } from "@codegouvfr/react-dsfr";
-import { yupResolver } from "@hookform/resolvers/yup";
 import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { v4 as uuidv4 } from "uuid";
-import * as yup from "yup";
 import api from "../../../api";
 import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
-import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
 import AppLayout from "../../../components/Layout/AppLayout";
 import LoadingText from "../../../components/Utils/LoadingText";
 import TableForm from "./forms/tables/TableForm";
@@ -56,6 +50,14 @@ const WfsServiceNew = ({ datastoreId, storedDataId }) => {
         setVisibility(v);   
     },[step]);
 
+    const previous = () => {
+        setStep(step - 1);
+    };
+
+    const next = () => {
+        setStep(step + 1);    
+    };
+
     const onValid = values => {
         const res = { ...result, ...values};
         setResult(res);
@@ -72,10 +74,10 @@ const WfsServiceNew = ({ datastoreId, storedDataId }) => {
                         stepCount={5}
                         title={Translator.trans(`service.wfs.new.step${step}`)}
                     />
-                    <TableForm tables={tables} visibility={visiblity[1]} onValid={values => { onValid(values); setStep(2); }}/>
-                    <UploadMetadataForm visibility={visiblity[2]} onPrevious={() => setStep(1)} onSubmit={() => setStep(3)}/>
-                    <DescriptionForm storedDataName={storedData.name} visibility={visiblity[3]} onPrevious={() => setStep(2)} onValid={values => { onValid(values); setStep(4); }}/>
-                    <AdditionalInfoForm storedData={storedData}  visibility={visiblity[4]} onPrevious={() => setStep(3)} onValid={() => {}} />
+                    <TableForm tables={tables} visibility={visiblity[1]} onValid={values => { onValid(values); next(); }}/>
+                    <UploadMetadataForm visibility={visiblity[2]} onPrevious={previous} onSubmit={next}/>
+                    <DescriptionForm storedDataName={storedData.name} visibility={visiblity[3]} onPrevious={previous} onValid={values => { onValid(values); next(); }}/>
+                    <AdditionalInfoForm storedData={storedData}  visibility={visiblity[4]} onPrevious={previous} onValid={values => { onValid(values); next(); }} />
                 </> 
             )}
         </AppLayout>
