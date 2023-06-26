@@ -1,3 +1,6 @@
+// Themes et mot cles INSPIRE
+import inspireKeywords from "./data/thematic-inspire.json";
+
 const languages = {
     "en_EN": "Anglais",
     "fr_FR": "Français"
@@ -28,4 +31,14 @@ const removeDiacritics = str => {
     return str;
 };
 
-export { languages, charsets, removeDiacritics };
+const getInspireKeywords = () => {
+    let words = new Set();
+    for (let theme in inspireKeywords) {
+        if (Array.isArray(inspireKeywords[theme]) && inspireKeywords[theme].length) {
+            words = [...words, ...inspireKeywords[theme]]   ; 
+        }
+    }
+    return [...words];
+};
+
+export { languages, charsets, removeDiacritics, getInspireKeywords };

@@ -61,8 +61,8 @@ const TagifyComponent = forwardRef((props, ref) => {
                         switch (state) {
                             case "error":
                                 return "fr-input-group--error";
-                            case "success":
-                                return "fr-input-group--valid";
+                            /*case "success":
+                                return "fr-input-group--valid"; */
                             case "default":
                                 return undefined;
                         }

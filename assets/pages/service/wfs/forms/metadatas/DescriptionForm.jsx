@@ -11,7 +11,7 @@ import { format as datefnsFormat } from "date-fns";
 import TagifyComponent from "../../../../../components/Utils/TagifyComponent";
 
 // Themes et mot cles INSPIRE
-import inspireKeywords from "./../../../../../data/thematic-inspire.json";
+import { getInspireKeywords } from "../../../../../utils";
 
 const schema = yup
     .object({
@@ -43,18 +43,13 @@ const DescriptionForm = ({ storedDataName, visibility, onPrevious, onValid }) =>
 
     useEffect(() => {
         const nice = removeDiacritics(storedDataName.toLowerCase()).replace(/ /g, "_");
+        const now = datefnsFormat(new Date(), "yyyy-MM-dd");
+
         setFormValue("data_technical_name", nice);
         setFormValue("data_public_name", storedDataName);
-
-        const now = datefnsFormat(new Date(), "yyyy-MM-dd");
         setFormValue("data_creation_date", now);
 
-        let words = [];
-        for (let theme in inspireKeywords) {
-            if (Array.isArray(inspireKeywords[theme]) && inspireKeywords[theme].length) {
-                words = [...words, ...inspireKeywords[theme]]   ; 
-            }
-        }
+        const words = getInspireKeywords();
         setKeywords(words);
     },[]);
 

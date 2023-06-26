@@ -22,8 +22,8 @@ service:
             step3: "Description de la ressource"
             step4: "Informations supplémentaires"
             step5: "Restrictions d'accès"
-            publish: "Publier le service"
             loading_data: "Chargement de la donnée stockée ..."
+            publish: "Publier le service maintenant"
             tables_form:
                 title: "Sélectionnez les tables nécessaires au service"
                 oneTable: "Une table détectée"
@@ -98,3 +98,6 @@ service:
                 encoding: "Encodage de la ressource"
                 hint_encoding: "TODO[Explication du champ]"
                 encoding_error: "l'encodage de la ressource est obligatoire"
+            access_retrictions:
+                title: "Restrictions d’accès"
+                open_to_all_option: "Tout public"
