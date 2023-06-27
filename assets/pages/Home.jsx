@@ -3,6 +3,8 @@ import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Card } from "@codegouvfr/react-dsfr/Card";
 import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
+import { Tag } from "@codegouvfr/react-dsfr/Tag";
+
 import React, { useContext } from "react";
 
 import AppLayout from "../components/Layout/AppLayout";
@@ -85,7 +87,7 @@ const Home = () => {
                                         <h4 className={fr.cx("fr-text--lead")}>Consommez des services</h4>
                                         <p>Lorem ipsum dolor sit amet,consectetur adipiscing elit.</p>
                                         <p></p>
-                                        <Badge small className={fr.cx("fr-badge--pink", "fr-badge--nowrap")}>
+                                        <Badge small className={fr.cx("fr-badge--pink")}>
                                             Prochainement
                                         </Badge>
                                         <p></p>
@@ -113,7 +115,7 @@ const Home = () => {
                                             {user == null ? (
                                                 <Button
                                                     linkProps={{ href: Routing.generate("cartesgouvfr_security_login") }}
-                                                    iconId={fr.cx("fr-icon-account-circle-line")}
+                                                    iconId={fr.cx("fr-icon-account-circle-fill")}
                                                 >
                                                     Se connecter
                                                 </Button>
@@ -153,12 +155,22 @@ const Home = () => {
                                         <h4 className={fr.cx("fr-text--lead")}>Consectetur adipiscing elit</h4>
                                         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
                                         <p>
-                                            <a href="" className={fr.cx("fr-btn fr-btn--tertiary-no-outline")}>
-                                                <span className={fr.cx("fr-badge  fr-badge--blue fr-badge--sm fr-badge--no-icon fr-mr-1w fr-badge-nowrap")}>
-                                                    Se connecter pour accéder
-                                                </span>
-                                                <span className={fr.cx("fr-icon-logout-box-r-line")} aria-hidden="true"></span>
-                                            </a>
+                                            {user == null ? (
+                                                <Button
+                                                    linkProps={{ href: Routing.generate("cartesgouvfr_security_login") }}
+                                                    iconId={fr.cx("fr-icon-account-circle-fill")}
+                                                >
+                                                    Se connecter
+                                                </Button>
+                                            ) : (
+                                                <Button
+                                                    linkProps={routes.datastore_list().link}
+                                                    iconId={fr.cx("fr-icon-arrow-right-line")}
+                                                    className={fr.cx("fr-btn--icon-right")}
+                                                >
+                                                    {Translator.trans("home.start")}
+                                                </Button>
+                                            )}
                                         </p>
                                     </div>
 
@@ -181,9 +193,9 @@ const Home = () => {
                                         <h4 className={fr.cx("fr-text--lead")}>Dolor sit amet consectetur</h4>
                                         <p>Lorem ipsum dolor sit amet,consectetur adipiscing elit.</p>
                                         <p></p>
-                                        <p className={fr.cx("fr-badge", "fr-badge--pink", "fr-badge--sm", "fr-badge--no-icon", "fr-badge-nowrap")}>
+                                        <Badge small className={fr.cx("fr-badge--pink")}>
                                             Prochainement
-                                        </p>
+                                        </Badge>
                                         <p></p>
                                     </div>
                                     <div className={fr.cx("fr-col-lg-3", "fr-col-12", "fr-text--center")}>
@@ -212,9 +224,9 @@ const Home = () => {
                         <div className={fr.cx("fr-col-xs-12 fr-col-sm-12 fr-col-md-4 fr-col-lg-4")}>
                             <Card
                                 badges={[
-                                    <Badge key="1" className="fr-badge--pink">
+                                    <Tag key="1" className={fr.cx("fr-tag--pink-tuile")}>
                                         Autour de la terre
-                                    </Badge>,
+                                    </Tag>,
                                 ]}
                                 desc="Les Communs d’utilité publique ! Une journée d’échanges pour une nouvelle manière de relever ensemble les défis d’intérêt général"
                                 detail="17 janvier 2023"
