@@ -9,7 +9,6 @@ import UploadMetadataForm from "./forms/metadatas/UploadMetadataForm";
 import DescriptionForm from "./forms/metadatas/DescriptionForm";
 import AdditionalInfoForm from "./forms/metadatas/AdditionalInfoForm";
 
-
 const WfsServiceNew = ({ datastoreId, storedDataId }) => {
     const stepMax = 5;
     const [step, setStep] = useState(1);
