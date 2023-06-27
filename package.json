@@ -1,7 +1,10 @@
 {
     "dependencies": {
         "@codegouvfr/react-dsfr": "^0.63.1",
+        "@emotion/react": "^11.11.1",
+        "@emotion/styled": "^11.11.0",
         "@hookform/resolvers": "^3.1.0",
+        "@mui/material": "^5.13.6",
         "@symfony/webpack-encore": "^4.3.0",
         "@yaireo/tagify": "^4.17.8",
         "autoprefixer": "^10.4.14",
