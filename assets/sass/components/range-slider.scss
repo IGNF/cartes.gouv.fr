@@ -1,118 +1,118 @@
 $thumb-size: 14px;
 
 @mixin track-styles {
-  appearance: none;
-  background: transparent;
-  border: transparent;
+    appearance: none;
+    background: transparent;
+    border: transparent;
 }
 
 @mixin thumb-styles {
-  appearance: none;
-  pointer-events: all;
-  width: $thumb-size;
-  height: $thumb-size;
-  border-radius: 0px;
-  border: 0 none;
-  cursor: grab;
-  background-color: red;
+    appearance: none;
+    pointer-events: all;
+    width: $thumb-size;
+    height: $thumb-size;
+    border-radius: 0px;
+    border: 0 none;
+    cursor: grab;
+    background-color: red;
 
-  &:active {
-    cursor: grabbing;
-  }
+    &:active {
+        cursor: grabbing;
+    }
 }
 
 .wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-  /*margin: 40px calc(#{$thumb-size} / 2);
+    position: relative;
+    display: flex;
+    align-items: center;
+    /*margin: 40px calc(#{$thumb-size} / 2);
   padding-top: 1.6rem;*/
-  height: calc(#{$thumb-size} + 1.6rem);
+    height: calc(#{$thumb-size} + 1.6rem);
 }
 
 .input-wrapper {
-  width: calc(100% + #{$thumb-size});
-  margin: 0 calc(#{$thumb-size} / -2);
-  position: absolute;
-  height: $thumb-size;
+    width: calc(100% + #{$thumb-size});
+    margin: 0 calc(#{$thumb-size} / -2);
+    position: absolute;
+    height: $thumb-size;
 }
 
 .control-wrapper {
-  width: 100%;
-  position: absolute;
-  height: $thumb-size;
+    width: 100%;
+    position: absolute;
+    height: $thumb-size;
 }
 
 .input {
-  position: absolute;
-  width: 100%;
-  pointer-events: none;
-  appearance: none;
-  height: 100%;
-  opacity: 0;
-  z-index: 3;
-  padding: 0;
+    position: absolute;
+    width: 100%;
+    pointer-events: none;
+    appearance: none;
+    height: 100%;
+    opacity: 0;
+    z-index: 3;
+    padding: 0;
 
-  &::-ms-track {
-    @include track-styles;
-  }
+    &::-ms-track {
+        @include track-styles;
+    }
 
-  &::-moz-range-track {
-    @include track-styles;
-  }
+    &::-moz-range-track {
+        @include track-styles;
+    }
 
-  &:focus::-webkit-slider-runnable-track {
-    @include track-styles;
-  }
+    &:focus::-webkit-slider-runnable-track {
+        @include track-styles;
+    }
 
-  &::-ms-thumb {
-    @include thumb-styles;
-  }
+    &::-ms-thumb {
+        @include thumb-styles;
+    }
 
-  &::-moz-range-thumb {
-    @include thumb-styles;
-  }
+    &::-moz-range-thumb {
+        @include thumb-styles;
+    }
 
-  &::-webkit-slider-thumb {
-    @include thumb-styles;
-  }
-};
+    &::-webkit-slider-thumb {
+        @include thumb-styles;
+    }
+}
 
 .rail {
-  position: absolute;
-  width: 100%;
-  top: 50%;
-  transform: translateY(-50%);
-  height: 6px;
-  border-radius: 3px;
-  background: white;
-  border: 1px solid gray;
+    position: absolute;
+    width: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 6px;
+    border-radius: 3px;
+    background: white;
+    border: 1px solid gray;
 }
 
 .inner-rail {
-  position: absolute;
-  height: 100%;
-  background: rgb(0,0,145);
-  opacity: 0.5;
+    position: absolute;
+    height: 100%;
+    background: rgb(0, 0, 145);
+    opacity: 0.5;
 }
 
 .control {
-  width: $thumb-size;
-  height: $thumb-size;
-  border-radius: 50%;
-  position: absolute;
-  background: rgb(0,0,145);
-  top: 50%;
-  margin-left: calc(#{$thumb-size} / -2);
-  transform: translate3d(0, -50%, 0);
-  z-index: 2;
+    width: $thumb-size;
+    height: $thumb-size;
+    border-radius: 50%;
+    position: absolute;
+    background: rgb(0, 0, 145);
+    top: 50%;
+    margin-left: calc(#{$thumb-size} / -2);
+    transform: translate3d(0, -50%, 0);
+    z-index: 2;
 }
 
 .ui-zoom-label {
-  position: absolute;
-  width: 2rem;
-  margin-left: -1rem;
-  text-align: center;
-  margin-top: 0.6rem;
-  font-size: 0.7rem;
+    position: absolute;
+    width: 2rem;
+    margin-left: -1rem;
+    text-align: center;
+    margin-top: 0.6rem;
+    font-size: 0.7rem;
 }

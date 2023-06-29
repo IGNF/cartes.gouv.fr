@@ -52,15 +52,4 @@ const routeDefs = {
 
 export const { RouteProvider, useRoute, routes } = createRouter(routeDefs);
 
-export const publicRoutes = [
-    "home",
-    "docs",
-    "contact",
-    "news",
-    "sitemap",
-    "accessibility",
-    "legal_notice",
-    "cgu",
-    "personal_data",
-    "cookies",
-];
+export const publicRoutes = ["home", "docs", "contact", "news", "sitemap", "accessibility", "legal_notice", "cgu", "personal_data", "cookies"];

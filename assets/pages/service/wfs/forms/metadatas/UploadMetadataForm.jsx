@@ -6,12 +6,12 @@ import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
 
 const UploadMetadataForm = ({ visibility, onPrevious, onSubmit }) => {
     return (
-        <div className={fr.cx("fr-my-2v")} style={{ display: visibility ? "block" : "none"}}> 
+        <div className={fr.cx("fr-my-2v")} style={{ display: visibility ? "block" : "none" }}>
             <h3>{Translator.trans("service.wfs.new.metadata_upload_form.title")}</h3>
             <Input
                 label={Translator.trans("service.wfs.new.metadata_upload_form.import")}
                 hintText={Translator.trans("service.wfs.new.metadata_upload_form.hint_import")}
-                nativeInputProps={{type: "file"/*, onChange: handleFileChanged*/ }}
+                nativeInputProps={{ type: "file" /*, onChange: handleFileChanged*/ }}
             />
             <ButtonsGroup
                 className={fr.cx("fr-my-2v")}
@@ -20,15 +20,15 @@ const UploadMetadataForm = ({ visibility, onPrevious, onSubmit }) => {
                     {
                         children: Translator.trans("previous_step"),
                         iconId: "fr-icon-arrow-left-fill",
-                        onClick: onPrevious
+                        onClick: onPrevious,
                     },
                     {
                         children: Translator.trans("continue"),
-                        onClick: onSubmit
-                    }
+                        onClick: onSubmit,
+                    },
                 ]}
                 inlineLayoutWhen="always"
-            />  
+            />
         </div>
     );
 };
@@ -36,9 +36,7 @@ const UploadMetadataForm = ({ visibility, onPrevious, onSubmit }) => {
 UploadMetadataForm.propTypes = {
     visibility: PropTypes.bool.isRequired,
     onPrevious: PropTypes.func.isRequired,
-    onSubmit: PropTypes.func.isRequired
+    onSubmit: PropTypes.func.isRequired,
 };
 
 export default UploadMetadataForm;
-
-

@@ -29,11 +29,7 @@ const DatastoreDataList = ({ datastoreId }) => {
                 <>
                     <h1>Données {datastore?.name || datastoreId}</h1>
 
-                    <Button
-                        linkProps={routes.datastore_data_new({ datastoreId }).link}
-                        className={fr.cx("fr-mr-2v")}
-                        iconId={fr.cx("fr-icon-add-line")}
-                    >
+                    <Button linkProps={routes.datastore_data_new({ datastoreId }).link} className={fr.cx("fr-mr-2v")} iconId={fr.cx("fr-icon-add-line")}>
                         Créer une fiche de données
                     </Button>
 

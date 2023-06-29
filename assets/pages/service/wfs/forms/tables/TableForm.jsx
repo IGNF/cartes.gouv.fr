@@ -8,12 +8,11 @@ import TableInfos from "./TableInfos";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 
-
 const schema = yup
     .object({
-        data_tables: yup.string().required(Translator.trans("service.wfs.new.tables_form.error"))
-    }).required();
-
+        data_tables: yup.string().required(Translator.trans("service.wfs.new.tables_form.error")),
+    })
+    .required();
 
 const TableForm = ({ tables, visibility, onValid }) => {
     const {
@@ -21,12 +20,12 @@ const TableForm = ({ tables, visibility, onValid }) => {
         handleSubmit,
         formState: { errors },
         getValues: getFormValues,
-        setValue: setFormValue
+        setValue: setFormValue,
     } = useForm({ resolver: yupResolver(schema) });
 
     const onChange = (tablesState) => {
         const value = Object.keys(tablesState).length ? JSON.stringify(tablesState) : null;
-        setFormValue("data_tables", value);     
+        setFormValue("data_tables", value);
     };
 
     const onSubmit = () => {
@@ -35,7 +34,7 @@ const TableForm = ({ tables, visibility, onValid }) => {
     };
 
     return (
-        <div className={fr.cx("fr-my-2v")} style={{ display: visibility ? "block" : "none"}}> 
+        <div className={fr.cx("fr-my-2v")} style={{ display: visibility ? "block" : "none" }}>
             <h3>{Translator.trans("service.wfs.new.tables_form.title")}</h3>
             <TableInfos tables={tables} onChange={onChange} />
             <Input
@@ -45,7 +44,7 @@ const TableForm = ({ tables, visibility, onValid }) => {
                     ...register("data_tables"),
                     type: "hidden",
                 }}
-            /> 
+            />
             <Button onClick={handleSubmit(onSubmit)}>{Translator.trans("continue")}</Button>
         </div>
     );
@@ -54,9 +53,7 @@ const TableForm = ({ tables, visibility, onValid }) => {
 TableForm.propTypes = {
     tables: PropTypes.array.isRequired,
     visibility: PropTypes.bool.isRequired,
-    onValid: PropTypes.func.isRequired
+    onValid: PropTypes.func.isRequired,
 };
 
 export default TableForm;
-
-
