@@ -16,63 +16,67 @@ const WfsServiceNew = ({ datastoreId, storedDataId }) => {
         METADATAS: 2,
         DESCRIPTION: 3,
         ADDITIONALINFORMATIONS: 4,
-        ACCESSRESTRICTIONS: 5
+        ACCESSRESTRICTIONS: 5,
     };
 
     const [step, setStep] = useState(Steps.Tables);
-    
+
     const [isLoading, setIsLoading] = useState(true);
     const [storedData, setStoredData] = useState({});
     const [tables, setTables] = useState([]);
-    
+
     const [result, setResult] = useState({});
 
     /* Visibilite des formulaires */
     const [visiblity, setVisibility] = useState(() => {
         const v = {};
-        Object.keys(Steps).forEach(key => {
-            v[Steps[key]] = false;   
+        Object.keys(Steps).forEach((key) => {
+            v[Steps[key]] = false;
         });
         return v;
     });
 
     useEffect(() => {
-        api.storedData.getOne(datastoreId, storedDataId)
-            .then(data => {
+        api.storedData
+            .getOne(datastoreId, storedDataId)
+            .then((data) => {
                 setStoredData(data);
-                
+
                 let rels = data.type_infos?.relations || [];
-                const relations = rels.map(rel => {
-                    if (rel.type === "TABLE") return rel; 
+                const relations = rels.map((rel) => {
+                    if (rel.type === "TABLE") return rel;
                 });
                 setTables(relations);
-            }).catch((error) => console.error(error))
+            })
+            .catch((error) => console.error(error))
             .finally(() => setIsLoading(false));
-    },[]);
+    }, []);
 
     useEffect(() => {
-        const v = { ... visiblity };
-        Object.keys(v).forEach(key => v[key] = false);
+        const v = { ...visiblity };
+        Object.keys(v).forEach((key) => (v[key] = false));
         v[step] = true;
-        setVisibility(v); 
-    },[step]);
+        setVisibility(v);
+    }, [step]);
 
     const previous = () => {
         setStep(step - 1);
     };
 
     const next = () => {
-        setStep(step + 1);    
+        setStep(step + 1);
     };
 
-    const onValid = values => {
-        const res = { ...result, ...values};
+    const onValid = (values) => {
+        const res = { ...result, ...values };
         setResult(res);
     };
 
     return (
         <AppLayout>
-            {isLoading ? <LoadingText message={Translator.trans("service.wfs.new.loading_data")}/> : ( 
+            {isLoading ? (
+                <LoadingText message={Translator.trans("service.wfs.new.loading_data")} />
+            ) : (
                 <>
                     <h2>{Translator.trans("service.wfs.new.title")}</h2>
                     <Stepper
@@ -81,12 +85,38 @@ const WfsServiceNew = ({ datastoreId, storedDataId }) => {
                         stepCount={5}
                         title={Translator.trans(`service.wfs.new.step${step}`)}
                     />
-                    <TableForm tables={tables} visibility={visiblity[Steps.TABLES]} onValid={values => { onValid(values); next(); }}/>
-                    <UploadMetadataForm visibility={visiblity[Steps.METADATAS]} onPrevious={previous} onSubmit={next}/>
-                    <DescriptionForm storedDataName={storedData.name} visibility={visiblity[Steps.DESCRIPTION]} onPrevious={previous} onValid={values => { onValid(values); next(); }}/>
-                    <AdditionalInfoForm storedData={storedData} visibility={visiblity[Steps.ADDITIONALINFORMATIONS]} onPrevious={previous} onValid={values => { onValid(values); next(); }} />
-                    <AccessRestrictionForm visibility={visiblity[Steps.ACCESSRESTRICTIONS]} onPrevious={previous} /*onValid={values => { onValid(values); }}*/ />
-                </> 
+                    <TableForm
+                        tables={tables}
+                        visibility={visiblity[Steps.TABLES]}
+                        onValid={(values) => {
+                            onValid(values);
+                            next();
+                        }}
+                    />
+                    <UploadMetadataForm visibility={visiblity[Steps.METADATAS]} onPrevious={previous} onSubmit={next} />
+                    <DescriptionForm
+                        storedDataName={storedData.name}
+                        visibility={visiblity[Steps.DESCRIPTION]}
+                        onPrevious={previous}
+                        onValid={(values) => {
+                            onValid(values);
+                            next();
+                        }}
+                    />
+                    <AdditionalInfoForm
+                        storedData={storedData}
+                        visibility={visiblity[Steps.ADDITIONALINFORMATIONS]}
+                        onPrevious={previous}
+                        onValid={(values) => {
+                            onValid(values);
+                            next();
+                        }}
+                    />
+                    <AccessRestrictionForm
+                        visibility={visiblity[Steps.ACCESSRESTRICTIONS]}
+                        onPrevious={previous} /*onValid={values => { onValid(values); }}*/
+                    />
+                </>
             )}
         </AppLayout>
     );

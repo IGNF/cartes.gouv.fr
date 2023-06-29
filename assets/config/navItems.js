@@ -5,24 +5,24 @@ export const defaultNavItems = [
         menuLinks: [
             {
                 linkProps: {
-                    href: "#"
+                    href: "#",
                 },
-                text: "Présentation générale"
+                text: "Présentation générale",
             },
             {
                 linkProps: {
-                    href: "#"
+                    href: "#",
                 },
-                text: "Gouvernance"
+                text: "Gouvernance",
             },
             {
                 linkProps: {
-                    href: "#"
+                    href: "#",
                 },
-                text: "Commencer sur cartes.gouv.fr"
-            }
+                text: "Commencer sur cartes.gouv.fr",
+            },
         ],
-        text: "Présentation"
+        text: "Présentation",
     },
     {
         menuLinks: [
@@ -30,22 +30,22 @@ export const defaultNavItems = [
                 linkProps: {
                     href: "#",
                 },
-                text: "Catalogue de données"
+                text: "Catalogue de données",
             },
             {
                 linkProps: {
                     href: "#",
                 },
-                text: "Catalogue de traitements"
+                text: "Catalogue de traitements",
             },
             {
                 linkProps: {
                     href: "#",
                 },
-                text: "API & outils de construction"
-            }
+                text: "API & outils de construction",
+            },
         ],
-        text: "Ressources"
+        text: "Ressources",
     },
     {
         menuLinks: [
@@ -53,34 +53,34 @@ export const defaultNavItems = [
                 linkProps: {
                     href: "#",
                 },
-                text: "Blog Développeurs"
+                text: "Blog Développeurs",
             },
             {
                 linkProps: {
                     href: "#",
                 },
-                text: "Communautés de développeurs"
+                text: "Communautés de développeurs",
             },
             {
                 linkProps: {
                     href: "#",
                 },
-                text: "API & outils de construction"
+                text: "API & outils de construction",
             },
             {
                 linkProps: {
                     href: "#",
                 },
-                text: "Bac à sable développement"
+                text: "Bac à sable développement",
             },
             {
                 linkProps: {
                     href: "#",
                 },
-                text: "Gitlab cartes.gouv"
-            }
+                text: "Gitlab cartes.gouv",
+            },
         ],
-        text: "Développeurs"
+        text: "Développeurs",
     },
     {
         menuLinks: [
@@ -88,38 +88,38 @@ export const defaultNavItems = [
                 linkProps: {
                     href: "#",
                 },
-                text: "Organisations"
+                text: "Organisations",
             },
             {
                 linkProps: {
                     href: "#",
                 },
-                text: "Communautés d'assistance"
+                text: "Communautés d'assistance",
             },
             {
                 linkProps: {
                     href: "#",
                 },
-                text: "Réutilisations"
+                text: "Réutilisations",
             },
             {
                 linkProps: {
                     href: "#",
                 },
-                text: "Témoignages"
-            }
+                text: "Témoignages",
+            },
         ],
-        text: "Communautés géoplateforme"
+        text: "Communautés géoplateforme",
     },
     {
         text: "Actualités",
-        linkProps: routes.news().link
+        linkProps: routes.news().link,
     },
     {
         text: "Agenda",
         linkProps: {
             href: "#",
-        }
+        },
     },
     {
         menuLinks: [
@@ -127,35 +127,35 @@ export const defaultNavItems = [
                 linkProps: {
                     href: "#",
                 },
-                text: "Niveau de service"
+                text: "Niveau de service",
             },
             {
                 linkProps: routes.docs().link,
-                text: "Documentation"
+                text: "Documentation",
             },
             {
                 linkProps: {
                     href: "#",
                 },
-                text: "Didacticiels"
+                text: "Didacticiels",
             },
             {
                 linkProps: routes.contact().link,
-                text: "Contacter l'assistance"
+                text: "Contacter l'assistance",
             },
             {
                 linkProps: {
                     href: "#",
                 },
-                text: "Plans d'assistance"
+                text: "Plans d'assistance",
             },
             {
                 linkProps: {
                     href: "#",
                 },
-                text: "FAQ"
-            }
+                text: "FAQ",
+            },
         ],
-        text: "Support"
-    }
+        text: "Support",
+    },
 ];

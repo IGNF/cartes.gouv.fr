@@ -14,9 +14,9 @@ const schema = yup
         data_language: yup.string().required(Translator.trans("service.wfs.new.additional_information_form.language_error")),
         data_charset: yup.string().required(Translator.trans("service.wfs.new.additional_information_form.charset_error")),
         data_projection: yup.string().required(Translator.trans("service.wfs.new.additional_information_form.projection_error")),
-        data_encoding: yup.string().required(Translator.trans("service.wfs.new.additional_information_form.encoding_error"))
-    }).required();
-
+        data_encoding: yup.string().required(Translator.trans("service.wfs.new.additional_information_form.encoding_error")),
+    })
+    .required();
 
 // TODO storedData : Utiliser pour la projection
 const AdditionalInfoForm = ({ storedData, visibility, onPrevious, onValid }) => {
@@ -24,16 +24,16 @@ const AdditionalInfoForm = ({ storedData, visibility, onPrevious, onValid }) => 
         register,
         handleSubmit,
         formState: { errors },
-        getValues: getFormValues
+        getValues: getFormValues,
     } = useForm({ resolver: yupResolver(schema) });
-    
+
     const onSubmit = () => {
         const values = getFormValues();
         onValid(values);
     };
 
     return (
-        <div className={fr.cx("fr-my-2v")} style={{ display: visibility ? "block" : "none"}}> 
+        <div className={fr.cx("fr-my-2v")} style={{ display: visibility ? "block" : "none" }}>
             <h3>{Translator.trans("service.wfs.new.additional_information_form.metadata_information_title")}</h3>
             <Select
                 label={Translator.trans("service.wfs.new.additional_information_form.language")}
@@ -42,13 +42,17 @@ const AdditionalInfoForm = ({ storedData, visibility, onPrevious, onValid }) => 
                 stateRelatedMessage={errors?.data_language?.message}
                 nativeSelectProps={{
                     ...register("data_language"),
-                    defaultValue: ""
+                    defaultValue: "",
                 }}
             >
-                <option value="" disabled hidden>Selectionnez une option</option>
+                <option value="" disabled hidden>
+                    Selectionnez une option
+                </option>
                 {Object.keys(languages).map((language, index) => {
                     return (
-                        <option key={index} value={language}>{languages[language]}</option>
+                        <option key={index} value={language}>
+                            {languages[language]}
+                        </option>
                     );
                 })}
             </Select>
@@ -59,16 +63,20 @@ const AdditionalInfoForm = ({ storedData, visibility, onPrevious, onValid }) => 
                 stateRelatedMessage={errors?.data_charset?.message}
                 nativeSelectProps={{
                     ...register("data_charset"),
-                    defaultValue: ""
+                    defaultValue: "",
                 }}
             >
-                <option value="" disabled hidden>Selectionnez une option</option>
+                <option value="" disabled hidden>
+                    Selectionnez une option
+                </option>
                 {Object.keys(charsets).map((charset, index) => {
                     return (
-                        <option key={index} value={charset}>{charsets[charset]}</option>
+                        <option key={index} value={charset}>
+                            {charsets[charset]}
+                        </option>
                     );
                 })}
-            </Select> 
+            </Select>
             <h3>{Translator.trans("service.wfs.new.additional_information_form.type_of_spatial_representation_title")}</h3>
             <Input
                 label={Translator.trans("service.wfs.new.additional_information_form.projection")}
@@ -76,16 +84,16 @@ const AdditionalInfoForm = ({ storedData, visibility, onPrevious, onValid }) => 
                 state={errors.data_projection ? "error" : "default"}
                 stateRelatedMessage={errors?.data_projection?.message}
                 nativeInputProps={{
-                    ...register("data_projection")
+                    ...register("data_projection"),
                 }}
             />
             <Input
                 label={Translator.trans("service.wfs.new.additional_information_form.encoding")}
                 hintText={Translator.trans("service.wfs.new.additional_information_form.hint_encoding")}
-                state={errors.data_encoding? "error" : "default"}
+                state={errors.data_encoding ? "error" : "default"}
                 stateRelatedMessage={errors?.data_encoding?.message}
                 nativeInputProps={{
-                    ...register("data_encoding")
+                    ...register("data_encoding"),
                 }}
             />
             <ButtonsGroup
@@ -95,15 +103,15 @@ const AdditionalInfoForm = ({ storedData, visibility, onPrevious, onValid }) => 
                     {
                         children: Translator.trans("previous_step"),
                         iconId: "fr-icon-arrow-left-fill",
-                        onClick: onPrevious
+                        onClick: onPrevious,
                     },
                     {
                         children: Translator.trans("continue"),
-                        onClick: handleSubmit(onSubmit)
-                    }
+                        onClick: handleSubmit(onSubmit),
+                    },
                 ]}
                 inlineLayoutWhen="always"
-            />  
+            />
         </div>
     );
 };
@@ -112,7 +120,7 @@ AdditionalInfoForm.propTypes = {
     storedData: PropTypes.object.isRequired,
     visibility: PropTypes.bool.isRequired,
     onPrevious: PropTypes.func.isRequired,
-    onValid: PropTypes.func.isRequired
+    onValid: PropTypes.func.isRequired,
 };
 
 export default AdditionalInfoForm;

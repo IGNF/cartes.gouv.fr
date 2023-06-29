@@ -2,10 +2,10 @@
     height: 300px;
 }
 
-
 .ui-map-zoom-levels {
     display: flex;
-    .ui-top-zoom-level, .ui-bottom-zoom-level {
+    .ui-top-zoom-level,
+    .ui-bottom-zoom-level {
         height: 300px;
         border: 1px solid lightgray;
         flex: 0 1 50%;

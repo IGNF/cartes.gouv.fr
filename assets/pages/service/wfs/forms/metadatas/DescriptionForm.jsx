@@ -19,16 +19,18 @@ const schema = yup
         data_public_name: yup.string().required(Translator.trans("service.wfs.new.description_form.public_name_error")),
         data_description: yup.string().required(Translator.trans("service.wfs.new.description_form.description_error")),
         data_identifier: yup.string().required(Translator.trans("service.wfs.new.description_form.identifier_error")),
-        data_email_contact: yup.string()
+        data_email_contact: yup
+            .string()
             .email(Translator.trans("service.wfs.new.description_form.email_contact_error"))
             .required(Translator.trans("service.wfs.new.description_form.email_contact_mandatory_error")),
         data_creation_date: yup.date().required(Translator.trans("service.wfs.new.description_form.creation_date_error")),
         data_organization: yup.string().required(Translator.trans("service.wfs.new.description_form.organization_error")),
-        data_organization_email: yup.string()
+        data_organization_email: yup
+            .string()
             .email(Translator.trans("service.wfs.new.description_form.organization_email_error"))
-            .required(Translator.trans("service.wfs.new.description_form.organization_email_mandatory_error"))
-    }).required();
-
+            .required(Translator.trans("service.wfs.new.description_form.organization_email_mandatory_error")),
+    })
+    .required();
 
 const DescriptionForm = ({ storedDataName, visibility, onPrevious, onValid }) => {
     const {
@@ -36,9 +38,9 @@ const DescriptionForm = ({ storedDataName, visibility, onPrevious, onValid }) =>
         handleSubmit,
         formState: { errors },
         setValue: setFormValue,
-        getValues: getFormValues
+        getValues: getFormValues,
     } = useForm({ resolver: yupResolver(schema) });
-        
+
     const [keywords, setKeywords] = useState([]);
 
     useEffect(() => {
@@ -51,7 +53,7 @@ const DescriptionForm = ({ storedDataName, visibility, onPrevious, onValid }) =>
 
         const words = getInspireKeywords();
         setKeywords(words);
-    },[]);
+    }, []);
 
     const tagifyRef = useRef();
 
@@ -65,7 +67,7 @@ const DescriptionForm = ({ storedDataName, visibility, onPrevious, onValid }) =>
     };
 
     return (
-        <div className={fr.cx("fr-my-2v")} style={{ display: visibility ? "block" : "none"}}> 
+        <div className={fr.cx("fr-my-2v")} style={{ display: visibility ? "block" : "none" }}>
             <h3>{Translator.trans("service.wfs.new.description_form.description_title")}</h3>
             <Input
                 label={Translator.trans("service.wfs.new.description_form.technical_name")}
@@ -73,7 +75,7 @@ const DescriptionForm = ({ storedDataName, visibility, onPrevious, onValid }) =>
                 state={errors.data_technical_name ? "error" : "default"}
                 stateRelatedMessage={errors?.data_technical_name?.message}
                 nativeInputProps={{
-                    ...register("data_technical_name")
+                    ...register("data_technical_name"),
                 }}
             />
             <Input
@@ -82,7 +84,7 @@ const DescriptionForm = ({ storedDataName, visibility, onPrevious, onValid }) =>
                 state={errors.data_public_name ? "error" : "default"}
                 stateRelatedMessage={errors?.data_public_name?.message}
                 nativeInputProps={{
-                    ...register("data_public_name")
+                    ...register("data_public_name"),
                 }}
             />
             <Input
@@ -92,7 +94,7 @@ const DescriptionForm = ({ storedDataName, visibility, onPrevious, onValid }) =>
                 stateRelatedMessage={errors?.data_description?.message}
                 textArea={true}
                 nativeTextAreaProps={{
-                    ...register("data_description")
+                    ...register("data_description"),
                 }}
             />
             <Input
@@ -101,10 +103,10 @@ const DescriptionForm = ({ storedDataName, visibility, onPrevious, onValid }) =>
                 state={errors.data_identifier ? "error" : "default"}
                 stateRelatedMessage={errors?.data_identifier?.message}
                 nativeInputProps={{
-                    ...register("data_identifier")
+                    ...register("data_identifier"),
                 }}
             />
-            <TagifyComponent 
+            <TagifyComponent
                 ref={tagifyRef}
                 name={"data_category"}
                 label={Translator.trans("service.wfs.new.description_form.category")}
@@ -118,7 +120,7 @@ const DescriptionForm = ({ storedDataName, visibility, onPrevious, onValid }) =>
                 state={errors.data_email_contact ? "error" : "default"}
                 stateRelatedMessage={errors?.data_email_contact?.message}
                 nativeInputProps={{
-                    ...register("data_email_contact")
+                    ...register("data_email_contact"),
                 }}
             />
             <h3>{Translator.trans("service.wfs.new.description_form.time_reference_title")}</h3>
@@ -129,7 +131,7 @@ const DescriptionForm = ({ storedDataName, visibility, onPrevious, onValid }) =>
                 stateRelatedMessage={errors?.data_creation_date?.message}
                 nativeInputProps={{
                     ...register("data_creation_date"),
-                    type: "date"
+                    type: "date",
                 }}
             />
             <Input
@@ -138,7 +140,7 @@ const DescriptionForm = ({ storedDataName, visibility, onPrevious, onValid }) =>
                 state={errors.data_resource_genealogy ? "error" : "default"}
                 stateRelatedMessage={errors?.data_resource_genealogy?.message}
                 nativeInputProps={{
-                    ...register("data_resource_genealogy")
+                    ...register("data_resource_genealogy"),
                 }}
             />
             <h3>{Translator.trans("service.wfs.new.description_form.resource_manager_title")}</h3>
@@ -148,7 +150,7 @@ const DescriptionForm = ({ storedDataName, visibility, onPrevious, onValid }) =>
                 state={errors.data_organization ? "error" : "default"}
                 stateRelatedMessage={errors?.data_organization?.message}
                 nativeInputProps={{
-                    ...register("data_organization")
+                    ...register("data_organization"),
                 }}
             />
             <Input
@@ -157,7 +159,7 @@ const DescriptionForm = ({ storedDataName, visibility, onPrevious, onValid }) =>
                 state={errors.data_organization_email ? "error" : "default"}
                 stateRelatedMessage={errors?.data_organization_email?.message}
                 nativeInputProps={{
-                    ...register("data_organization_email")
+                    ...register("data_organization_email"),
                 }}
             />
             <ButtonsGroup
@@ -167,18 +169,18 @@ const DescriptionForm = ({ storedDataName, visibility, onPrevious, onValid }) =>
                     {
                         children: Translator.trans("previous_step"),
                         iconId: "fr-icon-arrow-left-fill",
-                        onClick: onPrevious
+                        onClick: onPrevious,
                     },
                     {
                         children: Translator.trans("continue"),
                         onClick: () => {
                             handleSubmit(onSubmit)();
                             tagifyRef.current.checkValidity();
-                        }
-                    }
+                        },
+                    },
                 ]}
                 inlineLayoutWhen="always"
-            />  
+            />
         </div>
     );
 };
@@ -187,7 +189,7 @@ DescriptionForm.propTypes = {
     storedDataName: PropTypes.string.isRequired,
     visibility: PropTypes.bool.isRequired,
     onPrevious: PropTypes.func.isRequired,
-    onValid: PropTypes.func.isRequired
+    onValid: PropTypes.func.isRequired,
 };
 
 export default DescriptionForm;

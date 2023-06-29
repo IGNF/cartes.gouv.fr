@@ -9,5 +9,5 @@ export default {
     datastore,
     epsg,
     upload,
-    storedData
+    storedData,
 };

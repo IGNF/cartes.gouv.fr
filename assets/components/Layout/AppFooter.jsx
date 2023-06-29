@@ -11,7 +11,7 @@ const AppFooter = () => {
         <Footer
             accessibility="non compliant"
             accessibilityLinkProps={{
-                ...routes.accessibility().link
+                ...routes.accessibility().link,
             }}
             brandTop={
                 <>
@@ -27,37 +27,35 @@ const AppFooter = () => {
             Consectetur et vel quam auctor semper. Cras si amet mollis dolor. 
             "
             cookiesManagementLinkProps={{
-                ...routes.cookies().link
+                ...routes.cookies().link,
             }}
             homeLinkProps={{
                 ...routes.home().link,
                 title: "Accueil - cartes.gouv.fr",
             }}
             personalDataLinkProps={{
-                ...routes.personal_data().link
+                ...routes.personal_data().link,
             }}
             termsLinkProps={{
-                ...routes.legal_notice().link
+                ...routes.legal_notice().link,
             }}
             websiteMapLinkProps={{
-                ...routes.sitemap().link
+                ...routes.sitemap().link,
             }}
-            bottomItems={[
-                headerFooterDisplayItem
-            ]}
+            bottomItems={[headerFooterDisplayItem]}
             partnersLogos={{
                 sub: [
                     {
                         alt: "IGN",
                         href: "https://www.ign.fr",
-                        imgUrl: logoIgn
+                        imgUrl: logoIgn,
                     },
                     {
                         alt: "MINISTÈRE DE LA TRANSFORMATION ET DE LA FONCTION PUBLIQUES",
                         href: "https://www.transformation.gouv.fr/",
-                        imgUrl: logoMinistereTransformation
-                    } 
-                ]
+                        imgUrl: logoMinistereTransformation,
+                    },
+                ],
             }}
         />
     );

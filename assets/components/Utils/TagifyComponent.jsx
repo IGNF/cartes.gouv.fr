@@ -8,93 +8,78 @@ import "./../../sass/components/tagify.scss";
 import { symToStr } from "tsafe/symToStr";
 
 const TagifyComponent = forwardRef((props, ref) => {
-    const {
-        label, 
-        hintText, 
-        errorMessage,
-        whiteList,
-        name,
-    } = props;
+    const { label, hintText, errorMessage, whiteList, name } = props;
 
     const settings = {
         //maxTags: maxTags,
         enforceWhitelist: true,
         autoComplete: {
-            enabled: true
+            enabled: true,
         },
-        dropdown : {
+        dropdown: {
             enabled: 1,
-            position: "text", 
+            position: "text",
             closeOnSelect: false,
-            highlightFirst: true
-        }
+            highlightFirst: true,
+        },
     };
 
     const tagifyRef = useRef();
 
     const [state, setState] = useState("default");
     const [values, setValues] = useState([]);
-   
+
     useImperativeHandle(ref, () => ({
         checkValidity() {
-            const b = values.length ? true: false;
+            const b = values.length ? true : false;
             setState(b ? "default" : "error");
             return b;
         },
         getValues() {
             return values;
-        }
+        },
     }));
 
     const onChange = () => {
-        let v = tagifyRef.current.value.map(item => item.value);
+        let v = tagifyRef.current.value.map((item) => item.value);
         setValues(v);
         if (v.length) setState("default");
     };
 
     return (
-        <div 
+        <div
             ref={ref}
-            className={
-                fr.cx("fr-input-group",
-                    (() => {
-                        switch (state) {
-                            case "error":
-                                return "fr-input-group--error";
-                            /*case "success":
+            className={fr.cx(
+                "fr-input-group",
+                (() => {
+                    switch (state) {
+                        case "error":
+                            return "fr-input-group--error";
+                        /*case "success":
                                 return "fr-input-group--valid"; */
-                            case "default":
-                                return undefined;
-                        }
-                    })()
-                )
-            }
+                        case "default":
+                            return undefined;
+                    }
+                })()
+            )}
         >
-            <label className="fr-label">{label}
+            <label className="fr-label">
+                {label}
                 <span className="fr-hint-text">{hintText}</span>
             </label>
-            <Tags
-                tagifyRef={tagifyRef}
-                name={name}
-                onChange={onChange}
-                whitelist={whiteList}
-                settings={settings}
-                autoFocus={true}
-            />
+            <Tags tagifyRef={tagifyRef} name={name} onChange={onChange} whitelist={whiteList} settings={settings} autoFocus={true} />
             {state !== "default" && (
                 <p
-                    className={
-                        fr.cx(
-                            (() => {
-                                switch (state) {
-                                    case "error":
-                                        return "fr-error-text";
-                                    case "success":
-                                        return "fr-valid-text";
-                                }
-                            })()
-                        )
-                    }
+                    className={fr.cx(
+                        (() => {
+                            switch (state) {
+                                case "error":
+                                    return "fr-error-text";
+                                case "success":
+                                    return "fr-valid-text";
+                            }
+                        })()
+                    )}
                 >
                     {errorMessage}
                 </p>
@@ -111,6 +96,6 @@ TagifyComponent.propTypes = {
     name: PropTypes.string.isRequired,
 };
 
-TagifyComponent.displayName = symToStr({TagifyComponent});
+TagifyComponent.displayName = symToStr({ TagifyComponent });
 
 export default TagifyComponent;

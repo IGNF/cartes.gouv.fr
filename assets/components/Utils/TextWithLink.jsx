@@ -1,19 +1,21 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-const TextWithLink = ({text, linkText, linkRef}) => {
+const TextWithLink = ({ text, linkText, linkRef }) => {
     return (
         <>
-            {text}&nbsp;<a href={linkRef} target="_blank" rel="noreferrer">{linkText}</a>
-        </> 
+            {text}&nbsp;
+            <a href={linkRef} target="_blank" rel="noreferrer">
+                {linkText}
+            </a>
+        </>
     );
 };
-
 
 TextWithLink.propTypes = {
     text: PropTypes.string.isRequired,
     linkText: PropTypes.string.isRequired,
-    linkRef: PropTypes.string.isRequired
+    linkRef: PropTypes.string.isRequired,
 };
 
 export default TextWithLink;
