@@ -168,6 +168,7 @@ class UploadController extends AbstractController
                 case UploadTags::INT_STEP_PROCESSING:
                     switch ($currentStepStatus) {
                         case JobStatuses::WAITING:
+                            // TODO : mettre à jour id processing
                             /** @var array<string> */
                             $apiPlageProcessings = $this->parameterBag->get('api_plage_processings');
 

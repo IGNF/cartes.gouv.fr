@@ -31,7 +31,7 @@ abstract class AbstractEntrepotApiService
         private LoggerInterface $logger
     ) {
         $this->apiClient = $httpClient->withOptions([
-            'base_uri' => $parameters->get('api_plage_url'),
+            'base_uri' => $parameters->get('api_entrepot_url'),
             'proxy' => $parameters->get('http_proxy'),
             'verify_peer' => false,
             'verify_host' => false,
