@@ -130,7 +130,7 @@ class UploadController extends AbstractController
                             break;
                         case JobStatuses::IN_PROGRESS:
                             // vérifier ici si l'étape a terminé && réussi ou échoué ?
-                            if (UploadStatuses::CLOSED === $upload['status']) {
+                            if (in_array($upload['status'], [UploadStatuses::CLOSED, UploadStatuses::CHECKING])) {
                                 $currentStepStatus = JobStatuses::SUCCESSFUL;
                             }
                             break;
@@ -145,7 +145,9 @@ class UploadController extends AbstractController
                     switch ($currentStepStatus) {
                         case JobStatuses::WAITING:
                             // ne rien faire
-                            $currentStepStatus = JobStatuses::IN_PROGRESS;
+                            if (UploadStatuses::CHECKING === $upload['status']) {
+                                $currentStepStatus = JobStatuses::IN_PROGRESS;
+                            }
                             break;
                         case JobStatuses::IN_PROGRESS:
                             $uploadChecks = $this->entrepotApiService->upload->getCheckExecutions($datastoreId, $upload['_id']);
@@ -155,6 +157,8 @@ class UploadController extends AbstractController
                                 if (0 == count($uploadChecks[UploadCheckTypes::FAILED])) {
                                     // aucune check a échoué
                                     $currentStepStatus = JobStatuses::SUCCESSFUL;
+                                } else {
+                                    $currentStepStatus = JobStatuses::FAILED;
                                 }
                             }
                             break;
@@ -168,12 +172,11 @@ class UploadController extends AbstractController
                 case UploadTags::INT_STEP_PROCESSING:
                     switch ($currentStepStatus) {
                         case JobStatuses::WAITING:
-                            // TODO : mettre à jour id processing
                             /** @var array<string> */
-                            $apiPlageProcessings = $this->parameterBag->get('api_plage_processings');
+                            $apiEntrepotProcessings = $this->parameterBag->get('api_entrepot')['processings'];
 
                             $procExecBody = [
-                                'processing' => $apiPlageProcessings['int_vect_files_db'],
+                                'processing' => $apiEntrepotProcessings['int_vect_files_db'],
                                 'inputs' => [
                                     'upload' => [$upload['_id']],
                                 ],
@@ -182,42 +185,38 @@ class UploadController extends AbstractController
                                 ],
                             ];
 
-                            // TODO : désactivé le temps de debug
+                            $processingExec = $this->entrepotApiService->processing->addExecution($datastoreId, $procExecBody);
+                            $vectorDb = $processingExec['output']['stored_data'];
 
-                            // $processingExec = $this->entrepotApiService->processing->addExecution($datastoreId, $procExecBody);
-                            // $vectorDb = $processingExec['output']['stored_data'];
+                            // ajout tags sur l'upload
+                            $this->entrepotApiService->upload->addTags($datastoreId, $upload['_id'], [
+                                'vectordb_id' => $vectorDb['_id'],
+                                'proc_int_id' => $processingExec['_id'],
+                            ]);
 
-                            // // ajout tags sur l'upload
-                            // $this->entrepotApiService->upload->addTags($datastoreId, $upload['_id'], [
-                            //     'vectordb_id' => $vectorDb['_id'],
-                            //     'proc_int_id' => $processingExec['_id'],
-                            // ]);
-
-                            // // ajout tags sur la stored_data
-                            // $this->entrepotApiService->storedData->addTags($datastoreId, $vectorDb['_id'], [
-                            //     'upload_id' => $upload['_id'],
-                            //     'proc_int_id' => $processingExec['_id'],
-                            // ]);
+                            // ajout tags sur la stored_data
+                            $this->entrepotApiService->storedData->addTags($datastoreId, $vectorDb['_id'], [
+                                'upload_id' => $upload['_id'],
+                                'proc_int_id' => $processingExec['_id'],
+                            ]);
 
                             // // TODO : mise à jour ?
 
-                            // $this->entrepotApiService->processing->launchExecution($datastoreId, $processingExec['_id']);
+                            $this->entrepotApiService->processing->launchExecution($datastoreId, $processingExec['_id']);
                             $currentStepStatus = JobStatuses::IN_PROGRESS;
                             break;
 
                         case JobStatuses::IN_PROGRESS:
-                            // TODO : désactivé le temps de debug
+                            $processingExec = $this->entrepotApiService->processing->getExecution($datastoreId, $upload['tags']['proc_int_id']);
+                            $vectordb = $this->entrepotApiService->storedData->get($datastoreId, $upload['tags']['vectordb_id']);
 
-                            // $processingExec = $this->entrepotApiService->processing->getExecution($datastoreId, $upload['tags']['proc_int_id']);
-                            // $vectordb = $this->entrepotApiService->storedData->get($datastoreId, $upload['tags']['vectordb_id']);
-
-                            // if (!in_array($processingExec['status'], [ProcessingStatuses::CREATED, ProcessingStatuses::WAITING, ProcessingStatuses::PROGRESS])) {
-                            //     if (ProcessingStatuses::SUCCESS == $processingExec['status'] && StoredDataStatuses::GENERATED == $vectordb['status']) {
-                            //         $currentStepStatus = JobStatuses::SUCCESSFUL;
-                            //     } else {
-                            //         $currentStepStatus = JobStatuses::FAILED;
-                            //     }
-                            // }
+                            if (!in_array($processingExec['status'], [ProcessingStatuses::CREATED, ProcessingStatuses::WAITING, ProcessingStatuses::PROGRESS])) {
+                                if (ProcessingStatuses::SUCCESS == $processingExec['status'] && StoredDataStatuses::GENERATED == $vectordb['status']) {
+                                    $currentStepStatus = JobStatuses::SUCCESSFUL;
+                                } else {
+                                    $currentStepStatus = JobStatuses::FAILED;
+                                }
+                            }
                             break;
                         case JobStatuses::SUCCESSFUL:
                             $currentStep++;
