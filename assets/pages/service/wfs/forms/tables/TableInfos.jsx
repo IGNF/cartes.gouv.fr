@@ -131,53 +131,13 @@ const TableInfos = ({ tables, keywords, onChange }) => {
                                     onKeyUp: handleInputChange,
                                 }}
                             />
-                            <Input
+                            <TagifyComponent
+                                ref={refsById[table.name]}
                                 label={Translator.trans("service.wfs.new.tables_form.table.keywords")}
                                 hintText={Translator.trans("service.wfs.new.tables_form.table.hint_keywords")}
-                                textArea={true}
-                                nativeTextAreaProps={{
-                                    name: "keywords",
-                                    "data-table": table.name,
-                                    onKeyUp: handleInputChange,
-                                }}
+                                whiteList={keywords}
+                                onChange={(values) => tagifyChange(table.name, values)}
                             />
-                            <div style={{ display: tablesState[table.name].visible ? "block" : "none" }}>
-                                <Input
-                                    label={Translator.trans("service.wfs.new.tables_form.table.public_name")}
-                                    hintText={Translator.trans("service.wfs.new.tables_form.table.hint_public_name")}
-                                    nativeInputProps={{
-                                        name: "public_name",
-                                        "data-table": table.name,
-                                        onChange: handleInputChange,
-                                    }}
-                                />
-                                <Input
-                                    label={Translator.trans("service.wfs.new.tables_form.table.title")}
-                                    hintText={Translator.trans("service.wfs.new.tables_form.table.hint_title")}
-                                    nativeInputProps={{
-                                        name: "title",
-                                        "data-table": table.name,
-                                        onChange: handleInputChange,
-                                    }}
-                                />
-                                <Input
-                                    label={Translator.trans("service.wfs.new.tables_form.table.description")}
-                                    hintText={Translator.trans("service.wfs.new.tables_form.table.hint_description")}
-                                    textArea={true}
-                                    nativeTextAreaProps={{
-                                        name: "description",
-                                        "data-table": table.name,
-                                        onKeyUp: handleInputChange,
-                                    }}
-                                />
-                                <TagifyComponent
-                                    ref={refsById[table.name]}
-                                    label={Translator.trans("service.wfs.new.tables_form.table.keywords")}
-                                    hintText={Translator.trans("service.wfs.new.tables_form.table.hint_keywords")}
-                                    whiteList={keywords}
-                                    onChange={(values) => tagifyChange(table.name, values)}
-                                />
-                            </div>
                         </div>
                     </div>
                 );
