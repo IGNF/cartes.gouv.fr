@@ -16,3 +16,10 @@ parameters:
 
     support_contact_mail: "%env(resolve:SUPPORT_CONTACT_EMAIL)%"
     mailer_sender_address: "%env(resolve:MAILER_SENDER_ADDRESS)%"
+
+    api_entrepot:
+        processings:
+            int_vect_files_db: "%env(resolve:API_ENTREPOT_PROC_INT_VECT_FILES_DB)%"
+
+        endpoints:
+            wfs_public: "%env(resolve:API_ENTREPOT_ENDPOINT_WFS_PUBLIC)%"
