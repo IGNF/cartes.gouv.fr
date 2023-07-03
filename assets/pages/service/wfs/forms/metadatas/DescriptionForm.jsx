@@ -60,7 +60,7 @@ const DescriptionForm = ({ storedDataName, visibility, onPrevious, onValid }) =>
     const onSubmit = () => {
         const values = getFormValues();
         if (tagifyRef.current.checkValidity()) {
-            const name = tagifyRef.current.name;
+            const name = tagifyRef.current.getName();
             values[name] = tagifyRef.current.getValues();
             onValid(values);
         }
@@ -108,11 +108,14 @@ const DescriptionForm = ({ storedDataName, visibility, onPrevious, onValid }) =>
             />
             <TagifyComponent
                 ref={tagifyRef}
+                state={errors.data_identifier ? "error" : "default"}
+                stateRelatedMessage={errors?.data_identifier?.message}
                 name={"data_category"}
                 label={Translator.trans("service.wfs.new.description_form.category")}
                 hintText={Translator.trans("service.wfs.new.description_form.hint_category")}
-                errorMessage={Translator.trans("service.wfs.new.description_form.category_error")}
                 whiteList={keywords}
+                enforceWhitelist={true}
+                errorMessage={Translator.trans("service.wfs.new.description_form.category_error")}
             />
             <Input
                 label={Translator.trans("service.wfs.new.description_form.email_contact")}
