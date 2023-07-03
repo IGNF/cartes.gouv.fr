@@ -51,7 +51,8 @@ abstract class AbstractEntrepotApiService
     protected function postFile(string $url, string $filepath, array $query = []): array
     {
         $formFields = [
-            'filename' => DataPart::fromPath($filepath),
+            'file' => DataPart::fromPath($filepath),
+            'path' => 'data',
         ];
         $formData = new FormDataPart($formFields);
 
@@ -148,6 +149,7 @@ abstract class AbstractEntrepotApiService
 
             return $content;
         } else {
+            // TODO : error_description est un tableau, pas string
             $errorMsg = 'Entrepot API Error';
             try {
                 $errorResponse = $response->toArray(false);
