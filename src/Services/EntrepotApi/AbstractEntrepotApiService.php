@@ -154,7 +154,7 @@ abstract class AbstractEntrepotApiService
             try {
                 $errorResponse = $response->toArray(false);
                 if (array_key_exists('error_description', $errorResponse)) {
-                    $errorMsg = $errorResponse['error_description'];
+                    $errorMsg = is_array($errorResponse['error_description']) ? implode(', ', $errorResponse['error_description']) : $errorResponse['error_description'];
                 }
             } catch (JsonException $ex) {
                 $errorResponse = $response->getContent(false);
