@@ -8,12 +8,9 @@ import TableInfos from "./TableInfos";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 
-<<<<<<< HEAD
-=======
 // Themes et mot cles INSPIRE
 import { getInspireKeywords } from "../../../../../utils";
 
->>>>>>> 976f080 (refactor: Ajout des mots cles pour les tables)
 const schema = yup
     .object({
         data_tables: yup.string().required(Translator.trans("service.wfs.new.tables_form.error")),
@@ -28,13 +25,13 @@ const TableForm = ({ tables, visibility, onValid }) => {
         getValues: getFormValues,
         setValue: setFormValue,
     } = useForm({ resolver: yupResolver(schema) });
-  
+
     const [keywords, setKeywords] = useState([]);
 
     useEffect(() => {
         const words = getInspireKeywords();
         setKeywords(words);
-    },[]);
+    }, []);
 
     const onChange = (tablesState) => {
         const value = Object.keys(tablesState).length ? JSON.stringify(tablesState) : null;

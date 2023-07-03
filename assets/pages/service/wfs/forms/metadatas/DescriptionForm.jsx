@@ -142,6 +142,7 @@ const DescriptionForm = ({ storedDataName, visibility, onPrevious, onValid }) =>
                 hintText={Translator.trans("service.wfs.new.description_form.hint_resource_genealogy")}
                 state={errors.data_resource_genealogy ? "error" : "default"}
                 stateRelatedMessage={errors?.data_resource_genealogy?.message}
+                textArea={true}
                 nativeInputProps={{
                     ...register("data_resource_genealogy"),
                 }}
