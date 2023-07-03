@@ -18,7 +18,7 @@ knpu_oauth2_client:
         keycloak:
             type: keycloak
             client_id: "%env(resolve:IAM_CLIENT_ID)%"
-            client_secret: "" # '%env(OAUTH_KEYCLOAK_CLIENT_SECRET)%'
+            client_secret: "%env(resolve:IAM_CLIENT_SECRET)%"
             # a route name you'll create
             redirect_route: cartesgouvfr_security_login_check
             # redirect_params:
