@@ -63,7 +63,7 @@ class FileUploaderController extends AbstractController
             });
 
             // Tri des fichiers
-            usort($files, [$this, 'sortFiles']);
+            $files = $this->sortFiles($files);
 
             // Fusion des fichiers
             $filepath = $this->mergeFiles($directory, $originalFilename, $files);
@@ -118,14 +118,20 @@ class FileUploaderController extends AbstractController
     /**
      * Sort files dependeing on index (uuid_<index>).
      *
-     * @return int
+     * @param string[] $files
+     *
+     * @return string[]
      */
-    private function sortFiles(string $filename1, string $filename2)
+    private function sortFiles(array $files): array
     {
-        $index1 = $this->getIndex($filename1);
-        $index2 = $this->getIndex($filename2);
+        usort($files, function ($filename1, $filename2) {
+            $index1 = $this->getIndex($filename1);
+            $index2 = $this->getIndex($filename2);
 
-        return ($index1 < $index2) ? -1 : 1;
+            return ($index1 < $index2) ? -1 : 1;
+        });
+
+        return $files;
     }
 
     /**
