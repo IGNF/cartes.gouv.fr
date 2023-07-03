@@ -8,11 +8,11 @@ import "./../../sass/components/tagify.scss";
 import { symToStr } from "tsafe/symToStr";
 
 const TagifyComponent = forwardRef((props, ref) => {
-    const { label, hintText, errorMessage, whiteList, name } = props;
+    const { name, label, hintText, whiteList, enforceWhitelist = false, defaultValue = [], errorMessage = "", onChange } = props;
 
     const settings = {
         //maxTags: maxTags,
-        enforceWhitelist: true,
+        enforceWhitelist: enforceWhitelist,
         autoComplete: {
             enabled: true,
         },
@@ -35,14 +35,18 @@ const TagifyComponent = forwardRef((props, ref) => {
             setState(b ? "default" : "error");
             return b;
         },
+        getName() {
+            return tagifyRef.current.DOM.originalInput.name;
+        },
         getValues() {
-            return values;
+            return values.join(",");
         },
     }));
 
-    const onChange = () => {
+    const handleOnChange = () => {
         let v = tagifyRef.current.value.map((item) => item.value);
         setValues(v);
+        onChange?.(v);
         if (v.length) setState("default");
     };
 
@@ -67,8 +71,16 @@ const TagifyComponent = forwardRef((props, ref) => {
                 {label}
                 <span className="fr-hint-text">{hintText}</span>
             </label>
-            <Tags tagifyRef={tagifyRef} name={name} onChange={onChange} whitelist={whiteList} settings={settings} autoFocus={true} />
-            {state !== "default" && (
+            <Tags
+                tagifyRef={tagifyRef}
+                name={name}
+                onChange={handleOnChange}
+                whitelist={whiteList}
+                defaultValue={defaultValue}
+                settings={settings}
+                autoFocus={true}
+            />
+            {state !== "default" && errorMessage && (
                 <p
                     className={fr.cx(
                         (() => {
@@ -89,11 +101,14 @@ const TagifyComponent = forwardRef((props, ref) => {
 });
 
 TagifyComponent.propTypes = {
+    name: PropTypes.string,
     label: PropTypes.string.isRequired,
     hintText: PropTypes.string.isRequired,
-    errorMessage: PropTypes.string.isRequired,
     whiteList: PropTypes.arrayOf(PropTypes.string).isRequired,
-    name: PropTypes.string.isRequired,
+    enforceWhitelist: PropTypes.bool,
+    defaultValue: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
+    errorMessage: PropTypes.string,
+    onChange: PropTypes.func,
 };
 
 TagifyComponent.displayName = symToStr({ TagifyComponent });
