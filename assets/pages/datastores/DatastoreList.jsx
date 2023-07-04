@@ -1,18 +1,20 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { Tile } from "@codegouvfr/react-dsfr/Tile";
 import PropTypes from "prop-types";
-import React, { useEffect, useState } from "react";
+import React from "react";
 
+import { useQuery } from "@tanstack/react-query";
 import api from "../../api";
 import AppLayout from "../../components/Layout/AppLayout";
 import BtnBackToHome from "../../components/Utils/BtnBackToHome";
 import LoadingText from "../../components/Utils/LoadingText";
 import { defaultNavItems } from "../../config/navItems";
+import queryKeys from "../../modules/queryKeys";
 import { routes } from "../../router/router";
 
 const DatastoreTile = ({ datastore }) => {
     return (
-        <div className={fr.cx("fr-col")}>
+        <div className={fr.cx("fr-col", "fr-col-sm-6", "fr-col-md-4", "fr-col-lg-3")}>
             <Tile
                 title={datastore.name}
                 grey
@@ -28,16 +30,7 @@ DatastoreTile.propTypes = {
 };
 
 const DatastoreList = () => {
-    const [datastores, setDatastores] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        api.user
-            .getDatastoresList()
-            .then((response) => setDatastores(response))
-            .catch((error) => console.error(error))
-            .finally(() => setIsLoading(false));
-    }, []);
+    const { isLoading, data: datastores } = useQuery([queryKeys.datastore_list], () => api.user.getDatastoresList(), { staleTime: 60000 });
 
     return (
         <AppLayout navItems={defaultNavItems}>
