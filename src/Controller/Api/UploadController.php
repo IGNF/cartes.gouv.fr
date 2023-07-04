@@ -4,6 +4,7 @@ namespace App\Controller\Api;
 
 use App\Constants\EntrepotApi\ProcessingStatuses;
 use App\Constants\EntrepotApi\StoredDataStatuses;
+use App\Constants\EntrepotApi\StoredDataTags;
 use App\Constants\EntrepotApi\UploadCheckTypes;
 use App\Constants\EntrepotApi\UploadStatuses;
 use App\Constants\EntrepotApi\UploadTags;
@@ -198,6 +199,7 @@ class UploadController extends AbstractController
                             $this->entrepotApiService->storedData->addTags($datastoreId, $vectorDb['_id'], [
                                 'upload_id' => $upload['_id'],
                                 'proc_int_id' => $processingExec['_id'],
+                                StoredDataTags::DATA_NAME => $upload['tags'][UploadTags::DATA_NAME],
                             ]);
 
                             // // TODO : mise à jour ?

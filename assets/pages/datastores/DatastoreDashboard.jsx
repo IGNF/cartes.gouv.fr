@@ -1,30 +1,27 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
+import { useQuery } from "@tanstack/react-query";
 import PropTypes from "prop-types";
-import React, { useEffect, useState } from "react";
+import React from "react";
 
 import api from "../../api";
 import AppLayout from "../../components/Layout/AppLayout";
 import BtnBackToDatastoreList from "../../components/Utils/BtnBackToDatastoreList";
 import LoadingText from "../../components/Utils/LoadingText";
-import { routes } from "../../router/router";
 import { datastoreNavItems } from "../../config/datastoreNavItems";
+import queryKeys from "../../modules/queryKeys";
+import { routes } from "../../router/router";
 
 const DatastoreDashboard = ({ datastoreId }) => {
-    const [datastore, setDatastore] = useState(null);
-
-    useEffect(() => {
-        api.datastore
-            .getOne(datastoreId)
-            .then((response) => setDatastore(response))
-            .catch((error) => console.error(error));
-    }, []);
+    const { isLoading, data: datastore } = useQuery([queryKeys.datastore(datastoreId)], () => api.datastore.getOne(datastoreId), {
+        staleTime: 60000,
+    });
 
     const navItems = datastoreNavItems(datastoreId);
 
     return (
         <AppLayout navItems={navItems}>
-            {datastore === null ? (
+            {isLoading ? (
                 <LoadingText />
             ) : (
                 <>
