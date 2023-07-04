@@ -3,7 +3,7 @@ import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { Tag } from "@codegouvfr/react-dsfr/Tag";
 import MuiDsfrThemeProvider from "@codegouvfr/react-dsfr/mui";
-import { useQuery } from "@tanstack/react-query";
+import { useQueries } from "@tanstack/react-query";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -30,7 +30,9 @@ const DataListItem = ({ data }) => {
             </div>
             <div className={fr.cx("fr-col-2")}>{data?.date || functions.date.format(new Date().toISOString())}</div>
             <div className={fr.cx("fr-col-2")}>
-                <Badge noIcon={true}>Non Publié</Badge>
+                <Badge noIcon={true} severity="info">
+                    Non Publié
+                </Badge>
             </div>
         </div>
     );
@@ -41,27 +43,35 @@ DataListItem.propTypes = {
 };
 
 const DatastoreDataList = ({ datastoreId }) => {
-    const { isLoading: isLoadingDatastore, data: datastore } = useQuery([queryKeys.datastore(datastoreId)], () => api.datastore.getOne(datastoreId), {
-        staleTime: 60000,
+    const [datastoreQuery, dataListQuery] = useQueries({
+        queries: [
+            {
+                queryKey: [queryKeys.datastore(datastoreId)],
+                queryFn: () => api.datastore.getOne(datastoreId),
+                staleTime: 60000,
+            },
+            {
+                queryKey: [queryKeys.datastore_dataList(datastoreId)],
+                queryFn: () => api.data.getList(datastoreId),
+            },
+        ],
     });
-
-    const { isLoading: isLoadingDataList, data: dataList } = useQuery([queryKeys.datastore_dataList(datastoreId)], () => api.data.getList(datastoreId));
 
     const navItems = datastoreNavItems(datastoreId);
 
     return (
         <AppLayout navItems={navItems}>
-            {isLoadingDatastore ? (
+            {datastoreQuery.isLoading ? (
                 <LoadingText />
             ) : (
                 <MuiDsfrThemeProvider>
-                    <h1>Données {datastore?.name || datastoreId}</h1>
+                    <h1>Données {datastoreQuery?.data?.name || datastoreId}</h1>
 
                     <Button linkProps={routes.datastore_data_new({ datastoreId }).link} className={fr.cx("fr-mr-2v")} iconId={fr.cx("fr-icon-add-line")}>
                         Créer une fiche de données
                     </Button>
 
-                    {!isLoadingDataList && dataList.map((data) => <DataListItem key={data?._id} data={data} />)}
+                    {!dataListQuery.isLoading && dataListQuery?.data.map((data) => <DataListItem key={data?._id} data={data} />)}
                 </MuiDsfrThemeProvider>
             )}
         </AppLayout>
