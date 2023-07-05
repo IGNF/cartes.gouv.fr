@@ -22,7 +22,7 @@ const DatastoreList = lazy(() => import("../pages/datastores/DatastoreList"));
 const DatastoreDashboard = lazy(() => import("../pages/datastores/DatastoreDashboard"));
 const DatastoreDataList = lazy(() => import("../pages/datastores/DatastoreDataList"));
 const DataNewForm = lazy(() => import("../pages/data/DataNew/DataNewForm"));
-const DataView = lazy(() => import("../pages/data/DataView"));
+const DataView = lazy(() => import("../pages/data/DataView/DataView"));
 const WfsServiceNew = lazy(() => import("../pages/service/wfs/WfsServiceNew"));
 
 function RouterRenderer() {
