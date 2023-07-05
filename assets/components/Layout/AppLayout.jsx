@@ -1,11 +1,11 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import PropTypes from "prop-types";
-import React, { memo } from "react";
+import React from "react";
 
 import AppFooter from "./AppFooter";
 import AppHeader from "./AppHeader";
 
-const AppLayout = memo(function AppLayout({ children, navItems = [] }) {
+const AppLayout = ({ children, navItems = [] }) => {
     return (
         <>
             <AppHeader navItems={navItems} />
@@ -15,7 +15,7 @@ const AppLayout = memo(function AppLayout({ children, navItems = [] }) {
             <AppFooter />
         </>
     );
-});
+};
 
 AppLayout.propTypes = {
     children: PropTypes.node,

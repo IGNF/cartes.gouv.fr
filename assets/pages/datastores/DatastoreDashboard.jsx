@@ -9,11 +9,11 @@ import AppLayout from "../../components/Layout/AppLayout";
 import BtnBackToDatastoreList from "../../components/Utils/BtnBackToDatastoreList";
 import LoadingText from "../../components/Utils/LoadingText";
 import { datastoreNavItems } from "../../config/datastoreNavItems";
-import queryKeys from "../../modules/queryKeys";
+import reactQueryKeys from "../../modules/reactQueryKeys";
 import { routes } from "../../router/router";
 
 const DatastoreDashboard = ({ datastoreId }) => {
-    const { isLoading, data: datastore } = useQuery([queryKeys.datastore(datastoreId)], () => api.datastore.getOne(datastoreId), {
+    const datastoreQuery = useQuery([reactQueryKeys.datastore(datastoreId)], () => api.datastore.getOne(datastoreId), {
         staleTime: 60000,
     });
 
@@ -21,11 +21,11 @@ const DatastoreDashboard = ({ datastoreId }) => {
 
     return (
         <AppLayout navItems={navItems}>
-            {isLoading ? (
+            {datastoreQuery.isLoading ? (
                 <LoadingText />
             ) : (
                 <>
-                    <h1>Espace de travail {datastore?.name || datastoreId}</h1>
+                    <h1>Espace de travail {datastoreQuery?.data?.name || datastoreId}</h1>
 
                     <Button linkProps={routes.datastore_data_new({ datastoreId }).link} className={fr.cx("fr-mr-2v")}>
                         Ajouter une fiche de données
