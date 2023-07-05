@@ -13,9 +13,13 @@ import TagifyComponent from "../../../../../components/Utils/TagifyComponent";
 // Themes et mot cles INSPIRE
 import { getInspireKeywords } from "../../../../../utils";
 
-const schema = yup
+// TODO PROVISOIRE
+/* const schema = yup
     .object({
-        data_technical_name: yup.string().required(Translator.trans("service.wfs.new.description_form.technical_name_error")),
+        data_technical_name: yup
+            .string()
+            .required(Translator.trans("service.wfs.new.description_form.technical_name_error"))
+            .matches(/[\w-.]+/, Translator.trans("service.wfs.new.description_form.technical_name_regex")),
         data_public_name: yup.string().required(Translator.trans("service.wfs.new.description_form.public_name_error")),
         data_description: yup.string().required(Translator.trans("service.wfs.new.description_form.description_error")),
         data_identifier: yup.string().required(Translator.trans("service.wfs.new.description_form.identifier_error")),
@@ -30,7 +34,9 @@ const schema = yup
             .email(Translator.trans("service.wfs.new.description_form.organization_email_error"))
             .required(Translator.trans("service.wfs.new.description_form.organization_email_mandatory_error")),
     })
-    .required();
+    .required(); */
+
+const schema = yup.object({}).required();
 
 const DescriptionForm = ({ storedDataName, visibility, onPrevious, onValid }) => {
     const {
@@ -59,11 +65,16 @@ const DescriptionForm = ({ storedDataName, visibility, onPrevious, onValid }) =>
 
     const onSubmit = () => {
         const values = getFormValues();
-        if (tagifyRef.current.checkValidity()) {
+
+        // TODO A SUPPRIMER
+        onValid(values);
+
+        // TODO A DECOMMENTER
+        /* if (tagifyRef.current.checkValidity()) {
             const name = tagifyRef.current.getName();
             values[name] = tagifyRef.current.getValues();
             onValid(values);
-        }
+        } */
     };
 
     return (
@@ -179,7 +190,7 @@ const DescriptionForm = ({ storedDataName, visibility, onPrevious, onValid }) =>
                         children: Translator.trans("continue"),
                         onClick: () => {
                             handleSubmit(onSubmit)();
-                            tagifyRef.current.checkValidity();
+                            // tagifyRef.current.checkValidity();  // TODO PROVISOIRE
                         },
                     },
                 ]}

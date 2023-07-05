@@ -9,14 +9,18 @@ import { Input } from "@codegouvfr/react-dsfr/Input";
 import { Select } from "@codegouvfr/react-dsfr/Select";
 import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
 
-const schema = yup
+// TODO PROVISOIRE
+/* const schema = yup
     .object({
         data_language: yup.string().required(Translator.trans("service.wfs.new.additional_information_form.language_error")),
         data_charset: yup.string().required(Translator.trans("service.wfs.new.additional_information_form.charset_error")),
         data_projection: yup.string().required(Translator.trans("service.wfs.new.additional_information_form.projection_error")),
         data_encoding: yup.string().required(Translator.trans("service.wfs.new.additional_information_form.encoding_error")),
     })
-    .required();
+    .required(); */
+
+// TODO SUPPRIMER
+const schema = yup.object({}).required();
 
 // TODO storedData : Utiliser pour la projection
 const AdditionalInfoForm = ({ storedData, visibility, onPrevious, onValid }) => {
@@ -48,9 +52,9 @@ const AdditionalInfoForm = ({ storedData, visibility, onPrevious, onValid }) => 
                 <option value="" disabled hidden>
                     Selectionnez une option
                 </option>
-                {Object.keys(languages).map((language, index) => {
+                {Object.keys(languages).map((language) => {
                     return (
-                        <option key={index} value={language}>
+                        <option key={language} value={language}>
                             {languages[language]}
                         </option>
                     );
@@ -63,16 +67,13 @@ const AdditionalInfoForm = ({ storedData, visibility, onPrevious, onValid }) => 
                 stateRelatedMessage={errors?.data_charset?.message}
                 nativeSelectProps={{
                     ...register("data_charset"),
-                    defaultValue: "",
+                    defaultValue: "utf8",
                 }}
             >
-                <option value="" disabled hidden>
-                    Selectionnez une option
-                </option>
-                {Object.keys(charsets).map((charset, index) => {
+                {Object.keys(charsets).map((code) => {
                     return (
-                        <option key={index} value={charset}>
-                            {charsets[charset]}
+                        <option key={code} value={code} title={charsets[code]}>
+                            {code}
                         </option>
                     );
                 })}
