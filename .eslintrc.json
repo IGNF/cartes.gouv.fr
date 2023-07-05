@@ -3,7 +3,7 @@
         "browser": true,
         "es2021": true
     },
-    "extends": ["eslint:recommended", "plugin:react/recommended"],
+    "extends": ["eslint:recommended", "plugin:react/recommended", "plugin:react-hooks/recommended"],
     "overrides": [],
     "parserOptions": {
         "ecmaVersion": "latest",
@@ -16,7 +16,12 @@
     "rules": {
         "indent": ["error", 4, { "SwitchCase": 1 }],
         "quotes": ["error", "double"],
-        "semi": ["error", "always"]
+        "semi": ["error", "always"],
+        "eqeqeq": "warn",
+        "react-hooks/rules-of-hooks": "error",
+        "react-hooks/exhaustive-deps": "warn",
+        "react/react-in-jsx-scope": "off",
+        "react/prop-types": "error"
     },
     "settings": {
         "react": { "version": "detect" }
