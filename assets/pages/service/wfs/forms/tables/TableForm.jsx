@@ -11,9 +11,31 @@ import { Button } from "@codegouvfr/react-dsfr/Button";
 // Themes et mot cles INSPIRE
 import { getInspireKeywords } from "../../../../../utils";
 
+const mandatory = ["title", "description"];
+
 const schema = yup
     .object({
-        data_tables: yup.string().required(Translator.trans("service.wfs.new.tables_form.error")),
+        data_tables: yup
+            .string()
+            .required(Translator.trans("service.wfs.new.tables_form.error"))
+            .test({
+                name: "test",
+                exclusive: true,
+                params: { mandatory },
+                message: Translator.trans("service.wfs.new.tables_form.error_mandatory"),
+                test: (value) => {
+                    const desc = JSON.parse(value);
+
+                    for (const table of Object.keys(desc)) {
+                        const fields = Object.keys(desc[table]);
+                        if (!fields.length) return false;
+                        for (let m = 0; m < mandatory.length; ++m) {
+                            if (!fields.includes(mandatory[m])) return false;
+                        }
+                    }
+                    return true;
+                },
+            }),
     })
     .required();
 

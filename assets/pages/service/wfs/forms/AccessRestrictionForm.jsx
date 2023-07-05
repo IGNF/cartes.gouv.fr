@@ -2,6 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import React from "react";
 import { useForm } from "react-hook-form";
 import PropTypes from "prop-types";
+import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
 
 const AccessRestrictionForm = ({ visibility, onPrevious, onValid }) => {
@@ -14,12 +15,13 @@ const AccessRestrictionForm = ({ visibility, onPrevious, onValid }) => {
 
     const onSubmit = () => {
         const values = getFormValues();
-        onValid(values);
+        onValid?.(values);
     };
 
     return (
         <div className={fr.cx("fr-my-2v")} style={{ display: visibility ? "block" : "none" }}>
             <h3>{Translator.trans("service.wfs.new.access_retrictions.title")}</h3>
+            <Alert severity="error" title="A développer ..." className={fr.cx("fr-my-3w")} />
             <ButtonsGroup
                 className={fr.cx("fr-my-2v")}
                 alignment="between"

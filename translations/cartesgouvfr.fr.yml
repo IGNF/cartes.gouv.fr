@@ -1,5 +1,9 @@
+commons:
+    error: "Erreur"
+
 previous_step: "Étape précédente"
 continue: "Continuer"
+stored_data_does_not_exists: "La stored_data %stored_data% n'existe pas."
 
 # pages:
 home:
@@ -29,15 +33,17 @@ service:
                 oneTable: "Une table détectée"
                 manyTables: "%num% tables détectées"
                 table:
-                    public_name : "Nom public de la table (optionnel)"
+                    public_name: "Nom public de la table (optionnel)"
                     hint_public_name: "TODO[Explication du champ]"
-                    title: "Titre de la table (optionnel)"
+                    title: "Titre de la table"
                     hint_title: "TODO[Explication du champ]"
-                    description: "Résumé du contenu de la table (optionnel)"
+                    description: "Résumé du contenu de la table"
                     hint_description: "Bref résumé narratif du contenu de la table"
+                    description_error: "La description est obligatoire"
                     keywords: "Mot clés (optionnel)"
                     hint_keywords: "Utilisez l’auto-complétion ou saisissez librement des mots clés en appuyant sur Entrée après chaque mot"
                 error: "Sélectionnez au moins une table"
+                error_mandatory: "Les champs [Titre] et [Description] sont obligatoires"
             metadata_upload_form:
                 title: "Source des métadonnées"
                 help: "Apportez un maximum d'informations à vos utilisateurs en décrivant votre service le plus précisément possible."
@@ -52,6 +58,7 @@ service:
                 description_title: "Description"
                 technical_name: "Nom technique du service"
                 technical_name_error: "Le nom technique est obligatoire"
+                technical_name_regex: "Le titre ne doit contenir que des lettres, chiffres, tirets (-), underscores (_), ou points (.)"
                 hint_technical_name: "Nom technique qui sera visible de vos utilisateurs dans l'adresse de votre service"
                 public_name: "Intitulé (nom public)"
                 hint_public_name: "Nom caractéristique et souvent unique sous lequel la ressource est connue"

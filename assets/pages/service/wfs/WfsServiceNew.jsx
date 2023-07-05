@@ -2,6 +2,7 @@ import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
 import api from "../../../api";
 import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
+import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import AppLayout from "../../../components/Layout/AppLayout";
 import LoadingText from "../../../components/Utils/LoadingText";
 import TableForm from "./forms/tables/TableForm";
@@ -22,7 +23,7 @@ const WfsServiceNew = ({ datastoreId, storedDataId }) => {
     const [step, setStep] = useState(Steps.TABLES);
 
     const [isLoading, setIsLoading] = useState(true);
-    const [storedData, setStoredData] = useState({});
+    const [storedData, setStoredData] = useState(undefined);
     const [tables, setTables] = useState([]);
 
     const [result, setResult] = useState({});
@@ -48,7 +49,9 @@ const WfsServiceNew = ({ datastoreId, storedDataId }) => {
                 });
                 setTables(relations);
             })
-            .catch((error) => console.error(error))
+            .catch((error) => {
+                console.error(error);
+            })
             .finally(() => setIsLoading(false));
     }, []);
 
@@ -64,7 +67,17 @@ const WfsServiceNew = ({ datastoreId, storedDataId }) => {
     };
 
     const next = () => {
+        if (step + 1 > Steps.ACCESSRESTRICTIONS) {
+            return;
+        }
         setStep(step + 1);
+    };
+
+    // Supprime les valeurs vides ou nulles
+    const filter = () => {
+        let obj = { ...result };
+        Object.keys(obj).forEach((k) => (obj[k] === null || obj[k] === "") && delete obj[k]);
+        return obj;
     };
 
     const onValid = (values) => {
@@ -73,11 +86,21 @@ const WfsServiceNew = ({ datastoreId, storedDataId }) => {
         next();
     };
 
+    // Bouton dernier formulaire
+    const onSubmit = (values) => {
+        onValid(values);
+
+        const filtered = filter();
+        api.wfs.add(datastoreId, storedDataId, filtered).then((response) => {
+            console.log(response);
+        });
+    };
+
     return (
         <AppLayout>
             {isLoading ? (
                 <LoadingText message={Translator.trans("service.wfs.new.loading_data")} />
-            ) : (
+            ) : storedData ? (
                 <>
                     <h2>{Translator.trans("service.wfs.new.title")}</h2>
                     <Stepper
@@ -90,11 +113,16 @@ const WfsServiceNew = ({ datastoreId, storedDataId }) => {
                     <UploadMetadataForm visibility={visiblity[Steps.METADATAS]} onPrevious={previous} onSubmit={next} />
                     <DescriptionForm storedDataName={storedData.name} visibility={visiblity[Steps.DESCRIPTION]} onPrevious={previous} onValid={onValid} />
                     <AdditionalInfoForm storedData={storedData} visibility={visiblity[Steps.ADDITIONALINFORMATIONS]} onPrevious={previous} onValid={onValid} />
-                    <AccessRestrictionForm
-                        visibility={visiblity[Steps.ACCESSRESTRICTIONS]}
-                        onPrevious={previous} /*onValid={values => { onValid(values); }}*/
-                    />
+                    <AccessRestrictionForm visibility={visiblity[Steps.ACCESSRESTRICTIONS]} onPrevious={previous} onValid={onSubmit} />
                 </>
+            ) : (
+                <Alert
+                    closable
+                    description={Translator.trans("stored_data_does_not_exists", { stored_data: storedDataId })}
+                    onClose={function noRefCheck() {}}
+                    severity="error"
+                    title={Translator.trans("commons.error")}
+                />
             )}
         </AppLayout>
     );

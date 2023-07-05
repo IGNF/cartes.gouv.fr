@@ -1,15 +1,8 @@
 // Themes et mot cles INSPIRE
 import inspireKeywords from "./data/thematic-inspire.json";
 
-const getInspireKeywords = () => {
-    let words = new Set();
-    for (let theme in inspireKeywords) {
-        if (Array.isArray(inspireKeywords[theme]) && inspireKeywords[theme].length) {
-            words = [...words, ...inspireKeywords[theme]];
-        }
-    }
-    return [...words];
-};
+// charsets
+import charsets from "./data/charset_list.json";
 
 // https://fr.wikipedia.org/wiki/Liste_des_codes_ISO_639-2
 // INSPIRE : http://www.loc.gov/standards/iso639-2/
@@ -18,9 +11,14 @@ const languages = {
     fre: "Français",
 };
 
-const charsets = {
-    "ISO-8859-1": "ISO-8859-1",
-    "UTF-8": "UTF-8",
+const getInspireKeywords = () => {
+    let words = new Set();
+    for (let theme in inspireKeywords) {
+        if (Array.isArray(inspireKeywords[theme]) && inspireKeywords[theme].length) {
+            words = [...words, ...inspireKeywords[theme]];
+        }
+    }
+    return [...words];
 };
 
 /**

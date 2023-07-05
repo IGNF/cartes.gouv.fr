@@ -39,7 +39,7 @@ const TagifyComponent = forwardRef((props, ref) => {
             return tagifyRef.current.DOM.originalInput.name;
         },
         getValues() {
-            return values.join(",");
+            return values;
         },
     }));
 

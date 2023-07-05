@@ -87,9 +87,9 @@ const TableInfos = ({ tables, keywords, onChange }) => {
                         : Translator.trans("service.wfs.new.tables_form.manyTables", { num: numTables })}
                 </strong>
             </div>
-            {tables.map((table, index) => {
+            {tables.map((table) => {
                 return (
-                    <div className={fr.cx("fr-mb-4v")} key={index}>
+                    <div className={fr.cx("fr-mb-4v")} key={table.name}>
                         <Checkbox
                             className={fr.cx("fr-my-0")}
                             options={[
@@ -108,6 +108,7 @@ const TableInfos = ({ tables, keywords, onChange }) => {
                                 hintText={Translator.trans("service.wfs.new.tables_form.table.hint_public_name")}
                                 nativeInputProps={{
                                     name: "public_name",
+                                    defaultValue: table.name,
                                     "data-table": table.name,
                                     onChange: handleInputChange,
                                 }}
