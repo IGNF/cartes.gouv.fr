@@ -1,6 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import React from "react";
 import ErrorBoundary from "./components/Utils/ErrorBoundary";
 import { UserContextProvider } from "./contexts/UserContext";
 import RouterRenderer from "./router/RouterRenderer";
@@ -14,20 +13,18 @@ const queryClient = new QueryClient({
     },
 });
 
-const App = () => {
+const App = (): JSX.Element => {
     return (
-        <>
-            <QueryClientProvider client={queryClient}>
-                <ReactQueryDevtools initialIsOpen={false} />
-                <UserContextProvider>
-                    <RouteProvider>
-                        <ErrorBoundary>
-                            <RouterRenderer />
-                        </ErrorBoundary>
-                    </RouteProvider>
-                </UserContextProvider>
-            </QueryClientProvider>
-        </>
+        <QueryClientProvider client={queryClient}>
+            <ReactQueryDevtools initialIsOpen={false} />
+            <UserContextProvider>
+                <RouteProvider>
+                    <ErrorBoundary>
+                        <RouterRenderer />
+                    </ErrorBoundary>
+                </RouteProvider>
+            </UserContextProvider>
+        </QueryClientProvider>
     );
 };
 
