@@ -3,7 +3,7 @@
         "browser": true,
         "es2021": true
     },
-    "extends": ["eslint:recommended", "plugin:react/recommended", "plugin:react/jsx-runtime", "plugin:react-hooks/recommended"],
+    "extends": ["eslint:recommended", "plugin:react/recommended", "plugin:react-hooks/recommended"],
     "overrides": [],
     "parserOptions": {
         "ecmaVersion": "latest",
@@ -25,7 +25,9 @@
         "react/react-in-jsx-scope": "error",
         "react/jsx-no-useless-fragment": "warn",
         "react/jsx-pascal-case": "error",
-        "react/jsx-props-no-multi-spaces": "error"
+        "react/jsx-props-no-multi-spaces": "error",
+        "react/self-closing-comp": "warn",
+        "react/void-dom-elements-no-children": "error"
     },
     "settings": {
         "react": { "version": "detect" }
