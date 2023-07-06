@@ -3,7 +3,7 @@
         "browser": true,
         "es2021": true
     },
-    "extends": ["eslint:recommended", "plugin:react/recommended", "plugin:react-hooks/recommended"],
+    "extends": ["eslint:recommended", "plugin:react/recommended", "plugin:react/jsx-runtime", "plugin:react-hooks/recommended"],
     "overrides": [],
     "parserOptions": {
         "ecmaVersion": "latest",
@@ -20,8 +20,12 @@
         "eqeqeq": "warn",
         "react-hooks/rules-of-hooks": "error",
         "react-hooks/exhaustive-deps": "warn",
-        "react/react-in-jsx-scope": "off",
-        "react/prop-types": "error"
+        "react/hook-use-state": "error",
+        "react/jsx-uses-react": "error",
+        "react/react-in-jsx-scope": "error",
+        "react/jsx-no-useless-fragment": "warn",
+        "react/jsx-pascal-case": "error",
+        "react/jsx-props-no-multi-spaces": "error"
     },
     "settings": {
         "react": { "version": "detect" }
