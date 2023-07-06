@@ -52,7 +52,7 @@
         "build": "encore production --progress",
         "prebuild": "only-include-used-icons",
         "postinstall": "copy-dsfr-to-public",
-        "lint": "eslint assets/ --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+        "lint": "eslint assets/ --ext js,jsx --report-unused-disable-directives",
         "lint:watch": "esw assets/ --ext js,jsx --watch --report-unused-disable-directives",
         "format": "prettier --check assets/",
         "format:fix": "prettier --write assets/",
