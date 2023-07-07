@@ -33,6 +33,7 @@
         "@types/react-dom": "^18.2.6",
         "@typescript-eslint/eslint-plugin": "^5.61.0",
         "@typescript-eslint/parser": "^5.61.0",
+        "cypress": "^12.17.0",
         "eslint": "^8.44.0",
         "eslint-plugin-react": "^7.32.2",
         "eslint-plugin-react-hooks": "^4.6.0",
@@ -61,7 +62,10 @@
         "format": "prettier --check assets/",
         "format:fix": "prettier --write assets/",
         "clean": "rm -rf public/build",
-        "predev": "yarn clean"
+        "predev": "yarn clean",
+        "cy:open": "cypress open",
+        "cy:run": "cypress run",
+        "cy:run:headed": "cypress run --headed"
     },
     "browserslist": [
         "defaults"
