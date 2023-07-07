@@ -31,7 +31,7 @@ function RouterRenderer() {
 
     if (!publicRoutes.includes(route.name)) {
         // vérifier si l'utilisateur est authentifié et éventuellement ses droits à la ressource demandée
-        if (user == null) {
+        if (user === null) {
             // window.location.href = Routing.generate("cartesgouvfr_security_login");
             window.location.assign(Routing.generate("cartesgouvfr_security_login"));
             return <Redirect />;

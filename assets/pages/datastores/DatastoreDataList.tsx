@@ -3,8 +3,8 @@ import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { Tag } from "@codegouvfr/react-dsfr/Tag";
 import { useQueries, useQueryClient } from "@tanstack/react-query";
-import PropTypes from "prop-types";
-import React, { useEffect } from "react";
+import { FC, useEffect } from "react";
+import { symToStr } from "tsafe/symToStr";
 
 import api from "../../api";
 import AppLayout from "../../components/Layout/AppLayout";
@@ -14,7 +14,18 @@ import functions from "../../functions";
 import reactQueryKeys from "../../modules/reactQueryKeys";
 import { routes } from "../../router/router";
 
-const DataListItem = ({ datastoreId, data }) => {
+type Data = {
+    data_name?: string;
+    name: string;
+    date?: string;
+};
+
+type DataListItemProps = {
+    datastoreId: string;
+    data: Data;
+};
+
+const DataListItem: FC<DataListItemProps> = ({ datastoreId, data }) => {
     return (
         <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-grid-row--center", "fr-my-1w", "fr-p-2v", "fr-card--grey")}>
             <div className={fr.cx("fr-col")}>
@@ -38,12 +49,13 @@ const DataListItem = ({ datastoreId, data }) => {
     );
 };
 
-DataListItem.propTypes = {
-    datastoreId: PropTypes.string.isRequired,
-    data: PropTypes.object.isRequired,
+DataListItem.displayName = symToStr({ DataListItem });
+
+type DatastoreDataListType = {
+    datastoreId: string;
 };
 
-const DatastoreDataList = ({ datastoreId }) => {
+const DatastoreDataList: FC<DatastoreDataListType> = ({ datastoreId }) => {
     const abortController = new AbortController();
     const queryClient = useQueryClient();
 
@@ -68,7 +80,7 @@ const DatastoreDataList = ({ datastoreId }) => {
         return () => {
             queryClient.cancelQueries({ queryKey: [reactQueryKeys.datastore(datastoreId), reactQueryKeys.datastore_dataList(datastoreId)] });
         };
-    }, []);
+    }, [datastoreId, queryClient]);
 
     return (
         <AppLayout navItems={navItems}>
@@ -78,7 +90,7 @@ const DatastoreDataList = ({ datastoreId }) => {
                 <>
                     <h1>Données {datastoreQuery?.data?.name || datastoreId}</h1>
 
-                    <Button linkProps={routes.datastore_data_new({ datastoreId }).link} className={fr.cx("fr-mr-2v")} iconId={fr.cx("fr-icon-add-line")}>
+                    <Button linkProps={routes.datastore_data_new({ datastoreId }).link} className={fr.cx("fr-mr-2v")} iconId={"fr-icon-add-line"}>
                         Créer une fiche de données
                     </Button>
 
@@ -87,10 +99,6 @@ const DatastoreDataList = ({ datastoreId }) => {
             )}
         </AppLayout>
     );
-};
-
-DatastoreDataList.propTypes = {
-    datastoreId: PropTypes.string.isRequired,
 };
 
 export default DatastoreDataList;

@@ -17,8 +17,9 @@ const ZoomRange = (props) => {
     const { min = 0, max = 20, initialValues = [0, 20], center = [2.35, 48.85], onChange = null } = props;
 
     /* Identifiants des div contenant les maps */
+    const mapId = useId();
     const numMaps = 2;
-    const targets = [...new Array(numMaps)].map(() => "map-" + useId());
+    const targets = [...new Array(numMaps)].map(() => "map-" + mapId);
 
     const [minZoomMap, setMinZoomMap] = useState(null);
     const [maxZoomMap, setMaxZoomMap] = useState(null);
@@ -96,8 +97,8 @@ const ZoomRange = (props) => {
     return (
         <div className={fr.cx("fr-my-2v")}>
             <div className="ui-map-zoom-levels">
-                <div id={targets[0]} className="ui-top-zoom-level"></div>
-                <div id={targets[1]} className="ui-bottom-zoom-level"></div>
+                <div id={targets[0]} className="ui-top-zoom-level" />
+                <div id={targets[1]} className="ui-bottom-zoom-level" />
             </div>
             <RangeSlider min={min} max={max} initialValues={initialValues} onChange={handleOnChange} />
         </div>
