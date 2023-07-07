@@ -86,11 +86,9 @@ const Home = () => {
                                         />
                                         <h4 className={fr.cx("fr-text--lead")}>Consommez des services</h4>
                                         <p>Lorem ipsum dolor sit amet,consectetur adipiscing elit.</p>
-                                        <p></p>
                                         <Badge small className={fr.cx("fr-badge--pink")}>
                                             Prochainement
                                         </Badge>
-                                        <p></p>
                                     </div>
 
                                     <div className={fr.cx("fr-col-lg-3", "fr-col-md-6", "fr-col-12", "fr-text--center")}>
@@ -112,7 +110,7 @@ const Home = () => {
                                         <h4 className={fr.cx("fr-text--lead")}>Effectuer des traitements</h4>
                                         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
                                         <p>
-                                            {user == null ? (
+                                            {user === null ? (
                                                 <Button
                                                     linkProps={{ href: Routing.generate("cartesgouvfr_security_login") }}
                                                     iconId={fr.cx("fr-icon-account-circle-fill")}
@@ -155,7 +153,7 @@ const Home = () => {
                                         <h4 className={fr.cx("fr-text--lead")}>Consectetur adipiscing elit</h4>
                                         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
                                         <p>
-                                            {user == null ? (
+                                            {user === null ? (
                                                 <Button
                                                     linkProps={{ href: Routing.generate("cartesgouvfr_security_login") }}
                                                     iconId={fr.cx("fr-icon-account-circle-fill")}
@@ -192,11 +190,9 @@ const Home = () => {
                                         />
                                         <h4 className={fr.cx("fr-text--lead")}>Dolor sit amet consectetur</h4>
                                         <p>Lorem ipsum dolor sit amet,consectetur adipiscing elit.</p>
-                                        <p></p>
                                         <Badge small className={fr.cx("fr-badge--pink")}>
                                             Prochainement
                                         </Badge>
-                                        <p></p>
                                     </div>
                                     <div className={fr.cx("fr-col-lg-3", "fr-col-12", "fr-text--center")}>
                                         <img

@@ -66,7 +66,7 @@ const DataNewForm = ({ datastoreId }) => {
             setFormValue("data_technical_name", "");
             setFormValue("data_type", "");
         }
-    }, [showDataInfos]);
+    }, [showDataInfos, setFormValue]);
 
     const onSubmit = (formData) => {
         console.log(errors);
@@ -190,67 +190,65 @@ const DataNewForm = ({ datastoreId }) => {
             />
             {showProgress && <Progress label={"Upload en cours ..."} value={progressValue} max={progressMax} />}
             {showDataInfos && (
-                <>
-                    <div className={fr.cx("fr-mt-2v")}>
-                        <h5>Les données suivantes ont été détectées. Modifiez les si besoins</h5>
-                        <Input
-                            label="Nom technique de votre donnée:"
-                            hintText="Ce nom technique est invisible par votre utilisateur final. Il apparaitra uniquement dans votre espace de travail"
-                            state={errors.data_technical_name ? "error" : "default"}
-                            stateRelatedMessage={errors?.data_technical_name?.message}
-                            nativeInputProps={{
-                                ...register("data_technical_name"),
-                            }}
-                        />
-                        <Select
-                            label="Projection de vos données"
-                            placeholder="Selectionnez une Projection"
-                            nativeSelectProps={{
-                                ...register("data_srid"),
-                                onChange: (e) => setSrid(e.target.value),
-                                value: srid,
-                            }}
-                        >
-                            <option value="" disabled>
-                                Selectionnez une Projection
-                            </option>
+                <div className={fr.cx("fr-mt-2v")}>
+                    <h5>Les données suivantes ont été détectées. Modifiez les si besoins</h5>
+                    <Input
+                        label="Nom technique de votre donnée:"
+                        hintText="Ce nom technique est invisible par votre utilisateur final. Il apparaitra uniquement dans votre espace de travail"
+                        state={errors.data_technical_name ? "error" : "default"}
+                        stateRelatedMessage={errors?.data_technical_name?.message}
+                        nativeInputProps={{
+                            ...register("data_technical_name"),
+                        }}
+                    />
+                    <Select
+                        label="Projection de vos données"
+                        placeholder="Selectionnez une Projection"
+                        nativeSelectProps={{
+                            ...register("data_srid"),
+                            onChange: (e) => setSrid(e.target.value),
+                            value: srid,
+                        }}
+                    >
+                        <option value="" disabled>
+                            Selectionnez une Projection
+                        </option>
 
-                            {Object.entries(projections).map(([code, name]) => (
-                                <option key={code} value={code}>
-                                    {name}
-                                </option>
-                            ))}
-                        </Select>
-                        <RadioButtons
-                            state={errors.data_type ? "error" : "default"}
-                            stateRelatedMessage={errors?.data_type?.message}
-                            legend="Format du fichier déposé"
-                            options={[
-                                {
-                                    label: "Vecteur",
-                                    nativeInputProps: {
-                                        ...register("data_type"),
-                                        value: "vector",
-                                    },
+                        {Object.entries(projections).map(([code, name]) => (
+                            <option key={code} value={code}>
+                                {name}
+                            </option>
+                        ))}
+                    </Select>
+                    <RadioButtons
+                        state={errors.data_type ? "error" : "default"}
+                        stateRelatedMessage={errors?.data_type?.message}
+                        legend="Format du fichier déposé"
+                        options={[
+                            {
+                                label: "Vecteur",
+                                nativeInputProps: {
+                                    ...register("data_type"),
+                                    value: "vector",
                                 },
-                                {
-                                    label: "Raster",
-                                    nativeInputProps: {
-                                        ...register("data_type"),
-                                        value: "raster",
-                                    },
+                            },
+                            {
+                                label: "Raster",
+                                nativeInputProps: {
+                                    ...register("data_type"),
+                                    value: "raster",
                                 },
-                            ]}
-                            orientation="horizontal"
-                        />
-                        <Input
-                            nativeInputProps={{
-                                ...register("data_upload_path"),
-                                type: "hidden",
-                            }}
-                        />
-                    </div>
-                </>
+                            },
+                        ]}
+                        orientation="horizontal"
+                    />
+                    <Input
+                        nativeInputProps={{
+                            ...register("data_upload_path"),
+                            type: "hidden",
+                        }}
+                    />
+                </div>
             )}
             <Button
                 onClick={() => {
