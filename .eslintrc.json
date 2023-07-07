@@ -3,8 +3,13 @@
         "browser": true,
         "es2021": true
     },
-    "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended", "plugin:react/recommended", "plugin:react-hooks/recommended"],
-    "overrides": [],
+    "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/recommended",
+        "plugin:react/recommended",
+        "plugin:react/jsx-runtime",
+        "plugin:react-hooks/recommended"
+    ],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
         "ecmaVersion": "latest",
@@ -20,20 +25,31 @@
         "quotes": ["error", "double"],
         "semi": ["error", "always"],
         "eqeqeq": "warn",
+        "array-callback-return": "error",
         "react-hooks/rules-of-hooks": "error",
         "react-hooks/exhaustive-deps": "warn",
         "react/hook-use-state": "error",
-        "react/jsx-uses-react": "error",
-        "react/react-in-jsx-scope": "error",
         "react/jsx-no-useless-fragment": "warn",
         "react/jsx-pascal-case": "error",
         "react/jsx-props-no-multi-spaces": "error",
         "react/self-closing-comp": "warn",
         "react/void-dom-elements-no-children": "error",
-        "array-callback-return": "error"
+        "react/default-props-match-prop-types": "error",
+        "react/jsx-no-duplicate-props": "error",
+        "react/prefer-exact-props": "error"
+        // "react/no-unused-prop-types": "error"
     },
+    "overrides": [
+        {
+            "files": ["assets/**"],
+            "rules": {
+                "react/jsx-uses-react": "error" // import React from 'react' est nécessaire seulement dans les fichiers javascript (non-typescript)
+            }
+        }
+    ],
     "settings": {
         "react": { "version": "detect" }
+        // "propWrapperFunctions": [{ "property": "exact", "exact": true }]
     },
     "globals": {
         "Routing": true,
