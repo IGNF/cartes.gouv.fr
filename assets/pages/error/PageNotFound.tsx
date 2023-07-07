@@ -1,12 +1,12 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { Button } from "@codegouvfr/react-dsfr/Button";
-import React from "react";
+import { FC } from "react";
 
 import AppLayout from "../../components/Layout/AppLayout";
 import { defaultNavItems } from "../../config/navItems";
 import { appRoot, routes } from "../../router/router";
 
-const PageNotFound = () => {
+const PageNotFound: FC = () => {
     return (
         <AppLayout navItems={defaultNavItems}>
             <div
@@ -47,21 +47,18 @@ const PageNotFound = () => {
                 <div className={fr.cx("fr-col-12", "fr-col-md-3", "fr-col-offset-md-1", "fr-px-6w", "fr-px-md-0", "fr-py-0")}>
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className={fr.cx("fr-responsive-img", "fr-artwork")}
+                        className={"fr-responsive-img fr-artwork"}
                         aria-hidden="true"
                         width="160"
                         height="200"
                         viewBox="0 0 160 200"
                     >
-                        <use className="fr-artwork-motif" href={`${appRoot}/dsfr/artwork/background/ovoid.svg#artwork-motif`}></use>
-                        <use className="fr-artwork-background" href={`${appRoot}/dsfr/artwork/background/ovoid.svg#artwork-background`}></use>
+                        <use className="fr-artwork-motif" href={`${appRoot}/dsfr/artwork/background/ovoid.svg#artwork-motif`} />
+                        <use className="fr-artwork-background" href={`${appRoot}/dsfr/artwork/background/ovoid.svg#artwork-background`} />
                         <g transform="translate(40, 60)">
-                            <use
-                                className="fr-artwork-decorative"
-                                href={`${appRoot}/dsfr/artwork/pictograms/system/technical-error.svg#artwork-decorative`}
-                            ></use>
-                            <use className="fr-artwork-minor" href={`${appRoot}/dsfr/artwork/pictograms/system/technical-error.svg#artwork-minor`}></use>
-                            <use className="fr-artwork-major" href={`${appRoot}/dsfr/artwork/pictograms/system/technical-error.svg#artwork-major`}></use>
+                            <use className="fr-artwork-decorative" href={`${appRoot}/dsfr/artwork/pictograms/system/technical-error.svg#artwork-decorative`} />
+                            <use className="fr-artwork-minor" href={`${appRoot}/dsfr/artwork/pictograms/system/technical-error.svg#artwork-minor`} />
+                            <use className="fr-artwork-major" href={`${appRoot}/dsfr/artwork/pictograms/system/technical-error.svg#artwork-major`} />
                         </g>
                     </svg>
                 </div>

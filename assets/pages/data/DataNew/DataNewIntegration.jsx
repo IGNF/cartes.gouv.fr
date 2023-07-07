@@ -1,9 +1,9 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import Button from "@codegouvfr/react-dsfr/Button";
 import PropTypes from "prop-types";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import api from "../../../api";
+import { routes } from "../../../router/router";
 
 import "./../../../sass/components/spinner.scss";
 
@@ -16,34 +16,7 @@ const DataNewIntegration = ({ datastoreId, uploadId }) => {
     const refreshInterval = useRef();
     const requestInProgress = useRef(false);
 
-    useEffect(() => {
-        refreshInterval.current = setInterval(refresh, 5000);
-
-        return () => {
-            if (refreshInterval.current) {
-                clearInterval(refreshInterval.current);
-            }
-            // abortController?.current?.abort();
-        };
-    }, []);
-
-    useEffect(() => {
-        // stopper si une étape a échoué
-        if (Object.values(integrationProgress).includes("failed")) {
-            console.debug("stopping, one step failed");
-            clearInterval(refreshInterval.current);
-            return;
-        }
-
-        // stopper si toutes les étapes ont terminé
-        if (Object.keys(integrationProgress).length === integrationCurrentStep) {
-            console.debug("stopping, all steps completed successfully");
-            clearInterval(refreshInterval.current);
-            return;
-        }
-    }, [integrationProgress]);
-
-    const refresh = () => {
+    const refresh = useCallback(() => {
         if (requestInProgress.current === true) {
             console.debug("skipping, request already in progress");
             return;
@@ -63,7 +36,35 @@ const DataNewIntegration = ({ datastoreId, uploadId }) => {
             .finally(() => {
                 requestInProgress.current = false;
             });
-    };
+    }, [datastoreId, uploadId]);
+
+    useEffect(() => {
+        refreshInterval.current = setInterval(refresh, 5000);
+
+        return () => {
+            if (refreshInterval.current) {
+                clearInterval(refreshInterval.current);
+            }
+            // abortController?.current?.abort();
+        };
+    }, [refresh]);
+
+    useEffect(() => {
+        // stopper si une étape a échoué
+        if (Object.values(integrationProgress).includes("failed")) {
+            console.debug("stopping, one step failed");
+            clearInterval(refreshInterval.current);
+            return;
+        }
+
+        // stopper si toutes les étapes ont terminé
+        if (Object.keys(integrationProgress).length === integrationCurrentStep) {
+            console.debug("stopping, all steps completed successfully");
+            clearInterval(refreshInterval.current);
+
+            routes.datastore_data_view({ datastoreId, dataName: "TODOTODOTODO" }).push();
+        }
+    }, [integrationProgress, integrationCurrentStep, datastoreId]);
 
     const getStepIcon = (status) => {
         let iconClass = fr.cx("fr-icon-time-line");
@@ -106,11 +107,6 @@ const DataNewIntegration = ({ datastoreId, uploadId }) => {
                         </div>
                     ))}
                 </div>
-            </div>
-            <div className={fr.cx("fr-grid-row", "fr-grid-row--right")}>
-                <Button onClick={() => {}} disabled={true}>
-                    Continuer
-                </Button>
             </div>
         </div>
     );
