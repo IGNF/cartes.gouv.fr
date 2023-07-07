@@ -3,8 +3,9 @@
         "browser": true,
         "es2021": true
     },
-    "extends": ["eslint:recommended", "plugin:react/recommended", "plugin:react-hooks/recommended"],
+    "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended", "plugin:react/recommended", "plugin:react-hooks/recommended"],
     "overrides": [],
+    "parser": "@typescript-eslint/parser",
     "parserOptions": {
         "ecmaVersion": "latest",
         "sourceType": "module",
@@ -12,7 +13,8 @@
             "jsx": true
         }
     },
-    "plugins": ["react"],
+    "root": true,
+    "plugins": ["@typescript-eslint", "react"],
     "rules": {
         "indent": ["error", 4, { "SwitchCase": 1 }],
         "quotes": ["error", "double"],
@@ -27,7 +29,8 @@
         "react/jsx-pascal-case": "error",
         "react/jsx-props-no-multi-spaces": "error",
         "react/self-closing-comp": "warn",
-        "react/void-dom-elements-no-children": "error"
+        "react/void-dom-elements-no-children": "error",
+        "array-callback-return": "error"
     },
     "settings": {
         "react": { "version": "detect" }
