@@ -21,3 +21,9 @@ yarn-error.log
 
 /public/dsfr/
 .history
+
+### Cypress
+/cypress/screenshots
+/cypress/videos
+/cypress/downloads
+###
