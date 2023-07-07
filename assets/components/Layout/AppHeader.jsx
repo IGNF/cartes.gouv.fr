@@ -30,7 +30,7 @@ const AppHeader = ({ navItems = [] }) => {
         text: "Catalogue",
     });
 
-    if (user == null) {
+    if (user === null) {
         // utilisateur n'est pas connecté
         quickAccessItems.push({
             iconId: "fr-icon-account-line",

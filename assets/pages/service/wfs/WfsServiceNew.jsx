@@ -119,7 +119,6 @@ const WfsServiceNew = ({ datastoreId, storedDataId }) => {
                 <Alert
                     closable
                     description={Translator.trans("stored_data_does_not_exists", { stored_data: storedDataId })}
-                    onClose={function noRefCheck() {}}
                     severity="error"
                     title={Translator.trans("commons.error")}
                 />

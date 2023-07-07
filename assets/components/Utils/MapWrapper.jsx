@@ -66,7 +66,7 @@ const MapWrapper = (props) => {
         return () => initialMap.setTarget(undefined);
     }, []);
 
-    return <div ref={mapElement} className={props.className} id={props.id}></div>;
+    return <div ref={mapElement} className={props.className} id={props.id} />;
 };
 
 MapWrapper.propTypes = {

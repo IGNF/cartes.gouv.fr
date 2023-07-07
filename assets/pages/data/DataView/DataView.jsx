@@ -75,7 +75,6 @@ const DataView = ({ datastoreId, dataName }) => {
                             { label: "Jeux de données", isDefault: true, content: <DataListTab datastoreId={datastoreId} dataName={dataName} /> },
                             { label: "Services", content: <p>...liste de services...</p> },
                         ]}
-                        onTabChange={function noRefCheck() {}}
                     />
                 </div>
             </div>

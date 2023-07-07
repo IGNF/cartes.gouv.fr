@@ -4,6 +4,7 @@ import ErrorBoundary from "./components/Utils/ErrorBoundary";
 import { UserContextProvider } from "./contexts/UserContext";
 import RouterRenderer from "./router/RouterRenderer";
 import { RouteProvider } from "./router/router";
+import { FC } from "react";
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -13,7 +14,7 @@ const queryClient = new QueryClient({
     },
 });
 
-const App = (): JSX.Element => {
+const App: FC = () => {
     return (
         <QueryClientProvider client={queryClient}>
             <ReactQueryDevtools initialIsOpen={false} />
