@@ -36,7 +36,7 @@ class LogoutSubscriber implements EventSubscriberInterface
 
         $homeUrl = $this->urlGenerator->generate('cartesgouvfr_app', [], UrlGeneratorInterface::ABSOLUTE_URL);
         $response = new RedirectResponse($keycloak->getLogoutUrl([
-            'redirect_uri' => $homeUrl,
+            'post_logout_redirect_uri' => $homeUrl,
         ]));
         $event->setResponse($response);
     }
