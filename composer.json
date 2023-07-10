@@ -10,7 +10,7 @@
         "friendsofsymfony/jsrouting-bundle": "^3.2",
         "knpuniversity/oauth2-client-bundle": "^2.14",
         "phpdocumentor/reflection-docblock": "^5.3",
-        "stevenmaguire/oauth2-keycloak": "^4.0",
+        "stevenmaguire/oauth2-keycloak": "^5.0",
         "symfony/asset": "6.3.*",
         "symfony/console": "6.3.*",
         "symfony/doctrine-messenger": "6.3.*",
