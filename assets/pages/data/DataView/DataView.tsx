@@ -4,26 +4,28 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
 import PropTypes from "prop-types";
-import React from "react";
 
 import AppLayout from "../../../components/Layout/AppLayout";
 import { datastoreNavItems } from "../../../config/datastoreNavItems";
 import { routes } from "../../../router/router";
-import DataListTab from "./DataListTab";
+import DatasetListTab from "./DatasetListTab/DatasetListTab";
 
 const DataView = ({ datastoreId, dataName }) => {
     const navItems = datastoreNavItems(datastoreId);
 
     return (
         <AppLayout navItems={navItems}>
-            <div className={fr.cx("fr-grid-row", "fr-mb-4w")}>
-                <div className={fr.cx("fr-col")}>
-                    <Button iconId="fr-icon-arrow-left-s-line" priority="tertiary no outline" linkProps={routes.datastore_data_list({ datastoreId }).link} />
-                    {dataName}
-                    <Badge noIcon={true} severity="info">
-                        Non Publié
-                    </Badge>
-                </div>
+            <div className={fr.cx("fr-grid-row", "fr-grid-row--left", "fr-grid-row--middle", "fr-mb-4w")}>
+                <Button
+                    iconId="fr-icon-arrow-left-s-line"
+                    priority="tertiary no outline"
+                    linkProps={routes.datastore_data_list({ datastoreId }).link}
+                    title="Retour à la liste de mes données"
+                />
+                {dataName}&nbsp;
+                <Badge noIcon={true} severity="info">
+                    Non Publié
+                </Badge>
             </div>
 
             <div className={fr.cx("fr-grid-row", "fr-mb-4w")}>
@@ -72,7 +74,7 @@ const DataView = ({ datastoreId, dataName }) => {
                     <Tabs
                         tabs={[
                             { label: "Métadonnées", content: <p>...liste de métadonnées...</p> },
-                            { label: "Jeux de données", isDefault: true, content: <DataListTab datastoreId={datastoreId} dataName={dataName} /> },
+                            { label: "Jeux de données", isDefault: true, content: <DatasetListTab datastoreId={datastoreId} dataName={dataName} /> },
                             { label: "Services", content: <p>...liste de services...</p> },
                         ]}
                     />
