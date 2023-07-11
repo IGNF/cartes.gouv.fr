@@ -71,7 +71,7 @@ const DatastoreDataList: FC<DatastoreDataListType> = ({ datastoreId }) => {
                 staleTime: 60000,
             },
             {
-                queryKey: [reactQueryKeys.datastore_dataList(datastoreId)],
+                queryKey: [reactQueryKeys.datastore_dataList_detailed(datastoreId)],
                 queryFn: () => api.data.getList(datastoreId, true, { signal: abortController?.signal }),
                 refetchInterval: 10000,
             },
@@ -82,7 +82,7 @@ const DatastoreDataList: FC<DatastoreDataListType> = ({ datastoreId }) => {
 
     useEffect(() => {
         return () => {
-            queryClient.cancelQueries({ queryKey: [reactQueryKeys.datastore(datastoreId), reactQueryKeys.datastore_dataList(datastoreId)] });
+            queryClient.cancelQueries({ queryKey: [reactQueryKeys.datastore(datastoreId), reactQueryKeys.datastore_dataList_detailed(datastoreId)] });
         };
     }, [datastoreId, queryClient]);
 
@@ -111,7 +111,7 @@ const DatastoreDataList: FC<DatastoreDataListType> = ({ datastoreId }) => {
                     />
 
                     {!dataListQuery.isLoading &&
-                        dataListQuery?.data.map((data: Data) => <DataListItem key={data?._id} datastoreId={datastoreId} data={data} />)}
+                        dataListQuery?.data.map((data: Data) => <DataListItem key={data?.data_name} datastoreId={datastoreId} data={data} />)}
                 </>
             )}
         </AppLayout>
