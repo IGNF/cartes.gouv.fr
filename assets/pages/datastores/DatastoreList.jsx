@@ -1,9 +1,9 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { Tile } from "@codegouvfr/react-dsfr/Tile";
+import { useQuery } from "@tanstack/react-query";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { useQuery } from "@tanstack/react-query";
 import api from "../../api";
 import AppLayout from "../../components/Layout/AppLayout";
 import BtnBackToHome from "../../components/Utils/BtnBackToHome";
@@ -19,7 +19,7 @@ const DatastoreTile = ({ datastore }) => {
                 title={datastore.name}
                 grey
                 imageUrl="//www.gouvernement.fr/sites/default/files/static_assets/placeholder.1x1.png"
-                linkProps={routes.datastore_dashboard({ datastoreId: datastore._id }).link}
+                linkProps={routes.datastore_data_list({ datastoreId: datastore._id }).link}
             />
         </div>
     );
