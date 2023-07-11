@@ -1,6 +1,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
+import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { Tag } from "@codegouvfr/react-dsfr/Tag";
 import { useQueries, useQueryClient } from "@tanstack/react-query";
 import { FC, useEffect } from "react";
@@ -15,9 +16,10 @@ import reactQueryKeys from "../../modules/reactQueryKeys";
 import { routes } from "../../router/router";
 
 type Data = {
-    data_name?: string;
-    name: string;
+    _id: string;
+    data_name: string;
     date?: string;
+    categories: string[];
 };
 
 type DataListItemProps = {
@@ -29,17 +31,19 @@ const DataListItem: FC<DataListItemProps> = ({ datastoreId, data }) => {
     return (
         <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-grid-row--center", "fr-my-1w", "fr-p-2v", "fr-card--grey")}>
             <div className={fr.cx("fr-col")}>
-                <Button linkProps={routes.datastore_data_view({ datastoreId, dataName: data?.name }).link} priority="tertiary no outline">
+                <Button linkProps={routes.datastore_data_view({ datastoreId, dataName: data.data_name }).link} priority="tertiary no outline">
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
                         <img src="//www.gouvernement.fr/sites/default/files/static_assets/placeholder.1x1.png" width={"64px"} className={fr.cx("fr-mr-1v")} />
-                        <strong>{data?.data_name || data?.name}</strong>
-                        &nbsp;
-                        <Tag dismissible={false}>Tag 1</Tag>
-                        <Tag dismissible={false}>Tag 2</Tag>
+                        <strong className={fr.cx("fr-ml-2w")}>{data.data_name}</strong>
+                        {data.categories?.map((category, i) => (
+                            <Tag key={i} dismissible={false} className={fr.cx("fr-ml-2w")} small={true} pressed={false}>
+                                {category}
+                            </Tag>
+                        ))}
                     </div>
                 </Button>
             </div>
-            <div className={fr.cx("fr-col-2")}>{data?.date || functions.date.format(new Date().toISOString())}</div>
+            <div className={fr.cx("fr-col-2")}>{data?.date ? functions.date.format(data.date) : ""}</div>
             <div className={fr.cx("fr-col-2")}>
                 <Badge noIcon={true} severity="info">
                     Non Publié
@@ -68,7 +72,7 @@ const DatastoreDataList: FC<DatastoreDataListType> = ({ datastoreId }) => {
             },
             {
                 queryKey: [reactQueryKeys.datastore_dataList(datastoreId)],
-                queryFn: () => api.data.getList(datastoreId, { signal: abortController?.signal }),
+                queryFn: () => api.data.getList(datastoreId, true, { signal: abortController?.signal }),
                 refetchInterval: 10000,
             },
         ],
@@ -90,15 +94,30 @@ const DatastoreDataList: FC<DatastoreDataListType> = ({ datastoreId }) => {
                 <>
                     <h1>Données {datastoreQuery?.data?.name || datastoreId}</h1>
 
-                    <Button linkProps={routes.datastore_data_new({ datastoreId }).link} className={fr.cx("fr-mr-2v")} iconId={"fr-icon-add-line"}>
-                        Créer une fiche de données
-                    </Button>
+                    <ButtonsGroup
+                        buttons={[
+                            {
+                                linkProps: routes.datastore_data_new({ datastoreId }).link,
+                                iconId: "fr-icon-add-line",
+                                children: "Créer une fiche de données",
+                            },
+                            {
+                                linkProps: routes.datastore_list().link,
+                                children: "Retour à la liste de mes espaces de travail",
+                            },
+                        ]}
+                        alignment="left"
+                        inlineLayoutWhen="always"
+                    />
 
-                    {!dataListQuery.isLoading && dataListQuery?.data.map((data) => <DataListItem key={data?._id} datastoreId={datastoreId} data={data} />)}
+                    {!dataListQuery.isLoading &&
+                        dataListQuery?.data.map((data: Data) => <DataListItem key={data?._id} datastoreId={datastoreId} data={data} />)}
                 </>
             )}
         </AppLayout>
     );
 };
+
+DatastoreDataList.displayName = symToStr({ DatastoreDataList });
 
 export default DatastoreDataList;

@@ -18,6 +18,20 @@ class UploadApiService extends AbstractEntrepotApiService
         return $this->requestAll("datastores/$datastoreId/uploads", $query);
     }
 
+    /**
+     * @param mixed[] $query
+     */
+    public function getAllDetailed(string $datastoreId, array $query = []): array
+    {
+        $uploads = $this->getAll($datastoreId, $query);
+
+        foreach ($uploads as &$upload) {
+            $upload = $this->get($datastoreId, $upload['_id']);
+        }
+
+        return $uploads;
+    }
+
     public function get(string $datastoreId, string $uploadId): array
     {
         return $this->request('GET', "datastores/$datastoreId/uploads/$uploadId");

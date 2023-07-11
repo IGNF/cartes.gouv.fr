@@ -6,83 +6,83 @@ use App\Constants\EntrepotApi\StoredDataTags;
 use App\Services\EntrepotApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route(
     '/api/datastores/{datastoreId}/data',
     name: 'cartesgouvfr_api_data_',
     options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()'
+    // condition: 'request.isXmlHttpRequest()'
 )]
 class DataController extends AbstractController
 {
     public function __construct(
-        /* private EntrepotApiService $entrepotApiService */
+        private EntrepotApiService $entrepotApiService
     ) {
     }
 
     #[Route('', name: 'get_list')]
-    public function getDataList(/* string $datastoreId */): JsonResponse
-    {
-        // TODO : non fonctionnel pour le moment, l'API ignore les query params
-        // $dataList = $this->entrepotApiService->storedData->getAll($datastoreId, [
-        //     'sort' => 'date:desc',
-        //     'tags' => [StoredDataTags::DATA_NAME],
-        // ]);
+    public function getDataList(
+        string $datastoreId,
+        #[MapQueryParameter] bool $detailed = false
+    ): JsonResponse {
+        $uploads = $this->entrepotApiService->upload->getAllDetailed($datastoreId, [
+            'sort' => 'date:desc',
+        ]);
 
-        $dataList = $this->fakeDataList();
+        $uploadDataNames = array_map(function ($upload) {
+            if (isset($upload['tags'][StoredDataTags::DATA_NAME])) {
+                return $upload['tags'][StoredDataTags::DATA_NAME];
+            }
+        }, $uploads);
 
-        return $this->json($dataList);
+        $storedDataList = $this->entrepotApiService->storedData->getAllDetailed($datastoreId, [
+            'sort' => 'date:desc',
+        ]);
+
+        $storedDataDataNames = array_map(function ($storedData) {
+            if (isset($storedData['tags'][StoredDataTags::DATA_NAME])) {
+                return $storedData['tags'][StoredDataTags::DATA_NAME];
+            }
+        }, $storedDataList);
+
+        $uniqueDataNames = array_unique(array_merge($uploadDataNames, $storedDataDataNames));
+        $uniqueDataNames = array_filter($uniqueDataNames);
+        $uniqueDataNames = array_values($uniqueDataNames);
+
+        if ($detailed) {
+            $dataList = [];
+
+            foreach ($uniqueDataNames as $dataName) {
+                $dataList[] = json_decode($this->get($datastoreId, $dataName)->getContent(), true);
+            }
+
+            return $this->json($dataList);
+        }
+
+        return $this->json($uniqueDataNames);
     }
 
-    /**
-     * @return mixed[]
-     */
-    private function fakeDataList(): array
+    #[Route('/{dataName}', name: 'get')]
+    public function get(string $datastoreId, string $dataName): JsonResponse
     {
-        $str = '[
-            {
-                "name": "TOUTES_MAILLES_BV_ETENDUES_gpkg_04-07-2023",
-                "type": "VECTOR-DB",
-                "visibility": "PRIVATE",
-                "srs": "EPSG:2154",
-                "_id": "e82d5499-c0c5-4930-a703-f11d9cc7cd7e",
-                "data_name": "Donnée 1"
-            },
-            {
-                "name": "TOUTES_MAILLES_BV_ETENDUES_gpkg_03-07-2023",
-                "type": "VECTOR-DB",
-                "visibility": "PRIVATE",
-                "srs": "EPSG:2154",
-                "_id": "adffa569-2096-4ae8-a2ac-2342adfdf90d",
-                "data_name": "Donnée 2"
-            },
-            {
-                "name": "TOUTES_MAILLES_BV_ETENDUES_gpkg_03-07-2023",
-                "type": "VECTOR-DB",
-                "visibility": "PRIVATE",
-                "srs": "EPSG:2154",
-                "_id": "e0489e61-b502-4826-8e96-9d0cc48916ce",
-                "data_name": "Donnée 3"
-            },
-            {
-                "name": "hydro-ardennes-l93_gpkg_04-07-2023",
-                "type": "VECTOR-DB",
-                "visibility": "PRIVATE",
-                "srs": "EPSG:2154",
-                "_id": "133725bb-9a0f-4979-afca-b981fbf31fac",
-                "data_name": "Donnée 4"
-            },
-            {
-                "name": "TOUTES_MAILLES_BV_ETENDUES_gpkg_04-07-2023",
-                "type": "VECTOR-DB",
-                "visibility": "PRIVATE",
-                "srs": "EPSG:2154",
-                "_id": "235152f5-a100-46e5-958f-0b1b952a05d7",
-                "data_name": "Donnée 5"
-            }
-        ]';
+        return $this->json([
+            StoredDataTags::DATA_NAME => $dataName,
+            'date' => new \DateTime(),
+            'categories' => $this->getRandomCategories(), // TODO : temporaire
+        ]);
+    }
 
-        return json_decode($str, true);
+    private function getRandomCategories(): array
+    {
+        $categories = [];
+        $n = random_int(1, 3);
+
+        for ($i = 1; $i <= $n; ++$i) {
+            $categories[] = "Catégorie {$i}";
+        }
+
+        return $categories;
     }
 }
