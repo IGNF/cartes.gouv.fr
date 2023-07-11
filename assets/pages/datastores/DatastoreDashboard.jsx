@@ -1,12 +1,10 @@
-import { fr } from "@codegouvfr/react-dsfr";
-import Button from "@codegouvfr/react-dsfr/Button";
+import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { useQuery } from "@tanstack/react-query";
 import PropTypes from "prop-types";
 import React from "react";
 
 import api from "../../api";
 import AppLayout from "../../components/Layout/AppLayout";
-import BtnBackToDatastoreList from "../../components/Utils/BtnBackToDatastoreList";
 import LoadingText from "../../components/Utils/LoadingText";
 import { datastoreNavItems } from "../../config/datastoreNavItems";
 import reactQueryKeys from "../../modules/reactQueryKeys";
@@ -27,11 +25,21 @@ const DatastoreDashboard = ({ datastoreId }) => {
                 <>
                     <h1>Espace de travail {datastoreQuery?.data?.name || datastoreId}</h1>
 
-                    <Button linkProps={routes.datastore_data_new({ datastoreId }).link} className={fr.cx("fr-mr-2v")}>
-                        Ajouter une fiche de données
-                    </Button>
-
-                    <BtnBackToDatastoreList />
+                    <ButtonsGroup
+                        buttons={[
+                            {
+                                linkProps: routes.datastore_data_new({ datastoreId }).link,
+                                iconId: "fr-icon-add-line",
+                                children: "Créer une fiche de données",
+                            },
+                            {
+                                linkProps: routes.datastore_list().link,
+                                children: "Retour à la liste de mes espaces de travail",
+                            },
+                        ]}
+                        alignment="left"
+                        inlineLayoutWhen="always"
+                    />
                 </>
             )}
         </AppLayout>
