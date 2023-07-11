@@ -4,11 +4,13 @@ import { Input } from "@codegouvfr/react-dsfr/Input";
 import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
 import { Select } from "@codegouvfr/react-dsfr/Select";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format as datefnsFormat } from "date-fns";
 import PropTypes from "prop-types";
 import React, { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
+import * as yup from "yup";
 
 import api from "../../../api";
 import AppLayout from "../../../components/Layout/AppLayout";
@@ -18,7 +20,7 @@ import Wait from "../../../components/Utils/Wait";
 import { defaultProjections } from "../../../config/projections";
 import functions from "../../../functions";
 import FileUploader from "../../../modules/FileUploader";
-import schemas from "../../../validation/schemas";
+import reactQueryKeys from "../../../modules/reactQueryKeys";
 import DataNewIntegration from "./DataNewIntegration";
 
 import "./../../../sass/components/spinner.scss";
@@ -30,6 +32,29 @@ const fileUploader = new FileUploader();
 
 const DataNewForm = ({ datastoreId }) => {
     let uuid = "";
+
+    const schema = yup
+        .object({
+            data_name: yup
+                .string()
+                .required("Le nom de la donnée est obligatoire")
+                .test({
+                    name: "is-unique",
+                    test(dataName, ctx) {
+                        const existingDataList = dataListQuery?.data;
+                        if (existingDataList?.includes(dataName)) {
+                            return ctx.createError({ message: `Une fiche de donnée existe déjà avec le nom "${dataName}"` });
+                        }
+
+                        return true;
+                    },
+                }),
+            data_technical_name: yup.string().required("Le nom technique de la donnée est obligatoire"),
+            data_srid: yup.string().required("La projection (srid) est obligatoire"),
+            data_type: yup.string().required("Le format de donnée est obligatoire"),
+            data_upload_path: yup.string(),
+        })
+        .required();
 
     // Progress
     const [showProgress, setShowProgress] = useState(false);
@@ -51,9 +76,14 @@ const DataNewForm = ({ datastoreId }) => {
     const {
         register,
         handleSubmit,
-        formState: { errors, isValid },
+        formState: { errors, isValid, isValidating },
         setValue: setFormValue,
-    } = useForm({ resolver: yupResolver(schemas.dataNewForm) });
+    } = useForm({ resolver: yupResolver(schema) });
+
+    const queryClient = useQueryClient();
+    const dataListQuery = useQuery([reactQueryKeys.datastore_dataList(datastoreId)], () => api.data.getList(datastoreId), {
+        refetchInterval: 20000,
+    });
 
     useEffect(() => {
         setProgressValue(0);
@@ -68,9 +98,15 @@ const DataNewForm = ({ datastoreId }) => {
         }
     }, [showDataInfos, setFormValue]);
 
-    const onSubmit = (formData) => {
-        console.log(errors);
-        console.log(formData);
+    useEffect(() => {
+        return () => {
+            queryClient.cancelQueries({ queryKey: [reactQueryKeys.datastore_dataList(datastoreId)] });
+        };
+    }, [datastoreId, queryClient]);
+
+    const onSubmit = async (formData) => {
+        console.debug("errors", errors);
+        console.debug("formData", formData);
 
         const dataFile = dataFileRef.current?.files?.[0];
 
@@ -78,7 +114,7 @@ const DataNewForm = ({ datastoreId }) => {
             setUploadCreationInProgress(true);
 
             api.upload.add(datastoreId, formData).then((response) => {
-                console.log(response);
+                console.debug(response);
                 setUploadCreatedSuccessfully(true);
                 setUploadId(response?._id);
             });
@@ -261,13 +297,21 @@ const DataNewForm = ({ datastoreId }) => {
             </Button>
             <BtnBackToDashboard datastoreId={datastoreId} className={fr.cx("fr-ml-2w")} />
 
+            {isValidating && (
+                <Wait show={true}>
+                    <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "icons-spin")} />
+                </Wait>
+            )}
+
             {uploadCreationInProgress && (
                 <Wait show={true}>
                     {uploadCreatedSuccessfully ? (
                         <DataNewIntegration datastoreId={datastoreId} uploadId={uploadId} />
                     ) : (
-                        <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "icons-spin")} />
-                        // TODO : afficher un message "création de la fiche de donnée / upload en cours" ??
+                        <>
+                            <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "icons-spin")} />
+                            <p>Création de la fiche en cours</p>
+                        </>
                     )}
                 </Wait>
             )}
