@@ -19,6 +19,20 @@ class StoredDataApiService extends AbstractEntrepotApiService
         return $this->requestAll("datastores/$datastoreId/stored_data", $query);
     }
 
+    /**
+     * @param mixed[] $query
+     */
+    public function getAllDetailed(string $datastoreId, array $query = []): array
+    {
+        $storedDataList = $this->getAll($datastoreId, $query);
+
+        foreach ($storedDataList as &$storedData) {
+            $storedData = $this->get($datastoreId, $storedData['_id']);
+        }
+
+        return $storedDataList;
+    }
+
     public function get(string $datastoreId, string $storedDataId): array
     {
         return $this->request('GET', "datastores/$datastoreId/stored_data/$storedDataId");
