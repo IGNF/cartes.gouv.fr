@@ -22,8 +22,8 @@ const DataView = ({ datastoreId, dataName }) => {
                     linkProps={routes.datastore_data_list({ datastoreId }).link}
                     title="Retour à la liste de mes données"
                 />
-                {dataName}&nbsp;
-                <Badge noIcon={true} severity="info">
+                {dataName}
+                <Badge noIcon={true} severity="info" className={fr.cx("fr-ml-2w")}>
                     Non Publié
                 </Badge>
             </div>

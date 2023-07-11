@@ -7,7 +7,7 @@ import { FC, useState } from "react";
 
 import { routes } from "../../../../router/router";
 
-type ServiceTypes = "tms" | "wfs" | "wms-vector" | "pre-paquet" | undefined;
+type ServiceTypes = "tms" | "wfs" | "wms-vector" | "pre-paquet";
 
 type VectorDbListProps = {
     datastoreId: string;
@@ -20,10 +20,15 @@ const serviceTypeChoiceModal = createModal({
 });
 
 const VectorDbList: FC<VectorDbListProps> = ({ datastoreId, vectorDbList }) => {
-    const [serviceType, setServiceType] = useState<ServiceTypes>(undefined);
-    const [selectedStoredDataId, setSelectedStoredDataId] = useState<string | undefined>(undefined);
+    const [serviceType, setServiceType] = useState<ServiceTypes>();
+    const [selectedStoredDataId, setSelectedStoredDataId] = useState<string>();
 
     const handleContinue = () => {
+        if (!selectedStoredDataId) {
+            console.warn("Aucune stored_data sélectionnée");
+            return;
+        }
+
         switch (serviceType) {
             case "wfs":
                 routes.datastore_wfs_service_new({ datastoreId, storedDataId: selectedStoredDataId }).push();
