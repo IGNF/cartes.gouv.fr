@@ -105,6 +105,7 @@ const VectorDbList: FC<VectorDbListProps> = ({ datastoreId, vectorDbList }) => {
                             nativeInputProps: {
                                 checked: serviceType === "tms",
                                 onChange: () => setServiceType("tms"),
+                                disabled: true, // TODO : temporaire
                             },
                         },
                         {
@@ -121,6 +122,7 @@ const VectorDbList: FC<VectorDbListProps> = ({ datastoreId, vectorDbList }) => {
                             nativeInputProps: {
                                 checked: serviceType === "wms-vector",
                                 onChange: () => setServiceType("wms-vector"),
+                                disabled: true, // TODO : temporaire
                             },
                         },
                         {
@@ -129,6 +131,7 @@ const VectorDbList: FC<VectorDbListProps> = ({ datastoreId, vectorDbList }) => {
                             nativeInputProps: {
                                 checked: serviceType === "pre-paquet",
                                 onChange: () => setServiceType("pre-paquet"),
+                                disabled: true, // TODO : temporaire
                             },
                         },
                     ]}
