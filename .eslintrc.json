@@ -54,5 +54,6 @@
     "globals": {
         "Routing": true,
         "Translator": true
-    }
+    },
+    "ignorePatterns": ["public/**", "data/**"]
 }

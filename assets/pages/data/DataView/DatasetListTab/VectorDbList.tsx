@@ -5,13 +5,15 @@ import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { FC, useState } from "react";
 
+import functions from "../../../../functions";
 import { routes } from "../../../../router/router";
+import { type VectorDb } from "../../../../types";
 
 type ServiceTypes = "tms" | "wfs" | "wms-vector" | "pre-paquet";
 
 type VectorDbListProps = {
     datastoreId: string;
-    vectorDbList: { _id: string; name: string; date: string }[];
+    vectorDbList: VectorDb[] | undefined;
 };
 
 const serviceTypeChoiceModal = createModal({
@@ -49,11 +51,16 @@ const VectorDbList: FC<VectorDbListProps> = ({ datastoreId, vectorDbList }) => {
                 </h5>
             </div>
 
-            {vectorDbList.map((el) => (
+            {vectorDbList?.map((el) => (
                 <div key={el._id} className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mt-2v")}>
-                    <div className={fr.cx("fr-col")}>{el.name}</div>
+                    <div className={fr.cx("fr-col")}>
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
+                            <Button iconId="ri-add-box-fill" title="Voir les données liées" className={fr.cx("fr-mr-2v")} />
+                            {el.name}
+                        </div>
+                    </div>
                     <div className={fr.cx("fr-col-2")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--right")}>{el.date}</div>
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--right")}>{functions.date.format(el.last_event.date)}</div>
                     </div>
 
                     <div className={fr.cx("fr-col-3")}>
