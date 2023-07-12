@@ -13,7 +13,7 @@ use Symfony\Component\Routing\Annotation\Route;
     '/api/datastores/{datastoreId}/data',
     name: 'cartesgouvfr_api_data_',
     options: ['expose' => true],
-    // condition: 'request.isXmlHttpRequest()'
+    condition: 'request.isXmlHttpRequest()'
 )]
 class DataController extends AbstractController
 {
@@ -67,10 +67,17 @@ class DataController extends AbstractController
     #[Route('/{dataName}', name: 'get')]
     public function get(string $datastoreId, string $dataName): JsonResponse
     {
+        $vectorDbList = $this->entrepotApiService->storedData->getAllDetailed($datastoreId, [
+            'tags' => [
+                StoredDataTags::DATA_NAME => $dataName,
+            ],
+        ]);
+
         return $this->json([
             StoredDataTags::DATA_NAME => $dataName,
             'date' => new \DateTime(),
             'categories' => $this->getRandomCategories(), // TODO : temporaire
+            'vector_db_list' => $vectorDbList,
         ]);
     }
 

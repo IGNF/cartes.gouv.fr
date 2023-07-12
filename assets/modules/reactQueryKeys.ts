@@ -1,8 +1,9 @@
 const reactQueryKeys = {
     datastore_list: "datastore_list",
-    datastore: (id: string): string => `datastore_${id}`,
-    datastore_dataList: (id: string): string => `datastore_${id}_datalist`,
-    datastore_dataList_detailed: (id: string): string => `datastore_${id}_datalist_detailed`,
+    datastore: (datastoreId: string): string => `datastore_${datastoreId}`,
+    datastore_dataList: (datastoreId: string): string => `datastore_${datastoreId}_datalist`,
+    datastore_dataList_detailed: (datastoreId: string): string => `datastore_${datastoreId}_datalist_detailed`,
+    datastore_data: (datastoreId: string, dataName: string): string => `datastore_${datastoreId}_data_${dataName}`,
 };
 
 export default reactQueryKeys;
