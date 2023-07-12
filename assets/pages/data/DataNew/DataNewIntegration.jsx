@@ -1,70 +1,54 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import { useQuery } from "@tanstack/react-query";
 import PropTypes from "prop-types";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import api from "../../../api";
 import { routes } from "../../../router/router";
 
+import reactQueryKeys from "../../../modules/reactQueryKeys";
 import "./../../../sass/components/spinner.scss";
 
-const DataNewIntegration = ({ datastoreId, uploadId }) => {
+const DataNewIntegration = ({ datastoreId, uploadId, dataName }) => {
     const [integrationProgress, setIntegrationProgress] = useState({});
     const [integrationCurrentStep, setIntegrationCurrentStep] = useState(null);
 
-    const abortController = useRef(new AbortController());
+    // fetch integration progress
+    const abortController = new AbortController();
+    const [shouldFetchIntProg, setShouldFetchIntProg] = useState(true);
+    const integrationQuery = useQuery({
+        queryKey: [reactQueryKeys.datastore_upload_integration(datastoreId, uploadId)],
+        queryFn: () => api.upload.integrationProgressPing(datastoreId, uploadId, { signal: abortController?.signal }),
+        refetchInterval: 3000,
+        refetchIntervalInBackground: true,
+        enabled: shouldFetchIntProg,
+    });
 
-    const refreshInterval = useRef();
-    const requestInProgress = useRef(false);
-
-    const refresh = useCallback(() => {
-        if (requestInProgress.current === true) {
-            console.debug("skipping, request already in progress");
-            return;
-        }
-
-        requestInProgress.current = true;
-        const signal = abortController.current.signal;
-        api.upload
-            .integrationProgressPing(datastoreId, uploadId, { signal })
-            .then((response) => {
-                setIntegrationProgress(JSON.parse(response?.integration_progress));
-                setIntegrationCurrentStep(parseInt(response?.integration_current_step));
-            })
-            .catch((error) => {
-                console.error(error);
-            })
-            .finally(() => {
-                requestInProgress.current = false;
-            });
-    }, [datastoreId, uploadId]);
-
+    // mise à jour de integrationProgress et integrationCurrentStep à chaque refetch de integrationQuery
     useEffect(() => {
-        refreshInterval.current = setInterval(refresh, 5000);
-
-        return () => {
-            if (refreshInterval.current) {
-                clearInterval(refreshInterval.current);
-            }
-            // abortController?.current?.abort();
-        };
-    }, [refresh]);
+        const response = integrationQuery?.data;
+        if (response) {
+            setIntegrationProgress(JSON.parse(response?.integration_progress));
+            setIntegrationCurrentStep(parseInt(response?.integration_current_step));
+        }
+    }, [integrationQuery?.data]);
 
     useEffect(() => {
         // stopper si une étape a échoué
         if (Object.values(integrationProgress).includes("failed")) {
             console.debug("stopping, one step failed");
-            clearInterval(refreshInterval.current);
+            setShouldFetchIntProg(false);
             return;
         }
 
         // stopper si toutes les étapes ont terminé
         if (Object.keys(integrationProgress).length === integrationCurrentStep) {
             console.debug("stopping, all steps completed successfully");
-            clearInterval(refreshInterval.current);
+            setShouldFetchIntProg(false);
 
-            routes.datastore_data_view({ datastoreId, dataName: "TODOTODOTODO" }).push();
+            routes.datastore_data_view({ datastoreId, dataName }).push();
         }
-    }, [integrationProgress, integrationCurrentStep, datastoreId]);
+    }, [integrationProgress, integrationCurrentStep, datastoreId, dataName]);
 
     const getStepIcon = (status) => {
         let iconClass = fr.cx("fr-icon-time-line");
@@ -115,6 +99,7 @@ const DataNewIntegration = ({ datastoreId, uploadId }) => {
 DataNewIntegration.propTypes = {
     datastoreId: PropTypes.string,
     uploadId: PropTypes.string,
+    dataName: PropTypes.string,
 };
 
 export default DataNewIntegration;
