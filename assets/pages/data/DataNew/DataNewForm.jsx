@@ -73,16 +73,20 @@ const DataNewForm = ({ datastoreId }) => {
     const [uploadCreatedSuccessfully, setUploadCreatedSuccessfully] = useState(false);
     const [uploadId, setUploadId] = useState(null);
 
+    const [shouldFetchDataList, setShouldFetchDataList] = useState(true);
+
     const {
         register,
         handleSubmit,
         formState: { errors, isValid, isValidating },
         setValue: setFormValue,
+        getValues: getFormValues,
     } = useForm({ resolver: yupResolver(schema) });
 
     const queryClient = useQueryClient();
     const dataListQuery = useQuery([reactQueryKeys.datastore_dataList(datastoreId)], () => api.data.getList(datastoreId), {
         refetchInterval: 20000,
+        enabled: shouldFetchDataList,
     });
 
     useEffect(() => {
@@ -117,6 +121,7 @@ const DataNewForm = ({ datastoreId }) => {
                 console.debug(response);
                 setUploadCreatedSuccessfully(true);
                 setUploadId(response?._id);
+                setShouldFetchDataList(false);
             });
         }
     };
@@ -306,7 +311,7 @@ const DataNewForm = ({ datastoreId }) => {
             {uploadCreationInProgress && (
                 <Wait show={true}>
                     {uploadCreatedSuccessfully ? (
-                        <DataNewIntegration datastoreId={datastoreId} uploadId={uploadId} />
+                        <DataNewIntegration datastoreId={datastoreId} uploadId={uploadId} dataName={getFormValues().data_name} />
                     ) : (
                         <>
                             <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "icons-spin")} />
