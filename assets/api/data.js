@@ -3,12 +3,11 @@ import { jsonFetch } from "../modules/jsonFetch";
 /**
  *
  * @param {string} datastoreId
- * @param {boolean} detailed
  * @param {RequestInit} otherOptions
  * @returns
  */
-const getList = (datastoreId, detailed = false, otherOptions = {}) => {
-    const url = Routing.generate("cartesgouvfr_api_data_get_list", { datastoreId, detailed });
+const getList = (datastoreId, otherOptions = {}) => {
+    const url = Routing.generate("cartesgouvfr_api_data_get_list", { datastoreId });
     return jsonFetch(url, {
         ...otherOptions,
     });

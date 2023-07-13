@@ -2,6 +2,10 @@ export type Data = {
     data_name: string;
     date: string;
     categories: string[];
+    nb_publications: number;
+};
+
+export type DataDetailed = Data & {
     vector_db_list: VectorDb[] | undefined;
 };
 
