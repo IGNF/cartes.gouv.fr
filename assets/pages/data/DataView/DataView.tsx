@@ -12,7 +12,7 @@ import LoadingText from "../../../components/Utils/LoadingText";
 import { datastoreNavItems } from "../../../config/datastoreNavItems";
 import reactQueryKeys from "../../../modules/reactQueryKeys";
 import { routes } from "../../../router/router";
-import { type Data } from "../../../types";
+import { type DataDetailed } from "../../../types";
 import DatasetListTab from "./DatasetListTab/DatasetListTab";
 
 type DataViewProps = {
@@ -24,7 +24,7 @@ const DataView: FC<DataViewProps> = ({ datastoreId, dataName }) => {
 
     const queryClient = useQueryClient();
 
-    const dataQuery = useQuery<Data>([reactQueryKeys.datastore_data(datastoreId, dataName)], () => api.data.get(datastoreId, dataName), {
+    const dataQuery = useQuery<DataDetailed>([reactQueryKeys.datastore_data(datastoreId, dataName)], () => api.data.get(datastoreId, dataName), {
         refetchInterval: 20000,
     });
 
@@ -49,7 +49,7 @@ const DataView: FC<DataViewProps> = ({ datastoreId, dataName }) => {
                         />
                         {dataName}
                         <Badge noIcon={true} severity="info" className={fr.cx("fr-ml-2w")}>
-                            Non Publié
+                            {dataQuery?.data?.nb_publications && dataQuery?.data?.nb_publications > 0 ? "Publié" : "Non Publié"}
                         </Badge>
                     </div>
 
@@ -59,10 +59,10 @@ const DataView: FC<DataViewProps> = ({ datastoreId, dataName }) => {
                         </div>
                         <div className={fr.cx("fr-col")}>
                             <p>
-                                <strong>Création de la fiche de données :</strong>13 Mar. 2023
+                                <strong>Création de la fiche de données : </strong>13 Mar. 2023
                             </p>
                             <p>
-                                <strong>Mise à jour :</strong>17 Mar. 2023
+                                <strong>Mise à jour : </strong>17 Mar. 2023
                             </p>
                         </div>
                         <div className={fr.cx("fr-col-3")}>
@@ -90,13 +90,13 @@ const DataView: FC<DataViewProps> = ({ datastoreId, dataName }) => {
                         <div className={fr.cx("fr-col")}>
                             <Tabs
                                 tabs={[
-                                    { label: "Métadonnées", content: <p>...liste de métadonnées...</p> },
+                                    { label: "Métadonnées (0)", content: <p>...liste de métadonnées...</p> },
                                     {
-                                        label: "Jeux de données",
+                                        label: `Jeux de données (${dataQuery?.data?.vector_db_list?.length})`,
                                         isDefault: true,
                                         content: <DatasetListTab datastoreId={datastoreId} data={dataQuery?.data} />,
                                     },
-                                    { label: "Services", content: <p>...liste de services...</p> },
+                                    { label: "Services (0)", content: <p>...liste de services...</p> },
                                 ]}
                             />
                         </div>

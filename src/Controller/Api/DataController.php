@@ -2,19 +2,19 @@
 
 namespace App\Controller\Api;
 
+use App\Constants\EntrepotApi\ConfigurationStatuses;
 use App\Constants\EntrepotApi\StoredDataTags;
 use App\Constants\EntrepotApi\StoredDataTypes;
 use App\Services\EntrepotApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route(
     '/api/datastores/{datastoreId}/data',
     name: 'cartesgouvfr_api_data_',
     options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()'
+    // condition: 'request.isXmlHttpRequest()'
 )]
 class DataController extends AbstractController
 {
@@ -26,7 +26,6 @@ class DataController extends AbstractController
     #[Route('', name: 'get_list')]
     public function getDataList(
         string $datastoreId,
-        #[MapQueryParameter] bool $detailed = false
     ): JsonResponse {
         $uploads = $this->entrepotApiService->upload->getAllDetailed($datastoreId, [
             'sort' => 'date:desc',
@@ -52,21 +51,17 @@ class DataController extends AbstractController
         $uniqueDataNames = array_filter($uniqueDataNames);
         $uniqueDataNames = array_values($uniqueDataNames);
 
-        if ($detailed) {
-            $dataList = [];
+        $dataList = [];
 
-            foreach ($uniqueDataNames as $dataName) {
-                $dataList[] = json_decode($this->get($datastoreId, $dataName)->getContent(), true);
-            }
-
-            return $this->json($dataList);
+        foreach ($uniqueDataNames as $dataName) {
+            $dataList[] = $this->getBasicInfo($datastoreId, $dataName);
         }
 
-        return $this->json($uniqueDataNames);
+        return $this->json($dataList);
     }
 
     #[Route('/{dataName}', name: 'get')]
-    public function get(string $datastoreId, string $dataName): JsonResponse
+    public function getDetailed(string $datastoreId, string $dataName): JsonResponse
     {
         $vectorDbList = $this->entrepotApiService->storedData->getAllDetailed($datastoreId, [
             'type' => StoredDataTypes::VECTOR_DB,
@@ -75,14 +70,39 @@ class DataController extends AbstractController
             ],
         ]);
 
-        // configurations et offerings
+        // TODO : pyramid vector
+
+        // TODO configurations et offerings
+
+        $data = $this->getBasicInfo($datastoreId, $dataName);
 
         return $this->json([
+            ...$data,
+            'vector_db_list' => $vectorDbList,
+        ]);
+    }
+
+    private function getBasicInfo(string $datastoreId, string $dataName): array
+    {
+        $nbPublications = 0;
+        $configurations = $this->entrepotApiService->configuration->getAll($datastoreId, [
+            'tags' => [
+                StoredDataTags::DATA_NAME => $dataName,
+            ],
+        ]);
+
+        foreach ($configurations as $configuration) {
+            if (isset($configuration['status']) && ConfigurationStatuses::PUBLISHED === $configuration['status']) {
+                ++$nbPublications;
+            }
+        }
+
+        return [
             StoredDataTags::DATA_NAME => $dataName,
             'date' => new \DateTime(),
             'categories' => $this->getRandomCategories(), // TODO : temporaire
-            'vector_db_list' => $vectorDbList,
-        ]);
+            'nb_publications' => $nbPublications,
+        ];
     }
 
     private function getRandomCategories(): array

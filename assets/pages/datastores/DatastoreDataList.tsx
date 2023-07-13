@@ -14,13 +14,7 @@ import { datastoreNavItems } from "../../config/datastoreNavItems";
 import functions from "../../functions";
 import reactQueryKeys from "../../modules/reactQueryKeys";
 import { routes } from "../../router/router";
-
-type Data = {
-    _id: string;
-    data_name: string;
-    date?: string;
-    categories: string[];
-};
+import { type Data } from "../../types";
 
 type DataListItemProps = {
     datastoreId: string;
@@ -46,7 +40,7 @@ const DataListItem: FC<DataListItemProps> = ({ datastoreId, data }) => {
             <div className={fr.cx("fr-col-2")}>{data?.date ? functions.date.format(data.date) : ""}</div>
             <div className={fr.cx("fr-col-2")}>
                 <Badge noIcon={true} severity="info">
-                    Non Publié
+                    {data?.nb_publications > 0 ? `Publié (${data?.nb_publications})` : "Non Publié"}
                 </Badge>
             </div>
         </div>
@@ -72,7 +66,7 @@ const DatastoreDataList: FC<DatastoreDataListType> = ({ datastoreId }) => {
             },
             {
                 queryKey: [reactQueryKeys.datastore_dataList_detailed(datastoreId)],
-                queryFn: () => api.data.getList(datastoreId, true, { signal: abortController?.signal }),
+                queryFn: () => api.data.getList(datastoreId, { signal: abortController?.signal }),
                 refetchInterval: 10000,
             },
         ],

@@ -2,12 +2,12 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { FC } from "react";
 
-import { type Data } from "../../../../types";
+import { type DataDetailed } from "../../../../types";
 import VectorDbList from "./VectorDbList";
 
 type DataListTabProps = {
     datastoreId: string;
-    data?: Data;
+    data?: DataDetailed;
 };
 
 const DatasetListTab: FC<DataListTabProps> = ({ datastoreId, data }) => {
