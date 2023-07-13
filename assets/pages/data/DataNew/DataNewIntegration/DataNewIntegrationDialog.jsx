@@ -3,52 +3,74 @@ import { useQuery } from "@tanstack/react-query";
 import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
 
-import api from "../../../api";
-import { routes } from "../../../router/router";
+import api from "../../../../api";
+import reactQueryKeys from "../../../../modules/reactQueryKeys";
+import { routes } from "../../../../router/router";
 
-import reactQueryKeys from "../../../modules/reactQueryKeys";
-import "./../../../sass/components/spinner.scss";
+import "./../../../../sass/components/spinner.scss";
 
-const DataNewIntegration = ({ datastoreId, uploadId, dataName }) => {
+const DataNewIntegrationDialog = ({ datastoreId, uploadId }) => {
     const [integrationProgress, setIntegrationProgress] = useState({});
     const [integrationCurrentStep, setIntegrationCurrentStep] = useState(null);
 
-    // fetch integration progress
     const abortController = new AbortController();
-    const [shouldFetchIntProg, setShouldFetchIntProg] = useState(true);
-    const integrationQuery = useQuery({
+    const [shouldPingIntProg, setShouldPingIntProg] = useState(false);
+
+    // définition des query
+    // query qui "ping" et récupère le progress en boucle (query désactivé au départ)
+    const pingIntProgQuery = useQuery({
         queryKey: [reactQueryKeys.datastore_upload_integration(datastoreId, uploadId)],
-        queryFn: () => api.upload.integrationProgressPing(datastoreId, uploadId, { signal: abortController?.signal }),
+        queryFn: () => api.upload.pingIntegrationProgress(datastoreId, uploadId, { signal: abortController?.signal }),
         refetchInterval: 3000,
         refetchIntervalInBackground: true,
-        enabled: shouldFetchIntProg,
+        enabled: shouldPingIntProg,
     });
+
+    // query qui récupère les informations sur l'upload
+    const uploadQuery = useQuery({
+        queryKey: [reactQueryKeys.datastore_upload(datastoreId, uploadId)],
+        queryFn: () => api.upload.get(datastoreId, uploadId),
+    });
+
+    // première récupération du progress
+    useEffect(() => {
+        api.upload
+            .getIntegrationProgress(datastoreId, uploadId)
+            .then((response) => {
+                setIntegrationProgress(JSON.parse(response?.integration_progress));
+                setIntegrationCurrentStep(parseInt(response?.integration_current_step));
+                setShouldPingIntProg(true); // là on active le query pingIntProgQuery
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    }, [datastoreId, uploadId]);
 
     // mise à jour de integrationProgress et integrationCurrentStep à chaque refetch de integrationQuery
     useEffect(() => {
-        const response = integrationQuery?.data;
+        const response = pingIntProgQuery?.data;
         if (response) {
             setIntegrationProgress(JSON.parse(response?.integration_progress));
             setIntegrationCurrentStep(parseInt(response?.integration_current_step));
         }
-    }, [integrationQuery?.data]);
+    }, [pingIntProgQuery?.data]);
 
     useEffect(() => {
         // stopper si une étape a échoué
         if (Object.values(integrationProgress).includes("failed")) {
             console.debug("stopping, one step failed");
-            setShouldFetchIntProg(false);
+            setShouldPingIntProg(false);
             return;
         }
 
         // stopper si toutes les étapes ont terminé
         if (Object.keys(integrationProgress).length === integrationCurrentStep) {
             console.debug("stopping, all steps completed successfully");
-            setShouldFetchIntProg(false);
+            setShouldPingIntProg(false);
 
-            routes.datastore_data_view({ datastoreId, dataName }).push();
+            routes.datastore_data_view({ datastoreId, dataName: uploadQuery?.data?.tags?.data_name }).push();
         }
-    }, [integrationProgress, integrationCurrentStep, datastoreId, dataName]);
+    }, [integrationProgress, integrationCurrentStep, datastoreId, uploadQuery?.data]);
 
     const getStepIcon = (status) => {
         let iconClass = fr.cx("fr-icon-time-line");
@@ -70,6 +92,24 @@ const DataNewIntegration = ({ datastoreId, uploadId, dataName }) => {
         return <i className={iconClass} />;
     };
 
+    const getStepStatusText = (status) => {
+        let statusText = "";
+        switch (status) {
+            case "in_progress":
+                statusText = "En cours";
+                break;
+            case "successful":
+                statusText = "Succès";
+                break;
+            case "failed":
+                statusText = "Echèc";
+                break;
+            case "waiting":
+                statusText = "En attente";
+        }
+        return statusText;
+    };
+
     return (
         <div className={fr.cx("fr-container")}>
             <div className={fr.cx("fr-grid-row")}>
@@ -86,7 +126,7 @@ const DataNewIntegration = ({ datastoreId, uploadId, dataName }) => {
                         <div className={fr.cx("fr-grid-row")} key={step}>
                             <p>
                                 {getStepIcon(status)}
-                                &nbsp;{Translator.trans(`data.new_integration.steps.${step}`)} : {status}
+                                &nbsp;{Translator.trans(`data.new_integration.steps.${step}`)} : {getStepStatusText(status)}
                             </p>
                         </div>
                     ))}
@@ -96,10 +136,9 @@ const DataNewIntegration = ({ datastoreId, uploadId, dataName }) => {
     );
 };
 
-DataNewIntegration.propTypes = {
+DataNewIntegrationDialog.propTypes = {
     datastoreId: PropTypes.string,
     uploadId: PropTypes.string,
-    dataName: PropTypes.string,
 };
 
-export default DataNewIntegration;
+export default DataNewIntegrationDialog;
