@@ -17,6 +17,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route(
@@ -65,28 +66,38 @@ class UploadController extends AbstractController
         }
     }
 
-    #[Route('/{uploadId}/integration_progress', name: 'integration_progress', methods: ['GET'])]
-    public function integrationProgress(string $datastoreId, string $uploadId): JsonResponse
+    #[Route('/{uploadId}', name: 'get', methods: ['GET'])]
+    public function get(string $datastoreId, string $uploadId): JsonResponse
     {
-        // lecture dernier état des étapes de l'intégration
+        return $this->json($this->entrepotApiService->upload->get($datastoreId, $uploadId));
+    }
+
+    #[Route('/{uploadId}/integration_progress', name: 'integration_progress', methods: ['GET'])]
+    public function integrationProgress(
+        string $datastoreId,
+        string $uploadId,
+        #[MapQueryParameter] bool $getOnlyProgress = false,
+    ): JsonResponse {
         $upload = $this->entrepotApiService->upload->get($datastoreId, $uploadId);
 
-        $defaultIntegProgress = [
+        // construction de progress initial
+        $initialIntegProgress = [
             UploadTags::INT_STEP_SEND_FILES_API => JobStatuses::WAITING,
             UploadTags::INT_STEP_WAIT_CHECKS => JobStatuses::WAITING,
             UploadTags::INT_STEP_PROCESSING => JobStatuses::WAITING,
         ];
-        $integCurrentStep = isset($upload['tags'][UploadTags::INTEGRATION_CURRENT_STEP]) ? intval($upload['tags'][UploadTags::INTEGRATION_CURRENT_STEP]) : -1;
-        $integProgress = isset($upload['tags'][UploadTags::INTEGRATION_PROGRESS]) ? json_decode($upload['tags'][UploadTags::INTEGRATION_PROGRESS], true) : $defaultIntegProgress;
 
+        // lecture de progress si existe déjà dans les tags de l'upload, sinon on part du progress initial
+        $integCurrentStep = isset($upload['tags'][UploadTags::INTEGRATION_CURRENT_STEP]) ? intval($upload['tags'][UploadTags::INTEGRATION_CURRENT_STEP]) : 0;
+        $integProgress = isset($upload['tags'][UploadTags::INTEGRATION_PROGRESS]) ? json_decode($upload['tags'][UploadTags::INTEGRATION_PROGRESS], true) : $initialIntegProgress;
+
+        // clone de progress
         $integCurrStepClone = $integCurrentStep;
         $integProgressClone = $integProgress;
 
         try {
-            // exécuter les étapes de l'intégration, sauf la première fois que cette route est appelée
-            if (-1 === $integCurrentStep) {
-                ++$integCurrentStep;
-            } else {
+            // on exécute les étapes de l'intégration si getOnlyProgress est à false
+            if (false === $getOnlyProgress && $integCurrentStep < count($integProgress)) {
                 [$integCurrentStep, $integProgress] = $this->runIntegrationStep($datastoreId, $upload, $integProgress, $integCurrentStep);
             }
 
@@ -95,7 +106,7 @@ class UploadController extends AbstractController
                 UploadTags::INTEGRATION_PROGRESS => json_encode($integProgress),
             ];
 
-            // mise à jour état des étapes de l'intégration si changement
+            // mise à jour état des étapes de l'intégration uniquement si changement
             if ($integCurrStepClone !== $integCurrentStep || $integProgressClone !== $integProgress) {
                 $upload = $this->entrepotApiService->upload->addTags($datastoreId, $uploadId, $uploadTags);
             }

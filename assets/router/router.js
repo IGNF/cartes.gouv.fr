@@ -39,6 +39,13 @@ const routeDefs = {
         },
         (p) => `${appRoot}/datastores/${p.datastoreId}/data/new`
     ),
+    datastore_data_new_integration: defineRoute(
+        {
+            datastoreId: param.path.string,
+            uploadId: param.query.string,
+        },
+        (p) => `${appRoot}/datastores/${p.datastoreId}/data/new/integration`
+    ),
     datastore_data_view: defineRoute(
         {
             datastoreId: param.path.string,

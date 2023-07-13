@@ -21,8 +21,38 @@ const add = (datastoreId, formData) => {
  * @param {RequestInit} otherOptions
  * @returns {Promise}
  */
-const integrationProgressPing = (datastoreId, uploadId, otherOptions = {}) => {
-    const url = Routing.generate("cartesgouvfr_api_upload_integration_progress", { datastoreId, uploadId });
+const get = (datastoreId, uploadId, otherOptions = {}) => {
+    const url = Routing.generate("cartesgouvfr_api_upload_get", { datastoreId, uploadId });
+    return jsonFetch(url, {
+        method: "GET",
+        ...otherOptions,
+    });
+};
+
+/**
+ *
+ * @param {string} datastoreId
+ * @param {string} uploadId
+ * @param {RequestInit} otherOptions
+ * @returns {Promise}
+ */
+const getIntegrationProgress = (datastoreId, uploadId, otherOptions = {}) => {
+    const url = Routing.generate("cartesgouvfr_api_upload_integration_progress", { datastoreId, uploadId, getOnlyProgress: true });
+    return jsonFetch(url, {
+        method: "GET",
+        ...otherOptions,
+    });
+};
+
+/**
+ *
+ * @param {string} datastoreId
+ * @param {string} uploadId
+ * @param {RequestInit} otherOptions
+ * @returns {Promise}
+ */
+const pingIntegrationProgress = (datastoreId, uploadId, otherOptions = {}) => {
+    const url = Routing.generate("cartesgouvfr_api_upload_integration_progress", { datastoreId, uploadId, getOnlyProgress: false });
     return jsonFetch(url, {
         method: "GET",
         ...otherOptions,
@@ -31,5 +61,7 @@ const integrationProgressPing = (datastoreId, uploadId, otherOptions = {}) => {
 
 export default {
     add,
-    integrationProgressPing,
+    get,
+    getIntegrationProgress,
+    pingIntegrationProgress,
 };
