@@ -3,6 +3,7 @@
 namespace App\Controller\Api;
 
 use App\Constants\EntrepotApi\StoredDataTags;
+use App\Constants\EntrepotApi\StoredDataTypes;
 use App\Services\EntrepotApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -68,10 +69,13 @@ class DataController extends AbstractController
     public function get(string $datastoreId, string $dataName): JsonResponse
     {
         $vectorDbList = $this->entrepotApiService->storedData->getAllDetailed($datastoreId, [
+            'type' => StoredDataTypes::VECTOR_DB,
             'tags' => [
                 StoredDataTags::DATA_NAME => $dataName,
             ],
         ]);
+
+        // configurations et offerings
 
         return $this->json([
             StoredDataTags::DATA_NAME => $dataName,
