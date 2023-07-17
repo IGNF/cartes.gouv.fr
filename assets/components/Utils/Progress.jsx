@@ -1,6 +1,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import PropTypes from "prop-types";
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+
 import "./../../sass/components/progress.scss";
 
 const Progress = ({ label, value, max = 100 }) => {
@@ -9,7 +10,8 @@ const Progress = ({ label, value, max = 100 }) => {
     useEffect(() => {
         let percentage = Math.floor((value / max) * 100);
         setPercent(`${percentage}%`);
-    }, [value]);
+    }, [value, max]);
+
     return (
         <div className={fr.cx("fr-my-2v")}>
             <div className={fr.cx("fr-input-group")}>
