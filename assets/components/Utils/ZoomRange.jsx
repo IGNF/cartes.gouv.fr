@@ -1,15 +1,15 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import React, { useId, useState, useEffect } from "react";
 import PropTypes from "prop-types";
+import React, { useEffect, useId, useState } from "react";
 
 // Openlayers
 import Map from "ol/Map";
 import View from "ol/View";
-import { fromLonLat } from "ol/proj";
 import WMTSCapabilities from "ol/format/WMTSCapabilities";
-import { optionsFromCapabilities } from "ol/source/WMTS";
 import TileLayer from "ol/layer/Tile";
-import WMTS from "ol/source/WMTS";
+import { fromLonLat } from "ol/proj";
+import WMTS, { optionsFromCapabilities } from "ol/source/WMTS";
+
 import "./../../sass/components/zoom-range.scss";
 import RangeSlider from "./RangeSlider";
 
@@ -85,7 +85,7 @@ const ZoomRange = (props) => {
                 maps[m].setTarget(undefined);
             }
         };
-    }, []);
+    }, [center, targets, values]);
 
     const handleOnChange = (values) => {
         setValues(values);

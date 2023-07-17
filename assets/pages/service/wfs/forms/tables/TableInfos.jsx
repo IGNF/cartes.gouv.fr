@@ -1,8 +1,9 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import PropTypes from "prop-types";
-import React, { useEffect, useState, createRef, useMemo } from "react";
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import { Input } from "@codegouvfr/react-dsfr/Input";
+import PropTypes from "prop-types";
+import React, { createRef, useEffect, useMemo, useState } from "react";
+
 import TagifyComponent from "../../../../../components/Utils/TagifyComponent";
 
 const TableInfos = ({ tables, keywords, onChange }) => {
@@ -42,7 +43,7 @@ const TableInfos = ({ tables, keywords, onChange }) => {
     useEffect(() => {
         const value = filter(tablesState);
         onChange(value);
-    }, [tablesState]);
+    }, [tablesState, onChange]);
 
     /**
      * Table cochee/decochee
