@@ -8,6 +8,7 @@ import { languages, charsets } from "../../../../../utils";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { Select } from "@codegouvfr/react-dsfr/Select";
 import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
+import ignProducts from "./../../../../../data/md_resolutions.json";
 
 const getCode = (epsg) => {
     if (!epsg) return null;
@@ -25,6 +26,7 @@ const getCode = (epsg) => {
         data_charset: yup.string().required(Translator.trans("service.wfs.new.additional_information_form.charset_error")),
         data_projection: yup.string().required(Translator.trans("service.wfs.new.additional_information_form.projection_error")),
         data_encoding: yup.string().required(Translator.trans("service.wfs.new.additional_information_form.encoding_error")),
+        data_resolution: yup.number()
     })
     .required(); */
 
@@ -116,6 +118,26 @@ const AdditionalInfoForm = ({ storedData, fileType, visibility, onPrevious, onVa
                     defaultValue: fileType,
                 }}
             />
+            <Select
+                label={Translator.trans("service.wfs.new.additional_information_form.spatial_resolution")}
+                hintText={Translator.trans("service.wfs.new.additional_information_form.hint_spatial_resolution")}
+                nativeSelectProps={{
+                    ...register("data_resolution"),
+                    defaultValue: "",
+                }}
+            >
+                <option value="" disabled hidden>
+                    {Translator.trans("service.wfs.new.additional_information_form.select_spatial_resolution")}
+                </option>
+                {Object.keys(ignProducts).map((product) => {
+                    const text = `${product} (1/${ignProducts[product]})`;
+                    return (
+                        <option key={product} value={ignProducts[product]}>
+                            {text}
+                        </option>
+                    );
+                })}
+            </Select>
             <ButtonsGroup
                 className={fr.cx("fr-my-2v")}
                 alignment="between"
