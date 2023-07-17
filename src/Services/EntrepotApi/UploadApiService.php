@@ -139,6 +139,26 @@ class UploadApiService extends AbstractEntrepotApiService
     }
 
     /**
+     * @param string $datastoreId
+     * @param string $uploadId
+     *
+     * @return array
+     */
+    public function getFileTree($datastoreId, $uploadId)
+    {
+        $upload = $this->get($datastoreId, $uploadId);
+        if (UploadStatuses::DELETED == $upload['status'] || UploadStatuses::OPEN == $upload['status']) {
+            if (array_key_exists('file_tree', $upload['tags'])) {
+                return json_decode($upload['tags']['file_tree'], true);
+            }
+
+            return [];
+        }
+
+        return $this->request('GET', "datastores/$datastoreId/uploads/$uploadId/tree");
+    }
+    
+    /**
      * Opens an existing upload only if it isn't already OPEN.
      *
      * @param string $datastoreId

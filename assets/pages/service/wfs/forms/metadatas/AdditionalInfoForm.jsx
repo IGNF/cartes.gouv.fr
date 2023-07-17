@@ -9,6 +9,15 @@ import { Input } from "@codegouvfr/react-dsfr/Input";
 import { Select } from "@codegouvfr/react-dsfr/Select";
 import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
 
+const getCode = (epsg) => {
+    if (!epsg) return null;
+    const parts = epsg.split(":");
+    if (parts.length === 2) {
+        return parts[1];
+    }
+    return null;
+};
+
 // TODO PROVISOIRE
 /* const schema = yup
     .object({
@@ -23,7 +32,7 @@ import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
 const schema = yup.object({}).required();
 
 // TODO storedData : Utiliser pour la projection
-const AdditionalInfoForm = ({ storedData, visibility, onPrevious, onValid }) => {
+const AdditionalInfoForm = ({ storedData, fileType, visibility, onPrevious, onValid }) => {
     const {
         register,
         handleSubmit,
@@ -35,6 +44,12 @@ const AdditionalInfoForm = ({ storedData, visibility, onPrevious, onValid }) => 
         const values = getFormValues();
         onValid(values);
     };
+
+    let projUrl = null;
+    const code = getCode(storedData.srs);
+    if (code) {
+        projUrl = `http://www.opengis.net/def/crs/EPSG/0/${code}`;
+    }
 
     return (
         <div className={fr.cx("fr-my-2v")} style={{ display: visibility ? "block" : "none" }}>
@@ -86,6 +101,8 @@ const AdditionalInfoForm = ({ storedData, visibility, onPrevious, onValid }) => 
                 stateRelatedMessage={errors?.data_projection?.message}
                 nativeInputProps={{
                     ...register("data_projection"),
+                    readOnly: true,
+                    defaultValue: projUrl,
                 }}
             />
             <Input
@@ -95,6 +112,8 @@ const AdditionalInfoForm = ({ storedData, visibility, onPrevious, onValid }) => 
                 stateRelatedMessage={errors?.data_encoding?.message}
                 nativeInputProps={{
                     ...register("data_encoding"),
+                    readOnly: fileType !== "unknown",
+                    defaultValue: fileType,
                 }}
             />
             <ButtonsGroup
@@ -119,6 +138,7 @@ const AdditionalInfoForm = ({ storedData, visibility, onPrevious, onValid }) => 
 
 AdditionalInfoForm.propTypes = {
     storedData: PropTypes.object.isRequired,
+    fileType: PropTypes.string.isRequired,
     visibility: PropTypes.bool.isRequired,
     onPrevious: PropTypes.func.isRequired,
     onValid: PropTypes.func.isRequired,

@@ -92,6 +92,7 @@ class ConfigurationApiService extends AbstractEntrepotApiService
         $body = [
             'visibility' => 'PUBLIC',
             'endpoint' => $endpointId,
+            'open' => true
         ];
 
         return $this->request('POST', "datastores/$datastoreId/configurations/$configurationId/offerings", $body);

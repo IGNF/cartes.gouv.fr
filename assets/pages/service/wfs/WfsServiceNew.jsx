@@ -10,7 +10,37 @@ import UploadMetadataForm from "./forms/metadatas/UploadMetadataForm";
 import DescriptionForm from "./forms/metadatas/DescriptionForm";
 import AdditionalInfoForm from "./forms/metadatas/AdditionalInfoForm";
 import AccessRestrictionForm from "./forms/AccessRestrictionForm";
+import fileExtensions from "./../../../data/file_extensions.json";
 
+/**
+ * Recupere le type de fichier (unknown,csv ou geopackage)
+ * @param {Object} fileTree
+ * @returns
+ */
+const getUploadFileType = (fileTree) => {
+    let fileType = "unknown";
+    fileTree.every((obj) => {
+        if (obj.type === "DIRECTORY" && obj.name === "data") {
+            obj.children.every((child) => {
+                if (child.type === "FILE") {
+                    const extension = child.name.split(".").pop().toLowerCase();
+                    if (extension in fileExtensions) {
+                        fileType = fileExtensions[extension];
+                        return false;
+                    }
+                }
+            });
+        }
+    });
+    return fileType;
+};
+
+/**
+ * Formulaire general
+ * @param datastoreId identifiant du datastore
+ * @param storedDataId identifiant de la donnee stockee
+ * @returns
+ */
 const WfsServiceNew = ({ datastoreId, storedDataId }) => {
     const STEPS = {
         TABLES: 1,
@@ -24,6 +54,7 @@ const WfsServiceNew = ({ datastoreId, storedDataId }) => {
 
     const [isLoading, setIsLoading] = useState(true);
     const [storedData, setStoredData] = useState(undefined);
+    const [fileType, setFileType] = useState(undefined);
     const [tables, setTables] = useState([]);
 
     const [result, setResult] = useState({});
@@ -38,21 +69,26 @@ const WfsServiceNew = ({ datastoreId, storedDataId }) => {
     });
 
     useEffect(() => {
-        api.storedData
-            .getOne(datastoreId, storedDataId)
-            .then((data) => {
-                setStoredData(data);
+        (async () => {
+            try {
+                const storedData = await api.storedData.getOne(datastoreId, storedDataId);
+                setStoredData(storedData);
 
-                let rels = data.type_infos?.relations || [];
-
+                let rels = storedData.type_infos?.relations || [];
                 const relations = rels.filter((rel) => rel?.type === "TABLE");
                 setTables(relations);
-            })
-            .catch((error) => {
-                console.error(error);
-            })
-            .finally(() => setIsLoading(false));
-    }, [datastoreId, storedDataId]);
+
+                const uploadId = storedData.tags["upload_id"];
+                const fileTree = await api.upload.getFileTree(datastoreId, uploadId);
+                const fileType = getUploadFileType(fileTree);
+                setFileType(fileType);
+            } catch (error) {
+                console.log(`${error.data}, ${error.status}`);
+            } finally {
+                setIsLoading(false);
+            }
+        })();
+    }, []);
 
     useEffect(() => {
         setVisibility((prevVisibility) => {
@@ -110,11 +146,25 @@ const WfsServiceNew = ({ datastoreId, storedDataId }) => {
                         stepCount={5}
                         title={Translator.trans(`service.wfs.new.step${step}`)}
                     />
+<<<<<<< HEAD
                     <TableForm tables={tables} visibility={visibility[STEPS.TABLES]} onValid={onValid} />
                     <UploadMetadataForm visibility={visibility[STEPS.METADATAS]} onPrevious={previous} onSubmit={next} />
                     <DescriptionForm storedDataName={storedData.name} visibility={visibility[STEPS.DESCRIPTION]} onPrevious={previous} onValid={onValid} />
                     <AdditionalInfoForm storedData={storedData} visibility={visibility[STEPS.ADDITIONALINFORMATIONS]} onPrevious={previous} onValid={onValid} />
                     <AccessRestrictionForm visibility={visibility[STEPS.ACCESSRESTRICTIONS]} onPrevious={previous} onValid={onSubmit} />
+=======
+                    <TableForm tables={tables} visibility={visiblity[Steps.TABLES]} onValid={onValid} />
+                    <UploadMetadataForm visibility={visiblity[Steps.METADATAS]} onPrevious={previous} onSubmit={next} />
+                    <DescriptionForm storedDataName={storedData.name} visibility={visiblity[Steps.DESCRIPTION]} onPrevious={previous} onValid={onValid} />
+                    <AdditionalInfoForm
+                        storedData={storedData}
+                        fileType={fileType}
+                        visibility={visiblity[Steps.ADDITIONALINFORMATIONS]}
+                        onPrevious={previous}
+                        onValid={onValid}
+                    />
+                    <AccessRestrictionForm visibility={visiblity[Steps.ACCESSRESTRICTIONS]} onPrevious={previous} onValid={onSubmit} />
+>>>>>>> 902be19 (refactor: Mise a jour des formualaires (langue, encodage ...))
                 </>
             ) : (
                 <Alert

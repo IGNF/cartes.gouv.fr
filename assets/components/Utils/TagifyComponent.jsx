@@ -11,7 +11,6 @@ const TagifyComponent = forwardRef((props, ref) => {
     const { name, label, hintText, whiteList, enforceWhitelist = false, defaultValue = [], errorMessage = "", onChange } = props;
 
     const settings = {
-        //maxTags: maxTags,
         enforceWhitelist: enforceWhitelist,
         autoComplete: {
             enabled: true,
