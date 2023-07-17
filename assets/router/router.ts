@@ -1,6 +1,6 @@
 import { createRouter, defineRoute, param } from "type-route";
 
-export const appRoot = document.getElementById("root").dataset?.appRoot;
+export const appRoot = (document.getElementById("root") as HTMLDivElement).dataset?.appRoot ?? "";
 
 const routeDefs = {
     // routes non protégées
