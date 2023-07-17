@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from "uuid";
 import { fr } from "@codegouvfr/react-dsfr";
 import PropTypes from "prop-types";
 import React, { useEffect, useState, useRef } from "react";
@@ -115,12 +116,12 @@ const DescriptionForm = ({ storedDataName, visibility, onPrevious, onValid }) =>
                 stateRelatedMessage={errors?.data_identifier?.message}
                 nativeInputProps={{
                     ...register("data_identifier"),
+                    readOnly: true,
+                    defaultValue: uuidv4(),
                 }}
             />
             <TagifyComponent
                 ref={tagifyRef}
-                state={errors.data_identifier ? "error" : "default"}
-                stateRelatedMessage={errors?.data_identifier?.message}
                 name={"data_category"}
                 label={Translator.trans("service.wfs.new.description_form.category")}
                 hintText={Translator.trans("service.wfs.new.description_form.hint_category")}

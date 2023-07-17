@@ -18,6 +18,17 @@ const add = (datastoreId, formData) => {
  *
  * @param {string} datastoreId
  * @param {string} uploadId
+ * @returns {Promise}
+ */
+const getFileTree = (datastoreId, uploadId) => {
+    const url = Routing.generate("cartesgouvfr_api_upload_get_file_tree", { datastoreId, uploadId });
+    return jsonFetch(url);
+};
+
+/**
+ *
+ * @param {string} datastoreId
+ * @param {string} uploadId
  * @param {RequestInit} otherOptions
  * @returns {Promise}
  */
@@ -64,4 +75,5 @@ export default {
     get,
     getIntegrationProgress,
     pingIntegrationProgress,
+    getFileTree,
 };

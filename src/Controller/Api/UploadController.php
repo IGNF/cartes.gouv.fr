@@ -72,6 +72,25 @@ class UploadController extends AbstractController
         return $this->json($this->entrepotApiService->upload->get($datastoreId, $uploadId));
     }
 
+	#[Route(
+        '/{uploadId}/get_file_tree', 
+        name: 'get_file_tree', 
+        methods: ['GET'],
+        options: ['expose' => true],
+        condition: 'request.isXmlHttpRequest()'
+    )]
+    public function getFileTree(string $datastoreId, string $uploadId): JsonResponse
+    {
+        try {
+            $fileTree = $this->entrepotApiService->upload->getFileTree($datastoreId, $uploadId);
+            return $this->json($fileTree);
+        } catch (AppException $ex) {
+            return $this->json($ex->getDetails(), $ex->getCode());
+        } catch (\Exception $ex) {
+            return $this->json(['message' => $ex->getMessage()], $ex->getCode());
+        }
+    }
+	
     #[Route('/{uploadId}/integration_progress', name: 'integration_progress', methods: ['GET'])]
     public function integrationProgress(
         string $datastoreId,
