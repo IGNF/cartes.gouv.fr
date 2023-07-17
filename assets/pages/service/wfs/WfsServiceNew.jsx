@@ -19,19 +19,14 @@ import fileExtensions from "./../../../data/file_extensions.json";
  */
 const getUploadFileType = (fileTree) => {
     let fileType = "unknown";
-    fileTree.every((obj) => {
-        if (obj.type === "DIRECTORY" && obj.name === "data") {
-            obj.children.every((child) => {
-                if (child.type === "FILE") {
-                    const extension = child.name.split(".").pop().toLowerCase();
-                    if (extension in fileExtensions) {
-                        fileType = fileExtensions[extension];
-                        return false;
-                    }
-                }
-            });
+
+    const directory = fileTree.filter((tree) => tree?.type === "DIRECTORY" && tree?.name === "data");
+    if (directory.length) {
+        const extensions = directory[0].children.filter((child) => child.type === "FILE").map((file) => file.name.split(".").pop().toLowerCase());
+        if (extensions.length) {
+            fileType = extensions[0];
         }
-    });
+    }
     return fileType;
 };
 
@@ -146,25 +141,17 @@ const WfsServiceNew = ({ datastoreId, storedDataId }) => {
                         stepCount={5}
                         title={Translator.trans(`service.wfs.new.step${step}`)}
                     />
-<<<<<<< HEAD
                     <TableForm tables={tables} visibility={visibility[STEPS.TABLES]} onValid={onValid} />
                     <UploadMetadataForm visibility={visibility[STEPS.METADATAS]} onPrevious={previous} onSubmit={next} />
                     <DescriptionForm storedDataName={storedData.name} visibility={visibility[STEPS.DESCRIPTION]} onPrevious={previous} onValid={onValid} />
-                    <AdditionalInfoForm storedData={storedData} visibility={visibility[STEPS.ADDITIONALINFORMATIONS]} onPrevious={previous} onValid={onValid} />
-                    <AccessRestrictionForm visibility={visibility[STEPS.ACCESSRESTRICTIONS]} onPrevious={previous} onValid={onSubmit} />
-=======
-                    <TableForm tables={tables} visibility={visiblity[Steps.TABLES]} onValid={onValid} />
-                    <UploadMetadataForm visibility={visiblity[Steps.METADATAS]} onPrevious={previous} onSubmit={next} />
-                    <DescriptionForm storedDataName={storedData.name} visibility={visiblity[Steps.DESCRIPTION]} onPrevious={previous} onValid={onValid} />
                     <AdditionalInfoForm
                         storedData={storedData}
                         fileType={fileType}
-                        visibility={visiblity[Steps.ADDITIONALINFORMATIONS]}
+                        visibility={visibility[STEPS.ADDITIONALINFORMATIONS]}
                         onPrevious={previous}
                         onValid={onValid}
                     />
-                    <AccessRestrictionForm visibility={visiblity[Steps.ACCESSRESTRICTIONS]} onPrevious={previous} onValid={onSubmit} />
->>>>>>> 902be19 (refactor: Mise a jour des formualaires (langue, encodage ...))
+                    <AccessRestrictionForm visibility={visibility[STEPS.ACCESSRESTRICTIONS]} onPrevious={previous} onValid={onSubmit} />
                 </>
             ) : (
                 <Alert

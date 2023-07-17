@@ -28,7 +28,7 @@ const TableInfos = ({ tables, keywords, onChange }) => {
     /* On cree les references pour les tagifyComponent */
     const refsById = useMemo(() => {
         const refs = {};
-        tables.map((table) => {
+        tables.forEach((table) => {
             refs[table.name] = createRef();
         });
         return refs;
