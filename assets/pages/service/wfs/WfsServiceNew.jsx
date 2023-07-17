@@ -10,7 +10,6 @@ import UploadMetadataForm from "./forms/metadatas/UploadMetadataForm";
 import DescriptionForm from "./forms/metadatas/DescriptionForm";
 import AdditionalInfoForm from "./forms/metadatas/AdditionalInfoForm";
 import AccessRestrictionForm from "./forms/AccessRestrictionForm";
-import fileExtensions from "./../../../data/file_extensions.json";
 
 /**
  * Recupere le type de fichier (unknown,csv ou geopackage)
