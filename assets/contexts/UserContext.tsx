@@ -1,5 +1,4 @@
-import PropTypes from "prop-types";
-import { Dispatch, createContext, useState } from "react";
+import { Dispatch, FC, PropsWithChildren, createContext, useState } from "react";
 
 type UserType = object;
 
@@ -10,15 +9,9 @@ type UserContextType = {
 
 export const UserContext = createContext<null | UserContextType>(null);
 
-const UserContextProvider = ({ children }) => {
+export const UserContextProvider: FC<PropsWithChildren> = ({ children }) => {
     const userFromTwig = (document.getElementById("user") as HTMLDivElement).dataset?.user ?? null;
     const [user, setUser] = useState(userFromTwig === null ? null : JSON.parse(userFromTwig));
 
     return <UserContext.Provider value={{ user, setUser }}>{children}</UserContext.Provider>;
 };
-
-UserContextProvider.propTypes = {
-    children: PropTypes.node,
-};
-
-export { UserContextProvider };
