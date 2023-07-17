@@ -15,7 +15,7 @@ const RangeSlider = (props) => {
     const [values, setValues] = useState(initialValues);
     useEffect(() => {
         onChange?.(values);
-    }, [values]);
+    }, [values, onChange]);
 
     const handleChange = (e, newValue, activeThumb) => {
         if (!Array.isArray(newValue)) {
