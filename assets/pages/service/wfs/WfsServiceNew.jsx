@@ -1,15 +1,16 @@
+import { Alert } from "@codegouvfr/react-dsfr/Alert";
+import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
 import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
+
 import api from "../../../api";
-import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
-import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import AppLayout from "../../../components/Layout/AppLayout";
 import LoadingText from "../../../components/Utils/LoadingText";
-import TableForm from "./forms/tables/TableForm";
-import UploadMetadataForm from "./forms/metadatas/UploadMetadataForm";
-import DescriptionForm from "./forms/metadatas/DescriptionForm";
-import AdditionalInfoForm from "./forms/metadatas/AdditionalInfoForm";
 import AccessRestrictionForm from "./forms/AccessRestrictionForm";
+import AdditionalInfoForm from "./forms/metadatas/AdditionalInfoForm";
+import DescriptionForm from "./forms/metadatas/DescriptionForm";
+import UploadMetadataForm from "./forms/metadatas/UploadMetadataForm";
+import TableForm from "./forms/tables/TableForm";
 
 /**
  * Recupere le type de fichier (unknown,csv ou geopackage)
@@ -82,7 +83,7 @@ const WfsServiceNew = ({ datastoreId, storedDataId }) => {
                 setIsLoading(false);
             }
         })();
-    }, []);
+    }, [datastoreId, storedDataId]);
 
     useEffect(() => {
         setVisibility((prevVisibility) => {

@@ -1,17 +1,17 @@
-import React, { useState, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
+import React, { useEffect, useRef } from "react";
 
 import Map from "ol/Map";
 import View from "ol/View";
-import { fromLonLat } from "ol/proj";
 import WMTSCapabilities from "ol/format/WMTSCapabilities";
-import { optionsFromCapabilities } from "ol/source/WMTS";
 import TileLayer from "ol/layer/Tile";
-import WMTS from "ol/source/WMTS";
+import { fromLonLat } from "ol/proj";
+import WMTS, { optionsFromCapabilities } from "ol/source/WMTS";
+
 import "./../../sass/components/zoom-range.scss";
 
 const MapWrapper = (props) => {
-    const [map, setMap] = useState();
+    // const [map, setMap] = useState(); // NOTE : code non-utilisé commenté temporairement pour que le GitHub Action passe
 
     // get ref to div element - OpenLayers will render into this div
     const mapElement = useRef();
@@ -29,7 +29,7 @@ const MapWrapper = (props) => {
             }),
             controls: [],
         });
-        setMap(initialMap);
+        // setMap(initialMap); // NOTE : code non-utilisé commenté temporairement pour que le GitHub Action passe
 
         // Ajout de la couche PLANIGNV2
         fetch("https://wxs.ign.fr/cartes/geoportail/wmts?SERVICE=WMTS&VERSION=1.0.0&REQUEST=GetCapabilities")
@@ -64,7 +64,7 @@ const MapWrapper = (props) => {
          * re-render.
          */
         return () => initialMap.setTarget(undefined);
-    }, []);
+    }, [props]);
 
     return <div ref={mapElement} className={props.className} id={props.id} />;
 };

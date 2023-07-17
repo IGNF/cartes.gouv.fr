@@ -1,15 +1,16 @@
-import { v4 as uuidv4 } from "uuid";
 import { fr } from "@codegouvfr/react-dsfr";
-import PropTypes from "prop-types";
-import React, { useEffect, useState, useRef } from "react";
-import { useForm } from "react-hook-form";
-import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { Input } from "@codegouvfr/react-dsfr/Input";
 import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
-import { removeDiacritics } from "../../../../../utils";
+import { Input } from "@codegouvfr/react-dsfr/Input";
+import { yupResolver } from "@hookform/resolvers/yup";
 import { format as datefnsFormat } from "date-fns";
+import PropTypes from "prop-types";
+import React, { useEffect, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
+import { v4 as uuidv4 } from "uuid";
+import * as yup from "yup";
+
 import TagifyComponent from "../../../../../components/Utils/TagifyComponent";
+import { removeDiacritics } from "../../../../../utils";
 
 // Themes et mot cles INSPIRE
 import { getInspireKeywords } from "../../../../../utils";
@@ -60,7 +61,7 @@ const DescriptionForm = ({ storedDataName, visibility, onPrevious, onValid }) =>
 
         const words = getInspireKeywords();
         setKeywords(words);
-    }, []);
+    }, [setFormValue, storedDataName]);
 
     const tagifyRef = useRef();
 
