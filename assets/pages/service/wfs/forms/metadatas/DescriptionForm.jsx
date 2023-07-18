@@ -4,7 +4,7 @@ import { Input } from "@codegouvfr/react-dsfr/Input";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { format as datefnsFormat } from "date-fns";
 import PropTypes from "prop-types";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 import * as yup from "yup";

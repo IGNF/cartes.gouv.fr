@@ -2,7 +2,6 @@ import { FC } from "react";
 import { Autocomplete } from "@mui/material";
 import { TextField } from "@mui/material";
 import MuiDsfrThemeProvider from "@codegouvfr/react-dsfr/mui";
-import { getInspireKeywords } from "../../utils";
 
 type KeywordsComponentProps = {
     label: string;
