@@ -7,7 +7,7 @@ import { FC, useState } from "react";
 
 import functions from "../../../../functions";
 import { routes } from "../../../../router/router";
-import { type VectorDb } from "../../../../types";
+import { type VectorDb } from "../../../../types/app";
 
 type ServiceTypes = "tms" | "wfs" | "wms-vector" | "pre-paquet";
 

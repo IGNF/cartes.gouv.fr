@@ -2,7 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { FC } from "react";
 
-import { type DataDetailed } from "../../../../types";
+import { type DataDetailed } from "../../../../types/app";
 import VectorDbList from "./VectorDbList";
 
 type DataListTabProps = {
