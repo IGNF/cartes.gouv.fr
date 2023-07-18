@@ -34,11 +34,7 @@ const getCode = (epsg) => {
     .required(); */
 
 // TODO SUPPRIMER
-const schema = yup
-    .object({
-        data_languages: yup.string().required(Translator.trans("service.wfs.new.additional_information_form.language_error")),
-    })
-    .required();
+const schema = yup.object({}).required();
 
 // TODO storedData : Utiliser pour la projection
 const AdditionalInfoForm = ({ storedData, fileType, visibility, onPrevious, onValid }) => {

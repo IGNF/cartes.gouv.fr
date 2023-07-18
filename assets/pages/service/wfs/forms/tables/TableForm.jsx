@@ -1,6 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import PropTypes from "prop-types";
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -40,6 +40,8 @@ const schema = yup
     .required();
 
 const TableForm = ({ tables, visibility, onValid }) => {
+    const keywords = getInspireKeywords();
+
     const {
         register,
         handleSubmit,
@@ -47,13 +49,6 @@ const TableForm = ({ tables, visibility, onValid }) => {
         getValues: getFormValues,
         setValue: setFormValue,
     } = useForm({ resolver: yupResolver(schema) });
-
-    const [keywords, setKeywords] = useState([]);
-
-    useEffect(() => {
-        const words = getInspireKeywords();
-        setKeywords(words);
-    }, []);
 
     const onChange = (tablesState) => {
         const value = Object.keys(tablesState).length ? JSON.stringify(tablesState) : null;

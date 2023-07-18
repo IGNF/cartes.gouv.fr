@@ -149,7 +149,7 @@ const WfsServiceNew = ({ datastoreId, storedDataId }) => {
                         fileType={fileType}
                         visibility={visibility[STEPS.ADDITIONALINFORMATIONS]}
                         onPrevious={previous}
-                        //onValid={onValid}
+                        onValid={onValid}
                     />
                     <AccessRestrictionForm visibility={visibility[STEPS.ACCESSRESTRICTIONS]} onPrevious={previous} onValid={onSubmit} />
                 </>
