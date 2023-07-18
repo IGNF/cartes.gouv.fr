@@ -12,8 +12,12 @@ export type DataDetailed = Data & {
 export type VectorDb = {
     _id: string;
     name: string;
+    type: "VECTOR-DB";
+    visibility: "PRIVATE" | "PUBLIC";
+    srs: string;
     last_event: {
         title: string;
         date: string;
     };
+    tags: object;
 };

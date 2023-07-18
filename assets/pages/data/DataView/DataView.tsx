@@ -12,7 +12,7 @@ import LoadingText from "../../../components/Utils/LoadingText";
 import { datastoreNavItems } from "../../../config/datastoreNavItems";
 import reactQueryKeys from "../../../modules/reactQueryKeys";
 import { routes } from "../../../router/router";
-import { type DataDetailed } from "../../../types";
+import { type DataDetailed } from "../../../types/app";
 import DatasetListTab from "./DatasetListTab/DatasetListTab";
 
 type DataViewProps = {

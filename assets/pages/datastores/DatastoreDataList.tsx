@@ -14,7 +14,7 @@ import { datastoreNavItems } from "../../config/datastoreNavItems";
 import functions from "../../functions";
 import reactQueryKeys from "../../modules/reactQueryKeys";
 import { routes } from "../../router/router";
-import { type Data } from "../../types";
+import { type Data } from "../../types/app";
 
 type DataListItemProps = {
     datastoreId: string;
