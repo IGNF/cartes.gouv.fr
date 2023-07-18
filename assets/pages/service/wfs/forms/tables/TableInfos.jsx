@@ -2,21 +2,11 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import PropTypes from "prop-types";
-import React, { createRef, useEffect, useMemo, useState } from "react";
-
-import TagifyComponent from "../../../../../components/Utils/TagifyComponent";
+import React, { useEffect, useState } from "react";
+import KeywordsComponent from "./../../../../../components/Utils/KeywordsComponent";
 
 const TableInfos = ({ tables, keywords, onChange }) => {
     const numTables = tables.length;
-
-    /* On cree les references pour les tagifyComponent */
-    const refsById = useMemo(() => {
-        const refs = {};
-        tables.forEach((table) => {
-            refs[table.name] = createRef();
-        });
-        return refs;
-    }, [tables]);
 
     /* Ne conserve que les tables "checked" (visible a true) */
     const filter = (res) => {
@@ -79,7 +69,7 @@ const TableInfos = ({ tables, keywords, onChange }) => {
      * @param {string} table
      * @param {string} values
      */
-    const tagifyChange = (table, values) => {
+    const keywordsChange = (table, values) => {
         let res = { ...tablesState };
         if (values.length === 0 && "keywords" in res[table]) {
             // Pas de valeur, on supprime
@@ -143,12 +133,11 @@ const TableInfos = ({ tables, keywords, onChange }) => {
                                     onKeyUp: handleInputChange,
                                 }}
                             />
-                            <TagifyComponent
-                                ref={refsById[table.name]}
+                            <KeywordsComponent
                                 label={Translator.trans("service.wfs.new.tables_form.table.keywords")}
                                 hintText={Translator.trans("service.wfs.new.tables_form.table.hint_keywords")}
-                                whiteList={keywords}
-                                onChange={(values) => tagifyChange(table.name, values)}
+                                keywords={keywords}
+                                onChange={(values) => keywordsChange(table.name, values)}
                             />
                         </div>
                     </div>

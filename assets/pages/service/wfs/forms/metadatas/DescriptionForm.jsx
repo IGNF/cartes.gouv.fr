@@ -8,8 +8,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 import * as yup from "yup";
-
-import TagifyComponent from "../../../../../components/Utils/TagifyComponent";
+import KeywordsComponent from "../../../../../components/Utils/KeywordsComponent";
 import { removeDiacritics } from "../../../../../utils";
 
 // Themes et mot cles INSPIRE
@@ -25,6 +24,7 @@ import { getInspireKeywords } from "../../../../../utils";
         data_public_name: yup.string().required(Translator.trans("service.wfs.new.description_form.public_name_error")),
         data_description: yup.string().required(Translator.trans("service.wfs.new.description_form.description_error")),
         data_identifier: yup.string().required(Translator.trans("service.wfs.new.description_form.identifier_error")),
+        data_category: yup.string().required(Translator.trans("service.wfs.new.description_form.category_error")),
         data_email_contact: yup
             .string()
             .email(Translator.trans("service.wfs.new.description_form.email_contact_error"))
@@ -38,9 +38,11 @@ import { getInspireKeywords } from "../../../../../utils";
     })
     .required(); */
 
-const schema = yup.object({}).required();
+const schema = yup.object({ data_category: yup.string().required(Translator.trans("service.wfs.new.description_form.category_error")) }).required();
 
 const DescriptionForm = ({ storedDataName, visibility, onPrevious, onValid }) => {
+    const keywords = getInspireKeywords();
+
     const {
         register,
         handleSubmit,
@@ -49,8 +51,6 @@ const DescriptionForm = ({ storedDataName, visibility, onPrevious, onValid }) =>
         getValues: getFormValues,
     } = useForm({ resolver: yupResolver(schema) });
 
-    const [keywords, setKeywords] = useState([]);
-
     useEffect(() => {
         const nice = removeDiacritics(storedDataName.toLowerCase()).replace(/ /g, "_");
         const now = datefnsFormat(new Date(), "yyyy-MM-dd");
@@ -58,25 +58,15 @@ const DescriptionForm = ({ storedDataName, visibility, onPrevious, onValid }) =>
         setFormValue("data_technical_name", nice);
         setFormValue("data_public_name", storedDataName);
         setFormValue("data_creation_date", now);
-
-        const words = getInspireKeywords();
-        setKeywords(words);
     }, [setFormValue, storedDataName]);
 
-    const tagifyRef = useRef();
+    const handleKeywordsChange = (values) => {
+        setFormValue("data_category", values.join(","), { shouldValidate: true });
+    };
 
     const onSubmit = () => {
         const values = getFormValues();
-
-        // TODO A SUPPRIMER
         onValid(values);
-
-        // TODO A DECOMMENTER
-        /* if (tagifyRef.current.checkValidity()) {
-            const name = tagifyRef.current.getName();
-            values[name] = tagifyRef.current.getValues();
-            onValid(values);
-        } */
     };
 
     return (
@@ -121,14 +111,19 @@ const DescriptionForm = ({ storedDataName, visibility, onPrevious, onValid }) =>
                     defaultValue: uuidv4(),
                 }}
             />
-            <TagifyComponent
-                ref={tagifyRef}
-                name={"data_category"}
+            <KeywordsComponent
                 label={Translator.trans("service.wfs.new.description_form.category")}
                 hintText={Translator.trans("service.wfs.new.description_form.hint_category")}
-                whiteList={keywords}
-                enforceWhitelist={true}
-                errorMessage={Translator.trans("service.wfs.new.description_form.category_error")}
+                keywords={keywords}
+                onChange={handleKeywordsChange}
+            />
+            <Input
+                state={errors.data_category ? "error" : "default"}
+                stateRelatedMessage={errors?.data_category?.message}
+                nativeInputProps={{
+                    ...register("data_category"),
+                    type: "hidden",
+                }}
             />
             <Input
                 label={Translator.trans("service.wfs.new.description_form.email_contact")}
