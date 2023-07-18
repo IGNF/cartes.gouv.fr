@@ -4,11 +4,22 @@ import inspireKeywords from "./data/thematic-inspire.json";
 // charsets
 import charsets from "./data/charset_list.json";
 
-// https://fr.wikipedia.org/wiki/Liste_des_codes_ISO_639-2
-// INSPIRE : http://www.loc.gov/standards/iso639-2/
-const languages = {
-    eng: "Anglais",
-    fre: "Français",
+// Langues iso639-2
+// https://github.com/haliaeetus/iso-639/blob/master/data/iso_639-2.json
+import langs from "./data/iso_639-2.json";
+
+const getLanguages = () => {
+    const languages = [];
+    for (const def of Object.values(langs)) {
+        const code = def["639-2"];
+        if (code !== "und") {
+            languages.push({ language: def.fr[0], code: code });
+        }
+    }
+
+    // Supression des doublons
+    const nodoubles = [...new Map(languages.map((item) => [item["code"], item])).values()];
+    return nodoubles;
 };
 
 const getInspireKeywords = () => {
@@ -42,4 +53,4 @@ const removeDiacritics = (str) => {
     return str;
 };
 
-export { getInspireKeywords, languages, charsets, removeDiacritics };
+export { getInspireKeywords, getLanguages, charsets, removeDiacritics };
