@@ -14,7 +14,7 @@ use Symfony\Component\Routing\Annotation\Route;
     '/api/datastores/{datastoreId}/data',
     name: 'cartesgouvfr_api_data_',
     options: ['expose' => true],
-    // condition: 'request.isXmlHttpRequest()'
+    condition: 'request.isXmlHttpRequest()'
 )]
 class DataController extends AbstractController
 {
