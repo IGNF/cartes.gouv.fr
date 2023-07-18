@@ -55,5 +55,5 @@
         "Routing": true,
         "Translator": true
     },
-    "ignorePatterns": ["public/**", "data/**"]
+    "ignorePatterns": ["public/**", "data/**", "webpack.config.js", "cypress.config.ts", "postcss.config.js"]
 }
