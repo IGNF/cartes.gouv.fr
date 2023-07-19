@@ -56,7 +56,7 @@ export interface StaticFileDetailResponseDto {
     /** Description du fichier statique */
     description?: string;
     /** Type du fichier statique */
-    type: "GEOSERVER-FTL" | "GEOSERVER-STYLE" | "ROK4-STYLE" | "DERIVATION-SQL";
+    type: StaticFileDetailResponseDtoTypeEnum;
     /**
      * identifiant technique
      * @format uuid
@@ -102,7 +102,7 @@ export type StaticFileRok4StyleDetailsDto = StaticFileDetailsDto & {
 export interface ConfigurationResponseDto {
     /** Nom de la configuration */
     name: string;
-    status: "UNPUBLISHED" | "PUBLISHED" | "SYNCHRONIZING";
+    status: ConfigurationResponseDtoStatusEnum;
     /**
      * identifiant technique
      * @format uuid
@@ -140,7 +140,7 @@ export interface OfferingDetailResponseDto {
     /** Nom technique de la ressource. Ce nom doit être unique sur la plateforme pour un type de configuration donné. Uniquement des caractères alphanumériques, tiret, tiret bas, point */
     layer_name: string;
     /** Type de configuration */
-    type: "WMS-VECTOR" | "WFS" | "WFS-INSPIRE" | "WMTS-TMS" | "WMS-RASTER" | "DOWNLOAD" | "ITINERARY-ISOCURVE" | "ALTIMETRY";
+    type: OfferingDetailResponseDtoTypeEnum;
     /** Statut de l'offre */
     status: string;
     /** Informations sur la configuration de l'offre */
@@ -157,8 +157,8 @@ export interface OfferingDetailResponseDto {
 }
 
 export interface MetadataResponseDto {
-    type: "INSPIRE" | "ISOAP";
-    level: "DATASET" | "SERIES";
+    type: MetadataResponseDtoTypeEnum;
+    level: MetadataResponseDtoLevelEnum;
     file_identifier: string;
     endpoints?: EndpointListResponseDto[];
     /**
@@ -238,19 +238,18 @@ export type ConfigurationDownloadDetailsContent = ConfigurationDetailsContent & 
     abstract: string;
 };
 
-export type ConfigurationGetFeatureInfoIsStoredDataWmtsTmsDetailsContent = ConfigurationGetFeatureInfoWmtsTmsDetailsContent & {
+export type ConfigurationGetFeatureInfoIsStoredDataWmtsTmsDetailsContent = {
     /** Indique si on va utiliser directement la donnée stockée */
     stored_data: boolean;
 };
 
-export type ConfigurationGetFeatureInfoServerUrlWmtsTmsDetailsContent = ConfigurationGetFeatureInfoWmtsTmsDetailsContent & {
+export type ConfigurationGetFeatureInfoServerUrlWmtsTmsDetailsContent = {
     server_url: string;
 };
 
 /** Ressource cible du GetFeatureInfo */
-export type ConfigurationGetFeatureInfoWmtsTmsDetailsContent =
-    | ConfigurationGetFeatureInfoIsStoredDataWmtsTmsDetailsContent
-    | ConfigurationGetFeatureInfoServerUrlWmtsTmsDetailsContent;
+export type ConfigurationGetFeatureInfoWmtsTmsDetailsContent = ConfigurationGetFeatureInfoIsStoredDataWmtsTmsDetailsContent &
+    ConfigurationGetFeatureInfoServerUrlWmtsTmsDetailsContent;
 
 export type ConfigurationItineraryIsocurveDetailsContent = ConfigurationDetailsContent & {
     /** Bounding box de la configuration */
@@ -327,13 +326,13 @@ export interface ConfigurationMetadata {
     /** L'URL d'accès à la métadonnée' */
     url: string;
     /** Le type de métadonnées */
-    type: "ISO19115:2003" | "FGDC" | "TC211" | "19139" | "Other";
+    type: ConfigurationMetadataTypeEnum;
 }
 
 /** Informations à fournir pour modifier la configuration */
 export interface ConfigurationUpdateDto {
     /** Type de configuration */
-    type: "WMS-VECTOR" | "WFS" | "WFS-INSPIRE" | "WMTS-TMS" | "WMS-RASTER" | "DOWNLOAD" | "ITINERARY-ISOCURVE" | "ALTIMETRY";
+    type: ConfigurationUpdateDtoTypeEnum;
     /** Nom de la configuration */
     name: string;
     /** Métadonnées liées au propriétaire de la configuration */
@@ -354,11 +353,10 @@ export interface ConfigurationUpdateDto {
 }
 
 /** Informations sur la précision des données */
-export type ConfigurationUsedDataAccuracyAltimetryDetailsContent =
-    | ConfigurationUsedDataAccuracyManualAltimetryDetailsContent
-    | ConfigurationUsedDataAccuracyPyramidAltimetryDetailsContent;
+export type ConfigurationUsedDataAccuracyAltimetryDetailsContent = ConfigurationUsedDataAccuracyManualAltimetryDetailsContent &
+    ConfigurationUsedDataAccuracyPyramidAltimetryDetailsContent;
 
-export type ConfigurationUsedDataAccuracyManualAltimetryDetailsContent = ConfigurationUsedDataAccuracyAltimetryDetailsContent & {
+export type ConfigurationUsedDataAccuracyManualAltimetryDetailsContent = {
     /**
      * Valeur unique pour la précision des données
      * @format int32
@@ -367,7 +365,7 @@ export type ConfigurationUsedDataAccuracyManualAltimetryDetailsContent = Configu
     value: number;
 };
 
-export type ConfigurationUsedDataAccuracyPyramidAltimetryDetailsContent = ConfigurationUsedDataAccuracyAltimetryDetailsContent & {
+export type ConfigurationUsedDataAccuracyPyramidAltimetryDetailsContent = {
     /** Mapping entre les valeurs de la pyramide et les valeurs effectivement renvoyées */
     mapping: Record<string, number>;
     /**
@@ -429,9 +427,9 @@ export interface ConfigurationUsedDataItineraryIsocurveDetailsContent {
     /** Colonne de coût inverse (pour stored data de type GRAPHE-DB) */
     reverse_cost_column?: string;
     /** Type de coût */
-    cost_type?: "time" | "distance";
+    cost_type?: ConfigurationUsedDataItineraryIsocurveDetailsContentCostTypeEnum;
     /** Méthode de calcul de coût (pour stored data de type GRAPHE-VALHALLA) */
-    costing?: "auto" | "auto_shorter" | "pedestrian";
+    costing?: ConfigurationUsedDataItineraryIsocurveDetailsContentCostingEnum;
     /**
      * Attributs retournés par l'API
      * @uniqueItems true
@@ -467,16 +465,15 @@ export interface ConfigurationUsedDataRelationWmsVectorDetailsContent {
 }
 
 /** Informations sur la source des données */
-export type ConfigurationUsedDataSourceAltimetryDetailsContent =
-    | ConfigurationUsedDataSourceManualAltimetryDetailsContent
-    | ConfigurationUsedDataSourcePyramidAltimetryDetailsContent;
+export type ConfigurationUsedDataSourceAltimetryDetailsContent = ConfigurationUsedDataSourceManualAltimetryDetailsContent &
+    ConfigurationUsedDataSourcePyramidAltimetryDetailsContent;
 
-export type ConfigurationUsedDataSourceManualAltimetryDetailsContent = ConfigurationUsedDataSourceAltimetryDetailsContent & {
+export type ConfigurationUsedDataSourceManualAltimetryDetailsContent = {
     /** Valeur unique pour la source des données */
     value: string;
 };
 
-export type ConfigurationUsedDataSourcePyramidAltimetryDetailsContent = ConfigurationUsedDataSourceAltimetryDetailsContent & {
+export type ConfigurationUsedDataSourcePyramidAltimetryDetailsContent = {
     /** Mapping entre les valeurs de la pyramide et les valeurs effectivement renvoyées */
     mapping: Record<string, string>;
     /**
@@ -540,7 +537,7 @@ export type ConfigurationWmsRasterDetailsContent = ConfigurationDetailsContent &
      * Interpolation utilisée pour les conversions de résolution
      * @default "BICUBIC"
      */
-    interpolation?: "NEAREST-NEIGHBOUR" | "LINEAR" | "BICUBIC" | "LANCZOS2" | "LANCZOS3" | "LANCZOS4";
+    interpolation?: ConfigurationWmsRasterDetailsContentInterpolationEnum;
     /** Résolution minimale de la couche */
     bottom_resolution?: number;
     /** Résolution maximale de la couche */
@@ -586,8 +583,8 @@ export interface ConfigurationDetailResponseDto {
     /** Nom technique de la ressource. Ce nom doit être unique sur la plateforme pour un type de configuration donné. Uniquement des caractères alphanumériques, tiret, tiret bas, point */
     layer_name: string;
     /** Type de configuration */
-    type: "WMS-VECTOR" | "WFS" | "WFS-INSPIRE" | "WMTS-TMS" | "WMS-RASTER" | "DOWNLOAD" | "ITINERARY-ISOCURVE" | "ALTIMETRY";
-    status: "UNPUBLISHED" | "PUBLISHED" | "SYNCHRONIZING";
+    type: ConfigurationDetailResponseDtoTypeEnum;
+    status: ConfigurationDetailResponseDtoStatusEnum;
     tags: Record<string, string>;
     /** Métadonnées liées au propriétaire de la configuration */
     attribution?: ConfigurationAttribution;
@@ -653,7 +650,7 @@ export interface AnnexDetailResponseDto {
 
 export interface CommunityAddUserDto {
     /** @uniqueItems true */
-    rights?: ("COMMUNITY" | "PROCESSING" | "ANNEX" | "BROADCAST" | "UPLOAD")[];
+    rights?: CommunityAddUserDtoRightsEnum[];
 }
 
 /** Paramètres du traitement à créer */
@@ -668,7 +665,7 @@ export interface ProcessingCreateDto {
      * Priorité de traitement
      * @default "STANDARD"
      */
-    priority?: "STANDARD" | "PREMIUM";
+    priority?: ProcessingCreateDtoPriorityEnum;
     /** Types de données acceptés en entrée du traitement */
     input_types?: ProcessingInputTypesDto;
     output_type: ProcessingOutputTypeStoredDataDto | ProcessingOutputTypeUploadDto;
@@ -690,12 +687,12 @@ export interface ProcessingInputTypesDto {
      * Types de livraisons en entrée acceptés
      * @uniqueItems true
      */
-    upload?: ("VECTOR" | "RASTER" | "ARCHIVE" | "ROK4-PYRAMID")[];
+    upload?: ProcessingInputTypesDtoUploadEnum[];
     /**
      * Types de données stockées en entrée acceptés
      * @uniqueItems true
      */
-    stored_data?: ("ROK4-PYRAMID-RASTER" | "ROK4-PYRAMID-VECTOR" | "VECTOR-DB" | "ARCHIVE" | "GRAPH-DB" | "GRAPH-OSRM" | "GRAPH-VALHALLA")[];
+    stored_data?: ProcessingInputTypesDtoStoredDataEnum[];
 }
 
 export type ProcessingOutputTypeDto = object;
@@ -703,19 +700,19 @@ export type ProcessingOutputTypeDto = object;
 /** Type de donnée stockée en sortie du traitement */
 export type ProcessingOutputTypeStoredDataDto = ProcessingOutputTypeDto & {
     /** Type de donnée stockée */
-    stored_data: "ROK4-PYRAMID-RASTER" | "ROK4-PYRAMID-VECTOR" | "VECTOR-DB" | "ARCHIVE" | "GRAPH-DB" | "GRAPH-OSRM" | "GRAPH-VALHALLA";
+    stored_data: ProcessingOutputTypeStoredDataDtoStoredDataEnum;
     /**
      * Types de stockage cible du traitement
      * @minItems 1
      * @uniqueItems true
      */
-    storage: ("POSTGRESQL" | "S3" | "FILESYSTEM" | "POSTGRESQL-ROUTING")[];
+    storage: ProcessingOutputTypeStoredDataDtoStorageEnum[];
 };
 
 /** Type de livraison en sortie du traitement */
 export type ProcessingOutputTypeUploadDto = ProcessingOutputTypeDto & {
     /** Type de livraison */
-    upload: "VECTOR" | "RASTER" | "ARCHIVE" | "ROK4-PYRAMID";
+    upload: ProcessingOutputTypeUploadDtoUploadEnum;
 };
 
 export interface ProcessingParameterDto {
@@ -736,7 +733,7 @@ export type ProcessingParameterFreeDto = UtilRequiredKeys<ProcessingParameterDto
 /** Informations spécifiques d'un paramètre de type statique(s) */
 export type ProcessingParameterStaticFileDto = UtilRequiredKeys<ProcessingParameterDto, "name" | "description" | "mandatory"> & {
     /** Type de fichier(s) statique(s) attendu(s) pour ce paramètre */
-    static_type: "GEOSERVER-FTL" | "GEOSERVER-STYLE" | "ROK4-STYLE" | "DERIVATION-SQL";
+    static_type: ProcessingParameterStaticFileDtoStaticTypeEnum;
 };
 
 /** Informations sur la vérification */
@@ -759,7 +756,7 @@ export interface ProcessingAdminDetailResponseDto {
     /** Description du traitement */
     description: string;
     /** Priorité de traitement */
-    priority?: "STANDARD" | "PREMIUM";
+    priority?: ProcessingAdminDetailResponseDtoPriorityEnum;
     /** Types de données acceptés en entrée du traitement */
     input_types: ProcessingInputTypesDto;
     output_type: ProcessingOutputTypeStoredDataDto | ProcessingOutputTypeUploadDto;
@@ -811,7 +808,7 @@ export type UserHeaderKeyCreateDto = UtilRequiredKeys<UserKeyCreateDtoUserKeyInf
 
 export interface UserKeyCreateDtoUserKeyInfoDto {
     name: string;
-    type?: "HASH" | "HEADER" | "BASIC" | "OAUTH2";
+    type?: UserKeyCreateDtoUserKeyInfoDtoTypeEnum;
     whitelist?: string[];
     blacklist?: string[];
     user_agent?: string;
@@ -827,7 +824,7 @@ export type UserOauth2KeyCreateDto = UtilRequiredKeys<UserKeyCreateDtoUserKeyInf
 
 export interface UserKeyDetailsResponseDtoUserKeyInfoDto {
     name: string;
-    type?: "HASH" | "HEADER" | "BASIC" | "OAUTH2";
+    type?: UserKeyDetailsResponseDtoUserKeyInfoDtoTypeEnum;
     whitelist?: string[];
     blacklist?: string[];
     user_agent?: string;
@@ -985,7 +982,7 @@ export interface PrecisionModel {
 }
 
 /** Informations spécifiques d'une donnée stockée archive */
-export type StoredDataArchiveDetailsDto = StoredDataDetailsDto & {
+export type StoredDataArchiveDetailsDto = {
     /**
      * Nombre de fichiers contenus dans la donnée stockée
      * @format int32
@@ -996,15 +993,15 @@ export type StoredDataArchiveDetailsDto = StoredDataDetailsDto & {
 /** Paramètres de la donnée stockée à créer */
 export interface StoredDataCreateDto {
     name: string;
-    type: "ROK4-PYRAMID-RASTER" | "ROK4-PYRAMID-VECTOR" | "VECTOR-DB" | "ARCHIVE" | "GRAPH-DB" | "GRAPH-OSRM" | "GRAPH-VALHALLA";
+    type: StoredDataCreateDtoTypeEnum;
     /** @default "private" */
-    visibility?: "PRIVATE" | "REFERENCED" | "PUBLIC";
+    visibility?: StoredDataCreateDtoVisibilityEnum;
     srs?: string;
     extent?: Geometry;
     /** @format int64 */
     size?: number;
     /** @default "GENERATED" */
-    status?: "CREATED" | "GENERATING" | "MODIFYING" | "GENERATED" | "DELETED" | "UNSTABLE";
+    status?: StoredDataCreateDtoStatusEnum;
     /** @format uuid */
     _id?: string;
     /** @format uuid */
@@ -1021,24 +1018,23 @@ export interface StoredDataCreateDto {
 }
 
 /** Détails sur une donnée stockée */
-export type StoredDataDetailsDto =
-    | StoredDataRok4PyramidRasterDetailsDto
-    | StoredDataRok4PyramidVectorDetailsDto
-    | StoredDataVectorDbDetailsDto
-    | StoredDataArchiveDetailsDto
-    | StoredDataGraphDbDetailsDto
-    | StoredDataGraphDetailsDto;
+export type StoredDataDetailsDto = StoredDataRok4PyramidRasterDetailsDto &
+    StoredDataRok4PyramidVectorDetailsDto &
+    StoredDataVectorDbDetailsDto &
+    StoredDataArchiveDetailsDto &
+    StoredDataGraphDbDetailsDto &
+    StoredDataGraphDetailsDto;
 
 /** Liste des relations en BDD */
 export interface StoredDataDetailsRelationDto {
     name: string;
-    type: "TABLE" | "VIEW";
+    type: StoredDataDetailsRelationDtoTypeEnum;
     attributes: string[];
     primary_key?: string[];
 }
 
 /** Informations spécifiques d'une donnée stockée graphe d'itinéraire DB */
-export type StoredDataGraphDbDetailsDto = StoredDataDetailsDto & {
+export type StoredDataGraphDbDetailsDto = {
     /**
      * Liste des attributs utilisables du graphe
      * @uniqueItems true
@@ -1057,7 +1053,7 @@ export type StoredDataGraphDbDetailsDto = StoredDataDetailsDto & {
 };
 
 /** Informations spécifiques d'une donnée stockée graphe d'itinéraire OSRM ou VALHALLA */
-export type StoredDataGraphDetailsDto = StoredDataDetailsDto & {
+export type StoredDataGraphDetailsDto = {
     /**
      * Liste des attributs utilisables du graphe
      * @uniqueItems true
@@ -1077,29 +1073,29 @@ export interface StoredDataGraphDetailsOptimizationProfileDto {
 }
 
 /** Informations spécifiques d'une donnée stockée pyramide Rok4 Raster */
-export type StoredDataRok4PyramidRasterDetailsDto = StoredDataDetailsDto & {
+export type StoredDataRok4PyramidRasterDetailsDto = {
     tms: string;
     /** @uniqueItems true */
     levels: string[];
-    channels_format: "UINT8" | "UINT16" | "FLOAT32";
+    channels_format: StoredDataRok4PyramidRasterDetailsDtoChannelsFormatEnum;
     /**
      * @format int32
      * @min 1
      */
     channels_number: number;
-    compression: "RAW" | "JPG" | "PNG" | "LZW" | "ZIP" | "PKB" | "JPG90";
+    compression: StoredDataRok4PyramidRasterDetailsDtoCompressionEnum;
     nodata_value: string;
 };
 
 /** Informations spécifiques d'une donnée stockée pyramide Rok4 Vecteur */
-export type StoredDataRok4PyramidVectorDetailsDto = StoredDataDetailsDto & {
+export type StoredDataRok4PyramidVectorDetailsDto = {
     tms: string;
     /** @uniqueItems true */
     levels: string[];
 };
 
 /** Informations spécifiques d'une donnée stockée base vectorielle */
-export type StoredDataVectorDbDetailsDto = StoredDataDetailsDto & {
+export type StoredDataVectorDbDetailsDto = {
     /** @uniqueItems true */
     relations: StoredDataDetailsRelationDto[];
 };
@@ -1108,8 +1104,8 @@ export type Type = object;
 
 export interface StoredDataPrivateDetailResponseDto {
     name: string;
-    type: "ROK4-PYRAMID-RASTER" | "ROK4-PYRAMID-VECTOR" | "VECTOR-DB" | "ARCHIVE" | "GRAPH-DB" | "GRAPH-OSRM" | "GRAPH-VALHALLA";
-    visibility: "PRIVATE" | "REFERENCED" | "PUBLIC";
+    type: StoredDataPrivateDetailResponseDtoTypeEnum;
+    visibility: StoredDataPrivateDetailResponseDtoVisibilityEnum;
     srs?: string;
     contact: string;
     extent?: Geometry;
@@ -1119,7 +1115,7 @@ export interface StoredDataPrivateDetailResponseDto {
     storage: StoredDataStorageDto;
     /** @format int64 */
     size?: number;
-    status: "CREATED" | "GENERATING" | "MODIFYING" | "GENERATED" | "DELETED" | "UNSTABLE";
+    status: StoredDataPrivateDetailResponseDtoStatusEnum;
     /** @format uuid */
     _id: string;
     /** Détails sur une donnée stockée */
@@ -1127,29 +1123,29 @@ export interface StoredDataPrivateDetailResponseDto {
 }
 
 export interface StoredDataStorageDto {
-    type: "POSTGRESQL" | "S3" | "FILESYSTEM" | "POSTGRESQL-ROUTING";
+    type: StoredDataStorageDtoTypeEnum;
     /** @uniqueItems true */
     labels?: string[];
 }
 
 /** Certains type de livraison ne nécessitent pas d'informations spécifiques */
-export type EmptyDetails = UploadDetailsDto;
+export type EmptyDetails = {};
 
 /** Informations à fournir pour la déclaration d'une nouvelle livraison, la livraison est privée par défaut */
 export interface UploadCreateDto {
     description: string;
     name: string;
-    type: "VECTOR" | "RASTER" | "ARCHIVE" | "ROK4-PYRAMID";
+    type: UploadCreateDtoTypeEnum;
     srs: string;
     /** Détails sur une livraison */
     type_infos?: UploadDetailsDto;
 }
 
 /** Détails sur une livraison */
-export type UploadDetailsDto = EmptyDetails | UploadRok4PyramidDetailsDto;
+export type UploadDetailsDto = EmptyDetails & UploadRok4PyramidDetailsDto;
 
 /** Informations spécifiques d'une livraison de pyramide Rok4 */
-export type UploadRok4PyramidDetailsDto = UploadDetailsDto & {
+export type UploadRok4PyramidDetailsDto = {
     /** Format des données */
     format: string;
     /**
@@ -1166,9 +1162,9 @@ export type UploadRok4PyramidDetailsDto = UploadDetailsDto & {
 export interface UploadPrivateDetailResponseDto {
     name: string;
     description: string;
-    type: "VECTOR" | "RASTER" | "ARCHIVE" | "ROK4-PYRAMID";
-    visibility: "PRIVATE" | "REFERENCED" | "PUBLIC";
-    status: "CREATED" | "OPEN" | "CLOSED" | "CHECKING" | "GENERATING" | "MODIFYING" | "UNSTABLE" | "DELETED";
+    type: UploadPrivateDetailResponseDtoTypeEnum;
+    visibility: UploadPrivateDetailResponseDtoVisibilityEnum;
+    status: UploadPrivateDetailResponseDtoStatusEnum;
     srs: string;
     contact: string;
     extent?: Geometry;
@@ -1203,10 +1199,10 @@ export interface StaticFileCreateDto {
     /** la description du fichier statique */
     description?: string;
     /** le type du fichier statique */
-    type: "GEOSERVER-FTL" | "GEOSERVER-STYLE" | "ROK4-STYLE" | "DERIVATION-SQL";
+    type: StaticFileCreateDtoTypeEnum;
 }
 
-export type IdFieldDto = UploadOutputDto & {
+export type IdFieldDto = {
     /**
      * Identifiant de la livraison
      * @format uuid
@@ -1214,7 +1210,7 @@ export type IdFieldDto = UploadOutputDto & {
     id: string;
 };
 
-export type NamedFieldDto = UploadOutputDto & {
+export type NamedFieldDto = {
     /** Nom de la livraison */
     name: string;
 };
@@ -1252,11 +1248,11 @@ export type ProcessingExecutionCreateOutputUploadDto = ProcessingExecutionCreate
     upload?: UploadOutputDto;
 };
 
-export type StoredDataCreationDto = StoredDataOutputDto & {
+export type StoredDataCreationDto = {
     /** Nom de la donnée stockée */
     name: string;
     /** Type de stockage */
-    storage_type?: "POSTGRESQL" | "S3" | "FILESYSTEM" | "POSTGRESQL-ROUTING";
+    storage_type?: StoredDataCreationDtoStorageTypeEnum;
     storage_tags?: string[];
 };
 
@@ -1268,7 +1264,7 @@ export type UploadOutputDto = NamedFieldDto | IdFieldDto;
 export interface ProcessingExecutionDetailResponseDto {
     /** Informations sur le traitement */
     processing: ProcessingExecutionProcessingDto;
-    status: "CREATED" | "WAITING" | "PROGRESS" | "SUCCESS" | "FAILURE" | "ABORTED";
+    status: ProcessingExecutionDetailResponseDtoStatusEnum;
     /** @format date-time */
     creation: string;
     /** @format date-time */
@@ -1319,8 +1315,8 @@ export interface ProcessingExecutionProcessingDto {
 /** Informations simplifiée sur une donnée stockée */
 export interface ProcessingExecutionStoredDataDto {
     name: string;
-    type: "ROK4-PYRAMID-RASTER" | "ROK4-PYRAMID-VECTOR" | "VECTOR-DB" | "ARCHIVE" | "GRAPH-DB" | "GRAPH-OSRM" | "GRAPH-VALHALLA";
-    status: "CREATED" | "GENERATING" | "MODIFYING" | "GENERATED" | "DELETED" | "UNSTABLE";
+    type: ProcessingExecutionStoredDataDtoTypeEnum;
+    status: ProcessingExecutionStoredDataDtoStatusEnum;
     srs: string;
     /**
      * identifiant technique
@@ -1331,9 +1327,9 @@ export interface ProcessingExecutionStoredDataDto {
 
 /** Informations simplifiée sur une livraison */
 export interface ProcessingExecutionUploadDto {
-    type: "VECTOR" | "RASTER" | "ARCHIVE" | "ROK4-PYRAMID";
+    type: ProcessingExecutionUploadDtoTypeEnum;
     name: string;
-    status: "CREATED" | "OPEN" | "CLOSED" | "CHECKING" | "GENERATING" | "MODIFYING" | "UNSTABLE" | "DELETED";
+    status: ProcessingExecutionUploadDtoStatusEnum;
     srs?: string;
     /**
      * identifiant technique
@@ -1364,7 +1360,7 @@ export interface PermissionCreateDto {
     licence: string;
     /** @uniqueItems true */
     offerings: string[];
-    type?: "ACCOUNT" | "COMMUNITY";
+    type?: PermissionCreateDtoTypeEnum;
     only_oauth?: boolean;
 }
 
@@ -1438,11 +1434,11 @@ export interface PermissionDatastoreAuthorDto {
 /** Information sur l'offre */
 export interface PermissionOfferingResponseDto {
     /** Type de configuration */
-    type: "WMS-VECTOR" | "WFS" | "WFS-INSPIRE" | "WMTS-TMS" | "WMS-RASTER" | "DOWNLOAD" | "ITINERARY-ISOCURVE" | "ALTIMETRY";
+    type: PermissionOfferingResponseDtoTypeEnum;
     /** Visibilité de l'offre */
-    visibility: "PRIVATE" | "REFERENCED" | "PUBLIC";
+    visibility: PermissionOfferingResponseDtoVisibilityEnum;
     /** Statut de l'offre */
-    status: "PUBLISHING" | "MODIFYING" | "PUBLISHED" | "UNPUBLISHING" | "UNSTABLE";
+    status: PermissionOfferingResponseDtoStatusEnum;
     /** Nom technique de la ressource. Ce nom doit être unique sur la plateforme pour un type de configuration donné. Uniquement des caractères alphanumériques, tiret, tiret bas, point */
     layer_name: string;
     /** Indique si l'offre est ouverte sans clé d'accès */
@@ -1466,7 +1462,7 @@ export interface MetadataPublicationDto {
 /** Informations à fournir pour la déclaration d'une nouvelle configuration */
 export interface ConfigurationCreateDto {
     /** Type de configuration */
-    type: "WMS-VECTOR" | "WFS" | "WFS-INSPIRE" | "WMTS-TMS" | "WMS-RASTER" | "DOWNLOAD" | "ITINERARY-ISOCURVE" | "ALTIMETRY";
+    type: ConfigurationCreateDtoTypeEnum;
     /** Nom de la configuration */
     name: string;
     /** Métadonnées liées au propriétaire de la configuration */
@@ -1494,7 +1490,7 @@ export interface ConfigurationCreateDto {
 /** Paramètre pour la création de l'offre */
 export interface OfferingCreateDto {
     /** @default "PRIVATE" */
-    visibility?: "PRIVATE" | "REFERENCED" | "PUBLIC";
+    visibility?: OfferingCreateDtoVisibilityEnum;
     /** @format uuid */
     endpoint: string;
     open?: boolean;
@@ -1524,7 +1520,7 @@ export interface StorageCreateDto {
     /** Le nom du stockage. ce nom doit être unique pour la plateforme */
     name: string;
     /** Le type de stockage */
-    type: "POSTGRESQL" | "S3" | "FILESYSTEM" | "POSTGRESQL-ROUTING";
+    type: StorageCreateDtoTypeEnum;
     /** @uniqueItems true */
     labels?: string[];
     type_infos: StorageFileSystemDetailsDto | StoragePostgresqlDetailsDto | StorageS3DetailsDto;
@@ -1611,7 +1607,7 @@ export interface EndpointCreateDto {
      */
     technical_name: string;
     /** Type du point d'accès */
-    type: "WMS-VECTOR" | "WFS" | "WFS-INSPIRE" | "WMTS-TMS" | "WMS-RASTER" | "DOWNLOAD" | "METADATA" | "ITINERARY-ISOCURVE" | "ALTIMETRY";
+    type: EndpointCreateDtoTypeEnum;
     /** @uniqueItems true */
     urls: EndpointUrl[];
     /** Point d'accès ouvert ? (sans contrôle des accès) */
@@ -1626,7 +1622,7 @@ export interface EndpointDetailResponseDto {
     /** Nom technique du point d'accès. ce nom technique doit être unique */
     technical_name: string;
     /** Type du point d'accès */
-    type: "WMS-VECTOR" | "WFS" | "WFS-INSPIRE" | "WMTS-TMS" | "WMS-RASTER" | "DOWNLOAD" | "METADATA" | "ITINERARY-ISOCURVE" | "ALTIMETRY";
+    type: EndpointDetailResponseDtoTypeEnum;
     /** @uniqueItems true */
     urls: EndpointUrl[];
     /**
@@ -1861,7 +1857,7 @@ export interface CheckingCreateDto {
     /** Nom technique de la vérification tel que connu par l'orchestrateur */
     orchestrator_job_name: string;
     /** @uniqueItems true */
-    default_uploads_check?: ("VECTOR" | "RASTER" | "ARCHIVE" | "ROK4-PYRAMID")[];
+    default_uploads_check?: CheckingCreateDtoDefaultUploadsCheckEnum[];
 }
 
 /** Informations sur la vérification */
@@ -1878,7 +1874,7 @@ export interface CheckingAdminDetailResponseDto {
      */
     _id: string;
     /** @uniqueItems true */
-    default_uploads_check?: ("VECTOR" | "RASTER" | "ARCHIVE" | "ROK4-PYRAMID")[];
+    default_uploads_check?: CheckingAdminDetailResponseDtoDefaultUploadsCheckEnum[];
 }
 
 export interface UserKeyUpdateDto {
@@ -1892,13 +1888,13 @@ export interface UserKeyUpdateDto {
 /** Paramètres de la donnée stockée à créer */
 export interface StoredDataUpdateTechnicalDto {
     name?: string;
-    type: "ROK4-PYRAMID-RASTER" | "ROK4-PYRAMID-VECTOR" | "VECTOR-DB" | "ARCHIVE" | "GRAPH-DB" | "GRAPH-OSRM" | "GRAPH-VALHALLA";
-    visibility?: "PRIVATE" | "REFERENCED" | "PUBLIC";
+    type: StoredDataUpdateTechnicalDtoTypeEnum;
+    visibility?: StoredDataUpdateTechnicalDtoVisibilityEnum;
     srs?: string;
     extent?: Geometry;
     /** @format int64 */
     size?: number;
-    status?: "CREATED" | "GENERATING" | "MODIFYING" | "GENERATED" | "DELETED" | "UNSTABLE";
+    status?: StoredDataUpdateTechnicalDtoStatusEnum;
     type_infos?:
         | StoredDataArchiveDetailsDto
         | StoredDataGraphDbDetailsDto
@@ -1912,13 +1908,13 @@ export interface StoredDataUpdateTechnicalDto {
 export interface UploadUpdateDto {
     description?: string;
     name?: string;
-    visibility?: "PRIVATE" | "REFERENCED" | "PUBLIC";
+    visibility?: UploadUpdateDtoVisibilityEnum;
 }
 
 /** Informations à fournir pour la modification d'une donnée existante */
 export interface StoredDataUpdateDto {
     name?: string;
-    visibility?: "PRIVATE" | "REFERENCED" | "PUBLIC";
+    visibility?: StoredDataUpdateDtoVisibilityEnum;
 }
 
 /** Paramètres du statique à modifier */
@@ -1940,13 +1936,13 @@ export interface PermissionUpdateDto {
 
 /** Informations à fournir pour la modification d'une offre existante */
 export interface OfferingUpdateDto {
-    visibility?: "PRIVATE" | "REFERENCED" | "PUBLIC";
+    visibility?: OfferingUpdateDtoVisibilityEnum;
     open?: boolean;
     available?: boolean;
 }
 
 export interface MetadataUpdateDto {
-    type: "INSPIRE" | "ISOAP";
+    type: MetadataUpdateDtoTypeEnum;
 }
 
 /** Paramètres modifiables de l'annexe */
@@ -1990,7 +1986,7 @@ export interface ProcessingUpdateDto {
     /** Nom technique du traitement tel que connu par l'orchestrateur */
     orchestrator_job_name?: string;
     /** Priorité de traitement */
-    priority?: "STANDARD" | "PREMIUM";
+    priority?: ProcessingUpdateDtoPriorityEnum;
 }
 
 /** Paramètres du point d'accès à modifier */
@@ -2034,11 +2030,11 @@ export interface CheckingUpdateDto {
     /** Nom technique de la vérification tel que connu par l'orchestrateur */
     orchestrator_job_name?: string;
     /** @uniqueItems true */
-    default_uploads_check?: ("VECTOR" | "RASTER" | "ARCHIVE" | "ROK4-PYRAMID")[];
+    default_uploads_check?: CheckingUpdateDtoDefaultUploadsCheckEnum[];
 }
 
 export interface CommunityMemberDto {
-    rights?: ("COMMUNITY" | "PROCESSING" | "ANNEX" | "BROADCAST" | "UPLOAD")[];
+    rights?: CommunityMemberDtoRightsEnum[];
     community?: CommunityUserDto;
 }
 
@@ -2124,7 +2120,7 @@ export interface PermissionDetailsResponseDto {
 
 export interface UserKeyResponseDto {
     name: string;
-    type?: "HASH" | "HEADER" | "BASIC" | "OAUTH2";
+    type?: UserKeyResponseDtoTypeEnum;
     /**
      * identifiant technique
      * @format uuid
@@ -2156,7 +2152,7 @@ export interface OfferingListResponseDto {
     /** Nom technique de la ressource. Ce nom doit être unique sur la plateforme pour un type de configuration donné. Uniquement des caractères alphanumériques, tiret, tiret bas, point */
     layer_name: string;
     /** Type de configuration */
-    type: "WMS-VECTOR" | "WFS" | "WFS-INSPIRE" | "WMTS-TMS" | "WMS-RASTER" | "DOWNLOAD" | "ITINERARY-ISOCURVE" | "ALTIMETRY";
+    type: OfferingListResponseDtoTypeEnum;
     /** Statut de l'offre */
     status: string;
     /**
@@ -2185,9 +2181,9 @@ export interface PermissionResponseDto {
 
 export interface OfferingEndpointListResponseDto {
     /** Type de configuration */
-    type: "WMS-VECTOR" | "WFS" | "WFS-INSPIRE" | "WMTS-TMS" | "WMS-RASTER" | "DOWNLOAD" | "ITINERARY-ISOCURVE" | "ALTIMETRY";
+    type: OfferingEndpointListResponseDtoTypeEnum;
     /** Statut de l'offre */
-    status: "PUBLISHING" | "MODIFYING" | "PUBLISHED" | "UNPUBLISHING" | "UNSTABLE";
+    status: OfferingEndpointListResponseDtoStatusEnum;
     /** Nom technique de la ressource. Ce nom doit être unique sur la plateforme pour un type de configuration donné. Uniquement des caractères alphanumériques, tiret, tiret bas, point */
     layer_name: string;
     /**
@@ -2258,8 +2254,8 @@ export interface ConfigurationUsedDataItineraryIsocurveDetailsMessage {
     optimization?: string;
     cost_column?: string;
     reverse_cost_column?: string;
-    cost_type?: "time" | "distance";
-    costing?: "auto" | "auto_shorter" | "pedestrian";
+    cost_type?: ConfigurationUsedDataItineraryIsocurveDetailsMessageCostTypeEnum;
+    costing?: ConfigurationUsedDataItineraryIsocurveDetailsMessageCostingEnum;
     /** @uniqueItems true */
     attributes?: ConfigurationUsedDataAttributeItineraryIsocurveDetailsContent[];
     stored_data?: StoredDataMessage;
@@ -2319,7 +2315,7 @@ export type ConfigurationWmsRasterDetailsMessage = ConfigurationDetailsMessage &
     styles?: StaticFileMessage[];
     /** @uniqueItems true */
     used_data?: ConfigurationUsedDataWmtsTmsDetailsMessage[];
-    interpolation?: "NEAREST-NEIGHBOUR" | "LINEAR" | "BICUBIC" | "LANCZOS2" | "LANCZOS3" | "LANCZOS4";
+    interpolation?: ConfigurationWmsRasterDetailsMessageInterpolationEnum;
     bottom_resolution?: number;
     top_resolution?: number;
     abstract: string;
@@ -2379,7 +2375,7 @@ export interface PublicationMessage {
 export interface StaticFileMessage {
     name?: string;
     description?: string;
-    type?: "GEOSERVER-FTL" | "GEOSERVER-STYLE" | "ROK4-STYLE" | "DERIVATION-SQL";
+    type?: StaticFileMessageTypeEnum;
     file_name?: string;
     storage?: StorageMessage;
     /** @format uuid */
@@ -2390,7 +2386,7 @@ export interface StaticFileMessage {
 
 export interface StorageMessage {
     name?: string;
-    type?: "POSTGRESQL" | "S3" | "FILESYSTEM" | "POSTGRESQL-ROUTING";
+    type?: StorageMessageTypeEnum;
     /** @format uuid */
     _id?: string;
     /** Les informations spécifiques liées au type de stockage */
@@ -2398,9 +2394,9 @@ export interface StorageMessage {
 }
 
 export interface StoredDataMessage {
-    type?: "ROK4-PYRAMID-RASTER" | "ROK4-PYRAMID-VECTOR" | "VECTOR-DB" | "ARCHIVE" | "GRAPH-DB" | "GRAPH-OSRM" | "GRAPH-VALHALLA";
+    type?: StoredDataMessageTypeEnum;
     name?: string;
-    status?: "CREATED" | "GENERATING" | "MODIFYING" | "GENERATED" | "DELETED" | "UNSTABLE";
+    status?: StoredDataMessageStatusEnum;
     srs?: string;
     extent?: Geometry;
     /** @format int64 */
@@ -2448,12 +2444,12 @@ export interface TileMatrixSetLevelDto {
 
 /** Informations sur la livraison */
 export interface UploadListResponseDto {
-    type: "VECTOR" | "RASTER" | "ARCHIVE" | "ROK4-PYRAMID";
+    type: UploadListResponseDtoTypeEnum;
     name: string;
-    visibility: "PRIVATE" | "REFERENCED" | "PUBLIC";
+    visibility: UploadListResponseDtoVisibilityEnum;
     srs?: string;
     description: string;
-    status: "CREATED" | "OPEN" | "CLOSED" | "CHECKING" | "GENERATING" | "MODIFYING" | "UNSTABLE" | "DELETED";
+    status: UploadListResponseDtoStatusEnum;
     /**
      * identifiant technique
      * @format uuid
@@ -2468,9 +2464,9 @@ export type UploadDetailResponseDto = UploadPrivateDetailResponseDto | UploadSha
 export interface UploadSharedDetailResponseDto {
     name: string;
     description: string;
-    type: "VECTOR" | "RASTER" | "ARCHIVE" | "ROK4-PYRAMID";
-    visibility: "PRIVATE" | "REFERENCED" | "PUBLIC";
-    status: "CREATED" | "OPEN" | "CLOSED" | "CHECKING" | "GENERATING" | "MODIFYING" | "UNSTABLE" | "DELETED";
+    type: UploadSharedDetailResponseDtoTypeEnum;
+    visibility: UploadSharedDetailResponseDtoVisibilityEnum;
+    status: UploadSharedDetailResponseDtoStatusEnum;
     srs: string;
     contact: string;
     extent?: Geometry;
@@ -2545,8 +2541,8 @@ export interface CheckingExecutionListDto {
 
 export interface StoredDataListResponseDto {
     name: string;
-    type: "ROK4-PYRAMID-RASTER" | "ROK4-PYRAMID-VECTOR" | "VECTOR-DB" | "ARCHIVE" | "GRAPH-DB" | "GRAPH-OSRM" | "GRAPH-VALHALLA";
-    visibility: "PRIVATE" | "REFERENCED" | "PUBLIC";
+    type: StoredDataListResponseDtoTypeEnum;
+    visibility: StoredDataListResponseDtoVisibilityEnum;
     srs?: string;
     /**
      * identifiant technique
@@ -2560,8 +2556,8 @@ export type StoredDataDetailResponseDto = StoredDataPrivateDetailResponseDto | S
 
 export interface StoredDataSharedDetailResponseDto {
     name: string;
-    type: "ROK4-PYRAMID-RASTER" | "ROK4-PYRAMID-VECTOR" | "VECTOR-DB" | "ARCHIVE" | "GRAPH-DB" | "GRAPH-OSRM" | "GRAPH-VALHALLA";
-    visibility: "PRIVATE" | "REFERENCED" | "PUBLIC";
+    type: StoredDataSharedDetailResponseDtoTypeEnum;
+    visibility: StoredDataSharedDetailResponseDtoVisibilityEnum;
     srs?: string;
     contact: string;
     extent?: Geometry;
@@ -2590,7 +2586,7 @@ export interface StaticFileListResponseDto {
     /** Nom du fichier statique */
     name: string;
     /** Type du fichier statique */
-    type: "GEOSERVER-FTL" | "GEOSERVER-STYLE" | "ROK4-STYLE" | "DERIVATION-SQL";
+    type: StaticFileListResponseDtoTypeEnum;
     /**
      * identifiant technique
      * @format uuid
@@ -2618,7 +2614,7 @@ export interface ProcessingStandardDetailResponseDto {
     /** Description du traitement */
     description: string;
     /** Priorité de traitement */
-    priority?: "STANDARD" | "PREMIUM";
+    priority?: ProcessingStandardDetailResponseDtoPriorityEnum;
     /** Types de données acceptés en entrée du traitement */
     input_types: ProcessingInputTypesDto;
     output_type: ProcessingOutputTypeStoredDataDto | ProcessingOutputTypeUploadDto;
@@ -2643,7 +2639,7 @@ export interface ProcessingStandardDetailResponseDto {
 export interface ProcessingExecutionListResponseDto {
     /** Informations sur le traitement */
     processing: ProcessingExecutionProcessingDto;
-    status: "CREATED" | "WAITING" | "PROGRESS" | "SUCCESS" | "FAILURE" | "ABORTED";
+    status: ProcessingExecutionListResponseDtoStatusEnum;
     /**
      * identifiant technique
      * @format uuid
@@ -2670,9 +2666,9 @@ export interface ConfigurationListResponseDto {
     /** Nom technique de la ressource. Ce nom doit être unique sur la plateforme pour un type de configuration donné. Uniquement des caractères alphanumériques, tiret, tiret bas, point */
     layer_name: string;
     /** Type de configuration */
-    type: "WMS-VECTOR" | "WFS" | "WFS-INSPIRE" | "WMTS-TMS" | "WMS-RASTER" | "DOWNLOAD" | "ITINERARY-ISOCURVE" | "ALTIMETRY";
+    type: ConfigurationListResponseDtoTypeEnum;
     /** Statut de la configuration */
-    status: "UNPUBLISHED" | "PUBLISHED" | "SYNCHRONIZING";
+    status: ConfigurationListResponseDtoStatusEnum;
     /**
      * identifiant technique
      * @format uuid
@@ -2692,14 +2688,14 @@ export interface CheckingStandardDetailResponseDto {
      */
     _id: string;
     /** @uniqueItems true */
-    default_uploads_check?: ("VECTOR" | "RASTER" | "ARCHIVE" | "ROK4-PYRAMID")[];
+    default_uploads_check?: CheckingStandardDetailResponseDtoDefaultUploadsCheckEnum[];
 }
 
 /** Informations sur l'exécution de vérification */
 export interface CheckingExecutionListResponseDto {
     /** Informations sur la vérification */
     check: CheckingExecutionCheckResponseDto;
-    status: "WAITING" | "PROGRESS" | "SUCCESS" | "FAILURE";
+    status: CheckingExecutionListResponseDtoStatusEnum;
     /**
      * identifiant technique
      * @format uuid
@@ -2711,7 +2707,7 @@ export interface CheckingExecutionListResponseDto {
 export interface CheckingExecutionDetailResponseDto {
     /** Informations sur la vérification */
     check: CheckingExecutionCheckResponseDto;
-    status: "WAITING" | "PROGRESS" | "SUCCESS" | "FAILURE";
+    status: CheckingExecutionDetailResponseDtoStatusEnum;
     /** @format date-time */
     creation: string;
     /** @format date-time */
@@ -2729,7 +2725,7 @@ export interface CheckingExecutionDetailResponseDto {
 
 /** Informations sur la livraison */
 export interface CheckingExecutionUploadResponseDto {
-    type: "VECTOR" | "RASTER" | "ARCHIVE" | "ROK4-PYRAMID";
+    type: CheckingExecutionUploadResponseDtoTypeEnum;
     name: string;
     /**
      * identifiant technique
@@ -2756,7 +2752,7 @@ export interface AnnexListResponseDto {
 }
 
 export interface CommunityUserResponseDto {
-    rights?: ("COMMUNITY" | "PROCESSING" | "ANNEX" | "BROADCAST" | "UPLOAD")[];
+    rights?: CommunityUserResponseDtoRightsEnum[];
     user: UserDto;
 }
 
@@ -2773,9 +2769,9 @@ export interface UserDto {
 
 /** Informations sur la livraison */
 export interface UploadCatalogResponseDto {
-    type: "VECTOR" | "RASTER" | "ARCHIVE" | "ROK4-PYRAMID";
+    type: UploadCatalogResponseDtoTypeEnum;
     name: string;
-    visibility: "PRIVATE" | "REFERENCED" | "PUBLIC";
+    visibility: UploadCatalogResponseDtoVisibilityEnum;
     srs?: string;
     description: string;
     /** Nom du contact de la communauté */
@@ -2798,7 +2794,7 @@ export interface OfferingSharedDetailResponseDto {
     /** Nom technique de la ressource. Ce nom doit être unique sur la plateforme pour un type de configuration donné. Uniquement des caractères alphanumériques, tiret, tiret bas, point */
     layer_name: string;
     /** Type de configuration */
-    type: "WMS-VECTOR" | "WFS" | "WFS-INSPIRE" | "WMTS-TMS" | "WMS-RASTER" | "DOWNLOAD" | "ITINERARY-ISOCURVE" | "ALTIMETRY";
+    type: OfferingSharedDetailResponseDtoTypeEnum;
     contact: string;
     /** @uniqueItems true */
     urls: EndpointUrl[];
@@ -2839,4 +2835,1045 @@ export interface DatastoreListResponseDto {
     _id: string;
     /** Datastore actif ou non */
     active: boolean;
+}
+
+/** Type du fichier statique */
+export enum StaticFileDetailResponseDtoTypeEnum {
+    GEOSERVERFTL = "GEOSERVER-FTL",
+    GEOSERVERSTYLE = "GEOSERVER-STYLE",
+    ROK4STYLE = "ROK4-STYLE",
+    DERIVATIONSQL = "DERIVATION-SQL",
+}
+
+export enum ConfigurationResponseDtoStatusEnum {
+    UNPUBLISHED = "UNPUBLISHED",
+    PUBLISHED = "PUBLISHED",
+    SYNCHRONIZING = "SYNCHRONIZING",
+}
+
+/** Type de configuration */
+export enum OfferingDetailResponseDtoTypeEnum {
+    WMSVECTOR = "WMS-VECTOR",
+    WFS = "WFS",
+    WFSINSPIRE = "WFS-INSPIRE",
+    WMTSTMS = "WMTS-TMS",
+    WMSRASTER = "WMS-RASTER",
+    DOWNLOAD = "DOWNLOAD",
+    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
+    ALTIMETRY = "ALTIMETRY",
+}
+
+export enum MetadataResponseDtoTypeEnum {
+    INSPIRE = "INSPIRE",
+    ISOAP = "ISOAP",
+}
+
+export enum MetadataResponseDtoLevelEnum {
+    DATASET = "DATASET",
+    SERIES = "SERIES",
+}
+
+/** Le type de métadonnées */
+export enum ConfigurationMetadataTypeEnum {
+    ISO191152003 = "ISO19115:2003",
+    FGDC = "FGDC",
+    TC211 = "TC211",
+    Value19139 = "19139",
+    Other = "Other",
+}
+
+/** Type de configuration */
+export enum ConfigurationUpdateDtoTypeEnum {
+    WMSVECTOR = "WMS-VECTOR",
+    WFS = "WFS",
+    WFSINSPIRE = "WFS-INSPIRE",
+    WMTSTMS = "WMTS-TMS",
+    WMSRASTER = "WMS-RASTER",
+    DOWNLOAD = "DOWNLOAD",
+    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
+    ALTIMETRY = "ALTIMETRY",
+}
+
+/** Type de coût */
+export enum ConfigurationUsedDataItineraryIsocurveDetailsContentCostTypeEnum {
+    Time = "time",
+    Distance = "distance",
+}
+
+/** Méthode de calcul de coût (pour stored data de type GRAPHE-VALHALLA) */
+export enum ConfigurationUsedDataItineraryIsocurveDetailsContentCostingEnum {
+    Auto = "auto",
+    AutoShorter = "auto_shorter",
+    Pedestrian = "pedestrian",
+}
+
+/**
+ * Interpolation utilisée pour les conversions de résolution
+ * @default "BICUBIC"
+ */
+export enum ConfigurationWmsRasterDetailsContentInterpolationEnum {
+    NEARESTNEIGHBOUR = "NEAREST-NEIGHBOUR",
+    LINEAR = "LINEAR",
+    BICUBIC = "BICUBIC",
+    LANCZOS2 = "LANCZOS2",
+    LANCZOS3 = "LANCZOS3",
+    LANCZOS4 = "LANCZOS4",
+}
+
+/** Type de configuration */
+export enum ConfigurationDetailResponseDtoTypeEnum {
+    WMSVECTOR = "WMS-VECTOR",
+    WFS = "WFS",
+    WFSINSPIRE = "WFS-INSPIRE",
+    WMTSTMS = "WMTS-TMS",
+    WMSRASTER = "WMS-RASTER",
+    DOWNLOAD = "DOWNLOAD",
+    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
+    ALTIMETRY = "ALTIMETRY",
+}
+
+export enum ConfigurationDetailResponseDtoStatusEnum {
+    UNPUBLISHED = "UNPUBLISHED",
+    PUBLISHED = "PUBLISHED",
+    SYNCHRONIZING = "SYNCHRONIZING",
+}
+
+export enum CommunityAddUserDtoRightsEnum {
+    COMMUNITY = "COMMUNITY",
+    PROCESSING = "PROCESSING",
+    ANNEX = "ANNEX",
+    BROADCAST = "BROADCAST",
+    UPLOAD = "UPLOAD",
+}
+
+/**
+ * Priorité de traitement
+ * @default "STANDARD"
+ */
+export enum ProcessingCreateDtoPriorityEnum {
+    STANDARD = "STANDARD",
+    PREMIUM = "PREMIUM",
+}
+
+export enum ProcessingInputTypesDtoUploadEnum {
+    VECTOR = "VECTOR",
+    RASTER = "RASTER",
+    ARCHIVE = "ARCHIVE",
+    ROK4PYRAMID = "ROK4-PYRAMID",
+}
+
+export enum ProcessingInputTypesDtoStoredDataEnum {
+    ROK4PYRAMIDRASTER = "ROK4-PYRAMID-RASTER",
+    ROK4PYRAMIDVECTOR = "ROK4-PYRAMID-VECTOR",
+    VECTORDB = "VECTOR-DB",
+    ARCHIVE = "ARCHIVE",
+    GRAPHDB = "GRAPH-DB",
+    GRAPHOSRM = "GRAPH-OSRM",
+    GRAPHVALHALLA = "GRAPH-VALHALLA",
+}
+
+/** Type de donnée stockée */
+export enum ProcessingOutputTypeStoredDataDtoStoredDataEnum {
+    ROK4PYRAMIDRASTER = "ROK4-PYRAMID-RASTER",
+    ROK4PYRAMIDVECTOR = "ROK4-PYRAMID-VECTOR",
+    VECTORDB = "VECTOR-DB",
+    ARCHIVE = "ARCHIVE",
+    GRAPHDB = "GRAPH-DB",
+    GRAPHOSRM = "GRAPH-OSRM",
+    GRAPHVALHALLA = "GRAPH-VALHALLA",
+}
+
+export enum ProcessingOutputTypeStoredDataDtoStorageEnum {
+    POSTGRESQL = "POSTGRESQL",
+    S3 = "S3",
+    FILESYSTEM = "FILESYSTEM",
+    POSTGRESQLROUTING = "POSTGRESQL-ROUTING",
+}
+
+/** Type de livraison */
+export enum ProcessingOutputTypeUploadDtoUploadEnum {
+    VECTOR = "VECTOR",
+    RASTER = "RASTER",
+    ARCHIVE = "ARCHIVE",
+    ROK4PYRAMID = "ROK4-PYRAMID",
+}
+
+/** Type de fichier(s) statique(s) attendu(s) pour ce paramètre */
+export enum ProcessingParameterStaticFileDtoStaticTypeEnum {
+    GEOSERVERFTL = "GEOSERVER-FTL",
+    GEOSERVERSTYLE = "GEOSERVER-STYLE",
+    ROK4STYLE = "ROK4-STYLE",
+    DERIVATIONSQL = "DERIVATION-SQL",
+}
+
+/** Priorité de traitement */
+export enum ProcessingAdminDetailResponseDtoPriorityEnum {
+    STANDARD = "STANDARD",
+    PREMIUM = "PREMIUM",
+}
+
+export enum UserKeyCreateDtoUserKeyInfoDtoTypeEnum {
+    HASH = "HASH",
+    HEADER = "HEADER",
+    BASIC = "BASIC",
+    OAUTH2 = "OAUTH2",
+}
+
+export enum UserKeyDetailsResponseDtoUserKeyInfoDtoTypeEnum {
+    HASH = "HASH",
+    HEADER = "HEADER",
+    BASIC = "BASIC",
+    OAUTH2 = "OAUTH2",
+}
+
+export enum StoredDataCreateDtoTypeEnum {
+    ROK4PYRAMIDRASTER = "ROK4-PYRAMID-RASTER",
+    ROK4PYRAMIDVECTOR = "ROK4-PYRAMID-VECTOR",
+    VECTORDB = "VECTOR-DB",
+    ARCHIVE = "ARCHIVE",
+    GRAPHDB = "GRAPH-DB",
+    GRAPHOSRM = "GRAPH-OSRM",
+    GRAPHVALHALLA = "GRAPH-VALHALLA",
+}
+
+/** @default "private" */
+export enum StoredDataCreateDtoVisibilityEnum {
+    PRIVATE = "PRIVATE",
+    REFERENCED = "REFERENCED",
+    PUBLIC = "PUBLIC",
+}
+
+/** @default "GENERATED" */
+export enum StoredDataCreateDtoStatusEnum {
+    CREATED = "CREATED",
+    GENERATING = "GENERATING",
+    MODIFYING = "MODIFYING",
+    GENERATED = "GENERATED",
+    DELETED = "DELETED",
+    UNSTABLE = "UNSTABLE",
+}
+
+export enum StoredDataDetailsRelationDtoTypeEnum {
+    TABLE = "TABLE",
+    VIEW = "VIEW",
+}
+
+export enum StoredDataRok4PyramidRasterDetailsDtoChannelsFormatEnum {
+    UINT8 = "UINT8",
+    UINT16 = "UINT16",
+    FLOAT32 = "FLOAT32",
+}
+
+export enum StoredDataRok4PyramidRasterDetailsDtoCompressionEnum {
+    RAW = "RAW",
+    JPG = "JPG",
+    PNG = "PNG",
+    LZW = "LZW",
+    ZIP = "ZIP",
+    PKB = "PKB",
+    JPG90 = "JPG90",
+}
+
+export enum StoredDataPrivateDetailResponseDtoTypeEnum {
+    ROK4PYRAMIDRASTER = "ROK4-PYRAMID-RASTER",
+    ROK4PYRAMIDVECTOR = "ROK4-PYRAMID-VECTOR",
+    VECTORDB = "VECTOR-DB",
+    ARCHIVE = "ARCHIVE",
+    GRAPHDB = "GRAPH-DB",
+    GRAPHOSRM = "GRAPH-OSRM",
+    GRAPHVALHALLA = "GRAPH-VALHALLA",
+}
+
+export enum StoredDataPrivateDetailResponseDtoVisibilityEnum {
+    PRIVATE = "PRIVATE",
+    REFERENCED = "REFERENCED",
+    PUBLIC = "PUBLIC",
+}
+
+export enum StoredDataPrivateDetailResponseDtoStatusEnum {
+    CREATED = "CREATED",
+    GENERATING = "GENERATING",
+    MODIFYING = "MODIFYING",
+    GENERATED = "GENERATED",
+    DELETED = "DELETED",
+    UNSTABLE = "UNSTABLE",
+}
+
+export enum StoredDataStorageDtoTypeEnum {
+    POSTGRESQL = "POSTGRESQL",
+    S3 = "S3",
+    FILESYSTEM = "FILESYSTEM",
+    POSTGRESQLROUTING = "POSTGRESQL-ROUTING",
+}
+
+export enum UploadCreateDtoTypeEnum {
+    VECTOR = "VECTOR",
+    RASTER = "RASTER",
+    ARCHIVE = "ARCHIVE",
+    ROK4PYRAMID = "ROK4-PYRAMID",
+}
+
+export enum UploadPrivateDetailResponseDtoTypeEnum {
+    VECTOR = "VECTOR",
+    RASTER = "RASTER",
+    ARCHIVE = "ARCHIVE",
+    ROK4PYRAMID = "ROK4-PYRAMID",
+}
+
+export enum UploadPrivateDetailResponseDtoVisibilityEnum {
+    PRIVATE = "PRIVATE",
+    REFERENCED = "REFERENCED",
+    PUBLIC = "PUBLIC",
+}
+
+export enum UploadPrivateDetailResponseDtoStatusEnum {
+    CREATED = "CREATED",
+    OPEN = "OPEN",
+    CLOSED = "CLOSED",
+    CHECKING = "CHECKING",
+    GENERATING = "GENERATING",
+    MODIFYING = "MODIFYING",
+    UNSTABLE = "UNSTABLE",
+    DELETED = "DELETED",
+}
+
+/** le type du fichier statique */
+export enum StaticFileCreateDtoTypeEnum {
+    GEOSERVERFTL = "GEOSERVER-FTL",
+    GEOSERVERSTYLE = "GEOSERVER-STYLE",
+    ROK4STYLE = "ROK4-STYLE",
+    DERIVATIONSQL = "DERIVATION-SQL",
+}
+
+/** Type de stockage */
+export enum StoredDataCreationDtoStorageTypeEnum {
+    POSTGRESQL = "POSTGRESQL",
+    S3 = "S3",
+    FILESYSTEM = "FILESYSTEM",
+    POSTGRESQLROUTING = "POSTGRESQL-ROUTING",
+}
+
+export enum ProcessingExecutionDetailResponseDtoStatusEnum {
+    CREATED = "CREATED",
+    WAITING = "WAITING",
+    PROGRESS = "PROGRESS",
+    SUCCESS = "SUCCESS",
+    FAILURE = "FAILURE",
+    ABORTED = "ABORTED",
+}
+
+export enum ProcessingExecutionStoredDataDtoTypeEnum {
+    ROK4PYRAMIDRASTER = "ROK4-PYRAMID-RASTER",
+    ROK4PYRAMIDVECTOR = "ROK4-PYRAMID-VECTOR",
+    VECTORDB = "VECTOR-DB",
+    ARCHIVE = "ARCHIVE",
+    GRAPHDB = "GRAPH-DB",
+    GRAPHOSRM = "GRAPH-OSRM",
+    GRAPHVALHALLA = "GRAPH-VALHALLA",
+}
+
+export enum ProcessingExecutionStoredDataDtoStatusEnum {
+    CREATED = "CREATED",
+    GENERATING = "GENERATING",
+    MODIFYING = "MODIFYING",
+    GENERATED = "GENERATED",
+    DELETED = "DELETED",
+    UNSTABLE = "UNSTABLE",
+}
+
+export enum ProcessingExecutionUploadDtoTypeEnum {
+    VECTOR = "VECTOR",
+    RASTER = "RASTER",
+    ARCHIVE = "ARCHIVE",
+    ROK4PYRAMID = "ROK4-PYRAMID",
+}
+
+export enum ProcessingExecutionUploadDtoStatusEnum {
+    CREATED = "CREATED",
+    OPEN = "OPEN",
+    CLOSED = "CLOSED",
+    CHECKING = "CHECKING",
+    GENERATING = "GENERATING",
+    MODIFYING = "MODIFYING",
+    UNSTABLE = "UNSTABLE",
+    DELETED = "DELETED",
+}
+
+export enum PermissionCreateDtoTypeEnum {
+    ACCOUNT = "ACCOUNT",
+    COMMUNITY = "COMMUNITY",
+}
+
+/** Type de configuration */
+export enum PermissionOfferingResponseDtoTypeEnum {
+    WMSVECTOR = "WMS-VECTOR",
+    WFS = "WFS",
+    WFSINSPIRE = "WFS-INSPIRE",
+    WMTSTMS = "WMTS-TMS",
+    WMSRASTER = "WMS-RASTER",
+    DOWNLOAD = "DOWNLOAD",
+    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
+    ALTIMETRY = "ALTIMETRY",
+}
+
+/** Visibilité de l'offre */
+export enum PermissionOfferingResponseDtoVisibilityEnum {
+    PRIVATE = "PRIVATE",
+    REFERENCED = "REFERENCED",
+    PUBLIC = "PUBLIC",
+}
+
+/** Statut de l'offre */
+export enum PermissionOfferingResponseDtoStatusEnum {
+    PUBLISHING = "PUBLISHING",
+    MODIFYING = "MODIFYING",
+    PUBLISHED = "PUBLISHED",
+    UNPUBLISHING = "UNPUBLISHING",
+    UNSTABLE = "UNSTABLE",
+}
+
+/** Type de configuration */
+export enum ConfigurationCreateDtoTypeEnum {
+    WMSVECTOR = "WMS-VECTOR",
+    WFS = "WFS",
+    WFSINSPIRE = "WFS-INSPIRE",
+    WMTSTMS = "WMTS-TMS",
+    WMSRASTER = "WMS-RASTER",
+    DOWNLOAD = "DOWNLOAD",
+    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
+    ALTIMETRY = "ALTIMETRY",
+}
+
+/** @default "PRIVATE" */
+export enum OfferingCreateDtoVisibilityEnum {
+    PRIVATE = "PRIVATE",
+    REFERENCED = "REFERENCED",
+    PUBLIC = "PUBLIC",
+}
+
+/** Le type de stockage */
+export enum StorageCreateDtoTypeEnum {
+    POSTGRESQL = "POSTGRESQL",
+    S3 = "S3",
+    FILESYSTEM = "FILESYSTEM",
+    POSTGRESQLROUTING = "POSTGRESQL-ROUTING",
+}
+
+/** Type du point d'accès */
+export enum EndpointCreateDtoTypeEnum {
+    WMSVECTOR = "WMS-VECTOR",
+    WFS = "WFS",
+    WFSINSPIRE = "WFS-INSPIRE",
+    WMTSTMS = "WMTS-TMS",
+    WMSRASTER = "WMS-RASTER",
+    DOWNLOAD = "DOWNLOAD",
+    METADATA = "METADATA",
+    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
+    ALTIMETRY = "ALTIMETRY",
+}
+
+/** Type du point d'accès */
+export enum EndpointDetailResponseDtoTypeEnum {
+    WMSVECTOR = "WMS-VECTOR",
+    WFS = "WFS",
+    WFSINSPIRE = "WFS-INSPIRE",
+    WMTSTMS = "WMTS-TMS",
+    WMSRASTER = "WMS-RASTER",
+    DOWNLOAD = "DOWNLOAD",
+    METADATA = "METADATA",
+    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
+    ALTIMETRY = "ALTIMETRY",
+}
+
+/** Types de livraisons ayant cette vérification par défaut */
+export enum CheckingCreateDtoDefaultUploadsCheckEnum {
+    VECTOR = "VECTOR",
+    RASTER = "RASTER",
+    ARCHIVE = "ARCHIVE",
+    ROK4PYRAMID = "ROK4-PYRAMID",
+}
+
+/** Types de livraisons ayant cette vérification par défaut */
+export enum CheckingAdminDetailResponseDtoDefaultUploadsCheckEnum {
+    VECTOR = "VECTOR",
+    RASTER = "RASTER",
+    ARCHIVE = "ARCHIVE",
+    ROK4PYRAMID = "ROK4-PYRAMID",
+}
+
+export enum StoredDataUpdateTechnicalDtoTypeEnum {
+    ROK4PYRAMIDRASTER = "ROK4-PYRAMID-RASTER",
+    ROK4PYRAMIDVECTOR = "ROK4-PYRAMID-VECTOR",
+    VECTORDB = "VECTOR-DB",
+    ARCHIVE = "ARCHIVE",
+    GRAPHDB = "GRAPH-DB",
+    GRAPHOSRM = "GRAPH-OSRM",
+    GRAPHVALHALLA = "GRAPH-VALHALLA",
+}
+
+export enum StoredDataUpdateTechnicalDtoVisibilityEnum {
+    PRIVATE = "PRIVATE",
+    REFERENCED = "REFERENCED",
+    PUBLIC = "PUBLIC",
+}
+
+export enum StoredDataUpdateTechnicalDtoStatusEnum {
+    CREATED = "CREATED",
+    GENERATING = "GENERATING",
+    MODIFYING = "MODIFYING",
+    GENERATED = "GENERATED",
+    DELETED = "DELETED",
+    UNSTABLE = "UNSTABLE",
+}
+
+export enum UploadUpdateDtoVisibilityEnum {
+    PRIVATE = "PRIVATE",
+    REFERENCED = "REFERENCED",
+    PUBLIC = "PUBLIC",
+}
+
+export enum StoredDataUpdateDtoVisibilityEnum {
+    PRIVATE = "PRIVATE",
+    REFERENCED = "REFERENCED",
+    PUBLIC = "PUBLIC",
+}
+
+export enum OfferingUpdateDtoVisibilityEnum {
+    PRIVATE = "PRIVATE",
+    REFERENCED = "REFERENCED",
+    PUBLIC = "PUBLIC",
+}
+
+export enum MetadataUpdateDtoTypeEnum {
+    INSPIRE = "INSPIRE",
+    ISOAP = "ISOAP",
+}
+
+/** Priorité de traitement */
+export enum ProcessingUpdateDtoPriorityEnum {
+    STANDARD = "STANDARD",
+    PREMIUM = "PREMIUM",
+}
+
+/** Types de livraisons ayant cette vérification par défaut */
+export enum CheckingUpdateDtoDefaultUploadsCheckEnum {
+    VECTOR = "VECTOR",
+    RASTER = "RASTER",
+    ARCHIVE = "ARCHIVE",
+    ROK4PYRAMID = "ROK4-PYRAMID",
+}
+
+export enum CommunityMemberDtoRightsEnum {
+    COMMUNITY = "COMMUNITY",
+    PROCESSING = "PROCESSING",
+    ANNEX = "ANNEX",
+    BROADCAST = "BROADCAST",
+    UPLOAD = "UPLOAD",
+}
+
+export enum UserKeyResponseDtoTypeEnum {
+    HASH = "HASH",
+    HEADER = "HEADER",
+    BASIC = "BASIC",
+    OAUTH2 = "OAUTH2",
+}
+
+/** Type de configuration */
+export enum OfferingListResponseDtoTypeEnum {
+    WMSVECTOR = "WMS-VECTOR",
+    WFS = "WFS",
+    WFSINSPIRE = "WFS-INSPIRE",
+    WMTSTMS = "WMTS-TMS",
+    WMSRASTER = "WMS-RASTER",
+    DOWNLOAD = "DOWNLOAD",
+    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
+    ALTIMETRY = "ALTIMETRY",
+}
+
+/** Type de configuration */
+export enum OfferingEndpointListResponseDtoTypeEnum {
+    WMSVECTOR = "WMS-VECTOR",
+    WFS = "WFS",
+    WFSINSPIRE = "WFS-INSPIRE",
+    WMTSTMS = "WMTS-TMS",
+    WMSRASTER = "WMS-RASTER",
+    DOWNLOAD = "DOWNLOAD",
+    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
+    ALTIMETRY = "ALTIMETRY",
+}
+
+/** Statut de l'offre */
+export enum OfferingEndpointListResponseDtoStatusEnum {
+    PUBLISHING = "PUBLISHING",
+    MODIFYING = "MODIFYING",
+    PUBLISHED = "PUBLISHED",
+    UNPUBLISHING = "UNPUBLISHING",
+    UNSTABLE = "UNSTABLE",
+}
+
+export enum ConfigurationUsedDataItineraryIsocurveDetailsMessageCostTypeEnum {
+    Time = "time",
+    Distance = "distance",
+}
+
+export enum ConfigurationUsedDataItineraryIsocurveDetailsMessageCostingEnum {
+    Auto = "auto",
+    AutoShorter = "auto_shorter",
+    Pedestrian = "pedestrian",
+}
+
+export enum ConfigurationWmsRasterDetailsMessageInterpolationEnum {
+    NEARESTNEIGHBOUR = "NEAREST-NEIGHBOUR",
+    LINEAR = "LINEAR",
+    BICUBIC = "BICUBIC",
+    LANCZOS2 = "LANCZOS2",
+    LANCZOS3 = "LANCZOS3",
+    LANCZOS4 = "LANCZOS4",
+}
+
+export enum StaticFileMessageTypeEnum {
+    GEOSERVERFTL = "GEOSERVER-FTL",
+    GEOSERVERSTYLE = "GEOSERVER-STYLE",
+    ROK4STYLE = "ROK4-STYLE",
+    DERIVATIONSQL = "DERIVATION-SQL",
+}
+
+export enum StorageMessageTypeEnum {
+    POSTGRESQL = "POSTGRESQL",
+    S3 = "S3",
+    FILESYSTEM = "FILESYSTEM",
+    POSTGRESQLROUTING = "POSTGRESQL-ROUTING",
+}
+
+export enum StoredDataMessageTypeEnum {
+    ROK4PYRAMIDRASTER = "ROK4-PYRAMID-RASTER",
+    ROK4PYRAMIDVECTOR = "ROK4-PYRAMID-VECTOR",
+    VECTORDB = "VECTOR-DB",
+    ARCHIVE = "ARCHIVE",
+    GRAPHDB = "GRAPH-DB",
+    GRAPHOSRM = "GRAPH-OSRM",
+    GRAPHVALHALLA = "GRAPH-VALHALLA",
+}
+
+export enum StoredDataMessageStatusEnum {
+    CREATED = "CREATED",
+    GENERATING = "GENERATING",
+    MODIFYING = "MODIFYING",
+    GENERATED = "GENERATED",
+    DELETED = "DELETED",
+    UNSTABLE = "UNSTABLE",
+}
+
+export enum UploadListResponseDtoTypeEnum {
+    VECTOR = "VECTOR",
+    RASTER = "RASTER",
+    ARCHIVE = "ARCHIVE",
+    ROK4PYRAMID = "ROK4-PYRAMID",
+}
+
+export enum UploadListResponseDtoVisibilityEnum {
+    PRIVATE = "PRIVATE",
+    REFERENCED = "REFERENCED",
+    PUBLIC = "PUBLIC",
+}
+
+export enum UploadListResponseDtoStatusEnum {
+    CREATED = "CREATED",
+    OPEN = "OPEN",
+    CLOSED = "CLOSED",
+    CHECKING = "CHECKING",
+    GENERATING = "GENERATING",
+    MODIFYING = "MODIFYING",
+    UNSTABLE = "UNSTABLE",
+    DELETED = "DELETED",
+}
+
+export enum UploadSharedDetailResponseDtoTypeEnum {
+    VECTOR = "VECTOR",
+    RASTER = "RASTER",
+    ARCHIVE = "ARCHIVE",
+    ROK4PYRAMID = "ROK4-PYRAMID",
+}
+
+export enum UploadSharedDetailResponseDtoVisibilityEnum {
+    PRIVATE = "PRIVATE",
+    REFERENCED = "REFERENCED",
+    PUBLIC = "PUBLIC",
+}
+
+export enum UploadSharedDetailResponseDtoStatusEnum {
+    CREATED = "CREATED",
+    OPEN = "OPEN",
+    CLOSED = "CLOSED",
+    CHECKING = "CHECKING",
+    GENERATING = "GENERATING",
+    MODIFYING = "MODIFYING",
+    UNSTABLE = "UNSTABLE",
+    DELETED = "DELETED",
+}
+
+export enum StoredDataListResponseDtoTypeEnum {
+    ROK4PYRAMIDRASTER = "ROK4-PYRAMID-RASTER",
+    ROK4PYRAMIDVECTOR = "ROK4-PYRAMID-VECTOR",
+    VECTORDB = "VECTOR-DB",
+    ARCHIVE = "ARCHIVE",
+    GRAPHDB = "GRAPH-DB",
+    GRAPHOSRM = "GRAPH-OSRM",
+    GRAPHVALHALLA = "GRAPH-VALHALLA",
+}
+
+export enum StoredDataListResponseDtoVisibilityEnum {
+    PRIVATE = "PRIVATE",
+    REFERENCED = "REFERENCED",
+    PUBLIC = "PUBLIC",
+}
+
+export enum StoredDataSharedDetailResponseDtoTypeEnum {
+    ROK4PYRAMIDRASTER = "ROK4-PYRAMID-RASTER",
+    ROK4PYRAMIDVECTOR = "ROK4-PYRAMID-VECTOR",
+    VECTORDB = "VECTOR-DB",
+    ARCHIVE = "ARCHIVE",
+    GRAPHDB = "GRAPH-DB",
+    GRAPHOSRM = "GRAPH-OSRM",
+    GRAPHVALHALLA = "GRAPH-VALHALLA",
+}
+
+export enum StoredDataSharedDetailResponseDtoVisibilityEnum {
+    PRIVATE = "PRIVATE",
+    REFERENCED = "REFERENCED",
+    PUBLIC = "PUBLIC",
+}
+
+/** Type du fichier statique */
+export enum StaticFileListResponseDtoTypeEnum {
+    GEOSERVERFTL = "GEOSERVER-FTL",
+    GEOSERVERSTYLE = "GEOSERVER-STYLE",
+    ROK4STYLE = "ROK4-STYLE",
+    DERIVATIONSQL = "DERIVATION-SQL",
+}
+
+/** Priorité de traitement */
+export enum ProcessingStandardDetailResponseDtoPriorityEnum {
+    STANDARD = "STANDARD",
+    PREMIUM = "PREMIUM",
+}
+
+export enum ProcessingExecutionListResponseDtoStatusEnum {
+    CREATED = "CREATED",
+    WAITING = "WAITING",
+    PROGRESS = "PROGRESS",
+    SUCCESS = "SUCCESS",
+    FAILURE = "FAILURE",
+    ABORTED = "ABORTED",
+}
+
+/** Type de configuration */
+export enum ConfigurationListResponseDtoTypeEnum {
+    WMSVECTOR = "WMS-VECTOR",
+    WFS = "WFS",
+    WFSINSPIRE = "WFS-INSPIRE",
+    WMTSTMS = "WMTS-TMS",
+    WMSRASTER = "WMS-RASTER",
+    DOWNLOAD = "DOWNLOAD",
+    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
+    ALTIMETRY = "ALTIMETRY",
+}
+
+/** Statut de la configuration */
+export enum ConfigurationListResponseDtoStatusEnum {
+    UNPUBLISHED = "UNPUBLISHED",
+    PUBLISHED = "PUBLISHED",
+    SYNCHRONIZING = "SYNCHRONIZING",
+}
+
+/** Types de livraisons ayant cette vérification par défaut */
+export enum CheckingStandardDetailResponseDtoDefaultUploadsCheckEnum {
+    VECTOR = "VECTOR",
+    RASTER = "RASTER",
+    ARCHIVE = "ARCHIVE",
+    ROK4PYRAMID = "ROK4-PYRAMID",
+}
+
+export enum CheckingExecutionListResponseDtoStatusEnum {
+    WAITING = "WAITING",
+    PROGRESS = "PROGRESS",
+    SUCCESS = "SUCCESS",
+    FAILURE = "FAILURE",
+}
+
+export enum CheckingExecutionDetailResponseDtoStatusEnum {
+    WAITING = "WAITING",
+    PROGRESS = "PROGRESS",
+    SUCCESS = "SUCCESS",
+    FAILURE = "FAILURE",
+}
+
+export enum CheckingExecutionUploadResponseDtoTypeEnum {
+    VECTOR = "VECTOR",
+    RASTER = "RASTER",
+    ARCHIVE = "ARCHIVE",
+    ROK4PYRAMID = "ROK4-PYRAMID",
+}
+
+export enum CommunityUserResponseDtoRightsEnum {
+    COMMUNITY = "COMMUNITY",
+    PROCESSING = "PROCESSING",
+    ANNEX = "ANNEX",
+    BROADCAST = "BROADCAST",
+    UPLOAD = "UPLOAD",
+}
+
+export enum UploadCatalogResponseDtoTypeEnum {
+    VECTOR = "VECTOR",
+    RASTER = "RASTER",
+    ARCHIVE = "ARCHIVE",
+    ROK4PYRAMID = "ROK4-PYRAMID",
+}
+
+export enum UploadCatalogResponseDtoVisibilityEnum {
+    PRIVATE = "PRIVATE",
+    REFERENCED = "REFERENCED",
+    PUBLIC = "PUBLIC",
+}
+
+/** Type de configuration */
+export enum OfferingSharedDetailResponseDtoTypeEnum {
+    WMSVECTOR = "WMS-VECTOR",
+    WFS = "WFS",
+    WFSINSPIRE = "WFS-INSPIRE",
+    WMTSTMS = "WMTS-TMS",
+    WMSRASTER = "WMS-RASTER",
+    DOWNLOAD = "DOWNLOAD",
+    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
+    ALTIMETRY = "ALTIMETRY",
+}
+
+/** Type de livraisons */
+export enum GetAll1ParamsTypeEnum {
+    VECTOR = "VECTOR",
+    RASTER = "RASTER",
+    ARCHIVE = "ARCHIVE",
+    ROK4PYRAMID = "ROK4-PYRAMID",
+}
+
+/** Type de fichier statique */
+export enum GetAll3ParamsTypeEnum {
+    GEOSERVERFTL = "GEOSERVER-FTL",
+    GEOSERVERSTYLE = "GEOSERVER-STYLE",
+    ROK4STYLE = "ROK4-STYLE",
+    DERIVATIONSQL = "DERIVATION-SQL",
+}
+
+/** Statut des exécutions à récupérer */
+export enum GetAll5ParamsStatusEnum {
+    CREATED = "CREATED",
+    WAITING = "WAITING",
+    PROGRESS = "PROGRESS",
+    SUCCESS = "SUCCESS",
+    FAILURE = "FAILURE",
+    ABORTED = "ABORTED",
+}
+
+/** Quel type de métadonnées (INSPIRE, ISOAP...) veut-on voir */
+export enum GetAll7ParamsTypeEnum {
+    INSPIRE = "INSPIRE",
+    ISOAP = "ISOAP",
+}
+
+/** Quel niveau de métadonnées (lot, produit...) veut-on voir */
+export enum GetAll7ParamsLevelEnum {
+    DATASET = "DATASET",
+    SERIES = "SERIES",
+}
+
+/** Type de métadonnée */
+export enum Create3ParamsTypeEnum {
+    INSPIRE = "INSPIRE",
+    ISOAP = "ISOAP",
+}
+
+/** Type de configuration */
+export enum GetAll8ParamsTypeEnum {
+    WMSVECTOR = "WMS-VECTOR",
+    WFS = "WFS",
+    WFSINSPIRE = "WFS-INSPIRE",
+    WMTSTMS = "WMTS-TMS",
+    WMSRASTER = "WMS-RASTER",
+    DOWNLOAD = "DOWNLOAD",
+    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
+    ALTIMETRY = "ALTIMETRY",
+}
+
+/** Statut des configurations */
+export enum GetAll8ParamsStatusEnum {
+    UNPUBLISHED = "UNPUBLISHED",
+    PUBLISHED = "PUBLISHED",
+    SYNCHRONIZING = "SYNCHRONIZING",
+}
+
+/** Type de stockages à filter, à laisser vide pour tous les types */
+export enum GetByTypeParamsTypeEnum {
+    POSTGRESQL = "POSTGRESQL",
+    S3 = "S3",
+    FILESYSTEM = "FILESYSTEM",
+    POSTGRESQLROUTING = "POSTGRESQL-ROUTING",
+}
+
+/** Type de livraison en entrée */
+export enum GetAll12ParamsInputUploadTypeEnum {
+    VECTOR = "VECTOR",
+    RASTER = "RASTER",
+    ARCHIVE = "ARCHIVE",
+    ROK4PYRAMID = "ROK4-PYRAMID",
+}
+
+/** Type de donnée stockée en entrée */
+export enum GetAll12ParamsInputStoredDataTypeEnum {
+    ROK4PYRAMIDRASTER = "ROK4-PYRAMID-RASTER",
+    ROK4PYRAMIDVECTOR = "ROK4-PYRAMID-VECTOR",
+    VECTORDB = "VECTOR-DB",
+    ARCHIVE = "ARCHIVE",
+    GRAPHDB = "GRAPH-DB",
+    GRAPHOSRM = "GRAPH-OSRM",
+    GRAPHVALHALLA = "GRAPH-VALHALLA",
+}
+
+/** Type de livraison en sortie */
+export enum GetAll12ParamsOutputUploadTypeEnum {
+    VECTOR = "VECTOR",
+    RASTER = "RASTER",
+    ARCHIVE = "ARCHIVE",
+    ROK4PYRAMID = "ROK4-PYRAMID",
+}
+
+/** Type de donnée stockée en sortie */
+export enum GetAll12ParamsOutputStoredDataTypeEnum {
+    ROK4PYRAMIDRASTER = "ROK4-PYRAMID-RASTER",
+    ROK4PYRAMIDVECTOR = "ROK4-PYRAMID-VECTOR",
+    VECTORDB = "VECTOR-DB",
+    ARCHIVE = "ARCHIVE",
+    GRAPHDB = "GRAPH-DB",
+    GRAPHOSRM = "GRAPH-OSRM",
+    GRAPHVALHALLA = "GRAPH-VALHALLA",
+}
+
+/** Type de point d'accès voulu */
+export enum GetAll13ParamsTypeEnum {
+    WMSVECTOR = "WMS-VECTOR",
+    WFS = "WFS",
+    WFSINSPIRE = "WFS-INSPIRE",
+    WMTSTMS = "WMTS-TMS",
+    WMSRASTER = "WMS-RASTER",
+    DOWNLOAD = "DOWNLOAD",
+    METADATA = "METADATA",
+    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
+    ALTIMETRY = "ALTIMETRY",
+}
+
+/** Type de livraison ayant la vérification automatique */
+export enum GetAll16ParamsDefaultUploadCheckEnum {
+    VECTOR = "VECTOR",
+    RASTER = "RASTER",
+    ARCHIVE = "ARCHIVE",
+    ROK4PYRAMID = "ROK4-PYRAMID",
+}
+
+/** Type de diffusion des offres permises */
+export enum GetUserPermissionsParamsTypeEnum {
+    WMSVECTOR = "WMS-VECTOR",
+    WFS = "WFS",
+    WFSINSPIRE = "WFS-INSPIRE",
+    WMTSTMS = "WMTS-TMS",
+    WMSRASTER = "WMS-RASTER",
+    DOWNLOAD = "DOWNLOAD",
+    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
+    ALTIMETRY = "ALTIMETRY",
+}
+
+/** Type de donnée stockée */
+export enum GetAll2ParamsTypeEnum {
+    ROK4PYRAMIDRASTER = "ROK4-PYRAMID-RASTER",
+    ROK4PYRAMIDVECTOR = "ROK4-PYRAMID-VECTOR",
+    VECTORDB = "VECTOR-DB",
+    ARCHIVE = "ARCHIVE",
+    GRAPHDB = "GRAPH-DB",
+    GRAPHOSRM = "GRAPH-OSRM",
+    GRAPHVALHALLA = "GRAPH-VALHALLA",
+}
+
+/** Statut des données stockées */
+export enum GetAll2ParamsStatusEnum {
+    CREATED = "CREATED",
+    GENERATING = "GENERATING",
+    MODIFYING = "MODIFYING",
+    GENERATED = "GENERATED",
+    DELETED = "DELETED",
+    UNSTABLE = "UNSTABLE",
+}
+
+/** Type de diffusion des offres */
+export enum GetAll6ParamsTypeEnum {
+    WMSVECTOR = "WMS-VECTOR",
+    WFS = "WFS",
+    WFSINSPIRE = "WFS-INSPIRE",
+    WMTSTMS = "WMTS-TMS",
+    WMSRASTER = "WMS-RASTER",
+    DOWNLOAD = "DOWNLOAD",
+    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
+    ALTIMETRY = "ALTIMETRY",
+}
+
+/** Statut des offres */
+export enum GetAll6ParamsStatusEnum {
+    PUBLISHING = "PUBLISHING",
+    MODIFYING = "MODIFYING",
+    PUBLISHED = "PUBLISHED",
+    UNPUBLISHING = "UNPUBLISHING",
+    UNSTABLE = "UNSTABLE",
+}
+
+/** Type de livraison ayant la vérification automatique */
+export enum GetAll9ParamsDefaultUploadCheckEnum {
+    VECTOR = "VECTOR",
+    RASTER = "RASTER",
+    ARCHIVE = "ARCHIVE",
+    ROK4PYRAMID = "ROK4-PYRAMID",
+}
+
+/** Statut des exécutions à récupérer */
+export enum GetAll10ParamsStatusEnum {
+    WAITING = "WAITING",
+    PROGRESS = "PROGRESS",
+    SUCCESS = "SUCCESS",
+    FAILURE = "FAILURE",
+}
+
+/** Filtre sur les droits de l'utlisateur */
+export enum GetUsersParamsRightsEnum {
+    COMMUNITY = "COMMUNITY",
+    PROCESSING = "PROCESSING",
+    ANNEX = "ANNEX",
+    BROADCAST = "BROADCAST",
+    UPLOAD = "UPLOAD",
+}
+
+/** Type de livraisons */
+export enum GetUploadsParamsTypeEnum {
+    VECTOR = "VECTOR",
+    RASTER = "RASTER",
+    ARCHIVE = "ARCHIVE",
+    ROK4PYRAMID = "ROK4-PYRAMID",
+}
+
+/** Type de diffusion de l'offre */
+export enum GetPublicOfferingsParamsTypeEnum {
+    WMSVECTOR = "WMS-VECTOR",
+    WFS = "WFS",
+    WFSINSPIRE = "WFS-INSPIRE",
+    WMTSTMS = "WMTS-TMS",
+    WMSRASTER = "WMS-RASTER",
+    DOWNLOAD = "DOWNLOAD",
+    METADATA = "METADATA",
+    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
+    ALTIMETRY = "ALTIMETRY",
 }

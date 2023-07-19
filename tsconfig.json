@@ -10,5 +10,5 @@
         "noImplicitAny": false // mettre à true après avoir passé tous les fichiers en typescript
     },
     "include": ["assets"],
-    "exclude": ["node_modules", "public"]
+    "exclude": ["node_modules", "public", "assets/types/entrepot-generated.ts"]
 }
