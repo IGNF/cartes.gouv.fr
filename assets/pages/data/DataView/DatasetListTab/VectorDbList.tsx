@@ -1,4 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import { AlertProps } from "@codegouvfr/react-dsfr/Alert";
+import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
@@ -7,7 +9,7 @@ import { FC, useState } from "react";
 
 import functions from "../../../../functions";
 import { routes } from "../../../../router/router";
-import { type VectorDb } from "../../../../types/app";
+import { StoredDataStatuses, type VectorDb } from "../../../../types/app";
 
 type ServiceTypes = "tms" | "wfs" | "wms-vector" | "pre-paquet";
 
@@ -20,6 +22,47 @@ const serviceTypeChoiceModal = createModal({
     id: "service-type-choice-modal",
     isOpenedByDefault: false,
 });
+
+const getVectorDbBadge = (status) => {
+    let severity: AlertProps.Severity = "info";
+    let text = "";
+    switch (status) {
+        case StoredDataStatuses.GENERATED:
+            severity = "success";
+            text = "Prêt";
+            break;
+
+        case StoredDataStatuses.CREATED:
+        case StoredDataStatuses.GENERATING:
+            severity = "warning";
+            text = "En cours de génération";
+            break;
+
+        case StoredDataStatuses.MODIFYING:
+            severity = "warning";
+            text = "En cours de modification";
+            break;
+
+        case StoredDataStatuses.UNSTABLE:
+            severity = "error";
+            text = "Echoué";
+            break;
+
+        case StoredDataStatuses.DELETED:
+            severity = "info";
+            text = "Supprimé";
+            break;
+
+        default:
+            break;
+    }
+
+    return (
+        <Badge noIcon={true} severity={severity} className={fr.cx("fr-mr-2v")}>
+            {text}
+        </Badge>
+    );
+};
 
 const VectorDbList: FC<VectorDbListProps> = ({ datastoreId, vectorDbList }) => {
     const [serviceType, setServiceType] = useState<ServiceTypes>();
@@ -51,34 +94,35 @@ const VectorDbList: FC<VectorDbListProps> = ({ datastoreId, vectorDbList }) => {
                 </h5>
             </div>
 
-            {vectorDbList?.map((el) => (
-                <div key={el._id} className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mt-2v")}>
-                    <div className={fr.cx("fr-col")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <Button iconId="ri-add-box-fill" title="Voir les données liées" className={fr.cx("fr-mr-2v")} />
-                            {el.name}
+            {vectorDbList?.map((el) => {
+                return (
+                    <div key={el._id} className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mt-2v")}>
+                        <div className={fr.cx("fr-col")}>
+                            <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
+                                <Button iconId="ri-add-box-fill" title="Voir les données liées" className={fr.cx("fr-mr-2v")} />
+                                {el.name}
+                            </div>
                         </div>
-                    </div>
-                    <div className={fr.cx("fr-col-2")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--right")}>{functions.date.format(el.last_event.date)}</div>
-                    </div>
 
-                    <div className={fr.cx("fr-col-3")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-grid-row--middle")}>
-                            <Button
-                                onClick={() => {
-                                    setSelectedStoredDataId(el._id);
-                                    serviceTypeChoiceModal.open();
-                                }}
-                                className={fr.cx("fr-mr-2v")}
-                            >
-                                Créer un service
-                            </Button>
-                            <Button iconId="fr-icon-menu-2-fill" title="Autres actions" />
+                        <div className={fr.cx("fr-col")}>
+                            <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-grid-row--middle")}>
+                                <p className={fr.cx("fr-m-auto", "fr-mr-2v")}>{functions.date.format(el?.last_event?.date)}</p>
+                                {getVectorDbBadge(el.status)}
+                                <Button
+                                    onClick={() => {
+                                        setSelectedStoredDataId(el._id);
+                                        serviceTypeChoiceModal.open();
+                                    }}
+                                    className={fr.cx("fr-mr-2v")}
+                                >
+                                    Créer un service
+                                </Button>
+                                <Button iconId="fr-icon-menu-2-fill" title="Autres actions" />
+                            </div>
                         </div>
                     </div>
-                </div>
-            ))}
+                );
+            })}
 
             <serviceTypeChoiceModal.Component
                 title="Définissez le service à créer"
