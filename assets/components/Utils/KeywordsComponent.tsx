@@ -23,6 +23,7 @@ const KeywordsComponent: FC<KeywordsComponentProps> = (props) => {
                 autoComplete={true}
                 disablePortal
                 multiple
+                filterSelectedOptions
                 options={keywords}
                 renderInput={(params) => <TextField {...params} />}
                 onChange={(e, values: string[]) => onChange(values)}
