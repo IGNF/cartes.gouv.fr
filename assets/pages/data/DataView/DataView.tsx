@@ -58,10 +58,10 @@ const DataView: FC<DataViewProps> = ({ datastoreId, dataName }) => {
                             <img src="//www.gouvernement.fr/sites/default/files/static_assets/placeholder.1x1.png" width="128px" />
                         </div>
                         <div className={fr.cx("fr-col")}>
-                            <p>
+                            <p className={fr.cx("fr-mb-2v")}>
                                 <strong>Création de la fiche de données : </strong>13 Mar. 2023
                             </p>
-                            <p>
+                            <p className={fr.cx("fr-mb-2v")}>
                                 <strong>Mise à jour : </strong>17 Mar. 2023
                             </p>
                         </div>
