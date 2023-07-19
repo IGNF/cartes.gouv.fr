@@ -88,6 +88,7 @@ const AdditionalInfoForm = ({ storedData, fileType, visibility, onPrevious, onVa
                     autoComplete={true}
                     disablePortal
                     multiple
+                    filterSelectedOptions
                     options={languagesOptions}
                     getOptionLabel={(option) => option.language}
                     defaultValue={[{ language: "français", code: "fra" }]}
