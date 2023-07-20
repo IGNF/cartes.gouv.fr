@@ -11,7 +11,7 @@ import reactQueryKeys from "../../modules/reactQueryKeys";
 import { routes } from "../../router/router";
 
 const DatastoreDashboard = ({ datastoreId }) => {
-    const datastoreQuery = useQuery([reactQueryKeys.datastore(datastoreId)], () => api.datastore.getOne(datastoreId), {
+    const datastoreQuery = useQuery([reactQueryKeys.datastore(datastoreId)], () => api.datastore.get(datastoreId), {
         staleTime: 60000,
     });
 

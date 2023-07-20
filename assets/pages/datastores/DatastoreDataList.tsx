@@ -61,7 +61,7 @@ const DatastoreDataList: FC<DatastoreDataListType> = ({ datastoreId }) => {
         queries: [
             {
                 queryKey: [reactQueryKeys.datastore(datastoreId)],
-                queryFn: () => api.datastore.getOne(datastoreId, { signal: abortController?.signal }),
+                queryFn: () => api.datastore.get(datastoreId, { signal: abortController?.signal }),
                 staleTime: 60000,
             },
             {
@@ -105,7 +105,7 @@ const DatastoreDataList: FC<DatastoreDataListType> = ({ datastoreId }) => {
                     />
 
                     {!dataListQuery.isLoading &&
-                        dataListQuery?.data.map((data: Data) => <DataListItem key={data?.data_name} datastoreId={datastoreId} data={data} />)}
+                        dataListQuery?.data?.map((data: Data) => <DataListItem key={data?.data_name} datastoreId={datastoreId} data={data} />)}
                 </>
             )}
         </AppLayout>

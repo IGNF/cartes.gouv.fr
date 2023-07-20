@@ -106,7 +106,7 @@ const VectorDbList: FC<VectorDbListProps> = ({ datastoreId, vectorDbList }) => {
 
                         <div className={fr.cx("fr-col")}>
                             <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-grid-row--middle")}>
-                                <p className={fr.cx("fr-m-auto", "fr-mr-2v")}>{functions.date.format(el?.last_event?.date)}</p>
+                                <p className={fr.cx("fr-m-auto", "fr-mr-2v")}>{el?.last_event?.date && functions.date.format(el?.last_event?.date)}</p>
                                 {getVectorDbBadge(el.status)}
                                 <Button
                                     onClick={() => {
