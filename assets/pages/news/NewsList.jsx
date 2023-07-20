@@ -1,12 +1,10 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Card } from "@codegouvfr/react-dsfr/Card";
 import { Tag } from "@codegouvfr/react-dsfr/Tag";
 
 import React from "react";
 import AppLayout from "../../components/Layout/AppLayout";
 import { defaultNavItems } from "../../config/navItems";
-import { appRoot, routes } from "../../router/router";
 
 const NewsList = () => {
     return (

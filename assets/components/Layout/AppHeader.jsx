@@ -14,26 +14,16 @@ const AppHeader = ({ navItems = [] }) => {
     quickAccessItems.push({
         iconId: fr.cx("fr-icon-arrow-right-line"),
         linkProps: {
-            href: "#",
+            href: "https://geoportail.gouv.fr/cartes",
             className: "fr-btn--icon-right",
         },
-        text: "Portail cartographique",
-    });
-
-    quickAccessItems.push({
-        iconId: fr.cx("fr-icon-arrow-right-line"),
-        className: "fr-btn--icon-right",
-        linkProps: {
-            href: "#",
-            className: "fr-btn--icon-right",
-        },
-        text: "Catalogue",
+        text: "Accéder au Géoportail",
     });
 
     if (user === null) {
         // utilisateur n'est pas connecté
         quickAccessItems.push({
-            iconId: "fr-icon-account-line",
+            iconId: fr.cx("fr-icon-account-line"),
             linkProps: {
                 href: Routing.generate("cartesgouvfr_security_login"),
             },
