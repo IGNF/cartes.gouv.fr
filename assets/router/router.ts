@@ -8,6 +8,7 @@ const routeDefs = {
     docs: defineRoute(`${appRoot}/documentation`),
     contact: defineRoute(`${appRoot}/nous-ecrire`),
     news: defineRoute(`${appRoot}/actualites`),
+    faq: defineRoute(`${appRoot}/faq`),
     sitemap: defineRoute(`${appRoot}/plan-du-site`),
     accessibility: defineRoute(`${appRoot}/accessibilite`),
     legal_notice: defineRoute(`${appRoot}/mentions-legales`),
@@ -66,4 +67,4 @@ const routeDefs = {
 
 export const { RouteProvider, useRoute, routes } = createRouter(routeDefs);
 
-export const publicRoutes = ["home", "docs", "contact", "news", "sitemap", "accessibility", "legal_notice", "cgu", "personal_data", "cookies"];
+export const publicRoutes = ["home", "docs", "contact", "news", "faq", "sitemap", "accessibility", "legal_notice", "cgu", "personal_data", "cookies"];
