@@ -11,7 +11,8 @@ import { publicRoutes, useRoute } from "./router";
 
 const Docs = lazy(() => import("../pages/Docs"));
 const Contact = lazy(() => import("../pages/Contact"));
-const News = lazy(() => import("../pages/News"));
+const NewsList = lazy(() => import("../pages/news/NewsList"));
+const Faq = lazy(() => import("../pages/Faq"));
 const Sitemap = lazy(() => import("../pages/footer/Sitemap"));
 const Accessibility = lazy(() => import("../pages/footer/Accessibility"));
 const LegalNotice = lazy(() => import("../pages/footer/LegalNotice"));
@@ -52,7 +53,10 @@ function RouterRenderer() {
             content = <Contact />;
             break;
         case "news":
-            content = <News />;
+            content = <NewsList />;
+            break;
+        case "faq":
+            content = <Faq />;
             break;
         case "sitemap":
             content = <Sitemap />;

@@ -1,9 +1,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Button } from "@codegouvfr/react-dsfr/Button";
-import { Card } from "@codegouvfr/react-dsfr/Card";
 import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
-import { Tag } from "@codegouvfr/react-dsfr/Tag";
 
 import React, { useContext } from "react";
 
@@ -26,33 +24,25 @@ const Home = () => {
                     <div className={fr.cx("fr-container")}>
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
                             <div className={fr.cx("fr-col-12", "fr-col-lg-6", "fr-px-0v", "fr-pl-md-14v")}>
-                                <p className={fr.cx("fr-mt-4w", "fr-mt-md-7w", "fr-display--xxs")}>cartes.gouv.fr</p>
-
-                                <h1 className={fr.cx("fr-mt-2w", "fr-mt-md-3w", "fr-mb-4w", "fr-display--xs")}>
-                                    Le portail national
-                                    <br />
-                                    des géocommuns <br />
-                                    et de la connaissance <br />
-                                    du territoire
-                                </h1>
-                                <p className={fr.cx("fr-mb-5w", "fr-text--lg", "fr-pr-10v")}>
-                                    <strong>une solution dédiée à l’information géographique au service des professionnels et des citoyens</strong>
+                                <p className={fr.cx("fr-mt-4w", "fr-mt-md-7w", "fr-display--xxs")}>
+                                    Construisons ensemble le futur portail de la connaissance du territoire
                                 </p>
-                                <p className={fr.cx("fr-mb-2w")}>
-                                    <a
-                                        href=""
-                                        className={fr.cx(
-                                            "fr-btn",
-                                            "fr-btn--secondary",
-                                            "fr-btn--lg",
-                                            "fr-mb-6v",
-                                            "fr-btn--icon-left",
-                                            "fr-icon-play-circle-fill"
-                                        )}
-                                        aria-hidden="true"
-                                    >
-                                        Présentation vidéo
-                                    </a>
+
+                                <p className={fr.cx("fr-mb-5w", "fr-text--lg", "fr-pr-10v")}>
+                                    <span className="fr-icon-check-line" aria-hidden="true" /> Un accès <strong>unique</strong> et <strong>partagé</strong> aux
+                                    données géographiques <strong>ouvertes</strong>
+                                </p>
+                                <p className={fr.cx("fr-mb-5w", "fr-text--lg", "fr-pr-10v")}>
+                                    <span className="fr-icon-check-line" aria-hidden="true" /> Des outils plus <strong>simple</strong> pour déposer et diffuser
+                                    vos données en toute <strong>autonomie</strong>
+                                </p>
+                                <p className={fr.cx("fr-mb-5w", "fr-text--lg", "fr-pr-10v")}>
+                                    <span className="fr-icon-check-line" aria-hidden="true" /> Une nouvelle infrastructure plus <strong>performante</strong> qui
+                                    offre des services <strong>utiles pour tous</strong> les usagers
+                                </p>
+                                <p className={fr.cx("fr-mb-5w", "fr-text--lg", "fr-pr-10v")}>
+                                    <span className="fr-icon-check-line" aria-hidden="true" /> La possibilité d&apos;enrichir et améliorer{" "}
+                                    <strong>collectivement</strong> les données et les services
                                 </p>
                             </div>
                             <div className={fr.cx("fr-col-12", "fr-col-lg-6", "fr-pb-4w", "fr-pl-md-8w", "fr-pr-md-2w", "fr-pt-md-6w", "aligncenter")}>
@@ -208,39 +198,6 @@ const Home = () => {
                         },
                     ]}
                 />
-            </div>
-
-            {/* Section : Actualités */}
-            <div className={fr.cx("c-section", "c-section--blue")}>
-                <div className={fr.cx("fr-container fr-container--blue card  fr-pt-8v fr-pt-18v fr-mb-md-8v")}>
-                    <h2 className={fr.cx("fr-text--center  fr-mb-12v")}>Actualités</h2>
-
-                    <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
-                        {/* TODO : boucler sur 3 items */}
-                        <div className={fr.cx("fr-col-xs-12 fr-col-sm-12 fr-col-md-4 fr-col-lg-4")}>
-                            <Card
-                                badges={[
-                                    <Tag key="1" className={fr.cx("fr-tag--pink-tuile")}>
-                                        Autour de la terre
-                                    </Tag>,
-                                ]}
-                                desc="Les Communs d’utilité publique ! Une journée d’échanges pour une nouvelle manière de relever ensemble les défis d’intérêt général"
-                                detail="17 janvier 2023"
-                                enlargeLink
-                                imageAlt="illustration de l'article"
-                                imageUrl="https://2fresh-studio.com/projets/ign/assets/img/actu1.jpg"
-                                linkProps={{
-                                    href: "#",
-                                }}
-                                title="Ceci est un titre d'article"
-                            />
-                        </div>
-                    </div>
-
-                    <div className={fr.cx("fr-col-12 text--center fr-pt-6w fr-pb-8w")}>
-                        <Button linkProps={routes.news().link}>Voir toutes les actualités</Button>
-                    </div>
-                </div>
             </div>
         </AppLayout>
     );
