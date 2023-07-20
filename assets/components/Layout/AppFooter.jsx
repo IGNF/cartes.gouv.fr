@@ -21,10 +21,10 @@ const AppFooter = () => {
                 </>
             }
             contentDescription="
-            Texte optionnel 3 lignes maximum.
-
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-            Consectetur et vel quam auctor semper. Cras si amet mollis dolor. 
+                Cartes.gouv.fr propose des services développés par l’Institut national de 
+                l’information géographique et forestière (IGN) et ses partenaires, ils sont 
+                alimentés par la Géoplateforme, la nouvelle infrastructure publique des données 
+                géographiques.
             "
             cookiesManagementLinkProps={{
                 ...routes.cookies().link,
