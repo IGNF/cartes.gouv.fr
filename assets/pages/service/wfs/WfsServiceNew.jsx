@@ -66,7 +66,7 @@ const WfsServiceNew = ({ datastoreId, storedDataId }) => {
     useEffect(() => {
         (async () => {
             try {
-                const storedData = await api.storedData.getOne(datastoreId, storedDataId);
+                const storedData = await api.storedData.get(datastoreId, storedDataId);
                 setStoredData(storedData);
 
                 let rels = storedData.type_infos?.relations || [];

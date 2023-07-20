@@ -1,9 +1,16 @@
 import {
+    DatastoreDetailResponseDto,
     StoredDataPrivateDetailResponseDto,
     StoredDataPrivateDetailResponseDtoStatusEnum,
     StoredDataPrivateDetailResponseDtoTypeEnum,
     StoredDataPrivateDetailResponseDtoVisibilityEnum,
+    UploadDetailResponseDto,
+    UploadTreeElementResponseDto,
+    UserDetailsResponseDto,
 } from "./entrepot";
+
+/** datastore */
+export type Datastore = DatastoreDetailResponseDto;
 
 /** fiche de donnée */
 export type Data = {
@@ -27,3 +34,10 @@ export const StoredDataVisibilities = StoredDataPrivateDetailResponseDtoVisibili
 export interface VectorDb extends StoredData {
     type: StoredDataPrivateDetailResponseDtoTypeEnum.VECTORDB;
 }
+
+/** upload (livraison) */
+export type Upload = UploadDetailResponseDto;
+export type UploadTree = UploadTreeElementResponseDto;
+
+/** user */
+export type EntrepotUser = UserDetailsResponseDto;

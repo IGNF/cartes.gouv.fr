@@ -1,3 +1,5 @@
+import Routing from "fos-router";
+
 import { jsonFetch } from "../modules/jsonFetch";
 
 const getMe = () => {
@@ -10,7 +12,9 @@ const getDatastoresList = () => {
     return jsonFetch(url);
 };
 
-export default {
+const user = {
     getMe,
     getDatastoresList,
 };
+
+export default user;

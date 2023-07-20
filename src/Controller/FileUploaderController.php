@@ -155,10 +155,8 @@ class FileUploaderController extends AbstractController
      *      - Si c'est une archive (.zip) :
      *          - Pas de fichiers de type differents
      *          - Autres (nbre max de fichier ....).
-     *
-     * @return JSONResponse
      */
-    private function validate(string $filepath, string $uuid)
+    private function validate(string $filepath, string $uuid): JsonResponse
     {
         $file = new \SplFileInfo($filepath);
         $filename = $file->getFilename();

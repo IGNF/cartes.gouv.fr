@@ -11,7 +11,7 @@ export const UserContext = createContext<null | UserContextType>(null);
 
 export const UserContextProvider: FC<PropsWithChildren> = ({ children }) => {
     const userFromTwig = (document.getElementById("user") as HTMLDivElement).dataset?.user ?? null;
-    const [user, setUser] = useState(userFromTwig === null ? null : JSON.parse(userFromTwig));
+    const [user, setUser] = useState<UserType>(userFromTwig === null ? null : JSON.parse(userFromTwig));
 
     return <UserContext.Provider value={{ user, setUser }}>{children}</UserContext.Provider>;
 };

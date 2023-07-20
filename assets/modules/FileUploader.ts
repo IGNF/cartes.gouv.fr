@@ -1,21 +1,23 @@
+import Routing from "fos-router";
+
 import { jsonFetch } from "./jsonFetch";
+import { Dispatch, SetStateAction } from "react";
 
 const DEFAULT_CHUNK_SIZE = 16000000; // 16 MB
+
+type UploadFileResponseType = {
+    index: number;
+    numBytes: number;
+};
 
 export default class FileUploader {
     #_urlUploadChunk = Routing.generate("cartesgouvfr_file_uploader_upload_chunk");
     #_urlUploadComplete = Routing.generate("cartesgouvfr_file_uploader_upload_complete");
 
     /**
-     * Envoie le fichier en morceaux (voir FileUploadController)
-     *
-     * @param {string} uuid
-     * @param {File} file
-     * @param {Function} setProgressValue
-     * @param {number} maxChunkSize
-     * @returns
+     * Envoie le fichier en morceaux (voir FileUploadController de Symfony)
      */
-    uploadFile = async (uuid, file, setProgressValue = undefined, maxChunkSize = DEFAULT_CHUNK_SIZE) => {
+    uploadFile = async (uuid: string, file: File, setProgressValue: Dispatch<SetStateAction<number>>, maxChunkSize: number = DEFAULT_CHUNK_SIZE) => {
         let numBytes = 0;
 
         const uploadChunk = async (index, chunk) => {
@@ -26,15 +28,12 @@ export default class FileUploader {
             formData.append("index", index);
             formData.append("chunk", chunkFile, `${uuid}_${index}`);
 
-            return jsonFetch(
+            return jsonFetch<UploadFileResponseType>(
                 this.#_urlUploadChunk,
                 {
                     method: "POST",
-                    body: formData,
-                    headers: {
-                        "X-Requested-With": "XMLHttpRequest",
-                    },
                 },
+                formData,
                 true,
                 true
             );
@@ -46,7 +45,7 @@ export default class FileUploader {
         while (start < file.size) {
             const chunk = file.slice(start, start + maxChunkSize);
 
-            let response = await uploadChunk(index, chunk);
+            const response = await uploadChunk(index, chunk);
 
             numBytes += response.numBytes;
             if (setProgressValue) {
@@ -61,20 +60,19 @@ export default class FileUploader {
     /**
      * Déclare la fin du téléversement et demande la reconstitution de tous les morceaux
      *
-     * @param {string} uuid
-     * @param {File} file
      * @returns
      */
-    uploadComplete = (uuid, file) => {
+    uploadComplete = (uuid: string, file: File) => {
+        const body = {
+            uuid: uuid,
+            originalFilename: file.name,
+        };
         return jsonFetch(
             this.#_urlUploadComplete,
             {
                 method: "POST",
-                body: {
-                    uuid: uuid,
-                    originalFilename: file.name,
-                },
             },
+            body,
             false,
             true
         );
