@@ -14,21 +14,19 @@ use Twig\Environment as TwigEnvironment;
 class MailerService
 {
     public function __construct(
-        private ParameterBagInterface $parameters, 
-        private TwigEnvironment $twig, 
-        private MailerInterface $mailer, 
+        private ParameterBagInterface $parameters,
+        private TwigEnvironment $twig,
+        private MailerInterface $mailer,
         private LoggerInterface $logger)
-    {}
+    {
+    }
 
     /**
-     * @param string $to
-     * @param string $subject
-     * @param string $templateName
-     * @param array<mixed>  $params
+     * @param array<mixed> $params
      *
-     * @return void
+     * @throws TransportExceptionInterface
      */
-    public function sendMail($to, $subject, $templateName, $params = [])
+    public function sendMail(string $to, string $subject, string $templateName, array $params = []): void
     {
         $body = $this->twig->render($templateName, $params);
 
@@ -51,7 +49,7 @@ class MailerService
         }
     }
 
-    public function containsBannedWords(string $text) : bool
+    public function containsBannedWords(string $text): bool
     {
         $bannedWords = Yaml::parseFile(__DIR__.'/../../config/app/banned_words.yml');
 

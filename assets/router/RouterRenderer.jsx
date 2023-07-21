@@ -12,10 +12,10 @@ import { knownRoutes, publicRoutes, useRoute } from "./router";
 
 const About = lazy(() => import("../pages/About"));
 const Docs = lazy(() => import("../pages/Docs"));
-const Contact = lazy(() => import("../pages/Contact"));
+const Contact = lazy(() => import("../pages/contact/Contact"));
+const Thanks = lazy(() => import("../pages/contact/Thanks"));
 const NewsList = lazy(() => import("../pages/news/NewsList"));
 const Faq = lazy(() => import("../pages/Faq"));
-const Thanks = lazy(() => import("../pages/Thanks"));
 const Sitemap = lazy(() => import("../pages/footer/Sitemap"));
 const Accessibility = lazy(() => import("../pages/footer/Accessibility"));
 const LegalNotice = lazy(() => import("../pages/footer/LegalNotice"));

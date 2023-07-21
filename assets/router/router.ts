@@ -70,4 +70,18 @@ const routeDefs = {
 export const { RouteProvider, useRoute, routes } = createRouter(routeDefs);
 
 export const knownRoutes = Object.values(routes).map((r) => r.name);
-export const publicRoutes = ["home", "about", "docs", "contact", "news", "faq", "sitemap", "accessibility", "legal_notice", "cgu", "personal_data", "cookies"];
+export const publicRoutes = [
+    "home",
+    "about",
+    "docs",
+    "contact",
+    "contact_thanks",
+    "news",
+    "faq",
+    "sitemap",
+    "accessibility",
+    "legal_notice",
+    "cgu",
+    "personal_data",
+    "cookies",
+];

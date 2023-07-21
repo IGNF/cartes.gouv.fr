@@ -1,10 +1,11 @@
-import React from "react";
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
-import AppLayout from "../components/Layout/AppLayout";
-import { defaultNavItems } from "../config/navItems";
-import { routes } from "../router/router";
+import React from "react";
+
+import AppLayout from "../../components/Layout/AppLayout";
+import { defaultNavItems } from "../../config/navItems";
+import { routes } from "../../router/router";
 
 const Thanks = () => {
     const link = { __html: Translator.trans("mailer.signature", { href: routes.home().href }) };
@@ -14,6 +15,7 @@ const Thanks = () => {
             <Alert
                 title={Translator.trans("contact.thanks.title")}
                 closable
+                // TODO : à corriger, c'est à cause de ça qu'on a l'erreur "<p> dans un <p>"
                 description={
                     <>
                         <p>{Translator.trans("contact.thanks.description")}</p>
