@@ -1,0 +1,29 @@
+{% extends "Mailer/base.html.twig" %}
+{% trans_default_domain "cartesgouvfr" %}
+
+{% block body %}
+    <div>
+        <p>{{ 'contact.email_support.heading'|trans }}</p>
+        <hr>
+        <p>
+            <strong>{{ 'contact.email_support.user_email'|trans }} : </strong>
+            {{ userEmail }}
+        </p>
+        <p>
+            <strong>{{ 'contact.email_support.last_name'|trans }} : </strong>{% if lastName is not empty %}{{ lastName }}{% else %}{{ 'contact.email_support.not_specified'|trans }}{% endif %}
+        </p>
+        <p>
+            <strong>{{ 'contact.email_support.first_name'|trans }} : </strong>{% if firstName is not empty %}{{ firstName }}{% else %}{{ 'contact.email_support.not_specified'|trans }}{% endif %}
+        </p>
+        {% if userId is defined %}
+            <p><strong>{{ 'contact.email_support.user_id'|trans }} : </strong>{{ userId }}</p>
+        {% endif %}
+
+        <p><strong>{{ 'contact.email_support.date'|trans }} : </strong>{{ sendDate|date('d-m-Y H:i', "Europe/Paris") }}</p>
+
+        <p>
+            <strong>{{ 'contact.email_support.message'|trans }} : </strong><br />{{ message|raw|nl2br }}
+        </p>
+    </div>
+{% endblock %}
+    

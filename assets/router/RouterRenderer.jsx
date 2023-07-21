@@ -15,6 +15,7 @@ const Docs = lazy(() => import("../pages/Docs"));
 const Contact = lazy(() => import("../pages/Contact"));
 const NewsList = lazy(() => import("../pages/news/NewsList"));
 const Faq = lazy(() => import("../pages/Faq"));
+const Thanks = lazy(() => import("../pages/Thanks"));
 const Sitemap = lazy(() => import("../pages/footer/Sitemap"));
 const Accessibility = lazy(() => import("../pages/footer/Accessibility"));
 const LegalNotice = lazy(() => import("../pages/footer/LegalNotice"));
@@ -61,6 +62,9 @@ function RouterRenderer() {
             break;
         case "contact":
             content = <Contact />;
+            break;
+        case "contact_thanks":
+            content = <Thanks />;
             break;
         case "news":
             content = <NewsList />;
