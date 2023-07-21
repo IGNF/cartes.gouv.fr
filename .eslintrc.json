@@ -52,7 +52,6 @@
         // "propWrapperFunctions": [{ "property": "exact", "exact": true }]
     },
     "globals": {
-        "Routing": true,
         "Translator": true
     },
     "ignorePatterns": [

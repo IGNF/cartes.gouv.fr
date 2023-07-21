@@ -1,3 +1,4 @@
+import Routing from "fos-router";
 import React, { Suspense, lazy, useContext } from "react";
 
 import AppLayout from "../components/Layout/AppLayout";
