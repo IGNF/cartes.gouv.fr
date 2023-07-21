@@ -23,19 +23,23 @@ const About = () => {
                         façons de penser les cartes et doit encourager de nouveaux usages répondant à des besoins publics.
                     </p>
                     <p>
-                        Dans ce contexte, le programme Géoplateforme vise à doter la puissance publique d’une infrastructure collaborative et mutualisée pour la
-                        production et la diffusion des géodonnées. Son ambition est de permettre aux porteurs de politiques publiques et aux collectivités
-                        locales qui le souhaitent de bénéficier très simplement de fonctionnalités avancées pour diffuser leurs propres données et s’ouvrir à
-                        des communautés contributives. Cet espace, composante géographique de l’État-plateforme{" "}
-                        <a href="https://www.numerique.gouv.fr/publications/panorama-grands-projets-si/" target="_blank" rel="noreferrer">
-                            reconnue grand projet numérique de l’État
-                        </a>
+                        Dans ce contexte, le programme Géoplateforme vise à doter la puissance publique d’une{" "}
+                        <strong>infrastructure collaborative et mutualisée pour la production et la diffusion des géodonnées</strong>. Son ambition est de
+                        permettre aux porteurs de politiques publiques et aux collectivités locales qui le souhaitent de bénéficier très simplement de
+                        fonctionnalités avancées pour diffuser leurs propres données et s’ouvrir à des communautés contributives. Cet espace,{" "}
+                        <strong>
+                            composante géographique de l’État-plateforme{" "}
+                            <a href="https://www.numerique.gouv.fr/publications/panorama-grands-projets-si/" target="_blank" rel="noreferrer">
+                                reconnue grand projet numérique de l’État
+                            </a>
+                        </strong>
                         , répond notamment aux enjeux de souveraineté des données de l’État face aux géants de l’Internet.
                     </p>
                     <p>
-                        La Géoplateforme s’inscrit pleinement dans la dynamique des géo-communs soutenue par l’IGN. En effet, si l’institut a bien vocation à
-                        porter ses propres services sur la Géoplateforme, celle-ci se veut en premier lieu un outil commun au monde public. C’est la
-                        mobilisation progressive de partenaires, producteurs et usagers de données géographiques qui doit permettre d’atteindre cet objectif.
+                        La Géoplateforme s’inscrit pleinement dans la <strong>dynamique des géo-communs</strong> soutenue par l’IGN. En effet, si l’institut a
+                        bien vocation à porter ses propres services sur la Géoplateforme, celle-ci se veut en premier lieu un outil commun au monde public.
+                        C’est la mobilisation progressive de partenaires, producteurs et usagers de données géographiques qui doit permettre d’atteindre cet
+                        objectif.
                     </p>
 
                     <h2>Enjeux</h2>
@@ -123,15 +127,31 @@ const About = () => {
                         <li>
                             <strong>2021&nbsp;:</strong>
                             <br />
-                            Coproduire et modifier des jeux de données en autonomie tout en améliorant collectivement la qualité de l’ensemble des données
+                            <a href="https://www.ign.fr/geoplateforme/experimente" target="_blank" rel="noreferrer">
+                                Expérimentations de premières fonctionnalités
+                            </a>
+                            <br />
+                            Contractualisation de l’hébergement du socle technique de la Géoplateforme
+                            <br />
+                            <a
+                                href="https://www.ign.fr/espace-presse/lign-finalise-son-choix-de-partenaires-techniques-pour-la-geoplateforme"
+                                target="_blank"
+                                rel="noreferrer"
+                            >
+                                Passation du marché de construction, d’infogérance et de maintenance de la Géoplateforme
+                            </a>
                         </li>
                         <li>
                             <strong>2022&nbsp;:</strong>
                             <br />
-                            Expérimentations de nouvelles fonctionnalités
+                            <a href="https://www.ign.fr/geoplateforme/experimente" target="_blank" rel="noreferrer">
+                                Expérimentations de nouvelles fonctionnalités
+                            </a>
                             <br />
-                            Mise en place du socle technique et des premiers services permettant de gérer le cycle de vie de la donnée (chargement, mise à jour,
-                            diffusion)
+                            <a href="https://www.ign.fr/geoplateforme/construire-le-socle-de-la-geoplateforme" target="_blank" rel="noreferrer">
+                                Mise en place du socle technique
+                            </a>{" "}
+                            et des premiers services permettant de gérer le cycle de vie de la donnée (chargement, mise à jour, diffusion)
                         </li>
                         <li>
                             <strong>2023 - 2024&nbsp;:</strong>
