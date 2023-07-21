@@ -13,9 +13,7 @@ export const defaultNavItems = [
     },
     {
         text: "A propos",
-        linkProps: {
-            href: "#",
-        },
+        linkProps: routes.about().link,
     },
     {
         menuLinks: [

@@ -9,6 +9,7 @@ import Redirect from "../pages/Redirect";
 import PageNotFound from "../pages/error/PageNotFound";
 import { publicRoutes, useRoute } from "./router";
 
+const About = lazy(() => import("../pages/About"));
 const Docs = lazy(() => import("../pages/Docs"));
 const Contact = lazy(() => import("../pages/Contact"));
 const NewsList = lazy(() => import("../pages/news/NewsList"));
@@ -45,6 +46,9 @@ function RouterRenderer() {
     switch (route.name) {
         case "home":
             content = <Home />;
+            break;
+        case "about":
+            content = <About />;
             break;
         case "docs":
             content = <Docs />;

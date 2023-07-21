@@ -3,6 +3,8 @@ import React from "react";
 import AppLayout from "../../components/Layout/AppLayout";
 import { defaultNavItems } from "../../config/navItems";
 
+import { routes } from "../../router/router";
+
 const Accessibility = () => {
     return (
         <AppLayout navItems={defaultNavItems}>
@@ -15,14 +17,16 @@ const Accessibility = () => {
                     </p>
                     <ul>
                         <li>
-                            Envoyer un message par le biais du <a href="#">formulaire de contact en ligne</a>
+                            Envoyer un message par le biais du <a href={routes.contact().href}>formulaire de contact en ligne</a>
                         </li>
                         <li>
                             ou contacter l’IGN par courrier ou par téléphone&nbsp;:
                             <br />
                             Institut national de l’information géographique et forestière
                             <br />
-                            73 avenue de Paris, 94 165 Saint-Mandé Cedex
+                            73 avenue de Paris
+                            <br />
+                            94165 Saint-Mandé Cedex
                             <br />
                             Tél. : 01 43 98 80 00
                         </li>

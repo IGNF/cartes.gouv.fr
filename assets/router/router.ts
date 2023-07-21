@@ -5,6 +5,7 @@ export const appRoot = (document.getElementById("root") as HTMLDivElement).datas
 const routeDefs = {
     // routes non protégées
     home: defineRoute(appRoot === "" ? "/" : appRoot),
+    about: defineRoute(`${appRoot}/a-propos`),
     docs: defineRoute(`${appRoot}/documentation`),
     contact: defineRoute(`${appRoot}/nous-ecrire`),
     news: defineRoute(`${appRoot}/actualites`),
@@ -67,4 +68,4 @@ const routeDefs = {
 
 export const { RouteProvider, useRoute, routes } = createRouter(routeDefs);
 
-export const publicRoutes = ["home", "docs", "contact", "news", "faq", "sitemap", "accessibility", "legal_notice", "cgu", "personal_data", "cookies"];
+export const publicRoutes = ["home", "about", "docs", "contact", "news", "faq", "sitemap", "accessibility", "legal_notice", "cgu", "personal_data", "cookies"];
