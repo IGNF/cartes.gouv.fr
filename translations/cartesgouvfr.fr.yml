@@ -28,6 +28,7 @@ data:
 contact:
     title: "Nous écrire"
     form:
+        error_title: "Votre message n'a pas pu être envoyé"
         explain: 'Vous n''avez pas trouvé la réponse à votre question dans <a href="%href%">l''aide en ligne</a> ? Vous souhaitez la configuration d''un espace de travail pour vos besoins ? Contactez-nous !'
         email_contact: "Votre email *"
         email_contact_mandatory_error: "l'email est obligatoire"

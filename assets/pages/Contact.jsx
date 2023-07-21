@@ -1,8 +1,9 @@
-import React, { useContext } from "react";
+import React, { useState, useContext } from "react";
 import Routing from "fos-router";
 import Input from "@codegouvfr/react-dsfr/Input";
 import Select from "@codegouvfr/react-dsfr/Select";
 import Button from "@codegouvfr/react-dsfr/Button";
+import Alert from "@codegouvfr/react-dsfr/Alert";
 import { fr } from "@codegouvfr/react-dsfr";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -31,6 +32,8 @@ const schema = yup
 const Contact = () => {
     const { user } = useContext(UserContext);
 
+    const [error, setError] = useState(null);
+
     const {
         register,
         handleSubmit,
@@ -42,6 +45,7 @@ const Contact = () => {
     const infos = { __html: Translator.trans("contact.form.infos") };
 
     const onSubmit = () => {
+        setError(null);
         const url = Routing.generate("cartesgouvfr_contact_contact_us");
         jsonFetch(url, {
             method: "POST",
@@ -49,13 +53,14 @@ const Contact = () => {
         })
             .then(routes.contact_thanks().push())
             .catch((error) => {
-                console.log(error.message);
+                setError(error.message);
             });
     };
 
     return (
         <AppLayout navItems={defaultNavItems}>
             <h1>{Translator.trans("contact.title")}</h1>
+            {error && <Alert title={Translator.trans("contact.form.error_title")} closable description={error} severity="error" />}
             <p dangerouslySetInnerHTML={explain} />
             <Input
                 label={Translator.trans("contact.form.email_contact")}

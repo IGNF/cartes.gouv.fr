@@ -20,7 +20,6 @@ const Thanks = () => {
                         <p dangerouslySetInnerHTML={link} />
                     </>
                 }
-                onClose={function noRefCheck() {}}
                 severity="success"
             />
             <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-mt-1w")}>
