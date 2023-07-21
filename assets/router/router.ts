@@ -8,6 +8,7 @@ const routeDefs = {
     about: defineRoute(`${appRoot}/a-propos`),
     docs: defineRoute(`${appRoot}/documentation`),
     contact: defineRoute(`${appRoot}/nous-ecrire`),
+    contact_thanks: defineRoute(`${appRoot}/merci`),
     news: defineRoute(`${appRoot}/actualites`),
     faq: defineRoute(`${appRoot}/faq`),
     sitemap: defineRoute(`${appRoot}/plan-du-site`),
