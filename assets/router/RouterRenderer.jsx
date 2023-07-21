@@ -8,7 +8,7 @@ import { UserContext } from "../contexts/UserContext";
 import Home from "../pages/Home";
 import Redirect from "../pages/Redirect";
 import PageNotFound from "../pages/error/PageNotFound";
-import { publicRoutes, useRoute } from "./router";
+import { knownRoutes, publicRoutes, useRoute } from "./router";
 
 const About = lazy(() => import("../pages/About"));
 const Docs = lazy(() => import("../pages/Docs"));
@@ -32,6 +32,11 @@ const WfsServiceNew = lazy(() => import("../pages/service/wfs/WfsServiceNew"));
 function RouterRenderer() {
     const route = useRoute();
     const { user } = useContext(UserContext);
+
+    // vérification si la route demandée est bien connue/enregistrée
+    if (!knownRoutes.includes(route.name)) {
+        return <PageNotFound />;
+    }
 
     if (!publicRoutes.includes(route.name)) {
         // vérifier si l'utilisateur est authentifié et éventuellement ses droits à la ressource demandée
