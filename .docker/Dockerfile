@@ -75,7 +75,7 @@ RUN export APP_ENV=prod \
     && php bin/console assets:install
 
 RUN yarn install --production --frozen-lockfile \
-    && yarn encore production \
+    && yarn build \
     && yarn cache clean
 
 EXPOSE 8000

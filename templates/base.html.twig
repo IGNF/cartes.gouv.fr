@@ -34,10 +34,6 @@
     <body>
         {% block body %}{% endblock %}
 
-        {# fosjsrouting #}
-        <script src="{{ asset('bundles/fosjsrouting/js/router.min.js') }}"></script>
-        <script src="{{ path('fos_js_routing_js', { callback: 'fos.Router.setData' }) }}"></script>
-
         {# bazinga traducteur #}
         <script src="{{ asset('bundles/bazingajstranslation/js/translator.min.js') }}"></script>
         <script src="{{ path('bazinga_jstranslation_js', { 'domain': 'cartesgouvfr', 'locales': 'fr' }) }}"></script>
