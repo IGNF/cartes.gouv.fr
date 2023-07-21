@@ -32,10 +32,15 @@ const AppHeader = ({ navItems = [] }) => {
         });
     } else {
         // utilisateur est connecté
+        let btnMyAccountText = `${user.firstName} ${user.lastName}`;
+        if (btnMyAccountText.replace(/\s+/g, "") === "") {
+            btnMyAccountText = "Mon compte";
+        }
+
         quickAccessItems.push({
             iconId: fr.cx("fr-icon-account-line"),
             linkProps: routes.my_account().link,
-            text: `${user.firstName} ${user.lastName}`,
+            text: btnMyAccountText,
         });
         quickAccessItems.push({
             iconId: fr.cx("fr-icon-logout-box-r-line"),
