@@ -3,7 +3,15 @@ commons:
 
 previous_step: "Étape précédente"
 continue: "Continuer"
+pursue: "Poursuivre"
+send: "Envoyer"
 stored_data_does_not_exists: "La stored_data %stored_data% n'existe pas."
+
+# mailer
+mailer:
+    hello: "Bonjour"
+    signature: "Cordialement, l'équipe de la <a href='%href%'>Géoplateforme</a>"
+    login_info: "Votre nom d'utilisateur est : %login%"
 
 # pages:
 home:
@@ -16,6 +24,37 @@ data:
             send_files_api: Chargement des fichiers
             wait_checks: Vérifications standard et vecteur
             integration_processing: Intégration en base de données
+
+contact:
+    title: "Nous écrire"
+    form:
+        explain: 'Vous n''avez pas trouvé la réponse à votre question dans <a href="%href%">l''aide en ligne</a> ? Vous souhaitez la configuration d''un espace de travail pour vos besoins ? Contactez-nous !'
+        email_contact: "Votre email *"
+        email_contact_mandatory_error: "l'email est obligatoire"
+        email_contact_error: "l'email n'est pas correct"
+        lastName: "Nom"
+        firstName: "Prénom"
+        organization: "Organisme"
+        message_placeholder: "Décrivez votre demande en quelques lignes *"
+        message_minlength_error: "Le corps du message doit faire au moins 10 caractères"
+        infos: 'Les informations recueillies à partir de ce formulaire sont nécessaires à la gestion de votre demande par les services de l''IGN concernés. <a href="https://www.ign.fr/institut/donnees-caractere-personnel" target="_blank">En savoir plus sur la gestion des données à caractère personnel</a>'
+    email_support:
+        heading: "Un utilisateur a utilisé le formulaire de contact de la Geoplateforme."
+        user_id: "Identifiant unique de l'utilisateur"
+        user_email: "Adresse mail de l'utilisateur"
+        last_name: "Nom de l'utilisateur"
+        first_name: "Prénom de l'utilisateur"
+        date: "Date d'envoi"
+        message: "Corps du message"
+        not_specified: "Non renseigné"
+    email_acknowledgement:
+        heading: "Votre demande a été envoyée à l'IGN et une réponse vous sera apportée dans les meilleurs délais."
+        date: "Date d'envoi"
+        message: "Rappel de votre demande"
+    thanks:
+        title: "Votre message a bien été envoyé"
+        description: "Vous recevrez dans les prochaines minutes un accusé de réception récapitulant votre demande."
+        continue: "Poursuivre la navigation"
 
 service:
     wfs:
