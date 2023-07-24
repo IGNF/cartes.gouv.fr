@@ -7,10 +7,10 @@ import VectorDbList from "./VectorDbList";
 
 type DataListTabProps = {
     datastoreId: string;
-    data?: DatasheetDetailed;
+    datasheet?: DatasheetDetailed;
 };
 
-const DatasetListTab: FC<DataListTabProps> = ({ datastoreId, data }) => {
+const DatasetListTab: FC<DataListTabProps> = ({ datastoreId, datasheet }) => {
     // TODO : il y en aura d'autres types de données aussi (pyramid vector, raster, etc)
 
     return (
@@ -20,7 +20,7 @@ const DatasetListTab: FC<DataListTabProps> = ({ datastoreId, data }) => {
             </div>
             <div className={fr.cx("fr-grid-row", "fr-grid-row--center", "fr-grid-row--middle")}>
                 <div className={fr.cx("fr-col")}>
-                    <VectorDbList datastoreId={datastoreId} vectorDbList={data?.vector_db_list} />
+                    <VectorDbList datastoreId={datastoreId} vectorDbList={datasheet?.vector_db_list} />
                 </div>
             </div>
         </>

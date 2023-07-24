@@ -117,7 +117,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, dataName }) => {
                                     {
                                         label: `Jeux de données (${dataQuery?.data?.vector_db_list?.length})`,
                                         isDefault: true,
-                                        content: <DatasetListTab datastoreId={datastoreId} data={dataQuery?.data} />,
+                                        content: <DatasetListTab datastoreId={datastoreId} datasheet={dataQuery?.data} />,
                                     },
                                     { label: "Services (0)", content: <p>...liste de services...</p> },
                                 ]}
