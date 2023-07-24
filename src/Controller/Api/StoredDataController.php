@@ -20,7 +20,7 @@ class StoredDataController extends AbstractController
     ) {
     }
 
-    #[Route('/{storedDataId}', name: 'get')]
+    #[Route('/{storedDataId}', name: 'get', methods: ['GET'])]
     public function getStoredData(string $datastoreId, string $storedDataId): JsonResponse
     {
         return $this->json($this->entrepotApiService->storedData->get($datastoreId, $storedDataId));
