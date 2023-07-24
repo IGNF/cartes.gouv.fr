@@ -25,7 +25,7 @@ const DataListItem: FC<DataListItemProps> = ({ datastoreId, data }) => {
     return (
         <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-grid-row--center", "fr-my-1w", "fr-p-2v", "fr-card--grey")}>
             <div className={fr.cx("fr-col")}>
-                <Button linkProps={routes.datastore_data_view({ datastoreId, dataName: data.data_name }).link} priority="tertiary no outline">
+                <Button linkProps={routes.datastore_data_view({ datastoreId, datasheetName: data.data_name }).link} priority="tertiary no outline">
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
                         <img src="//www.gouvernement.fr/sites/default/files/static_assets/placeholder.1x1.png" width={"64px"} className={fr.cx("fr-mr-1v")} />
                         <strong className={fr.cx("fr-ml-2w")}>{data.data_name}</strong>

@@ -15,6 +15,7 @@ export type Datastore = DatastoreDetailResponseDto;
 /** fiche de donnée */
 export type Data = {
     data_name: string;
+    datasheet_name: string;
     date: string;
     categories: string[];
     nb_publications: number;
