@@ -117,7 +117,7 @@ function RouterRenderer() {
             content = <DatasheetNewIntegrationPage datastoreId={route.params.datastoreId} uploadId={route.params.uploadId} />;
             break;
         case "datastore_datasheet_view":
-            content = <DatasheetView datastoreId={route.params.datastoreId} dataName={route.params.dataName} />;
+            content = <DatasheetView datastoreId={route.params.datastoreId} datasheetName={route.params.datasheetName} />;
             break;
         case "datastore_wfs_service_new":
             content = <WfsServiceNew datastoreId={route.params.datastoreId} storedDataId={route.params.storedDataId} />;

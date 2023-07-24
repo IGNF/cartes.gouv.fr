@@ -25,29 +25,33 @@ const deleteDataConfirmModal = createModal({
 
 type DatasheetViewProps = {
     datastoreId: string;
-    dataName: string;
+    datasheetName: string;
 };
-const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, dataName }) => {
+const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) => {
     const navItems = datastoreNavItems(datastoreId);
 
     const queryClient = useQueryClient();
 
-    const dataQuery = useQuery<DatasheetDetailed>([reactQueryKeys.datastore_data(datastoreId, dataName)], () => api.datasheet.get(datastoreId, dataName), {
-        refetchInterval: 20000,
-    });
+    const dataQuery = useQuery<DatasheetDetailed>(
+        [reactQueryKeys.datastore_data(datastoreId, datasheetName)],
+        () => api.datasheet.get(datastoreId, datasheetName),
+        {
+            refetchInterval: 20000,
+        }
+    );
 
     const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
     useEffect(() => {
         return () => {
-            queryClient.cancelQueries({ queryKey: [reactQueryKeys.datastore_data(datastoreId, dataName)] });
+            queryClient.cancelQueries({ queryKey: [reactQueryKeys.datastore_data(datastoreId, datasheetName)] });
         };
-    }, [dataName, datastoreId, queryClient]);
+    }, [datasheetName, datastoreId, queryClient]);
 
     const handleDeleteData = () => {
         setIsDeleting(true);
         api.datasheet
-            .remove(datastoreId, dataName)
+            .remove(datastoreId, datasheetName)
             .then(() => {
                 routes.datastore_datasheet_list({ datastoreId }).push();
             })
@@ -72,7 +76,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, dataName }) => {
                             linkProps={routes.datastore_datasheet_list({ datastoreId }).link}
                             title="Retour à la liste de mes données"
                         />
-                        {dataName}
+                        {datasheetName}
                         <Badge noIcon={true} severity="info" className={fr.cx("fr-ml-2w")}>
                             {dataQuery?.data?.nb_publications && dataQuery?.data?.nb_publications > 0 ? "Publié" : "Non Publié"}
                         </Badge>
@@ -134,7 +138,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, dataName }) => {
             )}
 
             <deleteDataConfirmModal.Component
-                title={`Êtes-vous sûr de supprimer la fiche de données ${dataName} ?`}
+                title={`Êtes-vous sûr de supprimer la fiche de données ${datasheetName} ?`}
                 buttons={[
                     {
                         children: "Non, annuler",
