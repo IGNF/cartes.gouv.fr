@@ -36,31 +36,31 @@ const routeDefs = {
         },
         (p) => `${appRoot}/datastores/${p.datastoreId}`
     ),
-    datastore_data_list: defineRoute(
+    datastore_datasheet_list: defineRoute(
         {
             datastoreId: param.path.string,
         },
-        (p) => `${appRoot}/datastores/${p.datastoreId}/data`
+        (p) => `${appRoot}/datastores/${p.datastoreId}/datasheet`
     ),
-    datastore_data_new: defineRoute(
+    datastore_datasheet_new: defineRoute(
         {
             datastoreId: param.path.string,
         },
-        (p) => `${appRoot}/datastores/${p.datastoreId}/data/new`
+        (p) => `${appRoot}/datastores/${p.datastoreId}/datasheet/new`
     ),
-    datastore_data_new_integration: defineRoute(
+    datastore_datasheet_new_integration: defineRoute(
         {
             datastoreId: param.path.string,
             uploadId: param.query.string,
         },
-        (p) => `${appRoot}/datastores/${p.datastoreId}/data/new/integration`
+        (p) => `${appRoot}/datastores/${p.datastoreId}/datasheet/new/integration`
     ),
-    datastore_data_view: defineRoute(
+    datastore_datasheet_view: defineRoute(
         {
             datastoreId: param.path.string,
-            dataName: param.path.string,
+            datasheetName: param.path.string,
         },
-        (p) => `${appRoot}/datastores/${p.datastoreId}/data/${p.dataName}`
+        (p) => `${appRoot}/datastores/${p.datastoreId}/datasheet/${p.datasheetName}`
     ),
 
     // Creer et publier un service WFS
@@ -69,7 +69,7 @@ const routeDefs = {
             datastoreId: param.path.string,
             storedDataId: param.path.string,
         },
-        (p) => `${appRoot}/datastores/${p.datastoreId}/data/${p.storedDataId}/service/wfs/new`
+        (p) => `${appRoot}/datastores/${p.datastoreId}/datasheet/${p.storedDataId}/service/wfs/new`
     ),
 };
 

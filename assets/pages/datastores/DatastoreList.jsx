@@ -19,7 +19,7 @@ const DatastoreTile = ({ datastore }) => {
                 title={datastore.name}
                 grey
                 imageUrl="//www.gouvernement.fr/sites/default/files/static_assets/placeholder.1x1.png"
-                linkProps={routes.datastore_data_list({ datastoreId: datastore._id }).link}
+                linkProps={routes.datastore_datasheet_list({ datastoreId: datastore._id }).link}
             />
         </div>
     );

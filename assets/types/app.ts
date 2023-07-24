@@ -13,19 +13,19 @@ import {
 export type Datastore = DatastoreDetailResponseDto;
 
 /** fiche de donnée */
-export type Data = {
-    data_name: string;
+export type Datasheet = {
+    name: string;
     date: string;
     categories: string[];
     nb_publications: number;
 };
 
-export type DataDetailed = Data & {
+export type DatasheetDetailed = Datasheet & {
     vector_db_list: VectorDb[] | undefined;
     upload_list: Upload[] | undefined;
 };
 
-export type StoredData = Partial<StoredDataPrivateDetailResponseDto>;
+export type StoredData = StoredDataPrivateDetailResponseDto;
 
 export const StoredDataTypes = StoredDataPrivateDetailResponseDtoTypeEnum;
 export const StoredDataStatuses = StoredDataPrivateDetailResponseDtoStatusEnum;

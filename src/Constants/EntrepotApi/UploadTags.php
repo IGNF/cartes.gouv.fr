@@ -13,5 +13,5 @@ final class UploadTags
 
     public const DATA_UPLOAD_PATH = 'data_upload_path';
 
-    public const DATA_NAME = 'data_name';
+    public const DATASHEET_NAME = 'datasheet_name';
 }
