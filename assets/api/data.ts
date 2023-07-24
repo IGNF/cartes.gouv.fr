@@ -17,6 +17,13 @@ const get = (datastoreId: string, dataName: string, otherOptions: RequestInit = 
     });
 };
 
-const data = { getList, get };
+const remove = (datastoreId: string, dataName: string) => {
+    const url = Routing.generate("cartesgouvfr_api_data_delete", { datastoreId, dataName });
+    return jsonFetch(url, {
+        method: "DELETE",
+    });
+};
+
+const data = { getList, get, remove };
 
 export default data;

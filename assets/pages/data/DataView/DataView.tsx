@@ -2,18 +2,25 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
+import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { FC, useEffect } from "react";
+import { FC, useEffect, useState } from "react";
 
 import api from "../../../api";
 import AppLayout from "../../../components/Layout/AppLayout";
 import LoadingText from "../../../components/Utils/LoadingText";
+import Wait from "../../../components/Utils/Wait";
 import { datastoreNavItems } from "../../../config/datastoreNavItems";
 import reactQueryKeys from "../../../modules/reactQueryKeys";
 import { routes } from "../../../router/router";
 import { type DataDetailed } from "../../../types/app";
 import DatasetListTab from "./DatasetListTab/DatasetListTab";
+
+const deleteDataConfirmModal = createModal({
+    id: "delete-data-confirm-modal",
+    isOpenedByDefault: false,
+});
 
 type DataViewProps = {
     datastoreId: string;
@@ -28,11 +35,28 @@ const DataView: FC<DataViewProps> = ({ datastoreId, dataName }) => {
         refetchInterval: 20000,
     });
 
+    const [isDeleting, setIsDeleting] = useState<boolean>(false);
+
     useEffect(() => {
         return () => {
             queryClient.cancelQueries({ queryKey: [reactQueryKeys.datastore_data(datastoreId, dataName)] });
         };
     }, [dataName, datastoreId, queryClient]);
+
+    const handleDeleteData = () => {
+        setIsDeleting(true);
+        api.data
+            .remove(datastoreId, dataName)
+            .then(() => {
+                routes.datastore_data_list({ datastoreId }).push();
+            })
+            .catch((error) => {
+                console.error(error);
+            })
+            .finally(() => {
+                setIsDeleting(false);
+            });
+    };
 
     return (
         <AppLayout navItems={navItems}>
@@ -70,9 +94,7 @@ const DataView: FC<DataViewProps> = ({ datastoreId, dataName }) => {
                                 buttons={[
                                     {
                                         children: "Supprimer la donnée",
-                                        linkProps: {
-                                            href: "#",
-                                        },
+                                        onClick: () => deleteDataConfirmModal.open(),
                                         iconId: "fr-icon-delete-fill",
                                     },
                                     {
@@ -103,6 +125,42 @@ const DataView: FC<DataViewProps> = ({ datastoreId, dataName }) => {
                     </div>
                 </>
             )}
+
+            {isDeleting && (
+                <Wait show={true}>
+                    <p>En cours de suppression</p>
+                </Wait>
+            )}
+
+            <deleteDataConfirmModal.Component
+                title={`Êtes-vous sûr de supprimer la fiche de données ${dataName} ?`}
+                buttons={[
+                    {
+                        children: "Non, annuler",
+                        doClosesModal: true,
+                        priority: "secondary",
+                    },
+                    {
+                        children: "Oui, supprimer",
+                        onClick: handleDeleteData,
+                        doClosesModal: true,
+                        priority: "primary",
+                    },
+                ]}
+            >
+                <strong>Les éléments suivants seront supprimés :</strong>
+                <ul>
+                    {dataQuery?.data?.vector_db_list?.length && dataQuery?.data?.vector_db_list.length > 0 ? (
+                        <li> {dataQuery?.data?.vector_db_list.length} base(s) de donnée(s)</li>
+                    ) : null}
+
+                    {dataQuery?.data?.upload_list?.length && dataQuery?.data?.upload_list.length > 0 ? (
+                        <li> {dataQuery?.data?.upload_list.length} livraison(s)</li>
+                    ) : null}
+
+                    {/* TODO : pyramides tuiles vectorielles, raster, métadonnées etc... */}
+                </ul>
+            </deleteDataConfirmModal.Component>
         </AppLayout>
     );
 };
