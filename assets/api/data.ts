@@ -1,18 +1,18 @@
 import Routing from "fos-router";
 
 import { jsonFetch } from "../modules/jsonFetch";
-import { Data, DataDetailed } from "../types/app";
+import { Datasheet, DatasheetDetailed } from "../types/app";
 
 const getList = (datastoreId: string, otherOptions: RequestInit = {}) => {
     const url = Routing.generate("cartesgouvfr_api_datasheet_get_list", { datastoreId });
-    return jsonFetch<Data[]>(url, {
+    return jsonFetch<Datasheet[]>(url, {
         ...otherOptions,
     });
 };
 
 const get = (datastoreId: string, datasheetName: string, otherOptions: RequestInit = {}) => {
     const url = Routing.generate("cartesgouvfr_api_datasheet_get", { datastoreId, datasheetName });
-    return jsonFetch<DataDetailed>(url, {
+    return jsonFetch<DatasheetDetailed>(url, {
         ...otherOptions,
     });
 };

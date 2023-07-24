@@ -8,7 +8,7 @@ export const datastoreNavItems = (datastoreId) => {
         },
         {
             text: "Données",
-            linkProps: routes.datastore_data_list({ datastoreId }).link,
+            linkProps: routes.datastore_datasheet_list({ datastoreId }).link,
         },
         {
             text: "Membres",

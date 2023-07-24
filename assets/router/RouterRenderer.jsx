@@ -103,16 +103,16 @@ function RouterRenderer() {
         case "datastore_dashboard":
             content = <DatastoreDashboard datastoreId={route.params.datastoreId} />;
             break;
-        case "datastore_data_list":
+        case "datastore_datasheet_list":
             content = <DatastoreDataList datastoreId={route.params.datastoreId} />;
             break;
-        case "datastore_data_new":
+        case "datastore_datasheet_new":
             content = <DataNewForm datastoreId={route.params.datastoreId} />;
             break;
-        case "datastore_data_new_integration":
+        case "datastore_datasheet_new_integration":
             content = <DataNewIntegrationPage datastoreId={route.params.datastoreId} uploadId={route.params.uploadId} />;
             break;
-        case "datastore_data_view":
+        case "datastore_datasheet_view":
             content = <DataView datastoreId={route.params.datastoreId} dataName={route.params.dataName} />;
             break;
         case "datastore_wfs_service_new":

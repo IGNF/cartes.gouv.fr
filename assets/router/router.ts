@@ -36,26 +36,26 @@ const routeDefs = {
         },
         (p) => `${appRoot}/datastores/${p.datastoreId}`
     ),
-    datastore_data_list: defineRoute(
+    datastore_datasheet_list: defineRoute(
         {
             datastoreId: param.path.string,
         },
         (p) => `${appRoot}/datastores/${p.datastoreId}/datasheet`
     ),
-    datastore_data_new: defineRoute(
+    datastore_datasheet_new: defineRoute(
         {
             datastoreId: param.path.string,
         },
         (p) => `${appRoot}/datastores/${p.datastoreId}/datasheet/new`
     ),
-    datastore_data_new_integration: defineRoute(
+    datastore_datasheet_new_integration: defineRoute(
         {
             datastoreId: param.path.string,
             uploadId: param.query.string,
         },
         (p) => `${appRoot}/datastores/${p.datastoreId}/datasheet/new/integration`
     ),
-    datastore_data_view: defineRoute(
+    datastore_datasheet_view: defineRoute(
         {
             datastoreId: param.path.string,
             datasheetName: param.path.string,

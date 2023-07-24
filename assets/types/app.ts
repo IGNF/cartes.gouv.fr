@@ -13,7 +13,7 @@ import {
 export type Datastore = DatastoreDetailResponseDto;
 
 /** fiche de donnée */
-export type Data = {
+export type Datasheet = {
     data_name: string;
     datasheet_name: string;
     date: string;
@@ -21,7 +21,7 @@ export type Data = {
     nb_publications: number;
 };
 
-export type DataDetailed = Data & {
+export type DatasheetDetailed = Datasheet & {
     vector_db_list: VectorDb[] | undefined;
     upload_list: Upload[] | undefined;
 };

@@ -14,7 +14,7 @@ import Wait from "../../../components/Utils/Wait";
 import { datastoreNavItems } from "../../../config/datastoreNavItems";
 import reactQueryKeys from "../../../modules/reactQueryKeys";
 import { routes } from "../../../router/router";
-import { type DataDetailed } from "../../../types/app";
+import { type DatasheetDetailed } from "../../../types/app";
 import DatasetListTab from "./DatasetListTab/DatasetListTab";
 
 const deleteDataConfirmModal = createModal({
@@ -31,7 +31,7 @@ const DataView: FC<DataViewProps> = ({ datastoreId, dataName }) => {
 
     const queryClient = useQueryClient();
 
-    const dataQuery = useQuery<DataDetailed>([reactQueryKeys.datastore_data(datastoreId, dataName)], () => api.data.get(datastoreId, dataName), {
+    const dataQuery = useQuery<DatasheetDetailed>([reactQueryKeys.datastore_data(datastoreId, dataName)], () => api.data.get(datastoreId, dataName), {
         refetchInterval: 20000,
     });
 
@@ -48,7 +48,7 @@ const DataView: FC<DataViewProps> = ({ datastoreId, dataName }) => {
         api.data
             .remove(datastoreId, dataName)
             .then(() => {
-                routes.datastore_data_list({ datastoreId }).push();
+                routes.datastore_datasheet_list({ datastoreId }).push();
             })
             .catch((error) => {
                 console.error(error);
@@ -68,7 +68,7 @@ const DataView: FC<DataViewProps> = ({ datastoreId, dataName }) => {
                         <Button
                             iconId="fr-icon-arrow-left-s-line"
                             priority="tertiary no outline"
-                            linkProps={routes.datastore_data_list({ datastoreId }).link}
+                            linkProps={routes.datastore_datasheet_list({ datastoreId }).link}
                             title="Retour à la liste de mes données"
                         />
                         {dataName}
