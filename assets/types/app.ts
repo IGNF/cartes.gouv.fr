@@ -26,7 +26,7 @@ export type DatasheetDetailed = Datasheet & {
     upload_list: Upload[] | undefined;
 };
 
-export type StoredData = Partial<StoredDataPrivateDetailResponseDto>;
+export type StoredData = StoredDataPrivateDetailResponseDto;
 
 export const StoredDataTypes = StoredDataPrivateDetailResponseDtoTypeEnum;
 export const StoredDataStatuses = StoredDataPrivateDetailResponseDtoStatusEnum;

@@ -21,7 +21,7 @@ import { defaultProjections } from "../../../config/projections";
 import functions from "../../../functions";
 import FileUploader from "../../../modules/FileUploader";
 import reactQueryKeys from "../../../modules/reactQueryKeys";
-import DataNewIntegrationDialog from "./DataNewIntegration/DataNewIntegrationDialog";
+import DataNewIntegrationDialog from "./DatasheetNewIntegration/DataNewIntegrationDialog";
 
 import "./../../../sass/components/spinner.scss";
 

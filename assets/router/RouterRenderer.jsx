@@ -26,9 +26,9 @@ const Me = lazy(() => import("../pages/users/Me"));
 const DatastoreList = lazy(() => import("../pages/datastores/DatastoreList"));
 const DatastoreDashboard = lazy(() => import("../pages/datastores/DatastoreDashboard"));
 const DatastoreDataList = lazy(() => import("../pages/datastores/DatastoreDataList"));
-const DataNewForm = lazy(() => import("../pages/data/DataNew/DataNewForm"));
-const DataNewIntegrationPage = lazy(() => import("../pages/data/DataNew/DataNewIntegration/DataNewIntegration"));
-const DataView = lazy(() => import("../pages/data/DataView/DataView"));
+const DataNewForm = lazy(() => import("../pages/datasheet/DatasheetNew/DataNewForm"));
+const DataNewIntegrationPage = lazy(() => import("../pages/datasheet/DatasheetNew/DatasheetNewIntegration/DataNewIntegration"));
+const DataView = lazy(() => import("../pages/datasheet/DatasheetView/DataView"));
 const WfsServiceNew = lazy(() => import("../pages/service/wfs/WfsServiceNew"));
 
 function RouterRenderer() {
