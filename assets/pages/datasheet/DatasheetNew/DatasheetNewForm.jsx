@@ -84,7 +84,7 @@ const DatasheetNewForm = ({ datastoreId }) => {
     } = useForm({ resolver: yupResolver(schema) });
 
     const queryClient = useQueryClient();
-    const dataListQuery = useQuery([reactQueryKeys.datastore_dataList(datastoreId)], () => api.data.getList(datastoreId), {
+    const dataListQuery = useQuery([reactQueryKeys.datastore_dataList(datastoreId)], () => api.datasheet.getList(datastoreId), {
         refetchInterval: 20000,
         enabled: shouldFetchDataList,
     });

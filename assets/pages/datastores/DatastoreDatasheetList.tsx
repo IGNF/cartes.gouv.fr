@@ -66,7 +66,7 @@ const DatastoreDatasheetList: FC<DatastoreDatasheetListType> = ({ datastoreId })
             },
             {
                 queryKey: [reactQueryKeys.datastore_dataList_detailed(datastoreId)],
-                queryFn: () => api.data.getList(datastoreId, { signal: abortController?.signal }),
+                queryFn: () => api.datasheet.getList(datastoreId, { signal: abortController?.signal }),
                 refetchInterval: 10000,
             },
         ],

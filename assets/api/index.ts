@@ -1,4 +1,4 @@
-import data from "./data";
+import datasheet from "./datasheet";
 import datastore from "./datastore";
 import storedData from "./stored-data";
 import upload from "./upload";
@@ -9,7 +9,7 @@ import epsg from "./epsg";
 
 const api = {
     // Entrepot
-    data,
+    datasheet,
     datastore,
     storedData,
     upload,

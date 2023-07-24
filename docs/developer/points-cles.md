@@ -1,6 +1,6 @@
 # Points clés
 
-## Fiche de donnée (`data`)
+## Fiche de donnée (`datasheet`)
 
 Une fiche de donnée est une entité qui regroupe un ensemble de :
 

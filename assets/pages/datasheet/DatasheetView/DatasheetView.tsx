@@ -32,7 +32,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, dataName }) => {
 
     const queryClient = useQueryClient();
 
-    const dataQuery = useQuery<DatasheetDetailed>([reactQueryKeys.datastore_data(datastoreId, dataName)], () => api.data.get(datastoreId, dataName), {
+    const dataQuery = useQuery<DatasheetDetailed>([reactQueryKeys.datastore_data(datastoreId, dataName)], () => api.datasheet.get(datastoreId, dataName), {
         refetchInterval: 20000,
     });
 
@@ -46,7 +46,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, dataName }) => {
 
     const handleDeleteData = () => {
         setIsDeleting(true);
-        api.data
+        api.datasheet
             .remove(datastoreId, dataName)
             .then(() => {
                 routes.datastore_datasheet_list({ datastoreId }).push();
