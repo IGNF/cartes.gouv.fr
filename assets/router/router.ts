@@ -9,7 +9,13 @@ const routeDefs = {
     docs: defineRoute(`${appRoot}/documentation`),
     contact: defineRoute(`${appRoot}/nous-ecrire`),
     contact_thanks: defineRoute(`${appRoot}/merci`),
-    news: defineRoute(`${appRoot}/actualites`),
+    news_list: defineRoute(`${appRoot}/actualites`),
+    news_article: defineRoute(
+        {
+            slug: param.path.string,
+        },
+        (p) => `${appRoot}/actualites/${p.slug}`
+    ),
     faq: defineRoute(`${appRoot}/faq`),
     sitemap: defineRoute(`${appRoot}/plan-du-site`),
     accessibility: defineRoute(`${appRoot}/accessibilite`),
@@ -76,7 +82,8 @@ export const publicRoutes = [
     "docs",
     "contact",
     "contact_thanks",
-    "news",
+    "news_list",
+    "news_article",
     "faq",
     "sitemap",
     "accessibility",
