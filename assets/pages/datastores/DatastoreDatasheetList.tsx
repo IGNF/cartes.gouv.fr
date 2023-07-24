@@ -25,10 +25,10 @@ const DatasheetListItem: FC<DatasheetListItemProps> = ({ datastoreId, datasheet 
     return (
         <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-grid-row--center", "fr-my-1w", "fr-p-2v", "fr-card--grey")}>
             <div className={fr.cx("fr-col")}>
-                <Button linkProps={routes.datastore_datasheet_view({ datastoreId, datasheetName: datasheet.data_name }).link} priority="tertiary no outline">
+                <Button linkProps={routes.datastore_datasheet_view({ datastoreId, datasheetName: datasheet.name }).link} priority="tertiary no outline">
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
                         <img src="//www.gouvernement.fr/sites/default/files/static_assets/placeholder.1x1.png" width={"64px"} className={fr.cx("fr-mr-1v")} />
-                        <strong className={fr.cx("fr-ml-2w")}>{datasheet.data_name}</strong>
+                        <strong className={fr.cx("fr-ml-2w")}>{datasheet.name}</strong>
                         {datasheet.categories?.map((category, i) => (
                             <Tag key={i} dismissible={false} className={fr.cx("fr-ml-2w")} small={true} pressed={false}>
                                 {category}
@@ -106,7 +106,7 @@ const DatastoreDatasheetList: FC<DatastoreDatasheetListType> = ({ datastoreId })
 
                     {!dataListQuery.isLoading &&
                         dataListQuery?.data?.map((datasheet: Datasheet) => (
-                            <DatasheetListItem key={datasheet?.data_name} datastoreId={datastoreId} datasheet={datasheet} />
+                            <DatasheetListItem key={datasheet.name} datastoreId={datastoreId} datasheet={datasheet} />
                         ))}
                 </>
             )}

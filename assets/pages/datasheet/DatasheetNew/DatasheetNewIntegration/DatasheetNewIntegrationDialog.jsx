@@ -68,7 +68,7 @@ const DatasheetNewIntegrationDialog = ({ datastoreId, uploadId }) => {
             console.debug("stopping, all steps completed successfully");
             setShouldPingIntProg(false);
 
-            routes.datastore_datasheet_view({ datastoreId, datasheetName: uploadQuery?.data?.tags?.data_name }).push();
+            routes.datastore_datasheet_view({ datastoreId, datasheetName: uploadQuery?.data?.tags?.datasheet_name }).push();
         }
     }, [integrationProgress, integrationCurrentStep, datastoreId, uploadQuery?.data]);
 
