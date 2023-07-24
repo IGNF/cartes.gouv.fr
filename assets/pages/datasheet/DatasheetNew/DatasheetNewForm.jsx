@@ -9,6 +9,7 @@ import { format as datefnsFormat } from "date-fns";
 import PropTypes from "prop-types";
 import React, { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
+import { symToStr } from "tsafe/symToStr";
 import { v4 as uuidv4 } from "uuid";
 import * as yup from "yup";
 
@@ -21,7 +22,7 @@ import { defaultProjections } from "../../../config/projections";
 import functions from "../../../functions";
 import FileUploader from "../../../modules/FileUploader";
 import reactQueryKeys from "../../../modules/reactQueryKeys";
-import DataNewIntegrationDialog from "./DatasheetNewIntegration/DataNewIntegrationDialog";
+import DatasheetNewIntegrationDialog from "./DatasheetNewIntegration/DatasheetNewIntegrationDialog";
 
 import "./../../../sass/components/spinner.scss";
 
@@ -30,7 +31,7 @@ const fileExtensions = ["gpkg", "zip"];
 
 const fileUploader = new FileUploader();
 
-const DataNewForm = ({ datastoreId }) => {
+const DatasheetNewForm = ({ datastoreId }) => {
     let uuid = "";
 
     const schema = yup
@@ -310,7 +311,7 @@ const DataNewForm = ({ datastoreId }) => {
             {uploadCreationInProgress && (
                 <Wait show={true}>
                     {uploadCreatedSuccessfully ? (
-                        <DataNewIntegrationDialog datastoreId={datastoreId} uploadId={uploadId} />
+                        <DatasheetNewIntegrationDialog datastoreId={datastoreId} uploadId={uploadId} />
                     ) : (
                         <>
                             <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "icons-spin")} />
@@ -323,8 +324,10 @@ const DataNewForm = ({ datastoreId }) => {
     );
 };
 
-DataNewForm.propTypes = {
+DatasheetNewForm.propTypes = {
     datastoreId: PropTypes.string.isRequired,
 };
 
-export default DataNewForm;
+DatasheetNewForm.displayName = symToStr({ DatasheetNewForm });
+
+export default DatasheetNewForm;

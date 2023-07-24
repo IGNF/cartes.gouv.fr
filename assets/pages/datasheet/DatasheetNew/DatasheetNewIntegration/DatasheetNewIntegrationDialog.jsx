@@ -9,7 +9,7 @@ import { routes } from "../../../../router/router";
 
 import "./../../../../sass/components/spinner.scss";
 
-const DataNewIntegrationDialog = ({ datastoreId, uploadId }) => {
+const DatasheetNewIntegrationDialog = ({ datastoreId, uploadId }) => {
     const [integrationProgress, setIntegrationProgress] = useState({});
     const [integrationCurrentStep, setIntegrationCurrentStep] = useState(null);
 
@@ -68,7 +68,7 @@ const DataNewIntegrationDialog = ({ datastoreId, uploadId }) => {
             console.debug("stopping, all steps completed successfully");
             setShouldPingIntProg(false);
 
-            routes.datastore_data_view({ datastoreId, datasheetName: uploadQuery?.data?.tags?.data_name }).push();
+            routes.datastore_datasheet_view({ datastoreId, datasheetName: uploadQuery?.data?.tags?.data_name }).push();
         }
     }, [integrationProgress, integrationCurrentStep, datastoreId, uploadQuery?.data]);
 
@@ -136,9 +136,9 @@ const DataNewIntegrationDialog = ({ datastoreId, uploadId }) => {
     );
 };
 
-DataNewIntegrationDialog.propTypes = {
+DatasheetNewIntegrationDialog.propTypes = {
     datastoreId: PropTypes.string,
     uploadId: PropTypes.string,
 };
 
-export default DataNewIntegrationDialog;
+export default DatasheetNewIntegrationDialog;

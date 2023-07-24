@@ -28,7 +28,7 @@ const DatastoreDashboard = ({ datastoreId }) => {
                     <ButtonsGroup
                         buttons={[
                             {
-                                linkProps: routes.datastore_data_new({ datastoreId }).link,
+                                linkProps: routes.datastore_datasheet_new({ datastoreId }).link,
                                 iconId: "fr-icon-add-line",
                                 children: "Créer une fiche de données",
                             },

@@ -22,13 +22,17 @@ const Accessibility = lazy(() => import("../pages/footer/Accessibility"));
 const LegalNotice = lazy(() => import("../pages/footer/LegalNotice"));
 const PersonalData = lazy(() => import("../pages/footer/PersonalData"));
 const Cookies = lazy(() => import("../pages/footer/Cookies"));
+
 const Me = lazy(() => import("../pages/users/Me"));
+
 const DatastoreList = lazy(() => import("../pages/datastores/DatastoreList"));
 const DatastoreDashboard = lazy(() => import("../pages/datastores/DatastoreDashboard"));
 const DatastoreDataList = lazy(() => import("../pages/datastores/DatastoreDataList"));
-const DataNewForm = lazy(() => import("../pages/datasheet/DatasheetNew/DataNewForm"));
-const DataNewIntegrationPage = lazy(() => import("../pages/datasheet/DatasheetNew/DatasheetNewIntegration/DataNewIntegration"));
+
+const DatasheetNewForm = lazy(() => import("../pages/datasheet/DatasheetNew/DatasheetNewForm"));
+const DatasheetNewIntegrationPage = lazy(() => import("../pages/datasheet/DatasheetNew/DatasheetNewIntegration/DatasheetNewIntegration"));
 const DatasheetView = lazy(() => import("../pages/datasheet/DatasheetView/DatasheetView"));
+
 const WfsServiceNew = lazy(() => import("../pages/service/wfs/WfsServiceNew"));
 
 function RouterRenderer() {
@@ -107,10 +111,10 @@ function RouterRenderer() {
             content = <DatastoreDataList datastoreId={route.params.datastoreId} />;
             break;
         case "datastore_datasheet_new":
-            content = <DataNewForm datastoreId={route.params.datastoreId} />;
+            content = <DatasheetNewForm datastoreId={route.params.datastoreId} />;
             break;
         case "datastore_datasheet_new_integration":
-            content = <DataNewIntegrationPage datastoreId={route.params.datastoreId} uploadId={route.params.uploadId} />;
+            content = <DatasheetNewIntegrationPage datastoreId={route.params.datastoreId} uploadId={route.params.uploadId} />;
             break;
         case "datastore_datasheet_view":
             content = <DatasheetView datastoreId={route.params.datastoreId} dataName={route.params.dataName} />;
