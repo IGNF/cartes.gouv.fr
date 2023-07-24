@@ -84,7 +84,7 @@ const DatasheetNewForm = ({ datastoreId }) => {
     } = useForm({ resolver: yupResolver(schema) });
 
     const queryClient = useQueryClient();
-    const dataListQuery = useQuery([reactQueryKeys.datastore_dataList(datastoreId)], () => api.datasheet.getList(datastoreId), {
+    const dataListQuery = useQuery([reactQueryKeys.datastore_datasheet_list(datastoreId)], () => api.datasheet.getList(datastoreId), {
         refetchInterval: 20000,
         enabled: shouldFetchDataList,
     });
@@ -104,7 +104,7 @@ const DatasheetNewForm = ({ datastoreId }) => {
 
     useEffect(() => {
         return () => {
-            queryClient.cancelQueries({ queryKey: [reactQueryKeys.datastore_dataList(datastoreId)] });
+            queryClient.cancelQueries({ queryKey: [reactQueryKeys.datastore_datasheet_list(datastoreId)] });
         };
     }, [datastoreId, queryClient]);
 

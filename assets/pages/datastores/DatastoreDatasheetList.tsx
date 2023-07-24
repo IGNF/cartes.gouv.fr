@@ -65,7 +65,7 @@ const DatastoreDatasheetList: FC<DatastoreDatasheetListType> = ({ datastoreId })
                 staleTime: 60000,
             },
             {
-                queryKey: [reactQueryKeys.datastore_dataList_detailed(datastoreId)],
+                queryKey: [reactQueryKeys.datastore_datasheet_list(datastoreId)],
                 queryFn: () => api.datasheet.getList(datastoreId, { signal: abortController?.signal }),
                 refetchInterval: 10000,
             },
@@ -76,7 +76,7 @@ const DatastoreDatasheetList: FC<DatastoreDatasheetListType> = ({ datastoreId })
 
     useEffect(() => {
         return () => {
-            queryClient.cancelQueries({ queryKey: [reactQueryKeys.datastore(datastoreId), reactQueryKeys.datastore_dataList_detailed(datastoreId)] });
+            queryClient.cancelQueries({ queryKey: [reactQueryKeys.datastore(datastoreId), reactQueryKeys.datastore_datasheet_list(datastoreId)] });
         };
     }, [datastoreId, queryClient]);
 

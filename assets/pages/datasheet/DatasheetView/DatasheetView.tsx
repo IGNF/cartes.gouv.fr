@@ -33,7 +33,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
     const queryClient = useQueryClient();
 
     const dataQuery = useQuery<DatasheetDetailed>(
-        [reactQueryKeys.datastore_data(datastoreId, datasheetName)],
+        [reactQueryKeys.datastore_datasheet(datastoreId, datasheetName)],
         () => api.datasheet.get(datastoreId, datasheetName),
         {
             refetchInterval: 20000,
@@ -44,7 +44,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
 
     useEffect(() => {
         return () => {
-            queryClient.cancelQueries({ queryKey: [reactQueryKeys.datastore_data(datastoreId, datasheetName)] });
+            queryClient.cancelQueries({ queryKey: [reactQueryKeys.datastore_datasheet(datastoreId, datasheetName)] });
         };
     }, [datasheetName, datastoreId, queryClient]);
 
