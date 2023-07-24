@@ -15,6 +15,7 @@ const Docs = lazy(() => import("../pages/Docs"));
 const Contact = lazy(() => import("../pages/contact/Contact"));
 const Thanks = lazy(() => import("../pages/contact/Thanks"));
 const NewsList = lazy(() => import("../pages/news/NewsList"));
+const NewsArticle = lazy(() => import("../pages/news/NewsArticle"));
 const Faq = lazy(() => import("../pages/Faq"));
 const Sitemap = lazy(() => import("../pages/footer/Sitemap"));
 const Accessibility = lazy(() => import("../pages/footer/Accessibility"));
@@ -66,8 +67,11 @@ function RouterRenderer() {
         case "contact_thanks":
             content = <Thanks />;
             break;
-        case "news":
+        case "news_list":
             content = <NewsList />;
+            break;
+        case "news_article":
+            content = <NewsArticle slug={route.params.slug} />;
             break;
         case "faq":
             content = <Faq />;

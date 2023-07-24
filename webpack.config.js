@@ -33,24 +33,12 @@ Encore
      */
     .addEntry("main", "./assets/main.tsx")
 
-    // .copyFiles([
-    //     {
-    //         from: "./assets/css/doc",
-    //         to: "docs/css/[name].css",
-    //     },
-    //     {
-    //         from: "./assets/img",
-    //         to: "img/[path][name].[ext]",
-    //     },
-    //     {
-    //         from: "./docs/user",
-    //         to: "docs/[path][name].[ext]",
-    //     },
-    //     {
-    //         from: "./data",
-    //         to: "data/[name].[ext]",
-    //     },
-    // ])
+    .copyFiles([
+        {
+            from: "./assets/img",
+            to: "img/[path][name].[ext]",
+        },
+    ])
 
     // enables the Symfony UX Stimulus bridge (used in assets/bootstrap.js)
     // .enableStimulusBridge("./assets/controllers.json")

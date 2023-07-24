@@ -9,7 +9,7 @@ export const defaultNavItems = [
     },
     {
         text: "Actualités",
-        linkProps: routes.news().link,
+        linkProps: routes.news_list().link,
     },
     {
         text: "A propos",
