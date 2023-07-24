@@ -6,6 +6,7 @@ import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useEffect, useState } from "react";
+import { symToStr } from "tsafe/symToStr";
 
 import api from "../../../api";
 import AppLayout from "../../../components/Layout/AppLayout";
@@ -14,7 +15,7 @@ import Wait from "../../../components/Utils/Wait";
 import { datastoreNavItems } from "../../../config/datastoreNavItems";
 import reactQueryKeys from "../../../modules/reactQueryKeys";
 import { routes } from "../../../router/router";
-import { type DataDetailed } from "../../../types/app";
+import { type DatasheetDetailed } from "../../../types/app";
 import DatasetListTab from "./DatasetListTab/DatasetListTab";
 
 const deleteDataConfirmModal = createModal({
@@ -22,33 +23,37 @@ const deleteDataConfirmModal = createModal({
     isOpenedByDefault: false,
 });
 
-type DataViewProps = {
+type DatasheetViewProps = {
     datastoreId: string;
-    dataName: string;
+    datasheetName: string;
 };
-const DataView: FC<DataViewProps> = ({ datastoreId, dataName }) => {
+const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) => {
     const navItems = datastoreNavItems(datastoreId);
 
     const queryClient = useQueryClient();
 
-    const dataQuery = useQuery<DataDetailed>([reactQueryKeys.datastore_data(datastoreId, dataName)], () => api.data.get(datastoreId, dataName), {
-        refetchInterval: 20000,
-    });
+    const dataQuery = useQuery<DatasheetDetailed>(
+        [reactQueryKeys.datastore_datasheet(datastoreId, datasheetName)],
+        () => api.datasheet.get(datastoreId, datasheetName),
+        {
+            refetchInterval: 20000,
+        }
+    );
 
     const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
     useEffect(() => {
         return () => {
-            queryClient.cancelQueries({ queryKey: [reactQueryKeys.datastore_data(datastoreId, dataName)] });
+            queryClient.cancelQueries({ queryKey: [reactQueryKeys.datastore_datasheet(datastoreId, datasheetName)] });
         };
-    }, [dataName, datastoreId, queryClient]);
+    }, [datasheetName, datastoreId, queryClient]);
 
     const handleDeleteData = () => {
         setIsDeleting(true);
-        api.data
-            .remove(datastoreId, dataName)
+        api.datasheet
+            .remove(datastoreId, datasheetName)
             .then(() => {
-                routes.datastore_data_list({ datastoreId }).push();
+                routes.datastore_datasheet_list({ datastoreId }).push();
             })
             .catch((error) => {
                 console.error(error);
@@ -68,10 +73,10 @@ const DataView: FC<DataViewProps> = ({ datastoreId, dataName }) => {
                         <Button
                             iconId="fr-icon-arrow-left-s-line"
                             priority="tertiary no outline"
-                            linkProps={routes.datastore_data_list({ datastoreId }).link}
+                            linkProps={routes.datastore_datasheet_list({ datastoreId }).link}
                             title="Retour à la liste de mes données"
                         />
-                        {dataName}
+                        {datasheetName}
                         <Badge noIcon={true} severity="info" className={fr.cx("fr-ml-2w")}>
                             {dataQuery?.data?.nb_publications && dataQuery?.data?.nb_publications > 0 ? "Publié" : "Non Publié"}
                         </Badge>
@@ -116,7 +121,7 @@ const DataView: FC<DataViewProps> = ({ datastoreId, dataName }) => {
                                     {
                                         label: `Jeux de données (${dataQuery?.data?.vector_db_list?.length})`,
                                         isDefault: true,
-                                        content: <DatasetListTab datastoreId={datastoreId} data={dataQuery?.data} />,
+                                        content: <DatasetListTab datastoreId={datastoreId} datasheet={dataQuery?.data} />,
                                     },
                                     { label: "Services (0)", content: <p>...liste de services...</p> },
                                 ]}
@@ -133,7 +138,7 @@ const DataView: FC<DataViewProps> = ({ datastoreId, dataName }) => {
             )}
 
             <deleteDataConfirmModal.Component
-                title={`Êtes-vous sûr de supprimer la fiche de données ${dataName} ?`}
+                title={`Êtes-vous sûr de supprimer la fiche de données ${datasheetName} ?`}
                 buttons={[
                     {
                         children: "Non, annuler",
@@ -165,4 +170,6 @@ const DataView: FC<DataViewProps> = ({ datastoreId, dataName }) => {
     );
 };
 
-export default DataView;
+DatasheetView.displayName = symToStr({ DatasheetView });
+
+export default DatasheetView;

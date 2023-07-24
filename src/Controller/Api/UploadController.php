@@ -52,7 +52,7 @@ class UploadController extends AbstractController
             // ajout tags sur la livraison
             $tags = [
                 UploadTags::DATA_UPLOAD_PATH => $content['data_upload_path'],
-                UploadTags::DATA_NAME => $content['data_name'],
+                UploadTags::DATASHEET_NAME => $content['data_name'],
                 // statut des checks et du processing intégration
             ];
             $upload = $this->entrepotApiService->upload->addTags($datastoreId, $upload['_id'], $tags);
@@ -224,7 +224,7 @@ class UploadController extends AbstractController
                             $this->entrepotApiService->storedData->addTags($datastoreId, $vectorDb['_id'], [
                                 'upload_id' => $upload['_id'],
                                 'proc_int_id' => $processingExec['_id'],
-                                StoredDataTags::DATA_NAME => $upload['tags'][UploadTags::DATA_NAME],
+                                StoredDataTags::DATASHEET_NAME => $upload['tags'][UploadTags::DATASHEET_NAME],
                             ]);
 
                             // // TODO : mise à jour ?

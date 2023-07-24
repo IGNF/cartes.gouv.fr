@@ -22,13 +22,17 @@ const Accessibility = lazy(() => import("../pages/footer/Accessibility"));
 const LegalNotice = lazy(() => import("../pages/footer/LegalNotice"));
 const PersonalData = lazy(() => import("../pages/footer/PersonalData"));
 const Cookies = lazy(() => import("../pages/footer/Cookies"));
+
 const Me = lazy(() => import("../pages/users/Me"));
+
 const DatastoreList = lazy(() => import("../pages/datastores/DatastoreList"));
 const DatastoreDashboard = lazy(() => import("../pages/datastores/DatastoreDashboard"));
-const DatastoreDataList = lazy(() => import("../pages/datastores/DatastoreDataList"));
-const DataNewForm = lazy(() => import("../pages/data/DataNew/DataNewForm"));
-const DataNewIntegrationPage = lazy(() => import("../pages/data/DataNew/DataNewIntegration/DataNewIntegration"));
-const DataView = lazy(() => import("../pages/data/DataView/DataView"));
+const DatastoreDatasheetList = lazy(() => import("../pages/datastores/DatastoreDatasheetList"));
+
+const DatasheetNewForm = lazy(() => import("../pages/datasheet/DatasheetNew/DatasheetNewForm"));
+const DatasheetNewIntegrationPage = lazy(() => import("../pages/datasheet/DatasheetNew/DatasheetNewIntegration/DatasheetNewIntegration"));
+const DatasheetView = lazy(() => import("../pages/datasheet/DatasheetView/DatasheetView"));
+
 const WfsServiceNew = lazy(() => import("../pages/service/wfs/WfsServiceNew"));
 
 function RouterRenderer() {
@@ -103,17 +107,17 @@ function RouterRenderer() {
         case "datastore_dashboard":
             content = <DatastoreDashboard datastoreId={route.params.datastoreId} />;
             break;
-        case "datastore_data_list":
-            content = <DatastoreDataList datastoreId={route.params.datastoreId} />;
+        case "datastore_datasheet_list":
+            content = <DatastoreDatasheetList datastoreId={route.params.datastoreId} />;
             break;
-        case "datastore_data_new":
-            content = <DataNewForm datastoreId={route.params.datastoreId} />;
+        case "datastore_datasheet_new":
+            content = <DatasheetNewForm datastoreId={route.params.datastoreId} />;
             break;
-        case "datastore_data_new_integration":
-            content = <DataNewIntegrationPage datastoreId={route.params.datastoreId} uploadId={route.params.uploadId} />;
+        case "datastore_datasheet_new_integration":
+            content = <DatasheetNewIntegrationPage datastoreId={route.params.datastoreId} uploadId={route.params.uploadId} />;
             break;
-        case "datastore_data_view":
-            content = <DataView datastoreId={route.params.datastoreId} dataName={route.params.dataName} />;
+        case "datastore_datasheet_view":
+            content = <DatasheetView datastoreId={route.params.datastoreId} datasheetName={route.params.datasheetName} />;
             break;
         case "datastore_wfs_service_new":
             content = <WfsServiceNew datastoreId={route.params.datastoreId} storedDataId={route.params.storedDataId} />;

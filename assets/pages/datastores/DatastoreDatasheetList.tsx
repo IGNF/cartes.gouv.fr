@@ -14,22 +14,22 @@ import { datastoreNavItems } from "../../config/datastoreNavItems";
 import functions from "../../functions";
 import reactQueryKeys from "../../modules/reactQueryKeys";
 import { routes } from "../../router/router";
-import { type Data } from "../../types/app";
+import { type Datasheet } from "../../types/app";
 
-type DataListItemProps = {
+type DatasheetListItemProps = {
     datastoreId: string;
-    data: Data;
+    datasheet: Datasheet;
 };
 
-const DataListItem: FC<DataListItemProps> = ({ datastoreId, data }) => {
+const DatasheetListItem: FC<DatasheetListItemProps> = ({ datastoreId, datasheet }) => {
     return (
         <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-grid-row--center", "fr-my-1w", "fr-p-2v", "fr-card--grey")}>
             <div className={fr.cx("fr-col")}>
-                <Button linkProps={routes.datastore_data_view({ datastoreId, dataName: data.data_name }).link} priority="tertiary no outline">
+                <Button linkProps={routes.datastore_datasheet_view({ datastoreId, datasheetName: datasheet.name }).link} priority="tertiary no outline">
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
                         <img src="//www.gouvernement.fr/sites/default/files/static_assets/placeholder.1x1.png" width={"64px"} className={fr.cx("fr-mr-1v")} />
-                        <strong className={fr.cx("fr-ml-2w")}>{data.data_name}</strong>
-                        {data.categories?.map((category, i) => (
+                        <strong className={fr.cx("fr-ml-2w")}>{datasheet.name}</strong>
+                        {datasheet.categories?.map((category, i) => (
                             <Tag key={i} dismissible={false} className={fr.cx("fr-ml-2w")} small={true} pressed={false}>
                                 {category}
                             </Tag>
@@ -37,23 +37,23 @@ const DataListItem: FC<DataListItemProps> = ({ datastoreId, data }) => {
                     </div>
                 </Button>
             </div>
-            <div className={fr.cx("fr-col-2")}>{data?.date ? functions.date.format(data.date) : ""}</div>
+            <div className={fr.cx("fr-col-2")}>{datasheet?.date ? functions.date.format(datasheet.date) : ""}</div>
             <div className={fr.cx("fr-col-2")}>
                 <Badge noIcon={true} severity="info">
-                    {data?.nb_publications > 0 ? `Publié (${data?.nb_publications})` : "Non Publié"}
+                    {datasheet?.nb_publications > 0 ? `Publié (${datasheet?.nb_publications})` : "Non Publié"}
                 </Badge>
             </div>
         </div>
     );
 };
 
-DataListItem.displayName = symToStr({ DataListItem });
+DatasheetListItem.displayName = symToStr({ DataListItem: DatasheetListItem });
 
-type DatastoreDataListType = {
+type DatastoreDatasheetListType = {
     datastoreId: string;
 };
 
-const DatastoreDataList: FC<DatastoreDataListType> = ({ datastoreId }) => {
+const DatastoreDatasheetList: FC<DatastoreDatasheetListType> = ({ datastoreId }) => {
     const abortController = new AbortController();
     const queryClient = useQueryClient();
 
@@ -65,8 +65,8 @@ const DatastoreDataList: FC<DatastoreDataListType> = ({ datastoreId }) => {
                 staleTime: 60000,
             },
             {
-                queryKey: [reactQueryKeys.datastore_dataList_detailed(datastoreId)],
-                queryFn: () => api.data.getList(datastoreId, { signal: abortController?.signal }),
+                queryKey: [reactQueryKeys.datastore_datasheet_list(datastoreId)],
+                queryFn: () => api.datasheet.getList(datastoreId, { signal: abortController?.signal }),
                 refetchInterval: 10000,
             },
         ],
@@ -76,7 +76,7 @@ const DatastoreDataList: FC<DatastoreDataListType> = ({ datastoreId }) => {
 
     useEffect(() => {
         return () => {
-            queryClient.cancelQueries({ queryKey: [reactQueryKeys.datastore(datastoreId), reactQueryKeys.datastore_dataList_detailed(datastoreId)] });
+            queryClient.cancelQueries({ queryKey: [reactQueryKeys.datastore(datastoreId), reactQueryKeys.datastore_datasheet_list(datastoreId)] });
         };
     }, [datastoreId, queryClient]);
 
@@ -91,7 +91,7 @@ const DatastoreDataList: FC<DatastoreDataListType> = ({ datastoreId }) => {
                     <ButtonsGroup
                         buttons={[
                             {
-                                linkProps: routes.datastore_data_new({ datastoreId }).link,
+                                linkProps: routes.datastore_datasheet_new({ datastoreId }).link,
                                 iconId: "fr-icon-add-line",
                                 children: "Créer une fiche de données",
                             },
@@ -105,13 +105,15 @@ const DatastoreDataList: FC<DatastoreDataListType> = ({ datastoreId }) => {
                     />
 
                     {!dataListQuery.isLoading &&
-                        dataListQuery?.data?.map((data: Data) => <DataListItem key={data?.data_name} datastoreId={datastoreId} data={data} />)}
+                        dataListQuery?.data?.map((datasheet: Datasheet) => (
+                            <DatasheetListItem key={datasheet.name} datastoreId={datastoreId} datasheet={datasheet} />
+                        ))}
                 </>
             )}
         </AppLayout>
     );
 };
 
-DatastoreDataList.displayName = symToStr({ DatastoreDataList });
+DatastoreDatasheetList.displayName = symToStr({ DatastoreDatasheetList });
 
-export default DatastoreDataList;
+export default DatastoreDatasheetList;

@@ -14,12 +14,12 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route(
-    '/api/datastores/{datastoreId}/data',
-    name: 'cartesgouvfr_api_data_',
+    '/api/datastores/{datastoreId}/datasheet',
+    name: 'cartesgouvfr_api_datasheet_',
     options: ['expose' => true],
     condition: 'request.isXmlHttpRequest()'
 )]
-class DataController extends AbstractController
+class DatasheetController extends AbstractController
 {
     public function __construct(
         private EntrepotApiService $entrepotApiService
@@ -27,16 +27,15 @@ class DataController extends AbstractController
     }
 
     #[Route('', name: 'get_list', methods: ['GET'])]
-    public function getDataList(
-        string $datastoreId,
-    ): JsonResponse {
+    public function getDatasheetList(string $datastoreId): JsonResponse
+    {
         $uploads = $this->entrepotApiService->upload->getAllDetailed($datastoreId, [
             'sort' => 'date:desc',
         ]);
 
-        $uploadDataNames = array_map(function ($upload) {
-            if (isset($upload['tags'][StoredDataTags::DATA_NAME])) {
-                return $upload['tags'][StoredDataTags::DATA_NAME];
+        $uploadDatasheetNames = array_map(function ($upload) {
+            if (isset($upload['tags'][StoredDataTags::DATASHEET_NAME])) {
+                return $upload['tags'][StoredDataTags::DATASHEET_NAME];
             }
         }, $uploads);
 
@@ -44,38 +43,38 @@ class DataController extends AbstractController
             'sort' => 'date:desc',
         ]);
 
-        $storedDataDataNames = array_map(function ($storedData) {
-            if (isset($storedData['tags'][StoredDataTags::DATA_NAME])) {
-                return $storedData['tags'][StoredDataTags::DATA_NAME];
+        $storedDataDatasheetNames = array_map(function ($storedData) {
+            if (isset($storedData['tags'][StoredDataTags::DATASHEET_NAME])) {
+                return $storedData['tags'][StoredDataTags::DATASHEET_NAME];
             }
         }, $storedDataList);
 
-        $uniqueDataNames = array_unique(array_merge($uploadDataNames, $storedDataDataNames));
-        $uniqueDataNames = array_filter($uniqueDataNames);
-        $uniqueDataNames = array_values($uniqueDataNames);
+        $uniqueDatasheetNames = array_unique(array_merge($uploadDatasheetNames, $storedDataDatasheetNames));
+        $uniqueDatasheetNames = array_filter($uniqueDatasheetNames);
+        $uniqueDatasheetNames = array_values($uniqueDatasheetNames);
 
-        $dataList = [];
+        $datasheetList = [];
 
-        foreach ($uniqueDataNames as $dataName) {
-            $dataList[] = $this->getBasicInfo($datastoreId, $dataName);
+        foreach ($uniqueDatasheetNames as $datasheetName) {
+            $datasheetList[] = $this->getBasicInfo($datastoreId, $datasheetName);
         }
 
-        return $this->json($dataList);
+        return $this->json($datasheetList);
     }
 
-    #[Route('/{dataName}', name: 'get', methods: ['GET'])]
-    public function getDetailed(string $datastoreId, string $dataName): JsonResponse
+    #[Route('/{datasheetName}', name: 'get', methods: ['GET'])]
+    public function getDetailed(string $datastoreId, string $datasheetName): JsonResponse
     {
         $uploadList = $this->entrepotApiService->upload->getAllDetailed($datastoreId, [
             'tags' => [
-                UploadTags::DATA_NAME => $dataName,
+                UploadTags::DATASHEET_NAME => $datasheetName,
             ],
         ]);
 
         $vectorDbList = $this->entrepotApiService->storedData->getAllDetailed($datastoreId, [
             'type' => StoredDataTypes::VECTOR_DB,
             'tags' => [
-                StoredDataTags::DATA_NAME => $dataName,
+                StoredDataTags::DATASHEET_NAME => $datasheetName,
             ],
         ]);
 
@@ -83,7 +82,7 @@ class DataController extends AbstractController
 
         // TODO : configurations et offerings
 
-        $data = $this->getBasicInfo($datastoreId, $dataName);
+        $data = $this->getBasicInfo($datastoreId, $datasheetName);
 
         return $this->json([
             ...$data,
@@ -92,12 +91,12 @@ class DataController extends AbstractController
         ]);
     }
 
-    private function getBasicInfo(string $datastoreId, string $dataName): array
+    private function getBasicInfo(string $datastoreId, string $datasheetName): array
     {
         $nbPublications = 0;
         $configurations = $this->entrepotApiService->configuration->getAll($datastoreId, [
             'tags' => [
-                StoredDataTags::DATA_NAME => $dataName,
+                StoredDataTags::DATASHEET_NAME => $datasheetName,
             ],
         ]);
 
@@ -108,7 +107,7 @@ class DataController extends AbstractController
         }
 
         return [
-            StoredDataTags::DATA_NAME => $dataName,
+            'name' => $datasheetName,
             'date' => new \DateTime(),
             'categories' => $this->getRandomCategories(), // TODO : temporaire
             'nb_publications' => $nbPublications,
@@ -128,11 +127,11 @@ class DataController extends AbstractController
         return $categories;
     }
 
-    #[Route('/{dataName}', name: 'delete', methods: ['DELETE'])]
-    public function delete(string $datastoreId, string $dataName): Response
+    #[Route('/{datasheetName}', name: 'delete', methods: ['DELETE'])]
+    public function delete(string $datastoreId, string $datasheetName): Response
     {
         try {
-            $data = json_decode($this->getDetailed($datastoreId, $dataName)->getContent(), true);
+            $data = json_decode($this->getDetailed($datastoreId, $datasheetName)->getContent(), true);
 
             if (isset($data['upload_list'])) {
                 foreach ($data['upload_list'] as $upload) {
