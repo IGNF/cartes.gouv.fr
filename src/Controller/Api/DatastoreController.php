@@ -20,7 +20,7 @@ class DatastoreController extends AbstractController
     ) {
     }
 
-    #[Route('/{datastoreId}', name: 'get')]
+    #[Route('/{datastoreId}', name: 'get', methods: ['GET'])]
     public function getDatastore(string $datastoreId): JsonResponse
     {
         return $this->json($this->entrepotApiService->datastore->get($datastoreId));
