@@ -22,6 +22,7 @@ export type Data = {
 
 export type DataDetailed = Data & {
     vector_db_list: VectorDb[] | undefined;
+    upload_list: Upload[] | undefined;
 };
 
 export type StoredData = Partial<StoredDataPrivateDetailResponseDto>;

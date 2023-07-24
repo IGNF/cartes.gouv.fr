@@ -157,7 +157,7 @@ class UploadApiService extends AbstractEntrepotApiService
 
         return $this->request('GET', "datastores/$datastoreId/uploads/$uploadId/tree");
     }
-    
+
     /**
      * Opens an existing upload only if it isn't already OPEN.
      *
@@ -204,6 +204,31 @@ class UploadApiService extends AbstractEntrepotApiService
         return $this->request('DELETE', "datastores/$datastoreId/uploads/$uploadId/tags", [], [
             'tags' => $tags,
         ]);
+    }
+
+    public function remove(string $datastoreId, string $uploadId): mixed
+    {
+        $upload = $this->get($datastoreId, $uploadId);
+        if (UploadStatuses::OPEN == $upload['status']) {
+            $this->close($datastoreId, $uploadId);
+        }
+
+        // sauvegarde dans les tags de l'aborescence de fichiers de la livraison avant de la supprimer, parce qu'une fois supprimée elle ne sera plus récupérable
+        try {
+            $fileTree = $this->getFileTree($datastoreId, $uploadId);
+            $this->addTags($datastoreId, $uploadId, [
+                'file_tree' => json_encode($fileTree),
+            ]);
+        } catch (EntrepotApiException $ex) {
+            // ne rien faire, tant pis si la récupération de l'arborescence a échoué
+        }
+
+        return $this->request('DELETE', "datastores/$datastoreId/uploads/$uploadId");
+    }
+
+    public function getEvents(string $datastoreId, string $uploadId): array
+    {
+        return $this->request('GET', "datastores/$datastoreId/uploads/$uploadId/events");
     }
 
     public function getCheckExecutions(string $datastoreId, string $uploadId): array
