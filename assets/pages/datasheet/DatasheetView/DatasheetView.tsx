@@ -6,6 +6,7 @@ import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useEffect, useState } from "react";
+import { symToStr } from "tsafe/symToStr";
 
 import api from "../../../api";
 import AppLayout from "../../../components/Layout/AppLayout";
@@ -22,11 +23,11 @@ const deleteDataConfirmModal = createModal({
     isOpenedByDefault: false,
 });
 
-type DataViewProps = {
+type DatasheetViewProps = {
     datastoreId: string;
     dataName: string;
 };
-const DataView: FC<DataViewProps> = ({ datastoreId, dataName }) => {
+const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, dataName }) => {
     const navItems = datastoreNavItems(datastoreId);
 
     const queryClient = useQueryClient();
@@ -165,4 +166,6 @@ const DataView: FC<DataViewProps> = ({ datastoreId, dataName }) => {
     );
 };
 
-export default DataView;
+DatasheetView.displayName = symToStr({ DatasheetView });
+
+export default DatasheetView;

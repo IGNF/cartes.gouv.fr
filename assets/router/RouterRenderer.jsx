@@ -28,7 +28,7 @@ const DatastoreDashboard = lazy(() => import("../pages/datastores/DatastoreDashb
 const DatastoreDataList = lazy(() => import("../pages/datastores/DatastoreDataList"));
 const DataNewForm = lazy(() => import("../pages/datasheet/DatasheetNew/DataNewForm"));
 const DataNewIntegrationPage = lazy(() => import("../pages/datasheet/DatasheetNew/DatasheetNewIntegration/DataNewIntegration"));
-const DataView = lazy(() => import("../pages/datasheet/DatasheetView/DataView"));
+const DatasheetView = lazy(() => import("../pages/datasheet/DatasheetView/DatasheetView"));
 const WfsServiceNew = lazy(() => import("../pages/service/wfs/WfsServiceNew"));
 
 function RouterRenderer() {
@@ -113,7 +113,7 @@ function RouterRenderer() {
             content = <DataNewIntegrationPage datastoreId={route.params.datastoreId} uploadId={route.params.uploadId} />;
             break;
         case "datastore_datasheet_view":
-            content = <DataView datastoreId={route.params.datastoreId} dataName={route.params.dataName} />;
+            content = <DatasheetView datastoreId={route.params.datastoreId} dataName={route.params.dataName} />;
             break;
         case "datastore_wfs_service_new":
             content = <WfsServiceNew datastoreId={route.params.datastoreId} storedDataId={route.params.storedDataId} />;
