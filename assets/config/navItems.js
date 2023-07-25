@@ -2,21 +2,15 @@ import { routes } from "../router/router";
 
 export const defaultNavItems = [
     {
-        text: "Données et services",
-        linkProps: {
-            href: "#",
-        },
-    },
-    {
-        text: "Actualités",
-        linkProps: routes.news_list().link,
-    },
-    {
-        text: "A propos",
-        linkProps: routes.about().link,
-    },
-    {
         menuLinks: [
+            // {
+            //     linkProps: "#",
+            //     text: "Je veux...",
+            // },
+            {
+                linkProps: routes.docs().link,
+                text: "Documentation",
+            },
             {
                 linkProps: routes.faq().link,
                 text: "Questions fréquentes",
@@ -26,6 +20,40 @@ export const defaultNavItems = [
                 text: "Nous écrire",
             },
         ],
-        text: "Aide",
+        text: "Commencer avec cartes.gouv",
+    },
+    // {
+    //     menuLinks: [
+    //         {
+    //             linkProps: "#",
+    //             text: "Données",
+    //         },
+    //         {
+    //             linkProps: "#",
+    //             text: "Services",
+    //         },
+    //     ],
+    //     text: "Catalogue",
+    // },
+    // {
+    //     menuLinks: [
+    //         {
+    //             linkProps: "#",
+    //             text: "Gitlab Géoplateforme",
+    //         },
+    //         {
+    //             linkProps: "#",
+    //             text: "Bac à sable de développement",
+    //         },
+    //     ],
+    //     text: "Usine logicielle",
+    // },
+    {
+        text: "Actualités",
+        linkProps: routes.news_list().link,
+    },
+    {
+        text: "A propos",
+        linkProps: routes.about().link,
     },
 ];

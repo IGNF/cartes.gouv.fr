@@ -1,21 +1,21 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
-import { Button } from "@codegouvfr/react-dsfr/Button";
+// import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
-import Routing from "fos-router";
+// import Routing from "fos-router";
 
-import React, { useContext } from "react";
+import React/*, { useContext }*/ from "react";
 
 import AppLayout from "../components/Layout/AppLayout";
 import { defaultNavItems } from "../config/navItems";
-import { UserContext } from "../contexts/UserContext";
-import { appRoot, routes } from "../router/router";
+// import { UserContext } from "../contexts/UserContext";
+import { appRoot/*, routes*/ } from "../router/router";
 
 import hp from "../img/hp.jpg";
 import "../sass/pages/home.scss";
 
 const Home = () => {
-    const { user } = useContext(UserContext);
+    // const { user } = useContext(UserContext);
 
     return (
         <AppLayout navItems={defaultNavItems}>
@@ -100,7 +100,7 @@ const Home = () => {
                                         />
                                         <h4 className={fr.cx("fr-text--lead")}>Effectuer des traitements</h4>
                                         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                                        <p>
+                                        {/* <p>
                                             {user === null ? (
                                                 <Button
                                                     linkProps={{ href: Routing.generate("cartesgouvfr_security_login") }}
@@ -117,7 +117,7 @@ const Home = () => {
                                                     {Translator.trans("home.start")}
                                                 </Button>
                                             )}
-                                        </p>
+                                        </p> */}
                                     </div>
                                     <div className={fr.cx("fr-col-lg-3", "fr-col-md-6", "fr-col-12", "fr-text--center")}>
                                         <img
@@ -143,7 +143,7 @@ const Home = () => {
                                         />
                                         <h4 className={fr.cx("fr-text--lead")}>Consectetur adipiscing elit</h4>
                                         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                                        <p>
+                                        {/* <p>
                                             {user === null ? (
                                                 <Button
                                                     linkProps={{ href: Routing.generate("cartesgouvfr_security_login") }}
@@ -160,7 +160,7 @@ const Home = () => {
                                                     {Translator.trans("home.start")}
                                                 </Button>
                                             )}
-                                        </p>
+                                        </p> */}
                                     </div>
 
                                     <div className={fr.cx("fr-col-lg-3", "fr-col-12", "fr-text--center")}>
