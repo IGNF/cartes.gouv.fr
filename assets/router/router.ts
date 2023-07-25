@@ -1,6 +1,7 @@
+import Routing from "fos-router";
 import { createRouter, defineRoute, param } from "type-route";
 
-export const appRoot = (document.getElementById("root") as HTMLDivElement).dataset?.appRoot ?? "";
+export const appRoot = Routing.getBaseUrl(); // (document.getElementById("root") as HTMLDivElement).dataset?.appRoot ?? "";
 
 const routeDefs = {
     // routes non protégées
