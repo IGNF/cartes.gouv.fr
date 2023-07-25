@@ -7,7 +7,7 @@ import AppLayout from "../../components/Layout/AppLayout";
 import { defaultNavItems } from "../../config/navItems";
 import articles from "../../data/actualites.json";
 import functions from "../../functions";
-import { routes } from "../../router/router";
+import { appRoot, routes } from "../../router/router";
 import { type NewsArticle } from "../../types/newsArticle";
 
 type NewsListItemProps = {
@@ -32,7 +32,7 @@ const NewsListItem: FC<NewsListItemProps> = ({ slug, newsArticle }) => {
                 detail={newsArticle?.date && functions.date.format(newsArticle?.date)}
                 enlargeLink
                 imageAlt="illustration de l'article"
-                imageUrl={newsArticle?.thumbnail_url}
+                imageUrl={`${appRoot}/${newsArticle.thumbnail_url}`}
                 linkProps={routes.news_article({ slug }).link}
                 title={newsArticle?.title}
             />

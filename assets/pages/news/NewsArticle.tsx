@@ -1,12 +1,13 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import { useColors } from "@codegouvfr/react-dsfr/useColors";
 import Badge from "@codegouvfr/react-dsfr/Badge";
+import { useColors } from "@codegouvfr/react-dsfr/useColors";
 import { FC } from "react";
 
 import AppLayout from "../../components/Layout/AppLayout";
 import { defaultNavItems } from "../../config/navItems";
 import articles from "../../data/actualites.json";
 import functions from "../../functions";
+import { appRoot } from "../../router/router";
 import { type NewsArticle } from "../../types/newsArticle";
 
 type NewsArticleProps = {
@@ -48,7 +49,7 @@ const NewsArticle: FC<NewsArticleProps> = ({ slug }) => {
             </div>
 
             <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
-                <img src={newsArticle.thumbnail_url} width="100%" alt="illustration de l'article" />
+                <img src={`${appRoot}/${newsArticle.thumbnail_url}`} width="100%" alt="illustration de l'article" />
             </div>
 
             <div className={fr.cx("fr-grid-row", "fr-mt-2w")}>
