@@ -2,6 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Card } from "@codegouvfr/react-dsfr/Card";
 import { FC } from "react";
+import { symToStr } from "tsafe/symToStr";
 
 import AppLayout from "../../components/Layout/AppLayout";
 import { defaultNavItems } from "../../config/navItems";
@@ -39,6 +40,7 @@ const NewsListItem: FC<NewsListItemProps> = ({ slug, newsArticle }) => {
         </div>
     );
 };
+NewsListItem.displayName = symToStr({ NewsListItem });
 
 const NewsList = () => {
     return (
@@ -53,5 +55,7 @@ const NewsList = () => {
         </AppLayout>
     );
 };
+
+NewsList.displayName = symToStr({ NewsList });
 
 export default NewsList;

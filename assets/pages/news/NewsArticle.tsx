@@ -2,6 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import { useColors } from "@codegouvfr/react-dsfr/useColors";
 import { FC } from "react";
+import { symToStr } from "tsafe/symToStr";
 
 import AppLayout from "../../components/Layout/AppLayout";
 import { defaultNavItems } from "../../config/navItems";
@@ -53,10 +54,12 @@ const NewsArticle: FC<NewsArticleProps> = ({ slug }) => {
             </div>
 
             <div className={fr.cx("fr-grid-row", "fr-mt-2w")}>
-                <div className={fr.cx("fr-col")}>{newsArticle.content?.split("\n")?.map((paragraphe, i) => <p key={i}>{paragraphe}</p>)}</div>
+                <div className={fr.cx("fr-col")} dangerouslySetInnerHTML={{ __html: newsArticle.content }} />
             </div>
         </AppLayout>
     );
 };
+
+NewsArticle.displayName = symToStr({ NewsArticle });
 
 export default NewsArticle;
