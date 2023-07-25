@@ -10,7 +10,7 @@ const Docs = () => {
             <h1>Documentation</h1>
 
             <p>Ces contenus ne sont pas encore prêts.</p>
-            
+
             <BtnBackToHome />
         </AppLayout>
     );
