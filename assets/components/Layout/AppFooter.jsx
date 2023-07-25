@@ -26,6 +26,14 @@ const AppFooter = () => {
                 alimentés par la Géoplateforme, la nouvelle infrastructure publique des données 
                 géographiques.
             "
+            bottomItems={[
+                {
+                    text: "données personnelles",
+                    linkProps: routes.personal_data().link
+                },
+                // Choix du thème clair/sombre
+                headerFooterDisplayItem
+            ]}
             cookiesManagementLinkProps={{
                 ...routes.cookies().link,
             }}
@@ -42,7 +50,6 @@ const AppFooter = () => {
             websiteMapLinkProps={{
                 ...routes.sitemap().link,
             }}
-            bottomItems={[headerFooterDisplayItem]}
             partnersLogos={{
                 sub: [
                     {

@@ -66,9 +66,9 @@ const AppHeader = ({ navItems = [] }) => {
             }}
             serviceTitle="cartes.gouv.fr"
             quickAccessItems={quickAccessItems}
-            renderSearchInput={({ className, id, name, placeholder, type }) => (
-                <input className={className} id={id} name={name} placeholder={placeholder} type={type} />
-            )}
+            // renderSearchInput={({ className, id, name, placeholder, type }) => (
+            //     <input className={className} id={id} name={name} placeholder={placeholder} type={type} />
+            // )}
             navigation={navItems}
         />
     );
