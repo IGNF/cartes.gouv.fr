@@ -2,7 +2,7 @@
     "premieres-versions-adaptatives-des-api-javascript-geoportail": {
         "date": "2023-06-30",
         "title": "Premières versions adaptatives des API JavaScript Geoportail",
-        "thumbnail_url": "/build/img/actualites/1.png",
+        "thumbnail_url": "build/img/actualites/1.png",
         "tags": [
             "geoportail",
             "api"
@@ -13,7 +13,7 @@
     "avancement-du-programme-lidar-hd-publication-des-premieres-donnees-classees": {
         "date": "2023-07-21T12:09:09.000Z",
         "title": "Avancement du programme LiDAR HD : publication des premières données classées",
-        "thumbnail_url": "/build/img/actualites/2.png",
+        "thumbnail_url": "build/img/actualites/2.png",
         "tags": [
             "LidarHD",
             "3D"
@@ -24,7 +24,7 @@
     "quand-lia-se-met-au-service-des-enjeux-environnementaux-aidez-nous-a-relever-le-defi": {
         "date": "2023-07-21T12:09:09.000Z",
         "title": "Quand l’IA se met au service des enjeux environnementaux : aidez-nous à relever le défi !",
-        "thumbnail_url": "/build/img/actualites/3.png",
+        "thumbnail_url": "build/img/actualites/3.png",
         "tags": [
             "IA",
             "environnement",
