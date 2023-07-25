@@ -47,7 +47,7 @@ const Contact = () => {
     } = useForm({ resolver: yupResolver(schema) });
 
     const explanation = { __html: Translator.trans("contact.form.explain", { href: routes.docs().href }) };
-    const infos = { __html: Translator.trans("contact.form.infos") };
+    const infos = { __html: Translator.trans("contact.form.infos", {href: routes.personal_data().href }) };
 
     const onSubmit = () => {
         setError(null);
@@ -71,84 +71,89 @@ const Contact = () => {
 
     return (
         <AppLayout navItems={defaultNavItems}>
-            <h1>{Translator.trans("contact.title")}</h1>
-            <p dangerouslySetInnerHTML={explanation} />
+            <div className={fr.cx("fr-grid-row")}>
+                <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
+                    <h1>{Translator.trans("contact.title")}</h1>
+                    <p dangerouslySetInnerHTML={explanation} />
 
-            {error && <Alert title={Translator.trans("contact.form.error_title")} closable description={error} severity="error" />}
+                    {error && <Alert title={Translator.trans("contact.form.error_title")} closable description={error} severity="error" />}
 
-            <Input
-                label={Translator.trans("contact.form.email_contact")}
-                state={errors.email_contact ? "error" : "default"}
-                stateRelatedMessage={errors?.email_contact?.message}
-                nativeInputProps={{
-                    ...register("email_contact"),
-                    defaultValue: user?.email,
-                    readOnly: user ? true : false,
-                }}
-            />
-            <Input
-                label={Translator.trans("contact.form.lastName")}
-                nativeInputProps={{
-                    ...register("last_name"),
-                    defaultValue: user?.lastName,
-                    readOnly: user?.lastName ? true : false,
-                }}
-            />
-            <Input
-                label={Translator.trans("contact.form.firstName")}
-                nativeInputProps={{
-                    ...register("first_name"),
-                    defaultValue: user?.firstName,
-                    readOnly: user?.firstName ? true : false,
-                }}
-            />
-            <Input
-                label={Translator.trans("contact.form.organization")}
-                nativeInputProps={{
-                    ...register("organization"),
-                }}
-            />
-            <Input
-                state={errors.message ? "error" : "default"}
-                stateRelatedMessage={errors?.message?.message}
-                textArea={true}
-                nativeTextAreaProps={{
-                    ...register("message"),
-                    rows: 8,
-                    placeholder: Translator.trans("contact.form.message_placeholder"),
-                }}
-            />
-            <Select
-                className={"importance"}
-                nativeSelectProps={{
-                    ...register("importance"),
-                    defaultValue: "0",
-                }}
-            >
-                <option value="0">0</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-            </Select>
+                    <Input
+                        label={Translator.trans("contact.form.email_contact")}
+                        state={errors.email_contact ? "error" : "default"}
+                        stateRelatedMessage={errors?.email_contact?.message}
+                        nativeInputProps={{
+                            ...register("email_contact"),
+                            defaultValue: user?.email,
+                            readOnly: user ? true : false,
+                        }}
+                    />
+                    <Input
+                        label={Translator.trans("contact.form.lastName")}
+                        nativeInputProps={{
+                            ...register("last_name"),
+                            defaultValue: user?.lastName,
+                            readOnly: user?.lastName ? true : false,
+                        }}
+                    />
+                    <Input
+                        label={Translator.trans("contact.form.firstName")}
+                        nativeInputProps={{
+                            ...register("first_name"),
+                            defaultValue: user?.firstName,
+                            readOnly: user?.firstName ? true : false,
+                        }}
+                    />
+                    <Input
+                        label={Translator.trans("contact.form.organization")}
+                        nativeInputProps={{
+                            ...register("organization"),
+                        }}
+                    />
+                    <Input
+                        label={Translator.trans("contact.form.message")}
+                        state={errors.message ? "error" : "default"}
+                        stateRelatedMessage={errors?.message?.message}
+                        textArea={true}
+                        nativeTextAreaProps={{
+                            ...register("message"),
+                            rows: 8,
+                            placeholder: Translator.trans("contact.form.message_placeholder"),
+                        }}
+                    />
+                    <Select
+                        className={"importance"}
+                        nativeSelectProps={{
+                            ...register("importance"),
+                            defaultValue: "0",
+                        }}
+                    >
+                        <option value="0">0</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                    </Select>
 
-            <p dangerouslySetInnerHTML={infos} />
+                    <p dangerouslySetInnerHTML={infos} />
 
-            <div className={fr.cx("fr-grid-row", "fr-grid-row--right")}>
-                <Button onClick={handleSubmit(onSubmit)}>{Translator.trans("send")}</Button>
-            </div>
-
-            <Wait show={isSending}>
-                <div className={fr.cx("fr-container")}>
-                    <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                        <div className={fr.cx("fr-col-2")}>
-                            <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "icons-spin")} />
-                        </div>
-                        <div className={fr.cx("fr-col-10")}>
-                            <h6 className={fr.cx("fr-h6", "fr-m-0")}>{"Votre message est en cours d'envoi"}</h6>
-                        </div>
+                    <div className={fr.cx("fr-grid-row", "fr-grid-row--right")}>
+                        <Button onClick={handleSubmit(onSubmit)}>{Translator.trans("send")}</Button>
                     </div>
+
+                    <Wait show={isSending}>
+                        <div className={fr.cx("fr-container")}>
+                            <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
+                                <div className={fr.cx("fr-col-2")}>
+                                    <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "icons-spin")} />
+                                </div>
+                                <div className={fr.cx("fr-col-10")}>
+                                    <h6 className={fr.cx("fr-h6", "fr-m-0")}>{"Votre message est en cours d'envoi"}</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </Wait>
                 </div>
-            </Wait>
+            </div>
         </AppLayout>
     );
 };

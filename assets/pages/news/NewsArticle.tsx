@@ -28,33 +28,37 @@ const NewsArticle: FC<NewsArticleProps> = ({ slug }) => {
 
     return (
         <AppLayout navItems={defaultNavItems}>
-            <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>{badges}</div>
-            <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
-                <h1>{newsArticle?.title}</h1>
-            </div>
+            <div className={fr.cx("fr-grid-row")}>
+                <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
+                    <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>{badges}</div>
+                    <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
+                        <h1>{newsArticle?.title}</h1>
+                    </div>
 
-            <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
-                <p>{newsArticle.short_description}</p>
-            </div>
+                    <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
+                        <p>{newsArticle.short_description}</p>
+                    </div>
 
-            <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
-                <p
-                    style={{
-                        fontStyle: "italic",
-                        color: theme.decisions.text.mention.grey.default,
-                    }}
-                >
-                    <i className="ri-article-line" />
-                    &nbsp;Publié le {functions.date.format(newsArticle.date)}
-                </p>
-            </div>
+                    <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
+                        <p
+                            style={{
+                                fontStyle: "italic",
+                                color: theme.decisions.text.mention.grey.default,
+                            }}
+                        >
+                            <i className="ri-article-line" />
+                            &nbsp;Publié le {functions.date.format(newsArticle.date)}
+                        </p>
+                    </div>
 
-            <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
-                <img src={`${appRoot}/${newsArticle.thumbnail_url}`} width="100%" alt="illustration de l'article" />
-            </div>
+                    <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
+                        <img src={`${appRoot}/${newsArticle.thumbnail_url}`} width="100%" alt="illustration de l'article" />
+                    </div>
 
-            <div className={fr.cx("fr-grid-row", "fr-mt-2w")}>
-                <div className={fr.cx("fr-col")} dangerouslySetInnerHTML={{ __html: newsArticle.content }} />
+                    <div className={fr.cx("fr-grid-row", "fr-mt-2w")}>
+                        <div className={fr.cx("fr-col")} dangerouslySetInnerHTML={{ __html: newsArticle.content }} />
+                    </div>
+                </div>
             </div>
         </AppLayout>
     );
