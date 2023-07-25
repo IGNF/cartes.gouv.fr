@@ -47,7 +47,7 @@ const Contact = () => {
     } = useForm({ resolver: yupResolver(schema) });
 
     const explanation = { __html: Translator.trans("contact.form.explain", { href: routes.docs().href }) };
-    const infos = { __html: Translator.trans("contact.form.infos", {href: routes.personal_data().href }) };
+    const infos = { __html: Translator.trans("contact.form.infos", { href: routes.personal_data().href }) };
 
     const onSubmit = () => {
         setError(null);
