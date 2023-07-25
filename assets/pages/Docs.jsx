@@ -7,7 +7,10 @@ import { defaultNavItems } from "../config/navItems";
 const Docs = () => {
     return (
         <AppLayout navItems={defaultNavItems}>
-            <h1>Docs</h1>
+            <h1>Documentation</h1>
+
+            <p>Ces contenus ne sont pas encore prêts.</p>
+            
             <BtnBackToHome />
         </AppLayout>
     );

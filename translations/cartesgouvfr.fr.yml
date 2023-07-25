@@ -29,18 +29,19 @@ contact:
     title: "Nous écrire"
     form:
         error_title: "Votre message n'a pas pu être envoyé"
-        explain: 'Vous n''avez pas trouvé la réponse à votre question dans <a href="%href%">l''aide en ligne</a> ? Vous souhaitez la configuration d''un espace de travail pour vos besoins ? Contactez-nous !'
-        email_contact: "Votre email *"
-        email_contact_mandatory_error: "L'email est obligatoire"
-        email_contact_error: "L'email n'est pas valide"
-        lastName: "Nom"
-        firstName: "Prénom"
-        organization: "Organisme"
-        message_placeholder: "Décrivez votre demande en quelques lignes *"
-        message_minlength_error: "Le corps du message doit faire au moins 10 caractères"
-        infos: 'Les informations recueillies à partir de ce formulaire sont nécessaires à la gestion de votre demande par les services de l''IGN concernés. <a href="https://www.ign.fr/institut/donnees-caractere-personnel" target="_blank">En savoir plus sur la gestion des données à caractère personnel</a>'
+        explain: 'Vous n''avez pas trouvé la réponse à votre question dans <a href="%href%">l''aide en ligne</a> ? Vous souhaitez la configuration d''un espace de travail pour vos besoins ? Utilisez ce formulaire pour nous contacter.'
+        email_contact: "Votre email"
+        email_contact_mandatory_error: "Veuillez saisir une adresse email"
+        email_contact_error: "Veuillez saisir une adresse email valide"
+        lastName: "Votre nom (optionnel)"
+        firstName: "Votre prénom (optionnel)"
+        organization: "Votre organisme (optionnel)"
+        message: "Votre demande"
+        message_placeholder: "Décrivez votre demande en quelques lignes"
+        message_minlength_error: "Veuillez saisir une demande d'au moins 10 caractères."
+        infos: 'Les informations recueillies à partir de ce formulaire sont nécessaires à la gestion de votre demande par les services de l''IGN concernés. <a href="%href%">En savoir plus sur la gestion des données à caractère personnel</a>'
     email_support:
-        heading: "Un utilisateur a utilisé le formulaire de contact de la Geoplateforme."
+        heading: "Un utilisateur a utilisé le formulaire de contact de cartes.gouv.fr."
         user_id: "Identifiant unique de l'utilisateur"
         user_email: "Adresse mail de l'utilisateur"
         last_name: "Nom de l'utilisateur"
