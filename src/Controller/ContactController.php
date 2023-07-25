@@ -75,14 +75,15 @@ class ContactController extends AbstractController
                 'message' => $message,
             ]);
 
-            // sending mail to support address
-            $mailerService->sendMail($supportAddress, '[Géoplateforme] Demande de contact', 'Mailer/contact.html.twig', $supportMailParams);
+            // TODO : envoi de mail désactivé en attendant d'avoir l'adresse du serveur smtp en production
+            // envoi du mail à l'adresse du support
+            // $mailerService->sendMail($supportAddress, '[Géoplateforme] Demande de contact', 'Mailer/contact.html.twig', $supportMailParams);
 
-            // sending acknowledgement mail to user
-            $mailerService->sendMail($userEmail, '[Géoplateforme] Accusé de réception de votre demande', 'Mailer/contact_acknowledgement.html.twig', [
-                'message' => $message,
-                'sendDate' => $now,
-            ]);
+            // // envoi du mail d'accusé de réception à l'utilisateur
+            // $mailerService->sendMail($userEmail, '[Géoplateforme] Accusé de réception de votre demande', 'Mailer/contact_acknowledgement.html.twig', [
+            //     'message' => $message,
+            //     'sendDate' => $now,
+            // ]);
 
             return new JsonResponse(['success' => true]);
         } catch (BadRequestHttpException $e) {
