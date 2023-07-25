@@ -4,12 +4,12 @@ import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
 // import Routing from "fos-router";
 
-import React/*, { useContext }*/ from "react";
+import React /*, { useContext }*/ from "react";
 
 import AppLayout from "../components/Layout/AppLayout";
 import { defaultNavItems } from "../config/navItems";
 // import { UserContext } from "../contexts/UserContext";
-import { appRoot/*, routes*/ } from "../router/router";
+import { appRoot /*, routes*/ } from "../router/router";
 
 import hp from "../img/hp.jpg";
 import "../sass/pages/home.scss";
