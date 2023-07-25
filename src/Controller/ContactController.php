@@ -53,7 +53,7 @@ class ContactController extends AbstractController
                 throw new BadRequestHttpException('Votre message contient des mots interdits');
             }
 
-            $supportAddress = $this->getParameter('support_contact_mail');
+            // $supportAddress = $this->getParameter('support_contact_mail');
             $now = new \DateTime();
 
             $userApi = null;
