@@ -29,10 +29,10 @@ const AppFooter = () => {
             bottomItems={[
                 {
                     text: "données personnelles",
-                    linkProps: routes.personal_data().link
+                    linkProps: routes.personal_data().link,
                 },
                 // Choix du thème clair/sombre
-                headerFooterDisplayItem
+                headerFooterDisplayItem,
             ]}
             cookiesManagementLinkProps={{
                 ...routes.cookies().link,

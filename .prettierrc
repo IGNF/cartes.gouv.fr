@@ -2,5 +2,6 @@
     "$schema": "https://json.schemastore.org/prettierrc",
     "tabWidth": 4,
     "printWidth": 160,
-    "trailingComma": "es5"
+    "trailingComma": "es5",
+    "endOfLine": "auto"
 }
