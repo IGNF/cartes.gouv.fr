@@ -140,18 +140,20 @@ const Contact = () => {
                         <Button onClick={handleSubmit(onSubmit)}>{Translator.trans("send")}</Button>
                     </div>
 
-                    <Wait show={isSending}>
-                        <div className={fr.cx("fr-container")}>
-                            <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                                <div className={fr.cx("fr-col-2")}>
-                                    <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "icons-spin")} />
-                                </div>
-                                <div className={fr.cx("fr-col-10")}>
-                                    <h6 className={fr.cx("fr-h6", "fr-m-0")}>{"Votre message est en cours d'envoi"}</h6>
+                    {isSending && (
+                        <Wait>
+                            <div className={fr.cx("fr-container")}>
+                                <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
+                                    <div className={fr.cx("fr-col-2")}>
+                                        <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "icons-spin")} />
+                                    </div>
+                                    <div className={fr.cx("fr-col-10")}>
+                                        <h6 className={fr.cx("fr-h6", "fr-m-0")}>{"Votre message est en cours d'envoi"}</h6>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </Wait>
+                        </Wait>
+                    )}
                 </div>
             </div>
         </AppLayout>

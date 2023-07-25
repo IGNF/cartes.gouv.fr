@@ -303,13 +303,13 @@ const DatasheetNewForm = ({ datastoreId }) => {
             <BtnBackToDashboard datastoreId={datastoreId} className={fr.cx("fr-ml-2w")} />
 
             {isValidating && (
-                <Wait show={true}>
+                <Wait>
                     <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "icons-spin")} />
                 </Wait>
             )}
 
             {uploadCreationInProgress && (
-                <Wait show={true}>
+                <Wait>
                     {uploadCreatedSuccessfully ? (
                         <DatasheetNewIntegrationDialog datastoreId={datastoreId} uploadId={uploadId} />
                     ) : (

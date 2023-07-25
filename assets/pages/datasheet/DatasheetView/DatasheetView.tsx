@@ -132,7 +132,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
             )}
 
             {isDeleting && (
-                <Wait show={true}>
+                <Wait>
                     <p>En cours de suppression</p>
                 </Wait>
             )}
