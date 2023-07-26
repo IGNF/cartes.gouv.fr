@@ -33,7 +33,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
 
     const queryClient = useQueryClient();
 
-    const dataQuery = useQuery<DatasheetDetailed>(
+    const datasheetQuery = useQuery<DatasheetDetailed>(
         [reactQueryKeys.datastore_datasheet(datastoreId, datasheetName)],
         () => api.datasheet.get(datastoreId, datasheetName),
         {
@@ -66,7 +66,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
 
     return (
         <AppLayout navItems={navItems}>
-            {dataQuery.isLoading ? (
+            {datasheetQuery.isLoading ? (
                 <LoadingText />
             ) : (
                 <>
@@ -79,7 +79,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                         />
                         {datasheetName}
                         <Badge noIcon={true} severity="info" className={fr.cx("fr-ml-2w")}>
-                            {dataQuery?.data?.nb_publications && dataQuery?.data?.nb_publications > 0 ? "Publié" : "Non Publié"}
+                            {datasheetQuery?.data?.nb_publications && datasheetQuery?.data?.nb_publications > 0 ? "Publié" : "Non Publié"}
                         </Badge>
                     </div>
 
@@ -120,9 +120,9 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                                 tabs={[
                                     { label: "Métadonnées (0)", content: <p>...liste de métadonnées...</p> },
                                     {
-                                        label: `Jeux de données (${dataQuery?.data?.vector_db_list?.length})`,
+                                        label: `Jeux de données (${datasheetQuery?.data?.vector_db_list?.length})`,
                                         isDefault: true,
-                                        content: <DatasetListTab datastoreId={datastoreId} datasheet={dataQuery?.data} />,
+                                        content: <DatasetListTab datastoreId={datastoreId} datasheet={datasheetQuery?.data} />,
                                     },
                                     { label: "Services (0)", content: <p>...liste de services...</p> },
                                 ]}
@@ -158,12 +158,12 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                     >
                         <strong>Les éléments suivants seront supprimés :</strong>
                         <ul>
-                            {dataQuery?.data?.vector_db_list?.length && dataQuery?.data?.vector_db_list.length > 0 ? (
-                                <li> {dataQuery?.data?.vector_db_list.length} base(s) de donnée(s)</li>
+                            {datasheetQuery?.data?.vector_db_list?.length && datasheetQuery?.data?.vector_db_list.length > 0 ? (
+                                <li> {datasheetQuery?.data?.vector_db_list.length} base(s) de donnée(s)</li>
                             ) : null}
 
-                            {dataQuery?.data?.upload_list?.length && dataQuery?.data?.upload_list.length > 0 ? (
-                                <li> {dataQuery?.data?.upload_list.length} livraison(s)</li>
+                            {datasheetQuery?.data?.upload_list?.length && datasheetQuery?.data?.upload_list.length > 0 ? (
+                                <li> {datasheetQuery?.data?.upload_list.length} livraison(s)</li>
                             ) : null}
 
                             {/* TODO : pyramides tuiles vectorielles, raster, métadonnées etc... */}
