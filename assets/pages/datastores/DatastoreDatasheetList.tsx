@@ -57,7 +57,7 @@ const DatastoreDatasheetList: FC<DatastoreDatasheetListType> = ({ datastoreId })
     const abortController = new AbortController();
     const queryClient = useQueryClient();
 
-    const [datastoreQuery, dataListQuery] = useQueries({
+    const [datastoreQuery, datasheetListQuery] = useQueries({
         queries: [
             {
                 queryKey: [reactQueryKeys.datastore(datastoreId)],
@@ -104,8 +104,8 @@ const DatastoreDatasheetList: FC<DatastoreDatasheetListType> = ({ datastoreId })
                         inlineLayoutWhen="always"
                     />
 
-                    {!dataListQuery.isLoading &&
-                        dataListQuery?.data?.map((datasheet: Datasheet) => (
+                    {!datasheetListQuery.isLoading &&
+                        datasheetListQuery?.data?.map((datasheet: Datasheet) => (
                             <DatasheetListItem key={datasheet.name} datastoreId={datastoreId} datasheet={datasheet} />
                         ))}
                 </>
