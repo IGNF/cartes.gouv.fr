@@ -6,6 +6,7 @@ import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { symToStr } from "tsafe/symToStr";
 
 import api from "../../../api";
@@ -137,35 +138,40 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                 </Wait>
             )}
 
-            <deleteDataConfirmModal.Component
-                title={`Êtes-vous sûr de supprimer la fiche de données ${datasheetName} ?`}
-                buttons={[
-                    {
-                        children: "Non, annuler",
-                        doClosesModal: true,
-                        priority: "secondary",
-                    },
-                    {
-                        children: "Oui, supprimer",
-                        onClick: handleDeleteData,
-                        doClosesModal: true,
-                        priority: "primary",
-                    },
-                ]}
-            >
-                <strong>Les éléments suivants seront supprimés :</strong>
-                <ul>
-                    {dataQuery?.data?.vector_db_list?.length && dataQuery?.data?.vector_db_list.length > 0 ? (
-                        <li> {dataQuery?.data?.vector_db_list.length} base(s) de donnée(s)</li>
-                    ) : null}
+            <>
+                {createPortal(
+                    <deleteDataConfirmModal.Component
+                        title={`Êtes-vous sûr de supprimer la fiche de données ${datasheetName} ?`}
+                        buttons={[
+                            {
+                                children: "Non, annuler",
+                                doClosesModal: true,
+                                priority: "secondary",
+                            },
+                            {
+                                children: "Oui, supprimer",
+                                onClick: handleDeleteData,
+                                doClosesModal: true,
+                                priority: "primary",
+                            },
+                        ]}
+                    >
+                        <strong>Les éléments suivants seront supprimés :</strong>
+                        <ul>
+                            {dataQuery?.data?.vector_db_list?.length && dataQuery?.data?.vector_db_list.length > 0 ? (
+                                <li> {dataQuery?.data?.vector_db_list.length} base(s) de donnée(s)</li>
+                            ) : null}
 
-                    {dataQuery?.data?.upload_list?.length && dataQuery?.data?.upload_list.length > 0 ? (
-                        <li> {dataQuery?.data?.upload_list.length} livraison(s)</li>
-                    ) : null}
+                            {dataQuery?.data?.upload_list?.length && dataQuery?.data?.upload_list.length > 0 ? (
+                                <li> {dataQuery?.data?.upload_list.length} livraison(s)</li>
+                            ) : null}
 
-                    {/* TODO : pyramides tuiles vectorielles, raster, métadonnées etc... */}
-                </ul>
-            </deleteDataConfirmModal.Component>
+                            {/* TODO : pyramides tuiles vectorielles, raster, métadonnées etc... */}
+                        </ul>
+                    </deleteDataConfirmModal.Component>,
+                    document.body
+                )}
+            </>
         </AppLayout>
     );
 };

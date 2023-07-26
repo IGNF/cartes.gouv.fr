@@ -1,8 +1,9 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { FC, PropsWithChildren } from "react";
+import { createPortal } from "react-dom";
 
 const Wait: FC<PropsWithChildren> = ({ children }) => {
-    return (
+    return createPortal(
         <div
             style={{
                 position: "fixed",
@@ -26,7 +27,8 @@ const Wait: FC<PropsWithChildren> = ({ children }) => {
             >
                 <div className={fr.cx("fr-container", "fr-p-2w")}>{children}</div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 
