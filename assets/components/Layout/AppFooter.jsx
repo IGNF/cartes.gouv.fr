@@ -34,15 +34,9 @@ const AppFooter = () => {
                 // Choix du thème clair/sombre
                 headerFooterDisplayItem,
             ]}
-            cookiesManagementLinkProps={{
-                ...routes.cookies().link,
-            }}
             homeLinkProps={{
                 ...routes.home().link,
                 title: "Accueil - cartes.gouv.fr",
-            }}
-            personalDataLinkProps={{
-                ...routes.personal_data().link,
             }}
             termsLinkProps={{
                 ...routes.legal_notice().link,
