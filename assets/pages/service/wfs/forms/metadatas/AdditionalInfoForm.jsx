@@ -151,7 +151,7 @@ const AdditionalInfoForm = ({ storedData, fileType, visibility, onPrevious, onVa
             />
             <Select
                 label={Translator.trans("service.wfs.new.additional_information_form.spatial_resolution")}
-                hintText={Translator.trans("service.wfs.new.additional_information_form.hint_spatial_resolution")}
+                hint={Translator.trans("service.wfs.new.additional_information_form.hint_spatial_resolution")}
                 nativeSelectProps={{
                     ...register("data_resolution"),
                     defaultValue: "",
