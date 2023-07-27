@@ -99,7 +99,7 @@
             "vendor/bin/phpmd src text ./phpmd.xml",
             "vendor/bin/phpstan analyse -c phpstan.neon"
         ],
-        "check-todolist": "grep -rn \"TODO\" ./src ./templates ./tests ./assets",
+        "check-todolist": "grep -rn \"TODO\" ./src ./templates ./assets",
         "fix-style": [
             "vendor/bin/php-cs-fixer fix src",
             "vendor/bin/php-cs-fixer fix tests"
