@@ -24,6 +24,6 @@ const remove = (datastoreId: string, datasheetName: string) => {
     });
 };
 
-const data = { getList, get, remove };
+const datasheet = { getList, get, remove };
 
-export default data;
+export default datasheet;
