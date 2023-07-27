@@ -6,6 +6,7 @@ import React, { useEffect, useState } from "react";
 import api from "../../../api";
 import AppLayout from "../../../components/Layout/AppLayout";
 import LoadingText from "../../../components/Utils/LoadingText";
+import Translator from "../../../modules/Translator";
 import AccessRestrictionForm from "./forms/AccessRestrictionForm";
 import AdditionalInfoForm from "./forms/metadatas/AdditionalInfoForm";
 import DescriptionForm from "./forms/metadatas/DescriptionForm";

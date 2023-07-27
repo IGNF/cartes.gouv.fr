@@ -8,6 +8,8 @@ import TableInfos from "./TableInfos";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 
+import Translator from "../../../../../modules/Translator";
+
 // Themes et mot cles INSPIRE
 import { getInspireKeywords } from "../../../../../utils";
 

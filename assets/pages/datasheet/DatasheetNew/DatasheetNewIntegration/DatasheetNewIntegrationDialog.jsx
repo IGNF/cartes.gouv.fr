@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 
 import api from "../../../../api";
 import reactQueryKeys from "../../../../modules/reactQueryKeys";
+import Translator from "../../../../modules/Translator";
 import { routes } from "../../../../router/router";
 
 import "./../../../../sass/components/spinner.scss";

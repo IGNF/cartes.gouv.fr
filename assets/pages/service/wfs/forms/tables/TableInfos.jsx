@@ -3,6 +3,8 @@ import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
+
+import Translator from "../../../../../modules/Translator";
 import KeywordsComponent from "./../../../../../components/Utils/KeywordsComponent";
 
 const TableInfos = ({ tables, keywords, onChange }) => {

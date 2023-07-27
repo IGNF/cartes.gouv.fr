@@ -4,6 +4,8 @@ import React from "react";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
 
+import Translator from "../../../../../modules/Translator";
+
 const UploadMetadataForm = ({ visibility, onPrevious, onSubmit }) => {
     return (
         <div className={fr.cx("fr-my-2v")} style={{ display: visibility ? "block" : "none" }}>

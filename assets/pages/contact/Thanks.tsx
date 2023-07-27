@@ -1,10 +1,10 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
-import React from "react";
 
 import AppLayout from "../../components/Layout/AppLayout";
 import { defaultNavItems } from "../../config/navItems";
+import Translator from "../../modules/Translator";
 import { routes } from "../../router/router";
 
 const Thanks = () => {
