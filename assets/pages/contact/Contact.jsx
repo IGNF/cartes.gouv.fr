@@ -64,7 +64,7 @@ const Contact = () => {
             })
             .catch((error) => {
                 console.log(error);
-                setError(error.data.error);
+                setError(error.error);
             })
             .finally(() => setIsSending(false));
     };
