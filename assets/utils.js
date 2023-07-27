@@ -23,13 +23,10 @@ const getLanguages = () => {
 };
 
 const getInspireKeywords = () => {
-    let words = new Set();
-    for (let theme in inspireKeywords) {
-        if (Array.isArray(inspireKeywords[theme]) && inspireKeywords[theme].length) {
-            words = [...words, ...inspireKeywords[theme]];
-        }
-    }
-    return [...words];
+    // récupérer et applatir tous les sous-tableaux
+    const flat = Object.values(inspireKeywords).flat();
+    // retourner uniquement les valeurs uniques
+    return Array.from(new Set(flat));
 };
 
 /**
