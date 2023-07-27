@@ -21,7 +21,7 @@ const AccessRestrictionForm = ({ visibility, onPrevious, onValid }) => {
     };
 
     return (
-        <div className={fr.cx("fr-my-2v")} style={{ display: visibility ? "block" : "none" }}>
+        <div className={fr.cx("fr-my-2v", !visibility && "fr-hidden")}>
             <h3>{Translator.trans("service.wfs.new.access_retrictions.title")}</h3>
             <Alert severity="error" title="A développer ..." className={fr.cx("fr-my-3w")} />
             <ButtonsGroup
