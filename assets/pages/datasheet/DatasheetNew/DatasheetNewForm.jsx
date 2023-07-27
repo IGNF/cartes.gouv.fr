@@ -1,5 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import Button from "@codegouvfr/react-dsfr/Button";
+import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
 import { Select } from "@codegouvfr/react-dsfr/Select";
@@ -15,13 +15,13 @@ import * as yup from "yup";
 
 import api from "../../../api";
 import AppLayout from "../../../components/Layout/AppLayout";
-import BtnBackToDashboard from "../../../components/Utils/BtnBackToDashboard";
 import Progress from "../../../components/Utils/Progress";
 import Wait from "../../../components/Utils/Wait";
 import { defaultProjections } from "../../../config/projections";
 import functions from "../../../functions";
 import FileUploader from "../../../modules/FileUploader";
 import reactQueryKeys from "../../../modules/reactQueryKeys";
+import { routes } from "../../../router/router";
 import DatasheetNewIntegrationDialog from "./DatasheetNewIntegration/DatasheetNewIntegrationDialog";
 
 import "./../../../sass/components/spinner.scss";
@@ -291,16 +291,24 @@ const DatasheetNewForm = ({ datastoreId }) => {
                     />
                 </div>
             )}
-            <Button
-                onClick={() => {
-                    const dataFile = dataFileRef.current?.files?.[0];
-                    validateDataFile(dataFile);
-                    handleSubmit(onSubmit)();
-                }}
-            >
-                Soumettre
-            </Button>
-            <BtnBackToDashboard datastoreId={datastoreId} className={fr.cx("fr-ml-2w")} />
+            <ButtonsGroup
+                buttons={[
+                    {
+                        onClick: () => {
+                            const dataFile = dataFileRef.current?.files?.[0];
+                            validateDataFile(dataFile);
+                            handleSubmit(onSubmit)();
+                        },
+                        children: "Soumettre",
+                    },
+                    {
+                        linkProps: routes.datastore_datasheet_list({ datastoreId }).link,
+                        children: "Retour à mes données",
+                    },
+                ]}
+                inlineLayoutWhen="always"
+                className={fr.cx("fr-mt-2w")}
+            />
 
             {isValidating && (
                 <Wait>
