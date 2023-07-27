@@ -9,7 +9,7 @@ import { FC } from "react";
 const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
-            useErrorBoundary: true,
+            useErrorBoundary: false,
         },
     },
 });

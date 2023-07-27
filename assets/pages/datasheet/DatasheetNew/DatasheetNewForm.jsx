@@ -191,13 +191,13 @@ const DatasheetNewForm = ({ datastoreId }) => {
                     .catch((err) => {
                         console.error(err);
                         setShowProgress(false);
-                        setDataFileError(err?.data.msg);
+                        setDataFileError(err?.msg);
                     });
             })
             .catch((err) => {
                 console.error(err);
                 setShowProgress(false);
-                setDataFileError(err?.data.msg);
+                setDataFileError(err?.msg);
             });
     };
 
