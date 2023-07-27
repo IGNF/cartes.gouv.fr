@@ -6,6 +6,7 @@ use App\Constants\EntrepotApi\ConfigurationStatuses;
 use App\Constants\EntrepotApi\StoredDataTags;
 use App\Constants\EntrepotApi\StoredDataTypes;
 use App\Constants\EntrepotApi\UploadTags;
+use App\Exception\CartesApiException;
 use App\Exception\EntrepotApiException;
 use App\Services\EntrepotApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -81,6 +82,10 @@ class DatasheetController extends AbstractController
         // TODO : pyramid vector
 
         // TODO : configurations et offerings
+
+        if (0 === count($uploadList) && 0 === count($vectorDbList)) {
+            throw new CartesApiException("La fiche de donnée [$datasheetName] n'existe pas", Response::HTTP_NOT_FOUND);
+        }
 
         $data = $this->getBasicInfo($datastoreId, $datasheetName);
 
