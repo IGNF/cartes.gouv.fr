@@ -51,9 +51,7 @@
         "react": { "version": "detect" }
         // "propWrapperFunctions": [{ "property": "exact", "exact": true }]
     },
-    "globals": {
-        "Translator": true
-    },
+    "globals": {},
     "ignorePatterns": [
         "public/**",
         "data/**",

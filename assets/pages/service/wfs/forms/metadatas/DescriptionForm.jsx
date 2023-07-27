@@ -11,6 +11,8 @@ import * as yup from "yup";
 import KeywordsComponent from "../../../../../components/Utils/KeywordsComponent";
 import { removeDiacritics } from "../../../../../utils";
 
+import Translator from "../../../../../modules/Translator";
+
 // Themes et mot cles INSPIRE
 import { getInspireKeywords } from "../../../../../utils";
 

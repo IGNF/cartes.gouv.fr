@@ -12,6 +12,7 @@ import { Autocomplete, createFilterOptions } from "@mui/material";
 import { TextField } from "@mui/material";
 import MuiDsfrThemeProvider from "@codegouvfr/react-dsfr/mui";
 import ignProducts from "./../../../../../data/md_resolutions.json";
+import Translator from "../../../../../modules/Translator";
 
 const getCode = (epsg) => {
     if (!epsg) return null;

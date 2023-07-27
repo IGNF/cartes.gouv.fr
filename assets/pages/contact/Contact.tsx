@@ -5,7 +5,7 @@ import Input from "@codegouvfr/react-dsfr/Input";
 import Select from "@codegouvfr/react-dsfr/Select";
 import { yupResolver } from "@hookform/resolvers/yup";
 import Routing from "fos-router";
-import React, { useContext, useState } from "react";
+import { useContext, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
@@ -14,6 +14,7 @@ import Wait from "../../components/Utils/Wait";
 import { defaultNavItems } from "../../config/navItems";
 import { UserContext } from "../../contexts/UserContext";
 import { jsonFetch } from "../../modules/jsonFetch";
+import Translator from "../../modules/Translator";
 import { routes } from "../../router/router";
 
 import "../../sass/components/spinner.scss";
@@ -55,7 +56,7 @@ const Contact = () => {
 
         const url = Routing.generate("cartesgouvfr_contact_contact_us");
 
-        jsonFetch(url, { method: "POST" }, getFormValues())
+        jsonFetch<{ success: boolean }>(url, { method: "POST" }, getFormValues())
             .then((response) => {
                 console.log(response);
                 if (response?.success === true) {
@@ -122,6 +123,7 @@ const Contact = () => {
                         }}
                     />
                     <Select
+                        label={"importance"}
                         className={"importance"}
                         nativeSelectProps={{
                             ...register("importance"),
@@ -145,7 +147,7 @@ const Contact = () => {
                             <div className={fr.cx("fr-container")}>
                                 <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
                                     <div className={fr.cx("fr-col-2")}>
-                                        <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "icons-spin")} />
+                                        <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg") + " icons-spin"} />
                                     </div>
                                     <div className={fr.cx("fr-col-10")}>
                                         <h6 className={fr.cx("fr-h6", "fr-m-0")}>{"Votre message est en cours d'envoi"}</h6>

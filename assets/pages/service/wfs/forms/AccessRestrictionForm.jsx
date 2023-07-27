@@ -5,6 +5,8 @@ import PropTypes from "prop-types";
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
 
+import Translator from "../../../../modules/Translator";
+
 const AccessRestrictionForm = ({ visibility, onPrevious, onValid }) => {
     const {
         // register,
