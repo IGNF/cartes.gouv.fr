@@ -8,7 +8,7 @@ import Translator from "../../../../../modules/Translator";
 
 const UploadMetadataForm = ({ visibility, onPrevious, onSubmit }) => {
     return (
-        <div className={fr.cx("fr-my-2v")} style={{ display: visibility ? "block" : "none" }}>
+        <div className={fr.cx("fr-my-2v", !visibility && "fr-hidden")}>
             <h3>{Translator.trans("service.wfs.new.metadata_upload_form.title")}</h3>
             <Input
                 label={Translator.trans("service.wfs.new.metadata_upload_form.import")}

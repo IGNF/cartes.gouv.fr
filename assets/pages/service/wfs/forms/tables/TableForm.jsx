@@ -63,7 +63,7 @@ const TableForm = ({ tables, visibility, onValid }) => {
     };
 
     return (
-        <div className={fr.cx("fr-my-2v")} style={{ display: visibility ? "block" : "none" }}>
+        <div className={fr.cx("fr-my-2v", !visibility && "fr-hidden")}>
             <h3>{Translator.trans("service.wfs.new.tables_form.title")}</h3>
             <TableInfos tables={tables} keywords={keywords} onChange={onChange} />
             <Input
