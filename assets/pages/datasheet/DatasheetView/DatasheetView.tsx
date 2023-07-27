@@ -1,4 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import Alert from "@codegouvfr/react-dsfr/Alert";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
@@ -14,6 +15,7 @@ import AppLayout from "../../../components/Layout/AppLayout";
 import LoadingText from "../../../components/Utils/LoadingText";
 import Wait from "../../../components/Utils/Wait";
 import { datastoreNavItems } from "../../../config/datastoreNavItems";
+import { type CartesApiException } from "../../../modules/jsonFetch";
 import reactQueryKeys from "../../../modules/reactQueryKeys";
 import { routes } from "../../../router/router";
 import { type DatasheetDetailed } from "../../../types/app";
@@ -33,13 +35,12 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
 
     const queryClient = useQueryClient();
 
-    const datasheetQuery = useQuery<DatasheetDetailed>(
-        [reactQueryKeys.datastore_datasheet(datastoreId, datasheetName)],
-        () => api.datasheet.get(datastoreId, datasheetName),
-        {
-            refetchInterval: 20000,
-        }
-    );
+    const datasheetQuery = useQuery<DatasheetDetailed, CartesApiException>({
+        queryKey: [reactQueryKeys.datastore_datasheet(datastoreId, datasheetName)],
+        queryFn: () => api.datasheet.get(datastoreId, datasheetName),
+        refetchInterval: 20000,
+        retry: false,
+    });
 
     const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
@@ -68,6 +69,13 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
         <AppLayout navItems={navItems}>
             {datasheetQuery.isLoading ? (
                 <LoadingText />
+            ) : datasheetQuery.error ? (
+                <Alert
+                    severity="error"
+                    closable={false}
+                    title={datasheetQuery.error.message}
+                    description={<Button linkProps={routes.datastore_datasheet_list({ datastoreId }).link}>Retour à mes données</Button>}
+                />
             ) : (
                 <>
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--left", "fr-grid-row--middle", "fr-mb-4w")}>
