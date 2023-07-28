@@ -9,7 +9,7 @@ import AppLayout from "../../components/Layout/AppLayout";
 import BtnBackToHome from "../../components/Utils/BtnBackToHome";
 import LoadingText from "../../components/Utils/LoadingText";
 import { defaultNavItems } from "../../config/navItems";
-import reactQueryKeys from "../../modules/reactQueryKeys";
+import RCKeys from "../../modules/RCKeys";
 import { routes } from "../../router/router";
 
 const DatastoreTile = ({ datastore }) => {
@@ -30,7 +30,7 @@ DatastoreTile.propTypes = {
 };
 
 const DatastoreList = () => {
-    const { isLoading, data: datastores } = useQuery([reactQueryKeys.datastore_list], () => api.user.getDatastoresList(), { staleTime: 60000 });
+    const { isLoading, data: datastores } = useQuery(RCKeys.datastore_list, () => api.user.getDatastoresList(), { staleTime: 60000 });
 
     return (
         <AppLayout navItems={defaultNavItems}>

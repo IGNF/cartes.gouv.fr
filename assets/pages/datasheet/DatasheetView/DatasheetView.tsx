@@ -16,7 +16,7 @@ import LoadingText from "../../../components/Utils/LoadingText";
 import Wait from "../../../components/Utils/Wait";
 import { datastoreNavItems } from "../../../config/datastoreNavItems";
 import { type CartesApiException } from "../../../modules/jsonFetch";
-import reactQueryKeys from "../../../modules/reactQueryKeys";
+import RCKeys from "../../../modules/RCKeys";
 import { routes } from "../../../router/router";
 import { type DatasheetDetailed } from "../../../types/app";
 import DatasetListTab from "./DatasetListTab/DatasetListTab";
@@ -36,7 +36,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
     const queryClient = useQueryClient();
 
     const datasheetQuery = useQuery<DatasheetDetailed, CartesApiException>({
-        queryKey: [reactQueryKeys.datastore_datasheet(datastoreId, datasheetName)],
+        queryKey: RCKeys.datastore_datasheet(datastoreId, datasheetName),
         queryFn: () => api.datasheet.get(datastoreId, datasheetName),
         refetchInterval: 20000,
         retry: false,
@@ -46,7 +46,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
 
     useEffect(() => {
         return () => {
-            queryClient.cancelQueries({ queryKey: [reactQueryKeys.datastore_datasheet(datastoreId, datasheetName)] });
+            queryClient.cancelQueries({ queryKey: [...RCKeys.datastore_datasheet(datastoreId, datasheetName)] });
         };
     }, [datasheetName, datastoreId, queryClient]);
 
