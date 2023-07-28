@@ -1,7 +1,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import { useColors } from "@codegouvfr/react-dsfr/useColors";
-import { FC } from "react";
+import { FC, useEffect } from "react";
 import { symToStr } from "tsafe/symToStr";
 
 import AppLayout from "../../components/Layout/AppLayout";
@@ -25,6 +25,10 @@ const NewsArticle: FC<NewsArticleProps> = ({ slug }) => {
             {tag}
         </Badge>
     ));
+
+    useEffect(() => {
+        document.title = newsArticle?.title + " | cartes.gouv.fr";
+    }, []);
 
     return (
         <AppLayout navItems={defaultNavItems}>

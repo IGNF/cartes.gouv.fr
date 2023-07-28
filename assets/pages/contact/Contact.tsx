@@ -5,7 +5,7 @@ import Input from "@codegouvfr/react-dsfr/Input";
 import Select from "@codegouvfr/react-dsfr/Select";
 import { yupResolver } from "@hookform/resolvers/yup";
 import Routing from "fos-router";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
@@ -69,6 +69,10 @@ const Contact = () => {
             })
             .finally(() => setIsSending(false));
     };
+
+    useEffect(() => {
+        document.title = "Nous écrire | cartes.gouv.fr";
+    }, []);
 
     return (
         <AppLayout navItems={defaultNavItems}>
