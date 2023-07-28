@@ -137,7 +137,7 @@ const TableInfos = ({ tables, keywords, onChange }) => {
                             />
                             <KeywordsComponent
                                 label={Translator.trans("service.wfs.new.tables_form.table.keywords")}
-                                hintLabel={Translator.trans("service.wfs.new.tables_form.table.hint_keywords")}
+                                hintText={Translator.trans("service.wfs.new.tables_form.table.hint_keywords")}
                                 keywords={keywords}
                                 onChange={(values) => keywordsChange(table.name, values)}
                             />

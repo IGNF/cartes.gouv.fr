@@ -5,19 +5,19 @@ import MuiDsfrThemeProvider from "@codegouvfr/react-dsfr/mui";
 
 type KeywordsComponentProps = {
     label: string;
-    hintLabel: string;
+    hintText: string;
     keywords: string[];
     onChange: (values: string[]) => string;
 };
 
 const KeywordsComponent: FC<KeywordsComponentProps> = (props) => {
-    const { label, hintLabel, keywords, onChange } = props;
+    const { label, hintText, keywords, onChange } = props;
 
     return (
         <MuiDsfrThemeProvider>
             <label className="fr-label">
                 {label}
-                <span className="fr-hint-text">{hintLabel}</span>
+                <span className="fr-hint-text">{hintText}</span>
             </label>
             <Autocomplete
                 autoComplete={true}
