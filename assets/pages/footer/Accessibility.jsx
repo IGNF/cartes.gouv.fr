@@ -44,13 +44,23 @@ const Accessibility = () => {
                     <ul>
                         <li>
                             Envoyer un message au Défenseur des droits&nbsp;:
-                            <a href="https://formulaire.defenseurdesdroits.fr/" target="_blank" rel="noreferrer">
+                            <a
+                                href="https://formulaire.defenseurdesdroits.fr/"
+                                target="_blank"
+                                title="Saisir le Défenseur des droits - ouvre une nouvelle fenêtre"
+                                rel="noreferrer"
+                            >
                                 https://formulaire.defenseurdesdroits.fr/
                             </a>
                         </li>
                         <li>
                             Contacter le délégué du Défenseur des droits dans votre région&nbsp;:
-                            <a href="https://www.defenseurdesdroits.fr/saisir/delegues" target="_blank" rel="noreferrer">
+                            <a
+                                href="https://www.defenseurdesdroits.fr/saisir/delegues"
+                                target="_blank"
+                                title="Trouver un délégué du Défenseur des droits - ouvre une nouvelle fenêtre"
+                                rel="noreferrer"
+                            >
                                 https://www.defenseurdesdroits.fr/saisir/delegues
                             </a>
                         </li>

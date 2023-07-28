@@ -33,7 +33,12 @@ const About = () => {
                         fonctionnalités avancées pour diffuser leurs propres données et s’ouvrir à des communautés contributives. Cet espace,{" "}
                         <strong>
                             composante géographique de l’État-plateforme{" "}
-                            <a href="https://www.numerique.gouv.fr/publications/panorama-grands-projets-si/" target="_blank" rel="noreferrer">
+                            <a
+                                href="https://www.numerique.gouv.fr/publications/panorama-grands-projets-si/"
+                                target="_blank"
+                                title="Panorama des grands projets numériques de l’État - ouvre une nouvelle fenêtre"
+                                rel="noreferrer"
+                            >
                                 reconnue grand projet numérique de l’État
                             </a>
                         </strong>
@@ -131,7 +136,12 @@ const About = () => {
                         <li>
                             <strong>2021&nbsp;:</strong>
                             <br />
-                            <a href="https://www.ign.fr/geoplateforme/experimente" target="_blank" rel="noreferrer">
+                            <a
+                                href="https://www.ign.fr/geoplateforme/experimente"
+                                target="_blank"
+                                title="Expérimentations des premières fonctionnalité - ouvre une nouvelle fenêtre"
+                                rel="noreferrer"
+                            >
                                 Expérimentations de premières fonctionnalités
                             </a>
                             <br />
@@ -140,6 +150,7 @@ const About = () => {
                             <a
                                 href="https://www.ign.fr/espace-presse/lign-finalise-son-choix-de-partenaires-techniques-pour-la-geoplateforme"
                                 target="_blank"
+                                title="L’IGN finalise son choix de partenaires techniques pour le développement et l’exploitation de la Géoplateforme - ouvre une nouvelle fenêtre"
                                 rel="noreferrer"
                             >
                                 Passation du marché de construction, d’infogérance et de maintenance de la Géoplateforme
@@ -148,11 +159,21 @@ const About = () => {
                         <li>
                             <strong>2022&nbsp;:</strong>
                             <br />
-                            <a href="https://www.ign.fr/geoplateforme/experimente" target="_blank" rel="noreferrer">
+                            <a
+                                href="https://www.ign.fr/geoplateforme/experimente"
+                                target="_blank"
+                                title="Expérimentations de nouvelles fonctionnalités - ouvre une nouvelle fenêtre"
+                                rel="noreferrer"
+                            >
                                 Expérimentations de nouvelles fonctionnalités
                             </a>
                             <br />
-                            <a href="https://www.ign.fr/geoplateforme/construire-le-socle-de-la-geoplateforme" target="_blank" rel="noreferrer">
+                            <a
+                                href="https://www.ign.fr/geoplateforme/construire-le-socle-de-la-geoplateforme"
+                                target="_blank"
+                                title="Mise en place du socle technique - ouvre une nouvelle fenêtre"
+                                rel="noreferrer"
+                            >
                                 Mise en place du socle technique
                             </a>{" "}
                             et des premiers services permettant de gérer le cycle de vie de la donnée (chargement, mise à jour, diffusion)
