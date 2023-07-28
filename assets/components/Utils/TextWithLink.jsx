@@ -5,7 +5,7 @@ const TextWithLink = ({ text, linkText, linkRef }) => {
     return (
         <>
             {text}&nbsp;
-            <a href={linkRef} target="_blank" rel="noreferrer">
+            <a href={linkRef} target="_blank" title={linkText + " - ouvre une nouvelle fenêtre"} rel="noreferrer">
                 {linkText}
             </a>
         </>

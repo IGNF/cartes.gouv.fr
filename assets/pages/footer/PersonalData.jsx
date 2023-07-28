@@ -24,7 +24,12 @@ const PersonalData = () => {
                     </p>
                     <p>
                         Pour tous les évènements organisés par l’IGN, nous vous invitons à consulter le site&nbsp;:{" "}
-                        <a href="https://www.ign.fr/institut/donnees-caractere-personnel" target="_blank" rel="noreferrer">
+                        <a
+                            href="https://www.ign.fr/institut/donnees-caractere-personnel"
+                            target="_blank"
+                            title="L’IGN protège vos données personnelles - ouvre une nouvelle fenêtre"
+                            rel="noreferrer"
+                        >
                             L’IGN protège vos données personnelles - Institut - IGN
                         </a>
                     </p>
