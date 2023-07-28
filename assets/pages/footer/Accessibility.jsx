@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 import AppLayout from "../../components/Layout/AppLayout";
 import { defaultNavItems } from "../../config/navItems";
@@ -6,6 +6,10 @@ import { defaultNavItems } from "../../config/navItems";
 import { routes } from "../../router/router";
 
 const Accessibility = () => {
+    useEffect(() => {
+        document.title = "Accessibilité | cartes.gouv.fr";
+    }, []);
+
     return (
         <AppLayout navItems={defaultNavItems}>
             <div className="fr-grid-row">

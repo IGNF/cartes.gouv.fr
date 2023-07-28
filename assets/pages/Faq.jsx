@@ -1,6 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 
-import React from "react";
+import React, { useEffect } from "react";
 
 import { Accordion } from "@codegouvfr/react-dsfr/Accordion";
 
@@ -8,6 +8,10 @@ import AppLayout from "../components/Layout/AppLayout";
 import { defaultNavItems } from "../config/navItems";
 
 const Faq = () => {
+    useEffect(() => {
+        document.title = "Questions fréquentes | cartes.gouv.fr";
+    }, []);
+
     return (
         <AppLayout navItems={defaultNavItems}>
             <div className={fr.cx("fr-grid-row")}>

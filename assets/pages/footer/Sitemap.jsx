@@ -1,5 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import React from "react";
+import React, { useEffect } from "react";
 
 import AppLayout from "../../components/Layout/AppLayout";
 import { defaultNavItems } from "../../config/navItems";
@@ -7,6 +7,10 @@ import { defaultNavItems } from "../../config/navItems";
 import { routes } from "../../router/router";
 
 const SiteMap = () => {
+    useEffect(() => {
+        document.title = "Plan du site | cartes.gouv.fr";
+    }, []);
+
     return (
         <AppLayout navItems={defaultNavItems}>
             <h1>Plan du site</h1>

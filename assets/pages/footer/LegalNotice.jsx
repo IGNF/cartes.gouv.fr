@@ -1,6 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 
-import React from "react";
+import React, { useEffect } from "react";
 
 import { routes } from "../../router/router";
 
@@ -9,6 +9,10 @@ import { defaultNavItems } from "../../config/navItems";
 
 const LegalNotice = () => {
     const siteName = "cartes.gouv.fr";
+
+    useEffect(() => {
+        document.title = "Mentions légales | cartes.gouv.fr";
+    }, []);
 
     return (
         <AppLayout navItems={defaultNavItems}>

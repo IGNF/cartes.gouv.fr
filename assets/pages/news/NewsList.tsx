@@ -1,7 +1,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Card } from "@codegouvfr/react-dsfr/Card";
-import { FC } from "react";
+import { FC, useEffect } from "react";
 import { symToStr } from "tsafe/symToStr";
 
 import AppLayout from "../../components/Layout/AppLayout";
@@ -43,6 +43,10 @@ const NewsListItem: FC<NewsListItemProps> = ({ slug, newsArticle }) => {
 NewsListItem.displayName = symToStr({ NewsListItem });
 
 const NewsList = () => {
+    useEffect(() => {
+        document.title = "Actualités | cartes.gouv.fr";
+    }, []);
+
     return (
         <AppLayout navItems={defaultNavItems}>
             <div className={fr.cx("fr-container", "fr-pt-8v", "fr-pt-18v", "fr-mb-md-8v")}>

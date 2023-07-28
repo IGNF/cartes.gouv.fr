@@ -4,7 +4,7 @@ import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
 // import Routing from "fos-router";
 
-import React /*, { useContext }*/ from "react";
+import React, { useEffect /*, { useContext }*/ } from "react";
 
 import AppLayout from "../components/Layout/AppLayout";
 import { defaultNavItems } from "../config/navItems";
@@ -16,6 +16,9 @@ import "../sass/pages/home.scss";
 
 const Home = () => {
     // const { user } = useContext(UserContext);
+    useEffect(() => {
+        document.title = "cartes.gouv.fr | page d'accueil";
+    }, []);
 
     return (
         <AppLayout navItems={defaultNavItems}>
