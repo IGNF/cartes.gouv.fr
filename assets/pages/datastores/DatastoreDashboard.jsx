@@ -7,11 +7,11 @@ import api from "../../api";
 import AppLayout from "../../components/Layout/AppLayout";
 import LoadingText from "../../components/Utils/LoadingText";
 import { datastoreNavItems } from "../../config/datastoreNavItems";
-import reactQueryKeys from "../../modules/reactQueryKeys";
+import RCKeys from "../../modules/RCKeys";
 import { routes } from "../../router/router";
 
 const DatastoreDashboard = ({ datastoreId }) => {
-    const datastoreQuery = useQuery([reactQueryKeys.datastore(datastoreId)], () => api.datastore.get(datastoreId), {
+    const datastoreQuery = useQuery(RCKeys.datastore(datastoreId), () => api.datastore.get(datastoreId), {
         staleTime: 60000,
     });
 
