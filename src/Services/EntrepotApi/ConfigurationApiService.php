@@ -4,30 +4,6 @@ namespace App\Services\EntrepotApi;
 
 class ConfigurationApiService extends AbstractEntrepotApiService
 {
-    public function create(string $datastoreId, string $pyramidId, string $name, string $layerName, string $title, string $description, string|int $bottomLevel, string|int $topLevel): array
-    {
-        $body = [
-            'type' => 'WMTS-TMS',
-            'name' => $name,
-            'layer_name' => $layerName,
-            'type_infos' => [
-                'title' => $title,
-                'abstract' => $description,
-                'used_data' => [
-                    [
-                        'stored_data' => $pyramidId,
-                        'bottom_level' => $bottomLevel,
-                        'top_level' => $topLevel,
-                    ],
-                ],
-            ],
-        ];
-
-        return $this->add($datastoreId, $body);
-    }
-
-    // ----------------------------
-
     /**
      * @param array<mixed> $query
      */
@@ -36,14 +12,26 @@ class ConfigurationApiService extends AbstractEntrepotApiService
         return $this->request('GET', "datastores/$datastoreId/configurations", [], $query);
     }
 
+    /**
+     * @param mixed[] $query
+     */
+    public function getAllDetailed(string $datastoreId, array $query = []): array
+    {
+        $configurations = $this->getAll($datastoreId, $query);
+
+        foreach ($configurations as &$configuration) {
+            $configuration = $this->get($datastoreId, $configuration['_id']);
+        }
+
+        return $configurations;
+    }
+
     public function get(string $datastoreId, string $configurationId): array
     {
         return $this->request('GET', "datastores/$datastoreId/configurations/$configurationId");
     }
 
     /**
-     * Utiliser plutôt la fonction create.
-     *
      * @param array<mixed> $body
      */
     public function add(string $datastoreId, $body = []): array
@@ -57,9 +45,27 @@ class ConfigurationApiService extends AbstractEntrepotApiService
     }
 
     /**
+     * @param array<string,string> $tags
+     */
+    public function addTags(string $datastoreId, string $configurationId, array $tags): array
+    {
+        return $this->request('POST', "datastores/$datastoreId/configurations/$configurationId/tags", $tags);
+    }
+
+    /**
+     * @param array<string> $tags
+     */
+    public function removeTags(string $datastoreId, string $configurationId, array $tags): array
+    {
+        return $this->request('DELETE', "datastores/$datastoreId/configurations/$configurationId/tags", [], [
+            'tags' => $tags,
+        ]);
+    }
+
+    /**
      * Récupère toutes les offerings associées à la configuration fournie.
      */
-    public function getOfferings(string $datastoreId, string $configurationId): array
+    public function getConfigurationOfferings(string $datastoreId, string $configurationId): array
     {
         return $this->requestAll("datastores/$datastoreId/configurations/$configurationId/offerings");
     }
@@ -82,6 +88,20 @@ class ConfigurationApiService extends AbstractEntrepotApiService
         return $this->requestAll("datastores/$datastoreId/offerings", $query);
     }
 
+    /**
+     * @param mixed[] $query
+     */
+    public function getAllOfferingsDetailed(string $datastoreId, array $query = []): array
+    {
+        $offerings = $this->getAllOfferings($datastoreId, $query);
+
+        foreach ($offerings as &$offering) {
+            $offering = $this->getOffering($datastoreId, $offering['_id']);
+        }
+
+        return $offerings;
+    }
+
     public function getOffering(string $datastoreId, string $offeringId): array
     {
         return $this->request('GET', "datastores/$datastoreId/offerings/$offeringId");
@@ -92,7 +112,7 @@ class ConfigurationApiService extends AbstractEntrepotApiService
         $body = [
             'visibility' => 'PUBLIC',
             'endpoint' => $endpointId,
-            'open' => true
+            'open' => true,
         ];
 
         return $this->request('POST', "datastores/$datastoreId/configurations/$configurationId/offerings", $body);
