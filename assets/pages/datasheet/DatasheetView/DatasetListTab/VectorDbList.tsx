@@ -5,12 +5,15 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
+import { useQuery } from "@tanstack/react-query";
 import { FC, useState } from "react";
 import { createPortal } from "react-dom";
 
+import api from "../../../../api";
 import functions from "../../../../functions";
+import RCKeys from "../../../../modules/RCKeys";
 import { routes } from "../../../../router/router";
-import { StoredDataStatuses, type VectorDb } from "../../../../types/app";
+import { DatastoreEndpoint, StoredDataStatuses, type VectorDb } from "../../../../types/app";
 
 type ServiceTypes = "tms" | "wfs" | "wms-vector" | "pre-paquet";
 
@@ -66,8 +69,19 @@ const getVectorDbBadge = (status) => {
 };
 
 const VectorDbList: FC<VectorDbListProps> = ({ datastoreId, vectorDbList }) => {
+    const abortController = new AbortController();
+
     const [serviceType, setServiceType] = useState<ServiceTypes>();
     const [selectedStoredDataId, setSelectedStoredDataId] = useState<string>();
+
+    const endpointsQuery = useQuery<DatastoreEndpoint[]>({
+        queryKey: RCKeys.datastore_endpoints(datastoreId),
+        queryFn: () => api.datastore.getEndpoints(datastoreId, {}, { signal: abortController?.signal }),
+        retry: false,
+        staleTime: Infinity,
+    });
+
+    const wfsEndpoints = Array.isArray(endpointsQuery?.data) ? endpointsQuery?.data?.filter((endpoint) => endpoint.endpoint.type.toUpperCase() === "WFS") : [];
 
     const handleContinue = () => {
         if (!selectedStoredDataId) {
@@ -77,7 +91,7 @@ const VectorDbList: FC<VectorDbListProps> = ({ datastoreId, vectorDbList }) => {
 
         switch (serviceType) {
             case "wfs":
-                routes.datastore_wfs_service_new({ datastoreId, storedDataId: selectedStoredDataId }).push();
+                routes.datastore_wfs_service_new({ datastoreId, vectorDbId: selectedStoredDataId }).push();
                 break;
 
             default:
@@ -95,35 +109,34 @@ const VectorDbList: FC<VectorDbListProps> = ({ datastoreId, vectorDbList }) => {
                 </h5>
             </div>
 
-            {vectorDbList?.map((el) => {
-                return (
-                    <div key={el._id} className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mt-2v")}>
-                        <div className={fr.cx("fr-col")}>
-                            <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                                <Button iconId="ri-add-box-fill" title="Voir les données liées" className={fr.cx("fr-mr-2v")} />
-                                {el.name}
-                            </div>
-                        </div>
-
-                        <div className={fr.cx("fr-col")}>
-                            <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-grid-row--middle")}>
-                                <p className={fr.cx("fr-m-auto", "fr-mr-2v")}>{el?.last_event?.date && functions.date.format(el?.last_event?.date)}</p>
-                                {getVectorDbBadge(el.status)}
-                                <Button
-                                    onClick={() => {
-                                        setSelectedStoredDataId(el._id);
-                                        serviceTypeChoiceModal.open();
-                                    }}
-                                    className={fr.cx("fr-mr-2v")}
-                                >
-                                    Créer un service
-                                </Button>
-                                <Button iconId="fr-icon-menu-2-fill" title="Autres actions" />
-                            </div>
+            {vectorDbList?.map((el) => (
+                <div key={el._id} className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mt-2v")}>
+                    <div className={fr.cx("fr-col")}>
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
+                            <Button iconId="ri-add-box-fill" title="Voir les données liées" className={fr.cx("fr-mr-2v")} />
+                            {el.name}
                         </div>
                     </div>
-                );
-            })}
+
+                    <div className={fr.cx("fr-col")}>
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-grid-row--middle")}>
+                            <p className={fr.cx("fr-m-auto", "fr-mr-2v")}>{el?.last_event?.date && functions.date.format(el?.last_event?.date)}</p>
+                            {getVectorDbBadge(el.status)}
+                            <Button
+                                onClick={() => {
+                                    setSelectedStoredDataId(el._id);
+                                    serviceTypeChoiceModal.open();
+                                }}
+                                className={fr.cx("fr-mr-2v")}
+                                disabled={el.status !== StoredDataStatuses.GENERATED || wfsEndpoints?.length === 0}
+                            >
+                                Créer un service
+                            </Button>
+                            <Button iconId="fr-icon-menu-2-fill" title="Autres actions" disabled={el.status !== StoredDataStatuses.GENERATED} />
+                        </div>
+                    </div>
+                </div>
+            ))}
 
             <>
                 {createPortal(
