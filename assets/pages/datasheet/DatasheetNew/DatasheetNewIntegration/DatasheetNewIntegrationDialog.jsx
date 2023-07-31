@@ -127,7 +127,7 @@ const DatasheetNewIntegrationDialog = ({ datastoreId, uploadId }) => {
                         <div className={fr.cx("fr-grid-row")} key={step}>
                             <p>
                                 {getStepIcon(status)}
-                                &nbsp;{Translator.trans(`data.new_integration.steps.${step}`)} : {getStepStatusText(status)}
+                                &nbsp;{Translator.trans(`datasheet.new_integration.steps.${step}`)} : {getStepStatusText(status)}
                             </p>
                         </div>
                     ))}
