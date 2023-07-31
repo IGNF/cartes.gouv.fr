@@ -102,7 +102,7 @@ export type StaticFileRok4StyleDetailsDto = StaticFileDetailsDto & {
 export interface ConfigurationResponseDto {
     /** Nom de la configuration */
     name: string;
-    status: ConfigurationResponseDtoStatusEnum;
+    status: ConfigurationDetailResponseDtoStatusEnum;
     /**
      * identifiant technique
      * @format uuid
@@ -2843,12 +2843,6 @@ export enum StaticFileDetailResponseDtoTypeEnum {
     GEOSERVERSTYLE = "GEOSERVER-STYLE",
     ROK4STYLE = "ROK4-STYLE",
     DERIVATIONSQL = "DERIVATION-SQL",
-}
-
-export enum ConfigurationResponseDtoStatusEnum {
-    UNPUBLISHED = "UNPUBLISHED",
-    PUBLISHED = "PUBLISHED",
-    SYNCHRONIZING = "SYNCHRONIZING",
 }
 
 /** Type de configuration */

@@ -37,6 +37,8 @@ const routeDefs = {
         },
         (p) => `${appRoot}/datastores/${p.datastoreId}`
     ),
+
+    // fiche de données
     datastore_datasheet_list: defineRoute(
         {
             datastoreId: param.path.string,
@@ -60,6 +62,7 @@ const routeDefs = {
         {
             datastoreId: param.path.string,
             datasheetName: param.path.string,
+            activeTab: param.query.optional.string.default("dataset"),
         },
         (p) => `${appRoot}/datastores/${p.datastoreId}/datasheet/${p.datasheetName}`
     ),
@@ -68,9 +71,9 @@ const routeDefs = {
     datastore_wfs_service_new: defineRoute(
         {
             datastoreId: param.path.string,
-            storedDataId: param.path.string,
+            vectorDbId: param.query.string,
         },
-        (p) => `${appRoot}/datastores/${p.datastoreId}/datasheet/${p.storedDataId}/service/wfs/new`
+        (p) => `${appRoot}/datastores/${p.datastoreId}/service/wfs/new`
     ),
 };
 

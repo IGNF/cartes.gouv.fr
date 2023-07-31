@@ -1,5 +1,10 @@
 import {
+    ConfigurationDetailResponseDto,
+    ConfigurationDetailResponseDtoStatusEnum,
     DatastoreDetailResponseDto,
+    DatastoreEndpointResponseDto,
+    EndpointDetailResponseDtoTypeEnum,
+    OfferingDetailResponseDto,
     StoredDataPrivateDetailResponseDto,
     StoredDataPrivateDetailResponseDtoStatusEnum,
     StoredDataPrivateDetailResponseDtoTypeEnum,
@@ -23,6 +28,7 @@ export type Datasheet = {
 export type DatasheetDetailed = Datasheet & {
     vector_db_list: VectorDb[] | undefined;
     upload_list: Upload[] | undefined;
+    service_list: Service[] | undefined;
 };
 
 export type StoredData = StoredDataPrivateDetailResponseDto;
@@ -32,9 +38,14 @@ export const StoredDataStatuses = StoredDataPrivateDetailResponseDtoStatusEnum;
 export const StoredDataVisibilities = StoredDataPrivateDetailResponseDtoVisibilityEnum;
 
 /** stored_data (donnée stockée) */
-export interface VectorDb extends StoredData {
+export type VectorDb = StoredData & {
     type: StoredDataPrivateDetailResponseDtoTypeEnum.VECTORDB;
-}
+    tags: {
+        proc_int_id: string;
+        upload_id: string;
+        datasheet_name: string;
+    };
+};
 
 /** upload (livraison) */
 export type Upload = UploadDetailResponseDto;
@@ -42,3 +53,16 @@ export type UploadTree = UploadTreeElementResponseDto;
 
 /** user */
 export type EntrepotUser = UserDetailsResponseDto;
+
+/** configuration & offerings */
+export type Configuration = ConfigurationDetailResponseDto;
+export const ConfigurationStatuses = ConfigurationDetailResponseDtoStatusEnum;
+
+export type Offering = OfferingDetailResponseDto;
+export type Service = Offering & {
+    configuration: Configuration;
+};
+
+/** endpoints */
+export type DatastoreEndpoint = DatastoreEndpointResponseDto;
+export const EndpointTypes = EndpointDetailResponseDtoTypeEnum;
