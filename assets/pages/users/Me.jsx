@@ -1,13 +1,13 @@
-import React, { useContext } from "react";
+import React from "react";
 
 import AppLayout from "../../components/Layout/AppLayout";
 import BtnBackToHome from "../../components/Utils/BtnBackToHome";
 import { defaultNavItems } from "../../config/navItems";
-import { UserContext } from "../../contexts/UserContext";
 import functions from "../../functions";
+import useUser from "../../hooks/useUser";
 
 const Me = () => {
-    const { user } = useContext(UserContext);
+    const { user } = useUser();
 
     return (
         <AppLayout navItems={defaultNavItems}>

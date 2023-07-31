@@ -1,14 +1,15 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Header from "@codegouvfr/react-dsfr/Header";
 import Routing from "fos-router";
-import React, { useContext } from "react";
-import { UserContext } from "../../contexts/UserContext";
+import React from "react";
+
+import useUser from "../../hooks/useUser";
 import { routes } from "../../router/router";
 
 import PropTypes from "prop-types";
 
 const AppHeader = ({ navItems = [] }) => {
-    const { user } = useContext(UserContext);
+    const { user } = useUser();
 
     const quickAccessItems = [];
 

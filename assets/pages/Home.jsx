@@ -15,7 +15,6 @@ import hp from "../img/hp.jpg";
 import "../sass/pages/home.scss";
 
 const Home = () => {
-    // const { user } = useContext(UserContext);
     useEffect(() => {
         document.title = "cartes.gouv.fr | page d'accueil";
     }, []);

@@ -13,14 +13,18 @@ export type UserType = {
 };
 
 /** déclaration du type de la valeur du contexte `UserContext` */
-type UserContextType = {
+export type UserContextType = {
     user?: UserType;
 
     /** le setter d'un useState */
     setUser: Dispatch<UserType>;
 };
 
-/** initialisation du contexte `UserContext` */
+/**
+ * initialisation du contexte `UserContext`
+ *
+ * voir le hook useUser pour l'utilisation de ce contexte
+ */
 export const UserContext = createContext<UserContextType>({
     user: undefined,
     setUser: () => {},
