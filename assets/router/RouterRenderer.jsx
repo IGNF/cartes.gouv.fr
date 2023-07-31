@@ -120,7 +120,7 @@ function RouterRenderer() {
             content = <DatasheetView datastoreId={route.params.datastoreId} datasheetName={route.params.datasheetName} />;
             break;
         case "datastore_wfs_service_new":
-            content = <WfsServiceNew datastoreId={route.params.datastoreId} storedDataId={route.params.storedDataId} />;
+            content = <WfsServiceNew datastoreId={route.params.datastoreId} vectorDbId={route.params.vectorDbId} />;
             break;
         default:
             content = <PageNotFound />;

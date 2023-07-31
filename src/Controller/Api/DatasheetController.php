@@ -66,6 +66,7 @@ class DatasheetController extends AbstractController
     #[Route('/{datasheetName}', name: 'get', methods: ['GET'])]
     public function getDetailed(string $datastoreId, string $datasheetName): JsonResponse
     {
+        // recherche d'entités API qui représente une fiche de données : upload, stored_data
         $uploadList = $this->entrepotApiService->upload->getAllDetailed($datastoreId, [
             'tags' => [
                 UploadTags::DATASHEET_NAME => $datasheetName,
@@ -81,18 +82,21 @@ class DatasheetController extends AbstractController
 
         // TODO : pyramid vector
 
-        // TODO : configurations et offerings
-
         if (0 === count($uploadList) && 0 === count($vectorDbList)) {
             throw new CartesApiException("La fiche de donnée [$datasheetName] n'existe pas", Response::HTTP_NOT_FOUND);
         }
 
         $data = $this->getBasicInfo($datastoreId, $datasheetName);
 
+        // recherche de services (configuration et offering)
+        $storedDataList = array_merge($vectorDbList/* autres données */);
+        $services = $this->getServices($datastoreId, $storedDataList);
+
         return $this->json([
             ...$data,
             'vector_db_list' => $vectorDbList,
             'upload_list' => $uploadList,
+            'service_list' => $services,
         ]);
     }
 
@@ -117,6 +121,29 @@ class DatasheetController extends AbstractController
             'categories' => $this->getRandomCategories(), // TODO : temporaire
             'nb_publications' => $nbPublications,
         ];
+    }
+
+    /**
+     * Récupère les services (offerings) de la fiche de données.
+     *
+     * @param mixed[] $storedDataList
+     */
+    private function getServices(string $datastoreId, array $storedDataList): array
+    {
+        $offerings = [];
+
+        foreach ($storedDataList as $storedData) {
+            $tmpOfferings = $this->entrepotApiService->configuration->getAllOfferingsDetailed($datastoreId, [
+                'stored_data' => $storedData['_id'],
+            ]);
+            $offerings = array_merge($offerings, $tmpOfferings);
+        }
+
+        foreach ($offerings as &$offering) {
+            $offering['configuration'] = $this->entrepotApiService->configuration->get($datastoreId, $offering['configuration']['_id']);
+        }
+
+        return $offerings;
     }
 
     // TODO : à supprimer
