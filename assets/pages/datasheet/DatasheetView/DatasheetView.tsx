@@ -17,9 +17,10 @@ import Wait from "../../../components/Utils/Wait";
 import { datastoreNavItems } from "../../../config/datastoreNavItems";
 import { type CartesApiException } from "../../../modules/jsonFetch";
 import RCKeys from "../../../modules/RCKeys";
-import { routes } from "../../../router/router";
+import { routes, useRoute } from "../../../router/router";
 import { type DatasheetDetailed } from "../../../types/app";
 import DatasetListTab from "./DatasetListTab/DatasetListTab";
+import ServicesListTab from "./ServicesListTab";
 
 const deleteDataConfirmModal = createModal({
     id: "delete-data-confirm-modal",
@@ -32,12 +33,14 @@ type DatasheetViewProps = {
 };
 const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) => {
     const navItems = datastoreNavItems(datastoreId);
+    const route = useRoute();
 
+    const abortController = new AbortController();
     const queryClient = useQueryClient();
 
     const datasheetQuery = useQuery<DatasheetDetailed, CartesApiException>({
         queryKey: RCKeys.datastore_datasheet(datastoreId, datasheetName),
-        queryFn: () => api.datasheet.get(datastoreId, datasheetName),
+        queryFn: () => api.datasheet.get(datastoreId, datasheetName, { signal: abortController?.signal }),
         refetchInterval: 20000,
         retry: false,
     });
@@ -126,13 +129,21 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                         <div className={fr.cx("fr-col")}>
                             <Tabs
                                 tabs={[
-                                    { label: "Métadonnées (0)", content: <p>...liste de métadonnées...</p> },
                                     {
-                                        label: `Jeux de données (${datasheetQuery?.data?.vector_db_list?.length})`,
-                                        isDefault: true,
+                                        label: "Métadonnées (0)",
+                                        isDefault: route.params["activeTab"] === "metadata",
+                                        content: <p>...liste de métadonnées...</p>,
+                                    },
+                                    {
+                                        label: `Jeux de données (${datasheetQuery?.data?.vector_db_list?.length || 0})`,
+                                        isDefault: route.params["activeTab"] === "dataset",
                                         content: <DatasetListTab datastoreId={datastoreId} datasheet={datasheetQuery?.data} />,
                                     },
-                                    { label: "Services (0)", content: <p>...liste de services...</p> },
+                                    {
+                                        label: `Services (${datasheetQuery?.data?.service_list?.length || 0})`,
+                                        isDefault: route.params["activeTab"] === "services",
+                                        content: <ServicesListTab datasheet={datasheetQuery?.data} />,
+                                    },
                                 ]}
                             />
                         </div>
