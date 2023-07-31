@@ -1,10 +1,10 @@
 import Routing from "fos-router";
-import React, { Suspense, lazy, useContext } from "react";
+import React, { Suspense, lazy } from "react";
 
 import AppLayout from "../components/Layout/AppLayout";
 import LoadingText from "../components/Utils/LoadingText";
 import { defaultNavItems } from "../config/navItems";
-import { UserContext } from "../contexts/UserContext";
+import useUser from "../hooks/useUser";
 import Home from "../pages/Home";
 import Redirect from "../pages/Redirect";
 import PageNotFound from "../pages/error/PageNotFound";
@@ -37,7 +37,7 @@ const WfsServiceNew = lazy(() => import("../pages/service/wfs/WfsServiceNew"));
 
 function RouterRenderer() {
     const route = useRoute();
-    const { user } = useContext(UserContext);
+    const { user } = useUser();
 
     // vérification si la route demandée est bien connue/enregistrée
     if (!knownRoutes.includes(route.name)) {

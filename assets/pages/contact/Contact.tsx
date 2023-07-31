@@ -5,16 +5,16 @@ import Input from "@codegouvfr/react-dsfr/Input";
 import Select from "@codegouvfr/react-dsfr/Select";
 import { yupResolver } from "@hookform/resolvers/yup";
 import Routing from "fos-router";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
 import AppLayout from "../../components/Layout/AppLayout";
 import Wait from "../../components/Utils/Wait";
 import { defaultNavItems } from "../../config/navItems";
-import { UserContext } from "../../contexts/UserContext";
-import { jsonFetch } from "../../modules/jsonFetch";
+import useUser from "../../hooks/useUser";
 import Translator from "../../modules/Translator";
+import { jsonFetch } from "../../modules/jsonFetch";
 import { routes } from "../../router/router";
 
 import "../../sass/components/spinner.scss";
@@ -35,7 +35,7 @@ const schema = yup
     .required();
 
 const Contact = () => {
-    const { user } = useContext(UserContext);
+    const { user } = useUser();
 
     const [isSending, setIsSending] = useState(false);
     const [error, setError] = useState(null);
