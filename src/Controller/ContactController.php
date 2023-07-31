@@ -53,7 +53,7 @@ class ContactController extends AbstractController
                 throw new BadRequestHttpException('Votre message contient des mots interdits');
             }
 
-            // $supportAddress = $this->getParameter('support_contact_mail');
+            $supportAddress = $this->getParameter('support_contact_mail');
             $now = new \DateTime();
 
             $userApi = null;
@@ -77,13 +77,13 @@ class ContactController extends AbstractController
 
             // TODO : envoi de mail désactivé en attendant d'avoir l'adresse du serveur smtp en production
             // envoi du mail à l'adresse du support
-            // $mailerService->sendMail($supportAddress, '[Géoplateforme] Demande de contact', 'Mailer/contact.html.twig', $supportMailParams);
+            $mailerService->sendMail($supportAddress, '[Géoplateforme] Demande de contact', 'Mailer/contact.html.twig', $supportMailParams);
 
             // // envoi du mail d'accusé de réception à l'utilisateur
-            // $mailerService->sendMail($userEmail, '[Géoplateforme] Accusé de réception de votre demande', 'Mailer/contact_acknowledgement.html.twig', [
-            //     'message' => $message,
-            //     'sendDate' => $now,
-            // ]);
+            $mailerService->sendMail($userEmail, '[Géoplateforme] Accusé de réception de votre demande', 'Mailer/contact_acknowledgement.html.twig', [
+                'message' => $message,
+                'sendDate' => $now,
+            ]);
 
             return new JsonResponse(['success' => true]);
         } catch (BadRequestHttpException $e) {
