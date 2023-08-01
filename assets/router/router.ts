@@ -31,12 +31,6 @@ const routeDefs = {
 
     // espaces de travail
     datastore_list: defineRoute(`${appRoot}/datastores`),
-    datastore_dashboard: defineRoute(
-        {
-            datastoreId: param.path.string,
-        },
-        (p) => `${appRoot}/datastores/${p.datastoreId}`
-    ),
 
     // fiche de données
     datastore_datasheet_list: defineRoute(
