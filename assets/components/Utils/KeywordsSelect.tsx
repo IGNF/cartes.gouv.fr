@@ -10,7 +10,7 @@ type KeywordsComponentProps = {
     onChange: (values: string[]) => string;
 };
 
-const KeywordsComponent: FC<KeywordsComponentProps> = (props) => {
+const KeywordsSelect: FC<KeywordsComponentProps> = (props) => {
     const { label, hintText, keywords, onChange } = props;
 
     return (
@@ -32,4 +32,4 @@ const KeywordsComponent: FC<KeywordsComponentProps> = (props) => {
     );
 };
 
-export default KeywordsComponent;
+export default KeywordsSelect;
