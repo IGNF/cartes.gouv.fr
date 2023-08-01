@@ -149,7 +149,7 @@ const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
                     if (vectorDb?.tags?.datasheet_name) {
                         routes.datastore_datasheet_view({ datastoreId, datasheetName: vectorDb?.tags.datasheet_name, activeTab: "services" }).push();
                     } else {
-                        routes.datastore_datasheet_list({ datastoreId }).push();
+                        routes.datasheet_list().push();
                     }
                 })
                 .catch((error) => {

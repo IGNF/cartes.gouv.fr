@@ -29,16 +29,10 @@ const routeDefs = {
     // utilisateur
     my_account: defineRoute(`${appRoot}/mon-compte`),
 
-    // espaces de travail
-    datastore_list: defineRoute(`${appRoot}/datastores`),
+    dashboard_pro: defineRoute(`${appRoot}/dashboard`),
 
     // fiche de données
-    datastore_datasheet_list: defineRoute(
-        {
-            datastoreId: param.path.string,
-        },
-        (p) => `${appRoot}/datastores/${p.datastoreId}/datasheet`
-    ),
+    datasheet_list: defineRoute(`${appRoot}/donnees`),
     datastore_datasheet_new: defineRoute(
         {
             datastoreId: param.path.string,

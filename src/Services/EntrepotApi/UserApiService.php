@@ -30,7 +30,7 @@ class UserApiService extends AbstractEntrepotApiService
         $datastores = [];
         foreach ($datastoresList as $datastoreId) {
             try {
-                $datastores[$datastoreId] = $this->entrepotApiService->datastore->get($datastoreId);
+                $datastores[] = $this->entrepotApiService->datastore->get($datastoreId);
             } catch (EntrepotApiException $ex) {
                 // Rien à faire de particulier. On ignore silencieusement l'erreur et pour l'utilisateur c'est comme si ce datastore n'existait pas.
             }
