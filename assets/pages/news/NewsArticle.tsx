@@ -28,7 +28,7 @@ const NewsArticle: FC<NewsArticleProps> = ({ slug }) => {
 
     useEffect(() => {
         document.title = newsArticle?.title + " | cartes.gouv.fr";
-    }, []);
+    }, [newsArticle?.title]);
 
     return (
         <AppLayout navItems={defaultNavItems}>
