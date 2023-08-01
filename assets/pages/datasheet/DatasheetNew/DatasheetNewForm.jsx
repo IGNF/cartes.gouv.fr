@@ -302,7 +302,7 @@ const DatasheetNewForm = ({ datastoreId }) => {
                         children: "Soumettre",
                     },
                     {
-                        linkProps: routes.datastore_datasheet_list({ datastoreId }).link,
+                        linkProps: routes.datasheet_list().link,
                         children: "Retour à mes données",
                     },
                 ]}

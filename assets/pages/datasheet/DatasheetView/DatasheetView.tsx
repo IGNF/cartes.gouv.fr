@@ -14,9 +14,9 @@ import api from "../../../api";
 import AppLayout from "../../../components/Layout/AppLayout";
 import LoadingText from "../../../components/Utils/LoadingText";
 import Wait from "../../../components/Utils/Wait";
-import { datastoreNavItems } from "../../../config/datastoreNavItems";
-import { type CartesApiException } from "../../../modules/jsonFetch";
+import { dashboardProNavItems } from "../../../config/dashboardProNavItems";
 import RCKeys from "../../../modules/RCKeys";
+import { type CartesApiException } from "../../../modules/jsonFetch";
 import { routes, useRoute } from "../../../router/router";
 import { type DatasheetDetailed } from "../../../types/app";
 import DatasetListTab from "./DatasetListTab/DatasetListTab";
@@ -32,7 +32,7 @@ type DatasheetViewProps = {
     datasheetName: string;
 };
 const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) => {
-    const navItems = datastoreNavItems(datastoreId);
+    const navItems = dashboardProNavItems;
     const route = useRoute();
 
     const abortController = new AbortController();
@@ -58,7 +58,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
         api.datasheet
             .remove(datastoreId, datasheetName)
             .then(() => {
-                routes.datastore_datasheet_list({ datastoreId }).push();
+                routes.datasheet_list().push();
             })
             .catch((error) => {
                 console.error(error);
@@ -77,7 +77,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                     severity="error"
                     closable={false}
                     title={datasheetQuery.error.message}
-                    description={<Button linkProps={routes.datastore_datasheet_list({ datastoreId }).link}>Retour à mes données</Button>}
+                    description={<Button linkProps={routes.datasheet_list().link}>Retour à mes données</Button>}
                 />
             ) : (
                 <>
@@ -85,7 +85,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                         <Button
                             iconId="fr-icon-arrow-left-s-line"
                             priority="tertiary no outline"
-                            linkProps={routes.datastore_datasheet_list({ datastoreId }).link}
+                            linkProps={routes.datasheet_list().link}
                             title="Retour à la liste de mes données"
                         />
                         {datasheetName}

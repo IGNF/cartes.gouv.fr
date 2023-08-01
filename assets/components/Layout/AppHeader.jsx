@@ -40,7 +40,7 @@ const AppHeader = ({ navItems = [] }) => {
 
         quickAccessItems.push({
             iconId: fr.cx("fr-icon-account-line"),
-            linkProps: routes.my_account().link,
+            linkProps: routes.dashboard_pro().link,
             text: btnMyAccountText,
         });
         quickAccessItems.push({

@@ -25,8 +25,8 @@ const Cookies = lazy(() => import("../pages/footer/Cookies"));
 
 const Me = lazy(() => import("../pages/users/Me"));
 
-const DatastoreList = lazy(() => import("../pages/datastores/DatastoreList"));
-const DatastoreDatasheetList = lazy(() => import("../pages/datastores/DatastoreDatasheetList"));
+const DashboardPro = lazy(() => import("../pages/dashboard/DashboardPro"));
+const DatasheetList = lazy(() => import("../pages/datasheet/DatasheetList/DatasheetList"));
 
 const DatasheetNewForm = lazy(() => import("../pages/datasheet/DatasheetNew/DatasheetNewForm"));
 const DatasheetNewIntegrationPage = lazy(() => import("../pages/datasheet/DatasheetNew/DatasheetNewIntegration/DatasheetNewIntegration"));
@@ -100,11 +100,11 @@ function RouterRenderer() {
         case "my_account":
             content = <Me />;
             break;
-        case "datastore_list":
-            content = <DatastoreList />;
+        case "dashboard_pro":
+            content = <DashboardPro />;
             break;
-        case "datastore_datasheet_list":
-            content = <DatastoreDatasheetList datastoreId={route.params.datastoreId} />;
+        case "datasheet_list":
+            content = <DatasheetList />;
             break;
         case "datastore_datasheet_new":
             content = <DatasheetNewForm datastoreId={route.params.datastoreId} />;
