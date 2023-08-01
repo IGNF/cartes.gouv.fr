@@ -107,12 +107,12 @@ class ConfigurationApiService extends AbstractEntrepotApiService
         return $this->request('GET', "datastores/$datastoreId/offerings/$offeringId");
     }
 
-    public function addOffering(string $datastoreId, string $configurationId, string $endpointId): array
+    public function addOffering(string $datastoreId, string $configurationId, string $endpointId, bool $open = true): array
     {
         $body = [
-            'visibility' => 'PUBLIC',
+            // VISIBILITY va disparaître
             'endpoint' => $endpointId,
-            'open' => true,
+            'open' => $open,
         ];
 
         return $this->request('POST', "datastores/$datastoreId/configurations/$configurationId/offerings", $body);

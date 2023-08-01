@@ -7,7 +7,6 @@ use App\Exception\CartesApiException;
 use App\Exception\EntrepotApiException;
 use App\Services\EntrepotApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,7 +22,6 @@ class WfsController extends AbstractController
 {
     public function __construct(
         private EntrepotApiService $entrepotApiService,
-        private ParameterBagInterface $parameters
     ) {
     }
 
@@ -63,30 +61,31 @@ class WfsController extends AbstractController
             ];
 
             $storedData = $this->entrepotApiService->storedData->get($datastoreId, $storedDataId);
-            // $endpoints = [];
+            $endpoints = [];
+            $isOfferingOpen = true;
 
-            // TODO : désactivé temporairement, le champ share_with n'est pas récupéré dans la requête
             // TODO : implémentation partielle, tous les ne sont pas couverts
-            // if ('all_public' === $content['share_with']) {
-            //     $endpoints = $this->entrepotApiService->datastore->getEndpoints($datastoreId, [
-            //         'type' => 'WFS',
-            //         'open' => true,
-            //     ]);
-            // } elseif ('your_community' === $content['share_with']) {
-            //     $endpoints = $this->entrepotApiService->datastore->getEndpoints($datastoreId, [
-            //         'type' => 'WFS',
-            //         'open' => false,
-            //     ]);
-            // } else {
-            //     throw new CartesApiException('Valeur du champ [share_with] est invalide', Response::HTTP_BAD_REQUEST, ['share_with' => $content['share_with']]);
-            // }
+            if ('all_public' === $content['share_with']) {
+                $endpoints = $this->entrepotApiService->datastore->getEndpoints($datastoreId, [
+                    'type' => 'WFS',
+                    'open' => true,
+                ]);
+                $isOfferingOpen = true;
+            } elseif ('your_community' === $content['share_with']) {
+                $endpoints = $this->entrepotApiService->datastore->getEndpoints($datastoreId, [
+                    'type' => 'WFS',
+                    'open' => false,
+                ]);
+                $isOfferingOpen = false;
+            } else {
+                throw new CartesApiException('Valeur du champ [share_with] est invalide', Response::HTTP_BAD_REQUEST, ['share_with' => $content['share_with']]);
+            }
 
-            // if (0 === count($endpoints)) {
-            //     throw new CartesApiException("Aucun point d'accès (endpoint) du datastore ne peut convenir à la demande", Response::HTTP_BAD_REQUEST, ['share_with' => $content['share_with']]);
-            // }
+            if (0 === count($endpoints)) {
+                throw new CartesApiException("Aucun point d'accès (endpoint) du datastore ne peut convenir à la demande", Response::HTTP_BAD_REQUEST, ['share_with' => $content['share_with']]);
+            }
 
-            // $endpointId = $endpoints[0]['_id'];
-            $endpointId = $this->parameters->get('api_entrepot')['endpoints']['wfs_public'];
+            $endpointId = $endpoints[0]['endpoint']['_id'];
 
             // Ajout de la configuration
             $configuration = $this->entrepotApiService->configuration->add($datastoreId, $body);
@@ -95,7 +94,7 @@ class WfsController extends AbstractController
             ]);
 
             // Creation d'une offering
-            $offering = $this->entrepotApiService->configuration->addOffering($datastoreId, $configuration['_id'], $endpointId);
+            $offering = $this->entrepotApiService->configuration->addOffering($datastoreId, $configuration['_id'], $endpointId, $isOfferingOpen);
 
             return $this->json([
                 'configuration' => $configuration,

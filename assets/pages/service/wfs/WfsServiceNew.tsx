@@ -124,45 +124,42 @@ const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
     };
 
     // Supprime les valeurs vides ou nulles
-    const filter = () => {
+    const filter = (result) => {
         const obj = { ...result };
         Object.keys(obj).forEach((k) => (obj[k] === null || obj[k] === "") && delete obj[k]);
         return obj;
     };
 
     const onValid = (values) => {
-        // const res = { ...result, ...values };
-        setResult((res) => ({ ...res, ...values }));
+        const res = { ...result, ...values };
+        setResult(res);
         next();
-    };
 
-    // Bouton dernier formulaire
-    const onSubmit = (values) => {
-        onValid(values);
+        // dernière étape du formulaire
+        if (currentStep === STEPS.ACCESSRESTRICTIONS) {
+            setIsSubmitting(true);
 
-        setIsSubmitting(true);
+            const filtered = filter(res);
+            console.log(filtered);
 
-        const filtered = filter();
-        console.log(filtered);
-        return;
-
-        api.wfs
-            .add(datastoreId, vectorDbId, filtered)
-            .then((response) => {
-                console.log(response);
-                if (vectorDb?.tags?.datasheet_name) {
-                    routes.datastore_datasheet_view({ datastoreId, datasheetName: vectorDb?.tags.datasheet_name, activeTab: "services" }).push();
-                } else {
-                    routes.datastore_datasheet_list({ datastoreId }).push();
-                }
-            })
-            .catch((error) => {
-                console.error(error);
-                setError(error as CartesApiException);
-            })
-            .finally(() => {
-                setIsSubmitting(false);
-            });
+            api.wfs
+                .add(datastoreId, vectorDbId, filtered)
+                .then((response) => {
+                    console.log(response);
+                    if (vectorDb?.tags?.datasheet_name) {
+                        routes.datastore_datasheet_view({ datastoreId, datasheetName: vectorDb?.tags.datasheet_name, activeTab: "services" }).push();
+                    } else {
+                        routes.datastore_datasheet_list({ datastoreId }).push();
+                    }
+                })
+                .catch((error) => {
+                    console.error(error);
+                    setError(error as CartesApiException);
+                })
+                .finally(() => {
+                    setIsSubmitting(false);
+                });
+        }
     };
 
     return (
@@ -192,7 +189,7 @@ const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
                         datastoreId={datastoreId}
                         visibility={visibility[STEPS.ACCESSRESTRICTIONS]}
                         onPrevious={previous}
-                        onValid={onSubmit}
+                        onValid={onValid}
                     />
                 </>
             ) : (
