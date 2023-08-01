@@ -8,7 +8,7 @@ import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 import * as yup from "yup";
-import KeywordsComponent from "../../../../../components/Utils/KeywordsComponent";
+import KeywordsSelect from "../../../../../components/Utils/KeywordsSelect";
 import { removeDiacritics } from "../../../../../utils";
 
 import Translator from "../../../../../modules/Translator";
@@ -113,7 +113,7 @@ const DescriptionForm = ({ storedDataName, visibility, onPrevious, onValid }) =>
                     defaultValue: uuidv4(),
                 }}
             />
-            <KeywordsComponent
+            <KeywordsSelect
                 label={Translator.trans("service.wfs.new.description_form.category")}
                 hintText={Translator.trans("service.wfs.new.description_form.hint_category")}
                 keywords={keywords}

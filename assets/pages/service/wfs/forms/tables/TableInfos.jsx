@@ -5,7 +5,7 @@ import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
 
 import Translator from "../../../../../modules/Translator";
-import KeywordsComponent from "./../../../../../components/Utils/KeywordsComponent";
+import KeywordsSelect from "./../../../../../components/Utils/KeywordsSelect";
 
 const TableInfos = ({ tables, keywords, onChange }) => {
     const numTables = tables.length;
@@ -135,7 +135,7 @@ const TableInfos = ({ tables, keywords, onChange }) => {
                                     onKeyUp: handleInputChange,
                                 }}
                             />
-                            <KeywordsComponent
+                            <KeywordsSelect
                                 label={Translator.trans("service.wfs.new.tables_form.table.keywords")}
                                 hintText={Translator.trans("service.wfs.new.tables_form.table.hint_keywords")}
                                 keywords={keywords}
