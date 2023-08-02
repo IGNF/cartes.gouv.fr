@@ -70,7 +70,7 @@ const DatasheetList = () => {
             ) : (
                 <>
                     <Select
-                        label={null}
+                        label={"Espace de travail"}
                         nativeSelectProps={{
                             value: selectedDatastoreId,
                             onChange: (e) => setSelectedDatastoreId(e.target.value),

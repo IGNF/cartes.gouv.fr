@@ -1,7 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { useQuery } from "@tanstack/react-query";
-import PropTypes from "prop-types";
-import React, { useEffect, useState } from "react";
+import { FC, useEffect, useState } from "react";
 
 import api from "../../../../api";
 import RCKeys from "../../../../modules/RCKeys";
@@ -10,9 +9,14 @@ import { routes } from "../../../../router/router";
 
 import "./../../../../sass/components/spinner.scss";
 
-const DatasheetNewIntegrationDialog = ({ datastoreId, uploadId }) => {
+type DatasheetNewIntegrationDialogProps = {
+    datastoreId: string;
+    uploadId: string;
+};
+
+const DatasheetNewIntegrationDialog: FC<DatasheetNewIntegrationDialogProps> = ({ datastoreId, uploadId }) => {
     const [integrationProgress, setIntegrationProgress] = useState({});
-    const [integrationCurrentStep, setIntegrationCurrentStep] = useState(null);
+    const [integrationCurrentStep, setIntegrationCurrentStep] = useState<number>();
 
     const abortController = new AbortController();
     const [shouldPingIntProg, setShouldPingIntProg] = useState(false);
@@ -69,7 +73,9 @@ const DatasheetNewIntegrationDialog = ({ datastoreId, uploadId }) => {
             console.debug("stopping, all steps completed successfully");
             setShouldPingIntProg(false);
 
-            routes.datastore_datasheet_view({ datastoreId, datasheetName: uploadQuery?.data?.tags?.datasheet_name }).push();
+            if (uploadQuery?.data?.tags?.datasheet_name) {
+                routes.datastore_datasheet_view({ datastoreId, datasheetName: uploadQuery?.data?.tags?.datasheet_name }).push();
+            }
         }
     }, [integrationProgress, integrationCurrentStep, datastoreId, uploadQuery?.data]);
 
@@ -78,7 +84,7 @@ const DatasheetNewIntegrationDialog = ({ datastoreId, uploadId }) => {
 
         switch (status) {
             case "in_progress":
-                iconClass = fr.cx("fr-icon-refresh-line", "icons-spin");
+                iconClass = fr.cx("fr-icon-refresh-line") + " icons-spin";
                 break;
             case "successful":
                 iconClass = fr.cx("fr-icon-checkbox-line");
@@ -115,7 +121,7 @@ const DatasheetNewIntegrationDialog = ({ datastoreId, uploadId }) => {
         <div className={fr.cx("fr-container")}>
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-1")}>
-                    <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "icons-spin")} />
+                    <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg") + " icons-spin"} />
                 </div>
                 <div className={fr.cx("fr-col-11")}>
                     <h6 className={fr.cx("fr-h6")}>Vos données vecteur sont en cours de dépôt</h6>
@@ -135,11 +141,6 @@ const DatasheetNewIntegrationDialog = ({ datastoreId, uploadId }) => {
             </div>
         </div>
     );
-};
-
-DatasheetNewIntegrationDialog.propTypes = {
-    datastoreId: PropTypes.string,
-    uploadId: PropTypes.string,
 };
 
 export default DatasheetNewIntegrationDialog;
