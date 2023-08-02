@@ -1,6 +1,6 @@
-import Footer from "@codegouvfr/react-dsfr/Footer";
 import { headerFooterDisplayItem } from "@codegouvfr/react-dsfr/Display";
-import React from "react";
+import Footer from "@codegouvfr/react-dsfr/Footer";
+
 import { routes } from "../../router/router";
 
 import logoIgn from "../../img/logo-ign.png";
