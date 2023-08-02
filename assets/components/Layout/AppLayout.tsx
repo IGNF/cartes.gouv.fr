@@ -1,11 +1,14 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import PropTypes from "prop-types";
-import React from "react";
+import { FC, PropsWithChildren } from "react";
 
+import { MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation/MainNavigation";
 import AppFooter from "./AppFooter";
 import AppHeader from "./AppHeader";
 
-const AppLayout = ({ children, navItems = [] }) => {
+type AppLayoutProps = {
+    navItems?: MainNavigationProps.Item[];
+};
+const AppLayout: FC<PropsWithChildren<AppLayoutProps>> = ({ children, navItems = [] }) => {
     return (
         <>
             <AppHeader navItems={navItems} />
@@ -15,11 +18,6 @@ const AppLayout = ({ children, navItems = [] }) => {
             <AppFooter />
         </>
     );
-};
-
-AppLayout.propTypes = {
-    children: PropTypes.node,
-    navItems: PropTypes.arrayOf(PropTypes.object),
 };
 
 export default AppLayout;
