@@ -17,7 +17,7 @@ import api from "../../../api";
 import AppLayout from "../../../components/Layout/AppLayout";
 import Progress from "../../../components/Utils/Progress";
 import Wait from "../../../components/Utils/Wait";
-import { defaultProjections } from "../../../config/projections";
+import defaultProjections from "../../../data/default_projections.json";
 import functions from "../../../functions";
 import FileUploader from "../../../modules/FileUploader";
 import RCKeys from "../../../modules/RCKeys";

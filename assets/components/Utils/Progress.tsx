@@ -1,14 +1,18 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import PropTypes from "prop-types";
-import React, { useEffect, useState } from "react";
+import { FC, useEffect, useState } from "react";
 
 import "./../../sass/components/progress.scss";
 
-const Progress = ({ label, value, max = 100 }) => {
+type ProgressProps = {
+    label: string;
+    value: number;
+    max?: number;
+};
+const Progress: FC<ProgressProps> = ({ label, value, max = 100 }) => {
     const [percent, setPercent] = useState("");
 
     useEffect(() => {
-        let percentage = Math.floor((value / max) * 100);
+        const percentage = Math.floor((value / max) * 100);
         setPercent(`${percentage}%`);
     }, [value, max]);
 
@@ -24,12 +28,6 @@ const Progress = ({ label, value, max = 100 }) => {
             </div>
         </div>
     );
-};
-
-Progress.propTypes = {
-    label: PropTypes.string,
-    value: PropTypes.number,
-    max: PropTypes.number,
 };
 
 export default Progress;
