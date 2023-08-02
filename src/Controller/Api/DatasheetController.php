@@ -163,18 +163,35 @@ class DatasheetController extends AbstractController
     public function delete(string $datastoreId, string $datasheetName): Response
     {
         try {
-            $data = json_decode($this->getDetailed($datastoreId, $datasheetName)->getContent(), true);
+            $datasheet = json_decode($this->getDetailed($datastoreId, $datasheetName)->getContent(), true);
 
-            if (isset($data['upload_list'])) {
-                foreach ($data['upload_list'] as $upload) {
+            if (isset($datasheet['service_list'])) {
+                foreach ($datasheet['service_list'] as $offering) {
+                    $this->entrepotApiService->configuration->removeOffering($datastoreId, $offering['_id']);
+                    $configurationId = $offering['configuration']['_id'];
+
+                    while (1) {
+                        sleep(3);
+                        $configuration = $this->entrepotApiService->configuration->get($datastoreId, $configurationId);
+                        if (ConfigurationStatuses::UNPUBLISHED === $configuration['status']) {
+                            break;
+                        }
+                    }
+                    $this->entrepotApiService->configuration->remove($datastoreId, $configurationId);
+                }
+            }
+
+            if (isset($datasheet['upload_list'])) {
+                foreach ($datasheet['upload_list'] as $upload) {
+                    $this->entrepotApiService->upload->close($datastoreId, $upload['_id']);
                     $this->entrepotApiService->upload->remove($datastoreId, $upload['_id']);
                 }
             }
 
             $storedDataList = [];
 
-            if (isset($data['vector_db_list'])) {
-                $storedDataList = array_merge($storedDataList, $data['vector_db_list']);
+            if (isset($datasheet['vector_db_list'])) {
+                $storedDataList = array_merge($storedDataList, $datasheet['vector_db_list']);
             }
 
             foreach ($storedDataList as $storedData) {
@@ -185,10 +202,7 @@ class DatasheetController extends AbstractController
 
             return new JsonResponse(null, Response::HTTP_NO_CONTENT);
         } catch (EntrepotApiException $ex) {
-            return $this->json([
-                'error' => $ex->getMessage(),
-                'error_details' => $ex->getDetails(),
-            ], Response::HTTP_BAD_REQUEST);
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
     }
 }

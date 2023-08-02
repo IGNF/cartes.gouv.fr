@@ -22,6 +22,8 @@ import { type DatasheetDetailed } from "../../../types/app";
 import DatasetListTab from "./DatasetListTab/DatasetListTab";
 import ServicesListTab from "./ServicesListTab";
 
+import "../../../sass/components/spinner.scss";
+
 const deleteDataConfirmModal = createModal({
     id: "delete-data-confirm-modal",
     isOpenedByDefault: false,
@@ -153,7 +155,12 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
 
             {isDeleting && (
                 <Wait>
-                    <p>En cours de suppression</p>
+                    <div className={fr.cx("fr-container")}>
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
+                            <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " icons-spin"} />
+                            <h6 className={fr.cx("fr-m-0")}>En cours de suppression</h6>
+                        </div>
+                    </div>
                 </Wait>
             )}
 
@@ -178,9 +185,11 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                         <strong>Les éléments suivants seront supprimés :</strong>
                         <ul>
                             {datasheetQuery?.data?.vector_db_list?.length && datasheetQuery?.data?.vector_db_list.length > 0 ? (
-                                <li> {datasheetQuery?.data?.vector_db_list.length} base(s) de donnée(s)</li>
+                                <li> {datasheetQuery?.data?.vector_db_list.length} base(s) de données</li>
                             ) : null}
-
+                            {datasheetQuery?.data?.service_list?.length && datasheetQuery?.data?.service_list.length > 0 ? (
+                                <li> {datasheetQuery?.data?.service_list.length} service(s) publié(s)</li>
+                            ) : null}
                             {datasheetQuery?.data?.upload_list?.length && datasheetQuery?.data?.upload_list.length > 0 ? (
                                 <li> {datasheetQuery?.data?.upload_list.length} livraison(s)</li>
                             ) : null}
