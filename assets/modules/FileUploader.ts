@@ -67,7 +67,7 @@ export default class FileUploader {
             uuid: uuid,
             originalFilename: file.name,
         };
-        return jsonFetch(
+        return jsonFetch<{ srid: string; filename: string }>(
             this.#_urlUploadComplete,
             {
                 method: "POST",

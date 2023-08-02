@@ -27,9 +27,11 @@ const get = (datastoreId: string, uploadId: string, otherOptions: RequestInit = 
     });
 };
 
+type IntegrationProgress = { integration_progress: string; integration_current_step: string };
+
 const getIntegrationProgress = (datastoreId: string, uploadId: string, otherOptions: RequestInit = {}) => {
     const url = Routing.generate("cartesgouvfr_api_upload_integration_progress", { datastoreId, uploadId, getOnlyProgress: true });
-    return jsonFetch(url, {
+    return jsonFetch<IntegrationProgress>(url, {
         method: "GET",
         ...otherOptions,
     });
@@ -37,7 +39,7 @@ const getIntegrationProgress = (datastoreId: string, uploadId: string, otherOpti
 
 const pingIntegrationProgress = (datastoreId: string, uploadId: string, otherOptions: RequestInit = {}) => {
     const url = Routing.generate("cartesgouvfr_api_upload_integration_progress", { datastoreId, uploadId, getOnlyProgress: false });
-    return jsonFetch(url, {
+    return jsonFetch<IntegrationProgress>(url, {
         method: "GET",
         ...otherOptions,
     });

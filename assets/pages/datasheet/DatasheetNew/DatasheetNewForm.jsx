@@ -42,7 +42,7 @@ const DatasheetNewForm = ({ datastoreId }) => {
                 .test({
                     name: "is-unique",
                     test(dataName, ctx) {
-                        const existingDataList = dataListQuery?.data?.map((data) => data?.data_name);
+                        const existingDataList = dataListQuery?.data?.map((data) => data?.name);
                         if (existingDataList?.includes(dataName)) {
                             return ctx.createError({ message: `Une fiche de donnée existe déjà avec le nom "${dataName}"` });
                         }
