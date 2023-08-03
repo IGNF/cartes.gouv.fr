@@ -7,7 +7,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format as datefnsFormat } from "date-fns";
 import PropTypes from "prop-types";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { symToStr } from "tsafe/symToStr";
 import { v4 as uuidv4 } from "uuid";
@@ -67,14 +67,14 @@ const DatasheetNewForm = ({ datastoreId }) => {
 
     const [srid, setSrid] = useState(""); // srid
 
-    const [dataFileError, setDataFileError] = useState(null);
-    const dataFileRef = useRef();
+    const [dataFileError, setDataFileError] = useState<string>();
+    const dataFileRef = useRef<HTMLInputElement>(null);
 
-    const [uploadCreationInProgress, setUploadCreationInProgress] = useState(false);
-    const [uploadCreatedSuccessfully, setUploadCreatedSuccessfully] = useState(false);
-    const [uploadId, setUploadId] = useState(null);
+    const [uploadCreationInProgress, setUploadCreationInProgress] = useState<boolean>(false);
+    const [uploadCreatedSuccessfully, setUploadCreatedSuccessfully] = useState<boolean>(false);
+    const [uploadId, setUploadId] = useState<string>();
 
-    const [shouldFetchDataList, setShouldFetchDataList] = useState(true);
+    const [shouldFetchDataList, setShouldFetchDataList] = useState<boolean>(true);
 
     const {
         register,
@@ -133,7 +133,7 @@ const DatasheetNewForm = ({ datastoreId }) => {
         }
 
         const extension = functions.path.getFileExtension(file.name);
-        if (!fileExtensions.includes(extension)) {
+        if (!extension || !fileExtensions.includes(extension)) {
             setDataFileError(`L'extension du fichier ${file.name} n'est pas correcte`);
             return false;
         }
@@ -146,11 +146,13 @@ const DatasheetNewForm = ({ datastoreId }) => {
         return true;
     };
 
-    const postDataFile = (e) => {
-        setDataFileError(null);
+    const postDataFile = () => {
+        setDataFileError(undefined);
         setShowDataInfos(false);
 
-        const file = e.currentTarget.files?.[0];
+        if (!dataFileRef.current || !dataFileRef.current.files) return;
+
+        const file = dataFileRef.current.files[0];
         if (!validateDataFile(file)) {
             return;
         }
@@ -221,18 +223,24 @@ const DatasheetNewForm = ({ datastoreId }) => {
                     ...register("data_name"),
                 }}
             />
-            {/* A remplacer par le composant Upload quand il sera prêt (https://react-dsfr-components.etalab.studio/?path=/docs/components-upload--default) */}
+            {/* A remplacer par le composant Upload quand cette issue sera corrigée (https://github.com/codegouvfr/react-dsfr/issues/155 | https://react-dsfr-components.etalab.studio/?path=/docs/components-upload--default) */}
             <Input
                 label="Déposez votre fichier de données"
                 hintText="Formats de fichiers autorisés : archive zip contenant un Geopackage (recommandé) ou un CSV..."
-                state={dataFileError === null ? "default" : "error"}
+                state={dataFileError === undefined ? "default" : "error"}
                 stateRelatedMessage={dataFileError}
                 nativeInputProps={{ type: "file", onChange: postDataFile, className: fr.cx("fr-upload"), ref: dataFileRef }}
             />
+            {/* <Upload
+                hint="Formats de fichiers autorisés : archive zip contenant un Geopackage (recommandé) ou un CSV..."
+                state={dataFileError === undefined ? "default" : "error"}
+                stateRelatedMessage={dataFileError}
+                nativeInputProps={{ onChange: postDataFile, ref: dataFileRef }}
+            /> */}
             {showProgress && <Progress label={"Upload en cours ..."} value={progressValue} max={progressMax} />}
             {showDataInfos && (
                 <div className={fr.cx("fr-mt-2v")}>
-                    <h5>Les données suivantes ont été détectées. Modifiez les si besoins</h5>
+                    <h5>Les données suivantes ont été détectées. Modifiez les si besoin</h5>
                     <Input
                         label="Nom technique de votre donnée:"
                         hintText="Ce nom technique est invisible par votre utilisateur final. Il apparaitra uniquement dans votre espace de travail"
@@ -244,7 +252,6 @@ const DatasheetNewForm = ({ datastoreId }) => {
                     />
                     <Select
                         label="Projection de vos données"
-                        placeholder="Selectionnez une Projection"
                         nativeSelectProps={{
                             ...register("data_srid"),
                             onChange: (e) => setSrid(e.target.value),
@@ -283,12 +290,7 @@ const DatasheetNewForm = ({ datastoreId }) => {
                         ]}
                         orientation="horizontal"
                     />
-                    <Input
-                        nativeInputProps={{
-                            ...register("data_upload_path"),
-                            type: "hidden",
-                        }}
-                    />
+                    <input type="hidden" {...register("data_upload_path")} />
                 </div>
             )}
             <ButtonsGroup
@@ -312,17 +314,17 @@ const DatasheetNewForm = ({ datastoreId }) => {
 
             {isValidating && (
                 <Wait>
-                    <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "icons-spin")} />
+                    <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg") + " icons-spin"} />
                 </Wait>
             )}
 
-            {uploadCreationInProgress && (
+            {uploadCreationInProgress && uploadId && (
                 <Wait>
                     {uploadCreatedSuccessfully ? (
                         <DatasheetNewIntegrationDialog datastoreId={datastoreId} uploadId={uploadId} />
                     ) : (
                         <>
-                            <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "icons-spin")} />
+                            <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg") + " icons-spin"} />
                             <p>Création de la fiche en cours</p>
                         </>
                     )}
