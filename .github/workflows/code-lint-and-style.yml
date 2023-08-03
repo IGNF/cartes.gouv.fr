@@ -35,6 +35,7 @@ jobs:
     js:
         name: JavaScript
         runs-on: ubuntu-latest
+        needs: php
 
         steps:
             - name: Checkout repository
