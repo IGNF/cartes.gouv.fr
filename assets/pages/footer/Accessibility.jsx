@@ -43,25 +43,25 @@ const Accessibility = () => {
                     </p>
                     <ul>
                         <li>
-                            Envoyer un message au Défenseur des droits&nbsp;:
+                            Envoyer un message au Défenseur des droits&nbsp;:{" "}
                             <a
                                 href="https://formulaire.defenseurdesdroits.fr/"
                                 target="_blank"
                                 title="Saisir le Défenseur des droits - ouvre une nouvelle fenêtre"
                                 rel="noreferrer"
                             >
-                                https://formulaire.defenseurdesdroits.fr/
+                                formulaire.defenseurdesdroits.fr/
                             </a>
                         </li>
                         <li>
-                            Contacter le délégué du Défenseur des droits dans votre région&nbsp;:
+                            Contacter le délégué du Défenseur des droits dans votre région&nbsp;:{" "}
                             <a
                                 href="https://www.defenseurdesdroits.fr/saisir/delegues"
                                 target="_blank"
                                 title="Trouver un délégué du Défenseur des droits - ouvre une nouvelle fenêtre"
                                 rel="noreferrer"
                             >
-                                https://www.defenseurdesdroits.fr/saisir/delegues
+                                www.defenseurdesdroits.fr/saisir/delegues
                             </a>
                         </li>
                         <li>
