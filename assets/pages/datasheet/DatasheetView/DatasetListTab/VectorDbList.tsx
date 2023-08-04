@@ -82,8 +82,11 @@ const VectorDbList: FC<VectorDbListProps> = ({ datastoreId, vectorDbList }) => {
     });
 
     const wfsEndpoints = Array.isArray(endpointsQuery?.data) ? endpointsQuery?.data?.filter((endpoint) => endpoint.endpoint.type.toUpperCase() === "WFS") : [];
+    const wmsVectorEndpoints = Array.isArray(endpointsQuery?.data)
+        ? endpointsQuery?.data?.filter((endpoint) => endpoint.endpoint.type.toUpperCase() === "WMS-VECTOR")
+        : [];
 
-    const handleContinue = () => {
+    const handleCreateService = () => {
         if (!selectedStoredDataId) {
             console.warn("Aucune stored_data sélectionnée");
             return;
@@ -92,6 +95,10 @@ const VectorDbList: FC<VectorDbListProps> = ({ datastoreId, vectorDbList }) => {
         switch (serviceType) {
             case "wfs":
                 routes.datastore_wfs_service_new({ datastoreId, vectorDbId: selectedStoredDataId }).push();
+                break;
+
+            case "wms-vector":
+                routes.datastore_wms_vector_service_new({ datastoreId, vectorDbId: selectedStoredDataId }).push();
                 break;
 
             default:
@@ -128,7 +135,7 @@ const VectorDbList: FC<VectorDbListProps> = ({ datastoreId, vectorDbList }) => {
                                     serviceTypeChoiceModal.open();
                                 }}
                                 className={fr.cx("fr-mr-2v")}
-                                disabled={el.status !== StoredDataStatuses.GENERATED || wfsEndpoints?.length === 0}
+                                disabled={el.status !== StoredDataStatuses.GENERATED}
                             >
                                 Créer un service
                             </Button>
@@ -150,7 +157,7 @@ const VectorDbList: FC<VectorDbListProps> = ({ datastoreId, vectorDbList }) => {
                             },
                             {
                                 children: "Continuer",
-                                onClick: handleContinue,
+                                onClick: handleCreateService,
                                 doClosesModal: true,
                                 priority: "primary",
                             },
@@ -174,6 +181,7 @@ const VectorDbList: FC<VectorDbListProps> = ({ datastoreId, vectorDbList }) => {
                                     nativeInputProps: {
                                         checked: serviceType === "wfs",
                                         onChange: () => setServiceType("wfs"),
+                                        disabled: wfsEndpoints?.length === 0,
                                     },
                                 },
                                 {
@@ -182,7 +190,7 @@ const VectorDbList: FC<VectorDbListProps> = ({ datastoreId, vectorDbList }) => {
                                     nativeInputProps: {
                                         checked: serviceType === "wms-vector",
                                         onChange: () => setServiceType("wms-vector"),
-                                        disabled: true, // TODO : temporaire
+                                        disabled: wmsVectorEndpoints?.length === 0,
                                     },
                                 },
                                 {
