@@ -63,6 +63,14 @@ const routeDefs = {
         },
         (p) => `${appRoot}/datastores/${p.datastoreId}/service/wfs/new`
     ),
+
+    datastore_wms_vector_service_new: defineRoute(
+        {
+            datastoreId: param.path.string,
+            vectorDbId: param.query.string,
+        },
+        (p) => `${appRoot}/datastores/${p.datastoreId}/service/wms-vector/new`
+    ),
 };
 
 export const { RouteProvider, useRoute, routes } = createRouter(routeDefs);

@@ -70,7 +70,7 @@ service:
             step3: "Description de la ressource"
             step4: "Informations supplémentaires"
             step5: "Restrictions d'accès"
-            loading_data: "Chargement de la donnée stockée ..."
+            loading_stored_data: "Chargement de la donnée stockée ..."
             publish: "Publier le service maintenant"
             tables_form:
                 title: "Sélectionnez les tables nécessaires au service"
@@ -160,3 +160,13 @@ service:
                     all_public: Tout public
                     your_community: Votre communauté d'appartenance
                     communities_or_users: Communautés ou utilisateurs choisis
+
+    wms_vector:
+        new:
+            title: "Créer et publier un service WMS-Vecteur"
+            loading_stored_data: "Chargement de la donnée stockée ..."
+            step1: "Tables"
+            step2: "Source des métadonnées"
+            step3: "Description de la ressource"
+            step4: "Informations supplémentaires"
+            step5: "Restrictions d'accès"
