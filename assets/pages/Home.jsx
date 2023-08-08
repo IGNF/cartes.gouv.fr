@@ -49,7 +49,7 @@ const Home = () => {
                                 </p>
                             </div>
                             <div className={fr.cx("fr-col-12", "fr-col-lg-6", "fr-pb-4w", "fr-pl-md-8w", "fr-pr-md-2w", "fr-pt-md-6w", "aligncenter")}>
-                                <img src={hp} className={fr.cx("fr-responsive-img")} alt="" data-fr-js-ratio="true" />
+                                <img src={hp} className={fr.cx("fr-responsive-img")} alt="" role="presentation" data-fr-js-ratio="true" />
                             </div>
                         </div>
                     </div>
@@ -77,7 +77,7 @@ const Home = () => {
                                             className={fr.cx("fin-service-picto", "svg-fin-fc-finger")}
                                             role="presentation"
                                         />
-                                        <h4 className={fr.cx("fr-text--lead")}>Consommez des services</h4>
+                                        <h3 className={fr.cx("fr-text--lead")}>Consommez des services</h3>
                                         <p>Lorem ipsum dolor sit amet,consectetur adipiscing elit.</p>
                                         <Badge small className={fr.cx("fr-badge--pink")}>
                                             Prochainement
@@ -90,7 +90,7 @@ const Home = () => {
                                             className={fr.cx("fin-service-pict", "svg-fin-majorite")}
                                             role="presentation"
                                         />
-                                        <h4 className={fr.cx("fr-text--lead")}>Stocker et partager des géodonnées</h4>
+                                        <h3 className={fr.cx("fr-text--lead")}>Stocker et partager des géodonnées</h3>
                                         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
                                     </div>
 
@@ -100,7 +100,7 @@ const Home = () => {
                                             className={fr.cx("fin-service-picto", "svg-fin-procuration")}
                                             role="presentation"
                                         />
-                                        <h4 className={fr.cx("fr-text--lead")}>Effectuer des traitements</h4>
+                                        <h3 className={fr.cx("fr-text--lead")}>Effectuer des traitements</h3>
                                         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
                                         {/* <p>
                                             {user === null ? (
@@ -127,7 +127,7 @@ const Home = () => {
                                             className={fr.cx("fin-service-picto", "svg-fin-service-picto")}
                                             role="presentation"
                                         />
-                                        <h4 className={fr.cx("fr-text--lead")}>Lorem ipsum dolor</h4>
+                                        <h3 className={fr.cx("fr-text--lead")}>Lorem ipsum dolor</h3>
                                         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
                                     </div>
                                 </div>
@@ -143,7 +143,7 @@ const Home = () => {
                                             className={fr.cx("fin-service-picto", "svg-fin-procuration")}
                                             role="presentation"
                                         />
-                                        <h4 className={fr.cx("fr-text--lead")}>Consectetur adipiscing elit</h4>
+                                        <h3 className={fr.cx("fr-text--lead")}>Consectetur adipiscing elit</h3>
                                         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
                                         {/* <p>
                                             {user === null ? (
@@ -171,7 +171,7 @@ const Home = () => {
                                             className={fr.cx("fin-service-picto", "svg-fin-service-picto")}
                                             role="presentation"
                                         />
-                                        <h4 className={fr.cx("fr-text--lead")}>Sit amet</h4>
+                                        <h3 className={fr.cx("fr-text--lead")}>Sit amet</h3>
                                         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
                                     </div>
 
@@ -181,7 +181,7 @@ const Home = () => {
                                             className={fr.cx("fin-service-picto", "svg-fin-fc-finger")}
                                             role="presentation"
                                         />
-                                        <h4 className={fr.cx("fr-text--lead")}>Dolor sit amet consectetur</h4>
+                                        <h3 className={fr.cx("fr-text--lead")}>Dolor sit amet consectetur</h3>
                                         <p>Lorem ipsum dolor sit amet,consectetur adipiscing elit.</p>
                                         <Badge small className={fr.cx("fr-badge--pink")}>
                                             Prochainement
@@ -193,7 +193,7 @@ const Home = () => {
                                             className={fr.cx("fin-service-picto", "svg-fin-majorite")}
                                             role="presentation"
                                         />
-                                        <h4 className={fr.cx("fr-text--lead")}>Adipiscing elits</h4>
+                                        <h3 className={fr.cx("fr-text--lead")}>Adipiscing elits</h3>
                                         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
                                     </div>
                                 </div>

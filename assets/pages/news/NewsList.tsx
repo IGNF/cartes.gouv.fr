@@ -35,6 +35,7 @@ const NewsListItem: FC<NewsListItemProps> = ({ slug, newsArticle }) => {
                 imageAlt="illustration de l'article"
                 imageUrl={`${appRoot}/${newsArticle.thumbnail_url}`}
                 linkProps={routes.news_article({ slug }).link}
+                // title devrait être de niveau h2 ici, mais le composant force h3
                 title={newsArticle?.title}
             />
         </div>

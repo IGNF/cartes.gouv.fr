@@ -26,7 +26,7 @@ const AppHeader: FC<AppHeaderProps> = ({ navItems = [] }) => {
     if (!user) {
         // utilisateur n'est pas connecté
         quickAccessItems.push({
-            iconId: "fr-icon-account-line",
+            iconId: "fr-icon-account-fill",
             linkProps: {
                 href: Routing.generate("cartesgouvfr_security_login"),
             },
