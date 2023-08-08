@@ -81,7 +81,6 @@ const AccessRestrictionForm: FC<AccessRestrictionFormProps> = ({ datastoreId, vi
                         label: Translator.trans("service.wfs.new.access_retrictions.share_with_choices.communities_or_users"),
                         nativeInputProps: {
                             ...register("share_with"),
-                            value: "communities_or_users",
                             disabled: true, // TODO : désactivé pour l'instant parce que plus d'info est nécessaire sur la fonctionnalité
                         },
                     },

@@ -80,10 +80,11 @@ service:
                     public_name: "Nom public de la table (optionnel)"
                     hint_public_name: "TODO[Explication du champ]"
                     title: "Titre de la table"
+                    title_error: "Le titre de la table est obligatoire"
                     hint_title: "TODO[Explication du champ]"
                     description: "Résumé du contenu de la table"
                     hint_description: "Bref résumé narratif du contenu de la table"
-                    description_error: "La description est obligatoire"
+                    description_error: "La description de la table est obligatoire"
                     keywords: "Mot clés (optionnel)"
                     hint_keywords: "Utilisez l’auto-complétion ou saisissez librement des mots clés en appuyant sur Entrée après chaque mot"
                 error: "Sélectionnez au moins une table"
@@ -102,7 +103,7 @@ service:
                 description_title: "Description"
                 technical_name: "Nom technique du service"
                 technical_name_error: "Le nom technique est obligatoire"
-                technical_name_regex: "Le titre ne doit contenir que des lettres, chiffres, tirets (-), underscores (_), ou points (.)"
+                technical_name_regex: "Le nom technique ne doit contenir que des lettres, chiffres, tirets (-), underscores (_), ou points (.)"
                 hint_technical_name: "Nom technique qui sera visible de vos utilisateurs dans l'adresse de votre service"
                 public_name: "Intitulé (nom public)"
                 hint_public_name: "Nom caractéristique et souvent unique sous lequel la ressource est connue"
@@ -153,9 +154,9 @@ service:
                 hint_spatial_resolution: "Résolution indiquée en échelle (1/x)"
                 select_spatial_resolution: "Sélectionnez un produit (série)"
             access_retrictions:
-                title: "Restrictions d’accès"
+                title: Restrictions d’accès
                 share_with: Avec qui voulez-vous partager le service ?
-                share_with_error: Sélectionnez une des options
+                share_with_error: La restrictions d’accès est obligatoire
                 share_with_choices:
                     all_public: Tout public
                     your_community: Votre communauté d'appartenance

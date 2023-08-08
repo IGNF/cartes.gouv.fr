@@ -66,6 +66,7 @@ const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
     const [fileType, setFileType] = useState<string | undefined>(undefined);
     const [tables, setTables] = useState<unknown>([]);
     const [error, setError] = useState<CartesApiException>();
+    const [validationError, setValidationError] = useState<CartesApiException>();
 
     const [result, setResult] = useState({});
 
@@ -154,7 +155,7 @@ const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
                 })
                 .catch((error) => {
                     console.error(error);
-                    setError(error as CartesApiException);
+                    setValidationError(error as CartesApiException);
                 })
                 .finally(() => {
                     setIsSubmitting(false);
@@ -175,6 +176,15 @@ const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
                         stepCount={5}
                         title={Translator.trans(`service.wfs.new.step${currentStep}`)}
                     />
+                    {validationError?.code === 422 && (
+                        <Alert
+                            className="fr-preline"
+                            closable
+                            description={validationError.message}
+                            severity="error"
+                            title={Translator.trans("commons.error")}
+                        />
+                    )}
                     <TableForm tables={tables} visibility={visibility[STEPS.TABLES]} onValid={onValid} />
                     <UploadMetadataForm visibility={visibility[STEPS.METADATAS]} onPrevious={previous} onSubmit={next} />
                     <DescriptionForm storedDataName={vectorDb.name} visibility={visibility[STEPS.DESCRIPTION]} onPrevious={previous} onValid={onValid} />

@@ -8,6 +8,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 class CartesApiExceptionSubscriber implements EventSubscriberInterface
@@ -30,6 +31,11 @@ class CartesApiExceptionSubscriber implements EventSubscriberInterface
 
         if ($throwable instanceof CartesApiException) {
             $event->setResponse($this->getErrorResponse($throwable));
+        } else if ($throwable instanceof HttpException) {
+            if ($throwable->getStatusCode() === 422) { // Erreur de validation avec un DTO
+                $e = $this->format($throwable);
+                $event->setResponse($this->getErrorResponse($e));
+            }
         }
     }
 
@@ -56,5 +62,10 @@ class CartesApiExceptionSubscriber implements EventSubscriberInterface
         ]);
 
         return new JsonResponse($responseData, $responseData['code']);
+    }
+
+    private function format(HttpException $e) {
+        $code = $e->getStatusCode();
+        return new CartesApiException($e->getMessage(), $e->getStatusCode());
     }
 }

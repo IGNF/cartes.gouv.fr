@@ -186,6 +186,9 @@
     font-size: 14px;
     padding: 0.5rem 0.5rem;
 }
+.fr-preline {
+    white-space: pre-line;
+}
 @media (min-width: 30em) {
     .fr-tabs.fr-tabs--full button {
         padding: 0.5rem 1rem;
