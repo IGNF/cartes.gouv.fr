@@ -81,16 +81,20 @@ const Contact = () => {
                     <h1>{Translator.trans("contact.title")}</h1>
                     <p dangerouslySetInnerHTML={explanation} />
 
+                    <p>{Translator.trans("mandatory_fields")}</p>
+
                     {error && <Alert title={Translator.trans("contact.form.error_title")} closable description={error} severity="error" />}
 
                     <Input
                         label={Translator.trans("contact.form.email_contact")}
                         state={errors.email_contact ? "error" : "default"}
                         stateRelatedMessage={errors?.email_contact?.message}
+                        hintText="Format attendu : nom@domaine.fr"
                         nativeInputProps={{
                             ...register("email_contact"),
                             defaultValue: user?.email,
                             readOnly: user ? true : false,
+                            autoComplete: "email",
                         }}
                     />
                     <Input
@@ -99,6 +103,7 @@ const Contact = () => {
                             ...register("last_name"),
                             defaultValue: user?.lastName,
                             readOnly: user?.lastName ? true : false,
+                            autoComplete: "family-name",
                         }}
                     />
                     <Input
@@ -107,12 +112,14 @@ const Contact = () => {
                             ...register("first_name"),
                             defaultValue: user?.firstName,
                             readOnly: user?.firstName ? true : false,
+                            autoComplete: "given-name",
                         }}
                     />
                     <Input
                         label={Translator.trans("contact.form.organization")}
                         nativeInputProps={{
                             ...register("organization"),
+                            autoComplete: "organization",
                         }}
                     />
                     <Input

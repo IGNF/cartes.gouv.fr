@@ -7,6 +7,8 @@ pursue: "Poursuivre"
 send: "Envoyer"
 stored_data_does_not_exists: "La stored_data %stored_data% n'existe pas."
 
+mandatory_fields: "Sauf mention contraire “(optionnel)” dans le label, tous les champs sont obligatoires."
+
 # mailer
 mailer:
     hello: "Bonjour"

@@ -56,7 +56,7 @@ const NewsArticle: FC<NewsArticleProps> = ({ slug }) => {
                     </div>
 
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
-                        <img src={`${appRoot}/${newsArticle.thumbnail_url}`} width="100%" alt="illustration de l'article" />
+                        <img src={`${appRoot}/${newsArticle.thumbnail_url}`} alt="illustration de l'article" />
                     </div>
 
                     <div className={fr.cx("fr-grid-row", "fr-mt-2w")}>
