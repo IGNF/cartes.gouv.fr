@@ -22,7 +22,7 @@ import { getInspireKeywords } from "../../../../../utils";
         data_technical_name: yup
             .string()
             .required(Translator.trans("service.wfs.new.description_form.technical_name_error"))
-            .matches(/[\w-.]+/, Translator.trans("service.wfs.new.description_form.technical_name_regex")),
+            .matches(/^[\w-\.]+$/, Translator.trans("service.wfs.new.description_form.technical_name_regex")),
         data_public_name: yup.string().required(Translator.trans("service.wfs.new.description_form.public_name_error")),
         data_description: yup.string().required(Translator.trans("service.wfs.new.description_form.description_error")),
         data_identifier: yup.string().required(Translator.trans("service.wfs.new.description_form.identifier_error")),
@@ -40,7 +40,8 @@ import { getInspireKeywords } from "../../../../../utils";
     })
     .required(); */
 
-const schema = yup.object({ data_category: yup.string().required(Translator.trans("service.wfs.new.description_form.category_error")) }).required();
+// TODO SUPPRIMER
+const schema = yup.object({}).required();
 
 const DescriptionForm = ({ storedDataName, visibility, onPrevious, onValid }) => {
     const keywords = getInspireKeywords();
@@ -116,6 +117,7 @@ const DescriptionForm = ({ storedDataName, visibility, onPrevious, onValid }) =>
             <KeywordsSelect
                 label={Translator.trans("service.wfs.new.description_form.category")}
                 hintText={Translator.trans("service.wfs.new.description_form.hint_category")}
+                freeSolo
                 keywords={keywords}
                 onChange={handleKeywordsChange}
             />

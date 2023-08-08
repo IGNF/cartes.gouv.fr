@@ -1,0 +1,10 @@
+wfs_add:
+    table:
+        name_error: "Le nom de la table est obligatoire"
+        title_error: "Le titre de la table est obligatoire"
+        description_error: "La description de la table est obligatoire"
+    technical_name_error: "Le nom technique est obligatoire"
+    technical_name_regex: "Le nom technique ne doit contenir que des lettres, chiffres, tirets (-), underscores (_), ou points (.)"
+    public_name_error: "L'intitulé (nom public) est obligatoire"
+    description_error: "Un résumé est obligatoire"
+    share_with_error: "La restriction d’accès doit être 'all_public' ou 'your_community"

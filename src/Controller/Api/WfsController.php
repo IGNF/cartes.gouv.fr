@@ -2,15 +2,17 @@
 
 namespace App\Controller\Api;
 
-use App\Constants\EntrepotApi\StoredDataTags;
+use App\Dto\WfsAddDTO;
+use App\Services\EntrepotApiService;
 use App\Exception\CartesApiException;
 use App\Exception\EntrepotApiException;
-use App\Services\EntrepotApiService;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Constants\EntrepotApi\StoredDataTags;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 #[Route(
     '/api/datastores/{datastoreId}/{storedDataId}/wfs',
@@ -26,32 +28,31 @@ class WfsController extends AbstractController
     }
 
     #[Route('/', name: 'add')]
-    public function add(string $datastoreId, string $storedDataId, Request $request): JsonResponse
+    public function add(
+        string $datastoreId, 
+        string $storedDataId, 
+        #[MapRequestPayload()] WfsAddDTO $dto): JsonResponse
     {
         try {
-            $content = json_decode($request->getContent(), true);
-
-            $relations = [];
-            $tables = json_decode($content['data_tables'], true);
-
-            foreach ($tables as $tableName => $desc) {
+            foreach ($dto->data_tables as $table) {
                 $relation = [
-                    'native_name' => $tableName,
-                    'title' => $desc['title'],
-                    'abstract' => $desc['description'],
+                    'native_name' => $table->native_name,
+                    'title' => $table->title,
+                    'abstract' => $table->description
                 ];
-                foreach (['public_name', 'keywords'] as $key) {
-                    if (isset($desc[$key])) {
-                        $relation[$key] = $desc[$key];
-                    }
+                if ($table->public_name) {
+                    $relation['public_name'] = $table->public_name;     
+                }
+                if ($table->keywords) {
+                    $relation['keywords'] = $table->keywords;     
                 }
                 $relations[] = $relation;
             }
 
             $body = [
                 'type' => 'WFS',
-                'name' => $content['data_public_name'],
-                'layer_name' => $content['data_technical_name'],
+                'name' => $dto->data_public_name,
+                'layer_name' => $dto->data_technical_name,
                 'type_infos' => [
                     'used_data' => [[
                         'relations' => $relations,
@@ -65,24 +66,24 @@ class WfsController extends AbstractController
             $isOfferingOpen = true;
 
             // TODO : implémentation partielle, tous les ne sont pas couverts
-            if ('all_public' === $content['share_with']) {
+            if ('all_public' === $dto->share_with) {
                 $endpoints = $this->entrepotApiService->datastore->getEndpoints($datastoreId, [
                     'type' => 'WFS',
                     'open' => true,
                 ]);
                 $isOfferingOpen = true;
-            } elseif ('your_community' === $content['share_with']) {
+            } elseif ('your_community' === $dto->share_with) {
                 $endpoints = $this->entrepotApiService->datastore->getEndpoints($datastoreId, [
                     'type' => 'WFS',
                     'open' => false,
                 ]);
                 $isOfferingOpen = false;
             } else {
-                throw new CartesApiException('Valeur du champ [share_with] est invalide', Response::HTTP_BAD_REQUEST, ['share_with' => $content['share_with']]);
+                throw new CartesApiException('Valeur du champ [share_with] est invalide', Response::HTTP_BAD_REQUEST, ['share_with' => $dto->share_with]);
             }
 
             if (0 === count($endpoints)) {
-                throw new CartesApiException("Aucun point d'accès (endpoint) du datastore ne peut convenir à la demande", Response::HTTP_BAD_REQUEST, ['share_with' => $content['share_with']]);
+                throw new CartesApiException("Aucun point d'accès (endpoint) du datastore ne peut convenir à la demande", Response::HTTP_BAD_REQUEST, ['share_with' => $dto->share_with]);
             }
 
             $endpointId = $endpoints[0]['endpoint']['_id'];

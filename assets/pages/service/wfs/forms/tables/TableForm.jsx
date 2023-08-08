@@ -18,7 +18,8 @@ const mandatory = ["title", "description"];
 const schema = yup
     .object({
         data_tables: yup
-            .string()
+            .array()
+            .of(yup.object())
             .required(Translator.trans("service.wfs.new.tables_form.error"))
             .test({
                 name: "test",
@@ -26,15 +27,14 @@ const schema = yup
                 params: { mandatory },
                 message: Translator.trans("service.wfs.new.tables_form.error_mandatory"),
                 test: (value) => {
-                    const desc = JSON.parse(value);
-
-                    for (const table of Object.keys(desc)) {
-                        const fields = Object.keys(desc[table]);
+                    for (const table of value) {
+                        const fields = Object.keys(table);
                         if (!fields.length) return false;
                         for (let m = 0; m < mandatory.length; ++m) {
                             if (!fields.includes(mandatory[m])) return false;
                         }
                     }
+
                     return true;
                 },
             }),
@@ -53,7 +53,7 @@ const TableForm = ({ tables, visibility, onValid }) => {
     } = useForm({ resolver: yupResolver(schema) });
 
     const onChange = (tablesState) => {
-        const value = Object.keys(tablesState).length ? JSON.stringify(tablesState) : null;
+        const value = Object.keys(tablesState).length ? tablesState : null;
         setFormValue("data_tables", value);
     };
 

@@ -7,11 +7,12 @@ type KeywordsComponentProps = {
     label: string;
     hintText: string;
     keywords: string[];
+    freeSolo: boolean;
     onChange: (values: string[]) => string;
 };
 
 const KeywordsSelect: FC<KeywordsComponentProps> = (props) => {
-    const { label, hintText, keywords, onChange } = props;
+    const { label, hintText, keywords, freeSolo, onChange } = props;
 
     return (
         <MuiDsfrThemeProvider>
@@ -21,6 +22,7 @@ const KeywordsSelect: FC<KeywordsComponentProps> = (props) => {
             </label>
             <Autocomplete
                 autoComplete={true}
+                freeSolo={freeSolo !== undefined}
                 disablePortal
                 multiple
                 filterSelectedOptions

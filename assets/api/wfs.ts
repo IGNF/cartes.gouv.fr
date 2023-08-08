@@ -8,6 +8,10 @@ const add = (datastoreId: string, storedDataId: string, formData: FormData | obj
         url,
         {
             method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+            },
         },
         formData
     );

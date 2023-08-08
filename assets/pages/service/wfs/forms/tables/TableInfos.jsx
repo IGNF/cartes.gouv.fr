@@ -12,13 +12,14 @@ const TableInfos = ({ tables, keywords, onChange }) => {
 
     /* Ne conserve que les tables "checked" (visible a true) */
     const filter = (res) => {
-        const filtered = {};
+        const filtered = [];
         for (const [table, tableInfo] of Object.entries(res)) {
             if (!tableInfo.visible) continue;
 
             const info = { ...tableInfo };
             delete info.visible;
-            filtered[table] = info;
+            info["native_name"] = table;
+            filtered.push(info);
         }
         return filtered;
     };
@@ -138,6 +139,7 @@ const TableInfos = ({ tables, keywords, onChange }) => {
                             <KeywordsSelect
                                 label={Translator.trans("service.wfs.new.tables_form.table.keywords")}
                                 hintText={Translator.trans("service.wfs.new.tables_form.table.hint_keywords")}
+                                freeSolo
                                 keywords={keywords}
                                 onChange={(values) => keywordsChange(table.name, values)}
                             />
