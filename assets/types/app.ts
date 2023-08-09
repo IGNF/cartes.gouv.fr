@@ -5,6 +5,7 @@ import {
     DatastoreEndpointResponseDto,
     EndpointDetailResponseDtoTypeEnum,
     OfferingDetailResponseDto,
+    StoredDataDetailsRelationDto,
     StoredDataPrivateDetailResponseDto,
     StoredDataPrivateDetailResponseDtoStatusEnum,
     StoredDataPrivateDetailResponseDtoTypeEnum,
@@ -31,13 +32,15 @@ export type DatasheetDetailed = Datasheet & {
     service_list: Service[] | undefined;
 };
 
+/** stored_data (donnée stockée) */
 export type StoredData = StoredDataPrivateDetailResponseDto;
 
 export const StoredDataTypes = StoredDataPrivateDetailResponseDtoTypeEnum;
 export const StoredDataStatuses = StoredDataPrivateDetailResponseDtoStatusEnum;
 export const StoredDataVisibilities = StoredDataPrivateDetailResponseDtoVisibilityEnum;
+export type StoredDataRelation = StoredDataDetailsRelationDto;
 
-/** stored_data (donnée stockée) */
+/** stored_data (donnée stockée) du type VECTOR-DB */
 export type VectorDb = StoredData & {
     type: StoredDataPrivateDetailResponseDtoTypeEnum.VECTORDB;
     tags: {
@@ -60,7 +63,7 @@ export type Upload = UploadDetailResponseDto & {
 };
 export type UploadTree = UploadTreeElementResponseDto;
 
-/** user */
+/** user, objet représentant l'utilisateur de l'API Entrepot */
 export type EntrepotUser = UserDetailsResponseDto;
 
 /** configuration & offerings */
