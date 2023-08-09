@@ -175,8 +175,10 @@
     border: none;
     background: none;
     color: var(--text-title-grey);
+    text-decoration: underline;
 }
 .fr-tabs.fr-tabs--full .fr-tabs__tab:not([aria-selected="true"]) {
+    cursor: pointer;
     border: none;
     background: none;
     color: var(--text-mention-grey);
