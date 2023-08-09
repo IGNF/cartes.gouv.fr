@@ -1,7 +1,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import { FC, useEffect, useState } from "react";
-import { UseFormReturn } from "react-hook-form";
+import { type UseFormReturn } from "react-hook-form";
 
 import { type VectorDb } from "../../../../types/app";
 
@@ -41,6 +41,7 @@ const TableSelection: FC<TablesSelectionProps> = ({ vectorDb, visible, form }) =
 
     return (
         <div className={fr.cx(!visible && "fr-hidden")}>
+            <h3>Sélectionnez les tables nécessaires au service</h3>
             <Checkbox
                 options={tables.map((table) => ({
                     label: table.name,
@@ -50,7 +51,6 @@ const TableSelection: FC<TablesSelectionProps> = ({ vectorDb, visible, form }) =
                         checked: selectedTables.includes(table.name),
                     },
                 }))}
-                legend="Sélectionnez les tables nécessaires au service"
                 hintText={<strong>{tables.length} table(s) détectée(s) </strong>}
                 state={errors.selected_tables ? "error" : "default"}
                 stateRelatedMessage={errors?.selected_tables?.message?.toString()}
