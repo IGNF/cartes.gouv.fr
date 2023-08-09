@@ -9,7 +9,7 @@ import logoMinistereTransformation from "../../img/logo-ministere-transformation
 const AppFooter = () => {
     return (
         <Footer
-            accessibility="non compliant"
+            accessibility="partially compliant"
             accessibilityLinkProps={{
                 ...routes.accessibility().link,
             }}
