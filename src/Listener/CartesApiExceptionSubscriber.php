@@ -64,7 +64,7 @@ class CartesApiExceptionSubscriber implements EventSubscriberInterface
         return new JsonResponse($responseData, $responseData['code']);
     }
 
-    private function format(HttpException $e) {
+    private function format(HttpException $e) : CartesApiException {
         $code = $e->getStatusCode();
         return new CartesApiException($e->getMessage(), $e->getStatusCode());
     }

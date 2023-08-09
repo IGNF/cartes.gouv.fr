@@ -34,6 +34,7 @@ class WfsController extends AbstractController
         #[MapRequestPayload()] WfsAddDTO $dto): JsonResponse
     {
         try {
+            $relations = [];
             foreach ($dto->data_tables as $table) {
                 $relation = [
                     'native_name' => $table->native_name,
