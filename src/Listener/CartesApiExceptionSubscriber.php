@@ -31,8 +31,8 @@ class CartesApiExceptionSubscriber implements EventSubscriberInterface
 
         if ($throwable instanceof CartesApiException) {
             $event->setResponse($this->getErrorResponse($throwable));
-        } else if ($throwable instanceof HttpException) {
-            if ($throwable->getStatusCode() === 422) { // Erreur de validation avec un DTO
+        } elseif ($throwable instanceof HttpException) {
+            if (422 === $throwable->getStatusCode()) { // Erreur de validation avec un DTO
                 $e = $this->format($throwable);
                 $event->setResponse($this->getErrorResponse($e));
             }
@@ -64,8 +64,8 @@ class CartesApiExceptionSubscriber implements EventSubscriberInterface
         return new JsonResponse($responseData, $responseData['code']);
     }
 
-    private function format(HttpException $e) : CartesApiException {
-        $code = $e->getStatusCode();
+    private function format(HttpException $e): CartesApiException
+    {
         return new CartesApiException($e->getMessage(), $e->getStatusCode());
     }
 }
