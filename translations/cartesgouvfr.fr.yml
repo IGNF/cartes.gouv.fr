@@ -72,7 +72,7 @@ service:
             step3: "Description de la ressource"
             step4: "Informations supplémentaires"
             step5: "Restrictions d'accès"
-            loading_stored_data: "Chargement de la donnée stockée ..."
+            loading_stored_data: "Chargement de la donnée stockée..."
             publish: "Publier le service maintenant"
             tables_form:
                 title: "Sélectionnez les tables nécessaires au service"
@@ -167,7 +167,7 @@ service:
     wms_vector:
         new:
             title: "Créer et publier un service WMS-Vecteur"
-            loading_stored_data: "Chargement de la donnée stockée ..."
+            loading_stored_data: "Chargement de la donnée stockée..."
             publish: "Publier le service maintenant"
             step1: "Tables"
             step2: "Attributs"

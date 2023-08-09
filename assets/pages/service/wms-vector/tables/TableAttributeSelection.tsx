@@ -1,44 +1,34 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import { Accordion } from "@codegouvfr/react-dsfr/Accordion";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import { FC, useEffect, useState } from "react";
-import { UseFormReturn } from "react-hook-form";
+import { type UseFormReturn } from "react-hook-form";
 
-import { StoredDataRelation, VectorDb } from "../../../../types/app";
+import { type StoredDataRelation } from "../../../../types/app";
 
 type TableAttributeSelectionProps = {
-    vectorDb: VectorDb;
     visible: boolean;
     form: UseFormReturn;
+    selectedTables: StoredDataRelation[];
 };
-const TableAttributeSelection: FC<TableAttributeSelectionProps> = ({ vectorDb, visible, form }) => {
+const TableAttributeSelection: FC<TableAttributeSelectionProps> = ({ visible, form, selectedTables }) => {
     const {
-        watch,
         trigger,
         setValue: setFormValue,
         getValues: getFormValues,
         formState: { errors },
     } = form;
 
-    const selectedTableNamesList: string[] = watch("selected_tables");
-
-    const [selectedTables, setSelectedTables] = useState<StoredDataRelation[]>([]);
     const [tableAttributes, setTableAttributes] = useState<{ [tableName: string]: string[] }>({});
 
     useEffect(() => {
-        if (selectedTableNamesList) {
-            const relations = vectorDb.type_infos?.relations ?? [];
-            const tables = relations.filter((rel) => rel.type && rel.type === "TABLE");
-            const selectedTables = tables.filter((table) => selectedTableNamesList.includes(table.name));
-            setSelectedTables(selectedTables);
-
-            const prevTableAttributes = getFormValues("table_attributes") ?? {};
-            const tableAttributes = {};
-            selectedTables.forEach((table) => {
-                tableAttributes[table.name] = prevTableAttributes[table.name] ?? [];
-            });
-            setTableAttributes(tableAttributes);
-        }
-    }, [getFormValues, selectedTableNamesList, vectorDb.type_infos?.relations]);
+        const prevTableAttributes = getFormValues("table_attributes") ?? {};
+        const tableAttributes = {};
+        selectedTables.forEach((table) => {
+            tableAttributes[table.name] = prevTableAttributes[table.name] ?? [];
+        });
+        setTableAttributes(tableAttributes);
+    }, [getFormValues, selectedTables]);
 
     const toggleAttributes = (tableName: string, attrName: string) => {
         setTableAttributes((prevState) => {
@@ -64,36 +54,23 @@ const TableAttributeSelection: FC<TableAttributeSelectionProps> = ({ vectorDb, v
 
     return (
         <div className={fr.cx(!visible && "fr-hidden")}>
-            {/* <ul>
-                {selectedTables.map((table) => (
-                    <li key={table.name}>
-                        <p>{table.name}</p>
-                        <ul>
-                            {Object.keys(table.attributes).map((attrName) => (
-                                <li key={attrName}>
-                                    {attrName} : {tableAttributes?.[table.name].includes(attrName) ? "checked" : ""}
-                                </li>
-                            ))}
-                        </ul>
-                    </li>
-                ))}
-            </ul> */}
+            <h3>Choisissez les attributs des tables sélectionnées</h3>
 
             {selectedTables.map((table) => (
-                <Checkbox
-                    key={table.name}
-                    legend={table.name}
-                    options={Object.keys(table.attributes).map((attrName) => ({
-                        label: attrName,
-                        nativeInputProps: {
-                            value: attrName,
-                            checked: tableAttributes?.[table.name].includes(attrName),
-                            onChange: () => toggleAttributes(table.name, attrName),
-                        },
-                    }))}
-                    state={errors?.[`table_attributes_${table.name}`]?.message ? "error" : "default"}
-                    stateRelatedMessage={errors?.[`table_attributes_${table.name}`]?.message?.toString()}
-                />
+                <Accordion key={table.name} label={table.name} titleAs="h4" defaultExpanded={false}>
+                    <Checkbox
+                        options={Object.keys(table.attributes).map((attrName) => ({
+                            label: attrName,
+                            nativeInputProps: {
+                                value: attrName,
+                                checked: tableAttributes?.[table.name]?.includes(attrName) ?? false,
+                                onChange: () => toggleAttributes(table.name, attrName),
+                            },
+                        }))}
+                        state={errors?.table_attributes?.[table.name]?.message ? "error" : "default"}
+                        stateRelatedMessage={errors?.table_attributes?.[table.name]?.message?.toString()}
+                    />
+                </Accordion>
             ))}
         </div>
     );

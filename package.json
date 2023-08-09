@@ -14,6 +14,8 @@
         "date-fns": "^2.30.0",
         "dotenv": "^16.3.1",
         "fos-router": "./vendor/friendsofsymfony/jsrouting-bundle/Resources/",
+        "geostyler-sld-parser": "^5.1.0",
+        "geostyler-style": "^7.3.1",
         "ol": "^7.4.0",
         "postcss-loader": "^7.3.3",
         "prop-types": "^15.8.1",
