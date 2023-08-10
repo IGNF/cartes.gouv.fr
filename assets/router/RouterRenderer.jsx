@@ -35,6 +35,8 @@ const DatasheetView = lazy(() => import("../pages/datasheet/DatasheetView/Datash
 const WfsServiceNew = lazy(() => import("../pages/service/wfs/WfsServiceNew"));
 const WmsVectorServiceNew = lazy(() => import("../pages/service/wms-vector/WmsVectorServiceNew"));
 
+const ServiceView = lazy(() => import("../pages/service/view/ServiceView"));
+
 function RouterRenderer() {
     const route = useRoute();
     const { user } = useUser();
@@ -121,6 +123,10 @@ function RouterRenderer() {
             break;
         case "datastore_wms_vector_service_new":
             content = <WmsVectorServiceNew datastoreId={route.params.datastoreId} vectorDbId={route.params.vectorDbId} />;
+            break;
+
+        case "datastore_service_view":
+            content = <ServiceView datastoreId={route.params.datastoreId} offeringId={route.params.offeringId} />;
             break;
         default:
             content = <PageNotFound />;
