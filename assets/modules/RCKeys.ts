@@ -14,6 +14,8 @@ const RCKeys = {
 
     datastore_datasheet_list: (datastoreId: string): string[] => [`datastore_${datastoreId}_datasheet_list`],
     datastore_datasheet: (datastoreId: string, dataName: string): string[] => [`datastore_${datastoreId}_datasheet_${dataName}`],
+
+    datastore_offering: (datastoreId: string, offeringId: string): string[] => [`datastore_${datastoreId}_offering_${offeringId}`],
 };
 
 export default RCKeys;

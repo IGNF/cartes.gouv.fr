@@ -83,7 +83,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                 />
             ) : (
                 <>
-                    <div className={fr.cx("fr-grid-row", "fr-grid-row--left", "fr-grid-row--middle", "fr-mb-4w")}>
+                    <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-4w")}>
                         <Button
                             iconId="fr-icon-arrow-left-s-line"
                             priority="tertiary no outline"
@@ -144,7 +144,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                                     {
                                         label: `Services (${datasheetQuery?.data?.service_list?.length || 0})`,
                                         isDefault: route.params["activeTab"] === "services",
-                                        content: <ServicesListTab datasheet={datasheetQuery?.data} />,
+                                        content: <ServicesListTab datastoreId={datastoreId} datasheet={datasheetQuery?.data} />,
                                     },
                                 ]}
                             />
