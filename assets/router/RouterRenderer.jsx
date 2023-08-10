@@ -107,7 +107,7 @@ function RouterRenderer() {
             content = <DashboardPro />;
             break;
         case "datasheet_list":
-            content = <DatasheetList />;
+            content = <DatasheetList datastoreId={route.params.datastoreId} />;
             break;
         case "datastore_datasheet_new":
             content = <DatasheetNewForm datastoreId={route.params.datastoreId} />;

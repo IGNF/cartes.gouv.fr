@@ -7,9 +7,8 @@ import { useQuery } from "@tanstack/react-query";
 import { CSSProperties, FC } from "react";
 
 import api from "../../../api";
-import AppLayout from "../../../components/Layout/AppLayout";
+import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
 import LoadingText from "../../../components/Utils/LoadingText";
-import { dashboardProNavItems } from "../../../config/dashboardProNavItems";
 import RCKeys from "../../../modules/RCKeys";
 import { CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
@@ -20,8 +19,6 @@ type ServiceViewProps = {
     offeringId: string;
 };
 const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId }) => {
-    const navItems = dashboardProNavItems;
-
     const theme = useColors();
     const styleBoxCopyData: CSSProperties = {
         backgroundColor: theme.decisions.background.alt.blueFrance.default,
@@ -35,7 +32,7 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId }) => {
     });
 
     return (
-        <AppLayout navItems={navItems}>
+        <DatastoreLayout datastoreId={datastoreId}>
             {serviceQuery.isLoading ? (
                 <LoadingText />
             ) : serviceQuery.error ? (
@@ -43,7 +40,7 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId }) => {
                     severity="error"
                     closable={false}
                     title={serviceQuery.error.message}
-                    description={<Button linkProps={routes.datasheet_list().link}>Retour à mes données</Button>}
+                    description={<Button linkProps={routes.datasheet_list({ datastoreId }).link}>Retour à mes données</Button>}
                 />
             ) : (
                 <>
@@ -51,7 +48,7 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId }) => {
                         <Button
                             iconId="fr-icon-arrow-left-s-line"
                             priority="tertiary no outline"
-                            linkProps={routes.datasheet_list().link}
+                            linkProps={routes.datasheet_list({ datastoreId }).link}
                             title="Retour à la liste de mes données"
                         />
                         {serviceQuery.data.layer_name}
@@ -108,7 +105,7 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId }) => {
                     </div>
                 </>
             )}
-        </AppLayout>
+        </DatastoreLayout>
     );
 };
 

@@ -1,17 +1,17 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import SldStyleParser from "geostyler-sld-parser";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useQuery } from "@tanstack/react-query";
+import SldStyleParser from "geostyler-sld-parser";
 import { FC, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
 import api from "../../../api";
-import AppLayout from "../../../components/Layout/AppLayout";
+import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
 import LoadingText from "../../../components/Utils/LoadingText";
 import RCKeys from "../../../modules/RCKeys";
 import Translator from "../../../modules/Translator";
@@ -155,7 +155,7 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
     };
 
     return (
-        <AppLayout>
+        <DatastoreLayout datastoreId={datastoreId}>
             <h1>{Translator.trans("service.wms_vector.new.title")}</h1>
 
             {vectorDbQuery.isLoading ? (
@@ -165,7 +165,7 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
                     severity="error"
                     closable={false}
                     title="Récupération des informations sur la donnée stockée a échoué"
-                    description={<Button linkProps={routes.datasheet_list().link}>Retour à mes données</Button>}
+                    description={<Button linkProps={routes.datasheet_list({ datastoreId }).link}>Retour à mes données</Button>}
                 />
             ) : (
                 <>
@@ -203,7 +203,7 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
                     />
                 </>
             )}
-        </AppLayout>
+        </DatastoreLayout>
     );
 };
 

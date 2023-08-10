@@ -32,7 +32,12 @@ const routeDefs = {
     dashboard_pro: defineRoute(`${appRoot}/dashboard`),
 
     // fiche de données
-    datasheet_list: defineRoute(`${appRoot}/donnees`),
+    datasheet_list: defineRoute(
+        {
+            datastoreId: param.path.string,
+        },
+        (p) => `${appRoot}/datastores/${p.datastoreId}/datasheet`
+    ),
     datastore_datasheet_new: defineRoute(
         {
             datastoreId: param.path.string,
