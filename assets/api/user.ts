@@ -8,9 +8,9 @@ const getMe = () => {
     return jsonFetch(url);
 };
 
-const getDatastoresList = () => {
+const getDatastoresList = (otherOptions: RequestInit = {}) => {
     const url = Routing.generate("cartesgouvfr_api_user_datastores_list");
-    return jsonFetch<Datastore[]>(url);
+    return jsonFetch<Datastore[]>(url, { ...otherOptions });
 };
 
 const user = {

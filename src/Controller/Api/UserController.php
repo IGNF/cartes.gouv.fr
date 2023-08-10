@@ -2,6 +2,8 @@
 
 namespace App\Controller\Api;
 
+use App\Exception\CartesApiException;
+use App\Exception\EntrepotApiException;
 use App\Services\EntrepotApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -30,6 +32,12 @@ class UserController extends AbstractController
     public function getUserDatastores(): JsonResponse
     {
         // TODO: recherche de bac à sable et autres entrepots
-        return $this->json($this->entrepotApiService->user->getMyDatastores());
+        try {
+            $myDatastores = $this->entrepotApiService->user->getMyDatastores();
+
+            return $this->json($myDatastores);
+        } catch (EntrepotApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
     }
 }

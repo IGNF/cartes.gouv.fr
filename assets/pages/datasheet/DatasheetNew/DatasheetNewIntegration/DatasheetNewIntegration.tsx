@@ -1,6 +1,6 @@
 import { FC } from "react";
 
-import AppLayout from "../../../../components/Layout/AppLayout";
+import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
 import DatasheetNewIntegrationDialog from "./DatasheetNewIntegrationDialog";
 
 type DatasheetNewIntegrationProps = {
@@ -9,9 +9,9 @@ type DatasheetNewIntegrationProps = {
 };
 const DatasheetNewIntegration: FC<DatasheetNewIntegrationProps> = ({ datastoreId, uploadId }) => {
     return (
-        <AppLayout>
+        <DatastoreLayout datastoreId={datastoreId}>
             <DatasheetNewIntegrationDialog datastoreId={datastoreId} uploadId={uploadId} />
-        </AppLayout>
+        </DatastoreLayout>
     );
 };
 

@@ -2,7 +2,7 @@ import { type MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation/
 
 import { routes } from "../router/router";
 
-export const dashboardProNavItems: MainNavigationProps.Item[] = [
+export const datastoreNavItems = (datastoreId: string): MainNavigationProps.Item[] => [
     {
         text: "Tableau de bord",
         linkProps: routes.dashboard_pro().link,
@@ -10,7 +10,7 @@ export const dashboardProNavItems: MainNavigationProps.Item[] = [
     {
         menuLinks: [
             {
-                linkProps: routes.datasheet_list().link,
+                linkProps: routes.datasheet_list({ datastoreId }).link,
                 text: "Données",
             },
             {

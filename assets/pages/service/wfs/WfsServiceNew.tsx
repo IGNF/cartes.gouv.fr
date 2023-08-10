@@ -4,18 +4,18 @@ import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
 import { FC, useEffect, useState } from "react";
 
 import api from "../../../api";
-import AppLayout from "../../../components/Layout/AppLayout";
+import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
 import LoadingText from "../../../components/Utils/LoadingText";
 import Wait from "../../../components/Utils/Wait";
 import Translator from "../../../modules/Translator";
 import { CartesApiException } from "../../../modules/jsonFetch";
+import { routes } from "../../../router/router";
 import { type VectorDb } from "../../../types/app";
 import AccessRestrictionForm from "./forms/AccessRestrictionForm";
 import AdditionalInfoForm from "./forms/metadatas/AdditionalInfoForm";
 import DescriptionForm from "./forms/metadatas/DescriptionForm";
 import UploadMetadataForm from "./forms/metadatas/UploadMetadataForm";
 import TableForm from "./forms/tables/TableForm";
-import { routes } from "../../../router/router";
 
 import "../../../sass/components/spinner.scss";
 
@@ -150,7 +150,7 @@ const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
                     if (vectorDb?.tags?.datasheet_name) {
                         routes.datastore_datasheet_view({ datastoreId, datasheetName: vectorDb?.tags.datasheet_name, activeTab: "services" }).push();
                     } else {
-                        routes.datasheet_list().push();
+                        routes.datasheet_list({ datastoreId }).push();
                     }
                 })
                 .catch((error) => {
@@ -164,7 +164,7 @@ const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
     };
 
     return (
-        <AppLayout>
+        <DatastoreLayout datastoreId={datastoreId}>
             <h2>{Translator.trans("service.wfs.new.title")}</h2>
             {isLoading ? (
                 <LoadingText message={Translator.trans("service.wfs.new.loading_stored_data")} />
@@ -219,7 +219,7 @@ const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
                     </div>
                 </Wait>
             )}
-        </AppLayout>
+        </DatastoreLayout>
     );
 };
 

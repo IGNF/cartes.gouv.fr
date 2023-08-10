@@ -14,7 +14,6 @@ import { v4 as uuidv4 } from "uuid";
 import * as yup from "yup";
 
 import api from "../../../api";
-import AppLayout from "../../../components/Layout/AppLayout";
 import Progress from "../../../components/Utils/Progress";
 import Wait from "../../../components/Utils/Wait";
 import defaultProjections from "../../../data/default_projections.json";
@@ -22,6 +21,7 @@ import functions from "../../../functions";
 import FileUploader from "../../../modules/FileUploader";
 import RCKeys from "../../../modules/RCKeys";
 import { routes } from "../../../router/router";
+import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
 import DatasheetNewIntegrationDialog from "./DatasheetNewIntegration/DatasheetNewIntegrationDialog";
 
 import "./../../../sass/components/spinner.scss";
@@ -212,7 +212,7 @@ const DatasheetNewForm = ({ datastoreId }) => {
     };
 
     return (
-        <AppLayout>
+        <DatastoreLayout datastoreId={datastoreId}>
             <h2>Créer une fiche de données</h2>
             <Input
                 label="Nom de votre fiche de donnée"
@@ -304,7 +304,7 @@ const DatasheetNewForm = ({ datastoreId }) => {
                         children: "Soumettre",
                     },
                     {
-                        linkProps: routes.datasheet_list().link,
+                        linkProps: routes.datasheet_list({ datastoreId }).link,
                         children: "Retour à mes données",
                     },
                 ]}
@@ -330,7 +330,7 @@ const DatasheetNewForm = ({ datastoreId }) => {
                     )}
                 </Wait>
             )}
-        </AppLayout>
+        </DatastoreLayout>
     );
 };
 

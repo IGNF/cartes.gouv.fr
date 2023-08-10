@@ -11,10 +11,9 @@ import { createPortal } from "react-dom";
 import { symToStr } from "tsafe/symToStr";
 
 import api from "../../../api";
-import AppLayout from "../../../components/Layout/AppLayout";
+import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
 import LoadingText from "../../../components/Utils/LoadingText";
 import Wait from "../../../components/Utils/Wait";
-import { dashboardProNavItems } from "../../../config/dashboardProNavItems";
 import RCKeys from "../../../modules/RCKeys";
 import { type CartesApiException } from "../../../modules/jsonFetch";
 import { routes, useRoute } from "../../../router/router";
@@ -34,7 +33,6 @@ type DatasheetViewProps = {
     datasheetName: string;
 };
 const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) => {
-    const navItems = dashboardProNavItems;
     const route = useRoute();
 
     const abortController = new AbortController();
@@ -60,7 +58,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
         api.datasheet
             .remove(datastoreId, datasheetName)
             .then(() => {
-                routes.datasheet_list().push();
+                routes.datasheet_list({ datastoreId }).push();
             })
             .catch((error) => {
                 console.error(error);
@@ -71,7 +69,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
     };
 
     return (
-        <AppLayout navItems={navItems}>
+        <DatastoreLayout datastoreId={datastoreId}>
             {datasheetQuery.isLoading ? (
                 <LoadingText />
             ) : datasheetQuery.error ? (
@@ -79,7 +77,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                     severity="error"
                     closable={false}
                     title={datasheetQuery.error.message}
-                    description={<Button linkProps={routes.datasheet_list().link}>Retour à mes données</Button>}
+                    description={<Button linkProps={routes.datasheet_list({ datastoreId }).link}>Retour à mes données</Button>}
                 />
             ) : (
                 <>
@@ -87,7 +85,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                         <Button
                             iconId="fr-icon-arrow-left-s-line"
                             priority="tertiary no outline"
-                            linkProps={routes.datasheet_list().link}
+                            linkProps={routes.datasheet_list({ datastoreId }).link}
                             title="Retour à la liste de mes données"
                         />
                         {datasheetName}
@@ -200,7 +198,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                     document.body
                 )}
             </>
-        </AppLayout>
+        </DatastoreLayout>
     );
 };
 
