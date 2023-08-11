@@ -3,6 +3,8 @@
         "date": "2023-06-30",
         "title": "Premières versions adaptatives des API JavaScript Geoportail",
         "thumbnail_url": "build/img/actualites/1.png",
+        "thumbnail_alt": "Plan IGN centré sur Saint-Jean-de-Luz",
+        "thumbnail_caption": "Source : IGN",
         "tags": [
             "geoportail",
             "api"
@@ -14,6 +16,8 @@
         "date": "2023-07-21T12:09:09.000Z",
         "title": "Avancement du programme LiDAR HD : publication des premières données classées",
         "thumbnail_url": "build/img/actualites/2.png",
+        "thumbnail_alt": "Exemple de rendu de données LiDAR",
+        "thumbnail_caption": "Source : IGN",
         "tags": [
             "LidarHD",
             "3D"
@@ -25,6 +29,8 @@
         "date": "2023-07-21T12:09:09.000Z",
         "title": "Quand l’IA se met au service des enjeux environnementaux : aidez-nous à relever le défi !",
         "thumbnail_url": "build/img/actualites/3.png",
+        "thumbnail_alt": "FLAIR #2 Challenge AI | May 25th - September 25th, 2023",
+        "thumbnail_caption": "Source : IGN",
         "tags": [
             "IA",
             "environnement",

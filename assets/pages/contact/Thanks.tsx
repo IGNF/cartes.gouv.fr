@@ -18,8 +18,6 @@ const Thanks = () => {
         <AppLayout navItems={defaultNavItems}>
             <Alert
                 title={Translator.trans("contact.thanks.title")}
-                closable
-                // TODO : à corriger, c'est à cause de ça qu'on a l'erreur "<p> dans un <p>"
                 description={
                     <>
                         <p>{Translator.trans("contact.thanks.description")}</p>

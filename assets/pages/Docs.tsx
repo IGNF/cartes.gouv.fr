@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 
 import AppLayout from "../components/Layout/AppLayout";
 import BtnBackToHome from "../components/Utils/BtnBackToHome";

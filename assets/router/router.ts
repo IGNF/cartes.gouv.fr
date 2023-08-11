@@ -21,9 +21,7 @@ const routeDefs = {
     sitemap: defineRoute(`${appRoot}/plan-du-site`),
     accessibility: defineRoute(`${appRoot}/accessibilite`),
     legal_notice: defineRoute(`${appRoot}/mentions-legales`),
-    cgu: defineRoute(`${appRoot}/conditions-generales-d-utilisation`),
     personal_data: defineRoute(`${appRoot}/donnees-personnelles`),
-    cookies: defineRoute(`${appRoot}/gestion-des-cookies`),
 
     // routes protégées
     // utilisateur
@@ -103,5 +101,4 @@ export const publicRoutes = [
     "legal_notice",
     "cgu",
     "personal_data",
-    "cookies",
 ];

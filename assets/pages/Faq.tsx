@@ -1,6 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 
 import { Accordion } from "@codegouvfr/react-dsfr/Accordion";
 

@@ -1,6 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 
 import { routes } from "../../router/router";
 
@@ -20,7 +20,7 @@ const LegalNotice = () => {
                 <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
                     <h1>Mentions légales</h1>
 
-                    <h2>Editeur</h2>
+                    <h2>Éditeur</h2>
 
                     <p>
                         Le site {siteName} est édité par l’Institut national de l’information géographique et forestière (IGN), 73 avenue de Paris, 94165

@@ -1,5 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 
 import AppLayout from "../../components/Layout/AppLayout";
 import { defaultNavItems } from "../../config/navItems";
@@ -17,7 +17,7 @@ const SiteMap = () => {
 
             <section className={fr.cx("fr-py-6v")}>
                 <div className={fr.cx("fr-grid-row")}>
-                    <div className={fr.cx("fr-col-12 fr-col-md-8")}>
+                    <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
                         <ul>
                             <li>
                                 <a href={routes.home().href}>Accueil</a>
