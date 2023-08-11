@@ -78,7 +78,7 @@ const VectorDbList: FC<VectorDbListProps> = ({ datastoreId, vectorDbList }) => {
         queryKey: RCKeys.datastore_endpoints(datastoreId),
         queryFn: () => api.datastore.getEndpoints(datastoreId, {}, { signal: abortController?.signal }),
         retry: false,
-        staleTime: Infinity,
+        staleTime: 3600000,
     });
 
     const wfsEndpoints = Array.isArray(endpointsQuery?.data) ? endpointsQuery?.data?.filter((endpoint) => endpoint.endpoint.type.toUpperCase() === "WFS") : [];
