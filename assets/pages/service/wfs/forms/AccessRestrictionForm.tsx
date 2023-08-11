@@ -42,7 +42,7 @@ const AccessRestrictionForm: FC<AccessRestrictionFormProps> = ({ datastoreId, vi
         queryKey: RCKeys.datastore_endpoints(datastoreId),
         queryFn: () => api.datastore.getEndpoints(datastoreId, {}, { signal: abortController?.signal }),
         retry: false,
-        staleTime: Infinity,
+        staleTime: 3600000,
     });
 
     const wfsPublicEndpoints = Array.isArray(endpointsQuery?.data)

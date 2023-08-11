@@ -1,6 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
-import { useQueries, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useEffect } from "react";
 
 import api from "../../../api";
@@ -20,19 +20,17 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
     const abortController = new AbortController();
     const queryClient = useQueryClient();
 
-    const [datastoreQuery, datasheetListQuery] = useQueries({
-        queries: [
-            {
-                queryKey: RCKeys.datastore(datastoreId),
-                queryFn: () => api.datastore.get(datastoreId, { signal: abortController?.signal }),
-                staleTime: 60000,
-            },
-            {
-                queryKey: RCKeys.datastore_datasheet_list(datastoreId),
-                queryFn: () => api.datasheet.getList(datastoreId, { signal: abortController?.signal }),
-                refetchInterval: 10000,
-            },
-        ],
+    const datastoreQuery = useQuery({
+        queryKey: RCKeys.datastore(datastoreId),
+        queryFn: () => api.datastore.get(datastoreId, { signal: abortController?.signal }),
+        staleTime: 120000,
+    });
+
+    const datasheetListQuery = useQuery({
+        queryKey: RCKeys.datastore_datasheet_list(datastoreId),
+        queryFn: () => api.datasheet.getList(datastoreId, { signal: abortController?.signal }),
+        staleTime: 30000,
+        refetchInterval: 30000,
     });
 
     useEffect(() => {
