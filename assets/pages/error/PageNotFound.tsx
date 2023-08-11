@@ -53,12 +53,15 @@ const PageNotFound: FC = () => {
                         height="200"
                         viewBox="0 0 160 200"
                     >
-                        <use className="fr-artwork-motif" href={`${appRoot}/dsfr/artwork/background/ovoid.svg#artwork-motif`} />
-                        <use className="fr-artwork-background" href={`${appRoot}/dsfr/artwork/background/ovoid.svg#artwork-background`} />
+                        <use className={fr.cx("fr-artwork-motif")} href={`${appRoot}/dsfr/artwork/background/ovoid.svg#artwork-motif`} />
+                        <use className={fr.cx("fr-artwork-background")} href={`${appRoot}/dsfr/artwork/background/ovoid.svg#artwork-background`} />
                         <g transform="translate(40, 60)">
-                            <use className="fr-artwork-decorative" href={`${appRoot}/dsfr/artwork/pictograms/system/technical-error.svg#artwork-decorative`} />
-                            <use className="fr-artwork-minor" href={`${appRoot}/dsfr/artwork/pictograms/system/technical-error.svg#artwork-minor`} />
-                            <use className="fr-artwork-major" href={`${appRoot}/dsfr/artwork/pictograms/system/technical-error.svg#artwork-major`} />
+                            <use
+                                className={fr.cx("fr-artwork-decorative")}
+                                href={`${appRoot}/dsfr/artwork/pictograms/system/technical-error.svg#artwork-decorative`}
+                            />
+                            <use className={fr.cx("fr-artwork-minor")} href={`${appRoot}/dsfr/artwork/pictograms/system/technical-error.svg#artwork-minor`} />
+                            <use className={fr.cx("fr-artwork-major")} href={`${appRoot}/dsfr/artwork/pictograms/system/technical-error.svg#artwork-major`} />
                         </g>
                     </svg>
                 </div>

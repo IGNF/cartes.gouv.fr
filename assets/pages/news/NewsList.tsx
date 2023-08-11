@@ -32,7 +32,7 @@ const NewsListItem: FC<NewsListItemProps> = ({ slug, newsArticle }) => {
                 }
                 detail={newsArticle?.date && functions.date.format(newsArticle?.date)}
                 enlargeLink
-                imageAlt="illustration de l'article"
+                imageAlt={newsArticle?.thumbnail_alt}
                 imageUrl={`${appRoot}/${newsArticle.thumbnail_url}`}
                 linkProps={routes.news_article({ slug }).link}
                 // title devrait être de niveau h2 ici, mais le composant force h3

@@ -32,19 +32,19 @@ const Home = () => {
                                 </p>
 
                                 <p className={fr.cx("fr-mb-5w", "fr-text--lg", "fr-pr-10v")}>
-                                    <span className="fr-icon-check-line" aria-hidden="true" /> Un accès <strong>unique</strong> et <strong>partagé</strong> aux
-                                    données géographiques <strong>ouvertes</strong>
+                                    <span className={fr.cx("fr-icon-check-line")} aria-hidden="true" /> Un accès <strong>unique</strong> et{" "}
+                                    <strong>partagé</strong> aux données géographiques <strong>ouvertes</strong>
                                 </p>
                                 <p className={fr.cx("fr-mb-5w", "fr-text--lg", "fr-pr-10v")}>
-                                    <span className="fr-icon-check-line" aria-hidden="true" /> Des outils plus <strong>simple</strong> pour déposer et diffuser
-                                    vos données en toute <strong>autonomie</strong>
+                                    <span className={fr.cx("fr-icon-check-line")} aria-hidden="true" /> Des outils plus <strong>simple</strong> pour déposer et
+                                    diffuser vos données en toute <strong>autonomie</strong>
                                 </p>
                                 <p className={fr.cx("fr-mb-5w", "fr-text--lg", "fr-pr-10v")}>
-                                    <span className="fr-icon-check-line" aria-hidden="true" /> Une nouvelle infrastructure plus <strong>performante</strong> qui
-                                    offre des services <strong>utiles pour tous</strong> les usagers
+                                    <span className={fr.cx("fr-icon-check-line")} aria-hidden="true" /> Une nouvelle infrastructure plus{" "}
+                                    <strong>performante</strong> qui offre des services <strong>utiles pour tous</strong> les usagers
                                 </p>
                                 <p className={fr.cx("fr-mb-5w", "fr-text--lg", "fr-pr-10v")}>
-                                    <span className="fr-icon-check-line" aria-hidden="true" /> La possibilité d&apos;enrichir et améliorer{" "}
+                                    <span className={fr.cx("fr-icon-check-line")} aria-hidden="true" /> La possibilité d&apos;enrichir et améliorer{" "}
                                     <strong>collectivement</strong> les données et les services
                                 </p>
                             </div>
@@ -86,6 +86,7 @@ const Home = () => {
                                         <img
                                             src={`${appRoot}/dsfr/artwork/pictograms/digital/internet.svg`}
                                             className={fr.cx("fin-service-picto", "svg-fin-fc-finger")}
+                                            alt=""
                                             role="presentation"
                                         />
                                         <h3 className={fr.cx("fr-text--lead")}>Consommez des services</h3>
@@ -99,6 +100,7 @@ const Home = () => {
                                         <img
                                             src={`${appRoot}/dsfr/artwork/pictograms/environment/human-cooperation.svg`}
                                             className={fr.cx("fin-service-pict", "svg-fin-majorite")}
+                                            alt=""
                                             role="presentation"
                                         />
                                         <h3 className={fr.cx("fr-text--lead")}>Stocker et partager des géodonnées</h3>
@@ -109,6 +111,7 @@ const Home = () => {
                                         <img
                                             src={`${appRoot}/dsfr/artwork/pictograms/digital/data-visualization.svg`}
                                             className={fr.cx("fin-service-picto", "svg-fin-procuration")}
+                                            alt=""
                                             role="presentation"
                                         />
                                         <h3 className={fr.cx("fr-text--lead")}>Effectuer des traitements</h3>
@@ -136,6 +139,7 @@ const Home = () => {
                                         <img
                                             src={`${appRoot}/dsfr/artwork/pictograms/map/map.svg`}
                                             className={fr.cx("fin-service-picto", "svg-fin-service-picto")}
+                                            alt=""
                                             role="presentation"
                                         />
                                         <h3 className={fr.cx("fr-text--lead")}>Lorem ipsum dolor</h3>
@@ -152,6 +156,7 @@ const Home = () => {
                                         <img
                                             src={`${appRoot}/dsfr/artwork/pictograms/digital/data-visualization.svg`}
                                             className={fr.cx("fin-service-picto", "svg-fin-procuration")}
+                                            alt=""
                                             role="presentation"
                                         />
                                         <h3 className={fr.cx("fr-text--lead")}>Consectetur adipiscing elit</h3>
@@ -180,6 +185,7 @@ const Home = () => {
                                         <img
                                             src={`${appRoot}/dsfr/artwork/pictograms/map/map.svg`}
                                             className={fr.cx("fin-service-picto", "svg-fin-service-picto")}
+                                            alt=""
                                             role="presentation"
                                         />
                                         <h3 className={fr.cx("fr-text--lead")}>Sit amet</h3>
@@ -190,6 +196,7 @@ const Home = () => {
                                         <img
                                             src={`${appRoot}/dsfr/artwork/pictograms/digital/internet.svg`}
                                             className={fr.cx("fin-service-picto", "svg-fin-fc-finger")}
+                                            alt=""
                                             role="presentation"
                                         />
                                         <h3 className={fr.cx("fr-text--lead")}>Dolor sit amet consectetur</h3>
@@ -202,6 +209,7 @@ const Home = () => {
                                         <img
                                             src={`${appRoot}/dsfr/artwork/pictograms/environment/human-cooperation.svg`}
                                             className={fr.cx("fin-service-picto", "svg-fin-majorite")}
+                                            alt=""
                                             role="presentation"
                                         />
                                         <h3 className={fr.cx("fr-text--lead")}>Adipiscing elits</h3>

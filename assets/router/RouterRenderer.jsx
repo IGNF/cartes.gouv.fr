@@ -21,7 +21,6 @@ const Sitemap = lazy(() => import("../pages/footer/Sitemap"));
 const Accessibility = lazy(() => import("../pages/footer/Accessibility"));
 const LegalNotice = lazy(() => import("../pages/footer/LegalNotice"));
 const PersonalData = lazy(() => import("../pages/footer/PersonalData"));
-const Cookies = lazy(() => import("../pages/footer/Cookies"));
 
 const Me = lazy(() => import("../pages/users/Me"));
 
@@ -93,12 +92,6 @@ function RouterRenderer() {
             break;
         case "personal_data":
             content = <PersonalData />;
-            break;
-        case "cookies":
-            content = <Cookies />;
-            break;
-        case "cgu":
-            content = <h1>Route non implementée</h1>;
             break;
         case "my_account":
             content = <Me />;

@@ -1,3 +1,4 @@
+import { fr } from "@codegouvfr/react-dsfr";
 import { FC } from "react";
 import { Autocomplete } from "@mui/material";
 import { TextField } from "@mui/material";
@@ -16,9 +17,9 @@ const KeywordsSelect: FC<KeywordsComponentProps> = (props) => {
 
     return (
         <MuiDsfrThemeProvider>
-            <label className="fr-label">
+            <label className={fr.cx("fr-label")}>
                 {label}
-                <span className="fr-hint-text">{hintText}</span>
+                <span className={fr.cx("fr-hint-text")}>{hintText}</span>
             </label>
             <Autocomplete
                 autoComplete={true}

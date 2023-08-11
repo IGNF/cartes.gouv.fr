@@ -1,4 +1,6 @@
-import React, { useEffect } from "react";
+import { fr } from "@codegouvfr/react-dsfr";
+
+import { useEffect } from "react";
 
 import AppLayout from "../../components/Layout/AppLayout";
 import { defaultNavItems } from "../../config/navItems";
@@ -14,8 +16,8 @@ const Accessibility = () => {
 
     return (
         <AppLayout navItems={defaultNavItems}>
-            <div className="fr-grid-row">
-                <div className="fr-col-12 fr-col-md-8 fr-py-12v">
+            <div className={fr.cx("fr-grid-row")}>
+                <div className={fr.cx("fr-col-12", "fr-col-md-8", "fr-py-12v")}>
                     <h1>Accessibilité&nbsp;: partiellement conforme</h1>
 
                     <h2>État de conformité</h2>
@@ -71,6 +73,7 @@ const Accessibility = () => {
                         <li>HTML5</li>
                         <li>CSS</li>
                         <li>Javascript</li>
+                        <li>React</li>
                     </ul>
 
                     <h3>Environnement de test</h3>

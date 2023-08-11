@@ -56,7 +56,18 @@ const NewsArticle: FC<NewsArticleProps> = ({ slug }) => {
                     </div>
 
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
-                        <img src={`${appRoot}/${newsArticle.thumbnail_url}`} alt="illustration de l'article" />
+                        <figure className={fr.cx("fr-content-media")} role="group" aria-label={newsArticle?.thumbnail_caption}>
+                            <div className={fr.cx("fr-content-media__img")}>
+                                <img
+                                    className={fr.cx("fr-responsive-img")}
+                                    src={`${appRoot}/${newsArticle.thumbnail_url}`}
+                                    alt={newsArticle?.thumbnail_alt}
+                                    role="presentation"
+                                    data-fr-js-ratio="true"
+                                />
+                            </div>
+                            <figcaption className={fr.cx("fr-content-media__caption")}>{newsArticle?.thumbnail_caption}</figcaption>
+                        </figure>
                     </div>
 
                     <div className={fr.cx("fr-grid-row", "fr-mt-2w")}>

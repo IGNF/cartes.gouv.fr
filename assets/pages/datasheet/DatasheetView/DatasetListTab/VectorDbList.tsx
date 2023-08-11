@@ -111,7 +111,7 @@ const VectorDbList: FC<VectorDbListProps> = ({ datastoreId, vectorDbList }) => {
         <>
             <div className={fr.cx("fr-grid-row")}>
                 <h5>
-                    <i className="fr-icon-database-fill" />
+                    <i className={fr.cx("fr-icon-database-fill")} />
                     &nbsp;Bases de données vecteur ({vectorDbList?.length})
                 </h5>
             </div>

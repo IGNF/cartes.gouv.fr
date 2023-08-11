@@ -1,6 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 
 import AppLayout from "../../components/Layout/AppLayout";
 import { defaultNavItems } from "../../config/navItems";

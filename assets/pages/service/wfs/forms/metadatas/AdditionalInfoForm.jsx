@@ -81,9 +81,9 @@ const AdditionalInfoForm = ({ storedData, fileType, visibility, onPrevious, onVa
                 }}
             />
             <MuiDsfrThemeProvider>
-                <label className="fr-label">
+                <label className={fr.cx("fr-label")}>
                     {Translator.trans("service.wfs.new.additional_information_form.language")}
-                    <span className="fr-hint-text">{Translator.trans("service.wfs.new.additional_information_form.hint_language")}</span>
+                    <span className={fr.cx("fr-hint-text")}>{Translator.trans("service.wfs.new.additional_information_form.hint_language")}</span>
                 </label>
                 <Autocomplete
                     autoComplete={true}
