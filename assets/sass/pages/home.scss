@@ -90,42 +90,6 @@
     padding: 0 6rem 0 2.5rem;
     position: relative;
 }
-.fr-header__service-title--italic {
-    font-style: italic;
-    font-weight: normal;
-}
-.fr-une {
-    background: url(../../img/une.jpg) center center;
-    background-size: cover;
-    color: #fff;
-    text-align: center;
-}
-.fr-une h1,
-.fr-une h2,
-.fr-une h3,
-.fr-une h4 {
-    color: #fff !important;
-}
-.fr-une .fr-btn--secondary,
-.fr-une .fr-btn--tertiary-no-outline {
-    background-color: #fff;
-    box-shadow: none;
-}
-.fr-une .fr-une-title {
-    font-weight: 700;
-    font-size: 40px;
-    line-height: 48px;
-}
-.fr-une .fr-une-subtitle {
-    font-weight: 700;
-    font-size: 48px;
-    line-height: 56px;
-}
-.fr-une .fr-une-text {
-    font-weight: 700;
-    font-size: 48px;
-    line-height: 56px;
-}
 .c-section--blue {
     background-color: var(--background-alt-blue-france);
 }
@@ -134,9 +98,6 @@
 }
 .c-section--border-top {
     box-shadow: inset 0 1px 0 0 var(--border-default-grey);
-}
-.aligncenter {
-    align-self: center;
 }
 .d-none {
     display: none !important;
