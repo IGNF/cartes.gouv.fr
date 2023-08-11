@@ -28,7 +28,7 @@ const AppFooter = () => {
             "
             bottomItems={[
                 {
-                    text: "données personnelles",
+                    text: "Données personnelles",
                     linkProps: routes.personal_data().link,
                 },
                 // Choix du thème clair/sombre

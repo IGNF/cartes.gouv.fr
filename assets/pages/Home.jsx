@@ -11,7 +11,7 @@ import { defaultNavItems } from "../config/navItems";
 // import { UserContext } from "../contexts/UserContext";
 import { appRoot /*, routes*/ } from "../router/router";
 
-import hp from "../img/hp.jpg";
+import hp from "../img/photos/rustrel.jpg";
 import "../sass/pages/home.scss";
 
 const Home = () => {
@@ -48,8 +48,19 @@ const Home = () => {
                                     <strong>collectivement</strong> les données et les services
                                 </p>
                             </div>
-                            <div className={fr.cx("fr-col-12", "fr-col-lg-6", "fr-pb-4w", "fr-pl-md-8w", "fr-pr-md-2w", "fr-pt-md-6w", "aligncenter")}>
-                                <img src={hp} className={fr.cx("fr-responsive-img")} alt="" role="presentation" data-fr-js-ratio="true" />
+                            <div className={fr.cx("fr-col-12", "fr-col-lg-6", "fr-pb-4w", "fr-pl-md-8w", "fr-pr-md-2w", "fr-pt-md-6w")}>
+                                <figure className={fr.cx("fr-content-media")} role="group" aria-label="Rustrel (Vaucluse) - IGN">
+                                    <div className={fr.cx("fr-content-media__img")}>
+                                        <img
+                                            className={fr.cx("fr-responsive-img", "fr-ratio-1x1")}
+                                            src={hp}
+                                            alt=""
+                                            role="presentation"
+                                            data-fr-js-ratio="true"
+                                        />
+                                    </div>
+                                    <figcaption className={fr.cx("fr-content-media__caption")}>Rustrel (Vaucluse) - IGN</figcaption>
+                                </figure>
                             </div>
                         </div>
                     </div>
