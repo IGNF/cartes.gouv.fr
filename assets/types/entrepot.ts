@@ -236,6 +236,7 @@ export type ConfigurationDownloadDetailsContent = ConfigurationDetailsContent & 
     /** @uniqueItems true */
     used_data: ConfigurationUsedDataDownloadDetailsContent[];
     abstract: string;
+    bbox?: BoundingBox;
 };
 
 export type ConfigurationGetFeatureInfoIsStoredDataWmtsTmsDetailsContent = {

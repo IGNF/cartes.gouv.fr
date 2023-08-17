@@ -5,7 +5,6 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { useColors } from "@codegouvfr/react-dsfr/useColors";
 import { useQuery } from "@tanstack/react-query";
 import { CSSProperties, FC } from "react";
-
 import api from "../../../api";
 import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
 import LoadingText from "../../../components/Utils/LoadingText";
@@ -13,11 +12,13 @@ import RCKeys from "../../../modules/RCKeys";
 import { CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
 import { type Service } from "../../../types/app";
+import RMap from "../../../components/Utils/RMap";
 
 type ServiceViewProps = {
     datastoreId: string;
     offeringId: string;
 };
+
 const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId }) => {
     const theme = useColors();
     const styleBoxCopyData: CSSProperties = {
@@ -59,11 +60,9 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId }) => {
 
                     <div className={fr.cx("fr-grid-row", "fr-mb-4w")}>
                         <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
-                            <div>
-                                <p>container de la carte</p>
-                            </div>
+                            <RMap service={serviceQuery.data} />
                         </div>
-                        <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
+                        <div className={fr.cx("fr-col-12", "fr-col-md-4", "fr-p-1w")}>
                             <div className={fr.cx("fr-grid-row")}>
                                 <strong className={fr.cx("fr-text--xl")}>Diffuser le service</strong>
                             </div>
