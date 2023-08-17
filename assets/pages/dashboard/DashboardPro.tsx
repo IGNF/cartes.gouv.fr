@@ -27,7 +27,7 @@ const DashboardPro = () => {
                         <div className={fr.cx("fr-col", "fr-col-sm-6", "fr-col-md-4", "fr-col-lg-2")}>
                             <Tile linkProps={routes.datasheet_list({ datastoreId: datastoreId }).link} grey={true} title="Données" desc="25" />
                         </div>
-                        <div className={fr.cx("fr-col", "fr-col-sm-6", "fr-col-md-4", "fr-col-lg-2")}>
+                        {/* <div className={fr.cx("fr-col", "fr-col-sm-6", "fr-col-md-4", "fr-col-lg-2")}>
                             <Tile
                                 linkProps={{
                                     href: "#",
@@ -66,7 +66,7 @@ const DashboardPro = () => {
                                 title="Portails"
                                 desc="13"
                             />
-                        </div>
+                        </div> */}
                     </div>
                 </>
             )}

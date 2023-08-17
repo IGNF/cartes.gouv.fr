@@ -136,7 +136,6 @@
     border: none;
     background: none;
     color: var(--text-title-grey);
-    text-decoration: underline;
 }
 .fr-tabs.fr-tabs--full .fr-tabs__tab:not([aria-selected="true"]) {
     cursor: pointer;
@@ -144,6 +143,23 @@
     background: none;
     color: var(--text-mention-grey);
     font-weight: normal;
+    // Soulignement façon liens
+    span {
+        --underline-img: linear-gradient(0deg, currentColor, currentColor);
+        background-image: var(--underline-img), var(--underline-img);
+        background-position:
+            var(--underline-x) 100%,
+            var(--underline-x) calc(100% - var(--underline-thickness));
+        background-repeat: no-repeat, no-repeat;
+        transition: background-size 0s;
+        background-size:
+            var(--underline-hover-width) calc(var(--underline-thickness) * 2),
+            var(--underline-idle-width) var(--underline-thickness);
+    }
+    &:hover span,
+    &:active span {
+        --underline-hover-width: var(--underline-max-width);
+    }
 }
 .fr-tabs.fr-tabs--full button {
     font-size: 14px;

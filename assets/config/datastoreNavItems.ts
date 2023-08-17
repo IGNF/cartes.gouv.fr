@@ -22,34 +22,34 @@ export const datastoreNavItems = (datastoreId: string): MainNavigationProps.Item
         ],
         text: "Données",
     },
-    {
-        text: "Visualisation",
-        linkProps: {
-            href: "#",
-        },
-    },
-    {
-        text: "Outils & Traitements",
-        linkProps: {
-            href: "#",
-        },
-    },
-    {
-        text: "Collaboration",
-        linkProps: {
-            href: "#",
-        },
-    },
-    {
-        text: "Portails",
-        linkProps: {
-            href: "#",
-        },
-    },
-    {
-        text: "Utilisateurs & Groupes",
-        linkProps: {
-            href: "#",
-        },
-    },
+    // {
+    //     text: "Visualisation",
+    //     linkProps: {
+    //         href: "#",
+    //     },
+    // },
+    // {
+    //     text: "Outils & Traitements",
+    //     linkProps: {
+    //         href: "#",
+    //     },
+    // },
+    // {
+    //     text: "Collaboration",
+    //     linkProps: {
+    //         href: "#",
+    //     },
+    // },
+    // {
+    //     text: "Portails",
+    //     linkProps: {
+    //         href: "#",
+    //     },
+    // },
+    // {
+    //     text: "Utilisateurs & Groupes",
+    //     linkProps: {
+    //         href: "#",
+    //     },
+    // },
 ];
