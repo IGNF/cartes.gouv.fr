@@ -2,9 +2,9 @@
     "compilerOptions": {
         "target": "ESNext",
         "esModuleInterop": true,
-        "moduleResolution": "NodeNext",
-        "strict": true,
         "module": "ESNext",
+        "moduleResolution": "Bundler",
+        "strict": true,
         "jsx": "react-jsx",
         "skipLibCheck": true,
         "noImplicitAny": false, // mettre à true après avoir passé tous les fichiers en typescript
