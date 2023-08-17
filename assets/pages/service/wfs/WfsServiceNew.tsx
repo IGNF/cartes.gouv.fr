@@ -20,7 +20,7 @@ import TableForm from "./forms/tables/TableForm";
 import "../../../sass/components/spinner.scss";
 
 /**
- * Recupere le type de fichier (unknown, csv ou geopackage)
+ * Récupère le type de fichier (unknown, csv ou geopackage)
  * @param {Object} fileTree
  * @returns
  */
@@ -40,7 +40,7 @@ const getUploadFileType = (fileTree) => {
 /**
  *
  * @param datastoreId identifiant du datastore
- * @param vectorDbId identifiant de la donnee stockee VECTOR-DB
+ * @param vectorDbId identifiant de la donnee stockée VECTOR-DB
  */
 type WfsServiceNewProps = {
     datastoreId: string;
