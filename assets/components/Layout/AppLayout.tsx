@@ -4,6 +4,7 @@ import { FC, PropsWithChildren } from "react";
 import { MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation/MainNavigation";
 import AppFooter from "./AppFooter";
 import AppHeader from "./AppHeader";
+import { ConsentBannerAndConsentManagement } from "../../config/consentManagement";
 
 type AppLayoutProps = {
     navItems?: MainNavigationProps.Item[];
@@ -11,6 +12,7 @@ type AppLayoutProps = {
 const AppLayout: FC<PropsWithChildren<AppLayoutProps>> = ({ children, navItems = [] }) => {
     return (
         <>
+            <ConsentBannerAndConsentManagement />
             <AppHeader navItems={navItems} />
             <main role="main" className={fr.cx("fr-py-2w")}>
                 <div className={fr.cx("fr-container")}>{children}</div>
