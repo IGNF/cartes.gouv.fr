@@ -24,11 +24,12 @@ type RMapProps = {
 
 const backgroundIdentifier = "GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2";
 
+// LES CONTROLES DE L'API GEOPORTAIL
+let layerSwitcher, getFeatureInfo;
+
 const RMap: FC<RMapProps> = ({ service, projection = "EPSG:3857", center = [2.35, 48.8, 5], zoom = 10 }) => {
     const mapElementRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<Map>();
-    const switcherRef = useRef<typeof LayerSwitcher>();
-    const getFeatureInfoRef = useRef<typeof GetFeatureInfo>();
 
     const [bgLayerLoaded, setBgLayerLoaded] = useState<boolean>(false);
 
@@ -44,7 +45,7 @@ const RMap: FC<RMapProps> = ({ service, projection = "EPSG:3857", center = [2.35
     const addLayer = (layer) => {
         if (mapRef.current) {
             mapRef.current.addLayer(layer);
-            switcherRef.current?.addLayer(layer, {
+            layerSwitcher.addLayer(layer, {
                 title: layer.get("title"),
                 description: layer.get("abstract"),
             });
@@ -58,21 +59,11 @@ const RMap: FC<RMapProps> = ({ service, projection = "EPSG:3857", center = [2.35
 
         // Creation de la carte
         if (!mapRef.current) {
-            const search = new SearchEngine({
-                //barre de recherche
-                collapsed: false,
-                displayAdvancedSearch: false,
-                apiKey: "essentiels",
-                zoomTo: "auto",
-            });
-
             // Creation du layerSwitcher
-            switcherRef.current = new LayerSwitcher();
-
-            // GetFeatureInfo
-            getFeatureInfoRef.current = new GetFeatureInfo({
+            layerSwitcher = new LayerSwitcher();
+            getFeatureInfo = new GetFeatureInfo({
                 options: {
-                    auto: true,
+                    // auto: true,
                     active: true,
                     hidden: true,
                 },
@@ -85,7 +76,16 @@ const RMap: FC<RMapProps> = ({ service, projection = "EPSG:3857", center = [2.35
                     zoom: zoom,
                 }),
                 interactions: defaultInteractions(),
-                controls: [switcherRef.current, search, getFeatureInfoRef.current],
+                controls: [
+                    layerSwitcher,
+                    new SearchEngine({
+                        collapsed: false,
+                        displayAdvancedSearch: false,
+                        apiKey: "essentiels",
+                        zoomTo: "auto",
+                    }),
+                    getFeatureInfo,
+                ],
             });
 
             // Ajout de Plan IGN V2
@@ -127,7 +127,7 @@ const RMap: FC<RMapProps> = ({ service, projection = "EPSG:3857", center = [2.35
                         addLayer(layer);
                         gfiLayers.push({ obj: layer });
                     });
-                    getFeatureInfoRef.current.setLayers(gfiLayers);
+                    getFeatureInfo.setLayers(gfiLayers);
 
                     if (extent) {
                         mapRef.current?.getView().fit(extent);
