@@ -1,12 +1,12 @@
 import WMTS, { optionsFromCapabilities } from "ol/source/WMTS";
 import TileLayer from "ol/layer/Tile";
-import WMTSCapabilities from "ol/format/WMTSCapabilities.js";
+import WMTSCapabilities from "ol/format/WMTSCapabilities";
 
-export default class GeoservicesWMST {
+export default class GeoservicesWMTS {
     static _geoserviceUrl = "https://wxs.ign.fr/__GPPKEY__/geoportail/wmts?SERVICE=WMTS&VERSION=1.0.0&REQUEST=GetCapabilities";
 
     static _capabilities = {};
-    static async GetLayer(key: string, identifier: string): Promise<TileLayer<WMTS>> {
+    static async getLayer(key: string, identifier: string): Promise<TileLayer<WMTS>> {
         if (!(key in this._capabilities)) {
             const url = this._geoserviceUrl.replace("__GPPKEY__", key);
             const response = await fetch(url);
