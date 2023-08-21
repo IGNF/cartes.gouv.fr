@@ -5,14 +5,15 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { useColors } from "@codegouvfr/react-dsfr/useColors";
 import { useQuery } from "@tanstack/react-query";
 import { CSSProperties, FC } from "react";
+
 import api from "../../../api";
 import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
 import LoadingText from "../../../components/Utils/LoadingText";
+import RMap from "../../../components/Utils/RMap";
 import RCKeys from "../../../modules/RCKeys";
-import { CartesApiException } from "../../../modules/jsonFetch";
+import { type CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
 import { type Service } from "../../../types/app";
-import RMap from "../../../components/Utils/RMap";
 
 type ServiceViewProps = {
     datastoreId: string;
@@ -62,7 +63,7 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId }) => {
                         <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
                             <RMap service={serviceQuery.data} />
                         </div>
-                        <div className={fr.cx("fr-col-12", "fr-col-md-4", "fr-p-1w")}>
+                        <div className={fr.cx("fr-col-12", "fr-col-md-4", "fr-p-1w", "fr-px-2w")}>
                             <div className={fr.cx("fr-grid-row")}>
                                 <strong className={fr.cx("fr-text--xl")}>Diffuser le service</strong>
                             </div>
@@ -70,7 +71,9 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId }) => {
                             <div className={fr.cx("fr-grid-row")}>
                                 <p>
                                     Copiez vos adresses pour les utiliser dans vos applications SIG ou web. <br />
-                                    <a href="#">En savoir plus</a>
+                                    <a href="#" target="_blank" rel="noreferrer">
+                                        En savoir plus
+                                    </a>
                                 </p>
                             </div>
 
