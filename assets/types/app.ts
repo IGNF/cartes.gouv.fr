@@ -13,6 +13,12 @@ import {
     UploadDetailResponseDto,
     UploadTreeElementResponseDto,
     UserDetailsResponseDto,
+    ConfigurationAltimetryDetailsContent,
+    ConfigurationItineraryIsocurveDetailsContent,
+    ConfigurationWfsDetailsContent,
+    ConfigurationWmsRasterDetailsContent,
+    ConfigurationWmsVectorDetailsContent,
+    ConfigurationWmtsTmsDetailsContent,
 } from "./entrepot";
 
 /** datastore */
@@ -74,6 +80,14 @@ export type Offering = OfferingDetailResponseDto;
 export type Service = Offering & {
     configuration: Configuration;
 };
+
+export type TypeInfosWithBbox =
+    | ConfigurationAltimetryDetailsContent
+    | ConfigurationItineraryIsocurveDetailsContent
+    | ConfigurationWfsDetailsContent
+    | ConfigurationWmsRasterDetailsContent
+    | ConfigurationWmsVectorDetailsContent
+    | ConfigurationWmtsTmsDetailsContent;
 
 /** endpoints */
 export type DatastoreEndpoint = DatastoreEndpointResponseDto;
