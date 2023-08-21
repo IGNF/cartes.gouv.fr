@@ -1,16 +1,17 @@
-import { FC, useState, useEffect, useRef } from "react";
+import GetFeatureInfo from "geoportal-extensions-openlayers/src/OpenLayers/Controls/GetFeatureInfo";
+import LayerSwitcher from "geoportal-extensions-openlayers/src/OpenLayers/Controls/LayerSwitcher";
+import SearchEngine from "geoportal-extensions-openlayers/src/OpenLayers/Controls/SearchEngine";
 import Map from "ol/Map";
 import View from "ol/View";
-import { defaults as defaultInteractions } from "ol/interaction";
-import { fromLonLat } from "ol/proj";
 import { createOrUpdate } from "ol/extent";
-import { transformExtent } from "ol/proj";
-import SearchEngine from "geoportal-extensions-openlayers/src/OpenLayers/Controls/SearchEngine";
-import LayerSwitcher from "geoportal-extensions-openlayers/src/OpenLayers/Controls/LayerSwitcher";
-import GetFeatureInfo from "geoportal-extensions-openlayers/src/OpenLayers/Controls/GetFeatureInfo";
-import { type Service } from "../../types/app";
-import GeoservicesWMST from "../../modules/ol/GeoservicesWMTS";
+import { defaults as defaultInteractions } from "ol/interaction";
+import { fromLonLat, transformExtent } from "ol/proj";
+import { FC, useEffect, useRef, useState } from "react";
+
 import WFSService from "../../modules/WebServices/WFSService";
+import GeoservicesWMTS from "../../modules/ol/GeoservicesWMTS";
+import type { Service, TypeInfosWithBbox } from "../../types/app";
+
 import "geoportal-extensions-openlayers/dist/GpPluginOpenLayers.css";
 import "../../sass/components/map-view.scss";
 import "../../sass/components/ol.scss";
@@ -36,7 +37,7 @@ const RMap: FC<RMapProps> = ({ service, projection = "EPSG:3857", center = [2.35
     // Extent dans la configuration
     let extent;
 
-    const bbox = service.configuration.type_infos.bbox;
+    const bbox = (service.configuration.type_infos as TypeInfosWithBbox)?.bbox;
     if (bbox) {
         extent = createOrUpdate(bbox.west, bbox.south, bbox.east, bbox.north);
         extent = transformExtent(extent, "EPSG:4326", projection);
@@ -53,7 +54,7 @@ const RMap: FC<RMapProps> = ({ service, projection = "EPSG:3857", center = [2.35
     };
     useEffect(() => {
         const getBackgroundLayer = async () => {
-            const layer = await GeoservicesWMST.GetLayer("cartes", backgroundIdentifier);
+            const layer = await GeoservicesWMTS.getLayer("cartes", backgroundIdentifier);
             return layer;
         };
 
