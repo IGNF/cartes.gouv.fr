@@ -1,11 +1,12 @@
 import { XMLParser } from "fast-xml-parser";
-import { Service } from "../../types/app";
+import GeoJSON from "ol/format/GeoJSON";
 import { Geometry } from "ol/geom";
-import VectorSource from "ol/source/Vector";
-import VectorLayer from "ol/layer/Vector.js";
-import GeoJSON from "ol/format/GeoJSON.js";
+import VectorLayer from "ol/layer/Vector";
+import { bbox as bboxStrategy } from "ol/loadingstrategy";
 import { transformExtent } from "ol/proj";
-import { bbox as bboxStrategy } from "ol/loadingstrategy.js";
+import VectorSource from "ol/source/Vector";
+
+import { Service } from "../../types/app";
 
 type RequestInfo = {
     base_url: string;
