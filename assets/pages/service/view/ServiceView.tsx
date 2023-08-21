@@ -2,14 +2,14 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
-import { useColors } from "@codegouvfr/react-dsfr/useColors";
 import { useQuery } from "@tanstack/react-query";
-import { CSSProperties, FC } from "react";
+import { FC } from "react";
 
 import api from "../../../api";
 import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
 import LoadingText from "../../../components/Utils/LoadingText";
 import RMap from "../../../components/Utils/RMap";
+import TextCopyToClipboard from "../../../components/Utils/TextCopyToClipboard";
 import RCKeys from "../../../modules/RCKeys";
 import { type CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
@@ -21,12 +21,6 @@ type ServiceViewProps = {
 };
 
 const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId }) => {
-    const theme = useColors();
-    const styleBoxCopyData: CSSProperties = {
-        backgroundColor: theme.decisions.background.alt.blueFrance.default,
-        padding: fr.spacing("1w"),
-    };
-
     const serviceQuery = useQuery<Service, CartesApiException>({
         queryKey: RCKeys.datastore_offering(datastoreId, offeringId),
         queryFn: () => api.service.get(datastoreId, offeringId),
@@ -81,28 +75,20 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId }) => {
                             <div className={fr.cx("fr-grid-row")}>
                                 <strong>Lien public vers la carte</strong>
                             </div>
-                            <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-4w")}>
-                                <span style={styleBoxCopyData}>http://www.ign.fr/geoplateforme</span>
-                                <Button iconId="ri-file-copy-2-line" priority="tertiary no outline" title="Copier dans le presse-papier" />
-                            </div>
+                            <TextCopyToClipboard text={"http://www.ign.fr/geoplateforme"} className="fr-mb-4w" />
 
                             {/* Code HTML de l'iframe */}
                             <div className={fr.cx("fr-grid-row")}>
                                 <strong>{"Code HTML de l'iframe"}</strong>
                             </div>
-                            <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-4w")}>
-                                <span style={styleBoxCopyData}>{"<iframe width='600' height='40..."}</span>
-                                <Button iconId="ri-file-copy-2-line" priority="tertiary no outline" title="Copier dans le presse-papier" />
-                            </div>
+                            <TextCopyToClipboard text={"<iframe width='600' height='40..."} className="fr-mb-4w" />
 
                             {/* Adresse du service de données */}
                             <div className={fr.cx("fr-grid-row")}>
                                 <strong>Adresse du service de données</strong>
                             </div>
-                            <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-4w")}>
-                                <span style={styleBoxCopyData}>{"https://vt-gpf-beta.ign.fr/tms/1.0..."}</span>
-                                <Button iconId="ri-file-copy-2-line" priority="tertiary no outline" title="Copier dans le presse-papier" />
-                            </div>
+
+                            <TextCopyToClipboard text={serviceQuery.data.urls.map((url) => url.url).join(",")} className="fr-mb-4w" />
                         </div>
                     </div>
                 </>
