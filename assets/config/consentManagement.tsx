@@ -2,7 +2,7 @@ import { createConsentManagement } from "@codegouvfr/react-dsfr/consentManagemen
 import { startEulerianAnalytics } from "@codegouvfr/react-dsfr/eulerianAnalytics";
 
 const prEulerianApi = startEulerianAnalytics({
-    domain: "TODO.cartes.gouv.fr", // domaine de tracking Eulerian, à déclarer en DNS CNAME
+    domain: "acwg.cartes.gouv.fr", // domaine de tracking Eulerian
     site: {
         environment: "development", // TODO: dépendre de l'environnement
         entity: "IGN", // TODO: confirmer la valeur
