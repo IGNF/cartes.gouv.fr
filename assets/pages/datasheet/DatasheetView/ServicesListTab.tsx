@@ -38,7 +38,10 @@ const ServicesListTab: FC<ServicesListTabProps> = ({ datastoreId, datasheet }) =
                     </p>
                     <i className={fr.cx("fr-mr-2v", service.open ? "fr-icon-lock-unlock-fill" : "fr-icon-lock-fill")} />
 
-                    <Button className={fr.cx("fr-mr-2v")} linkProps={routes.datastore_service_view({ datastoreId, offeringId: service._id }).link}>
+                    <Button
+                        className={fr.cx("fr-mr-2v")}
+                        linkProps={routes.datastore_service_view({ datastoreId, offeringId: service._id, datasheetName: datasheet.name }).link}
+                    >
                         Visualiser
                     </Button>
                     <Button iconId="fr-icon-menu-2-fill" title="Autres actions" />
