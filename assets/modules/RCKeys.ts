@@ -2,7 +2,7 @@
  * Factory pour créer des query keys pour react-query
  */
 const RCKeys = {
-    datastore_list: (): string[] => ["datastore", "list"],
+    datastore_list: (): string[] => ["datastore"],
     datastore: (datastoreId: string): string[] => ["datastore", datastoreId],
     datastore_endpoints: (datastoreId: string): string[] => ["datastore", datastoreId, "endpoints"],
 
@@ -12,7 +12,7 @@ const RCKeys = {
 
     datastore_stored_data: (datastoreId: string, storedDataId: string): string[] => ["datastore", datastoreId, "stored_data", storedDataId],
 
-    datastore_datasheet_list: (datastoreId: string): string[] => ["datastore", datastoreId, "datasheet", "list"],
+    datastore_datasheet_list: (datastoreId: string): string[] => ["datastore", datastoreId, "datasheet"],
     datastore_datasheet: (datastoreId: string, dataName: string): string[] => ["datastore", datastoreId, "datasheet", dataName],
 
     datastore_offering: (datastoreId: string, offeringId: string): string[] => ["datastore", datastoreId, "offering", offeringId],

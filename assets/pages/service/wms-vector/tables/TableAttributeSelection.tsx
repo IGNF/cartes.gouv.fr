@@ -57,7 +57,7 @@ const TableAttributeSelection: FC<TableAttributeSelectionProps> = ({ visible, fo
             <h3>Choisissez les attributs des tables sélectionnées</h3>
 
             {selectedTables.map((table) => (
-                <Accordion key={table.name} label={table.name} titleAs="h4" defaultExpanded={false}>
+                <Accordion key={table.name} label={table.name} titleAs="h4" defaultExpanded={true}>
                     <Checkbox
                         options={Object.keys(table.attributes).map((attrName) => ({
                             label: attrName,

@@ -43,7 +43,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
 
     return (
         <DatastoreLayout datastoreId={datastoreId}>
-            {datastoreId === undefined ? (
+            {datastoreQuery.isLoading === undefined ? (
                 <LoadingText />
             ) : (
                 <>
