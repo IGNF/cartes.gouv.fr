@@ -36,7 +36,7 @@ const Home = () => {
                                     <strong>partagé</strong> aux données géographiques <strong>ouvertes</strong>
                                 </p>
                                 <p className={fr.cx("fr-mb-5w", "fr-text--lg", "fr-pr-10v")}>
-                                    <span className={fr.cx("fr-icon-check-line")} aria-hidden="true" /> Des outils plus <strong>simple</strong> pour déposer et
+                                    <span className={fr.cx("fr-icon-check-line")} aria-hidden="true" /> Des outils plus <strong>simples</strong> pour déposer et
                                     diffuser vos données en toute <strong>autonomie</strong>
                                 </p>
                                 <p className={fr.cx("fr-mb-5w", "fr-text--lg", "fr-pr-10v")}>
