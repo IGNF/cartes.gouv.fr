@@ -119,7 +119,7 @@ function RouterRenderer() {
             break;
 
         case "datastore_service_view":
-            content = <ServiceView datastoreId={route.params.datastoreId} offeringId={route.params.offeringId} />;
+            content = <ServiceView datastoreId={route.params.datastoreId} offeringId={route.params.offeringId} datasheetName={route.params.datasheetName} />;
             break;
         default:
             content = <PageNotFound />;

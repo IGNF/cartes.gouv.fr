@@ -18,14 +18,37 @@ import { type Service } from "../../../types/app";
 type ServiceViewProps = {
     datastoreId: string;
     offeringId: string;
+    datasheetName?: string;
 };
 
-const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId }) => {
+const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetName }) => {
     const serviceQuery = useQuery<Service, CartesApiException>({
         queryKey: RCKeys.datastore_offering(datastoreId, offeringId),
         queryFn: () => api.service.get(datastoreId, offeringId),
         staleTime: 60000,
     });
+
+    const getBackBtn = (datasheetName?: string) => {
+        if (datasheetName) {
+            return (
+                <Button
+                    iconId="fr-icon-arrow-left-s-line"
+                    priority="tertiary no outline"
+                    linkProps={routes.datastore_datasheet_view({ datastoreId, datasheetName, activeTab: "services" }).link}
+                    title="Retour à la fiche de donnée"
+                />
+            );
+        } else {
+            return (
+                <Button
+                    iconId="fr-icon-arrow-left-s-line"
+                    priority="tertiary no outline"
+                    linkProps={routes.datasheet_list({ datastoreId }).link}
+                    title="Retour à la liste de mes données"
+                />
+            );
+        }
+    };
 
     return (
         <DatastoreLayout datastoreId={datastoreId}>
@@ -41,12 +64,7 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId }) => {
             ) : (
                 <>
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-4w")}>
-                        <Button
-                            iconId="fr-icon-arrow-left-s-line"
-                            priority="tertiary no outline"
-                            linkProps={routes.datasheet_list({ datastoreId }).link}
-                            title="Retour à la liste de mes données"
-                        />
+                        {getBackBtn(datasheetName)}
                         {serviceQuery.data.layer_name}
                         <Badge noIcon={true} severity="info" className={fr.cx("fr-ml-2w")}>
                             {serviceQuery.data.type}
