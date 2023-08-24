@@ -14,6 +14,8 @@ import { appRoot /*, routes*/ } from "../router/router";
 import hp from "../img/photos/rustrel.jpg";
 import "../sass/pages/home.scss";
 
+import MenuList from "../components/Utils/MenuList";
+
 const Home = () => {
     useEffect(() => {
         document.title = "cartes.gouv.fr | page d'accueil";
@@ -215,11 +217,18 @@ const Home = () => {
                                         <h3 className={fr.cx("fr-text--lead")}>Adipiscing elits</h3>
                                         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
                                     </div>
+                                    <MenuList />
                                 </div>
                             ),
                         },
                     ]}
                 />
+            </div>
+
+            <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-text--center", "fr-mb-32v")}>
+                <div className={fr.cx("fr-col-1", "fr-col-offset-11")}>
+                    <MenuList />
+                </div>
             </div>
         </AppLayout>
     );
