@@ -1,18 +1,20 @@
-# Prod image
-FROM php:8.2-apache
+#----------------------------------------------------------------------
+# Instructions communes aux env dev et prod
+#----------------------------------------------------------------------
+FROM php:8.2-apache as base
 
 RUN rm /etc/apt/preferences.d/no-debian-php
 
 #----------------------------------------------------------------------
-# Args and env vars
+# Args et vars env
 #----------------------------------------------------------------------
 # ENV COMPOSER_ALLOW_SUPERUSER=1
 
 #----------------------------------------------------------------------
-# Configure locale to fr_FR.UTF-8
-# see also https://stackoverflow.com/a/41797247
+# Configurer "fr_FR.UTF-8" comme locale
+# en savoir plus : https://stackoverflow.com/a/41797247
 #----------------------------------------------------------------------
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -qy locales \
+RUN apt-get -qq update && DEBIAN_FRONTEND=noninteractive apt-get -qq install -y locales \
     && sed -i -e 's/# en_US.UTF-8 UTF-8/fr_FR.UTF-8 UTF-8/' /etc/locale.gen \
     && dpkg-reconfigure --frontend=noninteractive locales \
     && update-locale LANG=fr_FR.UTF-8 \
@@ -21,12 +23,12 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -qy locales
 ENV LANG fr_FR.UTF-8
 
 #----------------------------------------------------------------------
-# PHP Configuration & Extensions
+# PHP : Configuration & Extensions
 #----------------------------------------------------------------------
 COPY .docker/php.ini /usr/local/etc/php/conf.d/app.ini
 RUN pear config-set php_ini /usr/local/etc/php/conf.d/app.ini
 
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -qy libzip-dev zip libicu-dev libxslt-dev \
+RUN apt-get -qq update && DEBIAN_FRONTEND=noninteractive apt-get -qq install -y libzip-dev zip libicu-dev libxslt-dev \
     && docker-php-ext-install zip \
     && docker-php-ext-configure intl \
     && docker-php-ext-install intl \
@@ -37,7 +39,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -qy libzip-
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 
 #----------------------------------------------------------------------
-# Install Nodejs
+# Nodejs : Installation
 # https://github.com/nodejs/docker-node/blob/main/18/bullseye/Dockerfile
 # https://stackoverflow.com/a/63108753
 #----------------------------------------------------------------------
@@ -48,12 +50,12 @@ RUN npm i -g yarn pnpm npx
 # RUN yarn set version stable
 
 #----------------------------------------------------------------------
-# APT Cache Cleanup
+# Nettoyage Cache APT
 #----------------------------------------------------------------------
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 #----------------------------------------------------------------------
-# Configure apache
+# Configurer apache
 #----------------------------------------------------------------------
 COPY .docker/apache-ports.conf /etc/apache2/ports.conf
 COPY .docker/apache-security.conf /etc/apache2/conf-enabled/security.conf
@@ -62,8 +64,10 @@ COPY .docker/apache-vhost.conf /etc/apache2/sites-available/000-default.conf
 RUN a2enmod rewrite remoteip
 
 #----------------------------------------------------------------------
-# Install cartesgouvfr-site (production specific)
+# cartesgouvfr-site : Installation pour production
 #----------------------------------------------------------------------
+FROM base as prod
+
 COPY --chown=www-data:www-data . /opt/cartesgouvfr-site
 WORKDIR /opt/cartesgouvfr-site
 USER www-data
@@ -76,6 +80,45 @@ RUN export APP_ENV=prod \
 
 RUN yarn install --production --frozen-lockfile \
     && yarn build \
-    && yarn cache clean
+    && yarn cache clean \
+    && rm -rf node_modules
 
 EXPOSE 8000
+
+#----------------------------------------------------------------------
+# cartesgouvfr-site : Installation pour developpement
+#----------------------------------------------------------------------
+FROM base as dev
+
+RUN if [ "${http_proxy}" != "" ]; then \
+    pear config-set http_proxy ${http_proxy} \
+    ;fi
+
+RUN pecl install xdebug \
+    && docker-php-ext-enable xdebug \
+    && echo "xdebug.mode=debug" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+    && echo "xdebug.client_host=host.docker.internal" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+
+#----------------------------------------------------------------------
+# Installation de divers outils dév
+#----------------------------------------------------------------------
+RUN apt-get -qq update \
+    && DEBIAN_FRONTEND=noninteractive apt-get -qq install -y lsb-release gnupg2 wget curl vim git \
+    && echo "deb https://packages.sury.org/php/ $(lsb_release -cs) main" > /etc/apt/sources.list.d/php.list \
+    && curl -sS https://packages.sury.org/php/apt.gpg | apt-key add - \
+    && apt-get -qq update \
+    && DEBIAN_FRONTEND=noninteractive apt-get -qq install -y \
+    unzip \
+    make \
+    php-dev \
+    zip \
+    && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+VOLUME [ "/opt/cartesgouvfr-site" ]
+WORKDIR /opt/cartesgouvfr-site
+
+RUN chown -R www-data .
+EXPOSE 8000
+
+RUN useradd -ms /bin/bash dev_user
+USER dev_user

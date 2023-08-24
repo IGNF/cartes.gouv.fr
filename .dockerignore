@@ -1,6 +1,9 @@
-var
-.git
+/.git
+/.vscode
+/var
 /vendor/
 /node_modules/
+/docs
+/cypress
 
 docker-compose*.yml

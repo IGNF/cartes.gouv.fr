@@ -3,13 +3,13 @@ version: "3.4"
 networks:
     cartesgouvfr_network:
 
-
 services:
     app:
         image: ignf/cartes.gouv.fr:latest
         build:
             context: .
             dockerfile: .docker/Dockerfile
+            target: prod
             args:
                 - HTTP_PROXY
                 - HTTPS_PROXY
