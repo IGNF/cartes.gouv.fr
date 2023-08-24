@@ -6,9 +6,11 @@ networks:
 
 services:
     app_dev:
+        image: ignf/cartes.gouv.fr:dev
         build:
             context: .
-            dockerfile: .docker/dev.Dockerfile
+            dockerfile: .docker/Dockerfile
+            target: dev
             args:
                 - HTTP_PROXY
                 - HTTPS_PROXY
