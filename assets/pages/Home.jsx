@@ -216,8 +216,12 @@ const Home = () => {
                                         />
                                         <h3 className={fr.cx("fr-text--lead")}>Adipiscing elits</h3>
                                         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                                        <MenuList
+                                            menuOpenButtonProps={{
+                                                children: "sdqsdqs",
+                                            }}
+                                        />
                                     </div>
-                                    <MenuList />
                                 </div>
                             ),
                         },
@@ -226,8 +230,12 @@ const Home = () => {
             </div>
 
             <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-text--center", "fr-mb-32v")}>
-                <div className={fr.cx("fr-col-1", "fr-col-offset-11")}>
-                    <MenuList />
+                <div /*className={fr.cx("fr-col-1", "fr-col-offset-11")}*/>
+                    <MenuList
+                        menuOpenButtonProps={{
+                            children: "sdqsdqs",
+                        }}
+                    />
                 </div>
             </div>
         </AppLayout>

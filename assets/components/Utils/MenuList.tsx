@@ -1,12 +1,12 @@
-import Button, { ButtonProps as DsfrButtonProps } from "@codegouvfr/react-dsfr/Button";
+import Button, { ButtonProps } from "@codegouvfr/react-dsfr/Button";
 import MuiDsfrThemeProvider from "@codegouvfr/react-dsfr/mui";
 import { Divider, Menu, MenuItem } from "@mui/material";
-import React, { FC, MouseEvent, useId, useState } from "react";
-import { symToStr } from "tsafe/symToStr";
 import Typography from "@mui/material/Typography";
+import { FC, MouseEvent, useId, useState } from "react";
+import { symToStr } from "tsafe/symToStr";
 
 type MenuListProps = {
-    menuOpenButtonProps: typeof Button;
+    menuOpenButtonProps?: Omit<ButtonProps, "linkProps" | "onClick" | "type">;
 };
 
 const MenuList: FC<MenuListProps> = ({ menuOpenButtonProps }) => {
@@ -24,22 +24,23 @@ const MenuList: FC<MenuListProps> = ({ menuOpenButtonProps }) => {
         setAnchorEl(null);
     };
 
+    // props du bouton ouvrir menu
+    const _menuOpenBtnProps: ButtonProps = menuOpenButtonProps ? { ...(menuOpenButtonProps as ButtonProps) } : ({} as ButtonProps);
+    _menuOpenBtnProps.title = menuOpenButtonProps?.title ?? "Autres actions";
+    _menuOpenBtnProps.iconId = menuOpenButtonProps?.iconId ?? "fr-icon-menu-2-fill";
+    _menuOpenBtnProps.nativeButtonProps = {
+        ...(menuOpenButtonProps?.nativeButtonProps ?? {}),
+        "aria-controls": open ? otherActionsMenuId : undefined,
+        "aria-haspopup": "true",
+        "aria-expanded": open ? "true" : undefined,
+    };
+    _menuOpenBtnProps.id = otherActionsBtnId;
+    _menuOpenBtnProps.onClick = handleBtnOpenClick;
+    _menuOpenBtnProps.type = "button";
+
     return (
         <>
-            <Button
-                // {...menuOpenButtonProps}
-                iconId="fr-icon-menu-2-fill"
-                title="Autres actions"
-                onClick={handleBtnOpenClick}
-                id={otherActionsBtnId}
-                nativeButtonProps={{
-                    "aria-controls": open ? otherActionsMenuId : undefined,
-                    "aria-haspopup": "true",
-                    "aria-expanded": open ? "true" : undefined,
-                }}
-                // eslint-disable-next-line react/no-children-prop
-                children="ssdqsd"
-            />
+            <Button {..._menuOpenBtnProps} />
             <MuiDsfrThemeProvider>
                 <Menu
                     id={otherActionsMenuId}
