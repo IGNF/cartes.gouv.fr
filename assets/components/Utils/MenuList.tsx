@@ -1,17 +1,27 @@
+import { fr, type FrIconClassName, type RiIconClassName } from "@codegouvfr/react-dsfr";
 import Button, { ButtonProps } from "@codegouvfr/react-dsfr/Button";
 import MuiDsfrThemeProvider from "@codegouvfr/react-dsfr/mui";
-import { Divider, Menu, MenuItem } from "@mui/material";
+import { ListItemIcon, ListItemText, Menu, MenuItem } from "@mui/material";
 import Typography from "@mui/material/Typography";
-import { FC, MouseEvent, useId, useState } from "react";
+import { FC, MouseEvent, useId, useMemo, useState } from "react";
 import { symToStr } from "tsafe/symToStr";
 
-type MenuListProps = {
-    menuOpenButtonProps?: Omit<ButtonProps, "linkProps" | "onClick" | "type">;
+type MenuListItem = {
+    iconId?: FrIconClassName | RiIconClassName;
+    text?: string;
+    onClick: React.MouseEventHandler<HTMLElement>;
+    disabled?: boolean;
 };
 
-const MenuList: FC<MenuListProps> = ({ menuOpenButtonProps }) => {
+type MenuListProps = {
+    menuOpenButtonProps?: Omit<ButtonProps, "linkProps" | "onClick" | "type" | "disabled">;
+    items: MenuListItem[];
+    disabled?: boolean;
+};
+
+const MenuList: FC<MenuListProps> = ({ menuOpenButtonProps, items = [], disabled = false }) => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-    const open = Boolean(anchorEl);
+    const isMenuOpen = Boolean(anchorEl);
 
     const otherActionsBtnId = useId();
     const otherActionsMenuId = useId();
@@ -25,18 +35,24 @@ const MenuList: FC<MenuListProps> = ({ menuOpenButtonProps }) => {
     };
 
     // props du bouton ouvrir menu
-    const _menuOpenBtnProps: ButtonProps = menuOpenButtonProps ? { ...(menuOpenButtonProps as ButtonProps) } : ({} as ButtonProps);
-    _menuOpenBtnProps.title = menuOpenButtonProps?.title ?? "Autres actions";
-    _menuOpenBtnProps.iconId = menuOpenButtonProps?.iconId ?? "fr-icon-menu-2-fill";
-    _menuOpenBtnProps.nativeButtonProps = {
-        ...(menuOpenButtonProps?.nativeButtonProps ?? {}),
-        "aria-controls": open ? otherActionsMenuId : undefined,
-        "aria-haspopup": "true",
-        "aria-expanded": open ? "true" : undefined,
-    };
-    _menuOpenBtnProps.id = otherActionsBtnId;
-    _menuOpenBtnProps.onClick = handleBtnOpenClick;
-    _menuOpenBtnProps.type = "button";
+    const _menuOpenBtnProps = useMemo<ButtonProps>(() => {
+        const _props: ButtonProps = menuOpenButtonProps ? { ...(menuOpenButtonProps as ButtonProps) } : ({} as ButtonProps);
+        _props.title = menuOpenButtonProps?.title ?? "Autres actions";
+        _props.iconId = menuOpenButtonProps?.iconId ?? "fr-icon-menu-2-fill";
+        _props.nativeButtonProps = {
+            ...(menuOpenButtonProps?.nativeButtonProps ?? {}),
+            "aria-controls": isMenuOpen ? otherActionsMenuId : undefined,
+            "aria-haspopup": "true",
+            "aria-expanded": isMenuOpen ? "true" : undefined,
+        };
+        _props.id = otherActionsBtnId;
+        _props.onClick = handleBtnOpenClick;
+        _props.type = "button";
+        _props.disabled = disabled;
+        return _props;
+    }, [menuOpenButtonProps, disabled, isMenuOpen, otherActionsBtnId, otherActionsMenuId]);
+
+    const atLeastOneIcon = useMemo<boolean>(() => items.filter((item) => item.iconId !== undefined).length > 0, [items]);
 
     return (
         <>
@@ -48,7 +64,7 @@ const MenuList: FC<MenuListProps> = ({ menuOpenButtonProps }) => {
                         "aria-labelledby": otherActionsBtnId,
                     }}
                     anchorEl={anchorEl}
-                    open={open}
+                    open={isMenuOpen}
                     onClose={handleClose}
                     elevation={0}
                     anchorOrigin={{
@@ -60,23 +76,28 @@ const MenuList: FC<MenuListProps> = ({ menuOpenButtonProps }) => {
                         horizontal: "right",
                     }}
                 >
-                    <MenuItem onClick={handleClose}>
-                        <Typography noWrap> Action 1</Typography>
-                    </MenuItem>
-                    <MenuItem onClick={handleClose}>
-                        <Typography noWrap> Action 2</Typography>
-                    </MenuItem>
-                    <Divider
-                        sx={{
-                            mb: 0.1,
-                        }}
-                    />
-                    <MenuItem onClick={handleClose}>
-                        <Typography noWrap> Actionnnnnnnnnnnnn 3</Typography>
-                    </MenuItem>
-                    <MenuItem onClick={handleClose}>
-                        <Typography noWrap> Actionnnnnnnnnnnnnnnnnnnnnn 4</Typography>
-                    </MenuItem>
+                    {disabled === false &&
+                        items.map((item, i) => (
+                            <MenuItem
+                                key={i}
+                                onClick={(e: MouseEvent<HTMLElement>) => {
+                                    handleClose();
+                                    item.onClick(e);
+                                }}
+                                disabled={item.disabled}
+                            >
+                                {item.iconId && (
+                                    <ListItemIcon>
+                                        <i className={fr.cx(item.iconId)} />
+                                    </ListItemIcon>
+                                )}
+                                {item.text && (
+                                    <ListItemText inset={atLeastOneIcon && !item.iconId}>
+                                        <Typography noWrap>{item.text}</Typography>
+                                    </ListItemText>
+                                )}
+                            </MenuItem>
+                        ))}
                 </Menu>
             </MuiDsfrThemeProvider>
         </>
