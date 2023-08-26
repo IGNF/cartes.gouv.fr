@@ -6,12 +6,22 @@ import Typography from "@mui/material/Typography";
 import { FC, MouseEvent, useId, useMemo, useState } from "react";
 import { symToStr } from "tsafe/symToStr";
 
-type MenuListItem = {
-    iconId?: FrIconClassName | RiIconClassName;
-    text?: string;
+type MenuListItemCommon = {
     onClick: React.MouseEventHandler<HTMLElement>;
     disabled?: boolean;
 };
+
+type MenuListItemOnlyText = {
+    iconId?: never;
+    text: string;
+};
+
+type MenuListItemTextAndIcon = {
+    iconId: FrIconClassName | RiIconClassName;
+    text: string;
+};
+
+type MenuListItem = MenuListItemCommon & (MenuListItemOnlyText | MenuListItemTextAndIcon);
 
 type MenuListProps = {
     menuOpenButtonProps?: Omit<ButtonProps, "linkProps" | "onClick" | "type" | "disabled">;
