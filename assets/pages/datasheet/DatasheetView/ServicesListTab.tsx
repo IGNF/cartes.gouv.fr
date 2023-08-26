@@ -3,6 +3,7 @@ import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { FC } from "react";
 
+import MenuList from "../../../components/Utils/MenuList";
 import functions from "../../../functions";
 import Translator from "../../../modules/Translator";
 import { routes } from "../../../router/router";
@@ -44,7 +45,44 @@ const ServicesListTab: FC<ServicesListTabProps> = ({ datastoreId, datasheet }) =
                     >
                         Visualiser
                     </Button>
-                    <Button iconId="fr-icon-menu-2-fill" title="Autres actions" />
+                    <MenuList
+                        menuOpenButtonProps={{
+                            iconId: "fr-icon-menu-2-fill",
+                            title: "Autres actions",
+                        }}
+                        items={[
+                            {
+                                text: "Copier l'URL de diffusion",
+                                iconId: "ri-file-copy-2-line",
+                                onClick: () => console.warn("Action non implémentée"),
+                            },
+                            {
+                                text: "Gérer les styles",
+                                iconId: "ri-flashlight-line",
+                                onClick: () => console.warn("Action non implémentée"),
+                            },
+                            {
+                                text: "Mettre à jour la légende",
+                                iconId: "ri-list-check",
+                                onClick: () => console.warn("Action non implémentée"),
+                            },
+                            {
+                                text: "Modifier les informations de publication",
+                                iconId: "ri-edit-box-line",
+                                onClick: () => console.warn("Action non implémentée"),
+                            },
+                            {
+                                text: "Remplacer les données",
+                                iconId: "ri-refresh-line",
+                                onClick: () => console.warn("Action non implémentée"),
+                            },
+                            {
+                                text: "Dépublier",
+                                iconId: "ri-arrow-go-back-line",
+                                onClick: () => console.warn("Action non implémentée"),
+                            },
+                        ]}
+                    />
                 </div>
             </div>
         </div>

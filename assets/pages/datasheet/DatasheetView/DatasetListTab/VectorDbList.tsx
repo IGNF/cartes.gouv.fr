@@ -10,6 +10,7 @@ import { FC, useState } from "react";
 import { createPortal } from "react-dom";
 
 import api from "../../../../api";
+import MenuList from "../../../../components/Utils/MenuList";
 import functions from "../../../../functions";
 import RCKeys from "../../../../modules/RCKeys";
 import { routes } from "../../../../router/router";
@@ -139,7 +140,30 @@ const VectorDbList: FC<VectorDbListProps> = ({ datastoreId, vectorDbList }) => {
                             >
                                 Créer un service
                             </Button>
-                            <Button iconId="fr-icon-menu-2-fill" title="Autres actions" disabled={el.status !== StoredDataStatuses.GENERATED} />
+                            <MenuList
+                                menuOpenButtonProps={{
+                                    iconId: "fr-icon-menu-2-fill",
+                                    title: "Autres actions",
+                                }}
+                                disabled={el.status !== StoredDataStatuses.GENERATED}
+                                items={[
+                                    {
+                                        text: "Remplacer les données",
+                                        iconId: "ri-refresh-line",
+                                        onClick: () => console.warn("Action non implémentée"),
+                                    },
+                                    {
+                                        text: "Voir les détails",
+                                        iconId: "fr-icon-file-text-fill",
+                                        onClick: () => console.warn("Action non implémentée"),
+                                    },
+                                    {
+                                        text: "Supprimer",
+                                        iconId: "fr-icon-delete-line",
+                                        onClick: () => console.warn("Action non implémentée"),
+                                    },
+                                ]}
+                            />
                         </div>
                     </div>
                 </div>
