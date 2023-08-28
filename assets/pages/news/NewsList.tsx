@@ -37,6 +37,7 @@ const NewsListItem: FC<NewsListItemProps> = ({ slug, newsArticle }) => {
                 linkProps={routes.news_article({ slug }).link}
                 // title devrait être de niveau h2 ici, mais le composant force h3
                 title={newsArticle?.title}
+                titleAs="h2"
             />
         </div>
     );
