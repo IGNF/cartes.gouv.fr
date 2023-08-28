@@ -30,6 +30,7 @@ const DatastoreLayout: FC<PropsWithChildren<DatastoreLayoutProps>> = ({ datastor
             datastoreListQuery.data?.map((datastore) => ({
                 linkProps: routes.datasheet_list({ datastoreId: datastore._id }).link,
                 text: datastore.name,
+                isActive: datastore._id === datastoreQuery.data?._id,
             })) || [],
     };
 
