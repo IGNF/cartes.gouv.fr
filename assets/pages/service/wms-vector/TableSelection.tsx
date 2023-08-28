@@ -3,8 +3,8 @@ import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import { FC, useEffect, useState } from "react";
 import { type UseFormReturn } from "react-hook-form";
 
-import Translator from "../../../../modules/Translator";
-import { type VectorDb } from "../../../../types/app";
+import Translator from "../../../modules/Translator";
+import { type VectorDb } from "../../../types/app";
 
 type TablesSelectionProps = {
     vectorDb: VectorDb;

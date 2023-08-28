@@ -13,13 +13,13 @@ import * as yup from "yup";
 import api from "../../../api";
 import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
 import LoadingText from "../../../components/Utils/LoadingText";
+import functions from "../../../functions";
 import RCKeys from "../../../modules/RCKeys";
 import Translator from "../../../modules/Translator";
 import { routes } from "../../../router/router";
 import { type StoredDataRelation, type VectorDb } from "../../../types/app";
+import TableSelection from "./TableSelection";
 import UploadStyleFile from "./UploadStyleFile";
-import TableAttributeSelection from "./tables/TableAttributeSelection";
-import TableSelection from "./tables/TableSelection";
 
 type WmsVectorServiceNewProps = {
     datastoreId: string;
@@ -28,12 +28,11 @@ type WmsVectorServiceNewProps = {
 const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vectorDbId }) => {
     const STEPS = {
         TABLES_SELECTION: 1,
-        TABLE_ATTRIBUTES: 2,
-        STYLE_FILE: 3,
-        METADATA: 4,
-        DESCRIPTION: 5,
-        ADDITIONALINFORMATIONS: 6,
-        ACCESSRESTRICTIONS: 7,
+        STYLE_FILE: 2,
+        METADATA: 3,
+        DESCRIPTION: 4,
+        ADDITIONALINFORMATIONS: 5,
+        ACCESSRESTRICTIONS: 6,
     };
 
     const [currentStep, setCurrentStep] = useState(STEPS.TABLES_SELECTION);
@@ -49,26 +48,6 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
             selected_tables: yup.array(yup.string()).min(1, "Veuillez choisir au moins une table").required("Veuillez choisir au moins une table"),
         }),
         2: yup.object({
-            table_attributes: yup.lazy(() => {
-                return yup.mixed().nullable().notRequired();
-
-                // TODO : validation désactivée en attente de plus de précisions
-                // if (!selectedTables || selectedTables.length === 0) {
-                // return yup.mixed().nullable().notRequired();
-                // }
-
-                // const tableAttributes = {};
-                // selectedTables.forEach((table) => {
-                //     tableAttributes[table.name] = yup
-                //         .array()
-                //         .of(yup.string())
-                //         .min(1, "Veuillez choisir au moins un attribut pour chaque table")
-                //         .required("Veuillez choisir au moins un attribut pour chaque table");
-                // });
-                // return yup.object().shape(tableAttributes);
-            }),
-        }),
-        3: yup.object({
             style_files: yup.lazy(() => {
                 if (!selectedTables || selectedTables.length === 0) {
                     return yup.mixed().nullable().notRequired();
@@ -78,12 +57,18 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
                 selectedTables.forEach((table) => {
                     styleFiles[table.name] = yup
                         .mixed()
-                        .required(`Veuillez fournir un fichier de style pour chaque table ${table.name}`)
+                        .required(`Veuillez fournir un fichier de style pour la table ${table.name}`)
                         .test({
                             name: "is-valid-sld",
                             async test(value, ctx) {
                                 // TODO : retravailler la validation du SLD, et éventuellement déplacer la fonction de validation ailleurs
                                 if (value instanceof File) {
+                                    if (functions.path.getFileExtension(value.name)?.toLowerCase() !== "sld") {
+                                        return ctx.createError({
+                                            message: `L'extension du fichier de style ${value.name} n'est pas correcte. Seule l'extension sld est acceptée.`,
+                                        });
+                                    }
+
                                     const styleString = await value.text();
                                     const sldParser = new SldStyleParser();
                                     const result = await sldParser.readStyle(styleString);
@@ -110,10 +95,10 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
                 return yup.object().shape(styleFiles);
             }),
         }),
+        3: yup.object(),
         4: yup.object(),
         5: yup.object(),
         6: yup.object(),
-        7: yup.object(),
     };
 
     const form = useForm({ resolver: yupResolver(schemas[currentStep]), shouldUnregister: false });
@@ -177,7 +162,6 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
                     />
 
                     <TableSelection visible={currentStep === STEPS.TABLES_SELECTION} vectorDb={vectorDbQuery.data} form={form} />
-                    <TableAttributeSelection visible={currentStep === STEPS.TABLE_ATTRIBUTES} selectedTables={selectedTables} form={form} />
                     <UploadStyleFile visible={currentStep === STEPS.STYLE_FILE} selectedTables={selectedTables} form={form} />
 
                     <ButtonsGroup
