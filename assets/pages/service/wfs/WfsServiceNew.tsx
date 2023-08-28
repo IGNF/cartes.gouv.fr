@@ -176,7 +176,7 @@ const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
                         stepCount={5}
                         title={Translator.trans(`service.wfs.new.step${currentStep}`)}
                     />
-                    {validationError?.code === 422 && (
+                    {validationError && (
                         <Alert
                             className="fr-preline"
                             closable
