@@ -96,7 +96,7 @@ service:
                 help: "Apportez un maximum d'informations à vos utilisateurs en décrivant votre service le plus précisément possible."
                 # legend: "Comment allez-vous remplir les métadonnées"
                 # hint_legend: "Vous avez plusieurs méthodes pour fournir les données. Pour plus d’information, consultez"
-                import: "Importez un fichier de métadonnées"
+                import: "Importez un fichier de métadonnées (optionnel)"
                 hint_import: "[Informations sur le type de fichier, taille…etc.]"
                 # option_fill_form: "Compléter le formulaire manuellement"
                 # hint_option_fill_form: "[Informations sur le remplissage manuel"

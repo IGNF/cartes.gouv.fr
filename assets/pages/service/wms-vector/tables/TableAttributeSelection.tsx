@@ -4,6 +4,7 @@ import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import { FC, useEffect, useState } from "react";
 import { type UseFormReturn } from "react-hook-form";
 
+import Translator from "../../../../modules/Translator";
 import { type StoredDataRelation } from "../../../../types/app";
 
 type TableAttributeSelectionProps = {
@@ -55,6 +56,8 @@ const TableAttributeSelection: FC<TableAttributeSelectionProps> = ({ visible, fo
     return (
         <div className={fr.cx(!visible && "fr-hidden")}>
             <h3>Choisissez les attributs des tables sélectionnées</h3>
+
+            <p>{Translator.trans("mandatory_fields")}</p>
 
             {selectedTables.map((table) => (
                 <Accordion key={table.name} label={table.name} titleAs="h4" defaultExpanded={true}>

@@ -3,6 +3,7 @@ import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import { FC, useEffect, useState } from "react";
 import { type UseFormReturn } from "react-hook-form";
 
+import Translator from "../../../../modules/Translator";
 import { type VectorDb } from "../../../../types/app";
 
 type TablesSelectionProps = {
@@ -42,6 +43,9 @@ const TableSelection: FC<TablesSelectionProps> = ({ vectorDb, visible, form }) =
     return (
         <div className={fr.cx(!visible && "fr-hidden")}>
             <h3>Sélectionnez les tables nécessaires au service</h3>
+
+            <p>{Translator.trans("mandatory_fields")}</p>
+
             <Checkbox
                 options={tables.map((table) => ({
                     label: table.name,

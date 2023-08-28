@@ -5,7 +5,7 @@ type LoadingTextProps = {
 };
 
 const LoadingText = ({ message }: LoadingTextProps) => {
-    return <h2>{message ? message : "Chargement..."}</h2>;
+    return <h1>{message ? message : "Chargement..."}</h1>;
 };
 
 export default LoadingText;

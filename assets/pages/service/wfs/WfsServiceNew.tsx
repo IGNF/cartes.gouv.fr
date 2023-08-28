@@ -165,7 +165,7 @@ const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
 
     return (
         <DatastoreLayout datastoreId={datastoreId}>
-            <h2>{Translator.trans("service.wfs.new.title")}</h2>
+            <h1>{Translator.trans("service.wfs.new.title")}</h1>
             {isLoading ? (
                 <LoadingText message={Translator.trans("service.wfs.new.loading_stored_data")} />
             ) : vectorDb ? (

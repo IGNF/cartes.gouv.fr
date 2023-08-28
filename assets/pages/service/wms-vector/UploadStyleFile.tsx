@@ -3,6 +3,7 @@ import Input from "@codegouvfr/react-dsfr/Input";
 import { FC, FormEvent } from "react";
 import { type UseFormReturn } from "react-hook-form";
 
+import Translator from "../../../modules/Translator";
 import { type StoredDataRelation } from "../../../types/app";
 
 type UploadStyleFileProps = {
@@ -25,6 +26,8 @@ const UploadStyleFile: FC<UploadStyleFileProps> = ({ visible, selectedTables, fo
     return (
         <div className={fr.cx(!visible && "fr-hidden")}>
             <h3>Déposez vos fichiers de style SLD</h3>
+
+            <p>{Translator.trans("mandatory_fields")}</p>
 
             {selectedTables.map((table) => (
                 <Input
