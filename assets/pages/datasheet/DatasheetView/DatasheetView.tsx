@@ -115,12 +115,6 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                                         onClick: () => deleteDataConfirmModal.open(),
                                         iconId: "fr-icon-delete-fill",
                                     },
-                                    {
-                                        children: "Bouton à définir",
-                                        linkProps: {
-                                            href: "#",
-                                        },
-                                    },
                                 ]}
                             />
                         </div>
