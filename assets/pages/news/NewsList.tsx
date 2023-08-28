@@ -51,7 +51,7 @@ const NewsList = () => {
 
     return (
         <AppLayout navItems={defaultNavItems}>
-            <div className={fr.cx("fr-container", "fr-pt-8v", "fr-pt-18v", "fr-mb-md-8v")}>
+            <div className={fr.cx("fr-container")}>
                 <h1>Actualités</h1>
 
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>

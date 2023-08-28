@@ -149,7 +149,7 @@ const VectorDbList: FC<VectorDbListProps> = ({ datastoreId, vectorDbList }) => {
                                 items={[
                                     {
                                         text: "Remplacer les données",
-                                        iconId: "ri-refresh-line",
+                                        iconId: "fr-icon-refresh-line",
                                         onClick: () => console.warn("Action non implémentée"),
                                     },
                                     {

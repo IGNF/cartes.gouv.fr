@@ -21,7 +21,7 @@ const DashboardPro = () => {
                 <LoadingText />
             ) : (
                 <>
-                    <h2>Bienvenue {user?.firstName || "utilisateur-rice"}</h2>
+                    <h1>Bienvenue {user?.firstName || "utilisateur-rice"}</h1>
 
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
                         <div className={fr.cx("fr-col", "fr-col-sm-6", "fr-col-md-4", "fr-col-lg-2")}>

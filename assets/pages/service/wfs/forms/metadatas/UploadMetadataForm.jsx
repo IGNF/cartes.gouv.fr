@@ -10,6 +10,9 @@ const UploadMetadataForm = ({ visibility, onPrevious, onSubmit }) => {
     return (
         <div className={fr.cx("fr-my-2v", !visibility && "fr-hidden")}>
             <h3>{Translator.trans("service.wfs.new.metadata_upload_form.title")}</h3>
+
+            <p>{Translator.trans("mandatory_fields")}</p>
+
             <Input
                 label={Translator.trans("service.wfs.new.metadata_upload_form.import")}
                 hintText={Translator.trans("service.wfs.new.metadata_upload_form.hint_import")}

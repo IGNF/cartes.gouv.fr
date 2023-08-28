@@ -56,6 +56,8 @@ const AccessRestrictionForm: FC<AccessRestrictionFormProps> = ({ datastoreId, vi
         <div className={fr.cx("fr-my-2v", !visibility && "fr-hidden")}>
             <h3>{Translator.trans("service.wfs.new.access_retrictions.title")}</h3>
 
+            <p>{Translator.trans("mandatory_fields")}</p>
+
             <RadioButtons
                 legend={Translator.trans("service.wfs.new.access_retrictions.share_with")}
                 state={errors.share_with ? "error" : "default"}

@@ -19,6 +19,7 @@ import Wait from "../../../components/Utils/Wait";
 import defaultProjections from "../../../data/default_projections.json";
 import functions from "../../../functions";
 import FileUploader from "../../../modules/FileUploader";
+import Translator from "../../../modules/Translator";
 import RCKeys from "../../../modules/RCKeys";
 import { routes } from "../../../router/router";
 import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
@@ -215,7 +216,10 @@ const DatasheetNewForm = ({ datastoreId }) => {
 
     return (
         <DatastoreLayout datastoreId={datastoreId}>
-            <h2>Créer une fiche de données</h2>
+            <h1>Créer une fiche de données</h1>
+
+            <p>{Translator.trans("mandatory_fields")}</p>
+
             <Input
                 label="Nom de votre fiche de donnée"
                 hintText="Ce nom vous permettra d’identifier votre donnée dans la géoplateforme, soyez aussi clair que possible."

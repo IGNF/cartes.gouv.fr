@@ -69,6 +69,9 @@ const AdditionalInfoForm = ({ storedData, fileType, visibility, onPrevious, onVa
     return (
         <div className={fr.cx("fr-my-2v", !visibility && "fr-hidden")}>
             <h3>{Translator.trans("service.wfs.new.additional_information_form.metadata_information_title")}</h3>
+
+            <p>{Translator.trans("mandatory_fields")}</p>
+
             <Input
                 label={Translator.trans("service.wfs.new.additional_information_form.projection")}
                 hintText={Translator.trans("service.wfs.new.additional_information_form.hint_projection")}

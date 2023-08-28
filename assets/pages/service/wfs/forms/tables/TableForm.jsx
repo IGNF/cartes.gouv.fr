@@ -65,6 +65,9 @@ const TableForm = ({ tables, visibility, onValid }) => {
     return (
         <div className={fr.cx("fr-my-2v", !visibility && "fr-hidden")}>
             <h3>{Translator.trans("service.wfs.new.tables_form.title")}</h3>
+
+            <p>{Translator.trans("mandatory_fields")}</p>
+
             <TableInfos tables={tables} keywords={keywords} onChange={onChange} />
             <Input
                 state={errors.data_tables ? "error" : "default"}
