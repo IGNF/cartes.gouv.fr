@@ -1,4 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { useQuery } from "@tanstack/react-query";
 import { FC, useEffect, useState } from "react";
 
@@ -20,6 +21,8 @@ const DatasheetNewIntegrationDialog: FC<DatasheetNewIntegrationDialogProps> = ({
 
     const abortController = new AbortController();
     const [shouldPingIntProg, setShouldPingIntProg] = useState(false);
+
+    const [isIntegrationError, setIsIntegrationError] = useState(false);
 
     // définition des query
     // query qui "ping" et récupère le progress en boucle (query désactivé au départ)
@@ -65,6 +68,7 @@ const DatasheetNewIntegrationDialog: FC<DatasheetNewIntegrationDialogProps> = ({
         if (Object.values(integrationProgress).includes("failed")) {
             console.debug("stopping, one step failed");
             setShouldPingIntProg(false);
+            setIsIntegrationError(true);
             return;
         }
 
@@ -119,14 +123,26 @@ const DatasheetNewIntegrationDialog: FC<DatasheetNewIntegrationDialogProps> = ({
 
     return (
         <div className={fr.cx("fr-container")}>
-            <div className={fr.cx("fr-grid-row")}>
-                <div className={fr.cx("fr-col-1")}>
-                    <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg") + " icons-spin"} />
+            {isIntegrationError ? (
+                <div className={fr.cx("fr-grid-row")}>
+                    <div className={fr.cx("fr-col-1")}>
+                        <i className={fr.cx("fr-icon-close-circle-line", "fr-icon--lg")} />
+                    </div>
+                    <div className={fr.cx("fr-col-11")}>
+                        <h6 className={fr.cx("fr-h6")}>{"L'intégration de vos données a échoué"}</h6>
+                    </div>
                 </div>
-                <div className={fr.cx("fr-col-11")}>
-                    <h6 className={fr.cx("fr-h6")}>Vos données vecteur sont en cours de dépôt</h6>
+            ) : (
+                <div className={fr.cx("fr-grid-row")}>
+                    <div className={fr.cx("fr-col-1")}>
+                        <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg") + " icons-spin"} />
+                    </div>
+                    <div className={fr.cx("fr-col-11")}>
+                        <h6 className={fr.cx("fr-h6")}>Vos données vecteur sont en cours de dépôt</h6>
+                    </div>
                 </div>
-            </div>
+            )}
+
             <div className={fr.cx("fr-grid-row", "fr-px-4w")}>
                 <div className={fr.cx("fr-col", "fr-col--middle")}>
                     {Object.entries(integrationProgress).map(([step, status]) => (
@@ -139,6 +155,24 @@ const DatasheetNewIntegrationDialog: FC<DatasheetNewIntegrationDialogProps> = ({
                     ))}
                 </div>
             </div>
+
+            {isIntegrationError && (
+                <div className={fr.cx("fr-grid-row")}>
+                    <ButtonsGroup
+                        buttons={[
+                            {
+                                children: "Voir le rapport d'erreur",
+                                linkProps: { href: "#" },
+                            },
+                            {
+                                children: "Revenir à mes données",
+                                linkProps: routes.datasheet_list({ datastoreId }).link,
+                            },
+                        ]}
+                        inlineLayoutWhen="always"
+                    />
+                </div>
+            )}
         </div>
     );
 };
