@@ -106,7 +106,7 @@ const TableInfos = ({ tables, keywords, onChange }) => {
                                 },
                             ]}
                         />
-                        <div style={{ display: tablesState[table.name].visible ? "block" : "none" }}>
+                        <div className={fr.cx("fr-ml-8v")} style={{ display: tablesState[table.name].visible ? "block" : "none" }}>
                             <Input
                                 label={Translator.trans("service.wfs.new.tables_form.table.public_name")}
                                 hintText={Translator.trans("service.wfs.new.tables_form.table.hint_public_name")}
