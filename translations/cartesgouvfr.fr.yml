@@ -113,6 +113,7 @@ service:
                 description: "Résumé"
                 hint_description: "Bref résumé narratif du contenu de la ressource"
                 description_error: "Un résumé est obligatoire"
+                markdown_placeholder: "Veuillez saisir le texte Markdown"
                 identifier: "Identificateur de ressource unique"
                 hint_identifier: "Entrez une valeur identifiant la ressource de manière unique"
                 identifier_error: "L'identificateur est obligatoire"

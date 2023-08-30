@@ -1,10 +1,12 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { Input } from "@codegouvfr/react-dsfr/Input";
+import { useIsDark } from "@codegouvfr/react-dsfr/useIsDark";
 import { yupResolver } from "@hookform/resolvers/yup";
+import MDEditor from "@uiw/react-md-editor";
 import { format as datefnsFormat } from "date-fns";
 import PropTypes from "prop-types";
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 import * as yup from "yup";
@@ -46,12 +48,16 @@ const schema = yup.object({}).required();
 const DescriptionForm = ({ storedDataName, visibility, onPrevious, onValid }) => {
     const keywords = getInspireKeywords();
 
+    const { isDark } = useIsDark();
+    const [description, setDescription] = useState("");
+
     const {
         register,
         handleSubmit,
         formState: { errors },
         setValue: setFormValue,
         getValues: getFormValues,
+        trigger,
     } = useForm({ resolver: yupResolver(schema) });
 
     useEffect(() => {
@@ -96,16 +102,26 @@ const DescriptionForm = ({ storedDataName, visibility, onPrevious, onValid }) =>
                     ...register("data_public_name"),
                 }}
             />
-            <Input
-                label={Translator.trans("service.wfs.new.description_form.description")}
-                hintText={Translator.trans("service.wfs.new.description_form.hint_description")}
-                state={errors.data_description ? "error" : "default"}
-                stateRelatedMessage={errors?.data_description?.message}
-                textArea={true}
-                nativeTextAreaProps={{
-                    ...register("data_description"),
-                }}
-            />
+            <div className={fr.cx("fr-input-group", errors.data_description && "fr-input-group--error")} data-color-mode={isDark ? "dark" : "light"}>
+                <label className={fr.cx("fr-label")}>
+                    {Translator.trans("service.wfs.new.description_form.description")}
+                    <span className="fr-hint-text">{Translator.trans("service.wfs.new.description_form.hint_description")}</span>
+                </label>
+                <MDEditor
+                    value={description}
+                    height={200}
+                    extraCommands={[]}
+                    textareaProps={{
+                        placeholder: Translator.trans("service.wfs.new.description_form.markdown_placeholder"),
+                    }}
+                    onChange={(newValue = "") => {
+                        setDescription(newValue);
+                        setFormValue("data_description", newValue);
+                        trigger();
+                    }}
+                />
+                {errors.data_description && <p className={fr.cx("fr-error-text")}>{errors.data_description?.message}</p>}
+            </div>
             <Input
                 label={Translator.trans("service.wfs.new.description_form.identifier")}
                 hintText={Translator.trans("service.wfs.new.description_form.hint_identifier")}
@@ -193,6 +209,7 @@ const DescriptionForm = ({ storedDataName, visibility, onPrevious, onValid }) =>
                     {
                         children: Translator.trans("continue"),
                         onClick: () => {
+                            console.log(getFormValues());
                             handleSubmit(onSubmit)();
                             // tagifyRef.current.checkValidity();  // TODO PROVISOIRE
                         },
