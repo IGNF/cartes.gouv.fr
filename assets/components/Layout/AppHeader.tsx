@@ -1,9 +1,9 @@
 import Header, { HeaderProps } from "@codegouvfr/react-dsfr/Header";
 import { MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation/MainNavigation";
-import Routing from "fos-router";
 import { FC } from "react";
 
 import useUser from "../../hooks/useUser";
+import SymfonyRouting from "../../modules/Routing";
 import { routes } from "../../router/router";
 
 type AppHeaderProps = {
@@ -28,7 +28,7 @@ const AppHeader: FC<AppHeaderProps> = ({ navItems = [] }) => {
         quickAccessItems.push({
             iconId: "fr-icon-account-fill",
             linkProps: {
-                href: Routing.generate("cartesgouvfr_security_login"),
+                href: SymfonyRouting.generate("cartesgouvfr_security_login"),
             },
             text: "Se connecter",
         });
@@ -47,7 +47,7 @@ const AppHeader: FC<AppHeaderProps> = ({ navItems = [] }) => {
         quickAccessItems.push({
             iconId: "fr-icon-logout-box-r-line",
             linkProps: {
-                href: Routing.generate("cartesgouvfr_security_logout"),
+                href: SymfonyRouting.generate("cartesgouvfr_security_logout"),
             },
             text: "Se déconnecter",
         });

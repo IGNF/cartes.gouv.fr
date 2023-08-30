@@ -1,7 +1,7 @@
-import Routing from "fos-router";
-
-import { jsonFetch } from "./jsonFetch";
 import { Dispatch, SetStateAction } from "react";
+
+import SymfonyRouting from "../modules/Routing";
+import { jsonFetch } from "./jsonFetch";
 
 const DEFAULT_CHUNK_SIZE = 16000000; // 16 MB
 
@@ -11,8 +11,8 @@ type UploadFileResponseType = {
 };
 
 export default class FileUploader {
-    #_urlUploadChunk = Routing.generate("cartesgouvfr_file_uploader_upload_chunk");
-    #_urlUploadComplete = Routing.generate("cartesgouvfr_file_uploader_upload_complete");
+    #_urlUploadChunk = SymfonyRouting.generate("cartesgouvfr_file_uploader_upload_chunk");
+    #_urlUploadComplete = SymfonyRouting.generate("cartesgouvfr_file_uploader_upload_complete");
 
     /**
      * Envoie le fichier en morceaux (voir FileUploadController de Symfony)

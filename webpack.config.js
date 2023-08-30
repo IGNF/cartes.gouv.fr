@@ -1,5 +1,5 @@
 const Encore = require("@symfony/webpack-encore");
-const FosRouting = require("fos-router/webpack/FosRouting");
+const FosRouting = require("./vendor/friendsofsymfony/jsrouting-bundle/Resources/webpack/FosRouting");
 
 // Manually configure the runtime environment if not already configured yet by the "encore" command.
 // It's useful when you use tools that rely on webpack.config.js file.

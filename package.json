@@ -13,7 +13,6 @@
         "core-js": "^3.31.1",
         "date-fns": "^2.30.0",
         "dotenv": "^16.3.1",
-        "fos-router": "./vendor/friendsofsymfony/jsrouting-bundle/Resources/",
         "geoportal-extensions-openlayers": "^3.3.3",
         "geostyler-sld-parser": "^5.1.0",
         "geostyler-style": "^7.3.1",
@@ -27,6 +26,7 @@
         "react-hook-form": "^7.45.1",
         "type-route": "^1.0.1",
         "uuid": "^9.0.0",
+        "webpack-inject-plugin": "^1.5.5",
         "yup": "^1.2.0"
     },
     "devDependencies": {

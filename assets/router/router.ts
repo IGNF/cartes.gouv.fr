@@ -1,7 +1,8 @@
-import Routing from "fos-router";
 import { createRouter, defineRoute, param } from "type-route";
 
-export const appRoot = Routing.getBaseUrl(); // (document.getElementById("root") as HTMLDivElement).dataset?.appRoot ?? "";
+import SymfonyRouting from "../modules/Routing";
+
+export const appRoot = SymfonyRouting.getBaseUrl(); // (document.getElementById("root") as HTMLDivElement).dataset?.appRoot ?? "";
 
 const routeDefs = {
     // routes non protégées

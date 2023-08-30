@@ -1,9 +1,9 @@
-import Routing from "fos-router";
+import SymfonyRouting from "../modules/Routing";
 
 import { jsonFetch } from "../modules/jsonFetch";
 
 const add = (datastoreId: string, storedDataId: string, formData: FormData | object) => {
-    const url = Routing.generate("cartesgouvfr_api_wfs_add", { datastoreId, storedDataId });
+    const url = SymfonyRouting.generate("cartesgouvfr_api_wfs_add", { datastoreId, storedDataId });
     return jsonFetch(
         url,
         {

@@ -1,4 +1,4 @@
-import Routing from "fos-router";
+import SymfonyRouting from "../modules/Routing";
 import React, { Suspense, lazy } from "react";
 
 import AppLayout from "../components/Layout/AppLayout";
@@ -48,8 +48,8 @@ function RouterRenderer() {
     if (!publicRoutes.includes(route.name)) {
         // vérifier si l'utilisateur est authentifié et éventuellement ses droits à la ressource demandée
         if (user === null) {
-            // window.location.href = Routing.generate("cartesgouvfr_security_login");
-            window.location.assign(Routing.generate("cartesgouvfr_security_login"));
+            // window.location.href = SymfonyRouting.generate("cartesgouvfr_security_login");
+            window.location.assign(SymfonyRouting.generate("cartesgouvfr_security_login"));
             return <Redirect />;
         }
     }

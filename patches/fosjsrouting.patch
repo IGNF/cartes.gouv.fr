@@ -1,0 +1,19 @@
+--- a/vendor/friendsofsymfony/jsrouting-bundle/Resources/webpack/FosRouting.js	2023-07-04 17:41:13.000000000 +0000
++++ b/vendor/friendsofsymfony/jsrouting-bundle/Resources/webpack/FosRouting.js	2023-08-30 09:41:59.077339600 +0000
+@@ -90,11 +90,11 @@
+             }
+         });
+ 
+-        new InjectPlugin(() => {
+-            return 'import Routing from "fos-router";' +
+-                'import routes from '+JSON.stringify(this.finalTarget)+';' +
+-                'Routing.setRoutingData(routes);';
+-        }).apply(compiler);
++        // new InjectPlugin(() => {
++        //     return 'import Routing from "fos-router";' +
++        //         'import routes from '+JSON.stringify(this.finalTarget)+';' +
++        //         'Routing.setRoutingData(routes);';
++        // }).apply(compiler);
+     }
+ }
+ 

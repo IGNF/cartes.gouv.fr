@@ -4,7 +4,6 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
 import Select from "@codegouvfr/react-dsfr/Select";
 import { yupResolver } from "@hookform/resolvers/yup";
-import Routing from "fos-router";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
@@ -13,6 +12,7 @@ import AppLayout from "../../components/Layout/AppLayout";
 import Wait from "../../components/Utils/Wait";
 import { defaultNavItems } from "../../config/navItems";
 import useUser from "../../hooks/useUser";
+import SymfonyRouting from "../../modules/Routing";
 import Translator from "../../modules/Translator";
 import { jsonFetch } from "../../modules/jsonFetch";
 import { routes } from "../../router/router";
@@ -54,7 +54,7 @@ const Contact = () => {
         setError(null);
         setIsSending(true);
 
-        const url = Routing.generate("cartesgouvfr_contact_contact_us");
+        const url = SymfonyRouting.generate("cartesgouvfr_contact_contact_us");
 
         jsonFetch<{ success: boolean }>(url, { method: "POST" }, getFormValues())
             .then((response) => {
