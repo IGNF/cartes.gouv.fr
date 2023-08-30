@@ -1,8 +1,11 @@
 name: Code lint & style
 
 on:
-    - push
-    - pull_request
+    push:
+        branches-ignore:
+            - "dependabot/**"
+            - "renovate/**"
+    pull_request:
 
 jobs:
     php:
