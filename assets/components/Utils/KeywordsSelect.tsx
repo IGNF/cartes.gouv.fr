@@ -9,7 +9,7 @@ type KeywordsComponentProps = {
     hintText: string;
     keywords: string[];
     freeSolo: boolean;
-    onChange: (values: string[]) => string;
+    onChange: (values: string[]) => void;
 };
 
 const KeywordsSelect: FC<KeywordsComponentProps> = (props) => {

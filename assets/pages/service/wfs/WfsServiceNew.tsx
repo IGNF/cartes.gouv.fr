@@ -10,14 +10,15 @@ import Wait from "../../../components/Utils/Wait";
 import Translator from "../../../modules/Translator";
 import { CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
-import { type VectorDb } from "../../../types/app";
+import { StoredDataRelation, type VectorDb } from "../../../types/app";
 import AccessRestrictionForm from "./forms/AccessRestrictionForm";
 import AdditionalInfoForm from "./forms/metadatas/AdditionalInfoForm";
 import DescriptionForm from "./forms/metadatas/DescriptionForm";
 import UploadMetadataForm from "./forms/metadatas/UploadMetadataForm";
-import TableForm from "./forms/tables/TableForm";
+// import TableForm from "./forms/tables/TableForm";
 
 import "../../../sass/components/spinner.scss";
+import TableForm2 from "./forms/tables/TableForm2";
 
 /**
  * Récupère le type de fichier (unknown, csv ou geopackage)
@@ -64,7 +65,7 @@ const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [vectorDb, setVectorDb] = useState<VectorDb>();
     const [fileType, setFileType] = useState<string | undefined>(undefined);
-    const [tables, setTables] = useState<unknown>([]);
+    const [tables, setTables] = useState<StoredDataRelation[]>([]);
     const [error, setError] = useState<CartesApiException>();
     const [validationError, setValidationError] = useState<CartesApiException>();
 
@@ -185,7 +186,8 @@ const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
                             title={Translator.trans("commons.error")}
                         />
                     )}
-                    <TableForm tables={tables} visibility={visibility[STEPS.TABLES]} onValid={onValid} />
+                    {/* <TableForm tables={tables} visibility={visibility[STEPS.TABLES]} onValid={onValid} /> */}
+                    <TableForm2 tables={tables} visibility={visibility[STEPS.TABLES]} onValid={onValid} />
                     <UploadMetadataForm visibility={visibility[STEPS.METADATAS]} onPrevious={previous} onSubmit={next} />
                     <DescriptionForm storedDataName={vectorDb.name} visibility={visibility[STEPS.DESCRIPTION]} onPrevious={previous} onValid={onValid} />
                     <AdditionalInfoForm
