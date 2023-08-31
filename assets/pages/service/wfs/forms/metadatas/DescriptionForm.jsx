@@ -160,7 +160,7 @@ const DescriptionForm = ({ storedDataName, visibility, onPrevious, onValid }) =>
             <h3>{Translator.trans("service.wfs.new.description_form.time_reference_title")}</h3>
             <Input
                 label={Translator.trans("service.wfs.new.description_form.creation_date")}
-                hintText={Translator.trans("service.wfs.new.description_form.hint_creation_date")}
+                // hintText={Translator.trans("service.wfs.new.description_form.hint_creation_date")}
                 state={errors.data_creation_date ? "error" : "default"}
                 stateRelatedMessage={errors?.data_creation_date?.message}
                 nativeInputProps={{

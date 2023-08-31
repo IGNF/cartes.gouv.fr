@@ -15,10 +15,9 @@ import AccessRestrictionForm from "./forms/AccessRestrictionForm";
 import AdditionalInfoForm from "./forms/metadatas/AdditionalInfoForm";
 import DescriptionForm from "./forms/metadatas/DescriptionForm";
 import UploadMetadataForm from "./forms/metadatas/UploadMetadataForm";
-// import TableForm from "./forms/tables/TableForm";
+import TableForm from "./forms/tables/TableForm";
 
 import "../../../sass/components/spinner.scss";
-import TableForm2 from "./forms/tables/TableForm2";
 
 /**
  * Récupère le type de fichier (unknown, csv ou geopackage)
@@ -186,8 +185,7 @@ const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
                             title={Translator.trans("commons.error")}
                         />
                     )}
-                    {/* <TableForm tables={tables} visibility={visibility[STEPS.TABLES]} onValid={onValid} /> */}
-                    <TableForm2 tables={tables} visibility={visibility[STEPS.TABLES]} onValid={onValid} />
+                    <TableForm tables={tables} visibility={visibility[STEPS.TABLES]} onValid={onValid} />
                     <UploadMetadataForm visibility={visibility[STEPS.METADATAS]} onPrevious={previous} onSubmit={next} />
                     <DescriptionForm storedDataName={vectorDb.name} visibility={visibility[STEPS.DESCRIPTION]} onPrevious={previous} onValid={onValid} />
                     <AdditionalInfoForm

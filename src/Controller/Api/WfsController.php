@@ -42,9 +42,10 @@ class WfsController extends AbstractController
                     'abstract' => $table->description
                 ];
                 if ($table->public_name) {
-                    $relation['public_name'] = $table->public_name;     
+                    $relation['public_name'] = $table->public_name;
                 }
-                if ($table->keywords) {
+
+                if ($table->keywords && count($table->keywords) !== 0) {
                     $relation['keywords'] = $table->keywords;     
                 }
                 $relations[] = $relation;
