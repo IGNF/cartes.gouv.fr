@@ -42,7 +42,7 @@ const TableSelection: FC<TablesSelectionProps> = ({ vectorDb, visible, form }) =
 
     return (
         <div className={fr.cx(!visible && "fr-hidden")}>
-            <h3>Sélectionnez les tables nécessaires au service</h3>
+            <h3>{Translator.trans("service.wms_vector.new.step_tables.title")}</h3>
 
             <p>{Translator.trans("mandatory_fields")}</p>
 

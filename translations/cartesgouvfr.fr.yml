@@ -176,3 +176,16 @@ service:
             step4: "Description de la ressource"
             step5: "Informations supplémentaires"
             step6: "Restrictions d'accès"
+            step_tables:
+                title: "Sélectionnez les tables nécessaires au service"
+            step_style_file:
+                title: "Déposez vos fichiers de style SLD"
+            step_metadata:
+                title: "Source des métadonnées"
+                help: "Apportez un maximum d'informations à vos utilisateurs en décrivant votre service le plus précisément possible."
+                legend: "Comment allez-vous remplir les métadonnées"
+                legend_hint: "Vous avez plusieurs méthodes pour fournir les données. Pour plus d’information, consultez"
+                option_import_file: "Importez un fichier de métadonnées (optionnel)"
+                option_import_file_hint: "TODO[Informations sur le type de fichier, taille…etc.]"
+                option_fill_form: "Compléter le formulaire manuellement"
+                option_fill_form_hint: "[Informations sur le remplissage manuel"

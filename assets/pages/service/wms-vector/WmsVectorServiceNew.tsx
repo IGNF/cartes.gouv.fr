@@ -19,6 +19,7 @@ import Translator from "../../../modules/Translator";
 import { routes } from "../../../router/router";
 import { type StoredDataRelation, type VectorDb } from "../../../types/app";
 import TableSelection from "./TableSelection";
+import UploadMetadata from "./UploadMetadata";
 import UploadStyleFile from "./UploadStyleFile";
 
 type WmsVectorServiceNewProps = {
@@ -61,19 +62,23 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
                         .test({
                             name: "is-valid-sld",
                             async test(value, ctx) {
+                                if (value instanceof FileList && value.length === 0) {
+                                    return ctx.createError({ message: `Veuillez fournir un fichier de style pour la table ${table.name}` });
+                                }
+
+                                const file = value[0] ?? undefined;
+
                                 // TODO : retravailler la validation du SLD, et éventuellement déplacer la fonction de validation ailleurs
-                                if (value instanceof File) {
-                                    if (functions.path.getFileExtension(value.name)?.toLowerCase() !== "sld") {
+                                if (file instanceof File) {
+                                    if (functions.path.getFileExtension(file.name)?.toLowerCase() !== "sld") {
                                         return ctx.createError({
-                                            message: `L'extension du fichier de style ${value.name} n'est pas correcte. Seule l'extension sld est acceptée.`,
+                                            message: `L'extension du fichier de style ${file.name} n'est pas correcte. Seule l'extension sld est acceptée.`,
                                         });
                                     }
 
-                                    const styleString = await value.text();
+                                    const styleString = await file.text();
                                     const sldParser = new SldStyleParser();
                                     const result = await sldParser.readStyle(styleString);
-
-                                    console.log(result);
 
                                     if (result?.warnings || result?.unsupportedProperties || result?.errors) {
                                         return ctx.createError({ message: JSON.stringify(result) });
@@ -95,13 +100,53 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
                 return yup.object().shape(styleFiles);
             }),
         }),
-        3: yup.object(),
+        3: yup.object().shape({
+            is_upload_file: yup.string().oneOf(["true", "false"]).required().default("false"),
+            metadata_file_content: yup.mixed().when("is_upload_file", {
+                is: "true",
+                then: () =>
+                    yup
+                        .mixed()
+                        .required()
+                        .test({
+                            name: "is-valid-metadata",
+                            async test(value, ctx) {
+                                if (value instanceof FileList && value.length === 0) {
+                                    return ctx.createError({ message: "Veuillez fournir un fichier de métadonnées" });
+                                }
+                                const file = value[0] ?? undefined;
+
+                                if (file instanceof File) {
+                                    if (functions.path.getFileExtension(file.name)?.toLowerCase() !== "xml") {
+                                        return ctx.createError({
+                                            message: `L'extension du fichier de métadonnées ${file.name} n'est pas correcte. Seule l'extension xml est acceptée.`,
+                                        });
+                                    }
+
+                                    //  TODO : valider le fichier de métadonnées
+                                } else {
+                                    return ctx.createError({ message: "Le fichier de style de métadonnées est invalide" });
+                                }
+                                return true;
+                            },
+                        }),
+            }),
+        }),
         4: yup.object(),
         5: yup.object(),
         6: yup.object(),
     };
 
-    const form = useForm({ resolver: yupResolver(schemas[currentStep]), shouldUnregister: false });
+    const defaultValues = {
+        1: { selected_tables: [] },
+        3: { is_upload_file: "false" },
+    };
+
+    const form = useForm({
+        defaultValues: defaultValues[currentStep],
+        resolver: yupResolver(schemas[currentStep]),
+        mode: "onChange",
+    });
     const {
         // handleSubmit,
         formState: { errors },
@@ -163,6 +208,7 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
 
                     <TableSelection visible={currentStep === STEPS.TABLES_SELECTION} vectorDb={vectorDbQuery.data} form={form} />
                     <UploadStyleFile visible={currentStep === STEPS.STYLE_FILE} selectedTables={selectedTables} form={form} />
+                    <UploadMetadata visible={currentStep === STEPS.METADATA} form={form} />
 
                     <ButtonsGroup
                         className={fr.cx("fr-mt-2w")}
