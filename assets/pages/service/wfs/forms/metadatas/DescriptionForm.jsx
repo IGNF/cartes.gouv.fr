@@ -4,6 +4,7 @@ import { Input } from "@codegouvfr/react-dsfr/Input";
 import { useIsDark } from "@codegouvfr/react-dsfr/useIsDark";
 import { yupResolver } from "@hookform/resolvers/yup";
 import MDEditor from "@uiw/react-md-editor";
+import getLocaleCommands from "../../../../../modules/react-md/react-md-commands";
 import { format as datefnsFormat } from "date-fns";
 import PropTypes from "prop-types";
 import React, { useState, useEffect } from "react";
@@ -110,6 +111,7 @@ const DescriptionForm = ({ storedDataName, visibility, onPrevious, onValid }) =>
                 <MDEditor
                     value={description}
                     height={200}
+                    commands={getLocaleCommands("fr")}
                     extraCommands={[]}
                     textareaProps={{
                         placeholder: Translator.trans("service.wfs.new.description_form.markdown_placeholder"),
