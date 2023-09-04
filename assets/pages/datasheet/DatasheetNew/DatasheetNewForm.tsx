@@ -20,7 +20,7 @@ import defaultProjections from "../../../data/default_projections.json";
 import functions from "../../../functions";
 import FileUploader from "../../../modules/FileUploader";
 import Translator from "../../../modules/Translator";
-import RCKeys from "../../../modules/RCKeys";
+import RQKeys from "../../../modules/RQKeys";
 import { routes } from "../../../router/router";
 import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
 import DatasheetNewIntegrationDialog from "./DatasheetNewIntegration/DatasheetNewIntegrationDialog";
@@ -86,7 +86,7 @@ const DatasheetNewForm = ({ datastoreId }) => {
 
     const queryClient = useQueryClient();
     const dataListQuery = useQuery({
-        queryKey: RCKeys.datastore_datasheet_list(datastoreId),
+        queryKey: RQKeys.datastore_datasheet_list(datastoreId),
         queryFn: () => api.datasheet.getList(datastoreId),
         refetchInterval: 20000,
         enabled: shouldFetchDataList,
@@ -107,7 +107,7 @@ const DatasheetNewForm = ({ datastoreId }) => {
 
     useEffect(() => {
         return () => {
-            queryClient.cancelQueries({ queryKey: [...RCKeys.datastore_datasheet_list(datastoreId)] });
+            queryClient.cancelQueries({ queryKey: [...RQKeys.datastore_datasheet_list(datastoreId)] });
         };
     }, [datastoreId, queryClient]);
 

@@ -5,7 +5,7 @@ import { FC, PropsWithChildren } from "react";
 import api from "../../api";
 import { datastoreNavItems } from "../../config/datastoreNavItems";
 import { useDatastoreList } from "../../hooks/useDatastoreList";
-import RCKeys from "../../modules/RCKeys";
+import RQKeys from "../../modules/RQKeys";
 import { routes } from "../../router/router";
 import AppLayout from "./AppLayout";
 
@@ -19,7 +19,7 @@ const DatastoreLayout: FC<PropsWithChildren<DatastoreLayoutProps>> = ({ datastor
 
     const datastoreListQuery = useDatastoreList();
     const datastoreQuery = useQuery({
-        queryKey: RCKeys.datastore(datastoreId),
+        queryKey: RQKeys.datastore(datastoreId),
         queryFn: () => api.datastore.get(datastoreId, { signal: abortController.signal }),
         staleTime: 3600000,
     });

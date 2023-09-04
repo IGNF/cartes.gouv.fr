@@ -9,7 +9,7 @@ import * as yup from "yup";
 import Translator from "../../../../modules/Translator";
 import { useQuery } from "@tanstack/react-query";
 import { DatastoreEndpoint } from "../../../../types/app";
-import RCKeys from "../../../../modules/RCKeys";
+import RQKeys from "../../../../modules/RQKeys";
 import api from "../../../../api";
 
 type AccessRestrictionFormProps = {
@@ -39,7 +39,7 @@ const AccessRestrictionForm: FC<AccessRestrictionFormProps> = ({ datastoreId, vi
     };
 
     const endpointsQuery = useQuery<DatastoreEndpoint[]>({
-        queryKey: RCKeys.datastore_endpoints(datastoreId),
+        queryKey: RQKeys.datastore_endpoints(datastoreId),
         queryFn: () => api.datastore.getEndpoints(datastoreId, {}, { signal: abortController?.signal }),
         retry: false,
         staleTime: 3600000,

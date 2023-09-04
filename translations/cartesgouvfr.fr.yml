@@ -6,6 +6,9 @@ continue: "Continuer"
 pursue: "Poursuivre"
 send: "Envoyer"
 stored_data_does_not_exists: "La stored_data %stored_data% n'existe pas."
+get_stored_data_failed: "La récupération des informations sur la donnée stockée a échoué"
+get_filetree_failed: "La récupération du fichier associé à la donnée a échoué"
+back_to_my_datas: "Retour à mes données"
 
 mandatory_fields: "Sauf mention contraire “(optionnel)” dans le label, tous les champs sont obligatoires."
 

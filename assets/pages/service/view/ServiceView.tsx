@@ -10,7 +10,7 @@ import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
 import LoadingText from "../../../components/Utils/LoadingText";
 import RMap from "../../../components/Utils/RMap";
 import TextCopyToClipboard from "../../../components/Utils/TextCopyToClipboard";
-import RCKeys from "../../../modules/RCKeys";
+import RQKeys from "../../../modules/RQKeys";
 import { type CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
 import { type Service } from "../../../types/app";
@@ -23,7 +23,7 @@ type ServiceViewProps = {
 
 const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetName }) => {
     const serviceQuery = useQuery<Service, CartesApiException>({
-        queryKey: RCKeys.datastore_offering(datastoreId, offeringId),
+        queryKey: RQKeys.datastore_offering(datastoreId, offeringId),
         queryFn: () => api.service.get(datastoreId, offeringId),
         staleTime: 60000,
     });

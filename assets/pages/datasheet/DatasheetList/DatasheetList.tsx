@@ -6,7 +6,7 @@ import { FC, useEffect } from "react";
 import api from "../../../api";
 import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
 import LoadingText from "../../../components/Utils/LoadingText";
-import RCKeys from "../../../modules/RCKeys";
+import RQKeys from "../../../modules/RQKeys";
 import { routes } from "../../../router/router";
 import { Datasheet } from "../../../types/app";
 import DatasheetListItem from "./DatasheetListItem";
@@ -21,13 +21,13 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
     const queryClient = useQueryClient();
 
     const datastoreQuery = useQuery({
-        queryKey: RCKeys.datastore(datastoreId),
+        queryKey: RQKeys.datastore(datastoreId),
         queryFn: () => api.datastore.get(datastoreId, { signal: abortController?.signal }),
         staleTime: 120000,
     });
 
     const datasheetListQuery = useQuery({
-        queryKey: RCKeys.datastore_datasheet_list(datastoreId),
+        queryKey: RQKeys.datastore_datasheet_list(datastoreId),
         queryFn: () => api.datasheet.getList(datastoreId, { signal: abortController?.signal }),
         staleTime: 30000,
         refetchInterval: 30000,
@@ -36,7 +36,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
     useEffect(() => {
         return () => {
             queryClient.cancelQueries({
-                queryKey: [...RCKeys.datastore(datastoreId), ...RCKeys.datastore_datasheet_list(datastoreId)],
+                queryKey: [...RQKeys.datastore(datastoreId), ...RQKeys.datastore_datasheet_list(datastoreId)],
             });
         };
     }, [queryClient, datastoreId]);

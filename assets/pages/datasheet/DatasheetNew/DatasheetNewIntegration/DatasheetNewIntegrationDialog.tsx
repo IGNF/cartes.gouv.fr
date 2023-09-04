@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { FC, useEffect, useState } from "react";
 
 import api from "../../../../api";
-import RCKeys from "../../../../modules/RCKeys";
+import RQKeys from "../../../../modules/RQKeys";
 import Translator from "../../../../modules/Translator";
 import { routes } from "../../../../router/router";
 
@@ -27,7 +27,7 @@ const DatasheetNewIntegrationDialog: FC<DatasheetNewIntegrationDialogProps> = ({
     // définition des query
     // query qui "ping" et récupère le progress en boucle (query désactivé au départ)
     const pingIntProgQuery = useQuery({
-        queryKey: RCKeys.datastore_upload_integration(datastoreId, uploadId),
+        queryKey: RQKeys.datastore_upload_integration(datastoreId, uploadId),
         queryFn: () => api.upload.pingIntegrationProgress(datastoreId, uploadId, { signal: abortController?.signal }),
         refetchInterval: 3000,
         refetchIntervalInBackground: true,
@@ -36,7 +36,7 @@ const DatasheetNewIntegrationDialog: FC<DatasheetNewIntegrationDialogProps> = ({
 
     // query qui récupère les informations sur l'upload
     const uploadQuery = useQuery({
-        queryKey: RCKeys.datastore_upload(datastoreId, uploadId),
+        queryKey: RQKeys.datastore_upload(datastoreId, uploadId),
         queryFn: () => api.upload.get(datastoreId, uploadId),
     });
 

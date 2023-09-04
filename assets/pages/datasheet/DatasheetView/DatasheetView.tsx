@@ -14,7 +14,7 @@ import api from "../../../api";
 import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
 import LoadingText from "../../../components/Utils/LoadingText";
 import Wait from "../../../components/Utils/Wait";
-import RCKeys from "../../../modules/RCKeys";
+import RQKeys from "../../../modules/RQKeys";
 import { type CartesApiException } from "../../../modules/jsonFetch";
 import { routes, useRoute } from "../../../router/router";
 import { type DatasheetDetailed } from "../../../types/app";
@@ -39,7 +39,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
     const queryClient = useQueryClient();
 
     const datasheetQuery = useQuery<DatasheetDetailed, CartesApiException>({
-        queryKey: RCKeys.datastore_datasheet(datastoreId, datasheetName),
+        queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName),
         queryFn: () => api.datasheet.get(datastoreId, datasheetName, { signal: abortController?.signal }),
         staleTime: 20000,
         refetchInterval: 20000,
@@ -50,7 +50,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
 
     useEffect(() => {
         return () => {
-            queryClient.cancelQueries({ queryKey: [...RCKeys.datastore_datasheet(datastoreId, datasheetName)] });
+            queryClient.cancelQueries({ queryKey: [...RQKeys.datastore_datasheet(datastoreId, datasheetName)] });
         };
     }, [datasheetName, datastoreId, queryClient]);
 

@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
-import RCKeys from "../modules/RCKeys";
+import RQKeys from "../modules/RQKeys";
 import api from "../api";
 import { useEffect } from "react";
 import useUser from "./useUser";
@@ -16,13 +16,13 @@ export const useDatastoreList = () => {
     useEffect(() => {
         return () => {
             queryClient.cancelQueries({
-                queryKey: [...RCKeys.datastore_list()],
+                queryKey: [...RQKeys.datastore_list()],
             });
         };
     }, [queryClient]);
 
     return useQuery<Datastore[], CartesApiException>({
-        queryKey: RCKeys.datastore_list(),
+        queryKey: RQKeys.datastore_list(),
         queryFn: () => api.user.getDatastoresList({ signal: abortController.signal }),
         staleTime: 60000,
         enabled: !!user,

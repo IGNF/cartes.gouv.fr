@@ -1,8 +1,10 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
+import { Button } from "@codegouvfr/react-dsfr/Button";
 import { FC, useEffect, useState } from "react";
-
+import { useQuery } from "@tanstack/react-query";
+import RQKeys from "../../../modules/RQKeys";
 import api from "../../../api";
 import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
 import LoadingText from "../../../components/Utils/LoadingText";
@@ -16,7 +18,6 @@ import AdditionalInfoForm from "./forms/metadatas/AdditionalInfoForm";
 import DescriptionForm from "./forms/metadatas/DescriptionForm";
 import UploadMetadataForm from "./forms/metadatas/UploadMetadataForm";
 import TableForm from "./forms/tables/TableForm";
-
 import "../../../sass/components/spinner.scss";
 
 /**
@@ -59,10 +60,15 @@ const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
         ACCESSRESTRICTIONS: 5,
     };
 
+    const [isLoading, setIsLoading] = useState(true);
     const [currentStep, setCurrentStep] = useState(STEPS.TABLES);
 
-    const [isLoading, setIsLoading] = useState(true);
-    const [vectorDb, setVectorDb] = useState<VectorDb>();
+    const vectorDbQuery = useQuery({
+        queryKey: RQKeys.datastore_stored_data(datastoreId, vectorDbId),
+        queryFn: () => api.storedData.get<VectorDb>(datastoreId, vectorDbId),
+        staleTime: 600000,
+    });
+
     const [fileType, setFileType] = useState<string | undefined>(undefined);
     const [tables, setTables] = useState<StoredDataRelation[]>([]);
     const [error, setError] = useState<CartesApiException>();
@@ -74,17 +80,18 @@ const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
     useEffect(() => {
         (async () => {
             try {
-                const vectorDb = (await api.storedData.get(datastoreId, vectorDbId)) as VectorDb;
-                setVectorDb(vectorDb);
+                if (vectorDbQuery.data) {
+                    const relations = vectorDbQuery.data.type_infos?.relations ?? [];
 
-                const rels = vectorDb.type_infos?.relations || [];
-                const relations = rels.filter((rel) => rel?.type === "TABLE");
-                setTables(relations);
+                    const tables = relations.filter((rel) => rel.type && rel.type === "TABLE");
+                    setTables(tables);
 
-                const uploadId = vectorDb.tags["upload_id"];
-                const fileTree = await api.upload.getFileTree(datastoreId, uploadId);
-                const fileType = getUploadFileType(fileTree);
-                setFileType(fileType);
+                    // Le type de fichier associe
+                    const uploadId = vectorDbQuery.data.tags["upload_id"];
+                    const fileTree = await api.upload.getFileTree(datastoreId, uploadId);
+                    const fileType = getUploadFileType(fileTree);
+                    setFileType(fileType);
+                }
             } catch (error) {
                 console.error(error);
                 setError(error as CartesApiException);
@@ -92,7 +99,7 @@ const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
                 setIsLoading(false);
             }
         })();
-    }, [datastoreId, vectorDbId]);
+    }, [datastoreId, vectorDbQuery.data]);
 
     const previous = () => {
         setCurrentStep(currentStep - 1);
@@ -128,8 +135,8 @@ const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
                 .add(datastoreId, vectorDbId, filtered)
                 .then((response) => {
                     console.log(response);
-                    if (vectorDb?.tags?.datasheet_name) {
-                        routes.datastore_datasheet_view({ datastoreId, datasheetName: vectorDb?.tags.datasheet_name, activeTab: "services" }).push();
+                    if (vectorDbQuery.data?.tags?.datasheet_name) {
+                        routes.datastore_datasheet_view({ datastoreId, datasheetName: vectorDbQuery.data?.tags.datasheet_name, activeTab: "services" }).push();
                     } else {
                         routes.datasheet_list({ datastoreId }).push();
                     }
@@ -149,7 +156,16 @@ const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
             <h1>{Translator.trans("service.wfs.new.title")}</h1>
             {isLoading ? (
                 <LoadingText message={Translator.trans("service.wfs.new.loading_stored_data")} />
-            ) : vectorDb ? (
+            ) : vectorDbQuery.data === undefined ? (
+                <Alert
+                    severity="error"
+                    closable={false}
+                    title={Translator.trans("get_stored_data_failed")}
+                    description={<Button linkProps={routes.datasheet_list({ datastoreId }).link}>{Translator.trans("back_to_my_datas")}</Button>}
+                />
+            ) : error !== undefined ? (
+                <Alert severity="error" closable={true} title={Translator.trans("get_filetree_failed")} />
+            ) : (
                 <>
                     <Stepper
                         currentStep={currentStep}
@@ -168,9 +184,14 @@ const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
                     )}
                     <TableForm tables={tables} visible={currentStep === STEPS.TABLES} onValid={onValid} />
                     <UploadMetadataForm visible={currentStep === STEPS.METADATAS} onPrevious={previous} onSubmit={next} />
-                    <DescriptionForm storedDataName={vectorDb.name} visible={currentStep === STEPS.DESCRIPTION} onPrevious={previous} onValid={onValid} />
+                    <DescriptionForm
+                        storedDataName={vectorDbQuery.data.name}
+                        visible={currentStep === STEPS.DESCRIPTION}
+                        onPrevious={previous}
+                        onValid={onValid}
+                    />
                     <AdditionalInfoForm
-                        storedData={vectorDb}
+                        storedData={vectorDbQuery.data}
                         fileType={fileType}
                         visible={currentStep === STEPS.ADDITIONALINFORMATIONS}
                         onPrevious={previous}
@@ -183,8 +204,6 @@ const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
                         onValid={onValid}
                     />
                 </>
-            ) : (
-                <Alert closable description={error?.message} severity="error" title={Translator.trans("commons.error")} />
             )}
             {isSubmitting && (
                 <Wait>

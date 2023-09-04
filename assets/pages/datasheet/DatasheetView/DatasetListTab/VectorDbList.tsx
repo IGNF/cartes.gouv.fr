@@ -12,7 +12,7 @@ import { createPortal } from "react-dom";
 import api from "../../../../api";
 import MenuList from "../../../../components/Utils/MenuList";
 import functions from "../../../../functions";
-import RCKeys from "../../../../modules/RCKeys";
+import RQKeys from "../../../../modules/RQKeys";
 import { routes } from "../../../../router/router";
 import { DatastoreEndpoint, StoredDataStatuses, type VectorDb } from "../../../../types/app";
 
@@ -76,7 +76,7 @@ const VectorDbList: FC<VectorDbListProps> = ({ datastoreId, vectorDbList }) => {
     const [selectedStoredDataId, setSelectedStoredDataId] = useState<string>();
 
     const endpointsQuery = useQuery<DatastoreEndpoint[]>({
-        queryKey: RCKeys.datastore_endpoints(datastoreId),
+        queryKey: RQKeys.datastore_endpoints(datastoreId),
         queryFn: () => api.datastore.getEndpoints(datastoreId, {}, { signal: abortController?.signal }),
         retry: false,
         staleTime: 3600000,

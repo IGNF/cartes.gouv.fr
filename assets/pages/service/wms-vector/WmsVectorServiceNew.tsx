@@ -12,7 +12,7 @@ import * as yup from "yup";
 import api from "../../../api";
 import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
 import LoadingText from "../../../components/Utils/LoadingText";
-import RCKeys from "../../../modules/RCKeys";
+import RQKeys from "../../../modules/RQKeys";
 import Translator from "../../../modules/Translator";
 import { routes } from "../../../router/router";
 import { type StoredDataRelation, type VectorDb } from "../../../types/app";
@@ -38,7 +38,7 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
     const [currentStep, setCurrentStep] = useState(STEPS.TABLES_SELECTION);
 
     const vectorDbQuery = useQuery({
-        queryKey: RCKeys.datastore_stored_data(datastoreId, vectorDbId),
+        queryKey: RQKeys.datastore_stored_data(datastoreId, vectorDbId),
         queryFn: () => api.storedData.get<VectorDb>(datastoreId, vectorDbId),
         staleTime: 600000,
     });
