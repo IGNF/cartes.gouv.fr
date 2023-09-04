@@ -14,7 +14,7 @@ import api from "../../../../api";
 
 type AccessRestrictionFormProps = {
     datastoreId: string;
-    visibility: boolean;
+    visible: boolean;
     onPrevious: () => void;
     onValid: (values) => void;
 };
@@ -23,7 +23,7 @@ const schema = yup.object({
     share_with: yup.string().required(Translator.trans("service.wfs.new.access_retrictions.share_with_error")),
 });
 
-const AccessRestrictionForm: FC<AccessRestrictionFormProps> = ({ datastoreId, visibility, onPrevious, onValid }) => {
+const AccessRestrictionForm: FC<AccessRestrictionFormProps> = ({ datastoreId, visible, onPrevious, onValid }) => {
     const abortController = new AbortController();
 
     const {
@@ -53,7 +53,7 @@ const AccessRestrictionForm: FC<AccessRestrictionFormProps> = ({ datastoreId, vi
         : [];
 
     return (
-        <div className={fr.cx("fr-my-2v", !visibility && "fr-hidden")}>
+        <div className={fr.cx("fr-my-2v", !visible && "fr-hidden")}>
             <h3>{Translator.trans("service.wfs.new.access_retrictions.title")}</h3>
 
             <p>{Translator.trans("mandatory_fields")}</p>

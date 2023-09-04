@@ -1,14 +1,19 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import PropTypes from "prop-types";
-import React from "react";
+import { FC } from "react";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
 
 import Translator from "../../../../../modules/Translator";
 
-const UploadMetadataForm = ({ visibility, onPrevious, onSubmit }) => {
+type UploadMetadataFormProps = {
+    visible: boolean;
+    onPrevious: () => void;
+    onSubmit: () => void;
+};
+
+const UploadMetadataForm: FC<UploadMetadataFormProps> = ({ visible, onPrevious, onSubmit }) => {
     return (
-        <div className={fr.cx("fr-my-2v", !visibility && "fr-hidden")}>
+        <div className={fr.cx("fr-my-2v", !visible && "fr-hidden")}>
             <h3>{Translator.trans("service.wfs.new.metadata_upload_form.title")}</h3>
 
             <p>{Translator.trans("mandatory_fields")}</p>
@@ -36,12 +41,6 @@ const UploadMetadataForm = ({ visibility, onPrevious, onSubmit }) => {
             />
         </div>
     );
-};
-
-UploadMetadataForm.propTypes = {
-    visibility: PropTypes.bool.isRequired,
-    onPrevious: PropTypes.func.isRequired,
-    onSubmit: PropTypes.func.isRequired,
 };
 
 export default UploadMetadataForm;

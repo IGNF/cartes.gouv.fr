@@ -23,11 +23,11 @@ type TableInfos = {
 
 type TableFormProps = {
     tables: StoredDataRelation[];
-    visibility: boolean;
+    visible: boolean;
     onValid: (values) => void;
 };
 
-const TableForm: FC<TableFormProps> = ({ tables, visibility, onValid }) => {
+const TableForm: FC<TableFormProps> = ({ tables, visible, onValid }) => {
     const keywords = getInspireKeywords();
 
     const [selectedTables, setSelectedTables] = useState<Set<string>>(new Set());
@@ -88,7 +88,7 @@ const TableForm: FC<TableFormProps> = ({ tables, visibility, onValid }) => {
     };
 
     return (
-        <div className={fr.cx("fr-my-2v", !visibility && "fr-hidden")}>
+        <div className={fr.cx("fr-my-2v", !visible && "fr-hidden")}>
             <h3>{Translator.trans("service.wfs.new.tables_form.title")}</h3>
             <p>{Translator.trans("mandatory_fields")}</p>
 

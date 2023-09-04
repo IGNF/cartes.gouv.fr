@@ -69,16 +69,6 @@ const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
     const [validationError, setValidationError] = useState<CartesApiException>();
 
     const [result, setResult] = useState({});
-
-    /* Visibilite des formulaires */
-    const [visibility, setVisibility] = useState(() => {
-        const v = {};
-        Object.keys(STEPS).forEach((key) => {
-            v[STEPS[key]] = false;
-        });
-        return v;
-    });
-
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
     useEffect(() => {
@@ -103,15 +93,6 @@ const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
             }
         })();
     }, [datastoreId, vectorDbId]);
-
-    useEffect(() => {
-        setVisibility((prevVisibility) => {
-            const v = { ...prevVisibility };
-            Object.keys(v).forEach((key) => (v[key] = false));
-            v[currentStep] = true;
-            return v;
-        });
-    }, [currentStep]);
 
     const previous = () => {
         setCurrentStep(currentStep - 1);
@@ -185,19 +166,19 @@ const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
                             title={Translator.trans("commons.error")}
                         />
                     )}
-                    <TableForm tables={tables} visibility={visibility[STEPS.TABLES]} onValid={onValid} />
-                    <UploadMetadataForm visibility={visibility[STEPS.METADATAS]} onPrevious={previous} onSubmit={next} />
-                    <DescriptionForm storedDataName={vectorDb.name} visibility={visibility[STEPS.DESCRIPTION]} onPrevious={previous} onValid={onValid} />
+                    <TableForm tables={tables} visible={currentStep === STEPS.TABLES} onValid={onValid} />
+                    <UploadMetadataForm visible={currentStep === STEPS.METADATAS} onPrevious={previous} onSubmit={next} />
+                    <DescriptionForm storedDataName={vectorDb.name} visible={currentStep === STEPS.DESCRIPTION} onPrevious={previous} onValid={onValid} />
                     <AdditionalInfoForm
                         storedData={vectorDb}
                         fileType={fileType}
-                        visibility={visibility[STEPS.ADDITIONALINFORMATIONS]}
+                        visible={currentStep === STEPS.ADDITIONALINFORMATIONS}
                         onPrevious={previous}
                         onValid={onValid}
                     />
                     <AccessRestrictionForm
                         datastoreId={datastoreId}
-                        visibility={visibility[STEPS.ACCESSRESTRICTIONS]}
+                        visible={currentStep === STEPS.ACCESSRESTRICTIONS}
                         onPrevious={previous}
                         onValid={onValid}
                     />
