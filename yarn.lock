@@ -4198,9 +4198,9 @@ geostyler-sld-parser@^5.1.0:
     lodash "^4.17.21"
 
 geostyler-style@^7.3.1:
-  version "7.3.1"
-  resolved "https://registry.yarnpkg.com/geostyler-style/-/geostyler-style-7.3.1.tgz#f22dbe1f39a9874eeaff33a15dc587a4281007f0"
-  integrity sha512-9KOXmtRt0O7lhwWfmRORM5l3j3H1uR52NFHlHv1qTb1hgNGZIPhLUrGCaoceUdNkD9+P/Cjiqsea+X+H8h64zw==
+  version "7.4.0"
+  resolved "https://registry.yarnpkg.com/geostyler-style/-/geostyler-style-7.4.0.tgz#b26d230625b55effa83bf44d783136dff16c2c15"
+  integrity sha512-qB73PfMni+N8pTEAsh2Qjl3yz/du4zbgEDddMVscahPyYw4o/yErsDUl4ZMJAYTSQBnLmkTnSNjLN5w7yshjvw==
   dependencies:
     "@types/lodash" "^4.14.168"
     lodash "^4.17.21"
