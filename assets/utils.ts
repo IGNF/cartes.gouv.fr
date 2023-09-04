@@ -9,7 +9,12 @@ import charsets from "./data/charset_list.json";
 import langs from "./data/iso_639-2.json";
 
 const getLanguages = () => {
-    const languages = [];
+    type Language = {
+        language: string;
+        code: string;
+    };
+
+    const languages: Language[] = [];
     for (const def of Object.values(langs)) {
         const code = def["639-2"];
         if (code !== "und") {
