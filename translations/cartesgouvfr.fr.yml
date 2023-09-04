@@ -119,7 +119,7 @@ service:
                 identifier_error: "L'identificateur est obligatoire"
                 category: "Catégorie thématique"
                 hint_category: "Utilisez l’auto-complétion ou saisissez librement des mots clés en appuyant sur Entrée après chaque mot"
-                category_error: "Les catégories sont obligatoires"
+                category_error: "La catégorie thématique est obligatoire"
                 email_contact: "Email de contact sur les métadonnées"
                 hint_email_contact: "TODO[Explication du champ]"
                 email_contact_mandatory_error: "l'email de contact est obligatoire"

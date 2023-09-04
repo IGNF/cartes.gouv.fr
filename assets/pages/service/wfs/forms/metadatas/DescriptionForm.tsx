@@ -140,6 +140,8 @@ const DescriptionForm: FC<DescriptionFormProps> = ({ storedDataName, visible, on
             <KeywordsSelect
                 label={Translator.trans("service.wfs.new.description_form.category")}
                 hintText={Translator.trans("service.wfs.new.description_form.hint_category")}
+                state={errors.data_category ? "error" : "default"}
+                stateRelatedMessage={errors?.data_category?.message}
                 freeSolo
                 keywords={keywords}
                 onChange={handleKeywordsChange}
@@ -206,7 +208,6 @@ const DescriptionForm: FC<DescriptionFormProps> = ({ storedDataName, visible, on
                     {
                         children: Translator.trans("continue"),
                         onClick: () => {
-                            console.log(getFormValues());
                             handleSubmit(onSubmit)();
                         },
                     },
