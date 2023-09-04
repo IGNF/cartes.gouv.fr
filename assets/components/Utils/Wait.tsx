@@ -1,8 +1,11 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import { useColors } from "@codegouvfr/react-dsfr/useColors";
 import { FC, PropsWithChildren } from "react";
 import { createPortal } from "react-dom";
 
 const Wait: FC<PropsWithChildren> = ({ children }) => {
+    const theme = useColors();
+
     return createPortal(
         <div
             style={{
@@ -22,7 +25,8 @@ const Wait: FC<PropsWithChildren> = ({ children }) => {
                 style={{
                     justifyContent: "center",
                     alignItems: "center",
-                    backgroundColor: "white",
+                    backgroundColor: theme.decisions.background.default.grey.default,
+                    color: theme.decisions.text.default.grey.default,
                 }}
             >
                 <div className={fr.cx("fr-container", "fr-p-2w")}>{children}</div>
