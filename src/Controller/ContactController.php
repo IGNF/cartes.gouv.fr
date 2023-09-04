@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Exception\AppException;
 use App\Security\User;
 use App\Services\EntrepotApi\UserApiService;
 use App\Services\MailerService;
@@ -9,6 +10,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -86,8 +88,10 @@ class ContactController extends AbstractController
             ]);
 
             return new JsonResponse(['success' => true]);
-        } catch (BadRequestHttpException $e) {
+        } catch (BadRequestHttpException|AppException $e) {
             return new JsonResponse(['error' => $e->getMessage()], $e->getStatusCode());
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }
