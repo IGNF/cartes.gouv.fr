@@ -4,7 +4,7 @@ import { Upload } from "@codegouvfr/react-dsfr/Upload";
 import { FC } from "react";
 import { UseFormReturn } from "react-hook-form";
 
-import Translator from "../../../modules/Translator";
+import Translator from "../../../../modules/Translator";
 
 type UploadMetadataProps = {
     visible: boolean;

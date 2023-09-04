@@ -18,8 +18,9 @@ import { routes } from "../../../router/router";
 import { type StoredDataRelation, type VectorDb } from "../../../types/app";
 import validations from "../../../validations";
 import TableSelection from "./TableSelection";
-import UploadMetadata from "./UploadMetadata";
+import UploadMetadata from "./metadata/UploadMetadata";
 import UploadStyleFile from "./UploadStyleFile";
+import Description from "./metadata/Description";
 
 type WmsVectorServiceNewProps = {
     datastoreId: string;
@@ -161,6 +162,7 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
                     <TableSelection visible={currentStep === STEPS.TABLES_SELECTION} vectorDb={vectorDbQuery.data} form={form} />
                     <UploadStyleFile visible={currentStep === STEPS.STYLE_FILE} selectedTables={selectedTables} form={form} />
                     <UploadMetadata visible={currentStep === STEPS.METADATA} form={form} />
+                    <Description visible={currentStep === STEPS.DESCRIPTION} vectorDb={vectorDbQuery.data} form={form} />
 
                     <ButtonsGroup
                         className={fr.cx("fr-mt-2w")}

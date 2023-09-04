@@ -4,10 +4,10 @@ import { Autocomplete } from "@mui/material";
 import { TextField } from "@mui/material";
 import MuiDsfrThemeProvider from "@codegouvfr/react-dsfr/mui";
 
-type KeywordsComponentProps = {
+type KeywordsSelectProps = {
     label: string;
     hintText: string;
-    state: string;
+    state?: "default" | "error" | "success";
     stateRelatedMessage?: string;
     defaultValue?: string[];
     keywords: string[];
@@ -15,7 +15,7 @@ type KeywordsComponentProps = {
     onChange: (values: string[]) => void;
 };
 
-const KeywordsSelect: FC<KeywordsComponentProps> = (props) => {
+const KeywordsSelect: FC<KeywordsSelectProps> = (props) => {
     const { label, hintText, state, stateRelatedMessage, defaultValue = [], keywords, freeSolo, onChange } = props;
     const [value, setValue] = useState<string[]>(defaultValue);
 
