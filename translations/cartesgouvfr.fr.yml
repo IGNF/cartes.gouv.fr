@@ -1,6 +1,9 @@
 commons:
     error: "Erreur"
 
+site:
+    go_to_content: "Aller au contenu"
+
 previous_step: "Étape précédente"
 continue: "Continuer"
 pursue: "Poursuivre"
