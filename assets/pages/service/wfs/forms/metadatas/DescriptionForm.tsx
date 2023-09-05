@@ -2,6 +2,9 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { useIsDark } from "@codegouvfr/react-dsfr/useIsDark";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import RQKeys from "../../../../../modules/RQKeys";
+import api from "../../../../../api";
 import { yupResolver } from "@hookform/resolvers/yup";
 import MDEditor from "@uiw/react-md-editor";
 import getLocaleCommands from "../../../../../modules/react-md/react-md-commands";
@@ -12,46 +15,64 @@ import { v4 as uuidv4 } from "uuid";
 import * as yup from "yup";
 import KeywordsSelect from "../../../../../components/Utils/KeywordsSelect";
 import { removeDiacritics } from "../../../../../utils";
-
 import Translator from "../../../../../modules/Translator";
 
 // Themes et mot cles INSPIRE
 import { getInspireKeywords } from "../../../../../utils";
 
-const schema = yup
-    .object({
-        data_technical_name: yup
-            .string()
-            .required(Translator.trans("service.wfs.new.description_form.technical_name_error"))
-            .matches(/^[\w-.]+$/, Translator.trans("service.wfs.new.description_form.technical_name_regex")),
-        data_public_name: yup.string().required(Translator.trans("service.wfs.new.description_form.public_name_error")),
-        data_description: yup.string().required(Translator.trans("service.wfs.new.description_form.description_error")),
-        data_identifier: yup.string().required(Translator.trans("service.wfs.new.description_form.identifier_error")),
-        data_category: yup.string().required(Translator.trans("service.wfs.new.description_form.category_error")),
-        data_email_contact: yup
-            .string()
-            .email(Translator.trans("service.wfs.new.description_form.email_contact_error"))
-            .required(Translator.trans("service.wfs.new.description_form.email_contact_mandatory_error")),
-        data_creation_date: yup.date().required(Translator.trans("service.wfs.new.description_form.creation_date_error")),
-        data_resource_genealogy: yup.string(),
-        data_organization: yup.string().required(Translator.trans("service.wfs.new.description_form.organization_error")),
-        data_organization_email: yup
-            .string()
-            .email(Translator.trans("service.wfs.new.description_form.organization_email_error"))
-            .required(Translator.trans("service.wfs.new.description_form.organization_email_mandatory_error")),
-    })
-    .required();
-
 type DescriptionFormProps = {
+    datastoreId: string;
     storedDataName: string;
     visible: boolean;
     onPrevious: () => void;
     onValid: (values) => void;
 };
 
-const DescriptionForm: FC<DescriptionFormProps> = ({ storedDataName, visible, onPrevious, onValid }) => {
+const DescriptionForm: FC<DescriptionFormProps> = ({ datastoreId, storedDataName, visible, onPrevious, onValid }) => {
     const keywords = getInspireKeywords();
     const now = datefnsFormat(new Date(), "yyyy-MM-dd");
+
+    const schema = yup
+        .object({
+            data_technical_name: yup
+                .string()
+                .required(Translator.trans("service.wfs.new.description_form.technical_name_error"))
+                .matches(/^[\w-.]+$/, Translator.trans("service.wfs.new.description_form.technical_name_regex"))
+                .test({
+                    name: "is-unique",
+                    test(technicalName, ctx) {
+                        const technicalNameList = offeringsQuery?.data?.map((data) => data?.layer_name);
+                        if (technicalNameList?.includes(technicalName)) {
+                            return ctx.createError({ message: `"${technicalName}" : Ce nom technique existe déjà` });
+                        }
+
+                        return true;
+                    },
+                }),
+            data_public_name: yup.string().required(Translator.trans("service.wfs.new.description_form.public_name_error")),
+            data_description: yup.string().required(Translator.trans("service.wfs.new.description_form.description_error")),
+            data_identifier: yup.string().required(Translator.trans("service.wfs.new.description_form.identifier_error")),
+            data_category: yup.string().required(Translator.trans("service.wfs.new.description_form.category_error")),
+            data_email_contact: yup
+                .string()
+                .email(Translator.trans("service.wfs.new.description_form.email_contact_error"))
+                .required(Translator.trans("service.wfs.new.description_form.email_contact_mandatory_error")),
+            data_creation_date: yup.date().required(Translator.trans("service.wfs.new.description_form.creation_date_error")),
+            data_resource_genealogy: yup.string(),
+            data_organization: yup.string().required(Translator.trans("service.wfs.new.description_form.organization_error")),
+            data_organization_email: yup
+                .string()
+                .email(Translator.trans("service.wfs.new.description_form.organization_email_error"))
+                .required(Translator.trans("service.wfs.new.description_form.organization_email_mandatory_error")),
+        })
+        .required();
+
+    const queryClient = useQueryClient();
+    const offeringsQuery = useQuery({
+        queryKey: RQKeys.datastore_offerings(datastoreId),
+        queryFn: () => api.service.getOfferings(datastoreId),
+        refetchInterval: 10000,
+    });
 
     const { isDark } = useIsDark();
     const [description, setDescription] = useState("");
@@ -71,6 +92,12 @@ const DescriptionForm: FC<DescriptionFormProps> = ({ storedDataName, visible, on
         setFormValue("data_technical_name", nice);
         setFormValue("data_public_name", storedDataName);
     }, [setFormValue, storedDataName]);
+
+    useEffect(() => {
+        return () => {
+            queryClient.cancelQueries({ queryKey: [...RQKeys.datastore_offerings(datastoreId)] });
+        };
+    }, [datastoreId, queryClient, offeringsQuery.data]);
 
     const handleKeywordsChange = (values) => {
         setFormValue("data_category", values.join(","), { shouldValidate: true });

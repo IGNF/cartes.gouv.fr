@@ -22,6 +22,17 @@ class ServiceController extends AbstractController
     ) {
     }
 
+    #[Route('/offerings', name: 'get_offerings', methods: ['GET'])]
+    public function getOfferings(string $datastoreId): JsonResponse
+    {
+        try {
+            $offerings = $this->entrepotApiService->configuration->getAllOfferings($datastoreId);
+            return $this->json($offerings);
+        } catch (EntrepotApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
     #[Route('/offering/{offeringId}', name: 'get_offering', methods: ['GET'])]
     public function getOffering(string $datastoreId, string $offeringId): JsonResponse
     {

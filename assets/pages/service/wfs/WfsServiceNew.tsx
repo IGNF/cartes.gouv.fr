@@ -60,7 +60,6 @@ const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
         ACCESSRESTRICTIONS: 5,
     };
 
-    const [isLoading, setIsLoading] = useState(true);
     const [currentStep, setCurrentStep] = useState(STEPS.TABLES);
 
     const vectorDbQuery = useQuery({
@@ -95,8 +94,6 @@ const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
             } catch (error) {
                 console.error(error);
                 setError(error as CartesApiException);
-            } finally {
-                setIsLoading(false);
             }
         })();
     }, [datastoreId, vectorDbQuery.data]);
@@ -154,7 +151,7 @@ const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
     return (
         <DatastoreLayout datastoreId={datastoreId}>
             <h1>{Translator.trans("service.wfs.new.title")}</h1>
-            {isLoading ? (
+            {vectorDbQuery.isLoading ? (
                 <LoadingText message={Translator.trans("service.wfs.new.loading_stored_data")} />
             ) : vectorDbQuery.data === undefined ? (
                 <Alert
@@ -185,6 +182,7 @@ const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
                     <TableForm tables={tables} visible={currentStep === STEPS.TABLES} onValid={onValid} />
                     <UploadMetadataForm visible={currentStep === STEPS.METADATAS} onPrevious={previous} onSubmit={next} />
                     <DescriptionForm
+                        datastoreId={datastoreId}
                         storedDataName={vectorDbQuery.data.name}
                         visible={currentStep === STEPS.DESCRIPTION}
                         onPrevious={previous}
