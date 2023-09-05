@@ -18,9 +18,9 @@ import { routes } from "../../../router/router";
 import { type StoredDataRelation, type VectorDb } from "../../../types/app";
 import validations from "../../../validations";
 import TableSelection from "./TableSelection";
-import UploadMetadata from "./metadata/UploadMetadata";
 import UploadStyleFile from "./UploadStyleFile";
 import Description from "./metadata/Description";
+import UploadMetadata from "./metadata/UploadMetadata";
 
 type WmsVectorServiceNewProps = {
     datastoreId: string;
@@ -85,27 +85,45 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
                         }),
             }),
         }),
-        4: yup.object(),
+        4: yup
+            .object({
+                technical_name: yup
+                    .string()
+                    .required(Translator.trans("service.wms_vector.new.step_description.technical_name_error"))
+                    .matches(/^[\w-.]+$/, Translator.trans("service.wms_vector.new.step_description.technical_name_regex")),
+                public_name: yup.string().required(Translator.trans("service.wms_vector.new.step_description.public_name_error")),
+                description: yup.string().required(Translator.trans("service.wms_vector.new.step_description.description_error")),
+                identifier: yup.string().required(Translator.trans("service.wms_vector.new.step_description.identifier_error")),
+                category: yup
+                    .array(yup.string())
+                    .min(1, Translator.trans("service.wms_vector.new.step_description.category_error"))
+                    .required(Translator.trans("service.wms_vector.new.step_description.category_error")),
+                email_contact: yup
+                    .string()
+                    .email(Translator.trans("service.wms_vector.new.step_description.email_contact_error"))
+                    .required(Translator.trans("service.wms_vector.new.step_description.email_contact_mandatory_error")),
+                creation_date: yup.date().required(Translator.trans("service.wms_vector.new.step_description.creation_date_error")),
+                resource_genealogy: yup.string(),
+                organization: yup.string().required(Translator.trans("service.wms_vector.new.step_description.organization_error")),
+                organization_email: yup
+                    .string()
+                    .email(Translator.trans("service.wms_vector.new.step_description.organization_email_error"))
+                    .required(Translator.trans("service.wms_vector.new.step_description.organization_email_mandatory_error")),
+            })
+            .required(),
         5: yup.object(),
         6: yup.object(),
     };
 
-    const defaultValues = {
-        1: { selected_tables: [] },
-        3: { is_upload_file: "false" },
-    };
-
     const form = useForm({
-        defaultValues: defaultValues[currentStep],
         resolver: yupResolver(schemas[currentStep]),
         mode: "onChange",
     });
     const {
-        // handleSubmit,
-        formState: { errors },
+        handleSubmit,
+        formState: { errors, isValid },
         getValues: getFormValues,
         watch,
-        trigger,
     } = form;
 
     const selectedTableNamesList: string[] = watch("selected_tables");
@@ -122,9 +140,7 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
 
     const previousStep = () => setCurrentStep((currentStep) => currentStep - 1);
     const nextStep = async () => {
-        const isStepValid = await trigger();
-
-        if (!isStepValid) return;
+        if (!isValid) return;
 
         if (currentStep < Object.values(STEPS).length) {
             setCurrentStep((currentStep) => currentStep + 1);
@@ -180,7 +196,7 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
                                     currentStep < Object.values(STEPS).length
                                         ? Translator.trans("continue")
                                         : Translator.trans("service.wms_vector.new.publish"),
-                                onClick: nextStep,
+                                onClick: handleSubmit(nextStep),
                             },
                         ]}
                         inlineLayoutWhen="always"
