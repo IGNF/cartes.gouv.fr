@@ -1,6 +1,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { format as datefnsFormat } from "date-fns";
+import { XMLParser } from "fast-xml-parser";
 import { FC, useEffect } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
@@ -24,7 +25,10 @@ const Description: FC<DescriptionProps> = ({ vectorDb, visible, form }) => {
         register,
         formState: { errors },
         setValue: setFormValue,
+        watch,
     } = form;
+
+    const metadata: File = watch("metadata_file_content")?.[0];
 
     useEffect(() => {
         const storedDataName = vectorDb?.name ?? "";
@@ -33,6 +37,22 @@ const Description: FC<DescriptionProps> = ({ vectorDb, visible, form }) => {
         setFormValue("technical_name", nice);
         setFormValue("public_name", storedDataName);
     }, [setFormValue, vectorDb]);
+
+    useEffect(() => {
+        (async () => {
+            if (!metadata) return;
+
+            const xmlText = await metadata.text();
+
+            const xmlParser = new XMLParser();
+            const parsed = xmlParser.parse(xmlText);
+            const fileIdentifier = parsed["gmd:MD_Metadata"]?.["gmd:fileIdentifier"]?.["gco:CharacterString"] ?? "";
+            const hierarchyLevel = parsed["gmd:MD_Metadata"]["gmd:hierarchyLevel"]["gmd:MD_ScopeCode"] ?? "";
+
+            setFormValue("identifier", fileIdentifier);
+            setFormValue("resource_genealogy", hierarchyLevel);
+        })();
+    }, [setFormValue, metadata]);
 
     return (
         <div className={fr.cx(!visible && "fr-hidden")}>
@@ -114,8 +134,7 @@ const Description: FC<DescriptionProps> = ({ vectorDb, visible, form }) => {
                 hintText={Translator.trans("service.wms_vector.new.step_description.hint_resource_genealogy")}
                 state={errors.resource_genealogy ? "error" : "default"}
                 stateRelatedMessage={errors?.resource_genealogy?.message?.toString()}
-                textArea={true}
-                nativeTextAreaProps={{
+                nativeInputProps={{
                     ...register("resource_genealogy"),
                 }}
             />
