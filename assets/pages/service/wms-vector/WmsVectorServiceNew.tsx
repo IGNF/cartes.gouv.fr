@@ -4,7 +4,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
@@ -43,6 +43,13 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
         queryKey: RQKeys.datastore_stored_data(datastoreId, vectorDbId),
         queryFn: () => api.storedData.get<VectorDb>(datastoreId, vectorDbId),
         staleTime: 600000,
+    });
+
+    const queryClient = useQueryClient();
+    const offeringsQuery = useQuery({
+        queryKey: RQKeys.datastore_offerings(datastoreId),
+        queryFn: () => api.service.getOfferings(datastoreId),
+        refetchInterval: 10000,
     });
 
     const schemas = {
@@ -91,7 +98,18 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
                 technical_name: yup
                     .string()
                     .required(Translator.trans("service.wms_vector.new.step_description.technical_name_error"))
-                    .matches(/^[\w-.]+$/, Translator.trans("service.wms_vector.new.step_description.technical_name_regex")),
+                    .matches(/^[\w-.]+$/, Translator.trans("service.wms_vector.new.step_description.technical_name_regex"))
+                    .test({
+                        name: "is-unique",
+                        test(technicalName, ctx) {
+                            const technicalNameList = offeringsQuery?.data?.map((data) => data?.layer_name);
+                            if (technicalNameList?.includes(technicalName)) {
+                                return ctx.createError({ message: `"${technicalName}" : Ce nom technique existe déjà` });
+                            }
+
+                            return true;
+                        },
+                    }),
                 public_name: yup.string().required(Translator.trans("service.wms_vector.new.step_description.public_name_error")),
                 description: yup.string().required(Translator.trans("service.wms_vector.new.step_description.description_error")),
                 identifier: yup.string().required(Translator.trans("service.wms_vector.new.step_description.identifier_error")),
@@ -121,14 +139,20 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
         mode: "onChange",
     });
     const {
-        handleSubmit,
-        formState: { errors, isValid },
+        formState: { errors },
         getValues: getFormValues,
         watch,
+        trigger,
     } = form;
 
     const selectedTableNamesList: string[] = watch("selected_tables");
     const [selectedTables, setSelectedTables] = useState<StoredDataRelation[]>([]);
+
+    useEffect(() => {
+        return () => {
+            queryClient.cancelQueries({ queryKey: [...RQKeys.datastore_offerings(datastoreId)] });
+        };
+    }, [datastoreId, queryClient, offeringsQuery.data]);
 
     useEffect(() => {
         if (selectedTableNamesList && vectorDbQuery.data) {
@@ -140,8 +164,10 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
     }, [selectedTableNamesList, vectorDbQuery.data]);
 
     const previousStep = () => setCurrentStep((currentStep) => currentStep - 1);
+
     const nextStep = async () => {
-        if (!isValid) return;
+        const isStepValid = await trigger(undefined, { shouldFocus: true }); // demande de valider le formulaire
+        if (!isStepValid) return;
 
         if (currentStep < Object.values(STEPS).length) {
             setCurrentStep((currentStep) => currentStep + 1);
@@ -197,7 +223,7 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
                                     currentStep < Object.values(STEPS).length
                                         ? Translator.trans("continue")
                                         : Translator.trans("service.wms_vector.new.publish"),
-                                onClick: handleSubmit(nextStep),
+                                onClick: nextStep,
                             },
                         ]}
                         inlineLayoutWhen="always"
