@@ -37,7 +37,7 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
         ACCESSRESTRICTIONS: 6,
     };
 
-    const [currentStep, setCurrentStep] = useState(STEPS.TABLES_SELECTION);
+    const [currentStep, setCurrentStep] = useState(STEPS.DESCRIPTION);
 
     const vectorDbQuery = useQuery({
         queryKey: RQKeys.datastore_stored_data(datastoreId, vectorDbId),
@@ -47,7 +47,7 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
 
     const queryClient = useQueryClient();
     const offeringsQuery = useQuery({
-        queryKey: RQKeys.datastore_offerings(datastoreId),
+        queryKey: RQKeys.datastore_offering_list(datastoreId),
         queryFn: () => api.service.getOfferings(datastoreId),
         refetchInterval: 10000,
     });
@@ -102,7 +102,7 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
                     .test({
                         name: "is-unique",
                         test(technicalName, ctx) {
-                            const technicalNameList = offeringsQuery?.data?.map((data) => data?.layer_name);
+                            const technicalNameList = offeringsQuery?.data?.map((data) => data?.layer_name) ?? [];
                             if (technicalNameList?.includes(technicalName)) {
                                 return ctx.createError({ message: `"${technicalName}" : Ce nom technique existe déjà` });
                             }
@@ -150,7 +150,7 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
 
     useEffect(() => {
         return () => {
-            queryClient.cancelQueries({ queryKey: [...RQKeys.datastore_offerings(datastoreId)] });
+            queryClient.cancelQueries({ queryKey: [...RQKeys.datastore_offering_list(datastoreId)] });
         };
     }, [datastoreId, queryClient, offeringsQuery.data]);
 

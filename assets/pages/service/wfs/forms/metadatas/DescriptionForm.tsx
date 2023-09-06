@@ -69,7 +69,7 @@ const DescriptionForm: FC<DescriptionFormProps> = ({ datastoreId, storedDataName
 
     const queryClient = useQueryClient();
     const offeringsQuery = useQuery({
-        queryKey: RQKeys.datastore_offerings(datastoreId),
+        queryKey: RQKeys.datastore_offering_list(datastoreId),
         queryFn: () => api.service.getOfferings(datastoreId),
         refetchInterval: 10000,
     });
@@ -95,7 +95,7 @@ const DescriptionForm: FC<DescriptionFormProps> = ({ datastoreId, storedDataName
 
     useEffect(() => {
         return () => {
-            queryClient.cancelQueries({ queryKey: [...RQKeys.datastore_offerings(datastoreId)] });
+            queryClient.cancelQueries({ queryKey: [...RQKeys.datastore_offering_list(datastoreId)] });
         };
     }, [datastoreId, queryClient, offeringsQuery.data]);
 

@@ -15,7 +15,7 @@ const RQKeys = {
     datastore_datasheet_list: (datastoreId: string): string[] => ["datastore", datastoreId, "datasheet"],
     datastore_datasheet: (datastoreId: string, dataName: string): string[] => ["datastore", datastoreId, "datasheet", dataName],
 
-    datastore_offerings: (datastoreId: string): string[] => ["datastore", datastoreId],
+    datastore_offering_list: (datastoreId: string): string[] => ["datastore", datastoreId, "offering"],
     datastore_offering: (datastoreId: string, offeringId: string): string[] => ["datastore", datastoreId, "offering", offeringId],
 };
 
