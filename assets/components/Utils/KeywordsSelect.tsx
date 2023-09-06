@@ -12,12 +12,13 @@ type KeywordsSelectProps = {
     defaultValue?: string[];
     keywords: string[];
     freeSolo: boolean;
-    onChange: (values: string[]) => void;
+    /** readonly parce que `values` de `onChange` de AutoComplete est readonly */
+    onChange: (values: readonly string[]) => void;
 };
 
 const KeywordsSelect: FC<KeywordsSelectProps> = (props) => {
     const { label, hintText, state, stateRelatedMessage, defaultValue = [], keywords, freeSolo, onChange } = props;
-    const [value, setValue] = useState<string[]>(defaultValue);
+    const [value, setValue] = useState<readonly string[]>(defaultValue);
 
     return (
         <MuiDsfrThemeProvider>
@@ -35,7 +36,7 @@ const KeywordsSelect: FC<KeywordsSelectProps> = (props) => {
                     filterSelectedOptions
                     options={keywords}
                     renderInput={(params) => <TextField {...params} />}
-                    onChange={(e, values: string[]) => {
+                    onChange={(e, values) => {
                         setValue(values);
                         onChange(values);
                     }}
