@@ -36,7 +36,7 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
         ACCESSRESTRICTIONS: 6,
     };
 
-    const [currentStep, setCurrentStep] = useState(STEPS.METADATA);
+    const [currentStep, setCurrentStep] = useState(STEPS.TABLES_SELECTION);
 
     const vectorDbQuery = useQuery({
         queryKey: RQKeys.datastore_stored_data(datastoreId, vectorDbId),
