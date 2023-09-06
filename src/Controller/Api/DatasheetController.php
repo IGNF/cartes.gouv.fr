@@ -117,8 +117,8 @@ class DatasheetController extends AbstractController
 
         return [
             'name' => $datasheetName,
-            'date' => new \DateTime(),
-            'categories' => $this->getRandomCategories(), // TODO : temporaire
+            'date' => new \DateTime(), // TODO : pour le moment on se sait pas ça correspond à la date de quoi
+            'categories' => [],
             'nb_publications' => $nbPublications,
         ];
     }
@@ -144,19 +144,6 @@ class DatasheetController extends AbstractController
         }
 
         return $offerings;
-    }
-
-    // TODO : à supprimer
-    private function getRandomCategories(): array
-    {
-        $categories = [];
-        $n = random_int(1, 3);
-
-        for ($i = 1; $i <= $n; ++$i) {
-            $categories[] = "Catégorie {$i}";
-        }
-
-        return $categories;
     }
 
     #[Route('/{datasheetName}', name: 'delete', methods: ['DELETE'])]

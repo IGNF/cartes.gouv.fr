@@ -100,12 +100,9 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                             <img src="//www.gouvernement.fr/sites/default/files/static_assets/placeholder.1x1.png" width="128px" />
                         </div>
                         <div className={fr.cx("fr-col")}>
-                            <p className={fr.cx("fr-mb-2v")}>
-                                <strong>Création de la fiche de données : </strong>13 Mar. 2023
-                            </p>
-                            <p className={fr.cx("fr-mb-2v")}>
-                                <strong>Mise à jour : </strong>17 Mar. 2023
-                            </p>
+                            {/* TODO : désactivé car on n'a pas ces infos */}
+                            <p className={fr.cx("fr-mb-2v")}>{/* <strong>Création de la fiche de données : </strong>13 Mar. 2023 */}</p>
+                            <p className={fr.cx("fr-mb-2v")}>{/* <strong>Mise à jour : </strong>17 Mar. 2023 */}</p>
                         </div>
                         <div className={fr.cx("fr-col-3")}>
                             <ButtonsGroup
