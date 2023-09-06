@@ -14,7 +14,7 @@ import { useForm } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 import * as yup from "yup";
 import KeywordsSelect from "../../../../../components/Utils/KeywordsSelect";
-import { removeDiacritics } from "../../../../../utils";
+import { regex, removeDiacritics } from "../../../../../utils";
 import Translator from "../../../../../modules/Translator";
 
 // Themes et mot cles INSPIRE
@@ -55,14 +55,14 @@ const DescriptionForm: FC<DescriptionFormProps> = ({ datastoreId, storedDataName
             data_category: yup.string().required(Translator.trans("service.wfs.new.description_form.category_error")),
             data_email_contact: yup
                 .string()
-                .email(Translator.trans("service.wfs.new.description_form.email_contact_error"))
+                .matches(regex.email, Translator.trans("service.wfs.new.description_form.email_contact_error"))
                 .required(Translator.trans("service.wfs.new.description_form.email_contact_mandatory_error")),
             data_creation_date: yup.date().required(Translator.trans("service.wfs.new.description_form.creation_date_error")),
             data_resource_genealogy: yup.string(),
             data_organization: yup.string().required(Translator.trans("service.wfs.new.description_form.organization_error")),
             data_organization_email: yup
                 .string()
-                .email(Translator.trans("service.wfs.new.description_form.organization_email_error"))
+                .matches(regex.email, Translator.trans("service.wfs.new.description_form.organization_email_error"))
                 .required(Translator.trans("service.wfs.new.description_form.organization_email_mandatory_error")),
         })
         .required();

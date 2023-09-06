@@ -55,4 +55,8 @@ const removeDiacritics = (str) => {
     return str;
 };
 
-export { getInspireKeywords, getLanguages, charsets, removeDiacritics };
+const regex = {
+    email: /^[\w-.]+@([\w-]+\.)+[\w-]{2,}$/,
+};
+
+export { getInspireKeywords, getLanguages, charsets, removeDiacritics, regex };

@@ -16,6 +16,7 @@ import SymfonyRouting from "../../modules/Routing";
 import Translator from "../../modules/Translator";
 import { jsonFetch } from "../../modules/jsonFetch";
 import { routes } from "../../router/router";
+import { regex } from "../../utils";
 
 import "../../sass/components/spinner.scss";
 import "../../sass/pages/nous_ecrire.scss";
@@ -24,7 +25,7 @@ const schema = yup
     .object({
         email_contact: yup
             .string()
-            .email(Translator.trans("contact.form.email_contact_error"))
+            .matches(regex.email, Translator.trans("contact.form.email_contact_error"))
             .required(Translator.trans("contact.form.email_contact_mandatory_error")),
         last_name: yup.string(),
         first_name: yup.string(),

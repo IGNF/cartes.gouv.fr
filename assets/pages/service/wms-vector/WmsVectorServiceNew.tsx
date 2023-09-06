@@ -16,6 +16,7 @@ import RQKeys from "../../../modules/RQKeys";
 import Translator from "../../../modules/Translator";
 import { routes } from "../../../router/router";
 import { type StoredDataRelation, type VectorDb } from "../../../types/app";
+import { regex } from "../../../utils";
 import validations from "../../../validations";
 import TableSelection from "./TableSelection";
 import UploadStyleFile from "./UploadStyleFile";
@@ -100,14 +101,14 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
                     .required(Translator.trans("service.wms_vector.new.step_description.category_error")),
                 email_contact: yup
                     .string()
-                    .email(Translator.trans("service.wms_vector.new.step_description.email_contact_error"))
+                    .matches(regex.email, Translator.trans("service.wms_vector.new.step_description.email_contact_error"))
                     .required(Translator.trans("service.wms_vector.new.step_description.email_contact_mandatory_error")),
                 creation_date: yup.date().required(Translator.trans("service.wms_vector.new.step_description.creation_date_error")),
                 resource_genealogy: yup.string(),
                 organization: yup.string().required(Translator.trans("service.wms_vector.new.step_description.organization_error")),
                 organization_email: yup
                     .string()
-                    .email(Translator.trans("service.wms_vector.new.step_description.organization_email_error"))
+                    .matches(regex.email, Translator.trans("service.wms_vector.new.step_description.organization_email_error"))
                     .required(Translator.trans("service.wms_vector.new.step_description.organization_email_mandatory_error")),
             })
             .required(),
