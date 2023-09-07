@@ -11,8 +11,9 @@ import AppLayout from "./AppLayout";
 
 type DatastoreLayoutProps = {
     datastoreId: string;
+    documentTitle?: string;
 };
-const DatastoreLayout: FC<PropsWithChildren<DatastoreLayoutProps>> = ({ datastoreId, children }) => {
+const DatastoreLayout: FC<PropsWithChildren<DatastoreLayoutProps>> = ({ datastoreId, documentTitle, children }) => {
     const navItems = datastoreNavItems(datastoreId);
 
     const abortController = new AbortController();
@@ -34,7 +35,11 @@ const DatastoreLayout: FC<PropsWithChildren<DatastoreLayoutProps>> = ({ datastor
             })) || [],
     };
 
-    return <AppLayout navItems={[...navItems, datastoreLinks]}>{children}</AppLayout>;
+    return (
+        <AppLayout navItems={[...navItems, datastoreLinks]} documentTitle={documentTitle}>
+            {children}
+        </AppLayout>
+    );
 };
 
 export default DatastoreLayout;

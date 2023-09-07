@@ -70,7 +70,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
     };
 
     return (
-        <DatastoreLayout datastoreId={datastoreId}>
+        <DatastoreLayout datastoreId={datastoreId} documentTitle={`Données ${datasheetName}`}>
             {datasheetQuery.isLoading ? (
                 <LoadingText />
             ) : datasheetQuery.error ? (

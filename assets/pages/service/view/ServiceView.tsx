@@ -51,7 +51,7 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
     };
 
     return (
-        <DatastoreLayout datastoreId={datastoreId}>
+        <DatastoreLayout datastoreId={datastoreId} documentTitle={`Visualisation données ${datasheetName ?? serviceQuery.data?.layer_name}`}>
             {serviceQuery.isLoading ? (
                 <LoadingText />
             ) : serviceQuery.error ? (

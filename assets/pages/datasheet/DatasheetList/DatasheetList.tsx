@@ -42,7 +42,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
     }, [queryClient, datastoreId]);
 
     return (
-        <DatastoreLayout datastoreId={datastoreId}>
+        <DatastoreLayout datastoreId={datastoreId} documentTitle="Mes données">
             {datastoreQuery.isLoading === undefined ? (
                 <LoadingText />
             ) : (

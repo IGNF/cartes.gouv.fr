@@ -215,7 +215,7 @@ const DatasheetNewForm = ({ datastoreId }) => {
     };
 
     return (
-        <DatastoreLayout datastoreId={datastoreId}>
+        <DatastoreLayout datastoreId={datastoreId} documentTitle="Nouvelle fiche de données">
             <h1>Créer une fiche de données</h1>
 
             <p>{Translator.trans("mandatory_fields")}</p>

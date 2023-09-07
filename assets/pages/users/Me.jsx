@@ -10,7 +10,7 @@ const Me = () => {
     const { user } = useUser();
 
     return (
-        <AppLayout navItems={defaultNavItems}>
+        <AppLayout navItems={defaultNavItems} documentTitle="Mon compte">
             <h1>Mon compte</h1>
             <p>
                 <strong>Prénom</strong> : {user.firstName}

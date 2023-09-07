@@ -9,7 +9,7 @@ type DatasheetNewIntegrationProps = {
 };
 const DatasheetNewIntegration: FC<DatasheetNewIntegrationProps> = ({ datastoreId, uploadId }) => {
     return (
-        <DatastoreLayout datastoreId={datastoreId}>
+        <DatastoreLayout datastoreId={datastoreId} documentTitle="Intégration de votre donnée en base">
             <DatasheetNewIntegrationDialog datastoreId={datastoreId} uploadId={uploadId} />
         </DatastoreLayout>
     );

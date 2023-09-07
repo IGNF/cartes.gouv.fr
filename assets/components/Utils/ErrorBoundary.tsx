@@ -10,7 +10,7 @@ import AppLayout from "../Layout/AppLayout";
 
 const Fallback: FC<FallbackProps> = ({ error, resetErrorBoundary }) => {
     return (
-        <AppLayout navItems={defaultNavItems}>
+        <AppLayout navItems={defaultNavItems} documentTitle="Une erreur est survenue">
             <Alert severity="error" title="Une erreur est survenue" description={error?.message} className={fr.cx("fr-my-3w")} />
             <Button
                 onClick={() => {

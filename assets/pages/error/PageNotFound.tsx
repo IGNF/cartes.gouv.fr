@@ -8,7 +8,7 @@ import { appRoot, routes } from "../../router/router";
 
 const PageNotFound: FC = () => {
     return (
-        <AppLayout navItems={defaultNavItems}>
+        <AppLayout navItems={defaultNavItems} documentTitle="Page non trouvée">
             <div
                 className={fr.cx(
                     "fr-my-7w",

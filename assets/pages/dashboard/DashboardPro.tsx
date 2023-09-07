@@ -16,7 +16,7 @@ const DashboardPro = () => {
     const { user } = useUser();
 
     return (
-        <AppLayout navItems={navItems}>
+        <AppLayout navItems={navItems} documentTitle="Tableau de bord professionnel">
             {datastoreListQuery.isLoading ? (
                 <LoadingText />
             ) : (

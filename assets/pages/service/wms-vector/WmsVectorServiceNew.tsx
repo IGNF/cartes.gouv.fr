@@ -181,7 +181,7 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
     };
 
     return (
-        <DatastoreLayout datastoreId={datastoreId}>
+        <DatastoreLayout datastoreId={datastoreId} documentTitle="Créer et publier un service WMS-Vecteur">
             <h1>{Translator.trans("service.wms_vector.new.title")}</h1>
 
             {vectorDbQuery.isLoading ? (
