@@ -1,17 +1,11 @@
 import { fr } from "@codegouvfr/react-dsfr";
 
-import { useEffect } from "react";
-
 import AppLayout from "../../components/Layout/AppLayout";
 import { defaultNavItems } from "../../config/navItems";
 
 const PersonalData = () => {
-    useEffect(() => {
-        document.title = "Données à caractère personnel | cartes.gouv.fr";
-    }, []);
-
     return (
-        <AppLayout navItems={defaultNavItems}>
+        <AppLayout navItems={defaultNavItems} documentTitle="Données à caractère personnel">
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
                     <h1>Données à caractère personnel</h1>

@@ -1,17 +1,22 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import { FC, PropsWithChildren } from "react";
-import { SkipLinks } from "@codegouvfr/react-dsfr/SkipLinks";
 import { MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation/MainNavigation";
+import { SkipLinks } from "@codegouvfr/react-dsfr/SkipLinks";
+import { FC, PropsWithChildren } from "react";
+
+import { ConsentBannerAndConsentManagement } from "../../config/consentManagement";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
+import Translator from "../../modules/Translator";
 import AppFooter from "./AppFooter";
 import AppHeader from "./AppHeader";
-import { ConsentBannerAndConsentManagement } from "../../config/consentManagement";
-import Translator from "../../modules/Translator";
 
 type AppLayoutProps = {
     navItems?: MainNavigationProps.Item[];
+    documentTitle?: string;
 };
 
-const AppLayout: FC<PropsWithChildren<AppLayoutProps>> = ({ children, navItems = [] }) => {
+const AppLayout: FC<PropsWithChildren<AppLayoutProps>> = ({ children, navItems = [], documentTitle }) => {
+    useDocumentTitle(documentTitle);
+
     return (
         <>
             {/* Lien d'evitement (skip link) */}

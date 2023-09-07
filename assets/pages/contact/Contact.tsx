@@ -4,7 +4,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
 import Select from "@codegouvfr/react-dsfr/Select";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
@@ -71,12 +71,8 @@ const Contact = () => {
             .finally(() => setIsSending(false));
     };
 
-    useEffect(() => {
-        document.title = "Nous écrire | cartes.gouv.fr";
-    }, []);
-
     return (
-        <AppLayout navItems={defaultNavItems}>
+        <AppLayout navItems={defaultNavItems} documentTitle="Nous écrire">
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
                     <h1>{Translator.trans("contact.title")}</h1>

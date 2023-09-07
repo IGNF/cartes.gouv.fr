@@ -1,19 +1,12 @@
 import { fr } from "@codegouvfr/react-dsfr";
-
-import { useEffect } from "react";
-
 import { Accordion } from "@codegouvfr/react-dsfr/Accordion";
 
 import AppLayout from "../components/Layout/AppLayout";
 import { defaultNavItems } from "../config/navItems";
 
 const Faq = () => {
-    useEffect(() => {
-        document.title = "Questions fréquentes | cartes.gouv.fr";
-    }, []);
-
     return (
-        <AppLayout navItems={defaultNavItems}>
+        <AppLayout navItems={defaultNavItems} documentTitle="Questions fréquentes">
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
                     <h1>Questions fréquentes</h1>

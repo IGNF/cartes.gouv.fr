@@ -1,17 +1,11 @@
 import { fr } from "@codegouvfr/react-dsfr";
 
-import { useEffect } from "react";
-
 import AppLayout from "../components/Layout/AppLayout";
 import { defaultNavItems } from "../config/navItems";
 
 const About = () => {
-    useEffect(() => {
-        document.title = "La Géoplateforme en bref | cartes.gouv.fr";
-    }, []);
-
     return (
-        <AppLayout navItems={defaultNavItems}>
+        <AppLayout navItems={defaultNavItems} documentTitle="La Géoplateforme en bref">
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
                     <h1>La Géoplateforme en bref</h1>

@@ -1,7 +1,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import { useColors } from "@codegouvfr/react-dsfr/useColors";
-import { FC, useEffect } from "react";
+import { FC } from "react";
 import { symToStr } from "tsafe/symToStr";
 
 import AppLayout from "../../components/Layout/AppLayout";
@@ -26,12 +26,8 @@ const NewsArticle: FC<NewsArticleProps> = ({ slug }) => {
         </Badge>
     ));
 
-    useEffect(() => {
-        document.title = newsArticle?.title + " | cartes.gouv.fr";
-    }, [newsArticle?.title]);
-
     return (
-        <AppLayout navItems={defaultNavItems}>
+        <AppLayout navItems={defaultNavItems} documentTitle={newsArticle?.title}>
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>{badges}</div>

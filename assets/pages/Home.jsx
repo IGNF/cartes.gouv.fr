@@ -4,7 +4,7 @@ import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
 // import Routing from "fos-router";
 
-import React, { useEffect /*, { useContext }*/ } from "react";
+import React from "react";
 
 import AppLayout from "../components/Layout/AppLayout";
 import { defaultNavItems } from "../config/navItems";
@@ -15,12 +15,8 @@ import hp from "../img/photos/rustrel.jpg";
 import "../sass/pages/home.scss";
 
 const Home = () => {
-    useEffect(() => {
-        document.title = "cartes.gouv.fr | page d'accueil";
-    }, []);
-
     return (
-        <AppLayout navItems={defaultNavItems}>
+        <AppLayout navItems={defaultNavItems} documentTitle="Le nouveau portail national de la connaissance du territoire">
             {/* Section : Présentation */}
             <div className={fr.cx("c-section", "c-section--gray")}>
                 <div className={fr.cx("fr-container--fluid")}>

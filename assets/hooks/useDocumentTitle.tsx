@@ -1,19 +1,17 @@
 import { useRef, useEffect } from "react";
 
-const useDocumentTitle = (title: string, prevailOnUnmount: boolean = false) => {
-    const defaultTitle = useRef(document.title);
+const useDocumentTitle = (documentTitle?: string) => {
+    const siteTitle = useRef<string>(document.getElementById("root")?.dataset?.siteTitle ?? "cartes.gouv.fr");
 
     useEffect(() => {
-        document.title = title;
-    }, [title]);
+        document.title = documentTitle ? `${documentTitle} | ${siteTitle.current}` : siteTitle.current;
+    }, [documentTitle]);
 
     useEffect(
         () => () => {
-            if (!prevailOnUnmount) {
-                document.title = defaultTitle.current;
-            }
+            document.title = siteTitle.current;
         },
-        [prevailOnUnmount]
+        []
     );
 };
 

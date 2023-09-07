@@ -1,18 +1,12 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import { useEffect } from "react";
 
 import AppLayout from "../../components/Layout/AppLayout";
 import { defaultNavItems } from "../../config/navItems";
-
 import { routes } from "../../router/router";
 
 const SiteMap = () => {
-    useEffect(() => {
-        document.title = "Plan du site | cartes.gouv.fr";
-    }, []);
-
     return (
-        <AppLayout navItems={defaultNavItems}>
+        <AppLayout navItems={defaultNavItems} documentTitle="Plan du site">
             <h1>Plan du site</h1>
 
             <section className={fr.cx("fr-py-6v")}>

@@ -1,21 +1,14 @@
 import { fr } from "@codegouvfr/react-dsfr";
 
-import { useEffect } from "react";
-
-import { routes } from "../../router/router";
-
 import AppLayout from "../../components/Layout/AppLayout";
 import { defaultNavItems } from "../../config/navItems";
+import { routes } from "../../router/router";
 
 const LegalNotice = () => {
     const siteName = "cartes.gouv.fr";
 
-    useEffect(() => {
-        document.title = "Mentions légales | cartes.gouv.fr";
-    }, []);
-
     return (
-        <AppLayout navItems={defaultNavItems}>
+        <AppLayout navItems={defaultNavItems} documentTitle="Mentions légales">
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
                     <h1>Mentions légales</h1>
