@@ -1,0 +1,280 @@
+[
+    {
+        "community": {
+            "contact": "sylvain.lafay@ign.fr",
+            "_id": "a0f47300-4c9b-464a-b23f-639ccfa6a673",
+            "public": true
+        },
+        "processings": [
+            "af062611-13eb-4a18-8d04-9b7604a031cc",
+            "d78ff336-452c-43e8-a81d-cc7e9baa6f7e",
+            "af012611-13eb-4a18-8d04-9b7604a031cc",
+            "748e4ebe-3ef6-447d-8221-ecd3bc2157e6",
+            "af022611-13eb-4a18-8d04-9b7604a031cc",
+            "e2220fa2-50d8-44e9-b8eb-7e6401fd8c4c"
+        ],
+        "name": "cartes.gouv - dev",
+        "technical_name": "cartes-gouv-dev",
+        "endpoints": [
+            {
+                "use": 0,
+                "quota": 10,
+                "endpoint": {
+                    "name": "Service WMS (données vecteur) ouvert",
+                    "technical_name": "gpf-geoserver-wms-v",
+                    "type": "WMS-VECTOR",
+                    "urls": [
+                        {
+                            "type": "WMS",
+                            "url": "https://geoplateforme-gpf-apim.qua.gpf-tech.ign.fr/wms-v"
+                        }
+                    ],
+                    "_id": "ae022611-13eb-4a18-8d04-9b7604a031cc",
+                    "open": true,
+                    "metadata_fi": "gpf-geoserver-wms-v"
+                }
+            },
+            {
+                "use": 0,
+                "quota": 10,
+                "endpoint": {
+                    "name": "Service WMS (données raster) restreint",
+                    "technical_name": "gpf-rok4-server-wms-r-private",
+                    "type": "WMS-RASTER",
+                    "urls": [
+                        {
+                            "type": "WMS",
+                            "url": "https://geoplateforme-gpf-apim.qua.gpf-tech.ign.fr/private/wms-r"
+                        }
+                    ],
+                    "_id": "1b127935-bdc4-426e-b5b8-c0cc089e253f",
+                    "open": false,
+                    "metadata_fi": "gpf-rok4-server-wms-r-private"
+                }
+            },
+            {
+                "use": 0,
+                "quota": 10,
+                "endpoint": {
+                    "name": "Service WFS restreint",
+                    "technical_name": "gpf-geoserver-wfs-private",
+                    "type": "WFS",
+                    "urls": [
+                        {
+                            "type": "WFS",
+                            "url": "https://geoplateforme-gpf-apim.qua.gpf-tech.ign.fr/private/wfs"
+                        }
+                    ],
+                    "_id": "bad6568e-e3a9-46f1-8b94-43f38d494a9b",
+                    "open": false,
+                    "metadata_fi": "gpf-geoserver-wfs-private"
+                }
+            },
+            {
+                "use": 0,
+                "quota": 10,
+                "endpoint": {
+                    "name": "Catalogue de métadonnées",
+                    "technical_name": "https://geoplateforme-gpf-geonetwork.qua.gpf-tech.ign.fr/geonetwork/srv",
+                    "type": "METADATA",
+                    "urls": [
+                        {
+                            "type": "METADATA",
+                            "url": "https://geoplateforme-gpf-geonetwork.qua.gpf-tech.ign.fr/geonetwork/srv/fre/csw"
+                        }
+                    ],
+                    "_id": "7a81b5e2-2de1-4a7b-aa18-c14b98124b5e",
+                    "open": true,
+                    "metadata_fi": "endpoint"
+                }
+            },
+            {
+                "use": 0,
+                "quota": 10,
+                "endpoint": {
+                    "name": "Service tuilé (WMTS et TMS) ouvert",
+                    "technical_name": "gpf-rok4-server-wmts-tms",
+                    "type": "WMTS-TMS",
+                    "urls": [
+                        {
+                            "type": "WMTS",
+                            "url": "https://geoplateforme-gpf-apim.qua.gpf-tech.ign.fr/wmts"
+                        },
+                        {
+                            "type": "TMS",
+                            "url": "https://geoplateforme-gpf-apim.qua.gpf-tech.ign.fr/tms"
+                        }
+                    ],
+                    "_id": "752e99b4-c012-48af-854d-a8643f845da8",
+                    "open": true,
+                    "metadata_fi": "gpf-rok4-server-wmts-tms"
+                }
+            },
+            {
+                "use": 0,
+                "quota": 10,
+                "endpoint": {
+                    "name": "Service tuilé (WMTS et TMS) restreint",
+                    "technical_name": "gpf-rok4-server-wmts-tms-private",
+                    "type": "WMTS-TMS",
+                    "urls": [
+                        {
+                            "type": "TMS",
+                            "url": "https://geoplateforme-gpf-apim.qua.gpf-tech.ign.fr/private/tms/1.0.0"
+                        },
+                        {
+                            "type": "WMTS",
+                            "url": "https://geoplateforme-gpf-apim.qua.gpf-tech.ign.fr/private/wmts"
+                        }
+                    ],
+                    "_id": "5e9ec6ce-86fc-49a0-ac2d-d5c37d89ff0a",
+                    "open": false,
+                    "metadata_fi": "gpf-rok4-server-wmts-tms-private"
+                }
+            },
+            {
+                "use": 0,
+                "quota": 10,
+                "endpoint": {
+                    "name": "Service de téléchargement restreint",
+                    "technical_name": "gpf-download-private",
+                    "type": "DOWNLOAD",
+                    "urls": [
+                        {
+                            "type": "DOWNLOAD",
+                            "url": "https://geoplateforme-gpf-apim.qua.gpf-tech.ign.fr/private/telechargement"
+                        }
+                    ],
+                    "_id": "48e79f1a-5119-4e71-bae6-ddcdb4042213",
+                    "open": false,
+                    "metadata_fi": "gpf-download-private"
+                }
+            },
+            {
+                "use": 0,
+                "quota": 10,
+                "endpoint": {
+                    "name": "Service de téléchargement ouvert",
+                    "technical_name": "gpf-download",
+                    "type": "DOWNLOAD",
+                    "urls": [
+                        {
+                            "type": "DOWNLOAD",
+                            "url": "https://geoplateforme-gpf-apim.qua.gpf-tech.ign.fr/telechargement"
+                        }
+                    ],
+                    "_id": "ae042611-13eb-4a18-8d04-9b7604a031cc",
+                    "open": true,
+                    "metadata_fi": "gpf-download"
+                }
+            },
+            {
+                "use": 4,
+                "quota": 10,
+                "endpoint": {
+                    "name": "Service WFS ouvert",
+                    "technical_name": "gpf-geoserver-wfs",
+                    "type": "WFS",
+                    "urls": [
+                        {
+                            "type": "WFS",
+                            "url": "https://geoplateforme-gpf-apim.qua.gpf-tech.ign.fr/wfs"
+                        }
+                    ],
+                    "_id": "ae012611-13eb-4a18-8d04-9b7604a031cc",
+                    "open": true,
+                    "metadata_fi": "gpf-geoserver-wfs"
+                }
+            },
+            {
+                "use": 0,
+                "quota": 10,
+                "endpoint": {
+                    "name": "Service WMS (données vecteur) restreint",
+                    "technical_name": "gpf-geoserver-wms-v-private",
+                    "type": "WMS-VECTOR",
+                    "urls": [
+                        {
+                            "type": "WMS",
+                            "url": "https://geoplateforme-gpf-apim.qua.gpf-tech.ign.fr/private/wms-v"
+                        }
+                    ],
+                    "_id": "951c1834-3c42-4064-99be-eac6617c65b4",
+                    "open": false,
+                    "metadata_fi": "gpf-geoserver-wms-v-private"
+                }
+            },
+            {
+                "use": 0,
+                "quota": 10,
+                "endpoint": {
+                    "name": "Service WMS (données raster) ouvert",
+                    "technical_name": "gpf-rok4-server-wms-r",
+                    "type": "WMS-RASTER",
+                    "urls": [
+                        {
+                            "type": "WMS",
+                            "url": "https://geoplateforme-gpf-apim.qua.gpf-tech.ign.fr/wms-r"
+                        }
+                    ],
+                    "_id": "9cf2c4c3-c230-42d3-988a-cbe9f40f4e73",
+                    "open": true,
+                    "metadata_fi": "gpf-rok4-server-wms-r"
+                }
+            }
+        ],
+        "storages": {
+            "data": [
+                {
+                    "use": 60727296,
+                    "quota": 10000000000,
+                    "storage": {
+                        "name": "postgres",
+                        "type": "POSTGRESQL",
+                        "labels": [],
+                        "_id": "ab012611-13eb-4a18-8d04-9b7604a031cc"
+                    }
+                },
+                {
+                    "use": 0,
+                    "quota": 10000000000,
+                    "storage": {
+                        "name": "S3",
+                        "type": "S3",
+                        "labels": [],
+                        "_id": "ab032611-13eb-4a18-8d04-9b7604a031cc"
+                    }
+                }
+            ],
+            "upload": {
+                "use": 457580544,
+                "quota": 10000000000,
+                "storage": {
+                    "name": "S3",
+                    "type": "S3",
+                    "labels": [],
+                    "_id": "ab032611-13eb-4a18-8d04-9b7604a031cc"
+                }
+            },
+            "annexe": {
+                "use": 9942,
+                "quota": 10000000000,
+                "storage": {
+                    "name": "S3",
+                    "type": "S3",
+                    "labels": [],
+                    "_id": "ab032611-13eb-4a18-8d04-9b7604a031cc"
+                }
+            }
+        },
+        "_id": "190b714d-daa7-402b-8360-c75baa4c69cc",
+        "checks": [
+            "bc052611-13eb-4a18-8d04-9b7604a031cc",
+            "bc012611-13eb-4a18-8d04-9b7604a031cc",
+            "bc022611-13eb-4a18-8d04-9b7604a031cc",
+            "b91b0336-3f3f-4c7c-a851-1dc15cdaaeaa",
+            "bc032611-13eb-4a18-8d04-9b7604a031cc"
+        ],
+        "active": true
+    }
+]

@@ -57,6 +57,8 @@ yarn cypress install
 
 ### Lancement des tests
 
+> Vous trouverez les commandes complètes de cypress ci-après et des commandes raccourcies dans le package.json
+
 Ouvrir l'interface de pilotage de cypress :
 
 ```sh

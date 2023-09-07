@@ -29,15 +29,11 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
     public const SUCCESS_ROUTE = 'cartesgouvfr_app';
     public const HOME_ROUTE = 'cartesgouvfr_app';
 
-    private ClientRegistry $clientRegistry;
-    private RouterInterface $router;
-    private RequestStack $requestStack;
-
-    public function __construct(ClientRegistry $clientRegistry, RouterInterface $router, RequestStack $requestStack)
-    {
-        $this->clientRegistry = $clientRegistry;
-        $this->router = $router;
-        $this->requestStack = $requestStack;
+    public function __construct(
+        private ClientRegistry $clientRegistry,
+        private RouterInterface $router,
+        private RequestStack $requestStack
+    ) {
     }
 
     /**

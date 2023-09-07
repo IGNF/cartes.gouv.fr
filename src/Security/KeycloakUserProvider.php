@@ -8,6 +8,7 @@ use KnpU\OAuth2ClientBundle\Client\Provider\KeycloakClient;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Token\AccessToken;
 use Stevenmaguire\OAuth2\Client\Provider\KeycloakResourceOwner;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -20,19 +21,21 @@ use Symfony\Component\Security\Core\User\UserProviderInterface;
 
 class KeycloakUserProvider implements UserProviderInterface
 {
-    private ClientRegistry $clientRegistry;
-    private RequestStack $requestStack;
-    private EntrepotApiService $entrepotApiService;
-
-    public function __construct(ClientRegistry $clientRegistry, RequestStack $requestStack, EntrepotApiService $entrepotApiService)
-    {
-        $this->clientRegistry = $clientRegistry;
-        $this->requestStack = $requestStack;
-        $this->entrepotApiService = $entrepotApiService;
+    public function __construct(
+        private ClientRegistry $clientRegistry,
+        private RequestStack $requestStack,
+        private ParameterBagInterface $params,
+        private EntrepotApiService $entrepotApiService
+    ) {
     }
 
     public function loadUser(): User
     {
+        //  création d'un utilisateur bidon si en mode test
+        if ('test' === $this->params->get('app_env')) {
+            return User::getTestUser();
+        }
+
         /** @var KeycloakClient */
         $keycloakClient = $this->clientRegistry->getClient('keycloak');
 

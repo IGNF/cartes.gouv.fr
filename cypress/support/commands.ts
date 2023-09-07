@@ -35,3 +35,15 @@
 //     }
 //   }
 // }
+
+Cypress.Commands.add("fakeLogin", () => {
+    cy.session("simulation d'une connexion", () => {
+        cy.setCookie("MOCKSESSID", "d398fccecfa5fb0b0337e3b55f70daeeb6067445b225c0050164214467864ca0");
+    });
+});
+
+Cypress.Commands.add("fakeLogout", () => {
+    cy.session("simulation d'une déconnexion", () => {
+        cy.clearCookie("MOCKSESSID");
+    });
+});

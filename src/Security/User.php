@@ -110,4 +110,17 @@ class User implements UserInterface
     {
         return $this->lastApiCallDate;
     }
+
+    public static function getTestUser(): User
+    {
+        return new User([
+            'email' => 'test@test.com',
+            'given_name' => 'Test',
+            'family_name' => 'User',
+        ], [
+            '_id' => 'fc5a7948-142a-4dae-b24e-5550fe7183f9',
+            'creation' => '2023-06-26T11:52:25.924679Z',
+            'last_call' => '2023-08-01T14:09:41.074381Z',
+        ]);
+    }
 }

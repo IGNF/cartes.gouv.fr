@@ -11,5 +11,11 @@
         "resolveJsonModule": true
     },
     "include": ["assets"],
-    "exclude": ["node_modules", "public", "assets/types/entrepot-generated.ts"]
+    "exclude": ["node_modules", "public", "assets/types/entrepot-generated.ts"],
+    "ts-node": {
+        "compilerOptions": {
+            "module": "ES2015",
+            "moduleResolution": "node"
+        }
+    }
 }
