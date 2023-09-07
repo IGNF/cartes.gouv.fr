@@ -6,12 +6,12 @@ import * as yup from "yup";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import Input from "@codegouvfr/react-dsfr/Input";
-import Translator from "../../../../../modules/Translator";
-import { StoredDataRelation } from "../../../../../types/app";
-import KeywordsSelect from "./../../../../../components/Utils/KeywordsSelect";
+import Translator from "../../../modules/Translator";
+import { StoredDataRelation } from "../../../types/app";
+import KeywordsSelect from "../../../components/Utils/KeywordsSelect";
 
 // Themes et mot cles INSPIRE
-import { getInspireKeywords } from "../../../../../utils";
+import { getInspireKeywords } from "../../../utils";
 
 type TableInfos = {
     native_name?: string;

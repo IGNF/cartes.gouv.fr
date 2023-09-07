@@ -6,11 +6,11 @@ import { FC } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
-import Translator from "../../../../modules/Translator";
+import Translator from "../../../modules/Translator";
 import { useQuery } from "@tanstack/react-query";
-import { DatastoreEndpoint } from "../../../../types/app";
-import RQKeys from "../../../../modules/RQKeys";
-import api from "../../../../api";
+import { DatastoreEndpoint } from "../../../types/app";
+import RQKeys from "../../../modules/RQKeys";
+import api from "../../../api";
 
 type AccessRestrictionFormProps = {
     datastoreId: string;

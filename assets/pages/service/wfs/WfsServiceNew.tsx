@@ -13,11 +13,11 @@ import Translator from "../../../modules/Translator";
 import { CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
 import { StoredDataRelation, type VectorDb } from "../../../types/app";
-import AccessRestrictionForm from "./forms/AccessRestrictionForm";
-import AdditionalInfoForm from "./forms/metadatas/AdditionalInfoForm";
-import DescriptionForm from "./forms/metadatas/DescriptionForm";
-import UploadMetadataForm from "./forms/metadatas/UploadMetadataForm";
-import TableForm from "./forms/tables/TableForm";
+import AccessRestrictionForm from "./AccessRestrictionForm";
+import AdditionalInfoForm from "./forms/metadata/AdditionalInfoForm";
+import DescriptionForm from "./forms/metadata/DescriptionForm";
+import UploadMetadataForm from "./forms/metadata/UploadMetadataForm";
+import TableForm from "./TableForm";
 import "../../../sass/components/spinner.scss";
 
 /**
