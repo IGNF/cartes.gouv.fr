@@ -3,16 +3,16 @@ import { FC } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { getLanguages, charsets } from "../../../../../utils";
+import { getLanguages, charsets } from "../../../../utils";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { Select } from "@codegouvfr/react-dsfr/Select";
 import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { Autocomplete, createFilterOptions } from "@mui/material";
 import { TextField } from "@mui/material";
 import MuiDsfrThemeProvider from "@codegouvfr/react-dsfr/mui";
-import { StoredData } from "../../../../../types/app";
-import ignProducts from "../../../../../data/md_resolutions.json";
-import Translator from "../../../../../modules/Translator";
+import { StoredData } from "../../../../types/app";
+import ignProducts from "../../../../data/md_resolutions.json";
+import Translator from "../../../../modules/Translator";
 
 const getCode = (epsg) => {
     if (!epsg) return null;

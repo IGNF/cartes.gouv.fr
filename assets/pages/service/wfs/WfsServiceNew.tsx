@@ -14,9 +14,9 @@ import { CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
 import { StoredDataRelation, type VectorDb } from "../../../types/app";
 import AccessRestrictionForm from "./AccessRestrictionForm";
-import AdditionalInfoForm from "./forms/metadata/AdditionalInfoForm";
-import DescriptionForm from "./forms/metadata/DescriptionForm";
-import UploadMetadataForm from "./forms/metadata/UploadMetadataForm";
+import AdditionalInfoForm from "./metadata/AdditionalInfoForm";
+import DescriptionForm from "./metadata/DescriptionForm";
+import UploadMetadataForm from "./metadata/UploadMetadataForm";
 import TableForm from "./TableForm";
 import "../../../sass/components/spinner.scss";
 

@@ -3,7 +3,7 @@ import { FC } from "react";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
 
-import Translator from "../../../../../modules/Translator";
+import Translator from "../../../../modules/Translator";
 
 type UploadMetadataFormProps = {
     visible: boolean;

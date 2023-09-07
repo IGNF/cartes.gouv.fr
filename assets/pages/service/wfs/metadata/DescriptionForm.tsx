@@ -3,22 +3,22 @@ import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { useIsDark } from "@codegouvfr/react-dsfr/useIsDark";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import RQKeys from "../../../../../modules/RQKeys";
-import api from "../../../../../api";
+import RQKeys from "../../../../modules/RQKeys";
+import api from "../../../../api";
 import { yupResolver } from "@hookform/resolvers/yup";
 import MDEditor from "@uiw/react-md-editor";
-import getLocaleCommands from "../../../../../modules/react-md/react-md-commands";
+import getLocaleCommands from "../../../../modules/react-md/react-md-commands";
 import { format as datefnsFormat } from "date-fns";
 import { FC, useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 import * as yup from "yup";
-import KeywordsSelect from "../../../../../components/Utils/KeywordsSelect";
-import { regex, removeDiacritics } from "../../../../../utils";
-import Translator from "../../../../../modules/Translator";
+import KeywordsSelect from "../../../../components/Utils/KeywordsSelect";
+import { regex, removeDiacritics } from "../../../../utils";
+import Translator from "../../../../modules/Translator";
 
 // Themes et mot cles INSPIRE
-import { getInspireKeywords } from "../../../../../utils";
+import { getInspireKeywords } from "../../../../utils";
 
 type DescriptionFormProps = {
     datastoreId: string;
