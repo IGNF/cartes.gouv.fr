@@ -67,7 +67,7 @@ export type Upload = UploadDetailResponseDto & {
         integration_current_step: string;
     };
 };
-export type UploadTree = UploadTreeElementResponseDto;
+export type UploadTree = UploadTreeElementResponseDto[];
 
 /** user, objet représentant l'utilisateur de l'API Entrepot */
 export type EntrepotUser = UserDetailsResponseDto;

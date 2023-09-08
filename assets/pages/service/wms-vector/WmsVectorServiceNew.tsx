@@ -22,6 +22,8 @@ import TableSelection from "./TableSelection";
 import UploadStyleFile from "./UploadStyleFile";
 import Description from "./metadata/Description";
 import UploadMetadata from "./metadata/UploadMetadata";
+import AdditionalInfo from "./metadata/AdditionalInfo";
+import AccessRestrictions from "./AccessRestrictions";
 
 type WmsVectorServiceNewProps = {
     datastoreId: string;
@@ -130,8 +132,18 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
                     .required(Translator.trans("service.wms_vector.new.step_description.organization_email_mandatory_error")),
             })
             .required(),
-        5: yup.object(),
-        6: yup.object(),
+        5: yup
+            .object({
+                languages: yup.string().required(Translator.trans("service.wms_vector.new.step_additional_information.language_error")),
+                charset: yup.string().required(Translator.trans("service.wms_vector.new.step_additional_information.charset_error")),
+                projection: yup.string().required(Translator.trans("service.wms_vector.new.step_additional_information.projection_error")),
+                encoding: yup.string().required(Translator.trans("service.wms_vector.new.step_additional_information.encoding_error")),
+                resolution: yup.number(),
+            })
+            .required(),
+        6: yup.object({
+            share_with: yup.string().required(Translator.trans("service.wms_vector.new.step_additional_information.share_with_error")),
+        }),
     };
 
     const form = useForm({
@@ -206,6 +218,13 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
                     <UploadStyleFile visible={currentStep === STEPS.STYLE_FILE} selectedTables={selectedTables} form={form} />
                     <UploadMetadata visible={currentStep === STEPS.METADATA} form={form} />
                     <Description visible={currentStep === STEPS.DESCRIPTION} vectorDb={vectorDbQuery.data} form={form} />
+                    <AdditionalInfo
+                        visible={currentStep === STEPS.ADDITIONALINFORMATIONS}
+                        vectorDb={vectorDbQuery.data}
+                        datastoreId={datastoreId}
+                        form={form}
+                    />
+                    <AccessRestrictions visible={currentStep === STEPS.ACCESSRESTRICTIONS} datastoreId={datastoreId} form={form} />
 
                     <ButtonsGroup
                         className={fr.cx("fr-mt-2w")}

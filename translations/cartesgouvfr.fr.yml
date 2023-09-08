@@ -231,7 +231,7 @@ service:
                 hint_organization_email: "TODO[Explication du champ]"
                 organization_email_mandatory_error: "l'email de l'organisme est obligatoire"
                 organization_email_error: "l'email de l'organisme n'est pas correct"
-            additional_information_form:
+            step_additional_information:
                 metadata_information_title: "Informations sur les métadonnées"
                 language: "Langue des métadonnées"
                 language_placeholder: "Sélectionnez la ou les langues "
@@ -250,7 +250,7 @@ service:
                 spatial_resolution: "Résolution spatiale (optionnel)"
                 hint_spatial_resolution: "Résolution indiquée en échelle (1/x)"
                 select_spatial_resolution: "Sélectionnez un produit (série)"
-            access_retrictions:
+            step_access_retrictions:
                 title: Restrictions d’accès
                 share_with: Avec qui voulez-vous partager le service ?
                 share_with_error: La restrictions d’accès est obligatoire
