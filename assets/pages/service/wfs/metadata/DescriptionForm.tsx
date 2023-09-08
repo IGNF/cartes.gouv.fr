@@ -13,7 +13,7 @@ import { FC, useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 import * as yup from "yup";
-import KeywordsSelect from "../../../../components/Utils/KeywordsSelect";
+import KeywordsSelect from "../../../../components/Input/KeywordsSelect";
 import { regex, removeDiacritics } from "../../../../utils";
 import Translator from "../../../../modules/Translator";
 

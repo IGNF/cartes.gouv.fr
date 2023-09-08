@@ -7,7 +7,7 @@ import { UseFormReturn } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 
 import MarkdownEditor from "../../../../components/Input/MarkdownEditor";
-import KeywordsSelect from "../../../../components/Utils/KeywordsSelect";
+import KeywordsSelect from "../../../../components/Input/KeywordsSelect";
 import Translator from "../../../../modules/Translator";
 import { VectorDb } from "../../../../types/app";
 import { getInspireKeywords, removeDiacritics } from "../../../../utils";
