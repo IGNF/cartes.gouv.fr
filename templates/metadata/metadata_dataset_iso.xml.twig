@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?><gmd:MD_Metadata xmlns:gmd="http://www.isotc211.org/2005/gmd" xmlns:gco="http://www.isotc211.org/2005/gco" xmlns:gml="http://www.opengis.net/gml" xmlns:gmx="http://www.isotc211.org/2005/gmx" xmlns:gsr="http://www.isotc211.org/2005/gsr" xmlns:gss="http://www.isotc211.org/2005/gss" xmlns:gts="http://www.isotc211.org/2005/gts" xmlns:srv="http://www.isotc211.org/2005/srv" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" uuid="IGNF_BDTOPOr_3" xsi:schemaLocation="http://www.isotc211.org/2005/gmd https://www.isotc211.org/2005/gmd/gmd.xsd http://www.isotc211.org/2005/gmx https://www.isotc211.org/2005/gmx/gmx.xsd http://www.isotc211.org/2005/srv http://schemas.opengis.net/iso/19139/20060504/srv/srv.xsd">
+    <gmd:fileIdentifier>
+        {# Identificateur de ressource unique #}
+        <gco:CharacterString>{{ fileIdentifier }}.xml</gco:CharacterString>
+    </gmd:fileIdentifier>
+    <gmd:language>
+        <gmd:LanguageCode codeList="http://www.loc.gov/standards/iso639-2/" codeListValue="{{ language }}">{{ language }}</gmd:LanguageCode>
+    </gmd:language>
+    <gmd:characterSet>
+        <gmd:MD_CharacterSetCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/ML_gmxCodelists.xml#MD_CharacterSetCode" codeListValue="{{ charset }}">{{ charset }}</gmd:MD_CharacterSetCode>
+    </gmd:characterSet>
+    <gmd:hierarchyLevel>
+        <gmd:MD_ScopeCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/ML_gmxCodelists.xml#MD_ScopeCode" codeListValue="{{ hierarchyLevel }}">{{ hierarchyLevel }}</gmd:MD_ScopeCode>
+    </gmd:hierarchyLevel>
+
+    {# généalogie de la ressource #}
+    <gmd:hierarchyLevelName>
+        <gco:CharacterString>
+            {% apply spaceless %}
+            {% if hierarchyLevel == 'dataset' %}
+                Lot
+            {% elseif hierarchyLevel == 'series' %}
+                Produit
+            {% endif %}
+            {% endapply %}
+        </gco:CharacterString>
+    </gmd:hierarchyLevelName>
+
+    <gmd:identificationInfo>
+        <gmd:MD_DataIdentification>
+            <gmd:citation>
+                <gmd:CI_Citation>
+                    <gmd:title>
+                        {# intitulé #}
+                        <gco:CharacterString>{{ title }}</gco:CharacterString>
+                    </gmd:title>
+                </gmd:CI_Citation>
+            </gmd:citation>
+            <gmd:abstract>
+                {# résumé #}
+                <gco:CharacterString>{{ abstract }}</gco:CharacterString>
+            </gmd:abstract>
+
+            {# email de contact sur les métadonnées #}
+            <gmd:pointOfContact>
+                <gmd:CI_ResponsibleParty>
+                    <gmd:contactInfo>
+                        <gmd:CI_Contact>
+                            <gmd:address>
+                                <gmd:CI_Address>
+                                    <gmd:electronicMailAddress>
+                                        <gco:CharacterString>{{ contact_email }}</gco:CharacterString>
+                                    </gmd:electronicMailAddress>
+                                </gmd:CI_Address>
+                            </gmd:address>
+                        </gmd:CI_Contact>
+                    </gmd:contactInfo>
+                </gmd:CI_ResponsibleParty>
+            </gmd:pointOfContact>
+
+            <gmd:descriptiveKeywords>
+                <gmd:MD_Keywords>
+                    {% apply spaceless %}
+                    {% for item in thematic_categories %}
+                        <gmd:keyword>
+                            <gco:CharacterString>{{ item }}</gco:CharacterString>
+                        </gmd:keyword>
+                    {% endfor %}
+                    {% endapply %}
+                    <gmd:type>
+                        <gmd:MD_KeywordTypeCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/ML_gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="theme">theme</gmd:MD_KeywordTypeCode>
+                    </gmd:type>
+                </gmd:MD_Keywords>
+            </gmd:descriptiveKeywords>
+        </gmd:MD_DataIdentification>
+    </gmd:identificationInfo>
+
+    {# responsable de la ressource #}
+    <gmd:contact>
+        <gmd:CI_ResponsibleParty>
+            <gmd:organisationName>
+                <gco:CharacterString>{{ organisation_name }}</gco:CharacterString>
+            </gmd:organisationName>
+            <gmd:contactInfo>
+                <gmd:CI_Contact>
+                    <gmd:address>
+                        <gmd:CI_Address>
+                            <gmd:electronicMailAddress>
+                                <gco:CharacterString>{{ organisation_email }}</gco:CharacterString>
+                            </gmd:electronicMailAddress>
+                        </gmd:CI_Address>
+                    </gmd:address>
+                </gmd:CI_Contact>
+            </gmd:contactInfo>
+        </gmd:CI_ResponsibleParty>
+    </gmd:contact>
+
+    <gmd:dateStamp>
+        <gco:Date>{{ creation_date }}</gco:Date>
+    </gmd:dateStamp>
+
+    <gmd:distributionInfo>
+        <gmd:MD_Distribution>
+            <gmd:transferOptions>
+                <gmd:MD_DigitalTransferOptions>
+                    {# https://cnig.gouv.fr/IMG/pdf/guide_recherche_inspire.pdf #}
+                    {# Le champ linkage précise l’adresse du service, le champ « protocol » précise de quel type de service il s’agit (OGC:WMS, OGC:WFS, OGC:WMTS, OGC:CSW) et le champ « name » contient le nom de la couche. #}
+                    {% for layer_name in layer_names %}
+                        <gmd:onLine>
+                            <gmd:CI_OnlineResource>
+                                <gmd:linkage>
+                                    <gmd:URL>{{ endpoint_url }}</gmd:URL>
+                                </gmd:linkage>
+                                <gmd:protocol>
+                                    <gco:CharacterString>{{ endpoint_type }}</gco:CharacterString>
+                                </gmd:protocol>
+                                <gmd:name>
+                                    <gco:CharacterString>{{ layer_name }}</gco:CharacterString>
+                                </gmd:name>
+                            </gmd:CI_OnlineResource>
+                        </gmd:onLine>
+                    {% endfor %}
+                </gmd:MD_DigitalTransferOptions>
+            </gmd:transferOptions>
+        </gmd:MD_Distribution>
+    </gmd:distributionInfo>
+</gmd:MD_Metadata>
