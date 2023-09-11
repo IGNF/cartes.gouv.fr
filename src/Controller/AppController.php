@@ -24,6 +24,7 @@ class AppController extends AbstractController
 
         return $this->render('app.html.twig', [
             'app_root' => $appRoot,
+            // 'info_banner_msg' => 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Vitae officiis incidunt, quia unde quisquam adipisci eum excepturi voluptas delectus voluptatibus consectetur porro necessitatibus itaque ipsum deserunt fugit. Iure, id obcaecati!',
         ]);
     }
 

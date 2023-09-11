@@ -1,13 +1,17 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-<div id="root" data-app-root="{{ app_root }}" data-app-env="{{ app.request.server.get('APP_ENV') }}" data-site-title="cartes.gouv.fr"></div>
-<div id="user" {% if app.user %} data-user="{{ app.user|serialize('json') }}" {% endif %} ></div>
+    <div id="root" data-app-root="{{ app_root }}" data-app-env="{{ app.request.server.get('APP_ENV') }}" data-site-title="cartes.gouv.fr"></div>
 
-<noscript>
-    <p>
-        JavaScript semble être désactivé sur votre navigateur, ce qui est nécessaire pour le bon fonctionnement de ce site. Veuillez
-        activer JavaScript sur votre navigateur.
-    </p>
-</noscript>
+    {% if app.user %}
+        <div id="user" data-user="{{ app.user|serialize('json') }}"></div>
+    {% endif %}
+
+    {% if info_banner_msg is defined %}
+        <div id="info_banner" data-msg="{{ info_banner_msg }}"></div>
+    {% endif %}
+
+    <noscript>
+        <p>JavaScript semble être désactivé sur votre navigateur, ce qui est nécessaire pour le bon fonctionnement de ce site. Veuillez activer JavaScript sur votre navigateur.</p>
+    </noscript>
 {% endblock %}
