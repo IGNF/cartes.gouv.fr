@@ -1,7 +1,7 @@
 import { headerFooterDisplayItem } from "@codegouvfr/react-dsfr/Display";
 import Footer from "@codegouvfr/react-dsfr/Footer";
 
-import { FooterConsentManagementItem } from "../../config/consentManagement";
+import { FooterConsentManagementItem, FooterPersonalDataPolicyItem } from "../../config/consentManagement";
 import { routes } from "../../router/router";
 
 import logoIgn from "../../img/logo-ign.png";
@@ -28,10 +28,7 @@ const AppFooter = () => {
                 géographiques.
             "
             bottomItems={[
-                {
-                    text: "Données personnelles",
-                    linkProps: routes.personal_data().link,
-                },
+                <FooterPersonalDataPolicyItem key="footer-personal-data-policy-item" />,
                 <FooterConsentManagementItem key="footer-consent-management-item" />,
                 // Choix du thème clair/sombre
                 headerFooterDisplayItem,
