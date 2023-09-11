@@ -75,7 +75,7 @@ const Home = () => {
                     className={fr.cx("fr-tabs--full")}
                     tabs={[
                         {
-                            label: <span>Outils cartes.gouv.fr</span>,
+                            label: "Outils cartes.gouv.fr",
                             content: (
                                 <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-text--center")}>
                                     <div className={fr.cx("fr-col-lg-3", "fr-col-md-6", "fr-col-12", "fr-text--center")}>
@@ -145,7 +145,7 @@ const Home = () => {
                             ),
                         },
                         {
-                            label: <span>Pour aller plus loin</span>,
+                            label: "Pour aller plus loin",
                             content: (
                                 <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-text--center")}>
                                     <div className={fr.cx("fr-col-lg-3", "fr-col-12", "fr-text--center")}>
