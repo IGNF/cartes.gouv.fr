@@ -70,13 +70,13 @@ contact:
         continue: "Poursuivre la navigation"
 
 datastore_creation_request:
-    title: "Demande de création d'un entrepôt de données"
+    title: "Demande de création d'un espace de travail"
     form:
         error_title: "Votre message n'a pas pu être envoyé"
-        name: "Nom de l'entrepôt"
+        name: "Nom de l'espace de travail"
         name_hint: "TODO[Explication du champ]"
-        name_error: "Le nom de l'entrepôt est obligatoire"
-        name_minlength_error: "Le nom de l'entrepôt doit faire au minimum 10 caractères"
+        name_error: "Le nom de l'espace de travail est obligatoire"
+        name_minlength_error: "Le nom de l'espace de travail doit faire au minimum 10 caractères"
         data_type_legend: "Types de données à déposer"
         data_type_error: "Il doit y avoir au moins un type de données sélectionné"
         vector_data_type: "Vecteur"
@@ -96,7 +96,7 @@ datastore_creation_request:
         send: "Envoyer la demande"
     is_sending: "Votre demande est en cours d'envoi"
     email_support:
-        heading: "Un utilisateur a fait une demande de création d'un entrepôt de données"
+        heading: "Un utilisateur a fait une demande de création d'un espace de travail"
         details: "Détails de la demande"
         date: "Date d'envoi"
         datastore_name: "Nom de l'entrepôt"
@@ -107,7 +107,7 @@ datastore_creation_request:
         data_endpoint_status: "Statut"
         data_endpoint_quota: "Quota"
     email_acknowledgement:
-        heading: "Votre demande de création d'un entrepôt a été envoyée à l'IGN et une réponse vous sera apportée dans les meilleurs délais."
+        heading: "Votre demande de création d'un espace de travail a été envoyée à l'IGN et une réponse vous sera apportée dans les meilleurs délais."
         message: "Rappel de votre demande"
 
 service:

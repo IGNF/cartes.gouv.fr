@@ -123,13 +123,13 @@ class ContactController extends AbstractController
             $userEmail = $user->getEmail();
             
             // TODO A VOIR
-            /*$this->mailerLogger->info("User ({userEmail}) : Demande de création d'un entrepôt de données", [
+            /*$this->mailerLogger->info("User ({userEmail}) : Demande de création d'un espace de travail", [
                 'userEmail' => $userEmail
             ]);*/
 
             // TODO : Envoi de mail désactivé en attendant d'avoir l'adresse du serveur smtp en production
             // Envoi du mail à l'adresse du support
-            $this->mailerService->sendMail($supportAddress, "[Géoplateforme] Demande de création d'un entrepôt de données", 'Mailer/datastore_create_request.html.twig', $mailParams);
+            $this->mailerService->sendMail($supportAddress, "[Géoplateforme] Demande de création d'un espace de travail", 'Mailer/datastore_create_request.html.twig', $mailParams);
 
             // Envoi du mail d'accusé de réception à l'utilisateur
             $this->mailerService->sendMail($userEmail, '[Géoplateforme] Accusé de réception de votre demande', 'Mailer/datastore_create_request_acknowledgement.html.twig',
