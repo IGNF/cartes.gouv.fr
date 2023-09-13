@@ -38,15 +38,24 @@ export async function jsonFetch<T>(
             };
 
             const request = new Request(url, fetchConfig);
-            const response = await fetch(request);
 
-            // retourner un objet vide si la réponse n'a pas de body (dans un cas de 204 par exemple)
-            const data = await response.json().catch(() => ({}));
+            try {
+                const response = await fetch(request);
 
-            if (response.ok) {
-                resolve(data);
-            } else {
-                reject(data);
+                // retourner un objet vide si la réponse n'a pas de body (dans un cas de 204 par exemple)
+                const data = await response.json().catch(() => ({}));
+
+                if (response.ok) {
+                    resolve(data);
+                } else {
+                    reject(data);
+                }
+            } catch (error) {
+                if (error instanceof DOMException && error?.name === "AbortError") {
+                    // NOTE : ne rien faire, requête annulée par react-query parce que requête en doublon (en mode strict de react)
+                } else {
+                    reject(error);
+                }
             }
         })();
     });
