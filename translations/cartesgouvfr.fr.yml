@@ -99,7 +99,7 @@ datastore_creation_request:
         heading: "Un utilisateur a fait une demande de création d'un espace de travail"
         details: "Détails de la demande"
         date: "Date d'envoi"
-        datastore_name: "Nom de l'entrepôt"
+        datastore_name: "Nom de l'espace de travail"
         data_type: "Type de données"
         data_volume: "Volume des données"
         data_endpoint_quotas: "Quotas"
