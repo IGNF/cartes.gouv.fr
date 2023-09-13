@@ -13,7 +13,7 @@ class StoredDataApiService extends AbstractEntrepotApiService
     public function getAll(string $datastoreId, array $query = []): array
     {
         if (!array_key_exists('sort', $query)) { // par défaut, trier par la date de création décroissante
-            $query['sort'] = 'date:desc';
+            $query['sort'] = 'lastEvent,desc';
         }
 
         return $this->requestAll("datastores/$datastoreId/stored_data", $query);

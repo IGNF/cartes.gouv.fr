@@ -31,7 +31,7 @@ class DatasheetController extends AbstractController
     public function getDatasheetList(string $datastoreId): JsonResponse
     {
         $uploads = $this->entrepotApiService->upload->getAllDetailed($datastoreId, [
-            'sort' => 'date:desc',
+            'sort' => 'lastEvent,desc',
         ]);
 
         $uploadDatasheetNames = array_map(function ($upload) {
@@ -41,7 +41,7 @@ class DatasheetController extends AbstractController
         }, $uploads);
 
         $storedDataList = $this->entrepotApiService->storedData->getAllDetailed($datastoreId, [
-            'sort' => 'date:desc',
+            'sort' => 'lastEvent,desc',
         ]);
 
         $storedDataDatasheetNames = array_map(function ($storedData) {

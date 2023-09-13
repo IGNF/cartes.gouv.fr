@@ -13,7 +13,9 @@ class UploadApiService extends AbstractEntrepotApiService
      */
     public function getAll(string $datastoreId, array $query = []): array
     {
-        $query['sort'] = 'date:desc'; // trier par la date de création dans l'ordre descendant
+        if (!array_key_exists('sort', $query)) { // par défaut, trier par la date de création décroissante
+            $query['sort'] = 'lastEvent,desc';
+        }
 
         return $this->requestAll("datastores/$datastoreId/uploads", $query);
     }
