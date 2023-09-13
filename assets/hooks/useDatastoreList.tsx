@@ -1,29 +1,17 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
-import RQKeys from "../modules/RQKeys";
 import api from "../api";
-import { useEffect } from "react";
-import useUser from "./useUser";
-import { Datastore } from "../types/app";
+import RQKeys from "../modules/RQKeys";
 import { CartesApiException } from "../modules/jsonFetch";
+import { Datastore } from "../types/app";
+import useUser from "./useUser";
 
 export const useDatastoreList = () => {
-    const abortController = new AbortController();
-    const queryClient = useQueryClient();
-
     const { user } = useUser();
-
-    useEffect(() => {
-        return () => {
-            queryClient.cancelQueries({
-                queryKey: [...RQKeys.datastore_list()],
-            });
-        };
-    }, [queryClient]);
 
     return useQuery<Datastore[], CartesApiException>({
         queryKey: RQKeys.datastore_list(),
-        queryFn: () => api.user.getDatastoresList({ signal: abortController.signal }),
+        queryFn: ({ signal }) => api.user.getDatastoresList({ signal }),
         staleTime: 60000,
         enabled: !!user,
     });

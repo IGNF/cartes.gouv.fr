@@ -5,8 +5,8 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { FC, useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { FC, useState } from "react";
 import { createPortal } from "react-dom";
 import { symToStr } from "tsafe/symToStr";
 
@@ -35,24 +35,15 @@ type DatasheetViewProps = {
 const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) => {
     const route = useRoute();
 
-    const abortController = new AbortController();
-    const queryClient = useQueryClient();
-
     const datasheetQuery = useQuery<DatasheetDetailed, CartesApiException>({
         queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName),
-        queryFn: () => api.datasheet.get(datastoreId, datasheetName, { signal: abortController?.signal }),
+        queryFn: ({ signal }) => api.datasheet.get(datastoreId, datasheetName, { signal }),
         staleTime: 20000,
         refetchInterval: 20000,
         retry: false,
     });
 
     const [isDeleting, setIsDeleting] = useState<boolean>(false);
-
-    useEffect(() => {
-        return () => {
-            queryClient.cancelQueries({ queryKey: [...RQKeys.datastore_datasheet(datastoreId, datasheetName)] });
-        };
-    }, [datasheetName, datastoreId, queryClient]);
 
     const handleDeleteData = () => {
         setIsDeleting(true);

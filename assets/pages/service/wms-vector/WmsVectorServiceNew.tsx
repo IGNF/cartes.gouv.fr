@@ -4,7 +4,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { FC, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
@@ -18,12 +18,12 @@ import { routes } from "../../../router/router";
 import { type StoredDataRelation, type VectorDb } from "../../../types/app";
 import { regex } from "../../../utils";
 import validations from "../../../validations";
+import AccessRestrictions from "./AccessRestrictions";
 import TableSelection from "./TableSelection";
 import UploadStyleFile from "./UploadStyleFile";
+import AdditionalInfo from "./metadata/AdditionalInfo";
 import Description from "./metadata/Description";
 import UploadMetadata from "./metadata/UploadMetadata";
-import AdditionalInfo from "./metadata/AdditionalInfo";
-import AccessRestrictions from "./AccessRestrictions";
 
 type WmsVectorServiceNewProps = {
     datastoreId: string;
@@ -47,7 +47,6 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
         staleTime: 600000,
     });
 
-    const queryClient = useQueryClient();
     const offeringsQuery = useQuery({
         queryKey: RQKeys.datastore_offering_list(datastoreId),
         queryFn: () => api.service.getOfferings(datastoreId),
@@ -159,12 +158,6 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
 
     const selectedTableNamesList: string[] = watch("selected_tables");
     const [selectedTables, setSelectedTables] = useState<StoredDataRelation[]>([]);
-
-    useEffect(() => {
-        return () => {
-            queryClient.cancelQueries({ queryKey: [...RQKeys.datastore_offering_list(datastoreId)] });
-        };
-    }, [datastoreId, queryClient, offeringsQuery.data]);
 
     useEffect(() => {
         if (selectedTableNamesList && vectorDbQuery.data) {

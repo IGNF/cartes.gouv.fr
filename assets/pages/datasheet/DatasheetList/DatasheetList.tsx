@@ -1,7 +1,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { FC, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { FC } from "react";
 
 import api from "../../../api";
 import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
@@ -17,29 +17,18 @@ type DatasheetListProps = {
     datastoreId: string;
 };
 const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
-    const abortController = new AbortController();
-    const queryClient = useQueryClient();
-
     const datastoreQuery = useQuery({
         queryKey: RQKeys.datastore(datastoreId),
-        queryFn: () => api.datastore.get(datastoreId, { signal: abortController?.signal }),
+        queryFn: ({ signal }) => api.datastore.get(datastoreId, { signal }),
         staleTime: 120000,
     });
 
     const datasheetListQuery = useQuery({
         queryKey: RQKeys.datastore_datasheet_list(datastoreId),
-        queryFn: () => api.datasheet.getList(datastoreId, { signal: abortController?.signal }),
+        queryFn: ({ signal }) => api.datasheet.getList(datastoreId, { signal }),
         staleTime: 30000,
         refetchInterval: 30000,
     });
-
-    useEffect(() => {
-        return () => {
-            queryClient.cancelQueries({
-                queryKey: [...RQKeys.datastore(datastoreId), ...RQKeys.datastore_datasheet_list(datastoreId)],
-            });
-        };
-    }, [queryClient, datastoreId]);
 
     return (
         <DatastoreLayout datastoreId={datastoreId} documentTitle="Mes données">

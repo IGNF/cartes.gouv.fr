@@ -2,20 +2,21 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { useIsDark } from "@codegouvfr/react-dsfr/useIsDark";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import RQKeys from "../../../../modules/RQKeys";
-import api from "../../../../api";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useQuery } from "@tanstack/react-query";
 import MDEditor from "@uiw/react-md-editor";
-import getLocaleCommands from "../../../../modules/react-md/react-md-commands";
 import { format as datefnsFormat } from "date-fns";
-import { FC, useState, useEffect } from "react";
+import { FC, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 import * as yup from "yup";
+
+import api from "../../../../api";
 import KeywordsSelect from "../../../../components/Input/KeywordsSelect";
-import { regex, removeDiacritics } from "../../../../utils";
+import RQKeys from "../../../../modules/RQKeys";
 import Translator from "../../../../modules/Translator";
+import getLocaleCommands from "../../../../modules/react-md/react-md-commands";
+import { regex, removeDiacritics } from "../../../../utils";
 
 // Themes et mot cles INSPIRE
 import { getInspireKeywords } from "../../../../utils";
@@ -67,7 +68,6 @@ const DescriptionForm: FC<DescriptionFormProps> = ({ datastoreId, storedDataName
         })
         .required();
 
-    const queryClient = useQueryClient();
     const offeringsQuery = useQuery({
         queryKey: RQKeys.datastore_offering_list(datastoreId),
         queryFn: () => api.service.getOfferings(datastoreId),
@@ -92,12 +92,6 @@ const DescriptionForm: FC<DescriptionFormProps> = ({ datastoreId, storedDataName
         setFormValue("data_technical_name", nice);
         setFormValue("data_public_name", storedDataName);
     }, [setFormValue, storedDataName]);
-
-    useEffect(() => {
-        return () => {
-            queryClient.cancelQueries({ queryKey: [...RQKeys.datastore_offering_list(datastoreId)] });
-        };
-    }, [datastoreId, queryClient, offeringsQuery.data]);
 
     const handleKeywordsChange = (values) => {
         setFormValue("data_category", values.join(","), { shouldValidate: true });

@@ -19,7 +19,6 @@ const DatasheetNewIntegrationDialog: FC<DatasheetNewIntegrationDialogProps> = ({
     const [integrationProgress, setIntegrationProgress] = useState({});
     const [integrationCurrentStep, setIntegrationCurrentStep] = useState<number>();
 
-    const abortController = new AbortController();
     const [shouldPingIntProg, setShouldPingIntProg] = useState(false);
 
     const [isIntegrationError, setIsIntegrationError] = useState(false);
@@ -28,7 +27,7 @@ const DatasheetNewIntegrationDialog: FC<DatasheetNewIntegrationDialogProps> = ({
     // query qui "ping" et récupère le progress en boucle (query désactivé au départ)
     const pingIntProgQuery = useQuery({
         queryKey: RQKeys.datastore_upload_integration(datastoreId, uploadId),
-        queryFn: () => api.upload.pingIntegrationProgress(datastoreId, uploadId, { signal: abortController?.signal }),
+        queryFn: ({ signal }) => api.upload.pingIntegrationProgress(datastoreId, uploadId, { signal }),
         refetchInterval: 3000,
         refetchIntervalInBackground: true,
         enabled: shouldPingIntProg,

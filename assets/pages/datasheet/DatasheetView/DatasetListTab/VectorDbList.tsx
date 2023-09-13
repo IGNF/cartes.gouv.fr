@@ -70,14 +70,12 @@ const getVectorDbBadge = (status) => {
 };
 
 const VectorDbList: FC<VectorDbListProps> = ({ datastoreId, vectorDbList }) => {
-    const abortController = new AbortController();
-
     const [serviceType, setServiceType] = useState<ServiceTypes>();
     const [selectedStoredDataId, setSelectedStoredDataId] = useState<string>();
 
     const endpointsQuery = useQuery<DatastoreEndpoint[]>({
         queryKey: RQKeys.datastore_endpoints(datastoreId),
-        queryFn: () => api.datastore.getEndpoints(datastoreId, {}, { signal: abortController?.signal }),
+        queryFn: ({ signal }) => api.datastore.getEndpoints(datastoreId, {}, { signal }),
         retry: false,
         staleTime: 3600000,
     });

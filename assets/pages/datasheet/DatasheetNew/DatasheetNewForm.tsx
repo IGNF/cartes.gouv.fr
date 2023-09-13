@@ -4,7 +4,7 @@ import { Input } from "@codegouvfr/react-dsfr/Input";
 import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
 import { Select } from "@codegouvfr/react-dsfr/Select";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { format as datefnsFormat } from "date-fns";
 import PropTypes from "prop-types";
 import { useEffect, useRef, useState } from "react";
@@ -14,15 +14,15 @@ import { v4 as uuidv4 } from "uuid";
 import * as yup from "yup";
 
 import api from "../../../api";
+import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
 import Progress from "../../../components/Utils/Progress";
 import Wait from "../../../components/Utils/Wait";
 import defaultProjections from "../../../data/default_projections.json";
 import functions from "../../../functions";
 import FileUploader from "../../../modules/FileUploader";
-import Translator from "../../../modules/Translator";
 import RQKeys from "../../../modules/RQKeys";
+import Translator from "../../../modules/Translator";
 import { routes } from "../../../router/router";
-import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
 import DatasheetNewIntegrationDialog from "./DatasheetNewIntegration/DatasheetNewIntegrationDialog";
 
 import "./../../../sass/components/spinner.scss";
@@ -84,7 +84,6 @@ const DatasheetNewForm = ({ datastoreId }) => {
         setValue: setFormValue,
     } = useForm({ resolver: yupResolver(schema) });
 
-    const queryClient = useQueryClient();
     const dataListQuery = useQuery({
         queryKey: RQKeys.datastore_datasheet_list(datastoreId),
         queryFn: () => api.datasheet.getList(datastoreId),
@@ -104,12 +103,6 @@ const DatasheetNewForm = ({ datastoreId }) => {
             setFormValue("data_type", "");
         }
     }, [showDataInfos, setFormValue]);
-
-    useEffect(() => {
-        return () => {
-            queryClient.cancelQueries({ queryKey: [...RQKeys.datastore_datasheet_list(datastoreId)] });
-        };
-    }, [datastoreId, queryClient]);
 
     const onSubmit = async (formData) => {
         console.debug("errors", errors);

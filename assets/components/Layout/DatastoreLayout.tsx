@@ -16,12 +16,10 @@ type DatastoreLayoutProps = {
 const DatastoreLayout: FC<PropsWithChildren<DatastoreLayoutProps>> = ({ datastoreId, documentTitle, children }) => {
     const navItems = datastoreNavItems(datastoreId);
 
-    const abortController = new AbortController();
-
     const datastoreListQuery = useDatastoreList();
     const datastoreQuery = useQuery({
         queryKey: RQKeys.datastore(datastoreId),
-        queryFn: () => api.datastore.get(datastoreId, { signal: abortController.signal }),
+        queryFn: ({ signal }) => api.datastore.get(datastoreId, { signal }),
         staleTime: 3600000,
     });
 

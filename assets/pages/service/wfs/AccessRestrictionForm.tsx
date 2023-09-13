@@ -24,8 +24,6 @@ const schema = yup.object({
 });
 
 const AccessRestrictionForm: FC<AccessRestrictionFormProps> = ({ datastoreId, visible, onPrevious, onValid }) => {
-    const abortController = new AbortController();
-
     const {
         register,
         handleSubmit,
@@ -40,7 +38,7 @@ const AccessRestrictionForm: FC<AccessRestrictionFormProps> = ({ datastoreId, vi
 
     const endpointsQuery = useQuery<DatastoreEndpoint[]>({
         queryKey: RQKeys.datastore_endpoints(datastoreId),
-        queryFn: () => api.datastore.getEndpoints(datastoreId, {}, { signal: abortController?.signal }),
+        queryFn: ({ signal }) => api.datastore.getEndpoints(datastoreId, {}, { signal }),
         retry: false,
         staleTime: 3600000,
     });
