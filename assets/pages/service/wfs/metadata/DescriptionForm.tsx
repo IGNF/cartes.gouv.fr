@@ -154,8 +154,8 @@ const DescriptionForm: FC<DescriptionFormProps> = ({ datastoreId, storedDataName
                 stateRelatedMessage={errors?.data_identifier?.message}
                 nativeInputProps={{
                     ...register("data_identifier"),
-                    readOnly: true,
-                    defaultValue: uuidv4(),
+                    /*readOnly: true,
+                    defaultValue: uuidv4(),*/
                 }}
             />
             <KeywordsSelect

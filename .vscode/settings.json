@@ -1,4 +1,45 @@
 {
     "prettier.requireConfig": true,
-    "php-cs-fixer.executablePath": "${workspaceFolder}/vendor/bin/php-cs-fixer"
+    "php-cs-fixer.executablePath": "${workspaceFolder}/vendor/bin/php-cs-fixer",
+    "todo-tree.general.showActivityBarBadge": true,
+    "todo-tree.general.tags": ["NOTE", "TODO", "FIXME", "MARK", "[ ]", "[x]"],
+    "todo-tree.highlights.defaultHighlight": {
+        "type": "tag",
+        "fontWeight": "bold",
+        "foreground": "#000000",
+        "opacity": 90
+    },
+    "todo-tree.highlights.customHighlight": {
+        "NOTE": {
+            "background": "#FFA500",
+            "iconColour": "#FFA500",
+            "icon": "file"
+        },
+        "TODO": {
+            "background": "#FFD703",
+            "iconColour": "#FFD703",
+            "icon": "tag"
+        },
+        "FIXME": {
+            "background": "#FF01FF",
+            "iconColour": "#FF01FF",
+            "icon": "bug"
+        },
+        "MARK": {
+            "background": "#157EFB",
+            "iconColour": "#157EFB",
+            "icon": "tag"
+        },
+        "[ ]": {
+            "background": "#ff000080",
+            "iconColour": "#ff000080",
+            "icon": "square"
+        },
+        "[x]": {
+            "background": "#00ff0080",
+            "iconColour": "#00ff0080",
+            "icon": "square-fill"
+        }
+    },
+    "todo-tree.regex.regex": "(//|#|<!--|;|/\\*|^|^\\s*(-|\\d+.))\\s*($TAGS)"
 }

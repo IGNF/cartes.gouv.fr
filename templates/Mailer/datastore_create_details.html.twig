@@ -1,0 +1,13 @@
+{% trans_default_domain "cartesgouvfr" %}
+
+<ul>
+    <li>{{ 'datastore_creation_request.email_support.datastore_name'|trans }} : {{ data.name }}</li>
+    <li>{{ 'datastore_creation_request.email_support.data_type'|trans }} : {{ data.type|join(', ') }}</li>
+    <li>{{ 'datastore_creation_request.email_support.data_volume'|trans }} : {{ data.volume }}</li>
+    <li>{{ 'datastore_creation_request.email_support.data_endpoint_quotas'|trans }} :
+    <ul>
+        {% for endpoint, q in data.quotas %}
+            <li>{{ endpoint }}, <strong>{{ q.status }}</strong> : {{ q.quota }}</li>
+        {% endfor %}
+    </ul>
+</ul>

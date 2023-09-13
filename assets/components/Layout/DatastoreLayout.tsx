@@ -8,6 +8,7 @@ import { useDatastoreList } from "../../hooks/useDatastoreList";
 import RQKeys from "../../modules/RQKeys";
 import { routes } from "../../router/router";
 import AppLayout from "./AppLayout";
+import Translator from "../../modules/Translator";
 
 type DatastoreLayoutProps = {
     datastoreId: string;
@@ -32,6 +33,11 @@ const DatastoreLayout: FC<PropsWithChildren<DatastoreLayoutProps>> = ({ datastor
                 isActive: datastore._id === datastoreQuery.data?._id,
             })) || [],
     };
+
+    datastoreLinks.menuLinks.push({
+        text: Translator.trans("datastore_creation_request.title"),
+        linkProps: routes.datastore_create_request().link,
+    });
 
     return (
         <AppLayout navItems={[...navItems, datastoreLinks]} documentTitle={documentTitle}>

@@ -20,7 +20,9 @@ use Symfony\Component\Routing\Annotation\Route;
 class ContactController extends AbstractController
 {
     public function __construct(
-        private UserApiService $userApiService
+        private UserApiService $userApiService,
+        private MailerService $mailerService,
+        private LoggerInterface $mailerLogger
     ) {
     }
 
@@ -31,7 +33,7 @@ class ContactController extends AbstractController
         methods: ['POST'],
         condition: 'request.isXmlHttpRequest()'
     )]
-    public function contact(Request $request, MailerService $mailerService, LoggerInterface $mailerLogger): JsonResponse
+    public function contact(Request $request): JsonResponse
     {
         /** @var User */
         $user = $this->getUser();
@@ -51,7 +53,7 @@ class ContactController extends AbstractController
             }
 
             $message = $data['message'];
-            if ($mailerService->containsBannedWords($message)) {
+            if ($this->mailerService->containsBannedWords($message)) {
                 throw new BadRequestHttpException('Votre message contient des mots interdits');
             }
 
@@ -72,20 +74,67 @@ class ContactController extends AbstractController
                 $supportMailParams['userId'] = $userApi['_id'];
             }
 
-            $mailerLogger->info('User ({userEmail}) : {message}', [
+            $this->mailerLogger->info('User ({userEmail}) : {message}', [
                 'userEmail' => $userEmail,
                 'message' => $message,
             ]);
 
             // TODO : envoi de mail désactivé en attendant d'avoir l'adresse du serveur smtp en production
             // envoi du mail à l'adresse du support
-            $mailerService->sendMail($supportAddress, '[Géoplateforme] Demande de contact', 'Mailer/contact.html.twig', $supportMailParams);
+            $this->mailerService->sendMail($supportAddress, '[Géoplateforme] Demande de contact', 'Mailer/contact.html.twig', $supportMailParams);
 
             // // envoi du mail d'accusé de réception à l'utilisateur
-            $mailerService->sendMail($userEmail, '[Géoplateforme] Accusé de réception de votre demande', 'Mailer/contact_acknowledgement.html.twig', [
+            $this->mailerService->sendMail($userEmail, '[Géoplateforme] Accusé de réception de votre demande', 'Mailer/contact_acknowledgement.html.twig', [
                 'message' => $message,
                 'sendDate' => $now,
             ]);
+
+            return new JsonResponse(['success' => true]);
+        } catch (BadRequestHttpException|AppException $e) {
+            return new JsonResponse(['error' => $e->getMessage()], $e->getStatusCode());
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    #[Route(
+        '/datastore_create_request',
+        name: 'datastore_create_request',
+        options: ['expose' => true],
+        methods: ['POST'],
+        condition: 'request.isXmlHttpRequest()'
+    )]
+    public function datastoreCreateRequest(Request $request): JsonResponse
+    {
+        /** @var User */
+        $user = $this->getUser();
+
+        $data = json_decode($request->getContent(), true);
+
+        try {
+            $supportAddress = $this->getParameter('support_contact_mail');
+            $now = new \DateTime();
+
+            $mailParams = [
+                'sendDate' => $now,
+                'data' => $data
+            ];
+
+            $userEmail = $user->getEmail();
+            
+            // TODO A VOIR
+            /*$this->mailerLogger->info("User ({userEmail}) : Demande de création d'un entrepôt de données", [
+                'userEmail' => $userEmail
+            ]);*/
+
+            // TODO : envoi de mail désactivé en attendant d'avoir l'adresse du serveur smtp en production
+            // envoi du mail à l'adresse du support
+            $this->mailerService->sendMail(/* TODO $userEmail */$supportAddress, "[Géoplateforme] Demande de création d'un entrepôt de données", 'Mailer/datastore_create_request.html.twig', $mailParams);
+
+            // Envoi du mail d'accusé de réception à l'utilisateur
+            $this->mailerService->sendMail(/* TODO $userEmail */$supportAddress, '[Géoplateforme] Accusé de réception de votre demande', 'Mailer/datastore_create_request_acknowledgement.html.twig',
+                $mailParams
+            );
 
             return new JsonResponse(['success' => true]);
         } catch (BadRequestHttpException|AppException $e) {

@@ -30,6 +30,9 @@ const routeDefs = {
 
     dashboard_pro: defineRoute(`${appRoot}/dashboard`),
 
+    // Demande de creation d'un datastore
+    datastore_create_request: defineRoute(`${appRoot}/datastores/create_request`),
+
     // fiche de données
     datasheet_list: defineRoute(
         {

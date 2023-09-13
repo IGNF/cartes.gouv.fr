@@ -1,0 +1,28 @@
+{% extends "Mailer/base.html.twig" %}
+{% trans_default_domain "cartesgouvfr" %}
+
+{% block body %}
+    <div>
+        <p>{{ 'datastore_creation_request.email_support.heading'|trans }}</p>
+        <hr>
+        <p>
+            <strong>{{ 'contact.email_support.user_email'|trans }} : </strong>{{ app.user.email }}
+        </p>
+        <p>
+            <strong>{{ 'contact.email_support.last_name'|trans }} : </strong>{% if app.user.lastName is not empty %}{{ app.user.lastName }}{% else %}{{ 'contact.email_support.not_specified'|trans }}{% endif %}
+        </p>
+        <p>
+            <strong>{{ 'contact.email_support.first_name'|trans }} : </strong>{% if app.user.firstName is not empty %}{{ app.user.firstName }}{% else %}{{ 'contact.email_support.not_specified'|trans }}{% endif %}
+        </p>
+        <p>
+            <strong>{{ 'contact.email_support.user_id'|trans }} : </strong>{{ app.user.id }}
+        </p>
+        <p>
+            <strong>{{ 'contact.email_support.date'|trans }} : </strong>{{ sendDate|date('d-m-Y H:i', "Europe/Paris") }}
+        </p>
+        <p>
+            <strong>{{ 'datastore_creation_request.email_support.details'|trans }} : </strong>
+            {% include "Mailer/datastore_create_details.html.twig" %}
+        </p>
+    </div>
+{% endblock %}

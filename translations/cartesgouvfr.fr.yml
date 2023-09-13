@@ -69,6 +69,47 @@ contact:
         description: "Vous recevrez dans les prochaines minutes un accusé de réception récapitulant votre demande."
         continue: "Poursuivre la navigation"
 
+datastore_creation_request:
+    title: "Demande de création d'un entrepôt de données"
+    form:
+        error_title: "Votre message n'a pas pu être envoyé"
+        name: "Nom de l'entrepôt"
+        name_hint: "TODO[Explication du champ]"
+        name_error: "Le nom de l'entrepôt est obligatoire"
+        name_minlength_error: "Le nom de l'entrepôt doit faire au minimum 10 caractères"
+        data_type_legend: "Types de données à déposer"
+        data_type_error: "Il doit y avoir au moins un type de données sélectionné"
+        vector_data_type: "Vecteur"
+        raster_data_type: "Raster"
+        data_volume: "Volume des données"
+        select_data_volume: "Veuillez sélectionner un volume de données"
+        data_volume_hint: "TODO[Explication du champ]"
+        data_volume_error: "Le volume des données est obligatoire"
+        endpoint_quota:
+            label: "Quotas sur les différents flux"
+            label_hint: "TODO[Explication du champ]"
+            error: "Il faut sélectionner au moins un type de flux"
+            # public_status_label: "Public"
+            # public_status_value: "public"
+            # private_status_label: "Privé"
+            # private_status_value: "privé"
+        send: "Envoyer la demande"
+    is_sending: "Votre demande est en cours d'envoi"
+    email_support:
+        heading: "Un utilisateur a fait une demande de création d'un entrepôt de données"
+        details: "Détails de la demande"
+        date: "Date d'envoi"
+        datastore_name: "Nom de l'entrepôt"
+        data_type: "Type de données"
+        data_volume: "Volume des données"
+        data_endpoint_quotas: "Quotas"
+        data_endpoint_type: "Type de flux"
+        data_endpoint_status: "Statut"
+        data_endpoint_quota: "Quota"
+    email_acknowledgement:
+        heading: "Votre demande de création d'un entrepôt a été envoyée à l'IGN et une réponse vous sera apportée dans les meilleurs délais."
+        message: "Rappel de votre demande"
+
 service:
     wfs:
         new:
