@@ -32,6 +32,7 @@ const routeDefs = {
 
     // Demande de creation d'un datastore
     datastore_create_request: defineRoute(`${appRoot}/datastores/create_request`),
+    datastore_create_request_confirm: defineRoute(`${appRoot}/confirmation`),
 
     // fiche de données
     datasheet_list: defineRoute(

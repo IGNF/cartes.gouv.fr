@@ -2,7 +2,6 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { FC, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Input } from "@codegouvfr/react-dsfr/Input";
-import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Select } from "@codegouvfr/react-dsfr/Select";
 import AppLayout from "../../../components/Layout/AppLayout";
@@ -26,7 +25,6 @@ const DatastoreCreationForm: FC = () => {
                 .required(Translator.trans("datastore_creation_request.form.name_error"))
                 .min(10, Translator.trans("datastore_creation_request.form.name_minlength_error")),
             technical_name: yup.string().required(),
-            type: yup.array().of(yup.string()).min(1, Translator.trans("datastore_creation_request.form.data_type_error")),
             volume: yup.string().required(Translator.trans("datastore_creation_request.form.data_volume_error")),
             quotas: yup.object().test({
                 name: "is-not-empty",
@@ -50,7 +48,7 @@ const DatastoreCreationForm: FC = () => {
         formState: { errors },
         watch,
         handleSubmit,
-    } = useForm({ defaultValues: { type: [] }, resolver: yupResolver(schema), mode: "onChange" });
+    } = useForm({ resolver: yupResolver(schema), mode: "onChange" });
 
     const name = watch("name");
     useEffect(() => {
@@ -69,7 +67,7 @@ const DatastoreCreationForm: FC = () => {
         jsonFetch<{ success: boolean }>(url, { method: "POST" }, getFormValues())
             .then((response) => {
                 if (response?.success === true) {
-                    routes.contact_thanks().push();
+                    routes.datastore_create_request_confirm().push();
                 }
             })
             .catch((error) => {
@@ -95,28 +93,6 @@ const DatastoreCreationForm: FC = () => {
                         nativeInputProps={{
                             ...register("name"),
                         }}
-                    />
-                    <Checkbox
-                        legend={Translator.trans("datastore_creation_request.form.data_type_legend")}
-                        state={errors.type ? "error" : "default"}
-                        stateRelatedMessage={errors?.type?.message}
-                        options={[
-                            {
-                                label: Translator.trans("datastore_creation_request.form.vector_data_type"),
-                                nativeInputProps: {
-                                    ...register("type"),
-                                    value: Translator.trans("datastore_creation_request.form.vector_data_type"),
-                                },
-                            },
-                            {
-                                label: Translator.trans("datastore_creation_request.form.raster_data_type"),
-                                nativeInputProps: {
-                                    ...register("type"),
-                                    value: Translator.trans("datastore_creation_request.form.raster_data_type"),
-                                },
-                            },
-                        ]}
-                        orientation="horizontal"
                     />
                     <Select
                         label={Translator.trans("datastore_creation_request.form.data_volume")}

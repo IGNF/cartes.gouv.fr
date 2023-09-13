@@ -32,6 +32,7 @@ const DatasheetNewIntegrationPage = lazy(() => import("../pages/datasheet/Datash
 const DatasheetView = lazy(() => import("../pages/datasheet/DatasheetView/DatasheetView"));
 
 const DatastoreCreationForm = lazy(() => import("../pages/contact/datastore/DatastoreCreationForm"));
+const Confirm = lazy(() => import("../pages/contact/datastore/Confirmation"));
 
 const WfsServiceNew = lazy(() => import("../pages/service/wfs/WfsServiceNew"));
 const WmsVectorServiceNew = lazy(() => import("../pages/service/wms-vector/WmsVectorServiceNew"));
@@ -106,6 +107,9 @@ function RouterRenderer() {
             break;
         case "datastore_create_request":
             content = <DatastoreCreationForm />;
+            break;
+        case "datastore_create_request_confirm":
+            content = <Confirm />;
             break;
         case "datastore_datasheet_new":
             content = <DatasheetNewForm datastoreId={route.params.datastoreId} />;
