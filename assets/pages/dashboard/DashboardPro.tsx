@@ -2,17 +2,17 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { Tile } from "@codegouvfr/react-dsfr/Tile";
 
 import AppLayout from "../../components/Layout/AppLayout";
-import { datastoreNavItems } from "../../config/datastoreNavItems";
-import useUser from "../../hooks/useUser";
-import { routes } from "../../router/router";
-import { useDatastoreList } from "../../hooks/useDatastoreList";
 import LoadingText from "../../components/Utils/LoadingText";
+import { datastoreNavItems } from "../../config/datastoreNavItems";
+import { useDatastoreList } from "../../hooks/useDatastoreList";
+import useUser from "../../hooks/useUser";
+import Translator from "../../modules/Translator";
+import { routes } from "../../router/router";
 
 const DashboardPro = () => {
     const datastoreListQuery = useDatastoreList();
-    const datastoreId = datastoreListQuery?.data?.[0]._id ?? "id";
-
-    const navItems = datastoreNavItems(datastoreId);
+    const datastoreId = datastoreListQuery?.data?.[0]._id;
+    const navItems = datastoreNavItems();
     const { user } = useUser();
 
     return (
@@ -24,49 +24,18 @@ const DashboardPro = () => {
                     <h1>Bienvenue {user?.firstName || "utilisateur-rice"}</h1>
 
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
-                        <div className={fr.cx("fr-col", "fr-col-sm-6", "fr-col-md-4", "fr-col-lg-2")}>
-                            <Tile linkProps={routes.datasheet_list({ datastoreId: datastoreId }).link} grey={true} title="Données" desc="25" />
+                        {datastoreListQuery.data?.map((datastore) => (
+                            <div key={datastore._id} className={fr.cx("fr-col-12", "fr-col-sm-6", "fr-col-md-4", "fr-col-lg-3")}>
+                                <Tile
+                                    linkProps={datastoreId ? routes.datasheet_list({ datastoreId: datastoreId }).link : { href: "#" }}
+                                    grey={true}
+                                    title={datastore.name}
+                                />
+                            </div>
+                        ))}
+                        <div className={fr.cx("fr-col-12", "fr-col-sm-6", "fr-col-md-4", "fr-col-lg-3")}>
+                            <Tile linkProps={routes.datastore_create_request().link} grey={true} title={Translator.trans("datastore_creation_request.title")} />
                         </div>
-                        {/* <div className={fr.cx("fr-col", "fr-col-sm-6", "fr-col-md-4", "fr-col-lg-2")}>
-                            <Tile
-                                linkProps={{
-                                    href: "#",
-                                }}
-                                grey={true}
-                                title="Visualisations"
-                                desc="4"
-                            />
-                        </div>
-                        <div className={fr.cx("fr-col", "fr-col-sm-6", "fr-col-md-4", "fr-col-lg-2")}>
-                            <Tile
-                                linkProps={{
-                                    href: "#",
-                                }}
-                                grey={true}
-                                title="Outils & Traitements"
-                                desc="3"
-                            />
-                        </div>
-                        <div className={fr.cx("fr-col", "fr-col-sm-6", "fr-col-md-4", "fr-col-lg-2")}>
-                            <Tile
-                                linkProps={{
-                                    href: "#",
-                                }}
-                                grey={true}
-                                title="Collaboration"
-                                desc="13"
-                            />
-                        </div>
-                        <div className={fr.cx("fr-col", "fr-col-sm-6", "fr-col-md-4", "fr-col-lg-2")}>
-                            <Tile
-                                linkProps={{
-                                    href: "#",
-                                }}
-                                grey={true}
-                                title="Portails"
-                                desc="13"
-                            />
-                        </div> */}
                     </div>
                 </>
             )}

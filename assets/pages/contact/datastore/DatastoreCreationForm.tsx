@@ -12,11 +12,11 @@ import SymfonyRouting from "../../../modules/Routing";
 import { routes } from "../../../router/router";
 import Translator from "../../../modules/Translator";
 import { jsonFetch } from "../../../modules/jsonFetch";
-import { defaultNavItems } from "../../../config/navItems";
 import { removeDiacritics } from "../../../utils";
 import Wait from "../../../components/Utils/Wait";
 import EndpointQuota, { QuotaType } from "./EndpointQuota";
 import Alert from "@codegouvfr/react-dsfr/Alert";
+import { datastoreNavItems } from "../../../config/datastoreNavItems";
 
 const DatastoreCreationForm: FC = () => {
     const schema = yup
@@ -78,8 +78,10 @@ const DatastoreCreationForm: FC = () => {
             .finally(() => setIsSending(false));
     };
 
+    const navItems = datastoreNavItems();
+
     return (
-        <AppLayout navItems={defaultNavItems} documentTitle={Translator.trans("datastore_creation_request.title")}>
+        <AppLayout navItems={navItems} documentTitle={Translator.trans("datastore_creation_request.title")}>
             <div className={fr.cx("fr-grid-row")}>
                 <h1>{Translator.trans("datastore_creation_request.title")}</h1>
                 <p>{Translator.trans("mandatory_fields")}</p>

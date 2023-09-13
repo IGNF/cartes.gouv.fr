@@ -3,10 +3,6 @@ import { routes } from "../router/router";
 export const defaultNavItems = [
     {
         menuLinks: [
-            // {
-            //     linkProps: "#",
-            //     text: "Je veux...",
-            // },
             {
                 linkProps: routes.docs().link,
                 text: "Documentation",
@@ -22,32 +18,6 @@ export const defaultNavItems = [
         ],
         text: "Commencer avec cartes.gouv",
     },
-    // {
-    //     menuLinks: [
-    //         {
-    //             linkProps: "#",
-    //             text: "Données",
-    //         },
-    //         {
-    //             linkProps: "#",
-    //             text: "Services",
-    //         },
-    //     ],
-    //     text: "Catalogue",
-    // },
-    // {
-    //     menuLinks: [
-    //         {
-    //             linkProps: "#",
-    //             text: "Gitlab Géoplateforme",
-    //         },
-    //         {
-    //             linkProps: "#",
-    //             text: "Bac à sable de développement",
-    //         },
-    //     ],
-    //     text: "Usine logicielle",
-    // },
     {
         text: "Actualités",
         linkProps: routes.news_list().link,
