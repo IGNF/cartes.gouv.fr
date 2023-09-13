@@ -42,6 +42,13 @@ export const datastoreNavItems = (datastoreList: Datastore[] = [], datastore?: D
         // },
     ];
 
+    if (datastore !== undefined) {
+        navItems.push({
+            text: "Données",
+            linkProps: routes.datasheet_list({ datastoreId: datastore._id }).link,
+        });
+    }
+
     if (datastoreList.length > 0) {
         const datastoreLinks: MainNavigationProps.Item.Menu = {
             text: datastore?.name ?? "Choisir un espace de travail",
