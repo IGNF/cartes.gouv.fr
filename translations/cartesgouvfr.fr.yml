@@ -98,6 +98,7 @@ datastore_creation_request:
         details: "Détails de la demande"
         date: "Date d'envoi"
         datastore_name: "Nom de l'espace de travail"
+        datastore_technical_name: "Nom technique de l'espace de travail"
         data_volume: "Volume des données"
         data_endpoint_quotas: "Quotas"
         data_endpoint_type: "Type de flux"
