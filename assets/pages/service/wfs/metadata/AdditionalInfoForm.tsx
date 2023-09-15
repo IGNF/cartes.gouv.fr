@@ -1,15 +1,13 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import { FC } from "react";
+import { FC, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { getLanguages, charsets } from "../../../../utils";
+import { LanguageType, getLanguages, charsets } from "../../../../utils";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { Select } from "@codegouvfr/react-dsfr/Select";
 import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
-import { Autocomplete, createFilterOptions } from "@mui/material";
-import { TextField } from "@mui/material";
-import MuiDsfrThemeProvider from "@codegouvfr/react-dsfr/mui";
+import AutocompleteSelect from "../../../../components/Input/AutocompleteSelect";
 import { StoredData } from "../../../../types/app";
 import ignProducts from "../../../../data/md_resolutions.json";
 import Translator from "../../../../modules/Translator";
@@ -41,8 +39,6 @@ type AdditionalInfoFormProps = {
     onValid: (values) => void;
 };
 
-type LanguageOption = { language: string; code: string };
-
 const AdditionalInfoForm: FC<AdditionalInfoFormProps> = ({ storedData, fileType, visible, onPrevious, onValid }) => {
     let projUrl;
     const code = getCode(storedData.srs);
@@ -50,8 +46,7 @@ const AdditionalInfoForm: FC<AdditionalInfoFormProps> = ({ storedData, fileType,
         projUrl = `http://www.opengis.net/def/crs/EPSG/0/${code}`;
     }
 
-    const languagesOptions = getLanguages();
-    const filterOptions = createFilterOptions({ limit: 5 });
+    const languagesOptions: LanguageType[] = useMemo(getLanguages, []);
 
     const {
         register,
@@ -61,9 +56,9 @@ const AdditionalInfoForm: FC<AdditionalInfoFormProps> = ({ storedData, fileType,
         getValues: getFormValues,
     } = useForm({ resolver: yupResolver(schema) });
 
-    const handleOnLanguageChange = (e, values) => {
+    const handleOnLanguageChange = (e, values): void => {
         const codes = values.map((value) => value.code);
-        setFormValue("data_languages", codes.join(","), { shouldValidate: true });
+        setFormValue("data_languages", codes.join(",") /*, { shouldValidate: true }*/);
     };
 
     const onSubmit = () => {
@@ -74,9 +69,7 @@ const AdditionalInfoForm: FC<AdditionalInfoFormProps> = ({ storedData, fileType,
     return (
         <div className={fr.cx("fr-my-2v", !visible && "fr-hidden")}>
             <h3>{Translator.trans("service.wfs.new.additional_information_form.metadata_information_title")}</h3>
-
             <p>{Translator.trans("mandatory_fields")}</p>
-
             <Input
                 label={Translator.trans("service.wfs.new.additional_information_form.projection")}
                 hintText={Translator.trans("service.wfs.new.additional_information_form.hint_projection")}
@@ -88,25 +81,17 @@ const AdditionalInfoForm: FC<AdditionalInfoFormProps> = ({ storedData, fileType,
                     defaultValue: projUrl,
                 }}
             />
-            <MuiDsfrThemeProvider>
-                <label className={fr.cx("fr-label")}>
-                    {Translator.trans("service.wfs.new.additional_information_form.language")}
-                    <span className={fr.cx("fr-hint-text")}>{Translator.trans("service.wfs.new.additional_information_form.hint_language")}</span>
-                </label>
-                <Autocomplete
-                    autoComplete={true}
-                    disablePortal
-                    multiple
-                    filterSelectedOptions
-                    options={languagesOptions as LanguageOption[]}
-                    getOptionLabel={(option) => (option as LanguageOption).language}
-                    defaultValue={[{ language: "français", code: "fra" }]}
-                    renderInput={(params) => <TextField {...params} />}
-                    filterOptions={filterOptions}
-                    isOptionEqualToValue={(option, value) => (option as LanguageOption).code === (value as LanguageOption).code}
-                    onChange={handleOnLanguageChange}
-                />
-            </MuiDsfrThemeProvider>
+            <AutocompleteSelect
+                label={Translator.trans("service.wfs.new.additional_information_form.language")}
+                hintText={Translator.trans("service.wfs.new.additional_information_form.hint_language")}
+                freeSolo
+                defaultValue={[{ label: "français", value: "fra" }]}
+                getOptionLabel={(option) => (option as LanguageType).language}
+                isOptionEqualToValue={(option, value) => (option as LanguageType).code === (value as LanguageType).code}
+                options={languagesOptions}
+                searchFilter={{ limit: 5 }}
+                onChange={handleOnLanguageChange}
+            />
             <Select
                 label={Translator.trans("service.wfs.new.additional_information_form.charset")}
                 hint={Translator.trans("service.wfs.new.additional_information_form.hint_charset")}

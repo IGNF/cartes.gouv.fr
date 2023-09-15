@@ -8,12 +8,12 @@ import charsets from "./data/charset_list.json";
 // https://github.com/haliaeetus/iso-639/blob/master/data/iso_639-2.json
 import langs from "./data/iso_639-2.json";
 
-type Language = {
+export type LanguageType = {
     language: string;
     code: string;
 };
-const getLanguages = (): Language[] => {
-    const languages: Language[] = [];
+const getLanguages = (): LanguageType[] => {
+    const languages: LanguageType[] = [];
     for (const def of Object.values(langs)) {
         const code = def["639-2"];
         if (code !== "und") {

@@ -1,18 +1,16 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Input from "@codegouvfr/react-dsfr/Input";
 import Select from "@codegouvfr/react-dsfr/Select";
-import MuiDsfrThemeProvider from "@codegouvfr/react-dsfr/mui";
-import { Autocomplete, TextField, createFilterOptions } from "@mui/material";
+import AutocompleteSelect from "../../../../components/Input/AutocompleteSelect";
 import { useQuery } from "@tanstack/react-query";
 import { FC, useMemo } from "react";
 import { UseFormReturn } from "react-hook-form";
-
 import api from "../../../../api";
 import ignProducts from "../../../../data/md_resolutions.json";
 import RQKeys from "../../../../modules/RQKeys";
 import Translator from "../../../../modules/Translator";
 import { UploadTree, VectorDb } from "../../../../types/app";
-import { charsets, getLanguages } from "../../../../utils";
+import { LanguageType, charsets, getLanguages } from "../../../../utils";
 
 const getCode = (epsg) => {
     if (!epsg) return null;
@@ -41,11 +39,6 @@ const getUploadFileType = (fileTree) => {
     return fileType;
 };
 
-type Language = {
-    language: string;
-    code: string;
-};
-
 type AdditionalInfoProps = {
     vectorDb: VectorDb;
     visible: boolean;
@@ -65,10 +58,9 @@ const AdditionalInfo: FC<AdditionalInfoProps> = ({ vectorDb, datastoreId, visibl
         projUrl = `http://www.opengis.net/def/crs/EPSG/0/${code}`;
     }
 
-    const languagesOptions: Language[] = useMemo(getLanguages, []);
-    const filterOptions = createFilterOptions({ limit: 5 });
+    const languagesOptions: LanguageType[] = useMemo(getLanguages, []);
 
-    const handleOnLanguageChange = (e, values) => {
+    const handleOnLanguageChange = (e, values): void => {
         const codes = values.map((value) => value.code);
         setFormValue("languages", codes.join(","), { shouldValidate: true });
     };
@@ -100,25 +92,16 @@ const AdditionalInfo: FC<AdditionalInfoProps> = ({ vectorDb, datastoreId, visibl
                     defaultValue: projUrl,
                 }}
             />
-            <MuiDsfrThemeProvider>
-                <label className={fr.cx("fr-label")}>
-                    {Translator.trans("service.wms_vector.new.step_additional_information.language")}
-                    <span className={fr.cx("fr-hint-text")}>{Translator.trans("service.wms_vector.new.step_additional_information.hint_language")}</span>
-                </label>
-                <Autocomplete
-                    autoComplete={true}
-                    disablePortal
-                    multiple
-                    filterSelectedOptions
-                    options={languagesOptions}
-                    getOptionLabel={(option) => (option as Language).language}
-                    defaultValue={[{ language: "français", code: "fra" }]}
-                    renderInput={(params) => <TextField {...params} />}
-                    filterOptions={filterOptions}
-                    isOptionEqualToValue={(option, value) => (option as Language).code === (value as Language).code}
-                    onChange={handleOnLanguageChange}
-                />
-            </MuiDsfrThemeProvider>
+            <AutocompleteSelect
+                label={Translator.trans(Translator.trans("service.wms_vector.new.step_additional_information.language"))}
+                hintText={Translator.trans("service.wms_vector.new.step_additional_information.hint_language")}
+                freeSolo
+                // @ts-expect-error il n'y a pas vraiment d'erreur, faux positif de typescript
+                defaultValue={getFormValues(`table_infos.${table.name}.keywords`)}
+                options={languagesOptions}
+                searchFilter={{ limit: 5 }}
+                onChange={handleOnLanguageChange}
+            />
             <Select
                 label={Translator.trans("service.wms_vector.new.step_additional_information.charset")}
                 hint={Translator.trans("service.wms_vector.new.step_additional_information.hint_charset")}

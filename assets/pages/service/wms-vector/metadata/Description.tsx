@@ -7,7 +7,7 @@ import { UseFormReturn } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 
 import MarkdownEditor from "../../../../components/Input/MarkdownEditor";
-import KeywordsSelect from "../../../../components/Input/KeywordsSelect";
+import AutocompleteSelect from "../../../../components/Input/AutocompleteSelect";
 import Translator from "../../../../modules/Translator";
 import { VectorDb } from "../../../../types/app";
 import { getInspireKeywords, removeDiacritics } from "../../../../utils";
@@ -96,13 +96,13 @@ const Description: FC<DescriptionProps> = ({ vectorDb, visible, form }) => {
                     defaultValue: uuidv4(),
                 }}
             />
-            <KeywordsSelect
+            <AutocompleteSelect
                 label={Translator.trans("service.wms_vector.new.step_description.category")}
                 hintText={Translator.trans("service.wms_vector.new.step_description.hint_category")}
                 state={errors.category ? "error" : "default"}
                 stateRelatedMessage={errors?.category?.message?.toString()}
                 freeSolo
-                keywords={keywords}
+                options={keywords}
                 onChange={(values) => {
                     setFormValue("category", values, { shouldValidate: true });
                 }}

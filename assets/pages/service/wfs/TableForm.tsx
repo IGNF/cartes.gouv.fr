@@ -8,7 +8,7 @@ import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import Input from "@codegouvfr/react-dsfr/Input";
 import Translator from "../../../modules/Translator";
 import { StoredDataRelation } from "../../../types/app";
-import KeywordsSelect from "../../../components/Input/KeywordsSelect";
+import AutocompleteSelect from "../../../components/Input/AutocompleteSelect";
 
 // Themes et mot cles INSPIRE
 import { getInspireKeywords } from "../../../utils";
@@ -142,14 +142,14 @@ const TableForm: FC<TableFormProps> = ({ tables, visible, onValid }) => {
                                     state={errors?.table_infos?.[table.name]?.description?.message ? "error" : "default"}
                                     stateRelatedMessage={errors?.table_infos?.[table.name]?.description?.message}
                                 />
-                                <KeywordsSelect
+                                <AutocompleteSelect
                                     label={Translator.trans("service.wfs.new.tables_form.table.keywords")}
                                     hintText={Translator.trans("service.wfs.new.tables_form.table.hint_keywords")}
                                     freeSolo
-                                    keywords={keywords}
+                                    options={keywords}
                                     // @ts-expect-error il n'y a pas vraiment d'erreur, faux positif de typescript
                                     defaultValue={getFormValues(`table_infos.${table.name}.keywords`)}
-                                    onChange={(values) => {
+                                    onChange={(e, values) => {
                                         // @ts-expect-error il n'y a pas vraiment d'erreur, faux positif de typescript
                                         setFormValue(`table_infos.${table.name}.keywords`, values, { shouldValidate: true });
                                     }}

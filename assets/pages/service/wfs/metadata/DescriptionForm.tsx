@@ -1,21 +1,18 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { Input } from "@codegouvfr/react-dsfr/Input";
-import { useIsDark } from "@codegouvfr/react-dsfr/useIsDark";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useQuery } from "@tanstack/react-query";
-import MDEditor from "@uiw/react-md-editor";
 import { format as datefnsFormat } from "date-fns";
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect } from "react";
 import { useForm } from "react-hook-form";
 // import { v4 as uuidv4 } from "uuid";
 import * as yup from "yup";
-
 import api from "../../../../api";
-import KeywordsSelect from "../../../../components/Input/KeywordsSelect";
+import AutocompleteSelect from "../../../../components/Input/AutocompleteSelect";
+import MarkdownEditor from "../../../../components/Input/MarkdownEditor";
 import RQKeys from "../../../../modules/RQKeys";
 import Translator from "../../../../modules/Translator";
-import getLocaleCommands from "../../../../modules/react-md/react-md-commands";
 import { regex, removeDiacritics } from "../../../../utils";
 
 // Themes et mot cles INSPIRE
@@ -74,16 +71,12 @@ const DescriptionForm: FC<DescriptionFormProps> = ({ datastoreId, storedDataName
         refetchInterval: 10000,
     });
 
-    const { isDark } = useIsDark();
-    const [description, setDescription] = useState("");
-
     const {
         register,
         handleSubmit,
         formState: { errors },
         setValue: setFormValue,
         getValues: getFormValues,
-        trigger,
     } = useForm({ resolver: yupResolver(schema) });
 
     useEffect(() => {
@@ -93,7 +86,7 @@ const DescriptionForm: FC<DescriptionFormProps> = ({ datastoreId, storedDataName
         setFormValue("data_public_name", storedDataName);
     }, [setFormValue, storedDataName]);
 
-    const handleKeywordsChange = (values) => {
+    const handleKeywordsChange = (e, values) => {
         setFormValue("data_category", values.join(","), { shouldValidate: true });
     };
 
@@ -126,27 +119,15 @@ const DescriptionForm: FC<DescriptionFormProps> = ({ datastoreId, storedDataName
                     ...register("data_public_name"),
                 }}
             />
-            <div className={fr.cx("fr-input-group", errors.data_description && "fr-input-group--error")} data-color-mode={isDark ? "dark" : "light"}>
-                <label className={fr.cx("fr-label")}>
-                    {Translator.trans("service.wfs.new.description_form.description")}
-                    <span className="fr-hint-text">{Translator.trans("service.wfs.new.description_form.hint_description")}</span>
-                </label>
-                <MDEditor
-                    value={description}
-                    height={200}
-                    commands={getLocaleCommands("fr")}
-                    extraCommands={[]}
-                    textareaProps={{
-                        placeholder: Translator.trans("service.wfs.new.description_form.markdown_placeholder"),
-                    }}
-                    onChange={(newValue = "") => {
-                        setDescription(newValue);
-                        setFormValue("data_description", newValue);
-                        trigger();
-                    }}
-                />
-                {errors.data_description && <p className={fr.cx("fr-error-text")}>{errors.data_description?.message}</p>}
-            </div>
+            <MarkdownEditor
+                label={Translator.trans("service.wfs.new.description_form.description")}
+                hintText={Translator.trans("service.wfs.new.description_form.hint_description")}
+                state={errors.data_description ? "error" : "default"}
+                stateRelatedMessage={errors?.data_description?.message?.toString()}
+                onChange={(values) => {
+                    setFormValue("data_description", values, { shouldValidate: true });
+                }}
+            />
             <Input
                 label={Translator.trans("service.wfs.new.description_form.identifier")}
                 hintText={Translator.trans("service.wfs.new.description_form.hint_identifier")}
@@ -158,13 +139,13 @@ const DescriptionForm: FC<DescriptionFormProps> = ({ datastoreId, storedDataName
                     defaultValue: uuidv4(),*/
                 }}
             />
-            <KeywordsSelect
+            <AutocompleteSelect
                 label={Translator.trans("service.wfs.new.description_form.category")}
                 hintText={Translator.trans("service.wfs.new.description_form.hint_category")}
                 state={errors.data_category ? "error" : "default"}
                 stateRelatedMessage={errors?.data_category?.message}
                 freeSolo
-                keywords={keywords}
+                options={keywords}
                 onChange={handleKeywordsChange}
             />
             <Input
