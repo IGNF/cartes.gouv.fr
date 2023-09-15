@@ -43,7 +43,7 @@ const AutocompleteSelect: FC<AutocompleteSelectProps> = (props) => {
         onChange,
     } = props;
 
-    const [value, setValue] = useState<readonly string[]>(defaultValue);
+    const [value, setValue] = useState<string[]>(defaultValue);
 
     return (
         <MuiDsfrThemeProvider>
