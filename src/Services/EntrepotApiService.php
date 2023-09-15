@@ -6,6 +6,7 @@ use App\Services\EntrepotApi\AnnexeApiService;
 use App\Services\EntrepotApi\CommunityApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
+use App\Services\EntrepotApi\MetadataApi;
 use App\Services\EntrepotApi\ProcessingApiService;
 use App\Services\EntrepotApi\StoredDataApiService;
 use App\Services\EntrepotApi\UploadApiService;
@@ -22,6 +23,7 @@ class EntrepotApiService
         public readonly ConfigurationApiService $configuration,
         public readonly AnnexeApiService $annexe,
         public readonly CommunityApiService $community,
+        public readonly MetadataApi $metadata,
     ) {
         $this->user->setEntrepotApiService($this);
         $this->datastore->setEntrepotApiService($this);
@@ -31,5 +33,6 @@ class EntrepotApiService
         $this->configuration->setEntrepotApiService($this);
         $this->annexe->setEntrepotApiService($this);
         $this->community->setEntrepotApiService($this);
+        $this->metadata->setEntrepotApiService($this);
     }
 }
