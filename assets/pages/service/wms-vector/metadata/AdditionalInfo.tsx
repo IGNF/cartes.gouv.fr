@@ -85,7 +85,7 @@ const AdditionalInfo: FC<AdditionalInfoProps> = ({ vectorDb, datastoreId, visibl
 
     return (
         <div className={fr.cx(!visible && "fr-hidden")}>
-            <h3>{Translator.trans("service.wms_vector.new.step_additional_information.metainformation_title")}</h3>
+            <h3>{Translator.trans("service.wms_vector.new.step_additional_information.metadata_information_title")}</h3>
 
             <p>{Translator.trans("mandatory_fields")}</p>
 
@@ -163,9 +163,11 @@ const AdditionalInfo: FC<AdditionalInfoProps> = ({ vectorDb, datastoreId, visibl
             <Select
                 label={Translator.trans("service.wms_vector.new.step_additional_information.spatial_resolution")}
                 hint={Translator.trans("service.wms_vector.new.step_additional_information.hint_spatial_resolution")}
+                state={errors.resolution ? "error" : "default"}
+                stateRelatedMessage={errors?.resolution?.message?.toString()}
                 nativeSelectProps={{
                     ...register("resolution"),
-                    defaultValue: "",
+                    defaultValue: 0,
                 }}
             >
                 <option value="" disabled hidden>
