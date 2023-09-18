@@ -20,6 +20,3 @@ parameters:
     api_entrepot:
         processings:
             int_vect_files_db: "%env(resolve:API_ENTREPOT_PROC_INT_VECT_FILES_DB)%"
-
-        endpoints:
-            wfs_public: "%env(resolve:API_ENTREPOT_ENDPOINT_WFS_PUBLIC)%"
