@@ -1,33 +1,37 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import { FC, useState } from "react";
-import { Autocomplete } from "@mui/material";
-import { createFilterOptions, TextField } from "@mui/material";
 import MuiDsfrThemeProvider from "@codegouvfr/react-dsfr/mui";
+import { useColors } from "@codegouvfr/react-dsfr/useColors";
+import { Autocomplete, AutocompleteFreeSoloValueMapping, AutocompleteValue, CreateFilterOptionsConfig, TextField, createFilterOptions } from "@mui/material";
+import { CSSProperties, useId } from "react";
+import { ControllerRenderProps } from "react-hook-form";
+import { symToStr } from "tsafe/symToStr";
 
-export type filterType = {
-    ignoreAccents?: boolean;
-    ignoreCase?: boolean;
-    limit?: number;
-};
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
-type AutocompleteSelectProps = {
+interface AutocompleteSelectProps<T> {
+    id?: string;
     label: string;
     hintText: string;
     state?: "default" | "error" | "success";
     stateRelatedMessage?: string;
-    defaultValue?: any[];
-    searchFilter?: filterType;
-    options: any[];
-    getOptionLabel?: (option: any) => string;
-    isOptionEqualToValue?: (option: any, value: any) => boolean;
-    freeSolo: boolean;
-    /** readonly parce que `values` de `onChange` de AutoComplete est readonly */
-    onChange: (event: React.SyntheticEvent, value: readonly string[]) => void;
-};
+    defaultValue?: T[];
+    searchFilter?: CreateFilterOptionsConfig<T>;
+    options: T[];
+    multiple?: boolean;
+    autoComplete?: boolean;
+    getOptionLabel?: (option: T | AutocompleteFreeSoloValueMapping<boolean>) => string;
+    isOptionEqualToValue?: (option: T, value: T) => boolean;
+    freeSolo?: boolean;
+    disabled?: boolean;
+    onChange?: (event: React.SyntheticEvent, value: AutocompleteValue<T, boolean, boolean, boolean>) => void;
 
-const AutocompleteSelect: FC<AutocompleteSelectProps> = (props) => {
+    /** utiliser `controllerField` et `onChange` si contrôlé par le Controller de react-hook-form, ne pas utiliser en même temps que `value` */
+    controllerField?: ControllerRenderProps;
+    /** utiliser `value` et `onChange` si contrôlé par useState, ne pas utiliser en même temps que `controllerField` */
+    value?: T[];
+}
+
+const AutocompleteSelect = <T,>(props: AutocompleteSelectProps<T>) => {
     const {
+        id,
         label,
         hintText,
         state,
@@ -38,36 +42,83 @@ const AutocompleteSelect: FC<AutocompleteSelectProps> = (props) => {
             ignoreCase: true,
             limit: 10,
         },
+        freeSolo = false,
         options,
-        freeSolo,
+        multiple = true,
+        autoComplete = true,
+        getOptionLabel,
+        isOptionEqualToValue,
+        disabled = false,
+        controllerField,
         onChange,
+        value,
     } = props;
 
-    const [value, setValue] = useState<string[]>(defaultValue);
+    const inputId = (function useClosure() {
+        const _id = useId();
+
+        return id ?? `${symToStr({ AutocompleteSelect })}-${_id}`;
+    })();
+
+    const messageId = `${inputId}-msg`;
+
+    const theme = useColors();
+
+    const customStyle: CSSProperties = {
+        backgroundColor: theme.decisions.background.contrast.grey.default,
+        borderRadius: `${fr.spacing("1v")} ${fr.spacing("1v")} 0 0`,
+        boxShadow: `inset 0 -2px 0 0 var(${theme.decisions.border.plain.grey.default})`,
+        marginTop: fr.spacing("1v"),
+        fontFamily: "Marianne, arial, sans-serif",
+    };
 
     return (
         <MuiDsfrThemeProvider>
             <div className={fr.cx("fr-input-group", state === "error" && "fr-input-group--error")}>
-                <label className={fr.cx("fr-label")}>
+                <label className={fr.cx("fr-label")} htmlFor={inputId}>
                     {label}
-                    <span className={fr.cx("fr-hint-text")}>{hintText}</span>
+                    {hintText && <span className="fr-hint-text">{hintText}</span>}
                 </label>
+
                 <Autocomplete
-                    autoComplete={true}
-                    value={value}
-                    freeSolo={freeSolo !== undefined}
-                    disablePortal
-                    multiple
+                    {...controllerField}
+                    id={inputId}
+                    aria-describedby={messageId}
+                    autoComplete={autoComplete}
+                    freeSolo={freeSolo}
+                    disablePortal={true}
+                    multiple={multiple}
                     filterSelectedOptions
+                    forcePopupIcon={true}
+                    defaultValue={defaultValue}
+                    onChange={onChange}
                     filterOptions={createFilterOptions(searchFilter)}
                     options={options}
                     renderInput={(params) => <TextField {...params} />}
-                    onChange={(e, values) => {
-                        setValue(values);
-                        onChange(e, values);
-                    }}
+                    getOptionLabel={getOptionLabel}
+                    isOptionEqualToValue={isOptionEqualToValue}
+                    disabled={disabled}
+                    style={customStyle}
+                    value={value}
                 />
-                {state === "error" && <p className={fr.cx("fr-error-text")}>{stateRelatedMessage}</p>}
+
+                {state !== "default" && (
+                    <p
+                        id={messageId}
+                        className={fr.cx(
+                            (() => {
+                                switch (state) {
+                                    case "error":
+                                        return "fr-error-text";
+                                    case "success":
+                                        return "fr-valid-text";
+                                }
+                            })()
+                        )}
+                    >
+                        {stateRelatedMessage}
+                    </p>
+                )}
             </div>
         </MuiDsfrThemeProvider>
     );

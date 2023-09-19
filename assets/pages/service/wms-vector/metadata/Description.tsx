@@ -3,11 +3,11 @@ import Input from "@codegouvfr/react-dsfr/Input";
 import { format as datefnsFormat } from "date-fns";
 import { XMLParser } from "fast-xml-parser";
 import { FC, useEffect } from "react";
-import { UseFormReturn } from "react-hook-form";
+import { Controller, UseFormReturn } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 
-import MarkdownEditor from "../../../../components/Input/MarkdownEditor";
 import AutocompleteSelect from "../../../../components/Input/AutocompleteSelect";
+import MarkdownEditor from "../../../../components/Input/MarkdownEditor";
 import Translator from "../../../../modules/Translator";
 import { VectorDb } from "../../../../types/app";
 import { getInspireKeywords, removeDiacritics } from "../../../../utils";
@@ -26,6 +26,7 @@ const Description: FC<DescriptionProps> = ({ vectorDb, visible, form }) => {
         formState: { errors },
         setValue: setFormValue,
         watch,
+        control,
     } = form;
 
     const metadata: File = watch("metadata_file_content")?.[0];
@@ -34,7 +35,7 @@ const Description: FC<DescriptionProps> = ({ vectorDb, visible, form }) => {
         const storedDataName = vectorDb?.name ?? "";
         const nice = removeDiacritics(storedDataName.toLowerCase()).replace(/ /g, "_");
 
-        setFormValue("technical_name", nice);
+        setFormValue("technical_name", `${nice}_wmsv`);
         setFormValue("public_name", storedDataName);
     }, [setFormValue, vectorDb]);
 
@@ -96,17 +97,30 @@ const Description: FC<DescriptionProps> = ({ vectorDb, visible, form }) => {
                     defaultValue: uuidv4(),
                 }}
             />
-            <AutocompleteSelect
-                label={Translator.trans("service.wms_vector.new.step_description.category")}
-                hintText={Translator.trans("service.wms_vector.new.step_description.hint_category")}
-                state={errors.category ? "error" : "default"}
-                stateRelatedMessage={errors?.category?.message?.toString()}
-                freeSolo
-                options={keywords}
-                onChange={(values) => {
-                    setFormValue("category", values, { shouldValidate: true });
+
+            <Controller
+                control={control}
+                name="category"
+                defaultValue={[]}
+                render={({ field }) => {
+                    return (
+                        <AutocompleteSelect
+                            label={Translator.trans("service.wms_vector.new.step_description.category")}
+                            hintText={Translator.trans("service.wms_vector.new.step_description.hint_category")}
+                            options={keywords}
+                            freeSolo={true}
+                            getOptionLabel={(option) => option}
+                            isOptionEqualToValue={(option, value) => option === value}
+                            state={errors.category ? "error" : "default"}
+                            stateRelatedMessage={errors?.category?.message?.toString()}
+                            onChange={(_, value) => field.onChange(value)}
+                            // @ts-expect-error fausse alerte
+                            controllerField={field}
+                        />
+                    );
                 }}
             />
+
             <Input
                 label={Translator.trans("service.wms_vector.new.step_description.email_contact")}
                 hintText={Translator.trans("service.wms_vector.new.step_description.hint_email_contact")}

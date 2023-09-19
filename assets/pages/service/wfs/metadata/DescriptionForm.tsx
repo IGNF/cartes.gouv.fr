@@ -5,7 +5,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useQuery } from "@tanstack/react-query";
 import { format as datefnsFormat } from "date-fns";
 import { FC, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 // import { v4 as uuidv4 } from "uuid";
 import * as yup from "yup";
 import api from "../../../../api";
@@ -50,18 +50,21 @@ const DescriptionForm: FC<DescriptionFormProps> = ({ datastoreId, storedDataName
             data_public_name: yup.string().required(Translator.trans("service.wfs.new.description_form.public_name_error")),
             data_description: yup.string().required(Translator.trans("service.wfs.new.description_form.description_error")),
             data_identifier: yup.string().required(Translator.trans("service.wfs.new.description_form.identifier_error")),
-            data_category: yup.string().required(Translator.trans("service.wfs.new.description_form.category_error")),
+            data_category: yup
+                .array(yup.string())
+                .min(1, Translator.trans("service.wfs.new.description_form.category_error"))
+                .required(Translator.trans("service.wfs.new.description_form.category_error")),
             data_email_contact: yup
                 .string()
-                .matches(regex.email, Translator.trans("service.wfs.new.description_form.email_contact_error"))
-                .required(Translator.trans("service.wfs.new.description_form.email_contact_mandatory_error")),
+                .required(Translator.trans("service.wfs.new.description_form.email_contact_mandatory_error"))
+                .matches(regex.email, Translator.trans("service.wfs.new.description_form.email_contact_error")),
             data_creation_date: yup.date().required(Translator.trans("service.wfs.new.description_form.creation_date_error")),
             data_resource_genealogy: yup.string(),
             data_organization: yup.string().required(Translator.trans("service.wfs.new.description_form.organization_error")),
             data_organization_email: yup
                 .string()
-                .matches(regex.email, Translator.trans("service.wfs.new.description_form.organization_email_error"))
-                .required(Translator.trans("service.wfs.new.description_form.organization_email_mandatory_error")),
+                .required(Translator.trans("service.wfs.new.description_form.organization_email_mandatory_error"))
+                .matches(regex.email, Translator.trans("service.wfs.new.description_form.organization_email_error")),
         })
         .required();
 
@@ -73,6 +76,7 @@ const DescriptionForm: FC<DescriptionFormProps> = ({ datastoreId, storedDataName
 
     const {
         register,
+        control,
         handleSubmit,
         formState: { errors },
         setValue: setFormValue,
@@ -85,10 +89,6 @@ const DescriptionForm: FC<DescriptionFormProps> = ({ datastoreId, storedDataName
         setFormValue("data_technical_name", nice);
         setFormValue("data_public_name", storedDataName);
     }, [setFormValue, storedDataName]);
-
-    const handleKeywordsChange = (e, values) => {
-        setFormValue("data_category", values.join(","), { shouldValidate: true });
-    };
 
     const onSubmit = () => {
         const values = getFormValues();
@@ -139,14 +139,28 @@ const DescriptionForm: FC<DescriptionFormProps> = ({ datastoreId, storedDataName
                     defaultValue: uuidv4(),*/
                 }}
             />
-            <AutocompleteSelect
-                label={Translator.trans("service.wfs.new.description_form.category")}
-                hintText={Translator.trans("service.wfs.new.description_form.hint_category")}
-                state={errors.data_category ? "error" : "default"}
-                stateRelatedMessage={errors?.data_category?.message}
-                freeSolo
-                options={keywords}
-                onChange={handleKeywordsChange}
+
+            <Controller
+                control={control}
+                name="data_category"
+                defaultValue={[]}
+                render={({ field }) => {
+                    return (
+                        <AutocompleteSelect
+                            label={Translator.trans("service.wfs.new.description_form.category")}
+                            hintText={Translator.trans("service.wfs.new.description_form.hint_category")}
+                            state={errors.data_category ? "error" : "default"}
+                            stateRelatedMessage={errors?.data_category?.message}
+                            options={keywords}
+                            freeSolo={true}
+                            getOptionLabel={(option) => option}
+                            isOptionEqualToValue={(option, value) => option === value}
+                            onChange={(_, value) => field.onChange(value)}
+                            // @ts-expect-error fausse alerte
+                            controllerField={field}
+                        />
+                    );
+                }}
             />
             <Input
                 label={Translator.trans("service.wfs.new.description_form.email_contact")}

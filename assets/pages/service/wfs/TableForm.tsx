@@ -1,14 +1,15 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { FC, useState } from "react";
-import { useForm } from "react-hook-form";
-import * as yup from "yup";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import Input from "@codegouvfr/react-dsfr/Input";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { FC, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import * as yup from "yup";
+
+import AutocompleteSelect from "../../../components/Input/AutocompleteSelect";
 import Translator from "../../../modules/Translator";
 import { StoredDataRelation } from "../../../types/app";
-import AutocompleteSelect from "../../../components/Input/AutocompleteSelect";
 
 // Themes et mot cles INSPIRE
 import { getInspireKeywords } from "../../../utils";
@@ -53,10 +54,10 @@ const TableForm: FC<TableFormProps> = ({ tables, visible, onValid }) => {
 
     const {
         register,
+        control,
         handleSubmit,
         formState: { errors, isSubmitted },
         getValues: getFormValues,
-        setValue: setFormValue,
     } = useForm({ resolver: yupResolver(schema), mode: "onChange" });
 
     const format = (values: { table_infos: Record<string, TableInfos> }) => {
@@ -142,16 +143,31 @@ const TableForm: FC<TableFormProps> = ({ tables, visible, onValid }) => {
                                     state={errors?.table_infos?.[table.name]?.description?.message ? "error" : "default"}
                                     stateRelatedMessage={errors?.table_infos?.[table.name]?.description?.message}
                                 />
-                                <AutocompleteSelect
-                                    label={Translator.trans("service.wfs.new.tables_form.table.keywords")}
-                                    hintText={Translator.trans("service.wfs.new.tables_form.table.hint_keywords")}
-                                    freeSolo
-                                    options={keywords}
-                                    // @ts-expect-error il n'y a pas vraiment d'erreur, faux positif de typescript
-                                    defaultValue={getFormValues(`table_infos.${table.name}.keywords`)}
-                                    onChange={(e, values) => {
-                                        // @ts-expect-error il n'y a pas vraiment d'erreur, faux positif de typescript
-                                        setFormValue(`table_infos.${table.name}.keywords`, values, { shouldValidate: true });
+
+                                <Controller
+                                    // @ts-expect-error fausse alerte
+                                    name={`table_infos.${table.name}.keywords`}
+                                    control={control}
+                                    // @ts-expect-error fausse alerte
+                                    defaultValue={getFormValues(`table_infos.${table.name}.keywords`) ?? []}
+                                    render={({ field }) => {
+                                        return (
+                                            <AutocompleteSelect
+                                                label={Translator.trans("service.wfs.new.tables_form.table.keywords")}
+                                                hintText={Translator.trans("service.wfs.new.tables_form.table.hint_keywords")}
+                                                options={keywords}
+                                                freeSolo={true}
+                                                getOptionLabel={(option) => option}
+                                                isOptionEqualToValue={(option, value) => option === value}
+                                                state={errors.table_infos?.[table.name]?.["keywords"] ? "error" : "default"}
+                                                stateRelatedMessage={errors.table_infos?.[table.name]?.["keywords"]?.message?.toString()}
+                                                onChange={(_, value) => field.onChange(value)}
+                                                // @ts-expect-error fausse alerte
+                                                controllerField={field}
+                                                // @ts-expect-error fausse alerte
+                                                defaultValue={getFormValues(`table_infos.${table.name}.keywords`) ?? []}
+                                            />
+                                        );
                                     }}
                                 />
                             </div>

@@ -1,11 +1,12 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Input from "@codegouvfr/react-dsfr/Input";
 import Select from "@codegouvfr/react-dsfr/Select";
-import AutocompleteSelect from "../../../../components/Input/AutocompleteSelect";
 import { useQuery } from "@tanstack/react-query";
 import { FC, useMemo } from "react";
-import { UseFormReturn } from "react-hook-form";
+import { Controller, UseFormReturn } from "react-hook-form";
+
 import api from "../../../../api";
+import AutocompleteSelect from "../../../../components/Input/AutocompleteSelect";
 import ignProducts from "../../../../data/md_resolutions.json";
 import RQKeys from "../../../../modules/RQKeys";
 import Translator from "../../../../modules/Translator";
@@ -49,7 +50,7 @@ const AdditionalInfo: FC<AdditionalInfoProps> = ({ vectorDb, datastoreId, visibl
     const {
         register,
         formState: { errors },
-        setValue: setFormValue,
+        control,
     } = form;
 
     let projUrl;
@@ -59,11 +60,6 @@ const AdditionalInfo: FC<AdditionalInfoProps> = ({ vectorDb, datastoreId, visibl
     }
 
     const languagesOptions: LanguageType[] = useMemo(getLanguages, []);
-
-    const handleOnLanguageChange = (e, values): void => {
-        const codes = values.map((value) => value.code);
-        setFormValue("languages", codes.join(","), { shouldValidate: true });
-    };
 
     const fileTreeQuery = useQuery<UploadTree>({
         queryKey: RQKeys.datastore_upload_file_tree(datastoreId, vectorDb.tags.upload_id),
@@ -92,16 +88,32 @@ const AdditionalInfo: FC<AdditionalInfoProps> = ({ vectorDb, datastoreId, visibl
                     defaultValue: projUrl,
                 }}
             />
-            <AutocompleteSelect
-                label={Translator.trans(Translator.trans("service.wms_vector.new.step_additional_information.language"))}
-                hintText={Translator.trans("service.wms_vector.new.step_additional_information.hint_language")}
-                freeSolo
-                // @ts-expect-error il n'y a pas vraiment d'erreur, faux positif de typescript
-                defaultValue={getFormValues(`table_infos.${table.name}.keywords`)}
-                options={languagesOptions}
-                searchFilter={{ limit: 5 }}
-                onChange={handleOnLanguageChange}
+
+            <Controller
+                control={control}
+                name="languages"
+                defaultValue={[{ language: "français", code: "fra" }]}
+                render={({ field }) => {
+                    return (
+                        <AutocompleteSelect
+                            label={Translator.trans(Translator.trans("service.wms_vector.new.step_additional_information.language"))}
+                            hintText={Translator.trans("service.wms_vector.new.step_additional_information.hint_language")}
+                            state={errors.languages ? "error" : "default"}
+                            stateRelatedMessage={errors?.languages?.message?.toString()}
+                            freeSolo={false}
+                            defaultValue={[{ language: "français", code: "fra" }]}
+                            getOptionLabel={(option) => (option as LanguageType).language}
+                            isOptionEqualToValue={(option, value) => option.code === value.code}
+                            options={languagesOptions}
+                            searchFilter={{ limit: 5 }}
+                            onChange={(_, value) => field.onChange(value)}
+                            // @ts-expect-error fausse alerte
+                            controllerField={field}
+                        />
+                    );
+                }}
             />
+
             <Select
                 label={Translator.trans("service.wms_vector.new.step_additional_information.charset")}
                 hint={Translator.trans("service.wms_vector.new.step_additional_information.hint_charset")}

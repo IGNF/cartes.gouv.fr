@@ -1,6 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { FC, useMemo } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { LanguageType, getLanguages, charsets } from "../../../../utils";
@@ -23,7 +23,16 @@ const getCode = (epsg) => {
 
 const schema = yup
     .object({
-        data_languages: yup.string().required(Translator.trans("service.wfs.new.additional_information_form.language_error")),
+        data_languages: yup
+            .array()
+            .of(
+                yup.object({
+                    language: yup.string(),
+                    code: yup.string(),
+                })
+            )
+            .required(Translator.trans("service.wfs.new.additional_information_form.language_error"))
+            .min(1, Translator.trans("service.wfs.new.additional_information_form.language_error")),
         data_charset: yup.string().required(Translator.trans("service.wfs.new.additional_information_form.charset_error")),
         data_projection: yup.string().required(Translator.trans("service.wfs.new.additional_information_form.projection_error")),
         data_encoding: yup.string().required(Translator.trans("service.wfs.new.additional_information_form.encoding_error")),
@@ -50,16 +59,11 @@ const AdditionalInfoForm: FC<AdditionalInfoFormProps> = ({ storedData, fileType,
 
     const {
         register,
+        control,
         handleSubmit,
         formState: { errors },
-        setValue: setFormValue,
         getValues: getFormValues,
     } = useForm({ resolver: yupResolver(schema) });
-
-    const handleOnLanguageChange = (e, values): void => {
-        const codes = values.map((value) => value.code);
-        setFormValue("data_languages", codes.join(",") /*, { shouldValidate: true }*/);
-    };
 
     const onSubmit = () => {
         const values = getFormValues();
@@ -81,16 +85,30 @@ const AdditionalInfoForm: FC<AdditionalInfoFormProps> = ({ storedData, fileType,
                     defaultValue: projUrl,
                 }}
             />
-            <AutocompleteSelect
-                label={Translator.trans("service.wfs.new.additional_information_form.language")}
-                hintText={Translator.trans("service.wfs.new.additional_information_form.hint_language")}
-                freeSolo
-                defaultValue={[{ label: "français", value: "fra" }]}
-                getOptionLabel={(option) => (option as LanguageType).language}
-                isOptionEqualToValue={(option, value) => (option as LanguageType).code === (value as LanguageType).code}
-                options={languagesOptions}
-                searchFilter={{ limit: 5 }}
-                onChange={handleOnLanguageChange}
+
+            <Controller
+                control={control}
+                name="data_languages"
+                defaultValue={[{ language: "français", code: "fra" }]}
+                render={({ field }) => {
+                    return (
+                        <AutocompleteSelect
+                            label={Translator.trans("service.wfs.new.additional_information_form.language")}
+                            hintText={Translator.trans("service.wfs.new.additional_information_form.hint_language")}
+                            state={errors.data_languages ? "error" : "default"}
+                            stateRelatedMessage={errors?.data_languages?.message?.toString()}
+                            freeSolo={false}
+                            defaultValue={[{ language: "français", code: "fra" }]}
+                            getOptionLabel={(option) => (option as LanguageType).language}
+                            isOptionEqualToValue={(option, value) => option.code === value.code}
+                            options={languagesOptions}
+                            searchFilter={{ limit: 5 }}
+                            onChange={(_, value) => field.onChange(value)}
+                            // @ts-expect-error fausse alerte
+                            controllerField={field}
+                        />
+                    );
+                }}
             />
             <Select
                 label={Translator.trans("service.wfs.new.additional_information_form.charset")}

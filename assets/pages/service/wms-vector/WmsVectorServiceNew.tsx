@@ -15,7 +15,7 @@ import LoadingText from "../../../components/Utils/LoadingText";
 import RQKeys from "../../../modules/RQKeys";
 import Translator from "../../../modules/Translator";
 import { routes } from "../../../router/router";
-import { type StoredDataRelation, type VectorDb } from "../../../types/app";
+import type { StoredDataRelation, VectorDb } from "../../../types/app";
 import { regex } from "../../../utils";
 import validations from "../../../validations";
 import AccessRestrictions from "./AccessRestrictions";
@@ -39,7 +39,7 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
         ACCESSRESTRICTIONS: 6,
     };
 
-    const [currentStep, setCurrentStep] = useState(STEPS.DESCRIPTION);
+    const [currentStep, setCurrentStep] = useState(STEPS.ADDITIONALINFORMATIONS);
 
     const vectorDbQuery = useQuery({
         queryKey: RQKeys.datastore_stored_data(datastoreId, vectorDbId),
@@ -120,20 +120,29 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
                     .required(Translator.trans("service.wms_vector.new.step_description.category_error")),
                 email_contact: yup
                     .string()
-                    .matches(regex.email, Translator.trans("service.wms_vector.new.step_description.email_contact_error"))
-                    .required(Translator.trans("service.wms_vector.new.step_description.email_contact_mandatory_error")),
+                    .required(Translator.trans("service.wms_vector.new.step_description.email_contact_mandatory_error"))
+                    .matches(regex.email, Translator.trans("service.wms_vector.new.step_description.email_contact_error")),
                 creation_date: yup.date().required(Translator.trans("service.wms_vector.new.step_description.creation_date_error")),
                 resource_genealogy: yup.string(),
                 organization: yup.string().required(Translator.trans("service.wms_vector.new.step_description.organization_error")),
                 organization_email: yup
                     .string()
-                    .matches(regex.email, Translator.trans("service.wms_vector.new.step_description.organization_email_error"))
-                    .required(Translator.trans("service.wms_vector.new.step_description.organization_email_mandatory_error")),
+                    .required(Translator.trans("service.wms_vector.new.step_description.organization_email_mandatory_error"))
+                    .matches(regex.email, Translator.trans("service.wms_vector.new.step_description.organization_email_error")),
             })
             .required(),
         5: yup
             .object({
-                languages: yup.string().required(Translator.trans("service.wms_vector.new.step_additional_information.language_error")),
+                languages: yup
+                    .array()
+                    .of(
+                        yup.object({
+                            language: yup.string(),
+                            code: yup.string(),
+                        })
+                    )
+                    .required(Translator.trans("service.wms_vector.new.step_additional_information.language_error"))
+                    .min(1, Translator.trans("service.wms_vector.new.step_additional_information.language_error")),
                 charset: yup.string().required(Translator.trans("service.wms_vector.new.step_additional_information.charset_error")),
                 projection: yup.string().required(Translator.trans("service.wms_vector.new.step_additional_information.projection_error")),
                 encoding: yup.string().required(Translator.trans("service.wms_vector.new.step_additional_information.encoding_error")),
@@ -172,6 +181,9 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
 
     const nextStep = async () => {
         const isStepValid = await trigger(undefined, { shouldFocus: true }); // demande de valider le formulaire
+        console.log("errors", errors);
+        console.log("formValues", getFormValues());
+
         if (!isStepValid) return;
 
         if (currentStep < Object.values(STEPS).length) {
