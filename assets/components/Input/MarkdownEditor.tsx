@@ -29,6 +29,7 @@ const MarkdownEditor: FC<MarkdownEditorProps> = (props) => {
         borderRadius: `${fr.spacing("1v")} ${fr.spacing("1v")} 0 0`,
         boxShadow: `inset 0 -2px 0 0 var(${theme.decisions.border.plain.grey.default})`,
         marginTop: fr.spacing("1v"),
+        fontFamily: "Marianne, arial, sans-serif",
     };
 
     return (
