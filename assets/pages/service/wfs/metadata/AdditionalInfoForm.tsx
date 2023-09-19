@@ -1,16 +1,18 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import { FC, useMemo } from "react";
-import { Controller, useForm } from "react-hook-form";
-import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { LanguageType, getLanguages, charsets } from "../../../../utils";
+import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { Select } from "@codegouvfr/react-dsfr/Select";
-import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { FC, useEffect, useMemo } from "react";
+import { Controller, useForm } from "react-hook-form";
+import * as yup from "yup";
+import { DevTool } from "@hookform/devtools";
+
 import AutocompleteSelect from "../../../../components/Input/AutocompleteSelect";
-import { StoredData } from "../../../../types/app";
 import ignProducts from "../../../../data/md_resolutions.json";
 import Translator from "../../../../modules/Translator";
+import { StoredData } from "../../../../types/app";
+import { LanguageType, charsets, getLanguages } from "../../../../utils";
 
 const getCode = (epsg) => {
     if (!epsg) return null;
@@ -63,7 +65,12 @@ const AdditionalInfoForm: FC<AdditionalInfoFormProps> = ({ storedData, fileType,
         handleSubmit,
         formState: { errors },
         getValues: getFormValues,
+        setValue: setFormValue,
     } = useForm({ resolver: yupResolver(schema) });
+
+    useEffect(() => {
+        setFormValue("data_encoding", fileType ?? "");
+    }, [fileType, setFormValue]);
 
     const onSubmit = () => {
         const values = getFormValues();
@@ -156,8 +163,10 @@ const AdditionalInfoForm: FC<AdditionalInfoFormProps> = ({ storedData, fileType,
                 hint={Translator.trans("service.wfs.new.additional_information_form.hint_spatial_resolution")}
                 nativeSelectProps={{
                     ...register("data_resolution"),
-                    defaultValue: "",
+                    defaultValue: 0,
                 }}
+                state={errors?.data_resolution ? "error" : "default"}
+                stateRelatedMessage={errors?.data_resolution?.message}
             >
                 <option value="" disabled hidden>
                     {Translator.trans("service.wfs.new.additional_information_form.select_spatial_resolution")}
@@ -187,6 +196,7 @@ const AdditionalInfoForm: FC<AdditionalInfoFormProps> = ({ storedData, fileType,
                 ]}
                 inlineLayoutWhen="always"
             />
+            <DevTool control={control} />
         </div>
     );
 };

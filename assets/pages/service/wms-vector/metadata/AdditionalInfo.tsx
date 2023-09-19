@@ -2,7 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Input from "@codegouvfr/react-dsfr/Input";
 import Select from "@codegouvfr/react-dsfr/Select";
 import { useQuery } from "@tanstack/react-query";
-import { FC, useMemo } from "react";
+import { FC, useEffect, useMemo } from "react";
 import { Controller, UseFormReturn } from "react-hook-form";
 
 import api from "../../../../api";
@@ -51,6 +51,7 @@ const AdditionalInfo: FC<AdditionalInfoProps> = ({ vectorDb, datastoreId, visibl
         register,
         formState: { errors },
         control,
+        setValue: setFormValue,
     } = form;
 
     let projUrl;
@@ -70,6 +71,12 @@ const AdditionalInfo: FC<AdditionalInfoProps> = ({ vectorDb, datastoreId, visibl
     const fileType = useMemo(() => {
         return getUploadFileType(fileTreeQuery.data);
     }, [fileTreeQuery.data]);
+
+    useEffect(() => {
+        setFormValue("encoding", fileType);
+    }, [fileType, setFormValue]);
+
+    console.log("fileType", fileType);
 
     return (
         <div className={fr.cx(!visible && "fr-hidden")}>

@@ -39,7 +39,7 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
         ACCESSRESTRICTIONS: 6,
     };
 
-    const [currentStep, setCurrentStep] = useState(STEPS.ADDITIONALINFORMATIONS);
+    const [currentStep, setCurrentStep] = useState(STEPS.TABLES_SELECTION);
 
     const vectorDbQuery = useQuery({
         queryKey: RQKeys.datastore_stored_data(datastoreId, vectorDbId),
@@ -150,7 +150,7 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
             })
             .required(),
         6: yup.object({
-            share_with: yup.string().required(Translator.trans("service.wms_vector.new.step_additional_information.share_with_error")),
+            share_with: yup.string().required(Translator.trans("service.wms_vector.new.step_access_retrictions.share_with_error")),
         }),
     };
 
