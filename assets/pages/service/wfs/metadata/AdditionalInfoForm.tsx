@@ -6,7 +6,6 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { FC, useEffect, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import * as yup from "yup";
-import { DevTool } from "@hookform/devtools";
 
 import AutocompleteSelect from "../../../../components/Input/AutocompleteSelect";
 import ignProducts from "../../../../data/md_resolutions.json";
@@ -196,7 +195,6 @@ const AdditionalInfoForm: FC<AdditionalInfoFormProps> = ({ storedData, fileType,
                 ]}
                 inlineLayoutWhen="always"
             />
-            <DevTool control={control} />
         </div>
     );
 };
