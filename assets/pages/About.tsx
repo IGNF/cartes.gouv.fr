@@ -1,186 +1,138 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import { Badge } from "@codegouvfr/react-dsfr/Badge";
+import { Card } from "@codegouvfr/react-dsfr/Card";
 
 import AppLayout from "../components/Layout/AppLayout";
 import { defaultNavItems } from "../config/navItems";
 
 const About = () => {
     return (
-        <AppLayout navItems={defaultNavItems} documentTitle="La Géoplateforme en bref">
+        <AppLayout navItems={defaultNavItems} documentTitle="A propos de cartes.gouv.fr">
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
-                    <h1>La Géoplateforme en bref</h1>
+                    <h1>A propos de cartes.gouv.fr</h1>
+
+                    <h2>Cartes.gouv.fr, le nouveau portail national de l’information géographique et de la connaissance des territoires</h2>
 
                     <p>
-                        Nouvel espace public de l’information géographique, la Géoplateforme a pour objectif d’optimiser la production et la diffusion des
-                        géodatas au service de la décision publique.
+                        Face aux enjeux contemporains, la carte est un outil de médiation majeur. Le service public de la cartographie, pour révéler ce
+                        potentiel, doit s’engager à mettre à disposition de tous, citoyens et acteurs des territoires, les cartes et applications qui
+                        nourrissent la réflexion et guident l’action.
                     </p>
                     <p>
-                        La société connaît une révolution de la donnée géographique qui impose à l’État de se transformer. Le développement des usages
-                        numériques dans lesquels l’information géolocalisée est omniprésente se traduit par une mutation des pratiques des professionnels et des
-                        citoyens ainsi que par un accroissement des besoins en données. La large mise à disposition des données géographiques offre de nouvelles
-                        façons de penser les cartes et doit encourager de nouveaux usages répondant à des besoins publics.
-                    </p>
-                    <p>
-                        Dans ce contexte, le programme Géoplateforme vise à doter la puissance publique d’une{" "}
-                        <strong>infrastructure collaborative et mutualisée pour la production et la diffusion des géodonnées</strong>. Son ambition est de
-                        permettre aux porteurs de politiques publiques et aux collectivités locales qui le souhaitent de bénéficier très simplement de
-                        fonctionnalités avancées pour diffuser leurs propres données et s’ouvrir à des communautés contributives. Cet espace,{" "}
-                        <strong>
-                            composante géographique de l’État-plateforme{" "}
-                            <a
-                                href="https://www.numerique.gouv.fr/publications/panorama-grands-projets-si/"
-                                target="_blank"
-                                title="Panorama des grands projets numériques de l’État - ouvre une nouvelle fenêtre"
-                                rel="noreferrer"
-                            >
-                                reconnue grand projet numérique de l’État
-                            </a>
-                        </strong>
-                        , répond notamment aux enjeux de souveraineté des données de l’État face aux géants de l’Internet.
-                    </p>
-                    <p>
-                        La Géoplateforme s’inscrit pleinement dans la <strong>dynamique des géo-communs</strong> soutenue par l’IGN. En effet, si l’institut a
-                        bien vocation à porter ses propres services sur la Géoplateforme, celle-ci se veut en premier lieu un outil commun au monde public.
-                        C’est la mobilisation progressive de partenaires, producteurs et usagers de données géographiques qui doit permettre d’atteindre cet
-                        objectif.
+                        Le site cartes.gouv.fr lancé à l’automne 2023 porte cette ambition. Il offrira progressivement un accès centralisé aux géodonnées
+                        souveraines et aux fonctionnalités de référence pour visualiser, créer, héberger, enrichir ou diffuser des données et des services
+                        géographiques.
                     </p>
 
-                    <h2>Enjeux</h2>
-
-                    <ul>
-                        <li>
-                            <strong>Bâtir une plateforme ouverte et mutualisée</strong> dédiée à l’information géographique et contribuant au déploiement de
-                            l’État-plateforme,
-                        </li>
-                        <li>
-                            <strong>Organiser le dispositif collaboratif</strong> pour l’entretien et l’enrichissement de la donnée géographique au sein de la
-                            sphère publique,
-                        </li>
-                        <li>
-                            <strong>Constituer un écosystème d’usagers&nbsp;;</strong> outiller, soutenir et connecter les communautés existantes,
-                        </li>
-                        <li>
-                            <strong>Proposer une nouvelle infrastructure robuste</strong> assurant la reprise des services existants de l’IGN et de ses
-                            partenaires&nbsp;; optimiser le parcours d’accès à ces ressources et offrir des fonctionnalités complémentaires.
-                        </li>
-                    </ul>
-
-                    <h2>Objectifs</h2>
-
-                    <h3>Accessibilité aux données</h3>
+                    <h2>Co-construire la connaissance et les usages cartographiques de demain</h2>
 
                     <p>
-                        La Géoplateforme mettra à disposition un panel très large de jeux de données géographiques et de services accessibles à tous. Les
-                        données de cette plateforme seront ouvertes et la plus grande interopérabilité possible sera recherchée avec les systèmes existants
-                        (référencés sur le portail de diffusion de la Géoplateforme).
+                        Avec cartes.gouv.fr s’expriment les volontés de faire vivre les données géographiques, de co-construire et de partager la connaissance
+                        du territoire avec l’intention de donner plus de force et de cohérence à la cartographie publique, laquelle tient un rôle de premier
+                        plan dans le pilotage des politiques publiques et de la transition écologique.
                     </p>
                     <p>
-                        Les utilisateurs pourront facilement mettre à jour des données, rechercher des services et des jeux de données grâce à des critères
-                        simples et les utiliser pour leurs propres besoins de diffusion.
+                        Cartes.gouv.fr offre la possibilité de diffuser et de mettre à jour ses géodonnées en autonomie, d’effectuer des traitements ou des
+                        croisements afin d’en extraire de nouvelles données à valeur ajoutée, mais également de les mettre en cartographie afin de les partager
+                        à tous, citoyens comme décideurs.
+                    </p>
+                    <p>
+                        Le site se construit par briques. Pour offrir au plus tôt l’accès aux services, l’IGN a fait le choix de développer cartes.gouv.fr de
+                        manière évolutive. Ainsi, la première interface de cartes.gouv.fr rendue accessible en octobre 2023 rassemble les premières briques
+                        disponibles (catalogage, alimentation/diffusion des données) et de nouveaux services sont régulièrement ajoutés.
                     </p>
 
-                    <h3>Mutualisation des infrastructures</h3>
+                    <h2>La Géoplateforme comme infrastructure et moteur pour répondre aux besoins des producteurs et des développeurs de services</h2>
 
                     <p>
-                        La Géoplateforme pourra héberger les données géographiques produites et co-produites par l’ensemble des partenaires. Cette
-                        infrastructure sécurisée et évolutive permettra aux parties prenantes de partager et de déployer des solutions à grande échelle en
-                        répondant à leurs exigences de capacité, de fiabilité ou de performance.
+                        En parallèle, l’IGN développe une infrastructure, la Géoplateforme, ouverte et mutualisée pour l’hébergement, le partage, le traitement
+                        et la mise en cartographie des géodonnées. Le site cartes.gouv.fr s’appuie sur cette nouvelle plateforme&nbsp;: il en est en quelque
+                        sorte la vitrine principale (mais pas exclusive) tout autant qu’un pupitre de commande accessible à tous.
                     </p>
 
-                    <h2>Briques fonctionnelles</h2>
+                    <p>
+                        En effet, cartes.gouv.fr a vocation à remplacer progressivement les sites geoportail.gouv.fr et geoservices.ign.fr ainsi que d’autres
+                        services de l’IGN <a href="#footnote1">(1)</a> couramment utilisés par des publics variés avec l’objectif d’en élargir significativement
+                        les cibles respectives. De son côté, l’infrastructure Géoplateforme offre déjà et continuera à déployer des outils et fonctionnalités
+                        permettant de mobiliser, de valoriser des données (notamment ici sur cartes.gouv.fr) et de développer facilement des services utiles et
+                        performants aux usagers. Il est à noter que ses fonctionnalités peuvent être utilisées sans passer par cartes.gouv.fr.
+                    </p>
 
-                    <p>Pour atteindre ses ambitions, la Géoplateforme s’articule autour de cinq principales briques fonctionnelles&nbsp;:</p>
+                    <p>
+                        Mise en œuvre par l’IGN avec le soutien du Fonds pour la transformation de l’action publique, la Géoplateforme s’inscrit pleinement dans
+                        la <strong>dynamique des géocommuns</strong> soutenue par l’institut. En effet, la Géoplateforme se veut en premier lieu un outil commun
+                        porté par un ensemble de partenaires, de producteurs et d’usagers de données parmi lesquels le ministère de la transition écologique et
+                        de la cohésion des territoires, le Cerema, le CRIGE PACA, Géobretagne, INERIS, l’OFB, l’ONF ou le Shom.
+                    </p>
 
-                    <ul>
-                        <li>
-                            <strong>Des services&nbsp;:</strong>
-                            <br />
-                            Pouvoir rechercher, charger, valider, traiter et diffuser ses données en autonomie
-                        </li>
-                        <li>
-                            <strong>Des fonctions collaboratives&nbsp;:</strong>
-                            <br />
-                            Coproduire et modifier des jeux de données en autonomie tout en améliorant collectivement la qualité de l’ensemble des données
-                        </li>
-                        <li>
-                            <strong>La gestion de communautés&nbsp;:</strong>
-                            <br />
-                            Fédérer des communautés d’utilisateurs et favoriser la création de nouveaux portails thématiques
-                        </li>
-                        <li>
-                            <strong>La gestion des accès et habilitations&nbsp;:</strong>
-                            <br />
-                            Attribuer les droits d’accès et d’habilitations sur la Géoplateforme et ses ressources (jeux de données…)
-                        </li>
-                        <li>
-                            <strong>Le support&nbsp;:</strong>
-                            <br />
-                            Bénéficier d’un appui sur l’utilisation de la Géoplateforme
-                        </li>
-                    </ul>
+                    <h2>Les grandes dates clés de la construction de la Géoplateforme</h2>
 
-                    <h2>Calendrier</h2>
+                    {/* TODO : calendrier */}
+                    <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
+                        <div className={fr.cx("fr-col-sm-12", "fr-col-md-4", "fr-col-lg-4")}>
+                            <Card desc="Lancement du programme Géoplateforme" title="2019" titleAs="h3" />
+                        </div>
+                        <div className={fr.cx("fr-col-sm-12", "fr-col-md-4", "fr-col-lg-4")}>
+                            <Card desc="Audit DINUM du Géoportail, module API Carto « Nature »" title="2020" titleAs="h3" />
+                        </div>
+                        <div className={fr.cx("fr-col-sm-12", "fr-col-md-4", "fr-col-lg-4")}>
+                            <Card
+                                desc="Premières expérimentations : démonstrateur LiDAR HD, contribution directe à la BD TOPO®, Géotuileur…"
+                                title="2021 - 2022"
+                                titleAs="h3"
+                            />
+                        </div>
+                        <div className={fr.cx("fr-col-sm-12", "fr-col-md-4", "fr-col-lg-4")}>
+                            <Card
+                                desc="Ouverture des premiers services de la Géoplateforme (version bêta) : services de diffusion et de téléchargement, catalogage, chargement/traitement/diffusion vecteur."
+                                title="2023"
+                                titleAs="h3"
+                            />
+                        </div>
+                        <div className={fr.cx("fr-col-sm-12", "fr-col-md-4", "fr-col-lg-4")}>
+                            <Card desc="Lancement du site cartes.gouv.fr" title="2023" titleAs="h3" />
+                        </div>
+                        <div className={fr.cx("fr-col-sm-12", "fr-col-md-4", "fr-col-lg-4")}>
+                            <Card
+                                badges={[<Badge key="bientot">Bientôt</Badge>]}
+                                desc="Ouverture de la visualisation cartographique sur cartes.gouv.fr"
+                                title="2024"
+                                titleAs="h3"
+                            />
+                        </div>
+                    </div>
 
-                    <ul>
-                        <li>
-                            <strong>2021 - 2024&nbsp;:</strong>
-                            <br />
-                            Mobilisation d’une communauté de partenaires et mise en place progressive d’une gouvernance ouverte
-                        </li>
-                        <li>
-                            <strong>2021&nbsp;:</strong>
-                            <br />
-                            <a
-                                href="https://www.ign.fr/geoplateforme/experimente"
-                                target="_blank"
-                                title="Expérimentations des premières fonctionnalité - ouvre une nouvelle fenêtre"
-                                rel="noreferrer"
-                            >
-                                Expérimentations de premières fonctionnalités
-                            </a>
-                            <br />
-                            Contractualisation de l’hébergement du socle technique de la Géoplateforme
-                            <br />
-                            <a
-                                href="https://www.ign.fr/espace-presse/lign-finalise-son-choix-de-partenaires-techniques-pour-la-geoplateforme"
-                                target="_blank"
-                                title="L’IGN finalise son choix de partenaires techniques pour le développement et l’exploitation de la Géoplateforme - ouvre une nouvelle fenêtre"
-                                rel="noreferrer"
-                            >
-                                Passation du marché de construction, d’infogérance et de maintenance de la Géoplateforme
-                            </a>
-                        </li>
-                        <li>
-                            <strong>2022&nbsp;:</strong>
-                            <br />
-                            <a
-                                href="https://www.ign.fr/geoplateforme/experimente"
-                                target="_blank"
-                                title="Expérimentations de nouvelles fonctionnalités - ouvre une nouvelle fenêtre"
-                                rel="noreferrer"
-                            >
-                                Expérimentations de nouvelles fonctionnalités
-                            </a>
-                            <br />
-                            <a
-                                href="https://www.ign.fr/geoplateforme/construire-le-socle-de-la-geoplateforme"
-                                target="_blank"
-                                title="Mise en place du socle technique - ouvre une nouvelle fenêtre"
-                                rel="noreferrer"
-                            >
-                                Mise en place du socle technique
-                            </a>{" "}
-                            et des premiers services permettant de gérer le cycle de vie de la donnée (chargement, mise à jour, diffusion)
-                        </li>
-                        <li>
-                            <strong>2023 - 2024&nbsp;:</strong>
-                            <br />
-                            Développement de services et applicatifs&nbsp;: services collaboratifs, communautés, traitements, ouverture des services aux
-                            partenaires
-                        </li>
-                    </ul>
+                    <p>
+                        En savoir plus&nbsp;:{" "}
+                        <a
+                            href="https://www.ign.fr/geoplateforme/la-geoplateforme-en-bref"
+                            target="_blank"
+                            title="La Géoplateforme en bref - ouvre une nouvelle fenêtre"
+                            rel="noreferrer"
+                        >
+                            https://www.ign.fr/geoplateforme/la-geoplateforme-en-bref
+                        </a>
+                    </p>
 
-                    <em>Mis à jour le 13/04/2023</em>
+                    <p id="footnote1">
+                        (1) Dont{" "}
+                        <a
+                            href="https://espacecollaboratif.ign.fr"
+                            target="_blank"
+                            title="espacecollaboratif.ign.fr - ouvre une nouvelle fenêtre"
+                            rel="noreferrer"
+                        >
+                            espacecollaboratif.ign.fr
+                        </a>{" "}
+                        et{" "}
+                        <a href="https://macarte.ign.fr" target="_blank" title="macarte.ign.fr - ouvre une nouvelle fenêtre" rel="noreferrer">
+                            macarte.ign.fr
+                        </a>
+                        .
+                    </p>
+
+                    <em>Mis à jour le 13/09/2023</em>
                 </div>
             </div>
         </AppLayout>
