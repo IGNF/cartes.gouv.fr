@@ -12,6 +12,7 @@ type TableAttributeSelectionProps = {
     form: UseFormReturn;
     selectedTables: StoredDataRelation[];
 };
+
 const TableAttributeSelection: FC<TableAttributeSelectionProps> = ({ visible, form, selectedTables }) => {
     const {
         trigger,
@@ -20,7 +21,7 @@ const TableAttributeSelection: FC<TableAttributeSelectionProps> = ({ visible, fo
         formState: { errors },
     } = form;
 
-    const [tableAttributes, setTableAttributes] = useState<{ [tableName: string]: string[] }>({});
+    const [tableAttributes, setTableAttributes] = useState<Record<string, string[]>>({});
 
     useEffect(() => {
         const prevTableAttributes = getFormValues("table_attributes") ?? {};
@@ -55,21 +56,25 @@ const TableAttributeSelection: FC<TableAttributeSelectionProps> = ({ visible, fo
 
     return (
         <div className={fr.cx(!visible && "fr-hidden")}>
-            <h3>Choisissez les attributs des tables sélectionnées</h3>
-
+            <h3>{Translator.trans("choose_attributes")}</h3>
             <p>{Translator.trans("mandatory_fields")}</p>
 
             {selectedTables.map((table) => (
                 <Accordion key={table.name} label={table.name} titleAs="h4" defaultExpanded={true}>
                     <Checkbox
-                        options={Object.keys(table.attributes).map((attrName) => ({
-                            label: attrName,
-                            nativeInputProps: {
-                                value: attrName,
-                                checked: tableAttributes?.[table.name]?.includes(attrName) ?? false,
-                                onChange: () => toggleAttributes(table.name, attrName),
-                            },
-                        }))}
+                        options={Object.keys(table.attributes)
+                            .filter((attrName) => {
+                                return !/^geometry/.test(table.attributes[attrName]);
+                            })
+                            .sort()
+                            .map((attrName) => ({
+                                label: attrName,
+                                nativeInputProps: {
+                                    value: attrName,
+                                    checked: tableAttributes?.[table.name]?.includes(attrName) ?? false,
+                                    onChange: () => toggleAttributes(table.name, attrName),
+                                },
+                            }))}
                         state={errors?.table_attributes?.[table.name]?.message ? "error" : "default"}
                         stateRelatedMessage={errors?.table_attributes?.[table.name]?.message?.toString()}
                     />

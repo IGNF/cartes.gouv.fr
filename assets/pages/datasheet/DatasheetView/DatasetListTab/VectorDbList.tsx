@@ -6,7 +6,7 @@ import Input from "@codegouvfr/react-dsfr/Input";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { useQuery } from "@tanstack/react-query";
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
 import api from "../../../../api";
@@ -71,7 +71,9 @@ const getVectorDbBadge = (status) => {
 
 const VectorDbList: FC<VectorDbListProps> = ({ datastoreId, vectorDbList }) => {
     const [serviceType, setServiceType] = useState<ServiceTypes>();
-    const [selectedStoredDataId, setSelectedStoredDataId] = useState<string>();
+    const [selectedStoredData, setSelectedStoredData] = useState<VectorDb>();
+    const [technicalName, setTechnicalName] = useState<string>();
+    const [error, setError] = useState<string>();
 
     const endpointsQuery = useQuery<DatastoreEndpoint[]>({
         queryKey: RQKeys.datastore_endpoints(datastoreId),
@@ -84,20 +86,34 @@ const VectorDbList: FC<VectorDbListProps> = ({ datastoreId, vectorDbList }) => {
     const wmsVectorEndpoints = Array.isArray(endpointsQuery?.data)
         ? endpointsQuery?.data?.filter((endpoint) => endpoint.endpoint.type.toUpperCase() === "WMS-VECTOR")
         : [];
+    const tmsEndpoints = Array.isArray(endpointsQuery?.data)
+        ? endpointsQuery?.data?.filter((endpoint) => endpoint.endpoint.type.toUpperCase() === "WMTS-TMS")
+        : [];
+
+    useEffect(() => {
+        setTechnicalName(selectedStoredData?.name);
+    }, [selectedStoredData]);
 
     const handleCreateService = () => {
-        if (!selectedStoredDataId) {
+        if (!selectedStoredData) {
             console.warn("Aucune stored_data sélectionnée");
             return;
         }
 
         switch (serviceType) {
             case "wfs":
-                routes.datastore_wfs_service_new({ datastoreId, vectorDbId: selectedStoredDataId }).push();
+                routes.datastore_wfs_service_new({ datastoreId, vectorDbId: selectedStoredData._id }).push();
                 break;
 
             case "wms-vector":
-                routes.datastore_wms_vector_service_new({ datastoreId, vectorDbId: selectedStoredDataId }).push();
+                routes.datastore_wms_vector_service_new({ datastoreId, vectorDbId: selectedStoredData._id }).push();
+                break;
+
+            case "tms":
+                if (!technicalName) {
+                    return;
+                }
+                routes.datastore_tms_vector_service_new({ datastoreId, vectorDbId: selectedStoredData._id, technicalName }).push();
                 break;
 
             default:
@@ -130,7 +146,7 @@ const VectorDbList: FC<VectorDbListProps> = ({ datastoreId, vectorDbList }) => {
                             {getVectorDbBadge(el.status)}
                             <Button
                                 onClick={() => {
-                                    setSelectedStoredDataId(el._id);
+                                    setSelectedStoredData(el);
                                     serviceTypeChoiceModal.open();
                                 }}
                                 className={fr.cx("fr-mr-2v")}
@@ -194,7 +210,7 @@ const VectorDbList: FC<VectorDbListProps> = ({ datastoreId, vectorDbList }) => {
                                     nativeInputProps: {
                                         checked: serviceType === "tms",
                                         onChange: () => setServiceType("tms"),
-                                        disabled: true, // TODO : temporaire
+                                        disabled: tmsEndpoints?.length === 0,
                                     },
                                 },
                                 {
@@ -230,7 +246,15 @@ const VectorDbList: FC<VectorDbListProps> = ({ datastoreId, vectorDbList }) => {
                             <Input
                                 label="Nom technique de la pyramide de tuiles vectorielles"
                                 hintText="II s'agit du nom technique du service qui apparaitra dans votre espace de travail, il ne sera pas publié en ligne. Si vous le renommez, choisissez un nom explicite."
-                                nativeInputProps={{ placeholder: "[TODO] Nom technique par défaut" }}
+                                nativeInputProps={{
+                                    defaultValue: technicalName,
+                                    onChange: (e) => {
+                                        setTechnicalName(e.currentTarget.value ?? undefined);
+                                        setError(e.currentTarget.value ? undefined : "Le nom technique est obligatoire");
+                                    },
+                                }}
+                                state={error ? "error" : "default"}
+                                stateRelatedMessage={error ?? undefined}
                             />
                         )}
                     </serviceTypeChoiceModal.Component>,

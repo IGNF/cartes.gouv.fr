@@ -13,6 +13,7 @@ get_stored_data_failed: "La récupération des informations sur la donnée stock
 get_filetree_failed: "La récupération du fichier associé à la donnée a échoué"
 back_to_my_datas: "Retour à mes données"
 
+choose_attributes: "Choisissez les attributs des tables sélectionnées"
 mandatory_fields: "Sauf mention contraire “(optionnel)” dans le label, tous les champs sont obligatoires."
 
 # mailer
@@ -297,3 +298,21 @@ service:
                     all_public: Tout public
                     your_community: Votre communauté d'appartenance
                     communities_or_users: Communautés ou utilisateurs choisis
+    tms:
+        new:
+            title: "Créer et publier un service TMS"
+            loading_stored_data: "Chargement de la donnée stockée..."
+            publish: "Publier le service maintenant"
+            step1: "Tables"
+            step2: "Attributs"
+            step3: "Niveaux de zoom"
+            step4: "Option de généralisation"
+            step5: "Echantillon"
+            step_tables:
+                title: "Sélectionnez les tables nécessaires au service"
+                mandatory_error: "Veuillez choisir au moins une table"
+            step_attributes:
+                mandatory_error: "Veuillez choisir au moins un attribut pour chaque table"
+            step_zoom_levels:
+                title: "Choisissez les niveaux de zoom minimum et maximum des tables sélectionnées"
+                explain: "Les niveaux de zoom de la pyramide de tuiles vectorielles sont prédéfinis. Choisissez les bornes minimum et maximum de votre pyramide de tuiles en vous aidant des deux cartes. Tous les niveaux intermédiaires seront générés."

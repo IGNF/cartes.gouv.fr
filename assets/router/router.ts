@@ -72,12 +72,23 @@ const routeDefs = {
         (p) => `${appRoot}/datastores/${p.datastoreId}/service/wfs/new`
     ),
 
+    // Creer et publier un service WMS-VECTEUR
     datastore_wms_vector_service_new: defineRoute(
         {
             datastoreId: param.path.string,
             vectorDbId: param.query.string,
         },
         (p) => `${appRoot}/datastores/${p.datastoreId}/service/wms-vector/new`
+    ),
+
+    // Creer et publier un service TMS
+    datastore_tms_vector_service_new: defineRoute(
+        {
+            datastoreId: param.path.string,
+            vectorDbId: param.query.string,
+            technicalName: param.query.string,
+        },
+        (p) => `${appRoot}/datastores/${p.datastoreId}/service/tms/new`
     ),
 
     datastore_service_view: defineRoute(
