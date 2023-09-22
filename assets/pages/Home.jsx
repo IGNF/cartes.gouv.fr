@@ -1,7 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
 // import { Button } from "@codegouvfr/react-dsfr/Button";
-import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
 // import Routing from "fos-router";
 
 import React from "react";
@@ -71,151 +70,137 @@ const Home = () => {
                     </div>
                 </div>
 
-                <Tabs
-                    className={fr.cx("fr-tabs--full")}
-                    tabs={[
-                        {
-                            label: "Outils cartes.gouv.fr",
-                            content: (
-                                <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-text--center")}>
-                                    <div className={fr.cx("fr-col-lg-3", "fr-col-md-6", "fr-col-12", "fr-text--center")}>
-                                        <img
-                                            src={`${appRoot}/dsfr/artwork/pictograms/digital/internet.svg`}
-                                            className={fr.cx("fin-service-picto", "svg-fin-fc-finger")}
-                                            alt=""
-                                            role="presentation"
-                                        />
-                                        <h3 className={fr.cx("fr-text--lead")}>Consommez des services</h3>
-                                        <p>Lorem ipsum dolor sit amet,consectetur adipiscing elit.</p>
-                                        <Badge small className={fr.cx("fr-badge--pink")}>
-                                            Prochainement
-                                        </Badge>
-                                    </div>
+                <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-text--center")}>
+                    <div className={fr.cx("fr-col-lg-3", "fr-col-md-6", "fr-col-12", "fr-text--center")}>
+                        <img
+                            src={`${appRoot}/dsfr/artwork/pictograms/digital/internet.svg`}
+                            className={fr.cx("fin-service-picto", "svg-fin-fc-finger")}
+                            alt=""
+                            role="presentation"
+                        />
+                        <h3 className={fr.cx("fr-text--lead")}>Consommez des services</h3>
+                        <p>Lorem ipsum dolor sit amet,consectetur adipiscing elit.</p>
+                        <Badge small className={fr.cx("fr-badge--pink")}>
+                            Prochainement
+                        </Badge>
+                    </div>
 
-                                    <div className={fr.cx("fr-col-lg-3", "fr-col-md-6", "fr-col-12", "fr-text--center")}>
-                                        <img
-                                            src={`${appRoot}/dsfr/artwork/pictograms/environment/human-cooperation.svg`}
-                                            className={fr.cx("fin-service-pict", "svg-fin-majorite")}
-                                            alt=""
-                                            role="presentation"
-                                        />
-                                        <h3 className={fr.cx("fr-text--lead")}>Stocker et partager des géodonnées</h3>
-                                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                                    </div>
+                    <div className={fr.cx("fr-col-lg-3", "fr-col-md-6", "fr-col-12", "fr-text--center")}>
+                        <img
+                            src={`${appRoot}/dsfr/artwork/pictograms/environment/human-cooperation.svg`}
+                            className={fr.cx("fin-service-pict", "svg-fin-majorite")}
+                            alt=""
+                            role="presentation"
+                        />
+                        <h3 className={fr.cx("fr-text--lead")}>Stocker et partager des géodonnées</h3>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                    </div>
 
-                                    <div className={fr.cx("fr-col-lg-3", "fr-col-md-6", "fr-col-12", "fr-text--center")}>
-                                        <img
-                                            src={`${appRoot}/dsfr/artwork/pictograms/digital/data-visualization.svg`}
-                                            className={fr.cx("fin-service-picto", "svg-fin-procuration")}
-                                            alt=""
-                                            role="presentation"
-                                        />
-                                        <h3 className={fr.cx("fr-text--lead")}>Effectuer des traitements</h3>
-                                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                                        {/* <p>
-                                            {user === null ? (
-                                                <Button
-                                                    linkProps={{ href: Routing.generate("cartesgouvfr_security_login") }}
-                                                    iconId={fr.cx("fr-icon-account-circle-fill")}
-                                                >
-                                                    Se connecter
-                                                </Button>
-                                            ) : (
-                                                <Button
-                                                    linkProps={routes.datastore_list().link}
-                                                    iconId={fr.cx("fr-icon-arrow-right-line")}
-                                                    className={fr.cx("fr-btn--icon-right")}
-                                                >
-                                                    {Translator.trans("home.start")}
-                                                </Button>
-                                            )}
-                                        </p> */}
-                                    </div>
-                                    <div className={fr.cx("fr-col-lg-3", "fr-col-md-6", "fr-col-12", "fr-text--center")}>
-                                        <img
-                                            src={`${appRoot}/dsfr/artwork/pictograms/map/map.svg`}
-                                            className={fr.cx("fin-service-picto", "svg-fin-service-picto")}
-                                            alt=""
-                                            role="presentation"
-                                        />
-                                        <h3 className={fr.cx("fr-text--lead")}>Lorem ipsum dolor</h3>
-                                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                                    </div>
-                                </div>
-                            ),
-                        },
-                        {
-                            label: "Pour aller plus loin",
-                            content: (
-                                <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-text--center")}>
-                                    <div className={fr.cx("fr-col-lg-3", "fr-col-12", "fr-text--center")}>
-                                        <img
-                                            src={`${appRoot}/dsfr/artwork/pictograms/digital/data-visualization.svg`}
-                                            className={fr.cx("fin-service-picto", "svg-fin-procuration")}
-                                            alt=""
-                                            role="presentation"
-                                        />
-                                        <h3 className={fr.cx("fr-text--lead")}>Consectetur adipiscing elit</h3>
-                                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                                        {/* <p>
-                                            {user === null ? (
-                                                <Button
-                                                    linkProps={{ href: Routing.generate("cartesgouvfr_security_login") }}
-                                                    iconId={fr.cx("fr-icon-account-circle-fill")}
-                                                >
-                                                    Se connecter
-                                                </Button>
-                                            ) : (
-                                                <Button
-                                                    linkProps={routes.datastore_list().link}
-                                                    iconId={fr.cx("fr-icon-arrow-right-line")}
-                                                    className={fr.cx("fr-btn--icon-right")}
-                                                >
-                                                    {Translator.trans("home.start")}
-                                                </Button>
-                                            )}
-                                        </p> */}
-                                    </div>
+                    <div className={fr.cx("fr-col-lg-3", "fr-col-md-6", "fr-col-12", "fr-text--center")}>
+                        <img
+                            src={`${appRoot}/dsfr/artwork/pictograms/digital/data-visualization.svg`}
+                            className={fr.cx("fin-service-picto", "svg-fin-procuration")}
+                            alt=""
+                            role="presentation"
+                        />
+                        <h3 className={fr.cx("fr-text--lead")}>Effectuer des traitements</h3>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                        {/* <p>
+                            {user === null ? (
+                                <Button
+                                    linkProps={{ href: Routing.generate("cartesgouvfr_security_login") }}
+                                    iconId={fr.cx("fr-icon-account-circle-fill")}
+                                >
+                                    Se connecter
+                                </Button>
+                            ) : (
+                                <Button
+                                    linkProps={routes.datastore_list().link}
+                                    iconId={fr.cx("fr-icon-arrow-right-line")}
+                                    className={fr.cx("fr-btn--icon-right")}
+                                >
+                                    {Translator.trans("home.start")}
+                                </Button>
+                            )}
+                        </p> */}
+                    </div>
+                    <div className={fr.cx("fr-col-lg-3", "fr-col-md-6", "fr-col-12", "fr-text--center")}>
+                        <img
+                            src={`${appRoot}/dsfr/artwork/pictograms/map/map.svg`}
+                            className={fr.cx("fin-service-picto", "svg-fin-service-picto")}
+                            alt=""
+                            role="presentation"
+                        />
+                        <h3 className={fr.cx("fr-text--lead")}>Lorem ipsum dolor</h3>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                    </div>
+                </div>
 
-                                    <div className={fr.cx("fr-col-lg-3", "fr-col-12", "fr-text--center")}>
-                                        <img
-                                            src={`${appRoot}/dsfr/artwork/pictograms/map/map.svg`}
-                                            className={fr.cx("fin-service-picto", "svg-fin-service-picto")}
-                                            alt=""
-                                            role="presentation"
-                                        />
-                                        <h3 className={fr.cx("fr-text--lead")}>Sit amet</h3>
-                                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                                    </div>
+                <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-text--center")}>
+                    <div className={fr.cx("fr-col-lg-3", "fr-col-12", "fr-text--center")}>
+                        <img
+                            src={`${appRoot}/dsfr/artwork/pictograms/digital/data-visualization.svg`}
+                            className={fr.cx("fin-service-picto", "svg-fin-procuration")}
+                            alt=""
+                            role="presentation"
+                        />
+                        <h3 className={fr.cx("fr-text--lead")}>Consectetur adipiscing elit</h3>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                        {/* <p>
+                            {user === null ? (
+                                <Button
+                                    linkProps={{ href: Routing.generate("cartesgouvfr_security_login") }}
+                                    iconId={fr.cx("fr-icon-account-circle-fill")}
+                                >
+                                    Se connecter
+                                </Button>
+                            ) : (
+                                <Button
+                                    linkProps={routes.datastore_list().link}
+                                    iconId={fr.cx("fr-icon-arrow-right-line")}
+                                    className={fr.cx("fr-btn--icon-right")}
+                                >
+                                    {Translator.trans("home.start")}
+                                </Button>
+                            )}
+                        </p> */}
+                    </div>
 
-                                    <div className={fr.cx("fr-col-lg-3", "fr-col-12", "fr-text--center")}>
-                                        <img
-                                            src={`${appRoot}/dsfr/artwork/pictograms/digital/internet.svg`}
-                                            className={fr.cx("fin-service-picto", "svg-fin-fc-finger")}
-                                            alt=""
-                                            role="presentation"
-                                        />
-                                        <h3 className={fr.cx("fr-text--lead")}>Dolor sit amet consectetur</h3>
-                                        <p>Lorem ipsum dolor sit amet,consectetur adipiscing elit.</p>
-                                        <Badge small className={fr.cx("fr-badge--pink")}>
-                                            Prochainement
-                                        </Badge>
-                                    </div>
-                                    <div className={fr.cx("fr-col-lg-3", "fr-col-12", "fr-text--center")}>
-                                        <img
-                                            src={`${appRoot}/dsfr/artwork/pictograms/environment/human-cooperation.svg`}
-                                            className={fr.cx("fin-service-picto", "svg-fin-majorite")}
-                                            alt=""
-                                            role="presentation"
-                                        />
-                                        <h3 className={fr.cx("fr-text--lead")}>Adipiscing elits</h3>
-                                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                                    </div>
-                                </div>
-                            ),
-                        },
-                    ]}
-                />
+                    <div className={fr.cx("fr-col-lg-3", "fr-col-12", "fr-text--center")}>
+                        <img
+                            src={`${appRoot}/dsfr/artwork/pictograms/map/map.svg`}
+                            className={fr.cx("fin-service-picto", "svg-fin-service-picto")}
+                            alt=""
+                            role="presentation"
+                        />
+                        <h3 className={fr.cx("fr-text--lead")}>Sit amet</h3>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                    </div>
+
+                    <div className={fr.cx("fr-col-lg-3", "fr-col-12", "fr-text--center")}>
+                        <img
+                            src={`${appRoot}/dsfr/artwork/pictograms/digital/internet.svg`}
+                            className={fr.cx("fin-service-picto", "svg-fin-fc-finger")}
+                            alt=""
+                            role="presentation"
+                        />
+                        <h3 className={fr.cx("fr-text--lead")}>Dolor sit amet consectetur</h3>
+                        <p>Lorem ipsum dolor sit amet,consectetur adipiscing elit.</p>
+                        <Badge small className={fr.cx("fr-badge--pink")}>
+                            Prochainement
+                        </Badge>
+                    </div>
+                    <div className={fr.cx("fr-col-lg-3", "fr-col-12", "fr-text--center")}>
+                        <img
+                            src={`${appRoot}/dsfr/artwork/pictograms/environment/human-cooperation.svg`}
+                            className={fr.cx("fin-service-picto", "svg-fin-majorite")}
+                            alt=""
+                            role="presentation"
+                        />
+                        <h3 className={fr.cx("fr-text--lead")}>Adipiscing elits</h3>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                    </div>
+                </div>
             </div>
         </AppLayout>
     );
