@@ -20,12 +20,7 @@ const ZoomLevels = {
 const TableZoomLevels: FC<TableZoomLevelsProps> = ({ visible, form, selectedTables }) => {
     const [tableZoomLevels, setTableZoomLevels] = useState<Record<string, number[]>>({});
 
-    const {
-        // trigger,
-        setValue: setFormValue,
-        getValues: getFormValues,
-        // formState: { errors },
-    } = form;
+    const { setValue: setFormValue, getValues: getFormValues } = form;
 
     useEffect(() => {
         const prevTableZoomLevels = getFormValues("table_zoom_levels") ?? {};
@@ -49,7 +44,7 @@ const TableZoomLevels: FC<TableZoomLevelsProps> = ({ visible, form, selectedTabl
     };
 
     return (
-        <div className={fr.cx(!visible && "fr-hidden")}>
+        <div className={fr.cx("fr-my-2v", !visible && "fr-hidden")}>
             <h3>{Translator.trans("service.tms.new.step_zoom_levels.title")}</h3>
             <p>{Translator.trans("service.tms.new.step_zoom_levels.explain")}</p>
             {selectedTables.map((table) => (
