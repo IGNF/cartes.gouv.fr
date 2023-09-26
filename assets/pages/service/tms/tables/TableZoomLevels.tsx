@@ -10,6 +10,7 @@ type TableZoomLevelsProps = {
     visible: boolean;
     form: UseFormReturn;
     selectedTables: StoredDataRelation[];
+    onChange?: (values: number[]) => void;
 };
 
 const ZoomLevels = {
@@ -29,7 +30,6 @@ const TableZoomLevels: FC<TableZoomLevelsProps> = ({ visible, form, selectedTabl
             tableZoomLevels[table.name] = prevTableZoomLevels[table.name] ?? [ZoomLevels.TOP, ZoomLevels.BOTTOM];
         });
         setTableZoomLevels(tableZoomLevels);
-        setFormValue("table_zoom_levels", tableZoomLevels);
     }, [getFormValues, setFormValue, selectedTables]);
 
     useEffect(() => {

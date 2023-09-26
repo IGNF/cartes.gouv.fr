@@ -82,6 +82,7 @@ const TmsServiceNew: FC<TmsServiceNewProps> = ({ datastoreId, vectorDbId, techni
     });
     const {
         formState: { errors },
+        setValue: setFormValue,
         getValues: getFormValues,
         watch,
         trigger,
@@ -102,7 +103,6 @@ const TmsServiceNew: FC<TmsServiceNewProps> = ({ datastoreId, vectorDbId, techni
     const previousStep = () => setCurrentStep((currentStep) => currentStep - 1);
 
     const nextStep = async () => {
-        console.log(getFormValues("tippecanoe"));
         const isStepValid = await trigger(undefined, { shouldFocus: true }); // demande de valider le formulaire
         if (!isStepValid) return;
 
@@ -140,14 +140,19 @@ const TmsServiceNew: FC<TmsServiceNewProps> = ({ datastoreId, vectorDbId, techni
                     />
                     <TableSelection visible={currentStep === STEPS.TABLES_SELECTION} vectorDb={vectorDbQuery.data} form={form} />
                     <TableAttributeSelection visible={currentStep === STEPS.ATTRIBUTES_SELECTION} form={form} selectedTables={selectedTables} />
-                    <TableZoomLevels visible={currentStep === STEPS.ZOOM_LEVELS} form={form} selectedTables={selectedTables} />
+                    <TableZoomLevels
+                        visible={currentStep === STEPS.ZOOM_LEVELS}
+                        form={form}
+                        selectedTables={selectedTables}
+                        onChange={(v) => setFormValue("zoom_levels", v)}
+                    />
                     <TippeCanoe
                         visible={currentStep === STEPS.GENERALIZE_OPTIONS}
                         state={errors.tippecanoe ? "error" : "default"}
                         stateRelatedMessage={errors?.tippecanoe?.message as string}
                         form={form}
                     />
-                    {/* <RCSampleMap visible={currentStep === STEPS.SAMPLE} form={form} onChange={(v) => console.log(v)} /> */}
+                    {currentStep === STEPS.SAMPLE && <RCSampleMap form={form} onChange={(v) => console.log(v)} />}
                     <ButtonsGroup
                         className={fr.cx("fr-mt-2w")}
                         alignment="between"

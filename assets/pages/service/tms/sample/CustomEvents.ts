@@ -10,4 +10,4 @@ class ChangeExtentEvent extends BaseEvent {
     }
 }
 
-export default ChangeExtentEvent;
+export { ChangeExtentEvent };

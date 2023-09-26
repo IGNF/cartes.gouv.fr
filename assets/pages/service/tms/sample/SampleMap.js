@@ -5,7 +5,7 @@ import { transformExtent } from "ol/proj";
 import { optionsFromCapabilities } from "ol/source/WMTS";
 import WMTS from "ol/source/WMTS";
 import TileLayer from "ol/layer/Tile";
-import ChangeExtentEvent from "./CustomEvents";
+import { ChangeExtentEvent } from "./CustomEvents";
 
 export default class SampleMap extends Map {
     constructor(options) {
@@ -14,8 +14,6 @@ export default class SampleMap extends Map {
         this._bottomLevel = this.getView().getZoom();
         this._size;
 
-        // Traitement apres avoir recuperer le GetCapabilities
-        //this.on("getcapabilities", (e) => this._handleGetCapabilities(e));
         this.on("moveend", () => {
             const extent = this._getExtent();
             this.dispatchEvent(new ChangeExtentEvent(extent));
@@ -39,18 +37,8 @@ export default class SampleMap extends Map {
         });
     }
 
-    setBottomLevel(bottomLevel) {
-        // On remet le maxZoom a son etat original sinon this.getView().getZoomForResolution (ligne 63)
-        // retourne le nouveau zoom max
-        this.getView().setMaxZoom(this._bottomLevel);
-
-        this._bottomLevel = bottomLevel;
-        this._initialize();
-    }
-
     _initialize() {
         const target = this.getTarget();
-        if (!target) return;
 
         const numPixelsX = target.clientWidth;
         const numPixelsY = target.clientHeight;
