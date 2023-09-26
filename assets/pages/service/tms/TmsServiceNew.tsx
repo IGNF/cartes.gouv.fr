@@ -18,6 +18,8 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { fr } from "@codegouvfr/react-dsfr";
+import TippeCanoe from "./tippecanoes/Tippecanoe";
+import RCSampleMap from "./sample/RCSampleMap";
 
 type TmsServiceNewProps = {
     datastoreId: string;
@@ -60,6 +62,10 @@ const TmsServiceNew: FC<TmsServiceNewProps> = ({ datastoreId, vectorDbId, techni
         }),
     });
     schema[STEPS.ZOOM_LEVELS] = yup.mixed().nullable().notRequired();
+    schema[STEPS.GENERALIZE_OPTIONS] = yup.object({
+        tippecanoe: yup.string().required(Translator.trans("service.tms.new.step_tippecanoe.mandatory_error")),
+    });
+    schema[STEPS.SAMPLE] = yup.mixed().nullable().notRequired();
 
     /* l'etape courante */
     const [currentStep, setCurrentStep] = useState(STEPS.TABLES_SELECTION);
@@ -74,9 +80,9 @@ const TmsServiceNew: FC<TmsServiceNewProps> = ({ datastoreId, vectorDbId, techni
         resolver: yupResolver(schema[currentStep]),
         mode: "onChange",
     });
-
     const {
         formState: { errors },
+        setValue: setFormValue,
         getValues: getFormValues,
         watch,
         trigger,
@@ -134,7 +140,19 @@ const TmsServiceNew: FC<TmsServiceNewProps> = ({ datastoreId, vectorDbId, techni
                     />
                     <TableSelection visible={currentStep === STEPS.TABLES_SELECTION} vectorDb={vectorDbQuery.data} form={form} />
                     <TableAttributeSelection visible={currentStep === STEPS.ATTRIBUTES_SELECTION} form={form} selectedTables={selectedTables} />
-                    <TableZoomLevels visible={currentStep === STEPS.ZOOM_LEVELS} form={form} selectedTables={selectedTables} />
+                    <TableZoomLevels
+                        visible={currentStep === STEPS.ZOOM_LEVELS}
+                        form={form}
+                        selectedTables={selectedTables}
+                        onChange={(v) => setFormValue("zoom_levels", v)}
+                    />
+                    <TippeCanoe
+                        visible={currentStep === STEPS.GENERALIZE_OPTIONS}
+                        state={errors.tippecanoe ? "error" : "default"}
+                        stateRelatedMessage={errors?.tippecanoe?.message as string}
+                        form={form}
+                    />
+                    {currentStep === STEPS.SAMPLE && <RCSampleMap form={form} onChange={(v) => console.log(v)} />}
                     <ButtonsGroup
                         className={fr.cx("fr-mt-2w")}
                         alignment="between"

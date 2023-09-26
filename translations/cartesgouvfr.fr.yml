@@ -316,3 +316,6 @@ service:
             step_zoom_levels:
                 title: "Choisissez les niveaux de zoom minimum et maximum des tables sélectionnées"
                 explain: "Les niveaux de zoom de la pyramide de tuiles vectorielles sont prédéfinis. Choisissez les bornes minimum et maximum de votre pyramide de tuiles en vous aidant des deux cartes. Tous les niveaux intermédiaires seront générés."
+            step_tippecanoe:
+                title: "Choisissez une option de généralisation"
+                mandatory_error: "l'option de généralisation est obligatoire"
