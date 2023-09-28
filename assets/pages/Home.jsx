@@ -15,7 +15,7 @@ import "../sass/pages/home.scss";
 
 const Home = () => {
     return (
-        <AppLayout navItems={defaultNavItems} documentTitle="Le nouveau portail national de la connaissance du territoire">
+        <AppLayout navItems={defaultNavItems} documentTitle="Le service public des cartes et données du territoire">
             {/* Section : Présentation */}
             <div className={fr.cx("c-section", "c-section--gray")}>
                 <div className={fr.cx("fr-container--fluid")}>
