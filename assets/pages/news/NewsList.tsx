@@ -1,5 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import { Badge } from "@codegouvfr/react-dsfr/Badge";
+import { Tag } from "@codegouvfr/react-dsfr/Tag";
 import { Card } from "@codegouvfr/react-dsfr/Card";
 import { FC } from "react";
 import { symToStr } from "tsafe/symToStr";
@@ -19,12 +19,12 @@ type NewsListItemProps = {
 const NewsListItem: FC<NewsListItemProps> = ({ slug, newsArticle }) => {
     const SHORT_DESC_MAX_CHAR = 120;
 
-    const badges = newsArticle?.tags?.map((tag, i) => <Badge key={`${slug}_tag_${i}`}>{tag}</Badge>);
+    const tags = newsArticle?.tags?.map((tag, i) => <Tag key={`${slug}_tag_${i}`}>{tag}</Tag>);
 
     return (
         <div className={fr.cx("fr-col-sm-12", "fr-col-md-4", "fr-col-lg-4")}>
             <Card
-                badges={badges}
+                start={<div className={fr.cx("fr-tags-group")}>{tags}</div>}
                 desc={
                     newsArticle?.short_description && newsArticle?.short_description.length > SHORT_DESC_MAX_CHAR
                         ? newsArticle?.short_description.substring(0, 100) + "..."

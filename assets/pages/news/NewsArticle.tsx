@@ -1,5 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import Badge from "@codegouvfr/react-dsfr/Badge";
+import Tag from "@codegouvfr/react-dsfr/Tag";
 import { useColors } from "@codegouvfr/react-dsfr/useColors";
 import { FC } from "react";
 import { symToStr } from "tsafe/symToStr";
@@ -20,17 +20,19 @@ const NewsArticle: FC<NewsArticleProps> = ({ slug }) => {
 
     const theme = useColors();
 
-    const badges = newsArticle?.tags?.map((tag, i) => (
-        <Badge key={`${slug}_tag_${i}`} className={fr.cx("fr-mr-2v")}>
+    const tags = newsArticle?.tags?.map((tag, i) => (
+        <Tag key={`${slug}_tag_${i}`} className={fr.cx("fr-mr-2v")}>
             {tag}
-        </Badge>
+        </Tag>
     ));
 
     return (
         <AppLayout navItems={defaultNavItems} documentTitle={newsArticle?.title}>
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
-                    <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>{badges}</div>
+                    <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
+                        <div className={fr.cx("fr-tags-group")}>{tags}</div>
+                    </div>
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
                         <h1>{newsArticle?.title}</h1>
                     </div>
