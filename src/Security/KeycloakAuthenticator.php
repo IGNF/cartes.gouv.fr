@@ -7,6 +7,7 @@ use KnpU\OAuth2ClientBundle\Client\OAuth2ClientInterface;
 use KnpU\OAuth2ClientBundle\Client\Provider\KeycloakClient;
 use KnpU\OAuth2ClientBundle\Security\Authenticator\OAuth2Authenticator;
 use League\OAuth2\Client\Token\AccessToken;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -32,7 +33,8 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
     public function __construct(
         private ClientRegistry $clientRegistry,
         private RouterInterface $router,
-        private RequestStack $requestStack
+        private RequestStack $requestStack,
+        private LoggerInterface $logger,
     ) {
     }
 
@@ -107,6 +109,10 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
     {
         $message = strtr($exception->getMessageKey(), $exception->getMessageData());
 
-        return new Response($message, Response::HTTP_FORBIDDEN);
+        $this->logger->debug(self::class, [$message]);
+
+        return new RedirectResponse($this->router->generate(self::HOME_ROUTE, [
+            'authentication_failed' => true,
+        ]));
     }
 }

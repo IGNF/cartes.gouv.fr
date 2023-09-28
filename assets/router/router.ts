@@ -6,7 +6,12 @@ export const appRoot = SymfonyRouting.getBaseUrl(); // (document.getElementById(
 
 const routeDefs = {
     // routes non protégées
-    home: defineRoute(appRoot === "" ? "/" : appRoot),
+    home: defineRoute(
+        {
+            authentication_failed: param.query.optional.number,
+        },
+        () => (appRoot === "" ? "/" : appRoot)
+    ),
     about: defineRoute(`${appRoot}/a-propos`),
     docs: defineRoute(`${appRoot}/documentation`),
     contact: defineRoute(`${appRoot}/nous-ecrire`),

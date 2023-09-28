@@ -116,8 +116,10 @@ abstract class AbstractEntrepotApiService
         $options = $this->prepareOptions($body, $query, $headers, $fileUpload);
 
         $response = $this->apiClient->request($method, $url, $options);
+        $responseInfo = $response->getInfo();
+        $finalUrl = array_key_exists('url', $responseInfo) ? $responseInfo['url'] : null;
 
-        $this->logger->debug(self::class, [$method, $url, $body, $query, $response->getContent(false)]);
+        $this->logger->debug(self::class, [$method, $url, $body, $query, $response->getContent(false), $finalUrl]);
 
         $responseContent = $this->handleResponse($response, $expectJson);
 

@@ -1,21 +1,34 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import Alert from "@codegouvfr/react-dsfr/Alert";
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
-// import { Button } from "@codegouvfr/react-dsfr/Button";
-// import Routing from "fos-router";
-
 import React from "react";
 
 import AppLayout from "../components/Layout/AppLayout";
 import { defaultNavItems } from "../config/navItems";
-// import { UserContext } from "../contexts/UserContext";
-import { appRoot /*, routes*/ } from "../router/router";
+import SymfonyRouting from "../modules/Routing";
+import { appRoot, useRoute } from "../router/router";
 
 import hp from "../img/photos/rustrel.jpg";
 import "../sass/pages/home.scss";
 
 const Home = () => {
+    const { params } = useRoute();
+
     return (
         <AppLayout navItems={defaultNavItems} documentTitle="Le service public des cartes et données du territoire">
+            {params.authentication_failed === 1 && (
+                <Alert
+                    severity="error"
+                    closable={true}
+                    title={"Connexion échouée"}
+                    description={
+                        <p>
+                            La tentative de connexion a échoué, veuillez <a href={SymfonyRouting.generate("cartesgouvfr_security_login")}>réessayer</a>.
+                        </p>
+                    }
+                />
+            )}
+
             {/* Section : Présentation */}
             <div className={fr.cx("c-section", "c-section--gray")}>
                 <div className={fr.cx("fr-container--fluid")}>

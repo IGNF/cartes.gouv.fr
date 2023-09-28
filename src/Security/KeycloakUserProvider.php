@@ -9,6 +9,7 @@ use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Token\AccessToken;
 use Stevenmaguire\OAuth2\Client\Provider\KeycloakResourceOwner;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpClient\Exception\TimeoutException;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -25,7 +26,7 @@ class KeycloakUserProvider implements UserProviderInterface
         private ClientRegistry $clientRegistry,
         private RequestStack $requestStack,
         private ParameterBagInterface $params,
-        private EntrepotApiService $entrepotApiService
+        private EntrepotApiService $entrepotApiService,
     ) {
     }
 
@@ -61,7 +62,11 @@ class KeycloakUserProvider implements UserProviderInterface
         /** @var KeycloakResourceOwner */
         $keycloakUser = $keycloakClient->fetchUserFromToken($accessToken);
 
-        $apiUser = $this->entrepotApiService->user->getMe();
+        try {
+            $apiUser = $this->entrepotApiService->user->getMe();
+        } catch (TimeoutException $ex) {
+            throw new UserNotFoundException('Unable to refresh logged-in user', Response::HTTP_UNAUTHORIZED, $ex);
+        }
 
         $user = new User($keycloakUser->toArray(), $apiUser);
 
@@ -75,9 +80,9 @@ class KeycloakUserProvider implements UserProviderInterface
      * If you're not using these features, you do not need to implement
      * this method.
      *
-     * @throws UserNotFoundException if the user is not found
+     * {@inheritDoc}
      *
-     * @SuppressWarnings(UnusedFormalParameter)
+     * @throws UserNotFoundException if the user is not found
      */
     public function loadUserByIdentifier(string $identifier): UserInterface
     {

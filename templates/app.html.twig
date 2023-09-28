@@ -3,7 +3,7 @@
 {% block body %}
     <div id="root" data-app-root="{{ app_root }}" data-app-env="{{ app.request.server.get('APP_ENV') }}" data-site-title="cartes.gouv.fr"></div>
 
-    {% if app.user %}
+    {% if app.user is defined %}
         <div id="user" data-user="{{ app.user|serialize('json') }}"></div>
     {% endif %}
 
