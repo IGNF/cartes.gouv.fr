@@ -207,7 +207,10 @@ class UploadController extends AbstractController
                                     'upload' => [$upload['_id']],
                                 ],
                                 'output' => [
-                                    'stored_data' => ['name' => $upload['name']],
+                                    'stored_data' => [
+                                        'name' => $upload['name'],
+                                        'storage_tags' => ['VECTEUR'], // TODO : choisir VECTEUR ou RASTER en fonction du type de upload
+                                    ],
                                 ],
                             ];
 
