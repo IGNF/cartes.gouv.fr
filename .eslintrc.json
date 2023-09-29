@@ -4,6 +4,7 @@
         "es2021": true
     },
     "extends": [
+        "prettier",
         "eslint:recommended",
         "plugin:@typescript-eslint/recommended",
         "plugin:react/recommended",
@@ -21,7 +22,7 @@
     "root": true,
     "plugins": ["@typescript-eslint", "react"],
     "rules": {
-        "indent": ["error", 4, { "SwitchCase": 1 }],
+        // "indent": ["error", 4, { "SwitchCase": 1 }],
         "quotes": ["error", "double"],
         "semi": ["error", "always"],
         "eqeqeq": "warn",

@@ -10,6 +10,7 @@ import useCapabilities from "../../../../hooks/useCapabilities";
 import SampleMap from "./SampleMap";
 import { UseFormReturn } from "react-hook-form";
 import { fr } from "@codegouvfr/react-dsfr";
+import Translator from "../../../../modules/Translator";
 
 import "ol/ol.css";
 import "geoportal-extensions-openlayers/dist/GpPluginOpenLayers.css";
@@ -18,11 +19,12 @@ import "../../../../sass/components/ol.scss";
 
 type RCSampleMapProps = {
     form: UseFormReturn;
-    center?: number[];
-    onChange?: (extent: number[]) => void;
+    center: number[];
+    bottomZoomLevel: number;
+    onChange: (center: number[], extent: number[]) => void;
 };
 
-const RCSampleMap: FC<RCSampleMapProps> = ({ form, center = [2.35, 48.85], onChange }) => {
+const RCSampleMap: FC<RCSampleMapProps> = ({ form, center, bottomZoomLevel, onChange }) => {
     const mapTargetRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<SampleMap>();
 
@@ -30,16 +32,6 @@ const RCSampleMap: FC<RCSampleMapProps> = ({ form, center = [2.35, 48.85], onCha
     const { getValues: getFormValues } = form;
 
     useEffect(() => {
-        const getBottomZoomLevel = () => {
-            const zoomLevels: Record<string, number[]> = getFormValues("table_zoom_levels");
-
-            let level = -1;
-            Object.values(zoomLevels).forEach((levels) => {
-                if (levels[1] > level) level = levels[1];
-            });
-            return level;
-        };
-
         // Creation de la carte
         if (!mapRef.current) {
             // Controles par defaut
@@ -62,7 +54,7 @@ const RCSampleMap: FC<RCSampleMapProps> = ({ form, center = [2.35, 48.85], onCha
             mapRef.current = new SampleMap({
                 view: new View({
                     center: fromLonLat(center),
-                    zoom: getBottomZoomLevel(),
+                    zoom: bottomZoomLevel,
                 }),
                 interactions: [new DragPan(), new MouseWheelZoom({ useAnchor: false })],
                 controls: controls,
@@ -71,24 +63,25 @@ const RCSampleMap: FC<RCSampleMapProps> = ({ form, center = [2.35, 48.85], onCha
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             mapRef.current.on("extentchanged", (e) => {
-                onChange?.(e.extent);
+                onChange?.(e.center, e.extent);
             });
         }
 
         mapRef.current.setTarget(mapTargetRef.current || "");
 
         return () => mapRef.current?.setTarget(undefined);
-    }, [center, getFormValues, onChange]);
+    }, [center, bottomZoomLevel, getFormValues, onChange]);
 
     useEffect(() => {
-        if (capabilities && mapRef.current && mapTargetRef.current) {
+        if (capabilities && mapRef.current) {
             mapRef.current.addBackgroundLayer(capabilities);
         }
     }, [capabilities]);
 
     return (
-        <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
-            <div className={fr.cx("fr-col-12", "fr-col-md-6")}>
+        <div className={fr.cx("fr-grid-row")}>
+            <p className={fr.cx("fr-mb-1w")}>{Translator.trans("service.tms.new.step_sample.sample_explain")}</p>
+            <div className={fr.cx("fr-col-12", "fr-col-md-12")}>
                 <div className={"map-view"} ref={mapTargetRef} />
             </div>
         </div>

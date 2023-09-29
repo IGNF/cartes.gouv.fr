@@ -1,28 +1,42 @@
 import Map from "ol/Map";
 import Point from "ol/geom/Point";
 import { buffer } from "ol/extent";
-import { transformExtent } from "ol/proj";
+import { toLonLat, transformExtent } from "ol/proj";
 import { optionsFromCapabilities } from "ol/source/WMTS";
 import WMTS from "ol/source/WMTS";
 import TileLayer from "ol/layer/Tile";
 import { ChangeExtentEvent } from "./CustomEvents";
-
+import olDefaults from "../../../../data/ol-defaults.json";
 export default class SampleMap extends Map {
     constructor(options) {
         super(options);
 
-        this._bottomLevel = this.getView().getZoom();
+        this._zoomMax = olDefaults.zoom_levels.BOTTOM;
         this._size;
 
         this.on("moveend", () => {
+            const center = toLonLat(this.getView().getCenter());
             const extent = this._getExtent();
-            this.dispatchEvent(new ChangeExtentEvent(extent));
+            this.dispatchEvent(new ChangeExtentEvent(center, extent));
         });
     }
 
+    setBottomLevel(level) {
+        if (!level) return;
+
+        this.getView().setMaxZoom(level);
+        this.getView().setZoom(level);
+        this._initialize();
+    }
+
     addBackgroundLayer(capabilities) {
+        // En strictmode (dev) cette fonction est appelee deux fois
+        if (this.getLayers().getLength()) {
+            return;
+        }
+
         const wmtsOptions = optionsFromCapabilities(capabilities, {
-            layer: "GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2",
+            layer: olDefaults.default_background_layer,
         });
 
         const layer = new TileLayer({
@@ -38,7 +52,7 @@ export default class SampleMap extends Map {
     }
 
     _initialize() {
-        const target = this.getTarget();
+        const target = this.getTargetElement();
 
         const numPixelsX = target.clientWidth;
         const numPixelsY = target.clientHeight;
@@ -76,7 +90,6 @@ export default class SampleMap extends Map {
         // La partie noire opacité 0.3 (surface principale clockwise)
         ctx.moveTo(0, 0);
         ctx.lineTo(ctx.canvas.width, 0);
-        ctx.lineTo(ctx.canvas.width, 0);
         ctx.lineTo(ctx.canvas.width, ctx.canvas.height);
         ctx.lineTo(0, ctx.canvas.height);
 
@@ -91,9 +104,10 @@ export default class SampleMap extends Map {
         ctx.fill();
 
         ctx.lineWidth = 3;
-        ctx.strokeStyle = "rgba(255,255,255,1)";
+        ctx.strokeStyle = "rgba(255, 255, 255, 1)";
         ctx.strokeRect(cx - dxy2, cy - dxy2, dxy, dxy);
 
+        ctx.stroke();
         ctx.restore();
     }
 

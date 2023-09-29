@@ -9,12 +9,13 @@ import TileLayer from "ol/layer/Tile";
 import { fromLonLat } from "ol/proj";
 import WMTS, { optionsFromCapabilities } from "ol/source/WMTS";
 import useCapabilities from "../../hooks/useCapabilities";
-import "./../../sass/components/zoom-range.scss";
 import RangeSlider from "./RangeSlider";
+import olDefaults from "../../data/ol-defaults.json";
+import "./../../sass/components/zoom-range.scss";
 
 type ZoomRangeProps = {
-    min?: number;
-    max?: number;
+    min: number;
+    max: number;
     initialValues?: number[];
     center?: number[];
     onChange?: (values: number[]) => void;
@@ -23,7 +24,8 @@ type ZoomRangeProps = {
 const ZoomRange: FC<ZoomRangeProps> = (props) => {
     const { data: capabilities } = useCapabilities();
 
-    const { min = 0, max = 20, initialValues = [0, 20], center = [2.35, 48.85], onChange = null } = props;
+    const { min, max, initialValues = [olDefaults.zoom_levels.TOP, olDefaults.zoom_levels.BOTTOM], center = olDefaults.center, onChange = null } = props;
+
     const minZoom = Math.max(min, initialValues[0]),
         maxZoom = Math.min(max, initialValues[1]);
 
@@ -79,7 +81,7 @@ const ZoomRange: FC<ZoomRangeProps> = (props) => {
 
         if (capabilities) {
             const wmtsOptions = optionsFromCapabilities(capabilities, {
-                layer: "GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2",
+                layer: olDefaults.default_background_layer,
             });
 
             if (wmtsOptions) {

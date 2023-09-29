@@ -19,7 +19,8 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { fr } from "@codegouvfr/react-dsfr";
 import TippeCanoe from "./tippecanoes/Tippecanoe";
-import RCSampleMap from "./sample/RCSampleMap";
+import Sample from "./sample/Sample";
+import olDefaults from "../../../data/ol-defaults.json";
 
 type TmsServiceNewProps = {
     datastoreId: string;
@@ -91,6 +92,9 @@ const TmsServiceNew: FC<TmsServiceNewProps> = ({ datastoreId, vectorDbId, techni
     const selectedTableNamesList: string[] = watch("selected_tables");
     const [selectedTables, setSelectedTables] = useState<StoredDataRelation[]>([]);
 
+    const bottomZoomLevel = watch("bottom_zoom_level", olDefaults.zoom_levels.BOTTOM);
+    const sample = watch("sample");
+
     useEffect(() => {
         if (selectedTableNamesList && vectorDbQuery.data) {
             const relations = vectorDbQuery.data.type_infos?.relations ?? [];
@@ -111,7 +115,7 @@ const TmsServiceNew: FC<TmsServiceNewProps> = ({ datastoreId, vectorDbId, techni
         } else {
             // TODO Utiliser technicalName ici
             // TODO : onSubmit
-            console.log("// TODO : onSubmit");
+            console.log(technicalName); // POUR EVITER L'ERREUR ESLINT
             console.log("formValues", getFormValues());
             console.log("errors", errors);
         }
@@ -152,7 +156,7 @@ const TmsServiceNew: FC<TmsServiceNewProps> = ({ datastoreId, vectorDbId, techni
                         stateRelatedMessage={errors?.tippecanoe?.message as string}
                         form={form}
                     />
-                    {currentStep === STEPS.SAMPLE && <RCSampleMap form={form} onChange={(v) => console.log(v)} />}
+                    <Sample visible={currentStep === STEPS.SAMPLE} bottomZoomLevel={bottomZoomLevel} form={form} />
                     <ButtonsGroup
                         className={fr.cx("fr-mt-2w")}
                         alignment="between"
@@ -166,7 +170,11 @@ const TmsServiceNew: FC<TmsServiceNewProps> = ({ datastoreId, vectorDbId, techni
                             },
                             {
                                 children:
-                                    currentStep < Object.values(STEPS).length ? Translator.trans("continue") : Translator.trans("service.tms.new.publish"),
+                                    currentStep < Object.values(STEPS).length
+                                        ? Translator.trans("continue")
+                                        : sample?.is_sample === "true"
+                                        ? Translator.trans("service.tms.new.generate_sample")
+                                        : Translator.trans("service.tms.new.generate_pyramid"),
                                 onClick: nextStep,
                             },
                         ]}

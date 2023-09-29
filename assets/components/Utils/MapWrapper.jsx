@@ -7,7 +7,7 @@ import WMTSCapabilities from "ol/format/WMTSCapabilities";
 import TileLayer from "ol/layer/Tile";
 import { fromLonLat } from "ol/proj";
 import WMTS, { optionsFromCapabilities } from "ol/source/WMTS";
-
+import olDefaults from "../../data/ol-defaults.json";
 import "./../../sass/components/zoom-range.scss";
 
 const MapWrapper = (props) => {
@@ -17,7 +17,7 @@ const MapWrapper = (props) => {
     const mapElement = useRef();
 
     useEffect(() => {
-        const center = props.center ?? [2.35, 48.85]; // Paris
+        const center = props.center ?? olDefaults.center; // Paris
 
         // create map
         const initialMap = new Map({
@@ -44,7 +44,7 @@ const MapWrapper = (props) => {
                 const capabilities = format.read(response);
 
                 const wmtsOptions = optionsFromCapabilities(capabilities, {
-                    layer: "GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2",
+                    layer: olDefaults.default_background_layer,
                     matrixSet: "EPSG:3857",
                 });
 

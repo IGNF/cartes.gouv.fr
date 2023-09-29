@@ -31,7 +31,7 @@ class WfsController extends AbstractController
     public function add(
         string $datastoreId, 
         string $storedDataId, 
-        #[MapRequestPayload()] WfsAddDTO $dto): JsonResponse
+        #[MapRequestPayload] WfsAddDTO $dto): JsonResponse
     {
         try {
             $relations = [];

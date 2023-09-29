@@ -10,11 +10,10 @@ import { fromLonLat, transformExtent } from "ol/proj";
 import GetFeatureInfo from "geoportal-extensions-openlayers/src/OpenLayers/Controls/GetFeatureInfo";
 import LayerSwitcher from "geoportal-extensions-openlayers/src/OpenLayers/Controls/LayerSwitcher";
 import SearchEngine from "geoportal-extensions-openlayers/src/OpenLayers/Controls/SearchEngine";
-
 import WFSService from "../../modules/WebServices/WFSService";
 import type { Service, TypeInfosWithBbox } from "../../types/app";
 import useCapabilities from "../../hooks/useCapabilities";
-
+import olDefaults from "../../data/ol-defaults.json";
 import "geoportal-extensions-openlayers/dist/GpPluginOpenLayers.css";
 import "../../sass/components/map-view.scss";
 import "../../sass/components/ol.scss";
@@ -121,7 +120,7 @@ const RMap: FC<RMapProps> = ({ service, projection = "EPSG:3857", center = [2.35
         if (capabilities && mapRef.current) {
             // Ajout de la couche de fond PlanIgnV2
             const wmtsOptions = optionsFromCapabilities(capabilities, {
-                layer: "GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2",
+                layer: olDefaults,
             });
 
             if (wmtsOptions) {

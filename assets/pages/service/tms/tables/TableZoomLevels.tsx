@@ -5,17 +5,13 @@ import { StoredDataRelation } from "../../../../types/app";
 import Translator from "../../../../modules/Translator";
 import Accordion from "@codegouvfr/react-dsfr/Accordion";
 import ZoomRange from "../../../../components/Utils/ZoomRange";
+import olDefaults from "../../../../data/ol-defaults.json";
 
 type TableZoomLevelsProps = {
     visible: boolean;
     form: UseFormReturn;
     selectedTables: StoredDataRelation[];
     onChange?: (values: number[]) => void;
-};
-
-const ZoomLevels = {
-    TOP: 5,
-    BOTTOM: 18,
 };
 
 const TableZoomLevels: FC<TableZoomLevelsProps> = ({ visible, form, selectedTables }) => {
@@ -27,13 +23,22 @@ const TableZoomLevels: FC<TableZoomLevelsProps> = ({ visible, form, selectedTabl
         const prevTableZoomLevels = getFormValues("table_zoom_levels") ?? {};
         const tableZoomLevels = {};
         selectedTables.forEach((table) => {
-            tableZoomLevels[table.name] = prevTableZoomLevels[table.name] ?? [ZoomLevels.TOP, ZoomLevels.BOTTOM];
+            tableZoomLevels[table.name] = prevTableZoomLevels[table.name] ?? [olDefaults.zoom_levels.TOP, olDefaults.zoom_levels.BOTTOM];
         });
         setTableZoomLevels(tableZoomLevels);
     }, [getFormValues, setFormValue, selectedTables]);
 
     useEffect(() => {
+        const getBottomLevel = () => {
+            let level = -1;
+            Object.values(tableZoomLevels).forEach((levels) => {
+                if (levels[1] > level) level = levels[1];
+            });
+            return level === -1 ? olDefaults.zoom_levels.BOTTOM : level;
+        };
+
         setFormValue("table_zoom_levels", tableZoomLevels);
+        setFormValue("bottom_zoom_level", getBottomLevel());
     }, [tableZoomLevels, setFormValue]);
 
     const onZoomChanged = (tableName, values: number[]) => {
@@ -50,8 +55,8 @@ const TableZoomLevels: FC<TableZoomLevelsProps> = ({ visible, form, selectedTabl
             {selectedTables.map((table) => (
                 <Accordion key={table.name} label={table.name} titleAs="h4" defaultExpanded={true}>
                     <ZoomRange
-                        min={ZoomLevels.TOP}
-                        max={ZoomLevels.BOTTOM}
+                        min={olDefaults.zoom_levels.TOP}
+                        max={olDefaults.zoom_levels.BOTTOM}
                         initialValues={tableZoomLevels[table.name]}
                         onChange={(values) => onZoomChanged(table.name, values)}
                     />
