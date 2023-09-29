@@ -95,7 +95,11 @@ const About = () => {
                         </div>
                         <div className={fr.cx("fr-col-sm-12", "fr-col-md-4", "fr-col-lg-4")}>
                             <Card
-                                badges={[<Badge key="bientot">Bientôt</Badge>]}
+                                start={
+                                    <div className={fr.cx("fr-badges-group")}>
+                                        <Badge>Bientôt</Badge>
+                                    </div>
+                                }
                                 desc="Ouverture de la visualisation cartographique sur cartes.gouv.fr"
                                 title="2024"
                                 titleAs="h3"
