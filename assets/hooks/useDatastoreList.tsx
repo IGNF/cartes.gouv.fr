@@ -12,7 +12,7 @@ export const useDatastoreList = () => {
     return useQuery<Datastore[], CartesApiException>({
         queryKey: RQKeys.datastore_list(),
         queryFn: ({ signal }) => api.user.getDatastoresList({ signal }),
-        staleTime: 60000,
+        staleTime: 300000,
         enabled: !!user,
     });
 };
