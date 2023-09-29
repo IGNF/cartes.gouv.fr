@@ -170,7 +170,6 @@ class DatasheetController extends AbstractController
 
             if (isset($datasheet['upload_list'])) {
                 foreach ($datasheet['upload_list'] as $upload) {
-                    $this->entrepotApiService->upload->close($datastoreId, $upload['_id']);
                     $this->entrepotApiService->upload->remove($datastoreId, $upload['_id']);
                 }
             }

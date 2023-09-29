@@ -5,8 +5,8 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
-import { useQuery } from "@tanstack/react-query";
-import { FC, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { FC } from "react";
 import { createPortal } from "react-dom";
 import { symToStr } from "tsafe/symToStr";
 
@@ -17,7 +17,7 @@ import Wait from "../../../components/Utils/Wait";
 import RQKeys from "../../../modules/RQKeys";
 import { type CartesApiException } from "../../../modules/jsonFetch";
 import { routes, useRoute } from "../../../router/router";
-import { type DatasheetDetailed } from "../../../types/app";
+import { Datasheet, type DatasheetDetailed } from "../../../types/app";
 import DatasetListTab from "./DatasetListTab/DatasetListTab";
 import ServicesListTab from "./ServicesListTab";
 
@@ -35,30 +35,27 @@ type DatasheetViewProps = {
 const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) => {
     const route = useRoute();
 
+    const queryClient = useQueryClient();
+
+    const datasheetDeleteMutation = useMutation({
+        mutationFn: () => api.datasheet.remove(datastoreId, datasheetName),
+        onSuccess() {
+            queryClient.setQueryData<Datasheet[]>(RQKeys.datastore_datasheet_list(datastoreId), (datasheetList = []) => {
+                return datasheetList.filter((datasheet) => datasheet.name !== datasheetName);
+            });
+
+            routes.datasheet_list({ datastoreId }).push();
+        },
+    });
+
     const datasheetQuery = useQuery<DatasheetDetailed, CartesApiException>({
         queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName),
         queryFn: ({ signal }) => api.datasheet.get(datastoreId, datasheetName, { signal }),
         staleTime: 20000,
         refetchInterval: 20000,
         retry: false,
+        enabled: !datasheetDeleteMutation.isLoading,
     });
-
-    const [isDeleting, setIsDeleting] = useState<boolean>(false);
-
-    const handleDeleteData = () => {
-        setIsDeleting(true);
-        api.datasheet
-            .remove(datastoreId, datasheetName)
-            .then(() => {
-                routes.datasheet_list({ datastoreId }).push();
-            })
-            .catch((error) => {
-                console.error(error);
-            })
-            .finally(() => {
-                setIsDeleting(false);
-            });
-    };
 
     return (
         <DatastoreLayout datastoreId={datastoreId} documentTitle={`Données ${datasheetName}`}>
@@ -134,7 +131,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                 </>
             )}
 
-            {isDeleting && (
+            {datasheetDeleteMutation.isLoading && (
                 <Wait>
                     <div className={fr.cx("fr-container")}>
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
@@ -157,7 +154,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                             },
                             {
                                 children: "Oui, supprimer",
-                                onClick: handleDeleteData,
+                                onClick: () => datasheetDeleteMutation.mutate(),
                                 doClosesModal: true,
                                 priority: "primary",
                             },
