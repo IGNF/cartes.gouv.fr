@@ -4,7 +4,6 @@ import { format as datefnsFormat } from "date-fns";
 import { XMLParser } from "fast-xml-parser";
 import { FC, useEffect } from "react";
 import { Controller, UseFormReturn } from "react-hook-form";
-import { v4 as uuidv4 } from "uuid";
 
 import AutocompleteSelect from "../../../../components/Input/AutocompleteSelect";
 import MarkdownEditor from "../../../../components/Input/MarkdownEditor";
@@ -94,7 +93,6 @@ const Description: FC<DescriptionProps> = ({ vectorDb, visible, form }) => {
                 stateRelatedMessage={errors?.identifier?.message?.toString()}
                 nativeInputProps={{
                     ...register("identifier"),
-                    defaultValue: uuidv4(),
                 }}
             />
 

@@ -33,6 +33,7 @@ const UploadStyleFile: FC<UploadStyleFileProps> = ({ visible, selectedTables, fo
                     stateRelatedMessage={errors?.style_files?.[table.name]?.message}
                     nativeInputProps={{
                         ...register(`style_files.${table.name}`),
+                        accept: ".sld",
                     }}
                 />
             ))}

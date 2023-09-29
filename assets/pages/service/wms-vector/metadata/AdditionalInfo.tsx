@@ -76,8 +76,6 @@ const AdditionalInfo: FC<AdditionalInfoProps> = ({ vectorDb, datastoreId, visibl
         setFormValue("encoding", fileType);
     }, [fileType, setFormValue]);
 
-    console.log("fileType", fileType);
-
     return (
         <div className={fr.cx(!visible && "fr-hidden")}>
             <h3>{Translator.trans("service.wms_vector.new.step_additional_information.metadata_information_title")}</h3>

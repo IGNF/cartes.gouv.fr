@@ -64,6 +64,7 @@ const UploadMetadata: FC<UploadMetadataProps> = ({ visible, form }) => {
                     hint="Formats de fichiers autorisés : .xml"
                     nativeInputProps={{
                         ...register("metadata_file_content", { deps: ["is_upload_file"] }),
+                        accept: ".xml",
                     }}
                     state={errors?.metadata_file_content?.message ? "error" : "default"}
                     stateRelatedMessage={errors?.metadata_file_content?.message?.toString()}
