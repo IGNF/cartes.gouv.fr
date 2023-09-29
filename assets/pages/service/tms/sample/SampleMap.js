@@ -21,14 +21,6 @@ export default class SampleMap extends Map {
         });
     }
 
-    setBottomLevel(level) {
-        if (!level) return;
-
-        this.getView().setMaxZoom(level);
-        this.getView().setZoom(level);
-        this._initialize();
-    }
-
     addBackgroundLayer(capabilities) {
         // En strictmode (dev) cette fonction est appelee deux fois
         if (this.getLayers().getLength()) {

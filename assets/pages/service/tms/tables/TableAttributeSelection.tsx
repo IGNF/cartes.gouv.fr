@@ -44,10 +44,9 @@ const TableAttributeSelection: FC<TableAttributeSelectionProps> = ({ visible, fo
             }
 
             prevState[tableName] = tableAttr;
-
             return { ...prevState };
         });
-        trigger();
+        trigger(`table_attributes.${tableName}`);
     };
 
     useEffect(() => {
