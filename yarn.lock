@@ -1034,7 +1034,7 @@
     "@babel/helper-validator-identifier" "^7.22.19"
     to-fast-properties "^2.0.0"
 
-"@codegouvfr/react-dsfr@^0.77.0":
+"@codegouvfr/react-dsfr@^0.77.1":
   version "0.77.1"
   resolved "https://registry.yarnpkg.com/@codegouvfr/react-dsfr/-/react-dsfr-0.77.1.tgz#3440f35decd1c32a4076a57529c3a77439e2f67c"
   integrity sha512-1CZifsQgnjOs+mVDbnOYo57D2Vx+uBLM/Wdr1n5I9/LebGQpDlvD0Jm4iknLjCW0UnYlibMcHwcLRBlyxxKNDA==
