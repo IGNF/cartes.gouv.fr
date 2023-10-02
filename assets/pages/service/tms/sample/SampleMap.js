@@ -1,10 +1,12 @@
 import Map from "ol/Map";
 import Point from "ol/geom/Point";
+import { fromExtent } from "ol/geom/Polygon";
 import { buffer } from "ol/extent";
 import { toLonLat, transformExtent } from "ol/proj";
 import { optionsFromCapabilities } from "ol/source/WMTS";
 import WMTS from "ol/source/WMTS";
 import TileLayer from "ol/layer/Tile";
+import WKT from "ol/format/WKT";
 import { ChangeExtentEvent } from "./CustomEvents";
 import olDefaults from "../../../../data/ol-defaults.json";
 export default class SampleMap extends Map {
@@ -16,8 +18,8 @@ export default class SampleMap extends Map {
 
         this.on("moveend", () => {
             const center = toLonLat(this.getView().getCenter());
-            const extent = this._getExtent();
-            this.dispatchEvent(new ChangeExtentEvent(center, extent));
+            const area = this._getArea();
+            this.dispatchEvent(new ChangeExtentEvent(center, area));
         });
     }
 
@@ -104,14 +106,18 @@ export default class SampleMap extends Map {
     }
 
     /**
-     * Retourne l'extent de l'echantillon en lon,lat
+     * Retourne la surface de l'echantillon en WKT (lon, lat)
      * @returns
      */
-    _getExtent() {
+    _getArea() {
         let point = new Point(this.getView().getCenter());
 
         let extent = point.getExtent();
         extent = buffer(extent, this._size / 2);
-        return transformExtent(extent, "EPSG:3857", "EPSG:4326");
+        extent = transformExtent(extent, "EPSG:3857", "EPSG:4326");
+
+        const polygon = fromExtent(extent);
+        const wkt = new WKT();
+        return wkt.writeGeometry(polygon, { dataProjection: "EPSG:4326", decimals: 5 });
     }
 }

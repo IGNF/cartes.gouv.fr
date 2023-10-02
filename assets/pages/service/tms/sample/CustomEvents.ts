@@ -1,14 +1,14 @@
 import BaseEvent from "ol/events/Event";
-import { type Extent } from "ol/extent";
 
 class ChangeExtentEvent extends BaseEvent {
     center: number[];
-    extent: Extent;
+    area: string;
 
-    constructor(center: number[], extent: Extent) {
+    constructor(center: number[], area: string) {
         super("extentchanged");
+
         this.center = center;
-        this.extent = extent;
+        this.area = area;
     }
 }
 

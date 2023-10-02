@@ -21,7 +21,7 @@ type RCSampleMapProps = {
     form: UseFormReturn;
     center: number[];
     bottomZoomLevel: number;
-    onChange: (center: number[], extent: number[]) => void;
+    onChange: (center: number[], area: string) => void;
 };
 
 const RCSampleMap: FC<RCSampleMapProps> = ({ form, center, bottomZoomLevel, onChange }) => {
@@ -63,7 +63,7 @@ const RCSampleMap: FC<RCSampleMapProps> = ({ form, center, bottomZoomLevel, onCh
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             mapRef.current.on("extentchanged", (e) => {
-                onChange?.(e.center, e.extent);
+                onChange?.(e.center, e.area);
             });
         }
 

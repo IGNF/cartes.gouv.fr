@@ -4,18 +4,13 @@ import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import Translator from "../../../../modules/Translator";
 import { fr } from "@codegouvfr/react-dsfr";
 import RCSampleMap from "./RCSampleMap";
+import olDefaults from "../../../../data/ol-defaults.json";
 
 type booleanValue = "true" | "false";
-type SampleType = {
+export type SampleType = {
     is_sample: booleanValue;
     center: number[];
-    extent: number[];
-};
-
-const defaultSample: SampleType = {
-    is_sample: "false",
-    center: [2.35, 48.85],
-    extent: [NaN, NaN, NaN, NaN],
+    area: string | undefined;
 };
 
 type SampleProps = {
@@ -27,7 +22,11 @@ type SampleProps = {
 const Sample: FC<SampleProps> = ({ visible, bottomZoomLevel, form }) => {
     const { setValue: setFormValue, getValues: getFormValues } = form;
 
-    const [sample, setSample] = useState<SampleType>(defaultSample);
+    const [sample, setSample] = useState<SampleType>({
+        is_sample: "false",
+        center: olDefaults.center,
+        area: undefined,
+    });
 
     useEffect(() => {
         const sample = getFormValues("sample");
@@ -70,8 +69,8 @@ const Sample: FC<SampleProps> = ({ visible, bottomZoomLevel, form }) => {
                     form={form}
                     center={sample.center}
                     bottomZoomLevel={bottomZoomLevel}
-                    onChange={(center, extent) => {
-                        setSample({ ...sample, center: center, extent: extent });
+                    onChange={(center, area) => {
+                        setSample({ ...sample, center: center, area: area });
                     }}
                 />
             )}

@@ -21,7 +21,11 @@ const UploadMetadataForm: FC<UploadMetadataFormProps> = ({ visible, onPrevious, 
             <Input
                 label={Translator.trans("service.wfs.new.metadata_upload_form.import")}
                 hintText={Translator.trans("service.wfs.new.metadata_upload_form.hint_import")}
-                nativeInputProps={{ type: "file" /*, onChange: handleFileChanged*/ }}
+                nativeInputProps={{
+                    type: "file",
+                    accept: ".xml",
+                    /*, onChange: handleFileChanged*/
+                }}
             />
             <ButtonsGroup
                 className={fr.cx("fr-my-2v")}

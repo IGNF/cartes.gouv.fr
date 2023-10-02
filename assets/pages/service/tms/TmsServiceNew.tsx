@@ -19,7 +19,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { fr } from "@codegouvfr/react-dsfr";
 import TippeCanoe from "./tippecanoes/Tippecanoe";
-import Sample from "./sample/Sample";
+import Sample, { type SampleType } from "./sample/Sample";
 import olDefaults from "../../../data/ol-defaults.json";
 
 type TmsServiceNewProps = {
@@ -93,7 +93,7 @@ const TmsServiceNew: FC<TmsServiceNewProps> = ({ datastoreId, vectorDbId, techni
     const [selectedTables, setSelectedTables] = useState<StoredDataRelation[]>([]);
 
     const bottomZoomLevel = watch("bottom_zoom_level", olDefaults.zoom_levels.BOTTOM);
-    const sample = watch("sample");
+    const sample: SampleType = watch("sample");
 
     useEffect(() => {
         if (selectedTableNamesList && vectorDbQuery.data) {
@@ -112,13 +112,14 @@ const TmsServiceNew: FC<TmsServiceNewProps> = ({ datastoreId, vectorDbId, techni
 
         if (currentStep < Object.values(STEPS).length) {
             setCurrentStep((currentStep) => currentStep + 1);
-        } else {
-            // TODO Utiliser technicalName ici
-            // TODO : onSubmit
-            console.log(technicalName); // POUR EVITER L'ERREUR ESLINT
-            console.log("formValues", getFormValues());
-            console.log("errors", errors);
+            return;
         }
+
+        // TODO Utiliser technicalName ici
+        // TODO : onSubmit
+        console.log(technicalName); // POUR EVITER L'ERREUR ESLINT
+        console.log("formValues", getFormValues());
+        console.log("errors", errors);
     };
 
     return (

@@ -4,7 +4,7 @@ import { type Options } from "ol/source/WMTS";
 
 const useCapabilities = (key = "cartes") => {
     return useQuery<Options>({
-        queryKey: ["gpp_get_cap"],
+        queryKey: ["gpp_get_cap", key],
         queryFn: async () => {
             const response = await fetch(`https://wxs.ign.fr/${key}/geoportail/wmts?SERVICE=WMTS&VERSION=1.0.0&REQUEST=GetCapabilities`);
             if (!response.ok) {
