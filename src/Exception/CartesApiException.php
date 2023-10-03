@@ -2,6 +2,7 @@
 
 namespace App\Exception;
 
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
@@ -15,11 +16,10 @@ class CartesApiException extends HttpException
     /**
      * @param array<mixed> $details
      */
-    public function __construct(string $message, int $statusCode = 400, array $details = [], \Throwable $previous = null)
+    public function __construct(string $message, int $statusCode = Response::HTTP_BAD_REQUEST, array $details = [], \Throwable $previous = null)
     {
         $this->details = $details;
-        $this->code = $this->$statusCode = $statusCode;
-        parent::__construct($statusCode, $message, $previous);
+        parent::__construct($statusCode, $message, $previous, [], $statusCode);
     }
 
     public function getDetails(): array
