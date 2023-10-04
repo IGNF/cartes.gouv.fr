@@ -3,15 +3,17 @@ import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import { FC, useEffect, useState } from "react";
 import { type UseFormReturn } from "react-hook-form";
 
-import Translator from "../../../modules/Translator";
-import { type VectorDb } from "../../../types/app";
+import Translator from "../../modules/Translator";
+import { type VectorDb } from "../../types/app";
 
 type TablesSelectionProps = {
+    filterGeometric?: boolean;
     vectorDb: VectorDb;
     visible: boolean;
     form: UseFormReturn;
 };
-const TableSelection: FC<TablesSelectionProps> = ({ vectorDb, visible, form }) => {
+
+const TableSelection: FC<TablesSelectionProps> = ({ filterGeometric = false, vectorDb, visible, form }) => {
     const {
         formState: { errors },
         setValue: setFormValue,
@@ -19,7 +21,17 @@ const TableSelection: FC<TablesSelectionProps> = ({ vectorDb, visible, form }) =
     } = form;
 
     const relations = vectorDb.type_infos?.relations || [];
-    const tables = relations.filter((rel) => rel?.type === "TABLE");
+    const tables = relations.filter((relation) => {
+        const isGeometric = (attributes) => {
+            for (const type of Object.values(attributes)) {
+                if (/^geometry\(/.test(type as string)) return true;
+            }
+        };
+
+        if (relation.type !== "TABLE") return false;
+        if (!filterGeometric) return true;
+        return "attributes" in relation && isGeometric(relation.attributes);
+    });
 
     const [selectedTables, setSelectedTables] = useState<string[]>([]);
 

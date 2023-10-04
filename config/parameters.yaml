@@ -20,3 +20,4 @@ parameters:
     api_entrepot:
         processings:
             int_vect_files_db: "%env(resolve:API_ENTREPOT_PROC_INT_VECT_FILES_DB)%"
+            create_vect_pyr: "%env(resolve:API_PLAGE_PROC_CREATE_VECT_PYR)%"

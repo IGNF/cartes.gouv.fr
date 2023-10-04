@@ -8,3 +8,17 @@ wfs_add:
     public_name_error: "L'intitulé (nom public) est obligatoire"
     description_error: "Un résumé est obligatoire"
     share_with_error: "La restriction d’accès doit être 'all_public' ou 'your_community"
+
+pyramid_add:
+    vector_id_error: "vectordbId est obligatoire"
+    technical_name_error: "Le nom technique est obligatoire"
+    sample:
+        is_sample_error: "is_sample doit être 'true' ou 'false'"
+        area_error: "area est obligatoire"
+        area_wkt: "area doit être une chaine au format WKT"
+    tippecanoe_error: "l'option de généralisation (tippecanoe) est obligatoire"
+    composition:
+        table_error: "Le nom de la table est obligatoire"
+        attributes_error: "Il doit y avoir au moins un attribut"
+        bottom_level_error: "bottom_level doit être en {min} et {max}"
+        top_level_error: "top_level est doit être en {min} et {max}"

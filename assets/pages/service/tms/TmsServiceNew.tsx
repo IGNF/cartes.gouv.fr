@@ -11,7 +11,7 @@ import LoadingText from "../../../components/Utils/LoadingText";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { routes } from "../../../router/router";
-import TableSelection from "../wms-vector/TableSelection";
+import TableSelection from "../TableSelection";
 import TableAttributeSelection from "./tables/TableAttributeSelection";
 import TableZoomLevels from "./tables/TableZoomLevels";
 import { useForm } from "react-hook-form";
@@ -20,7 +20,10 @@ import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { fr } from "@codegouvfr/react-dsfr";
 import TippeCanoe from "./tippecanoes/Tippecanoe";
 import Sample, { type SampleType } from "./sample/Sample";
+import formatForm from "./format-form";
 import olDefaults from "../../../data/ol-defaults.json";
+import { CartesApiException } from "../../../modules/jsonFetch";
+import Wait from "../../../components/Utils/Wait";
 
 type TmsServiceNewProps = {
     datastoreId: string;
@@ -95,6 +98,9 @@ const TmsServiceNew: FC<TmsServiceNewProps> = ({ datastoreId, vectorDbId, techni
     const bottomZoomLevel = watch("bottom_zoom_level", olDefaults.zoom_levels.BOTTOM);
     const sample: SampleType = watch("sample");
 
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+    const [validationError, setValidationError] = useState<CartesApiException>();
+
     useEffect(() => {
         if (selectedTableNamesList && vectorDbQuery.data) {
             const relations = vectorDbQuery.data.type_infos?.relations ?? [];
@@ -115,15 +121,29 @@ const TmsServiceNew: FC<TmsServiceNewProps> = ({ datastoreId, vectorDbId, techni
             return;
         }
 
-        // TODO Utiliser technicalName ici
-        // TODO : onSubmit
-        console.log(technicalName); // POUR EVITER L'ERREUR ESLINT
-        console.log("formValues", getFormValues());
-        console.log("errors", errors);
+        const values = getFormValues();
+        const formatted = formatForm(technicalName, values);
+        formatted["vectorDbId"] = vectorDbId;
+
+        api.pyramid
+            .add(datastoreId, formatted)
+            .then(() => {
+                if (vectorDbQuery.data?.tags?.datasheet_name) {
+                    routes.datastore_datasheet_view({ datastoreId, datasheetName: vectorDbQuery.data?.tags.datasheet_name, activeTab: "services" }).push();
+                } else {
+                    routes.datasheet_list({ datastoreId }).push();
+                }
+            })
+            .catch((error) => {
+                setValidationError(error as CartesApiException);
+            })
+            .finally(() => {
+                setIsSubmitting(false);
+            });
     };
 
     return (
-        <DatastoreLayout datastoreId={datastoreId} documentTitle="Créer et publier un service TMS">
+        <DatastoreLayout datastoreId={datastoreId} documentTitle={Translator.trans("service.tms.new.title")}>
             <h1>{Translator.trans("service.tms.new.title")}</h1>
 
             {vectorDbQuery.isLoading ? (
@@ -143,7 +163,16 @@ const TmsServiceNew: FC<TmsServiceNewProps> = ({ datastoreId, vectorDbId, techni
                         nextTitle={currentStep < STEPS.SAMPLE && Translator.trans(`service.tms.new.step${currentStep + 1}`)}
                         title={Translator.trans(`service.tms.new.step${currentStep}`)}
                     />
-                    <TableSelection visible={currentStep === STEPS.TABLES_SELECTION} vectorDb={vectorDbQuery.data} form={form} />
+                    {validationError && (
+                        <Alert
+                            className="fr-preline"
+                            closable
+                            description={validationError.message}
+                            severity="error"
+                            title={Translator.trans("commons.error")}
+                        />
+                    )}
+                    <TableSelection filterGeometric={true} visible={currentStep === STEPS.TABLES_SELECTION} vectorDb={vectorDbQuery.data} form={form} />
                     <TableAttributeSelection visible={currentStep === STEPS.ATTRIBUTES_SELECTION} form={form} selectedTables={selectedTables} />
                     <TableZoomLevels
                         visible={currentStep === STEPS.ZOOM_LEVELS}
@@ -182,6 +211,20 @@ const TmsServiceNew: FC<TmsServiceNewProps> = ({ datastoreId, vectorDbId, techni
                         inlineLayoutWhen="always"
                     />
                 </>
+            )}
+            {isSubmitting && (
+                <Wait>
+                    <div className={fr.cx("fr-container")}>
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
+                            <div className={fr.cx("fr-col-2")}>
+                                <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg") + " icons-spin"} />
+                            </div>
+                            <div className={fr.cx("fr-col-10")}>
+                                <h6 className={fr.cx("fr-h6", "fr-m-0")}>{"Demande de création de la pyramide de tuiles en cours ..."}</h6>
+                            </div>
+                        </div>
+                    </div>
+                </Wait>
             )}
         </DatastoreLayout>
     );

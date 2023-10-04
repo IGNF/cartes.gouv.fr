@@ -19,7 +19,7 @@ import type { StoredDataRelation, VectorDb } from "../../../types/app";
 import { regex } from "../../../utils";
 import validations from "../../../validations";
 import AccessRestrictions from "./AccessRestrictions";
-import TableSelection from "./TableSelection";
+import TableSelection from "../TableSelection";
 import UploadStyleFile from "./UploadStyleFile";
 import AdditionalInfo from "./metadata/AdditionalInfo";
 import Description from "./metadata/Description";

@@ -126,12 +126,9 @@ const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
             setIsSubmitting(true);
 
             const filtered = filter(res);
-            console.log(filtered);
-
             api.wfs
                 .add(datastoreId, vectorDbId, filtered)
-                .then((response) => {
-                    console.log(response);
+                .then(() => {
                     if (vectorDbQuery.data?.tags?.datasheet_name) {
                         routes.datastore_datasheet_view({ datastoreId, datasheetName: vectorDbQuery.data?.tags.datasheet_name, activeTab: "services" }).push();
                     } else {
