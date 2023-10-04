@@ -19,7 +19,7 @@ import { type CartesApiException } from "../../../modules/jsonFetch";
 import { routes, useRoute } from "../../../router/router";
 import { Datasheet, type DatasheetDetailed } from "../../../types/app";
 import DatasetListTab from "./DatasetListTab/DatasetListTab";
-import ServicesListTab from "./ServicesListTab";
+import ServicesListTab from "./ServiceListTab/ServicesListTab";
 
 import "../../../sass/components/spinner.scss";
 

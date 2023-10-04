@@ -14,6 +14,16 @@ const getOfferings = (datastoreId: string) => {
     return jsonFetch<OfferingListResponseDto[]>(url);
 };
 
-const service = { get, getOfferings };
+/**
+ * Demande la suppression de l'offering et puis la configuration
+ */
+const unpublish = (datastoreId: string, offeringId: string) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_service_unpublish", { datastoreId, offeringId });
+    return jsonFetch(url, {
+        method: "DELETE",
+    });
+};
+
+const service = { get, getOfferings, unpublish };
 
 export default service;
