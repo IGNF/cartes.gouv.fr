@@ -11,7 +11,6 @@ import { routes } from "../../router/router";
 
 const DashboardPro = () => {
     const datastoreListQuery = useDatastoreList();
-    const datastoreId = datastoreListQuery?.data?.[0]._id;
     const navItems = datastoreNavItems();
     const { user } = useUser();
 
@@ -26,11 +25,7 @@ const DashboardPro = () => {
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
                         {datastoreListQuery.data?.map((datastore) => (
                             <div key={datastore._id} className={fr.cx("fr-col-12", "fr-col-sm-6", "fr-col-md-4", "fr-col-lg-3")}>
-                                <Tile
-                                    linkProps={datastoreId ? routes.datasheet_list({ datastoreId: datastoreId }).link : { href: "#" }}
-                                    grey={true}
-                                    title={datastore.name}
-                                />
+                                <Tile linkProps={routes.datasheet_list({ datastoreId: datastore._id }).link} grey={true} title={datastore.name} />
                             </div>
                         ))}
                         <div className={fr.cx("fr-col-12", "fr-col-sm-6", "fr-col-md-4", "fr-col-lg-3")}>

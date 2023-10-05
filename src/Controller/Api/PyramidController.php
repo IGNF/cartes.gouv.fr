@@ -109,7 +109,7 @@ class PyramidController extends AbstractController
         options: ['expose' => true],
         condition: 'request.isXmlHttpRequest()')
     ]
-    public function publish(string $datastoreId, string $pyramidId): JsonResponse
+    public function publish(/*string $datastoreId, string $pyramidId*/): JsonResponse
     {
         // TODO Suppression de l'Upload ?
 
