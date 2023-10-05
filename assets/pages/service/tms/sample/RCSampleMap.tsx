@@ -80,7 +80,7 @@ const RCSampleMap: FC<RCSampleMapProps> = ({ form, center, bottomZoomLevel, onCh
 
     return (
         <div className={fr.cx("fr-grid-row")}>
-            <p className={fr.cx("fr-mb-1w")}>{Translator.trans("service.tms.new.step_sample.sample_explain")}</p>
+            <p className={fr.cx("fr-mb-1w")}>{Translator.trans("pyramid_vector.new.step_sample.sample_explain")}</p>
             <div className={fr.cx("fr-col-12", "fr-col-md-12")}>
                 <div className={"map-view"} ref={mapTargetRef} />
             </div>

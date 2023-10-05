@@ -50,8 +50,8 @@ const TableZoomLevels: FC<TableZoomLevelsProps> = ({ visible, form, selectedTabl
 
     return (
         <div className={fr.cx("fr-my-2v", !visible && "fr-hidden")}>
-            <h3>{Translator.trans("service.tms.new.step_zoom_levels.title")}</h3>
-            <p>{Translator.trans("service.tms.new.step_zoom_levels.explain")}</p>
+            <h3>{Translator.trans("pyramid_vector.new.step_zoom_levels.title")}</h3>
+            <p>{Translator.trans("pyramid_vector.new.step_zoom_levels.explain")}</p>
             {selectedTables.map((table) => (
                 <Accordion key={table.name} label={table.name} titleAs="h4" defaultExpanded={true}>
                     <ZoomRange

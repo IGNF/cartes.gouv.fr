@@ -36,7 +36,7 @@ const Confirm = lazy(() => import("../pages/contact/datastore/Confirmation"));
 
 const WfsServiceNew = lazy(() => import("../pages/service/wfs/WfsServiceNew"));
 const WmsVectorServiceNew = lazy(() => import("../pages/service/wms-vector/WmsVectorServiceNew"));
-const TmsServiceNew = lazy(() => import("../pages/service/tms/TmsServiceNew"));
+const PyramidVectorNew = lazy(() => import("../pages/service/tms/PyramidVectorNew"));
 
 const ServiceView = lazy(() => import("../pages/service/view/ServiceView"));
 
@@ -127,8 +127,10 @@ function RouterRenderer() {
         case "datastore_wms_vector_service_new":
             content = <WmsVectorServiceNew datastoreId={route.params.datastoreId} vectorDbId={route.params.vectorDbId} />;
             break;
-        case "datastore_tms_vector_service_new":
-            content = <TmsServiceNew datastoreId={route.params.datastoreId} vectorDbId={route.params.vectorDbId} technicalName={route.params.technicalName} />;
+        case "datastore_pyramid_vector_new":
+            content = (
+                <PyramidVectorNew datastoreId={route.params.datastoreId} vectorDbId={route.params.vectorDbId} technicalName={route.params.technicalName} />
+            );
             break;
         case "datastore_service_view":
             content = <ServiceView datastoreId={route.params.datastoreId} offeringId={route.params.offeringId} datasheetName={route.params.datasheetName} />;

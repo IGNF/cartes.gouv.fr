@@ -34,6 +34,7 @@ export type Datasheet = {
 
 export type DatasheetDetailed = Datasheet & {
     vector_db_list: VectorDb[] | undefined;
+    pyramid_list: Pyramid[] | undefined;
     upload_list: Upload[] | undefined;
     service_list: Service[] | undefined;
 };
@@ -53,6 +54,19 @@ export type VectorDb = StoredData & {
         proc_int_id: string;
         upload_id: string;
         datasheet_name: string;
+    };
+};
+
+/** stored_data (donnée stockée) du type ROK4-PYRAMID-VECTOR */
+export type Pyramid = StoredData & {
+    type: StoredDataPrivateDetailResponseDtoTypeEnum.ROK4PYRAMIDVECTOR;
+    tags: {
+        datasheet_name: string;
+        upload_id: string;
+        vectordb_id: string;
+        proc_int_id: string;
+        proc_pyr_creat_id: string;
+        is_sample?: "true" | "false";
     };
 };
 

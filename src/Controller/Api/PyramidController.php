@@ -90,12 +90,9 @@ class PyramidController extends AbstractController
                 'proc_int_id' => $vectordb['tags']['proc_int_id'],
                 'vectordb_id' => $dto->vectorDbId,
                 'proc_pyr_creat_id' => $processingExecution['_id'],
+                'is_sample' => is_null($dto->area) ? "false" : "true"
             ];
-
-            if (! is_null($dto->area)) {
-                $pyramidTags['is_sample'] = true;
-            }
-
+        
             $this->entrepotApiService->storedData->addTags($datastoreId, $pyramidId, $pyramidTags);
             $this->entrepotApiService->processing->launchExecution($datastoreId, $processingExecution['_id']);
 
@@ -105,6 +102,21 @@ class PyramidController extends AbstractController
         } catch (\Exception $ex) {
             return $this->json(['message' => $ex->getMessage()], $ex->getCode());
         }
+    }
+
+    #[
+        Route('/publish/{pyramidId}', name: 'publish', methods: ['POST'], 
+        options: ['expose' => true],
+        condition: 'request.isXmlHttpRequest()')
+    ]
+    public function publish(string $datastoreId, string $pyramidId): JsonResponse
+    {
+        // TODO Suppression de l'Upload ?
+
+        // TODO Suppression de la base de donnees
+
+        
+        return new JsonResponse();
     }
 
     /**

@@ -298,31 +298,31 @@ service:
                     all_public: Tout public
                     your_community: Votre communauté d'appartenance
                     communities_or_users: Communautés ou utilisateurs choisis
-    tms:
-        new:
-            title: "Générer une pyramide de tuiles vectorielles"
-            loading_stored_data: "Chargement de la donnée stockée..."
-            step1: "Tables"
-            step2: "Attributs"
-            step3: "Niveaux de zoom"
-            step4: "Option de généralisation"
-            step5: "Echantillon"
-            step_tables:
-                title: "Sélectionnez les tables nécessaires au service"
-                mandatory_error: "Veuillez choisir au moins une table"
-            step_attributes:
-                mandatory_error: "Veuillez choisir au moins un attribut pour chaque table"
-            step_zoom_levels:
-                title: "Choisissez les niveaux de zoom minimum et maximum des tables sélectionnées"
-                explain: "Les niveaux de zoom de la pyramide de tuiles vectorielles sont prédéfinis. Choisissez les bornes minimum et maximum de votre pyramide de tuiles en vous aidant des deux cartes. Tous les niveaux intermédiaires seront générés."
-            step_tippecanoe:
-                title: "Choisissez une option de généralisation"
-                mandatory_error: "l'option de généralisation est obligatoire"
-            step_sample:
-                title: "Définition d'un échantillon (Optionnel)"
-                doubts: "Des doutes sur votre configuration ?"
-                explain: "En choisissant de générer un échantillon, vous pourrez visualiser votre pyramide de tuiles vectorielles sur une zone restreinte et ainsi confirmer votre paramétrage ou le modifier s'il ne vous convient pas. Vous obtiendrez ainsi un résultat plus rapide que si vous générez les tuiles vectorielles sur l'intégralité de vos données."
-                define_sample: "Définir un échantillon"
-                sample_explain: "Déplacez la carte ou utilisez l'outil de recherche pour choisir l'emplacement de votre échantillon. Choisissez un endroit où vous êtes certain de trouver des données. La taille de l'échantillon est limité à 10x10 tuiles vectorielles au niveau de zoom maximum que vous avez défini."
-            generate_pyramid: "Générer la pyramide complète"
-            generate_sample: "Générer l'échantillon"
+pyramid_vector:
+    new:
+        title: "Générer une pyramide de tuiles vectorielles"
+        loading_stored_data: "Chargement de la donnée stockée..."
+        step1: "Tables"
+        step2: "Attributs"
+        step3: "Niveaux de zoom"
+        step4: "Option de généralisation"
+        step5: "Echantillon"
+        step_tables:
+            title: "Sélectionnez les tables nécessaires au service"
+            mandatory_error: "Veuillez choisir au moins une table"
+        step_attributes:
+            mandatory_error: "Veuillez choisir au moins un attribut pour chaque table"
+        step_zoom_levels:
+            title: "Choisissez les niveaux de zoom minimum et maximum des tables sélectionnées"
+            explain: "Les niveaux de zoom de la pyramide de tuiles vectorielles sont prédéfinis. Choisissez les bornes minimum et maximum de votre pyramide de tuiles en vous aidant des deux cartes. Tous les niveaux intermédiaires seront générés."
+        step_tippecanoe:
+            title: "Choisissez une option de généralisation"
+            mandatory_error: "l'option de généralisation est obligatoire"
+        step_sample:
+            title: "Définition d'un échantillon (Optionnel)"
+            doubts: "Des doutes sur votre configuration ?"
+            explain: "En choisissant de générer un échantillon, vous pourrez visualiser votre pyramide de tuiles vectorielles sur une zone restreinte et ainsi confirmer votre paramétrage ou le modifier s'il ne vous convient pas. Vous obtiendrez ainsi un résultat plus rapide que si vous générez les tuiles vectorielles sur l'intégralité de vos données."
+            define_sample: "Définir un échantillon"
+            sample_explain: "Déplacez la carte ou utilisez l'outil de recherche pour choisir l'emplacement de votre échantillon. Choisissez un endroit où vous êtes certain de trouver des données. La taille de l'échantillon est limité à 10x10 tuiles vectorielles au niveau de zoom maximum que vous avez défini."
+        generate_pyramid: "Générer la pyramide complète"
+        generate_sample: "Générer l'échantillon"

@@ -22,7 +22,7 @@ const TippeCanoe: FC<TippeCanoeProps> = ({ visible, form, state, stateRelatedMes
         <div className={fr.cx("fr-my-2v", "fr-grid-row", !visible && "fr-hidden")}>
             <div className={fr.cx("fr-col-12", "fr-col-md-6")}>
                 <RadioButtons
-                    legend={Translator.trans("service.tms.new.step_tippecanoe.title")}
+                    legend={Translator.trans("pyramid_vector.new.step_tippecanoe.title")}
                     options={Object.values(tippecanoes).map((tpc) => ({
                         label: <RichLabel label={tpc.label} image={`${appRoot}/${tpc.image}`} />,
                         hintText: tpc.explain,

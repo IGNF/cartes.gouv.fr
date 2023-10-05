@@ -4,6 +4,7 @@ import { FC } from "react";
 
 import { type DatasheetDetailed } from "../../../../types/app";
 import VectorDbList from "./VectorDbList";
+import PyramidList from "./PyramidList";
 
 type DataListTabProps = {
     datastoreId: string;
@@ -20,6 +21,11 @@ const DatasetListTab: FC<DataListTabProps> = ({ datastoreId, datasheet }) => {
             <div className={fr.cx("fr-grid-row", "fr-grid-row--center", "fr-grid-row--middle")}>
                 <div className={fr.cx("fr-col")}>
                     <VectorDbList datastoreId={datastoreId} vectorDbList={datasheet?.vector_db_list} />
+                </div>
+            </div>
+            <div className={fr.cx("fr-grid-row", "fr-grid-row--center", "fr-grid-row--middle", "fr-mt-4w")}>
+                <div className={fr.cx("fr-col")}>
+                    <PyramidList datastoreId={datastoreId} pyramidList={datasheet?.pyramid_list} />
                 </div>
             </div>
         </>

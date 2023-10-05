@@ -80,9 +80,15 @@ class DatasheetController extends AbstractController
             ],
         ]);
 
-        // TODO : pyramid vector
+        // Pyramid vector
+        $pyramidList = $this->entrepotApiService->storedData->getAllDetailed($datastoreId, [
+            'type' => StoredDataTypes::ROK4_PYRAMID_VECTOR,
+            'tags' => [
+                StoredDataTags::DATASHEET_NAME => $datasheetName,
+            ],
+        ]);
 
-        if (0 === count($uploadList) && 0 === count($vectorDbList)) {
+        if (0 === count($uploadList) && 0 === count($vectorDbList) && 0 === count($pyramidList)) {
             throw new CartesApiException("La fiche de donnée [$datasheetName] n'existe pas", Response::HTTP_NOT_FOUND);
         }
 
@@ -95,6 +101,7 @@ class DatasheetController extends AbstractController
         return $this->json([
             ...$data,
             'vector_db_list' => $vectorDbList,
+            'pyramid_list' => $pyramidList,
             'upload_list' => $uploadList,
             'service_list' => $services,
         ]);

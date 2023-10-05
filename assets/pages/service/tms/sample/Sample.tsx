@@ -49,15 +49,15 @@ const Sample: FC<SampleProps> = ({ visible, bottomZoomLevel, form }) => {
 
     return (
         <div className={fr.cx("fr-my-2v", !visible && "fr-hidden")}>
-            <h3>{Translator.trans("service.tms.new.step_sample.title")}</h3>
+            <h3>{Translator.trans("pyramid_vector.new.step_sample.title")}</h3>
             <p>
-                <strong>{Translator.trans("service.tms.new.step_sample.doubts")}</strong>
+                <strong>{Translator.trans("pyramid_vector.new.step_sample.doubts")}</strong>
             </p>
-            <p>{Translator.trans("service.tms.new.step_sample.explain")}</p>
+            <p>{Translator.trans("pyramid_vector.new.step_sample.explain")}</p>
             <Checkbox
                 options={[
                     {
-                        label: Translator.trans("service.tms.new.step_sample.define_sample"),
+                        label: Translator.trans("pyramid_vector.new.step_sample.define_sample"),
                         nativeInputProps: {
                             onChange: () => toggleSample(),
                         },

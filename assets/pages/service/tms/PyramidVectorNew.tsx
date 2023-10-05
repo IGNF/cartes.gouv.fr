@@ -25,13 +25,13 @@ import olDefaults from "../../../data/ol-defaults.json";
 import { CartesApiException } from "../../../modules/jsonFetch";
 import Wait from "../../../components/Utils/Wait";
 
-type TmsServiceNewProps = {
+type PyramidVectorNewProps = {
     datastoreId: string;
     vectorDbId: string;
     technicalName: string;
 };
 
-const TmsServiceNew: FC<TmsServiceNewProps> = ({ datastoreId, vectorDbId, technicalName }) => {
+const PyramidVectorNew: FC<PyramidVectorNewProps> = ({ datastoreId, vectorDbId, technicalName }) => {
     const STEPS = {
         TABLES_SELECTION: 1,
         ATTRIBUTES_SELECTION: 2,
@@ -45,8 +45,8 @@ const TmsServiceNew: FC<TmsServiceNewProps> = ({ datastoreId, vectorDbId, techni
     schema[STEPS.TABLES_SELECTION] = yup.object({
         selected_tables: yup
             .array(yup.string())
-            .min(1, Translator.trans("service.tms.new.step_tables.mandatory_error"))
-            .required(Translator.trans("service.tms.new.step_tables.mandatory_error")),
+            .min(1, Translator.trans("pyramid_vector.new.step_tables.mandatory_error"))
+            .required(Translator.trans("pyramid_vector.new.step_tables.mandatory_error")),
     });
     schema[STEPS.ATTRIBUTES_SELECTION] = yup.object({
         table_attributes: yup.lazy(() => {
@@ -59,15 +59,15 @@ const TmsServiceNew: FC<TmsServiceNewProps> = ({ datastoreId, vectorDbId, techni
                 tableAttributes[table.name] = yup
                     .array()
                     .of(yup.string())
-                    .min(1, Translator.trans("service.tms.new.step_attributes.mandatory_error"))
-                    .required(Translator.trans("service.tms.new.step_attributes.mandatory_error"));
+                    .min(1, Translator.trans("pyramid_vector.new.step_attributes.mandatory_error"))
+                    .required(Translator.trans("pyramid_vector.new.step_attributes.mandatory_error"));
             });
             return yup.object().shape(tableAttributes);
         }),
     });
     schema[STEPS.ZOOM_LEVELS] = yup.mixed().nullable().notRequired();
     schema[STEPS.GENERALIZE_OPTIONS] = yup.object({
-        tippecanoe: yup.string().required(Translator.trans("service.tms.new.step_tippecanoe.mandatory_error")),
+        tippecanoe: yup.string().required(Translator.trans("pyramid_vector.new.step_tippecanoe.mandatory_error")),
     });
     schema[STEPS.SAMPLE] = yup.mixed().nullable().notRequired();
 
@@ -125,11 +125,13 @@ const TmsServiceNew: FC<TmsServiceNewProps> = ({ datastoreId, vectorDbId, techni
         const formatted = formatForm(technicalName, values);
         formatted["vectorDbId"] = vectorDbId;
 
+        setIsSubmitting(true);
+
         api.pyramid
             .add(datastoreId, formatted)
             .then(() => {
                 if (vectorDbQuery.data?.tags?.datasheet_name) {
-                    routes.datastore_datasheet_view({ datastoreId, datasheetName: vectorDbQuery.data?.tags.datasheet_name, activeTab: "services" }).push();
+                    routes.datastore_datasheet_view({ datastoreId, datasheetName: vectorDbQuery.data?.tags.datasheet_name, activeTab: "dataset" }).push();
                 } else {
                     routes.datasheet_list({ datastoreId }).push();
                 }
@@ -143,11 +145,11 @@ const TmsServiceNew: FC<TmsServiceNewProps> = ({ datastoreId, vectorDbId, techni
     };
 
     return (
-        <DatastoreLayout datastoreId={datastoreId} documentTitle={Translator.trans("service.tms.new.title")}>
-            <h1>{Translator.trans("service.tms.new.title")}</h1>
+        <DatastoreLayout datastoreId={datastoreId} documentTitle={Translator.trans("pyramid_vector.new.title")}>
+            <h1>{Translator.trans("pyramid_vector.new.title")}</h1>
 
             {vectorDbQuery.isLoading ? (
-                <LoadingText message={Translator.trans("service.tms.new.loading_stored_data")} />
+                <LoadingText message={Translator.trans("pyramid_vector.new.loading_stored_data")} />
             ) : vectorDbQuery.data === undefined ? (
                 <Alert
                     severity="error"
@@ -160,8 +162,8 @@ const TmsServiceNew: FC<TmsServiceNewProps> = ({ datastoreId, vectorDbId, techni
                     <Stepper
                         currentStep={currentStep}
                         stepCount={Object.values(STEPS).length}
-                        nextTitle={currentStep < STEPS.SAMPLE && Translator.trans(`service.tms.new.step${currentStep + 1}`)}
-                        title={Translator.trans(`service.tms.new.step${currentStep}`)}
+                        nextTitle={currentStep < STEPS.SAMPLE && Translator.trans(`pyramid_vector.new.step${currentStep + 1}`)}
+                        title={Translator.trans(`pyramid_vector.new.step${currentStep}`)}
                     />
                     {validationError && (
                         <Alert
@@ -203,8 +205,8 @@ const TmsServiceNew: FC<TmsServiceNewProps> = ({ datastoreId, vectorDbId, techni
                                     currentStep < Object.values(STEPS).length
                                         ? Translator.trans("continue")
                                         : sample?.is_sample === "true"
-                                        ? Translator.trans("service.tms.new.generate_sample")
-                                        : Translator.trans("service.tms.new.generate_pyramid"),
+                                        ? Translator.trans("pyramid_vector.new.generate_sample")
+                                        : Translator.trans("pyramid_vector.new.generate_pyramid"),
                                 onClick: nextStep,
                             },
                         ]}
@@ -230,4 +232,4 @@ const TmsServiceNew: FC<TmsServiceNewProps> = ({ datastoreId, vectorDbId, techni
     );
 };
 
-export default TmsServiceNew;
+export default PyramidVectorNew;
