@@ -1,5 +1,6 @@
 parameters:
     app_env: "%env(resolve:APP_ENV)%"
+    api_harvest_mode: "%env(resolve:API_HARVEST_MODE)%"
 
     public_path: "%env(resolve:ENCORE_PUBLIC_PATH)%"
 

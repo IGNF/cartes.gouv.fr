@@ -4,6 +4,7 @@ namespace App\Services\EntrepotApi;
 
 use App\Exception\EntrepotApiException;
 use App\Security\KeycloakToken;
+use App\Services\EntrepotApiFakeService;
 use App\Services\EntrepotApiService;
 use League\OAuth2\Client\Token\AccessToken;
 use Psr\Log\LoggerInterface;
@@ -28,6 +29,7 @@ abstract class AbstractEntrepotApiService
         protected ParameterBagInterface $parameters,
         protected Filesystem $filesystem,
         private RequestStack $requestStack,
+        private EntrepotApiFakeService $entrepotApiFakeService,
         private LoggerInterface $logger
     ) {
         $this->apiClient = $httpClient->withOptions([
@@ -113,6 +115,23 @@ abstract class AbstractEntrepotApiService
      */
     protected function request(string $method, string $url, iterable $body = [], array $query = [], array $headers = [], bool $fileUpload = false, bool $expectJson = true, bool $includeHeaders = false): mixed
     {
+        // Si mode test activé
+        if ('test' === $this->parameters->get('app_env')) {
+            $responseContent = $this->entrepotApiFakeService->fakeRequest($method, $url, $query);
+
+            if ($includeHeaders) {
+                return [
+                    'content' => $responseContent,
+                    'headers' => [
+                        'content-range' => ['1-9/9'],
+                    ],
+                ];
+            }
+
+            return $responseContent;
+        }
+
+        // Si mode test désactivé
         $options = $this->prepareOptions($body, $query, $headers, $fileUpload);
 
         $response = $this->apiClient->request($method, $url, $options);
@@ -122,6 +141,11 @@ abstract class AbstractEntrepotApiService
         $this->logger->debug(self::class, [$method, $url, $body, $query, $response->getContent(false), $finalUrl]);
 
         $responseContent = $this->handleResponse($response, $expectJson);
+
+        // stocker toutes les réponses en local si variable d'environnement API_HARVEST_MODE=1
+        if (1 === $this->parameters->get('api_harvest_mode')) {
+            $this->entrepotApiFakeService->storeResponse($responseContent, $method, $url, $query);
+        }
 
         if ($includeHeaders) {
             return [
