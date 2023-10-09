@@ -23,12 +23,11 @@ const getCode = (epsg) => {
 };
 
 /**
- * Récupère le type de fichier (unknown, csv ou geopackage)
- 
+ * Récupère le type de fichier (undefined, csv ou geopackage)
  */
 const getUploadFileType = (fileTree) => {
     if (!fileTree) return undefined;
-    let fileType = "unknown";
+    let fileType: string | undefined = undefined;
 
     const directory = fileTree.filter((tree) => tree?.type === "DIRECTORY" && tree?.name === "data");
     if (directory.length) {
@@ -156,7 +155,7 @@ const AdditionalInfo: FC<AdditionalInfoProps> = ({ vectorDb, datastoreId, visibl
                 stateRelatedMessage={errors?.encoding?.message?.toString()}
                 nativeInputProps={{
                     ...register("encoding"),
-                    readOnly: fileType !== "unknown",
+                    readOnly: fileType !== undefined,
                     defaultValue: fileType,
                 }}
             />

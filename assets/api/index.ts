@@ -4,6 +4,7 @@ import storedData from "./stored-data";
 import upload from "./upload";
 import user from "./user";
 import wfs from "./wfs";
+import wmsVector from "./wms-vector";
 import pyramid from "./pyramid";
 import service from "./service";
 import epsg from "./epsg";
@@ -16,6 +17,7 @@ const api = {
     upload,
     user,
     wfs,
+    wmsVector,
     pyramid,
     service,
     // epsg.io
