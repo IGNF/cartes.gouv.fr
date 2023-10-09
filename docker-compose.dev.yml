@@ -22,7 +22,7 @@ services:
             - http_proxy=${HTTP_PROXY}
             - https_proxy=${HTTPS_PROXY}
             - XDEBUG_MODE=debug
-            - XDEBUG_CONFIG="client_host=host.docker.internal client_port=9003"
+            - XDEBUG_CONFIG=client_host=host.docker.internal client_port=9003
         working_dir: /opt/cartesgouvfr-site
         volumes:
             - .:/opt/cartesgouvfr-site
