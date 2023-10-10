@@ -14,7 +14,6 @@
         "stevenmaguire/oauth2-keycloak": "^5.0",
         "symfony/asset": "6.3.*",
         "symfony/console": "6.3.*",
-        "symfony/doctrine-messenger": "6.3.*",
         "symfony/dotenv": "6.3.*",
         "symfony/expression-language": "6.3.*",
         "symfony/flex": "^2",
