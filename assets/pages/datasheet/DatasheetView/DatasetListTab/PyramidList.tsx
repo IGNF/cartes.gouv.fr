@@ -1,11 +1,13 @@
-import { FC } from "react";
-import { Pyramid, StoredDataStatuses } from "../../../../types/app";
 import { fr } from "@codegouvfr/react-dsfr";
+import Button from "@codegouvfr/react-dsfr/Button";
+import { FC } from "react";
+import { symToStr } from "tsafe/symToStr";
+
 import MenuList from "../../../../components/Utils/MenuList";
 import StoredDataStatusBadge from "../../../../components/Utils/StoredDataStatusBadge";
 import functions from "../../../../functions";
-import Button from "@codegouvfr/react-dsfr/Button";
 import { routes } from "../../../../router/router";
+import { Pyramid, StoredDataStatuses } from "../../../../types/app";
 
 type PyramidListProps = {
     datastoreId: string;
@@ -65,5 +67,7 @@ const PyramidList: FC<PyramidListProps> = ({ datastoreId, pyramidList }) => {
         </>
     );
 };
+
+PyramidList.displayName = symToStr({ PyramidList });
 
 export default PyramidList;

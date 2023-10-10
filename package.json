@@ -25,6 +25,7 @@
         "react-dom": "^18.2.0",
         "react-error-boundary": "^4.0.10",
         "react-hook-form": "^7.45.1",
+        "tsafe": "^1.6.5",
         "type-route": "^1.0.1",
         "uuid": "^9.0.0",
         "yup": "^1.2.0"

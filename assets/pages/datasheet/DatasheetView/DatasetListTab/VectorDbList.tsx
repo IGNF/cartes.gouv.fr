@@ -6,14 +6,15 @@ import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { useQuery } from "@tanstack/react-query";
 import { FC, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { symToStr } from "tsafe/symToStr";
 
 import api from "../../../../api";
 import MenuList from "../../../../components/Utils/MenuList";
+import StoredDataStatusBadge from "../../../../components/Utils/StoredDataStatusBadge";
 import functions from "../../../../functions";
 import RQKeys from "../../../../modules/RQKeys";
 import { routes } from "../../../../router/router";
 import { DatastoreEndpoint, StoredDataStatuses, type VectorDb } from "../../../../types/app";
-import StoredDataStatusBadge from "../../../../components/Utils/StoredDataStatusBadge";
 
 type ServiceTypes = "tms" | "wfs" | "wms-vector" | "pre-paquet";
 
@@ -222,5 +223,7 @@ const VectorDbList: FC<VectorDbListProps> = ({ datastoreId, vectorDbList }) => {
         </>
     );
 };
+
+VectorDbList.displayName = symToStr({ VectorDbList });
 
 export default VectorDbList;
