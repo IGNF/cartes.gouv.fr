@@ -1,6 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useEffect, useState } from "react";
 
 import api from "../../../../api";
@@ -22,6 +22,8 @@ const DatasheetNewIntegrationDialog: FC<DatasheetNewIntegrationDialogProps> = ({
     const [shouldPingIntProg, setShouldPingIntProg] = useState(false);
 
     const [isIntegrationError, setIsIntegrationError] = useState(false);
+
+    const queryClient = useQueryClient();
 
     // définition des query
     // query qui "ping" et récupère le progress en boucle (query désactivé au départ)
@@ -77,10 +79,11 @@ const DatasheetNewIntegrationDialog: FC<DatasheetNewIntegrationDialogProps> = ({
             setShouldPingIntProg(false);
 
             if (uploadQuery?.data?.tags?.datasheet_name) {
+                queryClient.invalidateQueries(RQKeys.datastore_datasheet(datastoreId, uploadQuery?.data?.tags?.datasheet_name));
                 routes.datastore_datasheet_view({ datastoreId, datasheetName: uploadQuery?.data?.tags?.datasheet_name }).push();
             }
         }
-    }, [integrationProgress, integrationCurrentStep, datastoreId, uploadQuery?.data]);
+    }, [integrationProgress, integrationCurrentStep, datastoreId, uploadQuery?.data, queryClient]);
 
     const getStepIcon = (status) => {
         let iconClass = fr.cx("fr-icon-time-line");
