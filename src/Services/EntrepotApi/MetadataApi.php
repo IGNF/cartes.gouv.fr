@@ -19,7 +19,7 @@ class MetadataApi extends AbstractEntrepotApiService
 
     public function add(string $datastoreId, string $filepath, string $type): array
     {
-        return $this->postFile("datastores/$datastoreId/metadata", $filepath, [
+        return $this->postFile("datastores/$datastoreId/metadata", $filepath, [], [
             'type' => $type,
         ]);
     }
@@ -42,7 +42,7 @@ class MetadataApi extends AbstractEntrepotApiService
         return $this->request('DELETE', "datastores/$datastoreId/metadata/$metadataId");
     }
 
-    public function downloadFile(string $datastoreId, string $metadataId): array
+    public function downloadFile(string $datastoreId, string $metadataId): mixed
     {
         return $this->request('GET', "datastores/$datastoreId/metadata/$metadataId/file");
     }

@@ -127,7 +127,9 @@ class UploadApiService extends AbstractEntrepotApiService
     public function uploadFile($datastoreId, $uploadId, $pathname, $filename)
     {
         // posting the file itself
-        $this->postFile("datastores/$datastoreId/uploads/$uploadId/data", $pathname);
+        $this->postFile("datastores/$datastoreId/uploads/$uploadId/data", $pathname, [
+            'path' => 'data',
+        ]);
 
         // calculating and posting the file's md5 checksum
         $md5 = \md5_file($pathname);

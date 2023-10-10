@@ -21,7 +21,11 @@ class AnnexeApiService extends AbstractEntrepotApiService
         return $response;
     }
 
-    public function add(string $datastoreId, UploadedFile $annexeFile, string $path): array
+    /**
+     * @param array<string> $paths
+     * @param array<string> $labels
+     */
+    public function add(string $datastoreId, UploadedFile $annexeFile, array $paths, array $labels = []): array
     {
         $directory = $this->parameters->get('upload_path');
         $filepath = $directory.'/'.$annexeFile->getClientOriginalName();
@@ -29,7 +33,8 @@ class AnnexeApiService extends AbstractEntrepotApiService
 
         $response = $this->postFile("datastores/$datastoreId/annexes", $filepath, [
             'published' => 'true',
-            'paths' => $path,
+            'paths' => $paths,
+            'labels' => $labels,
         ]);
 
         $this->filesystem->remove($filepath);

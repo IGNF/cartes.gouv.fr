@@ -48,14 +48,12 @@ abstract class AbstractEntrepotApiService
     }
 
     /**
-     * @param array<mixed> $query
+     * @param array<mixed> $formFields correspond à "Request Body" dans le swagger
+     * @param array<mixed> $query      correspond aux paramètes "Query" dans le swagger
      */
-    protected function postFile(string $url, string $filepath, array $query = []): array
+    protected function postFile(string $url, string $filepath, array $formFields = [], array $query = []): array
     {
-        $formFields = [
-            'file' => DataPart::fromPath($filepath),
-            'path' => 'data',
-        ];
+        $formFields['file'] = DataPart::fromPath($filepath); // ajout du fichier dans $formFields
         $formData = new FormDataPart($formFields);
 
         $body = $formData->bodyToIterable();
