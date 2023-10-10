@@ -1,10 +1,10 @@
-import SymfonyRouting from "../modules/Routing";
-import React, { Suspense, lazy } from "react";
+import { JSX, Suspense, lazy } from "react";
 
 import AppLayout from "../components/Layout/AppLayout";
 import LoadingText from "../components/Utils/LoadingText";
 import { defaultNavItems } from "../config/navItems";
 import useUser from "../hooks/useUser";
+import SymfonyRouting from "../modules/Routing";
 import Home from "../pages/Home";
 import Redirect from "../pages/Redirect";
 import PageNotFound from "../pages/error/PageNotFound";
@@ -45,7 +45,7 @@ function RouterRenderer() {
     const { user } = useUser();
 
     // vérification si la route demandée est bien connue/enregistrée
-    if (!knownRoutes.includes(route.name)) {
+    if (route.name === false || !knownRoutes.includes(route.name)) {
         return <PageNotFound />;
     }
 
@@ -58,7 +58,7 @@ function RouterRenderer() {
         }
     }
 
-    let content = null;
+    let content: JSX.Element;
 
     switch (route.name) {
         case "home":
