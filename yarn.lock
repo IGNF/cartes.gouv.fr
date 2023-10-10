@@ -1015,9 +1015,9 @@
     to-fast-properties "^2.0.0"
 
 "@codegouvfr/react-dsfr@^0.77.1":
-  version "0.77.1"
-  resolved "https://registry.yarnpkg.com/@codegouvfr/react-dsfr/-/react-dsfr-0.77.1.tgz#3440f35decd1c32a4076a57529c3a77439e2f67c"
-  integrity sha512-1CZifsQgnjOs+mVDbnOYo57D2Vx+uBLM/Wdr1n5I9/LebGQpDlvD0Jm4iknLjCW0UnYlibMcHwcLRBlyxxKNDA==
+  version "0.77.3"
+  resolved "https://registry.yarnpkg.com/@codegouvfr/react-dsfr/-/react-dsfr-0.77.3.tgz#d604e7e3bcd449f5a1763a4050891507d2f70fab"
+  integrity sha512-rn0/tFP4g3+dVLyv4w5WHw83jYnrF6tfW+Wj/lsb4v1/9vL3zphTwfew+edqVW2yF9eOSfGLMqy6XHXKwVTmRQ==
   dependencies:
     tsafe "^1.6.3"
 
@@ -8073,12 +8073,7 @@ ts-loader@^9.4.4:
     micromatch "^4.0.0"
     semver "^7.3.4"
 
-tsafe@^1.6.3:
-  version "1.6.4"
-  resolved "https://registry.yarnpkg.com/tsafe/-/tsafe-1.6.4.tgz#048a114761714538c72f16abd25bb247d4e3780e"
-  integrity sha512-l4Z54QFGHO8GF0gBpb3yPGHjkIkIirl8rwW+lMBmtEMzOJeRs8BdjkDEx6nU8Ak9PQVp/KNDtECxTja8MMIDoA==
-
-tsafe@^1.6.5:
+tsafe@^1.6.3, tsafe@^1.6.5:
   version "1.6.5"
   resolved "https://registry.yarnpkg.com/tsafe/-/tsafe-1.6.5.tgz#74943b69190069168a53d2accd6d07891cf1cce8"
   integrity sha512-895zss8xqqHKTc28sHGIfZKnt3C5jrstB1DyPr/h3/flK0zojsZUMQL1/W4ytdDW6KI4Oth62nb9rrxmA3s3Iw==
