@@ -16,7 +16,7 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
         <>
             <div className={fr.cx("fr-grid-row")}>
                 <h5>
-                    <i className={fr.cx("fr-icon-database-fill")} />
+                    <i className={fr.cx("ri-upload-2-line")} />
                     &nbsp;{title} ({uploadList?.length ?? 0})
                 </h5>
             </div>
