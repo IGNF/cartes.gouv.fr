@@ -11,7 +11,7 @@ const Confirmation = () => {
     const navItems = datastoreNavItems();
 
     return (
-        <AppLayout navItems={navItems} documentTitle="Demande de contact envoyée">
+        <AppLayout navItems={navItems} documentTitle="Demande envoyée">
             <Alert
                 title={Translator.trans("contact.thanks.title")}
                 description={

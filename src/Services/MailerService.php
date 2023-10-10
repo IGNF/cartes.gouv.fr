@@ -31,7 +31,7 @@ class MailerService
         $body = $this->twig->render($templateName, $params);
 
         $email = (new TemplatedEmail())
-            ->from(new Address($this->parameters->get('mailer_sender_address'), 'Géoplateforme'))
+            ->from(new Address($this->parameters->get('mailer_sender_address'), 'cartes.gouv.fr'))
             ->to(new Address($to))
             ->subject($subject)
             ->html($body)

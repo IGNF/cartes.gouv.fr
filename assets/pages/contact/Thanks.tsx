@@ -11,7 +11,7 @@ const Thanks = () => {
     const link = { __html: Translator.trans("mailer.signature", { href: routes.home().href }) };
 
     return (
-        <AppLayout navItems={defaultNavItems} documentTitle="Demande de contact envoyée">
+        <AppLayout navItems={defaultNavItems} documentTitle="Demande envoyée">
             <Alert
                 title={Translator.trans("contact.thanks.title")}
                 description={

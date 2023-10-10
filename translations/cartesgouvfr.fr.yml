@@ -19,7 +19,7 @@ mandatory_fields: "Sauf mention contraire “(optionnel)” dans le label, tous 
 # mailer
 mailer:
     hello: "Bonjour"
-    signature: "Cordialement, l'équipe de la <a href='%href%'>Géoplateforme</a>"
+    signature: "Cordialement, l'équipe de <a href='%href%'>cartes.gouv.fr</a>"
     login_info: "Votre nom d'utilisateur est : %login%"
 
 # pages:

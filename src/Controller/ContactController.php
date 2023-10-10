@@ -79,12 +79,11 @@ class ContactController extends AbstractController
                 'message' => $message,
             ]);
 
-            // TODO : envoi de mail désactivé en attendant d'avoir l'adresse du serveur smtp en production
             // envoi du mail à l'adresse du support
-            $this->mailerService->sendMail($supportAddress, '[Géoplateforme] Demande de contact', 'Mailer/contact.html.twig', $supportMailParams);
+            $this->mailerService->sendMail($supportAddress, '[cartes.gouv.fr] Nouvelle demande', 'Mailer/contact.html.twig', $supportMailParams);
 
             // // envoi du mail d'accusé de réception à l'utilisateur
-            $this->mailerService->sendMail($userEmail, '[Géoplateforme] Accusé de réception de votre demande', 'Mailer/contact_acknowledgement.html.twig', [
+            $this->mailerService->sendMail($userEmail, '[cartes.gouv.fr] Accusé de réception de votre demande', 'Mailer/contact_acknowledgement.html.twig', [
                 'message' => $message,
                 'sendDate' => $now,
             ]);
@@ -129,10 +128,10 @@ class ContactController extends AbstractController
 
             // TODO : Envoi de mail désactivé en attendant d'avoir l'adresse du serveur smtp en production
             // Envoi du mail à l'adresse du support
-            $this->mailerService->sendMail($supportAddress, "[Géoplateforme] Demande de création d'un espace de travail", 'Mailer/datastore_create_request.html.twig', $mailParams);
+            $this->mailerService->sendMail($supportAddress, "[cartes.gouv.fr] Demande de création d'un espace de travail", 'Mailer/datastore_create_request.html.twig', $mailParams);
 
             // Envoi du mail d'accusé de réception à l'utilisateur
-            $this->mailerService->sendMail($userEmail, '[Géoplateforme] Accusé de réception de votre demande', 'Mailer/datastore_create_request_acknowledgement.html.twig',
+            $this->mailerService->sendMail($userEmail, '[cartes.gouv.fr] Accusé de réception de votre demande', 'Mailer/datastore_create_request_acknowledgement.html.twig',
                 $mailParams
             );
 
