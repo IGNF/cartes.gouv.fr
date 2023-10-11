@@ -26,7 +26,7 @@ class EntrepotApiFakeService
         $filePath = $this->mockDataDir.'/'.$url.'.json';
 
         if (!$this->fs->exists($filePath)) {
-            throw new EntrepotApiException('Resource not found', Response::HTTP_NOT_FOUND);
+            throw new EntrepotApiException('Resource not found', Response::HTTP_NOT_FOUND, ['url' => $url, 'method' => $method, 'query' => $query, 'status_code' => $statusCode]);
         }
 
         $pathData = json_decode(file_get_contents($filePath), true);

@@ -141,7 +141,7 @@ abstract class AbstractEntrepotApiService
         $responseContent = $this->handleResponse($response, $expectJson);
 
         // stocker toutes les réponses en local si variable d'environnement API_HARVEST_MODE=1 et APP_ENV != test
-        if ('test' !== $this->parameters->get('app_env') && 1 === $this->parameters->get('api_harvest_mode')) {
+        if ('test' !== $this->parameters->get('app_env') && '1' === $this->parameters->get('api_harvest_mode')) {
             $this->entrepotApiFakeService->storeResponse($responseContent, $method, $url, $query);
         }
 
