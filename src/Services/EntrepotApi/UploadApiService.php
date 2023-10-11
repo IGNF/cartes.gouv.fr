@@ -255,8 +255,8 @@ class UploadApiService extends AbstractEntrepotApiService
         return $this->request('GET', "datastores/$datastoreId/checks/executions/$checkExecutionId");
     }
 
-    public function getCheckExecutionLogs(string $datastoreId, string $checkExecutionId): string
+    public function getCheckExecutionLogs(string $datastoreId, string $checkExecutionId): array
     {
-        return $this->request('GET', "datastores/$datastoreId/checks/executions/$checkExecutionId/logs", [], [], [], false, false);
+        return $this->request('GET', "datastores/$datastoreId/checks/executions/$checkExecutionId/logs", [], [], [], false, true);
     }
 }

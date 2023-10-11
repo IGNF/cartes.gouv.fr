@@ -19,6 +19,8 @@ import {
     ConfigurationWmsRasterDetailsContent,
     ConfigurationWmsVectorDetailsContent,
     ConfigurationWmtsTmsDetailsContent,
+    ProcessingExecutionDetailResponseDto,
+    CheckingExecutionDetailResponseDto,
 } from "./entrepot";
 
 /** datastore */
@@ -106,3 +108,27 @@ export type TypeInfosWithBbox =
 /** endpoints */
 export type DatastoreEndpoint = DatastoreEndpointResponseDto;
 export const EndpointTypes = EndpointDetailResponseDtoTypeEnum;
+
+export type CheckOrProcessingExecutionLogs = [string];
+export type ChecksDetailed = CheckingExecutionDetailResponseDto & {
+    logs: CheckOrProcessingExecutionLogs;
+};
+
+export type StoredDataReport = {
+    stored_data: StoredData;
+    input_upload: Upload & {
+        file_tree: UploadTree;
+        checks: {
+            asked: [ChecksDetailed];
+            in_progress: [ChecksDetailed];
+            passed: [ChecksDetailed];
+            failed: [ChecksDetailed];
+        };
+    };
+    proc_int_exec: ProcessingExecutionDetailResponseDto & {
+        logs: CheckOrProcessingExecutionLogs;
+    };
+    proc_pyr_creat_exec?: ProcessingExecutionDetailResponseDto & {
+        logs: CheckOrProcessingExecutionLogs;
+    };
+};

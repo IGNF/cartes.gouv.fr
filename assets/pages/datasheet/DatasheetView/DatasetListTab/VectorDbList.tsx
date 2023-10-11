@@ -118,17 +118,17 @@ const VectorDbList: FC<VectorDbListProps> = ({ datastoreId, vectorDbList }) => {
                                     iconId: "fr-icon-menu-2-fill",
                                     title: "Autres actions",
                                 }}
-                                disabled={el.status !== StoredDataStatuses.GENERATED}
                                 items={[
                                     {
                                         text: "Remplacer les données",
                                         iconId: "fr-icon-refresh-line",
                                         onClick: () => console.warn("Action non implémentée"),
+                                        disabled: el.status !== StoredDataStatuses.GENERATED,
                                     },
                                     {
                                         text: "Voir les détails",
                                         iconId: "fr-icon-file-text-fill",
-                                        onClick: () => console.warn("Action non implémentée"),
+                                        onClick: () => routes.datastore_stored_data_report({ datastoreId, storedDataId: el._id }).push(),
                                     },
                                     {
                                         text: "Supprimer",

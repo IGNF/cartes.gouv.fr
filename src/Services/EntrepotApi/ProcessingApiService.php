@@ -43,9 +43,9 @@ class ProcessingApiService extends AbstractEntrepotApiService
         return $this->request('GET', "datastores/$datastoreId/processings/executions/$processingExecutionId");
     }
 
-    public function getExecutionLogs(string $datastoreId, string $processingExecutionId): string
+    public function getExecutionLogs(string $datastoreId, string $processingExecutionId): array
     {
-        return $this->request('GET', "datastores/$datastoreId/processings/executions/$processingExecutionId/logs", [], [], [], false, false);
+        return $this->request('GET', "datastores/$datastoreId/processings/executions/$processingExecutionId/logs", [], [], [], false, true);
     }
 
     public function removeExecution(string $datastoreId, string $processingExecutionId): void
