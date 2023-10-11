@@ -110,7 +110,7 @@ export type DatastoreEndpoint = DatastoreEndpointResponseDto;
 export const EndpointTypes = EndpointDetailResponseDtoTypeEnum;
 
 export type CheckOrProcessingExecutionLogs = [string];
-export type ChecksDetailed = CheckingExecutionDetailResponseDto & {
+export type CheckDetailed = CheckingExecutionDetailResponseDto & {
     logs: CheckOrProcessingExecutionLogs;
 };
 
@@ -118,12 +118,7 @@ export type StoredDataReport = {
     stored_data: StoredData;
     input_upload: Upload & {
         file_tree: UploadTree;
-        checks: {
-            asked: [ChecksDetailed];
-            in_progress: [ChecksDetailed];
-            passed: [ChecksDetailed];
-            failed: [ChecksDetailed];
-        };
+        checks: [CheckDetailed];
     };
     proc_int_exec: ProcessingExecutionDetailResponseDto & {
         logs: CheckOrProcessingExecutionLogs;

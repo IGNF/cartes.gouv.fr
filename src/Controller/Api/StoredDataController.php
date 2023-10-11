@@ -51,12 +51,14 @@ class StoredDataController extends AbstractController
             // récupération de détails sur l'upload qui a servi à créer la stored_data
             $inputUpload = $this->entrepotApiService->upload->get($datastoreId, $storedData['tags']['upload_id']);
             $inputUpload['file_tree'] = $this->entrepotApiService->upload->getFileTree($datastoreId, $inputUpload['_id']);
-            $inputUpload['checks'] = $this->entrepotApiService->upload->getCheckExecutions($datastoreId, $inputUpload['_id']);
+            $inputUpload['checks'] = [];
+            $uploadChecks = $this->entrepotApiService->upload->getCheckExecutions($datastoreId, $inputUpload['_id']);
 
-            foreach ($inputUpload['checks'] as &$checkType) {
+            foreach ($uploadChecks as &$checkType) {
                 foreach ($checkType as &$checkExecution) {
                     $checkExecution = array_merge($checkExecution, $this->entrepotApiService->upload->getCheckExecution($datastoreId, $checkExecution['_id']));
                     $checkExecution['logs'] = $this->entrepotApiService->upload->getCheckExecutionLogs($datastoreId, $checkExecution['_id']);
+                    $inputUpload['checks'][] = $checkExecution;
                 }
             }
 

@@ -31,7 +31,7 @@ const DatasheetNewForm = lazy(() => import("../pages/datasheet/DatasheetNew/Data
 const DatasheetNewIntegrationPage = lazy(() => import("../pages/datasheet/DatasheetNew/DatasheetNewIntegration/DatasheetNewIntegration"));
 const DatasheetView = lazy(() => import("../pages/datasheet/DatasheetView/DatasheetView"));
 
-const StoredDataReport = lazy(() => import("../pages/stored_data/StoredDataReport"));
+const StoredDataReport = lazy(() => import("../pages/stored_data/StoredDataReport/StoredDataReport"));
 
 const DatastoreCreationForm = lazy(() => import("../pages/contact/datastore/DatastoreCreationForm"));
 const Confirm = lazy(() => import("../pages/contact/datastore/Confirmation"));
