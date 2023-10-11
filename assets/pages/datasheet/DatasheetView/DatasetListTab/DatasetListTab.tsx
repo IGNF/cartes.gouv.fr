@@ -18,7 +18,10 @@ const DatasetListTab: FC<DataListTabProps> = ({ datastoreId, datasheet }) => {
 
     // liste des uploads/livraisons dont l'intégration en base de données n'a pas réussi ou n'a pas terminé
     const unfinishedUploads = useMemo(() => {
-        return datasheet?.upload_list?.filter((upload) => upload.tags.integration_current_step !== "3");
+        return datasheet?.upload_list?.filter((upload) => {
+            const integrationProgress = JSON.parse(upload.tags.integration_progress);
+            return ["waiting", "in_progress"].includes(Object.values(integrationProgress)?.[2] as string);
+        });
     }, [datasheet?.upload_list]);
 
     return (
@@ -29,11 +32,13 @@ const DatasetListTab: FC<DataListTabProps> = ({ datastoreId, datasheet }) => {
             {unfinishedUploads && unfinishedUploads.length > 0 && (
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--center", "fr-grid-row--middle")}>
                     <div className={fr.cx("fr-col")}>
-                        <UnfinishedUploadList datastoreId={datastoreId} uploadList={unfinishedUploads} title="Livraisons non terminées" />
+                        <UnfinishedUploadList datastoreId={datastoreId} uploadList={unfinishedUploads} />
                     </div>
                 </div>
             )}
-            <div className={fr.cx("fr-grid-row", "fr-grid-row--center", "fr-grid-row--middle", "fr-mt-4w")}>
+            <div
+                className={fr.cx("fr-grid-row", "fr-grid-row--center", "fr-grid-row--middle", unfinishedUploads && unfinishedUploads.length > 0 && "fr-mt-4w")}
+            >
                 <div className={fr.cx("fr-col")}>
                     <VectorDbList datastoreId={datastoreId} vectorDbList={datasheet?.vector_db_list} />
                 </div>

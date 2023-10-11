@@ -9,15 +9,14 @@ import { Upload } from "../../../../types/app";
 type UnfinishedUploadListProps = {
     datastoreId: string;
     uploadList?: Upload[];
-    title?: string;
 };
-const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uploadList, title = "Livraisons" }) => {
+const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uploadList }) => {
     return (
         <>
             <div className={fr.cx("fr-grid-row")}>
                 <h5>
                     <i className={fr.cx("ri-upload-2-line")} />
-                    &nbsp;{title} ({uploadList?.length ?? 0})
+                    &nbsp;Livraisons non terminées ({uploadList?.length ?? 0})
                 </h5>
             </div>
 
