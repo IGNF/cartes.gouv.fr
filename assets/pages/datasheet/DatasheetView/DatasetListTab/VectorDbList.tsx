@@ -115,7 +115,6 @@ const VectorDbList: FC<VectorDbListProps> = ({ datastoreId, vectorDbList }) => {
                             </Button>
                             <MenuList
                                 menuOpenButtonProps={{
-                                    iconId: "fr-icon-menu-2-fill",
                                     title: "Autres actions",
                                 }}
                                 items={[
@@ -128,7 +127,7 @@ const VectorDbList: FC<VectorDbListProps> = ({ datastoreId, vectorDbList }) => {
                                     {
                                         text: "Voir les détails",
                                         iconId: "fr-icon-file-text-fill",
-                                        onClick: () => routes.datastore_stored_data_report({ datastoreId, storedDataId: el._id }).push(),
+                                        linkProps: routes.datastore_stored_data_report({ datastoreId, storedDataId: el._id }).link,
                                     },
                                     {
                                         text: "Supprimer",

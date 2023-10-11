@@ -1,5 +1,6 @@
 import { fr, type FrIconClassName, type RiIconClassName } from "@codegouvfr/react-dsfr";
 import Button, { ButtonProps } from "@codegouvfr/react-dsfr/Button";
+import { RegisteredLinkProps } from "@codegouvfr/react-dsfr/link";
 import MuiDsfrThemeProvider from "@codegouvfr/react-dsfr/mui";
 import { ListItemIcon, ListItemText, Menu, MenuItem } from "@mui/material";
 import Typography from "@mui/material/Typography";
@@ -7,21 +8,24 @@ import { FC, MouseEvent, useId, useMemo, useState } from "react";
 import { symToStr } from "tsafe/symToStr";
 
 type MenuListItemCommon = {
-    onClick: React.MouseEventHandler<HTMLElement>;
     disabled?: boolean;
-};
-
-type MenuListItemOnlyText = {
-    iconId?: never;
     text: string;
+    iconId?: FrIconClassName | RiIconClassName;
 };
 
-type MenuListItemTextAndIcon = {
-    iconId: FrIconClassName | RiIconClassName;
-    text: string;
+type MenuListItemWithOnClick = {
+    onClick: React.MouseEventHandler<HTMLElement>;
+    linkProps?: never;
 };
 
-type MenuListItem = MenuListItemCommon & (MenuListItemOnlyText | MenuListItemTextAndIcon);
+type MenuListItemWithLinkProps = {
+    onClick?: never;
+    linkProps: RegisteredLinkProps;
+};
+
+type MenuListItem = MenuListItemCommon &
+    // onClick et linkProps sont mutuellement exclusifs
+    (MenuListItemWithOnClick | MenuListItemWithLinkProps);
 
 type MenuListProps = {
     menuOpenButtonProps?: Omit<ButtonProps, "linkProps" | "onClick" | "type" | "disabled">;
@@ -87,27 +91,39 @@ const MenuList: FC<MenuListProps> = ({ menuOpenButtonProps, items = [], disabled
                     }}
                 >
                     {disabled === false &&
-                        items.map((item, i) => (
-                            <MenuItem
-                                key={i}
-                                onClick={(e: MouseEvent<HTMLElement>) => {
-                                    handleClose();
-                                    item.onClick(e);
-                                }}
-                                disabled={item.disabled}
-                            >
-                                {item.iconId && (
-                                    <ListItemIcon>
-                                        <i className={fr.cx(item.iconId)} />
-                                    </ListItemIcon>
-                                )}
-                                {item.text && (
-                                    <ListItemText inset={atLeastOneIcon && !item.iconId}>
-                                        <Typography noWrap>{item.text}</Typography>
-                                    </ListItemText>
-                                )}
-                            </MenuItem>
-                        ))}
+                        items.map((item, i) => {
+                            const itemContent = (
+                                <MenuItem
+                                    key={i}
+                                    onClick={(e: MouseEvent<HTMLElement>) => {
+                                        handleClose();
+                                        item.onClick?.(e);
+                                    }}
+                                    disabled={item.disabled}
+                                >
+                                    {item.iconId && (
+                                        <ListItemIcon>
+                                            <i className={fr.cx(item.iconId)} />
+                                        </ListItemIcon>
+                                    )}
+                                    {item.text && (
+                                        <ListItemText inset={atLeastOneIcon && !item.iconId}>
+                                            <Typography noWrap>{item.text}</Typography>
+                                        </ListItemText>
+                                    )}
+                                </MenuItem>
+                            );
+
+                            if (item.linkProps) {
+                                return (
+                                    <a key={i} {...item.linkProps}>
+                                        {itemContent}
+                                    </a>
+                                );
+                            }
+
+                            return itemContent;
+                        })}
                 </Menu>
             </MuiDsfrThemeProvider>
         </>
