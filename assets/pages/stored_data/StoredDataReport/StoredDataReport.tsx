@@ -10,7 +10,8 @@ import LoadingText from "../../../components/Utils/LoadingText";
 import RQKeys from "../../../modules/RQKeys";
 import { CartesApiException } from "../../../modules/jsonFetch";
 import { StoredDataReport } from "../../../types/app";
-import Logs from "./Logs";
+import ProcessingExecutionReport from "./ProcessingExecutionReport";
+import UploadCheckExecutionReport from "./UploadCheckExecutionReport";
 import UploadFileTree from "./UploadFileTree";
 
 type StoredDataReportProps = {
@@ -43,7 +44,7 @@ const StoredDataReport: FC<StoredDataReportProps> = ({ datastoreId, storedDataId
 
             {reportQuery?.data && (
                 <>
-                    <Accordion label="Données déposées" defaultExpanded={true}>
+                    <Accordion titleAs="h2" label="Données déposées" defaultExpanded={true}>
                         <ul className={fr.cx("fr-raw-list")}>
                             <li>
                                 <strong>Nom :</strong> {reportQuery.data?.input_upload?.name}
@@ -62,45 +63,26 @@ const StoredDataReport: FC<StoredDataReportProps> = ({ datastoreId, storedDataId
                             </li>
                         </ul>
 
-                        <Accordion label="Fichiers déposés" defaultExpanded={true} className={fr.cx("fr-mt-2v")}>
-                            {/* TODO : mettre en forme */}
+                        <Accordion titleAs="h3" label="Fichiers déposés" defaultExpanded={true} className={fr.cx("fr-mt-2v")}>
                             <UploadFileTree fileTree={reportQuery?.data?.input_upload?.file_tree} />
-                            {/* reportQuery?.data?.input_upload?.file_tree */}
-                            {/* <pre>
-                                <code>{JSON.stringify(reportQuery?.data?.input_upload.file_tree, null, 2)}</code>
-                            </pre> */}
                         </Accordion>
                     </Accordion>
 
-                    <Accordion label="Vérifications" defaultExpanded={true}>
+                    <Accordion titleAs="h2" label="Vérifications" defaultExpanded={true}>
                         {reportQuery?.data?.input_upload.checks.map((check) => (
-                            <Accordion key={check._id} label={check.check.name} defaultExpanded={true}>
-                                <ul className={fr.cx("fr-raw-list")}>
-                                    <li>
-                                        <strong>{"Espace de travail :"}</strong> {datastoreQuery?.data?.name}
-                                    </li>
-                                    <li>
-                                        <strong>{"Identifiant technique de l'exécution de vérification :"}</strong> {check._id}
-                                    </li>
-                                    <li>
-                                        <Logs logs={check.logs} />
-                                    </li>
-                                </ul>
+                            <Accordion key={check._id} titleAs="h3" label={check.check.name} defaultExpanded={true}>
+                                <UploadCheckExecutionReport check={check} datastoreName={datastoreQuery?.data?.name} />
                             </Accordion>
                         ))}
                     </Accordion>
 
-                    {/* <pre>
-                        <code>{JSON.stringify(reportQuery?.data?.stored_data, null, 2)}</code>
-                    </pre>
-
-                    <pre>
-                        <code>{JSON.stringify(reportQuery?.data?.proc_int_exec, null, 2)}</code>
-                    </pre>
-
-                    <pre>
-                        <code>{JSON.stringify(reportQuery?.data?.proc_pyr_creat_exec, null, 2)}</code>
-                    </pre> */}
+                    <Accordion titleAs="h2" label="Traitements" defaultExpanded={true}>
+                        {reportQuery?.data.processing_executions.map((procExec) => (
+                            <Accordion key={procExec._id} titleAs="h3" label={procExec.processing.name} defaultExpanded={true}>
+                                <ProcessingExecutionReport datastoreName={datastoreQuery?.data?.name} processingExecution={procExec} />
+                            </Accordion>
+                        ))}
+                    </Accordion>
                 </>
             )}
         </DatastoreLayout>

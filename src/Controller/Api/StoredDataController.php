@@ -2,7 +2,6 @@
 
 namespace App\Controller\Api;
 
-use App\Constants\EntrepotApi\StoredDataTypes;
 use App\Exception\CartesApiException;
 use App\Exception\EntrepotApiException;
 use App\Services\EntrepotApiService;
@@ -45,7 +44,6 @@ class StoredDataController extends AbstractController
     public function getReport(string $datastoreId, string $storedDataId): JsonResponse
     {
         try {
-            // commun à VECTOR-DB et ROK4-PYRAMID-VECTOR
             $storedData = $this->entrepotApiService->storedData->get($datastoreId, $storedDataId);
 
             // récupération de détails sur l'upload qui a servi à créer la stored_data
@@ -62,20 +60,20 @@ class StoredDataController extends AbstractController
                 }
             }
 
-            $procIntegrationExec = $this->entrepotApiService->processing->getExecution($datastoreId, $storedData['tags']['proc_int_id']);
-            $procIntegrationExec['logs'] = $this->entrepotApiService->processing->getExecutionLogs($datastoreId, $procIntegrationExec['_id']);
+            // récupération de l'exécution traitement (ou des exécutions, normalement y en a qu'une) qui a créé cette stored_data
+            $procExecList = $this->entrepotApiService->processing->getAllExecutions($datastoreId, [
+               'output_stored_data' => $storedDataId,
+            ]);
 
-            // specifique à ROK4-PYRAMID-VECTOR
-            if (StoredDataTypes::ROK4_PYRAMID_VECTOR == $storedData['type']) {
-                $procPyramidCreationExec = $this->entrepotApiService->processing->getExecution($datastoreId, $storedData['tags']['proc_pyr_creat_id']);
-                $procPyramidCreationExec['logs'] = $this->entrepotApiService->processing->getExecutionLogs($datastoreId, $procPyramidCreationExec['_id']);
+            foreach ($procExecList as &$procExec) {
+                $procExec = array_merge($procExec, $this->entrepotApiService->processing->getExecution($datastoreId, $procExec['_id']));
+                $procExec['logs'] = $this->entrepotApiService->processing->getExecutionLogs($datastoreId, $procExec['_id']);
             }
 
             return $this->json([
                 'stored_data' => $storedData,
                 'input_upload' => $inputUpload,
-                'proc_int_exec' => $procIntegrationExec,
-                'proc_pyr_creat_exec' => $procPyramidCreationExec ?? null,
+                'processing_executions' => $procExecList,
             ]);
         } catch (EntrepotApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());

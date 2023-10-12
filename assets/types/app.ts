@@ -21,6 +21,7 @@ import {
     ConfigurationWmtsTmsDetailsContent,
     ProcessingExecutionDetailResponseDto,
     CheckingExecutionDetailResponseDto,
+    ProcessingExecutionOutputStoredDataDto,
 } from "./entrepot";
 
 /** datastore */
@@ -114,16 +115,18 @@ export type CheckDetailed = CheckingExecutionDetailResponseDto & {
     logs: CheckOrProcessingExecutionLogs;
 };
 
+export type ProcessingExecution = ProcessingExecutionDetailResponseDto;
+
 export type StoredDataReport = {
     stored_data: StoredData;
     input_upload: Upload & {
         file_tree: UploadTree;
         checks: [CheckDetailed];
     };
-    proc_int_exec: ProcessingExecutionDetailResponseDto & {
-        logs: CheckOrProcessingExecutionLogs;
-    };
-    proc_pyr_creat_exec?: ProcessingExecutionDetailResponseDto & {
-        logs: CheckOrProcessingExecutionLogs;
-    };
+    processing_executions: [
+        ProcessingExecution & {
+            output: ProcessingExecutionOutputStoredDataDto;
+            logs: CheckOrProcessingExecutionLogs;
+        },
+    ];
 };

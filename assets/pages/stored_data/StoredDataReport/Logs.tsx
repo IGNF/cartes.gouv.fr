@@ -7,7 +7,7 @@ type LogsProps = {
 const Logs: FC<LogsProps> = ({ logs }) => {
     return (
         <>
-            <strong>Journal</strong>
+            <strong>Journal :</strong>
             {logs.length > 0 ? (
                 <pre>
                     <code
