@@ -41,5 +41,6 @@
             "icon": "square-fill"
         }
     },
-    "todo-tree.regex.regex": "(//|#|<!--|;|/\\*|^|^\\s*(-|\\d+.))\\s*($TAGS)"
+    "todo-tree.regex.regex": "(//|#|<!--|;|/\\*|^|^\\s*(-|\\d+.))\\s*($TAGS)",
+    "typescript.tsdk": "node_modules/typescript/lib"
 }
