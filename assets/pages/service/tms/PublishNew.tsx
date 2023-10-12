@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { FC, useState } from "react";
-import * as yup from "yup";
+import { FC, useMemo, useState } from "react";
 import RQKeys from "../../../modules/RQKeys";
 import api from "../../../api";
 import { Pyramid } from "../../../types/app";
@@ -16,13 +15,12 @@ import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { fr } from "@codegouvfr/react-dsfr";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import UploadMDFile from "../metadatas/UploadMDFile";
-import validations from "../../../validations";
 import Description from "../metadatas/Description";
-import { regex } from "../../../utils";
 import AdditionalInfo from "../metadatas/AdditionalInfo";
 import AccessRestrictions from "../AccessRestrictions";
 import Wait from "../../../components/Utils/Wait";
 import { CartesApiException } from "../../../modules/jsonFetch";
+import { CommonSchemasValidation } from "../common-schemas-validation";
 
 type PublishNewProps = {
     datastoreId: string;
@@ -47,80 +45,6 @@ const PublishNew: FC<PublishNewProps> = ({ datastoreId, pyramidId }) => {
         ACCESS_RESTRICTIONS: 4,
     };
 
-    // Definition du schema
-    const schemas = {};
-    schemas[STEPS.MD_UPLOAD_FILE] = yup.object().shape({
-        metadata_file_content: yup.mixed().test({
-            name: "is-valid-metadata",
-            async test(value, ctx) {
-                if (value instanceof FileList && value.length === 0) return true;
-                return validations.metadata.test(value as FileList, ctx);
-            },
-        }),
-    });
-    schemas[STEPS.MD_DESCRIPTION] = yup
-        .object({
-            technical_name: yup
-                .string()
-                .required(Translator.trans("service.tms.new.step_description.technical_name_error"))
-                .matches(regex.name_constraint, Translator.trans("service.tms.new.step_description.technical_name_regex"))
-                .test({
-                    name: "is-unique",
-                    test(technicalName, ctx) {
-                        const technicalNameList = offeringsQuery?.data?.map((data) => data?.layer_name) ?? [];
-                        if (technicalNameList?.includes(technicalName)) {
-                            return ctx.createError({ message: `"${technicalName}" : Ce nom technique existe déjà` });
-                        }
-
-                        return true;
-                    },
-                }),
-            public_name: yup.string().required(Translator.trans("service.tms.new.step_description.public_name_error")),
-            description: yup.string().required(Translator.trans("service.tms.new.step_description.description_error")),
-            identifier: yup
-                .string()
-                .matches(regex.name_constraint, Translator.trans("service.tms.new.step_description.identifier_regex"))
-                .required(Translator.trans("service.tms.new.step_description.identifier_error")),
-            category: yup
-                .array(yup.string())
-                .min(1, Translator.trans("service.tms.new.step_description.category_error"))
-                .required(Translator.trans("service.tms.new.step_description.category_error")),
-            email_contact: yup
-                .string()
-                .required(Translator.trans("service.tms.new.step_description.email_contact_mandatory_error"))
-                .matches(regex.email, Translator.trans("service.tms.new.step_description.email_contact_error")),
-            creation_date: yup.date().required(Translator.trans("service.tms.new.step_description.creation_date_error")),
-            resource_genealogy: yup.string(),
-            organization: yup.string().required(Translator.trans("service.tms.new.step_description.organization_error")),
-            organization_email: yup
-                .string()
-                .required(Translator.trans("service.tms.new.step_description.organization_email_mandatory_error"))
-                .matches(regex.email, Translator.trans("service.tms.new.step_description.organization_email_error")),
-        })
-        .required();
-    schemas[STEPS.MD_ADDITIONNAL_INFOS] = yup
-        .object({
-            languages: yup
-                .array()
-                .of(
-                    yup.object({
-                        language: yup.string(),
-                        code: yup.string(),
-                    })
-                )
-                .required(Translator.trans("service.wms_vector.new.step_additional_information.language_error"))
-                .min(1, Translator.trans("service.wms_vector.new.step_additional_information.language_error")),
-            charset: yup.string().required(Translator.trans("service.wms_vector.new.step_additional_information.charset_error")),
-            projection: yup.string().required(Translator.trans("service.wms_vector.new.step_additional_information.projection_error")),
-            encoding: yup.string().required(Translator.trans("service.wms_vector.new.step_additional_information.encoding_error")),
-            resolution: yup.number(),
-        })
-        .required();
-
-    schemas[STEPS.ACCESS_RESTRICTIONS] = yup.object({
-        share_with: yup.string().required(Translator.trans("service.wms_vector.new.step_access_retrictions.share_with_error")),
-    });
-
     /* l'etape courante */
     const [currentStep, setCurrentStep] = useState(STEPS.MD_UPLOAD_FILE);
 
@@ -138,6 +62,15 @@ const PublishNew: FC<PublishNewProps> = ({ datastoreId, pyramidId }) => {
         queryFn: () => api.service.getOfferings(datastoreId),
         refetchInterval: 10000,
     });
+
+    const commonValidation = useMemo(() => new CommonSchemasValidation(offeringsQuery.data), [offeringsQuery.data]);
+
+    // Definition du schema
+    const schemas = {};
+    schemas[STEPS.MD_UPLOAD_FILE] = commonValidation.getMDUploadFileSchema();
+    schemas[STEPS.MD_DESCRIPTION] = commonValidation.getMDDescriptionSchema();
+    schemas[STEPS.MD_ADDITIONNAL_INFOS] = commonValidation.getMDAdditionalInfoSchema();
+    schemas[STEPS.ACCESS_RESTRICTIONS] = commonValidation.getAccessRestrictionSchema();
 
     const form = useForm({
         resolver: yupResolver(schemas[currentStep]),
