@@ -55,6 +55,7 @@ const removeDiacritics = (str) => {
 };
 
 const regex = {
+    name_constraint: /^[\w-.]+$/,
     email: /^[\w-.]+@([\w-]+\.)+[\w-]{2,}$/,
 };
 

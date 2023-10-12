@@ -3,9 +3,10 @@ import { TestContext } from "yup";
 import functions from "../functions";
 
 const test = (value: FileList, ctx: TestContext) => {
-    if (value instanceof FileList && value.length === 0) {
-        return ctx.createError({ message: "Veuillez fournir un fichier de métadonnées" });
-    }
+    // TODO VOIR AVEC ARNEST
+    // if (value instanceof FileList && value.length === 0) {
+    //     return ctx.createError({ message: "Veuillez fournir un fichier de métadonnées" });
+    // }
     const file = value?.[0] ?? undefined;
 
     if (file instanceof File) {

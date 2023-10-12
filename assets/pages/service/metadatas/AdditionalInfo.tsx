@@ -5,13 +5,13 @@ import { useQuery } from "@tanstack/react-query";
 import { FC, useEffect, useMemo } from "react";
 import { Controller, UseFormReturn } from "react-hook-form";
 
-import api from "../../../../api";
-import AutocompleteSelect from "../../../../components/Input/AutocompleteSelect";
-import ignProducts from "../../../../data/md_resolutions.json";
-import RQKeys from "../../../../modules/RQKeys";
-import Translator from "../../../../modules/Translator";
-import { UploadTree, VectorDb } from "../../../../types/app";
-import { LanguageType, charsets, getLanguages } from "../../../../utils";
+import api from "../../../api";
+import AutocompleteSelect from "../../../components/Input/AutocompleteSelect";
+import ignProducts from "../../../data/md_resolutions.json";
+import RQKeys from "../../../modules/RQKeys";
+import Translator from "../../../modules/Translator";
+import { Pyramid, UploadTree, VectorDb } from "../../../types/app";
+import { LanguageType, charsets, getLanguages } from "../../../utils";
 
 const getCode = (epsg) => {
     if (!epsg) return null;
@@ -40,12 +40,12 @@ const getUploadFileType = (fileTree) => {
 };
 
 type AdditionalInfoProps = {
-    vectorDb: VectorDb;
+    storedData: VectorDb | Pyramid;
     visible: boolean;
     form: UseFormReturn;
     datastoreId: string;
 };
-const AdditionalInfo: FC<AdditionalInfoProps> = ({ vectorDb, datastoreId, visible, form }) => {
+const AdditionalInfo: FC<AdditionalInfoProps> = ({ storedData, datastoreId, visible, form }) => {
     const {
         register,
         formState: { errors },
@@ -54,7 +54,7 @@ const AdditionalInfo: FC<AdditionalInfoProps> = ({ vectorDb, datastoreId, visibl
     } = form;
 
     let projUrl;
-    const code = getCode(vectorDb.srs);
+    const code = getCode(storedData.srs);
     if (code) {
         projUrl = `http://www.opengis.net/def/crs/EPSG/0/${code}`;
     }
@@ -62,8 +62,8 @@ const AdditionalInfo: FC<AdditionalInfoProps> = ({ vectorDb, datastoreId, visibl
     const languagesOptions: LanguageType[] = useMemo(getLanguages, []);
 
     const fileTreeQuery = useQuery<UploadTree>({
-        queryKey: RQKeys.datastore_upload_file_tree(datastoreId, vectorDb.tags.upload_id),
-        queryFn: () => api.upload.getFileTree(datastoreId, vectorDb.tags.upload_id),
+        queryKey: RQKeys.datastore_upload_file_tree(datastoreId, storedData.tags.upload_id),
+        queryFn: () => api.upload.getFileTree(datastoreId, storedData.tags.upload_id),
         staleTime: 1800000,
     });
 
@@ -166,7 +166,7 @@ const AdditionalInfo: FC<AdditionalInfoProps> = ({ vectorDb, datastoreId, visibl
                 stateRelatedMessage={errors?.resolution?.message?.toString()}
                 nativeSelectProps={{
                     ...register("resolution"),
-                    defaultValue: 0,
+                    defaultValue: "",
                 }}
             >
                 <option value="">Aucune</option>

@@ -107,7 +107,7 @@ export type TypeInfosWithBbox =
 
 /** endpoints */
 export type DatastoreEndpoint = DatastoreEndpointResponseDto;
-export const EndpointTypes = EndpointDetailResponseDtoTypeEnum;
+export type EndpointTypes = `${EndpointDetailResponseDtoTypeEnum}`;
 
 export type CheckOrProcessingExecutionLogs = [string];
 export type CheckDetailed = CheckingExecutionDetailResponseDto & {
@@ -127,3 +127,23 @@ export type StoredDataReport = {
         logs: CheckOrProcessingExecutionLogs;
     };
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>> .theirs

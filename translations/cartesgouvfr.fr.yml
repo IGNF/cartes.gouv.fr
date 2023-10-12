@@ -262,7 +262,7 @@ service:
                 creation_date: "Date de la création de la ressource"
                 creation_date_error: "La date de création de la ressource est obligatoire"
                 resource_genealogy: "Généalogie de la ressource (optionnel)"
-                hint_resource_genealogy: "TODO[Explication du champ]"
+                hint_resource_genealogy: "Description du mode de production de la ressource"
                 resource_manager_title: "Responsable de la ressource"
                 organization: "Organisme"
                 hint_organization: "Nom de l'organisme responsable de la ressource  qui prend la responsabilité de la diffuser ou  qui est légitime pour rendre celle-ci visible et décider de son mode de diffusion"
@@ -298,6 +298,53 @@ service:
                     all_public: Tout public
                     your_community: Votre communauté d'appartenance
                     communities_or_users: Communautés ou utilisateurs choisis
+    tms:
+        new:
+            title: "Publier un service TMS"
+            loading_stored_data: "Chargement de la donnée stockée..."
+            publish: "Publier le service maintenant"
+            step1: "Source des métadonnées"
+            step2: "Description de la ressource"
+            step3: "Informations supplémentaires"
+            step4: ""
+            step_description:
+                description_title: "Description"
+                technical_name: "Nom technique du service"
+                technical_name_error: "Le nom technique est obligatoire"
+                technical_name_regex: "Le nom technique ne doit contenir que des lettres, chiffres, tirets (-), underscores (_), ou points (.)"
+                hint_technical_name: "Nom technique qui sera visible de vos utilisateurs dans l'adresse de votre service"
+                public_name: "Intitulé (nom public)"
+                hint_public_name: "Nom caractéristique et souvent unique sous lequel la ressource est connue"
+                public_name_error: "L'intitulé (nom public) est obligatoire"
+                description: "Résumé"
+                hint_description: "Bref résumé narratif du contenu de la ressource"
+                description_error: "Un résumé est obligatoire"
+                markdown_placeholder: "Veuillez saisir le texte Markdown"
+                identifier: "Identificateur de ressource unique"
+                hint_identifier: "Entrez une valeur identifiant la ressource de manière unique"
+                identifier_error: "L'identificateur est obligatoire"
+                identifier_regex: "L'identificateur ne doit contenir que des lettres, chiffres, tirets (-), underscores (_), ou points (.)"
+                category: "Catégorie thématique"
+                hint_category: "Utilisez l’auto-complétion ou saisissez librement des mots clés en appuyant sur Entrée après chaque mot"
+                category_error: "La catégorie thématique est obligatoire"
+                email_contact: "Email de contact sur les métadonnées"
+                hint_email_contact: "E-mail auprès duquel des compléments d'information peuvent être obtenus"
+                email_contact_mandatory_error: "l'email de contact est obligatoire"
+                email_contact_error: "l'email de contact n'est pas correct"
+                time_reference_title: "Référence temporelle"
+                creation_date: "Date de la création de la ressource"
+                creation_date_error: "La date de création de la ressource est obligatoire"
+                resource_genealogy: "Généalogie de la ressource (optionnel)"
+                hint_resource_genealogy: "Description du mode de production de la ressource"
+                resource_manager_title: "Responsable de la ressource"
+                organization: "Organisme"
+                hint_organization: "Nom de l'organisme responsable de la ressource  qui prend la responsabilité de la diffuser ou  qui est légitime pour rendre celle-ci visible et décider de son mode de diffusion"
+                organization_error: "l'organisme est obligatoire"
+                organization_email: "Email"
+                hint_organization_email: "Email de contact de l'organisme"
+                organization_email_mandatory_error: "l'email de l'organisme est obligatoire"
+                organization_email_error: "l'email de l'organisme n'est pas correct"
+
 pyramid_vector:
     new:
         title: "Générer une pyramide de tuiles vectorielles"
@@ -326,3 +373,7 @@ pyramid_vector:
             sample_explain: "Déplacez la carte ou utilisez l'outil de recherche pour choisir l'emplacement de votre échantillon. Choisissez un endroit où vous êtes certain de trouver des données. La taille de l'échantillon est limité à 10x10 tuiles vectorielles au niveau de zoom maximum que vous avez défini."
         generate_pyramid: "Générer la pyramide complète"
         generate_sample: "Générer l'échantillon"
+
+metadatas:
+    drag_and_drop_file: "Glissez-déposez votre fichier de métadonnées ici"
+    used_format: "Formats de fichiers autorisés : .xml"

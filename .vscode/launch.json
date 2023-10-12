@@ -1,6 +1,12 @@
 {
     "configurations": [
         {
+            "name": "Listen for Xdebug",
+            "type": "php",
+            "request": "launch",
+            "port": 9003
+        },
+        {
             "name": "Listen for Xdebug (in docker)",
             "type": "php",
             "request": "launch",
