@@ -1,16 +1,17 @@
-import { FC } from "react";
-import { useQuery } from "@tanstack/react-query";
-
-import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
-import RQKeys from "../../../modules/RQKeys";
-import api from "../../../api";
-import LoadingText from "../../../components/Utils/LoadingText";
-import Accordion from "@codegouvfr/react-dsfr/Accordion";
 import { fr } from "@codegouvfr/react-dsfr";
+import Accordion from "@codegouvfr/react-dsfr/Accordion";
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import { StoredDataReport } from "../../../types/app";
+import { useQuery } from "@tanstack/react-query";
+import { FC } from "react";
+
+import api from "../../../api";
+import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
+import LoadingText from "../../../components/Utils/LoadingText";
+import RQKeys from "../../../modules/RQKeys";
 import { CartesApiException } from "../../../modules/jsonFetch";
+import { StoredDataReport } from "../../../types/app";
 import Logs from "./Logs";
+import UploadFileTree from "./UploadFileTree";
 
 type StoredDataReportProps = {
     datastoreId: string;
@@ -30,11 +31,11 @@ const StoredDataReport: FC<StoredDataReportProps> = ({ datastoreId, storedDataId
         staleTime: 3600000,
     });
 
-    const title = `Rapport de génération de donnée stockée ${reportQuery?.data?.stored_data?.name ?? ""}`;
+    const pageTitle = `Rapport de génération de donnée stockée ${reportQuery?.data?.stored_data?.name ?? ""}`;
 
     return (
-        <DatastoreLayout datastoreId={datastoreId} documentTitle={title}>
-            <h1>{title}</h1>
+        <DatastoreLayout datastoreId={datastoreId} documentTitle={pageTitle}>
+            <h1>{pageTitle}</h1>
 
             {reportQuery.isLoading && <LoadingText as="h2" />}
 
@@ -63,9 +64,11 @@ const StoredDataReport: FC<StoredDataReportProps> = ({ datastoreId, storedDataId
 
                         <Accordion label="Fichiers déposés" defaultExpanded={true} className={fr.cx("fr-mt-2v")}>
                             {/* TODO : mettre en forme */}
-                            <pre>
+                            <UploadFileTree fileTree={reportQuery?.data?.input_upload?.file_tree} />
+                            {/* reportQuery?.data?.input_upload?.file_tree */}
+                            {/* <pre>
                                 <code>{JSON.stringify(reportQuery?.data?.input_upload.file_tree, null, 2)}</code>
-                            </pre>
+                            </pre> */}
                         </Accordion>
                     </Accordion>
 

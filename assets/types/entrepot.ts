@@ -2483,8 +2483,8 @@ export interface UploadSharedDetailResponseDto {
 
 /** Arborescence des fichiers liés à la livraison */
 export interface UploadTreeElementResponseDto {
-    type?: string;
-    name?: string;
+    type: string;
+    name: string;
     /** @format int64 */
     size?: number;
     children?: UploadTreeElementResponseDto[];
