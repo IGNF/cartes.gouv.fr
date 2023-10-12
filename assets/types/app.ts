@@ -127,23 +127,3 @@ export type StoredDataReport = {
         logs: CheckOrProcessingExecutionLogs;
     };
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
->>>>>>> .theirs
