@@ -1,42 +1,29 @@
-import { fr } from "@codegouvfr/react-dsfr";
-import { Alert } from "@codegouvfr/react-dsfr/Alert";
-import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
-import { Button } from "@codegouvfr/react-dsfr/Button";
-import { FC, useEffect, useState } from "react";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { FC, useEffect, useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
+import * as yup from "yup";
+import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
+import Translator from "../../../modules/Translator";
 import { useQuery } from "@tanstack/react-query";
 import RQKeys from "../../../modules/RQKeys";
 import api from "../../../api";
-import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
+import { StoredDataRelation, VectorDb } from "../../../types/app";
 import LoadingText from "../../../components/Utils/LoadingText";
-import Wait from "../../../components/Utils/Wait";
-import Translator from "../../../modules/Translator";
-import { CartesApiException } from "../../../modules/jsonFetch";
+import Alert from "@codegouvfr/react-dsfr/Alert";
+import Button from "@codegouvfr/react-dsfr/Button";
 import { routes } from "../../../router/router";
-import { StoredDataRelation, type VectorDb } from "../../../types/app";
-import AccessRestrictionForm from "./AccessRestrictionForm";
-import AdditionalInfoForm from "./metadata/AdditionalInfoForm";
-import DescriptionForm from "./metadata/DescriptionForm";
-import UploadMetadataForm from "./metadata/UploadMetadataForm";
-import TableForm from "./TableForm";
-import "../../../sass/components/spinner.scss";
-
-/**
- * Récupère le type de fichier (unknown, csv ou geopackage)
- * @param {Object} fileTree
- * @returns
- */
-const getUploadFileType = (fileTree) => {
-    let fileType = "unknown";
-
-    const directory = fileTree.filter((tree) => tree?.type === "DIRECTORY" && tree?.name === "data");
-    if (directory.length) {
-        const extensions = directory[0].children.filter((child) => child.type === "FILE").map((file) => file.name.split(".").pop().toLowerCase());
-        if (extensions.length) {
-            fileType = extensions[0];
-        }
-    }
-    return fileType;
-};
+import Stepper from "@codegouvfr/react-dsfr/Stepper";
+import TableInfosForm from "./TablesInfoForm";
+import { filterGeometricRelations } from "../../../helpers";
+import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
+import { fr } from "@codegouvfr/react-dsfr";
+import { CommonSchemasValidation } from "../common-schemas-validation";
+import { CartesApiException } from "../../../modules/jsonFetch";
+import UploadMDFile from "../metadatas/UploadMDFile";
+import Description from "../metadatas/Description";
+import AdditionalInfo from "../metadatas/AdditionalInfo";
+import AccessRestrictions from "../AccessRestrictions";
+import Wait from "../../../components/Utils/Wait";
 
 /**
  *
@@ -48,19 +35,32 @@ type WfsServiceNewProps = {
     vectorDbId: string;
 };
 
+type TableInfos = {
+    native_name?: string;
+    public_name?: string;
+    title: string;
+    description: string;
+    keywords?: string[];
+};
+
 /**
  * Formulaire general de création d'un service WFS
  */
 const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
     const STEPS = {
-        TABLES: 1,
-        METADATAS: 2,
-        DESCRIPTION: 3,
-        ADDITIONALINFORMATIONS: 4,
+        TABLES_INFOS: 1,
+        METADATAS_UPLOAD: 2,
+        METADATAS_DESCRIPTION: 3,
+        METADATAS_ADDITIONALINFORMATIONS: 4,
         ACCESSRESTRICTIONS: 5,
     };
 
-    const [currentStep, setCurrentStep] = useState(STEPS.TABLES);
+    /* l'etape courante */
+    const [currentStep, setCurrentStep] = useState(STEPS.TABLES_INFOS);
+    const [tables, setTables] = useState<StoredDataRelation[]>([]);
+
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+    const [validationError, setValidationError] = useState<CartesApiException>();
 
     const vectorDbQuery = useQuery({
         queryKey: RQKeys.datastore_stored_data(datastoreId, vectorDbId),
@@ -68,81 +68,108 @@ const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
         staleTime: 600000,
     });
 
-    const [fileType, setFileType] = useState<string | undefined>(undefined);
-    const [tables, setTables] = useState<StoredDataRelation[]>([]);
-    const [error, setError] = useState<CartesApiException>();
-    const [validationError, setValidationError] = useState<CartesApiException>();
+    const offeringsQuery = useQuery({
+        queryKey: RQKeys.datastore_offering_list(datastoreId),
+        queryFn: () => api.service.getOfferings(datastoreId),
+        refetchInterval: 10000,
+    });
 
-    const [result, setResult] = useState({});
-    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+    const commonValidation = useMemo(() => new CommonSchemasValidation(offeringsQuery.data), [offeringsQuery.data]);
+
+    // Definition du schema
+    const schemas = {};
+    schemas[STEPS.TABLES_INFOS] = yup.object().shape({
+        selected_tables: yup.array(yup.string()).min(1, "Veuillez choisir au moins une table").required("Veuillez choisir au moins une table"),
+        table_infos: yup.lazy(() => {
+            if (!selectedTables || selectedTables.length === 0) {
+                return yup.mixed().nullable().notRequired();
+            }
+
+            const table_schemas = {};
+            selectedTables.forEach((table) => {
+                table_schemas[table] = yup.object({
+                    public_name: yup.string().default(table),
+                    title: yup.string().required(`Le titre de la table ${table} est obligatoire`),
+                    description: yup.string().required(`Le résumé du contenu de la table ${table} est obligatoire`),
+                    keywords: yup.array().of(yup.string()),
+                });
+            });
+            return yup.object().shape(table_schemas);
+        }),
+    });
+    schemas[STEPS.METADATAS_UPLOAD] = commonValidation.getMDUploadFileSchema();
+    schemas[STEPS.METADATAS_DESCRIPTION] = commonValidation.getMDDescriptionSchema();
+    schemas[STEPS.METADATAS_ADDITIONALINFORMATIONS] = commonValidation.getMDAdditionalInfoSchema();
+    schemas[STEPS.ACCESSRESTRICTIONS] = commonValidation.getAccessRestrictionSchema();
 
     useEffect(() => {
-        (async () => {
-            try {
-                if (vectorDbQuery.data) {
-                    const relations = vectorDbQuery.data.type_infos?.relations ?? [];
+        if (!vectorDbQuery.data) return;
+        const relations = vectorDbQuery.data.type_infos?.relations ?? [];
+        const tables = filterGeometricRelations(relations, true);
+        setTables(tables);
+    }, [vectorDbQuery.data]);
 
-                    const tables = relations.filter((rel) => rel.type && rel.type === "TABLE");
-                    setTables(tables);
+    const form = useForm({
+        resolver: yupResolver(schemas[currentStep]),
+        mode: "onChange",
+    });
+    const {
+        formState: { errors },
+        getValues: getFormValues,
+        watch,
+        trigger,
+    } = form;
 
-                    // Le type de fichier associe
-                    const uploadId = vectorDbQuery.data.tags["upload_id"];
-                    const fileTree = await api.upload.getFileTree(datastoreId, uploadId);
-                    const fileType = getUploadFileType(fileTree);
-                    setFileType(fileType);
-                }
-            } catch (error) {
-                console.error(error);
-                setError(error as CartesApiException);
-            }
-        })();
-    }, [datastoreId, vectorDbQuery.data]);
+    const selectedTables = watch("selected_tables");
 
-    const previous = () => {
-        setCurrentStep(currentStep - 1);
+    // useEffect(() => {
+    //     // console.log(getFormValues("table_infos"));
+    //     console.log(selectedTables);
+    // }, [selectedTables, getFormValues]);
+
+    const format = (table_infos: Record<string, TableInfos>) => {
+        const tInfos: object[] = [];
+        for (const [name, infos] of Object.entries(table_infos)) {
+            tInfos.push({
+                native_name: name,
+                ...infos,
+            });
+        }
+        return tInfos;
     };
 
-    const next = () => {
-        if (currentStep + 1 > STEPS.ACCESSRESTRICTIONS) {
+    const previousStep = () => setCurrentStep((currentStep) => currentStep - 1);
+
+    const nextStep = async () => {
+        const isStepValid = await trigger(undefined, { shouldFocus: true }); // demande de valider le formulaire
+        if (!isStepValid) return;
+
+        if (currentStep < Object.values(STEPS).length) {
+            setCurrentStep((currentStep) => currentStep + 1);
             return;
         }
-        setCurrentStep(currentStep + 1);
-    };
 
-    // Supprime les valeurs vides ou nulles
-    const filter = (result) => {
-        const obj = { ...result };
-        Object.keys(obj).forEach((k) => (obj[k] === null || obj[k] === "") && delete obj[k]);
-        return obj;
-    };
+        setIsSubmitting(true);
 
-    const onValid = (values) => {
-        const res = { ...result, ...values };
-        setResult(res);
-        next();
+        const values = { ...getFormValues() };
+        values.table_infos = format(values.table_infos);
 
-        // dernière étape du formulaire
-        if (currentStep === STEPS.ACCESSRESTRICTIONS) {
-            setIsSubmitting(true);
-
-            const filtered = filter(res);
-            api.wfs
-                .add(datastoreId, vectorDbId, filtered)
-                .then(() => {
-                    if (vectorDbQuery.data?.tags?.datasheet_name) {
-                        routes.datastore_datasheet_view({ datastoreId, datasheetName: vectorDbQuery.data?.tags.datasheet_name, activeTab: "services" }).push();
-                    } else {
-                        routes.datasheet_list({ datastoreId }).push();
-                    }
-                })
-                .catch((error) => {
-                    console.error(error);
-                    setValidationError(error as CartesApiException);
-                })
-                .finally(() => {
-                    setIsSubmitting(false);
-                });
-        }
+        api.wfs
+            .add(datastoreId, vectorDbId, values)
+            .then(() => {
+                if (vectorDbQuery.data?.tags?.datasheet_name) {
+                    routes.datastore_datasheet_view({ datastoreId, datasheetName: vectorDbQuery.data?.tags.datasheet_name, activeTab: "services" }).push();
+                } else {
+                    routes.datasheet_list({ datastoreId }).push();
+                }
+            })
+            .catch((error) => {
+                console.error(error);
+                setValidationError(error as CartesApiException);
+            })
+            .finally(() => {
+                setIsSubmitting(false);
+            });
     };
 
     return (
@@ -157,8 +184,6 @@ const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
                     title={Translator.trans("get_stored_data_failed")}
                     description={<Button linkProps={routes.datasheet_list({ datastoreId }).link}>{Translator.trans("back_to_my_datas")}</Button>}
                 />
-            ) : error !== undefined ? (
-                <Alert severity="error" closable={true} title={Translator.trans("get_filetree_failed")} />
             ) : (
                 <>
                     <Stepper
@@ -176,27 +201,49 @@ const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
                             title={Translator.trans("commons.error")}
                         />
                     )}
-                    <TableForm tables={tables} visible={currentStep === STEPS.TABLES} onValid={onValid} />
-                    <UploadMetadataForm visible={currentStep === STEPS.METADATAS} onPrevious={previous} onSubmit={next} />
-                    <DescriptionForm
-                        datastoreId={datastoreId}
-                        storedDataName={vectorDbQuery.data.name}
-                        visible={currentStep === STEPS.DESCRIPTION}
-                        onPrevious={previous}
-                        onValid={onValid}
+                    <TableInfosForm
+                        visible={currentStep === STEPS.TABLES_INFOS}
+                        tables={tables}
+                        form={form}
+                        state={errors.selected_tables ? "error" : "default"}
+                        stateRelatedMessage={errors?.selected_tables?.message?.toString()}
                     />
-                    <AdditionalInfoForm
+                    <UploadMDFile visible={currentStep === STEPS.METADATAS_UPLOAD} form={form} />
+                    <Description storedData={vectorDbQuery.data} endpointType={"WFS"} visible={currentStep === STEPS.METADATAS_DESCRIPTION} form={form} />
+                    <AdditionalInfo
+                        datastoreId={datastoreId}
                         storedData={vectorDbQuery.data}
-                        fileType={fileType}
-                        visible={currentStep === STEPS.ADDITIONALINFORMATIONS}
-                        onPrevious={previous}
-                        onValid={onValid}
+                        visible={currentStep === STEPS.METADATAS_ADDITIONALINFORMATIONS}
+                        form={form}
                     />
-                    <AccessRestrictionForm
-                        datastoreId={datastoreId}
-                        visible={currentStep === STEPS.ACCESSRESTRICTIONS}
-                        onPrevious={previous}
-                        onValid={onValid}
+                    <AccessRestrictions datastoreId={datastoreId} endpointType={"WFS"} visible={currentStep === STEPS.ACCESSRESTRICTIONS} form={form} />
+                    {validationError && (
+                        <Alert
+                            className="fr-preline"
+                            closable
+                            description={validationError.message}
+                            severity="error"
+                            title={Translator.trans("commons.error")}
+                        />
+                    )}
+                    <ButtonsGroup
+                        className={fr.cx("fr-mt-2w")}
+                        alignment="between"
+                        buttons={[
+                            {
+                                children: Translator.trans("previous_step"),
+                                iconId: "fr-icon-arrow-left-fill",
+                                priority: "tertiary",
+                                onClick: previousStep,
+                                disabled: currentStep === STEPS.METADATAS_UPLOAD,
+                            },
+                            {
+                                children:
+                                    currentStep < Object.values(STEPS).length ? Translator.trans("continue") : Translator.trans("service.wfs.new.publish"),
+                                onClick: nextStep,
+                            },
+                        ]}
+                        inlineLayoutWhen="always"
                     />
                 </>
             )}

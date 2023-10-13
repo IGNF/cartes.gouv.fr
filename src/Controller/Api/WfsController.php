@@ -32,10 +32,10 @@ class WfsController extends AbstractController
         string $datastoreId, 
         string $storedDataId, 
         #[MapRequestPayload] WfsAddDTO $dto): JsonResponse
-    {
+    {        
         try {
             $relations = [];
-            foreach ($dto->data_tables as $table) {
+            foreach ($dto->table_infos as $table) {
                 $relation = [
                     'native_name' => $table->native_name,
                     'title' => $table->title,
@@ -53,8 +53,8 @@ class WfsController extends AbstractController
 
             $body = [
                 'type' => 'WFS',
-                'name' => $dto->data_public_name,
-                'layer_name' => $dto->data_technical_name,
+                'name' => $dto->public_name,
+                'layer_name' => $dto->technical_name,
                 'type_infos' => [
                     'used_data' => [[
                         'relations' => $relations,

@@ -135,7 +135,7 @@ const PublishNew: FC<PublishNewProps> = ({ datastoreId, pyramidId }) => {
                         title={Translator.trans(`service.tms.new.step${currentStep}`)}
                     />
                     <UploadMDFile visible={currentStep === STEPS.MD_UPLOAD_FILE} form={form} />
-                    <Description storedData={pyramidQuery.data} serviceType={"TMS"} visible={currentStep === STEPS.MD_DESCRIPTION} form={form} />
+                    <Description storedData={pyramidQuery.data} endpointType={"WMTS-TMS"} visible={currentStep === STEPS.MD_DESCRIPTION} form={form} />
                     <AdditionalInfo datastoreId={datastoreId} storedData={pyramidQuery.data} visible={currentStep === STEPS.MD_ADDITIONNAL_INFOS} form={form} />
                     <AccessRestrictions datastoreId={datastoreId} endpointType={"WMTS-TMS"} visible={currentStep === STEPS.ACCESS_RESTRICTIONS} form={form} />
                     {validationError && (

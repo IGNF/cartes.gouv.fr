@@ -1,98 +1,69 @@
-import { fr } from "@codegouvfr/react-dsfr";
-import { Button } from "@codegouvfr/react-dsfr/Button";
-import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
-import Input from "@codegouvfr/react-dsfr/Input";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { FC, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
-import * as yup from "yup";
-
-import AutocompleteSelect from "../../../components/Input/AutocompleteSelect";
+import { FC, useEffect, useState } from "react";
+import { Controller, UseFormReturn } from "react-hook-form";
 import Translator from "../../../modules/Translator";
-import { StoredDataRelation } from "../../../types/app";
+import { fr } from "@codegouvfr/react-dsfr";
+import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
+import Input from "@codegouvfr/react-dsfr/Input";
+import AutocompleteSelect from "../../../components/Input/AutocompleteSelect";
 
 // Themes et mot cles INSPIRE
 import { getInspireKeywords } from "../../../utils";
+import { StoredDataDetailsRelationDto } from "../../../types/entrepot";
 
-type TableInfos = {
-    native_name?: string;
-    public_name?: string;
-    title: string;
-    description: string;
-    keywords?: string[];
-};
-
-type TableFormProps = {
-    tables: StoredDataRelation[];
+type TablesInfoFormProps = {
+    tables: StoredDataDetailsRelationDto[];
     visible: boolean;
-    onValid: (values) => void;
+    form: UseFormReturn;
+    state?: "default" | "error" | "success";
+    stateRelatedMessage?: string;
 };
 
-const TableForm: FC<TableFormProps> = ({ tables, visible, onValid }) => {
-    const keywords = getInspireKeywords();
-
-    const [selectedTables, setSelectedTables] = useState<Set<string>>(new Set());
-    const schema = yup.object().shape({
-        table_infos: yup.lazy(() => {
-            if (!selectedTables || selectedTables.size === 0) {
-                return yup.mixed().nullable().notRequired();
-            }
-
-            const table_schemas = {};
-            selectedTables.forEach((table) => {
-                table_schemas[table] = yup.object({
-                    public_name: yup.string().default(table),
-                    title: yup.string().required(`Le titre de la table ${table} est obligatoire`),
-                    description: yup.string().required(`Le résumé du contenu de la table ${table} est obligatoire`),
-                    keywords: yup.array().of(yup.string()),
-                });
-            });
-
-            return yup.object().shape(table_schemas);
-        }),
-    });
-
+const TableInfosForm: FC<TablesInfoFormProps> = ({ visible, tables, state, stateRelatedMessage, form }) => {
     const {
         register,
-        control,
-        handleSubmit,
-        formState: { errors, isSubmitted },
+        trigger,
+        setValue: setFormValue,
         getValues: getFormValues,
-    } = useForm({ resolver: yupResolver(schema), mode: "onChange" });
+        formState: { errors },
+        control,
+    } = form;
 
-    const format = (values: { table_infos: Record<string, TableInfos> }) => {
-        const data_tables: object[] = [];
-        for (const [name, infos] of Object.entries(values.table_infos)) {
-            console.log(infos);
-            data_tables.push({
-                native_name: name,
-                ...infos,
-            });
-        }
-        return { data_tables };
-    };
+    const keywords = getInspireKeywords();
+    const [selectedTables, setSelectedTables] = useState<string[]>([]);
 
-    const onSubmit = () => {
-        const values = getFormValues();
-        if (selectedTables.size > 0) {
-            onValid(format(values as { table_infos: Record<string, TableInfos> }));
-        }
-    };
+    // Lorsqu'on revient sur ce composant, on recupere les anciennes valeur
+    useEffect(() => {
+        const prevTableInfos = getFormValues("table_infos") ?? {};
 
+        const tableSet = new Set<string>();
+        Object.keys(prevTableInfos).forEach((table) => {
+            tableSet.add(table);
+        });
+
+        setFormValue("table_infos", prevTableInfos);
+        setSelectedTables(Array.from(tableSet));
+    }, [getFormValues, setFormValue]);
+
+    // cocher/decocher une table
     const toggleTable = (tableName: string) => {
-        if (selectedTables.has(tableName)) {
-            selectedTables.delete(tableName);
-        } else {
-            selectedTables.add(tableName);
-        }
-        setSelectedTables(new Set(selectedTables));
+        const tableSet = new Set(selectedTables);
+        const exists = selectedTables.includes(tableName);
+        exists ? tableSet.delete(tableName) : tableSet.add(tableName);
+
+        setSelectedTables(Array.from(tableSet));
+        trigger("selected_tables");
     };
+
+    /* Mise a jour de la valeur [selected_tables] du formulaire lorsque
+    selectedTables change */
+    useEffect(() => {
+        setFormValue("selected_tables", selectedTables);
+    }, [selectedTables, setFormValue]);
 
     return (
         <div className={fr.cx("fr-my-2v", !visible && "fr-hidden")}>
             <h3>{Translator.trans("service.wfs.new.tables_form.title")}</h3>
             <p>{Translator.trans("mandatory_fields")}</p>
-
             {tables.map((table) => {
                 return (
                     <div className={fr.cx("fr-mb-4v")} key={table.name}>
@@ -104,19 +75,18 @@ const TableForm: FC<TableFormProps> = ({ tables, visible, onValid }) => {
                                     nativeInputProps: {
                                         value: table.name,
                                         onChange: () => toggleTable(table.name),
-                                        checked: selectedTables.has(table.name),
+                                        checked: selectedTables.includes(table.name),
                                     },
                                 },
                             ]}
                         />
-                        {selectedTables.has(table.name) && (
+                        {selectedTables.includes(table.name) && (
                             <div className={fr.cx("fr-ml-8v")}>
                                 <Input
                                     label={Translator.trans("service.wfs.new.tables_form.table.public_name")}
                                     hintText={Translator.trans("service.wfs.new.tables_form.table.hint_public_name")}
                                     nativeInputProps={{
-                                        defaultValue: table.name,
-                                        // @ts-expect-error il n'y a pas vraiment d'erreur, faux positif de typescript
+                                        defaultValue: getFormValues(`table_infos.${table.name}.public_name`) ?? table.name,
                                         ...register(`table_infos.${table.name}.public_name`),
                                     }}
                                     state={errors?.table_infos?.[table.name]?.public_name?.message ? "error" : "default"}
@@ -126,7 +96,7 @@ const TableForm: FC<TableFormProps> = ({ tables, visible, onValid }) => {
                                     label={Translator.trans("service.wfs.new.tables_form.table.title")}
                                     hintText={Translator.trans("service.wfs.new.tables_form.table.hint_title")}
                                     nativeInputProps={{
-                                        // @ts-expect-error il n'y a pas vraiment d'erreur, faux positif de typescript
+                                        defaultValue: getFormValues(`table_infos.${table.name}.title`),
                                         ...register(`table_infos.${table.name}.title`),
                                     }}
                                     state={errors?.table_infos?.[table.name]?.title?.message ? "error" : "default"}
@@ -137,7 +107,7 @@ const TableForm: FC<TableFormProps> = ({ tables, visible, onValid }) => {
                                     hintText={Translator.trans("service.wfs.new.tables_form.table.hint_description")}
                                     textArea={true}
                                     nativeTextAreaProps={{
-                                        // @ts-expect-error il n'y a pas vraiment d'erreur, faux positif de typescript
+                                        defaultValue: getFormValues(`table_infos.${table.name}.description`),
                                         ...register(`table_infos.${table.name}.description`),
                                     }}
                                     state={errors?.table_infos?.[table.name]?.description?.message ? "error" : "default"}
@@ -145,10 +115,8 @@ const TableForm: FC<TableFormProps> = ({ tables, visible, onValid }) => {
                                 />
 
                                 <Controller
-                                    // @ts-expect-error fausse alerte
                                     name={`table_infos.${table.name}.keywords`}
                                     control={control}
-                                    // @ts-expect-error fausse alerte
                                     defaultValue={getFormValues(`table_infos.${table.name}.keywords`) ?? []}
                                     render={({ field }) => {
                                         return (
@@ -164,7 +132,6 @@ const TableForm: FC<TableFormProps> = ({ tables, visible, onValid }) => {
                                                 onChange={(_, value) => field.onChange(value)}
                                                 // @ts-expect-error fausse alerte
                                                 controllerField={field}
-                                                // @ts-expect-error fausse alerte
                                                 defaultValue={getFormValues(`table_infos.${table.name}.keywords`) ?? []}
                                             />
                                         );
@@ -175,14 +142,9 @@ const TableForm: FC<TableFormProps> = ({ tables, visible, onValid }) => {
                     </div>
                 );
             })}
-            {isSubmitted && selectedTables.size === 0 && (
-                <div className={fr.cx("fr-messages-group", "fr-my-2v")} aria-live="assertive">
-                    <p className={fr.cx("fr-message", "fr-message--error")}>{"Veuillez choisir au moins une table"}</p>
-                </div>
-            )}
-            <Button onClick={handleSubmit(onSubmit)}>{Translator.trans("continue")}</Button>
+            {state === "error" && stateRelatedMessage !== undefined && <p className={fr.cx("fr-error-text")}>{stateRelatedMessage}</p>}
         </div>
     );
 };
 
-export default TableForm;
+export default TableInfosForm;

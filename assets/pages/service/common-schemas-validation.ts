@@ -82,6 +82,10 @@ export class CommonSchemasValidation {
     }
 
     getAccessRestrictionSchema() {
-        return yup.string().required(Translator.trans("share_with_error"));
+        return yup
+            .object({
+                share_with: yup.string().required(Translator.trans("share_with_error")),
+            })
+            .required();
     }
 }

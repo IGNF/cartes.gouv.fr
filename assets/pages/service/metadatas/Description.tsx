@@ -11,30 +11,33 @@ import { Pyramid, VectorDb } from "../../../types/app";
 import { getInspireKeywords, removeDiacritics } from "../../../utils";
 import Select from "@codegouvfr/react-dsfr/Select";
 import { regex } from "../../../utils";
+import { EndpointTypes } from "../../../types/app";
 
 type DescriptionProps = {
     storedData: VectorDb | Pyramid;
-    serviceType: "WFS" | "WMS-VECTOR" | "TMS";
+    endpointType: EndpointTypes;
     visible: boolean;
     form: UseFormReturn;
 };
 
-const getSuffix = (serviceType) => {
-    switch (serviceType) {
+const getSuffix = (endpointType) => {
+    switch (endpointType) {
         case "WFS":
             return "wfs";
         case "WMS-VECTOR":
             return "wmsv";
-        case "TMS":
+        case "WMTS-TMS":
             return "tms";
+        default:
+            return "other"; // TODO
     }
 };
 
-const Description: FC<DescriptionProps> = ({ storedData, serviceType, visible, form }) => {
+const Description: FC<DescriptionProps> = ({ storedData, endpointType, visible, form }) => {
     const keywords = getInspireKeywords();
     const now = datefnsFormat(new Date(), "yyyy-MM-dd");
 
-    const suffix = getSuffix(serviceType);
+    const suffix = getSuffix(endpointType);
 
     const {
         register,
