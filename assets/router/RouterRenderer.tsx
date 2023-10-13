@@ -36,8 +36,7 @@ const StoredDataReport = lazy(() => import("../pages/stored_data/StoredDataRepor
 const DatastoreCreationForm = lazy(() => import("../pages/contact/datastore/DatastoreCreationForm"));
 const Confirm = lazy(() => import("../pages/contact/datastore/Confirmation"));
 
-// TODO REMETTRE const WfsServiceNew = lazy(() => import("../pages/service/wfs/WfsServiceNew"));
-const WfsServiceNew = lazy(() => import("../pages/service/wfs/WfsServiceNew2"));
+const WfsServiceNew = lazy(() => import("../pages/service/wfs/WfsServiceNew"));
 const WmsVectorServiceNew = lazy(() => import("../pages/service/wms-vector/WmsVectorServiceNew"));
 const PyramidVectorNew = lazy(() => import("../pages/service/tms/PyramidVectorNew"));
 const PublishTmsServiceNew = lazy(() => import("../pages/service/tms/PublishNew"));
