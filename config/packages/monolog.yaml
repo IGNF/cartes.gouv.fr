@@ -53,12 +53,9 @@ when@prod:
 
         handlers:
             main:
-                type: rotating_file
-                path: "%kernel.logs_dir%/%kernel.environment%.log"
+                type: stream
+                path: php://stdout
                 level: info
-                # max number of log files to keep
-                # defaults to zero, which means infinite files
-                max_files: 10
             mailer:
                 type: rotating_file
                 path: "%kernel.logs_dir%/mailer.log"
