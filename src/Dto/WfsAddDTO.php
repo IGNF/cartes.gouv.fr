@@ -57,13 +57,13 @@ class WfsAddDTO {
             'choices' => ['','25000','75000','100000','150000', '200000','250000', '1000000'], // TODO NON EXHAUSTI
             'message' => 'common.resolution_error'
         ])]
-        public readonly string $resolution,
+        public readonly ? string $resolution,
 
         #[Assert\Choice([
             'choices' => ['','dataset','series'], 
             'message' => 'common.resource_genealogy_error'
         ])]
-        public readonly string $resource_genealogy,
+        public readonly ? string $resource_genealogy,
 
 		#[Assert\Choice([
             'choices' => ['all_public','your_community'], 	// TODO NON EXHAUSTIF
