@@ -55,7 +55,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
         staleTime: 20000,
         refetchInterval: 20000,
         retry: false,
-        enabled: !datasheetDeleteMutation.isLoading,
+        enabled: !datasheetDeleteMutation.isPending,
     });
 
     return (
@@ -132,7 +132,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                 </>
             )}
 
-            {datasheetDeleteMutation.isLoading && (
+            {datasheetDeleteMutation.isPending && (
                 <Wait>
                     <div className={fr.cx("fr-container")}>
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>

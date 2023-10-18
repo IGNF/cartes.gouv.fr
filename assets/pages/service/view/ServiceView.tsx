@@ -65,16 +65,16 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
                 <>
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-4w")}>
                         {getBackBtn(datasheetName)}
-                        {serviceQuery.data.layer_name}
-                        <Badge noIcon={true} severity="info" className={fr.cx("fr-ml-2w")}>
-                            {serviceQuery.data.type}
-                        </Badge>
+                        {serviceQuery?.data?.layer_name}
+                        {serviceQuery?.data?.type && (
+                            <Badge noIcon={true} severity="info" className={fr.cx("fr-ml-2w")}>
+                                {serviceQuery?.data?.type}
+                            </Badge>
+                        )}
                     </div>
 
                     <div className={fr.cx("fr-grid-row", "fr-mb-4w")}>
-                        <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
-                            <RMap service={serviceQuery.data} />
-                        </div>
+                        <div className={fr.cx("fr-col-12", "fr-col-md-8")}>{serviceQuery.data && <RMap service={serviceQuery.data} />}</div>
                         <div className={fr.cx("fr-col-12", "fr-col-md-4", "fr-p-1w", "fr-px-2w")}>
                             <div className={fr.cx("fr-grid-row")}>
                                 <strong className={fr.cx("fr-text--xl")}>Diffuser le service</strong>
@@ -106,7 +106,9 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
                                 <strong>Adresse du service de données</strong>
                             </div>
 
-                            <TextCopyToClipboard text={serviceQuery.data.urls.map((url) => url.url).join(",")} className="fr-mb-4w" />
+                            {serviceQuery?.data?.urls && (
+                                <TextCopyToClipboard text={serviceQuery?.data?.urls.map((url) => url.url).join(",")} className="fr-mb-4w" />
+                            )}
                         </div>
                     </div>
                 </>

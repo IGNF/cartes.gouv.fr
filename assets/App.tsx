@@ -6,13 +6,7 @@ import RouterRenderer from "./router/RouterRenderer";
 import { RouteProvider } from "./router/router";
 import { FC } from "react";
 
-const queryClient = new QueryClient({
-    defaultOptions: {
-        queries: {
-            useErrorBoundary: false,
-        },
-    },
-});
+const queryClient = new QueryClient();
 
 const App: FC = () => {
     return (
