@@ -1,9 +1,14 @@
 <!DOCTYPE html>
 <html lang="{{ app.request.getLocale() }}">
     <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>{% block title %}cartes.gouv.fr{% endblock %}</title>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="format-detection" content="telephone=no" />
+        <title>
+            {% block title %}
+                cartes.gouv.fr
+            {% endblock %}
+        </title>
 
         <link rel="apple-touch-icon" href="{{ asset('dsfr/favicon/apple-touch-icon.png') }}" />
         <link rel="icon" href="{{ asset('dsfr/favicon/favicon.svg') }}" type="image/svg+xml" />
@@ -13,11 +18,7 @@
         <link rel="stylesheet" href="{{ asset('dsfr/utility/icons/icons.min.css') }}" />
         <link rel="stylesheet" href="{{ asset('dsfr/dsfr.min.css') }}" />
 
-        {% set fonts_list = [
-            "Marianne-Regular",
-            "Marianne-Medium",
-            "Marianne-Bold",
-        ] %}
+        {% set fonts_list = ['Marianne-Regular', 'Marianne-Medium', 'Marianne-Bold'] %}
 
         {% for font_name in fonts_list %}
             <link rel="preload" href="{{ asset('dsfr/fonts/' ~ font_name ~ '.woff2') }}" as="font" crossorigin="anonymous" />
@@ -32,10 +33,11 @@
         {% endblock %}
     </head>
     <body>
-        {% block body %}{% endblock %}
+        {% block body %}
+        {% endblock %}
 
         {# bazinga traducteur #}
         <script src="{{ asset('bundles/bazingajstranslation/js/translator.min.js') }}"></script>
-        <script src="{{ path('bazinga_jstranslation_js', { 'domain': 'cartesgouvfr', 'locales': 'fr' }) }}"></script>
+        <script src="{{ path('bazinga_jstranslation_js', { domain: 'cartesgouvfr', locales: 'fr' }) }}"></script>
     </body>
 </html>
