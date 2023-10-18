@@ -5,8 +5,9 @@ import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
+import { symToStr } from "tsafe/symToStr";
 import * as yup from "yup";
 
 import api from "../../../api";
@@ -18,41 +19,41 @@ import Translator from "../../../modules/Translator";
 import { CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
 import type { Service, StoredDataRelation, VectorDb } from "../../../types/app";
-import { regex } from "../../../utils";
 import validations from "../../../validations";
+import AccessRestrictions from "../AccessRestrictions";
 import TableSelection from "../TableSelection";
-import AccessRestrictions from "./AccessRestrictions";
+import { CommonSchemasValidation } from "../common-schemas-validation";
+import AdditionalInfo from "../metadatas/AdditionalInfo";
+import Description from "../metadatas/Description";
+import UploadMDFile from "../metadatas/UploadMDFile";
 import UploadStyleFile from "./UploadStyleFile";
-import AdditionalInfo from "./metadata/AdditionalInfo";
-import Description from "./metadata/Description";
-import UploadMetadata from "./metadata/UploadMetadata";
 
 import "../../../sass/components/spinner.scss";
 
 const createFormData = (formValues: object) => {
     const fd = new FormData();
 
-    fd.append("category", formValues["category"]);
-    fd.append("charset", formValues["charset"]);
-    fd.append("creation_date", formValues["creation_date"]);
-    fd.append("description", formValues["description"]);
-    fd.append("email_contact", formValues["email_contact"]);
-    fd.append("encoding", formValues["encoding"]);
-    fd.append("identifier", formValues["identifier"]);
-    fd.append("languages", JSON.stringify(formValues["languages"]));
-    fd.append("selected_tables", JSON.stringify(formValues["selected_tables"]));
-    fd.append("organization", formValues["organization"]);
-    fd.append("organization_email", formValues["organization_email"]);
-    fd.append("projection", formValues["projection"]);
-    fd.append("public_name", formValues["public_name"]);
-    fd.append("resolution", formValues["resolution"]);
-    fd.append("resource_genealogy", formValues["resource_genealogy"]);
-    fd.append("share_with", formValues["share_with"]);
-    fd.append("technical_name", formValues["technical_name"]);
+    fd.set("category", formValues["category"]);
+    fd.set("charset", formValues["charset"]);
+    fd.set("creation_date", formValues["creation_date"]);
+    fd.set("description", formValues["description"]);
+    fd.set("email_contact", formValues["email_contact"]);
+    fd.set("encoding", formValues["encoding"]);
+    fd.set("identifier", formValues["identifier"]);
+    fd.set("languages", JSON.stringify(formValues["languages"]));
+    fd.set("selected_tables", JSON.stringify(formValues["selected_tables"]));
+    fd.set("organization", formValues["organization"]);
+    fd.set("organization_email", formValues["organization_email"]);
+    fd.set("projection", formValues["projection"]);
+    fd.set("public_name", formValues["public_name"]);
+    fd.set("resolution", formValues["resolution"]);
+    fd.set("resource_genealogy", formValues["resource_genealogy"]);
+    fd.set("share_with", formValues["share_with"]);
+    fd.set("technical_name", formValues["technical_name"]);
 
     // filtrer en fonction des tables sélectionnées
     formValues["selected_tables"].forEach((tableName) => {
-        fd.append(`style_${tableName}`, formValues["style_files"]?.[tableName]?.[0]);
+        fd.set(`style_${tableName}`, formValues["style_files"]?.[tableName]?.[0]);
     });
 
     return fd;
@@ -64,15 +65,15 @@ type WmsVectorServiceNewProps = {
 };
 const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vectorDbId }) => {
     const STEPS = {
-        TABLES_SELECTION: 1,
+        TABLES_INFOS: 1,
         STYLE_FILE: 2,
-        METADATA: 3,
-        DESCRIPTION: 4,
-        ADDITIONALINFORMATIONS: 5,
+        METADATAS_UPLOAD: 3,
+        METADATAS_DESCRIPTION: 4,
+        METADATAS_ADDITIONALINFORMATIONS: 5,
         ACCESSRESTRICTIONS: 6,
     };
 
-    const [currentStep, setCurrentStep] = useState(STEPS.TABLES_SELECTION);
+    const [currentStep, setCurrentStep] = useState(STEPS.TABLES_INFOS);
 
     const vectorDbQuery = useQuery({
         queryKey: RQKeys.datastore_stored_data(datastoreId, vectorDbId),
@@ -86,8 +87,11 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
         refetchInterval: 10000,
     });
 
+    const commonValidation = useMemo(() => new CommonSchemasValidation(offeringsQuery.data), [offeringsQuery.data]);
+
+    // Definition du schema
     const schemas = {};
-    schemas[STEPS.TABLES_SELECTION] = yup.object({
+    schemas[STEPS.TABLES_INFOS] = yup.object({
         selected_tables: yup.array(yup.string()).min(1, "Veuillez choisir au moins une table").required("Veuillez choisir au moins une table"),
     });
     schemas[STEPS.STYLE_FILE] = yup.object({
@@ -111,80 +115,10 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
             return yup.object().shape(styleFiles);
         }),
     });
-    schemas[STEPS.METADATA] = yup.object().shape({
-        is_upload_file: yup.string().oneOf(["true", "false"]).required().default("false"),
-        metadata_file_content: yup.mixed().when("is_upload_file", {
-            is: "true",
-            then: () =>
-                yup
-                    .mixed()
-                    .required()
-                    .test({
-                        name: "is-valid-metadata",
-                        async test(value, ctx) {
-                            return validations.metadata.test(value as FileList, ctx);
-                        },
-                    }),
-        }),
-    });
-    schemas[STEPS.DESCRIPTION] = yup
-        .object({
-            technical_name: yup
-                .string()
-                .required(Translator.trans("service.wms_vector.new.step_description.technical_name_error"))
-                .matches(/^[\w-.]+$/, Translator.trans("service.wms_vector.new.step_description.technical_name_regex"))
-                .test({
-                    name: "is-unique",
-                    test(technicalName, ctx) {
-                        const technicalNameList = offeringsQuery?.data?.map((data) => data?.layer_name) ?? [];
-                        if (technicalNameList?.includes(technicalName)) {
-                            return ctx.createError({ message: `"${technicalName}" : Ce nom technique existe déjà` });
-                        }
-
-                        return true;
-                    },
-                }),
-            public_name: yup.string().required(Translator.trans("service.wms_vector.new.step_description.public_name_error")),
-            description: yup.string().required(Translator.trans("service.wms_vector.new.step_description.description_error")),
-            identifier: yup.string().required(Translator.trans("service.wms_vector.new.step_description.identifier_error")),
-            category: yup
-                .array(yup.string())
-                .min(1, Translator.trans("service.wms_vector.new.step_description.category_error"))
-                .required(Translator.trans("service.wms_vector.new.step_description.category_error")),
-            email_contact: yup
-                .string()
-                .required(Translator.trans("service.wms_vector.new.step_description.email_contact_mandatory_error"))
-                .matches(regex.email, Translator.trans("service.wms_vector.new.step_description.email_contact_error")),
-            creation_date: yup.date().required(Translator.trans("service.wms_vector.new.step_description.creation_date_error")),
-            resource_genealogy: yup.string(),
-            organization: yup.string().required(Translator.trans("service.wms_vector.new.step_description.organization_error")),
-            organization_email: yup
-                .string()
-                .required(Translator.trans("service.wms_vector.new.step_description.organization_email_mandatory_error"))
-                .matches(regex.email, Translator.trans("service.wms_vector.new.step_description.organization_email_error")),
-        })
-        .required();
-    schemas[STEPS.ADDITIONALINFORMATIONS] = yup
-        .object({
-            languages: yup
-                .array()
-                .of(
-                    yup.object({
-                        language: yup.string(),
-                        code: yup.string(),
-                    })
-                )
-                .required(Translator.trans("service.wms_vector.new.step_additional_information.language_error"))
-                .min(1, Translator.trans("service.wms_vector.new.step_additional_information.language_error")),
-            charset: yup.string().required(Translator.trans("service.wms_vector.new.step_additional_information.charset_error")),
-            projection: yup.string().required(Translator.trans("service.wms_vector.new.step_additional_information.projection_error")),
-            encoding: yup.string().required(Translator.trans("service.wms_vector.new.step_additional_information.encoding_error")),
-            resolution: yup.number(),
-        })
-        .required();
-    schemas[STEPS.ACCESSRESTRICTIONS] = yup.object({
-        share_with: yup.string().required(Translator.trans("service.wms_vector.new.step_access_retrictions.share_with_error")),
-    });
+    schemas[STEPS.METADATAS_UPLOAD] = commonValidation.getMDUploadFileSchema();
+    schemas[STEPS.METADATAS_DESCRIPTION] = commonValidation.getMDDescriptionSchema();
+    schemas[STEPS.METADATAS_ADDITIONALINFORMATIONS] = commonValidation.getMDAdditionalInfoSchema();
+    schemas[STEPS.ACCESSRESTRICTIONS] = commonValidation.getAccessRestrictionSchema();
 
     const form = useForm({
         resolver: yupResolver(schemas[currentStep]),
@@ -277,17 +211,17 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
                         <Alert closable description={createServiceMutation.error.message} severity="error" title={Translator.trans("commons.error")} />
                     )}
 
-                    <TableSelection visible={currentStep === STEPS.TABLES_SELECTION} vectorDb={vectorDbQuery.data} form={form} />
+                    <TableSelection visible={currentStep === STEPS.TABLES_INFOS} vectorDb={vectorDbQuery.data} form={form} />
                     <UploadStyleFile visible={currentStep === STEPS.STYLE_FILE} selectedTables={selectedTables} form={form} />
-                    <UploadMetadata visible={currentStep === STEPS.METADATA} form={form} />
-                    <Description visible={currentStep === STEPS.DESCRIPTION} vectorDb={vectorDbQuery.data} form={form} />
+                    <UploadMDFile visible={currentStep === STEPS.METADATAS_UPLOAD} form={form} />
+                    <Description storedData={vectorDbQuery.data} endpointType={"WFS"} visible={currentStep === STEPS.METADATAS_DESCRIPTION} form={form} />
                     <AdditionalInfo
-                        visible={currentStep === STEPS.ADDITIONALINFORMATIONS}
-                        vectorDb={vectorDbQuery.data}
                         datastoreId={datastoreId}
+                        storedData={vectorDbQuery.data}
+                        visible={currentStep === STEPS.METADATAS_ADDITIONALINFORMATIONS}
                         form={form}
                     />
-                    <AccessRestrictions visible={currentStep === STEPS.ACCESSRESTRICTIONS} datastoreId={datastoreId} form={form} />
+                    <AccessRestrictions datastoreId={datastoreId} endpointType={"WFS"} visible={currentStep === STEPS.ACCESSRESTRICTIONS} form={form} />
 
                     <ButtonsGroup
                         className={fr.cx("fr-mt-2w")}
@@ -329,5 +263,7 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
         </DatastoreLayout>
     );
 };
+
+WmsVectorServiceNew.displayName = symToStr({ WmsVectorServiceNew });
 
 export default WmsVectorServiceNew;
