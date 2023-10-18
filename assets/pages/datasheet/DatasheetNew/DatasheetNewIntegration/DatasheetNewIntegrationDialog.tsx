@@ -79,7 +79,9 @@ const DatasheetNewIntegrationDialog: FC<DatasheetNewIntegrationDialogProps> = ({
             setShouldPingIntProg(false);
 
             if (uploadQuery?.data?.tags?.datasheet_name) {
-                queryClient.invalidateQueries(RQKeys.datastore_datasheet(datastoreId, uploadQuery?.data?.tags?.datasheet_name));
+                queryClient.invalidateQueries({
+                    queryKey: RQKeys.datastore_datasheet(datastoreId, uploadQuery?.data?.tags?.datasheet_name),
+                });
                 routes.datastore_datasheet_view({ datastoreId, datasheetName: uploadQuery?.data?.tags?.datasheet_name }).push();
             }
         }

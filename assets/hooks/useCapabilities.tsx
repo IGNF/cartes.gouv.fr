@@ -21,7 +21,6 @@ const useCapabilities = (key = "cartes") => {
             return capabilities;
         },
         staleTime: Infinity,
-        cacheTime: Infinity,
     });
 };
 
