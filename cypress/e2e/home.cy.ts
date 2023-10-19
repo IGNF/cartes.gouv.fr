@@ -10,7 +10,7 @@ describe("la page d'accueil", () => {
             .children()
             .first()
             .children("a")
-            .should("have.attr", "href", "https://geoportail.gouv.fr/carte")
+            .should("have.attr", "href", "https://www.geoportail.gouv.fr/carte")
             .contains("Accéder au Géoportail");
     });
 

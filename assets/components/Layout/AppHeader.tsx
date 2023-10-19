@@ -17,7 +17,7 @@ const AppHeader: FC<AppHeaderProps> = ({ navItems = [] }) => {
     quickAccessItems.push({
         iconId: "fr-icon-arrow-right-line",
         linkProps: {
-            href: "https://geoportail.gouv.fr/carte",
+            href: "https://www.geoportail.gouv.fr/carte",
             className: "fr-btn--icon-right",
         },
         text: "Accéder au Géoportail",
