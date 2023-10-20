@@ -15,7 +15,7 @@ class User implements UserInterface
     private string $firstName;
     private string $lastName;
 
-    /** @var array<string> */
+    /** @var array<string,mixed> */
     private array $communitiesMember = [];
 
     private \DateTimeInterface $accountCreationDate;
@@ -36,9 +36,7 @@ class User implements UserInterface
         $this->lastApiCallDate = new \DateTime($apiUserInfo['last_call']);
 
         if (array_key_exists('communities_member', $apiUserInfo)) {
-            foreach ($apiUserInfo['communities_member'] as $community) {
-                $this->communitiesMember[$community['community']['_id']] = $community;
-            }
+            $this->communitiesMember = $apiUserInfo['communities_member'];
         }
     }
 

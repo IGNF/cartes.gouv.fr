@@ -1,5 +1,7 @@
 import { Dispatch, FC, PropsWithChildren, createContext, useState } from "react";
 
+import { CommunityMemberDto } from "../types/entrepot";
+
 /** déclaration du type `User`, à tenir à jour avec le User de symfony */
 export type UserType = {
     id: string;
@@ -7,7 +9,7 @@ export type UserType = {
     firstName: string;
     lastName: string;
     roles: string[];
-    communitiesMember: string[];
+    communitiesMember: CommunityMemberDto[];
     accountCreationDate: string;
     lastApiCallDate: string;
 };
