@@ -4,7 +4,7 @@ import { routes } from "../router/router";
 import { Datastore } from "../types/app";
 import Translator from "../modules/Translator";
 
-export const datastoreNavItems = (datastoreList: Datastore[] = [], datastore?: Datastore): MainNavigationProps.Item[] => {
+export const datastoreNavItems = (datastoreList: Datastore[] = [], currentDatastore?: Datastore): MainNavigationProps.Item[] => {
     const navItems: MainNavigationProps.Item[] = [
         {
             text: "Tableau de bord",
@@ -42,21 +42,21 @@ export const datastoreNavItems = (datastoreList: Datastore[] = [], datastore?: D
         // },
     ];
 
-    if (datastore !== undefined) {
+    if (currentDatastore !== undefined) {
         navItems.push({
             text: "Données",
-            linkProps: routes.datasheet_list({ datastoreId: datastore._id }).link,
+            linkProps: routes.datasheet_list({ datastoreId: currentDatastore._id }).link,
         });
     }
 
     if (datastoreList.length > 0) {
         const datastoreLinks: MainNavigationProps.Item.Menu = {
-            text: datastore?.name ?? "Choisir un espace de travail",
+            text: currentDatastore?.name ?? "Choisir un espace de travail",
             menuLinks:
                 datastoreList?.map((datastore) => ({
                     linkProps: routes.datasheet_list({ datastoreId: datastore._id }).link,
                     text: datastore.name,
-                    isActive: datastore._id === datastore?._id,
+                    isActive: datastore._id === currentDatastore?._id,
                 })) || [],
         };
 
