@@ -3,8 +3,9 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
 import Select from "@codegouvfr/react-dsfr/Select";
+import { RegisteredLinkProps } from "@codegouvfr/react-dsfr/link";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useState } from "react";
+import { JSX, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
@@ -12,6 +13,8 @@ import AppLayout from "../../components/Layout/AppLayout";
 import Wait from "../../components/Utils/Wait";
 import { defaultNavItems } from "../../config/navItems";
 import useUser from "../../hooks/useUser";
+import { declareComponentKeys, useTranslation } from "../../i18n";
+import { type Translations } from "../../i18n/types";
 import SymfonyRouting from "../../modules/Routing";
 import Translator from "../../modules/Translator";
 import { jsonFetch } from "../../modules/jsonFetch";
@@ -36,6 +39,7 @@ const schema = yup
     .required();
 
 const Contact = () => {
+    const { t } = useTranslation({ Contact });
     const { user } = useUser();
 
     const [isSending, setIsSending] = useState(false);
@@ -72,13 +76,13 @@ const Contact = () => {
     };
 
     return (
-        <AppLayout navItems={defaultNavItems} documentTitle="Nous écrire">
+        <AppLayout navItems={defaultNavItems} documentTitle={t("title")}>
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
-                    <h1>{Translator.trans("contact.title")}</h1>
-                    <p dangerouslySetInnerHTML={explanation} />
+                    <h1>{t("title")}</h1>
+                    <p>{t("explanation", { linkProps: routes.docs().link })}</p>
 
-                    <p>{Translator.trans("mandatory_fields")}</p>
+                    <p>{t("mandatory_fields")}</p>
 
                     {error && <Alert title={Translator.trans("contact.form.error_title")} closable description={error} severity="error" />}
 
@@ -171,3 +175,32 @@ const Contact = () => {
 };
 
 export default Contact;
+
+// traductions
+export const { i18n } = declareComponentKeys<"title" | "mandatory_fields" | { K: "explanation"; P: { linkProps: RegisteredLinkProps }; R: JSX.Element }>()({
+    Contact,
+});
+
+export const frTranslations: Translations<"fr">["Contact"] = {
+    title: "Nous écrire",
+    mandatory_fields: "Sauf mention contraire “(optionnel)” dans le label, tous les champs sont obligatoires.",
+    explanation: ({ linkProps }) => (
+        <>
+            {"Vous n'avez pas trouvé la réponse à votre question dans "}
+            <a {...linkProps}>{"l'aide en ligne"}</a>
+            {" ? Vous souhaitez la configuration d'un espace de travail pour vos besoins ? Utilisez ce formulaire pour nous contacter."}
+        </>
+    ),
+};
+
+export const enTranslations: Translations<"en">["Contact"] = {
+    title: "Contact us",
+    mandatory_fields: "All fields are mandatory unless label contains the word “optional”",
+    explanation: ({ linkProps }) => (
+        <>
+            {"You did not find the answer to your question in "}
+            <a {...linkProps}>{"our documentation"}</a>
+            {"? Do you want to configure a workspace for your needs? Use this form to contact us."}
+        </>
+    ),
+};
