@@ -1,4 +1,26 @@
-export * from "./i18n";
+import { createI18nApi, declareComponentKeys, type GenericTranslations } from "i18nifty";
 
-export { languages, fallbackLanguage } from "./types";
-export type { Language } from "./types";
+// déclaration des langues
+/** liste des langues supportées */
+export const languages = ["fr", "en"] as const;
+
+/** langue de fallback */
+export const fallbackLanguage = "fr";
+
+// types
+export type Language = (typeof languages)[number];
+export type ComponentKey = typeof import("../pages/contact/Contact").i18n;
+export type Translations<L extends Language> = GenericTranslations<ComponentKey, Language, typeof fallbackLanguage, L>;
+export type LocalizedString = Parameters<typeof resolveLocalizedString>[0];
+
+/** initialisation de l'instance de i18n */
+export const { useTranslation, getTranslation, resolveLocalizedString, useLang, $lang, useResolveLocalizedString, useIsI18nFetching } =
+    createI18nApi<ComponentKey>()(
+        { languages, fallbackLanguage },
+        {
+            en: () => import("./languages/en").then(({ translations }) => translations),
+            fr: () => import("./languages/fr").then(({ translations }) => translations),
+        }
+    );
+
+export { declareComponentKeys };

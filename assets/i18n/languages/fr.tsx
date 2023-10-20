@@ -1,4 +1,4 @@
-import type { Translations } from "../types";
+import type { Translations } from "..";
 
 import { frTranslations as contactTranslations } from "../../pages/contact/Contact";
 

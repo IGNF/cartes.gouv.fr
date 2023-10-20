@@ -13,10 +13,8 @@ import AppLayout from "../../components/Layout/AppLayout";
 import Wait from "../../components/Utils/Wait";
 import { defaultNavItems } from "../../config/navItems";
 import useUser from "../../hooks/useUser";
-import { declareComponentKeys, useTranslation } from "../../i18n";
-import { type Translations } from "../../i18n/types";
+import { declareComponentKeys, getTranslation, useTranslation, type Translations } from "../../i18n";
 import SymfonyRouting from "../../modules/Routing";
-import Translator from "../../modules/Translator";
 import { jsonFetch } from "../../modules/jsonFetch";
 import { routes } from "../../router/router";
 import { regex } from "../../utils";
@@ -24,17 +22,15 @@ import { regex } from "../../utils";
 import "../../sass/components/spinner.scss";
 import "../../sass/pages/nous_ecrire.scss";
 
+const { t } = getTranslation("Contact");
 const schema = yup
     .object({
-        email_contact: yup
-            .string()
-            .matches(regex.email, Translator.trans("contact.form.email_contact_error"))
-            .required(Translator.trans("contact.form.email_contact_mandatory_error")),
+        email_contact: yup.string().matches(regex.email, t("form.email_contact_error")).required(t("form.email_contact_mandatory_error")),
         last_name: yup.string(),
         first_name: yup.string(),
         organization: yup.string(),
         importance: yup.number(),
-        message: yup.string().min(10, Translator.trans("contact.form.message_minlength_error")),
+        message: yup.string().min(10, t("form.message_minlength_error")),
     })
     .required();
 
@@ -51,9 +47,6 @@ const Contact = () => {
         formState: { errors },
         getValues: getFormValues,
     } = useForm({ resolver: yupResolver(schema) });
-
-    const explanation = { __html: Translator.trans("contact.form.explain", { href: routes.docs().href }) };
-    const infos = { __html: Translator.trans("contact.form.infos", { href: routes.personal_data().href }) };
 
     const onSubmit = () => {
         setError(null);
@@ -80,17 +73,17 @@ const Contact = () => {
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
                     <h1>{t("title")}</h1>
-                    <p>{t("explanation", { linkProps: routes.docs().link })}</p>
+                    <p>{t("form.explanation", { docsLinkProps: routes.docs().link })}</p>
 
                     <p>{t("mandatory_fields")}</p>
 
-                    {error && <Alert title={Translator.trans("contact.form.error_title")} closable description={error} severity="error" />}
+                    {error && <Alert title={t("form.error_title")} closable description={error} severity="error" />}
 
                     <Input
-                        label={Translator.trans("contact.form.email_contact")}
+                        label={t("form.email_contact")}
                         state={errors.email_contact ? "error" : "default"}
                         stateRelatedMessage={errors?.email_contact?.message}
-                        hintText="Format attendu : nom@domaine.fr"
+                        hintText={t("form.email_contact_hint")}
                         nativeInputProps={{
                             ...register("email_contact"),
                             defaultValue: user?.email,
@@ -99,7 +92,7 @@ const Contact = () => {
                         }}
                     />
                     <Input
-                        label={Translator.trans("contact.form.lastName")}
+                        label={t("form.lastName")}
                         nativeInputProps={{
                             ...register("last_name"),
                             defaultValue: user?.lastName,
@@ -108,7 +101,7 @@ const Contact = () => {
                         }}
                     />
                     <Input
-                        label={Translator.trans("contact.form.firstName")}
+                        label={t("form.firstName")}
                         nativeInputProps={{
                             ...register("first_name"),
                             defaultValue: user?.firstName,
@@ -117,21 +110,21 @@ const Contact = () => {
                         }}
                     />
                     <Input
-                        label={Translator.trans("contact.form.organization")}
+                        label={t("form.organization")}
                         nativeInputProps={{
                             ...register("organization"),
                             autoComplete: "organization",
                         }}
                     />
                     <Input
-                        label={Translator.trans("contact.form.message")}
+                        label={t("form.message")}
                         state={errors.message ? "error" : "default"}
                         stateRelatedMessage={errors?.message?.message}
                         textArea={true}
                         nativeTextAreaProps={{
                             ...register("message"),
                             rows: 8,
-                            placeholder: Translator.trans("contact.form.message_placeholder"),
+                            placeholder: t("form.message_placeholder"),
                         }}
                     />
                     <Select
@@ -148,10 +141,10 @@ const Contact = () => {
                         <option value="3">3</option>
                     </Select>
 
-                    <p dangerouslySetInnerHTML={infos} />
+                    <p>{t("form.infos", { personalDataLinkProps: routes.personal_data().link })}</p>
 
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--right")}>
-                        <Button onClick={handleSubmit(onSubmit)}>{Translator.trans("send")}</Button>
+                        <Button onClick={handleSubmit(onSubmit)}>{t("send")}</Button>
                     </div>
 
                     {isSending && (
@@ -177,30 +170,83 @@ const Contact = () => {
 export default Contact;
 
 // traductions
-export const { i18n } = declareComponentKeys<"title" | "mandatory_fields" | { K: "explanation"; P: { linkProps: RegisteredLinkProps }; R: JSX.Element }>()({
+export const { i18n } = declareComponentKeys<
+    | "title"
+    | "mandatory_fields"
+    | "form.error_title"
+    | { K: "form.explanation"; P: { docsLinkProps: RegisteredLinkProps }; R: JSX.Element }
+    | "form.email_contact"
+    | "form.email_contact_hint"
+    | "form.email_contact_mandatory_error"
+    | "form.email_contact_error"
+    | "form.lastName"
+    | "form.firstName"
+    | "form.organization"
+    | "form.message"
+    | "form.message_placeholder"
+    | "form.message_minlength_error"
+    | "send"
+    | { K: "form.infos"; P: { personalDataLinkProps: RegisteredLinkProps }; R: JSX.Element }
+>()({
     Contact,
 });
 
 export const frTranslations: Translations<"fr">["Contact"] = {
     title: "Nous écrire",
     mandatory_fields: "Sauf mention contraire “(optionnel)” dans le label, tous les champs sont obligatoires.",
-    explanation: ({ linkProps }) => (
+    "form.error_title": "Votre message n'a pas pu être envoyé",
+    "form.explanation": ({ docsLinkProps }) => (
         <>
             {"Vous n'avez pas trouvé la réponse à votre question dans "}
-            <a {...linkProps}>{"l'aide en ligne"}</a>
+            <a {...docsLinkProps}>{"l'aide en ligne"}</a>
             {" ? Vous souhaitez la configuration d'un espace de travail pour vos besoins ? Utilisez ce formulaire pour nous contacter."}
+        </>
+    ),
+    "form.email_contact": "Votre email",
+    "form.email_contact_hint": "Format attendu : nom@domaine.fr",
+    "form.email_contact_mandatory_error": "Veuillez saisir une adresse email",
+    "form.email_contact_error": "Veuillez saisir une adresse email valide",
+    "form.lastName": "Votre nom (optionnel)",
+    "form.firstName": "Votre prénom (optionnel)",
+    "form.organization": "Votre organisme (optionnel)",
+    "form.message": "Votre demande",
+    "form.message_placeholder": "Décrivez votre demande en quelques lignes",
+    "form.message_minlength_error": "Veuillez saisir une demande d'au moins 10 caractères.",
+    send: "Envoyer",
+    "form.infos": ({ personalDataLinkProps }) => (
+        <>
+            {"Les informations recueillies à partir de ce formulaire sont nécessaires à la gestion de votre demande par les services de l'IGN concernés. "}
+            <a {...personalDataLinkProps}>{"En savoir plus sur la gestion des données à caractère personnel."}</a>
         </>
     ),
 };
 
 export const enTranslations: Translations<"en">["Contact"] = {
     title: "Contact us",
-    mandatory_fields: "All fields are mandatory unless label contains the word “optional”",
-    explanation: ({ linkProps }) => (
+    mandatory_fields: "All fields are mandatory unless label states “optional”",
+    "form.error_title": "Your message could not be sent",
+    "form.explanation": ({ docsLinkProps }) => (
         <>
             {"You did not find the answer to your question in "}
-            <a {...linkProps}>{"our documentation"}</a>
+            <a {...docsLinkProps}>{"our documentation"}</a>
             {"? Do you want to configure a workspace for your needs? Use this form to contact us."}
+        </>
+    ),
+    "form.email_contact": "Email",
+    "form.email_contact_hint": "Expected format: name@domain.fr",
+    "form.email_contact_mandatory_error": "Enter an email address",
+    "form.email_contact_error": "Enter a valid email address",
+    "form.lastName": "Last name (optional)",
+    "form.firstName": "First name (optional)",
+    "form.organization": "Organization (optional)",
+    "form.message": "Message",
+    "form.message_placeholder": "Describe your request in a few lines",
+    "form.message_minlength_error": "Message must be at least 10 caractères.",
+    send: "Send",
+    "form.infos": ({ personalDataLinkProps }) => (
+        <>
+            {"The information collected from this form is necessary to process your request by the appropriate services at IGN. "}
+            <a {...personalDataLinkProps}>{"Learn more about how personal data is stored and used."}</a>
         </>
     ),
 };
