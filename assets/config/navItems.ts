@@ -4,7 +4,11 @@ export const defaultNavItems = [
     {
         menuLinks: [
             {
-                linkProps: routes.docs().link,
+                linkProps: {
+                    href: "https://geoservices.ign.fr/bascule-vers-la-geoplateforme",
+                    target: "_blank",
+                    title: "bascule vers la géoplateforme - ouvre une nouvelle fenêtre"
+                },
                 text: "Documentation",
             },
             {
