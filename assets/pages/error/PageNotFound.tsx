@@ -3,12 +3,11 @@ import { Button } from "@codegouvfr/react-dsfr/Button";
 import { FC } from "react";
 
 import AppLayout from "../../components/Layout/AppLayout";
-import { defaultNavItems } from "../../config/navItems";
 import { appRoot, routes } from "../../router/router";
 
 const PageNotFound: FC = () => {
     return (
-        <AppLayout navItems={defaultNavItems} documentTitle="Page non trouvée">
+        <AppLayout documentTitle="Page non trouvée">
             <div
                 className={fr.cx(
                     "fr-my-7w",

@@ -1,18 +1,20 @@
 import Header, { HeaderProps } from "@codegouvfr/react-dsfr/Header";
 import { MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation/MainNavigation";
-import { FC } from "react";
+import { FC, ReactNode } from "react";
 
 import useUser from "../../hooks/useUser";
 import SymfonyRouting from "../../modules/Routing";
 import { routes } from "../../router/router";
 
+export type NavigationProps = MainNavigationProps.Item[] | ReactNode;
+
 type AppHeaderProps = {
-    navItems?: MainNavigationProps.Item[];
+    navItems?: NavigationProps;
 };
 const AppHeader: FC<AppHeaderProps> = ({ navItems = [] }) => {
     const { user } = useUser();
 
-    const quickAccessItems: HeaderProps.QuickAccessItem[] = [];
+    const quickAccessItems: (HeaderProps.QuickAccessItem | ReactNode)[] = [];
 
     quickAccessItems.push({
         iconId: "fr-icon-arrow-right-line",

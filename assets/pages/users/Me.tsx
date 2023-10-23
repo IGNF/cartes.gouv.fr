@@ -1,6 +1,5 @@
 import AppLayout from "../../components/Layout/AppLayout";
 import BtnBackToHome from "../../components/Utils/BtnBackToHome";
-import { defaultNavItems } from "../../config/navItems";
 import functions from "../../functions";
 import useUser from "../../hooks/useUser";
 
@@ -8,7 +7,7 @@ const Me = () => {
     const { user } = useUser();
 
     return (
-        <AppLayout navItems={defaultNavItems} documentTitle="Mon compte">
+        <AppLayout documentTitle="Mon compte">
             <h1>Mon compte</h1>
 
             {user && (

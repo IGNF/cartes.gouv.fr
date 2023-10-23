@@ -1,14 +1,13 @@
 import { fr } from "@codegouvfr/react-dsfr";
 
 import AppLayout from "../../components/Layout/AppLayout";
-import { defaultNavItems } from "../../config/navItems";
 import { routes } from "../../router/router";
 
 const LegalNotice = () => {
     const siteName = "cartes.gouv.fr";
 
     return (
-        <AppLayout navItems={defaultNavItems} documentTitle="Mentions légales">
+        <AppLayout documentTitle="Mentions légales">
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
                     <h1>Mentions légales</h1>

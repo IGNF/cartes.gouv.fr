@@ -1,10 +1,8 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
-import React from "react";
 
 import AppLayout from "../components/Layout/AppLayout";
-import { defaultNavItems } from "../config/navItems";
 import SymfonyRouting from "../modules/Routing";
 import { appRoot, useRoute } from "../router/router";
 
@@ -15,7 +13,7 @@ const Home = () => {
     const { params } = useRoute();
 
     return (
-        <AppLayout navItems={defaultNavItems} documentTitle="Le service public des cartes et données du territoire">
+        <AppLayout documentTitle="Le service public des cartes et données du territoire">
             {params?.["authentication_failed"] === 1 && (
                 <Alert
                     severity="error"

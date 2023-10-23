@@ -3,11 +3,10 @@ import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Card } from "@codegouvfr/react-dsfr/Card";
 
 import AppLayout from "../components/Layout/AppLayout";
-import { defaultNavItems } from "../config/navItems";
 
 const About = () => {
     return (
-        <AppLayout navItems={defaultNavItems} documentTitle="A propos de cartes.gouv.fr">
+        <AppLayout documentTitle="A propos de cartes.gouv.fr">
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
                     <h1>A propos de cartes.gouv.fr</h1>

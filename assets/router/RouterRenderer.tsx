@@ -2,7 +2,6 @@ import { JSX, Suspense, lazy } from "react";
 
 import AppLayout from "../components/Layout/AppLayout";
 import LoadingText from "../components/Utils/LoadingText";
-import { defaultNavItems } from "../config/navItems";
 import useUser from "../hooks/useUser";
 import SymfonyRouting from "../modules/Routing";
 import Home from "../pages/Home";
@@ -157,7 +156,7 @@ function RouterRenderer() {
     return (
         <Suspense
             fallback={
-                <AppLayout navItems={defaultNavItems}>
+                <AppLayout>
                     <LoadingText />
                 </AppLayout>
             }

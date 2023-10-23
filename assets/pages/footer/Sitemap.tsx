@@ -1,12 +1,11 @@
 import { fr } from "@codegouvfr/react-dsfr";
 
 import AppLayout from "../../components/Layout/AppLayout";
-import { defaultNavItems } from "../../config/navItems";
 import { routes } from "../../router/router";
 
 const SiteMap = () => {
     return (
-        <AppLayout navItems={defaultNavItems} documentTitle="Plan du site">
+        <AppLayout documentTitle="Plan du site">
             <h1>Plan du site</h1>
 
             <section className={fr.cx("fr-py-6v")}>

@@ -1,14 +1,13 @@
 import { fr } from "@codegouvfr/react-dsfr";
 
 import AppLayout from "../../components/Layout/AppLayout";
-import { defaultNavItems } from "../../config/navItems";
 import { routes } from "../../router/router";
 
 const Accessibility = () => {
     const siteName = "cartes.gouv.fr";
 
     return (
-        <AppLayout navItems={defaultNavItems} documentTitle="Accessibilité">
+        <AppLayout documentTitle="Accessibilité">
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-12", "fr-col-md-8", "fr-py-12v")}>
                     <h1>Accessibilité&nbsp;: partiellement conforme</h1>

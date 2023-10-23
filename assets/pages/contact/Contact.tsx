@@ -11,7 +11,6 @@ import * as yup from "yup";
 
 import AppLayout from "../../components/Layout/AppLayout";
 import Wait from "../../components/Utils/Wait";
-import { defaultNavItems } from "../../config/navItems";
 import useUser from "../../hooks/useUser";
 import { declareComponentKeys, getTranslation, useTranslation, type Translations } from "../../i18n";
 import SymfonyRouting from "../../modules/Routing";
@@ -69,7 +68,7 @@ const Contact = () => {
     };
 
     return (
-        <AppLayout navItems={defaultNavItems} documentTitle={t("title")}>
+        <AppLayout documentTitle={t("title")}>
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
                     <h1>{t("title")}</h1>

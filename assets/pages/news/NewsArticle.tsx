@@ -5,7 +5,6 @@ import { FC } from "react";
 import { symToStr } from "tsafe/symToStr";
 
 import AppLayout from "../../components/Layout/AppLayout";
-import { defaultNavItems } from "../../config/navItems";
 import articles from "../../data/actualites.json";
 import functions from "../../functions";
 import { appRoot } from "../../router/router";
@@ -27,7 +26,7 @@ const NewsArticle: FC<NewsArticleProps> = ({ slug }) => {
     ));
 
     return (
-        <AppLayout navItems={defaultNavItems} documentTitle={newsArticle?.title}>
+        <AppLayout documentTitle={newsArticle?.title}>
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>

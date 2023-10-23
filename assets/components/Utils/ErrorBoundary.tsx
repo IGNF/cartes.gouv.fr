@@ -4,13 +4,12 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { FC, PropsWithChildren } from "react";
 import { ErrorBoundary as BaseErrorBoundary, type FallbackProps } from "react-error-boundary";
 
-import { defaultNavItems } from "../../config/navItems";
 import { routes } from "../../router/router";
 import AppLayout from "../Layout/AppLayout";
 
 const Fallback: FC<FallbackProps> = ({ error, resetErrorBoundary }) => {
     return (
-        <AppLayout navItems={defaultNavItems} documentTitle="Une erreur est survenue">
+        <AppLayout documentTitle="Une erreur est survenue">
             <Alert severity="error" title="Une erreur est survenue" description={error?.message} className={fr.cx("fr-my-3w")} />
             <Button
                 onClick={() => {

@@ -1,11 +1,10 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import { Tag } from "@codegouvfr/react-dsfr/Tag";
 import { Card } from "@codegouvfr/react-dsfr/Card";
+import { Tag } from "@codegouvfr/react-dsfr/Tag";
 import { FC } from "react";
 import { symToStr } from "tsafe/symToStr";
 
 import AppLayout from "../../components/Layout/AppLayout";
-import { defaultNavItems } from "../../config/navItems";
 import articles from "../../data/actualites.json";
 import functions from "../../functions";
 import { appRoot, routes } from "../../router/router";
@@ -45,7 +44,7 @@ NewsListItem.displayName = symToStr({ NewsListItem });
 
 const NewsList = () => {
     return (
-        <AppLayout navItems={defaultNavItems} documentTitle="Actualités">
+        <AppLayout documentTitle="Actualités">
             <div className={fr.cx("fr-container")}>
                 <h1>Actualités</h1>
 
