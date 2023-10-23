@@ -36,6 +36,8 @@ const StoredDataReport = lazy(() => import("../pages/stored_data/StoredDataRepor
 const DatastoreCreationForm = lazy(() => import("../pages/contact/datastore/DatastoreCreationForm"));
 const Confirm = lazy(() => import("../pages/contact/datastore/Confirmation"));
 
+const CommunityList = lazy(() => import("../pages/communities/CommunityList"));
+
 const WfsServiceNew = lazy(() => import("../pages/service/wfs/WfsServiceNew"));
 const WmsVectorServiceNew = lazy(() => import("../pages/service/wms-vector/WmsVectorServiceNew"));
 const PyramidVectorNew = lazy(() => import("../pages/service/tms/PyramidVectorNew"));
@@ -114,6 +116,9 @@ function RouterRenderer() {
             break;
         case "datastore_create_request_confirm":
             content = <Confirm />;
+            break;
+        case "join_community":
+            content = <CommunityList />;
             break;
         case "datastore_datasheet_new":
             content = <DatasheetNewForm datastoreId={route.params.datastoreId} />;

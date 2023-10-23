@@ -1,13 +1,22 @@
 {% trans_default_domain "cartesgouvfr" %}
 
-<ul>
-    <li>{{ 'datastore_creation_request.email_support.datastore_name'|trans }} : {{ data.name }}</li>
-    <li>{{ 'datastore_creation_request.email_support.datastore_technical_name'|trans }} : {{ data.technical_name }}</li>
-    <li>{{ 'datastore_creation_request.email_support.data_volume'|trans }} : {{ data.volume }}</li>
-    <li>{{ 'datastore_creation_request.email_support.data_endpoint_quotas'|trans }} :
+<p>{{ 'datastore_creation_request.email_support.datastore_name'|trans }} : {{ data.name }}<br>
+{{ 'datastore_creation_request.email_support.datastore_technical_name'|trans }} : {{ data.technical_name }}<br><br>
+{% if supervisor|length != 0 %}
+    {{ 'datastore_creation_request.email_support.is_supervisor'|trans }}
     <ul>
-        {% for endpoint, q in data.quotas %}
-            <li>{{ endpoint }}, <strong>{{ q.status }}</strong> : {{ q.quota }}</li>
-        {% endfor %}
+    {% for communityName, id in supervisor %}
+        <li>{{ communityName ~ ' (' ~ id ~ ')' }}</li>
+    {% endfor %}
     </ul>
-</ul>
+    <br>
+{% endif %}
+{% if member|length != 0 %}
+    {{ 'datastore_creation_request.email_support.is_member'|trans }}
+    <ul>
+    {% for communityName, id in member %}
+        <li>{{ communityName ~ ' (' ~ id ~ ')' }}</li>
+    {% endfor %}
+    </ul>
+{% endif %}
+</p>

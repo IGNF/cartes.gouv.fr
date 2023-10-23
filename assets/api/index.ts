@@ -1,3 +1,5 @@
+import contact from "./contact";
+import catalogs from "./catalogs";
 import datasheet from "./datasheet";
 import datastore from "./datastore";
 import storedData from "./stored-data";
@@ -10,6 +12,8 @@ import service from "./service";
 import epsg from "./epsg";
 
 const api = {
+    contact,
+    catalogs,
     // Entrepot
     datasheet,
     datastore,

@@ -3,8 +3,8 @@
 
 {% block body %}
     <div>
-        <p>{{ 'datastore_creation_request.email_support.heading'|trans }}</p>
-        {{ 'mailer.applicant_informations'|trans }} 
+        <p>{{ 'join_community.email_support.heading'|trans({'%name%': community.name, '%id%': community._id}) }}</p>
+        {{ 'mailer.applicant_informations'|trans }}
         <p>
             <strong>{{ 'mailer.user_email'|trans }} : </strong>{{ app.user.email }}<br>
             <strong>{{ 'mailer.last_name'|trans }} : </strong>{% if app.user.lastName is not empty %}{{ app.user.lastName }}{% else %}{{ 'contact.email_support.not_specified'|trans }}{% endif %}<br>
@@ -12,8 +12,7 @@
             <strong>{{ 'mailer.user_id'|trans }} : </strong>{{ app.user.id }}<br>
             <strong>{{ 'mailer.date'|trans }} : </strong>{{ sendDate|date('d-m-Y H:i', "Europe/Paris") }}
         </p>
-        <hr>
-        <strong>{{ 'datastore_creation_request.email_support.details'|trans }} : </strong>
-        {% include "Mailer/datastore_create_details.html.twig" %}
-    </div>
+        <strong>{{ 'join_community.email_support.message'|trans }}</strong><br>
+        {{ message|e }}
+     </div>
 {% endblock %}

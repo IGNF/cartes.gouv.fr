@@ -37,6 +37,16 @@ const routeDefs = {
 
     // Demande de creation d'un datastore
     datastore_create_request: defineRoute(`${appRoot}/datastores/create_request`),
+
+    // Demande pour rejoindre une communaute
+    join_community: defineRoute(
+        {
+            page: param.query.optional.number.default(1),
+            limit: param.query.optional.number.default(10),
+        },
+        () => `${appRoot}/join_community`
+    ),
+
     datastore_create_request_confirm: defineRoute(`${appRoot}/confirmation`),
 
     // fiche de données

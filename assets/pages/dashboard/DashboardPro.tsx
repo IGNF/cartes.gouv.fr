@@ -31,6 +31,9 @@ const DashboardPro = () => {
                         <div className={fr.cx("fr-col-12", "fr-col-sm-6", "fr-col-md-4", "fr-col-lg-3")}>
                             <Tile linkProps={routes.datastore_create_request().link} grey={true} title={Translator.trans("datastore_creation_request.title")} />
                         </div>
+                        <div className={fr.cx("fr-col-12", "fr-col-sm-6", "fr-col-md-4", "fr-col-lg-3")}>
+                            <Tile linkProps={routes.join_community().link} grey={true} title={Translator.trans("communities_list.title")} />
+                        </div>
                     </div>
                 </>
             )}
