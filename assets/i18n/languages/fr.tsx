@@ -1,9 +1,8 @@
 import type { Translations } from "..";
-
-import { frTranslations as navItemsTranslations } from "../../config/navItems";
-import { frTranslations as contactTranslations } from "../../pages/contact/Contact";
+import { navItemsFrTranslations } from "../../config/navItems";
+import { contactFrTranslations } from "../../pages/contact/Contact";
 
 export const translations: Translations<"fr"> = {
-    Contact: contactTranslations,
-    navItems: navItemsTranslations,
+    Contact: contactFrTranslations,
+    navItems: navItemsFrTranslations,
 };

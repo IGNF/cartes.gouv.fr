@@ -8,7 +8,7 @@ export const languages = ["fr", "en"] as const;
 export const fallbackLanguage = "fr";
 
 /** nom d'affichage des langues */
-export const fullNameByLang: Record<Language, string> = {
+export const languagesDisplayNames: Record<Language, string> = {
     fr: "Français",
     en: "English",
 };

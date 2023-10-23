@@ -23,29 +23,35 @@ export const defaultNavItems = (t: TranslationFunction<"navItems", ComponentKey>
                 text: t("nous écrire"),
             },
         ],
-        text: "Commencer avec cartes.gouv",
+        text: t("start"),
     },
     {
-        text: "Actualités",
+        text: t("news"),
         linkProps: routes.news_list().link,
     },
     {
-        text: "A propos",
+        text: t("about"),
         linkProps: routes.about().link,
     },
 ];
 
 // traductions
-export const { i18n } = declareComponentKeys<"documentation" | "faq" | "nous écrire">()("navItems");
+export const { i18n } = declareComponentKeys<"documentation" | "faq" | "nous écrire" | "start" | "news" | "about">()("navItems");
 
-export const frTranslations: Translations<"fr">["navItems"] = {
+export const navItemsFrTranslations: Translations<"fr">["navItems"] = {
     "nous écrire": "Nous écrire",
     documentation: "Documentation",
     faq: "Questions fréquentes",
+    start: "Commencer avec cartes.gouv",
+    news: "Actualités",
+    about: "A propos",
 };
 
-export const enTranslations: Translations<"en">["navItems"] = {
-    "nous écrire": undefined,
+export const navItemsEnTranslations: Translations<"en">["navItems"] = {
+    "nous écrire": "Contact us",
     documentation: undefined,
-    faq: undefined,
+    faq: "Frequently asked questions",
+    start: "Start with cartes.gouv",
+    news: "News",
+    about: "About",
 };

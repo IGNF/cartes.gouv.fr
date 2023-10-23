@@ -190,7 +190,7 @@ export const { i18n } = declareComponentKeys<
     Contact,
 });
 
-export const frTranslations: Translations<"fr">["Contact"] = {
+export const contactFrTranslations: Translations<"fr">["Contact"] = {
     title: "Nous écrire",
     mandatory_fields: "Sauf mention contraire “(optionnel)” dans le label, tous les champs sont obligatoires.",
     "form.error_title": "Votre message n'a pas pu être envoyé",
@@ -220,7 +220,7 @@ export const frTranslations: Translations<"fr">["Contact"] = {
     ),
 };
 
-export const enTranslations: Translations<"en">["Contact"] = {
+export const contactEnTranslations: Translations<"en">["Contact"] = {
     title: "Contact us",
     mandatory_fields: "All fields are mandatory unless label states “optional”",
     "form.error_title": "Your message could not be sent",
