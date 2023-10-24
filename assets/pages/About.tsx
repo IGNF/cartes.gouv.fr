@@ -28,8 +28,9 @@ const About = () => {
                     </p>
                     <p>
                         Le site se construit par briques et a vocation à reprendre progressivement les fonctions des sites geoportail.gouv.fr et
-                        geoservices.ign.fr ainsi que d’autres services de l’IGN (1). Ainsi, la première interface de cartes.gouv.fr rassemblera début 2024 les
-                        premières briques disponibles de catalogage, d’alimentation/diffusion des données. De nouveaux services seront régulièrement ajoutés.
+                        geoservices.ign.fr ainsi que d’autres services de l’IGN <a href="#footnote1">(1)</a>. Ainsi, la première interface de cartes.gouv.fr
+                        rassemblera début 2024 les premières briques disponibles de catalogage, d’alimentation/diffusion des données. De nouveaux services
+                        seront régulièrement ajoutés.
                     </p>
 
                     <h2>La Géoplateforme comme infrastructure et moteur pour répondre aux besoins des producteurs et des développeurs de services</h2>
@@ -50,8 +51,8 @@ const About = () => {
 
                     <h2>Les grandes dates clés de la construction de la Géoplateforme</h2>
 
-                    {/* TODO : calendrier */}
-                    <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
+                    {/* Calendrier */}
+                    <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mb-3w")}>
                         <div className={fr.cx("fr-col-sm-12", "fr-col-md-4", "fr-col-lg-4")}>
                             <Card
                                 desc="Premières expérimentations : démonstrateur LiDAR HD, contribution directe à la BD TOPO®, Géotuileur…"
