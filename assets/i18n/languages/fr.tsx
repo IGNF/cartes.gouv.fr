@@ -1,4 +1,4 @@
-import type { Translations } from "..";
+import type { Translations } from "../i18n";
 import { navItemsFrTranslations } from "../../config/navItems";
 import { contactFrTranslations } from "../../pages/contact/Contact";
 

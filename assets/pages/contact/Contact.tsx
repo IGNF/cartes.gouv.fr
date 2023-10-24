@@ -12,7 +12,7 @@ import * as yup from "yup";
 import AppLayout from "../../components/Layout/AppLayout";
 import Wait from "../../components/Utils/Wait";
 import useUser from "../../hooks/useUser";
-import { declareComponentKeys, getTranslation, useTranslation, type Translations } from "../../i18n";
+import { declareComponentKeys, getTranslation, useTranslation, type Translations } from "../../i18n/i18n";
 import SymfonyRouting from "../../modules/Routing";
 import { jsonFetch } from "../../modules/jsonFetch";
 import { routes } from "../../router/router";

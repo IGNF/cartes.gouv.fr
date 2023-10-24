@@ -3,7 +3,7 @@ import { MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation/MainN
 import { FC, ReactNode } from "react";
 
 import useUser from "../../hooks/useUser";
-// import { useLang } from "../../i18n";
+// import { useLang } from "../../i18n/i18n";
 import SymfonyRouting from "../../modules/Routing";
 import { routes } from "../../router/router";
 // import LanguageSelector from "../Utils/LanguageSelector";

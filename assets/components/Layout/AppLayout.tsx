@@ -6,7 +6,7 @@ import { FC, PropsWithChildren } from "react";
 import { ConsentBannerAndConsentManagement } from "../../config/consentManagement";
 import { defaultNavItems } from "../../config/navItems";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
-import { useTranslation } from "../../i18n";
+import { useTranslation } from "../../i18n/i18n";
 import Translator from "../../modules/Translator";
 import AppFooter from "./AppFooter";
 import AppHeader, { NavigationProps } from "./AppHeader";
