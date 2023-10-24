@@ -17,6 +17,7 @@ import { createPortal } from "react-dom";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { CommunityListResponseDto } from "../../types/entrepot";
 import Input from "@codegouvfr/react-dsfr/Input";
+import Wait from "../../components/Utils/Wait";
 
 const explainModal = createModal({
     id: "explain-modal",
@@ -41,7 +42,13 @@ const CommunityList: FC = () => {
         refetchOnWindowFocus: false,
     });
 
-    const {
+    const mutation = useMutation<unknown, { error: string }, { message: string }>({
+        mutationFn: (params) => {
+            const formData = { community: selectedCommunity, message: params.message };
+            return api.contact.joinCommunity(formData);
+        },
+    });
+    /*const {
         isError: isJoinError,
         error: joinError,
         isSuccess: isJoinSuccess,
@@ -51,7 +58,7 @@ const CommunityList: FC = () => {
             const formData = { community: selectedCommunity, message: params.message };
             return api.contact.joinCommunity(formData);
         },
-    });
+    });*/
 
     const navItems = datastoreNavItems();
 
@@ -69,7 +76,7 @@ const CommunityList: FC = () => {
 
     const handleOk = () => {
         const message = refMsg.current?.value ?? "";
-        mutate({ message: message }); // On lance la requete
+        mutation.mutate({ message: message }); // On lance la requete
 
         if (refMsg.current) {
             refMsg.current.value = "";
@@ -84,9 +91,9 @@ const CommunityList: FC = () => {
                     <LoadingText />
                 ) : isError ? (
                     <Alert severity="error" closable title={error.message} />
-                ) : isJoinError ? (
-                    <Alert severity="error" closable title={joinError.error} />
-                ) : isJoinSuccess ? (
+                ) : mutation.isError ? (
+                    <Alert severity="error" closable title={mutation.error.error} />
+                ) : mutation.isSuccess ? (
                     <Alert
                         severity="success"
                         closable
@@ -119,6 +126,20 @@ const CommunityList: FC = () => {
                     </>
                 )}
             </div>
+            {mutation.isPending && (
+                <Wait>
+                    <div className={fr.cx("fr-container")}>
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
+                            <div className={fr.cx("fr-col-2")}>
+                                <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg") + " icons-spin"} />
+                            </div>
+                            <div className={fr.cx("fr-col-10")}>
+                                <h6 className={fr.cx("fr-h6", "fr-m-0")}>{"Envoie de la demande ..."}</h6>
+                            </div>
+                        </div>
+                    </div>
+                </Wait>
+            )}
             <>
                 {createPortal(
                     <explainModal.Component
