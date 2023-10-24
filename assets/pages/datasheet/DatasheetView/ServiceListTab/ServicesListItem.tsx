@@ -6,13 +6,13 @@ import { useQueryClient } from "@tanstack/react-query";
 import { FC } from "react";
 import { createPortal } from "react-dom";
 import { symToStr } from "tsafe/symToStr";
-
 import api from "../../../../api";
 import MenuList from "../../../../components/Utils/MenuList";
 import functions from "../../../../functions";
 import RQKeys from "../../../../modules/RQKeys";
 import { routes } from "../../../../router/router";
 import { Service } from "../../../../types/app";
+import { offeringTypeDisplayName } from "../../../../utils";
 
 const unpublishServiceConfirmModal = createModal({
     id: "unpublish-service-confirm-modal",
@@ -41,17 +41,16 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
     return (
         <>
             <div key={service._id} className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mt-2v")}>
-                <div className={fr.cx("fr-col")}>
+                <div className={fr.cx("fr-col", "fr-col-md-4")}>
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
                         <Button iconId="ri-add-box-fill" title="Voir les données liées" className={fr.cx("fr-mr-2v")} />
                         {service.configuration.name}
                     </div>
                 </div>
 
-                <div className={fr.cx("fr-col")}>
+                <div className={fr.cx("fr-col", "fr-col-md-8")}>
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-grid-row--middle")}>
-                        {/* TODO : afficher le bon type de service */}
-                        <Badge>Web Feature Service</Badge>
+                        <Badge>{offeringTypeDisplayName(service.type)}</Badge>
                         <p className={fr.cx("fr-m-auto", "fr-mr-2v")}>
                             {service?.configuration?.last_event?.date && functions.date.format(service?.configuration?.last_event?.date)}
                         </p>

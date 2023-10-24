@@ -95,7 +95,7 @@ class DatasheetController extends AbstractController
         $data = $this->getBasicInfo($datastoreId, $datasheetName);
 
         // recherche de services (configuration et offering)
-        $storedDataList = array_merge($vectorDbList/* autres données */);
+        $storedDataList = array_merge($vectorDbList, $pyramidList);
         $services = $this->getServices($datastoreId, $storedDataList);
 
         return $this->json([

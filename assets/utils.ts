@@ -7,6 +7,7 @@ import charsets from "./data/charset_list.json";
 // Langues iso639-2
 // https://github.com/haliaeetus/iso-639/blob/master/data/iso_639-2.json
 import langs from "./data/iso_639-2.json";
+import { OfferingDetailResponseDtoTypeEnum } from "./types/entrepot";
 
 export type LanguageType = {
     language: string;
@@ -93,4 +94,27 @@ const decodeContentRange = (contentRange: string): ContentRangeType => {
     return { first: parseInt(parts[0], 10), last: parseInt(parts[1], 10), total: total };
 };
 
-export { getInspireKeywords, getLanguages, charsets, removeDiacritics, regex, decodeContentRange };
+const offeringTypeDisplayName = (type: OfferingDetailResponseDtoTypeEnum): string => {
+    switch (type) {
+        case "WMS-VECTOR":
+            return "Web Map Service Vecteur";
+        case "WFS":
+            return "Web Feature Service";
+        case "WFS-INSPIRE":
+            return "Web Feature Service Inspire";
+        case "WMTS-TMS":
+            return "Web Map Tile Service - Tile Map Service";
+        case "WMS-RASTER":
+            return "Web Map Service Raster";
+        case "DOWNLOAD":
+            return "Service de Téléchargement";
+        case "ITINERARY-ISOCURVE":
+            return "Service de calcul d'itinéraire / isochrone";
+        case "ALTIMETRY":
+            return "Service d'altimétrie";
+        default:
+            return "";
+    }
+};
+
+export { getInspireKeywords, getLanguages, charsets, removeDiacritics, regex, decodeContentRange, offeringTypeDisplayName };
