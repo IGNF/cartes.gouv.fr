@@ -30,13 +30,13 @@ const AppHeader: FC<AppHeaderProps> = ({ navItems = [] }) => {
 
     if (!user) {
         // utilisateur n'est pas connecté
-        quickAccessItems.push({
-            iconId: "fr-icon-account-fill",
-            linkProps: {
-                href: SymfonyRouting.generate("cartesgouvfr_security_login"),
-            },
-            text: "Se connecter",
-        });
+        // quickAccessItems.push({
+        //     iconId: "fr-icon-account-fill",
+        //     linkProps: {
+        //         href: SymfonyRouting.generate("cartesgouvfr_security_login"),
+        //     },
+        //     text: "Se connecter",
+        // });
     } else {
         // utilisateur est connecté
         let btnMyAccountText = `${user.firstName} ${user.lastName}`;
