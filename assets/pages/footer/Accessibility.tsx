@@ -95,15 +95,33 @@ const Accessibility = () => {
                     <h3>Pages du site ayant fait l’objet de la vérification de conformité</h3>
 
                     <ol>
-                        <li>Accueil</li>
-                        <li>Mentions légales</li>
-                        <li>Faq</li>
-                        <li>Plan du site</li>
-                        <li>A propos</li>
-                        <li>Détail actualité</li>
-                        <li>Actualités</li>
-                        <li>Contact</li>
-                        <li>Accessibilité</li>
+                        <li>
+                            <a {...routes.home().link}>Accueil</a>
+                        </li>
+                        <li>
+                            <a {...routes.legal_notice().link}>Mentions légales</a>
+                        </li>
+                        <li>
+                            <a {...routes.faq().link}>Faq</a>
+                        </li>
+                        <li>
+                            <a {...routes.sitemap().link}>Plan du site</a>
+                        </li>
+                        <li>
+                            <a {...routes.about().link}>A propos</a>
+                        </li>
+                        <li>
+                            <a {...routes.news_article({ slug: "premieres-versions-adaptatives-des-api-javascript-geoportail" }).link}>Détail actualité</a>
+                        </li>
+                        <li>
+                            <a {...routes.news_list().link}>Actualités</a>
+                        </li>
+                        <li>
+                            <a {...routes.contact().link}>Contact</a>
+                        </li>
+                        <li>
+                            <a {...routes.accessibility().link}>Accessibilité</a>
+                        </li>
                     </ol>
 
                     <h2>Retour d’information et contact</h2>

@@ -43,7 +43,7 @@ const LegalNotice = () => {
                     </p>
 
                     <p>
-                        <a href={routes.personal_data().href}>En savoir plus sur les données à caractère personnel</a>
+                        <a {...routes.personal_data().link}>En savoir plus sur les données à caractère personnel</a>
                     </p>
 
                     <h2>Droit de propriété intellectuelle</h2>

@@ -19,30 +19,30 @@ const SiteMap = () => {
                                 <span>Commencer avec cartes.gouv</span>
                                 <ul>
                                     <li>
-                                        <a href={routes.docs().href}>Documentation</a>
+                                        <a {...routes.docs().link}>Documentation</a>
                                     </li>
                                     <li>
-                                        <a href={routes.faq().href}>Questions fréquentes</a>
+                                        <a {...routes.faq().link}>Questions fréquentes</a>
                                     </li>
                                     <li>
-                                        <a href={routes.contact().href}>Nous écrire</a>
+                                        <a {...routes.contact().link}>Nous écrire</a>
                                     </li>
                                 </ul>
                             </li>
                             <li>
-                                <a href={routes.news_list().href}>Actualités</a>
+                                <a {...routes.news_list().link}>Actualités</a>
                             </li>
                             <li>
-                                <a href={routes.about().href}>A propos</a>
+                                <a {...routes.about().link}>A propos</a>
                             </li>
                             <li>
-                                <a href={routes.accessibility().href}>Accessibilité</a>
+                                <a {...routes.accessibility().link}>Accessibilité</a>
                             </li>
                             <li>
-                                <a href={routes.legal_notice().href}>Mentions légales</a>
+                                <a {...routes.legal_notice().link}>Mentions légales</a>
                             </li>
                             <li>
-                                <a href={routes.personal_data().href}>Données personnelles</a>
+                                <a {...routes.personal_data().link}>Données personnelles</a>
                             </li>
                         </ul>
                     </div>
