@@ -1,7 +1,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { Card } from "@codegouvfr/react-dsfr/Card";
 import { Tag } from "@codegouvfr/react-dsfr/Tag";
-import { FC } from "react";
+import { FC, Fragment } from "react";
 import { symToStr } from "tsafe/symToStr";
 
 import AppLayout from "../../components/Layout/AppLayout";
@@ -25,16 +25,21 @@ const NewsListItem: FC<NewsListItemProps> = ({ slug, newsArticle }) => {
             <Card
                 start={<div className={fr.cx("fr-tags-group")}>{tags}</div>}
                 desc={
-                    newsArticle?.short_description && newsArticle?.short_description.length > SHORT_DESC_MAX_CHAR
-                        ? newsArticle?.short_description.substring(0, 100) + "..."
-                        : newsArticle?.short_description
+                    <div
+                        dangerouslySetInnerHTML={{
+                            __html:
+                                newsArticle?.short_description && newsArticle?.short_description.length > SHORT_DESC_MAX_CHAR
+                                    ? newsArticle?.short_description.substring(0, 100) + "..."
+                                    : newsArticle?.short_description ?? "",
+                        }}
+                    />
                 }
                 detail={newsArticle?.date && functions.date.format(newsArticle?.date)}
                 enlargeLink
                 imageAlt={newsArticle?.thumbnail_alt}
                 imageUrl={`${appRoot}/${newsArticle.thumbnail_url}`}
                 linkProps={routes.news_article({ slug }).link}
-                title={newsArticle?.title}
+                title={<div dangerouslySetInnerHTML={{ __html: newsArticle?.title ?? "" }} />}
                 titleAs="h2"
             />
         </div>

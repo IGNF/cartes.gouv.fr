@@ -35,11 +35,9 @@ const NewsArticle: FC<NewsArticleProps> = ({ slug }) => {
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
                         <h1>{newsArticle?.title}</h1>
                     </div>
-
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
-                        <p>{newsArticle.short_description}</p>
+                        <p dangerouslySetInnerHTML={{ __html: newsArticle.short_description ?? "" }} />
                     </div>
-
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
                         <p
                             style={{
