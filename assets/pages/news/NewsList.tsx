@@ -25,7 +25,7 @@ const NewsListItem: FC<NewsListItemProps> = ({ slug, newsArticle }) => {
             <Card
                 start={<div className={fr.cx("fr-tags-group")}>{tags}</div>}
                 desc={
-                    <div
+                    <span
                         dangerouslySetInnerHTML={{
                             __html:
                                 newsArticle?.short_description && newsArticle?.short_description.length > SHORT_DESC_MAX_CHAR
@@ -39,7 +39,7 @@ const NewsListItem: FC<NewsListItemProps> = ({ slug, newsArticle }) => {
                 imageAlt={newsArticle?.thumbnail_alt}
                 imageUrl={`${appRoot}/${newsArticle.thumbnail_url}`}
                 linkProps={routes.news_article({ slug }).link}
-                title={<div dangerouslySetInnerHTML={{ __html: newsArticle?.title ?? "" }} />}
+                title={<span dangerouslySetInnerHTML={{ __html: newsArticle?.title ?? "" }} />}
                 titleAs="h2"
             />
         </div>

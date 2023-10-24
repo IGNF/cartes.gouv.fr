@@ -63,7 +63,7 @@ const About = () => {
                         <div className={fr.cx("fr-col-sm-12", "fr-col-md-4", "fr-col-lg-4")}>
                             <Card
                                 desc={
-                                    <div
+                                    <span
                                         dangerouslySetInnerHTML={{
                                             __html: "Ouverture des premiers services de la <strong>Géoplateforme</strong> (version bêta) : services de diffusion et de téléchargement, catalogage, chargement/traitement/diffusion vecteur",
                                         }}
@@ -76,7 +76,7 @@ const About = () => {
                         <div className={fr.cx("fr-col-sm-12", "fr-col-md-4", "fr-col-lg-4")}>
                             <Card
                                 desc={
-                                    <div
+                                    <span
                                         dangerouslySetInnerHTML={{
                                             __html: "Mise en ligne sur <strong>Cartes.gouv.fr</strong> des fonctionnalités de catalogage et d’alimentation/diffusion des données",
                                         }}
@@ -89,7 +89,7 @@ const About = () => {
                         <div className={fr.cx("fr-col-sm-12", "fr-col-md-4", "fr-col-lg-4")}>
                             <Card
                                 desc={
-                                    <div
+                                    <span
                                         dangerouslySetInnerHTML={{ __html: "Ouverture de la visualisation cartographique sur <strong>Cartes.gouv.fr</strong>" }}
                                     />
                                 }
