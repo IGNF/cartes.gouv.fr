@@ -6,7 +6,7 @@ import AppLayout from "../components/Layout/AppLayout";
 import SymfonyRouting from "../modules/Routing";
 import { appRoot, useRoute } from "../router/router";
 
-import hp from "../img/photos/rustrel.jpg";
+import hp from "../img/home/home.png";
 import "../sass/pages/home.scss";
 
 const Home = () => {
@@ -34,28 +34,28 @@ const Home = () => {
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
                             <div className={fr.cx("fr-col-12", "fr-col-lg-6", "fr-px-0", "fr-pl-md-14v")}>
                                 <p className={fr.cx("fr-mt-4w", "fr-mt-md-7w") + " fr-display--xxs"}>
-                                    Construisons ensemble le futur portail de la connaissance du territoire
+                                    Bienvenue sur le futur service public des cartes et données du territoire
                                 </p>
 
-                                <p className={fr.cx("fr-mb-5w", "fr-text--lg", "fr-pr-10v")}>
-                                    <span className={fr.cx("fr-icon-check-line")} aria-hidden="true" /> Un accès <strong>unique</strong> et{" "}
-                                    <strong>partagé</strong> aux données géographiques <strong>ouvertes</strong>
+                                <p className={fr.cx("fr-mt-4v", "fr-mt-md-7v", "fr-text--xl")}>
+                                    <strong>En construction, le site Cartes.gouv.fr arrive bientôt&nbsp;!</strong>
                                 </p>
-                                <p className={fr.cx("fr-mb-5w", "fr-text--lg", "fr-pr-10v")}>
-                                    <span className={fr.cx("fr-icon-check-line")} aria-hidden="true" /> Des outils plus <strong>simples</strong> pour déposer et
-                                    diffuser vos données en toute <strong>autonomie</strong>
+
+                                <p className={fr.cx("fr-text--lg", "fr-pr-10v")}>
+                                    La carte et le territoire bientôt réunis&nbsp;? Le besoin en données explose pour connaître la réalité terrain, analyser des
+                                    phénomènes, piloter des activités multiples.
                                 </p>
-                                <p className={fr.cx("fr-mb-5w", "fr-text--lg", "fr-pr-10v")}>
-                                    <span className={fr.cx("fr-icon-check-line")} aria-hidden="true" /> Une nouvelle infrastructure plus{" "}
-                                    <strong>performante</strong> qui offre des services <strong>utiles pour tous</strong> les usagers
+                                <p className={fr.cx("fr-text--lg", "fr-pr-10v")}>
+                                    Collectivités territoriales, acteurs publics, entreprises, associations, citoyens…
                                 </p>
-                                <p className={fr.cx("fr-mb-5w", "fr-text--lg", "fr-pr-10v")}>
-                                    <span className={fr.cx("fr-icon-check-line")} aria-hidden="true" /> La possibilité d&apos;enrichir et améliorer{" "}
-                                    <strong>collectivement</strong> les données et les services
+                                <p className={fr.cx("fr-text--lg", "fr-pr-10v")}>
+                                    <strong>Cartes.gouv.fr</strong> offrira à tous les bases de données et les outils utiles pour se saisir de ces opportunités,
+                                    avec en premier lieu des cartes et données publiques librement accessibles sur de nombreux thèmes (topographie, écologie,
+                                    sécurité, foncier, réglementations…).
                                 </p>
                             </div>
-                            <div className={fr.cx("fr-col-12", "fr-col-lg-6", "fr-pb-4w", "fr-pl-md-8w", "fr-pr-md-2w", "fr-pt-md-6w")}>
-                                <figure className={fr.cx("fr-content-media")} role="group" aria-label="Rustrel (Vaucluse) - IGN">
+                            <div className={fr.cx("fr-col-12", "fr-col-lg-6", "fr-pb-4w", "fr-pl-md-8w", "fr-pr-md-2w", "fr-mt-4w")}>
+                                <figure className={fr.cx("fr-content-media")} role="group" aria-label="Taux de boisement - IGN">
                                     <div className={fr.cx("fr-content-media__img")}>
                                         <img
                                             className={fr.cx("fr-responsive-img", "fr-ratio-1x1")}
@@ -65,8 +65,60 @@ const Home = () => {
                                             data-fr-js-ratio="true"
                                         />
                                     </div>
-                                    <figcaption className={fr.cx("fr-content-media__caption")}>Rustrel (Vaucluse) - IGN</figcaption>
+                                    <figcaption className={fr.cx("fr-content-media__caption")}>Taux de boisement - IGN</figcaption>
                                 </figure>
+                            </div>
+                        </div>
+
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
+                            <div className={fr.cx("fr-col-12", "fr-px-0", "fr-px-md-14v")}>
+                                <p className={fr.cx("fr-text--lg")}>
+                                    Le site proposera également des services qui vont s’enrichir pour permettre à chacun de créer, héberger, contribuer,
+                                    partager, visualiser et publier des données et des cartes en autonomie.
+                                </p>
+                                <p className={fr.cx("fr-text--lg")}>
+                                    <strong>Cartes.gouv.fr</strong> reprendra dans un premier temps les fonctions des sites Géoservices puis Géoportail ainsi
+                                    que de premiers outils pour la gestion des données par les acteurs publics. Il s’enrichira progressivement de
+                                    fonctionnalités nouvelles au bénéfice de tous.
+                                </p>
+                                <p className={fr.cx("fr-text--lg")}>
+                                    <strong>Cartes.gouv.fr</strong> s’appuie sur une nouvelle infrastructure ouverte et collaborative, la Géoplateforme,
+                                    soutenue par le Ministère de la Transition écologique et de la Cohésion des territoires ainsi que par le Fonds de
+                                    transformation de l’action publique.
+                                </p>
+                                <p className={fr.cx("fr-text--lg")}>
+                                    En attendant, retrouvez les données et services dont vous avez besoin sur{" "}
+                                    <a
+                                        href="https://www.geoportail.gouv.fr"
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        title="geoportail.gouv.fr - ouvre une nouvelle fenêtre"
+                                    >
+                                        Géoportail
+                                    </a>{" "}
+                                    et{" "}
+                                    <a
+                                        href="https://geoservices.ign.fr"
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        title="geoservices.ign.fr - ouvre une nouvelle fenêtre"
+                                    >
+                                        Géoservices
+                                    </a>
+                                    .
+                                </p>
+                                <p className={fr.cx("fr-mb-5w", "fr-text--lg")}>
+                                    Et pour en savoir + sur <strong>cartes.gouv.fr</strong>,{" "}
+                                    <a
+                                        href="https://ign.fr/geoplateforme/rejoindre-la-communaute"
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        title="Rejoindre la communauté Géoplateforme - ouvre une nouvelle fenêtre"
+                                    >
+                                        rejoignez la communauté Géoplateforme
+                                    </a>
+                                    .
+                                </p>
                             </div>
                         </div>
                     </div>
