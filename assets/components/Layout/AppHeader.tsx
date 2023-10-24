@@ -3,10 +3,10 @@ import { MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation/MainN
 import { FC, ReactNode } from "react";
 
 import useUser from "../../hooks/useUser";
-import { useLang } from "../../i18n";
+// import { useLang } from "../../i18n";
 import SymfonyRouting from "../../modules/Routing";
 import { routes } from "../../router/router";
-import LanguageSelector from "../Utils/LanguageSelector";
+// import LanguageSelector from "../Utils/LanguageSelector";
 
 export type NavigationProps = MainNavigationProps.Item[] | ReactNode;
 
@@ -15,7 +15,7 @@ type AppHeaderProps = {
 };
 const AppHeader: FC<AppHeaderProps> = ({ navItems = [] }) => {
     const { user } = useUser();
-    const { lang, setLang } = useLang();
+    // const { lang, setLang } = useLang();
 
     const quickAccessItems: (HeaderProps.QuickAccessItem | ReactNode)[] = [];
 
@@ -58,7 +58,7 @@ const AppHeader: FC<AppHeaderProps> = ({ navItems = [] }) => {
         });
     }
 
-    quickAccessItems.push(<LanguageSelector lang={lang} setLang={setLang} />);
+    // quickAccessItems.push(<LanguageSelector lang={lang} setLang={setLang} />);
 
     return (
         <Header
