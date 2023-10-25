@@ -1,14 +1,15 @@
-import { FC, useEffect, useState } from "react";
-import { Controller, UseFormReturn } from "react-hook-form";
-import Translator from "../../../modules/Translator";
 import { fr } from "@codegouvfr/react-dsfr";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import Input from "@codegouvfr/react-dsfr/Input";
+import { FC, useEffect } from "react";
+import { Controller, UseFormReturn } from "react-hook-form";
+
 import AutocompleteSelect from "../../../components/Input/AutocompleteSelect";
+import Translator from "../../../modules/Translator";
+import { StoredDataDetailsRelationDto } from "../../../types/entrepot";
 
 // Themes et mot cles INSPIRE
 import { getInspireKeywords } from "../../../utils";
-import { StoredDataDetailsRelationDto } from "../../../types/entrepot";
 
 type TablesInfoFormProps = {
     tables: StoredDataDetailsRelationDto[];
@@ -21,27 +22,25 @@ type TablesInfoFormProps = {
 const TableInfosForm: FC<TablesInfoFormProps> = ({ visible, tables, state, stateRelatedMessage, form }) => {
     const {
         register,
-        trigger,
         setValue: setFormValue,
         getValues: getFormValues,
         formState: { errors },
         control,
+        watch,
     } = form;
 
     const keywords = getInspireKeywords();
-    const [selectedTables, setSelectedTables] = useState<string[]>([]);
 
-    // Lorsqu'on revient sur ce composant, on recupere les anciennes valeur
+    const selectedTables = watch("selected_tables") ?? [];
+
+    // Lorsqu'on revient sur ce composant, on recupere les anciennes valeurs
     useEffect(() => {
         const prevTableInfos = getFormValues("table_infos") ?? {};
 
-        const tableSet = new Set<string>();
-        Object.keys(prevTableInfos).forEach((table) => {
-            tableSet.add(table);
-        });
+        const tableSet = new Set<string>(Object.keys(prevTableInfos));
 
         setFormValue("table_infos", prevTableInfos);
-        setSelectedTables(Array.from(tableSet));
+        setFormValue("selected_tables", Array.from(tableSet));
     }, [getFormValues, setFormValue]);
 
     // cocher/decocher une table
@@ -50,15 +49,8 @@ const TableInfosForm: FC<TablesInfoFormProps> = ({ visible, tables, state, state
         const exists = selectedTables.includes(tableName);
         exists ? tableSet.delete(tableName) : tableSet.add(tableName);
 
-        setSelectedTables(Array.from(tableSet));
-        trigger("selected_tables");
+        setFormValue("selected_tables", Array.from(tableSet), { shouldValidate: true });
     };
-
-    /* Mise a jour de la valeur [selected_tables] du formulaire lorsque
-    selectedTables change */
-    useEffect(() => {
-        setFormValue("selected_tables", selectedTables);
-    }, [selectedTables, setFormValue]);
 
     return (
         <div className={fr.cx("fr-my-2v", !visible && "fr-hidden")}>

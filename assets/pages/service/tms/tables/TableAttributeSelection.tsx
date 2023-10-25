@@ -1,7 +1,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { Accordion } from "@codegouvfr/react-dsfr/Accordion";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect } from "react";
 import { type UseFormReturn } from "react-hook-form";
 
 import Translator from "../../../../modules/Translator";
@@ -15,13 +15,13 @@ type TableAttributeSelectionProps = {
 
 const TableAttributeSelection: FC<TableAttributeSelectionProps> = ({ visible, form, selectedTables }) => {
     const {
-        trigger,
         setValue: setFormValue,
         getValues: getFormValues,
         formState: { errors },
+        watch,
     } = form;
 
-    const [tableAttributes, setTableAttributes] = useState<Record<string, string[]>>({});
+    const tableAttributes: Record<string, string[]> = watch("table_attributes") ?? {};
 
     useEffect(() => {
         const prevTableAttributes = getFormValues("table_attributes") ?? {};
@@ -29,29 +29,25 @@ const TableAttributeSelection: FC<TableAttributeSelectionProps> = ({ visible, fo
         selectedTables.forEach((table) => {
             tableAttributes[table.name] = prevTableAttributes[table.name] ?? [];
         });
-        setTableAttributes(tableAttributes);
-    }, [getFormValues, selectedTables]);
+
+        setFormValue("table_attributes", tableAttributes);
+    }, [getFormValues, setFormValue, selectedTables]);
 
     const toggleAttributes = (tableName: string, attrName: string) => {
-        setTableAttributes((prevState) => {
-            let tableAttr: string[] = prevState[tableName];
+        const prevTableAttributes = { ...tableAttributes };
+        let tableAttr: string[] = prevTableAttributes[tableName];
 
-            if (tableAttr.includes(attrName)) {
-                tableAttr = tableAttr.filter((el) => el !== attrName);
-            } else {
-                tableAttr.push(attrName);
-                tableAttr = Array.from(new Set(tableAttr));
-            }
+        if (tableAttr.includes(attrName)) {
+            tableAttr = tableAttr.filter((el) => el !== attrName);
+        } else {
+            tableAttr.push(attrName);
+            tableAttr = Array.from(new Set(tableAttr));
+        }
 
-            prevState[tableName] = tableAttr;
-            return { ...prevState };
-        });
-        trigger(`table_attributes.${tableName}`);
+        prevTableAttributes[tableName] = tableAttr;
+
+        setFormValue("table_attributes", { ...prevTableAttributes }, { shouldValidate: true });
     };
-
-    useEffect(() => {
-        setFormValue("table_attributes", tableAttributes);
-    }, [tableAttributes, setFormValue]);
 
     return (
         <div className={fr.cx(!visible && "fr-hidden")}>

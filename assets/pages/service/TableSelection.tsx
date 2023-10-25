@@ -1,10 +1,11 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
-import { FC, useEffect, useState } from "react";
+import { FC } from "react";
 import { type UseFormReturn } from "react-hook-form";
+
+import { filterGeometricRelations } from "../../helpers";
 import Translator from "../../modules/Translator";
 import { type VectorDb } from "../../types/app";
-import { filterGeometricRelations } from "../../helpers";
 
 type TablesSelectionProps = {
     filterGeometric?: boolean;
@@ -17,30 +18,25 @@ const TableSelection: FC<TablesSelectionProps> = ({ filterGeometric = false, vec
     const {
         formState: { errors },
         setValue: setFormValue,
-        trigger,
+        watch,
     } = form;
 
     const relations = vectorDb.type_infos?.relations || [];
     const tables = filterGeometricRelations(relations, filterGeometric);
 
-    const [selectedTables, setSelectedTables] = useState<string[]>([]);
+    const selectedTables = watch("selected_tables") ?? [];
 
     const toggleTable = (tableName: string) => {
-        setSelectedTables((prevState) => {
-            if (prevState.includes(tableName)) {
-                prevState = prevState.filter((el) => el !== tableName);
-            } else {
-                prevState.push(tableName);
-            }
+        let prevSelectedTables = [...selectedTables];
 
-            return Array.from(new Set(prevState));
-        });
-        trigger();
+        if (prevSelectedTables.includes(tableName)) {
+            prevSelectedTables = prevSelectedTables.filter((el) => el !== tableName);
+        } else {
+            prevSelectedTables.push(tableName);
+        }
+
+        setFormValue("selected_tables", Array.from(new Set(prevSelectedTables)), { shouldValidate: true });
     };
-
-    useEffect(() => {
-        setFormValue("selected_tables", selectedTables);
-    }, [selectedTables, setFormValue]);
 
     return (
         <div className={fr.cx(!visible && "fr-hidden")}>
