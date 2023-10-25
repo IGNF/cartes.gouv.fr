@@ -2,16 +2,18 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FC } from "react";
 import { createPortal } from "react-dom";
 import { symToStr } from "tsafe/symToStr";
+
 import api from "../../../../api";
 import MenuList from "../../../../components/Utils/MenuList";
+import Wait from "../../../../components/Utils/Wait";
 import functions from "../../../../functions";
 import RQKeys from "../../../../modules/RQKeys";
 import { routes } from "../../../../router/router";
-import { Service } from "../../../../types/app";
+import type { Service } from "../../../../types/app";
 import { offeringTypeDisplayName } from "../../../../utils";
 
 const unpublishServiceConfirmModal = createModal({
@@ -27,16 +29,12 @@ type ServicesListItemProps = {
 const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, datastoreId }) => {
     const queryClient = useQueryClient();
 
-    const handleUnpublishService = () => {
-        api.service
-            .unpublish(datastoreId, service._id)
-            .then(() => {
-                queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
-            })
-            .catch((error) => {
-                console.error(error);
-            });
-    };
+    const unpublishServiceMutation = useMutation({
+        mutationFn: () => api.service.unpublish(datastoreId, service._id),
+        onSuccess() {
+            queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
+        },
+    });
 
     return (
         <>
@@ -114,8 +112,8 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                             priority: "secondary",
                         },
                         {
-                            children: "Oui, supprimer",
-                            onClick: () => handleUnpublishService(),
+                            children: "Oui, dépublier",
+                            onClick: () => unpublishServiceMutation.mutate(),
                             doClosesModal: true,
                             priority: "primary",
                         },
@@ -128,6 +126,17 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                     </ul>
                 </unpublishServiceConfirmModal.Component>,
                 document.body
+            )}
+
+            {unpublishServiceMutation.isPending && (
+                <Wait>
+                    <div className={fr.cx("fr-container")}>
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
+                            <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " icons-spin"} />
+                            <h6 className={fr.cx("fr-m-0")}>En cours de dépublication</h6>
+                        </div>
+                    </div>
+                </Wait>
             )}
         </>
     );
