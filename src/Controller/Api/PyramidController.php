@@ -2,29 +2,28 @@
 
 namespace App\Controller\Api;
 
+use App\Constants\EntrepotApi\StoredDataTags;
+use App\Constants\EntrepotApi\UploadTags;
 use App\Dto\Pyramid\AddPyramidDTO;
 use App\Dto\Pyramid\CompositionDTO;
-use App\Services\EntrepotApiService;
-use App\Exception\CartesApiException;
 use App\Dto\Pyramid\PublishPyramidDTO;
-use App\Constants\EntrepotApi\UploadTags;
-use App\Constants\EntrepotApi\StoredDataTags;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
+use App\Exception\CartesApiException;
+use App\Services\EntrepotApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
+use Symfony\Component\Routing\Annotation\Route;
 
 #[Route(
     '/api/datastore/{datastoreId}/pyramid',
     name: 'cartesgouvfr_api_pyramid_'
 )]
-class PyramidController extends AbstractController
+class PyramidController extends AbstractController implements ApiControllerInterface
 {
-    const TOP_LEVEL_DEFAULT     = 5;
-    const BOTTOM_LEVEL_DEFAULT  = 18;
+    public const TOP_LEVEL_DEFAULT = 5;
+    public const BOTTOM_LEVEL_DEFAULT = 18;
 
     public function __construct(
         private EntrepotApiService $entrepotApiService,
@@ -32,8 +31,7 @@ class PyramidController extends AbstractController
     ) {
     }
 
-    #[
-        Route('/add', name: 'add', methods: ['POST'], 
+    #[Route('/add', name: 'add', methods: ['POST'],
         options: ['expose' => true],
         condition: 'request.isXmlHttpRequest()')
     ]
@@ -44,17 +42,17 @@ class PyramidController extends AbstractController
             // $samplePyramidId = $request->query->get('samplePyramidId', null);
 
             $vectordb = $this->entrepotApiService->storedData->get($datastoreId, $dto->vectorDbId);
-            
+
             // TODO Suppression de l'upload ?
 
             // On met les valeurs de bottom_level et top_level sous forme de chaine
             $composition = [];
-            foreach($dto->composition as $compo) {
+            foreach ($dto->composition as $compo) {
                 $composition[] = [
                     'table' => $compo->table,
                     'attributes' => $compo->attributes,
                     'bottom_level' => strval($compo->bottom_level),
-                    'top_level' => strval($compo->top_level)
+                    'top_level' => strval($compo->top_level),
                 ];
             }
 
@@ -64,11 +62,11 @@ class PyramidController extends AbstractController
                 'composition' => $composition,
                 'bottom_level' => strval(end($levels)),
                 'top_level' => strval($levels[0]),
-                'tippecanoe_options' => $dto->tippecanoe  
+                'tippecanoe_options' => $dto->tippecanoe,
             ];
 
-            if (! is_null($dto->area)) {
-                $parameters['area'] = $dto->area;   
+            if (!is_null($dto->area)) {
+                $parameters['area'] = $dto->area;
             }
 
             $apiEntrepotProcessings = $this->parameterBag->get('api_entrepot')['processings'];
@@ -78,7 +76,7 @@ class PyramidController extends AbstractController
                 'inputs' => ['stored_data' => [$dto->vectorDbId]],
                 'output' => ['stored_data' => [
                     'name' => $dto->technicalName,
-                    'storage_tags' => ['PYRAMIDE']
+                    'storage_tags' => ['PYRAMIDE'],
                 ]],
                 'parameters' => $parameters,
             ];
@@ -97,9 +95,9 @@ class PyramidController extends AbstractController
                 'proc_int_id' => $vectordb['tags']['proc_int_id'],
                 'vectordb_id' => $dto->vectorDbId,
                 'proc_pyr_creat_id' => $processingExecution['_id'],
-                'is_sample' => is_null($dto->area) ? "false" : "true"
+                'is_sample' => is_null($dto->area) ? 'false' : 'true',
             ];
-        
+
             $this->entrepotApiService->storedData->addTags($datastoreId, $pyramidId, $pyramidTags);
             $this->entrepotApiService->processing->launchExecution($datastoreId, $processingExecution['_id']);
 
@@ -112,13 +110,13 @@ class PyramidController extends AbstractController
     }
 
     #[
-        Route('/publish/{pyramidId}', name: 'publish', methods: ['POST'], 
-        options: ['expose' => true],
-        condition: 'request.isXmlHttpRequest()')
+        Route('/publish/{pyramidId}', name: 'publish', methods: ['POST'],
+            options: ['expose' => true],
+            condition: 'request.isXmlHttpRequest()')
     ]
     public function publish(
-        string $datastoreId, 
-        string $pyramidId, 
+        string $datastoreId,
+        string $pyramidId,
         #[MapRequestPayload] PublishPyramidDTO $dto): JsonResponse
     {
         try {
@@ -129,9 +127,10 @@ class PyramidController extends AbstractController
 
             // TODO Suppression de l'Upload ?
             // TODO Suppression de la base de donnees
- 
+
             // Restriction d'acces
-            $endpoints = []; $isOfferingOpen = true;
+            $endpoints = [];
+            $isOfferingOpen = true;
 
             if ('all_public' === $dto->share_with) {
                 $endpoints = $this->entrepotApiService->datastore->getEndpoints($datastoreId, [
@@ -155,19 +154,19 @@ class PyramidController extends AbstractController
 
             // Ajout d'une execution de traitement
             $requestBody = [
-                "type" => "WMTS-TMS",
-                "name" => $dto->public_name,
-                "layer_name" => $dto->technical_name,
-                "type_infos" => [
-                    "title" => $dto->public_name,
-                    "abstract" => $dto->description,
-                    "keywords" => $dto->category,
-                    "used_data" => [[
-                        "bottom_level" => $levels['bottom_level'],
-                        "top_level" => $levels['top_level'],
-                        "stored_data" => $pyramidId
-                    ]]
-                ]
+                'type' => 'WMTS-TMS',
+                'name' => $dto->public_name,
+                'layer_name' => $dto->technical_name,
+                'type_infos' => [
+                    'title' => $dto->public_name,
+                    'abstract' => $dto->description,
+                    'keywords' => $dto->category,
+                    'used_data' => [[
+                        'bottom_level' => $levels['bottom_level'],
+                        'top_level' => $levels['top_level'],
+                        'stored_data' => $pyramidId,
+                    ]],
+                ],
             ];
 
             // Ajout de la configuration
@@ -192,21 +191,23 @@ class PyramidController extends AbstractController
 
     /**
      * @param array<CompositionDTO> $composition
-     * @return array
      */
-    private function getLevels($composition) : array {
+    private function getLevels($composition): array
+    {
         $levels = [];
-        foreach($composition as $tableComposition) {
+        foreach ($composition as $tableComposition) {
             $levels[] = $tableComposition->bottom_level;
             $levels[] = $tableComposition->top_level;
         }
         $levels = array_unique($levels, SORT_NUMERIC);
         sort($levels, SORT_NUMERIC);
+
         return $levels;
     }
 
     /**
      * @param array<mixed> $pyramid
+     *
      * @return array
      */
     private function getBottomAndToLevel(array $pyramid)
@@ -216,7 +217,7 @@ class PyramidController extends AbstractController
         }
 
         $levels = $pyramid['type_infos']['levels'];
-        usort($levels, function(string $a, string $b) {
+        usort($levels, function (string $a, string $b) {
             return intval($a) - intval($b);
         });
 

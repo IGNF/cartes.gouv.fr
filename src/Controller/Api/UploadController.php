@@ -26,7 +26,7 @@ use Symfony\Component\Routing\Annotation\Route;
     options: ['expose' => true],
     condition: 'request.isXmlHttpRequest()'
 )]
-class UploadController extends AbstractController
+class UploadController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
         private EntrepotApiService $entrepotApiService,

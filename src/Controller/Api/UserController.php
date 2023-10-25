@@ -13,9 +13,9 @@ use Symfony\Component\Routing\Annotation\Route;
     '/api/user',
     name: 'cartesgouvfr_api_user_',
     options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()'
+    // condition: 'request.isXmlHttpRequest()'
 )]
-class UserController extends AbstractController
+class UserController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
         private readonly EntrepotApiService $entrepotApiService

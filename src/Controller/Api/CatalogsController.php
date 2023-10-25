@@ -2,15 +2,14 @@
 
 namespace App\Controller\Api;
 
-use App\Services\EntrepotApiService;
 use App\Exception\CartesApiException;
 use App\Exception\EntrepotApiException;
+use App\Services\EntrepotApiService;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-
 
 #[Route(
     '/api/catalogs',
@@ -18,7 +17,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
     options: ['expose' => true],
     condition: 'request.isXmlHttpRequest()'
 )]
-class CatalogsController extends AbstractController
+class CatalogsController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
         private EntrepotApiService $entrepotApiService,
@@ -31,14 +30,15 @@ class CatalogsController extends AbstractController
         $params = ['page' => 1, 'limit' => 10];
         try {
             $queryParams = [];
-            foreach($params as $name => $defValue) {
+            foreach ($params as $name => $defValue) {
                 $filtered = filter_var($request->get($name, $defValue), FILTER_VALIDATE_INT);
-                if ($filtered === false) {
+                if (false === $filtered) {
                     throw new \Exception("Le paramêtre $name n\'est pas valide", Response::HTTP_BAD_REQUEST);
                 }
                 $queryParams[$name] = $filtered;
             }
-            $response = $this->entrepotApiService->catalogs->getPublicCommunities($queryParams) ;   
+            $response = $this->entrepotApiService->catalogs->getPublicCommunities($queryParams);
+
             return $this->json($response);
         } catch (EntrepotApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);

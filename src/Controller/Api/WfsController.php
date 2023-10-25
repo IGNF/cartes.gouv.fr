@@ -2,17 +2,16 @@
 
 namespace App\Controller\Api;
 
+use App\Constants\EntrepotApi\StoredDataTags;
 use App\Dto\WfsAddDTO;
-use App\Services\EntrepotApiService;
 use App\Exception\CartesApiException;
 use App\Exception\EntrepotApiException;
-use App\Constants\EntrepotApi\StoredDataTags;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
+use App\Services\EntrepotApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
+use Symfony\Component\Routing\Annotation\Route;
 
 #[Route(
     '/api/datastores/{datastoreId}/{storedDataId}/wfs',
@@ -20,7 +19,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
     options: ['expose' => true],
     condition: 'request.isXmlHttpRequest()'
 )]
-class WfsController extends AbstractController
+class WfsController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
         private EntrepotApiService $entrepotApiService,
@@ -29,24 +28,24 @@ class WfsController extends AbstractController
 
     #[Route('/', name: 'add')]
     public function add(
-        string $datastoreId, 
-        string $storedDataId, 
+        string $datastoreId,
+        string $storedDataId,
         #[MapRequestPayload] WfsAddDTO $dto): JsonResponse
-    {        
+    {
         try {
             $relations = [];
             foreach ($dto->table_infos as $table) {
                 $relation = [
                     'native_name' => $table->native_name,
                     'title' => $table->title,
-                    'abstract' => $table->description
+                    'abstract' => $table->description,
                 ];
                 if ($table->public_name) {
                     $relation['public_name'] = $table->public_name;
                 }
 
-                if ($table->keywords && count($table->keywords) !== 0) {
-                    $relation['keywords'] = $table->keywords;     
+                if ($table->keywords && 0 !== count($table->keywords)) {
+                    $relation['keywords'] = $table->keywords;
                 }
                 $relations[] = $relation;
             }
