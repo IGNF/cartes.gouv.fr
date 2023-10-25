@@ -14,8 +14,8 @@
         "tags": ["Macarte", "Consultation"],
         "thumbnail_url": "build/img/actualites/7.png",
         "thumbnail_alt": "Une vue de l'outil MaCarte",
-        "short_description": "L’espace Collaboratif, outil en ligne pour enrichir vos bases de données collaboratives, va prochainement intégrer <strong>Cartes.gouv.fr</strong>",
-        "content": "<p>Ma Carte, outil en ligne de création et de publication de cartes, ouvert et mis à disposition de tous par l’IGN, s’enrichit de nouvelles fonctionnalités. <strong>Cartes.gouv.fr</strong> intègrera à terme ce service pour vous permettre de créer vos cartes plus simplement à partir des données de la communauté <strong>Géoplateforme</strong>. Contribuez à la consultation publique pour partager vos usages et nous aider à améliorer l’outil.</p><p><strong>Lien vers l'article : </strong><a href=\"https://www.ign.fr/agenda/consultation-publique-le-guichet-cartographe-du-service-public-en-questions\">Consultation publique : le guichet cartographe du service public en questions - Portail IGN - IGN</a></p>"    
+        "short_description": "Ma Carte, outil en ligne de création et de publication de cartes, ouvert et mis à disposition de tous par l’IGN, s’enrichit de nouvelles fonctionnalités. <strong>Cartes.gouv.fr</strong> intégrera à terme ce service pour vous permettre de créer vos cartes plus simplement à partir des données de la communauté <strong>Géoplateforme</strong>.  Contribuez à la consultation publique pour partager vos usages et nous aider à améliorer l’outil.",
+        "content": "<p>Lien vers l'article : <a href=\"https://www.ign.fr/agenda/consultation-publique-le-guichet-cartographe-du-service-public-en-questions\" target=\"_blank\" rel=\"\noreferrer\" title=\"Consultation Ma Carte - ouvre une nouvelle fenêtre\">Consultation publique : le guichet cartographe du service public en questions - Portail IGN - IGN</a></p>"    
     },
     "replay_presentation_de_la_premiere_version_du_site_cartes.gouv.fr": {
         "date": "2023-10-23T08:00:00.000Z",
