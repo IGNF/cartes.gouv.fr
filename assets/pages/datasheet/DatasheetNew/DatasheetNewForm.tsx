@@ -295,19 +295,20 @@ const DatasheetNewForm = ({ datastoreId }) => {
             <ButtonsGroup
                 buttons={[
                     {
+                        linkProps: routes.datasheet_list({ datastoreId }).link,
+                        children: "Annuler",
+                    },
+                    {
                         onClick: () => {
                             const dataFile = dataFileRef.current?.files?.[0];
                             validateDataFile(dataFile);
                             handleSubmit(onSubmit)();
                         },
-                        children: "Soumettre",
-                    },
-                    {
-                        linkProps: routes.datasheet_list({ datastoreId }).link,
-                        children: "Retour à mes données",
+                        children: "Déposer votre fichier",
                     },
                 ]}
                 inlineLayoutWhen="always"
+                alignment="right"
                 className={fr.cx("fr-mt-2w")}
             />
 
