@@ -10,6 +10,7 @@ export const defaultNavItems = (t: TranslationFunction<"navItems", ComponentKey>
                 linkProps: {
                     href: "https://geoservices.ign.fr/bascule-vers-la-geoplateforme",
                     target: "_blank",
+                    rel: "noreferrer",
                     title: "bascule vers la géoplateforme - ouvre une nouvelle fenêtre",
                 },
                 text: t("documentation"),
