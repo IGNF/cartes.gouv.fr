@@ -126,6 +126,21 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                                         content: <ServicesListTab datastoreId={datastoreId} datasheet={datasheetQuery?.data} />,
                                     },
                                 ]}
+                                onTabChange={({ tabIndex }) => {
+                                    let activeTab = "dataset";
+                                    switch (tabIndex) {
+                                        case 0:
+                                            activeTab = "metadata";
+                                            break;
+                                        case 1:
+                                            activeTab = "dataset";
+                                            break;
+                                        case 2:
+                                            activeTab = "services";
+                                            break;
+                                    }
+                                    routes.datastore_datasheet_view({ datastoreId, datasheetName, activeTab }).push();
+                                }}
                             />
                         </div>
                     </div>
