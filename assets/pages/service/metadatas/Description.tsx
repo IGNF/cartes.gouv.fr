@@ -162,7 +162,7 @@ const Description: FC<DescriptionProps> = ({ storedData, endpointType, visible, 
                 nativeInputProps={{
                     ...register("creation_date"),
                     type: "date",
-                    value: now,
+                    defaultValue: now,
                 }}
             />
             <Select
