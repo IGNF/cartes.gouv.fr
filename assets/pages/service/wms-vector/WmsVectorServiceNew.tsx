@@ -246,7 +246,7 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
                     />
                 </>
             )}
-            {createServiceMutation.isPaused && (
+            {createServiceMutation.isPending && (
                 <Wait>
                     <div className={fr.cx("fr-container")}>
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
