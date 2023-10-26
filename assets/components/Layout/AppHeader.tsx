@@ -26,7 +26,7 @@ const AppHeader: FC<AppHeaderProps> = ({ navItems = [] }) => {
             className: "fr-btn--icon-right",
             target: "_blank",
             rel: "noreferrer",
-            title: "Accéder au Géoportail - ouvre une nouvelle fenêtre"
+            title: "Accéder au Géoportail - ouvre une nouvelle fenêtre",
         },
         text: "Accéder au Géoportail",
     });

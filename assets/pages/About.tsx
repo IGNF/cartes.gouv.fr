@@ -8,7 +8,7 @@ const About = () => {
         <AppLayout documentTitle="A propos de cartes.gouv.fr">
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
-                    <h1>A propos de cartes.gouv.fr</h1>
+                    <h1>À propos</h1>
 
                     <h2>Cartes.gouv.fr, le service public des cartes et données du territoire</h2>
 
