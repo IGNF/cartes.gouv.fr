@@ -45,7 +45,7 @@ export const navItemsFrTranslations: Translations<"fr">["navItems"] = {
     faq: "Questions fréquentes",
     start: "Commencer avec cartes.gouv",
     news: "Actualités",
-    about: "A propos",
+    about: "À propos",
 };
 
 export const navItemsEnTranslations: Translations<"en">["navItems"] = {
