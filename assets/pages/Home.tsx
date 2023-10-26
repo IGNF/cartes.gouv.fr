@@ -124,11 +124,11 @@ const Home = () => {
                 </div>
             </div>
 
-            {/* Section proposition de valeur : Ce que vous pouvez faire avec cartes.gouv.fr */}
+            {/* Section proposition de valeur : Ce que vous pourrez faire avec cartes.gouv.fr */}
             <div className={fr.cx("fr-container", "fr-mt-8v", "fr-pb-3v", "fr-mt-md-10v", "fr-mb-2v", "fr-mb-md-8v")}>
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
                     <div className={fr.cx("fr-col-12")}>
-                        <h2 className={fr.cx("fr-my-5w") + " fr-text--center"}>Ce que vous pouvez faire avec cartes.gouv.fr</h2>
+                        <h2 className={fr.cx("fr-my-5w") + " fr-text--center"}>Ce que vous pourrez faire avec cartes.gouv.fr</h2>
                     </div>
                 </div>
 
