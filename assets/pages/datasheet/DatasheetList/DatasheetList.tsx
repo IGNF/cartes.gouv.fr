@@ -20,7 +20,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
     const datastoreQuery = useQuery({
         queryKey: RQKeys.datastore(datastoreId),
         queryFn: ({ signal }) => api.datastore.get(datastoreId, { signal }),
-        staleTime: 120000,
+        staleTime: 3600000,
     });
 
     const datasheetListQuery = useQuery({

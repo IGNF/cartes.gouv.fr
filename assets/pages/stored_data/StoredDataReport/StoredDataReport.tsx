@@ -23,7 +23,7 @@ const StoredDataReport: FC<StoredDataReportProps> = ({ datastoreId, storedDataId
     const datastoreQuery = useQuery({
         queryKey: RQKeys.datastore(datastoreId),
         queryFn: ({ signal }) => api.datastore.get(datastoreId, { signal }),
-        staleTime: 120000,
+        staleTime: 3600000,
     });
 
     const reportQuery = useQuery<StoredDataReport, CartesApiException>({
