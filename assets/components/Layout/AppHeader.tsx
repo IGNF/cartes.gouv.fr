@@ -24,6 +24,9 @@ const AppHeader: FC<AppHeaderProps> = ({ navItems = [] }) => {
         linkProps: {
             href: "https://www.geoportail.gouv.fr/carte",
             className: "fr-btn--icon-right",
+            target: "_blank",
+            rel: "noreferrer",
+            title: "Accéder au Géoportail - ouvre une nouvelle fenêtre"
         },
         text: "Accéder au Géoportail",
     });
