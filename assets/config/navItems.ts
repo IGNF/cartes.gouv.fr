@@ -41,7 +41,7 @@ export const { i18n } = declareComponentKeys<"documentation" | "faq" | "nous éc
 
 export const navItemsFrTranslations: Translations<"fr">["navItems"] = {
     "nous écrire": "Nous écrire",
-    documentation: "Documentation",
+    documentation: "Documentation Géoplateforme",
     faq: "Questions fréquentes",
     start: "Commencer avec cartes.gouv",
     news: "Actualités",
