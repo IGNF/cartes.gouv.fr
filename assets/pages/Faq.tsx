@@ -42,7 +42,7 @@ const Faq = () => {
                             </p>
                             <p>Il s’enrichira progressivement de fonctionnalités nouvelles au bénéfice de tous.</p>
                         </Accordion>
-                        <Accordion label="Quand arriveront les prochains services&nbsp;?" titleAs="h2">
+                        <Accordion label="Quand les prochains services arriveront-ils&nbsp;?" titleAs="h2">
                             <p>
                                 Cartes.gouv.fr s’enrichira au fur et à mesure des contributions de l’IGN et de ses partenaires. Début 2024 arriveront les
                                 premières fonctionnalités telles que le catalogue des données et services ainsi que le chargement et diffusion des données par
