@@ -9,15 +9,19 @@ import articles from "../../data/actualites.json";
 import functions from "../../functions";
 import { appRoot } from "../../router/router";
 import { type NewsArticle } from "../../types/newsArticle";
+import PageNotFound from "../error/PageNotFound";
 
 type NewsArticleProps = {
     slug: string;
 };
 
 const NewsArticle: FC<NewsArticleProps> = ({ slug }) => {
-    const newsArticle: NewsArticle = articles[slug];
-
     const theme = useColors();
+    const newsArticle: NewsArticle | undefined = articles[slug];
+
+    if (newsArticle === undefined) {
+        return <PageNotFound />;
+    }
 
     const tags = newsArticle?.tags?.map((tag, i) => (
         <Tag key={`${slug}_tag_${i}`} className={fr.cx("fr-mr-2v")}>
