@@ -5,16 +5,9 @@ import VectorLayer from "ol/layer/Vector";
 import { bbox as bboxStrategy } from "ol/loadingstrategy";
 import { transformExtent } from "ol/proj";
 import VectorSource from "ol/source/Vector";
-
 import { Service } from "../../types/app";
-
-type RequestInfo = {
-    base_url: string;
-    request: string;
-    service: string;
-    typeNames: string;
-    version: string;
-};
+import getRequestInfo from "./Utils";
+import olDefaults from "../../data/ol-defaults.json";
 
 type LayerInfo = {
     Abstract: string;
@@ -43,20 +36,18 @@ export type FeatureType = {
 
 export default class WFSService {
     _format: GeoJSON;
-    _projection: string;
     _offering: Service;
-    _requestInfo: RequestInfo | null;
+    _requestInfo: Record<string, string> | null;
     _parser: XMLParser;
     _featureTypes: FeatureType[];
 
-    constructor(offering: Service, projection = "EPSG:3857") {
+    constructor(offering: Service) {
         this._offering = offering;
-        this._projection = projection;
         this._requestInfo = null; // Variable de travail
 
         this._format = new GeoJSON();
         this._featureTypes = [];
-        this._parser = new XMLParser();
+        this._parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: "" });
     }
 
     async getLayers(): Promise<VectorLayer<VectorSource<Geometry>>[]> {
@@ -64,7 +55,7 @@ export default class WFSService {
         const layers: VectorLayer<VectorSource<Geometry>>[] = [];
 
         for (const descUrl of this._offering.urls) {
-            this._requestInfo = this._getRequestInfo(descUrl.url);
+            this._requestInfo = getRequestInfo(descUrl.url);
             if (!this._featureTypes.length) {
                 await this._getFeatureTypes();
             }
@@ -109,7 +100,7 @@ export default class WFSService {
 
         return new VectorLayer({
             source: vectorSource,
-            extent: transformExtent(info.extent, "EPSG:4326", this._projection),
+            extent: transformExtent(info.extent, "EPSG:4326", olDefaults.projection),
             properties: {
                 name: info.Name,
                 title: info.Title,
@@ -136,17 +127,6 @@ export default class WFSService {
             const xmlParsed = this._parser.parse(xml);
             this._featureTypes = xmlParsed["wfs:WFS_Capabilities"]["FeatureTypeList"]["FeatureType"];
         }
-    }
-
-    /**
-     * Recupere les informations de la requete DescribeFeatureType
-     * @param descFeatureTypeUrl
-     * @returns
-     */
-    _getRequestInfo(descFeatureTypeUrl): RequestInfo {
-        const url = new URL(descFeatureTypeUrl);
-        const params: Partial<RequestInfo> = Object.fromEntries(url.searchParams);
-        return { ...params, base_url: `${url.origin}${url.pathname}` } as RequestInfo;
     }
 
     /**

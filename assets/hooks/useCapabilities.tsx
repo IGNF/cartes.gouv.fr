@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import WMTSCapabilities from "ol/format/WMTSCapabilities";
-import { type Options } from "ol/source/WMTS";
+import { Capabilities } from "../types/ol";
 
-const useCapabilities = (key = "cartes") => {
-    return useQuery<Options>({
+const useCapabilities = (key: string = "cartes") => {
+    return useQuery<Capabilities>({
         queryKey: ["gpp_get_cap", key],
         queryFn: async () => {
             const response = await fetch(`https://wxs.ign.fr/${key}/geoportail/wmts?SERVICE=WMTS&VERSION=1.0.0&REQUEST=GetCapabilities`);

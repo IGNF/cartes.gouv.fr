@@ -17,15 +17,13 @@ import olDefaults from "../../data/ol-defaults.json";
 import "geoportal-extensions-openlayers/dist/GpPluginOpenLayers.css";
 import "../../sass/components/map-view.scss";
 import "../../sass/components/ol.scss";
+import TMSService from "../../modules/WebServices/TMSService";
 
 type RMapProps = {
-    projection?: string;
-    center?: [number, number];
-    zoom?: number;
     service: Service;
 };
 
-const RMap: FC<RMapProps> = ({ service, projection = "EPSG:3857", center = [2.35, 48.8, 5], zoom = 10 }) => {
+const RMap: FC<RMapProps> = ({ service }) => {
     const mapTargetRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<Map>();
 
@@ -33,52 +31,58 @@ const RMap: FC<RMapProps> = ({ service, projection = "EPSG:3857", center = [2.35
 
     // Extent dans la configuration
     let extent;
-
     const bbox = (service.configuration.type_infos as TypeInfosWithBbox)?.bbox;
     if (bbox) {
         extent = createOrUpdate(bbox.west, bbox.south, bbox.east, bbox.north);
-        extent = transformExtent(extent, "EPSG:4326", projection);
+        extent = transformExtent(extent, "EPSG:4326", olDefaults.projection);
     }
+
+    const gfinfo = ["WFS", "WMTS-TMS"].includes(service.type);
 
     /**
      * Retourne le controle correspondant au nom
      * @param name
      * @returns
      */
-    const getControl = (name: string): typeof LayerSwitcher | typeof GetFeatureInfo => {
+    const getControl = (className: string): typeof LayerSwitcher | typeof GetFeatureInfo => {
+        let control;
         if (mapRef.current) {
             mapRef.current.getControls().forEach((c) => {
-                if (c.get("name") === name) return c;
+                if (c.constructor.name === className) control = c;
             });
         }
-        return undefined;
+        return control;
     };
 
     useEffect(() => {
         // Creation de la carte
         if (!mapRef.current) {
             const controls = [
-                new LayerSwitcher({ name: "layerswitcher" }),
+                new LayerSwitcher(),
                 new SearchEngine({
                     collapsed: false,
                     displayAdvancedSearch: false,
                     apiKey: "essentiels",
                     zoomTo: "auto",
                 }),
-                new GetFeatureInfo({
-                    name: "getfeatureinfo",
-                    options: {
-                        active: true,
-                        hidden: true,
-                    },
-                }),
             ];
+
+            if (gfinfo) {
+                controls.push(
+                    new GetFeatureInfo({
+                        options: {
+                            active: true,
+                            hidden: true,
+                        },
+                    })
+                );
+            }
 
             mapRef.current = new Map({
                 view: new View({
-                    projection: projection,
-                    center: fromLonLat(center),
-                    zoom: zoom,
+                    projection: olDefaults.projection,
+                    center: fromLonLat(olDefaults.center),
+                    zoom: olDefaults.zoom,
                 }),
                 interactions: defaultInteractions(),
                 controls: controls,
@@ -92,13 +96,14 @@ const RMap: FC<RMapProps> = ({ service, projection = "EPSG:3857", center = [2.35
          * re-render.
          */
         return () => mapRef.current?.setTarget(undefined);
-    }, [projection, center, zoom]);
+    }, [gfinfo]);
 
     useEffect(() => {
         const addLayer = (layer) => {
+            // Ajout du layer dans la carte et dans le LayerSwitcher
             if (mapRef.current) {
                 mapRef.current.addLayer(layer);
-                getControl("layerswitcher")?.addLayer(layer, {
+                getControl("LayerSwitcher")?.addLayer(layer, {
                     title: layer.get("title"),
                     description: layer.get("abstract"),
                 });
@@ -109,8 +114,12 @@ const RMap: FC<RMapProps> = ({ service, projection = "EPSG:3857", center = [2.35
             // TODO Utiliser une factory ?
             switch (service.type) {
                 case "WFS": {
-                    const wfs = new WFSService(service, projection);
+                    const wfs = new WFSService(service);
                     return await wfs.getLayers();
+                }
+                case "WMTS-TMS": {
+                    const tms = new TMSService(service);
+                    return await tms.getLayers();
                 }
                 default:
                     break;
@@ -120,25 +129,32 @@ const RMap: FC<RMapProps> = ({ service, projection = "EPSG:3857", center = [2.35
         if (capabilities && mapRef.current) {
             // Ajout de la couche de fond PlanIgnV2
             const wmtsOptions = optionsFromCapabilities(capabilities, {
-                layer: olDefaults,
+                layer: olDefaults.default_background_layer,
             });
 
             if (wmtsOptions) {
+                const capLayer = capabilities.Contents.Layer?.find((l) => {
+                    return l.Identifier === olDefaults.default_background_layer;
+                });
+
                 const layer = new TileLayer({
                     opacity: 1,
                     source: new WMTS(wmtsOptions),
                 });
+                layer.set("title", capLayer?.Title);
                 addLayer(layer);
             }
 
             getLayers()
                 .then((layers) => {
                     const gfiLayers: object[] = [];
-                    layers?.forEach((layer) => {
-                        addLayer(layer);
-                        gfiLayers.push({ obj: layer });
-                    });
-                    getControl("getfeatureinfo")?.setLayers(gfiLayers);
+                    if (gfinfo) {
+                        layers?.forEach((layer) => {
+                            addLayer(layer);
+                            gfiLayers.push({ obj: layer });
+                        });
+                        getControl("GetFeatureInfo")?.setLayers(gfiLayers);
+                    }
                     if (extent) {
                         mapRef.current?.getView().fit(extent);
                     }
@@ -147,7 +163,7 @@ const RMap: FC<RMapProps> = ({ service, projection = "EPSG:3857", center = [2.35
                     console.error(err);
                 });
         }
-    }, [capabilities, service, projection, extent]);
+    }, [capabilities, extent, service, gfinfo]);
 
     return <div className={"map-view"} ref={mapTargetRef} />;
 };

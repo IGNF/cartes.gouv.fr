@@ -103,12 +103,10 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
 
                             {/* Adresse du service de données */}
                             <div className={fr.cx("fr-grid-row")}>
-                                <strong>Adresse du service de données</strong>
+                                <strong>Adresses du service de données</strong>
                             </div>
 
-                            {serviceQuery?.data?.urls && (
-                                <TextCopyToClipboard text={serviceQuery?.data?.urls.map((url) => url.url).join(",")} className="fr-mb-4w" />
-                            )}
+                            {serviceQuery?.data?.urls.map((url) => <TextCopyToClipboard text={url.url} key={url.url} className="fr-mb-1w" />)}
                         </div>
                     </div>
                 </>
