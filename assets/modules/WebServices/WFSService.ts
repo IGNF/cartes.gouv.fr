@@ -6,7 +6,7 @@ import { bbox as bboxStrategy } from "ol/loadingstrategy";
 import { transformExtent } from "ol/proj";
 import VectorSource from "ol/source/Vector";
 import { Service } from "../../types/app";
-import getRequestInfo from "./Utils";
+import getRequestInfo from "./ServiceUtils";
 import olDefaults from "../../data/ol-defaults.json";
 
 type LayerInfo = {
