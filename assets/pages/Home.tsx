@@ -5,7 +5,7 @@ import AppLayout from "../components/Layout/AppLayout";
 import SymfonyRouting from "../modules/Routing";
 import { appRoot, useRoute } from "../router/router";
 
-import hp from "../img/home/home.png";
+import hp from "../img/home/home.jpg";
 import "../sass/pages/home.scss";
 
 const Home = () => {
@@ -54,7 +54,11 @@ const Home = () => {
                                 </p>
                             </div>
                             <div className={fr.cx("fr-col-12", "fr-col-lg-6", "fr-pb-4w", "fr-pl-md-8w", "fr-pr-md-2w", "fr-mt-4w")}>
-                                <figure className={fr.cx("fr-content-media")} role="group" aria-label="Taux de boisement, observatoire des forêts françaises">
+                                <figure
+                                    className={fr.cx("fr-content-media")}
+                                    role="group"
+                                    aria-label="Carte des sylvoécorégions, Inventaire forestier national, 2011"
+                                >
                                     <div className={fr.cx("fr-content-media__img")}>
                                         <img
                                             className={fr.cx("fr-responsive-img", "fr-ratio-1x1")}
@@ -64,7 +68,9 @@ const Home = () => {
                                             data-fr-js-ratio="true"
                                         />
                                     </div>
-                                    <figcaption className={fr.cx("fr-content-media__caption")}>Source : Observatoire des forêts françaises - 2023</figcaption>
+                                    <figcaption className={fr.cx("fr-content-media__caption")}>
+                                        Source : Carte des sylvoécorégions, Inventaire forestier national - 2011
+                                    </figcaption>
                                 </figure>
                             </div>
                         </div>
@@ -74,49 +80,6 @@ const Home = () => {
                                 <p className={fr.cx("fr-text--lg")}>
                                     Le site proposera également des services qui vont s’enrichir pour permettre à chacun de créer, héberger, contribuer,
                                     partager, visualiser et publier des données et des cartes en autonomie.
-                                </p>
-                                <p className={fr.cx("fr-text--lg")}>
-                                    <strong>Cartes.gouv.fr</strong> reprendra dans un premier temps les fonctions des sites Géoservices puis Géoportail ainsi
-                                    que de premiers outils pour la gestion des données par les acteurs publics. Il s’enrichira progressivement de
-                                    fonctionnalités nouvelles au bénéfice de tous.
-                                </p>
-                                <p className={fr.cx("fr-text--lg")}>
-                                    <strong>Cartes.gouv.fr</strong> s’appuie sur une nouvelle infrastructure ouverte et collaborative, la Géoplateforme,
-                                    soutenue par le Ministère de la Transition écologique et de la Cohésion des territoires ainsi que par le Fonds de
-                                    transformation de l’action publique.
-                                </p>
-                                <p className={fr.cx("fr-text--lg")}>
-                                    En attendant, retrouvez les données et services dont vous avez besoin sur{" "}
-                                    <a
-                                        href="https://www.geoportail.gouv.fr"
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        title="geoportail.gouv.fr - ouvre une nouvelle fenêtre"
-                                    >
-                                        Géoportail
-                                    </a>{" "}
-                                    et{" "}
-                                    <a
-                                        href="https://geoservices.ign.fr"
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        title="geoservices.ign.fr - ouvre une nouvelle fenêtre"
-                                    >
-                                        Géoservices
-                                    </a>
-                                    .
-                                </p>
-                                <p className={fr.cx("fr-mb-5w", "fr-text--lg")}>
-                                    Et pour en savoir + sur <strong>cartes.gouv.fr</strong>,{" "}
-                                    <a
-                                        href="https://ign.fr/geoplateforme/rejoindre-la-communaute"
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        title="Rejoindre la communauté Géoplateforme - ouvre une nouvelle fenêtre"
-                                    >
-                                        rejoignez la communauté Géoplateforme
-                                    </a>
-                                    .
                                 </p>
                             </div>
                         </div>
@@ -165,6 +128,109 @@ const Home = () => {
                         <img src={`${appRoot}/dsfr/artwork/pictograms/digital/data-visualization.svg`} alt="" role="presentation" />
                         <h3 className={fr.cx("fr-text--lead")}>Contribuez aux données et services</h3>
                         <p>Grâce aux outils collaboratifs pour échanger, entretenir et enrichir les géodonnées et géoservices.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div className="c-section c-section--gray">
+                <div className={fr.cx("fr-container--fluid")}>
+                    <div className={fr.cx("fr-container")}>
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
+                            <div className={fr.cx("fr-col-12", "fr-px-0", "fr-px-md-14v")}>
+                                <p className={fr.cx("fr-mt-4w", "fr-mt-md-7w", "fr-text--lg")}>
+                                    <strong>Cartes.gouv.fr</strong> rassemblera ainsi des fonctionnalités dont certaines sont utilisables dès aujourd’hui sur
+                                    différents sites opérés par l’IGN tels que&nbsp;:
+                                </p>
+                                <ul>
+                                    <li className={fr.cx("fr-text--lg")}>
+                                        <a
+                                            href="https://www.geoportail.gouv.fr"
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            title="geoportail.gouv.fr - ouvre une nouvelle fenêtre"
+                                        >
+                                            geoportail.gouv.fr
+                                        </a>{" "}
+                                        : rechercher et visualiser un lieu, une photographie aérienne, une carte, des données sur un territoire et les
+                                        superposer,
+                                    </li>
+                                    <li className={fr.cx("fr-text--lg")}>
+                                        <a
+                                            href="https://geoservices.ign.fr"
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            title="geoservices.ign.fr - ouvre une nouvelle fenêtre"
+                                        >
+                                            geoservices.ign.fr
+                                        </a>{" "}
+                                        : télécharger et utiliser les flux de toutes les données et tous les services de l’IGN en accès libre et gratuit, ainsi
+                                        que les scans,
+                                    </li>
+                                    <li className={fr.cx("fr-text--lg")}>
+                                        <a
+                                            href="https://espacecollaboratif.ign.fr"
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            title="espacecollaboratif.ign.fr - ouvre une nouvelle fenêtre"
+                                        >
+                                            espacecollaboratif.ign.fr
+                                        </a>{" "}
+                                        : ouvrir l’enrichissement de vos bases de données à des communautés et participer à l’amélioration et l’enrichissement
+                                        des données IGN,
+                                    </li>
+                                    <li className={fr.cx("fr-text--lg")}>
+                                        <a href="https://macarte.ign.fr" target="_blank" rel="noreferrer" title="macarte.ign.fr - ouvre une nouvelle fenêtre">
+                                            macarte.ign.fr
+                                        </a>{" "}
+                                        : créer ses cartes en quelques clics, à partir des données Géoportail ou de ses propres données, et les publier sur une
+                                        adresse dédiée ou sur son propre site internet.
+                                    </li>
+                                </ul>
+                                <p className={fr.cx("fr-text--lg")}>
+                                    <strong>Cartes.gouv.fr</strong> reprendra dans un premier temps les fonctions des sites Géoservices puis Géoportail ainsi
+                                    que de premiers outils pour la gestion des données par les acteurs publics. Il s’enrichira progressivement de
+                                    fonctionnalités nouvelles au bénéfice de tous.
+                                </p>
+                                <p className={fr.cx("fr-text--lg")}>
+                                    <strong>Cartes.gouv.fr</strong> s’appuie sur une nouvelle infrastructure ouverte et collaborative, la Géoplateforme,
+                                    soutenue par le Ministère de la Transition écologique et de la Cohésion des territoires ainsi que par le Fonds de
+                                    transformation de l’action publique.
+                                </p>
+                                <p className={fr.cx("fr-text--lg")}>
+                                    En attendant, retrouvez les données et services dont vous avez besoin sur{" "}
+                                    <a
+                                        href="https://www.geoportail.gouv.fr"
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        title="geoportail.gouv.fr - ouvre une nouvelle fenêtre"
+                                    >
+                                        Géoportail
+                                    </a>{" "}
+                                    et{" "}
+                                    <a
+                                        href="https://geoservices.ign.fr"
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        title="geoservices.ign.fr - ouvre une nouvelle fenêtre"
+                                    >
+                                        Géoservices
+                                    </a>
+                                    .
+                                </p>
+                                <p className={fr.cx("fr-mb-5w", "fr-text--lg")}>
+                                    Et pour en savoir + sur <strong>cartes.gouv.fr</strong>,{" "}
+                                    <a
+                                        href="https://ign.fr/geoplateforme/rejoindre-la-communaute"
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        title="Rejoindre la communauté Géoplateforme - ouvre une nouvelle fenêtre"
+                                    >
+                                        rejoignez la communauté Géoplateforme
+                                    </a>
+                                    .
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
