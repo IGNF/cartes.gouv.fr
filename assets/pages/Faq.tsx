@@ -31,8 +31,8 @@ const Faq = () => {
                             <p>
                                 Mises en œuvre par l’IGN , la Géoplateforme et cartes.gouv.fr s’inscrivent pleinement dans la dynamique des géocommuns soutenue
                                 par l’institut. En effet, cartes.gouv.fr se veut en premier lieu un outil commun porté par un ensemble de partenaires, de
-                                producteurs et d’usagers de données parmi lesquels le ministère de la transition écologique et de la cohésion des territoires,
-                                le Cerema, le CRIGE PACA, Géobretagne, INERIS, l’OFB, l’ONF ou le Shom.
+                                producteurs et d’usagers de données parmi lesquels aujourd’hui le ministère de la transition écologique et de la cohésion des
+                                territoires, le Cerema, le CRIGE PACA, Géobretagne, INERIS, l’OFB, l’ONF ou le Shom.
                             </p>
                         </Accordion>
                         <Accordion label="Que deviendront le Géoportail et les Géoservices de l’IGN&nbsp;?" titleAs="h2">
