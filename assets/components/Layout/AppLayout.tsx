@@ -46,7 +46,7 @@ const AppLayout: FC<PropsWithChildren<AppLayoutProps>> = ({ children, navItems, 
             />
 
             <AppHeader navItems={navItems} />
-            <main id="main" role="main">
+            <main id="main" role="main" className={fr.cx("fr-my-2w")}>
                 {/* doit être le premier élément atteignable après le lien d'évitement (Accessibilité) : https://www.systeme-de-design.gouv.fr/elements-d-interface/composants/bandeau-d-information-importante */}
                 {infoBannerMsg && <Notice title={infoBannerMsg} isClosable={true} />}
 
