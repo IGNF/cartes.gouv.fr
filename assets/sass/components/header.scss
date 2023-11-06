@@ -1,0 +1,4 @@
+// Les liens d'accès rapide doivent toujours faire 14px. icons.css surcharge dsfr.css et les fait passer à 16px
+.fr-header__tools-links a {
+    font-size: 0.875rem !important;
+}

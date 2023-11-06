@@ -8,6 +8,8 @@ import SymfonyRouting from "../../modules/Routing";
 import { routes } from "../../router/router";
 // import LanguageSelector from "../Utils/LanguageSelector";
 
+import "../../sass/components/header.scss";
+
 export type NavigationProps = MainNavigationProps.Item[] | ReactNode;
 
 type AppHeaderProps = {
