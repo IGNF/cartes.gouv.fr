@@ -6,6 +6,8 @@ import { routes } from "../../router/router";
 
 import logoIgn from "../../img/logo-ign.png";
 import logoMinistereTransformation from "../../img/logo-ministere-transformation.png";
+import logoMinistereEcologie from "../../img/logo-ministere-ecologie.png";
+import logoCnig from "../../img/logo-cnig.png";
 
 const AppFooter = () => {
     return (
@@ -51,6 +53,16 @@ const AppFooter = () => {
                         alt: "MINISTÈRE DE LA TRANSFORMATION ET DE LA FONCTION PUBLIQUES",
                         href: "https://www.transformation.gouv.fr/",
                         imgUrl: logoMinistereTransformation,
+                    },
+                    {
+                        alt: "MINISTÈRE DE LA TRANSITION ÉCOLOGIQUE ET DE LA COHÉSION DES TERRITOIRES",
+                        href: "https://www.ecologie.gouv.fr/",
+                        imgUrl: logoMinistereEcologie,
+                    },
+                    {
+                        alt: "Conseil National de l'Information Géolocalisée",
+                        href: "https://cnig.gouv.fr/",
+                        imgUrl: logoCnig,
                     },
                 ],
             }}
