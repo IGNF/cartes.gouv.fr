@@ -5,7 +5,7 @@ import AppLayout from "../components/Layout/AppLayout";
 import SymfonyRouting from "../modules/Routing";
 import { appRoot, useRoute } from "../router/router";
 
-import hp from "../img/home/home.jpg";
+import hp from "../img/home/home.png";
 import "../sass/pages/home.scss";
 
 const Home = () => {
@@ -57,7 +57,7 @@ const Home = () => {
                                 <figure
                                     className={fr.cx("fr-content-media")}
                                     role="group"
-                                    aria-label="Carte des sylvoécorégions, Inventaire forestier national, 2011"
+                                    aria-label="Carte des sylvoécorégions, IGN - 2023"
                                 >
                                     <div className={fr.cx("fr-content-media__img")}>
                                         <img
@@ -69,7 +69,7 @@ const Home = () => {
                                         />
                                     </div>
                                     <figcaption className={fr.cx("fr-content-media__caption")}>
-                                        Source : Carte des sylvoécorégions, Inventaire forestier national - 2011
+                                        Source : Carte des sylvoécorégions, IGN - 2023
                                     </figcaption>
                                 </figure>
                             </div>
