@@ -19,7 +19,7 @@ const SiteMap = () => {
                                 <span>Commencer avec cartes.gouv</span>
                                 <ul>
                                     <li>
-                                        <a {...routes.docs().link}>Documentation</a>
+                                        <a {...routes.documentation().link}>Documentation Géoplateforme</a>
                                     </li>
                                     <li>
                                         <a {...routes.faq().link}>Questions fréquentes</a>

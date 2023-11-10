@@ -54,11 +54,7 @@ const Home = () => {
                                 </p>
                             </div>
                             <div className={fr.cx("fr-col-12", "fr-col-lg-6", "fr-pb-4w", "fr-pl-md-8w", "fr-pr-md-2w", "fr-mt-4w")}>
-                                <figure
-                                    className={fr.cx("fr-content-media")}
-                                    role="group"
-                                    aria-label="Carte des sylvoécorégions, IGN - 2023"
-                                >
+                                <figure className={fr.cx("fr-content-media")} role="group" aria-label="Carte des sylvoécorégions, IGN - 2023">
                                     <div className={fr.cx("fr-content-media__img")}>
                                         <img
                                             className={fr.cx("fr-responsive-img", "fr-ratio-1x1")}
@@ -68,9 +64,7 @@ const Home = () => {
                                             data-fr-js-ratio="true"
                                         />
                                     </div>
-                                    <figcaption className={fr.cx("fr-content-media__caption")}>
-                                        Source : Carte des sylvoécorégions, IGN - 2023
-                                    </figcaption>
+                                    <figcaption className={fr.cx("fr-content-media__caption")}>Source : Carte des sylvoécorégions, IGN - 2023</figcaption>
                                 </figure>
                             </div>
                         </div>

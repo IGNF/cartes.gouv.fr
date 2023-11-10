@@ -10,7 +10,7 @@ import PageNotFound from "../pages/error/PageNotFound";
 import { knownRoutes, publicRoutes, useRoute } from "./router";
 
 const About = lazy(() => import("../pages/About"));
-const Docs = lazy(() => import("../pages/Docs"));
+const Documentation = lazy(() => import("../pages/Documentation"));
 const Contact = lazy(() => import("../pages/contact/Contact"));
 const Thanks = lazy(() => import("../pages/contact/Thanks"));
 const NewsList = lazy(() => import("../pages/news/NewsList"));
@@ -71,8 +71,8 @@ function RouterRenderer() {
         case "about":
             content = <About />;
             break;
-        case "docs":
-            content = <Docs />;
+        case "documentation":
+            content = <Documentation />;
             break;
         case "contact":
             content = <Contact />;

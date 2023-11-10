@@ -5,7 +5,7 @@ import SymfonyRouting from "../modules/Routing";
 export const appRoot = SymfonyRouting.getBaseUrl(); // (document.getElementById("root") as HTMLDivElement).dataset?.appRoot ?? "";
 
 const routeDefs = {
-    // routes non protégées
+    // routes non protégées (doivent être listées plus bas dans publicRoutes)
     home: defineRoute(
         {
             authentication_failed: param.query.optional.number,
@@ -13,7 +13,7 @@ const routeDefs = {
         () => (appRoot === "" ? "/" : appRoot)
     ),
     about: defineRoute(`${appRoot}/a-propos`),
-    docs: defineRoute(`${appRoot}/documentation`),
+    documentation: defineRoute(`${appRoot}/documentation`),
     contact: defineRoute(`${appRoot}/nous-ecrire`),
     contact_thanks: defineRoute(`${appRoot}/merci`),
     news_list: defineRoute(`${appRoot}/actualites`),
@@ -138,7 +138,7 @@ export const knownRoutes = Object.values(routes).map((r) => r.name);
 export const publicRoutes = [
     "home",
     "about",
-    "docs",
+    "documentation",
     "contact",
     "contact_thanks",
     "news_list",

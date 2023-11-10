@@ -38,6 +38,10 @@ Encore
             from: "./assets/img",
             to: "img/[path][name].[ext]",
         },
+        {
+            from: "./assets/data/pdf",
+            to: "pdf/[path][name].[ext]",
+        },
     ])
 
     // enables the Symfony UX Stimulus bridge (used in assets/bootstrap.js)

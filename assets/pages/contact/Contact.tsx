@@ -72,7 +72,7 @@ const Contact = () => {
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
                     <h1>{t("title")}</h1>
-                    <p>{t("form.explanation", { docsLinkProps: routes.docs().link })}</p>
+                    <p>{t("form.explanation", { docsLinkProps: routes.documentation().link })}</p>
 
                     <p>{t("mandatory_fields")}</p>
 
