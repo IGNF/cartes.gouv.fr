@@ -132,8 +132,8 @@ const Home = () => {
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
                             <div className={fr.cx("fr-col-12", "fr-px-0", "fr-px-md-14v")}>
                                 <p className={fr.cx("fr-mt-4w", "fr-mt-md-7w", "fr-text--lg")}>
-                                    <strong>Cartes.gouv.fr</strong> rassemblera ainsi des fonctionnalités dont certaines sont utilisables dès aujourd’hui sur
-                                    différents sites opérés par l’IGN tels que&nbsp;:
+                                    <strong>Cartes.gouv.fr</strong> rassemblera ainsi et ouvrira à tous des fonctionnalités dont certaines sont utilisables dès
+                                    aujourd’hui sur différents sites opérés par l’IGN tels que&nbsp;:
                                 </p>
                                 <ul>
                                     <li className={fr.cx("fr-text--lg")}>
@@ -157,8 +157,8 @@ const Home = () => {
                                         >
                                             geoservices.ign.fr
                                         </a>{" "}
-                                        : télécharger et utiliser les flux de toutes les données et tous les services de l’IGN en accès libre et gratuit, ainsi
-                                        que les scans,
+                                        : télécharger et utiliser les flux de toutes les données et tous les services en accès libre et gratuit, ainsi que les
+                                        scans,
                                     </li>
                                     <li className={fr.cx("fr-text--lg")}>
                                         <a
@@ -170,7 +170,7 @@ const Home = () => {
                                             espacecollaboratif.ign.fr
                                         </a>{" "}
                                         : ouvrir l’enrichissement de vos bases de données à des communautés et participer à l’amélioration et l’enrichissement
-                                        des données IGN,
+                                        des données publiques ou de partenaires,
                                     </li>
                                     <li className={fr.cx("fr-text--lg")}>
                                         <a href="https://macarte.ign.fr" target="_blank" rel="noreferrer" title="macarte.ign.fr - ouvre une nouvelle fenêtre">
