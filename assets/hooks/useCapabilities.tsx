@@ -6,7 +6,7 @@ const useCapabilities = (key: string = "cartes") => {
     return useQuery<Capabilities>({
         queryKey: ["gpp_get_cap", key],
         queryFn: async () => {
-            const response = await fetch(`https://wxs.ign.fr/${key}/geoportail/wmts?SERVICE=WMTS&VERSION=1.0.0&REQUEST=GetCapabilities`);
+            const response = await fetch("https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetCapabilities");
             if (!response.ok) {
                 throw new Error(`Bad response from server : ${response.status}`);
             }

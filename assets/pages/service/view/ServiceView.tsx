@@ -3,6 +3,7 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { useQuery } from "@tanstack/react-query";
+import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
 import { FC } from "react";
 
 import api from "../../../api";
@@ -76,37 +77,57 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
                     <div className={fr.cx("fr-grid-row", "fr-mb-4w")}>
                         <div className={fr.cx("fr-col-12", "fr-col-md-8")}>{serviceQuery.data && <RMap service={serviceQuery.data} />}</div>
                         <div className={fr.cx("fr-col-12", "fr-col-md-4", "fr-p-1w", "fr-px-2w")}>
-                            <div className={fr.cx("fr-grid-row")}>
-                                <strong className={fr.cx("fr-text--xl")}>Diffuser le service</strong>
-                            </div>
+                            <Tabs
+                                tabs={[
+                                    {
+                                        label: "Diffuser le service",
+                                        content: (
+                                            <div className={fr.cx("fr-col-12")}>
+                                                <div className={fr.cx("fr-grid-row")}>
+                                                    <p>
+                                                        Copiez vos adresses pour les utiliser dans vos applications SIG ou web. <br />
+                                                        <a href="#" target="_blank" rel="noreferrer">
+                                                            En savoir plus
+                                                        </a>
+                                                    </p>
+                                                </div>
 
-                            <div className={fr.cx("fr-grid-row")}>
-                                <p>
-                                    Copiez vos adresses pour les utiliser dans vos applications SIG ou web. <br />
-                                    <a href="#" target="_blank" rel="noreferrer">
-                                        En savoir plus
-                                    </a>
-                                </p>
-                            </div>
+                                                {/* lien public vers la carte */}
+                                                <div className={fr.cx("fr-grid-row")}>
+                                                    <strong>Lien public vers la carte</strong>
+                                                </div>
+                                                <TextCopyToClipboard text={"http://www.ign.fr/geoplateforme"} className="fr-mb-4w" />
 
-                            {/* lien public vers la carte */}
-                            <div className={fr.cx("fr-grid-row")}>
-                                <strong>Lien public vers la carte</strong>
-                            </div>
-                            <TextCopyToClipboard text={"http://www.ign.fr/geoplateforme"} className="fr-mb-4w" />
+                                                {/* Code HTML de l'iframe */}
+                                                <div className={fr.cx("fr-grid-row")}>
+                                                    <strong>{"Code HTML de l'iframe"}</strong>
+                                                </div>
+                                                <TextCopyToClipboard text={"<iframe width='600' height='40..."} className="fr-mb-4w" />
 
-                            {/* Code HTML de l'iframe */}
-                            <div className={fr.cx("fr-grid-row")}>
-                                <strong>{"Code HTML de l'iframe"}</strong>
-                            </div>
-                            <TextCopyToClipboard text={"<iframe width='600' height='40..."} className="fr-mb-4w" />
+                                                {/* Adresse du service de données */}
+                                                <div className={fr.cx("fr-grid-row")}>
+                                                    <strong>Adresses du service de données</strong>
+                                                </div>
 
-                            {/* Adresse du service de données */}
-                            <div className={fr.cx("fr-grid-row")}>
-                                <strong>Adresses du service de données</strong>
-                            </div>
-
-                            {serviceQuery?.data?.urls.map((url) => <TextCopyToClipboard text={url.url} key={url.url} className="fr-mb-1w" />)}
+                                                {serviceQuery?.data?.urls.map((url) => {
+                                                    console.log(serviceQuery?.data);
+                                                    return <TextCopyToClipboard text={url.url} key={url.url} className="fr-mb-1w" />;
+                                                })}
+                                            </div>
+                                        ),
+                                    },
+                                    {
+                                        label: "Gérer les styles",
+                                        content: (
+                                            <p>
+                                                <a href="#" target="_blank" rel="noreferrer">
+                                                    Comment créer un style
+                                                </a>
+                                            </p>
+                                        ),
+                                    },
+                                ]}
+                            />
                         </div>
                     </div>
                 </>
