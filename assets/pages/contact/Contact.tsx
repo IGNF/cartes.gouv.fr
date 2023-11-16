@@ -45,20 +45,16 @@ const Contact = () => {
 
     const [isSending, setIsSending] = useState(false);
     const [error, setError] = useState(null);
-    const [remainingChars, setRemainingChars] = useState(charRange[1]);
 
     const {
         register,
         handleSubmit,
         formState: { errors },
         getValues: getFormValues,
+        watch,
     } = useForm({ resolver: yupResolver(schema(t)) });
 
-    const regMessage = register("message");
-    const handleMessageChanged = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        const value = e.currentTarget.value;
-        setRemainingChars(charRange[1] - value.length);
-    };
+    const message = watch("message") ?? "";
 
     const onSubmit = () => {
         setError(null);
@@ -135,17 +131,17 @@ const Contact = () => {
                         stateRelatedMessage={errors?.message?.message}
                         textArea={true}
                         nativeTextAreaProps={{
-                            ...regMessage,
-                            onChange: (e) => {
-                                regMessage.onChange(e);
-                                handleMessageChanged(e);
+                            ...register("message"),
+                            onPaste: (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+                                e.clipboardData?.getData("text/plain").slice(0, charRange[1]);
                             },
+                            maxLength: charRange[1],
                             rows: 8,
                             placeholder: t("form.message_placeholder"),
                         }}
                     />
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-mb-2w", "fr-mt-1w")}>
-                        <p className={fr.cx("fr-m-0", "fr-text--xs")}>{t("remaining_characters", { num: remainingChars })}</p>
+                        <p className={fr.cx("fr-m-0", "fr-text--xs")}>{t("remaining_characters", { num: charRange[1] - message.length })}</p>
                     </div>
                     <Select
                         label={"importance"}
