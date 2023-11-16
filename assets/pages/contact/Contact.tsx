@@ -8,11 +8,12 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { JSX, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
+import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
 
 import AppLayout from "../../components/Layout/AppLayout";
 import Wait from "../../components/Utils/Wait";
 import useUser from "../../hooks/useUser";
-import { declareComponentKeys, getTranslation, useTranslation, type Translations } from "../../i18n/i18n";
+import { declareComponentKeys, useTranslation, type Translations, ComponentKey } from "../../i18n/i18n";
 import SymfonyRouting from "../../modules/Routing";
 import { jsonFetch } from "../../modules/jsonFetch";
 import { routes } from "../../router/router";
@@ -21,17 +22,22 @@ import { regex } from "../../utils";
 import "../../sass/components/spinner.scss";
 import "../../sass/pages/nous_ecrire.scss";
 
-const { t } = getTranslation("Contact");
-const schema = yup
-    .object({
-        email_contact: yup.string().matches(regex.email, t("form.email_contact_error")).required(t("form.email_contact_mandatory_error")),
-        last_name: yup.string(),
-        first_name: yup.string(),
-        organization: yup.string(),
-        importance: yup.number(),
-        message: yup.string().min(10, t("form.message_minlength_error")),
-    })
-    .required();
+const charRange = [10, 8000];
+
+const schema = (t: TranslationFunction<"Contact", ComponentKey>) =>
+    yup
+        .object({
+            email_contact: yup.string().matches(regex.email, t("form.email_contact_error")).required(t("form.email_contact_mandatory_error")),
+            last_name: yup.string(),
+            first_name: yup.string(),
+            organization: yup.string(),
+            importance: yup.number(),
+            message: yup
+                .string()
+                .min(charRange[0], t("form.message_minlength_error", { min: charRange[0] }))
+                .max(charRange[1], t("form.message_maxlength_error", { max: charRange[1] })),
+        })
+        .required();
 
 const Contact = () => {
     const { t } = useTranslation({ Contact });
@@ -39,13 +45,20 @@ const Contact = () => {
 
     const [isSending, setIsSending] = useState(false);
     const [error, setError] = useState(null);
+    const [remainingChars, setRemainingChars] = useState(charRange[1]);
 
     const {
         register,
         handleSubmit,
         formState: { errors },
         getValues: getFormValues,
-    } = useForm({ resolver: yupResolver(schema) });
+    } = useForm({ resolver: yupResolver(schema(t)) });
+
+    const regMessage = register("message");
+    const handleMessageChanged = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        const value = e.currentTarget.value;
+        setRemainingChars(charRange[1] - value.length);
+    };
 
     const onSubmit = () => {
         setError(null);
@@ -116,16 +129,24 @@ const Contact = () => {
                         }}
                     />
                     <Input
+                        className={fr.cx("fr-mb-0")}
                         label={t("form.message")}
                         state={errors.message ? "error" : "default"}
                         stateRelatedMessage={errors?.message?.message}
                         textArea={true}
                         nativeTextAreaProps={{
-                            ...register("message"),
+                            ...regMessage,
+                            onChange: (e) => {
+                                regMessage.onChange(e);
+                                handleMessageChanged(e);
+                            },
                             rows: 8,
                             placeholder: t("form.message_placeholder"),
                         }}
                     />
+                    <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-mb-2w", "fr-mt-1w")}>
+                        <p className={fr.cx("fr-m-0", "fr-text--xs")}>{t("remaining_characters", { num: remainingChars })}</p>
+                    </div>
                     <Select
                         label={"importance"}
                         className={"importance"}
@@ -183,7 +204,10 @@ export const { i18n } = declareComponentKeys<
     | "form.organization"
     | "form.message"
     | "form.message_placeholder"
-    | "form.message_minlength_error"
+    | { K: "form.message_minlength_error"; P: { min: number }; R: string }
+    | { K: "form.message_maxlength_error"; P: { max: number }; R: string }
+    | { K: "remaining_characters"; P: { num: number }; R: string }
+    | "message_sent"
     | "send"
     | { K: "form.infos"; P: { personalDataLinkProps: RegisteredLinkProps }; R: JSX.Element }
 >()({
@@ -210,7 +234,10 @@ export const contactFrTranslations: Translations<"fr">["Contact"] = {
     "form.organization": "Votre organisme (optionnel)",
     "form.message": "Votre demande",
     "form.message_placeholder": "Décrivez votre demande en quelques lignes",
-    "form.message_minlength_error": "Veuillez saisir une demande d'au moins 10 caractères.",
+    "form.message_minlength_error": ({ min }) => `Veuillez saisir une demande d'au moins ${min} caractères.`,
+    "form.message_maxlength_error": ({ max }) => `Votre demande ne peut contenir que ${max} caractères.`,
+    remaining_characters: ({ num }) => `${num} caractères restants`,
+    message_sent: "Votre message est en cours d'envoi",
     send: "Envoyer",
     "form.infos": ({ personalDataLinkProps }) => (
         <>
@@ -240,7 +267,10 @@ export const contactEnTranslations: Translations<"en">["Contact"] = {
     "form.organization": "Organization (optional)",
     "form.message": "Message",
     "form.message_placeholder": "Describe your request in a few lines",
-    "form.message_minlength_error": "Message must be at least 10 caractères.",
+    "form.message_minlength_error": ({ min }) => `Message must be at least ${min} characters.`,
+    "form.message_maxlength_error": ({ max }) => `Message cannot exceed ${max} characters.`,
+    remaining_characters: ({ num }) => `${num} characters remaining`,
+    message_sent: "Your message is being sent",
     send: "Send",
     "form.infos": ({ personalDataLinkProps }) => (
         <>
