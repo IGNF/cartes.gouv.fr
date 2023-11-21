@@ -41,6 +41,16 @@ const DatasheetNewForm = ({ datastoreId }) => {
                 .string()
                 .required("Le nom de la donnée est obligatoire")
                 .test({
+                    name: "does-not-contain-equals",
+                    test(dataName, ctx) {
+                        if (dataName.includes("=")) {
+                            return ctx.createError({ message: "Le nom de la fiche de donnée ne peut pas contenir le symbole égal `=`" });
+                        }
+
+                        return true;
+                    },
+                })
+                .test({
                     name: "is-unique",
                     test(dataName, ctx) {
                         const existingDataList = dataListQuery?.data?.map((data) => data?.name);
