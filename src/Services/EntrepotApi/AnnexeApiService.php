@@ -3,12 +3,24 @@
 namespace App\Services\EntrepotApi;
 
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 
 class AnnexeApiService extends AbstractEntrepotApiService
 {
-    public function getAll(string $datastoreId): array
+    public function getAll(
+        string $datastoreId,
+        #[MapQueryParameter] string $mimeType = null,
+        #[MapQueryParameter] string $path = null) : array
     {
-        return $this->requestAll("datastores/$datastoreId/annexes");
+        $query = [];
+        if ($mimeType) {
+            $query['mime_type'] = $mimeType; 
+        }
+        if ($path) {
+            $query['path'] = $path; 
+        }
+
+        return $this->requestAll("datastores/$datastoreId/annexes", $query);
     }
 
     public function get(string $datastoreId, string $annexeId): array
@@ -25,19 +37,15 @@ class AnnexeApiService extends AbstractEntrepotApiService
      * @param array<string> $paths
      * @param array<string> $labels
      */
-    public function add(string $datastoreId, UploadedFile $annexeFile, array $paths, array $labels = []): array
+    public function add(string $datastoreId, string $annexeFilePath, array $paths, array $labels = []): array
     {
-        $directory = $this->parameters->get('upload_path');
-        $filepath = $directory.'/'.$annexeFile->getClientOriginalName();
-        $annexeFile->move($directory, $annexeFile->getClientOriginalName());
-
-        $response = $this->postFile("datastores/$datastoreId/annexes", $filepath, [
+        $response = $this->postFile("datastores/$datastoreId/annexes", $annexeFilePath, [
             'published' => 'true',
             'paths' => $paths,
             'labels' => $labels,
         ]);
 
-        $this->filesystem->remove($filepath);
+        $this->filesystem->remove($annexeFilePath);
 
         return $response;
     }
