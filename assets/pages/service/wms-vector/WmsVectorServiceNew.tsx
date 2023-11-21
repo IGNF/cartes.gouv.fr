@@ -33,7 +33,7 @@ import "../../../sass/components/spinner.scss";
 const createFormData = (formValues: object) => {
     const fd = new FormData();
 
-    fd.set("category", formValues["category"]);
+    fd.set("category", JSON.stringify(formValues["category"]));
     fd.set("charset", formValues["charset"]);
     fd.set("creation_date", formValues["creation_date"]);
     fd.set("description", formValues["description"]);
@@ -84,7 +84,7 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
     const offeringsQuery = useQuery({
         queryKey: RQKeys.datastore_offering_list(datastoreId),
         queryFn: () => api.service.getOfferings(datastoreId),
-        refetchInterval: 10000,
+        refetchInterval: 30000,
     });
 
     const commonValidation = useMemo(() => new CommonSchemasValidation(offeringsQuery.data), [offeringsQuery.data]);
@@ -178,11 +178,11 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
         onSuccess(response) {
             console.log(response);
 
-            // if (vectorDbQuery.data?.tags?.datasheet_name) {
-            //     routes.datastore_datasheet_view({ datastoreId, datasheetName: vectorDbQuery.data?.tags.datasheet_name, activeTab: "services" }).push();
-            // } else {
-            //     routes.datasheet_list({ datastoreId }).push();
-            // }
+            if (vectorDbQuery.data?.tags?.datasheet_name) {
+                routes.datastore_datasheet_view({ datastoreId, datasheetName: vectorDbQuery.data?.tags.datasheet_name, activeTab: "services" }).push();
+            } else {
+                routes.datasheet_list({ datastoreId }).push();
+            }
         },
     });
 
