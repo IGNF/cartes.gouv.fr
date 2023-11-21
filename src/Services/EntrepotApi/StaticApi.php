@@ -9,7 +9,7 @@ class StaticApi extends AbstractEntrepotApiService
      */
     public function getAll(string $datastoreId, $query = []): array
     {
-        return $this->request('GET', "datastores/$datastoreId/statics", [], $query);
+        return $this->requestAll("datastores/$datastoreId/statics", $query);
     }
 
     public function get(string $datastoreId, string $staticId): array
@@ -28,12 +28,20 @@ class StaticApi extends AbstractEntrepotApiService
             $formFields['description'] = $description;
         }
 
-        return $this->postFile("datastores/$datastoreId/statics", $filepath, $formFields);
+        $response = $this->sendFile('POST', "datastores/$datastoreId/statics", $filepath, $formFields);
+
+        $this->filesystem->remove($filepath);
+
+        return $response;
     }
 
     public function replaceFile(string $datastoreId, string $staticId, string $filepath): array
     {
-        return $this->postFile("datastores/$datastoreId/statics/$staticId", $filepath);
+        $response = $this->sendFile('PUT', "datastores/$datastoreId/statics/$staticId", $filepath);
+
+        $this->filesystem->remove($filepath);
+
+        return $response;
     }
 
     public function delete(string $datastoreId, string $staticId): array

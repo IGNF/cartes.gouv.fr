@@ -19,14 +19,14 @@ class MetadataApi extends AbstractEntrepotApiService
 
     public function add(string $datastoreId, string $filepath, string $type): array
     {
-        return $this->postFile("datastores/$datastoreId/metadata", $filepath, [], [
+        return $this->sendFile('POST', "datastores/$datastoreId/metadata", $filepath, [], [
             'type' => $type,
         ]);
     }
 
     public function replaceFile(string $datastoreId, string $metadataId, string $filepath): array
     {
-        return $this->postFile("datastores/$datastoreId/metadata/$metadataId", $filepath);
+        return $this->sendFile('PUT', "datastores/$datastoreId/metadata/$metadataId", $filepath);
     }
 
     /**
