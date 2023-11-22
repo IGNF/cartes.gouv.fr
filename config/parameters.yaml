@@ -15,6 +15,7 @@ parameters:
 
     upload_path: "%kernel.project_dir%/var/data/uploaded_files"
     style_files_upload_path: "%kernel.project_dir%/var/data/uploaded_style_files"
+    capabilities_path: "%kernel.project_dir%/var/data/capabilities"
 
     support_contact_mail: "%env(resolve:SUPPORT_CONTACT_EMAIL)%"
     mailer_sender_address: "%env(resolve:MAILER_SENDER_ADDRESS)%"
