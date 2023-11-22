@@ -2,7 +2,7 @@
 
 namespace App\Constants\EntrepotApi;
 
-final class StoredDataTags
+final class CommonTags
 {
     public const DATASHEET_NAME = 'datasheet_name';
 }

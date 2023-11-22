@@ -2,8 +2,7 @@
 
 namespace App\Controller\Api;
 
-use App\Constants\EntrepotApi\StoredDataTags;
-use App\Constants\EntrepotApi\UploadTags;
+use App\Constants\EntrepotApi\CommonTags;
 use App\Dto\Pyramid\AddPyramidDTO;
 use App\Dto\Pyramid\CompositionDTO;
 use App\Dto\Pyramid\PublishPyramidDTO;
@@ -90,7 +89,7 @@ class PyramidController extends AbstractController implements ApiControllerInter
             ]);
 
             $pyramidTags = [
-                UploadTags::DATASHEET_NAME => $vectordb['tags'][UploadTags::DATASHEET_NAME],
+                CommonTags::DATASHEET_NAME => $vectordb['tags'][CommonTags::DATASHEET_NAME],
                 'upload_id' => $vectordb['tags']['upload_id'],
                 'proc_int_id' => $vectordb['tags']['proc_int_id'],
                 'vectordb_id' => $dto->vectorDbId,
@@ -172,7 +171,7 @@ class PyramidController extends AbstractController implements ApiControllerInter
             // Ajout de la configuration
             $configuration = $this->entrepotApiService->configuration->add($datastoreId, $requestBody);
             $configuration = $this->entrepotApiService->configuration->addTags($datastoreId, $configuration['_id'], [
-                StoredDataTags::DATASHEET_NAME => $pyramid['tags'][StoredDataTags::DATASHEET_NAME],
+                CommonTags::DATASHEET_NAME => $pyramid['tags'][CommonTags::DATASHEET_NAME],
             ]);
 
             // Creation d'une offering

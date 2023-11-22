@@ -4,10 +4,10 @@ namespace App\Controller\Api;
 
 use App\Constants\EntrepotApi\ProcessingStatuses;
 use App\Constants\EntrepotApi\StoredDataStatuses;
-use App\Constants\EntrepotApi\StoredDataTags;
 use App\Constants\EntrepotApi\UploadCheckTypes;
 use App\Constants\EntrepotApi\UploadStatuses;
 use App\Constants\EntrepotApi\UploadTags;
+use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\UploadTypes;
 use App\Constants\JobStatuses;
 use App\Exception\AppException;
@@ -52,7 +52,7 @@ class UploadController extends AbstractController implements ApiControllerInterf
             // ajout tags sur la livraison
             $tags = [
                 UploadTags::DATA_UPLOAD_PATH => $content['data_upload_path'],
-                UploadTags::DATASHEET_NAME => $content['data_name'],
+                CommonTags::DATASHEET_NAME => $content['data_name'],
                 // statut des checks et du processing intégration
             ];
             $upload = $this->entrepotApiService->upload->addTags($datastoreId, $upload['_id'], $tags);
@@ -227,7 +227,7 @@ class UploadController extends AbstractController implements ApiControllerInterf
                             $this->entrepotApiService->storedData->addTags($datastoreId, $vectorDb['_id'], [
                                 'upload_id' => $upload['_id'],
                                 'proc_int_id' => $processingExec['_id'],
-                                StoredDataTags::DATASHEET_NAME => $upload['tags'][UploadTags::DATASHEET_NAME],
+                                CommonTags::DATASHEET_NAME => $upload['tags'][CommonTags::DATASHEET_NAME],
                             ]);
 
                             // // TODO : mise à jour ?

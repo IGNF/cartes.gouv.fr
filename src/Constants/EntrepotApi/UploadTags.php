@@ -12,6 +12,4 @@ final class UploadTags
     public const INT_STEP_PROCESSING = 'integration_processing';
 
     public const DATA_UPLOAD_PATH = 'data_upload_path';
-
-    public const DATASHEET_NAME = 'datasheet_name';
 }

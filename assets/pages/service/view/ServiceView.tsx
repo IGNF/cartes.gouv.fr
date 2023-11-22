@@ -15,6 +15,7 @@ import RQKeys from "../../../modules/RQKeys";
 import { type CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
 import { type Service } from "../../../types/app";
+import { createModal } from "@codegouvfr/react-dsfr/Modal";
 
 type ServiceViewProps = {
     datastoreId: string;
@@ -22,6 +23,11 @@ type ServiceViewProps = {
     datasheetName?: string;
 };
 
+/* const modal = createModal({
+    id: "style-modal", 
+    isOpenedByDefault: false
+});
+ */
 const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetName }) => {
     const serviceQuery = useQuery<Service, CartesApiException>({
         queryKey: RQKeys.datastore_offering(datastoreId, offeringId),
@@ -123,6 +129,7 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
                                                 <a href="#" target="_blank" rel="noreferrer">
                                                     Comment créer un style
                                                 </a>
+                                                <Button onClick={function noRefCheck() {}}>Ajouter un style</Button>
                                             </p>
                                         ),
                                     },

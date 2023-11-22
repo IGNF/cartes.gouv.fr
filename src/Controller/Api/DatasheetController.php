@@ -3,9 +3,8 @@
 namespace App\Controller\Api;
 
 use App\Constants\EntrepotApi\ConfigurationStatuses;
-use App\Constants\EntrepotApi\StoredDataTags;
+use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\StoredDataTypes;
-use App\Constants\EntrepotApi\UploadTags;
 use App\Exception\CartesApiException;
 use App\Exception\EntrepotApiException;
 use App\Services\EntrepotApiService;
@@ -35,8 +34,8 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         ]);
 
         $uploadDatasheetNames = array_map(function ($upload) {
-            if (isset($upload['tags'][StoredDataTags::DATASHEET_NAME])) {
-                return $upload['tags'][StoredDataTags::DATASHEET_NAME];
+            if (isset($upload['tags'][CommonTags::DATASHEET_NAME])) {
+                return $upload['tags'][CommonTags::DATASHEET_NAME];
             }
         }, $uploads);
 
@@ -45,8 +44,8 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         ]);
 
         $storedDataDatasheetNames = array_map(function ($storedData) {
-            if (isset($storedData['tags'][StoredDataTags::DATASHEET_NAME])) {
-                return $storedData['tags'][StoredDataTags::DATASHEET_NAME];
+            if (isset($storedData['tags'][CommonTags::DATASHEET_NAME])) {
+                return $storedData['tags'][CommonTags::DATASHEET_NAME];
             }
         }, $storedDataList);
 
@@ -69,14 +68,14 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         // recherche d'entités API qui représente une fiche de données : upload, stored_data
         $uploadList = $this->entrepotApiService->upload->getAllDetailed($datastoreId, [
             'tags' => [
-                UploadTags::DATASHEET_NAME => $datasheetName,
+                CommonTags::DATASHEET_NAME => $datasheetName,
             ],
         ]);
 
         $vectorDbList = $this->entrepotApiService->storedData->getAllDetailed($datastoreId, [
             'type' => StoredDataTypes::VECTOR_DB,
             'tags' => [
-                StoredDataTags::DATASHEET_NAME => $datasheetName,
+                CommonTags::DATASHEET_NAME => $datasheetName,
             ],
         ]);
 
@@ -84,7 +83,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         $pyramidList = $this->entrepotApiService->storedData->getAllDetailed($datastoreId, [
             'type' => StoredDataTypes::ROK4_PYRAMID_VECTOR,
             'tags' => [
-                StoredDataTags::DATASHEET_NAME => $datasheetName,
+                CommonTags::DATASHEET_NAME => $datasheetName,
             ],
         ]);
 
@@ -112,7 +111,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         $nbPublications = 0;
         $configurations = $this->entrepotApiService->configuration->getAll($datastoreId, [
             'tags' => [
-                StoredDataTags::DATASHEET_NAME => $datasheetName,
+                CommonTags::DATASHEET_NAME => $datasheetName,
             ],
         ]);
 

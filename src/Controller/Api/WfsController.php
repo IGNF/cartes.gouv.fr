@@ -2,10 +2,10 @@
 
 namespace App\Controller\Api;
 
-use App\Constants\EntrepotApi\StoredDataTags;
 use App\Dto\WfsAddDTO;
 use App\Exception\CartesApiException;
 use App\Exception\EntrepotApiException;
+use App\Constants\EntrepotApi\CommonTags;
 use App\Services\EntrepotApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -92,7 +92,7 @@ class WfsController extends AbstractController implements ApiControllerInterface
             // Ajout de la configuration
             $configuration = $this->entrepotApiService->configuration->add($datastoreId, $body);
             $configuration = $this->entrepotApiService->configuration->addTags($datastoreId, $configuration['_id'], [
-                StoredDataTags::DATASHEET_NAME => $storedData['tags'][StoredDataTags::DATASHEET_NAME],
+                CommonTags::DATASHEET_NAME => $storedData['tags'][CommonTags::DATASHEET_NAME],
             ]);
 
             // Creation d'une offering

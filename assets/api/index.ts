@@ -10,6 +10,7 @@ import wmsVector from "./wms-vector";
 import pyramid from "./pyramid";
 import service from "./service";
 import epsg from "./epsg";
+import annexe from "./annexe";
 
 const api = {
     contact,
@@ -26,5 +27,6 @@ const api = {
     service,
     // epsg.io
     epsg,
+    annexe,
 };
 export default api;

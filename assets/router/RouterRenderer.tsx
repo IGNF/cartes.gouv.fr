@@ -20,6 +20,7 @@ const Sitemap = lazy(() => import("../pages/footer/Sitemap"));
 const Accessibility = lazy(() => import("../pages/footer/Accessibility"));
 const LegalNotice = lazy(() => import("../pages/footer/LegalNotice"));
 const PersonalData = lazy(() => import("../pages/footer/PersonalData"));
+const Tries = lazy(() => import("../pages/Tries")); // TODO PROVISOIRE
 
 const Me = lazy(() => import("../pages/users/Me"));
 
@@ -147,6 +148,9 @@ function RouterRenderer() {
             break;
         case "datastore_service_view":
             content = <ServiceView datastoreId={route.params.datastoreId} offeringId={route.params.offeringId} datasheetName={route.params.datasheetName} />;
+            break;
+        case "my_tries": // TODO PROVISOIRE
+            content = <Tries />;
             break;
         default:
             content = <PageNotFound />;

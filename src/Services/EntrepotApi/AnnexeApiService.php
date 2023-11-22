@@ -39,7 +39,7 @@ class AnnexeApiService extends AbstractEntrepotApiService
      */
     public function add(string $datastoreId, string $annexeFilePath, array $paths, array $labels = []): array
     {
-        $response = $this->postFile("datastores/$datastoreId/annexes", $annexeFilePath, [
+        $response = $this->sendFile('POST', "datastores/$datastoreId/annexes", $annexeFilePath, [
             'published' => 'true',
             'paths' => $paths,
             'labels' => $labels,
@@ -50,6 +50,15 @@ class AnnexeApiService extends AbstractEntrepotApiService
         return $response;
     }
 
+    public function replaceFile(string $datastoreId, string $annexeId, string $annexeFilePath): array
+    {
+        $response = $this->sendFile('PUT', "datastores/$datastoreId/annexes/$annexeId", $annexeFilePath);
+ 
+        $this->filesystem->remove($annexeFilePath);
+ 
+        return $response;
+    }
+    
     public function publish(string $datastoreId, string $annexeId): array
     {
         return $this->request('PATCH', "datastores/$datastoreId/annexes/$annexeId", [
