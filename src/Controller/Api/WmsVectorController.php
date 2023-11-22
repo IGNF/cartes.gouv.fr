@@ -2,9 +2,8 @@
 
 namespace App\Controller\Api;
 
+use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\StaticFileTypes;
-use App\Constants\EntrepotApi\StoredDataTags;
-use App\Dto\WmsVector\WmsVectorAddDTO;
 use App\Exception\CartesApiException;
 use App\Exception\EntrepotApiException;
 use App\Services\EntrepotApiService;
@@ -14,7 +13,6 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route(
@@ -104,7 +102,7 @@ class WmsVectorController extends AbstractController implements ApiControllerInt
             // Ajout de la configuration
             $configuration = $this->entrepotApiService->configuration->add($datastoreId, $body);
             $configuration = $this->entrepotApiService->configuration->addTags($datastoreId, $configuration['_id'], [
-                StoredDataTags::DATASHEET_NAME => $storedData['tags'][StoredDataTags::DATASHEET_NAME],
+                CommonTags::DATASHEET_NAME => $storedData['tags'][CommonTags::DATASHEET_NAME],
             ]);
 
             // Creation d'une offering
