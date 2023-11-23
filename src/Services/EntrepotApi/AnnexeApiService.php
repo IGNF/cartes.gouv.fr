@@ -31,17 +31,41 @@ class AnnexeApiService extends AbstractEntrepotApiService
      * @param array<string> $paths
      * @param array<string> $labels
      */
-    public function add(string $datastoreId, string $annexeFilePath, array $paths, array $labels = []): array
+    public function add(string $datastoreId, string $annexeFilePath, array $paths, array $labels = null, bool $published = true): array
     {
         $response = $this->sendFile('POST', "datastores/$datastoreId/annexes", $annexeFilePath, [
-            'published' => 'true',
-            'paths' => $paths,
-            'labels' => $labels,
+            'published' => true === $published ? 'true' : 'false',
+            'paths' => join(',', $paths), // ici on fait un join parce que c'est un FormData, qui ne gère pas bien les virgules
         ]);
+
+        $response = $this->modify($datastoreId, $response['_id'], null, $labels, null);
 
         $this->filesystem->remove($annexeFilePath);
 
         return $response;
+    }
+
+    /**
+     * @param array<string> $paths
+     * @param array<string> $labels
+     */
+    public function modify(string $datastoreId, string $annexeId, array $paths = null, array $labels = null, bool $published = null): array
+    {
+        $body = [];
+
+        if ($paths) {
+            $body['paths'] = $paths;
+        }
+
+        if ($labels) {
+            $body['labels'] = $labels;
+        }
+
+        if (null !== $published) {
+            $body['published'] = true === $published ? 'true' : 'false';
+        }
+
+        return $this->request('PATCH', "datastores/$datastoreId/annexes/$annexeId", $body);
     }
 
     public function replaceFile(string $datastoreId, string $annexeId, string $annexeFilePath): array
