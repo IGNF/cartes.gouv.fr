@@ -171,6 +171,7 @@ const DatasheetNewIntegrationDialog: FC<DatasheetNewIntegrationDialogProps> = ({
                             {
                                 children: "Revenir à mes données",
                                 linkProps: routes.datasheet_list({ datastoreId }).link,
+                                priority: "secondary",
                             },
                         ]}
                         inlineLayoutWhen="always"
