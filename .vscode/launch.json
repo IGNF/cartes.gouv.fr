@@ -5,6 +5,15 @@
             "type": "php",
             "request": "launch",
             "port": 9003
+        },
+        {
+            "name": "Listen for Xdebug (in docker)",
+            "type": "php",
+            "request": "launch",
+            "port": 9003,
+            "pathMappings": {
+                "/opt/cartesgouvfr-site": "${workspaceFolder}"
+            }
         }
     ]
 }

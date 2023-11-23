@@ -1,6 +1,7 @@
 {
     "prettier.requireConfig": true,
     "php-cs-fixer.executablePath": "${workspaceFolder}/vendor/bin/php-cs-fixer",
+    "phpmd.rules": "${workspaceFolder}/phpmd.xml",
     "todo-tree.general.showActivityBarBadge": true,
     "todo-tree.general.tags": ["NOTE", "TODO", "FIXME", "MARK", "[ ]", "[x]"],
     "todo-tree.highlights.defaultHighlight": {

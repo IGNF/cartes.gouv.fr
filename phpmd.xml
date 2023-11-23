@@ -11,12 +11,12 @@
     <!-- see https://phpmd.org/rules/index.html for available rules -->
     <!-- TODO uncomment progressively and fix 'composer check-rules' issues -->
 
-    <!--
     <rule ref="rulesets/cleancode.xml">
         <exclude name="ElseExpression" />
         <exclude name="StaticAccess" />
         <exclude name="MissingImport" />
     </rule>
+    <!--
     <rule ref="rulesets/codesize.xml" />
     <rule ref="rulesets/controversial.xml" />
     <rule ref="rulesets/design.xml" />
