@@ -2,22 +2,16 @@
 
 namespace App\Services\EntrepotApi;
 
-use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
-
 class AnnexeApiService extends AbstractEntrepotApiService
 {
-    public function getAll(
-        string $datastoreId,
-        #[MapQueryParameter] string $mimeType = null,
-        #[MapQueryParameter] string $path = null) : array
+    public function getAll(string $datastoreId, string $mimeType = null, string $path = null): array
     {
         $query = [];
         if ($mimeType) {
-            $query['mime_type'] = $mimeType; 
+            $query['mime_type'] = $mimeType;
         }
         if ($path) {
-            $query['path'] = $path; 
+            $query['path'] = $path;
         }
 
         return $this->requestAll("datastores/$datastoreId/annexes", $query);
@@ -53,12 +47,12 @@ class AnnexeApiService extends AbstractEntrepotApiService
     public function replaceFile(string $datastoreId, string $annexeId, string $annexeFilePath): array
     {
         $response = $this->sendFile('PUT', "datastores/$datastoreId/annexes/$annexeId", $annexeFilePath);
- 
+
         $this->filesystem->remove($annexeFilePath);
- 
+
         return $response;
     }
-    
+
     public function publish(string $datastoreId, string $annexeId): array
     {
         return $this->request('PATCH', "datastores/$datastoreId/annexes/$annexeId", [
