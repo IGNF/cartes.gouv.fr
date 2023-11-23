@@ -214,14 +214,19 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
                     <TableSelection visible={currentStep === STEPS.TABLES_INFOS} vectorDb={vectorDbQuery.data} form={form} />
                     <UploadStyleFile visible={currentStep === STEPS.STYLE_FILE} selectedTables={selectedTables} form={form} />
                     <UploadMDFile visible={currentStep === STEPS.METADATAS_UPLOAD} form={form} />
-                    <Description storedData={vectorDbQuery.data} endpointType={"WFS"} visible={currentStep === STEPS.METADATAS_DESCRIPTION} form={form} />
+                    <Description
+                        storedData={vectorDbQuery.data}
+                        endpointType={"WMS-VECTOR"}
+                        visible={currentStep === STEPS.METADATAS_DESCRIPTION}
+                        form={form}
+                    />
                     <AdditionalInfo
                         datastoreId={datastoreId}
                         storedData={vectorDbQuery.data}
                         visible={currentStep === STEPS.METADATAS_ADDITIONALINFORMATIONS}
                         form={form}
                     />
-                    <AccessRestrictions datastoreId={datastoreId} endpointType={"WFS"} visible={currentStep === STEPS.ACCESSRESTRICTIONS} form={form} />
+                    <AccessRestrictions datastoreId={datastoreId} endpointType={"WMS-VECTOR"} visible={currentStep === STEPS.ACCESSRESTRICTIONS} form={form} />
 
                     <ButtonsGroup
                         className={fr.cx("fr-mt-2w")}
