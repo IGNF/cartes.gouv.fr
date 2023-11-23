@@ -39,12 +39,14 @@ class CartesApiExceptionSubscriber implements EventSubscriberInterface
         }
     }
 
+    /**
+     * @SuppressWarnings(UndefinedVariable)
+     */
     private function getErrorResponse(CartesApiException $throwable): JsonResponse
     {
-        $statusText = 'Internal Server Error';
         $responseData = [
             'code' => Response::HTTP_INTERNAL_SERVER_ERROR,
-            'status' => $statusText,
+            'status' => Response::$statusTexts[Response::HTTP_INTERNAL_SERVER_ERROR],
             'message' => 'An internal error has occurred',
             'details' => [],
         ];
@@ -52,7 +54,8 @@ class CartesApiExceptionSubscriber implements EventSubscriberInterface
         if ($throwable instanceof CartesApiException) {
             $code = $throwable->getCode();
             $responseData['code'] = $code;
-            $responseData['status'] = $statusText;
+
+            $responseData['status'] = Response::$statusTexts[$code];
             $responseData['message'] = $throwable->getMessage();
             $responseData['details'] = $throwable->getDetails();
         }
