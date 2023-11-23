@@ -55,7 +55,7 @@ class InternalApiSubscriber implements EventSubscriberInterface
                 // TODO préciser que c'est l'API interne
                 if (null == $accessToken
                     || (null != $accessToken && $accessToken->hasExpired())) {
-                    throw new CartesApiException(Response::$statusTexts[Response::HTTP_UNAUTHORIZED], Response::HTTP_UNAUTHORIZED, ['controller' => ApiControllerInterface::class]);
+                    throw new CartesApiException('Unauthorized', Response::HTTP_UNAUTHORIZED, ['controller' => ApiControllerInterface::class]);
                 }
             }
         }
