@@ -307,6 +307,7 @@ const DatasheetNewForm = ({ datastoreId }) => {
                     {
                         linkProps: routes.datasheet_list({ datastoreId }).link,
                         children: "Annuler",
+                        className: fr.cx("fr-btn--secondary"),
                     },
                     {
                         onClick: () => {
