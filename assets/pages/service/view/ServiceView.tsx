@@ -15,7 +15,7 @@ import RQKeys from "../../../modules/RQKeys";
 import { type CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
 import { type Service } from "../../../types/app";
-import { createModal } from "@codegouvfr/react-dsfr/Modal";
+// import { createModal } from "@codegouvfr/react-dsfr/Modal";
 
 type ServiceViewProps = {
     datastoreId: string;
