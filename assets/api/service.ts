@@ -21,6 +21,13 @@ const unpublishWfs = (datastoreId: string, offeringId: string) => {
     });
 };
 
-const service = { get, getOfferings, unpublishWfs };
+const unpublishWmsVector = (datastoreId: string, offeringId: string) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_service_wmsvector_unpublish", { datastoreId, offeringId });
+    return jsonFetch<null>(url, {
+        method: "DELETE",
+    });
+};
+
+const service = { get, getOfferings, unpublishWfs, unpublishWmsVector };
 
 export default service;

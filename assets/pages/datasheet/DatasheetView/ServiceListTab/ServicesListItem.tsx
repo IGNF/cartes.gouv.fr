@@ -34,6 +34,8 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
             switch (service.type) {
                 case "WFS":
                     return api.service.unpublishWfs(datastoreId, service._id);
+                case "WMS-VECTOR":
+                    return api.service.unpublishWmsVector(datastoreId, service._id);
                 default:
                     console.warn(`Dépublication de service ${service.type} n'a pas encore été implémentée`);
                     return Promise.reject(`Dépublication de service ${service.type} n'a pas encore été implémentée`);

@@ -3,6 +3,7 @@
 namespace App\Controller\Api;
 
 use App\Constants\EntrepotApi\ConfigurationStatuses;
+use App\Constants\EntrepotApi\StaticFileTypes;
 use App\Exception\CartesApiException;
 use App\Exception\EntrepotApiException;
 use App\Services\EntrepotApiService;
@@ -50,15 +51,17 @@ class ServiceController extends AbstractController implements ApiControllerInter
     }
 
     #[Route('/{offeringId}', name: 'wfs_unpublish', methods: ['DELETE'])]
-    public function unpublish(string $datastoreId, string $offeringId): Response
+    public function wfsUnpublish(string $datastoreId, string $offeringId): Response
     {
         try {
             $offering = $this->entrepotApiService->configuration->getOffering($datastoreId, $offeringId);
             $offering['configuration'] = $this->entrepotApiService->configuration->get($datastoreId, $offering['configuration']['_id']);
 
+            // suppression de l'offering
             $this->entrepotApiService->configuration->removeOffering($datastoreId, $offering['_id']);
             $configurationId = $offering['configuration']['_id'];
 
+            // suppression de la configuration
             // la suppression de l'offering nécessite quelques instants, et tant que la suppression de l'offering n'est pas faite, on ne peut pas demander la suppression de la configuration
             while (1) {
                 sleep(3);
@@ -68,6 +71,45 @@ class ServiceController extends AbstractController implements ApiControllerInter
                 }
             }
             $this->entrepotApiService->configuration->remove($datastoreId, $configurationId);
+
+            return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+        } catch (EntrepotApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
+    #[Route('/{offeringId}', name: 'wmsvector_unpublish', methods: ['DELETE'])]
+    public function wmsVectorUnpublish(string $datastoreId, string $offeringId): Response
+    {
+        try {
+            $offering = $this->entrepotApiService->configuration->getOffering($datastoreId, $offeringId);
+            $offering['configuration'] = $this->entrepotApiService->configuration->get($datastoreId, $offering['configuration']['_id']);
+
+            // récup tous les fichiers statiques liés à la stored_data
+            $storedDataId = $offering['configuration']['type_infos']['used_data'][0]['stored_data'];
+            $staticFiles = $this->entrepotApiService->static->getAll($datastoreId, [
+                'type' => StaticFileTypes::GEOSERVER_STYLE,
+                'name' => sprintf('storeddata_%s_style_wmsv_%%', $storedDataId),
+            ]);
+
+            // suppression de l'offering
+            $this->entrepotApiService->configuration->removeOffering($datastoreId, $offering['_id']);
+            $configurationId = $offering['configuration']['_id'];
+
+            // suppression de la configuration
+            // la suppression de l'offering nécessite quelques instants, et tant que la suppression de l'offering n'est pas faite, on ne peut pas demander la suppression de la configuration
+            while (1) {
+                sleep(3);
+                $configuration = $this->entrepotApiService->configuration->get($datastoreId, $configurationId);
+                if (ConfigurationStatuses::UNPUBLISHED === $configuration['status']) {
+                    break;
+                }
+            }
+            $this->entrepotApiService->configuration->remove($datastoreId, $configurationId);
+
+            foreach ($staticFiles as $staticFile) {
+                $this->entrepotApiService->static->delete($datastoreId, $staticFile['_id']);
+            }
 
             return new JsonResponse(null, Response::HTTP_NO_CONTENT);
         } catch (EntrepotApiException $ex) {
