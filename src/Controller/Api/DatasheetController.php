@@ -65,6 +65,8 @@ class DatasheetController extends AbstractController implements ApiControllerInt
     #[Route('/{datasheetName}', name: 'get', methods: ['GET'])]
     public function getDetailed(string $datastoreId, string $datasheetName): JsonResponse
     {
+        $datastore = $this->entrepotApiService->datastore->get($datastoreId);
+
         // recherche d'entités API qui représente une fiche de données : upload, stored_data
         $uploadList = $this->entrepotApiService->upload->getAllDetailed($datastoreId, [
             'tags' => [
@@ -93,9 +95,19 @@ class DatasheetController extends AbstractController implements ApiControllerInt
 
         $data = $this->getBasicInfo($datastoreId, $datasheetName);
 
-        // recherche de services (configuration et offering)
+        // Recherche de services (configuration et offering)
         $storedDataList = array_merge($vectorDbList, $pyramidList);
         $services = $this->getServices($datastoreId, $storedDataList);
+
+        // Recherche des annexes de type 'thumbnail' et ajout de l'url complete
+        $annexeUrl = $this->getParameter("annexe_url");
+        $annexes = $this->entrepotApiService->annexe->getAll($datastoreId, null, null, ["datasheet_name=$datasheetName", "type=thumbnail"]);
+        
+        $thumbnail = null;
+        if (count($annexes) == 1) {
+            $thumbnail = $annexes[0];
+            $thumbnail['url'] = $annexeUrl . '/' . $datastore['technical_name'] . $thumbnail['paths'][0];
+        }
 
         return $this->json([
             ...$data,
@@ -103,6 +115,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             'pyramid_list' => $pyramidList,
             'upload_list' => $uploadList,
             'service_list' => $services,
+            'thumbnail'=> $thumbnail,
         ]);
     }
 

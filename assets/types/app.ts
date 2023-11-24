@@ -22,6 +22,7 @@ import {
     ProcessingExecutionDetailResponseDto,
     CheckingExecutionDetailResponseDto,
     ProcessingExecutionOutputStoredDataDto,
+    AnnexDetailResponseDto,
 } from "./entrepot";
 
 /** datastore */
@@ -40,6 +41,7 @@ export type DatasheetDetailed = Datasheet & {
     pyramid_list: Pyramid[] | undefined;
     upload_list: Upload[] | undefined;
     service_list: Service[] | undefined;
+    thumbnail: AnnexDetailResponseDto & { url: string };
 };
 
 /** stored_data (donnée stockée) */

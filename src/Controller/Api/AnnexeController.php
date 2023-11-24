@@ -2,16 +2,18 @@
 
 namespace App\Controller\Api;
 
-use App\Constants\EntrepotApi\CommonTags;
+use Symfony\Component\Uid\Uuid;
 use App\Services\EntrepotApiService;
 use App\Exception\CartesApiException;
 use App\Exception\EntrepotApiException;
+use App\Constants\EntrepotApi\CommonTags;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\Filesystem\Filesystem;
 
 #[Route(
     '/api/datastore/{datastoreId}/annexe',
@@ -29,6 +31,42 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
             'verify_peer' => false,
             'verify_host' => false,
         ]);
+    }
+
+    #[Route('/thumbnail_add', name: 'thumbnail_add', methods: ['POST'],
+        options: ['expose' => true],
+        condition: 'request.isXmlHttpRequest()')
+    ]
+    public function addThumbnail(string $datastoreId, Request $request) : JsonResponse{
+        try {
+            $datastore = $this->entrepotApiService->datastore->get($datastoreId);
+            $annexeUrl = $this->parameterBag->get('annexe_url');
+
+            $uuid = Uuid::v4();
+            
+            $file = $request->files->get('file');
+            $extension = $file->getClientOriginalExtension();
+            $path = join('/', ['thumbnail', "$uuid.$extension"]);
+
+            $labels = [
+                CommonTags::DATASHEET_NAME . '=' .$request->request->get("datasheetName"),
+                'type=thumbnail'
+            ];
+
+            // On regarde s'il existe deja une vignette
+            $annexes = $this->entrepotApiService->annexe->getAll($datastoreId, null, null, $labels);
+
+            if (count($annexes)) {  // Il existe, on la supprime sinon le path ne change pas
+                $this->entrepotApiService->annexe->remove($datastoreId, $annexes[0]['_id']); // Sinon le path ne change pas
+            }
+            
+            $annexe = $this->entrepotApiService->annexe->add($datastoreId, $file->getRealPath(), [$path], $labels);
+            $annexe['url'] = $annexeUrl . '/' . $datastore['technical_name'] . $annexe['paths'][0];
+
+            return new JsonResponse($annexe);
+        } catch (EntrepotApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
     }
 
     #[Route('/capabilities_add/{offeringId}', name: 'capabilities_add', methods: ['GET'],
@@ -70,15 +108,13 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
             }
             
             $uuid = uniqid();
-            $filePath = str_replace('\\', '/', $capsPath) . "/capabilities-$uuid.xml";
-            // $filePath = $capsPath . "/capabilities-$uuid.xml";
-
+            $filePath = join(DIRECTORY_SEPARATOR, [realpath($capsPath), "capabilities-$uuid.xml"]);
+            
             // Creation du fichier
             file_put_contents($filePath, $xmlStr);
 
             // On regarde s'il existe deja un fichier avec ce path
-            $path = join("/", [$datastore['technical_name'], $endpoint['technical_name'], 'capabilities.xml']);
-            //$path = "/$path";
+            $path = join("/", [$endpoint['technical_name'], 'capabilities.xml']);
 
             $annexes = $this->entrepotApiService->annexe->getAll($datastoreId, null, $path);
             if (count($annexes)) {  // Il existe, on le met a jour

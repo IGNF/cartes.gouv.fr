@@ -4,14 +4,21 @@ namespace App\Services\EntrepotApi;
 
 class AnnexeApiService extends AbstractEntrepotApiService
 {
-    public function getAll(string $datastoreId, string $mimeType = null, string $path = null): array
-    {
+    /**
+     * @param array<string> $labels
+     * @return array
+     */
+    public function getAll(string $datastoreId, string $mimeType = null, string $path = null, array $labels = null): array
+    {        
         $query = [];
         if ($mimeType) {
             $query['mime_type'] = $mimeType;
         }
         if ($path) {
             $query['path'] = $path;
+        }
+        if ($labels) {
+            $query['labels'] = $labels;
         }
 
         return $this->requestAll("datastores/$datastoreId/annexes", $query);

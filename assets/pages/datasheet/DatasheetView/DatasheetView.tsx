@@ -6,9 +6,11 @@ import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FC } from "react";
+import { FC, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { symToStr } from "tsafe/symToStr";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
 
 import api from "../../../api";
 import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
@@ -20,11 +22,20 @@ import { routes, useRoute } from "../../../router/router";
 import { Datasheet, type DatasheetDetailed } from "../../../types/app";
 import DatasetListTab from "./DatasetListTab/DatasetListTab";
 import ServicesListTab from "./ServiceListTab/ServicesListTab";
+import path from "../../../functions/path";
 
 import "../../../sass/components/spinner.scss";
+import { Upload } from "@codegouvfr/react-dsfr/Upload";
+import { useForm } from "react-hook-form";
+import { AnnexDetailResponseDto } from "../../../types/entrepot";
 
 const deleteDataConfirmModal = createModal({
     id: "delete-data-confirm-modal",
+    isOpenedByDefault: false,
+});
+
+const addThumbnailModal = createModal({
+    id: "add-thumbnail-modal",
     isOpenedByDefault: false,
 });
 
@@ -33,9 +44,43 @@ type DatasheetViewProps = {
     datasheetName: string;
 };
 
-const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) => {
-    const route = useRoute();
+const defaultImgUrl = "//www.gouvernement.fr/sites/default/files/static_assets/placeholder.1x1.png";
 
+const schema = yup.object().shape({
+    file: yup
+        .mixed()
+        .test("required", "Aucun fichier n'a été choisi", (files) => {
+            const file = files?.[0] ?? undefined;
+            return file !== undefined;
+        })
+        .required("Aucun fichier n'a été choisi")
+        .test("check-file-size", "La taille du fichier ne peut excéder 2 Mo", (files) => {
+            const file = files?.[0] ?? undefined;
+
+            if (file instanceof File) {
+                const size = file.size / 1024 / 1024;
+                return size < 2;
+            }
+            return true;
+        })
+        .test("check-file-type", "Le fichier doit être au format jpeg ou png", (files) => {
+            const file = files?.[0] ?? undefined;
+            if (file) {
+                const extension = path.getFileExtension(file.name);
+                if (!extension) {
+                    return false;
+                }
+                return ["jpg", "jpeg", "png"].includes(extension);
+            }
+            return true;
+        }),
+});
+
+const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) => {
+    // Boite modale, gestion de l'image
+    const [modalImageUrl, setModalImageUrl] = useState<string>("");
+
+    const route = useRoute();
     const queryClient = useQueryClient();
 
     const datasheetDeleteMutation = useMutation({
@@ -49,6 +94,21 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
         },
     });
 
+    const thumbnailMutation = useMutation<AnnexDetailResponseDto & { url: string }, CartesApiException>({
+        mutationFn: () => {
+            const form = new FormData();
+            form.append("datasheetName", datasheetName);
+            form.append("file", upload);
+            return api.annexe.addThumbnail(datastoreId, form);
+        },
+        onSuccess: () => {
+            addThumbnailModal.close();
+        },
+        onSettled: () => {
+            reset();
+        },
+    });
+
     const datasheetQuery = useQuery<DatasheetDetailed, CartesApiException>({
         queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName),
         queryFn: ({ signal }) => api.datasheet.get(datastoreId, datasheetName, { signal }),
@@ -57,6 +117,44 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
         retry: false,
         enabled: !datasheetDeleteMutation.isPending,
     });
+
+    // Url de la vignette
+    const thumbnailUrl = datasheetQuery?.data?.thumbnail?.url;
+
+    const {
+        register,
+        formState: { errors },
+        watch,
+        resetField,
+        handleSubmit,
+    } = useForm({ resolver: yupResolver(schema), mode: "onChange" });
+
+    const upload: File = watch("file")?.[0];
+    useEffect(() => {
+        if (upload !== undefined) {
+            const reader = new FileReader();
+            reader.onload = () => {
+                setModalImageUrl(reader.result as string);
+            };
+            reader.readAsDataURL(upload);
+        }
+    }, [upload]);
+
+    const handleChooseThumbnail = () => {
+        addThumbnailModal.open();
+    };
+
+    const reset = () => {
+        resetField("file");
+        setModalImageUrl("");
+    };
+
+    const onSubmit = async () => {
+        if (upload) {
+            // Ajout dans les annexes
+            thumbnailMutation.mutate();
+        }
+    };
 
     return (
         <DatastoreLayout datastoreId={datastoreId} documentTitle={`Données ${datasheetName}`}>
@@ -86,7 +184,9 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
 
                     <div className={fr.cx("fr-grid-row", "fr-mb-4w")}>
                         <div className={fr.cx("fr-col-2")}>
-                            <img src="//www.gouvernement.fr/sites/default/files/static_assets/placeholder.1x1.png" width="128px" />
+                            <Button priority="tertiary no outline" onClick={handleChooseThumbnail}>
+                                <img src={thumbnailUrl ?? defaultImgUrl} width="128px" height="128px" />
+                            </Button>
                         </div>
                         <div className={fr.cx("fr-col")}>
                             {/* TODO : désactivé car on n'a pas ces infos */}
@@ -160,18 +260,74 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
 
             <>
                 {createPortal(
-                    <deleteDataConfirmModal.Component
-                        title={`Êtes-vous sûr de supprimer la fiche de données ${datasheetName} ?`}
+                    <addThumbnailModal.Component
+                        title={"Choisir la vignette"}
                         buttons={[
                             {
-                                children: "Non, annuler",
+                                children: "Annuler",
+                                onClick: () => {
+                                    reset();
+                                    thumbnailMutation.reset();
+                                },
                                 doClosesModal: true,
                                 priority: "secondary",
                             },
                             {
-                                children: "Oui, supprimer",
-                                onClick: () => datasheetDeleteMutation.mutate(),
+                                children: "Téléverser la vignette",
+                                onClick: handleSubmit(onSubmit),
+                                doClosesModal: false,
+                                priority: "primary",
+                            },
+                        ]}
+                    >
+                        {thumbnailMutation.isError && (
+                            <Alert
+                                severity="error"
+                                closable
+                                title="Une erreur est survenue"
+                                description={thumbnailMutation.error.message}
+                                className={fr.cx("fr-my-3w")}
+                            />
+                        )}
+                        <div className={fr.cx("fr-grid-row")}>
+                            <div className={fr.cx("fr-col-9")}>
+                                <Upload
+                                    label={""}
+                                    hint={"Taille maximale : 2 Mo. Formats supportés : jpg, png"}
+                                    state={errors.file ? "error" : "default"}
+                                    stateRelatedMessage={errors?.file?.message}
+                                    nativeInputProps={{
+                                        ...register("file"),
+                                        accept: ".png, .jpg, .jpeg",
+                                    }}
+                                />
+                            </div>
+                            <div className={fr.cx("fr-col-3")}>
+                                <img src={modalImageUrl ?? defaultImgUrl} width="128px" />
+                            </div>
+                        </div>
+                        {thumbnailMutation.isPending && (
+                            <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
+                                <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " icons-spin"} />
+                                <h6 className={fr.cx("fr-m-0")}>Ajout de la vignette en cours</h6>
+                            </div>
+                        )}
+                    </addThumbnailModal.Component>,
+                    document.body
+                )}
+                {createPortal(
+                    <deleteDataConfirmModal.Component
+                        title={`Êtes-vous sûr de supprimer la fiche de données ${datasheetName} ?`}
+                        buttons={[
+                            {
+                                children: "Annuler",
                                 doClosesModal: true,
+                                priority: "secondary",
+                            },
+                            {
+                                children: "Ajouter",
+                                onClick: () => thumbnailMutation.mutate(),
+                                doClosesModal: false,
                                 priority: "primary",
                             },
                         ]}
