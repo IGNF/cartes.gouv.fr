@@ -30,8 +30,16 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
     const queryClient = useQueryClient();
 
     const unpublishServiceMutation = useMutation({
-        mutationFn: () => api.service.unpublish(datastoreId, service._id),
-        onSuccess() {
+        mutationFn: () => {
+            switch (service.type) {
+                case "WFS":
+                    return api.service.unpublishWfs(datastoreId, service._id);
+                default:
+                    console.warn(`Dépublication de service ${service.type} n'a pas encore été implémentée`);
+                    return Promise.reject(`Dépublication de service ${service.type} n'a pas encore été implémentée`);
+            }
+        },
+        onSettled() {
             queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
         },
     });

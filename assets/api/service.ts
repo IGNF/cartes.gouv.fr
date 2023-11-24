@@ -14,16 +14,13 @@ const getOfferings = (datastoreId: string) => {
     return jsonFetch<OfferingListResponseDto[]>(url);
 };
 
-/**
- * Demande la suppression de l'offering et puis la configuration
- */
-const unpublish = (datastoreId: string, offeringId: string) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_service_unpublish", { datastoreId, offeringId });
-    return jsonFetch(url, {
+const unpublishWfs = (datastoreId: string, offeringId: string) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_service_wfs_unpublish", { datastoreId, offeringId });
+    return jsonFetch<null>(url, {
         method: "DELETE",
     });
 };
 
-const service = { get, getOfferings, unpublish };
+const service = { get, getOfferings, unpublishWfs };
 
 export default service;

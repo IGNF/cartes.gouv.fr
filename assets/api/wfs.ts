@@ -17,6 +17,6 @@ const add = (datastoreId: string, storedDataId: string, formData: FormData | obj
     );
 };
 
-export default {
-    add,
-};
+const wfs = { add };
+
+export default wfs;

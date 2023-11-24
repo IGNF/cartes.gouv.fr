@@ -49,7 +49,7 @@ class ServiceController extends AbstractController implements ApiControllerInter
         }
     }
 
-    #[Route('/{offeringId}', name: 'unpublish', methods: ['DELETE'])]
+    #[Route('/{offeringId}', name: 'wfs_unpublish', methods: ['DELETE'])]
     public function unpublish(string $datastoreId, string $offeringId): Response
     {
         try {
