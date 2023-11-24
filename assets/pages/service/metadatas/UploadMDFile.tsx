@@ -22,7 +22,7 @@ const UploadMDFile: FC<UploadMDFileProps> = ({ visible, form }) => {
             <p>{Translator.trans("mandatory_fields")}</p>
             <Upload
                 label={Translator.trans("metadatas.drag_and_drop_file")}
-                className={fr.cx("fr-mb-2w")}
+                className={fr.cx("fr-input-group", "fr-mb-2w")}
                 hint={Translator.trans("metadatas.used_format")}
                 nativeInputProps={{
                     ...register("metadata_file_content"),

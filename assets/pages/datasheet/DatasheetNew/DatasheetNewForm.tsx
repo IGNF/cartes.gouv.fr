@@ -3,6 +3,7 @@ import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
 import { Select } from "@codegouvfr/react-dsfr/Select";
+import { Upload } from "@codegouvfr/react-dsfr/Upload";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useQuery } from "@tanstack/react-query";
 import { format as datefnsFormat } from "date-fns";
@@ -232,20 +233,14 @@ const DatasheetNewForm = ({ datastoreId }) => {
                     ...register("data_name"),
                 }}
             />
-            {/* A remplacer par le composant Upload quand cette issue sera corrigée (https://github.com/codegouvfr/react-dsfr/issues/155 | https://react-dsfr-components.etalab.studio/?path=/docs/components-upload--default) */}
-            <Input
+            <Upload
                 label="Déposez votre fichier de données"
-                hintText="Formats de fichiers autorisés : archive zip contenant un Geopackage (recommandé) ou un CSV..."
-                state={dataFileError === undefined ? "default" : "error"}
-                stateRelatedMessage={dataFileError}
-                nativeInputProps={{ type: "file", onChange: postDataFile, className: fr.cx("fr-upload"), ref: dataFileRef }}
-            />
-            {/* <Upload
                 hint="Formats de fichiers autorisés : archive zip contenant un Geopackage (recommandé) ou un CSV..."
                 state={dataFileError === undefined ? "default" : "error"}
                 stateRelatedMessage={dataFileError}
                 nativeInputProps={{ onChange: postDataFile, ref: dataFileRef }}
-            /> */}
+                className={fr.cx("fr-input-group")}
+            />
             {showProgress && <Progress label={"Upload en cours ..."} value={progressValue} max={progressMax} />}
             {showDataInfos && (
                 <div className={fr.cx("fr-mt-2v")}>

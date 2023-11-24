@@ -27,7 +27,7 @@ const UploadStyleFile: FC<UploadStyleFileProps> = ({ visible, selectedTables, fo
                 <Upload
                     key={table.name}
                     label={table.name}
-                    className={fr.cx("fr-mb-2w")}
+                    className={fr.cx("fr-input-group", "fr-mb-2w")}
                     hint="Glissez-déposez votre fichier SLD ici. Formats de fichiers autorisés : .sld"
                     state={errors?.style_files?.[table.name]?.message ? "error" : "default"}
                     stateRelatedMessage={errors?.style_files?.[table.name]?.message}
