@@ -1,4 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import { ButtonProps } from "@codegouvfr/react-dsfr/Button";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useEffect, useState } from "react";
@@ -125,6 +126,21 @@ const DatasheetNewIntegrationDialog: FC<DatasheetNewIntegrationDialogProps> = ({
         return statusText;
     };
 
+    const bottomButtons: [ButtonProps, ...ButtonProps[]] = [
+        {
+            children: "Revenir à mes données",
+            linkProps: routes.datasheet_list({ datastoreId }).link,
+            priority: "secondary",
+        },
+    ];
+
+    if (uploadQuery.data?.tags?.vectordb_id) {
+        bottomButtons.unshift({
+            children: "Voir le rapport d'erreur",
+            linkProps: routes.datastore_stored_data_report({ datastoreId, storedDataId: uploadQuery.data?.tags.vectordb_id }).link,
+        });
+    }
+
     return (
         <div className={fr.cx("fr-container")}>
             {isIntegrationError ? (
@@ -162,20 +178,7 @@ const DatasheetNewIntegrationDialog: FC<DatasheetNewIntegrationDialogProps> = ({
 
             {isIntegrationError && (
                 <div className={fr.cx("fr-grid-row")}>
-                    <ButtonsGroup
-                        buttons={[
-                            {
-                                children: "Voir le rapport d'erreur",
-                                linkProps: { href: "#" },
-                            },
-                            {
-                                children: "Revenir à mes données",
-                                linkProps: routes.datasheet_list({ datastoreId }).link,
-                                priority: "secondary",
-                            },
-                        ]}
-                        inlineLayoutWhen="always"
-                    />
+                    <ButtonsGroup buttons={bottomButtons} inlineLayoutWhen="always" />
                 </div>
             )}
         </div>
