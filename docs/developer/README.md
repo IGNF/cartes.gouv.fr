@@ -1,8 +1,9 @@
 # Documentation développeur
 
-* [Installation et configuration](install.md)
-* [Implémentation et exécution des tests](test.md)
-* [Internationalisation](i18n.md)
+-   [Installation et configuration](install.md)
+-   [Implémentation et exécution des tests](test.md)
+-   [Internationalisation](i18n.md)
+-   [Explication des workflows](workflows.md)
 
 ## Commandes utiles
 
