@@ -123,7 +123,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             }
         }
 
-        $annexeUrl = $this->getParameter("annexe_url");
+        $annexeUrl = $this->getParameter("annexes_url");
         $annexes = $this->entrepotApiService->annexe->getAll($datastoreId, null, null, ["datasheet_name=$datasheetName", "type=thumbnail"]);
         
         $thumbnail = null;
@@ -204,7 +204,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
 
             // TODO : autres données à supprimer
             // Suppression des annexes
-            $annexeUrl = $this->getParameter("annexe_url");
+            $annexeUrl = $this->getParameter("annexes_url");
             
             $annexes = $this->entrepotApiService->annexe->getAll($datastoreId, null, null, ["datasheet_name=$datasheetName"]);
             foreach($annexes as $annexe) {

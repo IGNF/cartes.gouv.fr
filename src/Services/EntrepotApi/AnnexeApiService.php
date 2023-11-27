@@ -27,9 +27,9 @@ class AnnexeApiService extends AbstractEntrepotApiService
     public function get(string $datastoreId, string $annexeId): array
     {
         // TODO : mettre à jour l'url annexe
-        $apiPlageAnnexeUrl = $this->parameters->get('api_plage_annexe_url');
+        $annexeUrl = $this->parameters->get('annexes_url');
         $response = $this->request('GET', "datastores/$datastoreId/annexes/$annexeId");
-        $response['paths'][0] = $apiPlageAnnexeUrl.$response['paths'][0];
+        $response['paths'][0] = $annexeUrl.$response['paths'][0];
 
         return $response;
     }

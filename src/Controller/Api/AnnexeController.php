@@ -41,7 +41,7 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
     public function addThumbnail(string $datastoreId, Request $request) : JsonResponse{
         try {
             $datastore = $this->entrepotApiService->datastore->get($datastoreId);
-            $annexeUrl = $this->parameterBag->get('annexe_url');
+            $annexeUrl = $this->parameterBag->get('annexes_url');
 
             $uuid = Uuid::v4();
             
