@@ -28,6 +28,9 @@ import "../../../sass/components/spinner.scss";
 import { Upload } from "@codegouvfr/react-dsfr/Upload";
 import { useForm } from "react-hook-form";
 import { AnnexDetailResponseDto } from "../../../types/entrepot";
+import Common from "../../../i18n/Common";
+import { ComponentKey, Translations, declareComponentKeys, useTranslation } from "../../../i18n/i18n";
+import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
 
 const deleteDataConfirmModal = createModal({
     id: "delete-data-confirm-modal",
@@ -46,37 +49,39 @@ type DatasheetViewProps = {
 
 const defaultImgUrl = "//www.gouvernement.fr/sites/default/files/static_assets/placeholder.1x1.png";
 
-const schema = yup.object().shape({
-    file: yup
-        .mixed()
-        .test("required", "Aucun fichier n'a été choisi", (files) => {
-            const file = files?.[0] ?? undefined;
-            return file !== undefined;
-        })
-        .required("Aucun fichier n'a été choisi")
-        .test("check-file-size", "La taille du fichier ne peut excéder 2 Mo", (files) => {
-            const file = files?.[0] ?? undefined;
+const schema = (t: TranslationFunction<"DatasheetView", ComponentKey>) =>
+    yup.object().shape({
+        file: yup
+            .mixed()
+            .test("required", t("file_validation.required_error"), (files) => {
+                const file = files?.[0] ?? undefined;
+                return file !== undefined;
+            })
+            .test("check-file-size", t("file_validation.size_error"), (files) => {
+                const file = files?.[0] ?? undefined;
 
-            if (file instanceof File) {
-                const size = file.size / 1024 / 1024;
-                return size < 2;
-            }
-            return true;
-        })
-        .test("check-file-type", "Le fichier doit être au format jpeg ou png", (files) => {
-            const file = files?.[0] ?? undefined;
-            if (file) {
-                const extension = path.getFileExtension(file.name);
-                if (!extension) {
-                    return false;
+                if (file instanceof File) {
+                    const size = file.size / 1024 / 1024;
+                    return size < 2;
                 }
-                return ["jpg", "jpeg", "png"].includes(extension);
-            }
-            return true;
-        }),
-});
+                return true;
+            })
+            .test("check-file-type", t("file_validation.format_error"), (files) => {
+                const file = files?.[0] ?? undefined;
+                if (file) {
+                    const extension = path.getFileExtension(file.name);
+                    if (!extension) {
+                        return false;
+                    }
+                    return ["jpg", "jpeg", "png"].includes(extension);
+                }
+                return true;
+            }),
+    });
 
 const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) => {
+    const { t } = useTranslation({ Common, DatasheetView });
+
     // Boite modale, gestion de l'image
     const [modalImageUrl, setModalImageUrl] = useState<string>("");
 
@@ -120,6 +125,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
 
     // Url de la vignette
     const thumbnailUrl = datasheetQuery?.data?.thumbnail?.url;
+    const action: string = datasheetQuery?.data?.thumbnail?.url ? "modify" : "add";
 
     const {
         register,
@@ -127,7 +133,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
         watch,
         resetField,
         handleSubmit,
-    } = useForm({ resolver: yupResolver(schema), mode: "onChange" });
+    } = useForm({ resolver: yupResolver(schema(t)), mode: "onChange" });
 
     const upload: File = watch("file")?.[0];
     useEffect(() => {
@@ -165,7 +171,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                     severity="error"
                     closable={false}
                     title={datasheetQuery.error.message}
-                    description={<Button linkProps={routes.datasheet_list({ datastoreId }).link}>Retour à mes données</Button>}
+                    description={<Button linkProps={routes.datasheet_list({ datastoreId }).link}>{t("datasheet.back_to_list")}</Button>}
                 />
             ) : (
                 <>
@@ -174,17 +180,17 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                             iconId="fr-icon-arrow-left-s-line"
                             priority="tertiary no outline"
                             linkProps={routes.datasheet_list({ datastoreId }).link}
-                            title="Retour à la liste de mes données"
+                            title={t("datasheet.back_to_list")}
                         />
                         {datasheetName}
                         <Badge noIcon={true} severity="info" className={fr.cx("fr-ml-2w")}>
-                            {datasheetQuery?.data?.nb_publications && datasheetQuery?.data?.nb_publications > 0 ? "Publié" : "Non Publié"}
+                            {datasheetQuery?.data?.nb_publications && datasheetQuery?.data?.nb_publications > 0 ? t("published") : t("not_published")}
                         </Badge>
                     </div>
 
                     <div className={fr.cx("fr-grid-row", "fr-mb-4w")}>
                         <div className={fr.cx("fr-col-2")}>
-                            <Button priority="tertiary no outline" onClick={handleChooseThumbnail}>
+                            <Button priority="tertiary no outline" onClick={handleChooseThumbnail} nativeButtonProps={{ "aria-label": "Ajouter ou modifier" }}>
                                 <img src={thumbnailUrl ?? defaultImgUrl} width="128px" height="128px" />
                             </Button>
                         </div>
@@ -197,7 +203,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                             <ButtonsGroup
                                 buttons={[
                                     {
-                                        children: "Supprimer la donnée",
+                                        children: t("datasheet.remove"),
                                         onClick: () => deleteDataConfirmModal.open(),
                                         iconId: "fr-icon-delete-fill",
                                     },
@@ -211,17 +217,20 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                             <Tabs
                                 tabs={[
                                     {
-                                        label: "Métadonnées (0)",
+                                        // label: t("tab_label.metadatas"),
+                                        label: "TAB1",
                                         isDefault: route.params["activeTab"] === "metadata",
                                         content: <p>...liste de métadonnées...</p>,
                                     },
                                     {
-                                        label: `Jeux de données (${datasheetQuery?.data?.vector_db_list?.length || 0})`,
+                                        // label: t("tab_label.datasets", { num: datasheetQuery?.data?.vector_db_list?.length || 0 }),
+                                        label: "TAB2",
                                         isDefault: route.params["activeTab"] === "dataset",
                                         content: <DatasetListTab datastoreId={datastoreId} datasheet={datasheetQuery?.data} />,
                                     },
                                     {
-                                        label: `Services (${datasheetQuery?.data?.service_list?.length || 0})`,
+                                        // label: t("tab_label.services", { num: datasheetQuery?.data?.service_list?.length || 0 }),
+                                        label: "TAB3",
                                         isDefault: route.params["activeTab"] === "services",
                                         content: <ServicesListTab datastoreId={datastoreId} datasheet={datasheetQuery?.data} />,
                                     },
@@ -252,7 +261,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                     <div className={fr.cx("fr-container")}>
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
                             <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " icons-spin"} />
-                            <h6 className={fr.cx("fr-m-0")}>En cours de suppression</h6>
+                            <h6 className={fr.cx("fr-m-0")}>{t("being_deleted")}</h6>
                         </div>
                     </div>
                 </Wait>
@@ -261,10 +270,10 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
             <>
                 {createPortal(
                     <addThumbnailModal.Component
-                        title={"Choisir la vignette"}
+                        title={t("thumbnail_modal.title")}
                         buttons={[
                             {
-                                children: "Annuler",
+                                children: t("cancel"),
                                 onClick: () => {
                                     reset();
                                     thumbnailMutation.reset();
@@ -273,7 +282,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                                 priority: "secondary",
                             },
                             {
-                                children: "Téléverser la vignette",
+                                children: action === "add" ? t("thumbnail_modal.button_add_label") : t("thumbnail_modal.button_modify_label"),
                                 onClick: handleSubmit(onSubmit),
                                 doClosesModal: false,
                                 priority: "primary",
@@ -281,19 +290,13 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                         ]}
                     >
                         {thumbnailMutation.isError && (
-                            <Alert
-                                severity="error"
-                                closable
-                                title="Une erreur est survenue"
-                                description={thumbnailMutation.error.message}
-                                className={fr.cx("fr-my-3w")}
-                            />
+                            <Alert severity="error" closable title={t("error")} description={thumbnailMutation.error.message} className={fr.cx("fr-my-3w")} />
                         )}
                         <div className={fr.cx("fr-grid-row")}>
                             <div className={fr.cx("fr-col-9")}>
                                 <Upload
                                     label={""}
-                                    hint={"Taille maximale : 2 Mo. Formats supportés : jpg, png"}
+                                    hint={t("thumbnail_modal.file_hint")}
                                     state={errors.file ? "error" : "default"}
                                     stateRelatedMessage={errors?.file?.message}
                                     nativeInputProps={{
@@ -303,13 +306,13 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                                 />
                             </div>
                             <div className={fr.cx("fr-col-3")}>
-                                <img src={modalImageUrl ?? defaultImgUrl} width="128px" />
+                                <img src={modalImageUrl ?? defaultImgUrl} width="128px" height="128px" />
                             </div>
                         </div>
                         {thumbnailMutation.isPending && (
                             <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
                                 <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " icons-spin"} />
-                                <h6 className={fr.cx("fr-m-0")}>Ajout de la vignette en cours</h6>
+                                <h6 className={fr.cx("fr-m-0")}>{action === "add" ? t("thumbnail_modal.being_added") : t("thumbnail_modal.being_modified")}</h6>
                             </div>
                         )}
                     </addThumbnailModal.Component>,
@@ -317,22 +320,22 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                 )}
                 {createPortal(
                     <deleteDataConfirmModal.Component
-                        title={`Êtes-vous sûr de supprimer la fiche de données ${datasheetName} ?`}
+                        title={t("datasheet_confirm_delete_modal.title", { datasheetName: datasheetName })}
                         buttons={[
                             {
-                                children: "Annuler",
+                                children: t("no"),
                                 doClosesModal: true,
                                 priority: "secondary",
                             },
                             {
-                                children: "Ajouter",
+                                children: t("yes"),
                                 onClick: () => thumbnailMutation.mutate(),
                                 doClosesModal: false,
                                 priority: "primary",
                             },
                         ]}
                     >
-                        <strong>Les éléments suivants seront supprimés :</strong>
+                        <strong>{t("datasheet_confirm_delete_modal.text")}</strong>
                         <ul>
                             {datasheetQuery?.data?.vector_db_list?.length && datasheetQuery?.data?.vector_db_list.length > 0 ? (
                                 <li> {datasheetQuery?.data?.vector_db_list.length} base(s) de données</li>
@@ -357,3 +360,63 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
 DatasheetView.displayName = symToStr({ DatasheetView });
 
 export default DatasheetView;
+
+// Traductions
+export const { i18n } = declareComponentKeys<
+    | "tab_label.metadatas"
+    | { K: "tab_label.datasets"; P: { num: number }; R: string }
+    | { K: "tab_label.services"; P: { num: number }; R: string }
+    | "datasheet.back_to_list"
+    | "datasheet.remove"
+    | "file_validation.required_error"
+    | "file_validation.size_error"
+    | "file_validation.format_error"
+    | "thumbnail_modal.title"
+    | "thumbnail_modal.button_add_label"
+    | "thumbnail_modal.button_modify_label"
+    | "thumbnail_modal.file_hint"
+    | "thumbnail_modal.being_added"
+    | "thumbnail_modal.being_modified"
+    | { K: "datasheet_confirm_delete_modal.title"; P: { datasheetName: string }; R: string }
+    | "datasheet_confirm_delete_modal.text"
+>()({
+    DatasheetView,
+});
+
+export const DatasheetViewFrTranslations: Translations<"fr">["DatasheetView"] = {
+    "tab_label.metadatas": "Métadonnées (0)",
+    "tab_label.datasets": ({ num }) => `Jeux de données (${num})`,
+    "tab_label.services": ({ num }) => `Services (${num})`,
+    "datasheet.back_to_list": "Retour à ma liste de données",
+    "datasheet.remove": "Supprimer la fiche de données",
+    "file_validation.required_error": "Aucun fichier n'a été choisi",
+    "file_validation.size_error": "La taille du fichier ne peut excéder 2 Mo",
+    "file_validation.format_error": "Le fichier doit être au format jpeg ou png",
+    "thumbnail_modal.title": "Vignette pour la fiche de données",
+    "thumbnail_modal.button_add_label": "Ajouter la vignette",
+    "thumbnail_modal.button_modify_label": "Modifier la vignette",
+    "thumbnail_modal.file_hint": "Taille maximale : 2 Mo. Formats acceptés : jpg, png",
+    "thumbnail_modal.being_added": "Ajout de la vignette en cours ...",
+    "thumbnail_modal.being_modified": "Modification de la vignette en cours ...",
+    "datasheet_confirm_delete_modal.title": ({ datasheetName }) => `Êtes-vous sûr de supprimer la fiche de données ${datasheetName} ?`,
+    "datasheet_confirm_delete_modal.text": "Les éléments suivants seront supprimés :",
+};
+
+export const DatasheetViewEnTranslations: Translations<"en">["DatasheetView"] = {
+    "tab_label.metadatas": "Metadatas (0)",
+    "tab_label.datasets": ({ num }) => `Datasets (${num})`,
+    "tab_label.services": ({ num }) => `Services (${num})`,
+    "datasheet.back_to_list": "Back to my data list",
+    "datasheet.remove": "Delete datasheet",
+    "file_validation.required_error": "No files have been chosen",
+    "file_validation.size_error": "File size cannot exceed 2 MB",
+    "file_validation.format_error": "Format required for file is jpeg or png",
+    "thumbnail_modal.title": "Datasheet thumbnail",
+    "thumbnail_modal.button_add_label": "Add thumbnail",
+    "thumbnail_modal.button_modify_label": "Modify thumbnail",
+    "thumbnail_modal.file_hint": "Max size : 2 Mo. Accepted formats : jpg, png",
+    "thumbnail_modal.being_added": "Thumbnail being added ...",
+    "thumbnail_modal.being_modified": "Thumbnail being modified ...",
+    "datasheet_confirm_delete_modal.title": ({ datasheetName }) => `Are you sure you want to delete datasheet ${datasheetName} ?`,
+    "datasheet_confirm_delete_modal.text": "The following items will be deleted :",
+};

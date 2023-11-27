@@ -16,9 +16,11 @@ export const languagesDisplayNames: Record<Language, string> = {
 // types
 export type Language = (typeof languages)[number];
 export type ComponentKey =
+    | typeof import("../i18n/Common").i18n
     | typeof import("../pages/contact/Contact").i18n
     | typeof import("../config/navItems").i18n
-    | typeof import("../components/AddStyleForm/AddStyleForm").i18n;
+    | typeof import("../components/AddStyleForm/AddStyleForm").i18n
+    | typeof import("../pages/datasheet/DatasheetView/DatasheetView").i18n;
 
 export type Translations<L extends Language> = GenericTranslations<ComponentKey, Language, typeof fallbackLanguage, L>;
 export type LocalizedString = Parameters<typeof resolveLocalizedString>[0];
