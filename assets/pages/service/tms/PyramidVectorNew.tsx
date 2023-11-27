@@ -205,8 +205,8 @@ const PyramidVectorNew: FC<PyramidVectorNewProps> = ({ datastoreId, vectorDbId, 
                                     currentStep < Object.values(STEPS).length
                                         ? Translator.trans("continue")
                                         : sample?.is_sample === "true"
-                                        ? Translator.trans("pyramid_vector.new.generate_sample")
-                                        : Translator.trans("pyramid_vector.new.generate_pyramid"),
+                                          ? Translator.trans("pyramid_vector.new.generate_sample")
+                                          : Translator.trans("pyramid_vector.new.generate_pyramid"),
                                 onClick: nextStep,
                             },
                         ]}
