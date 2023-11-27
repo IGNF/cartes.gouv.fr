@@ -9,16 +9,14 @@ class CatalogsApiService extends AbstractEntrepotApiService
      */
     public function getPublicCommunities(array $query = []): mixed
     {
-        $response = $this->request("GET", "catalogs/communities", [], $query, [], false, true, true);
-        
-        // TODO REACTIVER
-        // $contentRange = $response['headers']['content-range'][0];
-        // $numPages = $this->getResultsPageCount($contentRange, $query['limit']);
+        $response = $this->request('GET', 'catalogs/communities', [], $query, [], false, true, true);
 
-        $numPages = 4;
+        $contentRange = $response['headers']['content-range'][0];
+        $numPages = $this->getResultsPageCount($contentRange, $query['limit']);
+
         return [
             'communities' => $response['content'],
-            'numPages' => $numPages
+            'numPages' => $numPages,
         ];
     }
 }
