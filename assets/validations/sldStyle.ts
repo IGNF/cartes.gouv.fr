@@ -15,7 +15,6 @@ const test = async (tableName: string, value: FileList, ctx: TestContext, tSld: 
 
     /**
      * // TODO : il manque la validation des contraintes suivantes :
-     * - seulement la version 1.0.0 de SLD est supportée
      * - type de symbologie (symbolizer) doit correspondre au type de geometrie
      */
     if (file instanceof File) {
@@ -24,10 +23,20 @@ const test = async (tableName: string, value: FileList, ctx: TestContext, tSld: 
         }
 
         const styleString = await file.text();
+
+        const domParser = new DOMParser();
+        const xmlDoc = domParser.parseFromString(styleString, "application/xml");
+        const version = xmlDoc.getElementsByTagName("StyledLayerDescriptor")[0].attributes?.["version"]?.nodeValue ?? "";
+
+        if (version === "") {
+            return ctx.createError({ message: tSld("sld_version_missing") });
+        } else if (version !== "1.0.0") {
+            return ctx.createError({ message: tSld("sld_version_unaccepted") });
+        }
+
         const sldParser = new SldStyleParser({ sldVersion: "1.0.0" });
         const result = await sldParser.readStyle(styleString);
 
-        console.log(result);
         const { output, warnings, errors, unsupportedProperties } = result;
 
         if (errors) {
@@ -76,6 +85,8 @@ const test = async (tableName: string, value: FileList, ctx: TestContext, tSld: 
 export const { i18n } = declareComponentKeys<
     | { K: "no_file_provided"; P: { tableName: string }; R: string }
     | { K: "unaccepted_extension"; P: { fileName: string }; R: string }
+    | "sld_version_missing"
+    | "sld_version_unaccepted"
     | "xml_invalid"
     | "field_name_invalid_or_unspecified"
     | { K: "field_name_does_not_correspond_table_name"; P: { fieldNameValue: string; tableName: string }; R: string }
@@ -87,6 +98,8 @@ export const { i18n } = declareComponentKeys<
 export const sldStyleValidationFrTranslations: Translations<"fr">["sldStyleValidation"] = {
     no_file_provided: ({ tableName }) => `Veuillez fournir un fichier de style pour la table ${tableName}`,
     unaccepted_extension: ({ fileName }) => `L'extension du fichier de style ${fileName} n'est pas correcte. Seule l'extension sld est acceptée.`,
+    sld_version_missing: "La version de SLD n'est pas spécifiée.",
+    sld_version_unaccepted: "Seule la version 1.0.0 de SLD est acceptée.",
     xml_invalid: "Le contenu du fichier a une syntaxe XML invalide.",
     field_name_invalid_or_unspecified: "Le champ 'name' est invalide ou n'est pas spécifié.",
     field_name_does_not_correspond_table_name: ({ fieldNameValue, tableName }) =>
@@ -104,6 +117,8 @@ export const sldStyleValidationFrTranslations: Translations<"fr">["sldStyleValid
 export const sldStyleValidationEnTranslations: Translations<"en">["sldStyleValidation"] = {
     no_file_provided: undefined,
     unaccepted_extension: undefined,
+    sld_version_missing: undefined,
+    sld_version_unaccepted: undefined,
     xml_invalid: undefined,
     field_name_invalid_or_unspecified: undefined,
     field_name_does_not_correspond_table_name: undefined,
