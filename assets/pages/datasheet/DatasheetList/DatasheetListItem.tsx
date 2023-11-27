@@ -20,7 +20,7 @@ const DatasheetListItem: FC<DatasheetListItemProps> = ({ datastoreId, datasheet 
             <div className={fr.cx("fr-col")}>
                 <Button linkProps={routes.datastore_datasheet_view({ datastoreId, datasheetName: datasheet.name }).link} priority="tertiary no outline">
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                        <img src={datasheet?.thumbnail?.url ?? defaultImgUrl} width={"64px"} height={"64px"} className={fr.cx("fr-mr-1v")} />
+                        <img src={datasheet?.thumbnail?.url ?? defaultImgUrl} height={"64px"} className={fr.cx("fr-mr-1v")} />
                         <strong className={fr.cx("fr-ml-2w")}>{datasheet.name}</strong>
 
                         {/* catégories thématiques */}

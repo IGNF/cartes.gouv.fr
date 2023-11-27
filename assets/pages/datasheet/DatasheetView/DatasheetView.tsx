@@ -250,7 +250,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                                 onClick={handleChooseThumbnail}
                                 nativeButtonProps={{ "aria-label": t("button.title"), title: t("button.title") }}
                             >
-                                <img src={thumbnailUrl === "" ? defaultImgUrl : thumbnailUrl} width="128px" height="128px" />
+                                <img src={thumbnailUrl === "" ? defaultImgUrl : thumbnailUrl} width={"128px"} />
                             </Button>
                         </div>
                         <div className={fr.cx("fr-col")}>
@@ -358,7 +358,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                                 />
                             </div>
                             <div className={fr.cx("fr-col-3")}>
-                                <img src={modalImageUrl === "" ? defaultImgUrl : modalImageUrl} width="128px" height="128px" />
+                                <img src={modalImageUrl === "" ? defaultImgUrl : modalImageUrl} width="128px" />
                             </div>
                         </div>
                         {thumbnailMutation.isPending && (
