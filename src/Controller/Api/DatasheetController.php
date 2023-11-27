@@ -2,8 +2,8 @@
 
 namespace App\Controller\Api;
 
-use App\Constants\EntrepotApi\ConfigurationStatuses;
 use App\Constants\EntrepotApi\CommonTags;
+use App\Constants\EntrepotApi\ConfigurationStatuses;
 use App\Constants\EntrepotApi\StoredDataTypes;
 use App\Exception\CartesApiException;
 use App\Exception\EntrepotApiException;
@@ -123,13 +123,13 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             }
         }
 
-        $annexeUrl = $this->getParameter("annexes_url");
-        $annexes = $this->entrepotApiService->annexe->getAll($datastoreId, null, null, ["datasheet_name=$datasheetName", "type=thumbnail"]);
-        
+        $annexeUrl = $this->getParameter('annexes_url');
+        $annexes = $this->entrepotApiService->annexe->getAll($datastoreId, null, null, ["datasheet_name=$datasheetName", 'type=thumbnail']);
+
         $thumbnail = null;
-        if (count($annexes) == 1) {
+        if (1 == count($annexes)) {
             $thumbnail = $annexes[0];
-            $thumbnail['url'] = $annexeUrl . '/' . $datastore['technical_name'] . $thumbnail['paths'][0];
+            $thumbnail['url'] = $annexeUrl.'/'.$datastore['technical_name'].$thumbnail['paths'][0];
         }
 
         return [
@@ -137,7 +137,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             'date' => new \DateTime(), // TODO : pour le moment on se sait pas ça correspond à la date de quoi
             'categories' => [],
             'nb_publications' => $nbPublications,
-            'thumbnail' => $thumbnail
+            'thumbnail' => $thumbnail,
         ];
     }
 
@@ -203,11 +203,10 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             }
 
             // TODO : autres données à supprimer
+
             // Suppression des annexes
-            $annexeUrl = $this->getParameter("annexes_url");
-            
             $annexes = $this->entrepotApiService->annexe->getAll($datastoreId, null, null, ["datasheet_name=$datasheetName"]);
-            foreach($annexes as $annexe) {
+            foreach ($annexes as $annexe) {
                 $this->entrepotApiService->annexe->remove($datastoreId, $annexe['_id']);
             }
 
