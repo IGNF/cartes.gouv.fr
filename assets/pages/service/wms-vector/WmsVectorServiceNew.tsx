@@ -127,12 +127,7 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
         resolver: yupResolver(schemas[currentStep]),
         mode: "onChange",
     });
-    const {
-        formState: { errors },
-        getValues: getFormValues,
-        watch,
-        trigger,
-    } = form;
+    const { getValues: getFormValues, watch, trigger } = form;
 
     const selectedTableNamesList: string[] = watch("selected_tables");
     const [selectedTables, setSelectedTables] = useState<StoredDataRelation[]>([]);
@@ -151,20 +146,14 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
     const nextStep = async () => {
         const isStepValid = await trigger(undefined, { shouldFocus: true }); // demande de valider le formulaire
 
-        if (!isStepValid) return;
+        if (!isStepValid) return; // ne fait rien si formulaire invalide
 
+        // formulaire est valide
         if (currentStep < Object.values(STEPS).length) {
+            // on passe à la prochaine étape du formulaire
             setCurrentStep((currentStep) => currentStep + 1);
         } else {
-            // formulaire est valide
-            // TODO : filtrer fichiers de style en fonction des tables gardées
-            // TODO : onSubmit
-
-            const formValues = getFormValues();
-            console.log("// TODO : onSubmit");
-            console.log("formValues", formValues);
-            console.log("errors", errors);
-
+            // on est à la dernière étape du formulaire donc on envoie la sauce
             createServiceMutation.mutate();
         }
     };
@@ -174,13 +163,9 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
             const formValues = getFormValues();
             const formData = createFormData(formValues);
 
-            console.log(formData);
-
             return api.wmsVector.add(datastoreId, vectorDbId, formData);
         },
-        onSuccess(response) {
-            console.log(response);
-
+        onSuccess() {
             if (vectorDbQuery.data?.tags?.datasheet_name) {
                 routes.datastore_datasheet_view({ datastoreId, datasheetName: vectorDbQuery.data?.tags.datasheet_name, activeTab: "services" }).push();
             } else {
