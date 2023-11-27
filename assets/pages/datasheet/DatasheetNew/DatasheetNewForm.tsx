@@ -7,8 +7,7 @@ import { Upload } from "@codegouvfr/react-dsfr/Upload";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useQuery } from "@tanstack/react-query";
 import { format as datefnsFormat } from "date-fns";
-import PropTypes from "prop-types";
-import { useEffect, useRef, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { symToStr } from "tsafe/symToStr";
 import { v4 as uuidv4 } from "uuid";
@@ -33,7 +32,10 @@ const fileExtensions = ["gpkg", "zip"];
 
 const fileUploader = new FileUploader();
 
-const DatasheetNewForm = ({ datastoreId }) => {
+type DatasheetNewFormProps = {
+    datastoreId: string;
+};
+const DatasheetNewForm: FC<DatasheetNewFormProps> = ({ datastoreId }) => {
     let uuid = "";
 
     const schema = yup
@@ -338,10 +340,6 @@ const DatasheetNewForm = ({ datastoreId }) => {
             )}
         </DatastoreLayout>
     );
-};
-
-DatasheetNewForm.propTypes = {
-    datastoreId: PropTypes.string.isRequired,
 };
 
 DatasheetNewForm.displayName = symToStr({ DatasheetNewForm });
