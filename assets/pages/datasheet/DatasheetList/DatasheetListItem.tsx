@@ -12,13 +12,15 @@ type DatasheetListItemProps = {
     datasheet: Datasheet;
 };
 
+const defaultImgUrl = "//www.gouvernement.fr/sites/default/files/static_assets/placeholder.1x1.png";
+
 const DatasheetListItem: FC<DatasheetListItemProps> = ({ datastoreId, datasheet }) => {
     return (
         <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-grid-row--center", "fr-my-1w", "fr-p-2v", "fr-card--grey")}>
             <div className={fr.cx("fr-col")}>
                 <Button linkProps={routes.datastore_datasheet_view({ datastoreId, datasheetName: datasheet.name }).link} priority="tertiary no outline">
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                        <img src="//www.gouvernement.fr/sites/default/files/static_assets/placeholder.1x1.png" width={"64px"} className={fr.cx("fr-mr-1v")} />
+                        <img src={datasheet?.thumbnail?.url ?? defaultImgUrl} width={"64px"} height={"64px"} className={fr.cx("fr-mr-1v")} />
                         <strong className={fr.cx("fr-ml-2w")}>{datasheet.name}</strong>
 
                         {/* catégories thématiques */}

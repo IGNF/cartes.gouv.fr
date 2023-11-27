@@ -6,9 +6,7 @@ const Common = () => {
 
 export default Common;
 
-export const { i18n } = declareComponentKeys<
-    "error" | "add" | "modify" | "send" | "cancel" | "delete" | "being_deleted" | "yes" | "no" | "published" | "not_published"
->()({
+export const { i18n } = declareComponentKeys<"error" | "add" | "modify" | "send" | "cancel" | "delete" | "yes" | "no" | "published" | "not_published">()({
     Common,
 });
 
@@ -19,7 +17,6 @@ export const commonFrTranslations: Translations<"fr">["Common"] = {
     send: "Envoyer",
     cancel: "Annuler",
     delete: "Supprimer",
-    being_deleted: "En cours de suppression",
     yes: "Oui",
     no: "Non",
     published: "Publié",
@@ -33,7 +30,6 @@ export const commonEnTranslations: Translations<"en">["Common"] = {
     send: "Send",
     cancel: "Cancel",
     delete: "Delete",
-    being_deleted: "Being deleted",
     yes: "Yes",
     no: "No",
     published: "Published",

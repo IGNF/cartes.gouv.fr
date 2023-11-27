@@ -34,6 +34,7 @@ export type Datasheet = {
     date: string;
     categories: string[];
     nb_publications: number;
+    thumbnail: AnnexDetailResponseDto & { url: string };
 };
 
 export type DatasheetDetailed = Datasheet & {

@@ -65,8 +65,6 @@ class DatasheetController extends AbstractController implements ApiControllerInt
     #[Route('/{datasheetName}', name: 'get', methods: ['GET'])]
     public function getDetailed(string $datastoreId, string $datasheetName): JsonResponse
     {
-        $datastore = $this->entrepotApiService->datastore->get($datastoreId);
-
         // recherche d'entités API qui représente une fiche de données : upload, stored_data
         $uploadList = $this->entrepotApiService->upload->getAllDetailed($datastoreId, [
             'tags' => [
@@ -99,28 +97,19 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         $storedDataList = array_merge($vectorDbList, $pyramidList);
         $services = $this->getServices($datastoreId, $storedDataList);
 
-        // Recherche des annexes de type 'thumbnail' et ajout de l'url complete
-        $annexeUrl = $this->getParameter("annexe_url");
-        $annexes = $this->entrepotApiService->annexe->getAll($datastoreId, null, null, ["datasheet_name=$datasheetName", "type=thumbnail"]);
-        
-        $thumbnail = null;
-        if (count($annexes) == 1) {
-            $thumbnail = $annexes[0];
-            $thumbnail['url'] = $annexeUrl . '/' . $datastore['technical_name'] . $thumbnail['paths'][0];
-        }
-
         return $this->json([
             ...$data,
             'vector_db_list' => $vectorDbList,
             'pyramid_list' => $pyramidList,
             'upload_list' => $uploadList,
             'service_list' => $services,
-            'thumbnail'=> $thumbnail,
         ]);
     }
 
     private function getBasicInfo(string $datastoreId, string $datasheetName): array
     {
+        $datastore = $this->entrepotApiService->datastore->get($datastoreId);
+
         $nbPublications = 0;
         $configurations = $this->entrepotApiService->configuration->getAll($datastoreId, [
             'tags' => [
@@ -134,11 +123,21 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             }
         }
 
+        $annexeUrl = $this->getParameter("annexe_url");
+        $annexes = $this->entrepotApiService->annexe->getAll($datastoreId, null, null, ["datasheet_name=$datasheetName", "type=thumbnail"]);
+        
+        $thumbnail = null;
+        if (count($annexes) == 1) {
+            $thumbnail = $annexes[0];
+            $thumbnail['url'] = $annexeUrl . '/' . $datastore['technical_name'] . $thumbnail['paths'][0];
+        }
+
         return [
             'name' => $datasheetName,
             'date' => new \DateTime(), // TODO : pour le moment on se sait pas ça correspond à la date de quoi
             'categories' => [],
             'nb_publications' => $nbPublications,
+            'thumbnail' => $thumbnail
         ];
     }
 
@@ -204,6 +203,13 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             }
 
             // TODO : autres données à supprimer
+            // Suppression des annexes
+            $annexeUrl = $this->getParameter("annexe_url");
+            
+            $annexes = $this->entrepotApiService->annexe->getAll($datastoreId, null, null, ["datasheet_name=$datasheetName"]);
+            foreach($annexes as $annexe) {
+                $this->entrepotApiService->annexe->remove($datastoreId, $annexe['_id']);
+            }
 
             return new JsonResponse(null, Response::HTTP_NO_CONTENT);
         } catch (EntrepotApiException $ex) {

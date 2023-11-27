@@ -7,6 +7,7 @@ use App\Services\EntrepotApiService;
 use App\Exception\CartesApiException;
 use App\Exception\EntrepotApiException;
 use App\Constants\EntrepotApi\CommonTags;
+use PHPMD\Renderer\JSONRenderer;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -66,6 +67,21 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
             return new JsonResponse($annexe);
         } catch (EntrepotApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
+    #[Route('/thumbnail_remove/{annexeId}', name: 'thumbnail_remove', methods: ['DELETE'],
+        options: ['expose' => true],
+        condition: 'request.isXmlHttpRequest()')
+    ]
+    public function removeThumbnail(string $datastoreId, string $annexeId) : JsonResponse {
+        try {
+            $this->entrepotApiService->annexe->remove($datastoreId, $annexeId);
+            return new JsonResponse();
+        } catch (EntrepotApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        } catch (\Exception $ex) {
+            throw new CartesApiException($ex->getMessage(), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
