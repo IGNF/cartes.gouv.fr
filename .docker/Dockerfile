@@ -1,7 +1,7 @@
 #----------------------------------------------------------------------
 # Instructions communes aux env dev et prod
 #----------------------------------------------------------------------
-FROM php:8.2-apache as base
+FROM php:8.3-apache as base
 
 RUN rm /etc/apt/preferences.d/no-debian-php
 
