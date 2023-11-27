@@ -4,6 +4,7 @@ import { navItemsEnTranslations } from "../../config/navItems";
 import { contactEnTranslations } from "../../pages/contact/Contact";
 import { AddStyleFormEnTranslations } from "../../components/AddStyleForm/AddStyleForm";
 import { DatasheetViewEnTranslations } from "../../pages/datasheet/DatasheetView/DatasheetView";
+import { sldStyleValidationEnTranslations } from "../../validations/sldStyle";
 
 export const translations: Translations<"en"> = {
     Common: commonEnTranslations,
@@ -11,4 +12,5 @@ export const translations: Translations<"en"> = {
     navItems: navItemsEnTranslations,
     AddStyleForm: AddStyleFormEnTranslations,
     DatasheetView: DatasheetViewEnTranslations,
+    sldStyleValidation: sldStyleValidationEnTranslations,
 };
