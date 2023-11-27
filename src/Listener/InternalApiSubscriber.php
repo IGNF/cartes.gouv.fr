@@ -52,7 +52,6 @@ class InternalApiSubscriber implements EventSubscriberInterface
                 /** @var AccessToken */
                 $accessToken = $session->get(KeycloakToken::SESSION_KEY);
 
-                // TODO préciser que c'est l'API interne
                 if (null == $accessToken
                     || (null != $accessToken && $accessToken->hasExpired())) {
                     throw new CartesApiException('Unauthorized', Response::HTTP_UNAUTHORIZED, ['controller' => ApiControllerInterface::class]);

@@ -6,10 +6,9 @@ class AnnexeApiService extends AbstractEntrepotApiService
 {
     /**
      * @param array<string> $labels
-     * @return array
      */
     public function getAll(string $datastoreId, string $mimeType = null, string $path = null, array $labels = null): array
-    {        
+    {
         $query = [];
         if ($mimeType) {
             $query['mime_type'] = $mimeType;
@@ -26,7 +25,6 @@ class AnnexeApiService extends AbstractEntrepotApiService
 
     public function get(string $datastoreId, string $annexeId): array
     {
-        // TODO : mettre à jour l'url annexe
         $annexesUrl = $this->parameters->get('annexes_url');
         $response = $this->request('GET', "datastores/$datastoreId/annexes/$annexeId");
         $response['paths'][0] = $annexesUrl.$response['paths'][0];

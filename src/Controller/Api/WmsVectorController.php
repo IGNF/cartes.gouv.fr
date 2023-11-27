@@ -19,7 +19,7 @@ use Symfony\Component\Routing\Annotation\Route;
     '/api/datastores/{datastoreId}/stored_data/{storedDataId}/wmsvector',
     name: 'cartesgouvfr_api_wmsvector_',
     options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()' // TODO : à remettre après les tests
+    condition: 'request.isXmlHttpRequest()'
 )]
 class WmsVectorController extends AbstractController implements ApiControllerInterface
 {
