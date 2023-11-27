@@ -10,7 +10,7 @@ parameters:
     iam_client_secret: "%env(resolve:IAM_CLIENT_SECRET)%"
 
     api_entrepot_url: "%env(resolve:API_ENTREPOT_URL)%"
-    annexe_url: "%env(resolve:ANNEXE_URL)%"
+    annexes_url: "%env(resolve:ANNEXES_URL)%"
 
     http_proxy: "%env(resolve:HTTP_PROXY)%"
 
