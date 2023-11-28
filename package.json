@@ -17,7 +17,7 @@
         "geoportal-extensions-openlayers": "^3.3.3",
         "geostyler-sld-parser": "^5.1.0",
         "geostyler-style": "^7.3.1",
-        "i18nifty": "^2.1.1",
+        "i18nifty": "^3.0.0",
         "ol": "6.15.1",
         "postcss-loader": "^7.3.3",
         "react": "^18.2.0",
