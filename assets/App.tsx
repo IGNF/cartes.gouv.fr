@@ -5,10 +5,13 @@ import { UserContextProvider } from "./contexts/UserContext";
 import RouterRenderer from "./router/RouterRenderer";
 import { RouteProvider } from "./router/router";
 import { FC } from "react";
+import { useTranslation } from "./i18n/i18n";
 
 const queryClient = new QueryClient();
 
 const App: FC = () => {
+    useTranslation("navItems");
+
     return (
         <QueryClientProvider client={queryClient}>
             <ReactQueryDevtools initialIsOpen={false} />

@@ -6,7 +6,6 @@ import { FC, PropsWithChildren } from "react";
 import { ConsentBannerAndConsentManagement } from "../../config/consentManagement";
 import { defaultNavItems } from "../../config/navItems";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
-import { useTranslation } from "../../i18n/i18n";
 import Translator from "../../modules/Translator";
 import AppFooter from "./AppFooter";
 import AppHeader, { NavigationProps } from "./AppHeader";
@@ -27,9 +26,7 @@ const AppLayout: FC<PropsWithChildren<AppLayoutProps>> = ({ children, navItems, 
     });
     const infoBannerMsg = document.getElementById("info_banner")?.dataset?.msg ?? undefined;
 
-    const { t } = useTranslation("navItems");
-
-    navItems = navItems ?? defaultNavItems(t);
+    navItems = navItems ?? defaultNavItems();
 
     return (
         <>

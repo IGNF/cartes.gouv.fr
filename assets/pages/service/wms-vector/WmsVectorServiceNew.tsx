@@ -14,7 +14,6 @@ import api from "../../../api";
 import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
 import LoadingText from "../../../components/Utils/LoadingText";
 import Wait from "../../../components/Utils/Wait";
-import { useTranslation } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/RQKeys";
 import Translator from "../../../modules/Translator";
 import { CartesApiException } from "../../../modules/jsonFetch";
@@ -90,12 +89,14 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
 
     const commonValidation = useMemo(() => new CommonSchemasValidation(offeringsQuery.data), [offeringsQuery.data]);
 
-    const { t: tSld } = useTranslation("sldStyleValidation");
-
     // Definition du schema
     const schemas = {};
     schemas[STEPS.TABLES_INFOS] = yup.object({
-        selected_tables: yup.array(yup.string()).min(1, "Veuillez choisir au moins une table").required("Veuillez choisir au moins une table"),
+        selected_tables: yup
+            .array(yup.string().trim())
+            .min(1, "Veuillez choisir au moins une table")
+            .required("Veuillez choisir au moins une table")
+            .strict(true),
     });
     schemas[STEPS.STYLE_FILE] = yup.object({
         style_files: yup.lazy(() => {
@@ -111,7 +112,7 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
                     .test({
                         name: "is-valid-sld",
                         async test(value, ctx) {
-                            return validations.sldStyle.test(table.name, value as FileList, ctx, tSld);
+                            return validations.sldStyle.test(table.name, value as FileList, ctx);
                         },
                     });
             });

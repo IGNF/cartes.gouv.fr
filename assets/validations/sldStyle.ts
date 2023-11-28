@@ -1,12 +1,13 @@
 import SldStyleParser from "geostyler-sld-parser";
 import { declareComponentKeys } from "i18nifty";
-import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
 import { TestContext } from "yup";
 
 import functions from "../functions";
-import { ComponentKey, Translations } from "../i18n/i18n";
+import { Translations, getTranslation } from "../i18n/i18n";
 
-const test = async (tableName: string, value: FileList, ctx: TestContext, tSld: TranslationFunction<"sldStyleValidation", ComponentKey>) => {
+const { t: tSld } = getTranslation("sldStyleValidation");
+
+const test = async (tableName: string, value: FileList, ctx: TestContext) => {
     if (value instanceof FileList && value.length === 0) {
         return ctx.createError({ message: tSld("no_file_provided", { tableName }) });
     }

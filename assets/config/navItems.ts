@@ -1,9 +1,9 @@
-import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
-
-import { ComponentKey, Translations, declareComponentKeys } from "../i18n/i18n";
+import { Translations, declareComponentKeys, getTranslation } from "../i18n/i18n";
 import { routes } from "../router/router";
 
-export const defaultNavItems = (t: TranslationFunction<"navItems", ComponentKey>) => [
+const { t } = getTranslation("navItems");
+
+export const defaultNavItems = () => [
     {
         menuLinks: [
             {
