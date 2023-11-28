@@ -203,8 +203,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             }
 
             // TODO : autres données à supprimer
-
-            // Suppression des annexes
+            // Suppression des annexes            
             $annexes = $this->entrepotApiService->annexe->getAll($datastoreId, null, null, ["datasheet_name=$datasheetName"]);
             foreach ($annexes as $annexe) {
                 $this->entrepotApiService->annexe->remove($datastoreId, $annexe['_id']);

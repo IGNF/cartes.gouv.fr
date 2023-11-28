@@ -110,9 +110,26 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
             form.append("file", upload);
             return api.annexe.addThumbnail(datastoreId, form);
         },
-        onSuccess: () => {
+        onSuccess: (response) => {
             addThumbnailModal.close();
-            queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
+
+            // Mise à jour du contenu de la réponse de datasheetQuery
+            queryClient.setQueryData<DatasheetDetailed>(RQKeys.datastore_datasheet(datastoreId, datasheetName), (datasheet) => {
+                if (datasheet) {
+                    datasheet.thumbnail = response;
+                }
+                return datasheet;
+            });
+
+            // Mise à jour du contenu de la réponse de datasheetListQuery
+            queryClient.setQueryData<Datasheet[]>(RQKeys.datastore_datasheet_list(datastoreId), (datasheetList = []) => {
+                return datasheetList.map((datasheet) => {
+                    if (datasheet.name === datasheetName) {
+                        datasheet.thumbnail = response;
+                    }
+                    return datasheet;
+                });
+            });
         },
         onSettled: () => {
             reset();
@@ -130,7 +147,24 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
         },
         onSuccess: () => {
             addThumbnailModal.close();
-            queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
+
+            // mise à jour du contenu de la réponse de datasheetQuery
+            queryClient.setQueryData<DatasheetDetailed>(RQKeys.datastore_datasheet(datastoreId, datasheetName), (datasheet) => {
+                if (datasheet) {
+                    datasheet.thumbnail = undefined;
+                }
+                return datasheet;
+            });
+
+            // mise à jour du contenu de la réponse de datasheetListQuery
+            queryClient.setQueryData<Datasheet[]>(RQKeys.datastore_datasheet_list(datastoreId), (datasheetList = []) => {
+                return datasheetList.map((datasheet) => {
+                    if (datasheet.name === datasheetName) {
+                        datasheet.thumbnail = undefined;
+                    }
+                    return datasheet;
+                });
+            });
         },
         onSettled: () => {
             reset();
@@ -250,7 +284,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                                 onClick={handleChooseThumbnail}
                                 nativeButtonProps={{ "aria-label": t("button.title"), title: t("button.title") }}
                             >
-                                <img src={thumbnailUrl === "" ? defaultImgUrl : thumbnailUrl} width={"128px"} />
+                                <img src={thumbnailUrl === "" ? defaultImgUrl : thumbnailUrl} width="128px" height="128px" />
                             </Button>
                         </div>
                         <div className={fr.cx("fr-col")}>

@@ -34,7 +34,7 @@ export type Datasheet = {
     date: string;
     categories: string[];
     nb_publications: number;
-    thumbnail: AnnexDetailResponseDto & { url: string };
+    thumbnail?: AnnexDetailResponseDto & { url: string };
 };
 
 export type DatasheetDetailed = Datasheet & {
@@ -42,7 +42,6 @@ export type DatasheetDetailed = Datasheet & {
     pyramid_list: Pyramid[] | undefined;
     upload_list: Upload[] | undefined;
     service_list: Service[] | undefined;
-    thumbnail: AnnexDetailResponseDto & { url: string };
 };
 
 /** stored_data (donnée stockée) */
