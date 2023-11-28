@@ -95,7 +95,7 @@ datastore_creation_request:
         date: "Date d'envoi"
         datastore_name: "Nom de l'espace de travail"
         datastore_technical_name: "Nom technique de l'espace de travail"
-        is_member: "L'utilisateur est une simple membre des communautés suivantes :"
+        is_member: "L'utilisateur est un simple membre des communautés suivantes :"
         is_supervisor: "L'utilisateur est superviseur des communautés suivantes :"
     email_acknowledgement:
         heading: "Votre demande de création d'un espace de travail a été envoyée à l'IGN et une réponse vous sera apportée dans les meilleurs délais."
