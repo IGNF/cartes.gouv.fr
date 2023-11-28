@@ -1,10 +1,10 @@
-import { JSX, Suspense, lazy } from "react";
+import { FC, JSX, Suspense, lazy } from "react";
 
 import AppLayout from "../components/Layout/AppLayout";
 import LoadingText from "../components/Utils/LoadingText";
 import SymfonyRouting from "../modules/Routing";
 import Home from "../pages/Home";
-import Redirect from "../pages/Redirect";
+import RedirectToLogin from "../pages/RedirectToLogin";
 import PageNotFound from "../pages/error/PageNotFound";
 import { useAuthStore } from "../stores/AuthStore";
 import { knownRoutes, publicRoutes, useRoute } from "./router";
@@ -45,7 +45,7 @@ const PublishTmsServiceNew = lazy(() => import("../pages/service/tms/PublishNew"
 
 const ServiceView = lazy(() => import("../pages/service/view/ServiceView"));
 
-function RouterRenderer() {
+const RouterRenderer: FC = () => {
     const route = useRoute();
     const { user } = useAuthStore();
 
@@ -59,7 +59,7 @@ function RouterRenderer() {
         if (user === null) {
             // window.location.href = SymfonyRouting.generate("cartesgouvfr_security_login");
             window.location.assign(SymfonyRouting.generate("cartesgouvfr_security_login"));
-            return <Redirect />;
+            return <RedirectToLogin />;
         }
     }
 
@@ -168,6 +168,6 @@ function RouterRenderer() {
             {content}
         </Suspense>
     );
-}
+};
 
 export default RouterRenderer;

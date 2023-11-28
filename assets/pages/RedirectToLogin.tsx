@@ -1,6 +1,6 @@
 import AppLayout from "../components/Layout/AppLayout";
 
-const Redirect = () => {
+const RedirectToLogin = () => {
     return (
         <AppLayout documentTitle="Redirection vers la page de connexion">
             <h1>Redirection vers la page de connexion...</h1>
@@ -8,4 +8,4 @@ const Redirect = () => {
     );
 };
 
-export default Redirect;
+export default RedirectToLogin;
