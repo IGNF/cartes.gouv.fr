@@ -1,10 +1,10 @@
 import AppLayout from "../../components/Layout/AppLayout";
 import BtnBackToHome from "../../components/Utils/BtnBackToHome";
 import functions from "../../functions";
-import useUser from "../../hooks/useUser";
+import { useAuthStore } from "../../stores/AuthStore";
 
 const Me = () => {
-    const { user } = useUser();
+    const { user } = useAuthStore();
 
     return (
         <AppLayout documentTitle="Mon compte">

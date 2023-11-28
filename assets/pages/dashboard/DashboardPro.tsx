@@ -5,14 +5,14 @@ import AppLayout from "../../components/Layout/AppLayout";
 import LoadingText from "../../components/Utils/LoadingText";
 import { datastoreNavItems } from "../../config/datastoreNavItems";
 import { useDatastoreList } from "../../hooks/useDatastoreList";
-import useUser from "../../hooks/useUser";
 import Translator from "../../modules/Translator";
 import { routes } from "../../router/router";
+import { useAuthStore } from "../../stores/AuthStore";
 
 const DashboardPro = () => {
     const datastoreListQuery = useDatastoreList();
     const navItems = datastoreNavItems();
-    const { user } = useUser();
+    const { user } = useAuthStore();
 
     return (
         <AppLayout navItems={navItems} documentTitle="Tableau de bord professionnel">

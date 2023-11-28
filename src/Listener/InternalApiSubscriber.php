@@ -5,7 +5,9 @@ namespace App\Listener;
 use App\Controller\Api\ApiControllerInterface;
 use App\Exception\CartesApiException;
 use App\Security\KeycloakToken;
+use App\Security\User;
 use League\OAuth2\Client\Token\AccessToken;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,12 +16,13 @@ use Symfony\Component\HttpKernel\Event\ControllerEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
- * @see https://symfony.com/doc/current/event_dispatcher.html#event-dispatcher-before-after-filters
+ * @see https://symfony.com/doc/current/event_dispatcher.html#before-filters-with-the-kernel-controller-event
  */
 class InternalApiSubscriber implements EventSubscriberInterface
 {
     public function __construct(
-        private ParameterBagInterface $parameters
+        private ParameterBagInterface $parameters,
+        private Security $security,
     ) {
     }
 
@@ -37,7 +40,7 @@ class InternalApiSubscriber implements EventSubscriberInterface
     {
         $controller = $event->getController();
 
-        // quand une classe controller définit plusieurs méthodes, ça retourne un array du genre -> [$controllerInstance, 'methodName']
+        // quand une classe controller définit plusieurs méthodes, ça retourne un array, par exemple -> [$controllerInstance, 'methodName']
         // seule la classe controller nous intéresse
         if (is_array($controller)) {
             $controller = $controller[0];
@@ -52,9 +55,13 @@ class InternalApiSubscriber implements EventSubscriberInterface
                 /** @var AccessToken */
                 $accessToken = $session->get(KeycloakToken::SESSION_KEY);
 
-                if (null == $accessToken
+                $user = $this->security->getUser();
+
+                if (null === $user
+                    || !($user instanceof User)
+                    || null == $accessToken
                     || (null != $accessToken && $accessToken->hasExpired())) {
-                    throw new CartesApiException('Unauthorized', Response::HTTP_UNAUTHORIZED, ['controller' => ApiControllerInterface::class]);
+                    throw new CartesApiException('Unauthorized', Response::HTTP_UNAUTHORIZED, ['controller' => ApiControllerInterface::class, 'session_expired' => true]);
                 }
             }
         }

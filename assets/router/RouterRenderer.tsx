@@ -2,11 +2,11 @@ import { JSX, Suspense, lazy } from "react";
 
 import AppLayout from "../components/Layout/AppLayout";
 import LoadingText from "../components/Utils/LoadingText";
-import useUser from "../hooks/useUser";
 import SymfonyRouting from "../modules/Routing";
 import Home from "../pages/Home";
 import Redirect from "../pages/Redirect";
 import PageNotFound from "../pages/error/PageNotFound";
+import { useAuthStore } from "../stores/AuthStore";
 import { knownRoutes, publicRoutes, useRoute } from "./router";
 
 const About = lazy(() => import("../pages/About"));
@@ -47,7 +47,7 @@ const ServiceView = lazy(() => import("../pages/service/view/ServiceView"));
 
 function RouterRenderer() {
     const route = useRoute();
-    const { user } = useUser();
+    const { user } = useAuthStore();
 
     // vérification si la route demandée est bien connue/enregistrée
     if (route.name === false || !knownRoutes.includes(route.name)) {

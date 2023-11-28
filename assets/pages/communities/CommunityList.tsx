@@ -12,12 +12,12 @@ import { datastoreNavItems } from "../../config/datastoreNavItems";
 import AppLayout from "../../components/Layout/AppLayout";
 import { routes, useRoute } from "../../router/router";
 import { type CommunitiesReponse } from "../../api/catalogs";
-import useUser from "../../hooks/useUser";
 import { createPortal } from "react-dom";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { CommunityListResponseDto } from "../../types/entrepot";
 import Input from "@codegouvfr/react-dsfr/Input";
 import Wait from "../../components/Utils/Wait";
+import { useAuthStore } from "../../stores/AuthStore";
 
 const explainModal = createModal({
     id: "explain-modal",
@@ -25,7 +25,7 @@ const explainModal = createModal({
 });
 
 const CommunityList: FC = () => {
-    const { user } = useUser();
+    const { user } = useAuthStore();
     const route = useRoute();
 
     const refMsg = useRef<HTMLTextAreaElement>(null);

@@ -7,6 +7,7 @@ import { ConsentBannerAndConsentManagement } from "../../config/consentManagemen
 import { defaultNavItems } from "../../config/navItems";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import Translator from "../../modules/Translator";
+import SessionExpiredAlert from "../Utils/SessionExpiredAlert";
 import AppFooter from "./AppFooter";
 import AppHeader, { NavigationProps } from "./AppHeader";
 
@@ -47,7 +48,10 @@ const AppLayout: FC<PropsWithChildren<AppLayoutProps>> = ({ children, navItems, 
                 {/* doit être le premier élément atteignable après le lien d'évitement (Accessibilité) : https://www.systeme-de-design.gouv.fr/elements-d-interface/composants/bandeau-d-information-importante */}
                 {infoBannerMsg && <Notice title={infoBannerMsg} isClosable={true} />}
 
-                <div className={fr.cx("fr-container", "fr-py-2w")}>{children}</div>
+                <div className={fr.cx("fr-container", "fr-py-2w")}>
+                    <SessionExpiredAlert />
+                    {children}
+                </div>
             </main>
             <AppFooter />
         </>

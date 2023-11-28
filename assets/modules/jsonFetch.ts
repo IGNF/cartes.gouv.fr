@@ -1,3 +1,5 @@
+import { useAuthStore } from "../stores/AuthStore";
+
 /** doit avoir la même structure que l'erreur renvoyée par CartesApiExceptionSubscriber de Symfony */
 export type CartesApiException = {
     code: number;
@@ -46,8 +48,12 @@ export async function jsonFetch<T>(
                 const data = await response.json().catch(() => ({}));
 
                 if (response.ok) {
+                    useAuthStore.getState().setSessionExpired(false);
                     resolve(data);
                 } else {
+                    if (hasSessionExpired(data)) {
+                        useAuthStore.getState().setSessionExpired(true);
+                    }
                     reject(data);
                 }
             } catch (error) {
@@ -60,3 +66,7 @@ export async function jsonFetch<T>(
         })();
     });
 }
+
+const hasSessionExpired = (error) => {
+    return error.code === 401 && error?.details?.controller === "App\\Controller\\Api\\ApiControllerInterface" && error?.details?.session_expired === true;
+};

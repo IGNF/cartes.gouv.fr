@@ -1,11 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { FC } from "react";
+
 import ErrorBoundary from "./components/Utils/ErrorBoundary";
-import { UserContextProvider } from "./contexts/UserContext";
+import { useTranslation } from "./i18n/i18n";
 import RouterRenderer from "./router/RouterRenderer";
 import { RouteProvider } from "./router/router";
-import { FC } from "react";
-import { useTranslation } from "./i18n/i18n";
 
 const queryClient = new QueryClient();
 
@@ -15,13 +15,12 @@ const App: FC = () => {
     return (
         <QueryClientProvider client={queryClient}>
             <ReactQueryDevtools initialIsOpen={false} />
-            <UserContextProvider>
-                <RouteProvider>
-                    <ErrorBoundary>
-                        <RouterRenderer />
-                    </ErrorBoundary>
-                </RouteProvider>
-            </UserContextProvider>
+
+            <RouteProvider>
+                <ErrorBoundary>
+                    <RouterRenderer />
+                </ErrorBoundary>
+            </RouteProvider>
         </QueryClientProvider>
     );
 };

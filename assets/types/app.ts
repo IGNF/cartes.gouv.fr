@@ -23,7 +23,20 @@ import {
     CheckingExecutionDetailResponseDto,
     ProcessingExecutionOutputStoredDataDto,
     AnnexDetailResponseDto,
+    CommunityMemberDto,
 } from "./entrepot";
+
+/** user */
+export type CartesUser = {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    roles: string[];
+    communitiesMember: CommunityMemberDto[];
+    accountCreationDate: string;
+    lastApiCallDate: string;
+};
 
 /** datastore */
 export type Datastore = DatastoreDetailResponseDto;

@@ -2,10 +2,10 @@ import Header, { HeaderProps } from "@codegouvfr/react-dsfr/Header";
 import { MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation/MainNavigation";
 import { FC, ReactNode } from "react";
 
-import useUser from "../../hooks/useUser";
 // import { useLang } from "../../i18n/i18n";
 import SymfonyRouting from "../../modules/Routing";
 import { routes } from "../../router/router";
+import { useAuthStore } from "../../stores/AuthStore";
 // import LanguageSelector from "../Utils/LanguageSelector";
 
 import "../../sass/components/header.scss";
@@ -16,7 +16,7 @@ type AppHeaderProps = {
     navItems?: NavigationProps;
 };
 const AppHeader: FC<AppHeaderProps> = ({ navItems = [] }) => {
-    const { user } = useUser();
+    const { user } = useAuthStore();
     // const { lang, setLang } = useLang();
 
     const quickAccessItems: (HeaderProps.QuickAccessItem | ReactNode)[] = [];

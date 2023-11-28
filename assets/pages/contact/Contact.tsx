@@ -12,11 +12,11 @@ import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
 
 import AppLayout from "../../components/Layout/AppLayout";
 import Wait from "../../components/Utils/Wait";
-import useUser from "../../hooks/useUser";
 import { declareComponentKeys, useTranslation, type Translations, ComponentKey } from "../../i18n/i18n";
 import SymfonyRouting from "../../modules/Routing";
 import { jsonFetch } from "../../modules/jsonFetch";
 import { routes } from "../../router/router";
+import { useAuthStore } from "../../stores/AuthStore";
 import { regex } from "../../utils";
 
 import "../../sass/components/spinner.scss";
@@ -41,7 +41,7 @@ const schema = (t: TranslationFunction<"Contact", ComponentKey>) =>
 
 const Contact = () => {
     const { t } = useTranslation({ Contact });
-    const { user } = useUser();
+    const { user } = useAuthStore();
 
     const [isSending, setIsSending] = useState(false);
     const [error, setError] = useState(null);
