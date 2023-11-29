@@ -78,21 +78,7 @@ const AdditionalInfo: FC<AdditionalInfoProps> = ({ storedData, datastoreId, visi
     return (
         <div className={fr.cx(!visible && "fr-hidden")}>
             <h3>{Translator.trans("service.wms_vector.new.step_additional_information.metadata_information_title")}</h3>
-
             <p>{Translator.trans("mandatory_fields")}</p>
-
-            <Input
-                label={Translator.trans("service.wms_vector.new.step_additional_information.projection")}
-                hintText={Translator.trans("service.wms_vector.new.step_additional_information.hint_projection")}
-                state={errors.projection ? "error" : "default"}
-                stateRelatedMessage={errors?.projection?.message?.toString()}
-                nativeInputProps={{
-                    ...register("projection"),
-                    readOnly: true,
-                    defaultValue: projUrl,
-                }}
-            />
-
             <Controller
                 control={control}
                 name="languages"

@@ -386,7 +386,7 @@ pyramid_vector:
         generate_sample: "Générer l'échantillon"
 
 metadatas:
-    drag_and_drop_file: "Glissez-déposez votre fichier de métadonnées ici"
+    drag_and_drop_file: "Glissez-déposez votre fichier de métadonnées ici (optionnel)"
     used_format: "Formats de fichiers autorisés : .xml"
 
     technical_name_error: "Le nom technique est obligatoire"

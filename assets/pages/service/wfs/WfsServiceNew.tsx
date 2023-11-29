@@ -122,11 +122,7 @@ const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
 
     const selectedTables = watch("selected_tables");
 
-    // useEffect(() => {
-    //     // console.log(getFormValues("table_infos"));
-    //     console.log(selectedTables);
-    // }, [selectedTables, getFormValues]);
-
+    // Ajout du nom natif et trim sur les mots cles
     const format = (table_infos: Record<string, TableInfos>) => {
         const tInfos: object[] = [];
         for (const [name, infos] of Object.entries(table_infos)) {
@@ -151,7 +147,12 @@ const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
 
         setIsSubmitting(true);
 
-        const values = { ...getFormValues() };
+        // Nettoyage => trim sur toutes les chaines
+        const values = JSON.parse(
+            JSON.stringify(getFormValues(), (key, value) => {
+                return typeof value === "string" ? value.trim() : value;
+            })
+        );
         values.table_infos = format(values.table_infos);
 
         api.wfs
@@ -235,7 +236,7 @@ const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
                                 iconId: "fr-icon-arrow-left-fill",
                                 priority: "tertiary",
                                 onClick: previousStep,
-                                disabled: currentStep === STEPS.METADATAS_UPLOAD,
+                                disabled: currentStep === STEPS.TABLES_INFOS,
                             },
                             {
                                 children:

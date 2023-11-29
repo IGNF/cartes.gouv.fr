@@ -17,6 +17,7 @@ export const languagesDisplayNames: Record<Language, string> = {
 export type Language = (typeof languages)[number];
 export type ComponentKey =
     | typeof import("../i18n/Common").i18n
+    | typeof import("../pages/service/metadatas/metadatas-validation-tr").i18n
     | typeof import("../pages/contact/Contact").i18n
     | typeof import("../config/navItems").i18n
     | typeof import("../components/AddStyleForm/AddStyleForm").i18n

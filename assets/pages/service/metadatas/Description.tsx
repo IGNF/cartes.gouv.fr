@@ -156,7 +156,6 @@ const Description: FC<DescriptionProps> = ({ storedData, endpointType, visible, 
             <h3>{Translator.trans("service.tms.new.step_description.time_reference_title")}</h3>
             <Input
                 label={Translator.trans("service.tms.new.step_description.creation_date")}
-                hintText={Translator.trans("service.tms.new.step_description.hint_creation_date")}
                 state={errors.creation_date ? "error" : "default"}
                 stateRelatedMessage={errors?.creation_date?.message?.toString()}
                 nativeInputProps={{
