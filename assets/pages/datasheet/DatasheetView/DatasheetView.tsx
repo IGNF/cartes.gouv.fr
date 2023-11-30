@@ -30,7 +30,7 @@ import { AnnexDetailResponseDto } from "../../../types/entrepot";
 import DatasetListTab from "./DatasetListTab/DatasetListTab";
 import ServicesListTab from "./ServiceListTab/ServicesListTab";
 
-import "../../../sass/components/fr-btn--hover.scss";
+import "../../../sass/components/buttons.scss";
 import "../../../sass/components/spinner.scss";
 
 const deleteDataConfirmModal = createModal({
@@ -290,16 +290,17 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                                     onMouseOver: () => setThumbnailAddBtnHover(true),
                                     onMouseOut: () => setThumbnailAddBtnHover(false),
                                 }}
-                                className="fr-btn--hover"
+                                className="frx-btn--hover"
                             >
                                 <img
-                                    className={thumbnailAddBtnHover ? "fr-btn--transparent fr-img--transparent-transition" : ""}
+                                    className={thumbnailAddBtnHover ? "frx-btn--transparent fr-img--transparent-transition" : ""}
+                                    loading="lazy"
                                     src={thumbnailUrl === "" ? defaultImgUrl : thumbnailUrl}
                                     width="128px"
                                     height="128px"
                                 />
                                 {thumbnailAddBtnHover && (
-                                    <div className="fr-btn--hover-icon">
+                                    <div className="frx-btn--hover-icon">
                                         <span className={fr.cx("fr-icon-edit-line")} />
                                     </div>
                                 )}
