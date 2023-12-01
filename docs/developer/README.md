@@ -4,6 +4,7 @@
 -   [Implémentation et exécution des tests](test.md)
 -   [Internationalisation](i18n.md)
 -   [Explication des workflows](workflows.md)
+-   [Utilisation de l'API Entrepôt](./entrepot/README.md)
 
 ## Commandes utiles
 

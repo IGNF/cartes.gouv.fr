@@ -3,16 +3,11 @@ import SymfonyRouting from "../modules/Routing";
 import { jsonFetch } from "../modules/jsonFetch";
 import { CommunityListResponseDto } from "../types/entrepot";
 
-export type CommunitiesReponse = {
-    communities: CommunityListResponseDto[];
-    numPages: number;
-};
-
-const getPublicCommunities = (page: number, limit: number = 10) => {
+const getAllPublicCommunities = () => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_catalogs_communities");
-    return jsonFetch<CommunitiesReponse>(`${url}?page=${page}&limit=${limit}`);
+    return jsonFetch<CommunityListResponseDto[]>(url);
 };
 
-const catalogs = { getPublicCommunities };
+const catalogs = { getAllPublicCommunities };
 
 export default catalogs;

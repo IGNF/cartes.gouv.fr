@@ -5,32 +5,33 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { ModalProps, createModal } from "@codegouvfr/react-dsfr/Modal";
 import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
+import { Upload } from "@codegouvfr/react-dsfr/Upload";
+import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
 import { FC, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { useForm } from "react-hook-form";
 import { symToStr } from "tsafe/symToStr";
 import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers/yup";
 
 import api from "../../../api";
 import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
 import LoadingText from "../../../components/Utils/LoadingText";
 import Wait from "../../../components/Utils/Wait";
+import path from "../../../functions/path";
+import Common from "../../../i18n/Common";
+import { ComponentKey, Translations, declareComponentKeys, useTranslation } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/RQKeys";
 import { type CartesApiException } from "../../../modules/jsonFetch";
 import { routes, useRoute } from "../../../router/router";
 import { Datasheet, type DatasheetDetailed } from "../../../types/app";
+import { AnnexDetailResponseDto } from "../../../types/entrepot";
 import DatasetListTab from "./DatasetListTab/DatasetListTab";
 import ServicesListTab from "./ServiceListTab/ServicesListTab";
-import path from "../../../functions/path";
 
+import "../../../sass/components/buttons.scss";
 import "../../../sass/components/spinner.scss";
-import { Upload } from "@codegouvfr/react-dsfr/Upload";
-import { useForm } from "react-hook-form";
-import { AnnexDetailResponseDto } from "../../../types/entrepot";
-import Common from "../../../i18n/Common";
-import { ComponentKey, Translations, declareComponentKeys, useTranslation } from "../../../i18n/i18n";
-import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
 
 const deleteDataConfirmModal = createModal({
     id: "delete-data-confirm-modal",
@@ -87,6 +88,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
 
     // Boite modale, gestion de l'image
     const [modalImageUrl, setModalImageUrl] = useState<string>("");
+    const [thumbnailAddBtnHover, setThumbnailAddBtnHover] = useState(false);
 
     const route = useRoute();
     const queryClient = useQueryClient();
@@ -174,8 +176,8 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
     const datasheetQuery = useQuery<DatasheetDetailed, CartesApiException>({
         queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName),
         queryFn: ({ signal }) => api.datasheet.get(datastoreId, datasheetName, { signal }),
-        staleTime: 20000,
-        refetchInterval: 20000,
+        // staleTime: 20000,
+        // refetchInterval: 20000,
         retry: false,
         enabled: !datasheetDeleteMutation.isPending,
     });
@@ -282,9 +284,26 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                             <Button
                                 priority="tertiary no outline"
                                 onClick={handleChooseThumbnail}
-                                nativeButtonProps={{ "aria-label": t("button.title"), title: t("button.title") }}
+                                nativeButtonProps={{
+                                    "aria-label": t("button.title"),
+                                    title: t("button.title"),
+                                    onMouseOver: () => setThumbnailAddBtnHover(true),
+                                    onMouseOut: () => setThumbnailAddBtnHover(false),
+                                }}
+                                className="frx-btn--hover"
                             >
-                                <img src={thumbnailUrl === "" ? defaultImgUrl : thumbnailUrl} width="128px" height="128px" />
+                                <img
+                                    className={thumbnailAddBtnHover ? "frx-btn--transparent fr-img--transparent-transition" : ""}
+                                    loading="lazy"
+                                    src={thumbnailUrl === "" ? defaultImgUrl : thumbnailUrl}
+                                    width="128px"
+                                    height="128px"
+                                />
+                                {thumbnailAddBtnHover && (
+                                    <div className="frx-btn--hover-icon">
+                                        <span className={fr.cx("fr-icon-edit-line")} />
+                                    </div>
+                                )}
                             </Button>
                         </div>
                         <div className={fr.cx("fr-col")}>

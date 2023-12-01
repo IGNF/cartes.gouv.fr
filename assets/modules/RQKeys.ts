@@ -18,6 +18,8 @@ const RQKeys = {
 
     datastore_offering_list: (datastoreId: string): string[] => ["datastore", datastoreId, "offering"],
     datastore_offering: (datastoreId: string, offeringId: string): string[] => ["datastore", datastoreId, "offering", offeringId],
+
+    catalogs_communities: (): string[] => ["catalogs", "communities"],
 };
 
 export default RQKeys;

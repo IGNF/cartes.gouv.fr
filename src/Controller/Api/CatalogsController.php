@@ -7,8 +7,6 @@ use App\Exception\EntrepotApiException;
 use App\Services\EntrepotApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route(
@@ -25,19 +23,10 @@ class CatalogsController extends AbstractController implements ApiControllerInte
     }
 
     #[Route('/communities', name: 'communities', methods: ['GET'])]
-    public function communities(Request $request): JsonResponse
+    public function communities(): JsonResponse
     {
-        $params = ['page' => 1, 'limit' => 10];
         try {
-            $queryParams = [];
-            foreach ($params as $name => $defValue) {
-                $filtered = filter_var($request->get($name, $defValue), FILTER_VALIDATE_INT);
-                if (false === $filtered) {
-                    throw new \Exception("Le paramêtre $name n\'est pas valide", Response::HTTP_BAD_REQUEST);
-                }
-                $queryParams[$name] = $filtered;
-            }
-            $response = $this->entrepotApiService->catalogs->getPublicCommunities($queryParams);
+            $response = $this->entrepotApiService->catalogs->getAllPublicCommunities();
 
             return $this->json($response);
         } catch (EntrepotApiException $ex) {

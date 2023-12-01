@@ -1,0 +1,26 @@
+.frx-btn--hover {
+    position: relative;
+    // padding: 0;
+}
+
+.frx-btn--hover-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.frx-btn--transparent {
+    opacity: 0.7;
+}
+
+.fr-img--transparent-transition {
+    transition: opacity 0.3s ease;
+}
