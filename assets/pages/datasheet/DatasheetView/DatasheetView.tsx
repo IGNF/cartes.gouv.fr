@@ -105,7 +105,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
     });
 
     // Ajout/modification d'une vignette
-    const thumbnailMutation = useMutation<AnnexDetailResponseDto & { url: string }, CartesApiException>({
+    const addThumbnailMutation = useMutation<AnnexDetailResponseDto & { url: string }, CartesApiException>({
         mutationFn: () => {
             const form = new FormData();
             form.append("datasheetName", datasheetName);
@@ -217,7 +217,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
     const onSubmit = async () => {
         if (upload) {
             // Ajout dans les annexes
-            thumbnailMutation.mutate();
+            addThumbnailMutation.mutate();
         }
     };
 
@@ -227,7 +227,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
             children: tCommon("cancel"),
             onClick: () => {
                 reset();
-                thumbnailMutation.reset();
+                addThumbnailMutation.reset();
             },
             doClosesModal: true,
             priority: "secondary",
@@ -379,12 +379,12 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
             <>
                 {createPortal(
                     <addThumbnailModal.Component title={t("thumbnail_modal.title")} buttons={thumbnailModalButtons}>
-                        {thumbnailMutation.isError && (
+                        {addThumbnailMutation.isError && (
                             <Alert
                                 severity="error"
                                 closable
                                 title={tCommon("error")}
-                                description={thumbnailMutation.error.message}
+                                description={addThumbnailMutation.error.message}
                                 className={fr.cx("fr-my-3w")}
                             />
                         )}
@@ -414,7 +414,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                                 <img src={modalImageUrl === "" ? defaultImgUrl : modalImageUrl} width="128px" />
                             </div>
                         </div>
-                        {thumbnailMutation.isPending && (
+                        {addThumbnailMutation.isPending && (
                             <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
                                 <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " icons-spin"} />
                                 <h6 className={fr.cx("fr-m-0")}>{t("thumbnail_modal.action_being", { action: action })}</h6>
@@ -440,7 +440,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                             },
                             {
                                 children: tCommon("yes"),
-                                onClick: () => thumbnailMutation.mutate(),
+                                onClick: () => datasheetDeleteMutation.mutate(),
                                 doClosesModal: false,
                                 priority: "primary",
                             },
