@@ -18,9 +18,23 @@ import "geoportal-extensions-openlayers/dist/GpPluginOpenLayers.css";
 import "../../sass/components/map-view.scss";
 import "../../sass/components/ol.scss";
 import TMSService from "../../modules/WebServices/TMSService";
+import { Coordinate } from "ol/coordinate";
+import MapEvent from "ol/MapEvent";
 
 type RMapProps = {
     service: Service;
+};
+
+type ContextType = {
+    firstRender: boolean;
+    center: Coordinate;
+    zoom: number;
+};
+
+const context: ContextType = {
+    firstRender: true,
+    center: fromLonLat(olDefaults.center),
+    zoom: olDefaults.zoom,
 };
 
 const RMap: FC<RMapProps> = ({ service }) => {
@@ -81,11 +95,15 @@ const RMap: FC<RMapProps> = ({ service }) => {
             mapRef.current = new Map({
                 view: new View({
                     projection: olDefaults.projection,
-                    center: fromLonLat(olDefaults.center),
-                    zoom: olDefaults.zoom,
+                    center: context.center,
+                    zoom: context.zoom,
                 }),
                 interactions: defaultInteractions(),
                 controls: controls,
+            });
+            mapRef.current.on("moveend", (evt: MapEvent) => {
+                context.center = evt.map.getView().getCenter() ?? fromLonLat(olDefaults.center);
+                context.zoom = evt.map.getView().getZoom() ?? olDefaults.zoom;
             });
         }
         mapRef.current.setTarget(mapTargetRef.current || "");
@@ -155,8 +173,11 @@ const RMap: FC<RMapProps> = ({ service }) => {
                         });
                         getControl("GetFeatureInfo")?.setLayers(gfiLayers);
                     }
-                    if (extent) {
+
+                    // On zoom sur l'extent de la couche au premier rendu
+                    if (extent && context.firstRender) {
                         mapRef.current?.getView().fit(extent);
+                        context.firstRender = false;
                     }
                 })
                 .catch((err) => {
