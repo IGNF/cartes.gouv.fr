@@ -21,7 +21,6 @@ export type ComponentKey =
     | typeof import("../pages/contact/Contact").i18n
     | typeof import("../config/navItems").i18n
     | typeof import("../config/datastoreNavItems").i18n
-    | typeof import("../components/AddStyleForm/AddStyleForm").i18n
     | typeof import("../pages/datasheet/DatasheetView/DatasheetView").i18n
     | typeof import("../validations/sldStyle").i18n;
 

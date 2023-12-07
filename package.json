@@ -15,6 +15,7 @@
         "date-fns": "^2.30.0",
         "dotenv": "^16.3.1",
         "geoportal-extensions-openlayers": "^3.3.3",
+        "geostyler-qgis-parser": "^2.0.0",
         "geostyler-sld-parser": "^5.1.0",
         "geostyler-style": "^7.3.1",
         "i18nifty": "^3.0.0",

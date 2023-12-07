@@ -1,4 +1,4 @@
-import { FC, useEffect, useRef } from "react";
+import { FC, useEffect, useMemo, useRef } from "react";
 
 import Map from "ol/Map";
 import View from "ol/View";
@@ -44,12 +44,16 @@ const RMap: FC<RMapProps> = ({ service }) => {
     const { data: capabilities } = useCapabilities();
 
     // Extent dans la configuration
-    let extent;
-    const bbox = (service.configuration.type_infos as TypeInfosWithBbox)?.bbox;
-    if (bbox) {
-        extent = createOrUpdate(bbox.west, bbox.south, bbox.east, bbox.north);
-        extent = transformExtent(extent, "EPSG:4326", olDefaults.projection);
-    }
+    const extent = useMemo(() => {
+        const bbox = (service.configuration.type_infos as TypeInfosWithBbox)?.bbox;
+        let extent;
+
+        if (bbox) {
+            extent = createOrUpdate(bbox.west, bbox.south, bbox.east, bbox.north);
+            extent = transformExtent(extent, "EPSG:4326", olDefaults.projection);
+        }
+        return extent;
+    }, [service.configuration.type_infos]);
 
     const gfinfo = ["WFS", "WMTS-TMS"].includes(service.type);
 

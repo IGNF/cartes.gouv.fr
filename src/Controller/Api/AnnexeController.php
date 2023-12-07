@@ -140,7 +140,7 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
                 $this->entrepotApiService->annexe->add($datastoreId, $filePath, [$path], [$label]);
             }
 
-            return new JsonResponse("C'est la fête");
+            return new JsonResponse("C'est la fête");   // TODO
         } catch (EntrepotApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         } catch (\Exception $ex) {

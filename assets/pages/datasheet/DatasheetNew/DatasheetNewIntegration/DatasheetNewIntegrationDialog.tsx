@@ -118,7 +118,7 @@ const DatasheetNewIntegrationDialog: FC<DatasheetNewIntegrationDialogProps> = ({
                 statusText = "Succès";
                 break;
             case "failed":
-                statusText = "Echèc";
+                statusText = "Echec";
                 break;
             case "waiting":
                 statusText = "En attente";

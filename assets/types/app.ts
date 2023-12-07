@@ -145,3 +145,15 @@ export type StoredDataReport = {
         },
     ];
 };
+
+// Tag pour les styles
+export type TagLayer = {
+    name?: string;
+    annexe_id: string;
+};
+
+export type TagStyle = {
+    name: string;
+    current?: boolean;
+    layers: TagLayer[];
+};

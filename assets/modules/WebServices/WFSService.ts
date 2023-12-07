@@ -6,7 +6,7 @@ import { bbox as bboxStrategy } from "ol/loadingstrategy";
 import { transformExtent } from "ol/proj";
 import VectorSource from "ol/source/Vector";
 import { Service } from "../../types/app";
-import getRequestInfo from "./ServiceUtils";
+import ServiceUtils from "./ServiceUtils";
 import olDefaults from "../../data/ol-defaults.json";
 
 type LayerInfo = {
@@ -55,7 +55,7 @@ export default class WFSService {
         const layers: VectorLayer<VectorSource<Geometry>>[] = [];
 
         for (const descUrl of this._offering.urls) {
-            this._requestInfo = getRequestInfo(descUrl.url);
+            this._requestInfo = ServiceUtils.getRequestInfo(descUrl.url);
             if (!this._featureTypes.length) {
                 await this._getFeatureTypes();
             }

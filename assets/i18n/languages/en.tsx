@@ -4,7 +4,6 @@ import { ValidationMetadatasEnTranslations } from "../../pages/service/metadatas
 import { navItemsEnTranslations } from "../../config/navItems";
 import { datastoreNavItemsEnTranslations } from "../../config/datastoreNavItems";
 import { contactEnTranslations } from "../../pages/contact/Contact";
-import { AddStyleFormEnTranslations } from "../../components/AddStyleForm/AddStyleForm";
 import { DatasheetViewEnTranslations } from "../../pages/datasheet/DatasheetView/DatasheetView";
 import { sldStyleValidationEnTranslations } from "../../validations/sldStyle";
 
@@ -14,7 +13,6 @@ export const translations: Translations<"en"> = {
     Contact: contactEnTranslations,
     navItems: navItemsEnTranslations,
     datastoreNavItems: datastoreNavItemsEnTranslations,
-    AddStyleForm: AddStyleFormEnTranslations,
     DatasheetView: DatasheetViewEnTranslations,
     sldStyleValidation: sldStyleValidationEnTranslations,
 };

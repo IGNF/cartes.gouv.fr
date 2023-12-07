@@ -147,7 +147,7 @@ class WmsVectorController extends AbstractController implements ApiControllerInt
             });
             $filteredStyles = array_values($filteredStyles);
 
-            $directory = $this->getParameter('style_files_upload_path');
+            $directory = $this->getParameter('style_files_path');
             $file->move($directory, $file->getClientOriginalName());
 
             // aucun fichier de style n'existe pas pour la combo de $storedDataId, 'wmsv' et $tableName

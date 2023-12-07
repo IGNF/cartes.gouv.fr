@@ -123,7 +123,7 @@ const routeDefs = {
         {
             datastoreId: param.path.string,
             offeringId: param.path.string,
-            datasheetName: param.query.optional.string,
+            datasheetName: param.query.string,
         },
         (p) => `${appRoot}/datastores/${p.datastoreId}/service/${p.offeringId}`
     ),

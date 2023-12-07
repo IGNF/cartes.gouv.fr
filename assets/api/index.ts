@@ -11,6 +11,7 @@ import pyramid from "./pyramid";
 import service from "./service";
 import epsg from "./epsg";
 import annexe from "./annexe";
+import style from "./style";
 
 const api = {
     contact,
@@ -28,5 +29,6 @@ const api = {
     // epsg.io
     epsg,
     annexe,
+    style,
 };
 export default api;

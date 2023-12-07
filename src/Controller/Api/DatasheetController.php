@@ -95,7 +95,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
 
         // Recherche de services (configuration et offering)
         $storedDataList = array_merge($vectorDbList, $pyramidList);
-        $services = $this->getServices($datastoreId, $storedDataList);
+        $services = $this->_getServices($datastoreId, $storedDataList);
 
         return $this->json([
             ...$data,
@@ -104,6 +104,19 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             'upload_list' => $uploadList,
             'service_list' => $services,
         ]);
+    }
+
+    #[Route('/{datasheetName}/services', name: 'get_services', methods: ['GET'])]
+    public function getServices(string $datastoreId, string $datasheetName): JsonResponse
+    {
+        $storedDataList = $this->entrepotApiService->storedData->getAllDetailed($datastoreId, [
+            'tags' => [
+                CommonTags::DATASHEET_NAME => $datasheetName,
+            ],
+        ]);
+
+        $services = $this->_getServices($datastoreId, $storedDataList);
+        return $this->json($services);
     }
 
     private function getBasicInfo(string $datastoreId, string $datasheetName): array
@@ -146,7 +159,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
      *
      * @param mixed[] $storedDataList
      */
-    private function getServices(string $datastoreId, array $storedDataList): array
+    private function _getServices(string $datastoreId, array $storedDataList): array
     {
         $offerings = [];
 

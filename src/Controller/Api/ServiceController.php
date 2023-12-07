@@ -44,6 +44,10 @@ class ServiceController extends AbstractController implements ApiControllerInter
             $offering = $this->entrepotApiService->configuration->getOffering($datastoreId, $offeringId);
             $offering['configuration'] = $this->entrepotApiService->configuration->get($datastoreId, $offering['configuration']['_id']);
 
+            // TODO PEUT ETRE PROVISOIRE 
+            $styles = $this->_getStyles($datastoreId, $offering['configuration']['_id']);
+            $offering['configuration']['styles'] = $styles;
+
             return $this->json($offering);
         } catch (EntrepotApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
@@ -115,5 +119,34 @@ class ServiceController extends AbstractController implements ApiControllerInter
         } catch (EntrepotApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
+    }
+
+    /**
+     * Recherche des styles et ajout de l'url
+     *
+     * @param string $datastoreId
+     * @param string $configId
+     * @return array<mixed>
+     */
+    private function _getStyles(string $datastoreId, string $configId) : array
+    {
+        $path = "/configuration/$configId/styles.json";
+        $styleAnnexes = $this->entrepotApiService->annexe->getAll($datastoreId, null, $path);
+            
+        $styles = [];
+        if (count($styleAnnexes)) {
+            $content = $this->entrepotApiService->annexe->download($datastoreId, $styleAnnexes[0]['_id']);
+            $styles = json_decode($content, true);    
+        }
+        
+        // Ajout des urls
+        foreach($styles as &$style) {
+            foreach($style['layers'] as &$layer) {
+                $annexe = $this->entrepotApiService->annexe->get($datastoreId, $layer['annexe_id']);
+                $layer['url'] = $annexe['paths'][0];
+            }    
+        }
+
+        return $styles;
     }
 }
