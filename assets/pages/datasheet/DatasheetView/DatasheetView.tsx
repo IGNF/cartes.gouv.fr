@@ -3,43 +3,31 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
-import { ModalProps, createModal } from "@codegouvfr/react-dsfr/Modal";
+import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
-import { Upload } from "@codegouvfr/react-dsfr/Upload";
-import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
-import { FC, useEffect, useState } from "react";
+import { FC } from "react";
 import { createPortal } from "react-dom";
-import { useForm } from "react-hook-form";
 import { symToStr } from "tsafe/symToStr";
-import * as yup from "yup";
 
 import api from "../../../api";
 import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
 import LoadingText from "../../../components/Utils/LoadingText";
 import Wait from "../../../components/Utils/Wait";
-import path from "../../../functions/path";
 import Common from "../../../i18n/Common";
-import { ComponentKey, Translations, declareComponentKeys, useTranslation } from "../../../i18n/i18n";
+import { Translations, declareComponentKeys, useTranslation } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/RQKeys";
 import { type CartesApiException } from "../../../modules/jsonFetch";
 import { routes, useRoute } from "../../../router/router";
 import { Datasheet, type DatasheetDetailed } from "../../../types/app";
-import { AnnexDetailResponseDto } from "../../../types/entrepot";
 import DatasetListTab from "./DatasetListTab/DatasetListTab";
+import DatasheetThumbnail, { ThumbnailAction } from "./DatasheetThumbnail";
 import ServicesListTab from "./ServiceListTab/ServicesListTab";
 
-import "../../../sass/components/buttons.scss";
 import "../../../sass/components/spinner.scss";
 
 const deleteDataConfirmModal = createModal({
     id: "delete-data-confirm-modal",
-    isOpenedByDefault: false,
-});
-
-const addThumbnailModal = createModal({
-    id: "add-thumbnail-modal",
     isOpenedByDefault: false,
 });
 
@@ -48,47 +36,9 @@ type DatasheetViewProps = {
     datasheetName: string;
 };
 
-type Action = "add" | "modify" | "delete";
-
-const defaultImgUrl = "//www.gouvernement.fr/sites/default/files/static_assets/placeholder.1x1.png";
-
-const schema = (t: TranslationFunction<"DatasheetView", ComponentKey>) =>
-    yup.object().shape({
-        file: yup
-            .mixed()
-            .test("required", t("file_validation.required_error"), (files) => {
-                const file = files?.[0] ?? undefined;
-                return file !== undefined;
-            })
-            .test("check-file-size", t("file_validation.size_error"), (files) => {
-                const file = files?.[0] ?? undefined;
-
-                if (file instanceof File) {
-                    const size = file.size / 1024 / 1024;
-                    return size < 2;
-                }
-                return true;
-            })
-            .test("check-file-type", t("file_validation.format_error"), (files) => {
-                const file = files?.[0] ?? undefined;
-                if (file) {
-                    const extension = path.getFileExtension(file.name);
-                    if (!extension) {
-                        return false;
-                    }
-                    return ["jpg", "jpeg", "png"].includes(extension);
-                }
-                return true;
-            }),
-    });
-
 const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) => {
     const { t: tCommon } = useTranslation({ Common });
     const { t } = useTranslation({ DatasheetView });
-
-    // Boite modale, gestion de l'image
-    const [modalImageUrl, setModalImageUrl] = useState<string>("");
-    const [thumbnailAddBtnHover, setThumbnailAddBtnHover] = useState(false);
 
     const route = useRoute();
     const queryClient = useQueryClient();
@@ -104,75 +54,6 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
         },
     });
 
-    // Ajout/modification d'une vignette
-    const addThumbnailMutation = useMutation<AnnexDetailResponseDto & { url: string }, CartesApiException>({
-        mutationFn: () => {
-            const form = new FormData();
-            form.append("datasheetName", datasheetName);
-            form.append("file", upload);
-            return api.annexe.addThumbnail(datastoreId, form);
-        },
-        onSuccess: (response) => {
-            addThumbnailModal.close();
-
-            // Mise à jour du contenu de la réponse de datasheetQuery
-            queryClient.setQueryData<DatasheetDetailed>(RQKeys.datastore_datasheet(datastoreId, datasheetName), (datasheet) => {
-                if (datasheet) {
-                    datasheet.thumbnail = response;
-                }
-                return datasheet;
-            });
-
-            // Mise à jour du contenu de la réponse de datasheetListQuery
-            queryClient.setQueryData<Datasheet[]>(RQKeys.datastore_datasheet_list(datastoreId), (datasheetList = []) => {
-                return datasheetList.map((datasheet) => {
-                    if (datasheet.name === datasheetName) {
-                        datasheet.thumbnail = response;
-                    }
-                    return datasheet;
-                });
-            });
-        },
-        onSettled: () => {
-            reset();
-        },
-    });
-
-    // Suppression d'une vignette
-    const deleteThumbnailMutation = useMutation<null, CartesApiException>({
-        mutationFn: () => {
-            const id = datasheetQuery?.data?.thumbnail?._id;
-            if (id) {
-                return api.annexe.removeThumbnail(datastoreId, id);
-            }
-            return Promise.resolve(null);
-        },
-        onSuccess: () => {
-            addThumbnailModal.close();
-
-            // mise à jour du contenu de la réponse de datasheetQuery
-            queryClient.setQueryData<DatasheetDetailed>(RQKeys.datastore_datasheet(datastoreId, datasheetName), (datasheet) => {
-                if (datasheet) {
-                    datasheet.thumbnail = undefined;
-                }
-                return datasheet;
-            });
-
-            // mise à jour du contenu de la réponse de datasheetListQuery
-            queryClient.setQueryData<Datasheet[]>(RQKeys.datastore_datasheet_list(datastoreId), (datasheetList = []) => {
-                return datasheetList.map((datasheet) => {
-                    if (datasheet.name === datasheetName) {
-                        datasheet.thumbnail = undefined;
-                    }
-                    return datasheet;
-                });
-            });
-        },
-        onSettled: () => {
-            reset();
-        },
-    });
-
     const datasheetQuery = useQuery<DatasheetDetailed, CartesApiException>({
         queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName),
         queryFn: ({ signal }) => api.datasheet.get(datastoreId, datasheetName, { signal }),
@@ -180,75 +61,6 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
         // refetchInterval: 20000,
         retry: false,
         enabled: !datasheetDeleteMutation.isPending,
-    });
-
-    // Url de la vignette
-    const thumbnailUrl = datasheetQuery?.data?.thumbnail?.url || "";
-    const action: Action = datasheetQuery?.data?.thumbnail?.url ? "modify" : "add";
-
-    const {
-        register,
-        formState: { errors },
-        watch,
-        resetField,
-        handleSubmit,
-    } = useForm({ resolver: yupResolver(schema(t)), mode: "onChange" });
-
-    const upload: File = watch("file")?.[0];
-    useEffect(() => {
-        if (upload !== undefined) {
-            const reader = new FileReader();
-            reader.onload = () => {
-                setModalImageUrl(reader.result as string);
-            };
-            reader.readAsDataURL(upload);
-        }
-    }, [upload]);
-
-    const handleChooseThumbnail = () => {
-        addThumbnailModal.open();
-    };
-
-    const reset = () => {
-        resetField("file");
-        setModalImageUrl("");
-    };
-
-    const onSubmit = async () => {
-        if (upload) {
-            // Ajout dans les annexes
-            addThumbnailMutation.mutate();
-        }
-    };
-
-    // Boutons de la boite de dialogue
-    const thumbnailModalButtons: [ModalProps.ActionAreaButtonProps, ...ModalProps.ActionAreaButtonProps[]] = [
-        {
-            children: tCommon("cancel"),
-            onClick: () => {
-                reset();
-                addThumbnailMutation.reset();
-            },
-            doClosesModal: true,
-            priority: "secondary",
-        },
-    ];
-    if (datasheetQuery?.data?.thumbnail?._id) {
-        thumbnailModalButtons.push({
-            children: tCommon("delete"),
-            iconId: "fr-icon-delete-line",
-            onClick: () => {
-                deleteThumbnailMutation.mutate();
-            },
-            doClosesModal: false,
-            priority: "secondary",
-        });
-    }
-    thumbnailModalButtons.push({
-        children: t("thumbnail_action", { action: action }),
-        onClick: handleSubmit(onSubmit),
-        doClosesModal: false,
-        priority: "primary",
     });
 
     return (
@@ -281,30 +93,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
 
                     <div className={fr.cx("fr-grid-row", "fr-mb-4w")}>
                         <div className={fr.cx("fr-col-2")}>
-                            <Button
-                                priority="tertiary no outline"
-                                onClick={handleChooseThumbnail}
-                                nativeButtonProps={{
-                                    "aria-label": t("button.title"),
-                                    title: t("button.title"),
-                                    onMouseOver: () => setThumbnailAddBtnHover(true),
-                                    onMouseOut: () => setThumbnailAddBtnHover(false),
-                                }}
-                                className="frx-btn--hover"
-                            >
-                                <img
-                                    className={thumbnailAddBtnHover ? "frx-btn--transparent fr-img--transparent-transition" : ""}
-                                    loading="lazy"
-                                    src={thumbnailUrl === "" ? defaultImgUrl : thumbnailUrl}
-                                    width="128px"
-                                    height="128px"
-                                />
-                                {thumbnailAddBtnHover && (
-                                    <div className="frx-btn--hover-icon">
-                                        <span className={fr.cx("fr-icon-edit-line")} />
-                                    </div>
-                                )}
-                            </Button>
+                            <DatasheetThumbnail datastoreId={datastoreId} datasheetName={datasheetName} datasheet={datasheetQuery.data} />
                         </div>
                         <div className={fr.cx("fr-col")}>
                             {/* TODO : désactivé car on n'a pas ces infos */}
@@ -378,58 +167,6 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
 
             <>
                 {createPortal(
-                    <addThumbnailModal.Component title={t("thumbnail_modal.title")} buttons={thumbnailModalButtons}>
-                        {addThumbnailMutation.isError && (
-                            <Alert
-                                severity="error"
-                                closable
-                                title={tCommon("error")}
-                                description={addThumbnailMutation.error.message}
-                                className={fr.cx("fr-my-3w")}
-                            />
-                        )}
-                        {deleteThumbnailMutation.isError && (
-                            <Alert
-                                severity="error"
-                                closable
-                                title={tCommon("error")}
-                                description={deleteThumbnailMutation.error.message}
-                                className={fr.cx("fr-my-3w")}
-                            />
-                        )}
-                        <div className={fr.cx("fr-grid-row")}>
-                            <div className={fr.cx("fr-col-9")}>
-                                <Upload
-                                    label={""}
-                                    hint={t("thumbnail_modal.file_hint")}
-                                    state={errors.file ? "error" : "default"}
-                                    stateRelatedMessage={errors?.file?.message}
-                                    nativeInputProps={{
-                                        ...register("file"),
-                                        accept: ".png, .jpg, .jpeg",
-                                    }}
-                                />
-                            </div>
-                            <div className={fr.cx("fr-col-3")}>
-                                <img src={modalImageUrl === "" ? defaultImgUrl : modalImageUrl} width="128px" />
-                            </div>
-                        </div>
-                        {addThumbnailMutation.isPending && (
-                            <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                                <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " icons-spin"} />
-                                <h6 className={fr.cx("fr-m-0")}>{t("thumbnail_modal.action_being", { action: action })}</h6>
-                            </div>
-                        )}
-                        {deleteThumbnailMutation.isPending && (
-                            <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                                <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " icons-spin"} />
-                                <h6 className={fr.cx("fr-m-0")}>{t("thumbnail_modal.action_being", { action: "delete" })}</h6>
-                            </div>
-                        )}
-                    </addThumbnailModal.Component>,
-                    document.body
-                )}
-                {createPortal(
                     <deleteDataConfirmModal.Component
                         title={t("datasheet_confirm_delete_modal.title", { datasheetName: datasheetName })}
                         buttons={[
@@ -486,8 +223,8 @@ export const { i18n } = declareComponentKeys<
     | "button.title"
     | "thumbnail_modal.title"
     | "thumbnail_modal.file_hint"
-    | { K: "thumbnail_modal.action_being"; P: { action: Action }; R: string }
-    | { K: "thumbnail_action"; P: { action: Action }; R: string }
+    | { K: "thumbnail_modal.action_being"; P: { action: ThumbnailAction }; R: string }
+    | { K: "thumbnail_action"; P: { action: ThumbnailAction }; R: string }
     | { K: "datasheet_confirm_delete_modal.title"; P: { datasheetName: string }; R: string }
     | "datasheet_confirm_delete_modal.text"
 >()({
