@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { FC, PropsWithChildren } from "react";
+import { FC, PropsWithChildren, memo, useMemo } from "react";
 
 import api from "../../api";
 import { datastoreNavItems } from "../../config/datastoreNavItems";
@@ -18,7 +18,8 @@ const DatastoreLayout: FC<PropsWithChildren<DatastoreLayoutProps>> = ({ datastor
         queryFn: ({ signal }) => api.datastore.get(datastoreId, { signal }),
         staleTime: 3600000,
     });
-    const navItems = datastoreNavItems(datastoreListQuery.data ?? [], datastoreQuery.data);
+
+    const navItems = useMemo(() => datastoreNavItems(datastoreListQuery.data ?? [], datastoreQuery.data), [datastoreListQuery.data, datastoreQuery.data]);
 
     return (
         <AppLayout navItems={navItems} documentTitle={documentTitle}>
@@ -27,4 +28,4 @@ const DatastoreLayout: FC<PropsWithChildren<DatastoreLayoutProps>> = ({ datastor
     );
 };
 
-export default DatastoreLayout;
+export default memo(DatastoreLayout);

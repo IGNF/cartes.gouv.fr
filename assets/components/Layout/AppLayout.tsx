@@ -1,7 +1,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { Notice, addNoticeTranslations } from "@codegouvfr/react-dsfr/Notice";
 import { SkipLinks } from "@codegouvfr/react-dsfr/SkipLinks";
-import { FC, PropsWithChildren } from "react";
+import { FC, PropsWithChildren, memo, useMemo } from "react";
 
 import { ConsentBannerAndConsentManagement } from "../../config/consentManagement";
 import { defaultNavItems } from "../../config/navItems";
@@ -10,25 +10,9 @@ import Translator from "../../modules/Translator";
 import SessionExpiredAlert from "../Utils/SessionExpiredAlert";
 import AppFooter from "./AppFooter";
 import AppHeader, { NavigationProps } from "./AppHeader";
+import { useTranslation } from "../../i18n/i18n";
 
-type AppLayoutProps = {
-    navItems?: NavigationProps;
-    documentTitle?: string;
-};
-
-const AppLayout: FC<PropsWithChildren<AppLayoutProps>> = ({ children, navItems, documentTitle }) => {
-    useDocumentTitle(documentTitle);
-
-    addNoticeTranslations({
-        lang: "fr",
-        messages: {
-            "hide message": "Fermer",
-        },
-    });
-    const infoBannerMsg = document.getElementById("info_banner")?.dataset?.msg ?? undefined;
-
-    navItems = navItems ?? defaultNavItems();
-
+const HiddenElements: FC = () => {
     return (
         <>
             {/* doit être le premier élément du DOM (Accessibilité) : https://www.systeme-de-design.gouv.fr/elements-d-interface/composants/gestionnaire-de-consentement */}
@@ -42,7 +26,27 @@ const AppLayout: FC<PropsWithChildren<AppLayoutProps>> = ({ children, navItems, 
                     },
                 ]}
             />
+        </>
+    );
+};
 
+const HiddenElementsMemoized = memo(HiddenElements);
+
+const infoBannerMsg = document.getElementById("info_banner")?.dataset?.msg ?? undefined;
+
+type AppLayoutProps = {
+    navItems?: NavigationProps;
+    documentTitle?: string;
+};
+const AppLayout: FC<PropsWithChildren<AppLayoutProps>> = ({ children, navItems, documentTitle }) => {
+    useDocumentTitle(documentTitle);
+    const { t } = useTranslation("navItems");
+
+    navItems = useMemo(() => navItems ?? defaultNavItems(t), [navItems, t]);
+
+    return (
+        <>
+            <HiddenElementsMemoized />
             <AppHeader navItems={navItems} />
             <main id="main" role="main" className={fr.cx("fr-my-2w")}>
                 {/* doit être le premier élément atteignable après le lien d'évitement (Accessibilité) : https://www.systeme-de-design.gouv.fr/elements-d-interface/composants/bandeau-d-information-importante */}
@@ -58,4 +62,11 @@ const AppLayout: FC<PropsWithChildren<AppLayoutProps>> = ({ children, navItems, 
     );
 };
 
-export default AppLayout;
+export default memo(AppLayout);
+
+addNoticeTranslations({
+    lang: "fr",
+    messages: {
+        "hide message": "Fermer",
+    },
+});

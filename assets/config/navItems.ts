@@ -1,9 +1,10 @@
-import { Translations, declareComponentKeys, getTranslation } from "../i18n/i18n";
+import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
+
+import { ComponentKey, Translations, declareComponentKeys } from "../i18n/i18n";
 import { routes } from "../router/router";
 
-const { t } = getTranslation("navItems");
-
-export const defaultNavItems = () => [
+// dans ce cas précise, getTranslation ne marche pas parce que les traductions sont pas encore chargées, on est donc obglié de passer la fonction t en paramètre
+export const defaultNavItems = (t: TranslationFunction<"navItems", ComponentKey>) => [
     {
         menuLinks: [
             {

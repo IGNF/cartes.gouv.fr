@@ -1,6 +1,6 @@
 import Header, { HeaderProps } from "@codegouvfr/react-dsfr/Header";
 import { MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation/MainNavigation";
-import { FC, ReactNode } from "react";
+import { FC, ReactNode, memo } from "react";
 
 // import { useLang } from "../../i18n/i18n";
 import SymfonyRouting from "../../modules/Routing";
@@ -88,4 +88,4 @@ const AppHeader: FC<AppHeaderProps> = ({ navItems = [] }) => {
     );
 };
 
-export default AppHeader;
+export default memo(AppHeader);

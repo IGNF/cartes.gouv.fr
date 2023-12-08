@@ -1,5 +1,5 @@
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import { FC } from "react";
+import { FC, memo } from "react";
 
 import SymfonyRouting from "../../modules/Routing";
 import { useAuthStore } from "../../stores/AuthStore";
@@ -27,4 +27,4 @@ const SessionExpiredAlert: FC = () => {
     );
 };
 
-export default SessionExpiredAlert;
+export default memo(SessionExpiredAlert);

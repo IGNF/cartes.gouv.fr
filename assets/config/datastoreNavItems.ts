@@ -1,13 +1,16 @@
 import { type MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation/MainNavigation";
+import { declareComponentKeys } from "i18nifty";
 
+import { Translations, getTranslation } from "../i18n/i18n";
 import { routes } from "../router/router";
 import { Datastore } from "../types/app";
-import Translator from "../modules/Translator";
+
+const { t } = getTranslation("datastoreNavItems");
 
 export const datastoreNavItems = (datastoreList: Datastore[] = [], currentDatastore?: Datastore): MainNavigationProps.Item[] => {
     const navItems: MainNavigationProps.Item[] = [
         {
-            text: "Tableau de bord",
+            text: t("dashboard"),
             linkProps: routes.dashboard_pro().link,
         },
         // {
@@ -44,14 +47,14 @@ export const datastoreNavItems = (datastoreList: Datastore[] = [], currentDatast
 
     if (currentDatastore !== undefined) {
         navItems.push({
-            text: "Données",
+            text: t("data"),
             linkProps: routes.datasheet_list({ datastoreId: currentDatastore._id }).link,
         });
     }
 
     if (datastoreList.length > 0) {
         const datastoreLinks: MainNavigationProps.Item.Menu = {
-            text: currentDatastore?.name ?? "Choisir un espace de travail",
+            text: currentDatastore?.name ?? t("choose datastore"),
             menuLinks:
                 datastoreList?.map((datastore) => ({
                     linkProps: routes.datasheet_list({ datastoreId: datastore._id }).link,
@@ -61,11 +64,28 @@ export const datastoreNavItems = (datastoreList: Datastore[] = [], currentDatast
         };
 
         datastoreLinks.menuLinks.push({
-            text: Translator.trans("datastore_creation_request.title"),
+            text: t("title"),
             linkProps: routes.datastore_create_request().link,
         });
         navItems.push(datastoreLinks);
     }
 
     return navItems;
+};
+
+// traductions
+export const { i18n } = declareComponentKeys<"dashboard" | "data" | "choose datastore" | "title">()("datastoreNavItems");
+
+export const datastoreNavItemsFrTranslations: Translations<"fr">["datastoreNavItems"] = {
+    dashboard: "Tableau de bord",
+    data: "Données",
+    "choose datastore": "Choisir un espace de travail",
+    title: "Demande de création d'un espace de travail",
+};
+
+export const datastoreNavItemsEnTranslations: Translations<"en">["datastoreNavItems"] = {
+    dashboard: undefined,
+    data: undefined,
+    "choose datastore": undefined,
+    title: undefined,
 };

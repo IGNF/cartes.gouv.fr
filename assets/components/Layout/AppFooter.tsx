@@ -1,5 +1,6 @@
 import { headerFooterDisplayItem } from "@codegouvfr/react-dsfr/Display";
 import Footer from "@codegouvfr/react-dsfr/Footer";
+import { memo } from "react";
 
 import { FooterConsentManagementItem, FooterPersonalDataPolicyItem } from "../../config/consentManagement";
 import { routes } from "../../router/router";
@@ -70,4 +71,4 @@ const AppFooter = () => {
     );
 };
 
-export default AppFooter;
+export default memo(AppFooter);
