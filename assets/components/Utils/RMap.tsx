@@ -20,12 +20,13 @@ import "../../sass/components/ol.scss";
 import TMSService from "../../modules/WebServices/TMSService";
 import { Coordinate } from "ol/coordinate";
 import MapEvent from "ol/MapEvent";
+import { OfferingDetailResponseDtoTypeEnum } from "../../types/entrepot";
 
 type RMapProps = {
     service: Service;
 };
 
-type ContextType = {
+/*type ContextType = {
     firstRender: boolean;
     center: Coordinate;
     zoom: number;
@@ -35,7 +36,7 @@ const context: ContextType = {
     firstRender: true,
     center: fromLonLat(olDefaults.center),
     zoom: olDefaults.zoom,
-};
+};*/
 
 const RMap: FC<RMapProps> = ({ service }) => {
     const mapTargetRef = useRef<HTMLDivElement>(null);
@@ -55,7 +56,7 @@ const RMap: FC<RMapProps> = ({ service }) => {
         return extent;
     }, [service.configuration.type_infos]);
 
-    const gfinfo = ["WFS", "WMTS-TMS"].includes(service.type);
+    const gfinfo = [OfferingDetailResponseDtoTypeEnum.WFS, OfferingDetailResponseDtoTypeEnum.WMTSTMS].includes(service.type);
 
     /**
      * Retourne le controle correspondant au nom
@@ -99,16 +100,18 @@ const RMap: FC<RMapProps> = ({ service }) => {
             mapRef.current = new Map({
                 view: new View({
                     projection: olDefaults.projection,
-                    center: context.center,
-                    zoom: context.zoom,
+                    /*center: context.center,
+                    zoom: context.zoom,*/
+                    center: fromLonLat(olDefaults.center),
+                    zoom: olDefaults.zoom,
                 }),
                 interactions: defaultInteractions(),
                 controls: controls,
             });
-            mapRef.current.on("moveend", (evt: MapEvent) => {
+            /*mapRef.current.on("moveend", (evt: MapEvent) => {
                 context.center = evt.map.getView().getCenter() ?? fromLonLat(olDefaults.center);
                 context.zoom = evt.map.getView().getZoom() ?? olDefaults.zoom;
-            });
+            });*/
         }
         mapRef.current.setTarget(mapTargetRef.current || "");
 
@@ -179,10 +182,13 @@ const RMap: FC<RMapProps> = ({ service }) => {
                     }
 
                     // On zoom sur l'extent de la couche au premier rendu
-                    if (extent && context.firstRender) {
+                    if (extent) {
+                        mapRef.current?.getView().fit(extent);
+                    }
+                    /*if (extent && context.firstRender) {
                         mapRef.current?.getView().fit(extent);
                         context.firstRender = false;
-                    }
+                    }*/
                 })
                 .catch((err) => {
                     console.error(err);
