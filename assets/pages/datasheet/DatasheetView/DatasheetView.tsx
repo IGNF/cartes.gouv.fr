@@ -249,7 +249,7 @@ export const DatasheetViewFrTranslations: Translations<"fr">["DatasheetView"] = 
             case "add":
                 return "Ajout de la vignette en cours ...";
             case "modify":
-                return "Modification de la vignette en cours ...";
+                return "Remplacement de la vignette en cours ...";
             case "delete":
                 return "Suppression de la vignette en cours ...";
         }
@@ -259,7 +259,7 @@ export const DatasheetViewFrTranslations: Translations<"fr">["DatasheetView"] = 
             case "add":
                 return "Ajouter une vignette";
             case "modify":
-                return "Modifier une vignette";
+                return "Remplacer une vignette";
             case "delete":
                 return "Supprimer une vignette";
         }
@@ -286,7 +286,7 @@ export const DatasheetViewEnTranslations: Translations<"en">["DatasheetView"] = 
             case "add":
                 return "Thumbnail being added ...";
             case "modify":
-                return "Thumbnail being modified ...";
+                return "Thumbnail being replaced ...";
             case "delete":
                 return "Thumbnail being deleted ...";
         }
@@ -296,7 +296,7 @@ export const DatasheetViewEnTranslations: Translations<"en">["DatasheetView"] = 
             case "add":
                 return "Add thumbnail";
             case "modify":
-                return "Modify thumbnail";
+                return "Replace thumbnail";
             case "delete":
                 return "Delete thumbnail";
         }

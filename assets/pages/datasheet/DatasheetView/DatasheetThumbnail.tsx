@@ -258,7 +258,6 @@ const DatasheetThumbnail: FC<DatasheetThumbnailProps> = ({ datastoreId, datashee
                     <div className={fr.cx("fr-grid-row")}>
                         <div className={fr.cx("fr-col-9")}>
                             <Upload
-                                label={""}
                                 hint={t("thumbnail_modal.file_hint")}
                                 state={errors.file ? "error" : "default"}
                                 stateRelatedMessage={errors?.file?.message}
@@ -266,6 +265,7 @@ const DatasheetThumbnail: FC<DatasheetThumbnailProps> = ({ datastoreId, datashee
                                     ...register("file"),
                                     accept: ".png, .jpg, .jpeg",
                                 }}
+                                className={fr.cx("fr-input-group")}
                             />
                         </div>
                         <div className={fr.cx("fr-col-3")}>
