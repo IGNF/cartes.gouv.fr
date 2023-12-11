@@ -55,7 +55,7 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
     const styleNames = useMemo<string[]>(() => {
         let styles: TagStyle[] = [];
         serviceListQuery.data?.forEach((service) => {
-            const configuration = service.configuration as ConfigurationDetailResponseDto;
+            const configuration = service.configuration;
             const s = configuration.tags.styles ? JSON.parse(configuration.tags.styles) : [];
             styles = styles.concat(s);
         });

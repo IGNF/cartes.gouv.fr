@@ -112,8 +112,8 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
                     .test({
                         name: "is-valid-sld",
                         async test(value, ctx) {
-                            return validations.getValidator("sld").validate(table.name, value as FileList, ctx);
-                            // return validations.sldStyle.test(table.name, value as FileList, ctx);
+                            // return validations.getValidator("sld").validate(table.name, value as FileList, ctx);
+                            return validations.sldStyle.test(table.name, value as FileList, ctx);
                         },
                     });
             });

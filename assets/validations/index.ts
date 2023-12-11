@@ -3,6 +3,7 @@ import sldStyle from "./sldStyle";
 import { FileFormat } from "./StyleValidator";
 import SldStyleValidator from "./SldStyleValidator";
 import QGisStyleValidator from "./QGisStyleValidator";
+import MapboxStyleValidator from "./MapboxStyleValidator";
 
 const getValidator = (format: FileFormat) => {
     switch (format) {
@@ -10,6 +11,8 @@ const getValidator = (format: FileFormat) => {
             return new SldStyleValidator(format);
         case "qml":
             return new QGisStyleValidator(format);
+        case "mapbox":
+            return new MapboxStyleValidator(format);
         default:
             throw new Error("Not implemented yet");
     }

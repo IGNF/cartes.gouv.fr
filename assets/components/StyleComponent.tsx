@@ -5,18 +5,20 @@ import { createPortal } from "react-dom";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { Upload } from "@codegouvfr/react-dsfr/Upload";
-import Alert from "@codegouvfr/react-dsfr/Alert";
+import Alert, { AlertProps } from "@codegouvfr/react-dsfr/Alert";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import ServiceUtils from "../modules/WebServices/ServiceUtils";
 import * as yup from "yup";
+import { v4 as uuidv4 } from "uuid";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation /*, useQueryClient*/, useQueryClient } from "@tanstack/react-query";
 import { CartesApiException } from "../modules/jsonFetch";
 import { AddStyleFormType, StyleHelper } from "../modules/WebServices/StyleHelper";
-import LoadingText from "./Utils/LoadingText";
 import validations from "../validations";
 import api from "../api";
+import { ConfigurationDetailResponseDto, OfferingDetailResponseDto } from "../types/entrepot";
+import RQKeys from "../modules/RQKeys";
 
 type StyleComponentProps = {
     datastoreId: string;
@@ -26,6 +28,11 @@ type StyleComponentProps = {
 };
 
 type FormatType = "mapbox" | "sld" | "qml";
+
+type ErrorType = {
+    message: string;
+    severity: AlertProps.Severity;
+};
 
 const addStyleModal = createModal({
     id: "style-modal",
@@ -46,11 +53,17 @@ const StyleComponent: FC<StyleComponentProps> = ({ datastoreId, service, styleNa
                 style_name: style_name,
                 style_files: yup.lazy(() => {
                     const styleFiles = {};
-                    layers.forEach((layer) => {
-                        styleFiles[layer] = yup.mixed().test({
+                    Object.keys(layers).forEach((uuid) => {
+                        styleFiles[uuid] = yup.mixed().test({
                             name: "is-valid",
                             async test(value, ctx) {
-                                return validations.getValidator(format).validate(layer, value as FileList, ctx);
+                                const files = value;
+
+                                const file = files?.[0] ?? undefined;
+                                if (file === undefined) {
+                                    return true;
+                                }
+                                return validations.getValidator(format).validate(layers[uuid], value as FileList, ctx);
                             },
                         });
                     });
@@ -64,10 +77,16 @@ const StyleComponent: FC<StyleComponentProps> = ({ datastoreId, service, styleNa
             style_name: style_name,
             style_files: yup.lazy(() => {
                 const styleFiles = {};
-                styleFiles["no-layer"] = yup.mixed().test({
+                styleFiles["no_layer"] = yup.mixed().test({
                     name: "is-valid",
-                    async test(/*value, ctx*/) {
-                        return true; // TODO
+                    async test(value, ctx) {
+                        const files = value;
+
+                        const file = files?.[0] ?? undefined;
+                        if (file === undefined) {
+                            return true;
+                        }
+                        return validations.getValidator(format).validate(undefined, value as FileList, ctx);
                     },
                 });
                 return yup.object().shape(styleFiles);
@@ -75,25 +94,44 @@ const StyleComponent: FC<StyleComponentProps> = ({ datastoreId, service, styleNa
         });
     };
 
-    // Le nom des layers
-    const [layers, setLayers] = useState<string[]>([]);
+    // Les layers object {uuid: nom}
+    const [layers, setLayers] = useState<Record<string, string>>({});
 
-    const [error, setError] = useState<string>();
+    const [error, setError] = useState<ErrorType | undefined>(undefined);
     const [format, setFormat] = useState<FormatType>("mapbox");
 
+    // On utilise un uuid car le nom des couches peuvent contenir des espaces, des quotes
+    // et la creation du schema pose problemes
     useEffect(() => {
-        ServiceUtils.getLayerNames(service)
+        const getLayerNames = async () => {
+            return ServiceUtils.getLayerNames(service);
+        };
+
+        getLayerNames()
             .then((layerNames) => {
-                setLayers(layerNames);
+                const layers = {};
+                layerNames.forEach((name) => {
+                    const uuid = uuidv4();
+                    layers[uuid] = name;
+                });
+                setLayers(layers);
             })
-            .catch((err) => setError(err.message));
+            .catch((err) => setError({ message: err.message, severity: "error" }));
     }, [service]);
+
+    const {
+        register,
+        reset,
+        getValues: getFormValues,
+        formState: { errors },
+        handleSubmit,
+    } = useForm({ resolver: yupResolver(schema()), mode: "onChange" });
 
     const hasStyles = service?.type === "WFS" || service?.type === "WMTS-TMS";
 
     const onChangeFormat = (f: FormatType) => {
         setFormat(f);
-        // TODO SUPPRIMER LES ANCIENS FICHIERS DANS LES INPUTS
+        reset({ style_files: {} });
     };
 
     const checkForm = (): boolean => {
@@ -102,7 +140,7 @@ const StyleComponent: FC<StyleComponentProps> = ({ datastoreId, service, styleNa
         const values = getFormValues() as AddStyleFormType;
         const b = StyleHelper.check(values);
         if (!b) {
-            setError("Il faut ajouter au moins un fichier.");
+            setError({ message: "Il faut ajouter au moins un fichier.", severity: "warning" });
         }
 
         return b;
@@ -110,12 +148,12 @@ const StyleComponent: FC<StyleComponentProps> = ({ datastoreId, service, styleNa
 
     const onSubmit = () => {
         if (checkForm()) {
-            const form = StyleHelper.format(getFormValues());
+            const form = StyleHelper.format(getFormValues(), layers);
             mutateAdd(form);
         }
     };
 
-    // const queryClient = useQueryClient();
+    const queryClient = useQueryClient();
 
     // Ajout d'un style
     const { isPending, mutate: mutateAdd } = useMutation<undefined, CartesApiException, FormData>({
@@ -125,30 +163,21 @@ const StyleComponent: FC<StyleComponentProps> = ({ datastoreId, service, styleNa
             }
             return Promise.resolve(undefined);
         },
-        onSuccess: (response) => {
+        onSuccess: (styles) => {
+            console.log(styles);
             // TODO METTRE A JOUR LA LISTE DES STYLES
+            /*queryClient.setQueryData<OfferingDetailResponseDto>(RQKeys.datastore_offering(datastoreId, service?._id), (service) => {    
+            });*/
             addStyleModal.close();
         },
         onError: (error) => {
-            setError(error.message);
+            setError({ message: error.message, severity: "error" });
         },
         onSettled: () => {
-            reset({});
+            setError(undefined);
+            reset({ style_name: "", style_files: {} });
         },
     });
-
-    const {
-        register,
-        //unregister,
-        reset,
-        resetField,
-        getValues: getFormValues,
-        setValue,
-        //trigger,
-        formState: { errors },
-        /*watch, */
-        handleSubmit,
-    } = useForm({ resolver: yupResolver(schema()), mode: "onChange" });
 
     return createPortal(
         <addStyleModal.Component
@@ -159,8 +188,8 @@ const StyleComponent: FC<StyleComponentProps> = ({ datastoreId, service, styleNa
                     priority: "secondary",
                     doClosesModal: false,
                     onClick: () => {
-                        // TODO NE FONCTIONNE PAS reset({"style_files", {}}) ou setValue("style_files", {});
-                        reset({});
+                        setError(undefined);
+                        reset({ style_name: "", style_files: {} });
                         addStyleModal.close();
                     },
                 },
@@ -173,7 +202,15 @@ const StyleComponent: FC<StyleComponentProps> = ({ datastoreId, service, styleNa
         >
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-12")}>
-                    {error && <Alert className={fr.cx("fr-mb-2w")} title={"Erreur"} closable description={error} severity="error" />}
+                    {error && (
+                        <Alert
+                            className={fr.cx("fr-mb-2w")}
+                            title={error?.severity === "error" ? "Erreur" : "Attention"}
+                            closable
+                            description={error?.message}
+                            severity={error?.severity ?? "error"}
+                        />
+                    )}
                     {hasStyles && (
                         <>
                             <Input
@@ -213,25 +250,50 @@ const StyleComponent: FC<StyleComponentProps> = ({ datastoreId, service, styleNa
                             />
                         </>
                     )}
-                    {hasStyles && (format === "sld" || format === "qml") && (
+                    {hasStyles && format === "sld" && (
                         <>
                             <p>{`Ajoutez un fichier ${format} par couche présente dans votre service.`}</p>
-                            {layers.map((layer) => (
-                                <div key={layer} className={fr.cx("fr-grid-row", "fr-mb-3w")}>
-                                    <Upload
-                                        className={fr.cx("fr-input-group")}
-                                        label={layer}
-                                        hint={`Sélectionner un fichier au format ${format}`}
-                                        state={errors?.style_files?.[layer]?.message ? "error" : "default"}
-                                        stateRelatedMessage={errors?.style_files?.[layer]?.message}
-                                        nativeInputProps={{
-                                            // @ts-expect-error probleme avec ce type de schema
-                                            ...register(`style_files[${layer}]`),
-                                            accept: `.${format}`,
-                                        }}
-                                    />
-                                </div>
-                            ))}
+                            {Object.keys(layers).map((uid) => {
+                                return (
+                                    <div key={uid} className={fr.cx("fr-grid-row", "fr-mb-3w")}>
+                                        <Upload
+                                            className={fr.cx("fr-input-group")}
+                                            label={layers[uid]}
+                                            hint={`Sélectionner un fichier au format ${format}`}
+                                            state={errors?.style_files?.[uid]?.message ? "error" : "default"}
+                                            stateRelatedMessage={errors?.style_files?.[uid]?.message}
+                                            nativeInputProps={{
+                                                // @ts-expect-error probleme avec ce type de schema
+                                                ...register(`style_files.${uid}`),
+                                                accept: `.${format}`,
+                                            }}
+                                        />
+                                    </div>
+                                );
+                            })}
+                        </>
+                    )}
+                    {hasStyles && format === "qml" && (
+                        <>
+                            <p>{`Ajoutez un fichier ${format} par couche présente dans votre service.`}</p>
+                            {Object.keys(layers).map((uid) => {
+                                return (
+                                    <div key={uid} className={fr.cx("fr-grid-row", "fr-mb-3w")}>
+                                        <Upload
+                                            className={fr.cx("fr-input-group")}
+                                            label={layers[uid]}
+                                            hint={`Sélectionner un fichier au format ${format}`}
+                                            state={errors?.style_files?.[uid]?.message ? "error" : "default"}
+                                            stateRelatedMessage={errors?.style_files?.[uid]?.message}
+                                            nativeInputProps={{
+                                                // @ts-expect-error probleme avec ce type de schema
+                                                ...register(`style_files.${uid}`),
+                                                accept: `.${format}`,
+                                            }}
+                                        />
+                                    </div>
+                                );
+                            })}
                         </>
                     )}
                     {hasStyles && format === "mapbox" && (
@@ -242,21 +304,26 @@ const StyleComponent: FC<StyleComponentProps> = ({ datastoreId, service, styleNa
                             </p>
                             <div className={fr.cx("fr-grid-row", "fr-mb-2w")}>
                                 <Upload
-                                    label={""}
-                                    hint={""}
-                                    state={errors?.style_files?.["mapbox"]?.message ? "error" : "default"}
-                                    stateRelatedMessage={errors?.style_files?.["mapbox"]?.message}
                                     className={fr.cx("fr-input-group")}
+                                    label={""}
+                                    hint={"Sélectionner un fichier au format json (mapbox)"}
+                                    state={errors?.style_files?.["no_layer"]?.message ? "error" : "default"}
+                                    stateRelatedMessage={errors?.style_files?.["no_layer"]?.message}
                                     nativeInputProps={{
                                         // @ts-expect-error probleme avec ce type de schema
-                                        ...register("style_files.mapbox"),
+                                        ...register("style_files.no_layer"),
                                         accept: ".json",
                                     }}
                                 />
                             </div>
                         </>
                     )}
-                    {isPending && <LoadingText message={"Ajout en cours ..."} as={"h2"} />}
+                    {isPending && (
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
+                            <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " icons-spin"} />
+                            <h6 className={fr.cx("fr-m-0")}>Ajout en cours ...</h6>
+                        </div>
+                    )}
                 </div>
             </div>
         </addStyleModal.Component>,

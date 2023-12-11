@@ -59,7 +59,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             $files = $request->files->all();
             foreach($files['style_files'] as $layer => $file) {
                 $annexe = $this->_addFile($datastoreId, $datasheetName, $file);
-                if ($layer === 'no-layer') {
+                if ($layer === 'no_layer') {
                     $newStyle['layers'][] = ['annexe_id' => $annexe['_id']];  
                 } else {
                     $newStyle['layers'][] = ['name' => $layer, 'annexe_id' => $annexe['_id']];      

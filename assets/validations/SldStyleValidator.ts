@@ -7,7 +7,7 @@ export default class SldStyleValidator extends StyleValidator {
         super(format);
     }
 
-    async validate(layerName: string, files: FileList, ctx: TestContext): Promise<ValidationError | boolean> {
+    async validate(layerName: string | undefined, files: FileList, ctx: TestContext): Promise<ValidationError | boolean> {
         const validation = await super.validate(layerName, files, ctx);
         if (validation instanceof ValidationError) {
             return validation;
@@ -52,10 +52,6 @@ export default class SldStyleValidator extends StyleValidator {
         if (output) {
             if (output?.name === "") {
                 return ctx.createError({ message: "field_name_invalid_or_unspecified" });
-            }
-
-            if (output.name !== layerName) {
-                return ctx.createError({ message: "field_name_does_not_correspond_table_name" });
             }
 
             if (output.rules.length === 0) {

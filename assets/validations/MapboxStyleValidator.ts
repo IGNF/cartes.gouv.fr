@@ -1,8 +1,8 @@
 import { TestContext, ValidationError } from "yup";
 import { FileFormat, StyleValidator } from "./StyleValidator";
-import QGISStyleParser from "geostyler-qgis-parser";
+import MapboxParser from "geostyler-mapbox-parser";
 
-export default class QGisStyleValidator extends StyleValidator {
+export default class MapboxStyleValidator extends StyleValidator {
     constructor(format: FileFormat) {
         super(format);
     }
@@ -15,10 +15,13 @@ export default class QGisStyleValidator extends StyleValidator {
 
         const file = files[0];
         const styleString = await file.text();
+        const mapboxStyle = JSON.parse(styleString) as mapboxgl.Style;
 
-        const qgisParser = new QGISStyleParser();
+        const mbParser = new MapboxParser();
 
-        const result = await qgisParser.readStyle(styleString);
+        const result = await mbParser.readStyle(mapboxStyle);
+
+        // TODO FAIRE L'ANALYSE
         // const { output, warnings, errors, unsupportedProperties } = result;
         console.log(result);
 

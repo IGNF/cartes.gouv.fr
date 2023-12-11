@@ -1648,6 +1648,11 @@
     "@types/qs" "*"
     "@types/serve-static" "*"
 
+"@types/geojson@*":
+  version "7946.0.13"
+  resolved "https://registry.yarnpkg.com/@types/geojson/-/geojson-7946.0.13.tgz#e6e77ea9ecf36564980a861e24e62a095988775e"
+  integrity sha512-bmrNrgKMOhM3WsafmbGmC+6dsF2Z308vLFsQ3a/bT8X8Sv5clVYpPars/UPq+sAaJP+5OoLAYgwbkS5QEJdLUQ==
+
 "@types/glob@^7.1.1":
   version "7.2.0"
   resolved "https://registry.yarnpkg.com/@types/glob/-/glob-7.2.0.tgz#bc1b5bf3aa92f25bd5dd39f35c57361bdce5b2eb"
@@ -1710,6 +1715,13 @@
   version "4.14.202"
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.202.tgz#f09dbd2fb082d507178b2f2a5c7e74bd72ff98f8"
   integrity sha512-OvlIYQK9tNneDlS0VN54LLd5uiPCBOp7gS5Z0f1mjoJYBrtStzgmJBxONW3U6OZqdtNzZPmn9BS/7WI7BFFcFQ==
+
+"@types/mapbox-gl@^2.7.18":
+  version "2.7.19"
+  resolved "https://registry.yarnpkg.com/@types/mapbox-gl/-/mapbox-gl-2.7.19.tgz#d650c30496323a7d429b6f672bc45218c680bda0"
+  integrity sha512-pkRdlhQJNbtwcKJSVC4uuOA6M3OlOObIMhNecqHB991oeaDF5XkjSIRaTE0lh5p4KClptSCxW6MBiREVRHrl2A==
+  dependencies:
+    "@types/geojson" "*"
 
 "@types/mdast@^4.0.0":
   version "4.0.3"
@@ -4363,6 +4375,14 @@ geostyler-cql-parser@^3.0.1:
     geostyler-style "^7.2.0"
     lodash "^4.17.21"
 
+geostyler-mapbox-parser@^5.0.1:
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/geostyler-mapbox-parser/-/geostyler-mapbox-parser-5.0.1.tgz#d4b3068398aeab867966e9df73ed15edbe034aa0"
+  integrity sha512-uL79jfXuULPcg/Yxj9EGDU5IX0xIQmhawUL239aCwbFv4FiM9KTuTdXG1M7P5r3RV6EZsbE21ETahx4ZzojVkw==
+  dependencies:
+    "@types/mapbox-gl" "^2.7.18"
+    geostyler-style "^8.0.0"
+
 geostyler-qgis-parser@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/geostyler-qgis-parser/-/geostyler-qgis-parser-2.0.0.tgz#042fb8c85193e847a3e4d10c3db72471b36156cc"
@@ -4395,6 +4415,14 @@ geostyler-style@^7.2.0, geostyler-style@^7.3.1:
   version "7.5.0"
   resolved "https://registry.yarnpkg.com/geostyler-style/-/geostyler-style-7.5.0.tgz#25a40c7b24453ee42b01c6fc4293807b687ad0ec"
   integrity sha512-0qlFOwDl9cdiiNUk6ijRSpBq+W3Kpry1aZS++BE8EPBxvbFgoTsKU6JIriKLmCqPqBmJIVnMFMUEk6Sf3n0ZIA==
+  dependencies:
+    "@types/lodash" "^4.14.201"
+    lodash "^4.17.21"
+
+geostyler-style@^8.0.0:
+  version "8.1.0"
+  resolved "https://registry.yarnpkg.com/geostyler-style/-/geostyler-style-8.1.0.tgz#2c65ec4e8f154a604f9a878d3355b998ea486388"
+  integrity sha512-8NgtzRc63bxC+1Vgqj/mMj77GX38CXXXWQ93PeZBdoMTkY9C/H0Anz38OrrlKdUgNVFZ/GJTNYwnX4wdaO5j6A==
   dependencies:
     "@types/lodash" "^4.14.201"
     lodash "^4.17.21"
