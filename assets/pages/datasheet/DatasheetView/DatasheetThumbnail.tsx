@@ -16,8 +16,7 @@ import functions from "../../../functions";
 import { ComponentKey, useTranslation } from "../../../i18n/i18n";
 import { CartesApiException } from "../../../modules/jsonFetch";
 import RQKeys from "../../../modules/RQKeys";
-import { Datasheet, DatasheetDetailed, DatasheetThumbnail } from "../../../types/app";
-import { AnnexDetailResponseDto } from "../../../types/entrepot";
+import type { Datasheet, DatasheetDetailed, DatasheetThumbnailAnnexe } from "../../../types/app";
 
 import "../../../sass/components/buttons.scss";
 
@@ -75,7 +74,7 @@ const DatasheetThumbnail: FC<DatasheetThumbnailProps> = ({ datastoreId, datashee
     const [thumbnailAddBtnHover, setThumbnailAddBtnHover] = useState(false);
 
     // Ajout/modification d'une vignette
-    const addThumbnailMutation = useMutation<AnnexDetailResponseDto & { url: string }, CartesApiException>({
+    const addThumbnailMutation = useMutation<DatasheetThumbnailAnnexe, CartesApiException>({
         mutationFn: () => {
             const form = new FormData();
             form.append("datasheetName", datasheetName);

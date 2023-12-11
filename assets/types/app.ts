@@ -47,10 +47,10 @@ export type Datasheet = {
     date: string;
     categories: string[];
     nb_publications: number;
-    thumbnail?: DatasheetThumbnail;
+    thumbnail?: DatasheetThumbnailAnnexe;
 };
 
-export type DatasheetThumbnail = AnnexDetailResponseDto & { url: string };
+export type DatasheetThumbnailAnnexe = AnnexDetailResponseDto & { url: string };
 
 export type DatasheetDetailed = Datasheet & {
     vector_db_list: VectorDb[] | undefined;

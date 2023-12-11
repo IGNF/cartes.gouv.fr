@@ -1,11 +1,10 @@
 import SymfonyRouting from "../modules/Routing";
-
 import { jsonFetch } from "../modules/jsonFetch";
-import { AnnexDetailResponseDto } from "../types/entrepot";
+import { DatasheetThumbnailAnnexe } from "../types/app";
 
 const addThumbnail = (datastoreId: string, data: object) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_annexe_thumbnail_add", { datastoreId });
-    return jsonFetch<AnnexDetailResponseDto & { url: string }>(
+    return jsonFetch<DatasheetThumbnailAnnexe>(
         url,
         {
             method: "POST",
