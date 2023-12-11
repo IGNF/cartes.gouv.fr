@@ -19,6 +19,8 @@ export default class QGisStyleValidator extends StyleValidator {
         const qgisParser = new QGISStyleParser();
 
         const result = await qgisParser.readStyle(styleString);
+
+        // TODO FAIRE L'ANALYSE
         // const { output, warnings, errors, unsupportedProperties } = result;
         console.log(result);
 
