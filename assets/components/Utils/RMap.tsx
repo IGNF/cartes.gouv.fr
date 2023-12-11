@@ -18,8 +18,6 @@ import "geoportal-extensions-openlayers/dist/GpPluginOpenLayers.css";
 import "../../sass/components/map-view.scss";
 import "../../sass/components/ol.scss";
 import TMSService from "../../modules/WebServices/TMSService";
-import { Coordinate } from "ol/coordinate";
-import MapEvent from "ol/MapEvent";
 import { OfferingDetailResponseDtoTypeEnum } from "../../types/entrepot";
 import WMSVectorService from "../../modules/WebServices/WMSVectorService";
 
@@ -155,7 +153,7 @@ const RMap: FC<RMapProps> = ({ service }) => {
                     break;
                 }
                 default:
-                    return Promise.resolve(null);
+                    return Promise.resolve([]);
             }
 
             if (webService) {

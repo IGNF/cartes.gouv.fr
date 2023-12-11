@@ -12,13 +12,11 @@ import * as yup from "yup";
 import { v4 as uuidv4 } from "uuid";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
-import { useMutation /*, useQueryClient*/, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { CartesApiException } from "../modules/jsonFetch";
 import { AddStyleFormType, StyleHelper } from "../modules/WebServices/StyleHelper";
 import validations from "../validations";
 import api from "../api";
-import { ConfigurationDetailResponseDto, OfferingDetailResponseDto } from "../types/entrepot";
-import RQKeys from "../modules/RQKeys";
 
 type StyleComponentProps = {
     datastoreId: string;
@@ -153,7 +151,7 @@ const StyleComponent: FC<StyleComponentProps> = ({ datastoreId, service, styleNa
         }
     };
 
-    const queryClient = useQueryClient();
+    // const queryClient = useQueryClient();
 
     // Ajout d'un style
     const { isPending, mutate: mutateAdd } = useMutation<undefined, CartesApiException, FormData>({

@@ -1,7 +1,7 @@
 import WMSCapabilities from "ol/format/WMSCapabilities";
 import { transformExtent } from "ol/proj";
 import { Service } from "../../types/app";
-import getRequestInfo from "./ServiceUtils";
+import ServiceUtils from "./ServiceUtils";
 import olDefaults from "../../data/ol-defaults.json";
 import TileLayer from "ol/layer/Tile";
 import TileWMSSource from "ol/source/TileWMS.js";
@@ -13,7 +13,7 @@ export default class WMSVectorService {
 
     constructor(offering: Service) {
         this._offering = offering;
-        this._requestInfo = getRequestInfo(offering.urls[0].url);
+        this._requestInfo = ServiceUtils.getRequestInfo(offering.urls[0].url);
         this._parser = new WMSCapabilities();
     }
 

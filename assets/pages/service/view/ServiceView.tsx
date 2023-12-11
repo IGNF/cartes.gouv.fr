@@ -15,7 +15,7 @@ import RQKeys from "../../../modules/RQKeys";
 import { type CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
 import { TagStyle, type Service } from "../../../types/app";
-import { ConfigurationDetailResponseDto, OfferingDetailResponseDtoTypeEnum } from "../../../types/entrepot"; // TODO A SUPPRIMER
+import { OfferingDetailResponseDtoTypeEnum } from "../../../types/entrepot"; // TODO A SUPPRIMER
 import { addStyleModal, StyleComponent } from "../../../components/StyleComponent";
 
 type ServiceViewProps = {
