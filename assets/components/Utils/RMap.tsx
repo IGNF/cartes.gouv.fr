@@ -21,6 +21,7 @@ import TMSService from "../../modules/WebServices/TMSService";
 import { Coordinate } from "ol/coordinate";
 import MapEvent from "ol/MapEvent";
 import { OfferingDetailResponseDtoTypeEnum } from "../../types/entrepot";
+import WMSVectorService from "../../modules/WebServices/WMSVectorService";
 
 type RMapProps = {
     service: Service;
@@ -56,7 +57,9 @@ const RMap: FC<RMapProps> = ({ service }) => {
         return extent;
     }, [service.configuration.type_infos]);
 
-    const gfinfo = [OfferingDetailResponseDtoTypeEnum.WFS, OfferingDetailResponseDtoTypeEnum.WMTSTMS].includes(service.type);
+    const gfinfo = [OfferingDetailResponseDtoTypeEnum.WFS, OfferingDetailResponseDtoTypeEnum.WMSVECTOR, OfferingDetailResponseDtoTypeEnum.WMTSTMS].includes(
+        service.type
+    );
 
     /**
      * Retourne le controle correspondant au nom
@@ -137,17 +140,26 @@ const RMap: FC<RMapProps> = ({ service }) => {
 
         const getLayers = async () => {
             // TODO Utiliser une factory ?
+            let webService;
             switch (service.type) {
-                case "WFS": {
-                    const wfs = new WFSService(service);
-                    return await wfs.getLayers();
+                case OfferingDetailResponseDtoTypeEnum.WFS: {
+                    webService = new WFSService(service);
+                    break;
                 }
-                case "WMTS-TMS": {
-                    const tms = new TMSService(service);
-                    return await tms.getLayers();
+                case OfferingDetailResponseDtoTypeEnum.WMTSTMS: {
+                    webService = new TMSService(service);
+                    break;
+                }
+                case OfferingDetailResponseDtoTypeEnum.WMSVECTOR: {
+                    webService = new WMSVectorService(service);
+                    break;
                 }
                 default:
-                    break;
+                    return Promise.resolve(null);
+            }
+
+            if (webService) {
+                return await webService.getLayers();
             }
         };
 
@@ -173,13 +185,13 @@ const RMap: FC<RMapProps> = ({ service }) => {
             getLayers()
                 .then((layers) => {
                     const gfiLayers: object[] = [];
-                    if (gfinfo) {
-                        layers?.forEach((layer) => {
-                            addLayer(layer);
+                    layers?.forEach((layer) => {
+                        addLayer(layer);
+                        if (gfinfo) {
                             gfiLayers.push({ obj: layer });
-                        });
-                        getControl("GetFeatureInfo")?.setLayers(gfiLayers);
-                    }
+                        }
+                    });
+                    getControl("GetFeatureInfo")?.setLayers(gfiLayers);
 
                     // On zoom sur l'extent de la couche au premier rendu
                     if (extent) {
