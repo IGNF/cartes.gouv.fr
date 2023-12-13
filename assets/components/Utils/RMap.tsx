@@ -10,16 +10,15 @@ import { fromLonLat, transformExtent } from "ol/proj";
 import GetFeatureInfo from "geoportal-extensions-openlayers/src/OpenLayers/Controls/GetFeatureInfo";
 import LayerSwitcher from "geoportal-extensions-openlayers/src/OpenLayers/Controls/LayerSwitcher";
 import SearchEngine from "geoportal-extensions-openlayers/src/OpenLayers/Controls/SearchEngine";
-import WFSService from "../../modules/WebServices/WFSService";
-import type { Service, TypeInfosWithBbox } from "../../types/app";
+import type { CartesStyle, Service, TypeInfosWithBbox } from "../../types/app";
 import useCapabilities from "../../hooks/useCapabilities";
 import olDefaults from "../../data/ol-defaults.json";
 import "geoportal-extensions-openlayers/dist/GpPluginOpenLayers.css";
 import "../../sass/components/map-view.scss";
 import "../../sass/components/ol.scss";
-import TMSService from "../../modules/WebServices/TMSService";
 import { OfferingDetailResponseDtoTypeEnum } from "../../types/entrepot";
-import WMSVectorService from "../../modules/WebServices/WMSVectorService";
+import getWebService from "../../modules/WebServices/WebServices";
+import StyleHelper from "../../modules/WebServices/StyleHelper";
 
 type RMapProps = {
     service: Service;
@@ -54,6 +53,10 @@ const RMap: FC<RMapProps> = ({ service }) => {
         }
         return extent;
     }, [service.configuration.type_infos]);
+
+    const currentStyle: CartesStyle | undefined = useMemo(() => {
+        return StyleHelper.getCurrentStyle(service.configuration.styles);
+    }, [service.configuration.styles]);
 
     const gfinfo = [OfferingDetailResponseDtoTypeEnum.WFS, OfferingDetailResponseDtoTypeEnum.WMSVECTOR, OfferingDetailResponseDtoTypeEnum.WMTSTMS].includes(
         service.type
@@ -125,86 +128,67 @@ const RMap: FC<RMapProps> = ({ service }) => {
     }, [gfinfo]);
 
     useEffect(() => {
-        const addLayer = (layer) => {
-            // Ajout du layer dans la carte et dans le LayerSwitcher
-            if (mapRef.current) {
-                mapRef.current.addLayer(layer);
-                getControl("LayerSwitcher")?.addLayer(layer, {
-                    title: layer.get("title"),
-                    description: layer.get("abstract"),
-                });
-            }
-        };
-
-        const getLayers = async () => {
-            // TODO Utiliser une factory ?
-            let webService;
-            switch (service.type) {
-                case OfferingDetailResponseDtoTypeEnum.WFS: {
-                    webService = new WFSService(service);
-                    break;
-                }
-                case OfferingDetailResponseDtoTypeEnum.WMTSTMS: {
-                    webService = new TMSService(service);
-                    break;
-                }
-                case OfferingDetailResponseDtoTypeEnum.WMSVECTOR: {
-                    webService = new WMSVectorService(service);
-                    break;
-                }
-                default:
-                    return Promise.resolve([]);
-            }
-
-            if (webService) {
-                return await webService.getLayers();
-            }
-        };
-
-        if (capabilities && mapRef.current) {
-            // Ajout de la couche de fond PlanIgnV2
-            const wmtsOptions = optionsFromCapabilities(capabilities, {
-                layer: olDefaults.default_background_layer,
-            });
-
-            if (wmtsOptions) {
-                const capLayer = capabilities.Contents.Layer?.find((l) => {
-                    return l.Identifier === olDefaults.default_background_layer;
-                });
-
-                const layer = new TileLayer({
-                    opacity: 1,
-                    source: new WMTS(wmtsOptions),
-                });
-                layer.set("title", capLayer?.Title);
-                addLayer(layer);
-            }
-
-            getLayers()
-                .then((layers) => {
-                    const gfiLayers: object[] = [];
-                    layers?.forEach((layer) => {
-                        addLayer(layer);
-                        if (gfinfo) {
-                            gfiLayers.push({ obj: layer });
-                        }
+        (async () => {
+            const addLayer = (layer) => {
+                // Ajout du layer dans la carte et dans le LayerSwitcher
+                if (mapRef.current) {
+                    mapRef.current.addLayer(layer);
+                    getControl("LayerSwitcher")?.addLayer(layer, {
+                        title: layer.get("title"),
+                        description: layer.get("abstract"),
                     });
-                    getControl("GetFeatureInfo")?.setLayers(gfiLayers);
+                }
+            };
 
-                    // On zoom sur l'extent de la couche au premier rendu
-                    if (extent) {
-                        mapRef.current?.getView().fit(extent);
-                    }
-                    /*if (extent && context.firstRender) {
-                        mapRef.current?.getView().fit(extent);
-                        context.firstRender = false;
-                    }*/
-                })
-                .catch((err) => {
-                    console.error(err);
+            const getLayers = async () => {
+                const webService = getWebService(service);
+                return await webService.getLayers();
+            };
+
+            if (capabilities && mapRef.current) {
+                // Ajout de la couche de fond PlanIgnV2
+                const wmtsOptions = optionsFromCapabilities(capabilities, {
+                    layer: olDefaults.default_background_layer,
                 });
-        }
+
+                if (wmtsOptions) {
+                    const capLayer = capabilities.Contents.Layer?.find((l) => {
+                        return l.Identifier === olDefaults.default_background_layer;
+                    });
+
+                    const layer = new TileLayer({
+                        opacity: 1,
+                        source: new WMTS(wmtsOptions),
+                    });
+                    layer.set("title", capLayer?.Title);
+                    addLayer(layer);
+                }
+
+                const layers = await getLayers();
+
+                const gfiLayers: object[] = [];
+                layers.forEach((layer) => {
+                    addLayer(layer);
+                    if (gfinfo) {
+                        gfiLayers.push({ obj: layer });
+                    }
+                });
+                getControl("GetFeatureInfo")?.setLayers(gfiLayers);
+
+                // On zoom sur l'extent de la couche au premier rendu
+                if (extent) {
+                    mapRef.current?.getView().fit(extent);
+                }
+            }
+        })();
     }, [capabilities, extent, service, gfinfo]);
+
+    useEffect(() => {
+        if (currentStyle && mapRef.current && capabilities) {
+            const layers = mapRef.current.getLayers().getArray();
+            StyleHelper.applyStyle(layers, currentStyle);
+        }
+    }, [currentStyle, capabilities]);
 
     return <div className={"map-view"} ref={mapTargetRef} />;
 };

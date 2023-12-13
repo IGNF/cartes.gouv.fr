@@ -2,9 +2,9 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
-import { FC, useEffect, useMemo } from "react";
+import { FC, useMemo } from "react";
 
 import api from "../../../api";
 import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
@@ -14,9 +14,12 @@ import TextCopyToClipboard from "../../../components/Utils/TextCopyToClipboard";
 import RQKeys from "../../../modules/RQKeys";
 import { type CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
-import { TagStyle, type Service } from "../../../types/app";
-import { OfferingDetailResponseDtoTypeEnum } from "../../../types/entrepot"; // TODO A SUPPRIMER
+import { CartesStyle, Configuration, type Service } from "../../../types/app";
+import { OfferingDetailResponseDtoTypeEnum } from "../../../types/entrepot";
 import { addStyleModal, StyleComponent } from "../../../components/StyleComponent";
+import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
+import StyleLabel from "./StyleLabel";
+import { FieldsetProps } from "@codegouvfr/react-dsfr/shared/Fieldset";
 
 type ServiceViewProps = {
     datastoreId: string;
@@ -39,31 +42,31 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
         refetchInterval: 60000,
     });
 
-    // TODO A VOIR : Styles du service
-    /*const styles = useMemo<TagStyle[]>(() => {
-        const configuration = serviceQuery.data?.configuration as ConfigurationDetailResponseDto;
+    // Les styles
+    const styles: CartesStyle[] | undefined = useMemo(() => {
+        const configuration = serviceQuery.data?.configuration as Configuration;
         if (configuration) {
-            return configuration.tags.styles ? JSON.parse(configuration.tags.styles) : [];
+            return configuration.styles;
         }
-    }, [serviceQuery.data]);*/
-
-    useEffect(() => {
-        console.log(serviceQuery.data);
-    }, [serviceQuery.data]);
+        return undefined;
+    }, [serviceQuery.data?.configuration]);
 
     // Recherche du nom des styles dans tous les services de la fiche de donnees datasheetName
     const styleNames = useMemo<string[]>(() => {
-        let styles: TagStyle[] = [];
+        let styles: CartesStyle[] = [];
         serviceListQuery.data?.forEach((service) => {
-            const configuration = service.configuration;
-            const s = configuration.tags.styles ? JSON.parse(configuration.tags.styles) : [];
-            styles = styles.concat(s);
+            const configuration = service.configuration as Configuration;
+            if ("styles" in configuration && Array.isArray(configuration.styles)) {
+                styles = styles.concat(configuration.styles);
+            }
         });
         return styles.map((style) => style.name);
     }, [serviceListQuery.data]);
 
-    const hasStyles =
+    const canManageStyles =
         serviceQuery.data?.type === OfferingDetailResponseDtoTypeEnum.WFS || serviceQuery.data?.type === OfferingDetailResponseDtoTypeEnum.WMTSTMS;
+
+    const queryClient = useQueryClient();
 
     // ONGLETS
     const tabs = [
@@ -105,8 +108,56 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
         },
     ];
 
+    // Suppression d'un style
+    const { isPending: isRemovePending, mutate: mutateRemove } = useMutation<CartesStyle[] | undefined, CartesApiException, string>({
+        mutationFn: (name: string) => {
+            if (serviceQuery.data) {
+                return api.style.remove(datastoreId, serviceQuery.data._id, { style_name: name });
+            }
+            return Promise.resolve(undefined);
+        },
+        onSuccess() {
+            if (serviceQuery?.data !== undefined) {
+                queryClient.refetchQueries({ queryKey: RQKeys.datastore_offering(datastoreId, serviceQuery?.data?._id) });
+                queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName) });
+            }
+        },
+    });
+
+    const handleRemove = (name: string) => {
+        mutateRemove(name);
+    };
+
+    // Changement de style par defaut
+    const { isPending: isPendingChangeCurrentStyle, mutate: mutateChangeCurrentStyle } = useMutation<CartesStyle[] | undefined, CartesApiException, string>({
+        mutationFn: (name: string) => {
+            if (serviceQuery.data) {
+                return api.style.setCurrent(datastoreId, serviceQuery.data._id, { style_name: name });
+            }
+            return Promise.resolve(undefined);
+        },
+        onSuccess() {
+            if (serviceQuery?.data !== undefined) {
+                queryClient.refetchQueries({ queryKey: RQKeys.datastore_offering(datastoreId, serviceQuery?.data?._id) });
+            }
+        },
+    });
+
+    // La liste des styles
+    const radioOptions: FieldsetProps.Common["options"] = [];
+    styles?.forEach((style) => {
+        const option = {
+            label: <StyleLabel style={style} onRemove={handleRemove} />,
+            nativeInputProps: {
+                checked: style.current,
+                onChange: () => mutateChangeCurrentStyle(style.name),
+            },
+        };
+        radioOptions.push(option);
+    });
+
     // Pas de gestion des styles pour les autres services
-    if (hasStyles) {
+    if (canManageStyles) {
         tabs.push({
             label: "Gérer les styles",
             content: (
@@ -118,6 +169,7 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
                             </a>
                         </p>
                     </div>
+                    {styles && styles.length !== 0 && <RadioButtons legend={"Mes styles :"} options={radioOptions} orientation="horizontal" />}
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
                         <Button onClick={() => addStyleModal.open()}>Ajouter un style</Button>
                     </div>
@@ -177,8 +229,22 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
                             <Tabs tabs={tabs} />
                         </div>
                     </div>
-                    {hasStyles && <StyleComponent datastoreId={datastoreId} service={serviceQuery?.data} styleNames={styleNames} />}
+                    {canManageStyles && (
+                        <StyleComponent datastoreId={datastoreId} datasheetName={datasheetName} service={serviceQuery?.data} styleNames={styleNames} />
+                    )}
                 </>
+            )}
+            {isPendingChangeCurrentStyle && (
+                <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
+                    <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " icons-spin"} />
+                    <h6 className={fr.cx("fr-m-0")}>Changement de style en cours ...</h6>
+                </div>
+            )}
+            {isRemovePending && (
+                <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
+                    <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " icons-spin"} />
+                    <h6 className={fr.cx("fr-m-0")}>Suppression en cours ...</h6>
+                </div>
             )}
         </DatastoreLayout>
     );

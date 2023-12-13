@@ -3066,6 +3066,11 @@ css-declaration-sorter@^6.3.1:
   resolved "https://registry.yarnpkg.com/css-declaration-sorter/-/css-declaration-sorter-6.4.1.tgz#28beac7c20bad7f1775be3a7129d7eae409a3a71"
   integrity sha512-rtdthzxKuyq6IzqX6jEcIzQF/YqccluefyCYheovBOLhFT/drQA9zj/UbRAa9J7C0o6EG6u3E6g+vKkay7/k3g==
 
+css-font-parser@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/css-font-parser/-/css-font-parser-2.0.0.tgz#3cc15cd7a44614b4e10a0ae89b071198bb82a796"
+  integrity sha512-YjgBiAq5rFNXfsPHofaEZwsUbCoSK0avstS76BSqNyVCM7+oiO44wZxbtq6YFSaQafCG0llS/f79oqlsmzaBJg==
+
 css-loader@^6.7.0:
   version "6.8.1"
   resolved "https://registry.yarnpkg.com/css-loader/-/css-loader-6.8.1.tgz#0f8f52699f60f5e679eab4ec0fcd68b8e8a50a88"
@@ -4390,6 +4395,14 @@ geostyler-mapbox-parser@^5.0.1:
   dependencies:
     "@types/mapbox-gl" "^2.7.18"
     geostyler-style "^8.0.0"
+
+geostyler-openlayers-parser@^4.3.0:
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/geostyler-openlayers-parser/-/geostyler-openlayers-parser-4.3.0.tgz#961ca17c386fbcf77517334c81344bc072800923"
+  integrity sha512-9LoctzoxorZogOpp6nXT6SZGnISRpNR9M+MLyhYVTFlOtDi4Gb4fWbUnpqVzDxqMNl8anMmv7cpMsmw1bjWsLw==
+  dependencies:
+    css-font-parser "^2.0.0"
+    geostyler-style "^8.1.0"
 
 geostyler-qgis-parser@^2.0.0:
   version "2.0.0"

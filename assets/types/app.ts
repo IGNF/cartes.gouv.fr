@@ -106,8 +106,21 @@ export type UploadTree = UploadTreeElementResponseDto[];
 /** user, objet représentant l'utilisateur de l'API Entrepot */
 export type EntrepotUser = UserDetailsResponseDto;
 
+/** les styles */
+type StyleLayer = {
+    name?: string;
+    annexe_id: string;
+    url: string;
+};
+
+export type CartesStyle = {
+    name: string;
+    current?: boolean;
+    layers: StyleLayer[];
+};
+
 /** configuration & offerings */
-export type Configuration = ConfigurationDetailResponseDto;
+export type Configuration = ConfigurationDetailResponseDto & { styles?: CartesStyle[] };
 export const ConfigurationStatuses = ConfigurationDetailResponseDtoStatusEnum;
 
 export type Offering = OfferingDetailResponseDto;
@@ -146,16 +159,4 @@ export type StoredDataReport = {
             logs: CheckOrProcessingExecutionLogs;
         },
     ];
-};
-
-// Tag pour les styles
-export type TagLayer = {
-    name?: string;
-    annexe_id: string;
-};
-
-export type TagStyle = {
-    name: string;
-    current?: boolean;
-    layers: TagLayer[];
 };

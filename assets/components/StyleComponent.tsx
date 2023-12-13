@@ -1,5 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import { Service, TagStyle } from "../types/app";
+import { CartesStyle, Service } from "../types/app";
 import { FC, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
@@ -12,17 +12,19 @@ import * as yup from "yup";
 import { v4 as uuidv4 } from "uuid";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CartesApiException } from "../modules/jsonFetch";
-import { AddStyleFormType, StyleHelper } from "../modules/WebServices/StyleHelper";
+import StyleHelper from "../modules/WebServices/StyleHelper";
 import validations from "../validations";
 import api from "../api";
+import { OfferingDetailResponseDtoTypeEnum } from "../types/entrepot";
+import RQKeys from "../modules/RQKeys";
 
 type StyleComponentProps = {
     datastoreId: string;
+    datasheetName: string;
     service?: Service;
     styleNames: string[];
-    styles?: TagStyle[];
 };
 
 type FormatType = "mapbox" | "sld" | "qml";
@@ -37,7 +39,7 @@ const addStyleModal = createModal({
     isOpenedByDefault: false,
 });
 
-const StyleComponent: FC<StyleComponentProps> = ({ datastoreId, service, styleNames }) => {
+const StyleComponent: FC<StyleComponentProps> = ({ datastoreId, datasheetName, service, styleNames }) => {
     const schema = () => {
         const style_name = yup
             .string()
@@ -96,7 +98,15 @@ const StyleComponent: FC<StyleComponentProps> = ({ datastoreId, service, styleNa
     const [layers, setLayers] = useState<Record<string, string>>({});
 
     const [error, setError] = useState<ErrorType | undefined>(undefined);
-    const [format, setFormat] = useState<FormatType>("mapbox");
+    const [format, setFormat] = useState<FormatType | undefined>(() => {
+        let defaultFormat: FormatType | undefined;
+        if (service?.type === OfferingDetailResponseDtoTypeEnum.WFS) {
+            defaultFormat = "sld";
+        } else if (service?.type === OfferingDetailResponseDtoTypeEnum.WMTSTMS) {
+            defaultFormat = "mapbox";
+        }
+        return defaultFormat;
+    });
 
     // On utilise un uuid car le nom des couches peuvent contenir des espaces, des quotes
     // et la creation du schema pose problemes
@@ -125,7 +135,7 @@ const StyleComponent: FC<StyleComponentProps> = ({ datastoreId, service, styleNa
         handleSubmit,
     } = useForm({ resolver: yupResolver(schema()), mode: "onChange" });
 
-    const hasStyles = service?.type === "WFS" || service?.type === "WMTS-TMS";
+    const hasStyles = service?.type === OfferingDetailResponseDtoTypeEnum.WFS || service?.type === OfferingDetailResponseDtoTypeEnum.WMTSTMS;
 
     const onChangeFormat = (f: FormatType) => {
         setFormat(f);
@@ -135,7 +145,7 @@ const StyleComponent: FC<StyleComponentProps> = ({ datastoreId, service, styleNa
     const checkForm = (): boolean => {
         setError(undefined);
 
-        const values = getFormValues() as AddStyleFormType;
+        const values = getFormValues();
         const b = StyleHelper.check(values);
         if (!b) {
             setError({ message: "Il faut ajouter au moins un fichier.", severity: "warning" });
@@ -151,31 +161,58 @@ const StyleComponent: FC<StyleComponentProps> = ({ datastoreId, service, styleNa
         }
     };
 
-    // const queryClient = useQueryClient();
+    const queryClient = useQueryClient();
 
     // Ajout d'un style
-    const { isPending, mutate: mutateAdd } = useMutation<undefined, CartesApiException, FormData>({
+    const { isPending, mutate: mutateAdd } = useMutation<CartesStyle[] | undefined, CartesApiException, FormData>({
         mutationFn: (form: FormData) => {
             if (service?._id) {
                 return api.style.add(datastoreId, service?._id, form);
             }
             return Promise.resolve(undefined);
         },
-        onSuccess: (styles) => {
-            console.log(styles);
-            // TODO METTRE A JOUR LA LISTE DES STYLES
-            /*queryClient.setQueryData<OfferingDetailResponseDto>(RQKeys.datastore_offering(datastoreId, service?._id), (service) => {    
-            });*/
+        onSuccess: () => {
+            setError(undefined);
+            if (service !== undefined) {
+                queryClient.refetchQueries({ queryKey: RQKeys.datastore_offering(datastoreId, service._id) });
+                queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName) });
+            }
             addStyleModal.close();
         },
         onError: (error) => {
             setError({ message: error.message, severity: "error" });
         },
         onSettled: () => {
-            setError(undefined);
             reset({ style_name: "", style_files: {} });
         },
     });
+
+    const radioOptions = [
+        {
+            label: "sld",
+            nativeInputProps: {
+                checked: format === "sld",
+                onChange: () => onChangeFormat("sld"),
+            },
+        },
+        {
+            label: "qml",
+            nativeInputProps: {
+                checked: format === "qml",
+                onChange: () => onChangeFormat("qml"),
+            },
+        },
+    ];
+
+    if (service?.type === OfferingDetailResponseDtoTypeEnum.WMTSTMS) {
+        radioOptions.unshift({
+            label: "mapbox",
+            nativeInputProps: {
+                checked: format === "mapbox",
+                onChange: () => onChangeFormat("mapbox"),
+            },
+        });
+    }
 
     return createPortal(
         <addStyleModal.Component
@@ -219,33 +256,7 @@ const StyleComponent: FC<StyleComponentProps> = ({ datastoreId, service, styleNa
                                     ...register("style_name"),
                                 }}
                             />
-                            <RadioButtons
-                                legend={"Format du style :"}
-                                options={[
-                                    {
-                                        label: "mapbox",
-                                        nativeInputProps: {
-                                            checked: format === "mapbox",
-                                            onChange: () => onChangeFormat("mapbox"),
-                                        },
-                                    },
-                                    {
-                                        label: "sld",
-                                        nativeInputProps: {
-                                            checked: format === "sld",
-                                            onChange: () => onChangeFormat("sld"),
-                                        },
-                                    },
-                                    {
-                                        label: "qml",
-                                        nativeInputProps: {
-                                            checked: format === "qml",
-                                            onChange: () => onChangeFormat("qml"),
-                                        },
-                                    },
-                                ]}
-                                orientation="horizontal"
-                            />
+                            <RadioButtons legend={"Format du style :"} options={radioOptions} orientation="horizontal" />
                         </>
                     )}
                     {hasStyles && format === "sld" && (

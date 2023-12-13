@@ -2,15 +2,17 @@
 
 namespace App\Controller\Api;
 
-use App\Constants\EntrepotApi\ConfigurationStatuses;
-use App\Constants\EntrepotApi\StaticFileTypes;
+use App\Controller\StyleTrait;
+use App\Services\EntrepotApiService;
 use App\Exception\CartesApiException;
 use App\Exception\EntrepotApiException;
-use App\Services\EntrepotApiService;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Constants\EntrepotApi\OfferingTypes;
+use App\Constants\EntrepotApi\StaticFileTypes;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Constants\EntrepotApi\ConfigurationStatuses;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 #[Route(
     '/api/datastores/{datastoreId}/offerings',
@@ -20,6 +22,8 @@ use Symfony\Component\Routing\Annotation\Route;
 )]
 class ServiceController extends AbstractController implements ApiControllerInterface
 {
+    use StyleTrait;
+    
     public function __construct(
         private EntrepotApiService $entrepotApiService
     ) {
@@ -44,10 +48,12 @@ class ServiceController extends AbstractController implements ApiControllerInter
             $offering = $this->entrepotApiService->configuration->getOffering($datastoreId, $offeringId);
             $offering['configuration'] = $this->entrepotApiService->configuration->get($datastoreId, $offering['configuration']['_id']);
 
-            // TODO PEUT ETRE PROVISOIRE 
-            $styles = $this->_getStyles($datastoreId, $offering['configuration']['_id']);
+            $styles = [];
+            if ($offering['type'] === OfferingTypes::WFS || $offering['type'] === OfferingTypes::WMTSTMS) {
+                $styles = $this->getStyles($datastoreId, $offering['configuration']['_id']);
+            }
             $offering['configuration']['styles'] = $styles;
-
+            
             return $this->json($offering);
         } catch (EntrepotApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
@@ -119,34 +125,5 @@ class ServiceController extends AbstractController implements ApiControllerInter
         } catch (EntrepotApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
-    }
-
-    /**
-     * Recherche des styles et ajout de l'url
-     *
-     * @param string $datastoreId
-     * @param string $configId
-     * @return array<mixed>
-     */
-    private function _getStyles(string $datastoreId, string $configId) : array
-    {
-        $path = "/configuration/$configId/styles.json";
-        $styleAnnexes = $this->entrepotApiService->annexe->getAll($datastoreId, null, $path);
-            
-        $styles = [];
-        if (count($styleAnnexes)) {
-            $content = $this->entrepotApiService->annexe->download($datastoreId, $styleAnnexes[0]['_id']);
-            $styles = json_decode($content, true);    
-        }
-        
-        // Ajout des urls
-        foreach($styles as &$style) {
-            foreach($style['layers'] as &$layer) {
-                $annexe = $this->entrepotApiService->annexe->get($datastoreId, $layer['annexe_id']);
-                $layer['url'] = $annexe['paths'][0];
-            }    
-        }
-
-        return $styles;
     }
 }

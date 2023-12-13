@@ -577,6 +577,7 @@ export type ConfigurationWmtsTmsDetailsContent = ConfigurationDetailsContent & {
 };
 
 /** Informations détaillées sur la configuration */
+
 export interface ConfigurationDetailResponseDto {
     /** Nom de la configuration */
     name: string;

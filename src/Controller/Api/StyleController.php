@@ -78,6 +78,121 @@ class StyleController extends AbstractController implements ApiControllerInterfa
         }
     }
 
+    #[Route('/{offeringId}/remove', name: 'remove', methods: ['POST'],
+        options: ['expose' => true],
+        condition: 'request.isXmlHttpRequest()')
+    ]
+    public function remove(string $datastoreId, string $offeringId, Request $request) : JsonResponse{
+        try {
+            // NOTE array_values re indexe les arrays
+            $data = json_decode($request->getContent(), true);
+            $styleName = $data['style_name'];
+
+            $offering = $this->entrepotApiService->configuration->getOffering($datastoreId, $offeringId);
+            $configId = $offering['configuration']['_id'];
+
+            // Recuperation des styles de la configuration
+            $path = "/configuration/$configId/styles.json";
+            $styleAnnexes = $this->entrepotApiService->annexe->getAll($datastoreId, null, $path);
+            
+            $styles = [];
+            if (0 != count($styleAnnexes)) {
+                $content = $this->entrepotApiService->annexe->download($datastoreId, $styleAnnexes[0]['_id']);
+                $styles = json_decode($content, true);    
+            }
+
+            // Recuperation du style
+            $style = array_values(array_filter($styles, static function ($style) use ($styleName) {
+                return $style['name'] == $styleName;
+            }));
+            if (0 == count($style)) {
+                throw new CartesApiException("Style $styleName does not exists", JsonResponse::HTTP_BAD_REQUEST);
+            }
+
+            // Suppression de toutes les annexes liees au style
+            foreach($style[0]['layers'] as $layer) {
+                $annexeId = $layer['annexe_id'];
+                $this->entrepotApiService->annexe->remove($datastoreId, $annexeId);
+            }
+
+            // On enleve le style
+            $styles = array_values(array_filter($styles, static function ($style) use ($styleName) {
+                return $style['name'] != $styleName;
+            }));
+
+            // Y-a-t-il un style courant
+            $current = array_filter($styles, static function ($style) {
+                return isset($style['current']);
+            });
+
+            // Plus de style courant, on en met un (le premier)
+            if (0 == count($current) && 0 != count($styles)) {
+                $styles[0]['current'] = true;    
+            }
+
+            // Plus de style, on supprime le fichier
+            $annexeId = count($styleAnnexes) ? $styleAnnexes[0]['_id'] : null;
+            if ($annexeId && 0 == count($styles)) {
+                $this->entrepotApiService->annexe->remove($datastoreId, $styleAnnexes[0]['_id']);
+                return new JsonResponse([]);
+            }
+
+            // Ecriture des styles mis a jour
+            $this->writeStyleFile($datastoreId,$annexeId, $styles, $path);
+
+            return new JsonResponse($styles);
+        } catch (EntrepotApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
+    #[Route('/{offeringId}/setcurrent', name: 'setcurrent', methods: ['POST'],
+        options: ['expose' => true],
+        condition: 'request.isXmlHttpRequest()')
+    ]
+    public function setCurrentStyle(string $datastoreId, string $offeringId, Request $request) : JsonResponse{
+        try {
+            $data = json_decode($request->getContent(), true);
+            $styleName = $data['style_name'];
+
+            $offering = $this->entrepotApiService->configuration->getOffering($datastoreId, $offeringId);
+            $configId = $offering['configuration']['_id'];
+ 
+            // Recuperation des styles de la configuration
+            $path = "/configuration/$configId/styles.json";
+            $styleAnnexes = $this->entrepotApiService->annexe->getAll($datastoreId, null, $path);
+            
+            $styles = [];
+            if (0 != count($styleAnnexes)) {
+                $content = $this->entrepotApiService->annexe->download($datastoreId, $styleAnnexes[0]['_id']);
+                $styles = json_decode($content, true);    
+            }
+            
+            // Recuperation du style
+            $style = array_filter($styles, static function ($style) use ($styleName) {
+                return $style['name'] == $styleName;
+            });
+            if (0 == count($style)) {
+                throw new CartesApiException("Style $styleName does not exists", JsonResponse::HTTP_BAD_REQUEST);
+            }
+            
+            // Suppression du style courant et mise a jour du style
+            $this->cleanStyleTags($styles);
+            $this->setCurrent($styles, $styleName);
+
+            $annexeId = count($styleAnnexes) ? $styleAnnexes[0]['_id'] : null;
+
+            // Ecriture des styles mis a jour
+            $this->writeStyleFile($datastoreId,$annexeId, $styles, $path);
+
+            return new JsonResponse($styles);
+        } catch (EntrepotApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+    
+
+
     /**
      * Ajout d'un fichier de style sous forme d'annexe
      *
@@ -110,6 +225,22 @@ class StyleController extends AbstractController implements ApiControllerInterfa
     private function cleanStyleTags(&$styles) : void {
         foreach($styles as &$style) {
             unset($style['current']);
+        }
+    }
+
+    /**
+     * Suppression de la cle current
+     *
+     * @param array<mixed> $styles
+     * @param string $styleName
+     * @return void
+     */
+    private function setCurrent(&$styles, $styleName) {
+        foreach($styles as &$style) {
+            if ($style['name'] == $styleName) {
+                $style['current'] = true;
+                break;  
+            }
         }
     }
 

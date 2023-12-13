@@ -5,7 +5,11 @@ import SldStyleValidator from "./SldStyleValidator";
 import QGisStyleValidator from "./QGisStyleValidator";
 import MapboxStyleValidator from "./MapboxStyleValidator";
 
-const getValidator = (format: FileFormat) => {
+const getValidator = (format: FileFormat | undefined) => {
+    if (format === undefined) {
+        throw new Error("Format is not defined");
+    }
+
     switch (format) {
         case "sld":
             return new SldStyleValidator(format);

@@ -6,9 +6,9 @@ const Common = () => {
 
 export default Common;
 
-export const { i18n } = declareComponentKeys<"error" | "add" | "modify" | "send" | "cancel" | "delete" | "yes" | "no" | "published" | "not_published">()({
-    Common,
-});
+export const { i18n } = declareComponentKeys<"error" | "add" | "modify" | "send" | "cancel" | "delete" | "yes" | "no" | "published" | "not_published">()(
+    "Common"
+);
 
 export const commonFrTranslations: Translations<"fr">["Common"] = {
     error: "Une erreur est survenue",
