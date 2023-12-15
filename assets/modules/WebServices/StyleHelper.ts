@@ -8,6 +8,7 @@ import MapboxStyleParser from "geostyler-mapbox-parser";
 import OpenLayersParser from "geostyler-openlayers-parser";
 import { CartesStyle } from "../../types/app";
 import BaseLayer from "ol/layer/Base";
+import { Geometry } from "ol/geom";
 
 type AddStyleFormType = {
     style_name: string;
@@ -78,7 +79,7 @@ class StyleHelper {
         }
     }
 
-    static async #_getOlStyle(layer: VectorLayer<VectorSource> | VectorTileLayer, currentStyle: CartesStyle) {
+    static async #_getOlStyle(layer: VectorLayer<VectorSource<Geometry>> | VectorTileLayer, currentStyle: CartesStyle) {
         const name = layer.get("name");
         const s = currentStyle.layers.filter((l) => l.name === name);
         if (!s.length) return undefined;
