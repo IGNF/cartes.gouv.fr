@@ -107,6 +107,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                                         children: t("datasheet.remove"),
                                         onClick: () => deleteDataConfirmModal.open(),
                                         iconId: "fr-icon-delete-fill",
+                                        priority: "secondary",
                                     },
                                 ]}
                             />
@@ -120,7 +121,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                                     {
                                         label: t("tab_label.metadatas"),
                                         isDefault: route.params["activeTab"] === "metadata",
-                                        content: <p>...liste de métadonnées...</p>,
+                                        content: <p>Liste des métadonnées à venir (bloqué par une évolution nécessaire sur les tags des entités metadata)</p>,
                                     },
                                     {
                                         label: t("tab_label.datasets", { num: datasheetQuery?.data?.vector_db_list?.length || 0 }),

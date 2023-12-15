@@ -109,6 +109,7 @@ const VectorDbList: FC<VectorDbListProps> = ({ datastoreId, vectorDbList }) => {
                                     serviceTypeChoiceModal.open();
                                 }}
                                 className={fr.cx("fr-mr-2v")}
+                                priority="secondary"
                                 disabled={el.status !== StoredDataStatuses.GENERATED}
                             >
                                 Créer un service
@@ -116,6 +117,7 @@ const VectorDbList: FC<VectorDbListProps> = ({ datastoreId, vectorDbList }) => {
                             <MenuList
                                 menuOpenButtonProps={{
                                     title: "Autres actions",
+                                    priority: "secondary",
                                 }}
                                 items={[
                                     {
