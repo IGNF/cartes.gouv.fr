@@ -16,11 +16,6 @@ import { routes } from "../../../../router/router";
 import type { Service } from "../../../../types/app";
 import { offeringTypeDisplayName } from "../../../../utils";
 
-const unpublishServiceConfirmModal = createModal({
-    id: "unpublish-service-confirm-modal",
-    isOpenedByDefault: false,
-});
-
 type ServicesListItemProps = {
     service: Service;
     datastoreId: string;
@@ -29,8 +24,13 @@ type ServicesListItemProps = {
 const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, datastoreId }) => {
     const queryClient = useQueryClient();
 
+    const unpublishServiceConfirmModal = createModal({
+        id: `unpublish-service-confirm-modal-${service._id}`,
+        isOpenedByDefault: false,
+    });
+
     const unpublishServiceMutation = useMutation({
-        mutationFn: () => {
+        mutationFn: (service: Service) => {
             switch (service.type) {
                 case "WFS":
                     return api.service.unpublishWfs(datastoreId, service._id);
@@ -123,7 +123,7 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                         },
                         {
                             children: "Oui, dépublier",
-                            onClick: () => unpublishServiceMutation.mutate(),
+                            onClick: () => unpublishServiceMutation.mutate(service),
                             doClosesModal: true,
                             priority: "primary",
                         },
