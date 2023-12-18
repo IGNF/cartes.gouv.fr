@@ -1,4 +1,4 @@
-import { FC, JSX, Suspense, lazy } from "react";
+import { FC, JSX, Suspense, lazy, useMemo } from "react";
 
 import AppLayout from "../components/Layout/AppLayout";
 import LoadingText from "../components/Utils/LoadingText";
@@ -49,113 +49,84 @@ const RouterRenderer: FC = () => {
     const route = useRoute();
     const { user } = useAuthStore();
 
-    // vérification si la route demandée est bien connue/enregistrée
-    if (route.name === false || !knownRoutes.includes(route.name)) {
-        return <PageNotFound />;
-    }
-
-    if (!publicRoutes.includes(route.name)) {
-        // vérifier si l'utilisateur est authentifié et éventuellement ses droits à la ressource demandée
-        if (user === null) {
-            // window.location.href = SymfonyRouting.generate("cartesgouvfr_security_login");
-            window.location.assign(SymfonyRouting.generate("cartesgouvfr_security_login"));
-            return <RedirectToLogin />;
+    const content: JSX.Element = useMemo(() => {
+        // vérification si la route demandée est bien connue/enregistrée
+        if (route.name === false || !knownRoutes.includes(route.name)) {
+            return <PageNotFound />;
         }
-    }
 
-    let content: JSX.Element;
+        if (!publicRoutes.includes(route.name)) {
+            // vérifier si l'utilisateur est authentifié et éventuellement ses droits à la ressource demandée
+            if (user === null) {
+                // window.location.href = SymfonyRouting.generate("cartesgouvfr_security_login");
+                window.location.assign(SymfonyRouting.generate("cartesgouvfr_security_login"));
+                return <RedirectToLogin />;
+            }
+        }
 
-    switch (route.name) {
-        case "home":
-            content = <Home />;
-            break;
-        case "about":
-            content = <About />;
-            break;
-        case "documentation":
-            content = <Documentation />;
-            break;
-        case "contact":
-            content = <Contact />;
-            break;
-        case "contact_thanks":
-            content = <Thanks />;
-            break;
-        case "news_list":
-            content = <NewsList />;
-            break;
-        case "news_article":
-            content = <NewsArticle slug={route.params.slug} />;
-            break;
-        case "faq":
-            content = <Faq />;
-            break;
-        case "sitemap":
-            content = <Sitemap />;
-            break;
-        case "accessibility":
-            content = <Accessibility />;
-            break;
-        case "legal_notice":
-            content = <LegalNotice />;
-            break;
-        case "personal_data":
-            content = <PersonalData />;
-            break;
-        case "my_account":
-            content = <Me />;
-            break;
-        case "dashboard_pro":
-            content = <DashboardPro />;
-            break;
-        case "datasheet_list":
-            content = <DatasheetList datastoreId={route.params.datastoreId} />;
-            break;
-        case "datastore_create_request":
-            content = <DatastoreCreationForm />;
-            break;
-        case "datastore_create_request_confirm":
-            content = <Confirm />;
-            break;
-        case "join_community":
-            content = <CommunityList />;
-            break;
-        case "datastore_datasheet_new":
-            content = <DatasheetNewForm datastoreId={route.params.datastoreId} />;
-            break;
-        case "datastore_datasheet_new_integration":
-            content = <DatasheetNewIntegrationPage datastoreId={route.params.datastoreId} uploadId={route.params.uploadId} />;
-            break;
-        case "datastore_datasheet_view":
-            content = <DatasheetView datastoreId={route.params.datastoreId} datasheetName={route.params.datasheetName} />;
-            break;
-        case "datastore_stored_data_report":
-            content = <StoredDataReport datastoreId={route.params.datastoreId} storedDataId={route.params.storedDataId} />;
-            break;
-        case "datastore_wfs_service_new":
-            content = <WfsServiceNew datastoreId={route.params.datastoreId} vectorDbId={route.params.vectorDbId} />;
-            break;
-        case "datastore_wms_vector_service_new":
-            content = <WmsVectorServiceNew datastoreId={route.params.datastoreId} vectorDbId={route.params.vectorDbId} />;
-            break;
-        case "datastore_pyramid_vector_new":
-            content = (
-                <PyramidVectorNew datastoreId={route.params.datastoreId} vectorDbId={route.params.vectorDbId} technicalName={route.params.technicalName} />
-            );
-            break;
-        case "datastore_tms_vector_service_new":
-            content = <PublishTmsServiceNew datastoreId={route.params.datastoreId} pyramidId={route.params.pyramidId} />;
-            break;
-        case "datastore_service_view":
-            content = <ServiceView datastoreId={route.params.datastoreId} offeringId={route.params.offeringId} datasheetName={route.params.datasheetName} />;
-            break;
-        case "my_tries": // TODO PROVISOIRE
-            content = <Tries />;
-            break;
-        default:
-            content = <PageNotFound />;
-            break;
-    }
+        switch (route.name) {
+            case "home":
+                return <Home />;
+            case "about":
+                return <About />;
+            case "documentation":
+                return <Documentation />;
+            case "contact":
+                return <Contact />;
+            case "contact_thanks":
+                return <Thanks />;
+            case "news_list":
+                return <NewsList />;
+            case "news_article":
+                return <NewsArticle slug={route.params.slug} />;
+            case "faq":
+                return <Faq />;
+            case "sitemap":
+                return <Sitemap />;
+            case "accessibility":
+                return <Accessibility />;
+            case "legal_notice":
+                return <LegalNotice />;
+            case "personal_data":
+                return <PersonalData />;
+            case "my_account":
+                return <Me />;
+            case "dashboard_pro":
+                return <DashboardPro />;
+            case "datasheet_list":
+                return <DatasheetList datastoreId={route.params.datastoreId} />;
+            case "datastore_create_request":
+                return <DatastoreCreationForm />;
+            case "datastore_create_request_confirm":
+                return <Confirm />;
+            case "join_community":
+                return <CommunityList />;
+            case "datastore_datasheet_new":
+                return <DatasheetNewForm datastoreId={route.params.datastoreId} />;
+            case "datastore_datasheet_new_integration":
+                return <DatasheetNewIntegrationPage datastoreId={route.params.datastoreId} uploadId={route.params.uploadId} />;
+            case "datastore_datasheet_view":
+                return <DatasheetView datastoreId={route.params.datastoreId} datasheetName={route.params.datasheetName} />;
+            case "datastore_stored_data_report":
+                return <StoredDataReport datastoreId={route.params.datastoreId} storedDataId={route.params.storedDataId} />;
+            case "datastore_wfs_service_new":
+                return <WfsServiceNew datastoreId={route.params.datastoreId} vectorDbId={route.params.vectorDbId} />;
+            case "datastore_wms_vector_service_new":
+                return <WmsVectorServiceNew datastoreId={route.params.datastoreId} vectorDbId={route.params.vectorDbId} />;
+            case "datastore_pyramid_vector_new":
+                return (
+                    <PyramidVectorNew datastoreId={route.params.datastoreId} vectorDbId={route.params.vectorDbId} technicalName={route.params.technicalName} />
+                );
+            case "datastore_tms_vector_service_new":
+                return <PublishTmsServiceNew datastoreId={route.params.datastoreId} pyramidId={route.params.pyramidId} />;
+            case "datastore_service_view":
+                return <ServiceView datastoreId={route.params.datastoreId} offeringId={route.params.offeringId} datasheetName={route.params.datasheetName} />;
+            case "my_tries": // TODO PROVISOIRE
+                return <Tries />;
+            default:
+                return <PageNotFound />;
+        }
+    }, [route, user]);
 
     return (
         <Suspense
