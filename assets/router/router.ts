@@ -55,6 +55,13 @@ const routeDefs = {
 
     datastore_create_request_confirm: defineRoute(`${appRoot}/confirmation`),
 
+    datastore_manage_storage: defineRoute(
+        {
+            datastoreId: param.path.string,
+        },
+        (p) => `${appRoot}/datastores/${p.datastoreId}/manage-storage`
+    ),
+
     // fiche de données
     datasheet_list: defineRoute(
         {

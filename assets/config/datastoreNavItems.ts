@@ -54,11 +54,15 @@ export const datastoreNavItems = (datastoreList: Datastore[] = [], currentDatast
             text: t("members"),
             linkProps: routes.members_list({ datastoreId: currentDatastore._id }).link,
         });
+        navItems.push({
+            text: t("manage_storage"),
+            linkProps: routes.datastore_manage_storage({ datastoreId: currentDatastore._id }).link,
+        });
     }
 
     if (datastoreList.length > 0) {
         const datastoreLinks: MainNavigationProps.Item.Menu = {
-            text: currentDatastore?.name ?? t("choose datastore"),
+            text: currentDatastore?.name ?? t("choose"),
             menuLinks:
                 datastoreList?.map((datastore) => ({
                     linkProps: routes.datasheet_list({ datastoreId: datastore._id }).link,
@@ -68,7 +72,7 @@ export const datastoreNavItems = (datastoreList: Datastore[] = [], currentDatast
         };
 
         datastoreLinks.menuLinks.push({
-            text: t("title"),
+            text: t("create_request"),
             linkProps: routes.datastore_create_request().link,
         });
         navItems.push(datastoreLinks);
@@ -78,20 +82,22 @@ export const datastoreNavItems = (datastoreList: Datastore[] = [], currentDatast
 };
 
 // traductions
-export const { i18n } = declareComponentKeys<"dashboard" | "data" | "members" | "choose datastore" | "title">()("datastoreNavItems");
+export const { i18n } = declareComponentKeys<"dashboard" | "data" | "members" | "manage_storage" | "choose" | "create_request">()("datastoreNavItems");
 
 export const datastoreNavItemsFrTranslations: Translations<"fr">["datastoreNavItems"] = {
     dashboard: "Tableau de bord",
     data: "Données",
     members: "Membres",
-    "choose datastore": "Choisir un espace de travail",
-    title: "Demande de création d'un espace de travail",
+    manage_storage: "Gérer l'espace de travail",
+    choose: "Choisir un espace de travail",
+    create_request: "Demande de création d'un espace de travail",
 };
 
 export const datastoreNavItemsEnTranslations: Translations<"en">["datastoreNavItems"] = {
     dashboard: undefined,
     data: undefined,
     members: undefined,
-    "choose datastore": undefined,
-    title: undefined,
+    manage_storage: undefined,
+    choose: undefined,
+    create_request: undefined,
 };

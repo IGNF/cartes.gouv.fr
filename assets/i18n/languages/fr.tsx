@@ -9,6 +9,7 @@ import { datastoreNavItemsFrTranslations } from "../../config/datastoreNavItems"
 import { contactFrTranslations } from "../../pages/contact/Contact";
 import { DatasheetViewFrTranslations } from "../../pages/datasheet/DatasheetView/DatasheetView";
 import { sldStyleValidationFrTranslations } from "../../validations/sldStyle";
+import { DatastoreManageStorageFrTranslations } from "../../pages/datastore/DatastoreManageStorage/DatastoreManageStorage";
 
 export const translations: Translations<"fr"> = {
     Common: commonFrTranslations,
@@ -21,4 +22,5 @@ export const translations: Translations<"fr"> = {
     datastoreNavItems: datastoreNavItemsFrTranslations,
     DatasheetView: DatasheetViewFrTranslations,
     sldStyleValidation: sldStyleValidationFrTranslations,
+    DatastoreManageStorage: DatastoreManageStorageFrTranslations,
 };

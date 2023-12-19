@@ -1,5 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import { FC, useEffect, useState } from "react";
+import { FC, useMemo } from "react";
 
 import "./../../sass/components/progress.scss";
 
@@ -9,12 +9,11 @@ type ProgressProps = {
     max?: number;
 };
 const Progress: FC<ProgressProps> = ({ label, value, max = 100 }) => {
-    const [percent, setPercent] = useState("");
-
-    useEffect(() => {
+    const percent = useMemo(() => {
         const percentage = Math.floor((value / max) * 100);
-        setPercent(`${percentage}%`);
-    }, [value, max]);
+
+        return `${percentage}%`;
+    }, [max, value]);
 
     return (
         <div className={fr.cx("fr-my-2v")}>

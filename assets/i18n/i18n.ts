@@ -25,7 +25,8 @@ export type ComponentKey =
     | typeof import("../config/navItems").i18n
     | typeof import("../config/datastoreNavItems").i18n
     | typeof import("../pages/datasheet/DatasheetView/DatasheetView").i18n
-    | typeof import("../validations/sldStyle").i18n;
+    | typeof import("../validations/sldStyle").i18n
+    | typeof import("../pages/datastore/DatastoreManageStorage/DatastoreManageStorage").i18n;
 
 export type Translations<L extends Language> = GenericTranslations<ComponentKey, Language, typeof fallbackLanguage, L>;
 export type LocalizedString = Parameters<typeof resolveLocalizedString>[0];

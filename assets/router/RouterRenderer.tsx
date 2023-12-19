@@ -24,6 +24,8 @@ const Tries = lazy(() => import("../pages/Tries")); // TODO PROVISOIRE
 
 const Me = lazy(() => import("../pages/users/Me"));
 
+const DatastoreManageStorage = lazy(() => import("../pages/datastore/DatastoreManageStorage/DatastoreManageStorage"));
+
 const DashboardPro = lazy(() => import("../pages/dashboard/DashboardPro"));
 const DatasheetList = lazy(() => import("../pages/datasheet/DatasheetList/DatasheetList"));
 
@@ -92,6 +94,8 @@ const RouterRenderer: FC = () => {
                 return <PersonalData />;
             case "my_account":
                 return <Me />;
+            case "datastore_manage_storage":
+                return <DatastoreManageStorage datastoreId={route.params.datastoreId} />;
             case "dashboard_pro":
                 return <DashboardPro />;
             case "datasheet_list":

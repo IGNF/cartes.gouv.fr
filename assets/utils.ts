@@ -55,6 +55,21 @@ const removeDiacritics = (str) => {
     return str;
 };
 
+/**
+ * Convertit des octets en KB, MB ...
+ */
+const niceBytes = (x: string) => {
+    const units = ["bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+
+    let l = 0,
+        n = parseInt(x, 10) || 0;
+    while (n >= 1024 && ++l) {
+        n = n / 1024;
+    }
+
+    return n.toFixed(n < 10 && l > 0 ? 2 : 0) + " " + units[l];
+};
+
 const regex = {
     name_constraint: /^[\w-.]+$/,
     email: /^[\w-.]+@([\w-]+\.)+[\w-]{2,}$/,
@@ -118,4 +133,4 @@ const offeringTypeDisplayName = (type: OfferingDetailResponseDtoTypeEnum): strin
     }
 };
 
-export { getInspireKeywords, getLanguages, charsets, removeDiacritics, regex, decodeContentRange, offeringTypeDisplayName };
+export { getInspireKeywords, getLanguages, charsets, removeDiacritics, regex, decodeContentRange, offeringTypeDisplayName, niceBytes };

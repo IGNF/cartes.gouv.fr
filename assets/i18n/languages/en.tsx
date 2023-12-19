@@ -9,6 +9,7 @@ import { datastoreNavItemsEnTranslations } from "../../config/datastoreNavItems"
 import { contactEnTranslations } from "../../pages/contact/Contact";
 import { DatasheetViewEnTranslations } from "../../pages/datasheet/DatasheetView/DatasheetView";
 import { sldStyleValidationEnTranslations } from "../../validations/sldStyle";
+import { DatastoreManageStorageEnTranslations } from "../../pages/datastore/DatastoreManageStorage/DatastoreManageStorage";
 
 export const translations: Translations<"en"> = {
     Common: commonEnTranslations,
@@ -21,4 +22,5 @@ export const translations: Translations<"en"> = {
     datastoreNavItems: datastoreNavItemsEnTranslations,
     DatasheetView: DatasheetViewEnTranslations,
     sldStyleValidation: sldStyleValidationEnTranslations,
+    DatastoreManageStorage: DatastoreManageStorageEnTranslations,
 };
