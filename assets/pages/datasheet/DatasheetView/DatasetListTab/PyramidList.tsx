@@ -51,7 +51,7 @@ const PyramidList: FC<PyramidListProps> = ({ datastoreId, pyramidList }) => {
                                     {
                                         text: "Voir les détails",
                                         iconId: "fr-icon-file-text-fill",
-                                        onClick: () => console.warn("Action non implémentée"),
+                                        linkProps: routes.datastore_stored_data_report({ datastoreId, storedDataId: el._id }).link,
                                     },
                                     {
                                         text: "Supprimer",
