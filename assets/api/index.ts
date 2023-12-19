@@ -4,6 +4,7 @@ import datasheet from "./datasheet";
 import datastore from "./datastore";
 import storedData from "./stored-data";
 import upload from "./upload";
+import community from "./community";
 import user from "./user";
 import wfs from "./wfs";
 import wmsVector from "./wms-vector";
@@ -21,6 +22,7 @@ const api = {
     datastore,
     storedData,
     upload,
+    community,
     user,
     wfs,
     wmsVector,

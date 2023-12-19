@@ -50,6 +50,10 @@ export const datastoreNavItems = (datastoreList: Datastore[] = [], currentDatast
             text: t("data"),
             linkProps: routes.datasheet_list({ datastoreId: currentDatastore._id }).link,
         });
+        navItems.push({
+            text: t("members"),
+            linkProps: routes.members_list({ datastoreId: currentDatastore._id }).link,
+        });
     }
 
     if (datastoreList.length > 0) {
@@ -74,11 +78,12 @@ export const datastoreNavItems = (datastoreList: Datastore[] = [], currentDatast
 };
 
 // traductions
-export const { i18n } = declareComponentKeys<"dashboard" | "data" | "choose datastore" | "title">()("datastoreNavItems");
+export const { i18n } = declareComponentKeys<"dashboard" | "data" | "members" | "choose datastore" | "title">()("datastoreNavItems");
 
 export const datastoreNavItemsFrTranslations: Translations<"fr">["datastoreNavItems"] = {
     dashboard: "Tableau de bord",
     data: "Données",
+    members: "Membres",
     "choose datastore": "Choisir un espace de travail",
     title: "Demande de création d'un espace de travail",
 };
@@ -86,6 +91,7 @@ export const datastoreNavItemsFrTranslations: Translations<"fr">["datastoreNavIt
 export const datastoreNavItemsEnTranslations: Translations<"en">["datastoreNavItems"] = {
     dashboard: undefined,
     data: undefined,
+    members: undefined,
     "choose datastore": undefined,
     title: undefined,
 };

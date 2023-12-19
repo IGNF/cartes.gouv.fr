@@ -16,7 +16,10 @@ export const languagesDisplayNames: Record<Language, string> = {
 // types
 export type Language = (typeof languages)[number];
 export type ComponentKey =
-    | typeof import("../i18n/Common").i18n
+    | typeof import("./Common").i18n
+    | typeof import("./Rights").i18n
+    | typeof import("../pages/communities/AddMember").i18n
+    | typeof import("../pages/communities/CommunityMembers").i18n
     | typeof import("../pages/service/metadatas/metadatas-validation-tr").i18n
     | typeof import("../pages/contact/Contact").i18n
     | typeof import("../config/navItems").i18n

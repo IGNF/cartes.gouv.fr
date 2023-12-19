@@ -36,6 +36,7 @@ const StoredDataReport = lazy(() => import("../pages/stored_data/StoredDataRepor
 const DatastoreCreationForm = lazy(() => import("../pages/contact/datastore/DatastoreCreationForm"));
 const Confirm = lazy(() => import("../pages/contact/datastore/Confirmation"));
 
+const CommunityMembers = lazy(() => import("../pages/communities/CommunityMembers"));
 const CommunityList = lazy(() => import("../pages/communities/CommunityList"));
 
 const WfsServiceNew = lazy(() => import("../pages/service/wfs/WfsServiceNew"));
@@ -99,6 +100,8 @@ const RouterRenderer: FC = () => {
                 return <DatastoreCreationForm />;
             case "datastore_create_request_confirm":
                 return <Confirm />;
+            case "members_list":
+                return <CommunityMembers datastoreId={route.params.datastoreId} userId={route.params.userId} />;
             case "join_community":
                 return <CommunityList />;
             case "datastore_datasheet_new":

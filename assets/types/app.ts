@@ -24,6 +24,7 @@ import {
     ProcessingExecutionOutputStoredDataDto,
     AnnexDetailResponseDto,
     CommunityMemberDto,
+    CommunityUserResponseDtoRightsEnum,
 } from "./entrepot";
 
 /** user */
@@ -159,4 +160,9 @@ export type StoredDataReport = {
             logs: CheckOrProcessingExecutionLogs;
         },
     ];
+};
+
+export type UserRightsResponseDto = {
+    user: string;
+    rights: CommunityUserResponseDtoRightsEnum[];
 };

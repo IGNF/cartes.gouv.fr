@@ -14,7 +14,6 @@ import api from "../../../api";
 import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
 import LoadingText from "../../../components/Utils/LoadingText";
 import Wait from "../../../components/Utils/Wait";
-import Common from "../../../i18n/Common";
 import { Translations, declareComponentKeys, useTranslation } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/RQKeys";
 import { type CartesApiException } from "../../../modules/jsonFetch";
@@ -37,7 +36,7 @@ type DatasheetViewProps = {
 };
 
 const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) => {
-    const { t: tCommon } = useTranslation({ Common });
+    const { t: tCommon } = useTranslation("Common");
     const { t } = useTranslation({ DatasheetView });
 
     const route = useRoute();

@@ -17,7 +17,7 @@ const StyleLabel: FC<StyleLabelProps> = ({ style, onRemove }) => {
                     <Button
                         title={"Supprimer le style"}
                         priority={"tertiary"}
-                        iconId="fr-icon-delete-line"
+                        iconId={"fr-icon-delete-line"}
                         onClick={() => {
                             onRemove(style.name);
                         }}

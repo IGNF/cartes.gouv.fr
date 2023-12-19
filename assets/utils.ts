@@ -58,6 +58,7 @@ const removeDiacritics = (str) => {
 const regex = {
     name_constraint: /^[\w-.]+$/,
     email: /^[\w-.]+@([\w-]+\.)+[\w-]{2,}$/,
+    uuid: /^[A-Za-z\d]{8}-[A-Za-z\d]{4}-[A-Za-z\d]{4}-[A-Za-z\d]{4}-[A-Za-z\d]{12}$/,
 };
 
 export type ContentRangeType = {

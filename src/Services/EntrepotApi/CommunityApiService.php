@@ -11,7 +11,7 @@ class CommunityApiService extends AbstractEntrepotApiService
 
     public function getMembers(string $communityId): array
     {
-        return $this->request('GET', "communities/$communityId/users");
+        return $this->requestAll("communities/$communityId/users");
     }
 
     /**

@@ -44,6 +44,15 @@ const routeDefs = {
     // Demande pour rejoindre une communaute
     join_community: defineRoute(`${appRoot}/join_community`),
 
+    // Liste des membres d'une communaute
+    members_list: defineRoute(
+        {
+            datastoreId: param.path.string,
+            userId: param.query.optional.string,
+        },
+        (p) => `${appRoot}/datastore/${p.datastoreId}/members`
+    ),
+
     datastore_create_request_confirm: defineRoute(`${appRoot}/confirmation`),
 
     // fiche de données

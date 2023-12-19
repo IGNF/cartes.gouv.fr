@@ -1,19 +1,29 @@
 import { declareComponentKeys, type Translations } from "./i18n";
 
-const Common = () => {
-    return null;
-};
-
-export default Common;
-
-export const { i18n } = declareComponentKeys<"error" | "add" | "modify" | "send" | "cancel" | "delete" | "yes" | "no" | "published" | "not_published">()(
-    "Common"
-);
+export const { i18n } = declareComponentKeys<
+    | "error"
+    | "add"
+    | "adding"
+    | "modify"
+    | "modifying"
+    | "removing"
+    | "send"
+    | "cancel"
+    | "delete"
+    | "yes"
+    | "no"
+    | "published"
+    | "not_published"
+    | "information"
+>()("Common");
 
 export const commonFrTranslations: Translations<"fr">["Common"] = {
     error: "Une erreur est survenue",
     add: "Ajouter",
+    adding: "Ajout en cours ...",
     modify: "Modifier",
+    modifying: "Modification en cours ...",
+    removing: "Suppression en cours ...",
     send: "Envoyer",
     cancel: "Annuler",
     delete: "Supprimer",
@@ -21,12 +31,16 @@ export const commonFrTranslations: Translations<"fr">["Common"] = {
     no: "Non",
     published: "Publié",
     not_published: "Non publié",
+    information: "Information",
 };
 
 export const commonEnTranslations: Translations<"en">["Common"] = {
     error: "Error is raised",
     add: "Add",
+    adding: "Adding ...",
     modify: "Modify",
+    modifying: "modifying ...",
+    removing: "Removing ...",
     send: "Send",
     cancel: "Cancel",
     delete: "Delete",
@@ -34,4 +48,5 @@ export const commonEnTranslations: Translations<"en">["Common"] = {
     no: "No",
     published: "Published",
     not_published: "Not published",
+    information: "Information",
 };
