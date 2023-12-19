@@ -124,7 +124,7 @@ export interface EndpointListResponseDto {
 /** Liste des urls du point d'accès */
 export interface EndpointUrl {
     /** Type de l'URL du point d'accès */
-    type: string;
+    type: EndpointUrlTypeEnum;
     /** URL du point d'accès */
     url: string;
 }
@@ -168,7 +168,7 @@ export interface MetadataResponseDto {
     _id: string;
 }
 
-/** Bounding box de la configuration */
+/** Bounding box */
 export interface BoundingBox {
     west: number;
     south: number;
@@ -177,21 +177,18 @@ export interface BoundingBox {
 }
 
 export type ConfigurationAltimetryDetailsContent = ConfigurationDetailsContent & {
-    /** Bounding box de la configuration */
+    /** Bounding box */
     bbox?: BoundingBox;
-    /** Titre de la configuration */
+    /** Titre */
     title: string;
     /**
-     * Mots clés de la configuration
+     * Mots clés
      * @uniqueItems true
      */
     keywords?: string[];
-    /**
-     * Données utilisées par la configuration
-     * @uniqueItems true
-     */
+    /** Données utilisées */
     used_data: ConfigurationUsedDataAltimetryDetailsContent[];
-    /** Description de la configuration */
+    /** Description */
     abstract: string;
 };
 
@@ -233,7 +230,11 @@ export type ConfigurationDetailsContent = object;
 
 export type ConfigurationDownloadDetailsContent = ConfigurationDetailsContent & {
     title: string;
-    /** @uniqueItems true */
+    /**
+     * Mots clés
+     * @uniqueItems true
+     */
+    keywords?: string[];
     used_data: ConfigurationUsedDataDownloadDetailsContent[];
     abstract: string;
 };
@@ -252,12 +253,12 @@ export type ConfigurationGetFeatureInfoWmtsTmsDetailsContent = ConfigurationGetF
     ConfigurationGetFeatureInfoServerUrlWmtsTmsDetailsContent;
 
 export type ConfigurationItineraryIsocurveDetailsContent = ConfigurationDetailsContent & {
-    /** Bounding box de la configuration */
+    /** Bounding box */
     bbox?: BoundingBox;
-    /** Titre de la configuration */
+    /** Titre */
     title: string;
     /**
-     * Mots clés de la configuration
+     * Mots clés
      * @uniqueItems true
      */
     keywords?: string[];
@@ -266,16 +267,13 @@ export type ConfigurationItineraryIsocurveDetailsContent = ConfigurationDetailsC
     /** Définition des contraintes pour la configuration */
     constraints?: object;
     /**
-     * Projection(s) de la configuration
+     * Projection(s)
      * @uniqueItems true
      */
     srss?: string[];
-    /**
-     * Données utilisées par la configuration
-     * @uniqueItems true
-     */
+    /** Données utilisées */
     used_data: ConfigurationUsedDataItineraryIsocurveDetailsContent[];
-    /** Description de la configuration */
+    /** Description */
     abstract: string;
 };
 
@@ -329,6 +327,20 @@ export interface ConfigurationMetadata {
     type: ConfigurationMetadataTypeEnum;
 }
 
+export type ConfigurationSearchDetailsContent = ConfigurationDetailsContent & {
+    /** Titre */
+    title: string;
+    /**
+     * Mots clés
+     * @uniqueItems true
+     */
+    keywords?: string[];
+    /** Données utilisées */
+    used_data: ConfigurationUsedDataSearchDetailsContent[];
+    /** Description */
+    abstract: string;
+};
+
 /** Informations à fournir pour modifier la configuration */
 export interface ConfigurationUpdateDto {
     /** Type de configuration */
@@ -341,6 +353,8 @@ export interface ConfigurationUpdateDto {
         | ConfigurationAltimetryDetailsContent
         | ConfigurationDownloadDetailsContent
         | ConfigurationItineraryIsocurveDetailsContent
+        | ConfigurationSearchDetailsContent
+        | ConfigurationVectorTmsDetailsContent
         | ConfigurationWfsDetailsContent
         | ConfigurationWmsRasterDetailsContent
         | ConfigurationWmsVectorDetailsContent
@@ -352,38 +366,15 @@ export interface ConfigurationUpdateDto {
     metadata?: ConfigurationMetadata[];
 }
 
-/** Informations sur la précision des données */
-export type ConfigurationUsedDataAccuracyAltimetryDetailsContent = ConfigurationUsedDataAccuracyManualAltimetryDetailsContent &
-    ConfigurationUsedDataAccuracyPyramidAltimetryDetailsContent;
-
-export type ConfigurationUsedDataAccuracyManualAltimetryDetailsContent = {
-    /**
-     * Valeur unique pour la précision des données
-     * @format int32
-     * @min 0
-     */
-    value: number;
-};
-
-export type ConfigurationUsedDataAccuracyPyramidAltimetryDetailsContent = {
-    /** Mapping entre les valeurs de la pyramide et les valeurs effectivement renvoyées */
-    mapping: Record<string, number>;
-    /**
-     * Identifiant de la donnée stockée
-     * @format uuid
-     */
-    stored_data: string;
-};
-
 export interface ConfigurationUsedDataAltimetryDetailsContent {
-    /** Titre de la configuration */
+    /** Titre */
     title: string;
-    /** Bounding box de la configuration */
+    /** Bounding box */
     bbox?: BoundingBox;
     /** Informations sur la source des données */
-    source: ConfigurationUsedDataSourceAltimetryDetailsContent;
-    /** Informations sur la précision des données */
-    accuracy: ConfigurationUsedDataAccuracyAltimetryDetailsContent;
+    source: ConfigurationUsedDataSourceAccuracyAltimetryDetailsContent;
+    /** Informations sur la source des données */
+    accuracy: ConfigurationUsedDataSourceAccuracyAltimetryDetailsContent;
     /**
      * Identifiant de la donnée stockée
      * @format uuid
@@ -407,6 +398,11 @@ export interface ConfigurationUsedDataAttributeItineraryIsocurveDetailsContent {
 export interface ConfigurationUsedDataDownloadDetailsContent {
     sub_name: string;
     title?: string;
+    /**
+     * Mots clés
+     * @uniqueItems true
+     */
+    keywords?: string[];
     format?: string;
     zone?: string;
     /**
@@ -442,13 +438,28 @@ export interface ConfigurationUsedDataItineraryIsocurveDetailsContent {
     stored_data: string;
 }
 
+export interface ConfigurationUsedDataRelationVectorTmsDetailsContent {
+    /** Nom de la table */
+    native_name: string;
+    /** Nom public de la table */
+    public_name?: string;
+    /** Description */
+    abstract: string;
+}
+
 export interface ConfigurationUsedDataRelationWfsDetailsContent {
     /** Nom de la table */
     native_name: string;
+    /** Nom public de la table */
     public_name?: string;
+    /** Titre */
     title: string;
-    /** @uniqueItems true */
+    /**
+     * Mots clés
+     * @uniqueItems true
+     */
     keywords?: string[];
+    /** Description */
     abstract: string;
 }
 
@@ -464,16 +475,25 @@ export interface ConfigurationUsedDataRelationWmsVectorDetailsContent {
     ftl?: string;
 }
 
-/** Informations sur la source des données */
-export type ConfigurationUsedDataSourceAltimetryDetailsContent = ConfigurationUsedDataSourceManualAltimetryDetailsContent &
-    ConfigurationUsedDataSourcePyramidAltimetryDetailsContent;
+export interface ConfigurationUsedDataSearchDetailsContent {
+    /**
+     * Identifiant de la donnée stockée
+     * @format uuid
+     */
+    stored_data: string;
+}
 
-export type ConfigurationUsedDataSourceManualAltimetryDetailsContent = {
+/** Informations sur la source des données */
+export type ConfigurationUsedDataSourceAccuracyAltimetryDetailsContent =
+    | ConfigurationUsedDataSourceAccuracyManualAltimetryDetailsContent
+    | ConfigurationUsedDataSourceAccuracyPyramidAltimetryDetailsContent;
+
+export type ConfigurationUsedDataSourceAccuracyManualAltimetryDetailsContent = {
     /** Valeur unique pour la source des données */
     value: string;
 };
 
-export type ConfigurationUsedDataSourcePyramidAltimetryDetailsContent = {
+export type ConfigurationUsedDataSourceAccuracyPyramidAltimetryDetailsContent = {
     /** Mapping entre les valeurs de la pyramide et les valeurs effectivement renvoyées */
     mapping: Record<string, string>;
     /**
@@ -483,8 +503,16 @@ export type ConfigurationUsedDataSourcePyramidAltimetryDetailsContent = {
     stored_data: string;
 };
 
+export interface ConfigurationUsedDataVectorTmsDetailsContent {
+    relations: ConfigurationUsedDataRelationVectorTmsDetailsContent[];
+    /**
+     * Identifiant de la donnée stockée
+     * @format uuid
+     */
+    stored_data: string;
+}
+
 export interface ConfigurationUsedDataWfsDetailsContent {
-    /** @uniqueItems true */
     relations: ConfigurationUsedDataRelationWfsDetailsContent[];
     /**
      * Identifiant de la donnée stockée
@@ -494,7 +522,6 @@ export interface ConfigurationUsedDataWfsDetailsContent {
 }
 
 export interface ConfigurationUsedDataWmsVectorDetailsContent {
-    /** @uniqueItems true */
     relations: ConfigurationUsedDataRelationWmsVectorDetailsContent[];
     /**
      * Identifiant de la donnée stockée
@@ -513,25 +540,27 @@ export interface ConfigurationUsedDataWmtsTmsDetailsContent {
     stored_data: string;
 }
 
+export type ConfigurationVectorTmsDetailsContent = ConfigurationDetailsContent & {
+    used_data: ConfigurationUsedDataVectorTmsDetailsContent[];
+};
+
 export type ConfigurationWfsDetailsContent = ConfigurationDetailsContent & {
-    /** Bounding box de la configuration */
+    /** Bounding box */
     bbox?: BoundingBox;
-    /** @uniqueItems true */
     used_data: ConfigurationUsedDataWfsDetailsContent[];
 };
 
 export type ConfigurationWmsRasterDetailsContent = ConfigurationDetailsContent & {
-    /** Bounding box de la configuration */
+    /** Bounding box */
     bbox?: BoundingBox;
     title: string;
-    /** @uniqueItems true */
-    keywords?: string[];
     /**
-     * Identifiants des fichiers statiques de style Rok4
+     * Mots clés
      * @uniqueItems true
      */
+    keywords?: string[];
+    /** Identifiants des fichiers statiques de style Rok4 */
     styles?: string[];
-    /** @uniqueItems true */
     used_data: ConfigurationUsedDataWmtsTmsDetailsContent[];
     /**
      * Interpolation utilisée pour les conversions de résolution
@@ -548,28 +577,29 @@ export type ConfigurationWmsRasterDetailsContent = ConfigurationDetailsContent &
 };
 
 export type ConfigurationWmsVectorDetailsContent = ConfigurationDetailsContent & {
-    /** Bounding box de la configuration */
+    /** Bounding box */
     bbox?: BoundingBox;
     title: string;
-    /** @uniqueItems true */
+    /**
+     * Mots clés
+     * @uniqueItems true
+     */
     keywords?: string[];
-    /** @uniqueItems true */
     used_data: ConfigurationUsedDataWmsVectorDetailsContent[];
     abstract: string;
 };
 
 export type ConfigurationWmtsTmsDetailsContent = ConfigurationDetailsContent & {
-    /** Bounding box de la configuration */
+    /** Bounding box */
     bbox?: BoundingBox;
     title: string;
-    /** @uniqueItems true */
-    keywords?: string[];
     /**
-     * Identifiants des fichiers statiques de style Rok4
+     * Mots clés
      * @uniqueItems true
      */
+    keywords?: string[];
+    /** Identifiants des fichiers statiques de style Rok4 */
     styles?: string[];
-    /** @uniqueItems true */
     used_data: ConfigurationUsedDataWmtsTmsDetailsContent[];
     abstract: string;
     /** Ressource cible du GetFeatureInfo */
@@ -577,7 +607,6 @@ export type ConfigurationWmtsTmsDetailsContent = ConfigurationDetailsContent & {
 };
 
 /** Informations détaillées sur la configuration */
-
 export interface ConfigurationDetailResponseDto {
     /** Nom de la configuration */
     name: string;
@@ -605,6 +634,8 @@ export interface ConfigurationDetailResponseDto {
         | ConfigurationAltimetryDetailsContent
         | ConfigurationDownloadDetailsContent
         | ConfigurationItineraryIsocurveDetailsContent
+        | ConfigurationSearchDetailsContent
+        | ConfigurationVectorTmsDetailsContent
         | ConfigurationWfsDetailsContent
         | ConfigurationWmsRasterDetailsContent
         | ConfigurationWmsVectorDetailsContent
@@ -851,6 +882,48 @@ export interface AccessCreateDto {
     offerings: string[];
 }
 
+/** Informations à fournir pour la déclaration d'une nouvelle livraison, la livraison est privée par défaut */
+export interface UploadCreateDto {
+    description: string;
+    name: string;
+    type: UploadCreateDtoTypeEnum;
+    srs: string;
+    /** Détails sur une livraison */
+    type_infos?: UploadDetailsDto;
+}
+
+/** Détails sur une livraison */
+export type UploadDetailsDto = UploadRok4PyramidDetailsDto | UploadIndexDetailsDto | UploadHistoricImageryDetailsDto;
+
+/** Informations spécifiques d'une livraison d'images historiques */
+export type UploadHistoricImageryDetailsDto = {
+    /** Identifiant de jeu de données */
+    dataset_identifier: string;
+};
+
+/** Informations spécifiques d'une livraison de type Index */
+export type UploadIndexDetailsDto = {
+    /**
+     * Indique si l'index se comportera comme l'index standard
+     * @default false
+     */
+    is_search_layer?: boolean;
+};
+
+/** Informations spécifiques d'une livraison de pyramide Rok4 */
+export type UploadRok4PyramidDetailsDto = {
+    /** Format des données */
+    format: string;
+    /**
+     * Nombre de canaux des images, uniquement pour une pyramide raster
+     * @format int32
+     * @min 1
+     */
+    channels_number?: number;
+    /** TileMatrixSet de la pyramide */
+    tms: string;
+};
+
 export interface Coordinate {
     /** @format double */
     x?: number;
@@ -878,6 +951,8 @@ export interface Envelope {
     /** @format double */
     diameter?: number;
     /** @format double */
+    height?: number;
+    /** @format double */
     min_x?: number;
     /** @format double */
     min_y?: number;
@@ -885,8 +960,6 @@ export interface Envelope {
     max_x?: number;
     /** @format double */
     max_y?: number;
-    /** @format double */
-    height?: number;
     /** @format double */
     area?: number;
     /** @format double */
@@ -901,6 +974,7 @@ export interface Geometry {
     length?: number;
     empty?: boolean;
     valid?: boolean;
+    envelope_internal?: Envelope;
     /** @format int32 */
     num_geometries?: number;
     coordinate?: Coordinate;
@@ -909,6 +983,8 @@ export interface Geometry {
     srid?: number;
     /** @format int32 */
     dimension?: number;
+    /** @format int32 */
+    boundary_dimension?: number;
     geometry_type?: string;
     coordinates?: Coordinate[];
     /** @format int32 */
@@ -919,9 +995,6 @@ export interface Geometry {
     centroid?: Point;
     interior_point?: Point;
     boundary?: Geometry;
-    envelope_internal?: Envelope;
-    /** @format int32 */
-    boundary_dimension?: number;
     simple?: boolean;
 }
 
@@ -938,24 +1011,25 @@ export interface Point {
     user_data?: object;
     coordinates?: Coordinate[];
     empty?: boolean;
+    coordinate_sequence?: CoordinateSequence;
+    coordinate?: Coordinate;
+    /** @format double */
+    x?: number;
     /** @format double */
     y?: number;
-    coordinate?: Coordinate;
     /** @format int32 */
     dimension?: number;
+    /** @format int32 */
+    boundary_dimension?: number;
     geometry_type?: string;
     /** @format int32 */
     num_points?: number;
     boundary?: Geometry;
-    /** @format double */
-    x?: number;
-    coordinate_sequence?: CoordinateSequence;
-    /** @format int32 */
-    boundary_dimension?: number;
     simple?: boolean;
     /** @format double */
     length?: number;
     valid?: boolean;
+    envelope_internal?: Envelope;
     /** @format int32 */
     num_geometries?: number;
     precision_model?: PrecisionModel;
@@ -966,7 +1040,6 @@ export interface Point {
     area?: number;
     centroid?: Point;
     interior_point?: Point;
-    envelope_internal?: Envelope;
 }
 
 export interface PrecisionModel {
@@ -974,12 +1047,38 @@ export interface PrecisionModel {
     scale?: number;
     type?: Type;
     floating?: boolean;
+    /** @format int32 */
+    maximum_significant_digits?: number;
     /** @format double */
     offset_x?: number;
     /** @format double */
     offset_y?: number;
-    /** @format int32 */
-    maximum_significant_digits?: number;
+}
+
+export type Type = object;
+
+/** Informations détaillées sur la livraison */
+export interface UploadPrivateDetailResponseDto {
+    name: string;
+    description: string;
+    type: UploadPrivateDetailResponseDtoTypeEnum;
+    visibility: UploadPrivateDetailResponseDtoVisibilityEnum;
+    status: UploadPrivateDetailResponseDtoStatusEnum;
+    srs: string;
+    contact: string;
+    extent?: Geometry;
+    /** @format int64 */
+    size?: number;
+    /** Informations sur l'évènement */
+    last_event?: EventDto;
+    tags?: Record<string, string>;
+    /**
+     * identifiant technique
+     * @format uuid
+     */
+    _id: string;
+    /** Détails sur une livraison */
+    type_infos?: UploadDetailsDto;
 }
 
 /** Informations spécifiques d'une donnée stockée archive */
@@ -991,46 +1090,20 @@ export type StoredDataArchiveDetailsDto = {
     files_number: number;
 };
 
-/** Paramètres de la donnée stockée à créer */
-export interface StoredDataCreateDto {
-    name: string;
-    type: StoredDataCreateDtoTypeEnum;
-    /** @default "private" */
-    visibility?: StoredDataCreateDtoVisibilityEnum;
-    srs?: string;
-    extent?: Geometry;
-    /** @format int64 */
-    size?: number;
-    /** @default "GENERATED" */
-    status?: StoredDataCreateDtoStatusEnum;
-    /** @format uuid */
-    _id?: string;
-    /** @format uuid */
-    datastore: string;
-    /** @format uuid */
-    storage: string;
-    type_infos?:
-        | StoredDataArchiveDetailsDto
-        | StoredDataGraphDbDetailsDto
-        | StoredDataGraphDetailsDto
-        | StoredDataRok4PyramidRasterDetailsDto
-        | StoredDataRok4PyramidVectorDetailsDto
-        | StoredDataVectorDbDetailsDto;
-}
-
 /** Détails sur une donnée stockée */
 export type StoredDataDetailsDto = StoredDataRok4PyramidRasterDetailsDto &
     StoredDataRok4PyramidVectorDetailsDto &
     StoredDataVectorDbDetailsDto &
     StoredDataArchiveDetailsDto &
     StoredDataGraphDbDetailsDto &
-    StoredDataGraphDetailsDto;
+    StoredDataGraphDetailsDto &
+    StoredDataIndexDetailsDto;
 
 /** Liste des relations en BDD */
 export interface StoredDataDetailsRelationDto {
     name: string;
     type: StoredDataDetailsRelationDtoTypeEnum;
-    attributes: string[];
+    attributes: Record<string, string>;
     primary_key?: string[];
 }
 
@@ -1073,6 +1146,39 @@ export interface StoredDataGraphDetailsOptimizationProfileDto {
     optimization: string;
 }
 
+/** Informations spécifiques d'une donnée stockée index */
+export type StoredDataIndexDetailsDto = {
+    /** Champs présents dans les documents et leur type */
+    fields: Record<string, string>;
+    /**
+     * Nombre de documents contenus dans l'index
+     * @format int32
+     */
+    count: number;
+    /** Indique si l'index se comportera comme l'index standard */
+    is_search_layer: boolean;
+};
+
+export interface StoredDataPrivateDetailResponseDto {
+    name: string;
+    type: StoredDataPrivateDetailResponseDtoTypeEnum;
+    visibility: StoredDataPrivateDetailResponseDtoVisibilityEnum;
+    srs?: string;
+    contact: string;
+    extent?: Geometry;
+    /** Informations sur l'évènement */
+    last_event?: EventDto;
+    tags?: Record<string, string>;
+    storage: StoredDataStorageDto;
+    /** @format int64 */
+    size?: number;
+    status: StoredDataPrivateDetailResponseDtoStatusEnum;
+    /** @format uuid */
+    _id: string;
+    /** Détails sur une donnée stockée */
+    type_infos?: StoredDataDetailsDto;
+}
+
 /** Informations spécifiques d'une donnée stockée pyramide Rok4 Raster */
 export type StoredDataRok4PyramidRasterDetailsDto = {
     tms: string;
@@ -1095,101 +1201,17 @@ export type StoredDataRok4PyramidVectorDetailsDto = {
     levels: string[];
 };
 
-/** Informations spécifiques d'une donnée stockée base vectorielle */
-export type StoredDataVectorDbDetailsDto = {
-    /** @uniqueItems true */
-    relations: StoredDataDetailsRelationDto[];
-};
-
-export type Type = object;
-
-export interface StoredDataPrivateDetailResponseDto {
-    name: string;
-    type: StoredDataPrivateDetailResponseDtoTypeEnum;
-    visibility: StoredDataPrivateDetailResponseDtoVisibilityEnum;
-    srs?: string;
-    contact: string;
-    extent?: Geometry;
-    /** Informations sur l'évènement */
-    last_event?: EventDto;
-    tags?: Record<string, string>;
-    storage: StoredDataStorageDto;
-    /** @format int64 */
-    size?: number;
-    status: StoredDataPrivateDetailResponseDtoStatusEnum;
-    /** @format uuid */
-    _id: string;
-    /** Détails sur une donnée stockée */
-    type_infos?: StoredDataDetailsDto;
-}
-
 export interface StoredDataStorageDto {
     type: StoredDataStorageDtoTypeEnum;
     /** @uniqueItems true */
     labels?: string[];
 }
 
-/** Certains type de livraison ne nécessitent pas d'informations spécifiques */
-export type EmptyDetails = {};
-
-/** Informations à fournir pour la déclaration d'une nouvelle livraison, la livraison est privée par défaut */
-export interface UploadCreateDto {
-    description: string;
-    name: string;
-    type: UploadCreateDtoTypeEnum;
-    srs: string;
-    /** Détails sur une livraison */
-    type_infos?: UploadDetailsDto;
-}
-
-/** Détails sur une livraison */
-export type UploadDetailsDto = EmptyDetails & UploadRok4PyramidDetailsDto;
-
-/** Informations spécifiques d'une livraison de pyramide Rok4 */
-export type UploadRok4PyramidDetailsDto = {
-    /** Format des données */
-    format: string;
-    /**
-     * Nombre de canaux des images, uniquement pour une pyramide raster
-     * @format int32
-     * @min 1
-     */
-    channels_number?: number;
-    /** TileMatrixSet de la pyramide */
-    tms: string;
+/** Informations spécifiques d'une donnée stockée base vectorielle */
+export type StoredDataVectorDbDetailsDto = {
+    /** @uniqueItems true */
+    relations: StoredDataDetailsRelationDto[];
 };
-
-/** Informations détaillées sur la livraison */
-export interface UploadPrivateDetailResponseDto {
-    name: string;
-    description: string;
-    type: UploadPrivateDetailResponseDtoTypeEnum;
-    visibility: UploadPrivateDetailResponseDtoVisibilityEnum;
-    status: UploadPrivateDetailResponseDtoStatusEnum;
-    srs: string;
-    contact: string;
-    extent?: Geometry;
-    /** @format int64 */
-    size?: number;
-    /** Informations sur l'évènement */
-    last_event?: EventDto;
-    tags?: Record<string, string>;
-    /**
-     * identifiant technique
-     * @format uuid
-     */
-    _id: string;
-    /** Détails sur une livraison */
-    type_infos?: UploadDetailsDto;
-}
-
-/** Paramètres de la livraison à téléverser */
-export interface UploadDataCreateDto {
-    /** @format binary */
-    file: File;
-    /** Sous arborescence dans la livraison */
-    path: string;
-}
 
 /** Paramètres du statique à ajouter */
 export interface StaticFileCreateDto {
@@ -1285,9 +1307,7 @@ export interface ProcessingExecutionDetailResponseDto {
 }
 
 export interface ProcessingExecutionInputDto {
-    /** @uniqueItems true */
     upload: ProcessingExecutionUploadDto[];
-    /** @uniqueItems true */
     stored_data: ProcessingExecutionStoredDataDto[];
 }
 
@@ -1477,6 +1497,8 @@ export interface ConfigurationCreateDto {
         | ConfigurationAltimetryDetailsContent
         | ConfigurationDownloadDetailsContent
         | ConfigurationItineraryIsocurveDetailsContent
+        | ConfigurationSearchDetailsContent
+        | ConfigurationVectorTmsDetailsContent
         | ConfigurationWfsDetailsContent
         | ConfigurationWmsRasterDetailsContent
         | ConfigurationWmsVectorDetailsContent
@@ -1516,6 +1538,11 @@ export interface AnnexCreateDto {
     labels?: string[];
 }
 
+/** Paramètres du client à créer */
+export interface ClientCreateDto {
+    valid_redirects_uris?: string[];
+}
+
 /** Paramètres du stockage à créer */
 export interface StorageCreateDto {
     /** Le nom du stockage. ce nom doit être unique pour la plateforme */
@@ -1524,7 +1551,7 @@ export interface StorageCreateDto {
     type: StorageCreateDtoTypeEnum;
     /** @uniqueItems true */
     labels?: string[];
-    type_infos: StorageFileSystemDetailsDto | StoragePostgresqlDetailsDto | StorageS3DetailsDto;
+    type_infos: StorageFileSystemDetailsDto | StorageOpenSearchDetailsDto | StoragePostgresqlDetailsDto | StorageS3DetailsDto;
 }
 
 /** Les informations spécifiques liées au type de stockage */
@@ -1537,6 +1564,15 @@ export type StorageFileSystemDetailsDto = StorageDetailsDto & {
      * @pattern \S+
      */
     mount_name: string;
+};
+
+/** Les informations spécifiques liées au stockage OPENSEARCH */
+export type StorageOpenSearchDetailsDto = StorageDetailsDto & {
+    /**
+     * le hosts pour la connexion au stockage OPENSEARCH
+     * @uniqueItems true
+     */
+    hosts: StorageSocket[];
 };
 
 /** Les informations spécifiques liées au stockage POSTGRESQL */
@@ -1574,6 +1610,19 @@ export type StorageS3DetailsDto = StorageDetailsDto & {
     pot_name: string;
 };
 
+/** le hosts pour la connexion au stockage OPENSEARCH */
+export interface StorageSocket {
+    /** le host pour la connexion au stockage */
+    host: string;
+    /**
+     * le port pour la connexion au stockage
+     * @format int32
+     * @min 1
+     * @max 65535
+     */
+    port: number;
+}
+
 /** Informations sur le stockage */
 export interface StorageDetailResponseDto {
     /** Le nom du stockage. ce nom est unique pour la plateforme */
@@ -1587,7 +1636,7 @@ export interface StorageDetailResponseDto {
      * @format uuid
      */
     _id: string;
-    type_infos?: StorageFileSystemDetailsDto | StoragePostgresqlDetailsDto | StorageS3DetailsDto;
+    type_infos?: StorageFileSystemDetailsDto | StorageOpenSearchDetailsDto | StoragePostgresqlDetailsDto | StorageS3DetailsDto;
 }
 
 /** Le type de stockage */
@@ -1595,6 +1644,7 @@ export enum StorageType {
     POSTGRESQL = "POSTGRESQL",
     S3 = "S3",
     FILESYSTEM = "FILESYSTEM",
+    OPENSEARCH = "OPENSEARCH",
     POSTGRESQLROUTING = "POSTGRESQL-ROUTING",
 }
 
@@ -1801,6 +1851,11 @@ export interface CommunityCreateDto {
      * @format uuid
      */
     supervisor: string;
+    /**
+     * Création d'un compte de service pour cette communauté
+     * @default false
+     */
+    create_service_account?: boolean;
 }
 
 /** Informations sur l'entrepôt lié */
@@ -1884,25 +1939,6 @@ export interface UserKeyUpdateDto {
     blacklist?: string[];
     user_agent?: string;
     referer?: string;
-}
-
-/** Paramètres de la donnée stockée à créer */
-export interface StoredDataUpdateTechnicalDto {
-    name?: string;
-    type: StoredDataUpdateTechnicalDtoTypeEnum;
-    visibility?: StoredDataUpdateTechnicalDtoVisibilityEnum;
-    srs?: string;
-    extent?: Geometry;
-    /** @format int64 */
-    size?: number;
-    status?: StoredDataUpdateTechnicalDtoStatusEnum;
-    type_infos?:
-        | StoredDataArchiveDetailsDto
-        | StoredDataGraphDbDetailsDto
-        | StoredDataGraphDetailsDto
-        | StoredDataRok4PyramidRasterDetailsDto
-        | StoredDataRok4PyramidVectorDetailsDto
-        | StoredDataVectorDbDetailsDto;
 }
 
 /** Informations à fournir pour la modification d'une livraison existante */
@@ -2180,249 +2216,6 @@ export interface PermissionResponseDto {
     _id: string;
 }
 
-export interface OfferingEndpointListResponseDto {
-    /** Type de configuration */
-    type: OfferingEndpointListResponseDtoTypeEnum;
-    /** Statut de l'offre */
-    status: OfferingEndpointListResponseDtoStatusEnum;
-    /** Nom technique de la ressource. Ce nom doit être unique sur la plateforme pour un type de configuration donné. Uniquement des caractères alphanumériques, tiret, tiret bas, point */
-    layer_name: string;
-    /**
-     * identifiant technique
-     * @format uuid
-     */
-    _id: string;
-}
-
-export type ConfigurationAltimetryDetailsMessage = ConfigurationDetailsMessage & {
-    title?: string;
-    /** @uniqueItems true */
-    keywords?: string[];
-    /** Bounding box de la configuration */
-    bbox?: BoundingBox;
-    /** @uniqueItems true */
-    used_data?: ConfigurationUsedDataAltimetryDetailsMessage[];
-    abstract?: string;
-};
-
-export type ConfigurationDetailsMessage = object;
-
-export type ConfigurationDownloadDetailsMessage = ConfigurationDetailsMessage & {
-    title: string;
-    /** @uniqueItems true */
-    used_data?: ConfigurationUsedDataDownloadDetailsMessage[];
-    abstract: string;
-};
-
-export type ConfigurationItineraryIsocurveDetailsMessage = ConfigurationDetailsMessage & {
-    title?: string;
-    /** @uniqueItems true */
-    keywords?: string[];
-    /** Limites pour les calculs d'itinéraire (nombre d'étapes et de contraintes) et d'isochrone (durée et distance) */
-    limits?: ConfigurationLimitsItineraryIsocurveDetailsContent;
-    /** Bounding box de la configuration */
-    bbox?: BoundingBox;
-    constraints?: JsonNode;
-    /** @uniqueItems true */
-    srss?: string[];
-    /** @uniqueItems true */
-    used_data?: ConfigurationUsedDataItineraryIsocurveDetailsMessage[];
-    abstract?: string;
-};
-
-export type ConfigurationUsedDataAccuracyAltimetryDetailsMessage = object;
-
-export interface ConfigurationUsedDataAltimetryDetailsMessage {
-    title?: string;
-    /** Bounding box de la configuration */
-    bbox?: BoundingBox;
-    source?: ConfigurationUsedDataSourceAltimetryDetailsMessage;
-    accuracy?: ConfigurationUsedDataAccuracyAltimetryDetailsMessage;
-    stored_data?: StoredDataMessage;
-}
-
-export interface ConfigurationUsedDataDownloadDetailsMessage {
-    sub_name: string;
-    title?: string;
-    format?: string;
-    zone?: string;
-    stored_data?: StoredDataMessage;
-    abstract?: string;
-}
-
-export interface ConfigurationUsedDataItineraryIsocurveDetailsMessage {
-    profile?: string;
-    optimization?: string;
-    cost_column?: string;
-    reverse_cost_column?: string;
-    cost_type?: ConfigurationUsedDataItineraryIsocurveDetailsMessageCostTypeEnum;
-    costing?: ConfigurationUsedDataItineraryIsocurveDetailsMessageCostingEnum;
-    /** @uniqueItems true */
-    attributes?: ConfigurationUsedDataAttributeItineraryIsocurveDetailsContent[];
-    stored_data?: StoredDataMessage;
-}
-
-export interface ConfigurationUsedDataRelationWfsDetailsMessage {
-    /** Nom de la table */
-    native_name: string;
-    public_name?: string;
-    title: string;
-    /** @uniqueItems true */
-    keywords?: string[];
-    abstract: string;
-}
-
-export interface ConfigurationUsedDataRelationWmsVectorDetailsMessage {
-    /** Nom de la table */
-    name: string;
-    style?: StaticFileMessage;
-    ftl?: StaticFileMessage;
-}
-
-export type ConfigurationUsedDataSourceAltimetryDetailsMessage = object;
-
-export interface ConfigurationUsedDataWfsDetailsMessage {
-    /** @uniqueItems true */
-    relations: ConfigurationUsedDataRelationWfsDetailsMessage[];
-    stored_data?: StoredDataMessage;
-}
-
-export interface ConfigurationUsedDataWmsVectorDetailsMessage {
-    /** @uniqueItems true */
-    relations: ConfigurationUsedDataRelationWmsVectorDetailsMessage[];
-    stored_data?: StoredDataMessage;
-}
-
-export interface ConfigurationUsedDataWmtsTmsDetailsMessage {
-    bottom_level: string;
-    top_level: string;
-    stored_data?: StoredDataMessage;
-}
-
-export type ConfigurationWfsDetailsMessage = ConfigurationDetailsMessage & {
-    /** Bounding box de la configuration */
-    bbox?: BoundingBox;
-    /** @uniqueItems true */
-    used_data?: ConfigurationUsedDataWfsDetailsMessage[];
-};
-
-export type ConfigurationWmsRasterDetailsMessage = ConfigurationDetailsMessage & {
-    /** Bounding box de la configuration */
-    bbox?: BoundingBox;
-    title: string;
-    /** @uniqueItems true */
-    keywords?: string[];
-    /** @uniqueItems true */
-    styles?: StaticFileMessage[];
-    /** @uniqueItems true */
-    used_data?: ConfigurationUsedDataWmtsTmsDetailsMessage[];
-    interpolation?: ConfigurationWmsRasterDetailsMessageInterpolationEnum;
-    bottom_resolution?: number;
-    top_resolution?: number;
-    abstract: string;
-    /** Ressource cible du GetFeatureInfo */
-    getfeatureinfo?: ConfigurationGetFeatureInfoWmtsTmsDetailsContent;
-};
-
-export type ConfigurationWmsVectorDetailsMessage = ConfigurationDetailsMessage & {
-    /** Bounding box de la configuration */
-    bbox?: BoundingBox;
-    title: string;
-    /** @uniqueItems true */
-    keywords?: string[];
-    /** @uniqueItems true */
-    used_data?: ConfigurationUsedDataWmsVectorDetailsMessage[];
-    abstract: string;
-};
-
-export type ConfigurationWmtsTmsDetailsMessage = ConfigurationDetailsMessage & {
-    /** Bounding box de la configuration */
-    bbox?: BoundingBox;
-    title: string;
-    /** @uniqueItems true */
-    keywords?: string[];
-    /** @uniqueItems true */
-    styles?: StaticFileMessage[];
-    /** @uniqueItems true */
-    used_data?: ConfigurationUsedDataWmtsTmsDetailsMessage[];
-    abstract: string;
-    /** Ressource cible du GetFeatureInfo */
-    getfeatureinfo?: ConfigurationGetFeatureInfoWmtsTmsDetailsContent;
-};
-
-export type JsonNode = object;
-
-export interface PublicationMessage {
-    type?: string;
-    status?: string;
-    endpoint_name?: string;
-    layer_name?: string;
-    /** Métadonnées liées au propriétaire de la configuration */
-    attribution?: ConfigurationAttribution;
-    /** @format uuid */
-    _id?: string;
-    type_infos?:
-        | ConfigurationAltimetryDetailsMessage
-        | ConfigurationDownloadDetailsMessage
-        | ConfigurationItineraryIsocurveDetailsMessage
-        | ConfigurationWfsDetailsMessage
-        | ConfigurationWmsRasterDetailsMessage
-        | ConfigurationWmsVectorDetailsMessage
-        | ConfigurationWmtsTmsDetailsMessage;
-    /** @uniqueItems true */
-    metadata?: ConfigurationMetadata[];
-}
-
-export interface StaticFileMessage {
-    name?: string;
-    description?: string;
-    type?: StaticFileMessageTypeEnum;
-    file_name?: string;
-    storage?: StorageMessage;
-    /** @format uuid */
-    _id?: string;
-    /** les informations spécifiques liées au type de statique */
-    type_infos?: StaticFileDetailsDto;
-}
-
-export interface StorageMessage {
-    name?: string;
-    type?: StorageMessageTypeEnum;
-    /** @format uuid */
-    _id?: string;
-    /** Les informations spécifiques liées au type de stockage */
-    type_infos?: StorageDetailsDto;
-}
-
-export interface StoredDataMessage {
-    type?: StoredDataMessageTypeEnum;
-    name?: string;
-    status?: StoredDataMessageStatusEnum;
-    srs?: string;
-    extent?: Geometry;
-    /** @format int64 */
-    size?: number;
-    storage?: StorageMessage;
-    /** @uniqueItems true */
-    ancestors?: string[];
-    /** @format uuid */
-    _id?: string;
-    /** Détails sur une donnée stockée */
-    type_infos?: StoredDataDetailsDto;
-}
-
-export interface TechnicalJndiPostgresqlResourceResponseDto {
-    host?: string;
-    /** @format int32 */
-    port?: number;
-    database_name?: string;
-    /**
-     * identifiant technique
-     * @format uuid
-     */
-    _id: string;
-}
-
 /** Informations sur le TMS */
 export interface TileMatrixSetListDto {
     srs: string;
@@ -2484,8 +2277,8 @@ export interface UploadSharedDetailResponseDto {
 
 /** Arborescence des fichiers liés à la livraison */
 export interface UploadTreeElementResponseDto {
-    type: string;
-    name: string;
+    type?: string;
+    name?: string;
     /** @format int64 */
     size?: number;
     children?: UploadTreeElementResponseDto[];
@@ -2823,6 +2616,22 @@ export interface CommunityListResponseDto {
     public: boolean;
 }
 
+export interface AccountResponseDto {
+    last_name?: string;
+    first_name?: string;
+    username?: string;
+    email?: string;
+    phone_number?: string;
+    siret?: string;
+    company_name?: string;
+    category?: string;
+    /** @format date-time */
+    last_call?: string;
+    state?: AccountResponseDtoStateEnum;
+    temporary_locked?: boolean;
+    required_actions?: string[];
+}
+
 /** Informations sur l'entrepôt */
 export interface DatastoreListResponseDto {
     /** Nom de la communauté */
@@ -2846,16 +2655,31 @@ export enum StaticFileDetailResponseDtoTypeEnum {
     DERIVATIONSQL = "DERIVATION-SQL",
 }
 
+/** Type de l'URL du point d'accès */
+export enum EndpointUrlTypeEnum {
+    WMTS = "WMTS",
+    TMS = "TMS",
+    WMS = "WMS",
+    WFS = "WFS",
+    DOWNLOAD = "DOWNLOAD",
+    ITINERARY = "ITINERARY",
+    ISOCURVE = "ISOCURVE",
+    ALTIMETRY = "ALTIMETRY",
+    METADATA = "METADATA",
+    SEARCH = "SEARCH",
+}
+
 /** Type de configuration */
 export enum OfferingDetailResponseDtoTypeEnum {
     WMSVECTOR = "WMS-VECTOR",
     WFS = "WFS",
-    WFSINSPIRE = "WFS-INSPIRE",
     WMTSTMS = "WMTS-TMS",
     WMSRASTER = "WMS-RASTER",
     DOWNLOAD = "DOWNLOAD",
     ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
     ALTIMETRY = "ALTIMETRY",
+    SEARCH = "SEARCH",
+    VECTORTMS = "VECTOR-TMS",
 }
 
 export enum MetadataResponseDtoTypeEnum {
@@ -2881,12 +2705,13 @@ export enum ConfigurationMetadataTypeEnum {
 export enum ConfigurationUpdateDtoTypeEnum {
     WMSVECTOR = "WMS-VECTOR",
     WFS = "WFS",
-    WFSINSPIRE = "WFS-INSPIRE",
     WMTSTMS = "WMTS-TMS",
     WMSRASTER = "WMS-RASTER",
     DOWNLOAD = "DOWNLOAD",
     ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
     ALTIMETRY = "ALTIMETRY",
+    SEARCH = "SEARCH",
+    VECTORTMS = "VECTOR-TMS",
 }
 
 /** Type de coût */
@@ -2919,12 +2744,13 @@ export enum ConfigurationWmsRasterDetailsContentInterpolationEnum {
 export enum ConfigurationDetailResponseDtoTypeEnum {
     WMSVECTOR = "WMS-VECTOR",
     WFS = "WFS",
-    WFSINSPIRE = "WFS-INSPIRE",
     WMTSTMS = "WMTS-TMS",
     WMSRASTER = "WMS-RASTER",
     DOWNLOAD = "DOWNLOAD",
     ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
     ALTIMETRY = "ALTIMETRY",
+    SEARCH = "SEARCH",
+    VECTORTMS = "VECTOR-TMS",
 }
 
 export enum ConfigurationDetailResponseDtoStatusEnum {
@@ -2955,6 +2781,8 @@ export enum ProcessingInputTypesDtoUploadEnum {
     RASTER = "RASTER",
     ARCHIVE = "ARCHIVE",
     ROK4PYRAMID = "ROK4-PYRAMID",
+    INDEX = "INDEX",
+    HISTORICIMAGERY = "HISTORIC-IMAGERY",
 }
 
 export enum ProcessingInputTypesDtoStoredDataEnum {
@@ -2965,6 +2793,7 @@ export enum ProcessingInputTypesDtoStoredDataEnum {
     GRAPHDB = "GRAPH-DB",
     GRAPHOSRM = "GRAPH-OSRM",
     GRAPHVALHALLA = "GRAPH-VALHALLA",
+    INDEX = "INDEX",
 }
 
 /** Type de donnée stockée */
@@ -2976,12 +2805,14 @@ export enum ProcessingOutputTypeStoredDataDtoStoredDataEnum {
     GRAPHDB = "GRAPH-DB",
     GRAPHOSRM = "GRAPH-OSRM",
     GRAPHVALHALLA = "GRAPH-VALHALLA",
+    INDEX = "INDEX",
 }
 
 export enum ProcessingOutputTypeStoredDataDtoStorageEnum {
     POSTGRESQL = "POSTGRESQL",
     S3 = "S3",
     FILESYSTEM = "FILESYSTEM",
+    OPENSEARCH = "OPENSEARCH",
     POSTGRESQLROUTING = "POSTGRESQL-ROUTING",
 }
 
@@ -2991,6 +2822,8 @@ export enum ProcessingOutputTypeUploadDtoUploadEnum {
     RASTER = "RASTER",
     ARCHIVE = "ARCHIVE",
     ROK4PYRAMID = "ROK4-PYRAMID",
+    INDEX = "INDEX",
+    HISTORICIMAGERY = "HISTORIC-IMAGERY",
 }
 
 /** Type de fichier(s) statique(s) attendu(s) pour ce paramètre */
@@ -3021,91 +2854,13 @@ export enum UserKeyDetailsResponseDtoUserKeyInfoDtoTypeEnum {
     OAUTH2 = "OAUTH2",
 }
 
-export enum StoredDataCreateDtoTypeEnum {
-    ROK4PYRAMIDRASTER = "ROK4-PYRAMID-RASTER",
-    ROK4PYRAMIDVECTOR = "ROK4-PYRAMID-VECTOR",
-    VECTORDB = "VECTOR-DB",
-    ARCHIVE = "ARCHIVE",
-    GRAPHDB = "GRAPH-DB",
-    GRAPHOSRM = "GRAPH-OSRM",
-    GRAPHVALHALLA = "GRAPH-VALHALLA",
-}
-
-/** @default "private" */
-export enum StoredDataCreateDtoVisibilityEnum {
-    PRIVATE = "PRIVATE",
-    REFERENCED = "REFERENCED",
-    PUBLIC = "PUBLIC",
-}
-
-/** @default "GENERATED" */
-export enum StoredDataCreateDtoStatusEnum {
-    CREATED = "CREATED",
-    GENERATING = "GENERATING",
-    MODIFYING = "MODIFYING",
-    GENERATED = "GENERATED",
-    DELETED = "DELETED",
-    UNSTABLE = "UNSTABLE",
-}
-
-export enum StoredDataDetailsRelationDtoTypeEnum {
-    TABLE = "TABLE",
-    VIEW = "VIEW",
-}
-
-export enum StoredDataRok4PyramidRasterDetailsDtoChannelsFormatEnum {
-    UINT8 = "UINT8",
-    UINT16 = "UINT16",
-    FLOAT32 = "FLOAT32",
-}
-
-export enum StoredDataRok4PyramidRasterDetailsDtoCompressionEnum {
-    RAW = "RAW",
-    JPG = "JPG",
-    PNG = "PNG",
-    LZW = "LZW",
-    ZIP = "ZIP",
-    PKB = "PKB",
-    JPG90 = "JPG90",
-}
-
-export enum StoredDataPrivateDetailResponseDtoTypeEnum {
-    ROK4PYRAMIDRASTER = "ROK4-PYRAMID-RASTER",
-    ROK4PYRAMIDVECTOR = "ROK4-PYRAMID-VECTOR",
-    VECTORDB = "VECTOR-DB",
-    ARCHIVE = "ARCHIVE",
-    GRAPHDB = "GRAPH-DB",
-    GRAPHOSRM = "GRAPH-OSRM",
-    GRAPHVALHALLA = "GRAPH-VALHALLA",
-}
-
-export enum StoredDataPrivateDetailResponseDtoVisibilityEnum {
-    PRIVATE = "PRIVATE",
-    REFERENCED = "REFERENCED",
-    PUBLIC = "PUBLIC",
-}
-
-export enum StoredDataPrivateDetailResponseDtoStatusEnum {
-    CREATED = "CREATED",
-    GENERATING = "GENERATING",
-    MODIFYING = "MODIFYING",
-    GENERATED = "GENERATED",
-    DELETED = "DELETED",
-    UNSTABLE = "UNSTABLE",
-}
-
-export enum StoredDataStorageDtoTypeEnum {
-    POSTGRESQL = "POSTGRESQL",
-    S3 = "S3",
-    FILESYSTEM = "FILESYSTEM",
-    POSTGRESQLROUTING = "POSTGRESQL-ROUTING",
-}
-
 export enum UploadCreateDtoTypeEnum {
     VECTOR = "VECTOR",
     RASTER = "RASTER",
     ARCHIVE = "ARCHIVE",
     ROK4PYRAMID = "ROK4-PYRAMID",
+    INDEX = "INDEX",
+    HISTORICIMAGERY = "HISTORIC-IMAGERY",
 }
 
 export enum UploadPrivateDetailResponseDtoTypeEnum {
@@ -3113,6 +2868,8 @@ export enum UploadPrivateDetailResponseDtoTypeEnum {
     RASTER = "RASTER",
     ARCHIVE = "ARCHIVE",
     ROK4PYRAMID = "ROK4-PYRAMID",
+    INDEX = "INDEX",
+    HISTORICIMAGERY = "HISTORIC-IMAGERY",
 }
 
 export enum UploadPrivateDetailResponseDtoVisibilityEnum {
@@ -3132,6 +2889,61 @@ export enum UploadPrivateDetailResponseDtoStatusEnum {
     DELETED = "DELETED",
 }
 
+export enum StoredDataDetailsRelationDtoTypeEnum {
+    TABLE = "TABLE",
+    VIEW = "VIEW",
+}
+
+export enum StoredDataPrivateDetailResponseDtoTypeEnum {
+    ROK4PYRAMIDRASTER = "ROK4-PYRAMID-RASTER",
+    ROK4PYRAMIDVECTOR = "ROK4-PYRAMID-VECTOR",
+    VECTORDB = "VECTOR-DB",
+    ARCHIVE = "ARCHIVE",
+    GRAPHDB = "GRAPH-DB",
+    GRAPHOSRM = "GRAPH-OSRM",
+    GRAPHVALHALLA = "GRAPH-VALHALLA",
+    INDEX = "INDEX",
+}
+
+export enum StoredDataPrivateDetailResponseDtoVisibilityEnum {
+    PRIVATE = "PRIVATE",
+    REFERENCED = "REFERENCED",
+    PUBLIC = "PUBLIC",
+}
+
+export enum StoredDataPrivateDetailResponseDtoStatusEnum {
+    CREATED = "CREATED",
+    GENERATING = "GENERATING",
+    MODIFYING = "MODIFYING",
+    GENERATED = "GENERATED",
+    DELETED = "DELETED",
+    UNSTABLE = "UNSTABLE",
+}
+
+export enum StoredDataRok4PyramidRasterDetailsDtoChannelsFormatEnum {
+    UINT8 = "UINT8",
+    UINT16 = "UINT16",
+    FLOAT32 = "FLOAT32",
+}
+
+export enum StoredDataRok4PyramidRasterDetailsDtoCompressionEnum {
+    RAW = "RAW",
+    JPG = "JPG",
+    PNG = "PNG",
+    LZW = "LZW",
+    ZIP = "ZIP",
+    PKB = "PKB",
+    JPG90 = "JPG90",
+}
+
+export enum StoredDataStorageDtoTypeEnum {
+    POSTGRESQL = "POSTGRESQL",
+    S3 = "S3",
+    FILESYSTEM = "FILESYSTEM",
+    OPENSEARCH = "OPENSEARCH",
+    POSTGRESQLROUTING = "POSTGRESQL-ROUTING",
+}
+
 /** le type du fichier statique */
 export enum StaticFileCreateDtoTypeEnum {
     GEOSERVERFTL = "GEOSERVER-FTL",
@@ -3145,6 +2957,7 @@ export enum StoredDataCreationDtoStorageTypeEnum {
     POSTGRESQL = "POSTGRESQL",
     S3 = "S3",
     FILESYSTEM = "FILESYSTEM",
+    OPENSEARCH = "OPENSEARCH",
     POSTGRESQLROUTING = "POSTGRESQL-ROUTING",
 }
 
@@ -3165,6 +2978,7 @@ export enum ProcessingExecutionStoredDataDtoTypeEnum {
     GRAPHDB = "GRAPH-DB",
     GRAPHOSRM = "GRAPH-OSRM",
     GRAPHVALHALLA = "GRAPH-VALHALLA",
+    INDEX = "INDEX",
 }
 
 export enum ProcessingExecutionStoredDataDtoStatusEnum {
@@ -3181,6 +2995,8 @@ export enum ProcessingExecutionUploadDtoTypeEnum {
     RASTER = "RASTER",
     ARCHIVE = "ARCHIVE",
     ROK4PYRAMID = "ROK4-PYRAMID",
+    INDEX = "INDEX",
+    HISTORICIMAGERY = "HISTORIC-IMAGERY",
 }
 
 export enum ProcessingExecutionUploadDtoStatusEnum {
@@ -3203,12 +3019,13 @@ export enum PermissionCreateDtoTypeEnum {
 export enum PermissionOfferingResponseDtoTypeEnum {
     WMSVECTOR = "WMS-VECTOR",
     WFS = "WFS",
-    WFSINSPIRE = "WFS-INSPIRE",
     WMTSTMS = "WMTS-TMS",
     WMSRASTER = "WMS-RASTER",
     DOWNLOAD = "DOWNLOAD",
     ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
     ALTIMETRY = "ALTIMETRY",
+    SEARCH = "SEARCH",
+    VECTORTMS = "VECTOR-TMS",
 }
 
 /** Visibilité de l'offre */
@@ -3231,12 +3048,13 @@ export enum PermissionOfferingResponseDtoStatusEnum {
 export enum ConfigurationCreateDtoTypeEnum {
     WMSVECTOR = "WMS-VECTOR",
     WFS = "WFS",
-    WFSINSPIRE = "WFS-INSPIRE",
     WMTSTMS = "WMTS-TMS",
     WMSRASTER = "WMS-RASTER",
     DOWNLOAD = "DOWNLOAD",
     ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
     ALTIMETRY = "ALTIMETRY",
+    SEARCH = "SEARCH",
+    VECTORTMS = "VECTOR-TMS",
 }
 
 /** @default "PRIVATE" */
@@ -3251,6 +3069,7 @@ export enum StorageCreateDtoTypeEnum {
     POSTGRESQL = "POSTGRESQL",
     S3 = "S3",
     FILESYSTEM = "FILESYSTEM",
+    OPENSEARCH = "OPENSEARCH",
     POSTGRESQLROUTING = "POSTGRESQL-ROUTING",
 }
 
@@ -3258,26 +3077,28 @@ export enum StorageCreateDtoTypeEnum {
 export enum EndpointCreateDtoTypeEnum {
     WMSVECTOR = "WMS-VECTOR",
     WFS = "WFS",
-    WFSINSPIRE = "WFS-INSPIRE",
     WMTSTMS = "WMTS-TMS",
     WMSRASTER = "WMS-RASTER",
     DOWNLOAD = "DOWNLOAD",
     METADATA = "METADATA",
     ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
     ALTIMETRY = "ALTIMETRY",
+    SEARCH = "SEARCH",
+    VECTORTMS = "VECTOR-TMS",
 }
 
 /** Type du point d'accès */
 export enum EndpointDetailResponseDtoTypeEnum {
     WMSVECTOR = "WMS-VECTOR",
     WFS = "WFS",
-    WFSINSPIRE = "WFS-INSPIRE",
     WMTSTMS = "WMTS-TMS",
     WMSRASTER = "WMS-RASTER",
     DOWNLOAD = "DOWNLOAD",
     METADATA = "METADATA",
     ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
     ALTIMETRY = "ALTIMETRY",
+    SEARCH = "SEARCH",
+    VECTORTMS = "VECTOR-TMS",
 }
 
 /** Types de livraisons ayant cette vérification par défaut */
@@ -3286,6 +3107,8 @@ export enum CheckingCreateDtoDefaultUploadsCheckEnum {
     RASTER = "RASTER",
     ARCHIVE = "ARCHIVE",
     ROK4PYRAMID = "ROK4-PYRAMID",
+    INDEX = "INDEX",
+    HISTORICIMAGERY = "HISTORIC-IMAGERY",
 }
 
 /** Types de livraisons ayant cette vérification par défaut */
@@ -3294,31 +3117,8 @@ export enum CheckingAdminDetailResponseDtoDefaultUploadsCheckEnum {
     RASTER = "RASTER",
     ARCHIVE = "ARCHIVE",
     ROK4PYRAMID = "ROK4-PYRAMID",
-}
-
-export enum StoredDataUpdateTechnicalDtoTypeEnum {
-    ROK4PYRAMIDRASTER = "ROK4-PYRAMID-RASTER",
-    ROK4PYRAMIDVECTOR = "ROK4-PYRAMID-VECTOR",
-    VECTORDB = "VECTOR-DB",
-    ARCHIVE = "ARCHIVE",
-    GRAPHDB = "GRAPH-DB",
-    GRAPHOSRM = "GRAPH-OSRM",
-    GRAPHVALHALLA = "GRAPH-VALHALLA",
-}
-
-export enum StoredDataUpdateTechnicalDtoVisibilityEnum {
-    PRIVATE = "PRIVATE",
-    REFERENCED = "REFERENCED",
-    PUBLIC = "PUBLIC",
-}
-
-export enum StoredDataUpdateTechnicalDtoStatusEnum {
-    CREATED = "CREATED",
-    GENERATING = "GENERATING",
-    MODIFYING = "MODIFYING",
-    GENERATED = "GENERATED",
-    DELETED = "DELETED",
-    UNSTABLE = "UNSTABLE",
+    INDEX = "INDEX",
+    HISTORICIMAGERY = "HISTORIC-IMAGERY",
 }
 
 export enum UploadUpdateDtoVisibilityEnum {
@@ -3356,6 +3156,8 @@ export enum CheckingUpdateDtoDefaultUploadsCheckEnum {
     RASTER = "RASTER",
     ARCHIVE = "ARCHIVE",
     ROK4PYRAMID = "ROK4-PYRAMID",
+    INDEX = "INDEX",
+    HISTORICIMAGERY = "HISTORIC-IMAGERY",
 }
 
 export enum CommunityMemberDtoRightsEnum {
@@ -3377,86 +3179,13 @@ export enum UserKeyResponseDtoTypeEnum {
 export enum OfferingListResponseDtoTypeEnum {
     WMSVECTOR = "WMS-VECTOR",
     WFS = "WFS",
-    WFSINSPIRE = "WFS-INSPIRE",
     WMTSTMS = "WMTS-TMS",
     WMSRASTER = "WMS-RASTER",
     DOWNLOAD = "DOWNLOAD",
     ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
     ALTIMETRY = "ALTIMETRY",
-}
-
-/** Type de configuration */
-export enum OfferingEndpointListResponseDtoTypeEnum {
-    WMSVECTOR = "WMS-VECTOR",
-    WFS = "WFS",
-    WFSINSPIRE = "WFS-INSPIRE",
-    WMTSTMS = "WMTS-TMS",
-    WMSRASTER = "WMS-RASTER",
-    DOWNLOAD = "DOWNLOAD",
-    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
-    ALTIMETRY = "ALTIMETRY",
-}
-
-/** Statut de l'offre */
-export enum OfferingEndpointListResponseDtoStatusEnum {
-    PUBLISHING = "PUBLISHING",
-    MODIFYING = "MODIFYING",
-    PUBLISHED = "PUBLISHED",
-    UNPUBLISHING = "UNPUBLISHING",
-    UNSTABLE = "UNSTABLE",
-}
-
-export enum ConfigurationUsedDataItineraryIsocurveDetailsMessageCostTypeEnum {
-    Time = "time",
-    Distance = "distance",
-}
-
-export enum ConfigurationUsedDataItineraryIsocurveDetailsMessageCostingEnum {
-    Auto = "auto",
-    AutoShorter = "auto_shorter",
-    Pedestrian = "pedestrian",
-}
-
-export enum ConfigurationWmsRasterDetailsMessageInterpolationEnum {
-    NEARESTNEIGHBOUR = "NEAREST-NEIGHBOUR",
-    LINEAR = "LINEAR",
-    BICUBIC = "BICUBIC",
-    LANCZOS2 = "LANCZOS2",
-    LANCZOS3 = "LANCZOS3",
-    LANCZOS4 = "LANCZOS4",
-}
-
-export enum StaticFileMessageTypeEnum {
-    GEOSERVERFTL = "GEOSERVER-FTL",
-    GEOSERVERSTYLE = "GEOSERVER-STYLE",
-    ROK4STYLE = "ROK4-STYLE",
-    DERIVATIONSQL = "DERIVATION-SQL",
-}
-
-export enum StorageMessageTypeEnum {
-    POSTGRESQL = "POSTGRESQL",
-    S3 = "S3",
-    FILESYSTEM = "FILESYSTEM",
-    POSTGRESQLROUTING = "POSTGRESQL-ROUTING",
-}
-
-export enum StoredDataMessageTypeEnum {
-    ROK4PYRAMIDRASTER = "ROK4-PYRAMID-RASTER",
-    ROK4PYRAMIDVECTOR = "ROK4-PYRAMID-VECTOR",
-    VECTORDB = "VECTOR-DB",
-    ARCHIVE = "ARCHIVE",
-    GRAPHDB = "GRAPH-DB",
-    GRAPHOSRM = "GRAPH-OSRM",
-    GRAPHVALHALLA = "GRAPH-VALHALLA",
-}
-
-export enum StoredDataMessageStatusEnum {
-    CREATED = "CREATED",
-    GENERATING = "GENERATING",
-    MODIFYING = "MODIFYING",
-    GENERATED = "GENERATED",
-    DELETED = "DELETED",
-    UNSTABLE = "UNSTABLE",
+    SEARCH = "SEARCH",
+    VECTORTMS = "VECTOR-TMS",
 }
 
 export enum UploadListResponseDtoTypeEnum {
@@ -3464,6 +3193,8 @@ export enum UploadListResponseDtoTypeEnum {
     RASTER = "RASTER",
     ARCHIVE = "ARCHIVE",
     ROK4PYRAMID = "ROK4-PYRAMID",
+    INDEX = "INDEX",
+    HISTORICIMAGERY = "HISTORIC-IMAGERY",
 }
 
 export enum UploadListResponseDtoVisibilityEnum {
@@ -3488,6 +3219,8 @@ export enum UploadSharedDetailResponseDtoTypeEnum {
     RASTER = "RASTER",
     ARCHIVE = "ARCHIVE",
     ROK4PYRAMID = "ROK4-PYRAMID",
+    INDEX = "INDEX",
+    HISTORICIMAGERY = "HISTORIC-IMAGERY",
 }
 
 export enum UploadSharedDetailResponseDtoVisibilityEnum {
@@ -3515,6 +3248,7 @@ export enum StoredDataListResponseDtoTypeEnum {
     GRAPHDB = "GRAPH-DB",
     GRAPHOSRM = "GRAPH-OSRM",
     GRAPHVALHALLA = "GRAPH-VALHALLA",
+    INDEX = "INDEX",
 }
 
 export enum StoredDataListResponseDtoVisibilityEnum {
@@ -3531,6 +3265,7 @@ export enum StoredDataSharedDetailResponseDtoTypeEnum {
     GRAPHDB = "GRAPH-DB",
     GRAPHOSRM = "GRAPH-OSRM",
     GRAPHVALHALLA = "GRAPH-VALHALLA",
+    INDEX = "INDEX",
 }
 
 export enum StoredDataSharedDetailResponseDtoVisibilityEnum {
@@ -3566,12 +3301,13 @@ export enum ProcessingExecutionListResponseDtoStatusEnum {
 export enum ConfigurationListResponseDtoTypeEnum {
     WMSVECTOR = "WMS-VECTOR",
     WFS = "WFS",
-    WFSINSPIRE = "WFS-INSPIRE",
     WMTSTMS = "WMTS-TMS",
     WMSRASTER = "WMS-RASTER",
     DOWNLOAD = "DOWNLOAD",
     ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
     ALTIMETRY = "ALTIMETRY",
+    SEARCH = "SEARCH",
+    VECTORTMS = "VECTOR-TMS",
 }
 
 /** Statut de la configuration */
@@ -3587,6 +3323,8 @@ export enum CheckingStandardDetailResponseDtoDefaultUploadsCheckEnum {
     RASTER = "RASTER",
     ARCHIVE = "ARCHIVE",
     ROK4PYRAMID = "ROK4-PYRAMID",
+    INDEX = "INDEX",
+    HISTORICIMAGERY = "HISTORIC-IMAGERY",
 }
 
 export enum CheckingExecutionListResponseDtoStatusEnum {
@@ -3608,6 +3346,8 @@ export enum CheckingExecutionUploadResponseDtoTypeEnum {
     RASTER = "RASTER",
     ARCHIVE = "ARCHIVE",
     ROK4PYRAMID = "ROK4-PYRAMID",
+    INDEX = "INDEX",
+    HISTORICIMAGERY = "HISTORIC-IMAGERY",
 }
 
 export enum CommunityUserResponseDtoRightsEnum {
@@ -3623,6 +3363,8 @@ export enum UploadCatalogResponseDtoTypeEnum {
     RASTER = "RASTER",
     ARCHIVE = "ARCHIVE",
     ROK4PYRAMID = "ROK4-PYRAMID",
+    INDEX = "INDEX",
+    HISTORICIMAGERY = "HISTORIC-IMAGERY",
 }
 
 export enum UploadCatalogResponseDtoVisibilityEnum {
@@ -3635,12 +3377,23 @@ export enum UploadCatalogResponseDtoVisibilityEnum {
 export enum OfferingSharedDetailResponseDtoTypeEnum {
     WMSVECTOR = "WMS-VECTOR",
     WFS = "WFS",
-    WFSINSPIRE = "WFS-INSPIRE",
     WMTSTMS = "WMTS-TMS",
     WMSRASTER = "WMS-RASTER",
     DOWNLOAD = "DOWNLOAD",
     ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
     ALTIMETRY = "ALTIMETRY",
+    SEARCH = "SEARCH",
+    VECTORTMS = "VECTOR-TMS",
+}
+
+export enum AccountResponseDtoStateEnum {
+    ACTIVE = "ACTIVE",
+    DISABLED = "DISABLED",
+    DISABLED_ELEVEN_MONTHS = "DISABLED_ELEVEN_MONTHS",
+    INACTIVE_NINE_MONTHS = "INACTIVE_NINE_MONTHS",
+    INACTIVE_ELEVEN_MONTHS = "INACTIVE_ELEVEN_MONTHS",
+    INACTIVE_ELEVEN_MONTHS_THREE_WEEKS = "INACTIVE_ELEVEN_MONTHS_THREE_WEEKS",
+    DELETED = "DELETED",
 }
 
 /** Type de livraisons */
@@ -3649,6 +3402,8 @@ export enum GetAll1ParamsTypeEnum {
     RASTER = "RASTER",
     ARCHIVE = "ARCHIVE",
     ROK4PYRAMID = "ROK4-PYRAMID",
+    INDEX = "INDEX",
+    HISTORICIMAGERY = "HISTORIC-IMAGERY",
 }
 
 /** Type de fichier statique */
@@ -3691,12 +3446,13 @@ export enum Create3ParamsTypeEnum {
 export enum GetAll8ParamsTypeEnum {
     WMSVECTOR = "WMS-VECTOR",
     WFS = "WFS",
-    WFSINSPIRE = "WFS-INSPIRE",
     WMTSTMS = "WMTS-TMS",
     WMSRASTER = "WMS-RASTER",
     DOWNLOAD = "DOWNLOAD",
     ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
     ALTIMETRY = "ALTIMETRY",
+    SEARCH = "SEARCH",
+    VECTORTMS = "VECTOR-TMS",
 }
 
 /** Statut des configurations */
@@ -3711,6 +3467,7 @@ export enum GetByTypeParamsTypeEnum {
     POSTGRESQL = "POSTGRESQL",
     S3 = "S3",
     FILESYSTEM = "FILESYSTEM",
+    OPENSEARCH = "OPENSEARCH",
     POSTGRESQLROUTING = "POSTGRESQL-ROUTING",
 }
 
@@ -3720,6 +3477,8 @@ export enum GetAll12ParamsInputUploadTypeEnum {
     RASTER = "RASTER",
     ARCHIVE = "ARCHIVE",
     ROK4PYRAMID = "ROK4-PYRAMID",
+    INDEX = "INDEX",
+    HISTORICIMAGERY = "HISTORIC-IMAGERY",
 }
 
 /** Type de donnée stockée en entrée */
@@ -3731,6 +3490,7 @@ export enum GetAll12ParamsInputStoredDataTypeEnum {
     GRAPHDB = "GRAPH-DB",
     GRAPHOSRM = "GRAPH-OSRM",
     GRAPHVALHALLA = "GRAPH-VALHALLA",
+    INDEX = "INDEX",
 }
 
 /** Type de livraison en sortie */
@@ -3739,6 +3499,8 @@ export enum GetAll12ParamsOutputUploadTypeEnum {
     RASTER = "RASTER",
     ARCHIVE = "ARCHIVE",
     ROK4PYRAMID = "ROK4-PYRAMID",
+    INDEX = "INDEX",
+    HISTORICIMAGERY = "HISTORIC-IMAGERY",
 }
 
 /** Type de donnée stockée en sortie */
@@ -3750,19 +3512,21 @@ export enum GetAll12ParamsOutputStoredDataTypeEnum {
     GRAPHDB = "GRAPH-DB",
     GRAPHOSRM = "GRAPH-OSRM",
     GRAPHVALHALLA = "GRAPH-VALHALLA",
+    INDEX = "INDEX",
 }
 
 /** Type de point d'accès voulu */
 export enum GetAll13ParamsTypeEnum {
     WMSVECTOR = "WMS-VECTOR",
     WFS = "WFS",
-    WFSINSPIRE = "WFS-INSPIRE",
     WMTSTMS = "WMTS-TMS",
     WMSRASTER = "WMS-RASTER",
     DOWNLOAD = "DOWNLOAD",
     METADATA = "METADATA",
     ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
     ALTIMETRY = "ALTIMETRY",
+    SEARCH = "SEARCH",
+    VECTORTMS = "VECTOR-TMS",
 }
 
 /** Type de livraison ayant la vérification automatique */
@@ -3771,18 +3535,21 @@ export enum GetAll16ParamsDefaultUploadCheckEnum {
     RASTER = "RASTER",
     ARCHIVE = "ARCHIVE",
     ROK4PYRAMID = "ROK4-PYRAMID",
+    INDEX = "INDEX",
+    HISTORICIMAGERY = "HISTORIC-IMAGERY",
 }
 
 /** Type de diffusion des offres permises */
 export enum GetUserPermissionsParamsTypeEnum {
     WMSVECTOR = "WMS-VECTOR",
     WFS = "WFS",
-    WFSINSPIRE = "WFS-INSPIRE",
     WMTSTMS = "WMTS-TMS",
     WMSRASTER = "WMS-RASTER",
     DOWNLOAD = "DOWNLOAD",
     ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
     ALTIMETRY = "ALTIMETRY",
+    SEARCH = "SEARCH",
+    VECTORTMS = "VECTOR-TMS",
 }
 
 /** Type de donnée stockée */
@@ -3794,6 +3561,7 @@ export enum GetAll2ParamsTypeEnum {
     GRAPHDB = "GRAPH-DB",
     GRAPHOSRM = "GRAPH-OSRM",
     GRAPHVALHALLA = "GRAPH-VALHALLA",
+    INDEX = "INDEX",
 }
 
 /** Statut des données stockées */
@@ -3810,12 +3578,13 @@ export enum GetAll2ParamsStatusEnum {
 export enum GetAll6ParamsTypeEnum {
     WMSVECTOR = "WMS-VECTOR",
     WFS = "WFS",
-    WFSINSPIRE = "WFS-INSPIRE",
     WMTSTMS = "WMTS-TMS",
     WMSRASTER = "WMS-RASTER",
     DOWNLOAD = "DOWNLOAD",
     ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
     ALTIMETRY = "ALTIMETRY",
+    SEARCH = "SEARCH",
+    VECTORTMS = "VECTOR-TMS",
 }
 
 /** Statut des offres */
@@ -3833,6 +3602,8 @@ export enum GetAll9ParamsDefaultUploadCheckEnum {
     RASTER = "RASTER",
     ARCHIVE = "ARCHIVE",
     ROK4PYRAMID = "ROK4-PYRAMID",
+    INDEX = "INDEX",
+    HISTORICIMAGERY = "HISTORIC-IMAGERY",
 }
 
 /** Statut des exécutions à récupérer */
@@ -3852,23 +3623,65 @@ export enum GetUsersParamsRightsEnum {
     UPLOAD = "UPLOAD",
 }
 
+/** Filtre sur le type des offres permises */
+export enum GetCommunityPermissionsParamsTypeEnum {
+    WMSVECTOR = "WMS-VECTOR",
+    WFS = "WFS",
+    WMTSTMS = "WMTS-TMS",
+    WMSRASTER = "WMS-RASTER",
+    DOWNLOAD = "DOWNLOAD",
+    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
+    ALTIMETRY = "ALTIMETRY",
+    SEARCH = "SEARCH",
+    VECTORTMS = "VECTOR-TMS",
+}
+
 /** Type de livraisons */
 export enum GetUploadsParamsTypeEnum {
     VECTOR = "VECTOR",
     RASTER = "RASTER",
     ARCHIVE = "ARCHIVE",
     ROK4PYRAMID = "ROK4-PYRAMID",
+    INDEX = "INDEX",
+    HISTORICIMAGERY = "HISTORIC-IMAGERY",
 }
 
 /** Type de diffusion de l'offre */
 export enum GetPublicOfferingsParamsTypeEnum {
     WMSVECTOR = "WMS-VECTOR",
     WFS = "WFS",
-    WFSINSPIRE = "WFS-INSPIRE",
     WMTSTMS = "WMTS-TMS",
     WMSRASTER = "WMS-RASTER",
     DOWNLOAD = "DOWNLOAD",
     METADATA = "METADATA",
     ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
     ALTIMETRY = "ALTIMETRY",
+    SEARCH = "SEARCH",
+    VECTORTMS = "VECTOR-TMS",
+}
+
+/** Filtre sur le statut du compte */
+export enum GetUsers1ParamsStateEnum {
+    ACTIVE = "ACTIVE",
+    INACTIVE_NINE_MONTHS = "INACTIVE_NINE_MONTHS",
+    INACTIVE_ELEVEN_MONTHS = "INACTIVE_ELEVEN_MONTHS",
+    INACTIVE_ELEVEN_MONTHS_THREE_WEEKS = "INACTIVE_ELEVEN_MONTHS_THREE_WEEKS",
+    DISABLED = "DISABLED",
+    DISABLED_ELEVEN_MONTHS = "DISABLED_ELEVEN_MONTHS",
+}
+
+/** Actions requises pour le compte de l'utilisateur */
+export enum GetUsers1ParamsRequiredActionsEnum {
+    CONFIGURE_TOTP = "CONFIGURE_TOTP",
+    UPDATE_GPF_PASSWORD = "UPDATE_GPF_PASSWORD",
+    UPDATE_PROFILE = "UPDATE_PROFILE",
+    VERIFY_EMAIL = "VERIFY_EMAIL",
+    UPDATE_EMAIL = "UPDATE_EMAIL",
+    TERMS_AND_CONDITIONS = "TERMS_AND_CONDITIONS",
+}
+
+/** Catégorie Professionnel / Particulier de l'utilisateur */
+export enum GetUsers1ParamsCategoryEnum {
+    PROFESSIONNEL = "PROFESSIONNEL",
+    PARTICULIER = "PARTICULIER",
 }

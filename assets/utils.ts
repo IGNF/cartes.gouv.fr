@@ -112,24 +112,22 @@ const decodeContentRange = (contentRange: string): ContentRangeType => {
 
 const offeringTypeDisplayName = (type: OfferingDetailResponseDtoTypeEnum): string => {
     switch (type) {
-        case "WMS-VECTOR":
+        case OfferingDetailResponseDtoTypeEnum.WMSVECTOR:
             return "Web Map Service Vecteur";
-        case "WFS":
+        case OfferingDetailResponseDtoTypeEnum.WFS:
             return "Web Feature Service";
-        case "WFS-INSPIRE":
-            return "Web Feature Service Inspire";
-        case "WMTS-TMS":
+        case OfferingDetailResponseDtoTypeEnum.WMTSTMS:
             return "Web Map Tile Service - Tile Map Service";
-        case "WMS-RASTER":
+        case OfferingDetailResponseDtoTypeEnum.WMSRASTER:
             return "Web Map Service Raster";
-        case "DOWNLOAD":
+        case OfferingDetailResponseDtoTypeEnum.DOWNLOAD:
             return "Service de Téléchargement";
-        case "ITINERARY-ISOCURVE":
+        case OfferingDetailResponseDtoTypeEnum.ITINERARYISOCURVE:
             return "Service de calcul d'itinéraire / isochrone";
-        case "ALTIMETRY":
+        case OfferingDetailResponseDtoTypeEnum.ALTIMETRY:
             return "Service d'altimétrie";
         default:
-            return "";
+            return type;
     }
 };
 

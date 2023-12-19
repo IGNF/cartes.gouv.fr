@@ -15,3 +15,37 @@ npx swagger-typescript-api@latest -p <chemin/vers/fichier/openapi> -o assets/typ
 > Il est conseillé de re-déclarer les types dans le fichier `app.ts` pour renommer les types et les interfaces et les importer depuis celui-ci.
 
 3. Supprimer le fichier auto-généré. ❗ Ne pas le commiter ❗
+
+## Corrections manuelles à faire
+
+-   Supprimer les références circulaires
+-   `StoredDataDetailsDto` :
+
+remplacer
+
+```ts
+/** Détails sur une donnée stockée */
+export type StoredDataDetailsDto =
+    | StoredDataRok4PyramidRasterDetailsDto
+    | StoredDataRok4PyramidVectorDetailsDto
+    | StoredDataVectorDbDetailsDto
+    | StoredDataArchiveDetailsDto
+    | StoredDataGraphDbDetailsDto
+    | StoredDataGraphDetailsDto
+    | StoredDataIndexDetailsDto;
+```
+
+par
+
+```ts
+/** Détails sur une donnée stockée */
+export type StoredDataDetailsDto = StoredDataRok4PyramidRasterDetailsDto &
+    StoredDataRok4PyramidVectorDetailsDto &
+    StoredDataVectorDbDetailsDto &
+    StoredDataArchiveDetailsDto &
+    StoredDataGraphDbDetailsDto &
+    StoredDataGraphDetailsDto &
+    StoredDataIndexDetailsDto;
+```
+
+-   `ConfigurationDetailResponseDtoStatusEnum` : supprimer `ConfigurationResponseDtoStatusEnum` et ne garder que `ConfigurationDetailResponseDtoStatusEnum`

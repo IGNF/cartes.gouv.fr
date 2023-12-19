@@ -2,24 +2,24 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
+import { FieldsetProps } from "@codegouvfr/react-dsfr/shared/Fieldset";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useMemo } from "react";
 
 import api from "../../../api";
 import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
+import { StyleComponent, addStyleModal } from "../../../components/StyleComponent";
 import LoadingText from "../../../components/Utils/LoadingText";
 import RMap from "../../../components/Utils/RMap";
 import TextCopyToClipboard from "../../../components/Utils/TextCopyToClipboard";
 import RQKeys from "../../../modules/RQKeys";
 import { type CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
-import { CartesStyle, Configuration, type Service } from "../../../types/app";
+import { CartesStyle, type Service } from "../../../types/app";
 import { OfferingDetailResponseDtoTypeEnum } from "../../../types/entrepot";
-import { addStyleModal, StyleComponent } from "../../../components/StyleComponent";
-import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import StyleLabel from "./StyleLabel";
-import { FieldsetProps } from "@codegouvfr/react-dsfr/shared/Fieldset";
 
 type ServiceViewProps = {
     datastoreId: string;
@@ -44,7 +44,7 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
 
     // Les styles
     const styles: CartesStyle[] | undefined = useMemo(() => {
-        const configuration = serviceQuery.data?.configuration as Configuration;
+        const configuration = serviceQuery.data?.configuration;
         if (configuration) {
             return configuration.styles;
         }
@@ -55,7 +55,7 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
     const styleNames = useMemo<string[]>(() => {
         let styles: CartesStyle[] = [];
         serviceListQuery.data?.forEach((service) => {
-            const configuration = service.configuration as Configuration;
+            const configuration = service.configuration;
             if ("styles" in configuration && Array.isArray(configuration.styles)) {
                 styles = styles.concat(configuration.styles);
             }
