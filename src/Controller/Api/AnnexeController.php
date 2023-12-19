@@ -57,8 +57,8 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
             // On regarde s'il existe deja une vignette
             $annexes = $this->entrepotApiService->annexe->getAll($datastoreId, null, null, $labels);
 
-            if (count($annexes)) {  // Il existe, on la supprime sinon le path ne change pas
-                $this->entrepotApiService->annexe->remove($datastoreId, $annexes[0]['_id']); // Sinon le path ne change pas
+            if (count($annexes)) {  // Elle existe, on la supprime sinon le path ne change pas
+                $this->entrepotApiService->annexe->remove($datastoreId, $annexes[0]['_id']);
             }
             
             $annexe = $this->entrepotApiService->annexe->add($datastoreId, $file->getRealPath(), [$path], $labels);

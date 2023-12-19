@@ -73,7 +73,7 @@ const DatasheetThumbnail: FC<DatasheetThumbnailProps> = ({ datastoreId, datashee
     const [modalImageUrl, setModalImageUrl] = useState<string>("");
     const [thumbnailAddBtnHover, setThumbnailAddBtnHover] = useState(false);
 
-    // Ajout/modification d'une vignette
+    // Ajout/modification de la vignette
     const addThumbnailMutation = useMutation<DatasheetThumbnailAnnexe, CartesApiException>({
         mutationFn: () => {
             const form = new FormData();
@@ -107,7 +107,7 @@ const DatasheetThumbnail: FC<DatasheetThumbnailProps> = ({ datastoreId, datashee
         },
     });
 
-    // Suppression d'une vignette
+    // Suppression de la vignette
     const deleteThumbnailMutation = useMutation<null, CartesApiException>({
         mutationFn: () => {
             if (datasheet?.thumbnail?._id) {

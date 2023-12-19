@@ -260,9 +260,9 @@ export const DatasheetViewFrTranslations: Translations<"fr">["DatasheetView"] = 
             case "add":
                 return "Ajouter une vignette";
             case "modify":
-                return "Remplacer une vignette";
+                return "Remplacer la vignette";
             case "delete":
-                return "Supprimer une vignette";
+                return "Supprimer la vignette";
         }
     },
     "datasheet_confirm_delete_modal.title": ({ datasheetName }) => `Êtes-vous sûr de supprimer la fiche de données ${datasheetName} ?`,
