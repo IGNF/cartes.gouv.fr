@@ -64,18 +64,14 @@ class StyleHelper {
         return style;
     }
 
-    static async applyStyle(layers: BaseLayer[], currentStyle: CartesStyle) {
-        if (currentStyle === undefined) {
-            return;
-        }
+    static async applyStyle(layer: BaseLayer, currentStyle: CartesStyle | undefined) {
+        if (!currentStyle) return;
 
-        for (const layer of layers) {
-            // TODO Quid VectorTileLayer ?
-            if (layer instanceof VectorLayer) {
-                const style = await StyleHelper.#getOlStyle(layer, currentStyle);
-                if (style) {
-                    layer.setStyle(style);
-                }
+        // TODO VectorTileLayer (TMS) ?
+        if (layer instanceof VectorLayer) {
+            const style = await StyleHelper.#getOlStyle(layer, currentStyle);
+            if (style) {
+                layer.setStyle(style);
             }
         }
     }

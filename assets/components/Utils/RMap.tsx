@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo, useRef } from "react";
+import { FC, useCallback, useEffect, useMemo, useRef } from "react";
 
 import Map from "ol/Map";
 import View from "ol/View";
@@ -23,18 +23,6 @@ import StyleHelper from "../../modules/WebServices/StyleHelper";
 type RMapProps = {
     service: Service;
 };
-
-/*type ContextType = {
-    firstRender: boolean;
-    center: Coordinate;
-    zoom: number;
-};
-
-const context: ContextType = {
-    firstRender: true,
-    center: fromLonLat(olDefaults.center),
-    zoom: olDefaults.zoom,
-};*/
 
 const RMap: FC<RMapProps> = ({ service }) => {
     const mapTargetRef = useRef<HTMLDivElement>(null);
@@ -69,7 +57,7 @@ const RMap: FC<RMapProps> = ({ service }) => {
      * @param name
      * @returns
      */
-    const getControl = (className: string): typeof LayerSwitcher | typeof GetFeatureInfo => {
+    const getControl = useCallback((className: string): typeof LayerSwitcher | typeof GetFeatureInfo => {
         let control;
         if (mapRef.current) {
             mapRef.current.getControls().forEach((c) => {
@@ -77,7 +65,11 @@ const RMap: FC<RMapProps> = ({ service }) => {
             });
         }
         return control;
-    };
+    }, []);
+
+    const ready: boolean = useMemo(() => {
+        return !!(mapRef.current && capabilities && extent);
+    }, [capabilities, extent]);
 
     useEffect(() => {
         // Creation de la carte
@@ -106,18 +98,12 @@ const RMap: FC<RMapProps> = ({ service }) => {
             mapRef.current = new Map({
                 view: new View({
                     projection: olDefaults.projection,
-                    /*center: context.center,
-                    zoom: context.zoom,*/
                     center: fromLonLat(olDefaults.center),
                     zoom: olDefaults.zoom,
                 }),
                 interactions: defaultInteractions(),
                 controls: controls,
             });
-            /*mapRef.current.on("moveend", (evt: MapEvent) => {
-                context.center = evt.map.getView().getCenter() ?? fromLonLat(olDefaults.center);
-                context.zoom = evt.map.getView().getZoom() ?? olDefaults.zoom;
-            });*/
         }
         mapRef.current.setTarget(mapTargetRef.current || "");
 
@@ -132,65 +118,53 @@ const RMap: FC<RMapProps> = ({ service }) => {
     useEffect(() => {
         (async () => {
             const addLayer = (layer) => {
+                StyleHelper.applyStyle(layer, currentStyle);
+
                 // Ajout du layer dans la carte et dans le LayerSwitcher
-                if (mapRef.current) {
-                    mapRef.current.addLayer(layer);
-                    getControl("LayerSwitcher")?.addLayer(layer, {
-                        title: layer.get("title"),
-                        description: layer.get("abstract"),
-                    });
-                }
+                mapRef.current?.addLayer(layer);
+                getControl("LayerSwitcher")?.addLayer(layer, {
+                    title: layer.get("title"),
+                    description: layer.get("abstract"),
+                });
             };
 
-            const getLayers = async () => {
-                const webService = getWebService(service);
-                return await webService.getLayers();
-            };
+            if (!ready) return;
 
-            if (capabilities && mapRef.current) {
-                // Ajout de la couche de fond PlanIgnV2
-                const wmtsOptions = optionsFromCapabilities(capabilities, {
-                    layer: olDefaults.default_background_layer,
+            // Ajout de la couche de fond PlanIgnV2
+            const wmtsOptions = optionsFromCapabilities(capabilities, {
+                layer: olDefaults.default_background_layer,
+            });
+
+            if (wmtsOptions) {
+                const capLayer = capabilities?.Contents.Layer?.find((l) => {
+                    return l.Identifier === olDefaults.default_background_layer;
                 });
 
-                if (wmtsOptions) {
-                    const capLayer = capabilities.Contents.Layer?.find((l) => {
-                        return l.Identifier === olDefaults.default_background_layer;
-                    });
-
-                    const layer = new TileLayer({
-                        opacity: 1,
-                        source: new WMTS(wmtsOptions),
-                    });
-                    layer.set("title", capLayer?.Title);
-                    addLayer(layer);
-                }
-
-                const layers = await getLayers();
-
-                const gfiLayers: object[] = [];
-                layers.forEach((layer) => {
-                    addLayer(layer);
-                    if (gfinfo) {
-                        gfiLayers.push({ obj: layer });
-                    }
+                const layer = new TileLayer({
+                    opacity: 1,
+                    source: new WMTS(wmtsOptions),
                 });
-                getControl("GetFeatureInfo")?.setLayers(gfiLayers);
+                layer.set("title", capLayer?.Title);
+                addLayer(layer);
+            }
 
-                // On zoom sur l'extent de la couche au premier rendu
-                if (extent) {
-                    mapRef.current?.getView().fit(extent);
+            const layers = await getWebService(service).getLayers();
+
+            const gfiLayers: object[] = [];
+            layers.forEach((layer) => {
+                addLayer(layer);
+                if (gfinfo) {
+                    gfiLayers.push({ obj: layer });
                 }
+            });
+            getControl("GetFeatureInfo")?.setLayers(gfiLayers);
+
+            // On zoom sur l'extent de la couche au premier rendu
+            if (extent) {
+                mapRef.current?.getView().fit(extent);
             }
         })();
-    }, [capabilities, extent, service, gfinfo]);
-
-    useEffect(() => {
-        if (capabilities && currentStyle) {
-            const layers = mapRef.current?.getLayers().getArray() ?? [];
-            StyleHelper.applyStyle(layers, currentStyle);
-        }
-    }, [currentStyle, capabilities]);
+    }, [ready, service, capabilities, currentStyle, getControl, extent, gfinfo]);
 
     return <div className={"map-view"} ref={mapTargetRef} />;
 };
