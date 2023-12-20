@@ -1,3 +1,8 @@
+.frx-icon-spin::before {
+    animation: spin 2s linear infinite;
+}
+
+// TODO : à supprimer une fois toutes les utilisations de icons-spin seront supprimées
 .icons-spin::before {
     animation: spin 2s linear infinite;
 }
