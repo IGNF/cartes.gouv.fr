@@ -8,6 +8,7 @@ use App\Services\EntrepotApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route(
@@ -21,6 +22,25 @@ class StoredDataController extends AbstractController implements ApiControllerIn
     public function __construct(
         private EntrepotApiService $entrepotApiService
     ) {
+    }
+
+    #[Route('', name: 'get_list', methods: ['GET'])]
+    public function getStoredDataList(
+        string $datastoreId,
+        #[MapQueryParameter] string $type = null,
+    ): JsonResponse {
+        try {
+            $query = [];
+            if (null !== $type) {
+                $query['type'] = $type;
+            }
+
+            $storedDataList = $this->entrepotApiService->storedData->getAllDetailed($datastoreId, $query);
+
+            return $this->json($storedDataList);
+        } catch (EntrepotApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
+        }
     }
 
     #[Route('/{storedDataId}', name: 'get', methods: ['GET'])]

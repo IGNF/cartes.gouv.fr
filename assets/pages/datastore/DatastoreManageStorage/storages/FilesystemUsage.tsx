@@ -6,7 +6,7 @@ import { Datastore } from "../../../../types/app";
 import { niceBytes } from "../../../../utils";
 
 type FilesystemUsageProps = {
-    datastore?: Datastore;
+    datastore: Datastore;
 };
 const FilesystemUsage: FC<FilesystemUsageProps> = ({ datastore }) => {
     const { t } = useTranslation("DatastoreManageStorage");
@@ -19,12 +19,14 @@ const FilesystemUsage: FC<FilesystemUsageProps> = ({ datastore }) => {
         <>
             <p>{t("storage.filesystem.explanation")}</p>
 
-            {filesystemUsage && (
+            {filesystemUsage ? (
                 <Progress
                     label={`${niceBytes(filesystemUsage.use.toString())} / ${niceBytes(filesystemUsage.quota.toString())}`}
                     value={filesystemUsage.use}
                     max={filesystemUsage.quota}
                 />
+            ) : (
+                <p>{t("storage.not_found")}</p>
             )}
         </>
     );

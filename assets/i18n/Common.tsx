@@ -35,7 +35,7 @@ export const commonFrTranslations: Translations<"fr">["Common"] = {
 };
 
 export const commonEnTranslations: Translations<"en">["Common"] = {
-    error: "Error is raised",
+    error: "An error occurred",
     add: "Add",
     adding: "Adding ...",
     modify: "Modify",

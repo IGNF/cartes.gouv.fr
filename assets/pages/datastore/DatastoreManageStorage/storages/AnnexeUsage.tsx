@@ -6,7 +6,7 @@ import { Datastore } from "../../../../types/app";
 import { niceBytes } from "../../../../utils";
 
 type AnnexeUsageProps = {
-    datastore?: Datastore;
+    datastore: Datastore;
 };
 const AnnexeUsage: FC<AnnexeUsageProps> = ({ datastore }) => {
     const { t } = useTranslation("DatastoreManageStorage");
@@ -19,12 +19,14 @@ const AnnexeUsage: FC<AnnexeUsageProps> = ({ datastore }) => {
         <>
             <p>{t("storage.annexe.explanation")}</p>
 
-            {annexeUsage && (
+            {annexeUsage ? (
                 <Progress
                     label={`${niceBytes(annexeUsage.use.toString())} / ${niceBytes(annexeUsage.quota.toString())}`}
                     value={annexeUsage.use}
                     max={annexeUsage.quota}
                 />
+            ) : (
+                <p>{t("storage.not_found")}</p>
             )}
         </>
     );

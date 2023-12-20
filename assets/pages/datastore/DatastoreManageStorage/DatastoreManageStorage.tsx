@@ -14,6 +14,7 @@ import FilesystemUsage from "./storages/FilesystemUsage";
 import PostgresqlUsage from "./storages/PostgresqlUsage";
 import S3Usage from "./storages/S3Usage";
 import UploadUsage from "./storages/UploadUsage";
+import LoadingIcon from "../../../components/Utils/LoadingIcon";
 
 type DatastoreManageStorageProps = {
     datastoreId: string;
@@ -32,43 +33,46 @@ const DatastoreManageStorage: FC<DatastoreManageStorageProps> = ({ datastoreId }
             <div className={fr.cx("fr-grid-row")}>
                 <h1>
                     {t("title", { datastoreName: datastoreQuery?.data?.name })}
-                    {datastoreQuery?.isFetching && <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-ml-2w") + " icons-spin"} />}
+                    {datastoreQuery?.isFetching && <LoadingIcon className={fr.cx("fr-ml-2w")} largeIcon />}
                 </h1>
                 <p>{t("explanation")}</p>
             </div>
 
-            <div className={fr.cx("fr-grid-row")}>
-                <div className={fr.cx("fr-col-12")}>
-                    <Tabs
-                        tabs={[
-                            {
-                                label: t("storage.filesystem.label"),
-                                content: <FilesystemUsage datastore={datastoreQuery.data} />,
-                            },
-                            {
-                                label: t("storage.postgresql.label"),
-                                content: <PostgresqlUsage datastore={datastoreQuery.data} />,
-                            },
-                            {
-                                label: t("storage.s3.label"),
-                                content: <S3Usage datastore={datastoreQuery.data} />,
-                            },
-                            {
-                                label: t("storage.upload.label"),
-                                content: <UploadUsage datastore={datastoreQuery.data} />,
-                            },
-                            {
-                                label: t("storage.annexe.label"),
-                                content: <AnnexeUsage datastore={datastoreQuery.data} />,
-                            },
-                            {
-                                label: t("storage.endpoints.label"),
-                                content: <EndpointsUsage datastore={datastoreQuery.data} />,
-                            },
-                        ]}
-                    />
+            {datastoreQuery.data && (
+                <div className={fr.cx("fr-grid-row")}>
+                    <div className={fr.cx("fr-col-12")}>
+                        <Tabs
+                            tabs={[
+                                {
+                                    label: t("storage.filesystem.label"),
+                                    content: <FilesystemUsage datastore={datastoreQuery.data} />,
+                                },
+                                {
+                                    label: t("storage.postgresql.label"),
+                                    content: <PostgresqlUsage datastore={datastoreQuery.data} />,
+                                    isDefault: true,
+                                },
+                                {
+                                    label: t("storage.s3.label"),
+                                    content: <S3Usage datastore={datastoreQuery.data} />,
+                                },
+                                {
+                                    label: t("storage.upload.label"),
+                                    content: <UploadUsage datastore={datastoreQuery.data} />,
+                                },
+                                {
+                                    label: t("storage.annexe.label"),
+                                    content: <AnnexeUsage datastore={datastoreQuery.data} />,
+                                },
+                                {
+                                    label: t("storage.endpoints.label"),
+                                    content: <EndpointsUsage datastore={datastoreQuery.data} />,
+                                },
+                            ]}
+                        />
+                    </div>
                 </div>
-            </div>
+            )}
         </DatastoreLayout>
     );
 };
@@ -78,9 +82,12 @@ export default DatastoreManageStorage;
 export const { i18n } = declareComponentKeys<
     | { K: "title"; P: { datastoreName: string | undefined }; R: string }
     | "explanation"
+    | "stored_data.size.unknown"
+    | "storage.not_found"
     | { K: "storage.filesystem.label"; R: JSX.Element }
     | "storage.filesystem.explanation"
     | { K: "storage.postgresql.label"; R: JSX.Element }
+    | "storage.postgresql.vectordb.loading"
     | "storage.postgresql.explanation"
     | { K: "storage.s3.label"; R: JSX.Element }
     | "storage.s3.explanation"
@@ -95,9 +102,11 @@ export const { i18n } = declareComponentKeys<
 });
 
 export const DatastoreManageStorageFrTranslations: Translations<"fr">["DatastoreManageStorage"] = {
-    title: ({ datastoreName }) => `Gérer l'espace de travail ${datastoreName ?? ""}`,
+    title: ({ datastoreName }) => `Gérer l'espace de travail${datastoreName ? " " + datastoreName : ""}`,
     explanation:
         "Cette page vous permet de voir en un seul coup d'œil le volume de vos données et votre situation par rapport aux différents quotas qui vous sont alloués.",
+    "stored_data.size.unknown": "Taille inconnue",
+    "storage.not_found": "Aucun stockage de ce type n'est attribué à votre espace de travail.",
     "storage.filesystem.label": (
         <span>
             Données intégrées sous <br /> forme de fichiers
@@ -109,6 +118,7 @@ export const DatastoreManageStorageFrTranslations: Translations<"fr">["Datastore
             Données intégrées <br /> en base
         </span>
     ),
+    "storage.postgresql.vectordb.loading": "Chargement des données vectorielles en BD PostgreSQL en cours",
     "storage.postgresql.explanation":
         "Il s'agit de l'espace occupé par des données sur les serveurs PostgreSQL de votre espace de travail. Il s'agit de données intermédiaires qui ne sont pas directement visibles de vos utilisateurs.",
     "storage.s3.label": (
@@ -143,9 +153,12 @@ export const DatastoreManageStorageFrTranslations: Translations<"fr">["Datastore
 export const DatastoreManageStorageEnTranslations: Translations<"en">["DatastoreManageStorage"] = {
     title: undefined,
     explanation: undefined,
+    "stored_data.size.unknown": undefined,
+    "storage.not_found": undefined,
     "storage.filesystem.label": undefined,
     "storage.filesystem.explanation": undefined,
     "storage.postgresql.label": undefined,
+    "storage.postgresql.vectordb.loading": undefined,
     "storage.postgresql.explanation": undefined,
     "storage.s3.label": undefined,
     "storage.s3.explanation": undefined,

@@ -5,7 +5,7 @@ import { useTranslation } from "../../../../i18n/i18n";
 import { Datastore } from "../../../../types/app";
 
 type EndpointsUsageProps = {
-    datastore?: Datastore;
+    datastore: Datastore;
 };
 const EndpointsUsage: FC<EndpointsUsageProps> = ({ datastore }) => {
     const { t } = useTranslation("DatastoreManageStorage");
@@ -18,7 +18,7 @@ const EndpointsUsage: FC<EndpointsUsageProps> = ({ datastore }) => {
         <>
             <p>{t("storage.endpoints.explanation")}</p>
 
-            {endpointsUsage &&
+            {endpointsUsage ? (
                 endpointsUsage.map((endpoint) => (
                     <Progress
                         key={endpoint.endpoint._id}
@@ -26,7 +26,10 @@ const EndpointsUsage: FC<EndpointsUsageProps> = ({ datastore }) => {
                         value={endpoint.use}
                         max={endpoint.quota}
                     />
-                ))}
+                ))
+            ) : (
+                <p>{t("storage.not_found")}</p>
+            )}
         </>
     );
 };

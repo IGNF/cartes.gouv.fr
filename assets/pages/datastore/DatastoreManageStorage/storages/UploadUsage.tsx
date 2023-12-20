@@ -6,7 +6,7 @@ import { Datastore } from "../../../../types/app";
 import { niceBytes } from "../../../../utils";
 
 type UploadUsageProps = {
-    datastore?: Datastore;
+    datastore: Datastore;
 };
 const UploadUsage: FC<UploadUsageProps> = ({ datastore }) => {
     const { t } = useTranslation("DatastoreManageStorage");
@@ -19,12 +19,14 @@ const UploadUsage: FC<UploadUsageProps> = ({ datastore }) => {
         <>
             <p>{t("storage.upload.explanation")}</p>
 
-            {uploadUsage && (
+            {uploadUsage ? (
                 <Progress
                     label={`${niceBytes(uploadUsage.use.toString())} / ${niceBytes(uploadUsage.quota.toString())}`}
                     value={uploadUsage.use}
                     max={uploadUsage.quota}
                 />
+            ) : (
+                <p>{t("storage.not_found")}</p>
             )}
         </>
     );

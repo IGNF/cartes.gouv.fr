@@ -6,7 +6,7 @@ import { Datastore } from "../../../../types/app";
 import { niceBytes } from "../../../../utils";
 
 type S3UsageProps = {
-    datastore?: Datastore;
+    datastore: Datastore;
 };
 const S3Usage: FC<S3UsageProps> = ({ datastore }) => {
     const { t } = useTranslation("DatastoreManageStorage");
@@ -19,8 +19,10 @@ const S3Usage: FC<S3UsageProps> = ({ datastore }) => {
         <>
             <p>{t("storage.s3.explanation")}</p>
 
-            {s3Usage && (
+            {s3Usage ? (
                 <Progress label={`${niceBytes(s3Usage.use.toString())} / ${niceBytes(s3Usage.quota.toString())}`} value={s3Usage.use} max={s3Usage.quota} />
+            ) : (
+                <p>{t("storage.not_found")}</p>
             )}
         </>
     );
