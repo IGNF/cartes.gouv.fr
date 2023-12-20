@@ -19,6 +19,10 @@ const DatasetListTab: FC<DataListTabProps> = ({ datastoreId, datasheet }) => {
     // liste des uploads/livraisons dont l'intégration en base de données n'a pas réussi ou n'a pas terminé
     const unfinishedUploads = useMemo(() => {
         return datasheet?.upload_list?.filter((upload) => {
+            if (upload.tags.integration_progress === undefined) {
+                return true;
+            }
+
             const integrationProgress = JSON.parse(upload.tags.integration_progress);
             return ["waiting", "in_progress"].includes(Object.values(integrationProgress)?.[2] as string);
         });

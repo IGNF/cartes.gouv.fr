@@ -63,8 +63,9 @@ const AdditionalInfo: FC<AdditionalInfoProps> = ({ storedData, datastoreId, visi
 
     const fileTreeQuery = useQuery<UploadTree>({
         queryKey: RQKeys.datastore_upload_file_tree(datastoreId, storedData.tags.upload_id),
-        queryFn: () => api.upload.getFileTree(datastoreId, storedData.tags.upload_id),
+        queryFn: () => api.upload.getFileTree(datastoreId, storedData.tags.upload_id!),
         staleTime: 1800000,
+        enabled: !!storedData.tags.upload_id,
     });
 
     const fileType = useMemo(() => {
