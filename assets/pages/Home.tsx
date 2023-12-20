@@ -32,7 +32,7 @@ const Home = () => {
                     <div className={fr.cx("fr-container")}>
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
                             <div className={fr.cx("fr-col-12", "fr-col-lg-6", "fr-px-0", "fr-pl-md-14v")}>
-                                <p className={fr.cx("fr-mt-4w", "fr-mt-md-7w") + " fr-display--xxs"}>
+                                <p className={fr.cx("fr-mt-4w", "fr-mt-md-7w") + " frx-display--xxs"}>
                                     Bienvenue sur le futur service public des cartes et données du territoire
                                 </p>
 
@@ -91,18 +91,18 @@ const Home = () => {
             <div className={fr.cx("fr-container", "fr-mt-8v", "fr-pb-3v", "fr-mt-md-10v", "fr-mb-2v", "fr-mb-md-8v")}>
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
                     <div className={fr.cx("fr-col-12")}>
-                        <h2 className={fr.cx("fr-my-5w") + " fr-text--center"}>Ce que vous pourrez faire avec cartes.gouv.fr</h2>
+                        <h2 className={fr.cx("fr-my-5w") + " frx-text--center"}>Ce que vous pourrez faire avec cartes.gouv.fr</h2>
                     </div>
                 </div>
 
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-grid-row--center")}>
-                    <div className={fr.cx("fr-col-lg-3", "fr-col-md-6", "fr-col-12") + " fr-text--center"}>
+                    <div className={fr.cx("fr-col-lg-3", "fr-col-md-6", "fr-col-12") + " frx-text--center"}>
                         <img src={`${appRoot}/dsfr/artwork/pictograms/map/map.svg`} alt="" role="presentation" />
                         <h3 className={fr.cx("fr-text--lead")}>Consultez et utilisez des géodonnées</h3>
                         <p>Grâce au catalogue et aux cartes en ligne, grâce aux services et données de la communauté Géoplateforme.</p>
                     </div>
 
-                    <div className={fr.cx("fr-col-lg-3", "fr-col-md-6", "fr-col-12") + " fr-text--center"}>
+                    <div className={fr.cx("fr-col-lg-3", "fr-col-md-6", "fr-col-12") + " frx-text--center"}>
                         <img src={`${appRoot}/dsfr/artwork/pictograms/map/location-france.svg`} alt="" role="presentation" />
                         <h3 className={fr.cx("fr-text--lead")}>Créez des cartes</h3>
                         <p>
@@ -111,7 +111,7 @@ const Home = () => {
                         </p>
                     </div>
 
-                    <div className={fr.cx("fr-col-lg-3", "fr-col-md-6", "fr-col-12") + " fr-text--center"}>
+                    <div className={fr.cx("fr-col-lg-3", "fr-col-md-6", "fr-col-12") + " frx-text--center"}>
                         <img src={`${appRoot}/dsfr/artwork/pictograms/system/system.svg`} alt="" role="presentation" />
                         <h3 className={fr.cx("fr-text--lead")}>Stockez, traitez et partagez vos données</h3>
                         <p>En toute autonomie, selon la diffusion de votre choix depuis cartes.gouv.fr et sur vos sites et applis.</p>
@@ -119,12 +119,12 @@ const Home = () => {
                 </div>
 
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-grid-row--center")}>
-                    <div className={fr.cx("fr-col-lg-3", "fr-col-md-6", "fr-col-12") + " fr-text--center"}>
+                    <div className={fr.cx("fr-col-lg-3", "fr-col-md-6", "fr-col-12") + " frx-text--center"}>
                         <img src={`${appRoot}/dsfr/artwork/pictograms/environment/human-cooperation.svg`} alt="" role="presentation" />
                         <h3 className={fr.cx("fr-text--lead")}>Gérez et animez vos communautés</h3>
                         <p>Via des guichets collaboratifs pour entretenir et enrichir les données.</p>
                     </div>
-                    <div className={fr.cx("fr-col-lg-3", "fr-col-12") + " fr-text--center"}>
+                    <div className={fr.cx("fr-col-lg-3", "fr-col-12") + " frx-text--center"}>
                         <img src={`${appRoot}/dsfr/artwork/pictograms/digital/data-visualization.svg`} alt="" role="presentation" />
                         <h3 className={fr.cx("fr-text--lead")}>Contribuez aux données et services</h3>
                         <p>Grâce aux outils collaboratifs pour échanger, entretenir et enrichir les géodonnées et géoservices.</p>
