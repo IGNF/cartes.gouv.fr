@@ -19,6 +19,7 @@ import { routes } from "../../../router/router";
 import { CartesStyle, type Service } from "../../../types/app";
 import { OfferingDetailResponseDtoTypeEnum } from "../../../types/entrepot";
 import StyleLabel from "./StyleLabel";
+import Wait from "../../../components/Utils/Wait";
 
 type ServiceViewProps = {
     datastoreId: string;
@@ -108,24 +109,30 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
     ];
 
     // Suppression d'un style
-    const { isPending: isRemovePending, mutate: mutateRemove } = useMutation<CartesStyle[] | undefined, CartesApiException, string>({
+    const { isPending: isRemovePending, mutate: mutateRemove } = useMutation<CartesStyle[], CartesApiException, string>({
         mutationFn: (name: string) => {
             if (serviceQuery.data) {
                 return api.style.remove(datastoreId, serviceQuery.data._id, { style_name: name });
             }
-            return Promise.resolve(undefined);
+            return Promise.resolve([]);
         },
-        onSuccess() {
-            if (serviceQuery?.data !== undefined) {
+        onSuccess(styles) {
+            if (serviceQuery.data) {
+                queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName) });
+                queryClient.setQueryData<Service>(RQKeys.datastore_offering(datastoreId, offeringId), (oldService) => {
+                    if (oldService) {
+                        const newService = { ...oldService } as Service;
+                        newService.configuration.styles = styles;
+                        return newService;
+                    }
+                });
+            }
+            /* if (serviceQuery?.data !== undefined) {
                 queryClient.refetchQueries({ queryKey: RQKeys.datastore_offering(datastoreId, serviceQuery?.data?._id) });
                 queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName) });
-            }
+            } */
         },
     });
-
-    const handleRemove = (name: string) => {
-        mutateRemove(name);
-    };
 
     // Changement de style par defaut
     const { isPending: isPendingChangeCurrentStyle, mutate: mutateChangeCurrentStyle } = useMutation<CartesStyle[], CartesApiException, string>({
@@ -147,6 +154,10 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
             }
         },
     });
+
+    const handleRemove = (name: string) => {
+        mutateRemove(name);
+    };
 
     const radioOptions: FieldsetProps.Common["options"] = [];
     styles?.forEach((style) => {
@@ -238,17 +249,15 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
                     )}
                 </>
             )}
-            {isPendingChangeCurrentStyle && (
-                <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                    <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " icons-spin"} />
-                    <h6 className={fr.cx("fr-m-0")}>Changement de style en cours ...</h6>
-                </div>
-            )}
-            {isRemovePending && (
-                <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                    <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " icons-spin"} />
-                    <h6 className={fr.cx("fr-m-0")}>Suppression en cours ...</h6>
-                </div>
+            {(isPendingChangeCurrentStyle || isRemovePending) && (
+                <Wait>
+                    <div className={fr.cx("fr-container")}>
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
+                            <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " icons-spin"} />
+                            <h6 className={fr.cx("fr-m-0")}>{isRemovePending ? "Suppression en cours ..." : "Changement de style en cours ..."}</h6>
+                        </div>
+                    </div>
+                </Wait>
             )}
         </DatastoreLayout>
     );
