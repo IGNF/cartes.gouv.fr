@@ -17,7 +17,7 @@ type DatasheetNewIntegrationDialogProps = {
 };
 
 const DatasheetNewIntegrationDialog: FC<DatasheetNewIntegrationDialogProps> = ({ datastoreId, uploadId }) => {
-    const [integrationProgress, setIntegrationProgress] = useState({});
+    const [integrationProgress, setIntegrationProgress] = useState(null);
     const [integrationCurrentStep, setIntegrationCurrentStep] = useState<number>();
 
     const [shouldPingIntProg, setShouldPingIntProg] = useState(false);
@@ -47,8 +47,8 @@ const DatasheetNewIntegrationDialog: FC<DatasheetNewIntegrationDialogProps> = ({
         api.upload
             .getIntegrationProgress(datastoreId, uploadId)
             .then((response) => {
-                setIntegrationProgress(JSON.parse(response?.integration_progress));
-                setIntegrationCurrentStep(parseInt(response?.integration_current_step));
+                setIntegrationProgress(response?.integration_progress ? JSON.parse(response?.integration_progress) : null);
+                setIntegrationCurrentStep(response?.integration_current_step ? parseInt(response?.integration_current_step) : 0);
                 setShouldPingIntProg(true); // là on active le query pingIntProgQuery
             })
             .catch((error) => {
@@ -60,14 +60,14 @@ const DatasheetNewIntegrationDialog: FC<DatasheetNewIntegrationDialogProps> = ({
     useEffect(() => {
         const response = pingIntProgQuery?.data;
         if (response) {
-            setIntegrationProgress(JSON.parse(response?.integration_progress));
-            setIntegrationCurrentStep(parseInt(response?.integration_current_step));
+            setIntegrationProgress(response?.integration_progress ? JSON.parse(response?.integration_progress) : null);
+            setIntegrationCurrentStep(response?.integration_current_step ? parseInt(response?.integration_current_step) : 0);
         }
     }, [pingIntProgQuery?.data]);
 
     useEffect(() => {
         // stopper si une étape a échoué
-        if (Object.values(integrationProgress).includes("failed")) {
+        if (integrationProgress && Object.values(integrationProgress).includes("failed")) {
             console.debug("stopping, one step failed");
             setShouldPingIntProg(false);
             setIsIntegrationError(true);
@@ -75,7 +75,7 @@ const DatasheetNewIntegrationDialog: FC<DatasheetNewIntegrationDialogProps> = ({
         }
 
         // stopper si toutes les étapes ont terminé
-        if (Object.keys(integrationProgress).length === integrationCurrentStep) {
+        if (integrationProgress && Object.keys(integrationProgress).length === integrationCurrentStep) {
             console.debug("stopping, all steps completed successfully");
             setShouldPingIntProg(false);
 
@@ -165,14 +165,15 @@ const DatasheetNewIntegrationDialog: FC<DatasheetNewIntegrationDialogProps> = ({
 
             <div className={fr.cx("fr-grid-row", "fr-px-4w")}>
                 <div className={fr.cx("fr-col", "fr-col--middle")}>
-                    {Object.entries(integrationProgress).map(([step, status]) => (
-                        <div className={fr.cx("fr-grid-row")} key={step}>
-                            <p>
-                                {getStepIcon(status)}
-                                &nbsp;{Translator.trans(`datasheet.new_integration.steps.${step}`)} : {getStepStatusText(status)}
-                            </p>
-                        </div>
-                    ))}
+                    {integrationProgress &&
+                        Object.entries(integrationProgress).map(([step, status]) => (
+                            <div className={fr.cx("fr-grid-row")} key={step}>
+                                <p>
+                                    {getStepIcon(status)}
+                                    &nbsp;{Translator.trans(`datasheet.new_integration.steps.${step}`)} : {getStepStatusText(status)}
+                                </p>
+                            </div>
+                        ))}
                 </div>
             </div>
 
