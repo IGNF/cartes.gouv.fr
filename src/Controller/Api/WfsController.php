@@ -2,10 +2,10 @@
 
 namespace App\Controller\Api;
 
+use App\Constants\EntrepotApi\CommonTags;
 use App\Dto\WfsAddDTO;
 use App\Exception\CartesApiException;
 use App\Exception\EntrepotApiException;
-use App\Constants\EntrepotApi\CommonTags;
 use App\Services\EntrepotApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;

@@ -2,18 +2,18 @@
 
 namespace App\Controller\Api;
 
-use App\Controller\StyleTrait;
-use App\Services\EntrepotApiService;
-use App\Exception\CartesApiException;
-use App\Exception\EntrepotApiException;
 use App\Constants\EntrepotApi\CommonTags;
+use App\Constants\EntrepotApi\ConfigurationStatuses;
 use App\Constants\EntrepotApi\OfferingTypes;
 use App\Constants\EntrepotApi\StoredDataTypes;
+use App\Controller\StyleTrait;
+use App\Exception\CartesApiException;
+use App\Exception\EntrepotApiException;
+use App\Services\EntrepotApiService;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use App\Constants\EntrepotApi\ConfigurationStatuses;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 #[Route(
     '/api/datastores/{datastoreId}/datasheet',
@@ -120,6 +120,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         ]);
 
         $services = $this->_getServices($datastoreId, $storedDataList);
+
         return $this->json($services);
     }
 
@@ -176,9 +177,9 @@ class DatasheetController extends AbstractController implements ApiControllerInt
 
         foreach ($offerings as &$offering) {
             $offering['configuration'] = $this->entrepotApiService->configuration->get($datastoreId, $offering['configuration']['_id']);
-            
+
             $styles = [];
-            if ($offering['type'] === OfferingTypes::WFS || $offering['type'] === OfferingTypes::WMTSTMS) {
+            if (OfferingTypes::WFS === $offering['type'] || OfferingTypes::WMTSTMS === $offering['type']) {
                 $styles = $this->getStyles($datastoreId, $offering['configuration']['_id']);
             }
             $offering['configuration']['styles'] = $styles;
@@ -226,7 +227,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             }
 
             // TODO : autres données à supprimer
-            // Suppression des annexes            
+            // Suppression des annexes
             $annexes = $this->entrepotApiService->annexe->getAll($datastoreId, null, null, ["datasheet_name=$datasheetName"]);
             foreach ($annexes as $annexe) {
                 $this->entrepotApiService->annexe->remove($datastoreId, $annexe['_id']);

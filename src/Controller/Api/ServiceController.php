@@ -2,17 +2,17 @@
 
 namespace App\Controller\Api;
 
-use App\Controller\StyleTrait;
-use App\Services\EntrepotApiService;
-use App\Exception\CartesApiException;
-use App\Exception\EntrepotApiException;
+use App\Constants\EntrepotApi\ConfigurationStatuses;
 use App\Constants\EntrepotApi\OfferingTypes;
 use App\Constants\EntrepotApi\StaticFileTypes;
+use App\Controller\StyleTrait;
+use App\Exception\CartesApiException;
+use App\Exception\EntrepotApiException;
+use App\Services\EntrepotApiService;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use App\Constants\EntrepotApi\ConfigurationStatuses;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 #[Route(
     '/api/datastores/{datastoreId}/offerings',
@@ -23,7 +23,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 class ServiceController extends AbstractController implements ApiControllerInterface
 {
     use StyleTrait;
-    
+
     public function __construct(
         private EntrepotApiService $entrepotApiService
     ) {
@@ -49,11 +49,11 @@ class ServiceController extends AbstractController implements ApiControllerInter
             $offering['configuration'] = $this->entrepotApiService->configuration->get($datastoreId, $offering['configuration']['_id']);
 
             $styles = [];
-            if ($offering['type'] === OfferingTypes::WFS || $offering['type'] === OfferingTypes::WMTSTMS) {
+            if (OfferingTypes::WFS === $offering['type'] || OfferingTypes::WMTSTMS === $offering['type']) {
                 $styles = $this->getStyles($datastoreId, $offering['configuration']['_id']);
             }
             $offering['configuration']['styles'] = $styles;
-            
+
             return $this->json($offering);
         } catch (EntrepotApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);

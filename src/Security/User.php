@@ -120,16 +120,16 @@ class User implements UserInterface
             'creation' => '2023-06-26T11:52:25.924679Z',
             'last_call' => '2023-08-01T14:09:41.074381Z',
             'communities_member' => [[
-                'rights' => ['ANNEX','BROADCAST','PROCESSING','UPLOAD'],
+                'rights' => ['ANNEX', 'BROADCAST', 'PROCESSING', 'UPLOAD'],
                 'community' => [
                     'name' => 'cartes.gouv - dev',
                     'technical_name' => 'cartes-gouv-dev',
                     'datastore' => '190b714d-daa7-402b-8360-c75baa4c69cc',
                     'supervisor' => '6b3637ed-c1cf-409c-a54c-fb77d4c16ea6',
                     'public' => true,
-                    '_id' => 'a0f47300-4c9b-464a-b23f-639ccfa6a673'
-                ]
-            ]]
+                    '_id' => 'a0f47300-4c9b-464a-b23f-639ccfa6a673',
+                ],
+            ]],
         ]);
     }
 }

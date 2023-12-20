@@ -137,12 +137,10 @@ class ContactController extends AbstractController
 
             $userEmail = $user->getEmail();
 
-            // TODO A VOIR
-            /*$this->mailerLogger->info("User ({userEmail}) : Demande de création d'un espace de travail", [
-                'userEmail' => $userEmail
-            ]);*/
+            $this->mailerLogger->info("User ({userEmail}) : Demande de création d'un espace de travail", [
+                'userEmail' => $userEmail,
+            ]);
 
-            // TODO : Envoi de mail désactivé en attendant d'avoir l'adresse du serveur smtp en production
             // Envoi du mail à l'adresse du support
             $this->mailerService->sendMail($supportAddress, "[cartes.gouv.fr] Demande de création d'un espace de travail", 'Mailer/datastore_create_request.html.twig', $mailParams);
 
@@ -185,12 +183,12 @@ class ContactController extends AbstractController
                 'message' => $data['message'],
             ];
 
-            // TODO A VOIR
-            /*$this->mailerLogger->info("User ({userEmail}) : Demande de création d'un espace de travail", [
-                'userEmail' => $userEmail
-            ]);*/
+            $this->mailerLogger->info('User ({userEmail}) : Demande pour rejoindre une communauté', [
+                'userEmail' => $userEmail,
+                'community' => $data['community'],
+                'message' => $data['message'],
+            ]);
 
-            // TODO : Envoi de mail désactivé en attendant d'avoir l'adresse du serveur smtp en production
             // Envoi du mail à l'adresse du support
             $this->mailerService->sendMail(
                 $supportAddress,

@@ -2,12 +2,12 @@
 
 namespace App\Controller\Api;
 
+use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ProcessingStatuses;
 use App\Constants\EntrepotApi\StoredDataStatuses;
 use App\Constants\EntrepotApi\UploadCheckTypes;
 use App\Constants\EntrepotApi\UploadStatuses;
 use App\Constants\EntrepotApi\UploadTags;
-use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\UploadTypes;
 use App\Constants\JobStatuses;
 use App\Exception\AppException;

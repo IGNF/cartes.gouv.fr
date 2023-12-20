@@ -40,7 +40,7 @@ class AnnexeApiService extends AbstractEntrepotApiService
         ]);
 
         if (null !== $labels) {
-            $response = $this->modify($datastoreId, $response['_id'], null, $labels, null);    
+            $response = $this->modify($datastoreId, $response['_id'], null, $labels, null);
         }
 
         $this->filesystem->remove($annexeFilePath);

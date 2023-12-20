@@ -2,19 +2,18 @@
 
 namespace App\Controller\Api;
 
-use Symfony\Component\Uid\Uuid;
-use App\Services\EntrepotApiService;
+use App\Constants\EntrepotApi\CommonTags;
 use App\Exception\CartesApiException;
 use App\Exception\EntrepotApiException;
-use App\Constants\EntrepotApi\CommonTags;
-use PHPMD\Renderer\JSONRenderer;
-use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
+use App\Services\EntrepotApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Uid\Uuid;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 #[Route(
     '/api/datastore/{datastoreId}/annexe',
@@ -38,20 +37,21 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
         options: ['expose' => true],
         condition: 'request.isXmlHttpRequest()')
     ]
-    public function addThumbnail(string $datastoreId, Request $request) : JsonResponse{
+    public function addThumbnail(string $datastoreId, Request $request): JsonResponse
+    {
         try {
             $datastore = $this->entrepotApiService->datastore->get($datastoreId);
             $annexeUrl = $this->parameterBag->get('annexes_url');
 
             $uuid = Uuid::v4();
-            
+
             $file = $request->files->get('file');
             $extension = $file->getClientOriginalExtension();
             $path = join('/', ['thumbnail', "$uuid.$extension"]);
 
             $labels = [
-                CommonTags::DATASHEET_NAME . '=' .$request->request->get("datasheetName"),
-                'type=thumbnail'
+                CommonTags::DATASHEET_NAME.'='.$request->request->get('datasheetName'),
+                'type=thumbnail',
             ];
 
             // On regarde s'il existe deja une vignette
@@ -60,9 +60,9 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
             if (count($annexes)) {  // Elle existe, on la supprime sinon le path ne change pas
                 $this->entrepotApiService->annexe->remove($datastoreId, $annexes[0]['_id']);
             }
-            
+
             $annexe = $this->entrepotApiService->annexe->add($datastoreId, $file->getRealPath(), [$path], $labels);
-            $annexe['url'] = $annexeUrl . '/' . $datastore['technical_name'] . $annexe['paths'][0];
+            $annexe['url'] = $annexeUrl.'/'.$datastore['technical_name'].$annexe['paths'][0];
 
             return new JsonResponse($annexe);
         } catch (EntrepotApiException $ex) {
@@ -74,9 +74,11 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
         options: ['expose' => true],
         condition: 'request.isXmlHttpRequest()')
     ]
-    public function removeThumbnail(string $datastoreId, string $annexeId) : JsonResponse {
+    public function removeThumbnail(string $datastoreId, string $annexeId): JsonResponse
+    {
         try {
             $this->entrepotApiService->annexe->remove($datastoreId, $annexeId);
+
             return new JsonResponse();
         } catch (EntrepotApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
@@ -89,54 +91,55 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
         options: ['expose' => true],
         condition: 'request.isXmlHttpRequest()')
     ]
-    public function addCapabilities(string $datastoreId, string $offeringId): JsonResponse {
+    public function addCapabilities(string $datastoreId, string $offeringId): JsonResponse
+    {
         try {
             $fs = new Filesystem();
 
             $capsPath = $this->parameterBag->get('capabilities_path');
-            if (! $fs->exists($capsPath)) {
+            if (!$fs->exists($capsPath)) {
                 $fs->mkdir($capsPath);
             }
 
-            $datastore      = $this->entrepotApiService->datastore->get($datastoreId);
-            $offering       = $this->entrepotApiService->configuration->getOffering($datastoreId, $offeringId);
-            $configuration  = $this->entrepotApiService->configuration->get($datastoreId, $offering['configuration']['_id']);
+            $datastore = $this->entrepotApiService->datastore->get($datastoreId);
+            $offering = $this->entrepotApiService->configuration->getOffering($datastoreId, $offeringId);
+            $configuration = $this->entrepotApiService->configuration->get($datastoreId, $offering['configuration']['_id']);
 
             // Recherche du endpoint
             $endpoint = null;
-            foreach($datastore['endpoints'] as $ep) {
+            foreach ($datastore['endpoints'] as $ep) {
                 if ($ep['endpoint']['_id'] == $offering['endpoint']['_id']) {
                     $endpoint = $ep['endpoint'];
                     break;
                 }
             }
-            
+
             $allOfferings = $this->entrepotApiService->configuration->getAllOfferings($datastoreId, ['type' => $endpoint['type']]);
 
             // TODO Les autres (WMS-VECTOR, TMS ...)
             $xmlStr = null;
-            switch($endpoint['type']) {
+            switch ($endpoint['type']) {
                 case 'WFS':
                     $xmlStr = $this->filterWFSCapabilities($endpoint, $offering, $allOfferings);
                     break;
-                    
+
                 default: break;
             }
-            
+
             $uuid = uniqid();
             $filePath = join(DIRECTORY_SEPARATOR, [realpath($capsPath), "capabilities-$uuid.xml"]);
-            
+
             // Creation du fichier
             file_put_contents($filePath, $xmlStr);
 
             // On regarde s'il existe deja un fichier avec ce path
-            $path = join("/", [$endpoint['technical_name'], 'capabilities.xml']);
+            $path = join('/', [$endpoint['technical_name'], 'capabilities.xml']);
 
             $annexes = $this->entrepotApiService->annexe->getAll($datastoreId, null, $path);
             if (count($annexes)) {  // Il existe, on le met a jour
                 $this->entrepotApiService->annexe->replaceFile($datastoreId, $annexes[0]['_id'], $filePath);
             } else {
-                $label = CommonTags::DATASHEET_NAME . '=' . $configuration['tags'][CommonTags::DATASHEET_NAME];
+                $label = CommonTags::DATASHEET_NAME.'='.$configuration['tags'][CommonTags::DATASHEET_NAME];
                 $this->entrepotApiService->annexe->add($datastoreId, $filePath, [$path], [$label]);
             }
 
@@ -148,58 +151,61 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
         }
     }
 
-    private function filterWFSCapabilities(mixed $endpoint, mixed $offering, mixed $allOfferings) : string {
+    private function filterWFSCapabilities(mixed $endpoint, mixed $offering, mixed $allOfferings): string
+    {
         // Les couches liees aux offerings
         $layerNames = [];
-        foreach($allOfferings as $off) {
-            $layerNames[] = $off["layer_name"];
+        foreach ($allOfferings as $off) {
+            $layerNames[] = $off['layer_name'];
         }
 
         $version = $this->getWFSVersion($offering['urls'][0]['url']);
 
         $url = $endpoint['urls'][0]['url'];
         $getCapUrl = "$url?SERVICE=WFS&VERSION=$version&request=GetCapabilities";
-        
-        $response = $this->httpClient->request("GET", $getCapUrl);
-        if ($response->getStatusCode() != JsonResponse::HTTP_OK) {
-            throw new \Exception("Request GetCapabilities failed");
+
+        $response = $this->httpClient->request('GET', $getCapUrl);
+        if (JsonResponse::HTTP_OK != $response->getStatusCode()) {
+            throw new \Exception('Request GetCapabilities failed');
         }
 
-        $doc = new \DOMDocument; 
+        $doc = new \DOMDocument();
         $loaded = $doc->loadXML($response->getContent());
-        if (! $loaded) {
-            throw new \Exception("Parsing GetCapabilities failed");
+        if (!$loaded) {
+            throw new \Exception('Parsing GetCapabilities failed');
         }
 
-        $featureTypeList = $doc->getElementsByTagName("FeatureTypeList")[0];
+        $featureTypeList = $doc->getElementsByTagName('FeatureTypeList')[0];
         $featureTypes = $featureTypeList->childNodes;
 
         $index = $featureTypes->count() - 1;
-        while($index >=0) {
+        while ($index >= 0) {
             $child = $featureTypes->item($index);
-            $name = $child->getElementsByTagName("Name")[0]->textContent;
-            
+            $name = $child->getElementsByTagName('Name')[0]->textContent;
+
             $found = false;
-            foreach($layerNames as $layerName) {
+            foreach ($layerNames as $layerName) {
                 if (preg_match("/^$layerName:/", $name)) {
                     $found = true;
-                    break;    
+                    break;
                 }
             }
-            if (! $found) {
+            if (!$found) {
                 $featureTypeList->removeChild($child);
             }
-            $index--;
+            --$index;
         }
 
         return $doc->saveXML();
     }
 
-    private function getWFSVersion(string $url) : string{
+    private function getWFSVersion(string $url): string
+    {
         $res = [];
-        
+
         $parsed = parse_url($url);
         parse_str($parsed['query'], $res);
+
         return $res['version'];
     }
 }

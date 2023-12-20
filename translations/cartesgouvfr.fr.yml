@@ -116,7 +116,7 @@ join_community:
         heading: 'Un utilisateur demande à rejoindre la communauté "%name%" (id=%id%)'
         message: "Message :"
     email_acknowledgement:
-        heading: 'Votre demande pour rejoindre la communauté "%name%" a été envoyée à l''IGN et une réponse vous sera apportée dans les meilleurs délais.'
+        heading: 'Votre demande pour rejoindre la communauté "%name%" a été envoyée à son adresse email de contact.'
         date: "Date d'envoi"
         message: "Votre message :"
 

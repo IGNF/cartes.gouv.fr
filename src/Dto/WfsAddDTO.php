@@ -1,21 +1,21 @@
 <?php
 
 namespace App\Dto;
- 
-use App\Dto\WfsTableDTO;
+
 use Symfony\Component\Validator\Constraints as Assert;
 
-class WfsAddDTO {
-	public function __construct(
-		#[Assert\NotBlank(['message' => 'common.technical_name_error'])]
+class WfsAddDTO
+{
+    public function __construct(
+        #[Assert\NotBlank(['message' => 'common.technical_name_error'])]
         #[Assert\Regex(['pattern' => '/^[\w\-\.]+$/', 'message' => 'common.technical_name_regex'])]
         public readonly string $technical_name,
 
         #[Assert\NotBlank(['message' => 'common.public_name_error'])]
         public readonly string $public_name,
 
-		// common
-		#[Assert\NotBlank(['message' => 'common.description_error'])]
+        // common
+        #[Assert\NotBlank(['message' => 'common.description_error'])]
         public readonly string $description,
 
         #[Assert\NotBlank(['message' => 'common.identifier_error'])]
@@ -34,7 +34,7 @@ class WfsAddDTO {
         public readonly string $creation_date,
 
         #[Assert\NotBlank(['message' => 'common.organization_error'])]
-        public readonly  string $organization,
+        public readonly string $organization,
 
         #[Assert\NotBlank(['message' => 'common.organization_email_error'])]
         #[Assert\Email(message: 'organization_email {{ value }} n\est pas une adresse email valide')]
@@ -54,28 +54,28 @@ class WfsAddDTO {
         public readonly string $encoding,
 
         #[Assert\Choice([
-            'choices' => ['','25000','75000','100000','150000', '200000','250000', '1000000'], // TODO NON EXHAUSTI
-            'message' => 'common.resolution_error'
+            'choices' => ['', '25000', '75000', '100000', '150000', '200000', '250000', '1000000'], // TODO NON EXHAUSTIF
+            'message' => 'common.resolution_error',
         ])]
-        public readonly ? string $resolution,
+        public readonly ?string $resolution,
 
         #[Assert\Choice([
-            'choices' => ['','dataset','series'], 
-            'message' => 'common.resource_genealogy_error'
+            'choices' => ['', 'dataset', 'series'],
+            'message' => 'common.resource_genealogy_error',
         ])]
-        public readonly ? string $resource_genealogy,
+        public readonly ?string $resource_genealogy,
 
-		#[Assert\Choice([
-            'choices' => ['all_public','your_community'], 	// TODO NON EXHAUSTIF
-            'message' => 'common.share_with_error'
+        #[Assert\Choice([
+            'choices' => ['all_public', 'your_community'], 	// TODO NON EXHAUSTIF
+            'message' => 'common.share_with_error',
         ])]
-        public readonly string $share_with,    
+        public readonly string $share_with,
 
-		/**
-		 * @var WfsTableDTO[]
-		 */
-		#[Assert\Valid]
-		public readonly array $table_infos
-	) {
-	}
+        /**
+         * @var WfsTableDTO[]
+         */
+        #[Assert\Valid]
+        public readonly array $table_infos
+    ) {
+    }
 }
