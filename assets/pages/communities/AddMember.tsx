@@ -77,7 +77,7 @@ const AddMember: FC<AddMemberProps> = ({ datastoreId, communityId, communityMemb
         },
         onSuccess: () => {
             resetAll();
-            routes.members_list({ datastoreId }).push();
+            routes.members_list({ datastoreId }).push(); // Suppression du parametre userId de la requete
             queryClient.refetchQueries({ queryKey: ["community", "members", communityId] });
         },
         onError: (error) => {
@@ -98,9 +98,14 @@ const AddMember: FC<AddMemberProps> = ({ datastoreId, communityId, communityMemb
         mutate(values);
     };
 
+    let title = t("add_user_title");
+    if (isPending) {
+        title += `&nbsp;${t("running")}&nbsp;<i class="fr-icon-refresh-line icons-spin" />`;
+    }
+
     return createPortal(
         <addMemberModal.Component
-            title={t("add_user_title")}
+            title={<span dangerouslySetInnerHTML={{ __html: title }} />}
             buttons={[
                 {
                     children: tCommon("cancel"),
@@ -117,12 +122,6 @@ const AddMember: FC<AddMemberProps> = ({ datastoreId, communityId, communityMemb
             ]}
         >
             {error && <Alert severity={"error"} title={tCommon("error")} description={error?.message} className={fr.cx("fr-my-3w")} />}
-            {isPending && (
-                <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-my-1w")}>
-                    <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " icons-spin"} />
-                    <h6 className={fr.cx("fr-m-0")}>{tCommon("adding")}</h6>
-                </div>
-            )}
             <Input
                 label={t("user_id")}
                 state={errors.user_id ? "error" : "default"}
@@ -153,7 +152,13 @@ export { addMemberModal, AddMember };
 
 // traductions
 export const { i18n } = declareComponentKeys<
-    "add_user_title" | "user_id" | "grants_to_be_assigned" | "id_mandatory" | "id_must_be_uuid" | { K: "already_member"; P: { userId: string }; R: string }
+    | "add_user_title"
+    | "user_id"
+    | "grants_to_be_assigned"
+    | "id_mandatory"
+    | "id_must_be_uuid"
+    | { K: "already_member"; P: { userId: string }; R: string }
+    | "running"
 >()({
     AddMember,
 });
@@ -165,6 +170,7 @@ export const AddMemberFrTranslations: Translations<"fr">["AddMember"] = {
     id_mandatory: "L'identifiant est obligatoire",
     id_must_be_uuid: "L'Identifiant doit être un UUID",
     already_member: ({ userId }) => `l'utilisateur ${userId} est déjà membre de cette communauté`,
+    running: "en cours ...",
 };
 
 export const AddMemberEnTranslations: Translations<"en">["AddMember"] = {
@@ -174,4 +180,5 @@ export const AddMemberEnTranslations: Translations<"en">["AddMember"] = {
     id_mandatory: "Identifier is mandatory",
     id_must_be_uuid: "Identifier must be an UUID",
     already_member: ({ userId }) => `User ${userId} is already a member of this community`,
+    running: "running ...",
 };
