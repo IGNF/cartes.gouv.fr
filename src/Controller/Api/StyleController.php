@@ -91,7 +91,6 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             $data = json_decode($request->getContent(), true);
             $styleName = $data['style_name'];
 
-            $datastore = $this->entrepotApiService->datastore->get($datastoreId);
             $offering = $this->entrepotApiService->configuration->getOffering($datastoreId, $offeringId);
             
             $configId = $offering['configuration']['_id'];
@@ -162,7 +161,6 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             $data = json_decode($request->getContent(), true);
             $styleName = $data['style_name'];
 
-            $datastore = $this->entrepotApiService->datastore->get($datastoreId);
             $offering = $this->entrepotApiService->configuration->getOffering($datastoreId, $offeringId);
             
             $configId = $offering['configuration']['_id'];
