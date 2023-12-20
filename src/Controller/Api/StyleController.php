@@ -32,8 +32,9 @@ class StyleController extends AbstractController implements ApiControllerInterfa
     public function add(string $datastoreId, string $offeringId, Request $request): JsonResponse
     {
         try {
-            $styleName = $request->request->get('style_name');
-
+            $styleName = $request->request->get("style_name");
+            
+            $datastore = $this->entrepotApiService->datastore->get($datastoreId);
             $offering = $this->entrepotApiService->configuration->getOffering($datastoreId, $offeringId);
 
             $configId = $offering['configuration']['_id'];
@@ -67,6 +68,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             }
 
             $styles[] = $newStyle;
+            $this->_addUrls($datastore, $styles);
 
             // Re ecriture dans le fichier
             $annexeId = count($styleAnnexes) ? $styleAnnexes[0]['_id'] : null;
@@ -89,7 +91,9 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             $data = json_decode($request->getContent(), true);
             $styleName = $data['style_name'];
 
+            $datastore = $this->entrepotApiService->datastore->get($datastoreId);
             $offering = $this->entrepotApiService->configuration->getOffering($datastoreId, $offeringId);
+            
             $configId = $offering['configuration']['_id'];
 
             // Recuperation des styles de la configuration
@@ -158,7 +162,9 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             $data = json_decode($request->getContent(), true);
             $styleName = $data['style_name'];
 
+            $datastore = $this->entrepotApiService->datastore->get($datastoreId);
             $offering = $this->entrepotApiService->configuration->getOffering($datastoreId, $offeringId);
+            
             $configId = $offering['configuration']['_id'];
 
             // Recuperation des styles de la configuration
@@ -191,6 +197,25 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             return new JsonResponse($styles);
         } catch (EntrepotApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+    
+    /**
+     * Ajout des urls des annexes
+     * 
+     * @param array<mixed> $datastore
+     * @param array<mixed> $styles
+     * @return void
+     */
+    private function _addUrls($datastore, &$styles)
+    {
+        $annexeUrl = $this->getParameter('annexes_url');
+
+        foreach($styles as &$style) {
+            foreach($style['layers'] as &$layer) {
+                $annexe = $this->entrepotApiService->annexe->get($datastore['_id'], $layer['annexe_id']);
+                $layer['url'] = $annexeUrl . '/' . $datastore['technical_name'] . $annexe['paths'][0];
+            }    
         }
     }
 

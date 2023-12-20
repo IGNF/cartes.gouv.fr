@@ -7,8 +7,8 @@ import QGISStyleParser from "geostyler-qgis-parser";
 import MapboxStyleParser from "geostyler-mapbox-parser";
 import OpenLayersParser from "geostyler-openlayers-parser";
 import { CartesStyle } from "../../types/app";
-import BaseLayer from "ol/layer/Base";
 import { Geometry } from "ol/geom";
+import BaseLayer from "ol/layer/Base";
 
 type AddStyleFormType = {
     style_name: string;
@@ -70,8 +70,9 @@ class StyleHelper {
         }
 
         for (const layer of layers) {
+            // TODO Quid VectorTileLayer ?
             if (layer instanceof VectorLayer) {
-                const style = await StyleHelper.#_getOlStyle(layer, currentStyle);
+                const style = await StyleHelper.#getOlStyle(layer, currentStyle);
                 if (style) {
                     layer.setStyle(style);
                 }
@@ -79,7 +80,7 @@ class StyleHelper {
         }
     }
 
-    static async #_getOlStyle(layer: VectorLayer<VectorSource<Geometry>> | VectorTileLayer, currentStyle: CartesStyle) {
+    static async #getOlStyle(layer: VectorLayer<VectorSource<Geometry>> | VectorTileLayer, currentStyle: CartesStyle) {
         const name = layer.get("name");
         const s = currentStyle.layers.filter((l) => l.name === name);
         if (!s.length) return undefined;
@@ -88,7 +89,9 @@ class StyleHelper {
 
         // Lecture du fichier
         const response = await fetch(s[0].url);
-        const xmlString = response.text();
+
+        if (!response.ok) return undefined;
+        const xmlString = await response.text();
 
         const extension = path.getFileExtension(s[0].url);
 
@@ -116,8 +119,6 @@ class StyleHelper {
             const parsed = await olParser.writeStyle(output);
             return parsed.output;
         }
-
-        return undefined;
     }
 }
 

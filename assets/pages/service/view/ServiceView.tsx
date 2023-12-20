@@ -7,7 +7,6 @@ import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
 import { FieldsetProps } from "@codegouvfr/react-dsfr/shared/Fieldset";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useMemo } from "react";
-
 import api from "../../../api";
 import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
 import { StyleComponent, addStyleModal } from "../../../components/StyleComponent";
@@ -43,13 +42,13 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
     });
 
     // Les styles
-    const styles: CartesStyle[] | undefined = useMemo(() => {
-        const configuration = serviceQuery.data?.configuration;
-        if (configuration) {
-            return configuration.styles;
-        }
-        return undefined;
-    }, [serviceQuery.data?.configuration]);
+    const styles: CartesStyle[] = useMemo(() => {
+        return serviceQuery.data?.configuration.styles ?? [];
+    }, [serviceQuery.data?.configuration.styles]);
+
+    const currentStyle: CartesStyle | undefined = useMemo(() => {
+        return styles.find((style) => style.current === true);
+    }, [styles]);
 
     // Recherche du nom des styles dans tous les services de la fiche de donnees datasheetName
     const styleNames = useMemo<string[]>(() => {
@@ -129,27 +128,32 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
     };
 
     // Changement de style par defaut
-    const { isPending: isPendingChangeCurrentStyle, mutate: mutateChangeCurrentStyle } = useMutation<CartesStyle[] | undefined, CartesApiException, string>({
+    const { isPending: isPendingChangeCurrentStyle, mutate: mutateChangeCurrentStyle } = useMutation<CartesStyle[], CartesApiException, string>({
         mutationFn: (name: string) => {
             if (serviceQuery.data) {
                 return api.style.setCurrent(datastoreId, serviceQuery.data._id, { style_name: name });
             }
-            return Promise.resolve(undefined);
+            return Promise.resolve([]);
         },
-        onSuccess() {
-            if (serviceQuery?.data !== undefined) {
-                queryClient.refetchQueries({ queryKey: RQKeys.datastore_offering(datastoreId, serviceQuery?.data?._id) });
+        onSuccess(styles) {
+            if (serviceQuery.data) {
+                queryClient.setQueryData<Service>(RQKeys.datastore_offering(datastoreId, offeringId), (oldService) => {
+                    if (oldService) {
+                        const newService = { ...oldService } as Service;
+                        newService.configuration.styles = styles;
+                        return newService;
+                    }
+                });
             }
         },
     });
 
-    // La liste des styles
     const radioOptions: FieldsetProps.Common["options"] = [];
     styles?.forEach((style) => {
         const option = {
             label: <StyleLabel style={style} onRemove={handleRemove} />,
             nativeInputProps: {
-                checked: style.current,
+                checked: currentStyle?.name === style.name,
                 onChange: () => mutateChangeCurrentStyle(style.name),
             },
         };

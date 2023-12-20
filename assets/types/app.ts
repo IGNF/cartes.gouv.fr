@@ -121,7 +121,7 @@ export type CartesStyle = {
 };
 
 /** configuration & offerings */
-export type Configuration = ConfigurationDetailResponseDto & { styles?: CartesStyle[] };
+export type Configuration = ConfigurationDetailResponseDto & { styles: CartesStyle[] };
 export const ConfigurationStatuses = ConfigurationDetailResponseDtoStatusEnum;
 
 export type Offering = OfferingDetailResponseDto;

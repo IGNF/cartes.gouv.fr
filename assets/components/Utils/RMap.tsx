@@ -55,12 +55,14 @@ const RMap: FC<RMapProps> = ({ service }) => {
     }, [service.configuration.type_infos]);
 
     const currentStyle: CartesStyle | undefined = useMemo(() => {
-        return StyleHelper.getCurrentStyle(service.configuration.styles);
+        return service.configuration.styles.find((style) => style.current === true);
     }, [service.configuration.styles]);
 
-    const gfinfo = [OfferingDetailResponseDtoTypeEnum.WFS, OfferingDetailResponseDtoTypeEnum.WMSVECTOR, OfferingDetailResponseDtoTypeEnum.WMTSTMS].includes(
-        service.type
-    );
+    const gfinfo = useMemo(() => {
+        return [OfferingDetailResponseDtoTypeEnum.WFS, OfferingDetailResponseDtoTypeEnum.WMSVECTOR, OfferingDetailResponseDtoTypeEnum.WMTSTMS].includes(
+            service.type
+        );
+    }, [service.type]);
 
     /**
      * Retourne le controle correspondant au nom
@@ -184,8 +186,8 @@ const RMap: FC<RMapProps> = ({ service }) => {
     }, [capabilities, extent, service, gfinfo]);
 
     useEffect(() => {
-        if (currentStyle && mapRef.current && capabilities) {
-            const layers = mapRef.current.getLayers().getArray();
+        if (capabilities && currentStyle) {
+            const layers = mapRef.current?.getLayers().getArray() ?? [];
             StyleHelper.applyStyle(layers, currentStyle);
         }
     }, [currentStyle, capabilities]);
