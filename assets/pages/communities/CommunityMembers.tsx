@@ -66,7 +66,7 @@ const CommunityMembers: FC<CommunityMembersProps> = ({ datastoreId, userId }) =>
         return datastore?.community._id;
     }, [datastore]);
 
-    // La communaute
+    // La communauté
     const { data: community, isLoading: isLoadingCommunity } = useQuery({
         queryKey: ["community", communityId],
         queryFn: () => {
@@ -76,7 +76,7 @@ const CommunityMembers: FC<CommunityMembersProps> = ({ datastoreId, userId }) =>
         enabled: !!communityId,
     });
 
-    // Les droits sur cette communaute
+    // Les droits sur cette communauté
     const userRights = useMemo(() => {
         const communityMember = user?.communitiesMember.filter((member) => member.community?._id === communityId);
         return communityMember?.length ? communityMember[0].rights : undefined;
@@ -90,7 +90,7 @@ const CommunityMembers: FC<CommunityMembersProps> = ({ datastoreId, userId }) =>
         return userRights?.includes(CommunityMemberDtoRightsEnum.COMMUNITY);
     }, [userRights]);
 
-    // Les membres de cette communaute
+    // Les membres de cette communauté
     const { data: communityMembers, isLoading: isLoadingMembers } = useQuery({
         queryKey: ["community", "members", communityId],
         queryFn: () => {
@@ -169,7 +169,7 @@ const CommunityMembers: FC<CommunityMembersProps> = ({ datastoreId, userId }) =>
 
     // Modification d'un droit d'un utilisateur
     const handleToggleChanged = (user_id: string, right: string, checked: boolean) => {
-        const m = JSON.parse(JSON.stringify(members)); // Vrai copie
+        const m = JSON.parse(JSON.stringify(members)); // Vraie copie
 
         const user = m.find((member) => member.id === user_id);
         if (!user) {
@@ -197,6 +197,7 @@ const CommunityMembers: FC<CommunityMembersProps> = ({ datastoreId, userId }) =>
             )}
             {!isLoadingMembers && isAuthorized === true && (
                 <>
+                    {/* TODO : translate */}
                     <h1>Membres de la communauté {community?.name}</h1>
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--right")}>
                         <Button priority={"primary"} iconId={"fr-icon-add-circle-line"} onClick={() => addMemberModal.open()}>
@@ -206,6 +207,7 @@ const CommunityMembers: FC<CommunityMembersProps> = ({ datastoreId, userId }) =>
                     <table className={tableClassName}>
                         <thead>
                             <tr>
+                                {/* TODO : translate */}
                                 <th>Nom</th>
                                 {getTranslatedRightTypes().map((right) => (
                                     <th key={right}>{right}</th>
@@ -217,7 +219,10 @@ const CommunityMembers: FC<CommunityMembersProps> = ({ datastoreId, userId }) =>
                             {members.map((member) => {
                                 return (
                                     <tr key={member.id}>
-                                        <td>{member.name}</td>
+                                        {/* TODO : translate */}
+                                        <td>
+                                            {member.name} {member.isMe === true ? " (moi)" : ""} {member.isSupervisor === true ? " (superviseur)" : ""}
+                                        </td>
                                         {Object.keys(member.rights).map((r) => {
                                             return (
                                                 <td key={r}>

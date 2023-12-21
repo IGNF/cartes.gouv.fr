@@ -4,7 +4,7 @@ import { CommunityUserResponseDtoRightsEnum } from "../../types/entrepot";
 
 const { t } = getTranslation("Rights");
 
-const rightTypes = ["annex", "broadcast", "community", "processing", "upload"] as const;
+const rightTypes = ["community", "upload", "processing", "annex", "broadcast"] as const;
 
 const getRights = () => {
     return rightTypes.map((type) => type.toUpperCase());

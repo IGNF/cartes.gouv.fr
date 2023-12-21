@@ -129,7 +129,7 @@ const AddMember: FC<AddMemberProps> = ({ datastoreId, communityId, communityMemb
                 nativeInputProps={{ ...register("user_id"), defaultValue: userId }}
             />
             <Checkbox
-                legend={t("grants_to_be_assigned")}
+                legend={t("rights_granted")}
                 options={rightTypes.map((right) => {
                     const explain = translateRights(`${right}_explain`);
                     const upRight = right.toUpperCase();
@@ -152,21 +152,15 @@ export { addMemberModal, AddMember };
 
 // traductions
 export const { i18n } = declareComponentKeys<
-    | "add_user_title"
-    | "user_id"
-    | "grants_to_be_assigned"
-    | "id_mandatory"
-    | "id_must_be_uuid"
-    | { K: "already_member"; P: { userId: string }; R: string }
-    | "running"
+    "add_user_title" | "user_id" | "rights_granted" | "id_mandatory" | "id_must_be_uuid" | { K: "already_member"; P: { userId: string }; R: string } | "running"
 >()({
     AddMember,
 });
 
 export const AddMemberFrTranslations: Translations<"fr">["AddMember"] = {
-    add_user_title: "Ajout d'un utilisateur",
+    add_user_title: "Ajouter un utilisateur",
     user_id: "Identifiant de l'utilisateur",
-    grants_to_be_assigned: "Droits à assigner",
+    rights_granted: "Permissions accordées",
     id_mandatory: "L'identifiant est obligatoire",
     id_must_be_uuid: "L'Identifiant doit être un UUID",
     already_member: ({ userId }) => `l'utilisateur ${userId} est déjà membre de cette communauté`,
@@ -176,7 +170,7 @@ export const AddMemberFrTranslations: Translations<"fr">["AddMember"] = {
 export const AddMemberEnTranslations: Translations<"en">["AddMember"] = {
     add_user_title: "Add user",
     user_id: "User identifier",
-    grants_to_be_assigned: "Grants to be assigned",
+    rights_granted: "Rights granted",
     id_mandatory: "Identifier is mandatory",
     id_must_be_uuid: "Identifier must be an UUID",
     already_member: ({ userId }) => `User ${userId} is already a member of this community`,
