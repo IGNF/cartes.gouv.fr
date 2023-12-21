@@ -5,7 +5,7 @@ import SymfonyRouting from "../../modules/Routing";
 import { useAuthStore } from "../../stores/AuthStore";
 
 const SessionExpiredAlert: FC = () => {
-    const { sessionExpired } = useAuthStore();
+    const sessionExpired = useAuthStore((state) => state.sessionExpired);
 
     return (
         sessionExpired && (

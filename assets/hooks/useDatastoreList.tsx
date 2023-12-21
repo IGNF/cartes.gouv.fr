@@ -7,7 +7,7 @@ import { useAuthStore } from "../stores/AuthStore";
 import { Datastore } from "../types/app";
 
 export const useDatastoreList = () => {
-    const { user } = useAuthStore();
+    const user = useAuthStore((state) => state.user);
 
     return useQuery<Datastore[], CartesApiException>({
         queryKey: RQKeys.datastore_list(),

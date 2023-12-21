@@ -16,7 +16,7 @@ type AppHeaderProps = {
     navItems?: NavigationProps;
 };
 const AppHeader: FC<AppHeaderProps> = ({ navItems = [] }) => {
-    const { user } = useAuthStore();
+    const user = useAuthStore((state) => state.user);
     // const { lang, setLang } = useLang();
 
     const quickAccessItems: (HeaderProps.QuickAccessItem | ReactNode)[] = [];

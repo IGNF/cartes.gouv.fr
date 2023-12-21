@@ -50,7 +50,7 @@ const ServiceView = lazy(() => import("../pages/service/view/ServiceView"));
 
 const RouterRenderer: FC = () => {
     const route = useRoute();
-    const { user } = useAuthStore();
+    const user = useAuthStore((state) => state.user);
 
     const content: JSX.Element = useMemo(() => {
         // vérification si la route demandée est bien connue/enregistrée
