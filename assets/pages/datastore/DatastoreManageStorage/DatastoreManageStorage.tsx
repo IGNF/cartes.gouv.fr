@@ -57,6 +57,7 @@ const DatastoreManageStorage: FC<DatastoreManageStorageProps> = ({ datastoreId }
             {
                 label: t("storage.endpoints.label"),
                 content: <EndpointsUsage datastore={datastoreQuery.data} />,
+                isDefault: true,
             },
         ];
 
@@ -116,6 +117,7 @@ export const { i18n } = declareComponentKeys<
     | "storage.annexe.loading"
     | "storage.annexe.explanation"
     | { K: "storage.endpoints.label"; R: JSX.Element }
+    | "storage.endpoints.loading"
     | "storage.endpoints.explanation"
 >()({
     DatastoreManageStorage,
@@ -193,6 +195,7 @@ export const DatastoreManageStorageFrTranslations: Translations<"fr">["Datastore
             Points de <br /> publication
         </span>
     ),
+    "storage.endpoints.loading": "Chargement des flux publiés en cours",
     "storage.endpoints.explanation": "Il s'agit du nombre de couches publiées par point de publication dans votre espace de travail.",
 };
 export const DatastoreManageStorageEnTranslations: Translations<"en">["DatastoreManageStorage"] = {
@@ -218,5 +221,6 @@ export const DatastoreManageStorageEnTranslations: Translations<"en">["Datastore
     "storage.annexe.loading": undefined,
     "storage.annexe.explanation": undefined,
     "storage.endpoints.label": undefined,
+    "storage.endpoints.loading": undefined,
     "storage.endpoints.explanation": undefined,
 };

@@ -12,6 +12,7 @@ use App\Services\EntrepotApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route(
@@ -29,11 +30,15 @@ class ServiceController extends AbstractController implements ApiControllerInter
     ) {
     }
 
-    #[Route('', name: 'get_offerings', methods: ['GET'])]
-    public function getOfferings(string $datastoreId): JsonResponse
+    #[Route('', name: 'get_offerings_list', methods: ['GET'])]
+    public function getOfferings(string $datastoreId, #[MapQueryParameter] bool $detailed = false): JsonResponse
     {
         try {
-            $offerings = $this->entrepotApiService->configuration->getAllOfferings($datastoreId);
+            if (true === $detailed) {
+                $offerings = $this->entrepotApiService->configuration->getAllOfferingsDetailed($datastoreId);
+            } else {
+                $offerings = $this->entrepotApiService->configuration->getAllOfferings($datastoreId);
+            }
 
             return $this->json($offerings);
         } catch (EntrepotApiException $ex) {

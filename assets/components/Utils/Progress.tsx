@@ -1,5 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import { FC, useMemo } from "react";
+import { FC, memo, useMemo } from "react";
 
 import "./../../sass/components/progress.scss";
 
@@ -29,4 +29,4 @@ const Progress: FC<ProgressProps> = ({ label, value, max = 100 }) => {
     );
 };
 
-export default Progress;
+export default memo(Progress);
