@@ -1,7 +1,18 @@
 import SymfonyRouting from "../modules/Routing";
-
 import { jsonFetch } from "../modules/jsonFetch";
-import { Upload, UploadTree } from "../types/app";
+import { Upload, UploadTree, UploadType } from "../types/app";
+
+const getList = (datastoreId: string, type?: UploadType, otherOptions: RequestInit = {}) => {
+    const params = { datastoreId };
+    if (type !== undefined) {
+        params["type"] = type;
+    }
+
+    const url = SymfonyRouting.generate("cartesgouvfr_api_upload_get_list", params);
+    return jsonFetch<Upload[]>(url, {
+        ...otherOptions,
+    });
+};
 
 const add = (datastoreId: string, data: object) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_upload_add", { datastoreId });
@@ -46,6 +57,7 @@ const pingIntegrationProgress = (datastoreId: string, uploadId: string, otherOpt
 };
 
 const upload = {
+    getList,
     add,
     get,
     getIntegrationProgress,

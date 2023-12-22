@@ -11,6 +11,7 @@ use App\Constants\EntrepotApi\UploadTags;
 use App\Constants\EntrepotApi\UploadTypes;
 use App\Constants\JobStatuses;
 use App\Exception\AppException;
+use App\Exception\CartesApiException;
 use App\Exception\EntrepotApiException;
 use App\Services\EntrepotApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -32,6 +33,25 @@ class UploadController extends AbstractController implements ApiControllerInterf
         private EntrepotApiService $entrepotApiService,
         private ParameterBagInterface $parameterBag,
     ) {
+    }
+
+    #[Route('', name: 'get_list', methods: ['GET'])]
+    public function getUploadList(
+        string $datastoreId,
+        #[MapQueryParameter] string $type = null,
+    ): JsonResponse {
+        try {
+            $query = [];
+            if (null !== $type) {
+                $query['type'] = $type;
+            }
+
+            $uploadList = $this->entrepotApiService->upload->getAllDetailed($datastoreId, $query);
+
+            return $this->json($uploadList);
+        } catch (EntrepotApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
+        }
     }
 
     #[Route('/', name: 'add', methods: ['POST'])]

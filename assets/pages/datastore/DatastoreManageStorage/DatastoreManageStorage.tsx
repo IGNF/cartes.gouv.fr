@@ -9,6 +9,7 @@ import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
 import LoadingIcon from "../../../components/Utils/LoadingIcon";
 import { useTranslation, type Translations } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/RQKeys";
+import { StoredDataType, StoredDataTypesEnum, UploadType, UploadTypesEnum } from "./../../../types/app";
 import AnnexeUsage from "./storages/AnnexeUsage";
 import EndpointsUsage from "./storages/EndpointsUsage";
 import FilesystemUsage from "./storages/FilesystemUsage";
@@ -95,17 +96,22 @@ export default DatastoreManageStorage;
 export const { i18n } = declareComponentKeys<
     | { K: "title"; P: { datastoreName: string | undefined }; R: string }
     | "explanation"
-    | "stored_data.size.unknown"
     | "storage.not_found"
+    | "data.size.unknown"
+    | { K: "stored_data.type.title"; P: { type: StoredDataType }; R: string }
     | { K: "storage.filesystem.label"; R: JSX.Element }
+    | "storage.filesystem.stored_data_list.loading"
     | "storage.filesystem.explanation"
     | { K: "storage.postgresql.label"; R: JSX.Element }
     | "storage.postgresql.vectordb.loading"
     | "storage.postgresql.explanation"
     | { K: "storage.s3.label"; R: JSX.Element }
+    | "storage.s3.stored_data_list.loading"
     | "storage.s3.explanation"
     | { K: "storage.upload.label"; R: JSX.Element }
+    | "storage.upload.loading"
     | "storage.upload.explanation"
+    | { K: "upload.type.title"; P: { type: UploadType }; R: string }
     | { K: "storage.annexe.label"; R: JSX.Element }
     | "storage.annexe.explanation"
     | { K: "storage.endpoints.label"; R: JSX.Element }
@@ -118,14 +124,27 @@ export const DatastoreManageStorageFrTranslations: Translations<"fr">["Datastore
     title: ({ datastoreName }) => `Gérer l'espace de travail${datastoreName ? " " + datastoreName : ""}`,
     explanation:
         "Cette page vous permet de voir en un seul coup d'œil le volume de vos données et votre situation par rapport aux différents quotas qui vous sont alloués.",
-    "stored_data.size.unknown": "Taille inconnue",
     "storage.not_found": "Aucun stockage de ce type n'est attribué à votre espace de travail.",
+    "data.size.unknown": "Taille inconnue",
+    "stored_data.type.title": ({ type }) => {
+        switch (type) {
+            case StoredDataTypesEnum.VECTORDB:
+                return "Données vectorielles en BD PostgreSQL";
+            case StoredDataTypesEnum.ROK4PYRAMIDVECTOR:
+                return "Pyramide de tuiles vectorielles";
+            case StoredDataTypesEnum.ROK4PYRAMIDRASTER:
+                return "Pyramide de tuiles raster";
+            default:
+                return type;
+        }
+    },
     "storage.filesystem.label": (
         <span>
             Données intégrées sous <br /> forme de fichiers
         </span>
     ),
-    "storage.filesystem.explanation": "Cet espace est utilisé par le Géotuileur pour le stockage des pyramides de tuiles vectorielles.",
+    "storage.filesystem.stored_data_list.loading": "Chargement des données stockées sous forme de fichiers.",
+    "storage.filesystem.explanation": "Cet espace est utilisé pour le stockage des pyramides de tuiles vectorielles.",
     "storage.postgresql.label": (
         <span>
             Données intégrées <br /> en base
@@ -139,16 +158,27 @@ export const DatastoreManageStorageFrTranslations: Translations<"fr">["Datastore
             Stockage <br /> de masse
         </span>
     ),
+    "storage.s3.stored_data_list.loading": "Chargement des données stockées dans le stockage de masse en cours",
     "storage.s3.explanation":
-        "Cet espace est utilisé par le Géotuileur pour le stockage des pyramides de \
-    tuiles vectorielles. Il est plus performant que le stockage sous forme de fichiers.",
+        "Cet espace est utilisé pour le stockage des pyramides de tuiles vectorielles. Il est plus performant que le stockage sous forme de fichiers.",
     "storage.upload.label": (
         <span>
             Données <br /> déposées
         </span>
     ),
+    "storage.upload.loading": "Chargement des données déposées en cours",
     "storage.upload.explanation":
         "Il s'agit de l'espace occupé par les fichiers de données bruts que vous avez téléversés (fichiers csv, geopackage...). Ces fichiers sont normalement supprimés dès l'intégration en base réussie de vos données. Il est possible qu'il reste des traces de fichiers dans cet espace lorsque les intégrations en base ont échoué.",
+    "upload.type.title": ({ type }) => {
+        switch (type) {
+            case UploadTypesEnum.VECTOR:
+                return "Vecteur";
+            case UploadTypesEnum.RASTER:
+                return "Raster";
+            default:
+                return type;
+        }
+    },
     "storage.annexe.label": (
         <span>
             Fichiers <br /> annexes
@@ -166,17 +196,22 @@ export const DatastoreManageStorageFrTranslations: Translations<"fr">["Datastore
 export const DatastoreManageStorageEnTranslations: Translations<"en">["DatastoreManageStorage"] = {
     title: undefined,
     explanation: undefined,
-    "stored_data.size.unknown": undefined,
     "storage.not_found": undefined,
+    "data.size.unknown": undefined,
+    "stored_data.type.title": undefined,
     "storage.filesystem.label": undefined,
+    "storage.filesystem.stored_data_list.loading": undefined,
     "storage.filesystem.explanation": undefined,
     "storage.postgresql.label": undefined,
     "storage.postgresql.vectordb.loading": undefined,
     "storage.postgresql.explanation": undefined,
     "storage.s3.label": undefined,
+    "storage.s3.stored_data_list.loading": undefined,
     "storage.s3.explanation": undefined,
     "storage.upload.label": undefined,
+    "storage.upload.loading": undefined,
     "storage.upload.explanation": undefined,
+    "upload.type.title": undefined,
     "storage.annexe.label": undefined,
     "storage.annexe.explanation": undefined,
     "storage.endpoints.label": undefined,

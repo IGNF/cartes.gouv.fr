@@ -1,9 +1,8 @@
 import SymfonyRouting from "../modules/Routing";
-
 import { jsonFetch } from "../modules/jsonFetch";
-import { StoredData, StoredDataReport } from "../types/app";
+import { StoredData, StoredDataReport, StoredDataType } from "../types/app";
 
-const getList = <T = StoredData>(datastoreId: string, type?: string, otherOptions: RequestInit = {}) => {
+const getList = <T = StoredData[]>(datastoreId: string, type?: StoredDataType, otherOptions: RequestInit = {}) => {
     const params = { datastoreId };
     if (type !== undefined) {
         params["type"] = type;
