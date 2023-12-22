@@ -23,6 +23,20 @@ class AnnexeApiService extends AbstractEntrepotApiService
         return $this->requestAll("datastores/$datastoreId/annexes", $query);
     }
 
+    /**
+     * @param array<string> $labels
+     */
+    public function getAllDetailed(string $datastoreId, string $mimeType = null, string $path = null, array $labels = null): array
+    {
+        $annexes = $this->getAll($datastoreId, $mimeType, $path, $labels);
+
+        foreach ($annexes as &$annexe) {
+            $annexe = $this->get($datastoreId, $annexe['_id']);
+        }
+
+        return $annexes;
+    }
+
     public function get(string $datastoreId, string $annexeId): array
     {
         return $this->request('GET', "datastores/$datastoreId/annexes/$annexeId");

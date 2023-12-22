@@ -52,7 +52,7 @@ export type Datasheet = {
     thumbnail?: DatasheetThumbnailAnnexe;
 };
 
-export type DatasheetThumbnailAnnexe = AnnexDetailResponseDto & { url: string };
+export type DatasheetThumbnailAnnexe = Annexe & { url: string };
 
 export type DatasheetDetailed = Datasheet & {
     vector_db_list: VectorDb[] | undefined;
@@ -170,3 +170,5 @@ export type UserRightsResponseDto = {
     user: string;
     rights: CommunityUserResponseDtoRightsEnum[];
 };
+
+export type Annexe = AnnexDetailResponseDto;

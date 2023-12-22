@@ -1,4 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Table from "@codegouvfr/react-dsfr/Table";
 import { useQuery } from "@tanstack/react-query";
@@ -44,6 +45,8 @@ const UploadUsage: FC<UploadUsageProps> = ({ datastore }) => {
             )}
 
             {uploadListQuery.isFetching && <LoadingText message={t("storage.upload.loading")} as="p" withSpinnerIcon className={fr.cx("fr-mt-4v")} />}
+
+            {uploadListQuery.error && <Alert severity="error" title={uploadListQuery.error.message} as="h2" closable onClose={uploadListQuery.refetch} />}
 
             {uploadListQuery.data && uploadListQuery.data.length > 0 && (
                 <Table

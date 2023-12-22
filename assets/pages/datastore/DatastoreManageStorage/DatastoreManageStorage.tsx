@@ -113,6 +113,7 @@ export const { i18n } = declareComponentKeys<
     | "storage.upload.explanation"
     | { K: "upload.type.title"; P: { type: UploadType }; R: string }
     | { K: "storage.annexe.label"; R: JSX.Element }
+    | "storage.annexe.loading"
     | "storage.annexe.explanation"
     | { K: "storage.endpoints.label"; R: JSX.Element }
     | "storage.endpoints.explanation"
@@ -184,6 +185,7 @@ export const DatastoreManageStorageFrTranslations: Translations<"fr">["Datastore
             Fichiers <br /> annexes
         </span>
     ),
+    "storage.annexe.loading": "Chargement des annexes",
     "storage.annexe.explanation":
         "Cet espace est occupé par les fichiers mis à disposition de vos utilisateurs via des adresses publiques. Il s'agit généralement des fichiers de style au format JSON qui servent à symboliser vos pyramides de tuiles vectorielles.",
     "storage.endpoints.label": (
@@ -213,6 +215,7 @@ export const DatastoreManageStorageEnTranslations: Translations<"en">["Datastore
     "storage.upload.explanation": undefined,
     "upload.type.title": undefined,
     "storage.annexe.label": undefined,
+    "storage.annexe.loading": undefined,
     "storage.annexe.explanation": undefined,
     "storage.endpoints.label": undefined,
     "storage.endpoints.explanation": undefined,

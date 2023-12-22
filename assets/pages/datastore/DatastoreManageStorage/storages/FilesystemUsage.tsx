@@ -1,4 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Table from "@codegouvfr/react-dsfr/Table";
 import { useQuery } from "@tanstack/react-query";
@@ -50,6 +51,10 @@ const FilesystemUsage: FC<FilesystemUsageProps> = ({ datastore }) => {
 
             {storedDataListQuery.isFetching && (
                 <LoadingText message={t("storage.filesystem.stored_data_list.loading")} as="p" withSpinnerIcon className={fr.cx("fr-mt-4v")} />
+            )}
+
+            {storedDataListQuery.error && (
+                <Alert severity="error" title={storedDataListQuery.error.message} as="h2" closable onClose={storedDataListQuery.refetch} />
             )}
 
             {storedDataListInFilesystem.length > 0 && (

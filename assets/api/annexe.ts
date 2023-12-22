@@ -1,6 +1,13 @@
 import SymfonyRouting from "../modules/Routing";
 import { jsonFetch } from "../modules/jsonFetch";
-import { DatasheetThumbnailAnnexe } from "../types/app";
+import { Annexe, DatasheetThumbnailAnnexe } from "../types/app";
+
+const getList = (datastoreId: string, otherOptions: RequestInit = {}) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_annexe_get_list", { datastoreId });
+    return jsonFetch<Annexe[]>(url, {
+        ...otherOptions,
+    });
+};
 
 const addThumbnail = (datastoreId: string, data: object) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_annexe_thumbnail_add", { datastoreId });
@@ -25,6 +32,7 @@ const addCapabilities = (datastoreId: string, offeringId: string) => {
 };
 
 export default {
+    getList,
     addThumbnail,
     removeThumbnail,
     addCapabilities,

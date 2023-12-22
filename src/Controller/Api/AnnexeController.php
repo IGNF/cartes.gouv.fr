@@ -17,7 +17,9 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 #[Route(
     '/api/datastore/{datastoreId}/annexe',
-    name: 'cartesgouvfr_api_annexe_'
+    name: 'cartesgouvfr_api_annexe_',
+    options: ['expose' => true],
+    condition: 'request.isXmlHttpRequest()'
 )]
 class AnnexeController extends AbstractController implements ApiControllerInterface
 {
@@ -33,10 +35,19 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
         ]);
     }
 
-    #[Route('/thumbnail_add', name: 'thumbnail_add', methods: ['POST'],
-        options: ['expose' => true],
-        condition: 'request.isXmlHttpRequest()')
-    ]
+    #[Route('', name: 'get_list', methods: ['GET'])]
+    public function getAnnexeList(string $datastoreId): JsonResponse
+    {
+        try {
+            $annexeList = $this->entrepotApiService->annexe->getAllDetailed($datastoreId);
+
+            return $this->json($annexeList);
+        } catch (EntrepotApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
+        }
+    }
+
+    #[Route('/thumbnail_add', name: 'thumbnail_add', methods: ['POST'])]
     public function addThumbnail(string $datastoreId, Request $request): JsonResponse
     {
         try {
@@ -70,10 +81,7 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
         }
     }
 
-    #[Route('/thumbnail_remove/{annexeId}', name: 'thumbnail_remove', methods: ['DELETE'],
-        options: ['expose' => true],
-        condition: 'request.isXmlHttpRequest()')
-    ]
+    #[Route('/thumbnail_remove/{annexeId}', name: 'thumbnail_remove', methods: ['DELETE'])]
     public function removeThumbnail(string $datastoreId, string $annexeId): JsonResponse
     {
         try {
@@ -87,10 +95,7 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
         }
     }
 
-    #[Route('/capabilities_add/{offeringId}', name: 'capabilities_add', methods: ['GET'],
-        options: ['expose' => true],
-        condition: 'request.isXmlHttpRequest()')
-    ]
+    #[Route('/capabilities_add/{offeringId}', name: 'capabilities_add', methods: ['GET'])]
     public function addCapabilities(string $datastoreId, string $offeringId): JsonResponse
     {
         try {
