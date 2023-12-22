@@ -1,30 +1,31 @@
 import {
+    AnnexDetailResponseDto,
+    CheckingExecutionDetailResponseDto,
+    CommunityMemberDto,
+    CommunityUserResponseDtoRightsEnum,
+    ConfigurationAltimetryDetailsContent,
     ConfigurationDetailResponseDto,
     ConfigurationDetailResponseDtoStatusEnum,
-    DatastoreDetailResponseDto,
-    DatastoreEndpointResponseDto,
-    EndpointDetailResponseDtoTypeEnum,
-    OfferingDetailResponseDto,
-    StoredDataDetailsRelationDto,
-    StoredDataPrivateDetailResponseDto,
-    StoredDataPrivateDetailResponseDtoStatusEnum,
-    StoredDataPrivateDetailResponseDtoTypeEnum,
-    StoredDataPrivateDetailResponseDtoVisibilityEnum,
-    UploadDetailResponseDto,
-    UploadTreeElementResponseDto,
-    UserDetailsResponseDto,
-    ConfigurationAltimetryDetailsContent,
     ConfigurationItineraryIsocurveDetailsContent,
     ConfigurationWfsDetailsContent,
     ConfigurationWmsRasterDetailsContent,
     ConfigurationWmsVectorDetailsContent,
     ConfigurationWmtsTmsDetailsContent,
+    DatastoreDetailResponseDto,
+    DatastoreEndpointResponseDto,
+    EndpointDetailResponseDtoTypeEnum,
+    OfferingDetailResponseDto,
     ProcessingExecutionDetailResponseDto,
-    CheckingExecutionDetailResponseDto,
     ProcessingExecutionOutputStoredDataDto,
-    AnnexDetailResponseDto,
-    CommunityMemberDto,
-    CommunityUserResponseDtoRightsEnum,
+    StoredDataDetailsRelationDto,
+    StoredDataPrivateDetailResponseDto,
+    StoredDataPrivateDetailResponseDtoStatusEnum,
+    StoredDataPrivateDetailResponseDtoTypeEnum,
+    StoredDataPrivateDetailResponseDtoVisibilityEnum,
+    UploadPrivateDetailResponseDto,
+    UploadPrivateDetailResponseDtoTypeEnum,
+    UploadTreeElementResponseDto,
+    UserDetailsResponseDto,
 } from "./entrepot";
 
 /** user */
@@ -63,7 +64,8 @@ export type DatasheetDetailed = Datasheet & {
 /** stored_data (donnée stockée) */
 export type StoredData = StoredDataPrivateDetailResponseDto;
 
-export const StoredDataTypes = StoredDataPrivateDetailResponseDtoTypeEnum;
+export const StoredDataTypesEnum = StoredDataPrivateDetailResponseDtoTypeEnum;
+export type StoredDataType = StoredDataPrivateDetailResponseDtoTypeEnum;
 export const StoredDataStatuses = StoredDataPrivateDetailResponseDtoStatusEnum;
 export const StoredDataVisibilities = StoredDataPrivateDetailResponseDtoVisibilityEnum;
 export type StoredDataRelation = StoredDataDetailsRelationDto;
@@ -92,7 +94,7 @@ export type Pyramid = StoredData & {
 };
 
 /** upload (livraison) */
-export type Upload = UploadDetailResponseDto & {
+export type Upload = UploadPrivateDetailResponseDto & {
     tags: {
         datasheet_name?: string;
         proc_int_id?: string;
@@ -102,6 +104,8 @@ export type Upload = UploadDetailResponseDto & {
         integration_current_step?: string;
     };
 };
+export const UploadTypesEnum = UploadPrivateDetailResponseDtoTypeEnum;
+export type UploadType = UploadPrivateDetailResponseDtoTypeEnum;
 export type UploadTree = UploadTreeElementResponseDto[];
 
 /** user, objet représentant l'utilisateur de l'API Entrepot */
