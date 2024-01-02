@@ -1017,9 +1017,9 @@
     to-fast-properties "^2.0.0"
 
 "@codegouvfr/react-dsfr@^1.0.0":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@codegouvfr/react-dsfr/-/react-dsfr-1.0.1.tgz#75c6539211aa223c1f2b322cc80478a81001f3ab"
-  integrity sha512-TjiO/mAd0t6Qo53kfC5TUnd5FKDzlAr0bRPYW1kIhnUbsnFUTTtoVlWZnxlb7sn3QP3EyDDe+UGtUnUnK8rMkQ==
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@codegouvfr/react-dsfr/-/react-dsfr-1.0.4.tgz#f3877a566aed7c7602cde897f92b7752fc2f8b5f"
+  integrity sha512-OJE73kgd8YLC6OUATTIl14ZLZAq42o5sTEcUsUG9Pn9whu+yUIDsJV0npJBhjm17uxZ0lwcLVqXcXGSEw5S9zw==
   dependencies:
     tsafe "^1.6.3"
 
