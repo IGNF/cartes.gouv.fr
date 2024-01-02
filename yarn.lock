@@ -4432,7 +4432,7 @@ geostyler-sld-parser@^5.1.0:
     geostyler-style "^8.1.0"
     lodash "^4.17.21"
 
-geostyler-style@^7.2.0, geostyler-style@^7.3.1:
+geostyler-style@^7.2.0:
   version "7.5.0"
   resolved "https://registry.yarnpkg.com/geostyler-style/-/geostyler-style-7.5.0.tgz#25a40c7b24453ee42b01c6fc4293807b687ad0ec"
   integrity sha512-0qlFOwDl9cdiiNUk6ijRSpBq+W3Kpry1aZS++BE8EPBxvbFgoTsKU6JIriKLmCqPqBmJIVnMFMUEk6Sf3n0ZIA==
