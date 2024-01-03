@@ -3,6 +3,8 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { createModal, ModalProps } from "@codegouvfr/react-dsfr/Modal";
 import { Upload } from "@codegouvfr/react-dsfr/Upload";
+import Wait from "../../../components/Utils/Wait";
+import { ConfirmDialogModal, ConfirmDialog } from "../../../components/Utils/ConfirmDialog";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
@@ -17,7 +19,6 @@ import { ComponentKey, useTranslation } from "../../../i18n/i18n";
 import { CartesApiException } from "../../../modules/jsonFetch";
 import RQKeys from "../../../modules/RQKeys";
 import type { Datasheet, DatasheetDetailed, DatasheetThumbnailAnnexe } from "../../../types/app";
-
 import "../../../sass/components/buttons.scss";
 
 const defaultImgUrl = "//www.gouvernement.fr/sites/default/files/static_assets/placeholder.1x1.png";
@@ -64,6 +65,7 @@ type DatasheetThumbnailProps = {
     datasheetName: string;
     datasheet?: Datasheet;
 };
+
 const DatasheetThumbnail: FC<DatasheetThumbnailProps> = ({ datastoreId, datasheetName, datasheet }) => {
     const queryClient = useQueryClient();
     const { t: tCommon } = useTranslation("Common");
@@ -116,8 +118,6 @@ const DatasheetThumbnail: FC<DatasheetThumbnailProps> = ({ datastoreId, datashee
             return Promise.resolve(null);
         },
         onSuccess: () => {
-            addThumbnailModal.close();
-
             // mise à jour du contenu de la réponse de datasheetQuery
             queryClient.setQueryData<DatasheetDetailed>(RQKeys.datastore_datasheet(datastoreId, datasheetName), (datasheet) => {
                 if (datasheet) {
@@ -186,55 +186,69 @@ const DatasheetThumbnail: FC<DatasheetThumbnailProps> = ({ datastoreId, datashee
                 doClosesModal: true,
                 priority: "secondary",
             },
+            {
+                children: t("thumbnail_action", { action: action }),
+                onClick: handleSubmit(onSubmit),
+                doClosesModal: false,
+                priority: "primary",
+            },
         ];
 
-        if (datasheet?.thumbnail?._id) {
-            btns.push({
-                children: tCommon("delete"),
-                iconId: "fr-icon-delete-line",
-                onClick: () => {
-                    deleteThumbnailMutation.mutate();
-                },
-                doClosesModal: false,
-                priority: "secondary",
-            });
-        }
-        btns.push({
-            children: t("thumbnail_action", { action: action }),
-            onClick: handleSubmit(onSubmit),
-            doClosesModal: false,
-            priority: "primary",
-        });
-
         return btns;
-    }, [action, addThumbnailMutation, datasheet?.thumbnail, deleteThumbnailMutation, handleSubmit, onSubmit, reset, t, tCommon]);
+    }, [action, addThumbnailMutation, handleSubmit, onSubmit, reset, t, tCommon]);
 
     return (
         <>
-            <Button
-                priority="tertiary no outline"
-                onClick={addThumbnailModal.open}
-                nativeButtonProps={{
-                    "aria-label": t("button.title"),
-                    title: t("button.title"),
-                    onMouseOver: () => setThumbnailAddBtnHover(true),
-                    onMouseOut: () => setThumbnailAddBtnHover(false),
-                }}
-                className="frx-btn--hover"
+            <div
+                className={"frx-thumbnail"}
+                aria-label={t("button.title")}
+                title={t("button.title")}
+                onMouseOver={() => setThumbnailAddBtnHover(true)}
+                onMouseOut={() => setThumbnailAddBtnHover(false)}
             >
                 <img
                     className={thumbnailAddBtnHover ? "frx-btn--transparent fr-img--transparent-transition" : ""}
                     loading="lazy"
                     src={datasheet?.thumbnail?.url === undefined ? defaultImgUrl : datasheet?.thumbnail?.url}
-                    width="128px"
-                    height="128px"
                 />
                 {thumbnailAddBtnHover && (
                     <div className="frx-btn--hover-icon">
-                        <span className={fr.cx("fr-icon-edit-line")} />
+                        <Button
+                            title={t("thumbnail_action", { action: action })}
+                            iconId="fr-icon-edit-line"
+                            priority="tertiary no outline"
+                            onClick={addThumbnailModal.open}
+                        />
+                        {datasheet?.thumbnail?._id !== undefined && (
+                            <Button
+                                title={t("thumbnail_action", { action: "delete" })}
+                                iconId="fr-icon-delete-line"
+                                priority="tertiary no outline"
+                                onClick={ConfirmDialogModal.open}
+                            />
+                        )}
                     </div>
                 )}
-            </Button>
+                {deleteThumbnailMutation.isError && (
+                    <Alert
+                        severity="error"
+                        closable
+                        title={tCommon("error")}
+                        description={deleteThumbnailMutation.error.message}
+                        className={fr.cx("fr-my-3w")}
+                    />
+                )}
+                {deleteThumbnailMutation.isPending && (
+                    <Wait>
+                        <div className={fr.cx("fr-container")}>
+                            <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
+                                <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " icons-spin"} />
+                                <h6 className={fr.cx("fr-m-0")}>{t("thumbnail_modal.action_being", { action: "delete" })}</h6>
+                            </div>
+                        </div>
+                    </Wait>
+                )}
+            </div>
             {createPortal(
                 <addThumbnailModal.Component title={t("thumbnail_modal.title")} buttons={thumbnailModalButtons}>
                     {addThumbnailMutation.isError && (
@@ -243,15 +257,6 @@ const DatasheetThumbnail: FC<DatasheetThumbnailProps> = ({ datastoreId, datashee
                             closable
                             title={tCommon("error")}
                             description={addThumbnailMutation.error.message}
-                            className={fr.cx("fr-my-3w")}
-                        />
-                    )}
-                    {deleteThumbnailMutation.isError && (
-                        <Alert
-                            severity="error"
-                            closable
-                            title={tCommon("error")}
-                            description={deleteThumbnailMutation.error.message}
                             className={fr.cx("fr-my-3w")}
                         />
                     )}
@@ -278,15 +283,15 @@ const DatasheetThumbnail: FC<DatasheetThumbnailProps> = ({ datastoreId, datashee
                             <h6 className={fr.cx("fr-m-0")}>{t("thumbnail_modal.action_being", { action: action })}</h6>
                         </div>
                     )}
-                    {deleteThumbnailMutation.isPending && (
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " icons-spin"} />
-                            <h6 className={fr.cx("fr-m-0")}>{t("thumbnail_modal.action_being", { action: "delete" })}</h6>
-                        </div>
-                    )}
                 </addThumbnailModal.Component>,
                 document.body
             )}
+            <ConfirmDialog
+                title={t("thumbnail_confirm_delete_modal.title")}
+                onConfirm={() => {
+                    deleteThumbnailMutation.mutate();
+                }}
+            />
         </>
     );
 };

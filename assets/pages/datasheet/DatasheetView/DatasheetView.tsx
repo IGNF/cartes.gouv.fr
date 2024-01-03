@@ -225,6 +225,7 @@ export const { i18n } = declareComponentKeys<
     | "thumbnail_modal.file_hint"
     | { K: "thumbnail_modal.action_being"; P: { action: ThumbnailAction }; R: string }
     | { K: "thumbnail_action"; P: { action: ThumbnailAction }; R: string }
+    | "thumbnail_confirm_delete_modal.title"
     | { K: "datasheet_confirm_delete_modal.title"; P: { datasheetName: string }; R: string }
     | "datasheet_confirm_delete_modal.text"
 >()({
@@ -264,6 +265,7 @@ export const DatasheetViewFrTranslations: Translations<"fr">["DatasheetView"] = 
                 return "Supprimer la vignette";
         }
     },
+    "thumbnail_confirm_delete_modal.title": "Êtes-vous sûr de vouloir supprimer la vignette de cette fiche de données ?",
     "datasheet_confirm_delete_modal.title": ({ datasheetName }) => `Êtes-vous sûr de supprimer la fiche de données ${datasheetName} ?`,
     "datasheet_confirm_delete_modal.text": "Les éléments suivants seront supprimés :",
 };
@@ -301,6 +303,7 @@ export const DatasheetViewEnTranslations: Translations<"en">["DatasheetView"] = 
                 return "Delete thumbnail";
         }
     },
+    "thumbnail_confirm_delete_modal.title": "Are you sure you want to remove the thumbnail from this data sheet",
     "datasheet_confirm_delete_modal.title": ({ datasheetName }) => `Are you sure you want to delete datasheet ${datasheetName} ?`,
     "datasheet_confirm_delete_modal.text": "The following items will be deleted :",
 };
