@@ -56,6 +56,11 @@ const pingIntegrationProgress = (datastoreId: string, uploadId: string, otherOpt
     });
 };
 
+const remove = (datastoreId: string, uploadId: string) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_upload_delete", { datastoreId, uploadId });
+    return jsonFetch<null>(url, { method: "DELETE" });
+};
+
 const upload = {
     getList,
     add,
@@ -63,6 +68,7 @@ const upload = {
     getIntegrationProgress,
     pingIntegrationProgress,
     getFileTree,
+    remove,
 };
 
 export default upload;

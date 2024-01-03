@@ -113,7 +113,7 @@ const DatasheetThumbnail: FC<DatasheetThumbnailProps> = ({ datastoreId, datashee
     const deleteThumbnailMutation = useMutation<null, CartesApiException>({
         mutationFn: () => {
             if (datasheet?.thumbnail?._id) {
-                return api.annexe.removeThumbnail(datastoreId, datasheet?.thumbnail?._id);
+                return api.annexe.remove(datastoreId, datasheet?.thumbnail?._id);
             }
             return Promise.resolve(null);
         },

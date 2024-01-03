@@ -21,8 +21,8 @@ const addThumbnail = (datastoreId: string, data: object) => {
     );
 };
 
-const removeThumbnail = (datastoreId: string, annexeId: string) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_annexe_thumbnail_remove", { datastoreId, annexeId });
+const remove = (datastoreId: string, annexeId: string) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_annexe_delete", { datastoreId, annexeId });
     return jsonFetch<null>(url, { method: "DELETE" });
 };
 
@@ -34,6 +34,6 @@ const addCapabilities = (datastoreId: string, offeringId: string) => {
 export default {
     getList,
     addThumbnail,
-    removeThumbnail,
     addCapabilities,
+    remove,
 };

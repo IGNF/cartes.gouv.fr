@@ -89,7 +89,13 @@ class UploadController extends AbstractController implements ApiControllerInterf
     #[Route('/{uploadId}', name: 'get', methods: ['GET'])]
     public function get(string $datastoreId, string $uploadId): JsonResponse
     {
-        return $this->json($this->entrepotApiService->upload->get($datastoreId, $uploadId));
+        try {
+            return $this->json($this->entrepotApiService->upload->get($datastoreId, $uploadId));
+        } catch (EntrepotApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        } catch (\Exception $ex) {
+            throw new CartesApiException($ex->getMessage(), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     #[Route('/{uploadId}/file_tree', name: 'get_file_tree', methods: ['GET'])]
@@ -282,5 +288,19 @@ class UploadController extends AbstractController implements ApiControllerInterf
         $progress[$currentStepName] = $currentStepStatus;
 
         return [$currentStep, $progress];
+    }
+
+    #[Route('/{uploadId}', name: 'delete', methods: ['DELETE'])]
+    public function delete(string $datastoreId, string $uploadId): JsonResponse
+    {
+        try {
+            $this->json($this->entrepotApiService->upload->remove($datastoreId, $uploadId));
+
+            return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
+        } catch (EntrepotApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        } catch (\Exception $ex) {
+            throw new CartesApiException($ex->getMessage(), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }

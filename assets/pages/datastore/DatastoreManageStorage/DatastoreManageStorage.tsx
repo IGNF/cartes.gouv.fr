@@ -57,7 +57,6 @@ const DatastoreManageStorage: FC<DatastoreManageStorageProps> = ({ datastoreId }
             {
                 label: t("storage.endpoints.label"),
                 content: <EndpointsUsage datastore={datastoreQuery.data} />,
-                isDefault: true,
             },
         ];
 
@@ -95,27 +94,44 @@ const DatastoreManageStorage: FC<DatastoreManageStorageProps> = ({ datastoreId }
 export default DatastoreManageStorage;
 
 export const { i18n } = declareComponentKeys<
-    | { K: "title"; P: { datastoreName: string | undefined }; R: string }
+    // commun
+    | { K: "title"; P: { datastoreName?: string }; R: string }
     | "explanation"
     | "storage.not_found"
     | "data.size.unknown"
     | { K: "stored_data.type.title"; P: { type: StoredDataType }; R: string }
+
+    // FILESYSTEM
     | { K: "storage.filesystem.label"; R: JSX.Element }
     | "storage.filesystem.stored_data_list.loading"
     | "storage.filesystem.explanation"
+
+    // POSTGRES
     | { K: "storage.postgresql.label"; R: JSX.Element }
     | "storage.postgresql.vectordb.loading"
     | "storage.postgresql.explanation"
+
+    // S3
     | { K: "storage.s3.label"; R: JSX.Element }
     | "storage.s3.stored_data_list.loading"
     | "storage.s3.explanation"
+
+    // upload
     | { K: "storage.upload.label"; R: JSX.Element }
     | "storage.upload.loading"
+    | { K: "storage.upload.deletion.confirmation"; P: { uploadName?: string; uploadId?: string }; R: string }
+    | "storage.upload.deletion.in_progress"
     | "storage.upload.explanation"
     | { K: "upload.type.title"; P: { type: UploadType }; R: string }
+
+    // annexe
     | { K: "storage.annexe.label"; R: JSX.Element }
     | "storage.annexe.loading"
+    | { K: "storage.annexe.deletion.confirmation"; P: { annexeId?: string }; R: string }
+    | "storage.annexe.deletion.in_progress"
     | "storage.annexe.explanation"
+
+    // endpoint
     | { K: "storage.endpoints.label"; R: JSX.Element }
     | "storage.endpoints.loading"
     | "storage.endpoints.explanation"
@@ -137,6 +153,16 @@ export const DatastoreManageStorageFrTranslations: Translations<"fr">["Datastore
                 return "Pyramide de tuiles vectorielles";
             case StoredDataTypesEnum.ROK4PYRAMIDRASTER:
                 return "Pyramide de tuiles raster";
+            default:
+                return type;
+        }
+    },
+    "upload.type.title": ({ type }) => {
+        switch (type) {
+            case UploadTypesEnum.VECTOR:
+                return "Vecteur";
+            case UploadTypesEnum.RASTER:
+                return "Raster";
             default:
                 return type;
         }
@@ -170,24 +196,19 @@ export const DatastoreManageStorageFrTranslations: Translations<"fr">["Datastore
         </span>
     ),
     "storage.upload.loading": "Chargement des données déposées en cours",
+    "storage.upload.deletion.confirmation": ({ uploadName, uploadId }) => `Êtes-vous sûr de vouloir supprimer la donnée déposée ${uploadName} (${uploadId})`,
+    "storage.upload.deletion.in_progress": "Suppression de la donnée déposée en cours",
     "storage.upload.explanation":
         "Il s'agit de l'espace occupé par les fichiers de données bruts que vous avez téléversés (fichiers csv, geopackage...). Ces fichiers sont normalement supprimés dès l'intégration en base réussie de vos données. Il est possible qu'il reste des traces de fichiers dans cet espace lorsque les intégrations en base ont échoué.",
-    "upload.type.title": ({ type }) => {
-        switch (type) {
-            case UploadTypesEnum.VECTOR:
-                return "Vecteur";
-            case UploadTypesEnum.RASTER:
-                return "Raster";
-            default:
-                return type;
-        }
-    },
+
     "storage.annexe.label": (
         <span>
             Fichiers <br /> annexes
         </span>
     ),
     "storage.annexe.loading": "Chargement des annexes",
+    "storage.annexe.deletion.confirmation": ({ annexeId }) => `Êtes-vous sûr de vouloir supprimer l'annexe ${annexeId}`,
+    "storage.annexe.deletion.in_progress": "Suppression de l'annexe en cours",
     "storage.annexe.explanation":
         "Cet espace est occupé par les fichiers mis à disposition de vos utilisateurs via des adresses publiques. Il s'agit généralement des fichiers de style au format JSON qui servent à symboliser vos pyramides de tuiles vectorielles.",
     "storage.endpoints.label": (
@@ -204,22 +225,32 @@ export const DatastoreManageStorageEnTranslations: Translations<"en">["Datastore
     "storage.not_found": undefined,
     "data.size.unknown": undefined,
     "stored_data.type.title": undefined,
+    "upload.type.title": undefined,
+
     "storage.filesystem.label": undefined,
     "storage.filesystem.stored_data_list.loading": undefined,
     "storage.filesystem.explanation": undefined,
+
     "storage.postgresql.label": undefined,
     "storage.postgresql.vectordb.loading": undefined,
     "storage.postgresql.explanation": undefined,
+
     "storage.s3.label": undefined,
     "storage.s3.stored_data_list.loading": undefined,
     "storage.s3.explanation": undefined,
+
     "storage.upload.label": undefined,
     "storage.upload.loading": undefined,
+    "storage.upload.deletion.confirmation": undefined,
+    "storage.upload.deletion.in_progress": undefined,
     "storage.upload.explanation": undefined,
-    "upload.type.title": undefined,
+
     "storage.annexe.label": undefined,
     "storage.annexe.loading": undefined,
+    "storage.annexe.deletion.confirmation": undefined,
+    "storage.annexe.deletion.in_progress": undefined,
     "storage.annexe.explanation": undefined,
+
     "storage.endpoints.label": undefined,
     "storage.endpoints.loading": undefined,
     "storage.endpoints.explanation": undefined,

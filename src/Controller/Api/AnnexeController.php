@@ -81,13 +81,13 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
         }
     }
 
-    #[Route('/thumbnail_remove/{annexeId}', name: 'thumbnail_remove', methods: ['DELETE'])]
-    public function removeThumbnail(string $datastoreId, string $annexeId): JsonResponse
+    #[Route('/{annexeId}', name: 'delete', methods: ['DELETE'])]
+    public function deleteAnnexe(string $datastoreId, string $annexeId): JsonResponse
     {
         try {
             $this->entrepotApiService->annexe->remove($datastoreId, $annexeId);
 
-            return new JsonResponse();
+            return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
         } catch (EntrepotApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         } catch (\Exception $ex) {

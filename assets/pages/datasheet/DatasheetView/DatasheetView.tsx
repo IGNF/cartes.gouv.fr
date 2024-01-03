@@ -178,7 +178,6 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                             {
                                 children: tCommon("yes"),
                                 onClick: () => datasheetDeleteMutation.mutate(),
-                                doClosesModal: false,
                                 priority: "primary",
                             },
                         ]}

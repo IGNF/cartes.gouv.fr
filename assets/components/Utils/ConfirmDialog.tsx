@@ -23,7 +23,6 @@ const ConfirmDialog: FC<ConfirmDialogProps> = ({ title, onConfirm, noTitle = tCo
             {createPortal(
                 <ConfirmDialogModal.Component
                     title={title}
-                    size={"small"}
                     buttons={[
                         {
                             children: noTitle,
@@ -45,3 +44,4 @@ const ConfirmDialog: FC<ConfirmDialogProps> = ({ title, onConfirm, noTitle = tCo
 };
 
 export { ConfirmDialogModal, ConfirmDialog };
+export default ConfirmDialog;
