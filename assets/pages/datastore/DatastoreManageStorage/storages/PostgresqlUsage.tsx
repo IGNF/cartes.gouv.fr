@@ -1,18 +1,27 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
+import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { Table } from "@codegouvfr/react-dsfr/Table";
-import { useQuery } from "@tanstack/react-query";
-import { FC, memo, useMemo } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { FC, memo, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 
 import api from "../../../../api";
+import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import Progress from "../../../../components/Utils/Progress";
+import Wait from "../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
-import { Datastore, StoredData } from "../../../../types/app";
+import { Datastore, StoredData, StoredDataTypesEnum, VectorDb } from "../../../../types/app";
 import { niceBytes } from "../../../../utils";
+
+const confirmDialogModal = createModal({
+    id: "confirm-delete-pg-modal",
+    isOpenedByDefault: false,
+});
 
 type PostgresqlUsageProps = {
     datastore: Datastore;
@@ -31,9 +40,27 @@ const PostgresqlUsage: FC<PostgresqlUsageProps> = ({ datastore }) => {
         staleTime: 60000,
     });
 
-    const vectorDbList = useMemo(() => {
-        return storedDataListQuery?.data?.filter((storedData) => storedData.type === "VECTOR-DB") ?? [];
+    const vectorDbList: VectorDb[] = useMemo(() => {
+        return (storedDataListQuery?.data?.filter((storedData) => storedData.type === StoredDataTypesEnum.VECTORDB) as VectorDb[]) ?? [];
     }, [storedDataListQuery?.data]);
+
+    const queryClient = useQueryClient();
+
+    const [currentStoredDataId, setCurrentStoredDataId] = useState<string | undefined>();
+
+    const deleteStoredDataMutation = useMutation({
+        mutationFn: (storedDataId: string) => api.storedData.remove(datastore._id, storedDataId),
+        onSuccess() {
+            queryClient.setQueryData(RQKeys.datastore_stored_data_list(datastore._id), (storedDataList: StoredData[]) => {
+                return storedDataList.filter((storedData) => storedData._id !== currentStoredDataId);
+            });
+
+            setCurrentStoredDataId(undefined);
+        },
+        onError() {
+            setCurrentStoredDataId(undefined);
+        },
+    });
 
     return (
         <>
@@ -53,6 +80,10 @@ const PostgresqlUsage: FC<PostgresqlUsageProps> = ({ datastore }) => {
                 <Alert severity="error" title={storedDataListQuery.error.message} as="h2" closable onClose={storedDataListQuery.refetch} />
             )}
 
+            {deleteStoredDataMutation.error && (
+                <Alert severity="error" title={deleteStoredDataMutation.error.message} as="h2" closable onClose={storedDataListQuery.refetch} />
+            )}
+
             {vectorDbList.length > 0 && (
                 <Table
                     noCaption
@@ -67,12 +98,53 @@ const PostgresqlUsage: FC<PostgresqlUsageProps> = ({ datastore }) => {
                             key={vectorDb._id}
                             priority="tertiary no outline"
                             iconId="fr-icon-delete-line"
-                            onClick={() => console.warn("Fonctionnalité non implémentée")}
+                            onClick={() => {
+                                setCurrentStoredDataId(vectorDb._id);
+                                confirmDialogModal.open();
+                            }}
                         >
                             {tCommon("delete")}
                         </Button>,
                     ])}
                 />
+            )}
+
+            {createPortal(
+                <confirmDialogModal.Component
+                    title={t("storage.postgresql.deletion.confirmation", {
+                        storedDataName: vectorDbList?.find((storedData) => storedData._id === currentStoredDataId)?.name,
+                        storedDataId: currentStoredDataId,
+                    })}
+                    buttons={[
+                        {
+                            children: tCommon("no"),
+                            priority: "secondary",
+                        },
+                        {
+                            children: tCommon("yes"),
+                            onClick: () => {
+                                if (currentStoredDataId !== undefined) {
+                                    deleteStoredDataMutation.mutate(currentStoredDataId);
+                                }
+                            },
+                            priority: "primary",
+                        },
+                    ]}
+                >
+                    <div />
+                </confirmDialogModal.Component>,
+                document.body
+            )}
+
+            {deleteStoredDataMutation.isPending && (
+                <Wait>
+                    <div className={fr.cx("fr-container")}>
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
+                            <LoadingIcon className={fr.cx("fr-mr-2v")} />
+                            <h6 className={fr.cx("fr-m-0")}>{t("storage.postgresql.deletion.in_progress")}</h6>
+                        </div>
+                    </div>
+                </Wait>
             )}
         </>
     );

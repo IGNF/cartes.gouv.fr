@@ -99,4 +99,18 @@ class StoredDataController extends AbstractController implements ApiControllerIn
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
         }
     }
+
+    #[Route('/{storedDataId}', name: 'delete', methods: ['DELETE'])]
+    public function delete(string $datastoreId, string $storedDataId): JsonResponse
+    {
+        try {
+            $this->entrepotApiService->storedData->remove($datastoreId, $storedDataId);
+
+            return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
+        } catch (EntrepotApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        } catch (\Exception $ex) {
+            throw new CartesApiException($ex->getMessage(), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 }

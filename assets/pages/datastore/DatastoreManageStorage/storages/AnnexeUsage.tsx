@@ -1,12 +1,13 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
+import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import Table from "@codegouvfr/react-dsfr/Table";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 
 import api from "../../../../api";
-import ConfirmDialog, { ConfirmDialogModal } from "../../../../components/Utils/ConfirmDialog";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import Progress from "../../../../components/Utils/Progress";
@@ -16,6 +17,11 @@ import RQKeys from "../../../../modules/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import { Annexe, Datastore } from "../../../../types/app";
 import { niceBytes } from "../../../../utils";
+
+const confirmDialogModal = createModal({
+    id: "confirm-delete-annexe-modal",
+    isOpenedByDefault: false,
+});
 
 type AnnexeUsageProps = {
     datastore: Datastore;
@@ -90,7 +96,7 @@ const AnnexeUsage: FC<AnnexeUsageProps> = ({ datastore }) => {
                             iconId="fr-icon-delete-line"
                             onClick={() => {
                                 setCurrentAnnexeId(annexe._id);
-                                ConfirmDialogModal.open();
+                                confirmDialogModal.open();
                             }}
                         >
                             {tCommon("delete")}
@@ -99,14 +105,29 @@ const AnnexeUsage: FC<AnnexeUsageProps> = ({ datastore }) => {
                 />
             )}
 
-            <ConfirmDialog
-                onConfirm={() => {
-                    if (currentAnnexeId !== undefined) {
-                        deleteAnnexeMutation.mutate(currentAnnexeId);
-                    }
-                }}
-                title={t("storage.annexe.deletion.confirmation", { annexeId: currentAnnexeId })}
-            />
+            {createPortal(
+                <confirmDialogModal.Component
+                    title={t("storage.annexe.deletion.confirmation", { annexeId: currentAnnexeId })}
+                    buttons={[
+                        {
+                            children: tCommon("no"),
+                            priority: "secondary",
+                        },
+                        {
+                            children: tCommon("yes"),
+                            onClick: () => {
+                                if (currentAnnexeId !== undefined) {
+                                    deleteAnnexeMutation.mutate(currentAnnexeId);
+                                }
+                            },
+                            priority: "primary",
+                        },
+                    ]}
+                >
+                    <div />
+                </confirmDialogModal.Component>,
+                document.body
+            )}
 
             {deleteAnnexeMutation.isPending && (
                 <Wait>

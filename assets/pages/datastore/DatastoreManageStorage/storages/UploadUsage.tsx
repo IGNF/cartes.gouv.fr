@@ -1,19 +1,27 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
+import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import Table from "@codegouvfr/react-dsfr/Table";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 
 import api from "../../../../api";
+import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import Progress from "../../../../components/Utils/Progress";
+import Wait from "../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/RQKeys";
+import { CartesApiException } from "../../../../modules/jsonFetch";
 import { Datastore, Upload } from "../../../../types/app";
 import { niceBytes } from "../../../../utils";
-import { CartesApiException } from "../../../../modules/jsonFetch";
-import ConfirmDialog, { ConfirmDialogModal } from "../../../../components/Utils/ConfirmDialog";
+
+const confirmDialogModal = createModal({
+    id: "confirm-delete-upload-modal",
+    isOpenedByDefault: false,
+});
 
 type UploadUsageProps = {
     datastore: Datastore;
@@ -88,7 +96,7 @@ const UploadUsage: FC<UploadUsageProps> = ({ datastore }) => {
                             iconId="fr-icon-delete-line"
                             onClick={() => {
                                 setCurrentUploadId(upload._id);
-                                ConfirmDialogModal.open();
+                                confirmDialogModal.open();
                             }}
                         >
                             {tCommon("delete")}
@@ -97,17 +105,43 @@ const UploadUsage: FC<UploadUsageProps> = ({ datastore }) => {
                 />
             )}
 
-            <ConfirmDialog
-                onConfirm={() => {
-                    if (currentUploadId !== undefined) {
-                        deleteUploadMutation.mutate(currentUploadId);
-                    }
-                }}
-                title={t("storage.upload.deletion.confirmation", {
-                    uploadName: uploadListQuery.data?.find((upload) => upload._id === currentUploadId)?.name,
-                    uploadId: currentUploadId,
-                })}
-            />
+            {createPortal(
+                <confirmDialogModal.Component
+                    title={t("storage.upload.deletion.confirmation", {
+                        uploadName: uploadListQuery.data?.find((upload) => upload._id === currentUploadId)?.name,
+                        uploadId: currentUploadId,
+                    })}
+                    buttons={[
+                        {
+                            children: tCommon("no"),
+                            priority: "secondary",
+                        },
+                        {
+                            children: tCommon("yes"),
+                            onClick: () => {
+                                if (currentUploadId !== undefined) {
+                                    deleteUploadMutation.mutate(currentUploadId);
+                                }
+                            },
+                            priority: "primary",
+                        },
+                    ]}
+                >
+                    <div />
+                </confirmDialogModal.Component>,
+                document.body
+            )}
+
+            {deleteUploadMutation.isPending && (
+                <Wait>
+                    <div className={fr.cx("fr-container")}>
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
+                            <LoadingIcon className={fr.cx("fr-mr-2v")} />
+                            <h6 className={fr.cx("fr-m-0")}>{t("storage.upload.deletion.in_progress")}</h6>
+                        </div>
+                    </div>
+                </Wait>
+            )}
         </>
     );
 };

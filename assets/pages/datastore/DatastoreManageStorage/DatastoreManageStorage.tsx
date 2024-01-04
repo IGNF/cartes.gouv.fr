@@ -104,16 +104,22 @@ export const { i18n } = declareComponentKeys<
     // FILESYSTEM
     | { K: "storage.filesystem.label"; R: JSX.Element }
     | "storage.filesystem.stored_data_list.loading"
+    | { K: "storage.filesystem.deletion.confirmation"; P: { storedDataName?: string; storedDataId?: string }; R: string }
+    | "storage.filesystem.deletion.in_progress"
     | "storage.filesystem.explanation"
 
     // POSTGRES
     | { K: "storage.postgresql.label"; R: JSX.Element }
     | "storage.postgresql.vectordb.loading"
+    | { K: "storage.postgresql.deletion.confirmation"; P: { storedDataName?: string; storedDataId?: string }; R: string }
+    | "storage.postgresql.deletion.in_progress"
     | "storage.postgresql.explanation"
 
     // S3
     | { K: "storage.s3.label"; R: JSX.Element }
     | "storage.s3.stored_data_list.loading"
+    | { K: "storage.s3.deletion.confirmation"; P: { storedDataName?: string; storedDataId?: string }; R: string }
+    | "storage.s3.deletion.in_progress"
     | "storage.s3.explanation"
 
     // upload
@@ -173,6 +179,9 @@ export const DatastoreManageStorageFrTranslations: Translations<"fr">["Datastore
         </span>
     ),
     "storage.filesystem.stored_data_list.loading": "Chargement des données stockées sous forme de fichiers.",
+    "storage.filesystem.deletion.confirmation": ({ storedDataName, storedDataId }) =>
+        `Êtes-vous sûr de vouloir supprimer la donnée stockée ${storedDataName} (${storedDataId}) ?`,
+    "storage.filesystem.deletion.in_progress": "Suppression de la donnée stockée en cours",
     "storage.filesystem.explanation": "Cet espace est utilisé pour le stockage des pyramides de tuiles vectorielles.",
     "storage.postgresql.label": (
         <span>
@@ -180,6 +189,9 @@ export const DatastoreManageStorageFrTranslations: Translations<"fr">["Datastore
         </span>
     ),
     "storage.postgresql.vectordb.loading": "Chargement des données vectorielles en BD PostgreSQL en cours",
+    "storage.postgresql.deletion.confirmation": ({ storedDataName, storedDataId }) =>
+        `Êtes-vous sûr de vouloir supprimer la donnée stockée ${storedDataName} (${storedDataId}) ?`,
+    "storage.postgresql.deletion.in_progress": "Suppression de la donnée stockée en cours",
     "storage.postgresql.explanation":
         "Il s'agit de l'espace occupé par des données sur les serveurs PostgreSQL de votre espace de travail. Il s'agit de données intermédiaires qui ne sont pas directement visibles de vos utilisateurs.",
     "storage.s3.label": (
@@ -188,6 +200,9 @@ export const DatastoreManageStorageFrTranslations: Translations<"fr">["Datastore
         </span>
     ),
     "storage.s3.stored_data_list.loading": "Chargement des données stockées dans le stockage de masse en cours",
+    "storage.s3.deletion.confirmation": ({ storedDataName, storedDataId }) =>
+        `Êtes-vous sûr de vouloir supprimer la donnée stockée ${storedDataName} (${storedDataId}) ?`,
+    "storage.s3.deletion.in_progress": "Suppression de la donnée stockée en cours",
     "storage.s3.explanation":
         "Cet espace est utilisé pour le stockage des pyramides de tuiles vectorielles. Il est plus performant que le stockage sous forme de fichiers.",
     "storage.upload.label": (
@@ -196,7 +211,7 @@ export const DatastoreManageStorageFrTranslations: Translations<"fr">["Datastore
         </span>
     ),
     "storage.upload.loading": "Chargement des données déposées en cours",
-    "storage.upload.deletion.confirmation": ({ uploadName, uploadId }) => `Êtes-vous sûr de vouloir supprimer la donnée déposée ${uploadName} (${uploadId})`,
+    "storage.upload.deletion.confirmation": ({ uploadName, uploadId }) => `Êtes-vous sûr de vouloir supprimer la donnée déposée ${uploadName} (${uploadId}) ?`,
     "storage.upload.deletion.in_progress": "Suppression de la donnée déposée en cours",
     "storage.upload.explanation":
         "Il s'agit de l'espace occupé par les fichiers de données bruts que vous avez téléversés (fichiers csv, geopackage...). Ces fichiers sont normalement supprimés dès l'intégration en base réussie de vos données. Il est possible qu'il reste des traces de fichiers dans cet espace lorsque les intégrations en base ont échoué.",
@@ -207,7 +222,7 @@ export const DatastoreManageStorageFrTranslations: Translations<"fr">["Datastore
         </span>
     ),
     "storage.annexe.loading": "Chargement des annexes",
-    "storage.annexe.deletion.confirmation": ({ annexeId }) => `Êtes-vous sûr de vouloir supprimer l'annexe ${annexeId}`,
+    "storage.annexe.deletion.confirmation": ({ annexeId }) => `Êtes-vous sûr de vouloir supprimer l'annexe ${annexeId} ?`,
     "storage.annexe.deletion.in_progress": "Suppression de l'annexe en cours",
     "storage.annexe.explanation":
         "Cet espace est occupé par les fichiers mis à disposition de vos utilisateurs via des adresses publiques. Il s'agit généralement des fichiers de style au format JSON qui servent à symboliser vos pyramides de tuiles vectorielles.",
@@ -229,14 +244,20 @@ export const DatastoreManageStorageEnTranslations: Translations<"en">["Datastore
 
     "storage.filesystem.label": undefined,
     "storage.filesystem.stored_data_list.loading": undefined,
+    "storage.filesystem.deletion.confirmation": undefined,
+    "storage.filesystem.deletion.in_progress": undefined,
     "storage.filesystem.explanation": undefined,
 
     "storage.postgresql.label": undefined,
     "storage.postgresql.vectordb.loading": undefined,
+    "storage.postgresql.deletion.confirmation": undefined,
+    "storage.postgresql.deletion.in_progress": undefined,
     "storage.postgresql.explanation": undefined,
 
     "storage.s3.label": undefined,
     "storage.s3.stored_data_list.loading": undefined,
+    "storage.s3.deletion.confirmation": undefined,
+    "storage.s3.deletion.in_progress": undefined,
     "storage.s3.explanation": undefined,
 
     "storage.upload.label": undefined,

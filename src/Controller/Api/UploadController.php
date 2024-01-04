@@ -294,7 +294,7 @@ class UploadController extends AbstractController implements ApiControllerInterf
     public function delete(string $datastoreId, string $uploadId): JsonResponse
     {
         try {
-            $this->json($this->entrepotApiService->upload->remove($datastoreId, $uploadId));
+            $this->entrepotApiService->upload->remove($datastoreId, $uploadId);
 
             return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
         } catch (EntrepotApiException $ex) {

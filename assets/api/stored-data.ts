@@ -28,10 +28,16 @@ const getReportData = (datastoreId: string, storedDataId: string, otherOptions: 
     });
 };
 
+const remove = (datastoreId: string, storedDataId: string) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_stored_data_delete", { datastoreId, storedDataId });
+    return jsonFetch<null>(url, { method: "DELETE" });
+};
+
 const storedData = {
     getList,
     get,
     getReportData,
+    remove,
 };
 
 export default storedData;
