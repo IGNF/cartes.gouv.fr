@@ -90,6 +90,9 @@ const AnnexeUsage: FC<AnnexeUsageProps> = ({ datastore }) => {
                         annexe.paths[0] ?? "",
                         annexe.mime_type,
                         annexe.size ? niceBytes(annexe.size?.toString()) : t("data.size.unknown"),
+                        <ul key={`annexe-${annexe._id}-labels`}>
+                            {annexe.labels?.sort().map((label) => <li key={`annexe-${annexe._id}-label-${label}`}> {label} </li>)}
+                        </ul>,
                         <Button
                             key={annexe._id}
                             priority="tertiary no outline"

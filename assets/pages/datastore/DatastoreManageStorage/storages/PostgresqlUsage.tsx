@@ -3,6 +3,7 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { Table } from "@codegouvfr/react-dsfr/Table";
+import Tag from "@codegouvfr/react-dsfr/Tag";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, memo, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
@@ -15,6 +16,7 @@ import Wait from "../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
+import { routes } from "../../../../router/router";
 import { Datastore, StoredData, StoredDataTypesEnum, VectorDb } from "../../../../types/app";
 import { niceBytes } from "../../../../utils";
 
@@ -94,6 +96,14 @@ const PostgresqlUsage: FC<PostgresqlUsageProps> = ({ datastore }) => {
                         vectorDb.name,
                         t("stored_data.type.title", { type: vectorDb.type }),
                         vectorDb.size ? niceBytes(vectorDb.size?.toString()) : t("data.size.unknown"),
+                        vectorDb?.tags?.datasheet_name && (
+                            <Tag
+                                key={`tag-pg-${vectorDb._id}`}
+                                linkProps={routes.datastore_datasheet_view({ datastoreId: datastore._id, datasheetName: vectorDb.tags.datasheet_name }).link}
+                            >
+                                {vectorDb.tags.datasheet_name}
+                            </Tag>
+                        ),
                         <Button
                             key={vectorDb._id}
                             priority="tertiary no outline"
