@@ -140,6 +140,8 @@ export const { i18n } = declareComponentKeys<
     // endpoint
     | { K: "storage.endpoints.label"; R: JSX.Element }
     | "storage.endpoints.loading"
+    | { K: "storage.endpoints.deletion.confirmation"; P: { offeringName?: string; offeringId?: string }; R: string }
+    | "storage.endpoints.deletion.in_progress"
     | "storage.endpoints.explanation"
 >()({
     DatastoreManageStorage,
@@ -232,6 +234,8 @@ export const DatastoreManageStorageFrTranslations: Translations<"fr">["Datastore
         </span>
     ),
     "storage.endpoints.loading": "Chargement des flux publiés en cours",
+    "storage.endpoints.deletion.confirmation": ({ offeringName, offeringId }) => `Êtes-vous sûr de vouloir dépublier le flux ${offeringName} (${offeringId}) ?`,
+    "storage.endpoints.deletion.in_progress": "Suppression du flux en cours",
     "storage.endpoints.explanation": "Il s'agit du nombre de couches publiées par point de publication dans votre espace de travail.",
 };
 export const DatastoreManageStorageEnTranslations: Translations<"en">["DatastoreManageStorage"] = {
@@ -274,5 +278,7 @@ export const DatastoreManageStorageEnTranslations: Translations<"en">["Datastore
 
     "storage.endpoints.label": undefined,
     "storage.endpoints.loading": undefined,
+    "storage.endpoints.deletion.confirmation": undefined,
+    "storage.endpoints.deletion.in_progress": undefined,
     "storage.endpoints.explanation": undefined,
 };

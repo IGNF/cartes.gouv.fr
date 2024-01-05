@@ -15,6 +15,7 @@ import {
     DatastoreEndpointResponseDto,
     EndpointDetailResponseDtoTypeEnum,
     OfferingDetailResponseDto,
+    OfferingDetailResponseDtoTypeEnum,
     ProcessingExecutionDetailResponseDto,
     ProcessingExecutionOutputStoredDataDto,
     StoredDataDetailsRelationDto,
@@ -129,6 +130,9 @@ export type Configuration = ConfigurationDetailResponseDto & { styles: CartesSty
 export const ConfigurationStatuses = ConfigurationDetailResponseDtoStatusEnum;
 
 export type Offering = OfferingDetailResponseDto;
+export const OfferingTypesEnum = OfferingDetailResponseDtoTypeEnum;
+export type OfferingType = OfferingDetailResponseDtoTypeEnum;
+
 export type Service = Offering & {
     configuration: Configuration;
 };

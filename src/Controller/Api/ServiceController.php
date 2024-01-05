@@ -87,6 +87,8 @@ class ServiceController extends AbstractController implements ApiControllerInter
             }
             $this->entrepotApiService->configuration->remove($datastoreId, $configurationId);
 
+            // TODO : supprimer les fichiers de styles en annexe qui sont référencés dans les tags de la configuration
+
             return new JsonResponse(null, Response::HTTP_NO_CONTENT);
         } catch (EntrepotApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
@@ -125,6 +127,36 @@ class ServiceController extends AbstractController implements ApiControllerInter
             foreach ($staticFiles as $staticFile) {
                 $this->entrepotApiService->static->delete($datastoreId, $staticFile['_id']);
             }
+
+            return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+        } catch (EntrepotApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
+    #[Route('/{offeringId}', name: 'tms_unpublish', methods: ['DELETE'])]
+    public function tmsUnpublish(string $datastoreId, string $offeringId): Response
+    {
+        try {
+            $offering = $this->entrepotApiService->configuration->getOffering($datastoreId, $offeringId);
+            $offering['configuration'] = $this->entrepotApiService->configuration->get($datastoreId, $offering['configuration']['_id']);
+
+            // suppression de l'offering
+            $this->entrepotApiService->configuration->removeOffering($datastoreId, $offering['_id']);
+            $configurationId = $offering['configuration']['_id'];
+
+            // suppression de la configuration
+            // la suppression de l'offering nécessite quelques instants, et tant que la suppression de l'offering n'est pas faite, on ne peut pas demander la suppression de la configuration
+            while (1) {
+                sleep(3);
+                $configuration = $this->entrepotApiService->configuration->get($datastoreId, $configurationId);
+                if (ConfigurationStatuses::UNPUBLISHED === $configuration['status']) {
+                    break;
+                }
+            }
+            $this->entrepotApiService->configuration->remove($datastoreId, $configurationId);
+
+            // TODO : supprimer les fichiers de styles en annexe qui sont référencés dans les tags de la configuration
 
             return new JsonResponse(null, Response::HTTP_NO_CONTENT);
         } catch (EntrepotApiException $ex) {

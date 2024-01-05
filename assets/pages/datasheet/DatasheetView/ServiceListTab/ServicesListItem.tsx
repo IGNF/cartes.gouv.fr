@@ -13,7 +13,7 @@ import Wait from "../../../../components/Utils/Wait";
 import functions from "../../../../functions";
 import RQKeys from "../../../../modules/RQKeys";
 import { routes } from "../../../../router/router";
-import type { Service } from "../../../../types/app";
+import { OfferingTypesEnum, type Service } from "../../../../types/app";
 import { offeringTypeDisplayName } from "../../../../utils";
 
 type ServicesListItemProps = {
@@ -32,10 +32,13 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
     const unpublishServiceMutation = useMutation({
         mutationFn: (service: Service) => {
             switch (service.type) {
-                case "WFS":
+                case OfferingTypesEnum.WFS:
                     return api.service.unpublishWfs(datastoreId, service._id);
-                case "WMS-VECTOR":
+                case OfferingTypesEnum.WMSVECTOR:
                     return api.service.unpublishWmsVector(datastoreId, service._id);
+                case OfferingTypesEnum.WMTSTMS:
+                    return api.service.unpublishTms(datastoreId, service._id);
+
                 default:
                     console.warn(`Dépublication de service ${service.type} n'a pas encore été implémentée`);
                     return Promise.reject(`Dépublication de service ${service.type} n'a pas encore été implémentée`);
