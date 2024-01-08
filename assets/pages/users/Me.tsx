@@ -1,10 +1,13 @@
+import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
+
 import AppLayout from "../../components/Layout/AppLayout";
-import BtnBackToHome from "../../components/Utils/BtnBackToHome";
 import functions from "../../functions";
+import SymfonyRouting from "../../modules/Routing";
+import { routes } from "../../router/router";
 import { useAuthStore } from "../../stores/AuthStore";
 
 const Me = () => {
-    const { user } = useAuthStore();
+    const user = useAuthStore((state) => state.user);
 
     return (
         <AppLayout documentTitle="Mon compte">
@@ -30,7 +33,27 @@ const Me = () => {
                 </>
             )}
 
-            <BtnBackToHome />
+            <ButtonsGroup
+                buttons={[
+                    {
+                        linkProps: routes.home().link,
+                        children: "Retour à l'accueil",
+                        priority: "primary",
+                    },
+                    {
+                        children: "Modifier mes informations",
+                        linkProps: {
+                            href: SymfonyRouting.generate("cartesgouvfr_security_userinfo_edit"),
+                            target: "_blank",
+                            rel: "noreferrer",
+                            title: "Accéder au Géoportail - ouvre une nouvelle fenêtre",
+                        },
+                        priority: "secondary",
+                    },
+                ]}
+                alignment="left"
+                inlineLayoutWhen="always"
+            />
         </AppLayout>
     );
 };

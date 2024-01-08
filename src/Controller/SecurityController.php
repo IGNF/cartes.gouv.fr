@@ -6,6 +6,7 @@ use App\Exception\AppException;
 use App\Security\User;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use KnpU\OAuth2ClientBundle\Client\Provider\KeycloakClient;
+use Stevenmaguire\OAuth2\Client\Provider\Keycloak;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -63,6 +64,22 @@ class SecurityController extends AbstractController
     public function signup(): RedirectResponse
     {
         throw new AppException('not yet implemented');
+    }
+
+    #[Route('/userinfo/edit', name: 'userinfo_edit', methods: ['GET'], options: ['expose' => true])]
+    public function userInfoEdit(ClientRegistry $clientRegistry, Request $request): RedirectResponse
+    {
+        /** @var KeycloakClient */
+        $client = $clientRegistry->getClient('keycloak');
+
+        /** @var Keycloak */
+        $keycloak = $client->getOAuth2Provider();
+
+        $iamRealm = $this->getParameter('iam_realm');
+
+        $accountUrl = "{$keycloak->authServerUrl}/realms/{$iamRealm}/account";
+
+        return $this->redirect($accountUrl);
     }
 
     private function testLogin(

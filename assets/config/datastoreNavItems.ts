@@ -3,11 +3,14 @@ import { declareComponentKeys } from "i18nifty";
 
 import { Translations, getTranslation } from "../i18n/i18n";
 import { routes } from "../router/router";
+import { useAuthStore } from "../stores/AuthStore";
 import { Datastore } from "../types/app";
 
 const { t } = getTranslation("datastoreNavItems");
 
 export const datastoreNavItems = (datastoreList: Datastore[] = [], currentDatastore?: Datastore): MainNavigationProps.Item[] => {
+    const user = useAuthStore.getState().user;
+
     const navItems: MainNavigationProps.Item[] = [
         {
             text: t("dashboard"),
@@ -78,11 +81,20 @@ export const datastoreNavItems = (datastoreList: Datastore[] = [], currentDatast
         navItems.push(datastoreLinks);
     }
 
+    if (user !== undefined) {
+        navItems.push({
+            text: t("my_account"),
+            linkProps: routes.my_account().link,
+        });
+    }
+
     return navItems;
 };
 
 // traductions
-export const { i18n } = declareComponentKeys<"dashboard" | "data" | "members" | "manage_storage" | "choose" | "create_request">()("datastoreNavItems");
+export const { i18n } = declareComponentKeys<"dashboard" | "data" | "members" | "manage_storage" | "choose" | "create_request" | "my_account">()(
+    "datastoreNavItems"
+);
 
 export const datastoreNavItemsFrTranslations: Translations<"fr">["datastoreNavItems"] = {
     dashboard: "Tableau de bord",
@@ -91,6 +103,7 @@ export const datastoreNavItemsFrTranslations: Translations<"fr">["datastoreNavIt
     manage_storage: "Gérer l'espace de travail",
     choose: "Choisir un espace de travail",
     create_request: "Demande de création d'un espace de travail",
+    my_account: "Mon compte",
 };
 
 export const datastoreNavItemsEnTranslations: Translations<"en">["datastoreNavItems"] = {
@@ -100,4 +113,5 @@ export const datastoreNavItemsEnTranslations: Translations<"en">["datastoreNavIt
     manage_storage: undefined,
     choose: undefined,
     create_request: undefined,
+    my_account: undefined,
 };

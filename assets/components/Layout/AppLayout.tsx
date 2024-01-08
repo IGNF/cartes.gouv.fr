@@ -1,4 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import { MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation";
 import { Notice, addNoticeTranslations } from "@codegouvfr/react-dsfr/Notice";
 import { SkipLinks } from "@codegouvfr/react-dsfr/SkipLinks";
 import { FC, PropsWithChildren, memo, useMemo } from "react";
@@ -6,11 +7,11 @@ import { FC, PropsWithChildren, memo, useMemo } from "react";
 import { ConsentBannerAndConsentManagement } from "../../config/consentManagement";
 import { defaultNavItems } from "../../config/navItems";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
+import { useTranslation } from "../../i18n/i18n";
 import Translator from "../../modules/Translator";
 import SessionExpiredAlert from "../Utils/SessionExpiredAlert";
 import AppFooter from "./AppFooter";
-import AppHeader, { NavigationProps } from "./AppHeader";
-import { useTranslation } from "../../i18n/i18n";
+import AppHeader from "./AppHeader";
 
 const HiddenElements: FC = () => {
     return (
@@ -35,7 +36,7 @@ const HiddenElementsMemoized = memo(HiddenElements);
 const infoBannerMsg = document.getElementById("info_banner")?.dataset?.msg ?? undefined;
 
 type AppLayoutProps = {
-    navItems?: NavigationProps;
+    navItems?: MainNavigationProps.Item[];
     documentTitle?: string;
 };
 const AppLayout: FC<PropsWithChildren<AppLayoutProps>> = ({ children, navItems, documentTitle }) => {

@@ -10,10 +10,8 @@ import { useAuthStore } from "../../stores/AuthStore";
 
 import "../../sass/components/header.scss";
 
-export type NavigationProps = MainNavigationProps.Item[] | ReactNode;
-
 type AppHeaderProps = {
-    navItems?: NavigationProps;
+    navItems?: MainNavigationProps.Item[];
 };
 const AppHeader: FC<AppHeaderProps> = ({ navItems = [] }) => {
     const user = useAuthStore((state) => state.user);
