@@ -1,9 +1,8 @@
-import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
+import Button from "@codegouvfr/react-dsfr/Button";
 
 import AppLayout from "../../components/Layout/AppLayout";
 import functions from "../../functions";
 import SymfonyRouting from "../../modules/Routing";
-import { routes } from "../../router/router";
 import { useAuthStore } from "../../stores/AuthStore";
 
 const Me = () => {
@@ -33,27 +32,16 @@ const Me = () => {
                 </>
             )}
 
-            <ButtonsGroup
-                buttons={[
-                    {
-                        linkProps: routes.home().link,
-                        children: "Retour à l'accueil",
-                        priority: "primary",
-                    },
-                    {
-                        children: "Modifier mes informations",
-                        linkProps: {
-                            href: SymfonyRouting.generate("cartesgouvfr_security_userinfo_edit"),
-                            target: "_blank",
-                            rel: "noreferrer",
-                            title: "Accéder au Géoportail - ouvre une nouvelle fenêtre",
-                        },
-                        priority: "secondary",
-                    },
-                ]}
-                alignment="left"
-                inlineLayoutWhen="always"
-            />
+            <Button
+                linkProps={{
+                    href: SymfonyRouting.generate("cartesgouvfr_security_userinfo_edit"),
+                    target: "_blank",
+                    rel: "noreferrer",
+                    title: "Accéder au Géoportail - ouvre une nouvelle fenêtre",
+                }}
+            >
+                {"Modifier mes informations"}
+            </Button>
         </AppLayout>
     );
 };
