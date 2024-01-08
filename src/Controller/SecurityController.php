@@ -67,7 +67,7 @@ class SecurityController extends AbstractController
     }
 
     #[Route('/userinfo/edit', name: 'userinfo_edit', methods: ['GET'], options: ['expose' => true])]
-    public function userInfoEdit(ClientRegistry $clientRegistry, Request $request): RedirectResponse
+    public function userInfoEdit(ClientRegistry $clientRegistry): RedirectResponse
     {
         /** @var KeycloakClient */
         $client = $clientRegistry->getClient('keycloak');
