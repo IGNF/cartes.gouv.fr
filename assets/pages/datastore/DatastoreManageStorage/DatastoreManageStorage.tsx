@@ -136,6 +136,7 @@ export const { i18n } = declareComponentKeys<
     | { K: "storage.annexe.deletion.confirmation"; P: { annexeId?: string }; R: string }
     | "storage.annexe.deletion.in_progress"
     | "storage.annexe.explanation"
+    | { K: "storage.annexe.labels.type"; P: { type: string }; R: string }
 
     // endpoint
     | { K: "storage.endpoints.label"; R: JSX.Element }
@@ -228,6 +229,16 @@ export const DatastoreManageStorageFrTranslations: Translations<"fr">["Datastore
     "storage.annexe.deletion.in_progress": "Suppression de l'annexe en cours",
     "storage.annexe.explanation":
         "Cet espace est occupé par les fichiers mis à disposition de vos utilisateurs via des adresses publiques. Il s'agit généralement des fichiers de style au format JSON qui servent à symboliser vos pyramides de tuiles vectorielles.",
+    "storage.annexe.labels.type": ({ type }) => {
+        switch (type) {
+            case "style":
+                return "style";
+            case "thumbnail":
+                return "vignette";
+            default:
+                return type;
+        }
+    },
     "storage.endpoints.label": (
         <span>
             Points de <br /> publication
@@ -275,6 +286,7 @@ export const DatastoreManageStorageEnTranslations: Translations<"en">["Datastore
     "storage.annexe.deletion.confirmation": undefined,
     "storage.annexe.deletion.in_progress": undefined,
     "storage.annexe.explanation": undefined,
+    "storage.annexe.labels.type": undefined,
 
     "storage.endpoints.label": undefined,
     "storage.endpoints.loading": undefined,

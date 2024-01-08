@@ -3,8 +3,9 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import Table from "@codegouvfr/react-dsfr/Table";
+import Tag from "@codegouvfr/react-dsfr/Tag";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FC, useMemo, useState } from "react";
+import { FC, ReactNode, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
 import api from "../../../../api";
@@ -15,8 +16,14 @@ import Wait from "../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
+import { routes } from "../../../../router/router";
 import { Annexe, Datastore } from "../../../../types/app";
 import { niceBytes } from "../../../../utils";
+
+const TAGS_PREFIX = {
+    DATASHEET_NAME: "datasheet_name=",
+    TYPE: "type=",
+};
 
 const confirmDialogModal = createModal({
     id: "confirm-delete-annexe-modal",
@@ -90,8 +97,23 @@ const AnnexeUsage: FC<AnnexeUsageProps> = ({ datastore }) => {
                         annexe.paths[0] ?? "",
                         annexe.mime_type,
                         annexe.size ? niceBytes(annexe.size?.toString()) : t("data.size.unknown"),
-                        <ul key={`annexe-${annexe._id}-labels`}>
-                            {annexe.labels?.sort().map((label) => <li key={`annexe-${annexe._id}-label-${label}`}>{label}</li>)}
+                        <ul key={`annexe-${annexe._id}-labels-list`} className={fr.cx("fr-tags-group")}>
+                            {annexe.labels?.sort().map((label) => {
+                                const key = `annexe-${annexe._id}-label-${label}`;
+                                let tag: ReactNode = null;
+
+                                const datasheetName = label.startsWith(TAGS_PREFIX.DATASHEET_NAME) ? label.replace(TAGS_PREFIX.DATASHEET_NAME, "") : undefined;
+                                if (datasheetName !== undefined) {
+                                    tag = <Tag linkProps={routes.datastore_datasheet_view({ datastoreId: datastore._id, datasheetName })}>{datasheetName}</Tag>;
+                                }
+
+                                const type = label.startsWith(TAGS_PREFIX.TYPE) ? label.replace(TAGS_PREFIX.TYPE, "") : undefined;
+                                if (type !== undefined) {
+                                    tag = <Tag>{t("storage.annexe.labels.type", { type })}</Tag>;
+                                }
+
+                                return <li key={key}>{tag ? tag : <Tag>{label}</Tag>}</li>;
+                            })}
                         </ul>,
                         <Button
                             key={annexe._id}
