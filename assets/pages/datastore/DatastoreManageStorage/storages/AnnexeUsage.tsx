@@ -104,7 +104,11 @@ const AnnexeUsage: FC<AnnexeUsageProps> = ({ datastore }) => {
 
                                 const datasheetName = label.startsWith(TAGS_PREFIX.DATASHEET_NAME) ? label.replace(TAGS_PREFIX.DATASHEET_NAME, "") : undefined;
                                 if (datasheetName !== undefined) {
-                                    tag = <Tag linkProps={routes.datastore_datasheet_view({ datastoreId: datastore._id, datasheetName })}>{datasheetName}</Tag>;
+                                    tag = (
+                                        <Tag linkProps={routes.datastore_datasheet_view({ datastoreId: datastore._id, datasheetName }).link}>
+                                            {datasheetName}
+                                        </Tag>
+                                    );
                                 }
 
                                 const type = label.startsWith(TAGS_PREFIX.TYPE) ? label.replace(TAGS_PREFIX.TYPE, "") : undefined;
