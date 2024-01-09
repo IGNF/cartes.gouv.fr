@@ -43,7 +43,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                     </div>
 
                     <div className={fr.cx("fr-grid-row")}>
-                        <Button linkProps={routes.datastore_datasheet_new({ datastoreId: datastoreId }).link} iconId={"fr-icon-add-line"}>
+                        <Button linkProps={routes.datastore_datasheet_upload({ datastoreId: datastoreId }).link} iconId={"fr-icon-add-line"}>
                             Créer une fiche de données
                         </Button>
                     </div>

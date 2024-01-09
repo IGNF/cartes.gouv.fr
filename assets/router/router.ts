@@ -69,9 +69,10 @@ const routeDefs = {
         },
         (p) => `${appRoot}/datastores/${p.datastoreId}/datasheet`
     ),
-    datastore_datasheet_new: defineRoute(
+    datastore_datasheet_upload: defineRoute(
         {
             datastoreId: param.path.string,
+            datasheetName: param.query.optional.string,
         },
         (p) => `${appRoot}/datastores/${p.datastoreId}/datasheet/new`
     ),

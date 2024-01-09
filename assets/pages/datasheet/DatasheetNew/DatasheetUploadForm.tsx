@@ -15,6 +15,7 @@ import * as yup from "yup";
 
 import api from "../../../api";
 import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
+import LoadingIcon from "../../../components/Utils/LoadingIcon";
 import Progress from "../../../components/Utils/Progress";
 import Wait from "../../../components/Utils/Wait";
 import defaultProjections from "../../../data/default_projections.json";
@@ -22,20 +23,19 @@ import functions from "../../../functions";
 import FileUploader from "../../../modules/FileUploader";
 import RQKeys from "../../../modules/RQKeys";
 import Translator from "../../../modules/Translator";
-import { routes } from "../../../router/router";
-import DatasheetNewIntegrationDialog from "./DatasheetNewIntegration/DatasheetNewIntegrationDialog";
-
-import "./../../../sass/components/spinner.scss";
+import { routes, useRoute } from "../../../router/router";
+import DatasheetUploadIntegrationDialog from "./DatasheetUploadIntegration/DatasheetUploadIntegrationDialog";
 
 const maxFileSize = 2000000000; // 2 GB
 const fileExtensions = ["gpkg", "zip"];
 
 const fileUploader = new FileUploader();
 
-type DatasheetNewFormProps = {
+type DatasheetUploadFormProps = {
     datastoreId: string;
 };
-const DatasheetNewForm: FC<DatasheetNewFormProps> = ({ datastoreId }) => {
+const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
+    const route = useRoute();
     let uuid = "";
 
     const schema = yup
@@ -56,6 +56,11 @@ const DatasheetNewForm: FC<DatasheetNewFormProps> = ({ datastoreId }) => {
                 .test({
                     name: "is-unique",
                     test(dataName, ctx) {
+                        // si on téléverse un nouveau fichier sur une fiche de données existante, ne vérifie pas l'unicité
+                        if (route.params?.["datasheetName"] !== undefined) {
+                            return true;
+                        }
+
                         const existingDataList = dataListQuery?.data?.map((data) => data?.name);
                         if (existingDataList?.includes(dataName)) {
                             return ctx.createError({ message: `Une fiche de donnée existe déjà avec le nom "${dataName}"` });
@@ -110,7 +115,6 @@ const DatasheetNewForm: FC<DatasheetNewFormProps> = ({ datastoreId }) => {
 
     useEffect(() => {
         if (!showDataInfos) {
-            setFormValue("data_name", "");
             setFormValue("data_upload_path", "");
             setFormValue("data_technical_name", "");
             setFormValue("data_type", "");
@@ -233,6 +237,8 @@ const DatasheetNewForm: FC<DatasheetNewFormProps> = ({ datastoreId }) => {
                 stateRelatedMessage={errors?.data_name?.message}
                 nativeInputProps={{
                     ...register("data_name"),
+                    defaultValue: route.params?.["datasheetName"],
+                    readOnly: !!route.params?.["datasheetName"],
                 }}
             />
             <Upload
@@ -322,17 +328,17 @@ const DatasheetNewForm: FC<DatasheetNewFormProps> = ({ datastoreId }) => {
 
             {isValidating && (
                 <Wait>
-                    <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg") + " icons-spin"} />
+                    <LoadingIcon largeIcon={true} />
                 </Wait>
             )}
 
             {uploadCreationInProgress && uploadId && (
                 <Wait>
                     {uploadCreatedSuccessfully ? (
-                        <DatasheetNewIntegrationDialog datastoreId={datastoreId} uploadId={uploadId} />
+                        <DatasheetUploadIntegrationDialog datastoreId={datastoreId} uploadId={uploadId} />
                     ) : (
                         <>
-                            <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg") + " icons-spin"} />
+                            <LoadingIcon largeIcon={true} />
                             <p>Création de la fiche en cours</p>
                         </>
                     )}
@@ -342,6 +348,6 @@ const DatasheetNewForm: FC<DatasheetNewFormProps> = ({ datastoreId }) => {
     );
 };
 
-DatasheetNewForm.displayName = symToStr({ DatasheetNewForm });
+DatasheetUploadForm.displayName = symToStr({ DatasheetNewForm: DatasheetUploadForm });
 
-export default DatasheetNewForm;
+export default DatasheetUploadForm;

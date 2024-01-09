@@ -3,6 +3,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { FC, useMemo } from "react";
 import { symToStr } from "tsafe/symToStr";
 
+import { routes } from "../../../../router/router";
 import { type DatasheetDetailed } from "../../../../types/app";
 import PyramidList from "./PyramidList/PyramidList";
 import UnfinishedUploadList from "./UnfinishedUploadList";
@@ -31,7 +32,9 @@ const DatasetListTab: FC<DataListTabProps> = ({ datastoreId, datasheet }) => {
     return (
         <>
             <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-grid-row--middle")}>
-                <Button iconId="fr-icon-add-line">Ajouter un fichier de données</Button>
+                <Button iconId="fr-icon-add-line" linkProps={routes.datastore_datasheet_upload({ datastoreId, datasheetName: datasheet?.name }).link}>
+                    Ajouter un fichier de données
+                </Button>
             </div>
             {unfinishedUploads && unfinishedUploads.length > 0 && (
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--center", "fr-grid-row--middle")}>

@@ -4,7 +4,7 @@ import Input from "@codegouvfr/react-dsfr/Input";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { useQuery } from "@tanstack/react-query";
-import { FC, memo, useState } from "react";
+import { FC, memo, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { symToStr } from "tsafe/symToStr";
 
@@ -16,11 +16,6 @@ import RQKeys from "../../../../../modules/RQKeys";
 import { routes } from "../../../../../router/router";
 import { DatastoreEndpoint, StoredDataStatuses, VectorDb } from "../../../../../types/app";
 
-const serviceTypeChoiceModal = createModal({
-    id: "service-type-choice-modal",
-    isOpenedByDefault: false,
-});
-
 type ServiceTypes = "tms" | "wfs" | "wms-vector" | "pre-paquet";
 
 type VectorDbListItemProps = {
@@ -31,7 +26,7 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ vectorDb, datastoreId }) 
     const [serviceType, setServiceType] = useState<ServiceTypes>();
 
     const [technicalName, setTechnicalName] = useState<string>(vectorDb.name);
-    const [error, setError] = useState<string>();
+    const [technicalNameError, setTechnicalNameError] = useState<string>();
 
     const endpointsQuery = useQuery<DatastoreEndpoint[]>({
         queryKey: RQKeys.datastore_endpoints(datastoreId),
@@ -40,13 +35,19 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ vectorDb, datastoreId }) 
         staleTime: 3600000,
     });
 
-    const wfsEndpoints = Array.isArray(endpointsQuery?.data) ? endpointsQuery?.data?.filter((endpoint) => endpoint.endpoint.type.toUpperCase() === "WFS") : [];
-    const wmsVectorEndpoints = Array.isArray(endpointsQuery?.data)
-        ? endpointsQuery?.data?.filter((endpoint) => endpoint.endpoint.type.toUpperCase() === "WMS-VECTOR")
-        : [];
-    const tmsEndpoints = Array.isArray(endpointsQuery?.data)
-        ? endpointsQuery?.data?.filter((endpoint) => endpoint.endpoint.type.toUpperCase() === "WMTS-TMS")
-        : [];
+    const { wfsEndpoints, wmsVectorEndpoints, tmsEndpoints } = useMemo(() => {
+        const wfsEndpoints = Array.isArray(endpointsQuery?.data)
+            ? endpointsQuery?.data?.filter((endpoint) => endpoint.endpoint.type.toUpperCase() === "WFS")
+            : [];
+        const wmsVectorEndpoints = Array.isArray(endpointsQuery?.data)
+            ? endpointsQuery?.data?.filter((endpoint) => endpoint.endpoint.type.toUpperCase() === "WMS-VECTOR")
+            : [];
+        const tmsEndpoints = Array.isArray(endpointsQuery?.data)
+            ? endpointsQuery?.data?.filter((endpoint) => endpoint.endpoint.type.toUpperCase() === "WMTS-TMS")
+            : [];
+
+        return { wfsEndpoints, wmsVectorEndpoints, tmsEndpoints };
+    }, [endpointsQuery.data]);
 
     const handleCreateService = () => {
         switch (serviceType) {
@@ -70,6 +71,15 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ vectorDb, datastoreId }) 
                 break;
         }
     };
+
+    const serviceTypeChoiceModal = useMemo(
+        () =>
+            createModal({
+                id: `service-type-choice-modal-vectordb-${vectorDb._id}`,
+                isOpenedByDefault: false,
+            }),
+        [vectorDb._id]
+    );
 
     return (
         <>
@@ -189,11 +199,11 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ vectorDb, datastoreId }) 
                                 defaultValue: technicalName,
                                 onChange: (e) => {
                                     setTechnicalName(e.currentTarget.value ?? undefined);
-                                    setError(e.currentTarget.value ? undefined : "Le nom technique est obligatoire");
+                                    setTechnicalNameError(e.currentTarget.value ? undefined : "Le nom technique est obligatoire");
                                 },
                             }}
-                            state={error ? "error" : "default"}
-                            stateRelatedMessage={error ?? undefined}
+                            state={technicalNameError ? "error" : "default"}
+                            stateRelatedMessage={technicalNameError ?? undefined}
                         />
                     )}
                 </serviceTypeChoiceModal.Component>,

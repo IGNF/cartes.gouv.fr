@@ -10,12 +10,12 @@ import RQKeys from "../../../../modules/RQKeys";
 import Translator from "../../../../modules/Translator";
 import { routes } from "../../../../router/router";
 
-type DatasheetNewIntegrationDialogProps = {
+type DatasheetUploadIntegrationDialogProps = {
     datastoreId: string;
     uploadId: string;
 };
 
-const DatasheetNewIntegrationDialog: FC<DatasheetNewIntegrationDialogProps> = ({ datastoreId, uploadId }) => {
+const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps> = ({ datastoreId, uploadId }) => {
     const [integrationProgress, setIntegrationProgress] = useState(null);
     const [integrationCurrentStep, setIntegrationCurrentStep] = useState<number>();
 
@@ -185,4 +185,4 @@ const DatasheetNewIntegrationDialog: FC<DatasheetNewIntegrationDialogProps> = ({
     );
 };
 
-export default DatasheetNewIntegrationDialog;
+export default DatasheetUploadIntegrationDialog;

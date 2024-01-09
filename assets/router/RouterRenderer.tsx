@@ -29,8 +29,8 @@ const DatastoreManageStorage = lazy(() => import("../pages/datastore/DatastoreMa
 const DashboardPro = lazy(() => import("../pages/dashboard/DashboardPro"));
 const DatasheetList = lazy(() => import("../pages/datasheet/DatasheetList/DatasheetList"));
 
-const DatasheetNewForm = lazy(() => import("../pages/datasheet/DatasheetNew/DatasheetNewForm"));
-const DatasheetNewIntegrationPage = lazy(() => import("../pages/datasheet/DatasheetNew/DatasheetNewIntegration/DatasheetNewIntegration"));
+const DatasheetUploadForm = lazy(() => import("../pages/datasheet/DatasheetNew/DatasheetUploadForm"));
+const DatasheetUploadIntegrationPage = lazy(() => import("../pages/datasheet/DatasheetNew/DatasheetUploadIntegration/DatasheetUploadIntegrationPage"));
 const DatasheetView = lazy(() => import("../pages/datasheet/DatasheetView/DatasheetView"));
 
 const StoredDataReport = lazy(() => import("../pages/stored_data/StoredDataReport/StoredDataReport"));
@@ -108,10 +108,10 @@ const RouterRenderer: FC = () => {
                 return <CommunityMembers datastoreId={route.params.datastoreId} userId={route.params.userId} />;
             case "join_community":
                 return <CommunityList />;
-            case "datastore_datasheet_new":
-                return <DatasheetNewForm datastoreId={route.params.datastoreId} />;
+            case "datastore_datasheet_upload":
+                return <DatasheetUploadForm datastoreId={route.params.datastoreId} />;
             case "datastore_datasheet_new_integration":
-                return <DatasheetNewIntegrationPage datastoreId={route.params.datastoreId} uploadId={route.params.uploadId} />;
+                return <DatasheetUploadIntegrationPage datastoreId={route.params.datastoreId} uploadId={route.params.uploadId} />;
             case "datastore_datasheet_view":
                 return <DatasheetView datastoreId={route.params.datastoreId} datasheetName={route.params.datasheetName} />;
             case "datastore_stored_data_report":
