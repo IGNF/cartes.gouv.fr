@@ -12,6 +12,7 @@ import { symToStr } from "tsafe/symToStr";
 
 import api from "../../../api";
 import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
+import LoadingIcon from "../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../components/Utils/LoadingText";
 import Wait from "../../../components/Utils/Wait";
 import { Translations, declareComponentKeys, useTranslation } from "../../../i18n/i18n";
@@ -22,8 +23,6 @@ import { Datasheet, type DatasheetDetailed } from "../../../types/app";
 import DatasetListTab from "./DatasetListTab/DatasetListTab";
 import DatasheetThumbnail, { type ThumbnailAction } from "./DatasheetThumbnail";
 import ServicesListTab from "./ServiceListTab/ServicesListTab";
-
-import "../../../sass/components/spinner.scss";
 
 const deleteDataConfirmModal = createModal({
     id: "delete-data-confirm-modal",
@@ -160,7 +159,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                 <Wait>
                     <div className={fr.cx("fr-container")}>
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " icons-spin"} />
+                            <LoadingIcon className={fr.cx("fr-mr-2v")} largeIcon={true} />
                             <h6 className={fr.cx("fr-m-0")}>{t("datasheet.being_removed", { datasheetName: datasheetName })}</h6>
                         </div>
                     </div>

@@ -5,11 +5,10 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useEffect, useState } from "react";
 
 import api from "../../../../api";
+import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import RQKeys from "../../../../modules/RQKeys";
 import Translator from "../../../../modules/Translator";
 import { routes } from "../../../../router/router";
-
-import "./../../../../sass/components/spinner.scss";
 
 type DatasheetNewIntegrationDialogProps = {
     datastoreId: string;
@@ -89,23 +88,23 @@ const DatasheetNewIntegrationDialog: FC<DatasheetNewIntegrationDialogProps> = ({
     }, [integrationProgress, integrationCurrentStep, datastoreId, uploadQuery?.data, queryClient]);
 
     const getStepIcon = (status) => {
-        let iconClass = fr.cx("fr-icon-time-line");
+        let icon = <span className={fr.cx("fr-icon-time-line")} />;
 
         switch (status) {
             case "in_progress":
-                iconClass = fr.cx("fr-icon-refresh-line") + " icons-spin";
+                icon = <LoadingIcon />;
                 break;
             case "successful":
-                iconClass = fr.cx("fr-icon-checkbox-line");
+                icon = <span className={fr.cx("fr-icon-checkbox-line")} />;
                 break;
             case "failed":
-                iconClass = fr.cx("fr-icon-close-circle-line");
+                icon = <span className={fr.cx("fr-icon-close-circle-line")} />;
                 break;
             case "waiting":
             default:
                 break;
         }
-        return <i className={iconClass} />;
+        return icon;
     };
 
     const getStepStatusText = (status) => {
@@ -155,7 +154,7 @@ const DatasheetNewIntegrationDialog: FC<DatasheetNewIntegrationDialogProps> = ({
             ) : (
                 <div className={fr.cx("fr-grid-row")}>
                     <div className={fr.cx("fr-col-1")}>
-                        <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg") + " icons-spin"} />
+                        <LoadingIcon largeIcon={true} />
                     </div>
                     <div className={fr.cx("fr-col-11")}>
                         <h6 className={fr.cx("fr-h6")}>Vos données vecteur sont en cours de dépôt</h6>

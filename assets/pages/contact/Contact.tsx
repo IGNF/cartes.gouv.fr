@@ -5,21 +5,21 @@ import Input from "@codegouvfr/react-dsfr/Input";
 import Select from "@codegouvfr/react-dsfr/Select";
 import { RegisteredLinkProps } from "@codegouvfr/react-dsfr/link";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
 import { JSX, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
-import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
 
 import AppLayout from "../../components/Layout/AppLayout";
+import LoadingIcon from "../../components/Utils/LoadingIcon";
 import Wait from "../../components/Utils/Wait";
-import { declareComponentKeys, useTranslation, type Translations, ComponentKey } from "../../i18n/i18n";
+import { ComponentKey, declareComponentKeys, useTranslation, type Translations } from "../../i18n/i18n";
 import SymfonyRouting from "../../modules/Routing";
 import { jsonFetch } from "../../modules/jsonFetch";
 import { routes } from "../../router/router";
 import { useAuthStore } from "../../stores/AuthStore";
 import { regex } from "../../utils";
 
-import "../../sass/components/spinner.scss";
 import "../../sass/pages/nous_ecrire.scss";
 
 const charRange = [10, 8000];
@@ -168,7 +168,7 @@ const Contact = () => {
                             <div className={fr.cx("fr-container")}>
                                 <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
                                     <div className={fr.cx("fr-col-2")}>
-                                        <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg") + " icons-spin"} />
+                                        <LoadingIcon largeIcon={true} />
                                     </div>
                                     <div className={fr.cx("fr-col-10")}>
                                         <h6 className={fr.cx("fr-h6", "fr-m-0")}>{"Votre message est en cours d'envoi"}</h6>

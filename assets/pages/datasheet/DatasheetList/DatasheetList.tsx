@@ -5,13 +5,12 @@ import { FC } from "react";
 
 import api from "../../../api";
 import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
+import LoadingIcon from "../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../components/Utils/LoadingText";
 import RQKeys from "../../../modules/RQKeys";
 import { routes } from "../../../router/router";
 import { Datasheet } from "../../../types/app";
 import DatasheetListItem from "./DatasheetListItem";
-
-import "../../../sass/components/spinner.scss";
 
 type DatasheetListProps = {
     datastoreId: string;
@@ -32,16 +31,14 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
 
     return (
         <DatastoreLayout datastoreId={datastoreId} documentTitle="Mes données">
-            {datastoreQuery.isLoading === undefined ? (
+            {datastoreQuery.data === undefined ? (
                 <LoadingText />
             ) : (
                 <>
                     <div className={fr.cx("fr-grid-row")}>
                         <h1>
                             Données {datastoreQuery?.data && datastoreQuery?.data?.name}
-                            {(datastoreQuery?.isFetching || datasheetListQuery?.isFetching) && (
-                                <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-ml-2w") + " icons-spin"} />
-                            )}
+                            {(datastoreQuery?.isFetching || datasheetListQuery?.isFetching) && <LoadingIcon className={fr.cx("fr-ml-2w")} largeIcon={true} />}
                         </h1>
                     </div>
 

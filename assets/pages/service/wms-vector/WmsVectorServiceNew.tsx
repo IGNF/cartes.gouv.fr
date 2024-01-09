@@ -12,6 +12,7 @@ import * as yup from "yup";
 
 import api from "../../../api";
 import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
+import LoadingIcon from "../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../components/Utils/LoadingText";
 import Wait from "../../../components/Utils/Wait";
 import RQKeys from "../../../modules/RQKeys";
@@ -27,8 +28,6 @@ import AdditionalInfo from "../metadatas/AdditionalInfo";
 import Description from "../metadatas/Description";
 import UploadMDFile from "../metadatas/UploadMDFile";
 import UploadStyleFile from "./UploadStyleFile";
-
-import "../../../sass/components/spinner.scss";
 
 const createFormData = (formValues: object) => {
     const fd = new FormData();
@@ -246,7 +245,7 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
                     <div className={fr.cx("fr-container")}>
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
                             <div className={fr.cx("fr-col-2")}>
-                                <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg") + " icons-spin"} />
+                                <LoadingIcon largeIcon={true} />
                             </div>
                             <div className={fr.cx("fr-col-10")}>
                                 <h6 className={fr.cx("fr-h6", "fr-m-0")}>{"Création du service WMS-Vecteur en cours"}</h6>
