@@ -4,9 +4,9 @@ import { FC, useMemo } from "react";
 import { symToStr } from "tsafe/symToStr";
 
 import { type DatasheetDetailed } from "../../../../types/app";
-import PyramidList from "./PyramidList";
+import PyramidList from "./PyramidList/PyramidList";
 import UnfinishedUploadList from "./UnfinishedUploadList";
-import VectorDbList from "./VectorDbList";
+import VectorDbList from "./VectorDbList/VectorDbList";
 
 type DataListTabProps = {
     datastoreId: string;
