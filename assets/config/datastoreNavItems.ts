@@ -81,7 +81,7 @@ export const datastoreNavItems = (datastoreList: Datastore[] = [], currentDatast
         navItems.push(datastoreLinks);
     }
 
-    if (user !== undefined) {
+    if (user !== null) {
         navItems.push({
             text: t("my_account"),
             linkProps: routes.my_account().link,

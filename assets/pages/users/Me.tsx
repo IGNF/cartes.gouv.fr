@@ -1,15 +1,18 @@
 import Button from "@codegouvfr/react-dsfr/Button";
+import { useMemo } from "react";
 
 import AppLayout from "../../components/Layout/AppLayout";
+import { datastoreNavItems } from "../../config/datastoreNavItems";
 import functions from "../../functions";
 import SymfonyRouting from "../../modules/Routing";
 import { useAuthStore } from "../../stores/AuthStore";
 
 const Me = () => {
     const user = useAuthStore((state) => state.user);
+    const navItems = useMemo(() => datastoreNavItems(), []);
 
     return (
-        <AppLayout documentTitle="Mon compte">
+        <AppLayout documentTitle="Mon compte" navItems={navItems}>
             <h1>Mon compte</h1>
 
             {user && (

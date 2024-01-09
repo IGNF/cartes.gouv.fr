@@ -37,7 +37,7 @@ export const defaultNavItems = (t: TranslationFunction<"navItems", ComponentKey>
         },
     ];
 
-    if (user !== undefined) {
+    if (user !== null) {
         navItems.push({
             text: t("my_account"),
             linkProps: routes.my_account().link,
