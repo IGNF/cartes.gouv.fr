@@ -2,6 +2,8 @@
 
 namespace App\Controller\Api;
 
+use App\Constants\EntrepotApi\OfferingStatuses;
+use App\Constants\EntrepotApi\ProcessingStatuses;
 use App\Exception\CartesApiException;
 use App\Exception\EntrepotApiException;
 use App\Services\EntrepotApiService;
@@ -56,6 +58,40 @@ class StoredDataController extends AbstractController implements ApiControllerIn
             } elseif (Response::HTTP_BAD_REQUEST === $ex->getStatusCode()) {
                 throw new CartesApiException("L'identifiant de la donnée stockée [$storedDataId] est invalide", $ex->getStatusCode(), $ex->getDetails());
             }
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
+        }
+    }
+
+    #[Route('/{storedDataId}/uses', name: 'get_uses', methods: ['GET'])]
+    public function getUses(string $datastoreId, string $storedDataId): JsonResponse
+    {
+        try {
+            $storedDataList = [];
+            $offeringsList = [];
+
+            $procExecList = $this->entrepotApiService->processing->getAllExecutions($datastoreId, [
+                'input_stored_data' => $storedDataId,
+            ]);
+            foreach ($procExecList as &$procExec) {
+                if (ProcessingStatuses::SUCCESS === $procExec['status']) {
+                    $procExec = $this->entrepotApiService->processing->getExecution($datastoreId, $procExec['_id']);
+
+                    if (isset($procExec['output']['stored_data'])) {
+                        $storedDataList[] = $procExec['output']['stored_data'];
+                    }
+                }
+            }
+
+            $offeringsList = $this->entrepotApiService->configuration->getAllOfferings($datastoreId, [
+                'stored_data' => $storedDataId,
+                'status' => OfferingStatuses::PUBLISHED,
+            ]);
+
+            return $this->json([
+                'stored_data_list' => $storedDataList,
+                'offerings_list' => $offeringsList,
+            ]);
+        } catch (EntrepotApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
         }
     }

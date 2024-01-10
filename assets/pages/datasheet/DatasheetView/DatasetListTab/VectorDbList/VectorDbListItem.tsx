@@ -12,9 +12,11 @@ import api from "../../../../../api";
 import MenuList from "../../../../../components/Utils/MenuList";
 import StoredDataStatusBadge from "../../../../../components/Utils/StoredDataStatusBadge";
 import functions from "../../../../../functions";
+import useToggle from "../../../../../hooks/useToggle";
 import RQKeys from "../../../../../modules/RQKeys";
 import { routes } from "../../../../../router/router";
 import { DatastoreEndpoint, StoredDataStatuses, VectorDb } from "../../../../../types/app";
+import VectorDbDesc from "./VectorDbDesc";
 
 type ServiceTypes = "tms" | "wfs" | "wms-vector" | "pre-paquet";
 
@@ -23,6 +25,7 @@ type VectorDbListItemProps = {
     datastoreId: string;
 };
 const VectorDbListItem: FC<VectorDbListItemProps> = ({ vectorDb, datastoreId }) => {
+    // création d'un service
     const [serviceType, setServiceType] = useState<ServiceTypes>();
 
     const [technicalName, setTechnicalName] = useState<string>(vectorDb.name);
@@ -81,12 +84,22 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ vectorDb, datastoreId }) 
         [vectorDb._id]
     );
 
+    // description de vectordb
+    const [showDescription, toggleShowDescription] = useToggle(false);
+
     return (
         <>
             <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mt-2v")}>
                 <div className={fr.cx("fr-col")}>
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                        <Button iconId="ri-add-box-fill" title="Voir les données liées" className={fr.cx("fr-mr-2v")} />
+                        <Button
+                            iconId={showDescription ? "ri-subtract-fill" : "ri-add-fill"}
+                            size="small"
+                            title="Voir les données liées"
+                            className={fr.cx("fr-mr-2v")}
+                            priority="secondary"
+                            onClick={toggleShowDescription}
+                        />
                         {vectorDb.name}
                     </div>
                 </div>
@@ -132,6 +145,8 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ vectorDb, datastoreId }) 
                     </div>
                 </div>
             </div>
+
+            {showDescription && <VectorDbDesc datastoreId={datastoreId} vectorDb={vectorDb} />}
 
             {createPortal(
                 <serviceTypeChoiceModal.Component

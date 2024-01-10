@@ -14,6 +14,7 @@ const RQKeys = {
     datastore_stored_data_list: (datastoreId: string): string[] => ["datastore", datastoreId, "stored_data"],
     datastore_stored_data_list_with_type: (datastoreId: string, type: string): string[] => ["datastore", datastoreId, "stored_data", "type", type],
     datastore_stored_data: (datastoreId: string, storedDataId: string): string[] => ["datastore", datastoreId, "stored_data", storedDataId],
+    datastore_stored_data_uses: (datastoreId: string, storedDataId: string): string[] => ["datastore", datastoreId, "stored_data", storedDataId, "uses"],
     datastore_stored_data_report: (datastoreId: string, storedDataId: string): string[] => ["datastore", datastoreId, "stored_data", storedDataId, "report"],
 
     datastore_datasheet_list: (datastoreId: string): string[] => ["datastore", datastoreId, "datasheet"],
