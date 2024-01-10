@@ -2,55 +2,54 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import { useColors } from "@codegouvfr/react-dsfr/useColors";
 import { useQuery } from "@tanstack/react-query";
-import { FC, memo, useMemo } from "react";
+import { FC } from "react";
 
 import api from "../../../../../api";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import RQKeys from "../../../../../modules/RQKeys";
-import { StoredDataTypesEnum, VectorDb } from "../../../../../types/app";
+import { Pyramid } from "../../../../../types/app";
 import { offeringTypeDisplayName } from "../../../../../utils";
 
-type VectorDbDescProps = {
-    vectorDb: VectorDb;
+type PyramidDescProps = {
+    pyramid: Pyramid;
     datastoreId: string;
 };
-const VectorDbDesc: FC<VectorDbDescProps> = ({ vectorDb, datastoreId }) => {
+const PyramidDesc: FC<PyramidDescProps> = ({ pyramid, datastoreId }) => {
     const dataUsesQuery = useQuery({
-        queryKey: RQKeys.datastore_stored_data_uses(datastoreId, vectorDb._id),
-        queryFn: ({ signal }) => api.storedData.getUses(datastoreId, vectorDb._id, { signal }),
+        queryKey: RQKeys.datastore_stored_data_uses(datastoreId, pyramid._id),
+        queryFn: ({ signal }) => api.storedData.getUses(datastoreId, pyramid._id, { signal }),
         staleTime: 600000,
     });
 
-    const pyramidVectorList = useMemo(
-        () => dataUsesQuery.data?.stored_data_list.filter((sd) => sd.type === StoredDataTypesEnum.ROK4PYRAMIDVECTOR.valueOf()),
-        [dataUsesQuery.data?.stored_data_list]
-    );
+    const vectorDbUsedId = pyramid.tags.vectordb_id;
+
+    const vectorDbUsedQuery = useQuery({
+        queryKey: RQKeys.datastore_stored_data(datastoreId, vectorDbUsedId ?? "XXXX"),
+        queryFn: ({ signal }) => {
+            if (pyramid.tags.vectordb_id === undefined) {
+                return Promise.reject();
+            }
+            return api.storedData.get(datastoreId, pyramid.tags.vectordb_id, { signal });
+        },
+        staleTime: 600000,
+        enabled: !!pyramid.tags.vectordb_id,
+    });
 
     const theme = useColors();
 
     return (
         <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mt-2v", "fr-ml-10v")}>
             <div className={fr.cx("fr-col")}>
-                {dataUsesQuery.isFetching && <LoadingText as="p" withSpinnerIcon={true} />}
+                {(dataUsesQuery.isFetching || vectorDbUsedQuery.isFetching) && <LoadingText as="p" withSpinnerIcon={true} />}
 
-                {dataUsesQuery.data?.stored_data_list.length === 0 && dataUsesQuery.data?.offerings_list.length === 0 && (
-                    <div className={fr.cx("fr-grid-row", "fr-mt-2v", "fr-p-2v")} style={{ backgroundColor: theme.decisions.background.default.grey.default }}>
-                        <p className={fr.cx("fr-p-0", "fr-m-0")}>{"La base de données n'a pas encore été utilisée"}</p>
-                    </div>
-                )}
-
-                {pyramidVectorList && pyramidVectorList.length > 0 && (
+                {vectorDbUsedQuery.data && (
                     <div className={fr.cx("fr-grid-row", "fr-mt-2v", "fr-p-2v")} style={{ backgroundColor: theme.decisions.background.default.grey.default }}>
                         <div className={fr.cx("fr-col", "fr-col-md-4")}>
-                            <span className={fr.cx("ri-stack-line")} /> Pyramides créés ({pyramidVectorList.length})
+                            <span className={fr.cx("fr-icon-database-fill")} /> Base de données utilisée
                         </div>
                         <div className={fr.cx("fr-col")}>
                             <ul className={fr.cx("fr-raw-list")}>
-                                {pyramidVectorList.map((pyramidVector) => (
-                                    <li key={pyramidVector._id} className={fr.cx("fr-mb-2v")}>
-                                        {pyramidVector.name}
-                                    </li>
-                                ))}
+                                <li className={fr.cx("fr-mb-2v")}>{vectorDbUsedQuery.data.name}</li>
                             </ul>
                         </div>
                     </div>
@@ -77,4 +76,4 @@ const VectorDbDesc: FC<VectorDbDescProps> = ({ vectorDb, datastoreId }) => {
     );
 };
 
-export default memo(VectorDbDesc);
+export default PyramidDesc;

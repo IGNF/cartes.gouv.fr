@@ -3,6 +3,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
+import { useColors } from "@codegouvfr/react-dsfr/useColors";
 import { useQuery } from "@tanstack/react-query";
 import { FC, memo, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
@@ -87,66 +88,70 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ vectorDb, datastoreId }) 
     // description de vectordb
     const [showDescription, toggleShowDescription] = useToggle(false);
 
+    const theme = useColors();
+
     return (
         <>
-            <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mt-2v")}>
-                <div className={fr.cx("fr-col")}>
-                    <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                        <Button
-                            iconId={showDescription ? "ri-subtract-fill" : "ri-add-fill"}
-                            size="small"
-                            title="Voir les données liées"
-                            className={fr.cx("fr-mr-2v")}
-                            priority="secondary"
-                            onClick={toggleShowDescription}
-                        />
-                        {vectorDb.name}
+            <div className={fr.cx("fr-p-2v", "fr-mt-2v")} style={{ backgroundColor: theme.decisions.background.contrast.grey.default }}>
+                <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
+                    <div className={fr.cx("fr-col")}>
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
+                            <Button
+                                iconId={showDescription ? "ri-subtract-fill" : "ri-add-fill"}
+                                size="small"
+                                title="Voir les données liées"
+                                className={fr.cx("fr-mr-2v")}
+                                priority="secondary"
+                                onClick={toggleShowDescription}
+                            />
+                            {vectorDb.name}
+                        </div>
+                    </div>
+
+                    <div className={fr.cx("fr-col")}>
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-grid-row--middle")}>
+                            <p className={fr.cx("fr-m-auto", "fr-mr-2v")}>{vectorDb?.last_event?.date && functions.date.format(vectorDb?.last_event?.date)}</p>
+                            <StoredDataStatusBadge status={vectorDb.status} />
+                            <Button
+                                onClick={() => {
+                                    serviceTypeChoiceModal.open();
+                                }}
+                                className={fr.cx("fr-mr-2v")}
+                                priority="secondary"
+                                disabled={vectorDb.status !== StoredDataStatuses.GENERATED}
+                            >
+                                Créer un service
+                            </Button>
+                            <MenuList
+                                menuOpenButtonProps={{
+                                    title: "Autres actions",
+                                    priority: "secondary",
+                                }}
+                                items={[
+                                    {
+                                        text: "Remplacer les données",
+                                        iconId: "fr-icon-refresh-line",
+                                        onClick: () => console.warn("Action non implémentée"),
+                                        disabled: vectorDb.status !== StoredDataStatuses.GENERATED,
+                                    },
+                                    {
+                                        text: "Voir les détails",
+                                        iconId: "fr-icon-file-text-fill",
+                                        linkProps: routes.datastore_stored_data_report({ datastoreId, storedDataId: vectorDb._id }).link,
+                                    },
+                                    {
+                                        text: "Supprimer",
+                                        iconId: "fr-icon-delete-line",
+                                        onClick: () => console.warn("Action non implémentée"),
+                                    },
+                                ]}
+                            />
+                        </div>
                     </div>
                 </div>
 
-                <div className={fr.cx("fr-col")}>
-                    <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-grid-row--middle")}>
-                        <p className={fr.cx("fr-m-auto", "fr-mr-2v")}>{vectorDb?.last_event?.date && functions.date.format(vectorDb?.last_event?.date)}</p>
-                        <StoredDataStatusBadge status={vectorDb.status} />
-                        <Button
-                            onClick={() => {
-                                serviceTypeChoiceModal.open();
-                            }}
-                            className={fr.cx("fr-mr-2v")}
-                            priority="secondary"
-                            disabled={vectorDb.status !== StoredDataStatuses.GENERATED}
-                        >
-                            Créer un service
-                        </Button>
-                        <MenuList
-                            menuOpenButtonProps={{
-                                title: "Autres actions",
-                                priority: "secondary",
-                            }}
-                            items={[
-                                {
-                                    text: "Remplacer les données",
-                                    iconId: "fr-icon-refresh-line",
-                                    onClick: () => console.warn("Action non implémentée"),
-                                    disabled: vectorDb.status !== StoredDataStatuses.GENERATED,
-                                },
-                                {
-                                    text: "Voir les détails",
-                                    iconId: "fr-icon-file-text-fill",
-                                    linkProps: routes.datastore_stored_data_report({ datastoreId, storedDataId: vectorDb._id }).link,
-                                },
-                                {
-                                    text: "Supprimer",
-                                    iconId: "fr-icon-delete-line",
-                                    onClick: () => console.warn("Action non implémentée"),
-                                },
-                            ]}
-                        />
-                    </div>
-                </div>
+                {showDescription && <VectorDbDesc datastoreId={datastoreId} vectorDb={vectorDb} />}
             </div>
-
-            {showDescription && <VectorDbDesc datastoreId={datastoreId} vectorDb={vectorDb} />}
 
             {createPortal(
                 <serviceTypeChoiceModal.Component

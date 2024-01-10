@@ -4,7 +4,7 @@ import { RegisteredLinkProps } from "@codegouvfr/react-dsfr/link";
 import MuiDsfrThemeProvider from "@codegouvfr/react-dsfr/mui";
 import { ListItemIcon, ListItemText, Menu, MenuItem } from "@mui/material";
 import Typography from "@mui/material/Typography";
-import { FC, MouseEvent, useId, useMemo, useState } from "react";
+import { FC, memo, MouseEvent, useId, useMemo, useState } from "react";
 import { symToStr } from "tsafe/symToStr";
 
 type MenuListItemCommon = {
@@ -132,4 +132,4 @@ const MenuList: FC<MenuListProps> = ({ menuOpenButtonProps, items = [], disabled
 
 MenuList.displayName = symToStr({ MenuList });
 
-export default MenuList;
+export default memo(MenuList);
