@@ -2188,7 +2188,7 @@ export interface OfferingListResponseDto {
     /** Nom technique de la ressource. Ce nom doit être unique sur la plateforme pour un type de configuration donné. Uniquement des caractères alphanumériques, tiret, tiret bas, point */
     layer_name: string;
     /** Type de configuration */
-    type: OfferingListResponseDtoTypeEnum;
+    type: OfferingDetailResponseDtoTypeEnum;
     /** Statut de l'offre */
     status: string;
     /**
@@ -3172,19 +3172,6 @@ export enum UserKeyResponseDtoTypeEnum {
     HEADER = "HEADER",
     BASIC = "BASIC",
     OAUTH2 = "OAUTH2",
-}
-
-/** Type de configuration */
-export enum OfferingListResponseDtoTypeEnum {
-    WMSVECTOR = "WMS-VECTOR",
-    WFS = "WFS",
-    WMTSTMS = "WMTS-TMS",
-    WMSRASTER = "WMS-RASTER",
-    DOWNLOAD = "DOWNLOAD",
-    ITINERARYISOCURVE = "ITINERARY-ISOCURVE",
-    ALTIMETRY = "ALTIMETRY",
-    SEARCH = "SEARCH",
-    VECTORTMS = "VECTOR-TMS",
 }
 
 export enum UploadListResponseDtoTypeEnum {
