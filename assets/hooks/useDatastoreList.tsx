@@ -6,7 +6,7 @@ import { CartesApiException } from "../modules/jsonFetch";
 import { useAuthStore } from "../stores/AuthStore";
 import { Datastore } from "../types/app";
 
-export const useDatastoreList = () => {
+const useDatastoreList = () => {
     const user = useAuthStore((state) => state.user);
 
     return useQuery<Datastore[], CartesApiException>({
@@ -16,3 +16,5 @@ export const useDatastoreList = () => {
         enabled: !!user,
     });
 };
+
+export default useDatastoreList;

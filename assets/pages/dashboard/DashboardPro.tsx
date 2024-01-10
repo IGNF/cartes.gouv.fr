@@ -4,7 +4,7 @@ import { Tile } from "@codegouvfr/react-dsfr/Tile";
 import AppLayout from "../../components/Layout/AppLayout";
 import LoadingText from "../../components/Utils/LoadingText";
 import { datastoreNavItems } from "../../config/datastoreNavItems";
-import { useDatastoreList } from "../../hooks/useDatastoreList";
+import useDatastoreList from "../../hooks/useDatastoreList";
 import Translator from "../../modules/Translator";
 import { routes } from "../../router/router";
 import { useAuthStore } from "../../stores/AuthStore";

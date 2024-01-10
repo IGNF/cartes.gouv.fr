@@ -3,7 +3,7 @@ import { FC, PropsWithChildren, memo, useMemo } from "react";
 
 import api from "../../api";
 import { datastoreNavItems } from "../../config/datastoreNavItems";
-import { useDatastoreList } from "../../hooks/useDatastoreList";
+import useDatastoreList from "../../hooks/useDatastoreList";
 import RQKeys from "../../modules/RQKeys";
 import AppLayout from "./AppLayout";
 
