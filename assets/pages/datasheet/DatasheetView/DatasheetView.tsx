@@ -80,8 +80,9 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                             priority="tertiary no outline"
                             linkProps={routes.datasheet_list({ datastoreId }).link}
                             title={t("datasheet.back_to_list")}
+                            size="large"
                         />
-                        {datasheetName}
+                        <h1 className={fr.cx("fr-m-0")}>{datasheetName}</h1>
                         <Badge noIcon={true} severity="info" className={fr.cx("fr-ml-2w")}>
                             {datasheetQuery?.data?.nb_publications && datasheetQuery?.data?.nb_publications > 0
                                 ? tCommon("published")

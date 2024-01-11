@@ -1,4 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import Button from "@codegouvfr/react-dsfr/Button";
 import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
@@ -7,7 +8,7 @@ import { Upload } from "@codegouvfr/react-dsfr/Upload";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useQuery } from "@tanstack/react-query";
 import { format as datefnsFormat } from "date-fns";
-import { FC, useEffect, useRef, useState } from "react";
+import { FC, useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { symToStr } from "tsafe/symToStr";
 import { v4 as uuidv4 } from "uuid";
@@ -36,6 +37,9 @@ type DatasheetUploadFormProps = {
 };
 const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
     const route = useRoute();
+
+    const datasheetName: string | undefined = useMemo(() => route.params?.["datasheetName"], [route.params]);
+
     let uuid = "";
 
     const schema = yup
@@ -57,7 +61,7 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                     name: "is-unique",
                     test(dataName, ctx) {
                         // si on téléverse un nouveau fichier sur une fiche de données existante, ne vérifie pas l'unicité
-                        if (route.params?.["datasheetName"] !== undefined) {
+                        if (datasheetName !== undefined) {
                             return true;
                         }
 
@@ -225,8 +229,21 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
     };
 
     return (
-        <DatastoreLayout datastoreId={datastoreId} documentTitle="Nouvelle fiche de données">
-            <h1>Créer une fiche de données</h1>
+        <DatastoreLayout datastoreId={datastoreId} documentTitle={datasheetName === undefined ? "Créer une fiche de données" : "Ajouter un fichier de données"}>
+            <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-4w")}>
+                <Button
+                    iconId="fr-icon-arrow-left-s-line"
+                    priority="tertiary no outline"
+                    linkProps={
+                        datasheetName === undefined
+                            ? routes.datasheet_list({ datastoreId }).link
+                            : routes.datastore_datasheet_view({ datastoreId, datasheetName }).link
+                    }
+                    title={datasheetName === undefined ? "Retour à ma liste de données" : "Retour à ma fiche de données"}
+                    size="large"
+                />
+                <h1 className={fr.cx("fr-m-0")}>{datasheetName === undefined ? "Créer une fiche de données" : "Ajouter un fichier de données"}</h1>
+            </div>
 
             <p>{Translator.trans("mandatory_fields")}</p>
 
@@ -237,8 +254,8 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                 stateRelatedMessage={errors?.data_name?.message}
                 nativeInputProps={{
                     ...register("data_name"),
-                    defaultValue: route.params?.["datasheetName"],
-                    readOnly: !!route.params?.["datasheetName"],
+                    defaultValue: datasheetName,
+                    readOnly: !!datasheetName,
                 }}
             />
             <Upload
