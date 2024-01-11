@@ -11,10 +11,12 @@ import api from "../../../../api";
 import MenuList from "../../../../components/Utils/MenuList";
 import Wait from "../../../../components/Utils/Wait";
 import functions from "../../../../functions";
+import useToggle from "../../../../hooks/useToggle";
 import RQKeys from "../../../../modules/RQKeys";
 import { routes } from "../../../../router/router";
-import { OfferingTypesEnum, type Service } from "../../../../types/app";
+import { OfferingTypeEnum, type Service } from "../../../../types/app";
 import { offeringTypeDisplayName } from "../../../../utils";
+import ServiceDesc from "./ServiceDesc";
 
 type ServicesListItemProps = {
     service: Service;
@@ -32,11 +34,11 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
     const unpublishServiceMutation = useMutation({
         mutationFn: (service: Service) => {
             switch (service.type) {
-                case OfferingTypesEnum.WFS:
+                case OfferingTypeEnum.WFS:
                     return api.service.unpublishWfs(datastoreId, service._id);
-                case OfferingTypesEnum.WMSVECTOR:
+                case OfferingTypeEnum.WMSVECTOR:
                     return api.service.unpublishWmsVector(datastoreId, service._id);
-                case OfferingTypesEnum.WMTSTMS:
+                case OfferingTypeEnum.WMTSTMS:
                     return api.service.unpublishTms(datastoreId, service._id);
 
                 default:
@@ -49,70 +51,85 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
         },
     });
 
+    const [showDescription, toggleShowDescription] = useToggle(false);
+
     return (
         <>
-            <div key={service._id} className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mt-2v")}>
-                <div className={fr.cx("fr-col", "fr-col-md-4")}>
-                    <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                        <Button iconId="ri-add-box-fill" title="Voir les données liées" className={fr.cx("fr-mr-2v")} />
-                        {service.configuration.name}
+            <div className={fr.cx("fr-p-2v", "fr-mt-2v")} style={{ backgroundColor: fr.colors.decisions.background.contrast.grey.default }}>
+                <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
+                    <div className={fr.cx("fr-col", "fr-col-md-4")}>
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
+                            <Button
+                                iconId={showDescription ? "ri-subtract-fill" : "ri-add-fill"}
+                                size="small"
+                                title="Voir les données liées"
+                                className={fr.cx("fr-mr-2v")}
+                                priority="secondary"
+                                onClick={toggleShowDescription}
+                            />
+                            {service.configuration.name}
+                        </div>
+                    </div>
+
+                    <div className={fr.cx("fr-col", "fr-col-md-8")}>
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-grid-row--middle")}>
+                            <Badge>{offeringTypeDisplayName(service.type)}</Badge>
+                            <p className={fr.cx("fr-m-auto", "fr-mr-2v")}>
+                                {service?.configuration?.last_event?.date && functions.date.format(service?.configuration?.last_event?.date)}
+                            </p>
+                            <i className={fr.cx("fr-mr-2v", service.open ? "fr-icon-lock-unlock-fill" : "fr-icon-lock-fill")} />
+
+                            <Button
+                                className={fr.cx("fr-mr-2v")}
+                                linkProps={routes.datastore_service_view({ datastoreId, offeringId: service._id, datasheetName: datasheetName }).link}
+                                priority="secondary"
+                            >
+                                Visualiser
+                            </Button>
+                            <MenuList
+                                menuOpenButtonProps={{
+                                    iconId: "fr-icon-menu-2-fill",
+                                    title: "Autres actions",
+                                    priority: "secondary",
+                                }}
+                                items={[
+                                    {
+                                        text: "Copier l'URL de diffusion",
+                                        iconId: "ri-file-copy-2-line",
+                                        onClick: () => console.warn("Action non implémentée"),
+                                    },
+                                    {
+                                        text: "Gérer les styles",
+                                        iconId: "ri-flashlight-line",
+                                        onClick: () => console.warn("Action non implémentée"),
+                                    },
+                                    {
+                                        text: "Mettre à jour la légende",
+                                        iconId: "ri-list-check",
+                                        onClick: () => console.warn("Action non implémentée"),
+                                    },
+                                    {
+                                        text: "Modifier les informations de publication",
+                                        iconId: "ri-edit-box-line",
+                                        onClick: () => console.warn("Action non implémentée"),
+                                    },
+                                    {
+                                        text: "Remplacer les données",
+                                        iconId: "fr-icon-refresh-line",
+                                        onClick: () => console.warn("Action non implémentée"),
+                                    },
+                                    {
+                                        text: "Dépublier",
+                                        iconId: "ri-arrow-go-back-line",
+                                        onClick: () => unpublishServiceConfirmModal.open(),
+                                    },
+                                ]}
+                            />
+                        </div>
                     </div>
                 </div>
 
-                <div className={fr.cx("fr-col", "fr-col-md-8")}>
-                    <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-grid-row--middle")}>
-                        <Badge>{offeringTypeDisplayName(service.type)}</Badge>
-                        <p className={fr.cx("fr-m-auto", "fr-mr-2v")}>
-                            {service?.configuration?.last_event?.date && functions.date.format(service?.configuration?.last_event?.date)}
-                        </p>
-                        <i className={fr.cx("fr-mr-2v", service.open ? "fr-icon-lock-unlock-fill" : "fr-icon-lock-fill")} />
-
-                        <Button
-                            className={fr.cx("fr-mr-2v")}
-                            linkProps={routes.datastore_service_view({ datastoreId, offeringId: service._id, datasheetName: datasheetName }).link}
-                        >
-                            Visualiser
-                        </Button>
-                        <MenuList
-                            menuOpenButtonProps={{
-                                iconId: "fr-icon-menu-2-fill",
-                                title: "Autres actions",
-                            }}
-                            items={[
-                                {
-                                    text: "Copier l'URL de diffusion",
-                                    iconId: "ri-file-copy-2-line",
-                                    onClick: () => console.warn("Action non implémentée"),
-                                },
-                                {
-                                    text: "Gérer les styles",
-                                    iconId: "ri-flashlight-line",
-                                    onClick: () => console.warn("Action non implémentée"),
-                                },
-                                {
-                                    text: "Mettre à jour la légende",
-                                    iconId: "ri-list-check",
-                                    onClick: () => console.warn("Action non implémentée"),
-                                },
-                                {
-                                    text: "Modifier les informations de publication",
-                                    iconId: "ri-edit-box-line",
-                                    onClick: () => console.warn("Action non implémentée"),
-                                },
-                                {
-                                    text: "Remplacer les données",
-                                    iconId: "fr-icon-refresh-line",
-                                    onClick: () => console.warn("Action non implémentée"),
-                                },
-                                {
-                                    text: "Dépublier",
-                                    iconId: "ri-arrow-go-back-line",
-                                    onClick: () => unpublishServiceConfirmModal.open(),
-                                },
-                            ]}
-                        />
-                    </div>
-                </div>
+                {showDescription && <ServiceDesc datastoreId={datastoreId} service={service} />}
             </div>
 
             {createPortal(

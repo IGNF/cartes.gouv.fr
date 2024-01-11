@@ -1,13 +1,12 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Badge from "@codegouvfr/react-dsfr/Badge";
-import { useColors } from "@codegouvfr/react-dsfr/useColors";
 import { useQuery } from "@tanstack/react-query";
-import { FC } from "react";
+import { FC, useMemo } from "react";
 
 import api from "../../../../../api";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import RQKeys from "../../../../../modules/RQKeys";
-import { Pyramid } from "../../../../../types/app";
+import { Pyramid, VectorDb } from "../../../../../types/app";
 import { offeringTypeDisplayName } from "../../../../../utils";
 
 type PyramidDescProps = {
@@ -21,21 +20,19 @@ const PyramidDesc: FC<PyramidDescProps> = ({ pyramid, datastoreId }) => {
         staleTime: 600000,
     });
 
-    const vectorDbUsedId = pyramid.tags.vectordb_id;
+    const vectorDbUsedId = useMemo(() => pyramid.tags.vectordb_id, [pyramid.tags.vectordb_id]);
 
     const vectorDbUsedQuery = useQuery({
         queryKey: RQKeys.datastore_stored_data(datastoreId, vectorDbUsedId ?? "XXXX"),
         queryFn: ({ signal }) => {
-            if (pyramid.tags.vectordb_id === undefined) {
+            if (vectorDbUsedId === undefined) {
                 return Promise.reject();
             }
-            return api.storedData.get(datastoreId, pyramid.tags.vectordb_id, { signal });
+            return api.storedData.get<VectorDb>(datastoreId, vectorDbUsedId, { signal });
         },
         staleTime: 600000,
-        enabled: !!pyramid.tags.vectordb_id,
+        enabled: !!vectorDbUsedId,
     });
-
-    const theme = useColors();
 
     return (
         <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mt-2v", "fr-ml-10v")}>
@@ -43,27 +40,33 @@ const PyramidDesc: FC<PyramidDescProps> = ({ pyramid, datastoreId }) => {
                 {(dataUsesQuery.isFetching || vectorDbUsedQuery.isFetching) && <LoadingText as="p" withSpinnerIcon={true} />}
 
                 {vectorDbUsedQuery.data && (
-                    <div className={fr.cx("fr-grid-row", "fr-mt-2v", "fr-p-2v")} style={{ backgroundColor: theme.decisions.background.default.grey.default }}>
+                    <div
+                        className={fr.cx("fr-grid-row", "fr-mt-2v", "fr-p-2v")}
+                        style={{ backgroundColor: fr.colors.decisions.background.default.grey.default }}
+                    >
                         <div className={fr.cx("fr-col", "fr-col-md-4")}>
                             <span className={fr.cx("fr-icon-database-fill")} /> Base de données utilisée
                         </div>
                         <div className={fr.cx("fr-col")}>
                             <ul className={fr.cx("fr-raw-list")}>
-                                <li className={fr.cx("fr-mb-2v")}>{vectorDbUsedQuery.data.name}</li>
+                                <li>{vectorDbUsedQuery.data.name}</li>
                             </ul>
                         </div>
                     </div>
                 )}
 
                 {dataUsesQuery.data?.offerings_list && dataUsesQuery.data?.offerings_list?.length > 0 && (
-                    <div className={fr.cx("fr-grid-row", "fr-mt-2v", "fr-p-2v")} style={{ backgroundColor: theme.decisions.background.default.grey.default }}>
+                    <div
+                        className={fr.cx("fr-grid-row", "fr-mt-2v", "fr-p-2v")}
+                        style={{ backgroundColor: fr.colors.decisions.background.default.grey.default }}
+                    >
                         <div className={fr.cx("fr-col", "fr-col-md-4")}>
                             <span className={fr.cx("ri-image-line")} /> Services publiés ({dataUsesQuery.data?.offerings_list?.length})
                         </div>
                         <div className={fr.cx("fr-col")}>
                             <ul className={fr.cx("fr-raw-list")}>
-                                {dataUsesQuery.data?.offerings_list.map((offering) => (
-                                    <li key={offering._id} className={fr.cx("fr-mb-2v")}>
+                                {dataUsesQuery.data?.offerings_list.map((offering, i) => (
+                                    <li key={offering._id} className={fr.cx(i + 1 !== dataUsesQuery.data?.offerings_list.length && "fr-mb-2v")}>
                                         {offering.layer_name} <Badge>{offeringTypeDisplayName(offering.type)}</Badge>
                                     </li>
                                 ))}
