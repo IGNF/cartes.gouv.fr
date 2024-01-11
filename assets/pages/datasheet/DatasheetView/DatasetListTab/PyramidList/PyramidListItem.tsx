@@ -1,14 +1,13 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
-import { useColors } from "@codegouvfr/react-dsfr/useColors";
 import { FC } from "react";
 
 import MenuList from "../../../../../components/Utils/MenuList";
 import StoredDataStatusBadge from "../../../../../components/Utils/StoredDataStatusBadge";
 import functions from "../../../../../functions";
-import { routes } from "../../../../../router/router";
-import { Pyramid, StoredDataStatuses } from "../../../../../types/app";
 import useToggle from "../../../../../hooks/useToggle";
+import { routes } from "../../../../../router/router";
+import { Pyramid, StoredDataStatusEnum } from "../../../../../types/app";
 import PyramidDesc from "./PyramidDesc";
 
 type PyramidListItemProps = {
@@ -18,10 +17,8 @@ type PyramidListItemProps = {
 const PyramidListItem: FC<PyramidListItemProps> = ({ datastoreId, pyramid }) => {
     const [showDescription, toggleShowDescription] = useToggle(false);
 
-    const theme = useColors();
-
     return (
-        <div className={fr.cx("fr-p-2v", "fr-mt-2v")} style={{ backgroundColor: theme.decisions.background.contrast.grey.default }}>
+        <div className={fr.cx("fr-p-2v", "fr-mt-2v")} style={{ backgroundColor: fr.colors.decisions.background.contrast.grey.default }}>
             <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
                 <div className={fr.cx("fr-col")}>
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
@@ -47,7 +44,7 @@ const PyramidListItem: FC<PyramidListItemProps> = ({ datastoreId, pyramid }) => 
                             }}
                             className={fr.cx("fr-mr-2v")}
                             priority="secondary"
-                            disabled={pyramid.status !== StoredDataStatuses.GENERATED}
+                            disabled={pyramid.status !== StoredDataStatusEnum.GENERATED}
                         >
                             Publier le service TMS
                         </Button>

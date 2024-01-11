@@ -1,12 +1,12 @@
 import SymfonyRouting from "../modules/Routing";
 import { jsonFetch } from "../modules/jsonFetch";
-import { StoredData, StoredDataReport, StoredDataType } from "../types/app";
+import { StoredData, StoredDataReport, StoredDataTypeEnum } from "../types/app";
 import { OfferingListResponseDto, StoredDataListResponseDto } from "../types/entrepot";
 
-const getList = <T = StoredData[]>(datastoreId: string, type?: StoredDataType, otherOptions: RequestInit = {}) => {
+const getList = <T = StoredData[]>(datastoreId: string, type?: StoredDataTypeEnum, otherOptions: RequestInit = {}) => {
     const params = { datastoreId };
     if (type !== undefined) {
-        params["type"] = type;
+        params["type"] = type.valueOf();
     }
 
     const url = SymfonyRouting.generate("cartesgouvfr_api_stored_data_get_list", params);

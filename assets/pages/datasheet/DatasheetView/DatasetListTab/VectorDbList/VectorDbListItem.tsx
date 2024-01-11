@@ -3,7 +3,6 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
-import { useColors } from "@codegouvfr/react-dsfr/useColors";
 import { useQuery } from "@tanstack/react-query";
 import { FC, memo, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
@@ -16,7 +15,7 @@ import functions from "../../../../../functions";
 import useToggle from "../../../../../hooks/useToggle";
 import RQKeys from "../../../../../modules/RQKeys";
 import { routes } from "../../../../../router/router";
-import { DatastoreEndpoint, StoredDataStatuses, VectorDb } from "../../../../../types/app";
+import { DatastoreEndpoint, StoredDataStatusEnum, VectorDb } from "../../../../../types/app";
 import VectorDbDesc from "./VectorDbDesc";
 
 type ServiceTypes = "tms" | "wfs" | "wms-vector" | "pre-paquet";
@@ -88,11 +87,9 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ vectorDb, datastoreId }) 
     // description de vectordb
     const [showDescription, toggleShowDescription] = useToggle(false);
 
-    const theme = useColors();
-
     return (
         <>
-            <div className={fr.cx("fr-p-2v", "fr-mt-2v")} style={{ backgroundColor: theme.decisions.background.contrast.grey.default }}>
+            <div className={fr.cx("fr-p-2v", "fr-mt-2v")} style={{ backgroundColor: fr.colors.decisions.background.contrast.grey.default }}>
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
                     <div className={fr.cx("fr-col")}>
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
@@ -118,7 +115,7 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ vectorDb, datastoreId }) 
                                 }}
                                 className={fr.cx("fr-mr-2v")}
                                 priority="secondary"
-                                disabled={vectorDb.status !== StoredDataStatuses.GENERATED}
+                                disabled={vectorDb.status !== StoredDataStatusEnum.GENERATED}
                             >
                                 Créer un service
                             </Button>
@@ -132,7 +129,7 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ vectorDb, datastoreId }) 
                                         text: "Remplacer les données",
                                         iconId: "fr-icon-refresh-line",
                                         onClick: () => console.warn("Action non implémentée"),
-                                        disabled: vectorDb.status !== StoredDataStatuses.GENERATED,
+                                        disabled: vectorDb.status !== StoredDataStatusEnum.GENERATED,
                                     },
                                     {
                                         text: "Voir les détails",

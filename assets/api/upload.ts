@@ -1,11 +1,11 @@
 import SymfonyRouting from "../modules/Routing";
 import { jsonFetch } from "../modules/jsonFetch";
-import { Upload, UploadTree, UploadType } from "../types/app";
+import { Upload, UploadTree, UploadTypeEnum } from "../types/app";
 
-const getList = (datastoreId: string, type?: UploadType, otherOptions: RequestInit = {}) => {
+const getList = (datastoreId: string, type?: UploadTypeEnum, otherOptions: RequestInit = {}) => {
     const params = { datastoreId };
     if (type !== undefined) {
-        params["type"] = type;
+        params["type"] = type.valueOf();
     }
 
     const url = SymfonyRouting.generate("cartesgouvfr_api_upload_get_list", params);

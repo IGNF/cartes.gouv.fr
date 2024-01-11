@@ -1,8 +1,9 @@
-import { FC } from "react";
-import { StoredDataStatuses } from "../../types/app";
+import { fr } from "@codegouvfr/react-dsfr";
 import { AlertProps } from "@codegouvfr/react-dsfr/Alert";
 import Badge from "@codegouvfr/react-dsfr/Badge";
-import { fr } from "@codegouvfr/react-dsfr";
+import { FC } from "react";
+
+import { StoredDataStatusEnum } from "../../types/app";
 
 type StoredDataStatusBadgeProps = {
     status: string;
@@ -12,28 +13,28 @@ const StoredDataStatusBadge: FC<StoredDataStatusBadgeProps> = ({ status }) => {
     let severity: AlertProps.Severity = "info";
     let text = "";
     switch (status) {
-        case StoredDataStatuses.GENERATED:
+        case StoredDataStatusEnum.GENERATED:
             severity = "success";
             text = "Prêt";
             break;
 
-        case StoredDataStatuses.CREATED:
-        case StoredDataStatuses.GENERATING:
+        case StoredDataStatusEnum.CREATED:
+        case StoredDataStatusEnum.GENERATING:
             severity = "warning";
             text = "En cours de génération";
             break;
 
-        case StoredDataStatuses.MODIFYING:
+        case StoredDataStatusEnum.MODIFYING:
             severity = "warning";
             text = "En cours de modification";
             break;
 
-        case StoredDataStatuses.UNSTABLE:
+        case StoredDataStatusEnum.UNSTABLE:
             severity = "error";
             text = "Echoué";
             break;
 
-        case StoredDataStatuses.DELETED:
+        case StoredDataStatusEnum.DELETED:
             severity = "info";
             text = "Supprimé";
             break;

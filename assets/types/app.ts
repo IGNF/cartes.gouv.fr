@@ -5,7 +5,6 @@ import {
     CommunityUserResponseDtoRightsEnum,
     ConfigurationAltimetryDetailsContent,
     ConfigurationDetailResponseDto,
-    ConfigurationDetailResponseDtoStatusEnum,
     ConfigurationItineraryIsocurveDetailsContent,
     ConfigurationWfsDetailsContent,
     ConfigurationWmsRasterDetailsContent,
@@ -15,16 +14,12 @@ import {
     DatastoreEndpointResponseDto,
     EndpointDetailResponseDtoTypeEnum,
     OfferingDetailResponseDto,
-    OfferingDetailResponseDtoTypeEnum,
     ProcessingExecutionDetailResponseDto,
     ProcessingExecutionOutputStoredDataDto,
     StoredDataDetailsRelationDto,
     StoredDataPrivateDetailResponseDto,
-    StoredDataPrivateDetailResponseDtoStatusEnum,
     StoredDataPrivateDetailResponseDtoTypeEnum,
-    StoredDataPrivateDetailResponseDtoVisibilityEnum,
     UploadPrivateDetailResponseDto,
-    UploadPrivateDetailResponseDtoTypeEnum,
     UploadTreeElementResponseDto,
     UserDetailsResponseDto,
 } from "./entrepot";
@@ -64,11 +59,11 @@ export type DatasheetDetailed = Datasheet & {
 
 /** stored_data (donnée stockée) */
 export type StoredData = StoredDataPrivateDetailResponseDto;
-
-export const StoredDataTypesEnum = StoredDataPrivateDetailResponseDtoTypeEnum;
-export type StoredDataType = StoredDataPrivateDetailResponseDtoTypeEnum;
-export const StoredDataStatuses = StoredDataPrivateDetailResponseDtoStatusEnum;
-export const StoredDataVisibilities = StoredDataPrivateDetailResponseDtoVisibilityEnum;
+export {
+    StoredDataPrivateDetailResponseDtoTypeEnum as StoredDataTypeEnum,
+    StoredDataPrivateDetailResponseDtoStatusEnum as StoredDataStatusEnum,
+    StoredDataPrivateDetailResponseDtoVisibilityEnum as StoredDataVisibilityEnum,
+} from "./entrepot";
 export type StoredDataRelation = StoredDataDetailsRelationDto;
 
 /** stored_data (donnée stockée) du type VECTOR-DB */
@@ -105,8 +100,12 @@ export type Upload = UploadPrivateDetailResponseDto & {
         integration_current_step?: string;
     };
 };
-export const UploadTypesEnum = UploadPrivateDetailResponseDtoTypeEnum;
-export type UploadType = UploadPrivateDetailResponseDtoTypeEnum;
+
+export {
+    UploadPrivateDetailResponseDtoTypeEnum as UploadTypeEnum,
+    UploadPrivateDetailResponseDtoStatusEnum as UploadStatusEnum,
+    UploadPrivateDetailResponseDtoVisibilityEnum as UploadVisibilityEnum,
+} from "./entrepot";
 export type UploadTree = UploadTreeElementResponseDto[];
 
 /** user, objet représentant l'utilisateur de l'API Entrepot */
@@ -127,11 +126,13 @@ export type CartesStyle = {
 
 /** configuration & offerings */
 export type Configuration = ConfigurationDetailResponseDto & { styles: CartesStyle[] };
-export const ConfigurationStatuses = ConfigurationDetailResponseDtoStatusEnum;
+export {
+    ConfigurationDetailResponseDtoStatusEnum as ConfigurationStatusEnum,
+    ConfigurationDetailResponseDtoTypeEnum as ConfigurationTypeEnum,
+} from "./entrepot";
 
 export type Offering = OfferingDetailResponseDto;
-export const OfferingTypesEnum = OfferingDetailResponseDtoTypeEnum;
-export type OfferingType = OfferingDetailResponseDtoTypeEnum;
+export { OfferingDetailResponseDtoTypeEnum as OfferingTypeEnum } from "./entrepot";
 
 export type Service = Offering & {
     configuration: Configuration;

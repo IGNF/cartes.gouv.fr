@@ -15,7 +15,7 @@ import Wait from "../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
-import { Datastore, Offering, OfferingTypesEnum } from "../../../../types/app";
+import { Datastore, Offering, OfferingTypeEnum } from "../../../../types/app";
 
 const confirmDialogModal = createModal({
     id: "confirm-unpublish-offering-modal",
@@ -50,11 +50,11 @@ const EndpointsUsage: FC<EndpointsUsageProps> = ({ datastore }) => {
     const unpublishOfferingMutation = useMutation({
         mutationFn: (offering: Offering) => {
             switch (offering.type) {
-                case OfferingTypesEnum.WFS:
+                case OfferingTypeEnum.WFS:
                     return api.service.unpublishWfs(datastore._id, offering._id);
-                case OfferingTypesEnum.WMSVECTOR:
+                case OfferingTypeEnum.WMSVECTOR:
                     return api.service.unpublishWmsVector(datastore._id, offering._id);
-                case OfferingTypesEnum.WMTSTMS:
+                case OfferingTypeEnum.WMTSTMS:
                     return api.service.unpublishTms(datastore._id, offering._id);
 
                 default:

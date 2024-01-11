@@ -7,7 +7,7 @@ import charsets from "./data/charset_list.json";
 // Langues iso639-2
 // https://github.com/haliaeetus/iso-639/blob/master/data/iso_639-2.json
 import langs from "./data/iso_639-2.json";
-import { OfferingDetailResponseDtoTypeEnum } from "./types/entrepot";
+import { OfferingTypeEnum } from "./types/app";
 
 export type LanguageType = {
     language: string;
@@ -110,25 +110,25 @@ const decodeContentRange = (contentRange: string): ContentRangeType => {
     return { first: parseInt(parts[0], 10), last: parseInt(parts[1], 10), total: total };
 };
 
-const offeringTypeDisplayName = (type: OfferingDetailResponseDtoTypeEnum): string => {
+const offeringTypeDisplayName = (type: OfferingTypeEnum): string => {
     switch (type) {
-        case OfferingDetailResponseDtoTypeEnum.WMSVECTOR:
+        case OfferingTypeEnum.WMSVECTOR:
             return "Web Map Service Vecteur";
-        case OfferingDetailResponseDtoTypeEnum.WFS:
+        case OfferingTypeEnum.WFS:
             return "Web Feature Service";
-        case OfferingDetailResponseDtoTypeEnum.WMTSTMS:
+        case OfferingTypeEnum.WMTSTMS:
             return "Web Map Tile Service - Tile Map Service";
-        case OfferingDetailResponseDtoTypeEnum.WMSRASTER:
+        case OfferingTypeEnum.WMSRASTER:
             return "Web Map Service Raster";
-        case OfferingDetailResponseDtoTypeEnum.DOWNLOAD:
+        case OfferingTypeEnum.DOWNLOAD:
             return "Service de Téléchargement";
-        case OfferingDetailResponseDtoTypeEnum.ITINERARYISOCURVE:
+        case OfferingTypeEnum.ITINERARYISOCURVE:
             return "Service de calcul d'itinéraire / isochrone";
-        case OfferingDetailResponseDtoTypeEnum.ALTIMETRY:
+        case OfferingTypeEnum.ALTIMETRY:
             return "Service d'altimétrie";
         default:
             return type;
     }
 };
 
-export { getInspireKeywords, getLanguages, charsets, removeDiacritics, regex, decodeContentRange, offeringTypeDisplayName, niceBytes };
+export { charsets, decodeContentRange, getInspireKeywords, getLanguages, niceBytes, offeringTypeDisplayName, regex, removeDiacritics };

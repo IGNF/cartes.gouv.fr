@@ -17,7 +17,7 @@ import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import { routes } from "../../../../router/router";
-import { Datastore, StoredData, StoredDataTypesEnum, VectorDb } from "../../../../types/app";
+import { Datastore, StoredData, StoredDataTypeEnum, VectorDb } from "../../../../types/app";
 import { niceBytes } from "../../../../utils";
 
 const confirmDialogModal = createModal({
@@ -43,7 +43,7 @@ const PostgresqlUsage: FC<PostgresqlUsageProps> = ({ datastore }) => {
     });
 
     const vectorDbList: VectorDb[] = useMemo(() => {
-        return (storedDataListQuery?.data?.filter((storedData) => storedData.type === StoredDataTypesEnum.VECTORDB) as VectorDb[]) ?? [];
+        return (storedDataListQuery?.data?.filter((storedData) => storedData.type === StoredDataTypeEnum.VECTORDB) as VectorDb[]) ?? [];
     }, [storedDataListQuery?.data]);
 
     const queryClient = useQueryClient();

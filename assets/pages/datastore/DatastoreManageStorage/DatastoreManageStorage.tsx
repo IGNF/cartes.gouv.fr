@@ -9,7 +9,7 @@ import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
 import LoadingIcon from "../../../components/Utils/LoadingIcon";
 import { useTranslation, type Translations } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/RQKeys";
-import { StoredDataType, StoredDataTypesEnum, UploadType, UploadTypesEnum } from "./../../../types/app";
+import { StoredDataTypeEnum, UploadTypeEnum } from "./../../../types/app";
 import AnnexeUsage from "./storages/AnnexeUsage";
 import EndpointsUsage from "./storages/EndpointsUsage";
 import FilesystemUsage from "./storages/FilesystemUsage";
@@ -99,7 +99,7 @@ export const { i18n } = declareComponentKeys<
     | "explanation"
     | "storage.not_found"
     | "data.size.unknown"
-    | { K: "stored_data.type.title"; P: { type: StoredDataType }; R: string }
+    | { K: "stored_data.type.title"; P: { type: StoredDataTypeEnum }; R: string }
 
     // FILESYSTEM
     | { K: "storage.filesystem.label"; R: JSX.Element }
@@ -128,7 +128,7 @@ export const { i18n } = declareComponentKeys<
     | { K: "storage.upload.deletion.confirmation"; P: { uploadName?: string; uploadId?: string }; R: string }
     | "storage.upload.deletion.in_progress"
     | "storage.upload.explanation"
-    | { K: "upload.type.title"; P: { type: UploadType }; R: string }
+    | { K: "upload.type.title"; P: { type: UploadTypeEnum }; R: string }
 
     // annexe
     | { K: "storage.annexe.label"; R: JSX.Element }
@@ -156,11 +156,11 @@ export const DatastoreManageStorageFrTranslations: Translations<"fr">["Datastore
     "data.size.unknown": "Taille inconnue",
     "stored_data.type.title": ({ type }) => {
         switch (type) {
-            case StoredDataTypesEnum.VECTORDB:
+            case StoredDataTypeEnum.VECTORDB:
                 return "Données vectorielles en BD PostgreSQL";
-            case StoredDataTypesEnum.ROK4PYRAMIDVECTOR:
+            case StoredDataTypeEnum.ROK4PYRAMIDVECTOR:
                 return "Pyramide de tuiles vectorielles";
-            case StoredDataTypesEnum.ROK4PYRAMIDRASTER:
+            case StoredDataTypeEnum.ROK4PYRAMIDRASTER:
                 return "Pyramide de tuiles raster";
             default:
                 return type;
@@ -168,9 +168,9 @@ export const DatastoreManageStorageFrTranslations: Translations<"fr">["Datastore
     },
     "upload.type.title": ({ type }) => {
         switch (type) {
-            case UploadTypesEnum.VECTOR:
+            case UploadTypeEnum.VECTOR:
                 return "Vecteur";
-            case UploadTypesEnum.RASTER:
+            case UploadTypeEnum.RASTER:
                 return "Raster";
             default:
                 return type;
