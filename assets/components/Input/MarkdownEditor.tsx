@@ -1,5 +1,4 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import { useColors } from "@codegouvfr/react-dsfr/useColors";
 import { useIsDark } from "@codegouvfr/react-dsfr/useIsDark";
 import MDEditor from "@uiw/react-md-editor";
 import { CSSProperties, FC, useState } from "react";
@@ -20,14 +19,13 @@ type MarkdownEditorProps = {
 const MarkdownEditor: FC<MarkdownEditorProps> = (props) => {
     const { label, hintText, defaultValue = "", state, stateRelatedMessage, placeholder, onChange } = props;
     const { isDark } = useIsDark();
-    const theme = useColors();
 
     const [value, setValue] = useState<string>(defaultValue);
 
     const customStyle: CSSProperties = {
-        backgroundColor: theme.decisions.background.contrast.grey.default,
+        backgroundColor: fr.colors.decisions.background.contrast.grey.default,
         borderRadius: `${fr.spacing("1v")} ${fr.spacing("1v")} 0 0`,
-        boxShadow: `inset 0 -2px 0 0 var(${theme.decisions.border.plain.grey.default})`,
+        boxShadow: `inset 0 -2px 0 0 var(${fr.colors.decisions.border.plain.grey.default})`,
         marginTop: fr.spacing("1v"),
         fontFamily: "Marianne, arial, sans-serif",
     };

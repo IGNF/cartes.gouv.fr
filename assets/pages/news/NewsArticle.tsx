@@ -1,6 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Tag from "@codegouvfr/react-dsfr/Tag";
-import { useColors } from "@codegouvfr/react-dsfr/useColors";
 import { FC } from "react";
 import { symToStr } from "tsafe/symToStr";
 
@@ -16,7 +15,6 @@ type NewsArticleProps = {
 };
 
 const NewsArticle: FC<NewsArticleProps> = ({ slug }) => {
-    const theme = useColors();
     const newsArticle: NewsArticle | undefined = articles[slug];
 
     if (newsArticle === undefined) {
@@ -46,7 +44,7 @@ const NewsArticle: FC<NewsArticleProps> = ({ slug }) => {
                         <p
                             style={{
                                 fontStyle: "italic",
-                                color: theme.decisions.text.mention.grey.default,
+                                color: fr.colors.decisions.text.mention.grey.default,
                             }}
                         >
                             <i className="ri-article-line" />

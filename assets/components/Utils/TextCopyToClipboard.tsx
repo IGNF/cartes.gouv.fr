@@ -1,7 +1,6 @@
-import { CSSProperties, FC } from "react";
-import { useColors } from "@codegouvfr/react-dsfr/useColors";
-import { type FrCxArg, fr } from "@codegouvfr/react-dsfr";
+import { fr, type FrCxArg } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
+import { CSSProperties, FC } from "react";
 
 type TextCopyToClipboardProps = {
     text: string;
@@ -9,9 +8,8 @@ type TextCopyToClipboardProps = {
 };
 
 const TextCopyToClipboard: FC<TextCopyToClipboardProps> = ({ text, className }) => {
-    const theme = useColors();
     const styleBoxCopyData: CSSProperties = {
-        backgroundColor: theme.decisions.background.alt.blueFrance.default,
+        backgroundColor: fr.colors.decisions.background.alt.blueFrance.default,
         padding: fr.spacing("1w"),
         overflow: "auto",
         width: "80%",

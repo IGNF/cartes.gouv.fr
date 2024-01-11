@@ -1,6 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import MuiDsfrThemeProvider from "@codegouvfr/react-dsfr/mui";
-import { useColors } from "@codegouvfr/react-dsfr/useColors";
 import { Autocomplete, AutocompleteFreeSoloValueMapping, AutocompleteValue, CreateFilterOptionsConfig, TextField, createFilterOptions } from "@mui/material";
 import { CSSProperties, useId } from "react";
 import { ControllerRenderProps } from "react-hook-form";
@@ -62,12 +61,10 @@ const AutocompleteSelect = <T,>(props: AutocompleteSelectProps<T>) => {
 
     const messageId = `${inputId}-msg`;
 
-    const theme = useColors();
-
     const customStyle: CSSProperties = {
-        backgroundColor: theme.decisions.background.contrast.grey.default,
+        backgroundColor: fr.colors.decisions.background.contrast.grey.default,
         borderRadius: `${fr.spacing("1v")} ${fr.spacing("1v")} 0 0`,
-        boxShadow: `inset 0 -2px 0 0 var(${theme.decisions.border.plain.grey.default})`,
+        boxShadow: `inset 0 -2px 0 0 var(${fr.colors.decisions.border.plain.grey.default})`,
         marginTop: fr.spacing("1v"),
         fontFamily: "Marianne, arial, sans-serif",
     };
