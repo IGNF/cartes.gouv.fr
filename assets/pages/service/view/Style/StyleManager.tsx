@@ -63,7 +63,7 @@ const StyleManager: FC<StyleManagerProps> = ({ datastoreId, datasheetName, servi
                                 if (file === undefined) {
                                     return true;
                                 }
-                                return validations.getValidator(format).validate(layers[uuid], value as FileList, ctx);
+                                return validations.getValidator(service, format).validate(layers[uuid], value as FileList, ctx);
                             },
                         });
                     });
@@ -86,7 +86,7 @@ const StyleManager: FC<StyleManagerProps> = ({ datastoreId, datasheetName, servi
                         if (file === undefined) {
                             return true;
                         }
-                        return validations.getValidator(format).validate(undefined, value as FileList, ctx);
+                        return validations.getValidator(service, format).validate(undefined, value as FileList, ctx);
                     },
                 });
                 return yup.object().shape(styleFiles);

@@ -1,22 +1,25 @@
 import { TestContext, ValidationError } from "yup";
 import functions from "../functions";
-
-type FileFormat = "sld" | "qml" | "mapbox";
+import { Service, StyleFormat } from "../types/app";
 
 class StyleValidator {
-    _format: string;
+    readonly service: Service;
+    readonly format: StyleFormat;
 
-    constructor(format: FileFormat) {
-        this._format = format === "mapbox" ? "json" : format;
+    constructor(service: Service, format: StyleFormat) {
+        this.service = service;
+        this.format = format;
     }
 
     async validate(layerName: string | undefined, files: FileList, ctx: TestContext): Promise<ValidationError | boolean> {
+        const extension = this.format === "mapbox" ? "json" : this.format;
+
         const file = files[0];
-        if (file !== undefined && functions.path.getFileExtension(file?.name)?.toLowerCase() !== this._format) {
+        if (file !== undefined && functions.path.getFileExtension(file?.name)?.toLowerCase() !== extension) {
             return ctx.createError({ message: "unaccepted_extension" });
         }
 
         return true;
     }
 }
-export { FileFormat, StyleValidator };
+export default StyleValidator;

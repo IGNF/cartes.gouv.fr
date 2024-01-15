@@ -18,8 +18,11 @@ import { type CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
 import { CartesStyle, type Service } from "../../../types/app";
 import { OfferingDetailResponseDtoTypeEnum } from "../../../types/entrepot";
-import StyleLabel from "./Style/StyleLabel";
 import Wait from "../../../components/Utils/Wait";
+import { getTranslation } from "../../../i18n/i18n";
+import "../../../sass/pages/service_view.scss";
+
+const { t: tStyle } = getTranslation("Style");
 
 type ServiceViewProps = {
     datastoreId: string;
@@ -159,10 +162,20 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
         mutateRemove(name);
     };
 
-    const radioOptions: FieldsetProps.Common["options"] = [];
+    const radioOptions: FieldsetProps.Radio["options"] = [];
     styles?.forEach((style) => {
         const option = {
-            label: <StyleLabel style={style} onRemove={handleRemove} />,
+            label: style.name,
+            illustration: (
+                <Button
+                    title={tStyle("remove_style")}
+                    priority={"tertiary"}
+                    iconId={"fr-icon-delete-line"}
+                    onClick={() => {
+                        handleRemove(style.name);
+                    }}
+                />
+            ),
             nativeInputProps: {
                 checked: currentStyle?.name === style.name,
                 onChange: () => mutateChangeCurrentStyle(style.name),
@@ -184,7 +197,38 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
                             </a>
                         </p>
                     </div>
-                    {styles && styles.length !== 0 && <RadioButtons legend={"Mes styles :"} options={radioOptions} orientation="horizontal" />}
+                    {styles && styles.length !== 0 && <RadioButtons legend={"Mes styles :"} options={radioOptions} />}
+                    {/* {styles && styles.length !== 0 && (
+                        <RadioButtons
+                            legend="Légende pour l’ensemble de champs"
+                            name="radio"
+                            options={[
+                                {
+                                    illustration: <img alt="illustration" src="https://placehold.it/100x100" />,
+                                    label: "Label radio",
+                                    nativeInputProps: {
+                                        value: "value1",
+                                    },
+                                },
+                                {
+                                    illustration: <img alt="illustration" src="https://placehold.it/100x100" />,
+                                    label: "Label radio 2",
+                                    nativeInputProps: {
+                                        value: "value2",
+                                    },
+                                },
+                                {
+                                    illustration: <img alt="illustration" src="https://placehold.it/100x100" />,
+                                    label: "Label radio 3",
+                                    nativeInputProps: {
+                                        value: "value3",
+                                    },
+                                },
+                            ]}
+                            state="default"
+                            stateRelatedMessage="State description"
+                        />
+                    )} */}
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
                         <Button onClick={() => addStyleModal.open()}>Ajouter un style</Button>
                     </div>
