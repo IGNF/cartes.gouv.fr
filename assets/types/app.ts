@@ -124,6 +124,27 @@ export type CartesStyle = {
     layers: StyleLayer[];
 };
 
+export type StyleForm = {
+    style_name: string;
+    style_files: Record<string, FileList>;
+};
+
+export type StyleFormat = "mapbox" | "sld" | "qml";
+
+/** metadata pour TMS */
+export type TmsMetadata = {
+    name: string;
+    description: string;
+    minzoom: number;
+    maxzoom: number;
+    crs: string;
+    center: number[];
+    bounds: number[];
+    format: string;
+    tiles: string[];
+    vector_layers: unknown[];
+};
+
 /** configuration & offerings */
 export type Configuration = ConfigurationDetailResponseDto & { styles: CartesStyle[] };
 export {
@@ -136,6 +157,7 @@ export { OfferingDetailResponseDtoTypeEnum as OfferingTypeEnum } from "./entrepo
 
 export type Service = Offering & {
     configuration: Configuration;
+    tms_metadata?: TmsMetadata;
 };
 
 export type TypeInfosWithBbox =

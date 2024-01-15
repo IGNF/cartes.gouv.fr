@@ -9,7 +9,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useMemo } from "react";
 import api from "../../../api";
 import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
-import { StyleComponent, addStyleModal } from "../../../components/StyleComponent";
+import { StyleManager, addStyleModal } from "./Style/StyleManager";
 import LoadingText from "../../../components/Utils/LoadingText";
 import RMap from "../../../components/Utils/RMap";
 import TextCopyToClipboard from "../../../components/Utils/TextCopyToClipboard";
@@ -18,7 +18,7 @@ import { type CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
 import { CartesStyle, type Service } from "../../../types/app";
 import { OfferingDetailResponseDtoTypeEnum } from "../../../types/entrepot";
-import StyleLabel from "./StyleLabel";
+import StyleLabel from "./Style/StyleLabel";
 import Wait from "../../../components/Utils/Wait";
 
 type ServiceViewProps = {
@@ -228,8 +228,8 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
                             <Tabs tabs={tabs} />
                         </div>
                     </div>
-                    {canManageStyles && (
-                        <StyleComponent datastoreId={datastoreId} datasheetName={datasheetName} service={serviceQuery?.data} styleNames={styleNames} />
+                    {canManageStyles && serviceQuery.data && (
+                        <StyleManager datastoreId={datastoreId} datasheetName={datasheetName} service={serviceQuery.data} styleNames={styleNames} />
                     )}
                 </>
             )}

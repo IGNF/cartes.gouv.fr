@@ -56,6 +56,15 @@ const removeDiacritics = (str) => {
 };
 
 /**
+ * Recupere les informations d'une requete
+ */
+const getRequestInfo = (url: string): Record<string, string> => {
+    const _url = new URL(url);
+    const params = Object.fromEntries(_url.searchParams);
+    return { ...params, base_url: `${_url.origin}${_url.pathname}` };
+};
+
+/**
  * Convertit des octets en KB, MB ...
  */
 const niceBytes = (x: string) => {
@@ -131,4 +140,4 @@ const offeringTypeDisplayName = (type: OfferingTypeEnum): string => {
     }
 };
 
-export { charsets, decodeContentRange, getInspireKeywords, getLanguages, niceBytes, offeringTypeDisplayName, regex, removeDiacritics };
+export { getInspireKeywords, getLanguages, charsets, removeDiacritics, regex, decodeContentRange, offeringTypeDisplayName, getRequestInfo, niceBytes };

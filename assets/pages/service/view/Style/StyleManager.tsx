@@ -1,5 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import { CartesStyle, Service } from "../types/app";
+import { CartesStyle, Service, StyleFormat } from "../../../../types/app";
 import { FC, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
@@ -7,27 +7,27 @@ import Input from "@codegouvfr/react-dsfr/Input";
 import { Upload } from "@codegouvfr/react-dsfr/Upload";
 import Alert, { AlertProps } from "@codegouvfr/react-dsfr/Alert";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
-import ServiceUtils from "../modules/WebServices/ServiceUtils";
 import * as yup from "yup";
 import { v4 as uuidv4 } from "uuid";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { CartesApiException } from "../modules/jsonFetch";
-import StyleHelper from "../modules/WebServices/StyleHelper";
-import validations from "../validations";
-import api from "../api";
-import { OfferingDetailResponseDtoTypeEnum } from "../types/entrepot";
-import RQKeys from "../modules/RQKeys";
+import { CartesApiException } from "../../../../modules/jsonFetch";
+import StyleHelper from "../../../../modules/Style/StyleHelper";
+import validations from "../../../../validations";
+import api from "../../../../api";
+import { OfferingDetailResponseDtoTypeEnum } from "../../../../types/entrepot";
+import RQKeys from "../../../../modules/RQKeys";
+import UploadLayerStyles from "./UploadLayerStyles";
+import getWebService from "../../../../modules/WebServices/WebServices";
+import getStyleFilesManager from "../../../../modules/Style/StyleFilesManager";
 
-type StyleComponentProps = {
+type StyleManagerProps = {
     datastoreId: string;
     datasheetName: string;
-    service?: Service;
+    service: Service;
     styleNames: string[];
 };
-
-type FormatType = "mapbox" | "sld" | "qml";
 
 type ErrorType = {
     message: string;
@@ -39,7 +39,7 @@ const addStyleModal = createModal({
     isOpenedByDefault: false,
 });
 
-const StyleComponent: FC<StyleComponentProps> = ({ datastoreId, datasheetName, service, styleNames }) => {
+const StyleManager: FC<StyleManagerProps> = ({ datastoreId, datasheetName, service, styleNames }) => {
     const schema = () => {
         const style_name = yup
             .string()
@@ -98,8 +98,9 @@ const StyleComponent: FC<StyleComponentProps> = ({ datastoreId, datasheetName, s
     const [layers, setLayers] = useState<Record<string, string>>({});
 
     const [error, setError] = useState<ErrorType | undefined>(undefined);
-    const [format, setFormat] = useState<FormatType | undefined>(() => {
-        let defaultFormat: FormatType | undefined;
+
+    const [format, setFormat] = useState<StyleFormat | undefined>(() => {
+        let defaultFormat: StyleFormat | undefined;
         if (service?.type === OfferingDetailResponseDtoTypeEnum.WFS) {
             defaultFormat = "sld";
         } else if (service?.type === OfferingDetailResponseDtoTypeEnum.WMTSTMS) {
@@ -111,33 +112,29 @@ const StyleComponent: FC<StyleComponentProps> = ({ datastoreId, datasheetName, s
     // On utilise un uuid car le nom des couches peuvent contenir des espaces, des quotes
     // et la creation du schema pose problemes
     useEffect(() => {
-        const getLayerNames = async () => {
-            return ServiceUtils.getLayerNames(service);
-        };
+        if (!service) return;
 
-        getLayerNames()
-            .then((layerNames) => {
-                const layers = {};
-                layerNames.forEach((name) => {
-                    const uuid = uuidv4();
-                    layers[uuid] = name;
-                });
-                setLayers(layers);
-            })
-            .catch((err) => setError({ message: err.message, severity: "error" }));
+        const layers = {};
+        const layerNames: string[] = getWebService(service).getLayerNames();
+        layerNames.forEach((name) => {
+            const uuid = uuidv4();
+            layers[uuid] = name;
+        });
+        setLayers(layers);
     }, [service]);
 
+    const form = useForm({ resolver: yupResolver(schema()), mode: "onChange" });
     const {
         register,
         reset,
         getValues: getFormValues,
         formState: { errors },
         handleSubmit,
-    } = useForm({ resolver: yupResolver(schema()), mode: "onChange" });
+    } = form;
 
     const hasStyles = service?.type === OfferingDetailResponseDtoTypeEnum.WFS || service?.type === OfferingDetailResponseDtoTypeEnum.WMTSTMS;
 
-    const onChangeFormat = (f: FormatType) => {
+    const onChangeFormat = (f: StyleFormat) => {
         setFormat(f);
         reset({ style_files: {} });
     };
@@ -155,9 +152,9 @@ const StyleComponent: FC<StyleComponentProps> = ({ datastoreId, datasheetName, s
     };
 
     const onSubmit = () => {
-        if (checkForm()) {
-            const form = StyleHelper.format(getFormValues(), layers);
-            mutateAdd(form);
+        if (checkForm() && service && format) {
+            const manager = getStyleFilesManager(service, format);
+            manager.prepare(getFormValues(), layers).then((formData) => mutateAdd(formData));
         }
     };
 
@@ -259,52 +256,10 @@ const StyleComponent: FC<StyleComponentProps> = ({ datastoreId, datasheetName, s
                             <RadioButtons legend={"Format du style :"} options={radioOptions} orientation="horizontal" />
                         </>
                     )}
-                    {hasStyles && format === "sld" && (
-                        <>
-                            <p>{`Ajoutez un fichier ${format} par couche présente dans votre service.`}</p>
-                            {Object.keys(layers).map((uid) => {
-                                return (
-                                    <div key={uid} className={fr.cx("fr-grid-row", "fr-mb-3w")}>
-                                        <Upload
-                                            className={fr.cx("fr-input-group")}
-                                            label={layers[uid]}
-                                            hint={`Sélectionner un fichier au format ${format}`}
-                                            state={errors?.style_files?.[uid]?.message ? "error" : "default"}
-                                            stateRelatedMessage={errors?.style_files?.[uid]?.message}
-                                            nativeInputProps={{
-                                                // @ts-expect-error probleme avec ce type de schema
-                                                ...register(`style_files.${uid}`),
-                                                accept: `.${format}`,
-                                            }}
-                                        />
-                                    </div>
-                                );
-                            })}
-                        </>
-                    )}
-                    {hasStyles && format === "qml" && (
-                        <>
-                            <p>{`Ajoutez un fichier ${format} par couche présente dans votre service.`}</p>
-                            {Object.keys(layers).map((uid) => {
-                                return (
-                                    <div key={uid} className={fr.cx("fr-grid-row", "fr-mb-3w")}>
-                                        <Upload
-                                            className={fr.cx("fr-input-group")}
-                                            label={layers[uid]}
-                                            hint={`Sélectionner un fichier au format ${format}`}
-                                            state={errors?.style_files?.[uid]?.message ? "error" : "default"}
-                                            stateRelatedMessage={errors?.style_files?.[uid]?.message}
-                                            nativeInputProps={{
-                                                // @ts-expect-error probleme avec ce type de schema
-                                                ...register(`style_files.${uid}`),
-                                                accept: `.${format}`,
-                                            }}
-                                        />
-                                    </div>
-                                );
-                            })}
-                        </>
-                    )}
+                    {/* @ts-expect-error Problème d'inférence du type */}
+                    {hasStyles && format === "sld" && <UploadLayerStyles form={form} format={format} layers={layers} />}
+                    {/* @ts-expect-error Problème d'inférence du type */}
+                    {hasStyles && format === "qml" && <UploadLayerStyles form={form} format={format} layers={layers} />}
                     {hasStyles && format === "mapbox" && (
                         <>
                             <p className={fr.cx("fr-text--xs", "fr-mb-0")}>
@@ -340,4 +295,4 @@ const StyleComponent: FC<StyleComponentProps> = ({ datastoreId, datasheetName, s
     );
 };
 
-export { addStyleModal, StyleComponent };
+export { addStyleModal, StyleManager };

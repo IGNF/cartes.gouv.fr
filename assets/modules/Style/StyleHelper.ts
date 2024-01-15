@@ -27,23 +27,6 @@ class StyleHelper {
         return numFiles !== 0;
     }
 
-    static format(values: AddStyleFormType, layersMapping: Record<string, string>): FormData {
-        const formData = new FormData();
-
-        formData.append("style_name", values.style_name);
-        for (const [uuid, list] of Object.entries(values.style_files)) {
-            if (!list.length) {
-                continue;
-            }
-            if (uuid in layersMapping) {
-                formData.append(`style_files[${layersMapping[uuid]}]`, list[0]);
-            } else {
-                formData.append("style_files", list[0]);
-            }
-        }
-        return formData;
-    }
-
     /**
      * Retourne le style courant s'il existe
      * @param Style[] styles

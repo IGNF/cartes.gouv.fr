@@ -18,6 +18,7 @@ export type Language = (typeof languages)[number];
 export type ComponentKey =
     | typeof import("./Common").i18n
     | typeof import("./Rights").i18n
+    | typeof import("./Style").i18n
     | typeof import("../pages/communities/AddMember").i18n
     | typeof import("../pages/communities/CommunityMembers").i18n
     | typeof import("../pages/service/metadatas/metadatas-validation-tr").i18n

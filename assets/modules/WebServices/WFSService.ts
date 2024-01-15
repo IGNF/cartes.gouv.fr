@@ -1,12 +1,13 @@
 import { XMLParser } from "fast-xml-parser";
-import GeoJSON from "ol/format/GeoJSON";
 import { Geometry } from "ol/geom";
-import VectorLayer from "ol/layer/Vector";
-import { bbox as bboxStrategy } from "ol/loadingstrategy";
 import { transformExtent } from "ol/proj";
+import { bbox as bboxStrategy } from "ol/loadingstrategy";
+import GeoJSON from "ol/format/GeoJSON";
 import VectorSource from "ol/source/Vector";
+import VectorLayer from "ol/layer/Vector";
 import { Service } from "../../types/app";
-import ServiceUtils from "./ServiceUtils";
+import BaseService from "./BaseService";
+import { getRequestInfo } from "../../utils";
 import olDefaults from "../../data/ol-defaults.json";
 
 type LayerInfo = {
@@ -25,7 +26,7 @@ type WGS84BoundingBox = {
     "ows:UpperCorner": string;
 };
 
-export type FeatureType = {
+type FeatureType = {
     Abstract: string;
     DefaultCRS: string;
     Name: string;
@@ -34,42 +35,47 @@ export type FeatureType = {
     "ows:WGS84BoundingBox": WGS84BoundingBox;
 };
 
-export default class WFSService {
-    _format: GeoJSON;
-    _offering: Service;
-    _requestInfo: Record<string, string> | null;
-    _parser: XMLParser;
-    _featureTypes: FeatureType[];
+class WFSService implements BaseService {
+    service: Service;
+    #format: GeoJSON;
+    #featureTypes: FeatureType[];
+    #parser: XMLParser;
 
-    constructor(offering: Service) {
-        this._offering = offering;
-        this._requestInfo = null; // Variable de travail
-
-        this._format = new GeoJSON();
-        this._featureTypes = [];
-        this._parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: "" });
+    constructor(service: Service) {
+        this.service = service;
+        this.#format = new GeoJSON();
+        this.#featureTypes = [];
+        this.#parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: "" });
     }
 
-    async getLayers(): Promise<VectorLayer<VectorSource<Geometry>>[]> {
-        // const layers: VectorLayer<VectorSource>[] = []; // Version 7.5.1 d'openlayers
+    getLayerNames() {
+        const layers: string[] = [];
+        this.service.urls.forEach((endpointUrl) => {
+            const info = getRequestInfo(endpointUrl.url);
+            layers.push(info.typeNames);
+        });
+        return layers;
+    }
+
+    async getLayers() {
         const layers: VectorLayer<VectorSource<Geometry>>[] = [];
 
-        for (const descUrl of this._offering.urls) {
-            this._requestInfo = ServiceUtils.getRequestInfo(descUrl.url);
-            if (!this._featureTypes.length) {
-                await this._getFeatureTypes();
+        for (const descUrl of this.service.urls) {
+            const requestInfo = getRequestInfo(descUrl.url);
+            if (!this.#featureTypes.length) {
+                await this.#getFeatureTypes(requestInfo);
             }
-            const info = this._getInfo();
+            const info = this.#getInfo(requestInfo);
             if (info) {
-                layers.push(this._getLayer(info));
+                layers.push(this.#getLayer(info));
             }
         }
 
         return layers;
     }
 
-    _getLayer(info: LayerInfo): VectorLayer<VectorSource<Geometry>> {
-        const format = this._format;
+    #getLayer(info: LayerInfo): VectorLayer<VectorSource<Geometry>> {
+        const format = this.#format;
 
         const vectorSource = new VectorSource({
             format: format,
@@ -112,31 +118,29 @@ export default class WFSService {
     /**
      * Recupere les FeatureTypes a partir de la requete GetCapabilities
      */
-    async _getFeatureTypes() {
-        if (this._requestInfo) {
-            const sp = new URLSearchParams();
-            sp.append("service", this._requestInfo.service);
-            sp.append("request", "GetCapabilities");
-            sp.append("version", this._requestInfo.version);
-            const getCapParams = sp.toString();
+    async #getFeatureTypes(requestInfo: Record<string, string>) {
+        const sp = new URLSearchParams();
+        sp.append("service", requestInfo.service);
+        sp.append("request", "GetCapabilities");
+        sp.append("version", requestInfo.version);
+        const getCapParams = sp.toString();
 
-            const getCapUrl = `${this._requestInfo.base_url}?${getCapParams}`;
-            const result = await fetch(getCapUrl);
+        const getCapUrl = `${requestInfo.base_url}?${getCapParams}`;
+        const result = await fetch(getCapUrl);
 
-            const xml = await result.text();
-            const xmlParsed = this._parser.parse(xml);
-            this._featureTypes = xmlParsed["wfs:WFS_Capabilities"]["FeatureTypeList"]["FeatureType"];
-        }
+        const xml = await result.text();
+        const xmlParsed = this.#parser.parse(xml);
+        this.#featureTypes = xmlParsed["wfs:WFS_Capabilities"]["FeatureTypeList"]["FeatureType"];
     }
 
     /**
      * Recupere les infomations de la layer si celle-ci existe dans les FeatureTypes
      * @returns
      */
-    _getInfo(): LayerInfo | null {
+    #getInfo(requestInfo: Record<string, string>): LayerInfo | null {
         let featureTypeInfo;
 
-        for (const featureType of this._featureTypes) {
+        for (const featureType of this.#featureTypes) {
             const info: Partial<FeatureType> = {};
             ["Name", "Title", "Abstract"].forEach((key) => {
                 info[key] = featureType[key];
@@ -144,8 +148,8 @@ export default class WFSService {
             const match = featureType["DefaultCRS"].match(/urn:ogc:def:crs:EPSG::(\d+)/);
             info["DefaultCRS"] = match ? `EPSG:${match[1]}` : "EPSG:4326";
 
-            if (this._requestInfo && info.Name === this._requestInfo.typeNames) {
-                featureTypeInfo = { base_url: this._requestInfo.base_url, version: this._requestInfo.version, ...info };
+            if (info.Name === requestInfo.typeNames) {
+                featureTypeInfo = { base_url: requestInfo.base_url, version: requestInfo.version, ...info };
 
                 let keywords = featureType["ows:Keywords"];
                 if (!Array.isArray(keywords)) {
@@ -162,3 +166,5 @@ export default class WFSService {
         return featureTypeInfo;
     }
 }
+
+export default WFSService;

@@ -4,6 +4,7 @@ import Map from "ol/Map";
 import View from "ol/View";
 import WMTS, { optionsFromCapabilities } from "ol/source/WMTS";
 import TileLayer from "ol/layer/Tile";
+import BaseLayer from "ol/layer/Base";
 import { createOrUpdate } from "ol/extent";
 import { defaults as defaultInteractions } from "ol/interaction";
 import { fromLonLat, transformExtent } from "ol/proj";
@@ -18,10 +19,26 @@ import "../../sass/components/map-view.scss";
 import "../../sass/components/ol.scss";
 import { OfferingDetailResponseDtoTypeEnum } from "../../types/entrepot";
 import getWebService from "../../modules/WebServices/WebServices";
-import StyleHelper from "../../modules/WebServices/StyleHelper";
+import StyleHelper from "../../modules/Style/StyleHelper";
 
 type RMapProps = {
     service: Service;
+};
+
+/**
+ * Recherche d'un controle de la carte par son nom
+ * @param map La carte
+ * @param className Nom de la classe du control
+ * @returns
+ */
+const getControl = (map: Map | undefined, className: string): typeof LayerSwitcher | typeof GetFeatureInfo => {
+    if (!map) return undefined;
+
+    let control;
+    map.getControls().forEach((c) => {
+        if (c.constructor.name === className) control = c;
+    });
+    return control;
 };
 
 const RMap: FC<RMapProps> = ({ service }) => {
@@ -53,23 +70,25 @@ const RMap: FC<RMapProps> = ({ service }) => {
     }, [service.type]);
 
     /**
-     * Retourne le controle correspondant au nom
-     * @param name
-     * @returns
+     * Ajout de la couche dans la carte (+ dans le layerSwitcher)
      */
-    const getControl = useCallback((className: string): typeof LayerSwitcher | typeof GetFeatureInfo => {
-        let control;
-        if (mapRef.current) {
-            mapRef.current.getControls().forEach((c) => {
-                if (c.constructor.name === className) control = c;
-            });
-        }
-        return control;
-    }, []);
+    const addLayer = useCallback(
+        (layer: BaseLayer, applyStyle: boolean = true): void => {
+            if (applyStyle) {
+                StyleHelper.applyStyle(layer, currentStyle);
+            }
 
-    const ready: boolean = useMemo(() => {
-        return !!(mapRef.current && capabilities && extent);
-    }, [capabilities, extent]);
+            // Ajout du layer dans la carte et dans le LayerSwitcher
+            mapRef.current?.addLayer(layer);
+            getControl(mapRef.current, "LayerSwitcher")?.addLayer(layer, {
+                title: layer.get("title"),
+                description: layer.get("abstract"),
+            });
+        },
+        [currentStyle]
+    );
+
+    const ready = !!(capabilities && extent);
 
     useEffect(() => {
         // Creation de la carte
@@ -117,17 +136,6 @@ const RMap: FC<RMapProps> = ({ service }) => {
 
     useEffect(() => {
         (async () => {
-            const addLayer = (layer) => {
-                StyleHelper.applyStyle(layer, currentStyle);
-
-                // Ajout du layer dans la carte et dans le LayerSwitcher
-                mapRef.current?.addLayer(layer);
-                getControl("LayerSwitcher")?.addLayer(layer, {
-                    title: layer.get("title"),
-                    description: layer.get("abstract"),
-                });
-            };
-
             if (!ready) return;
 
             // Ajout de la couche de fond PlanIgnV2
@@ -157,14 +165,14 @@ const RMap: FC<RMapProps> = ({ service }) => {
                     gfiLayers.push({ obj: layer });
                 }
             });
-            getControl("GetFeatureInfo")?.setLayers(gfiLayers);
+            getControl(mapRef.current, "GetFeatureInfo")?.setLayers(gfiLayers);
 
             // On zoom sur l'extent de la couche au premier rendu
             if (extent) {
                 mapRef.current?.getView().fit(extent);
             }
         })();
-    }, [ready, service, capabilities, currentStyle, getControl, extent, gfinfo]);
+    }, [ready, service, capabilities, currentStyle, addLayer, extent, gfinfo]);
 
     return <div className={"map-view"} ref={mapTargetRef} />;
 };

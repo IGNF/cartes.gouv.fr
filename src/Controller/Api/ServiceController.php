@@ -2,18 +2,20 @@
 
 namespace App\Controller\Api;
 
-use App\Constants\EntrepotApi\ConfigurationStatuses;
-use App\Constants\EntrepotApi\OfferingTypes;
-use App\Constants\EntrepotApi\StaticFileTypes;
 use App\Controller\StyleTrait;
+use App\Services\EntrepotApiService;
 use App\Exception\CartesApiException;
 use App\Exception\EntrepotApiException;
-use App\Services\EntrepotApiService;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Constants\EntrepotApi\OfferingTypes;
+use App\Constants\EntrepotApi\StaticFileTypes;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Constants\EntrepotApi\ConfigurationStatuses;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 #[Route(
     '/api/datastores/{datastoreId}/offerings',
@@ -25,9 +27,18 @@ class ServiceController extends AbstractController implements ApiControllerInter
 {
     use StyleTrait;
 
+    private HttpClientInterface $httpClient;
+    
     public function __construct(
-        private EntrepotApiService $entrepotApiService
+        private EntrepotApiService $entrepotApiService,
+        ParameterBagInterface $parameterBag,
+        HttpClientInterface $httpClient
     ) {
+        $this->httpClient = $httpClient->withOptions([
+            'proxy' => $parameterBag->get('http_proxy'),
+            'verify_peer' => false,
+            'verify_host' => false,
+        ]);
     }
 
     #[Route('', name: 'get_offerings_list', methods: ['GET'])]
@@ -52,6 +63,20 @@ class ServiceController extends AbstractController implements ApiControllerInter
         try {
             $offering = $this->entrepotApiService->configuration->getOffering($datastoreId, $offeringId);
             $offering['configuration'] = $this->entrepotApiService->configuration->get($datastoreId, $offering['configuration']['_id']);
+
+            // Metadatas (TMS)
+            if (OfferingTypes::WMTSTMS === $offering['type']) {
+                $urls = array_values(array_filter($offering['urls'], static function ($url) {
+                    return $url['type'] == 'TMS';
+                }));
+                $url = $urls[0]['url'] . '/metadata.json';
+                
+                $response = $this->httpClient->request('GET', $url);
+                if (Response::HTTP_OK != $response->getStatusCode()) {
+                    throw new EntrepotApiException("Request $url failed");
+                }
+                $offering['tms_metadata'] = $response->toArray();
+            }
 
             $styles = [];
             if (OfferingTypes::WFS === $offering['type'] || OfferingTypes::WMTSTMS === $offering['type']) {

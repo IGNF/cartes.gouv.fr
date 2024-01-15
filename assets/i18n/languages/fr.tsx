@@ -1,6 +1,7 @@
 import type { Translations } from "../i18n";
 import { commonFrTranslations } from "../Common";
 import { RightsFrTranslations } from "../Rights";
+import { StyleFrTranslations } from "../Style";
 import { AddMemberFrTranslations } from "../../pages/communities/AddMember";
 import { CommunityMembersFrTranslations } from "../../pages/communities/CommunityMembers";
 import { ValidationMetadatasFrTranslations } from "../../pages/service/metadatas/metadatas-validation-tr";
@@ -14,6 +15,7 @@ import { DatastoreManageStorageFrTranslations } from "../../pages/datastore/Data
 export const translations: Translations<"fr"> = {
     Common: commonFrTranslations,
     Rights: RightsFrTranslations,
+    Style: StyleFrTranslations,
     AddMember: AddMemberFrTranslations,
     CommunityMembers: CommunityMembersFrTranslations,
     ValidationMetadatas: ValidationMetadatasFrTranslations,
