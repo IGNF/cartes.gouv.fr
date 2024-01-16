@@ -4,6 +4,9 @@ import MapboxParser from "geostyler-mapbox-parser";
 import { Service, StyleForm, StyleFormat, TmsMetadata } from "../../types/app";
 import BaseStyleFilesManager from "./BaseStyleFilesManager";
 import { Sources } from "mapbox-gl";
+import QGISStyleParser from "geostyler-qgis-parser";
+import { declareComponentKeys } from "i18nifty";
+import { Translations, getTranslation } from "../../i18n/i18n";
 
 type PartialAnyLayer =
     | mapboxgl.BackgroundLayer
@@ -15,6 +18,8 @@ type PartialAnyLayer =
     | mapboxgl.LineLayer
     | mapboxgl.RasterLayer
     | mapboxgl.SymbolLayer;
+
+const { t } = getTranslation("TMSStyleFilesManager");
 
 export default class TMSStyleFilesManager implements BaseStyleFilesManager {
     readonly service: Service;
@@ -29,24 +34,19 @@ export default class TMSStyleFilesManager implements BaseStyleFilesManager {
 
     async prepare(values: StyleForm, layersMapping: Record<string, string>): Promise<FormData> {
         if (!this.#metadata) {
-            throw new Error("tms_metadata n'est pas defini dans le service");
+            throw new Error(t("metadata_not_defined"));
         }
 
-        const formData = new FormData();
         switch (this.inputFormat) {
             case "sld":
             case "qml":
                 return this.#merge(values, layersMapping);
-            case "mapbox": // TODO
-                break;
+            case "mapbox":
+                return this.#buildMapbox(values);
         }
-        return formData;
     }
 
     async #merge(values: StyleForm, layersMapping: Record<string, string>): Promise<FormData> {
-        const formData = new FormData();
-        formData.append("style_name", values.style_name);
-
         const style: mapboxgl.Style = this.#buildEmptyStyle();
 
         for (const [uuid, files] of Object.entries(values.style_files)) {
@@ -56,8 +56,46 @@ export default class TMSStyleFilesManager implements BaseStyleFilesManager {
             }
         }
 
-        const id = uuidv4();
-        formData.append(`style_files[${id}]`, new Blob([JSON.stringify(style)], { type: "application/json" }));
+        const layer = "no_layer";
+        const blob = new Blob([JSON.stringify(style)], { type: "application/json" });
+
+        const formData = new FormData();
+        formData.append("style_name", values.style_name);
+        formData.append(`style_files[${layer}]`, new File([blob], `${layer}.json`));
+
+        return formData;
+    }
+
+    async #buildMapbox(values: StyleForm) {
+        if (!this.#metadata) {
+            throw new Error(t("metadata_not_defined"));
+        }
+
+        const files = values.style_files["no_layer"];
+
+        const styleString = await files[0].text();
+        const mapboxStyle = JSON.parse(styleString);
+
+        mapboxStyle.sources = {
+            [this.#metadata.name]: {
+                type: "vector",
+                tiles: this.#metadata.tiles,
+                minzoom: this.#metadata.minzoom,
+                maxzoom: this.#metadata.maxzoom,
+            },
+        };
+
+        mapboxStyle.layers.forEach((layer) => {
+            layer.id = uuidv4();
+            layer.source = this.#metadata?.name;
+        });
+
+        const layer = "no_layer";
+        const blob = new Blob([JSON.stringify(mapboxStyle)], { type: "application/json" });
+
+        const formData = new FormData();
+        formData.append("style_name", values.style_name);
+        formData.append(`style_files[${layer}]`, new File([blob], `${layer}.json`));
 
         return formData;
     }
@@ -65,14 +103,14 @@ export default class TMSStyleFilesManager implements BaseStyleFilesManager {
     async #toMapboxLayer(layerName: string, file: File) {
         const styleString = await file.text();
 
-        const sldParser = new SldStyleParser({ sldVersion: "1.0.0" });
-        const { output } = await sldParser.readStyle(styleString);
+        const parser = this.inputFormat === "sld" ? new SldStyleParser({ sldVersion: "1.0.0" }) : new QGISStyleParser();
+        const { output } = await parser.readStyle(styleString);
 
-        if (output === undefined) throw Error("Erreur dans le 'parsing' du fichier");
+        if (output === undefined) throw Error(t("parsing_error"));
 
         const mbParser = new MapboxParser();
         const { output: mbStyle } = await mbParser.writeStyle(output);
-        if (mbStyle === undefined) throw Error("Erreur dans l'écriture du style mapbox");
+        if (mbStyle === undefined) throw Error(t("writing_error"));
 
         const layer = mbStyle.layers[0] as PartialAnyLayer;
 
@@ -84,7 +122,7 @@ export default class TMSStyleFilesManager implements BaseStyleFilesManager {
 
     #buildEmptyStyle(): mapboxgl.Style {
         if (!this.#metadata) {
-            throw new Error("tms_metadata n'est pas defini dans le service");
+            throw new Error(t("metadata_not_defined"));
         }
 
         const sources: Sources = {
@@ -103,3 +141,16 @@ export default class TMSStyleFilesManager implements BaseStyleFilesManager {
         };
     }
 }
+
+export const { i18n } = declareComponentKeys<"metadata_not_defined" | "parsing_error" | "writing_error">()("TMSStyleFilesManager");
+
+export const TMSStyleFilesManagerFrTranslations: Translations<"fr">["TMSStyleFilesManager"] = {
+    metadata_not_defined: "tms_metadata n'est pas defini dans le service",
+    parsing_error: "Erreur dans l'analyse du fichier",
+    writing_error: "Erreur dans l'écriture du style mapbox",
+};
+export const TMSStyleFilesManagerEnTranslations: Translations<"en">["TMSStyleFilesManager"] = {
+    metadata_not_defined: "tms_metadata is not defined in service",
+    parsing_error: "File parsing error",
+    writing_error: "Writing mapbox style error",
+};

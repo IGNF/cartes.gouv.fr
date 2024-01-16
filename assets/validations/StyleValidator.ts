@@ -11,7 +11,7 @@ class StyleValidator {
         this.format = format;
     }
 
-    async validate(layerName: string | undefined, files: FileList, ctx: TestContext): Promise<ValidationError | boolean> {
+    async validate(files: FileList, ctx: TestContext): Promise<ValidationError | boolean> {
         const extension = this.format === "mapbox" ? "json" : this.format;
 
         const file = files[0];

@@ -21,6 +21,7 @@ import RQKeys from "../../../../modules/RQKeys";
 import UploadLayerStyles from "./UploadLayerStyles";
 import getWebService from "../../../../modules/WebServices/WebServices";
 import getStyleFilesManager from "../../../../modules/Style/StyleFilesManager";
+import { getTranslation } from "../../../../i18n/i18n";
 
 type StyleManagerProps = {
     datastoreId: string;
@@ -38,6 +39,8 @@ const addStyleModal = createModal({
     id: "style-modal",
     isOpenedByDefault: false,
 });
+
+const { t: tCommon } = getTranslation("Common");
 
 const StyleManager: FC<StyleManagerProps> = ({ datastoreId, datasheetName, service, styleNames }) => {
     const schema = () => {
@@ -63,7 +66,7 @@ const StyleManager: FC<StyleManagerProps> = ({ datastoreId, datasheetName, servi
                                 if (file === undefined) {
                                     return true;
                                 }
-                                return validations.getValidator(service, format).validate(layers[uuid], value as FileList, ctx);
+                                return validations.getValidator(service, format).validate(value as FileList, ctx);
                             },
                         });
                     });
@@ -86,7 +89,7 @@ const StyleManager: FC<StyleManagerProps> = ({ datastoreId, datasheetName, servi
                         if (file === undefined) {
                             return true;
                         }
-                        return validations.getValidator(service, format).validate(undefined, value as FileList, ctx);
+                        return validations.getValidator(service, format).validate(value as FileList, ctx);
                     },
                 });
                 return yup.object().shape(styleFiles);
@@ -140,8 +143,6 @@ const StyleManager: FC<StyleManagerProps> = ({ datastoreId, datasheetName, servi
     };
 
     const checkForm = (): boolean => {
-        setError(undefined);
-
         const values = getFormValues();
         const b = StyleHelper.check(values);
         if (!b) {
@@ -152,9 +153,15 @@ const StyleManager: FC<StyleManagerProps> = ({ datastoreId, datasheetName, servi
     };
 
     const onSubmit = () => {
+        setError(undefined);
         if (checkForm() && service && format) {
             const manager = getStyleFilesManager(service, format);
-            manager.prepare(getFormValues(), layers).then((formData) => mutateAdd(formData));
+            manager
+                .prepare(getFormValues(), layers)
+                .then((formData) => mutateAdd(formData))
+                .catch((e: Error) => {
+                    setError({ message: e.message, severity: "error" });
+                });
         }
     };
 
@@ -216,7 +223,7 @@ const StyleManager: FC<StyleManagerProps> = ({ datastoreId, datasheetName, servi
             title={"Ajouter un style"}
             buttons={[
                 {
-                    children: "Annuler",
+                    children: tCommon("cancel"),
                     priority: "secondary",
                     doClosesModal: false,
                     onClick: () => {
@@ -242,6 +249,12 @@ const StyleManager: FC<StyleManagerProps> = ({ datastoreId, datasheetName, servi
                             description={error?.message}
                             severity={error?.severity ?? "error"}
                         />
+                    )}
+                    {isPending && (
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-2w")}>
+                            <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " icons-spin"} />
+                            <h6 className={fr.cx("fr-m-0")}>{tCommon("adding")}</h6>
+                        </div>
                     )}
                     {hasStyles && (
                         <>
@@ -281,12 +294,6 @@ const StyleManager: FC<StyleManagerProps> = ({ datastoreId, datasheetName, servi
                                 />
                             </div>
                         </>
-                    )}
-                    {isPending && (
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " icons-spin"} />
-                            <h6 className={fr.cx("fr-m-0")}>Ajout en cours ...</h6>
-                        </div>
                     )}
                 </div>
             </div>

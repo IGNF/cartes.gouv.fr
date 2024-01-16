@@ -10,6 +10,8 @@ import { datastoreNavItemsFrTranslations } from "../../config/datastoreNavItems"
 import { contactFrTranslations } from "../../pages/contact/Contact";
 import { DatasheetViewFrTranslations } from "../../pages/datasheet/DatasheetView/DatasheetView";
 import { sldStyleValidationFrTranslations } from "../../validations/sldStyle";
+import { mapboxStyleValidationFrTranslations } from "../../validations/MapboxStyleValidator";
+import { TMSStyleFilesManagerFrTranslations } from "../../modules/Style/TMSStyleFilesManager";
 import { DatastoreManageStorageFrTranslations } from "../../pages/datastore/DatastoreManageStorage/DatastoreManageStorage";
 
 export const translations: Translations<"fr"> = {
@@ -24,5 +26,7 @@ export const translations: Translations<"fr"> = {
     datastoreNavItems: datastoreNavItemsFrTranslations,
     DatasheetView: DatasheetViewFrTranslations,
     sldStyleValidation: sldStyleValidationFrTranslations,
+    mapboxStyleValidation: mapboxStyleValidationFrTranslations,
+    TMSStyleFilesManager: TMSStyleFilesManagerFrTranslations,
     DatastoreManageStorage: DatastoreManageStorageFrTranslations,
 };

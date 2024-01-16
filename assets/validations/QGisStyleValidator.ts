@@ -8,8 +8,8 @@ export default class QGisStyleValidator extends StyleValidator {
         super(service, format);
     }
 
-    async validate(layerName: string | undefined, files: FileList, ctx: TestContext): Promise<ValidationError | boolean> {
-        const validation = await super.validate(layerName, files, ctx);
+    async validate(files: FileList, ctx: TestContext): Promise<ValidationError | boolean> {
+        const validation = await super.validate(files, ctx);
         if (validation instanceof ValidationError) {
             return validation;
         }
@@ -21,9 +21,25 @@ export default class QGisStyleValidator extends StyleValidator {
 
         const result = await qgisParser.readStyle(styleString);
 
-        // TODO FAIRE L'ANALYSE
-        // const { output, warnings, errors, unsupportedProperties } = result;
-        console.log(result);
+        const { warnings, errors, unsupportedProperties } = result;
+
+        if (errors) {
+            const invalidXmlSyntax = !!errors.find((e) => e instanceof TypeError);
+
+            if (invalidXmlSyntax) {
+                return ctx.createError({ message: "xml_invalid" });
+            } else {
+                return ctx.createError({ message: JSON.stringify(errors) });
+            }
+        }
+
+        if (unsupportedProperties) {
+            return ctx.createError({ message: JSON.stringify(unsupportedProperties) });
+        }
+
+        if (warnings) {
+            return ctx.createError({ message: JSON.stringify(warnings) });
+        }
 
         return true;
     }

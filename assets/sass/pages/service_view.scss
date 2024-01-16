@@ -1,3 +1,7 @@
+.fr-radio-rich input[type="radio"] + label {
+    min-height: unset;
+}
+
 .fr-radio-rich input[type="radio"] + label::before {
     all: unset;
 }

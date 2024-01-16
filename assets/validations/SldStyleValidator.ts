@@ -8,8 +8,8 @@ export default class SldStyleValidator extends StyleValidator {
         super(service, format);
     }
 
-    async validate(layerName: string | undefined, files: FileList, ctx: TestContext): Promise<ValidationError | boolean> {
-        const validation = await super.validate(layerName, files, ctx);
+    async validate(files: FileList, ctx: TestContext): Promise<ValidationError | boolean> {
+        const validation = await super.validate(files, ctx);
         if (validation instanceof ValidationError) {
             return validation;
         }
