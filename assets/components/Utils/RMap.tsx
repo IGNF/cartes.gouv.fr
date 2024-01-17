@@ -11,18 +11,30 @@ import { fromLonLat, transformExtent } from "ol/proj";
 import GetFeatureInfo from "geoportal-extensions-openlayers/src/OpenLayers/Controls/GetFeatureInfo";
 import LayerSwitcher from "geoportal-extensions-openlayers/src/OpenLayers/Controls/LayerSwitcher";
 import SearchEngine from "geoportal-extensions-openlayers/src/OpenLayers/Controls/SearchEngine";
-import type { CartesStyle, Service, TypeInfosWithBbox } from "../../types/app";
+import type { CartesStyle /*, Service, TypeInfosWithBbox*/ } from "../../types/app";
 import useCapabilities from "../../hooks/useCapabilities";
 import olDefaults from "../../data/ol-defaults.json";
 import "geoportal-extensions-openlayers/dist/GpPluginOpenLayers.css";
 import "../../sass/components/map-view.scss";
 import "../../sass/components/ol.scss";
 import { OfferingDetailResponseDtoTypeEnum } from "../../types/entrepot";
-import getWebService from "../../modules/WebServices/WebServices";
 import StyleHelper from "../../modules/Style/StyleHelper";
 
+export interface Initial {
+    type: OfferingDetailResponseDtoTypeEnum;
+    bbox?: {
+        west: number;
+        south: number;
+        east: number;
+        north: number;
+    };
+    currentStyle?: CartesStyle;
+    layers: BaseLayer[];
+}
+
 type RMapProps = {
-    service: Service;
+    initial: Initial;
+    currentStyle?: CartesStyle;
 };
 
 /**
@@ -41,7 +53,7 @@ const getControl = (map: Map | undefined, className: string): typeof LayerSwitch
     return control;
 };
 
-const RMap: FC<RMapProps> = ({ service }) => {
+const RMap: FC<RMapProps> = ({ initial, currentStyle }) => {
     const mapTargetRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<Map>();
 
@@ -49,35 +61,30 @@ const RMap: FC<RMapProps> = ({ service }) => {
 
     // Extent dans la configuration
     const extent = useMemo(() => {
-        const bbox = (service.configuration.type_infos as TypeInfosWithBbox)?.bbox;
         let extent;
 
+        const bbox = initial.bbox;
         if (bbox) {
             extent = createOrUpdate(bbox.west, bbox.south, bbox.east, bbox.north);
             extent = transformExtent(extent, "EPSG:4326", olDefaults.projection);
         }
         return extent;
-    }, [service.configuration.type_infos]);
-
-    const currentStyle: CartesStyle | undefined = useMemo(() => {
-        return service.configuration.styles.find((style) => style.current === true);
-    }, [service.configuration.styles]);
+    }, [initial.bbox]);
 
     const gfinfo = useMemo(() => {
         return [OfferingDetailResponseDtoTypeEnum.WFS, OfferingDetailResponseDtoTypeEnum.WMSVECTOR, OfferingDetailResponseDtoTypeEnum.WMTSTMS].includes(
-            service.type
+            initial.type
         );
-    }, [service.type]);
+    }, [initial.type]);
 
     /**
      * Ajout de la couche dans la carte (+ dans le layerSwitcher)
      */
     const addLayer = useCallback(
-        (layer: BaseLayer, applyStyle: boolean = true): void => {
-            if (applyStyle) {
-                StyleHelper.applyStyle(layer, currentStyle);
+        (layer: BaseLayer): void => {
+            if (initial.currentStyle) {
+                StyleHelper.applyStyle(layer, initial.currentStyle);
             }
-
             // Ajout du layer dans la carte et dans le LayerSwitcher
             mapRef.current?.addLayer(layer);
             getControl(mapRef.current, "LayerSwitcher")?.addLayer(layer, {
@@ -85,10 +92,8 @@ const RMap: FC<RMapProps> = ({ service }) => {
                 description: layer.get("abstract"),
             });
         },
-        [currentStyle]
+        [initial.currentStyle]
     );
-
-    const ready = !!(capabilities && extent);
 
     useEffect(() => {
         // Creation de la carte
@@ -136,7 +141,7 @@ const RMap: FC<RMapProps> = ({ service }) => {
 
     useEffect(() => {
         (async () => {
-            if (!ready) return;
+            if (!capabilities) return;
 
             // Ajout de la couche de fond PlanIgnV2
             const wmtsOptions = optionsFromCapabilities(capabilities, {
@@ -152,11 +157,12 @@ const RMap: FC<RMapProps> = ({ service }) => {
                     opacity: 1,
                     source: new WMTS(wmtsOptions),
                 });
+                layer.set("name", capLayer?.Identifier);
                 layer.set("title", capLayer?.Title);
                 addLayer(layer);
             }
 
-            const layers = await getWebService(service).getLayers();
+            const layers = initial.layers;
 
             const gfiLayers: object[] = [];
             layers.forEach((layer) => {
@@ -172,7 +178,19 @@ const RMap: FC<RMapProps> = ({ service }) => {
                 mapRef.current?.getView().fit(extent);
             }
         })();
-    }, [ready, service, capabilities, currentStyle, addLayer, extent, gfinfo]);
+    }, [capabilities, extent, addLayer, gfinfo, initial.layers]);
+
+    useEffect(() => {
+        if (!mapRef.current) {
+            return;
+        }
+        const layers = mapRef.current.getLayers().getArray();
+        layers.forEach((layer) => {
+            if (olDefaults.default_background_layer !== layer.get("name")) {
+                StyleHelper.applyStyle(layer, currentStyle);
+            }
+        });
+    }, [currentStyle]);
 
     return <div className={"map-view"} ref={mapTargetRef} />;
 };

@@ -6,7 +6,7 @@ import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
 import { FieldsetProps } from "@codegouvfr/react-dsfr/shared/Fieldset";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FC, useMemo } from "react";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import api from "../../../api";
 import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
 import { StyleManager, addStyleModal } from "./Style/StyleManager";
@@ -16,12 +16,13 @@ import TextCopyToClipboard from "../../../components/Utils/TextCopyToClipboard";
 import RQKeys from "../../../modules/RQKeys";
 import { type CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
-import { CartesStyle, type Service } from "../../../types/app";
+import { CartesStyle, TypeInfosWithBbox, type Service } from "../../../types/app";
 import { OfferingDetailResponseDtoTypeEnum } from "../../../types/entrepot";
 import Wait from "../../../components/Utils/Wait";
 import { getTranslation } from "../../../i18n/i18n";
 import "../../../sass/pages/service_view.scss";
-
+import getWebService from "../../../modules/WebServices/WebServices";
+import type { Initial } from "../../../components/Utils/RMap";
 const { t: tStyle } = getTranslation("Style");
 
 type ServiceViewProps = {
@@ -45,14 +46,41 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
         refetchInterval: 60000,
     });
 
+    const [initialValues, setInitialValues] = useState<Initial>();
+    const [currentStyle, setCurrentStyle] = useState<CartesStyle | undefined>();
+
+    const getCurrentStyle = useCallback(() => {
+        if (serviceQuery.data?.configuration.styles) {
+            return serviceQuery.data?.configuration.styles.find((style) => style.current === true);
+        }
+    }, [serviceQuery.data?.configuration.styles]);
+
+    useEffect(() => {
+        if (!serviceQuery.data) return;
+
+        let initial: Initial = { type: serviceQuery.data.type, bbox: undefined, layers: [] };
+
+        const infos = serviceQuery.data.configuration.type_infos as TypeInfosWithBbox;
+        if (infos.bbox) {
+            initial = { ...initial, bbox: infos.bbox };
+        }
+
+        const styles = serviceQuery.data.configuration.styles;
+        const currentStyle = styles.find((style) => style.current === true);
+        initial = { ...initial, currentStyle: currentStyle };
+
+        getWebService(serviceQuery.data)
+            .getLayers()
+            .then((layers) => {
+                initial = { ...initial, layers: layers ?? [] };
+                setInitialValues(initial);
+            });
+    }, [serviceQuery.data]);
+
     // Les styles
     const styles: CartesStyle[] = useMemo(() => {
         return serviceQuery.data?.configuration.styles ?? [];
     }, [serviceQuery.data?.configuration.styles]);
-
-    const currentStyle: CartesStyle | undefined = useMemo(() => {
-        return styles.find((style) => style.current === true);
-    }, [styles]);
 
     // Recherche du nom des styles dans tous les services de la fiche de donnees datasheetName
     const styleNames = useMemo<string[]>(() => {
@@ -126,14 +154,11 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
                     if (oldService) {
                         const newService = { ...oldService } as Service;
                         newService.configuration.styles = styles;
+                        setCurrentStyle(getCurrentStyle());
                         return newService;
                     }
                 });
             }
-            /* if (serviceQuery?.data !== undefined) {
-                queryClient.refetchQueries({ queryKey: RQKeys.datastore_offering(datastoreId, serviceQuery?.data?._id) });
-                queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName) });
-            } */
         },
     });
 
@@ -151,6 +176,7 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
                     if (oldService) {
                         const newService = { ...oldService } as Service;
                         newService.configuration.styles = styles;
+                        setCurrentStyle(getCurrentStyle());
                         return newService;
                     }
                 });
@@ -177,7 +203,7 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
                 />
             ),
             nativeInputProps: {
-                checked: currentStyle?.name === style.name,
+                checked: style?.current === true,
                 onChange: () => mutateChangeCurrentStyle(style.name),
             },
         };
@@ -198,37 +224,6 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
                         </p>
                     </div>
                     {styles && styles.length !== 0 && <RadioButtons legend={"Mes styles :"} options={radioOptions} />}
-                    {/* {styles && styles.length !== 0 && (
-                        <RadioButtons
-                            legend="Légende pour l’ensemble de champs"
-                            name="radio"
-                            options={[
-                                {
-                                    illustration: <img alt="illustration" src="https://placehold.it/100x100" />,
-                                    label: "Label radio",
-                                    nativeInputProps: {
-                                        value: "value1",
-                                    },
-                                },
-                                {
-                                    illustration: <img alt="illustration" src="https://placehold.it/100x100" />,
-                                    label: "Label radio 2",
-                                    nativeInputProps: {
-                                        value: "value2",
-                                    },
-                                },
-                                {
-                                    illustration: <img alt="illustration" src="https://placehold.it/100x100" />,
-                                    label: "Label radio 3",
-                                    nativeInputProps: {
-                                        value: "value3",
-                                    },
-                                },
-                            ]}
-                            state="default"
-                            stateRelatedMessage="State description"
-                        />
-                    )} */}
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
                         <Button onClick={() => addStyleModal.open()}>Ajouter un style</Button>
                     </div>
@@ -267,7 +262,7 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
                     </div>
 
                     <div className={fr.cx("fr-grid-row", "fr-mb-4w")}>
-                        <div className={fr.cx("fr-col-12", "fr-col-md-8")}>{serviceQuery.data && <RMap service={serviceQuery.data} />}</div>
+                        <div className={fr.cx("fr-col-12", "fr-col-md-8")}>{initialValues && <RMap initial={initialValues} currentStyle={currentStyle} />}</div>
                         <div className={fr.cx("fr-col-12", "fr-col-md-4", "fr-p-1w", "fr-px-2w")}>
                             <Tabs tabs={tabs} />
                         </div>
