@@ -22,7 +22,7 @@ import Wait from "../../../components/Utils/Wait";
 import { getTranslation } from "../../../i18n/i18n";
 import "../../../sass/pages/service_view.scss";
 import getWebService from "../../../modules/WebServices/WebServices";
-import type { Initial } from "../../../components/Utils/RMap";
+import type { MapInitial } from "../../../components/Utils/RMap";
 const { t: tStyle } = getTranslation("Style");
 
 type ServiceViewProps = {
@@ -46,7 +46,7 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
         refetchInterval: 60000,
     });
 
-    const [initialValues, setInitialValues] = useState<Initial>();
+    const [initialValues, setInitialValues] = useState<MapInitial>();
     const [currentStyle, setCurrentStyle] = useState<CartesStyle | undefined>();
 
     const getCurrentStyle = useCallback(() => {
@@ -58,7 +58,7 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
     useEffect(() => {
         if (!serviceQuery.data) return;
 
-        let initial: Initial = { type: serviceQuery.data.type, bbox: undefined, layers: [] };
+        let initial: MapInitial = { type: serviceQuery.data.type, bbox: undefined, layers: [] };
 
         const infos = serviceQuery.data.configuration.type_infos as TypeInfosWithBbox;
         if (infos.bbox) {

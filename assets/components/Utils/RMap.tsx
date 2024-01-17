@@ -11,16 +11,16 @@ import { fromLonLat, transformExtent } from "ol/proj";
 import GetFeatureInfo from "geoportal-extensions-openlayers/src/OpenLayers/Controls/GetFeatureInfo";
 import LayerSwitcher from "geoportal-extensions-openlayers/src/OpenLayers/Controls/LayerSwitcher";
 import SearchEngine from "geoportal-extensions-openlayers/src/OpenLayers/Controls/SearchEngine";
-import type { CartesStyle /*, Service, TypeInfosWithBbox*/ } from "../../types/app";
+import { OfferingDetailResponseDtoTypeEnum } from "../../types/entrepot";
+import type { CartesStyle } from "../../types/app";
+import StyleHelper from "../../modules/Style/StyleHelper";
 import useCapabilities from "../../hooks/useCapabilities";
 import olDefaults from "../../data/ol-defaults.json";
 import "geoportal-extensions-openlayers/dist/GpPluginOpenLayers.css";
 import "../../sass/components/map-view.scss";
 import "../../sass/components/ol.scss";
-import { OfferingDetailResponseDtoTypeEnum } from "../../types/entrepot";
-import StyleHelper from "../../modules/Style/StyleHelper";
 
-export interface Initial {
+export interface MapInitial {
     type: OfferingDetailResponseDtoTypeEnum;
     bbox?: {
         west: number;
@@ -33,7 +33,7 @@ export interface Initial {
 }
 
 type RMapProps = {
-    initial: Initial;
+    initial: MapInitial;
     currentStyle?: CartesStyle;
 };
 
