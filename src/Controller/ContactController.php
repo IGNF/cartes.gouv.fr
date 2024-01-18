@@ -189,9 +189,9 @@ class ContactController extends AbstractController
                 'message' => $data['message'],
             ]);
 
-            // Envoi du mail à l'adresse du support
+            // Envoi du mail à l'adresse de contact de la communauté
             $this->mailerService->sendMail(
-                $supportAddress,
+                $data['community']['contact'],
                 '[cartes.gouv.fr] Demande pour rejoindre une communauté',
                 'Mailer/join_community.html.twig',
                 $mailParams
