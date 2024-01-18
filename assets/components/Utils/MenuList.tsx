@@ -114,7 +114,7 @@ const MenuList: FC<MenuListProps> = ({ menuOpenButtonProps, items = [], disabled
                                 </MenuItem>
                             );
 
-                            if (item.linkProps) {
+                            if (item.linkProps && !item.disabled) {
                                 return (
                                     <a key={i} {...item.linkProps}>
                                         {itemContent}
