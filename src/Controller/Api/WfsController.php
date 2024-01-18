@@ -68,13 +68,13 @@ class WfsController extends AbstractController implements ApiControllerInterface
 
             // TODO : implémentation partielle, tous les partages ne sont pas couverts
             if ('all_public' === $dto->share_with) {
-                $endpoints = $this->entrepotApiService->datastore->getEndpoints($datastoreId, [
+                $endpoints = $this->entrepotApiService->datastore->getEndpointsList($datastoreId, [
                     'type' => 'WFS',
                     'open' => true,
                 ]);
                 $isOfferingOpen = true;
             } elseif ('your_community' === $dto->share_with) {
-                $endpoints = $this->entrepotApiService->datastore->getEndpoints($datastoreId, [
+                $endpoints = $this->entrepotApiService->datastore->getEndpointsList($datastoreId, [
                     'type' => 'WFS',
                     'open' => false,
                 ]);

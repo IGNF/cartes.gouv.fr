@@ -78,13 +78,13 @@ class WmsVectorController extends AbstractController implements ApiControllerInt
 
             // TODO : implémentation partielle, tous les partages ne sont pas couverts
             if ('all_public' === $data['share_with']) {
-                $endpoints = $this->entrepotApiService->datastore->getEndpoints($datastoreId, [
+                $endpoints = $this->entrepotApiService->datastore->getEndpointsList($datastoreId, [
                     'type' => 'WMS-VECTOR',
                     'open' => true,
                 ]);
                 $isOfferingOpen = true;
             } elseif ('your_community' === $data['share_with']) {
-                $endpoints = $this->entrepotApiService->datastore->getEndpoints($datastoreId, [
+                $endpoints = $this->entrepotApiService->datastore->getEndpointsList($datastoreId, [
                     'type' => 'WMS-VECTOR',
                     'open' => false,
                 ]);

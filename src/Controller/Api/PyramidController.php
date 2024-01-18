@@ -17,7 +17,9 @@ use Symfony\Component\Routing\Annotation\Route;
 
 #[Route(
     '/api/datastore/{datastoreId}/pyramid',
-    name: 'cartesgouvfr_api_pyramid_'
+    name: 'cartesgouvfr_api_pyramid_',
+    options: ['expose' => true],
+    condition: 'request.isXmlHttpRequest()'
 )]
 class PyramidController extends AbstractController implements ApiControllerInterface
 {
@@ -30,10 +32,7 @@ class PyramidController extends AbstractController implements ApiControllerInter
     ) {
     }
 
-    #[Route('/add', name: 'add', methods: ['POST'],
-        options: ['expose' => true],
-        condition: 'request.isXmlHttpRequest()')
-    ]
+    #[Route('/add', name: 'add', methods: ['POST'])]
     public function add(string $datastoreId, #[MapRequestPayload] AddPyramidDTO $dto): JsonResponse
     {
         try {
@@ -108,11 +107,7 @@ class PyramidController extends AbstractController implements ApiControllerInter
         }
     }
 
-    #[
-        Route('/publish/{pyramidId}', name: 'publish', methods: ['POST'],
-            options: ['expose' => true],
-            condition: 'request.isXmlHttpRequest()')
-    ]
+    #[Route('/publish/{pyramidId}', name: 'publish', methods: ['POST'])]
     public function publish(
         string $datastoreId,
         string $pyramidId,
@@ -132,13 +127,13 @@ class PyramidController extends AbstractController implements ApiControllerInter
             $isOfferingOpen = true;
 
             if ('all_public' === $dto->share_with) {
-                $endpoints = $this->entrepotApiService->datastore->getEndpoints($datastoreId, [
+                $endpoints = $this->entrepotApiService->datastore->getEndpointsList($datastoreId, [
                     'type' => 'WMTS-TMS',
                     'open' => true,
                 ]);
                 $isOfferingOpen = true;
             } elseif ('your_community' === $dto->share_with) {
-                $endpoints = $this->entrepotApiService->datastore->getEndpoints($datastoreId, [
+                $endpoints = $this->entrepotApiService->datastore->getEndpointsList($datastoreId, [
                     'type' => 'WMTS-TMS',
                     'open' => false,
                 ]);
