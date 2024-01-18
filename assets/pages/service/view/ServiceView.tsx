@@ -2,28 +2,23 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
-import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
-import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
-import { FieldsetProps } from "@codegouvfr/react-dsfr/shared/Fieldset";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import { Tabs, TabsProps } from "@codegouvfr/react-dsfr/Tabs";
+import { useQuery } from "@tanstack/react-query";
+import { FC, useEffect, useMemo, useState } from "react";
+
 import api from "../../../api";
 import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
-import { StyleManager, addStyleModal } from "./Style/StyleManager";
 import LoadingText from "../../../components/Utils/LoadingText";
+import type { MapInitial } from "../../../components/Utils/RMap";
 import RMap from "../../../components/Utils/RMap";
-import TextCopyToClipboard from "../../../components/Utils/TextCopyToClipboard";
 import RQKeys from "../../../modules/RQKeys";
+import getWebService from "../../../modules/WebServices/WebServices";
 import { type CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
-import { CartesStyle, TypeInfosWithBbox, type Service } from "../../../types/app";
-import { OfferingDetailResponseDtoTypeEnum } from "../../../types/entrepot";
-import Wait from "../../../components/Utils/Wait";
-import { getTranslation } from "../../../i18n/i18n";
 import "../../../sass/pages/service_view.scss";
-import getWebService from "../../../modules/WebServices/WebServices";
-import type { MapInitial } from "../../../components/Utils/RMap";
-const { t: tStyle } = getTranslation("Style");
+import { CartesStyle, OfferingTypeEnum, Service, TypeInfosWithBbox } from "../../../types/app";
+import DiffuseServiceTab from "./DiffuseServiceTab";
+import ManageStylesTab from "./ManageStylesTab";
 
 type ServiceViewProps = {
     datastoreId: string;
@@ -38,22 +33,8 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
         staleTime: 60000,
     });
 
-    // Recherche des services (offerings) contenant le tag datasheet_name a datasheetName
-    const serviceListQuery = useQuery<Service[], CartesApiException>({
-        queryKey: RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName),
-        queryFn: ({ signal }) => api.datasheet.getServices(datastoreId, datasheetName, { signal }),
-        staleTime: 60000,
-        refetchInterval: 60000,
-    });
-
     const [initialValues, setInitialValues] = useState<MapInitial>();
     const [currentStyle, setCurrentStyle] = useState<CartesStyle | undefined>();
-
-    const getCurrentStyle = useCallback(() => {
-        if (serviceQuery.data?.configuration.styles) {
-            return serviceQuery.data?.configuration.styles.find((style) => style.current === true);
-        }
-    }, [serviceQuery.data?.configuration.styles]);
 
     useEffect(() => {
         if (!serviceQuery.data) return;
@@ -66,7 +47,7 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
         }
 
         const styles = serviceQuery.data.configuration.styles;
-        const currentStyle = styles.find((style) => style.current === true);
+        const currentStyle = styles?.find((style) => style.current === true);
         initial = { ...initial, currentStyle: currentStyle };
 
         getWebService(serviceQuery.data)
@@ -77,160 +58,35 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
             });
     }, [serviceQuery.data]);
 
-    // Les styles
-    const styles: CartesStyle[] = useMemo(() => {
-        return serviceQuery.data?.configuration.styles ?? [];
-    }, [serviceQuery.data?.configuration.styles]);
-
-    // Recherche du nom des styles dans tous les services de la fiche de donnees datasheetName
-    const styleNames = useMemo<string[]>(() => {
-        let styles: CartesStyle[] = [];
-        serviceListQuery.data?.forEach((service) => {
-            const configuration = service.configuration;
-            if ("styles" in configuration && Array.isArray(configuration.styles)) {
-                styles = styles.concat(configuration.styles);
-            }
-        });
-        return styles.map((style) => style.name);
-    }, [serviceListQuery.data]);
-
-    const canManageStyles =
-        serviceQuery.data?.type === OfferingDetailResponseDtoTypeEnum.WFS || serviceQuery.data?.type === OfferingDetailResponseDtoTypeEnum.WMTSTMS;
-
-    const queryClient = useQueryClient();
-
     // ONGLETS
-    const tabs = [
-        {
-            label: "Diffuser le service",
-            content: (
-                <div className={fr.cx("fr-col-12")}>
-                    <div className={fr.cx("fr-grid-row")}>
-                        <p>
-                            Copiez vos adresses pour les utiliser dans vos applications SIG ou web. <br />
-                            <a href="#" target="_blank" rel="noreferrer">
-                                En savoir plus
-                            </a>
-                        </p>
-                    </div>
+    const tabs: TabsProps["tabs"] = useMemo(() => {
+        const canManageStyles = serviceQuery.data?.type === OfferingTypeEnum.WFS || serviceQuery.data?.type === OfferingTypeEnum.WMTSTMS;
 
-                    {/* lien public vers la carte */}
-                    <div className={fr.cx("fr-grid-row")}>
-                        <strong>Lien public vers la carte</strong>
-                    </div>
-                    <TextCopyToClipboard text={"http://www.ign.fr/geoplateforme"} className="fr-mb-4w" />
-
-                    {/* Code HTML de l'iframe */}
-                    <div className={fr.cx("fr-grid-row")}>
-                        <strong>{"Code HTML de l'iframe"}</strong>
-                    </div>
-                    <TextCopyToClipboard text={"<iframe width='600' height='40..."} className="fr-mb-4w" />
-
-                    {/* Adresse du service de données */}
-                    <div className={fr.cx("fr-grid-row")}>
-                        <strong>Adresses du service de données</strong>
-                    </div>
-
-                    {serviceQuery?.data?.urls.map((url) => {
-                        return <TextCopyToClipboard text={url.url} key={url.url} className="fr-mb-1w" />;
-                    })}
-                </div>
-            ),
-        },
-    ];
-
-    // Suppression d'un style
-    const { isPending: isRemovePending, mutate: mutateRemove } = useMutation<CartesStyle[], CartesApiException, string>({
-        mutationFn: (name: string) => {
-            if (serviceQuery.data) {
-                return api.style.remove(datastoreId, serviceQuery.data._id, { style_name: name });
-            }
-            return Promise.resolve([]);
-        },
-        onSuccess(styles) {
-            if (serviceQuery.data) {
-                queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName) });
-                queryClient.setQueryData<Service>(RQKeys.datastore_offering(datastoreId, offeringId), (oldService) => {
-                    if (oldService) {
-                        const newService = { ...oldService } as Service;
-                        newService.configuration.styles = styles;
-                        setCurrentStyle(getCurrentStyle());
-                        return newService;
-                    }
-                });
-            }
-        },
-    });
-
-    // Changement de style par defaut
-    const { isPending: isPendingChangeCurrentStyle, mutate: mutateChangeCurrentStyle } = useMutation<CartesStyle[], CartesApiException, string>({
-        mutationFn: (name: string) => {
-            if (serviceQuery.data) {
-                return api.style.setCurrent(datastoreId, serviceQuery.data._id, { style_name: name });
-            }
-            return Promise.resolve([]);
-        },
-        onSuccess(styles) {
-            if (serviceQuery.data) {
-                queryClient.setQueryData<Service>(RQKeys.datastore_offering(datastoreId, offeringId), (oldService) => {
-                    if (oldService) {
-                        const newService = { ...oldService } as Service;
-                        newService.configuration.styles = styles;
-                        setCurrentStyle(getCurrentStyle());
-                        return newService;
-                    }
-                });
-            }
-        },
-    });
-
-    const handleRemove = (name: string) => {
-        mutateRemove(name);
-    };
-
-    const radioOptions: FieldsetProps.Radio["options"] = [];
-    styles?.forEach((style) => {
-        const option = {
-            label: style.name,
-            illustration: (
-                <Button
-                    title={tStyle("remove_style")}
-                    priority={"tertiary"}
-                    iconId={"fr-icon-delete-line"}
-                    onClick={() => {
-                        handleRemove(style.name);
-                    }}
-                />
-            ),
-            nativeInputProps: {
-                checked: style?.current === true,
-                onChange: () => mutateChangeCurrentStyle(style.name),
+        const _tabs: TabsProps["tabs"] = [
+            {
+                label: "Diffuser le service",
+                content: <DiffuseServiceTab service={serviceQuery.data} />,
             },
-        };
-        radioOptions.push(option);
-    });
+        ];
 
-    // Pas de gestion des styles pour les autres services
-    if (canManageStyles) {
-        tabs.push({
-            label: "Gérer les styles",
-            content: (
-                <>
-                    <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
-                        <p>
-                            <a href="#" target="_blank" rel="noreferrer">
-                                Comment créer un style
-                            </a>
-                        </p>
-                    </div>
-                    {styles && styles.length !== 0 && <RadioButtons legend={"Mes styles :"} options={radioOptions} />}
-                    <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
-                        <Button onClick={() => addStyleModal.open()}>Ajouter un style</Button>
-                    </div>
-                </>
-            ),
-        });
-    }
+        // Pas de gestion des styles pour les autres services
+        if (canManageStyles) {
+            _tabs.push({
+                label: "Gérer les styles",
+                content: (
+                    <ManageStylesTab
+                        service={serviceQuery.data}
+                        offeringId={offeringId}
+                        datastoreId={datastoreId}
+                        datasheetName={datasheetName}
+                        setCurrentStyle={setCurrentStyle}
+                    />
+                ),
+            });
+        }
+
+        return _tabs;
+    }, [datasheetName, datastoreId, offeringId, serviceQuery.data]);
 
     return (
         <DatastoreLayout datastoreId={datastoreId} documentTitle={`Visualisation données ${datasheetName ?? serviceQuery.data?.layer_name}`}>
@@ -267,20 +123,7 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
                             <Tabs tabs={tabs} />
                         </div>
                     </div>
-                    {canManageStyles && serviceQuery.data && (
-                        <StyleManager datastoreId={datastoreId} datasheetName={datasheetName} service={serviceQuery.data} styleNames={styleNames} />
-                    )}
                 </>
-            )}
-            {(isPendingChangeCurrentStyle || isRemovePending) && (
-                <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " icons-spin"} />
-                            <h6 className={fr.cx("fr-m-0")}>{isRemovePending ? "Suppression en cours ..." : "Changement de style en cours ..."}</h6>
-                        </div>
-                    </div>
-                </Wait>
             )}
         </DatastoreLayout>
     );
