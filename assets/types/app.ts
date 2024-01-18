@@ -146,7 +146,7 @@ export type TmsMetadata = {
 };
 
 /** configuration & offerings */
-export type Configuration = ConfigurationDetailResponseDto & { styles: CartesStyle[] };
+export type Configuration = ConfigurationDetailResponseDto & { styles?: CartesStyle[] };
 export {
     ConfigurationDetailResponseDtoStatusEnum as ConfigurationStatusEnum,
     ConfigurationDetailResponseDtoTypeEnum as ConfigurationTypeEnum,
@@ -158,6 +158,7 @@ export { OfferingDetailResponseDtoTypeEnum as OfferingTypeEnum } from "./entrepo
 export type Service = Offering & {
     configuration: Configuration;
     tms_metadata?: TmsMetadata;
+    share_url?: string;
 };
 
 export type TypeInfosWithBbox =

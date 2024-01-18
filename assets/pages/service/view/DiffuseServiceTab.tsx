@@ -36,9 +36,7 @@ const DiffuseServiceTab: FC<DiffuseServiceTabProps> = ({ service }) => {
                 <strong>Adresse du service de données</strong>
             </div>
 
-            {service?.urls.map((url) => {
-                return <TextCopyToClipboard text={url.url} key={url.url} className="fr-mb-1w" />;
-            })}
+            <TextCopyToClipboard text={service?.share_url ?? "Indisponible"} disabled={!service?.share_url} className="fr-mb-1w" />
         </div>
     );
 };

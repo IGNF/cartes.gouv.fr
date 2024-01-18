@@ -2,20 +2,20 @@
 
 namespace App\Controller\Api;
 
-use App\Controller\StyleTrait;
-use App\Services\EntrepotApiService;
-use App\Exception\CartesApiException;
-use App\Exception\EntrepotApiException;
+use App\Constants\EntrepotApi\ConfigurationStatuses;
 use App\Constants\EntrepotApi\OfferingTypes;
 use App\Constants\EntrepotApi\StaticFileTypes;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use App\Constants\EntrepotApi\ConfigurationStatuses;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
-use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
+use App\Controller\StyleTrait;
+use App\Exception\CartesApiException;
+use App\Exception\EntrepotApiException;
+use App\Services\EntrepotApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 #[Route(
     '/api/datastores/{datastoreId}/offerings',
@@ -28,7 +28,7 @@ class ServiceController extends AbstractController implements ApiControllerInter
     use StyleTrait;
 
     private HttpClientInterface $httpClient;
-    
+
     public function __construct(
         private EntrepotApiService $entrepotApiService,
         ParameterBagInterface $parameterBag,
@@ -67,10 +67,10 @@ class ServiceController extends AbstractController implements ApiControllerInter
             // Metadatas (TMS)
             if (OfferingTypes::WMTSTMS === $offering['type']) {
                 $urls = array_values(array_filter($offering['urls'], static function ($url) {
-                    return $url['type'] == 'TMS';
+                    return 'TMS' == $url['type'];
                 }));
-                $url = $urls[0]['url'] . '/metadata.json';
-                
+                $url = $urls[0]['url'].'/metadata.json';
+
                 $response = $this->httpClient->request('GET', $url);
                 if (Response::HTTP_OK != $response->getStatusCode()) {
                     throw new EntrepotApiException("Request $url failed");
@@ -83,6 +83,9 @@ class ServiceController extends AbstractController implements ApiControllerInter
                 $styles = $this->getStyles($datastoreId, $offering['configuration']['_id']);
             }
             $offering['configuration']['styles'] = $styles;
+
+            // url de partage (url capabilities si WFS ou WMS-VECTOR, url spécifique si TMS)
+            $offering['share_url'] = $this->getShareUrl($datastoreId, $offering);
 
             return $this->json($offering);
         } catch (EntrepotApiException $ex) {
@@ -187,5 +190,36 @@ class ServiceController extends AbstractController implements ApiControllerInter
         } catch (EntrepotApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
+    }
+
+    /**
+     * @param array<mixed> $offering
+     */
+    private function getShareUrl(string $datastoreId, array $offering): ?string
+    {
+        $datastore = $this->entrepotApiService->datastore->get($datastoreId);
+        $endpointId = $offering['endpoint']['_id'];
+
+        $endpoint = $this->entrepotApiService->datastore->getEndpoint($datastoreId, $endpointId);
+        $shareUrl = null;
+
+        switch ($offering['type']) {
+            case OfferingTypes::WFS:
+            case OfferingTypes::WMSVECTOR:
+                $annexeUrl = $this->getParameter('annexes_url');
+                $shareUrl = join('/', [$annexeUrl, $datastore['technical_name'],  $endpoint['endpoint']['technical_name'], 'capabilities.xml']);
+                break;
+
+            case OfferingTypes::WMTSTMS:
+                if (isset($offering['tms_metadata']['tiles'][0])) {
+                    $shareUrl = $offering['tms_metadata']['tiles'][0];
+                }
+                break;
+
+            default:
+                break;
+        }
+
+        return $shareUrl;
     }
 }
