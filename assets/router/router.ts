@@ -146,10 +146,10 @@ const routeDefs = {
     ),
 };
 
-export const { RouteProvider, useRoute, routes } = createRouter(routeDefs);
+export const { RouteProvider, useRoute, routes, session } = createRouter(routeDefs);
 
 export const knownRoutes = Object.values(routes).map((r) => r.name);
-export const publicRoutes = [
+export const publicRoutes: typeof knownRoutes = [
     "home",
     "about",
     "documentation",
@@ -161,7 +161,6 @@ export const publicRoutes = [
     "sitemap",
     "accessibility",
     "legal_notice",
-    "cgu",
     "personal_data",
     "my_tries", // TODO PROVISOIRE
 ];
