@@ -2,7 +2,7 @@
 
 namespace App\Constants\EntrepotApi;
 
-final class OfferingTypes
+final class ConfigurationTypes
 {
     public const WMSVECTOR = 'WMS-VECTOR';
     public const WFS = 'WFS';
