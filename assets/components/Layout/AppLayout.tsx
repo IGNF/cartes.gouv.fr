@@ -10,6 +10,7 @@ import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { useTranslation } from "../../i18n/i18n";
 import Translator from "../../modules/Translator";
 import SessionExpiredAlert from "../Utils/SessionExpiredAlert";
+import SnackbarMessage from "../Utils/SnackbarMessage";
 import AppFooter from "./AppFooter";
 import AppHeader from "./AppHeader";
 
@@ -59,6 +60,7 @@ const AppLayout: FC<PropsWithChildren<AppLayoutProps>> = ({ children, navItems, 
                 </div>
             </main>
             <AppFooter />
+            <SnackbarMessage />
         </>
     );
 };
