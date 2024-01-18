@@ -172,7 +172,6 @@ class ContactController extends AbstractController
         $data = json_decode($request->getContent(), true);
 
         try {
-            $supportAddress = $this->getParameter('support_contact_mail');
             $now = new \DateTime();
 
             $userEmail = $user->getEmail();
