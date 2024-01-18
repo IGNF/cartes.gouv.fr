@@ -1,5 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import { FC } from "react";
+import { FC, memo } from "react";
 import { symToStr } from "tsafe/symToStr";
 
 import { type VectorDb } from "../../../../../types/app";
@@ -27,4 +27,4 @@ const VectorDbList: FC<VectorDbListProps> = ({ datastoreId, vectorDbList }) => {
 
 VectorDbList.displayName = symToStr({ VectorDbList });
 
-export default VectorDbList;
+export default memo(VectorDbList);

@@ -1,6 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
-import { FC, useMemo } from "react";
+import { FC, memo, useMemo } from "react";
 import { symToStr } from "tsafe/symToStr";
 
 import { routes } from "../../../../router/router";
@@ -61,4 +61,4 @@ const DatasetListTab: FC<DataListTabProps> = ({ datastoreId, datasheet }) => {
 
 DatasetListTab.displayName = symToStr({ DatasetListTab });
 
-export default DatasetListTab;
+export default memo(DatasetListTab);

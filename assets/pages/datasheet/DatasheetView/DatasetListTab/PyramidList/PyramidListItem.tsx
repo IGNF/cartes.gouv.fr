@@ -1,6 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
-import { FC } from "react";
+import { FC, memo } from "react";
 
 import MenuList from "../../../../../components/Utils/MenuList";
 import StoredDataStatusBadge from "../../../../../components/Utils/StoredDataStatusBadge";
@@ -77,4 +77,4 @@ const PyramidListItem: FC<PyramidListItemProps> = ({ datastoreId, pyramid }) => 
     );
 };
 
-export default PyramidListItem;
+export default memo(PyramidListItem);

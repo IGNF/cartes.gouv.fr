@@ -1,7 +1,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import { useQuery } from "@tanstack/react-query";
-import { FC, useMemo } from "react";
+import { FC, memo, useMemo } from "react";
 
 import api from "../../../../../api";
 import LoadingText from "../../../../../components/Utils/LoadingText";
@@ -79,4 +79,4 @@ const PyramidDesc: FC<PyramidDescProps> = ({ pyramid, datastoreId }) => {
     );
 };
 
-export default PyramidDesc;
+export default memo(PyramidDesc);

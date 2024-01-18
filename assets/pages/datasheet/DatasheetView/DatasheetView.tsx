@@ -148,7 +148,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                                             activeTab = "services";
                                             break;
                                     }
-                                    routes.datastore_datasheet_view({ datastoreId, datasheetName, activeTab }).push();
+                                    routes.datastore_datasheet_view({ datastoreId, datasheetName, activeTab }).replace();
                                 }}
                             />
                         </div>

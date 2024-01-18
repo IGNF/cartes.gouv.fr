@@ -1,5 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import { FC } from "react";
+import { FC, memo } from "react";
 import { symToStr } from "tsafe/symToStr";
 
 import { Pyramid } from "../../../../../types/app";
@@ -26,4 +26,4 @@ const PyramidList: FC<PyramidListProps> = ({ datastoreId, pyramidList }) => {
 
 PyramidList.displayName = symToStr({ PyramidList });
 
-export default PyramidList;
+export default memo(PyramidList);

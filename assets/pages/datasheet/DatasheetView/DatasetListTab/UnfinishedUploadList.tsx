@@ -1,6 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
-import { FC } from "react";
+import { FC, memo } from "react";
 import { symToStr } from "tsafe/symToStr";
 
 import { routes } from "../../../../router/router";
@@ -41,4 +41,4 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
 
 UnfinishedUploadList.displayName = symToStr({ UnfinishedUploadList });
 
-export default UnfinishedUploadList;
+export default memo(UnfinishedUploadList);
