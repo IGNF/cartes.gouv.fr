@@ -191,35 +191,4 @@ class ServiceController extends AbstractController implements ApiControllerInter
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
     }
-
-    /**
-     * @param array<mixed> $offering
-     */
-    private function getShareUrl(string $datastoreId, array $offering): ?string
-    {
-        $datastore = $this->entrepotApiService->datastore->get($datastoreId);
-        $endpointId = $offering['endpoint']['_id'];
-
-        $endpoint = $this->entrepotApiService->datastore->getEndpoint($datastoreId, $endpointId);
-        $shareUrl = null;
-
-        switch ($offering['type']) {
-            case OfferingTypes::WFS:
-            case OfferingTypes::WMSVECTOR:
-                $annexeUrl = $this->getParameter('annexes_url');
-                $shareUrl = join('/', [$annexeUrl, $datastore['technical_name'],  $endpoint['endpoint']['technical_name'], 'capabilities.xml']);
-                break;
-
-            case OfferingTypes::WMTSTMS:
-                if (isset($offering['tms_metadata']['tiles'][0])) {
-                    $shareUrl = $offering['tms_metadata']['tiles'][0];
-                }
-                break;
-
-            default:
-                break;
-        }
-
-        return $shareUrl;
-    }
 }

@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Constants\EntrepotApi\OfferingTypes;
+
 trait StyleTrait
 {
     /**
@@ -20,7 +22,38 @@ trait StyleTrait
             $content = $this->entrepotApiService->annexe->download($datastoreId, $styleAnnexes[0]['_id']);
             $styles = json_decode($content, true);
         }
-        
+
         return $styles;
+    }
+
+    /**
+     * @param array<mixed> $offering
+     */
+    private function getShareUrl(string $datastoreId, array $offering): ?string
+    {
+        $datastore = $this->entrepotApiService->datastore->get($datastoreId);
+        $endpointId = $offering['endpoint']['_id'];
+
+        $endpoint = $this->entrepotApiService->datastore->getEndpoint($datastoreId, $endpointId);
+        $shareUrl = null;
+
+        switch ($offering['type']) {
+            case OfferingTypes::WFS:
+            case OfferingTypes::WMSVECTOR:
+                $annexeUrl = $this->getParameter('annexes_url');
+                $shareUrl = join('/', [$annexeUrl, $datastore['technical_name'],  $endpoint['endpoint']['technical_name'], 'capabilities.xml']);
+                break;
+
+            case OfferingTypes::WMTSTMS:
+                if (isset($offering['tms_metadata']['tiles'][0])) {
+                    $shareUrl = $offering['tms_metadata']['tiles'][0];
+                }
+                break;
+
+            default:
+                break;
+        }
+
+        return $shareUrl;
     }
 }

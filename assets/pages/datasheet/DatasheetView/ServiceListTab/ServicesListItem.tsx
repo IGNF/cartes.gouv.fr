@@ -14,6 +14,7 @@ import functions from "../../../../functions";
 import useToggle from "../../../../hooks/useToggle";
 import RQKeys from "../../../../modules/RQKeys";
 import { routes } from "../../../../router/router";
+import { useSnackbarStore } from "../../../../stores/SnackbarStore";
 import { OfferingTypeEnum, type Service } from "../../../../types/app";
 import { offeringTypeDisplayName } from "../../../../utils";
 import ServiceDesc from "./ServiceDesc";
@@ -25,6 +26,8 @@ type ServicesListItemProps = {
 };
 const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, datastoreId }) => {
     const queryClient = useQueryClient();
+
+    const setMessage = useSnackbarStore((state) => state.setMessage);
 
     const unpublishServiceConfirmModal = createModal({
         id: `unpublish-service-confirm-modal-${service._id}`,
@@ -96,7 +99,13 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                                     {
                                         text: "Copier l'URL de diffusion",
                                         iconId: "ri-file-copy-2-line",
-                                        onClick: () => console.warn("Action non implémentée"),
+                                        onClick: async () => {
+                                            if (!service.share_url) return;
+
+                                            await navigator.clipboard.writeText(service.share_url);
+
+                                            setMessage("L'URL copiée");
+                                        },
                                     },
                                     {
                                         text: "Gérer les styles",
