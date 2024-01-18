@@ -141,6 +141,7 @@ const routeDefs = {
             datastoreId: param.path.string,
             offeringId: param.path.string,
             datasheetName: param.query.string,
+            activeTab: param.query.optional.string.default("diffuse"),
         },
         (p) => `${appRoot}/datastores/${p.datastoreId}/service/${p.offeringId}`
     ),

@@ -110,7 +110,9 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                                     {
                                         text: "Gérer les styles",
                                         iconId: "ri-flashlight-line",
-                                        onClick: () => console.warn("Action non implémentée"),
+                                        linkProps: routes.datastore_service_view({ datastoreId, datasheetName, offeringId: service._id, activeTab: "styles" })
+                                            .link,
+                                        disabled: ![OfferingTypeEnum.WFS, OfferingTypeEnum.WMTSTMS].includes(service.type),
                                     },
                                     {
                                         text: "Mettre à jour la légende",

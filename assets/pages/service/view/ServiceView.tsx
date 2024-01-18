@@ -14,7 +14,7 @@ import RMap from "../../../components/Utils/RMap";
 import RQKeys from "../../../modules/RQKeys";
 import getWebService from "../../../modules/WebServices/WebServices";
 import { type CartesApiException } from "../../../modules/jsonFetch";
-import { routes } from "../../../router/router";
+import { routes, useRoute } from "../../../router/router";
 import "../../../sass/pages/service_view.scss";
 import { CartesStyle, OfferingTypeEnum, Service, TypeInfosWithBbox } from "../../../types/app";
 import DiffuseServiceTab from "./DiffuseServiceTab";
@@ -27,6 +27,8 @@ type ServiceViewProps = {
 };
 
 const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetName }) => {
+    const route = useRoute();
+
     const serviceQuery = useQuery<Service, CartesApiException>({
         queryKey: RQKeys.datastore_offering(datastoreId, offeringId),
         queryFn: () => api.service.get(datastoreId, offeringId),
@@ -66,6 +68,7 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
             {
                 label: "Diffuser le service",
                 content: <DiffuseServiceTab service={serviceQuery.data} />,
+                isDefault: route.params["activeTab"] === "diffuse",
             },
         ];
 
@@ -82,11 +85,12 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
                         setCurrentStyle={setCurrentStyle}
                     />
                 ),
+                isDefault: route.params["activeTab"] === "styles",
             });
         }
 
         return _tabs;
-    }, [datasheetName, datastoreId, offeringId, serviceQuery.data]);
+    }, [datasheetName, datastoreId, offeringId, serviceQuery.data, route.params]);
 
     return (
         <DatastoreLayout datastoreId={datastoreId} documentTitle={`Visualisation données ${datasheetName ?? serviceQuery.data?.layer_name}`}>
