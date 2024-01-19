@@ -11,12 +11,7 @@ const DiffuseServiceTab: FC<DiffuseServiceTabProps> = ({ service }) => {
     return (
         <div className={fr.cx("fr-col-12")}>
             <div className={fr.cx("fr-grid-row")}>
-                <p>
-                    Copiez vos adresses pour les utiliser dans vos applications SIG ou web. <br />
-                    <a href="#" target="_blank" rel="noreferrer">
-                        En savoir plus
-                    </a>
-                </p>
+                <p>Copiez vos adresses pour les utiliser dans vos applications SIG ou web.</p>
             </div>
 
             {/* lien public vers la carte */}

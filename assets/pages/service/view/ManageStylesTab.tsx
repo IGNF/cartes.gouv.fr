@@ -103,13 +103,14 @@ const ManageStylesTab: FC<ManageStylesTabProps> = ({ service, offeringId, datast
     return (
         <>
             <div className={fr.cx("fr-col-12")}>
+                {/* TODO: quand documentation disponible
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
                     <p>
                         <a href="#" target="_blank" rel="noreferrer">
                             Comment créer un style
                         </a>
                     </p>
-                </div>
+                </div> */}
                 {styles && styles.length !== 0 && (
                     <RadioButtons
                         legend={"Mes styles :"}
