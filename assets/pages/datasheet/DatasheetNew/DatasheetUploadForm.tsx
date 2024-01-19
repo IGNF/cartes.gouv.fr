@@ -286,6 +286,8 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                             onChange: (e) => setSrid(e.target.value),
                             value: srid,
                         }}
+                        state={errors.data_srid ? "error" : "default"}
+                        stateRelatedMessage={errors?.data_srid?.message}
                     >
                         <option value="" disabled>
                             Selectionnez une Projection
