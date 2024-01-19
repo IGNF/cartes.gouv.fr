@@ -4,6 +4,7 @@ namespace App\Controller\Api;
 
 use App\Constants\EntrepotApi\OfferingStatuses;
 use App\Constants\EntrepotApi\ProcessingStatuses;
+use App\Constants\EntrepotApi\StoredDataStatuses;
 use App\Exception\CartesApiException;
 use App\Exception\EntrepotApiException;
 use App\Services\EntrepotApiService;
@@ -76,7 +77,7 @@ class StoredDataController extends AbstractController implements ApiControllerIn
                 if (ProcessingStatuses::SUCCESS === $procExec['status']) {
                     $procExec = $this->entrepotApiService->processing->getExecution($datastoreId, $procExec['_id']);
 
-                    if (isset($procExec['output']['stored_data'])) {
+                    if (isset($procExec['output']['stored_data']['status']) && StoredDataStatuses::DELETED !== $procExec['output']['stored_data']['status']) {
                         $storedDataList[] = $procExec['output']['stored_data'];
                     }
                 }

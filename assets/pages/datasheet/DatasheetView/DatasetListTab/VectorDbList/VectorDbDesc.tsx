@@ -6,7 +6,7 @@ import { FC, memo, useMemo } from "react";
 import api from "../../../../../api";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import RQKeys from "../../../../../modules/RQKeys";
-import { StoredDataTypeEnum, VectorDb } from "../../../../../types/app";
+import { StoredDataStatusEnum, StoredDataTypeEnum, VectorDb } from "../../../../../types/app";
 import { offeringTypeDisplayName } from "../../../../../utils";
 
 type VectorDbDescProps = {
@@ -21,7 +21,10 @@ const VectorDbDesc: FC<VectorDbDescProps> = ({ vectorDb, datastoreId }) => {
     });
 
     const pyramidVectorList = useMemo(
-        () => dataUsesQuery.data?.stored_data_list.filter((sd) => sd.type === StoredDataTypeEnum.ROK4PYRAMIDVECTOR.valueOf()),
+        () =>
+            dataUsesQuery.data?.stored_data_list.filter(
+                (sd) => sd.type === StoredDataTypeEnum.ROK4PYRAMIDVECTOR.valueOf() && sd.status !== StoredDataStatusEnum.DELETED.valueOf()
+            ),
         [dataUsesQuery.data?.stored_data_list]
     );
 
@@ -30,7 +33,7 @@ const VectorDbDesc: FC<VectorDbDescProps> = ({ vectorDb, datastoreId }) => {
             <div className={fr.cx("fr-col")}>
                 {dataUsesQuery.isFetching && <LoadingText as="p" withSpinnerIcon={true} />}
 
-                {dataUsesQuery.data?.stored_data_list.length === 0 && dataUsesQuery.data?.offerings_list.length === 0 && (
+                {pyramidVectorList?.length === 0 && dataUsesQuery.data?.offerings_list.length === 0 && (
                     <div
                         className={fr.cx("fr-grid-row", "fr-mt-2v", "fr-p-2v")}
                         style={{ backgroundColor: fr.colors.decisions.background.default.grey.default }}
