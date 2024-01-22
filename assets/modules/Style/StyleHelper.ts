@@ -9,7 +9,6 @@ import OpenLayersParser from "geostyler-openlayers-parser";
 import { CartesStyle } from "../../types/app";
 import { Geometry } from "ol/geom";
 import BaseLayer from "ol/layer/Base";
-import style from "../../api/style";
 
 type AddStyleFormType = {
     style_name: string;
