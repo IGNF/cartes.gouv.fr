@@ -9,6 +9,7 @@ import OpenLayersParser from "geostyler-openlayers-parser";
 import { CartesStyle } from "../../types/app";
 import { Geometry } from "ol/geom";
 import BaseLayer from "ol/layer/Base";
+import style from "../../api/style";
 
 type AddStyleFormType = {
     style_name: string;
@@ -50,29 +51,34 @@ class StyleHelper {
     static async applyStyle(layer: BaseLayer, currentStyle: CartesStyle | undefined) {
         if (!currentStyle) return;
 
-        // TODO VectorTileLayer (TMS) ?
-        if (layer instanceof VectorLayer) {
-            const style = await StyleHelper.#getOlStyle(layer, currentStyle);
+        if (layer instanceof VectorLayer || layer instanceof VectorTileLayer) {
+            const nameMandatory = layer instanceof VectorLayer ? true : false;
+            const style = await StyleHelper.#getOlStyle(layer, currentStyle, nameMandatory);
             if (style) {
                 layer.setStyle(style);
             }
         }
     }
 
-    static async #getOlStyle(layer: VectorLayer<VectorSource<Geometry>> | VectorTileLayer, currentStyle: CartesStyle) {
-        const name = layer.get("name");
-        const s = currentStyle.layers.filter((l) => l.name === name);
-        if (!s.length) return undefined;
+    static async #getOlStyle(layer: VectorLayer<VectorSource<Geometry>> | VectorTileLayer, currentStyle: CartesStyle, nameMandatory = true) {
+        let styleUrl;
+        if (nameMandatory) {
+            // Le nom est obligatoire pour les flux WFS
+            const name = layer.get("name");
+            const s = currentStyle.layers.filter((l) => l.name === name);
+            if (s.length) styleUrl = s[0];
+            else return undefined;
+        } else styleUrl = currentStyle.layers[0].url;
 
         const olParser = new OpenLayersParser();
 
         // Lecture du fichier
-        const response = await fetch(s[0].url);
+        const response = await fetch(styleUrl);
 
         if (!response.ok) return undefined;
         const xmlString = await response.text();
 
-        const extension = path.getFileExtension(s[0].url);
+        const extension = path.getFileExtension(styleUrl);
 
         let parser;
         switch (extension) {
