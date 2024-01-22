@@ -42,7 +42,6 @@ const RMap: FC<RMapProps> = ({ initial, currentStyle }) => {
     const mapRef = useRef<Map>();
 
     const { data: capabilities } = useCapabilities();
-    const [layersAdded, setLayersAdded] = useState<boolean>(false);
 
     // Extent dans la configuration
     const extent = useMemo(() => {
@@ -146,8 +145,8 @@ const RMap: FC<RMapProps> = ({ initial, currentStyle }) => {
         (async () => {
             if (!capabilities) return;
 
-            // Les layers ont deja ete ajoutees
-            if (layersAdded) return;
+            // Suppression de tous les layers
+            mapRef.current?.getLayers().clear();
 
             // Ajout de la couche de fond PlanIgnV2
             const wmtsOptions = optionsFromCapabilities(capabilities, {
@@ -178,14 +177,13 @@ const RMap: FC<RMapProps> = ({ initial, currentStyle }) => {
                 }
             });
             getControl("GetFeatureInfo")?.setLayers(gfiLayers);
-            setLayersAdded(true);
 
             // On zoom sur l'extent de la couche au premier rendu
             if (extent) {
                 mapRef.current?.getView().fit(extent);
             }
         })();
-    }, [gfinfo, capabilities, extent, initial.layers, addLayer, layersAdded]);
+    }, [gfinfo, capabilities, extent, initial.layers, addLayer]);
 
     useEffect(() => {
         getWorkingLayers().forEach((layer) => StyleHelper.applyStyle(layer, currentStyle));
