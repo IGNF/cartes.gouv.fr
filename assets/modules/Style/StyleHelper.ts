@@ -65,7 +65,7 @@ class StyleHelper {
             // Le nom est obligatoire pour les flux WFS
             const name = layer.get("name");
             const s = currentStyle.layers.filter((l) => l.name === name);
-            if (s.length) styleUrl = s[0];
+            if (s.length) styleUrl = s[0].url;
             else return undefined;
         } else styleUrl = currentStyle.layers[0].url;
 
