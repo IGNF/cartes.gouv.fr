@@ -13,9 +13,21 @@ const getDatastoresList = (otherOptions: RequestInit = {}) => {
     return jsonFetch<Datastore[]>(url, { ...otherOptions });
 };
 
+const addToSandbox = () => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_user_add_to_sandbox");
+    return jsonFetch<undefined>(url, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+        },
+    });
+};
+
 const user = {
     getMe,
     getDatastoresList,
+    addToSandbox,
 };
 
 export default user;

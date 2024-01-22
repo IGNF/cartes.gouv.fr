@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useMemo, useRef } from "react";
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import Map from "ol/Map";
 import View from "ol/View";
@@ -37,27 +37,12 @@ type RMapProps = {
     currentStyle?: CartesStyle;
 };
 
-/**
- * Recherche d'un controle de la carte par son nom
- * @param map La carte
- * @param className Nom de la classe du control
- * @returns
- */
-const getControl = (map: Map | undefined, className: string): typeof LayerSwitcher | typeof GetFeatureInfo => {
-    if (!map) return undefined;
-
-    let control;
-    map.getControls().forEach((c) => {
-        if (c.constructor.name === className) control = c;
-    });
-    return control;
-};
-
 const RMap: FC<RMapProps> = ({ initial, currentStyle }) => {
     const mapTargetRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<Map>();
 
     const { data: capabilities } = useCapabilities();
+    const [layersAdded, setLayersAdded] = useState<boolean>(false);
 
     // Extent dans la configuration
     const extent = useMemo(() => {
@@ -77,6 +62,24 @@ const RMap: FC<RMapProps> = ({ initial, currentStyle }) => {
         );
     }, [initial.type]);
 
+    const getControl = (className: string): typeof LayerSwitcher | typeof GetFeatureInfo => {
+        const controls = mapRef.current
+            ?.getControls()
+            .getArray()
+            .filter((c) => {
+                return c.constructor.name === className;
+            });
+        return controls ? controls[0] : controls;
+    };
+
+    const getWorkingLayers = useCallback((): BaseLayer[] => {
+        const workingLayers = mapRef.current
+            ?.getLayers()
+            .getArray()
+            .filter((l) => l.get("name") !== olDefaults.default_background_layer);
+        return workingLayers ? workingLayers : [];
+    }, []);
+
     /**
      * Ajout de la couche dans la carte (+ dans le layerSwitcher)
      */
@@ -87,7 +90,7 @@ const RMap: FC<RMapProps> = ({ initial, currentStyle }) => {
             }
             // Ajout du layer dans la carte et dans le LayerSwitcher
             mapRef.current?.addLayer(layer);
-            getControl(mapRef.current, "LayerSwitcher")?.addLayer(layer, {
+            getControl("LayerSwitcher")?.addLayer(layer, {
                 title: layer.get("title"),
                 description: layer.get("abstract"),
             });
@@ -143,6 +146,9 @@ const RMap: FC<RMapProps> = ({ initial, currentStyle }) => {
         (async () => {
             if (!capabilities) return;
 
+            // Les layers ont deja ete ajoutees
+            if (layersAdded) return;
+
             // Ajout de la couche de fond PlanIgnV2
             const wmtsOptions = optionsFromCapabilities(capabilities, {
                 layer: olDefaults.default_background_layer,
@@ -171,26 +177,19 @@ const RMap: FC<RMapProps> = ({ initial, currentStyle }) => {
                     gfiLayers.push({ obj: layer });
                 }
             });
-            getControl(mapRef.current, "GetFeatureInfo")?.setLayers(gfiLayers);
+            getControl("GetFeatureInfo")?.setLayers(gfiLayers);
+            setLayersAdded(true);
 
             // On zoom sur l'extent de la couche au premier rendu
             if (extent) {
                 mapRef.current?.getView().fit(extent);
             }
         })();
-    }, [capabilities, extent, addLayer, gfinfo, initial.layers]);
+    }, [gfinfo, capabilities, extent, initial.layers, addLayer, layersAdded]);
 
     useEffect(() => {
-        if (!mapRef.current) {
-            return;
-        }
-        const layers = mapRef.current.getLayers().getArray();
-        layers.forEach((layer) => {
-            if (olDefaults.default_background_layer !== layer.get("name")) {
-                StyleHelper.applyStyle(layer, currentStyle);
-            }
-        });
-    }, [currentStyle]);
+        getWorkingLayers().forEach((layer) => StyleHelper.applyStyle(layer, currentStyle));
+    }, [currentStyle, getWorkingLayers]);
 
     return <div className={"map-view"} ref={mapTargetRef} />;
 };

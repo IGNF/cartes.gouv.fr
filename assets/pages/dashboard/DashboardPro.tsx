@@ -8,11 +8,24 @@ import useDatastoreList from "../../hooks/useDatastoreList";
 import Translator from "../../modules/Translator";
 import { routes } from "../../router/router";
 import { useAuthStore } from "../../stores/AuthStore";
+import { useMutation } from "@tanstack/react-query";
+import { CartesApiException } from "../../modules/jsonFetch";
+import api from "../../api";
 
 const DashboardPro = () => {
     const datastoreListQuery = useDatastoreList();
     const navItems = datastoreNavItems();
     const { user } = useAuthStore();
+
+    const { mutate } = useMutation<undefined, CartesApiException>({
+        mutationFn: () => {
+            return api.user.addToSandbox();
+        },
+    });
+
+    const handleClick = (datastoreId) => {
+        mutate(undefined, { onSuccess: () => routes.datasheet_list({ datastoreId: datastoreId }).push() });
+    };
 
     return (
         <AppLayout navItems={navItems} documentTitle="Tableau de bord professionnel">
@@ -23,11 +36,14 @@ const DashboardPro = () => {
                     <h1>Bienvenue {user?.firstName || "utilisateur-rice"}</h1>
 
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
-                        {datastoreListQuery.data?.map((datastore) => (
-                            <div key={datastore._id} className={fr.cx("fr-col-12", "fr-col-sm-6", "fr-col-md-4", "fr-col-lg-3")}>
-                                <Tile linkProps={routes.datasheet_list({ datastoreId: datastore._id }).link} grey={true} title={datastore.name} />
-                            </div>
-                        ))}
+                        {datastoreListQuery.data?.map((datastore) => {
+                            const link = { ...routes.datasheet_list({ datastoreId: datastore._id }).link, onClick: () => handleClick(datastore._id) };
+                            return (
+                                <div key={datastore._id} className={fr.cx("fr-col-12", "fr-col-sm-6", "fr-col-md-4", "fr-col-lg-3")}>
+                                    <Tile linkProps={link} grey={true} title={datastore.name} />
+                                </div>
+                            );
+                        })}
                         <div className={fr.cx("fr-col-12", "fr-col-sm-6", "fr-col-md-4", "fr-col-lg-3")}>
                             <Tile linkProps={routes.datastore_create_request().link} grey={true} title={Translator.trans("datastore_creation_request.title")} />
                         </div>
