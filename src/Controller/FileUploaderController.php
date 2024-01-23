@@ -403,9 +403,42 @@ class FileUploaderController extends AbstractController
         $filepath = $file->getPathname();
 
         $db = new \SQLite3($filepath);
-        $res = $db->query('SELECT table_name, srs_id FROM gpkg_geometry_columns');
+        
+        $res = $db->query('SELECT gc.table_name, rs.definition FROM gpkg_geometry_columns gc LEFT JOIN gpkg_spatial_ref_sys rs ON gc.srs_id = rs.srs_id');
         while ($row = $res->fetchArray()) {
-            $srids[] = 'EPSG:'.$row['srs_id'];
+            $srid = $this->getProjection($row['definition']);
+            if (! is_null($srid )) {
+                $srids[] = $srid;    
+            }
         }
+    }
+
+    /**
+     * Recherche la projection dans la definition WKT
+     * Adapté de https://github.com/DanielJDufour/wkt-crs/blob/main/README.md voir 
+     * https://github.com/DanielJDufour/wkt-crs/blob/main/wkt-crs.js fonction parse
+     * 
+     * @param string $definition
+     * @return string | null
+     */
+    private function getProjection($definition)
+    {
+        $wkt = preg_replace_callback('/[A-Z][A-Z\d_]+\[/i', function ($matches) {
+            return '["' . substr($matches[0], 0, strlen($matches[0]) - 1) . '",';
+        }, $definition);
+        
+        $wkt = preg_replace_callback('/, ?([A-Z][A-Z\d_]+[,\]])/', function ($matches) {
+            $v = substr($matches[0], 1, strlen($matches[0]) - 2);
+            return ',"' . $v . '"]';
+        }, $wkt);
+        
+        $json = json_decode($wkt, true);        
+        foreach($json as $v) {
+            if ('AUTHORITY' == $v[0]) {
+                return $v[1] . ':' . $v[2];	
+            }
+        } 
+        
+        return null;
     }
 }
