@@ -6,11 +6,12 @@ import { Pyramid } from "../../../../../types/app";
 import PyramidListItem from "./PyramidListItem";
 
 type PyramidListProps = {
+    datasheetName?: string;
     datastoreId: string;
     pyramidList: Pyramid[] | undefined;
 };
 
-const PyramidList: FC<PyramidListProps> = ({ datastoreId, pyramidList }) => {
+const PyramidList: FC<PyramidListProps> = ({ datasheetName, datastoreId, pyramidList }) => {
     return (
         <>
             <div className={fr.cx("fr-grid-row")}>
@@ -19,7 +20,7 @@ const PyramidList: FC<PyramidListProps> = ({ datastoreId, pyramidList }) => {
                     &nbsp;Pyramides de tuiles vectorielles ({pyramidList?.length})
                 </h5>
             </div>
-            {pyramidList?.map((pyramid) => <PyramidListItem key={pyramid._id} datastoreId={datastoreId} pyramid={pyramid} />)}
+            {pyramidList?.map((pyramid) => <PyramidListItem key={pyramid._id} datasheetName={datasheetName} datastoreId={datastoreId} pyramid={pyramid} />)}
         </>
     );
 };

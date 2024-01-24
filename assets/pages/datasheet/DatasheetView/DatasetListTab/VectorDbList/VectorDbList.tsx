@@ -6,11 +6,12 @@ import { type VectorDb } from "../../../../../types/app";
 import VectorDbListItem from "./VectorDbListItem";
 
 type VectorDbListProps = {
+    datasheetName?: string;
     datastoreId: string;
     vectorDbList: VectorDb[] | undefined;
 };
 
-const VectorDbList: FC<VectorDbListProps> = ({ datastoreId, vectorDbList }) => {
+const VectorDbList: FC<VectorDbListProps> = ({ datasheetName, datastoreId, vectorDbList }) => {
     return (
         <>
             <div className={fr.cx("fr-grid-row")}>
@@ -20,7 +21,9 @@ const VectorDbList: FC<VectorDbListProps> = ({ datastoreId, vectorDbList }) => {
                 </h5>
             </div>
 
-            {vectorDbList?.map((vectorDb) => <VectorDbListItem key={vectorDb._id} datastoreId={datastoreId} vectorDb={vectorDb} />)}
+            {vectorDbList?.map((vectorDb) => (
+                <VectorDbListItem key={vectorDb._id} datasheetName={datasheetName} datastoreId={datastoreId} vectorDb={vectorDb} />
+            ))}
         </>
     );
 };

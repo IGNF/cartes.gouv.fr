@@ -19,8 +19,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class UserController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        private readonly EntrepotApiService $entrepotApiService,
-        private readonly ServiceAccount $serviceAccount
+        private readonly EntrepotApiService $entrepotApiService
     ) {
     }
 
@@ -31,10 +30,10 @@ class UserController extends AbstractController implements ApiControllerInterfac
     }
 
     #[Route('/me/datastores', name: 'datastores_list')]
-    public function getUserDatastores(): JsonResponse
+    public function getUserDatastores(ServiceAccount $serviceAccount): JsonResponse
     {
         try {
-            $sandboxCommunity = $this->serviceAccount->getSandboxCommunity();
+            $sandboxCommunity = $serviceAccount->getSandboxCommunity();
 
             $myDatastores = $this->entrepotApiService->user->getMyDatastores();
             $myDatastores = array_values(array_filter($myDatastores, function ($myDatastore) use ($sandboxCommunity) {
@@ -48,9 +47,9 @@ class UserController extends AbstractController implements ApiControllerInterfac
     }
 
     #[Route('me/add_to_sandbox', name: 'add_to_sandbox', methods: ['PUT'])]
-    public function addMemberToSandbox(): JsonResponse
+    public function addMemberToSandbox(ServiceAccount $serviceAccount): JsonResponse
     {
-        $this->serviceAccount->addCurrentUserToSandbox();
+        $serviceAccount->addCurrentUserToSandbox();
         return new JsonResponse();
     }
 }

@@ -13,6 +13,8 @@ import { sldStyleValidationFrTranslations } from "../../validations/sldStyle";
 import { mapboxStyleValidationFrTranslations } from "../../validations/MapboxStyleValidator";
 import { TMSStyleFilesManagerFrTranslations } from "../../modules/Style/TMSStyleFilesManager";
 import { DatastoreManageStorageFrTranslations } from "../../pages/datastore/DatastoreManageStorage/DatastoreManageStorage";
+import { VectorDbListItemFrTranslations } from "../../pages/datasheet/DatasheetView/DatasetListTab/VectorDbList/VectorDbListItem";
+import { PyramidListItemFrTranslations } from "../../pages/datasheet/DatasheetView/DatasetListTab/PyramidList/PyramidListItem";
 
 export const translations: Translations<"fr"> = {
     Common: commonFrTranslations,
@@ -24,6 +26,8 @@ export const translations: Translations<"fr"> = {
     Contact: contactFrTranslations,
     navItems: navItemsFrTranslations,
     datastoreNavItems: datastoreNavItemsFrTranslations,
+    VectorDbListItem: VectorDbListItemFrTranslations,
+    PyramidListItem: PyramidListItemFrTranslations,
     DatasheetView: DatasheetViewFrTranslations,
     sldStyleValidation: sldStyleValidationFrTranslations,
     mapboxStyleValidation: mapboxStyleValidationFrTranslations,

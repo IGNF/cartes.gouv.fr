@@ -3,7 +3,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, memo, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { symToStr } from "tsafe/symToStr";
@@ -15,16 +15,31 @@ import functions from "../../../../../functions";
 import useToggle from "../../../../../hooks/useToggle";
 import RQKeys from "../../../../../modules/RQKeys";
 import { routes } from "../../../../../router/router";
-import { DatastoreEndpoint, StoredDataStatusEnum, VectorDb } from "../../../../../types/app";
+import { DatasheetDetailed, DatastoreEndpoint, StoredDataStatusEnum, VectorDb } from "../../../../../types/app";
 import VectorDbDesc from "./VectorDbDesc";
+import { Translations, declareComponentKeys, getTranslation, useTranslation } from "../../../../../i18n/i18n";
+import Alert from "@codegouvfr/react-dsfr/Alert";
+import Wait from "../../../../../components/Utils/Wait";
+import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 
 type ServiceTypes = "tms" | "wfs" | "wms-vector" | "pre-paquet";
 
 type VectorDbListItemProps = {
-    vectorDb: VectorDb;
+    datasheetName?: string;
     datastoreId: string;
+    vectorDb: VectorDb;
 };
-const VectorDbListItem: FC<VectorDbListItemProps> = ({ vectorDb, datastoreId }) => {
+
+const confirmDialogModal = createModal({
+    id: "confirm-delete-vectordb",
+    isOpenedByDefault: false,
+});
+
+const { t: tCommon } = getTranslation("Common");
+
+const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreId, vectorDb }) => {
+    const { t } = useTranslation({ VectorDbListItem });
+
     // création d'un service
     const [serviceType, setServiceType] = useState<ServiceTypes>();
 
@@ -51,6 +66,20 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ vectorDb, datastoreId }) 
 
         return { wfsEndpoints, wmsVectorEndpoints, tmsEndpoints };
     }, [endpointsQuery.data]);
+
+    /* Suppression de la base de donnees */
+    const queryClient = useQueryClient();
+
+    const deleteVectorDbMutation = useMutation({
+        mutationFn: () => api.storedData.remove(datastoreId, vectorDb._id),
+        onSuccess() {
+            if (datasheetName) {
+                queryClient.setQueryData(RQKeys.datastore_datasheet(datastoreId, datasheetName), (datasheet: DatasheetDetailed) => {
+                    return datasheet.vector_db_list?.filter((storedData) => storedData._id !== vectorDb._id);
+                });
+            }
+        },
+    });
 
     const handleCreateService = () => {
         switch (serviceType) {
@@ -96,7 +125,7 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ vectorDb, datastoreId }) 
                             <Button
                                 iconId={showDescription ? "ri-subtract-fill" : "ri-add-fill"}
                                 size="small"
-                                title="Voir les données liées"
+                                title={t("show_linked_datas")}
                                 className={fr.cx("fr-mr-2v")}
                                 priority="secondary"
                                 onClick={toggleShowDescription}
@@ -117,29 +146,29 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ vectorDb, datastoreId }) 
                                 priority="secondary"
                                 disabled={vectorDb.status !== StoredDataStatusEnum.GENERATED}
                             >
-                                Créer un service
+                                {t("create_service")}
                             </Button>
                             <MenuList
                                 menuOpenButtonProps={{
-                                    title: "Autres actions",
+                                    title: t("other_actions"),
                                     priority: "secondary",
                                 }}
                                 items={[
                                     {
-                                        text: "Remplacer les données",
+                                        text: t("replace_datas"),
                                         iconId: "fr-icon-refresh-line",
                                         onClick: () => console.warn("Action non implémentée"),
                                         disabled: vectorDb.status !== StoredDataStatusEnum.GENERATED,
                                     },
                                     {
-                                        text: "Voir les détails",
+                                        text: t("show_details"),
                                         iconId: "fr-icon-file-text-fill",
                                         linkProps: routes.datastore_stored_data_report({ datastoreId, storedDataId: vectorDb._id }).link,
                                     },
                                     {
-                                        text: "Supprimer",
+                                        text: tCommon("delete"),
                                         iconId: "fr-icon-delete-line",
-                                        onClick: () => console.warn("Action non implémentée"),
+                                        onClick: () => confirmDialogModal.open(),
                                     },
                                 ]}
                             />
@@ -149,18 +178,36 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ vectorDb, datastoreId }) 
 
                 {showDescription && <VectorDbDesc datastoreId={datastoreId} vectorDb={vectorDb} />}
             </div>
-
+            {deleteVectorDbMutation.error && (
+                <Alert
+                    title={t("error_deleting", { dbname: vectorDb.name })}
+                    closable
+                    description={deleteVectorDbMutation.error.message}
+                    as="h2"
+                    severity="error"
+                />
+            )}
+            {deleteVectorDbMutation.isPending && (
+                <Wait>
+                    <div className={fr.cx("fr-container")}>
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
+                            <LoadingIcon className={fr.cx("fr-mr-2v")} />
+                            <h6 className={fr.cx("fr-m-0")}>{tCommon("removing")}</h6>
+                        </div>
+                    </div>
+                </Wait>
+            )}
             {createPortal(
                 <serviceTypeChoiceModal.Component
-                    title="Définissez le service à créer"
+                    title={t("define_service")}
                     buttons={[
                         {
-                            children: "Annuler",
+                            children: tCommon("cancel"),
                             doClosesModal: true,
                             priority: "secondary",
                         },
                         {
-                            children: "Continuer",
+                            children: tCommon("continue"),
                             onClick: handleCreateService,
                             doClosesModal: true,
                             priority: "primary",
@@ -172,7 +219,7 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ vectorDb, datastoreId }) 
                         options={[
                             {
                                 label: "Tile Map Service (TMS)",
-                                hintText: "Dans une première étape  vous allez créer une pyramide de tuiles vectorielles que vous devrez ensuite publier",
+                                hintText: t("tms_hint_text"),
                                 nativeInputProps: {
                                     checked: serviceType === "tms",
                                     onChange: () => setServiceType("tms"),
@@ -181,7 +228,7 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ vectorDb, datastoreId }) 
                             },
                             {
                                 label: "Web Feature Service (WFS)",
-                                hintText: "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Dolor, dolore unde! Autem eos nam fugiat!",
+                                hintText: t("wfs_hint_text"),
                                 nativeInputProps: {
                                     checked: serviceType === "wfs",
                                     onChange: () => setServiceType("wfs"),
@@ -190,7 +237,7 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ vectorDb, datastoreId }) 
                             },
                             {
                                 label: "Web Map Service (WMS-Vecteur)",
-                                hintText: "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Dolor, dolore unde! Autem eos nam fugiat!",
+                                hintText: t("wms_hint_text"),
                                 nativeInputProps: {
                                     checked: serviceType === "wms-vector",
                                     onChange: () => setServiceType("wms-vector"),
@@ -198,8 +245,8 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ vectorDb, datastoreId }) 
                                 },
                             },
                             {
-                                label: "Fichier pré-paquets",
-                                hintText: "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Dolor, dolore unde! Autem eos nam fugiat!",
+                                label: t("prepaquet_label"),
+                                hintText: t("prepaquet_hint_text"),
                                 nativeInputProps: {
                                     checked: serviceType === "pre-paquet",
                                     onChange: () => setServiceType("pre-paquet"),
@@ -210,13 +257,13 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ vectorDb, datastoreId }) 
                     />
                     {serviceType && serviceType === "tms" && (
                         <Input
-                            label="Nom technique de la pyramide de tuiles vectorielles"
-                            hintText="II s'agit du nom technique du service qui apparaitra dans votre espace de travail, il ne sera pas publié en ligne. Si vous le renommez, choisissez un nom explicite."
+                            label={t("tile_technical_name")}
+                            hintText={t("tile_technical_name_hint_text")}
                             nativeInputProps={{
                                 defaultValue: technicalName,
                                 onChange: (e) => {
                                     setTechnicalName(e.currentTarget.value ?? undefined);
-                                    setTechnicalNameError(e.currentTarget.value ? undefined : "Le nom technique est obligatoire");
+                                    setTechnicalNameError(e.currentTarget.value ? undefined : t("technical_name_is_mandatory"));
                                 },
                             }}
                             state={technicalNameError ? "error" : "default"}
@@ -226,6 +273,25 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ vectorDb, datastoreId }) 
                 </serviceTypeChoiceModal.Component>,
                 document.body
             )}
+            {createPortal(
+                <confirmDialogModal.Component
+                    title={t("confirm_delete_modal.title", { dbname: vectorDb.name })}
+                    buttons={[
+                        {
+                            children: tCommon("no"),
+                            priority: "secondary",
+                        },
+                        {
+                            children: tCommon("yes"),
+                            onClick: () => deleteVectorDbMutation.mutate(),
+                            priority: "primary",
+                        },
+                    ]}
+                >
+                    <div />
+                </confirmDialogModal.Component>,
+                document.body
+            )}
         </>
     );
 };
@@ -233,3 +299,65 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ vectorDb, datastoreId }) 
 VectorDbListItem.displayName = symToStr({ VectorDbListItem });
 
 export default memo(VectorDbListItem);
+
+// traductions
+export const { i18n } = declareComponentKeys<
+    | "create_service"
+    | "define_service"
+    | "show_linked_datas"
+    | "other_actions"
+    | "replace_datas"
+    | "show_details"
+    | "tms_hint_text"
+    | "wfs_hint_text"
+    | "wms_hint_text"
+    | "prepaquet_label"
+    | "prepaquet_hint_text"
+    | "tile_technical_name"
+    | "tile_technical_name_hint_text"
+    | "technical_name_is_mandatory"
+    | { K: "confirm_delete_modal.title"; P: { dbname: string }; R: string }
+    | { K: "error_deleting"; P: { dbname: string }; R: string }
+>()({
+    VectorDbListItem,
+});
+
+export const VectorDbListItemFrTranslations: Translations<"fr">["VectorDbListItem"] = {
+    create_service: "Créer un service",
+    define_service: "Définissez le service à créer",
+    show_linked_datas: "Voir les données liées",
+    other_actions: "Autres actions",
+    replace_datas: "Remplacer les données",
+    show_details: "Voir les détails",
+    tms_hint_text: "Dans une première étape  vous allez créer une pyramide de tuiles vectorielles que vous devrez ensuite publier",
+    wfs_hint_text: "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Dolor, dolore unde! Autem eos nam fugiat!",
+    wms_hint_text: "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Dolor, dolore unde! Autem eos nam fugiat!",
+    prepaquet_label: "Fichier pré-paquets",
+    prepaquet_hint_text: "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Dolor, dolore unde! Autem eos nam fugiat!",
+    tile_technical_name: "Nom technique de la pyramide de tuiles vectorielles",
+    tile_technical_name_hint_text:
+        "II s'agit du nom technique du service qui apparaitra dans votre espace de travail, il ne sera pas publié en ligne. Si vous le renommez, choisissez un nom explicite.",
+    technical_name_is_mandatory: "Le nom technique est obligatoire",
+    "confirm_delete_modal.title": ({ dbname }) => `Êtes-vous sûr de vouloir supprimer la base de données ${dbname} ?`,
+    error_deleting: ({ dbname }) => `La suppression de la base de données ${dbname} a échoué`,
+};
+
+export const VectorDbListItemEnTranslations: Translations<"en">["VectorDbListItem"] = {
+    create_service: "Create service",
+    define_service: "Define service to create",
+    show_linked_datas: "Show linked datas",
+    other_actions: "Other actions",
+    replace_datas: "Replace datas",
+    show_details: "Show details",
+    tms_hint_text: "In a first step you will create a pyramid of vector tiles which you will then have to publish",
+    wfs_hint_text: "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Dolor, dolore unde! Autem eos nam fugiat!",
+    wms_hint_text: "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Dolor, dolore unde! Autem eos nam fugiat!",
+    prepaquet_label: "[TODO]",
+    prepaquet_hint_text: "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Dolor, dolore unde! Autem eos nam fugiat!",
+    tile_technical_name: "Technical name of vector tile pyramid [TODO]",
+    tile_technical_name_hint_text:
+        "This is the technical name of the service which will appear in your workspace, it will not be published online. If you rename it, choose a meaningful name. [TODO]",
+    technical_name_is_mandatory: "Technical name is mandatory",
+    "confirm_delete_modal.title": ({ dbname }) => `Are you sure you want to delete database ${dbname} ?`,
+    error_deleting: ({ dbname }) => `Deleting ${dbname} database failed`,
+};

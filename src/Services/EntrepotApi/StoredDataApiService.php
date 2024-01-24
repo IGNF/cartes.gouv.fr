@@ -77,15 +77,6 @@ class StoredDataApiService extends AbstractEntrepotApiService
 
     public function remove(string $datastoreId, string $storedDataId): void
     {
-        $storedData = $this->get($datastoreId, $storedDataId);
-        if (StoredDataTypes::ROK4_PYRAMID_VECTOR == $storedData['type'] && array_key_exists('initial_pyramid_id', $storedData['tags'])) {
-            $this->removeTags($datastoreId, $storedData['tags']['initial_pyramid_id'], ['update_pyramid_id']);
-        }
-
-        if (StoredDataStatuses::CREATED == $storedData['status'] && array_key_exists('proc_int_id', $storedData['tags'])) {
-            $this->entrepotApiService->processing->removeExecution($datastoreId, $storedData['tags']['proc_int_id']);
-        }
-
         $this->request('DELETE', "datastores/$datastoreId/stored_data/$storedDataId");
     }
 
