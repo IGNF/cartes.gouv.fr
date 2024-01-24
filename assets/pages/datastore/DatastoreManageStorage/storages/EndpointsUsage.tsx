@@ -49,18 +49,12 @@ const EndpointsUsage: FC<EndpointsUsageProps> = ({ datastore }) => {
 
     const unpublishOfferingMutation = useMutation({
         mutationFn: (offering: Offering) => {
-            switch (offering.type) {
-                case OfferingTypeEnum.WFS:
-                    return api.service.unpublishWfs(datastore._id, offering._id);
-                case OfferingTypeEnum.WMSVECTOR:
-                    return api.service.unpublishWmsVector(datastore._id, offering._id);
-                case OfferingTypeEnum.WMTSTMS:
-                    return api.service.unpublishTms(datastore._id, offering._id);
-
-                default:
-                    console.warn(`Dépublication de service ${offering.type} n'a pas encore été implémentée`);
-                    return Promise.reject(`Dépublication de service ${offering.type} n'a pas encore été implémentée`);
+            if (![OfferingTypeEnum.WFS, OfferingTypeEnum.WMSVECTOR, OfferingTypeEnum.WMTSTMS].includes(offering.type)) {
+                console.warn(`Dépublication de service ${offering.type} n'a pas encore été implémentée`);
+                return Promise.reject(`Dépublication de service ${offering.type} n'a pas encore été implémentée`);
             }
+
+            return api.service.unpublishService(datastore._id, offering._id);
         },
         onSuccess() {
             queryClient.setQueryData(RQKeys.datastore_offering_list(datastore._id), (offeringsList: Offering[]) => {
