@@ -36,18 +36,12 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
 
     const unpublishServiceMutation = useMutation({
         mutationFn: (service: Service) => {
-            switch (service.type) {
-                case OfferingTypeEnum.WFS:
-                    return api.service.unpublishWfs(datastoreId, service._id);
-                case OfferingTypeEnum.WMSVECTOR:
-                    return api.service.unpublishWmsVector(datastoreId, service._id);
-                case OfferingTypeEnum.WMTSTMS:
-                    return api.service.unpublishTms(datastoreId, service._id);
-
-                default:
-                    console.warn(`Dépublication de service ${service.type} n'a pas encore été implémentée`);
-                    return Promise.reject(`Dépublication de service ${service.type} n'a pas encore été implémentée`);
+            if (![OfferingTypeEnum.WFS, OfferingTypeEnum.WMSVECTOR, OfferingTypeEnum.WMTSTMS].includes(service.type)) {
+                console.warn(`Dépublication de service ${service.type} n'a pas encore été implémentée`);
+                return Promise.reject(`Dépublication de service ${service.type} n'a pas encore été implémentée`);
             }
+
+            return api.service.unpublishService(datastoreId, service._id);
         },
         onSettled() {
             queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
@@ -122,7 +116,21 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                                     {
                                         text: "Modifier les informations de publication",
                                         iconId: "ri-edit-box-line",
-                                        onClick: () => console.warn("Action non implémentée"),
+                                        linkProps: (() => {
+                                            switch (service.type) {
+                                                case OfferingTypeEnum.WMSVECTOR:
+                                                    return routes.datastore_wms_vector_service_modify({
+                                                        datastoreId,
+                                                        vectorDbId: service.configuration.type_infos.used_data[0].stored_data,
+                                                        offeringId: service._id,
+                                                    }).link;
+
+                                                default:
+                                                    return {
+                                                        onClick: () => console.warn("Action non implémentée"),
+                                                    };
+                                            }
+                                        })(),
                                     },
                                     {
                                         text: "Remplacer les données",

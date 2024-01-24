@@ -3,9 +3,11 @@ import { jsonFetch } from "../modules/jsonFetch";
 import { Service } from "../types/app";
 import { OfferingDetailResponseDto, OfferingListResponseDto } from "../types/entrepot";
 
-const get = (datastoreId: string, offeringId: string) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_service_get_offering", { datastoreId, offeringId });
-    return jsonFetch<Service>(url);
+const getService = (datastoreId: string, offeringId: string, otherOptions: RequestInit = {}) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_service_get_service", { datastoreId, offeringId });
+    return jsonFetch<Service>(url, {
+        ...otherOptions,
+    });
 };
 
 const getOfferings = (datastoreId: string, otherOptions: RequestInit = {}) => {
@@ -22,34 +24,18 @@ const getOfferingsDetailed = (datastoreId: string, otherOptions: RequestInit = {
     });
 };
 
-const unpublishWfs = (datastoreId: string, offeringId: string) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_service_wfs_unpublish", { datastoreId, offeringId });
-    return jsonFetch<null>(url, {
-        method: "DELETE",
-    });
-};
-
-const unpublishWmsVector = (datastoreId: string, offeringId: string) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_service_wmsvector_unpublish", { datastoreId, offeringId });
-    return jsonFetch<null>(url, {
-        method: "DELETE",
-    });
-};
-
-const unpublishTms = (datastoreId: string, offeringId: string) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_service_tms_unpublish", { datastoreId, offeringId });
+const unpublishService = (datastoreId: string, offeringId: string) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_service_unpublish_service", { datastoreId, offeringId });
     return jsonFetch<null>(url, {
         method: "DELETE",
     });
 };
 
 const service = {
-    get,
+    getService,
     getOfferings,
     getOfferingsDetailed,
-    unpublishWfs,
-    unpublishWmsVector,
-    unpublishTms,
+    unpublishService,
 };
 
 export default service;

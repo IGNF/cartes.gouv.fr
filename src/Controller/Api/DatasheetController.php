@@ -4,18 +4,15 @@ namespace App\Controller\Api;
 
 use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationStatuses;
-use App\Constants\EntrepotApi\OfferingTypes;
 use App\Constants\EntrepotApi\StoredDataTypes;
-use App\Controller\StyleTrait;
 use App\Exception\CartesApiException;
 use App\Exception\EntrepotApiException;
+use App\Services\CartesServiceApi;
 use App\Services\EntrepotApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 #[Route(
     '/api/datastores/{datastoreId}/datasheet',
@@ -25,20 +22,10 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 )]
 class DatasheetController extends AbstractController implements ApiControllerInterface
 {
-    use StyleTrait;
-
-    private HttpClientInterface $httpClient;
-
     public function __construct(
         private EntrepotApiService $entrepotApiService,
-        ParameterBagInterface $parameterBag,
-        HttpClientInterface $httpClient
+        private CartesServiceApi $cartesServiceApi,
     ) {
-        $this->httpClient = $httpClient->withOptions([
-            'proxy' => $parameterBag->get('http_proxy'),
-            'verify_peer' => false,
-            'verify_host' => false,
-        ]);
     }
 
     #[Route('', name: 'get_list', methods: ['GET'])]
@@ -187,30 +174,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         }
 
         foreach ($offerings as &$offering) {
-            $offering['configuration'] = $this->entrepotApiService->configuration->get($datastoreId, $offering['configuration']['_id']);
-
-            // Metadatas (TMS)
-            if (OfferingTypes::WMTSTMS === $offering['type']) {
-                $urls = array_values(array_filter($offering['urls'], static function ($url) {
-                    return 'TMS' == $url['type'];
-                }));
-                $url = $urls[0]['url'].'/metadata.json';
-
-                $response = $this->httpClient->request('GET', $url);
-                if (Response::HTTP_OK != $response->getStatusCode()) {
-                    throw new EntrepotApiException("Request $url failed");
-                }
-                $offering['tms_metadata'] = $response->toArray();
-            }
-
-            $styles = [];
-            if (OfferingTypes::WFS === $offering['type'] || OfferingTypes::WMTSTMS === $offering['type']) {
-                $styles = $this->getStyles($datastoreId, $offering['configuration']['_id']);
-            }
-            $offering['configuration']['styles'] = $styles;
-
-            // url de partage (url capabilities si WFS ou WMS-VECTOR, url spécifique si TMS)
-            $offering['share_url'] = $this->getShareUrl($datastoreId, $offering);
+            $offering = $this->cartesServiceApi->getService($datastoreId, $offering['_id']);
         }
 
         return $offerings;

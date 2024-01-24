@@ -31,7 +31,7 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
 
     const serviceQuery = useQuery<Service, CartesApiException>({
         queryKey: RQKeys.datastore_offering(datastoreId, offeringId),
-        queryFn: () => api.service.get(datastoreId, offeringId),
+        queryFn: () => api.service.getService(datastoreId, offeringId),
         staleTime: 60000,
     });
 
