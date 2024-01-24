@@ -3,22 +3,23 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { createModal, ModalProps } from "@codegouvfr/react-dsfr/Modal";
 import { Upload } from "@codegouvfr/react-dsfr/Upload";
-import Wait from "../../../components/Utils/Wait";
-import { ConfirmDialogModal, ConfirmDialog } from "../../../components/Utils/ConfirmDialog";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
-import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import { FC, memo, useCallback, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import * as yup from "yup";
 
 import { useForm } from "react-hook-form";
 import api from "../../../api";
+import { ConfirmDialog, ConfirmDialogModal } from "../../../components/Utils/ConfirmDialog";
+import Wait from "../../../components/Utils/Wait";
 import functions from "../../../functions";
 import { ComponentKey, useTranslation } from "../../../i18n/i18n";
 import { CartesApiException } from "../../../modules/jsonFetch";
 import RQKeys from "../../../modules/RQKeys";
 import type { Datasheet, DatasheetDetailed, DatasheetThumbnailAnnexe } from "../../../types/app";
+
 import "../../../sass/components/buttons.scss";
 
 const defaultImgUrl = "//www.gouvernement.fr/sites/default/files/static_assets/placeholder.1x1.png";
@@ -296,4 +297,4 @@ const DatasheetThumbnail: FC<DatasheetThumbnailProps> = ({ datastoreId, datashee
     );
 };
 
-export default DatasheetThumbnail;
+export default memo(DatasheetThumbnail);
