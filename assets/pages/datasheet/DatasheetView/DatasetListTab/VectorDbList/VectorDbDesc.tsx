@@ -1,25 +1,24 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Badge from "@codegouvfr/react-dsfr/Badge";
-import { useQuery } from "@tanstack/react-query";
+import { UseQueryResult } from "@tanstack/react-query";
 import { FC, memo, useMemo } from "react";
 
-import api from "../../../../../api";
 import LoadingText from "../../../../../components/Utils/LoadingText";
-import RQKeys from "../../../../../modules/RQKeys";
-import { StoredDataStatusEnum, StoredDataTypeEnum, VectorDb } from "../../../../../types/app";
+import { StoredDataStatusEnum, StoredDataTypeEnum } from "../../../../../types/app";
+import { OfferingListResponseDto, ProcessingExecutionStoredDataDto } from "../../../../../types/entrepot";
 import { offeringTypeDisplayName } from "../../../../../utils";
 
 type VectorDbDescProps = {
-    vectorDb: VectorDb;
-    datastoreId: string;
+    dataUsesQuery: UseQueryResult<
+        {
+            stored_data_list: ProcessingExecutionStoredDataDto[];
+            offerings_list: OfferingListResponseDto[];
+        },
+        Error
+    >;
 };
-const VectorDbDesc: FC<VectorDbDescProps> = ({ vectorDb, datastoreId }) => {
-    const dataUsesQuery = useQuery({
-        queryKey: RQKeys.datastore_stored_data_uses(datastoreId, vectorDb._id),
-        queryFn: ({ signal }) => api.storedData.getUses(datastoreId, vectorDb._id, { signal }),
-        staleTime: 600000,
-    });
 
+const VectorDbDesc: FC<VectorDbDescProps> = ({ dataUsesQuery }) => {
     const pyramidVectorList = useMemo(
         () =>
             dataUsesQuery.data?.stored_data_list.filter(
@@ -61,7 +60,6 @@ const VectorDbDesc: FC<VectorDbDescProps> = ({ vectorDb, datastoreId }) => {
                         </div>
                     </div>
                 )}
-
                 {dataUsesQuery.data?.offerings_list && dataUsesQuery.data?.offerings_list?.length > 0 && (
                     <div
                         className={fr.cx("fr-grid-row", "fr-mt-2v", "fr-p-2v")}

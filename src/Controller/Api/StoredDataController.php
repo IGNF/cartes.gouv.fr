@@ -7,6 +7,7 @@ use App\Constants\EntrepotApi\ProcessingStatuses;
 use App\Constants\EntrepotApi\StoredDataStatuses;
 use App\Exception\CartesApiException;
 use App\Exception\EntrepotApiException;
+use App\Services\CartesServiceApi;
 use App\Services\EntrepotApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -138,9 +139,16 @@ class StoredDataController extends AbstractController implements ApiControllerIn
     }
 
     #[Route('/{storedDataId}', name: 'delete', methods: ['DELETE'])]
-    public function delete(string $datastoreId, string $storedDataId): JsonResponse
+    public function delete(string $datastoreId, string $storedDataId, CartesServiceApi $cartesServiceApi): JsonResponse
     {
         try {
+            // Suppression des offerings et configurations associees
+            $offerings = $this->entrepotApiService->configuration->getAllOfferings($datastoreId, ['stored_data' => $storedDataId]);
+            foreach($offerings as $offering) {
+                $cartesServiceApi->unpublish($datastoreId, $offering['_id']);
+            }
+
+            // Suppression de la donnee stockee
             $this->entrepotApiService->storedData->remove($datastoreId, $storedDataId);
 
             return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);

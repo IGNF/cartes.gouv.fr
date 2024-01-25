@@ -8,19 +8,22 @@ import { FC, memo, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { symToStr } from "tsafe/symToStr";
 
+import Alert from "@codegouvfr/react-dsfr/Alert";
+import Badge from "@codegouvfr/react-dsfr/Badge";
 import api from "../../../../../api";
+import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
+import LoadingText from "../../../../../components/Utils/LoadingText";
 import MenuList from "../../../../../components/Utils/MenuList";
 import StoredDataStatusBadge from "../../../../../components/Utils/StoredDataStatusBadge";
+import Wait from "../../../../../components/Utils/Wait";
 import functions from "../../../../../functions";
 import useToggle from "../../../../../hooks/useToggle";
+import { Translations, declareComponentKeys, getTranslation, useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/RQKeys";
 import { routes } from "../../../../../router/router";
-import { DatasheetDetailed, DatastoreEndpoint, StoredDataStatusEnum, VectorDb } from "../../../../../types/app";
+import { DatastoreEndpoint, StoredDataStatusEnum, VectorDb } from "../../../../../types/app";
+import { offeringTypeDisplayName } from "../../../../../utils";
 import VectorDbDesc from "./VectorDbDesc";
-import { Translations, declareComponentKeys, getTranslation, useTranslation } from "../../../../../i18n/i18n";
-import Alert from "@codegouvfr/react-dsfr/Alert";
-import Wait from "../../../../../components/Utils/Wait";
-import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 
 type ServiceTypes = "tms" | "wfs" | "wms-vector" | "pre-paquet";
 
@@ -29,11 +32,6 @@ type VectorDbListItemProps = {
     datastoreId: string;
     vectorDb: VectorDb;
 };
-
-const confirmDialogModal = createModal({
-    id: "confirm-delete-vectordb",
-    isOpenedByDefault: false,
-});
 
 const { t: tCommon } = getTranslation("Common");
 
@@ -51,6 +49,12 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
         queryFn: ({ signal }) => api.datastore.getEndpoints(datastoreId, {}, { signal }),
         retry: false,
         staleTime: 3600000,
+    });
+
+    const dataUsesQuery = useQuery({
+        queryKey: RQKeys.datastore_stored_data_uses(datastoreId, vectorDb._id),
+        queryFn: ({ signal }) => api.storedData.getUses(datastoreId, vectorDb._id, { signal }),
+        staleTime: 600000,
     });
 
     const { wfsEndpoints, wmsVectorEndpoints, tmsEndpoints } = useMemo(() => {
@@ -74,9 +78,7 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
         mutationFn: () => api.storedData.remove(datastoreId, vectorDb._id),
         onSuccess() {
             if (datasheetName) {
-                queryClient.setQueryData(RQKeys.datastore_datasheet(datastoreId, datasheetName), (datasheet: DatasheetDetailed) => {
-                    return datasheet.vector_db_list?.filter((storedData) => storedData._id !== vectorDb._id);
-                });
+                queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
             }
         },
     });
@@ -108,6 +110,15 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
         () =>
             createModal({
                 id: `service-type-choice-modal-vectordb-${vectorDb._id}`,
+                isOpenedByDefault: false,
+            }),
+        [vectorDb._id]
+    );
+
+    const confirmRemoveVectorDbModal = useMemo(
+        () =>
+            createModal({
+                id: `confirm-delete-vectordb-${vectorDb._id}`,
                 isOpenedByDefault: false,
             }),
         [vectorDb._id]
@@ -168,15 +179,14 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
                                     {
                                         text: tCommon("delete"),
                                         iconId: "fr-icon-delete-line",
-                                        onClick: () => confirmDialogModal.open(),
+                                        onClick: () => confirmRemoveVectorDbModal.open(),
                                     },
                                 ]}
                             />
                         </div>
                     </div>
                 </div>
-
-                {showDescription && <VectorDbDesc datastoreId={datastoreId} vectorDb={vectorDb} />}
+                {showDescription && <VectorDbDesc dataUsesQuery={dataUsesQuery} />}
             </div>
             {deleteVectorDbMutation.error && (
                 <Alert
@@ -274,7 +284,7 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
                 document.body
             )}
             {createPortal(
-                <confirmDialogModal.Component
+                <confirmRemoveVectorDbModal.Component
                     title={t("confirm_delete_modal.title", { dbname: vectorDb.name })}
                     buttons={[
                         {
@@ -288,8 +298,26 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
                         },
                     ]}
                 >
-                    <div />
-                </confirmDialogModal.Component>,
+                    {dataUsesQuery.isFetching && <LoadingText withSpinnerIcon={true} />}
+                    {dataUsesQuery.data?.offerings_list && dataUsesQuery.data?.offerings_list?.length > 0 && (
+                        <div className={fr.cx("fr-grid-row", "fr-mt-2v", "fr-p-2v")}>
+                            <p className={fr.cx("fr-h6")}>{t("following_services_deleted")}</p>
+                            <div className={fr.cx("fr-col")}>
+                                <ul className={fr.cx("fr-raw-list")}>
+                                    {dataUsesQuery.data?.offerings_list.map((offering, i) => (
+                                        <li
+                                            key={offering._id}
+                                            className={fr.cx(i + 1 !== dataUsesQuery.data?.offerings_list.length && "fr-mb-2v", "fr-text--xs")}
+                                        >
+                                            {offering.layer_name}
+                                            <Badge className={fr.cx("fr-ml-1v", "fr-text--xs")}>{offeringTypeDisplayName(offering.type)}</Badge>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </div>
+                    )}
+                </confirmRemoveVectorDbModal.Component>,
                 document.body
             )}
         </>
@@ -317,6 +345,7 @@ export const { i18n } = declareComponentKeys<
     | "tile_technical_name_hint_text"
     | "technical_name_is_mandatory"
     | { K: "confirm_delete_modal.title"; P: { dbname: string }; R: string }
+    | "following_services_deleted"
     | { K: "error_deleting"; P: { dbname: string }; R: string }
 >()({
     VectorDbListItem,
@@ -339,6 +368,7 @@ export const VectorDbListItemFrTranslations: Translations<"fr">["VectorDbListIte
         "II s'agit du nom technique du service qui apparaitra dans votre espace de travail, il ne sera pas publié en ligne. Si vous le renommez, choisissez un nom explicite.",
     technical_name_is_mandatory: "Le nom technique est obligatoire",
     "confirm_delete_modal.title": ({ dbname }) => `Êtes-vous sûr de vouloir supprimer la base de données ${dbname} ?`,
+    following_services_deleted: "Les services suivants seront aussi supprimés :",
     error_deleting: ({ dbname }) => `La suppression de la base de données ${dbname} a échoué`,
 };
 
@@ -359,5 +389,6 @@ export const VectorDbListItemEnTranslations: Translations<"en">["VectorDbListIte
         "This is the technical name of the service which will appear in your workspace, it will not be published online. If you rename it, choose a meaningful name. [TODO]",
     technical_name_is_mandatory: "Technical name is mandatory",
     "confirm_delete_modal.title": ({ dbname }) => `Are you sure you want to delete database ${dbname} ?`,
+    following_services_deleted: "The following services will be deleted :",
     error_deleting: ({ dbname }) => `Deleting ${dbname} database failed`,
 };

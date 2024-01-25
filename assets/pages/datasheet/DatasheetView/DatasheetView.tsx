@@ -55,8 +55,8 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
     const datasheetQuery = useQuery<DatasheetDetailed, CartesApiException>({
         queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName),
         queryFn: ({ signal }) => api.datasheet.get(datastoreId, datasheetName, { signal }),
-        // staleTime: 20000,
-        // refetchInterval: 20000,
+        staleTime: 20000,
+        refetchInterval: 20000,
         retry: false,
         enabled: !datasheetDeleteMutation.isPending,
     });

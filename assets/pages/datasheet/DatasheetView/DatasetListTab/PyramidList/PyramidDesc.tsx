@@ -1,25 +1,28 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Badge from "@codegouvfr/react-dsfr/Badge";
-import { useQuery } from "@tanstack/react-query";
+import { UseQueryResult, useQuery } from "@tanstack/react-query";
 import { FC, memo, useMemo } from "react";
 
 import api from "../../../../../api";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import RQKeys from "../../../../../modules/RQKeys";
 import { Pyramid, VectorDb } from "../../../../../types/app";
+import { OfferingListResponseDto, ProcessingExecutionStoredDataDto } from "../../../../../types/entrepot";
 import { offeringTypeDisplayName } from "../../../../../utils";
 
 type PyramidDescProps = {
-    pyramid: Pyramid;
     datastoreId: string;
+    pyramid: Pyramid;
+    dataUsesQuery: UseQueryResult<
+        {
+            stored_data_list: ProcessingExecutionStoredDataDto[];
+            offerings_list: OfferingListResponseDto[];
+        },
+        Error
+    >;
 };
-const PyramidDesc: FC<PyramidDescProps> = ({ pyramid, datastoreId }) => {
-    const dataUsesQuery = useQuery({
-        queryKey: RQKeys.datastore_stored_data_uses(datastoreId, pyramid._id),
-        queryFn: ({ signal }) => api.storedData.getUses(datastoreId, pyramid._id, { signal }),
-        staleTime: 600000,
-    });
 
+const PyramidDesc: FC<PyramidDescProps> = ({ datastoreId, pyramid, dataUsesQuery }) => {
     const vectorDbUsedId = useMemo(() => pyramid.tags.vectordb_id, [pyramid.tags.vectordb_id]);
 
     const vectorDbUsedQuery = useQuery({
