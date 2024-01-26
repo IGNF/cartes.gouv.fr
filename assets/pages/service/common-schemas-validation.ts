@@ -24,21 +24,26 @@ export class CommonSchemasValidation {
         });
     }
 
-    getMDDescriptionSchema() {
+    getMDDescriptionSchema(offeringId?: string) {
+        let technicalName = yup
+            .string()
+            .required(tValidMD("metadatas.technical_name_error"))
+            .matches(regex.name_constraint, tValidMD("metadatas.technical_name_regex"));
+
+        if (!offeringId) {
+            technicalName = technicalName.test({
+                name: "is-unique",
+                message: tValidMD("metadatas.technical_name_unicity_error"),
+                test: (technicalName) => {
+                    const technicalNameList = this._offeringList?.map((offering) => offering?.layer_name) ?? [];
+                    return !technicalNameList?.includes(technicalName);
+                },
+            });
+        }
+
         return yup
             .object({
-                technical_name: yup
-                    .string()
-                    .required(tValidMD("metadatas.technical_name_error"))
-                    .matches(regex.name_constraint, tValidMD("metadatas.technical_name_regex"))
-                    .test({
-                        name: "is-unique",
-                        message: tValidMD("metadatas.technical_name_unicity_error"),
-                        test: (technicalName) => {
-                            const technicalNameList = this._offeringList?.map((offering) => offering?.layer_name) ?? [];
-                            return !technicalNameList?.includes(technicalName);
-                        },
-                    }),
+                technical_name: technicalName,
                 public_name: yup.string().required(tValidMD("metadatas.public_name_error")),
                 description: yup.string().required(tValidMD("metadatas.description_error")),
                 identifier: yup

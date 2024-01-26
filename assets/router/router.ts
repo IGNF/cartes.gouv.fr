@@ -121,6 +121,15 @@ const routeDefs = {
         },
         (p) => `${appRoot}/datastores/${p.datastoreId}/service/wms-vector/new`
     ),
+    // Modifier les infos d'une publication existante
+    datastore_wms_vector_service_modify: defineRoute(
+        {
+            datastoreId: param.path.string,
+            vectorDbId: param.query.string,
+            offeringId: param.path.string,
+        },
+        (p) => `${appRoot}/datastores/${p.datastoreId}/service/wms-vector/${p.offeringId}/edit`
+    ),
 
     // Creation d'une pyramide vecteur
     datastore_pyramid_vector_new: defineRoute(

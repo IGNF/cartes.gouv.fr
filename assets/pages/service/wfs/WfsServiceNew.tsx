@@ -1,29 +1,30 @@
+import { fr } from "@codegouvfr/react-dsfr";
+import Alert from "@codegouvfr/react-dsfr/Alert";
+import Button from "@codegouvfr/react-dsfr/Button";
+import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
+import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useQuery } from "@tanstack/react-query";
 import { FC, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
-import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
-import Translator from "../../../modules/Translator";
-import { useQuery } from "@tanstack/react-query";
-import RQKeys from "../../../modules/RQKeys";
+
 import api from "../../../api";
-import { StoredDataRelation, VectorDb } from "../../../types/app";
+import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
 import LoadingText from "../../../components/Utils/LoadingText";
-import Alert from "@codegouvfr/react-dsfr/Alert";
-import Button from "@codegouvfr/react-dsfr/Button";
-import { routes } from "../../../router/router";
-import Stepper from "@codegouvfr/react-dsfr/Stepper";
-import TableInfosForm from "./TablesInfoForm";
-import { filterGeometricRelations } from "../../../helpers";
-import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
-import { fr } from "@codegouvfr/react-dsfr";
-import { CommonSchemasValidation } from "../common-schemas-validation";
-import { CartesApiException } from "../../../modules/jsonFetch";
-import UploadMDFile from "../metadatas/UploadMDFile";
-import Description from "../metadatas/Description";
-import AdditionalInfo from "../metadatas/AdditionalInfo";
-import AccessRestrictions from "../AccessRestrictions";
 import Wait from "../../../components/Utils/Wait";
+import { filterGeometricRelations } from "../../../helpers";
+import RQKeys from "../../../modules/RQKeys";
+import Translator from "../../../modules/Translator";
+import { CartesApiException } from "../../../modules/jsonFetch";
+import { routes } from "../../../router/router";
+import { EndpointTypeEnum, StoredDataRelation, VectorDb } from "../../../types/app";
+import AccessRestrictions from "../AccessRestrictions";
+import { CommonSchemasValidation } from "../common-schemas-validation";
+import AdditionalInfo from "../metadatas/AdditionalInfo";
+import Description from "../metadatas/Description";
+import UploadMDFile from "../metadatas/UploadMDFile";
+import TableInfosForm from "./TablesInfoForm";
 
 /**
  *
@@ -210,14 +211,19 @@ const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
                         stateRelatedMessage={errors?.selected_tables?.message?.toString()}
                     />
                     <UploadMDFile visible={currentStep === STEPS.METADATAS_UPLOAD} form={form} />
-                    <Description storedData={vectorDbQuery.data} endpointType={"WFS"} visible={currentStep === STEPS.METADATAS_DESCRIPTION} form={form} />
+                    <Description visible={currentStep === STEPS.METADATAS_DESCRIPTION} form={form} />
                     <AdditionalInfo
                         datastoreId={datastoreId}
                         storedData={vectorDbQuery.data}
                         visible={currentStep === STEPS.METADATAS_ADDITIONALINFORMATIONS}
                         form={form}
                     />
-                    <AccessRestrictions datastoreId={datastoreId} endpointType={"WFS"} visible={currentStep === STEPS.ACCESSRESTRICTIONS} form={form} />
+                    <AccessRestrictions
+                        datastoreId={datastoreId}
+                        endpointType={EndpointTypeEnum.WFS}
+                        visible={currentStep === STEPS.ACCESSRESTRICTIONS}
+                        form={form}
+                    />
                     {validationError && (
                         <Alert
                             className="fr-preline"

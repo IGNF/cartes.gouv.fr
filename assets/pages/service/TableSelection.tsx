@@ -1,42 +1,50 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
-import { FC } from "react";
-import { type UseFormReturn } from "react-hook-form";
+import { FC, useCallback, useMemo } from "react";
+import { useWatch, type UseFormReturn } from "react-hook-form";
 
 import { filterGeometricRelations } from "../../helpers";
 import Translator from "../../modules/Translator";
 import { type VectorDb } from "../../types/app";
+import { WmsVectorServiceFormType } from "./wms-vector/WmsVectorServiceNew";
 
 type TablesSelectionProps = {
     filterGeometric?: boolean;
     vectorDb: VectorDb;
     visible: boolean;
-    form: UseFormReturn;
+    form: UseFormReturn<WmsVectorServiceFormType>;
 };
 
 const TableSelection: FC<TablesSelectionProps> = ({ filterGeometric = false, vectorDb, visible, form }) => {
     const {
         formState: { errors },
         setValue: setFormValue,
-        watch,
     } = form;
 
-    const relations = vectorDb.type_infos?.relations || [];
-    const tables = filterGeometricRelations(relations, filterGeometric);
+    const tables = useMemo(() => {
+        const relations = vectorDb.type_infos?.relations || [];
+        return filterGeometricRelations(relations, filterGeometric);
+    }, [filterGeometric, vectorDb.type_infos?.relations]);
 
-    const selectedTables = watch("selected_tables") ?? [];
+    const selectedTableNamesList: string[] = useWatch({
+        control: form.control,
+        name: "selected_tables",
+    });
 
-    const toggleTable = (tableName: string) => {
-        let prevSelectedTables = [...selectedTables];
+    const toggleTable = useCallback(
+        (tableName: string) => {
+            let prevSelectedTables = [...selectedTableNamesList];
 
-        if (prevSelectedTables.includes(tableName)) {
-            prevSelectedTables = prevSelectedTables.filter((el) => el !== tableName);
-        } else {
-            prevSelectedTables.push(tableName);
-        }
+            if (prevSelectedTables.includes(tableName)) {
+                prevSelectedTables = prevSelectedTables.filter((el) => el !== tableName);
+            } else {
+                prevSelectedTables.push(tableName);
+            }
 
-        setFormValue("selected_tables", Array.from(new Set(prevSelectedTables)), { shouldValidate: true });
-    };
+            setFormValue("selected_tables", Array.from(new Set(prevSelectedTables)), { shouldValidate: true });
+        },
+        [selectedTableNamesList, setFormValue]
+    );
 
     return (
         <div className={fr.cx(!visible && "fr-hidden")}>
@@ -50,7 +58,7 @@ const TableSelection: FC<TablesSelectionProps> = ({ filterGeometric = false, vec
                     nativeInputProps: {
                         value: table.name,
                         onChange: () => toggleTable(table.name),
-                        checked: selectedTables.includes(table.name),
+                        checked: selectedTableNamesList.includes(table.name),
                     },
                 }))}
                 hintText={<strong>{tables.length} table(s) détectée(s) </strong>}

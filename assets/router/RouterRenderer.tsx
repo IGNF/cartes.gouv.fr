@@ -127,6 +127,8 @@ const RouterRenderer: FC = () => {
                 return <WfsServiceNew datastoreId={route.params.datastoreId} vectorDbId={route.params.vectorDbId} />;
             case "datastore_wms_vector_service_new":
                 return <WmsVectorServiceNew datastoreId={route.params.datastoreId} vectorDbId={route.params.vectorDbId} />;
+            case "datastore_wms_vector_service_modify":
+                return <WmsVectorServiceNew datastoreId={route.params.datastoreId} vectorDbId={route.params.vectorDbId} offeringId={route.params.offeringId} />;
             case "datastore_pyramid_vector_new":
                 return (
                     <PyramidVectorNew datastoreId={route.params.datastoreId} vectorDbId={route.params.vectorDbId} technicalName={route.params.technicalName} />

@@ -1,46 +1,39 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Input from "@codegouvfr/react-dsfr/Input";
-import { format as datefnsFormat } from "date-fns";
+import Select from "@codegouvfr/react-dsfr/Select";
 import { XMLParser } from "fast-xml-parser";
 import { FC, useEffect } from "react";
 import { Controller, UseFormReturn } from "react-hook-form";
+
 import AutocompleteSelect from "../../../components/Input/AutocompleteSelect";
 import MarkdownEditor from "../../../components/Input/MarkdownEditor";
-import { Pyramid, VectorDb } from "../../../types/app";
-import { getInspireKeywords, removeDiacritics } from "../../../utils";
-import Select from "@codegouvfr/react-dsfr/Select";
-import { regex } from "../../../utils";
-import { EndpointTypes } from "../../../types/app";
 import { getTranslation } from "../../../i18n/i18n";
+import { EndpointTypeEnum } from "../../../types/app";
+import { getInspireKeywords, regex } from "../../../utils";
 
 type DescriptionProps = {
-    storedData: VectorDb | Pyramid;
-    endpointType: EndpointTypes;
     visible: boolean;
     form: UseFormReturn;
 };
 
-const getSuffix = (endpointType) => {
+export const getEndpointSuffix = (endpointType: EndpointTypeEnum) => {
     switch (endpointType) {
-        case "WFS":
+        case EndpointTypeEnum.WFS:
             return "wfs";
-        case "WMS-VECTOR":
+        case EndpointTypeEnum.WMSVECTOR:
             return "wmsv";
-        case "WMTS-TMS":
+        case EndpointTypeEnum.WMTSTMS:
             return "tms";
         default:
             return "other"; // TODO
     }
 };
 
-const Description: FC<DescriptionProps> = ({ storedData, endpointType, visible, form }) => {
+const keywords = getInspireKeywords();
+
+const Description: FC<DescriptionProps> = ({ visible, form }) => {
     const { t: tCommon } = getTranslation("Common");
     const { t } = getTranslation("MetadatasForm");
-
-    const keywords = getInspireKeywords();
-    const now = datefnsFormat(new Date(), "yyyy-MM-dd");
-
-    const suffix = getSuffix(endpointType);
 
     const {
         register,
@@ -51,14 +44,6 @@ const Description: FC<DescriptionProps> = ({ storedData, endpointType, visible, 
     } = form;
 
     const metadata: File = watch("metadata_file_content")?.[0];
-
-    useEffect(() => {
-        const storedDataName = storedData?.name ?? "";
-        const nice = removeDiacritics(storedDataName.toLowerCase()).replace(/ /g, "_");
-
-        setFormValue("technical_name", `${nice}_${suffix}`);
-        setFormValue("public_name", storedDataName);
-    }, [setFormValue, storedData, suffix]);
 
     useEffect(() => {
         (async () => {
@@ -163,7 +148,6 @@ const Description: FC<DescriptionProps> = ({ storedData, endpointType, visible, 
                 nativeInputProps={{
                     ...register("creation_date"),
                     type: "date",
-                    defaultValue: now,
                 }}
             />
             <Select
@@ -173,7 +157,6 @@ const Description: FC<DescriptionProps> = ({ storedData, endpointType, visible, 
                 stateRelatedMessage={errors?.resource_genealogy?.message?.toString()}
                 nativeSelectProps={{
                     ...register("resource_genealogy"),
-                    defaultValue: "",
                 }}
             >
                 <option value="">{tCommon("none")}</option>

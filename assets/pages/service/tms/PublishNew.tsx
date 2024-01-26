@@ -1,26 +1,27 @@
-import { useQuery } from "@tanstack/react-query";
-import { FC, useMemo, useState } from "react";
-import RQKeys from "../../../modules/RQKeys";
-import api from "../../../api";
-import { Pyramid } from "../../../types/app";
-import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
-import Translator from "../../../modules/Translator";
-import LoadingText from "../../../components/Utils/LoadingText";
+import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
-import { routes } from "../../../router/router";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
-import { fr } from "@codegouvfr/react-dsfr";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
-import UploadMDFile from "../metadatas/UploadMDFile";
-import Description from "../metadatas/Description";
-import AdditionalInfo from "../metadatas/AdditionalInfo";
-import AccessRestrictions from "../AccessRestrictions";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useQuery } from "@tanstack/react-query";
+import { FC, useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
+
+import api from "../../../api";
+import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
+import LoadingText from "../../../components/Utils/LoadingText";
 import Wait from "../../../components/Utils/Wait";
+import RQKeys from "../../../modules/RQKeys";
+import Translator from "../../../modules/Translator";
 import { CartesApiException } from "../../../modules/jsonFetch";
+import { routes } from "../../../router/router";
+import { EndpointTypeEnum, Pyramid } from "../../../types/app";
+import AccessRestrictions from "../AccessRestrictions";
 import { CommonSchemasValidation } from "../common-schemas-validation";
+import AdditionalInfo from "../metadatas/AdditionalInfo";
+import Description from "../metadatas/Description";
+import UploadMDFile from "../metadatas/UploadMDFile";
 
 type PublishNewProps = {
     datastoreId: string;
@@ -135,9 +136,14 @@ const PublishNew: FC<PublishNewProps> = ({ datastoreId, pyramidId }) => {
                         title={Translator.trans(`service.tms.new.step${currentStep}`)}
                     />
                     <UploadMDFile visible={currentStep === STEPS.MD_UPLOAD_FILE} form={form} />
-                    <Description storedData={pyramidQuery.data} endpointType={"WMTS-TMS"} visible={currentStep === STEPS.MD_DESCRIPTION} form={form} />
+                    <Description visible={currentStep === STEPS.MD_DESCRIPTION} form={form} />
                     <AdditionalInfo datastoreId={datastoreId} storedData={pyramidQuery.data} visible={currentStep === STEPS.MD_ADDITIONNAL_INFOS} form={form} />
-                    <AccessRestrictions datastoreId={datastoreId} endpointType={"WMTS-TMS"} visible={currentStep === STEPS.ACCESS_RESTRICTIONS} form={form} />
+                    <AccessRestrictions
+                        datastoreId={datastoreId}
+                        endpointType={EndpointTypeEnum.WMTSTMS}
+                        visible={currentStep === STEPS.ACCESS_RESTRICTIONS}
+                        form={form}
+                    />
                     {validationError && (
                         <Alert
                             className="fr-preline"

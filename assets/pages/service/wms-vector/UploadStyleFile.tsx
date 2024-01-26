@@ -11,7 +11,7 @@ type UploadStyleFileProps = {
     selectedTables: StoredDataRelation[];
     form: UseFormReturn;
 };
-const UploadStyleFile: FC<UploadStyleFileProps> = ({ visible, selectedTables, form }) => {
+const UploadStyleFile: FC<UploadStyleFileProps> = ({ visible, selectedTables = [], form }) => {
     const {
         formState: { errors },
         register,
