@@ -1,18 +1,18 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
-import { FC, useCallback, useMemo } from "react";
+import { FC, memo, useCallback, useMemo } from "react";
 import { useWatch, type UseFormReturn } from "react-hook-form";
 
 import { filterGeometricRelations } from "../../helpers";
 import Translator from "../../modules/Translator";
 import { type VectorDb } from "../../types/app";
-import { WmsVectorServiceFormType } from "./wms-vector/WmsVectorServiceNew";
+import { WmsVectorServiceFormValuesType } from "./wms-vector/WmsVectorServiceForm";
 
 type TablesSelectionProps = {
     filterGeometric?: boolean;
     vectorDb: VectorDb;
     visible: boolean;
-    form: UseFormReturn<WmsVectorServiceFormType>;
+    form: UseFormReturn<WmsVectorServiceFormValuesType>;
 };
 
 const TableSelection: FC<TablesSelectionProps> = ({ filterGeometric = false, vectorDb, visible, form }) => {
@@ -69,4 +69,4 @@ const TableSelection: FC<TablesSelectionProps> = ({ filterGeometric = false, vec
     );
 };
 
-export default TableSelection;
+export default memo(TableSelection, (prevProps, nextProps) => prevProps.form.formState.isDirty && nextProps.form.formState.isDirty);
