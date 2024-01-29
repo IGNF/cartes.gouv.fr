@@ -55,7 +55,7 @@ const createFormData = (formValues: object) => {
     fd.set("technical_name", formValues["technical_name"]);
 
     // filtrer en fonction des tables sélectionnées
-    formValues["selected_tables"].forEach((tableName) => {
+    formValues["selected_tables"].forEach((tableName: string) => {
         fd.set(`style_${tableName}`, formValues["style_files"]?.[tableName]?.[0]);
     });
 
@@ -71,7 +71,7 @@ const STEPS = {
     ACCESSRESTRICTIONS: 6,
 };
 
-export type WmsVectorServiceFormType = {
+export type WmsVectorServiceFormValuesType = {
     selected_tables: string[];
     style_files?: Record<string, FileList>;
     metadata_file_content?: FileList;
@@ -83,12 +83,12 @@ export type WmsVectorServiceFormType = {
     resource_genealogy?: string;
 };
 
-type WmsVectorServiceNewProps = {
+type WmsVectorServiceFormProps = {
     datastoreId: string;
     vectorDbId: string;
     offeringId?: string;
 };
-const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vectorDbId, offeringId }) => {
+const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vectorDbId, offeringId }) => {
     const [currentStep, setCurrentStep] = useState(STEPS.TABLES_INFOS);
 
     const vectorDbQuery = useQuery({
@@ -149,7 +149,7 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
     schemas[STEPS.METADATAS_ADDITIONALINFORMATIONS] = commonValidation.getMDAdditionalInfoSchema();
     schemas[STEPS.ACCESSRESTRICTIONS] = commonValidation.getAccessRestrictionSchema();
 
-    const defaultValues: WmsVectorServiceFormType = useMemo(() => {
+    const defaultValues: WmsVectorServiceFormValuesType = useMemo(() => {
         if (offeringId) {
             const share_with = offeringQuery.data?.open === true ? "all_public" : "your_community";
             const typeInfos = offeringQuery.data?.configuration?.type_infos as ConfigurationWmsVectorDetailsContent | undefined;
@@ -322,6 +322,6 @@ const WmsVectorServiceNew: FC<WmsVectorServiceNewProps> = ({ datastoreId, vector
     );
 };
 
-WmsVectorServiceNew.displayName = symToStr({ WmsVectorServiceNew });
+WmsVectorServiceForm.displayName = symToStr({ WmsVectorServiceForm });
 
-export default WmsVectorServiceNew;
+export default WmsVectorServiceForm;
