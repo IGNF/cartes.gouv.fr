@@ -60,5 +60,8 @@ common:
     encoding_error: "L'encodage de la ressource est obligatoire"
     language_error: "La langue est obligatoire"
     language_min_error: "Il doit y avoir au moins une langue sélectionnée"
+    attribution_text_mandatory_error: "Le texte à afficher de l'attribution est obligatoire"
+    attribution_url_mandatory_error: "L'URL de l'attribution est obligatoire"
+    attribution_url_error: "L'URL de l'attribution n'est pas valide"
     resolution_error: "La résolution n'est pas valide"
     share_with_error: "La restriction n'est pas valide"
