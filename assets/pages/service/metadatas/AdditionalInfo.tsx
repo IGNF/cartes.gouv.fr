@@ -8,8 +8,8 @@ import { Controller, UseFormReturn } from "react-hook-form";
 import api from "../../../api";
 import AutocompleteSelect from "../../../components/Input/AutocompleteSelect";
 import ignProducts from "../../../data/md_resolutions.json";
+import { getTranslation } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/RQKeys";
-import Translator from "../../../modules/Translator";
 import { Pyramid, UploadTree, VectorDb } from "../../../types/app";
 import { LanguageType, charsets, getLanguages } from "../../../utils";
 
@@ -45,7 +45,11 @@ type AdditionalInfoProps = {
     form: UseFormReturn;
     datastoreId: string;
 };
+
 const AdditionalInfo: FC<AdditionalInfoProps> = ({ storedData, datastoreId, visible, form }) => {
+    const { t: tCommon } = getTranslation("Common");
+    const { t } = getTranslation("MetadatasForm");
+
     const {
         register,
         formState: { errors },
@@ -78,8 +82,28 @@ const AdditionalInfo: FC<AdditionalInfoProps> = ({ storedData, datastoreId, visi
 
     return (
         <div className={fr.cx(!visible && "fr-hidden")}>
-            <h3>{Translator.trans("service.wms_vector.new.step_additional_information.metadata_information_title")}</h3>
-            <p>{Translator.trans("mandatory_fields")}</p>
+            <p>{tCommon("mandatory_fields")}</p>
+            <h3>{t("attribution.title")}</h3>
+            <p>{t("attribution.explain")}</p>
+            <Input
+                label={t("attribution_form.text")}
+                hintText={t("attribution_form.hint_text")}
+                state={errors.attribution_text ? "error" : "default"}
+                stateRelatedMessage={errors?.attribution_text?.message?.toString()}
+                nativeInputProps={{
+                    ...register("attribution_text"),
+                }}
+            />
+            <Input
+                label={t("attribution_form.url")}
+                hintText={t("attribution_form.hint_url")}
+                state={errors.attribution_url ? "error" : "default"}
+                stateRelatedMessage={errors?.attribution_url?.message?.toString()}
+                nativeInputProps={{
+                    ...register("attribution_url"),
+                }}
+            />
+            <h3>{t("metadata.additionnal_infos_form.metadata_information_title")}</h3>
             <Controller
                 control={control}
                 name="languages"
@@ -87,8 +111,8 @@ const AdditionalInfo: FC<AdditionalInfoProps> = ({ storedData, datastoreId, visi
                 render={({ field }) => {
                     return (
                         <AutocompleteSelect
-                            label={Translator.trans(Translator.trans("service.wms_vector.new.step_additional_information.language"))}
-                            hintText={Translator.trans("service.wms_vector.new.step_additional_information.hint_language")}
+                            label={t("metadata.additionnal_infos_form.language")}
+                            hintText={t("metadata.additionnal_infos_form.hint_language")}
                             state={errors.languages ? "error" : "default"}
                             stateRelatedMessage={errors?.languages?.message?.toString()}
                             freeSolo={false}
@@ -106,8 +130,8 @@ const AdditionalInfo: FC<AdditionalInfoProps> = ({ storedData, datastoreId, visi
             />
 
             <Select
-                label={Translator.trans("service.wms_vector.new.step_additional_information.charset")}
-                hint={Translator.trans("service.wms_vector.new.step_additional_information.hint_charset")}
+                label={t("metadata.additionnal_infos_form.charset")}
+                hint={t("metadata.additionnal_infos_form.hint_charset")}
                 state={errors.charset ? "error" : "default"}
                 stateRelatedMessage={errors?.charset?.message?.toString()}
                 nativeSelectProps={{
@@ -123,10 +147,10 @@ const AdditionalInfo: FC<AdditionalInfoProps> = ({ storedData, datastoreId, visi
                     );
                 })}
             </Select>
-            <h3>{Translator.trans("service.wms_vector.new.step_additional_information.type_of_spatial_representation_title")}</h3>
+            <h3>{t("metadata.additionnal_infos_form.type_of_spatial_representation_title")}</h3>
             <Input
-                label={Translator.trans("service.wms_vector.new.step_additional_information.projection")}
-                hintText={Translator.trans("service.wms_vector.new.step_additional_information.hint_projection")}
+                label={t("metadata.additionnal_infos_form.projection")}
+                hintText={t("metadata.additionnal_infos_form.hint_projection")}
                 state={errors.projection ? "error" : "default"}
                 stateRelatedMessage={errors?.projection?.message?.toString()}
                 nativeInputProps={{
@@ -136,8 +160,8 @@ const AdditionalInfo: FC<AdditionalInfoProps> = ({ storedData, datastoreId, visi
                 }}
             />
             <Input
-                label={Translator.trans("service.wms_vector.new.step_additional_information.encoding")}
-                hintText={Translator.trans("service.wms_vector.new.step_additional_information.hint_encoding")}
+                label={t("metadata.additionnal_infos_form.encoding")}
+                hintText={t("metadata.additionnal_infos_form.hint_encoding")}
                 state={errors.encoding ? "error" : "default"}
                 stateRelatedMessage={errors?.encoding?.message?.toString()}
                 nativeInputProps={{
@@ -147,8 +171,8 @@ const AdditionalInfo: FC<AdditionalInfoProps> = ({ storedData, datastoreId, visi
                 }}
             />
             <Select
-                label={Translator.trans("service.wms_vector.new.step_additional_information.spatial_resolution")}
-                hint={Translator.trans("service.wms_vector.new.step_additional_information.hint_spatial_resolution")}
+                label={t("metadata.additionnal_infos_form.hint_spatial_resolution")}
+                hint={t("metadata.additionnal_infos_form.hint_spatial_resolution")}
                 state={errors.resolution ? "error" : "default"}
                 stateRelatedMessage={errors?.resolution?.message?.toString()}
                 nativeSelectProps={{

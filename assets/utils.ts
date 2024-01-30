@@ -82,7 +82,7 @@ const niceBytes = (x: string) => {
 const regex = {
     name_constraint: /^[\w-.]+$/,
     email: /^[\w-.]+@([\w-]+\.)+[\w-]{2,}$/,
-    uuid: /^[A-Za-z\d]{8}-[A-Za-z\d]{4}-[A-Za-z\d]{4}-[A-Za-z\d]{4}-[A-Za-z\d]{12}$/,
+    uuid: /^[A-F\d]{8}-[A-F\d]{4}-[A-F\d]{4}-[A-F\d]{4}-[A-F\d]{12}$/i,
 };
 
 export type ContentRangeType = {

@@ -18,6 +18,8 @@ export const { i18n } = declareComponentKeys<
     | "published"
     | "not_published"
     | "information"
+    | "mandatory_fields"
+    | "none"
 >()("Common");
 
 export const commonFrTranslations: Translations<"fr">["Common"] = {
@@ -38,6 +40,8 @@ export const commonFrTranslations: Translations<"fr">["Common"] = {
     published: "Publié",
     not_published: "Non publié",
     information: "Information",
+    mandatory_fields: "Sauf mention contraire “(optionnel)” dans le label, tous les champs sont obligatoires.",
+    none: "Aucune",
 };
 
 export const commonEnTranslations: Translations<"en">["Common"] = {
@@ -58,4 +62,6 @@ export const commonEnTranslations: Translations<"en">["Common"] = {
     published: "Published",
     not_published: "Not published",
     information: "Information",
+    mandatory_fields: "All fields are mandatory unless label states “optional”",
+    none: "None",
 };

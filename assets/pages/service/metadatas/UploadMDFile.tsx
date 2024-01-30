@@ -2,8 +2,10 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { Upload } from "@codegouvfr/react-dsfr/Upload";
 import { FC } from "react";
 import { UseFormReturn } from "react-hook-form";
+import { getTranslation } from "../../../i18n/i18n";
 
-import Translator from "../../../modules/Translator";
+const { t } = getTranslation("MetadatasForm");
+const { t: tCommon } = getTranslation("Common");
 
 type UploadMDFileProps = {
     visible: boolean;
@@ -18,12 +20,12 @@ const UploadMDFile: FC<UploadMDFileProps> = ({ visible, form }) => {
 
     return (
         <div className={fr.cx("fr-my-2v", !visible && "fr-hidden")}>
-            <h3>{Translator.trans("service.wfs.new.metadata_upload_form.title")}</h3>
-            <p>{Translator.trans("mandatory_fields")}</p>
+            <h3>{t("metadata.upload_form.title")}</h3>
+            <p>{tCommon("mandatory_fields")}</p>
             <Upload
-                label={Translator.trans("metadatas.drag_and_drop_file")}
+                label={t("metadata.upload_form.drag_and_drop_file")}
                 className={fr.cx("fr-input-group", "fr-mb-2w")}
-                hint={Translator.trans("metadatas.used_format")}
+                hint={t("metadata.upload_form.used_format")}
                 nativeInputProps={{
                     ...register("metadata_file_content"),
                     accept: ".xml",

@@ -1,20 +1,21 @@
-import type { Translations } from "../i18n";
+import { datastoreNavItemsEnTranslations } from "../../config/datastoreNavItems";
+import { navItemsEnTranslations } from "../../config/navItems";
+import { TMSStyleFilesManagerEnTranslations } from "../../modules/Style/TMSStyleFilesManager";
+import { AddMemberEnTranslations } from "../../pages/communities/AddMember";
+import { CommunityMembersEnTranslations } from "../../pages/communities/CommunityMembers";
+import { contactEnTranslations } from "../../pages/contact/Contact";
+import { PyramidListItemFrTranslations } from "../../pages/datasheet/DatasheetView/DatasetListTab/PyramidList/PyramidListItem";
+import { VectorDbListItemEnTranslations } from "../../pages/datasheet/DatasheetView/DatasetListTab/VectorDbList/VectorDbListItem";
+import { DatasheetViewEnTranslations } from "../../pages/datasheet/DatasheetView/DatasheetView";
+import { DatastoreManageStorageEnTranslations } from "../../pages/datastore/DatastoreManageStorage/DatastoreManageStorage";
+import { MetadatasFormEnTranslations } from "../../pages/service/metadatas/metadatas-form-tr";
+import { ValidationMetadatasEnTranslations } from "../../pages/service/metadatas/metadatas-validation-tr";
+import { mapboxStyleValidationEnTranslations } from "../../validations/MapboxStyleValidator";
+import { sldStyleValidationEnTranslations } from "../../validations/sldStyle";
 import { commonEnTranslations } from "../Common";
 import { RightsEnTranslations } from "../Rights";
 import { StyleEnTranslations } from "../Style";
-import { CommunityMembersEnTranslations } from "../../pages/communities/CommunityMembers";
-import { AddMemberEnTranslations } from "../../pages/communities/AddMember";
-import { ValidationMetadatasEnTranslations } from "../../pages/service/metadatas/metadatas-validation-tr";
-import { navItemsEnTranslations } from "../../config/navItems";
-import { datastoreNavItemsEnTranslations } from "../../config/datastoreNavItems";
-import { contactEnTranslations } from "../../pages/contact/Contact";
-import { DatasheetViewEnTranslations } from "../../pages/datasheet/DatasheetView/DatasheetView";
-import { sldStyleValidationEnTranslations } from "../../validations/sldStyle";
-import { mapboxStyleValidationEnTranslations } from "../../validations/MapboxStyleValidator";
-import { TMSStyleFilesManagerEnTranslations } from "../../modules/Style/TMSStyleFilesManager";
-import { DatastoreManageStorageEnTranslations } from "../../pages/datastore/DatastoreManageStorage/DatastoreManageStorage";
-import { VectorDbListItemEnTranslations } from "../../pages/datasheet/DatasheetView/DatasetListTab/VectorDbList/VectorDbListItem";
-import { PyramidListItemFrTranslations } from "../../pages/datasheet/DatasheetView/DatasetListTab/PyramidList/PyramidListItem";
+import type { Translations } from "../i18n";
 
 export const translations: Translations<"en"> = {
     Common: commonEnTranslations,
@@ -23,6 +24,7 @@ export const translations: Translations<"en"> = {
     AddMember: AddMemberEnTranslations,
     CommunityMembers: CommunityMembersEnTranslations,
     ValidationMetadatas: ValidationMetadatasEnTranslations,
+    MetadatasForm: MetadatasFormEnTranslations,
     Contact: contactEnTranslations,
     navItems: navItemsEnTranslations,
     datastoreNavItems: datastoreNavItemsEnTranslations,

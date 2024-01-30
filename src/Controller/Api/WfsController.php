@@ -54,6 +54,10 @@ class WfsController extends AbstractController implements ApiControllerInterface
                 'type' => 'WFS',
                 'name' => $dto->public_name,
                 'layer_name' => $dto->technical_name,
+                'attribution' => [
+                    'title' => $dto->attribution_text,
+                    'url' => $dto->attribution_url
+                ],
                 'type_infos' => [
                     'used_data' => [[
                         'relations' => $relations,

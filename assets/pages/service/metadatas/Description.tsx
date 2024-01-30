@@ -6,12 +6,12 @@ import { FC, useEffect } from "react";
 import { Controller, UseFormReturn } from "react-hook-form";
 import AutocompleteSelect from "../../../components/Input/AutocompleteSelect";
 import MarkdownEditor from "../../../components/Input/MarkdownEditor";
-import Translator from "../../../modules/Translator";
 import { Pyramid, VectorDb } from "../../../types/app";
 import { getInspireKeywords, removeDiacritics } from "../../../utils";
 import Select from "@codegouvfr/react-dsfr/Select";
 import { regex } from "../../../utils";
 import { EndpointTypes } from "../../../types/app";
+import { getTranslation } from "../../../i18n/i18n";
 
 type DescriptionProps = {
     storedData: VectorDb | Pyramid;
@@ -34,6 +34,9 @@ const getSuffix = (endpointType) => {
 };
 
 const Description: FC<DescriptionProps> = ({ storedData, endpointType, visible, form }) => {
+    const { t: tCommon } = getTranslation("Common");
+    const { t } = getTranslation("MetadatasForm");
+
     const keywords = getInspireKeywords();
     const now = datefnsFormat(new Date(), "yyyy-MM-dd");
 
@@ -81,12 +84,11 @@ const Description: FC<DescriptionProps> = ({ storedData, endpointType, visible, 
 
     return (
         <div className={fr.cx(!visible && "fr-hidden")}>
-            <p>{Translator.trans("mandatory_fields")}</p>
-
-            <h3>{Translator.trans("service.tms.new.step_description.description_title")}</h3>
+            <p>{tCommon("mandatory_fields")}</p>
+            <h3>{t("metadata.description_form.description_title")}</h3>
             <Input
-                label={Translator.trans("service.tms.new.step_description.technical_name")}
-                hintText={Translator.trans("service.tms.new.step_description.hint_technical_name")}
+                label={t("metadata.description_form.technical_name")}
+                hintText={t("metadata.description_form.hint_technical_name")}
                 state={errors.technical_name ? "error" : "default"}
                 stateRelatedMessage={errors?.technical_name?.message?.toString()}
                 nativeInputProps={{
@@ -94,8 +96,8 @@ const Description: FC<DescriptionProps> = ({ storedData, endpointType, visible, 
                 }}
             />
             <Input
-                label={Translator.trans("service.tms.new.step_description.public_name")}
-                hintText={Translator.trans("service.tms.new.step_description.hint_public_name")}
+                label={t("metadata.description_form.public_name")}
+                hintText={t("metadata.description_form.hint_public_name")}
                 state={errors.public_name ? "error" : "default"}
                 stateRelatedMessage={errors?.public_name?.message?.toString()}
                 nativeInputProps={{
@@ -103,8 +105,8 @@ const Description: FC<DescriptionProps> = ({ storedData, endpointType, visible, 
                 }}
             />
             <MarkdownEditor
-                label={Translator.trans("service.tms.new.step_description.description")}
-                hintText={Translator.trans("service.tms.new.step_description.hint_description")}
+                label={t("metadata.description_form.description")}
+                hintText={t("metadata.description_form.hint_description")}
                 state={errors.description ? "error" : "default"}
                 stateRelatedMessage={errors?.description?.message?.toString()}
                 onChange={(values) => {
@@ -112,8 +114,8 @@ const Description: FC<DescriptionProps> = ({ storedData, endpointType, visible, 
                 }}
             />
             <Input
-                label={Translator.trans("service.tms.new.step_description.identifier")}
-                hintText={Translator.trans("service.tms.new.step_description.hint_identifier")}
+                label={t("metadata.description_form.identifier")}
+                hintText={t("metadata.description_form.hint_identifier")}
                 state={errors.identifier ? "error" : "default"}
                 stateRelatedMessage={errors?.identifier?.message?.toString()}
                 nativeInputProps={{
@@ -127,8 +129,8 @@ const Description: FC<DescriptionProps> = ({ storedData, endpointType, visible, 
                 render={({ field }) => {
                     return (
                         <AutocompleteSelect
-                            label={Translator.trans("service.tms.new.step_description.category")}
-                            hintText={Translator.trans("service.tms.new.step_description.hint_category")}
+                            label={t("metadata.description_form.category")}
+                            hintText={t("metadata.description_form.hint_category")}
                             options={keywords}
                             freeSolo={true}
                             getOptionLabel={(option) => option}
@@ -144,8 +146,8 @@ const Description: FC<DescriptionProps> = ({ storedData, endpointType, visible, 
             />
 
             <Input
-                label={Translator.trans("service.tms.new.step_description.email_contact")}
-                hintText={Translator.trans("service.tms.new.step_description.hint_email_contact")}
+                label={t("metadata.description_form.contact_email")}
+                hintText={t("metadata.description_form.hint_contact_email")}
                 state={errors.email_contact ? "error" : "default"}
                 stateRelatedMessage={errors?.email_contact?.message?.toString()}
                 nativeInputProps={{
@@ -153,9 +155,9 @@ const Description: FC<DescriptionProps> = ({ storedData, endpointType, visible, 
                 }}
             />
 
-            <h3>{Translator.trans("service.tms.new.step_description.time_reference_title")}</h3>
+            <h3>{t("metadata.description_form.time_reference_title")}</h3>
             <Input
-                label={Translator.trans("service.tms.new.step_description.creation_date")}
+                label={t("metadata.description_form.creation_date")}
                 state={errors.creation_date ? "error" : "default"}
                 stateRelatedMessage={errors?.creation_date?.message?.toString()}
                 nativeInputProps={{
@@ -165,8 +167,8 @@ const Description: FC<DescriptionProps> = ({ storedData, endpointType, visible, 
                 }}
             />
             <Select
-                label={Translator.trans("service.tms.new.step_description.resource_genealogy")}
-                hint={Translator.trans("service.tms.new.step_description.hint_resource_genealogy")}
+                label={t("metadata.description_form.resource_genealogy")}
+                hint={t("metadata.description_form.hint_resource_genealogy")}
                 state={errors.resource_genealogy ? "error" : "default"}
                 stateRelatedMessage={errors?.resource_genealogy?.message?.toString()}
                 nativeSelectProps={{
@@ -174,14 +176,14 @@ const Description: FC<DescriptionProps> = ({ storedData, endpointType, visible, 
                     defaultValue: "",
                 }}
             >
-                <option value="">Aucune</option>
+                <option value="">{tCommon("none")}</option>
                 <option value="dataset">Lot</option>
                 <option value="series">Produit</option>
             </Select>
-            <h3>{Translator.trans("service.tms.new.step_description.resource_manager_title")}</h3>
+            <h3>{t("metadata.description_form.resource_manager_title")}</h3>
             <Input
-                label={Translator.trans("service.tms.new.step_description.organization")}
-                hintText={Translator.trans("service.tms.new.step_description.hint_organization")}
+                label={t("metadata.description_form.organization")}
+                hintText={t("metadata.description_form.hint_organization")}
                 state={errors.organization ? "error" : "default"}
                 stateRelatedMessage={errors?.organization?.message?.toString()}
                 nativeInputProps={{
@@ -189,8 +191,8 @@ const Description: FC<DescriptionProps> = ({ storedData, endpointType, visible, 
                 }}
             />
             <Input
-                label={Translator.trans("service.tms.new.step_description.organization_email")}
-                hintText={Translator.trans("service.tms.new.step_description.hint_organization_email")}
+                label={t("metadata.description_form.organization_email")}
+                hintText={t("metadata.description_form.hint_organization_email")}
                 state={errors.organization_email ? "error" : "default"}
                 stateRelatedMessage={errors?.organization_email?.message?.toString()}
                 nativeInputProps={{

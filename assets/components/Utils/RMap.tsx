@@ -1,24 +1,27 @@
 import { FC, useCallback, useEffect, useMemo, useRef } from "react";
 
-import Map from "ol/Map";
-import View from "ol/View";
-import WMTS, { optionsFromCapabilities } from "ol/source/WMTS";
-import TileLayer from "ol/layer/Tile";
-import BaseLayer from "ol/layer/Base";
-import { createOrUpdate } from "ol/extent";
-import { defaults as defaultInteractions } from "ol/interaction";
-import { fromLonLat, transformExtent } from "ol/proj";
 import GetFeatureInfo from "geoportal-extensions-openlayers/src/OpenLayers/Controls/GetFeatureInfo";
 import LayerSwitcher from "geoportal-extensions-openlayers/src/OpenLayers/Controls/LayerSwitcher";
 import SearchEngine from "geoportal-extensions-openlayers/src/OpenLayers/Controls/SearchEngine";
-import { OfferingDetailResponseDtoTypeEnum } from "../../types/entrepot";
-import type { CartesStyle } from "../../types/app";
-import StyleHelper from "../../modules/Style/StyleHelper";
-import useCapabilities from "../../hooks/useCapabilities";
+import Map from "ol/Map";
+import View from "ol/View";
+import Attribution from "ol/control/Attribution";
+import { createOrUpdate } from "ol/extent";
+import { defaults as defaultInteractions } from "ol/interaction";
+import BaseLayer from "ol/layer/Base";
+import TileLayer from "ol/layer/Tile";
+import { fromLonLat, transformExtent } from "ol/proj";
+import WMTS, { optionsFromCapabilities } from "ol/source/WMTS";
 import olDefaults from "../../data/ol-defaults.json";
+import useCapabilities from "../../hooks/useCapabilities";
+import StyleHelper from "../../modules/Style/StyleHelper";
+import type { CartesStyle } from "../../types/app";
+import { OfferingDetailResponseDtoTypeEnum } from "../../types/entrepot";
+
+import "ol/ol.css";
 import "geoportal-extensions-openlayers/dist/GpPluginOpenLayers.css";
-import "../../sass/components/map-view.scss";
 import "../../sass/components/ol.scss";
+import "../../sass/components/map-view.scss";
 
 export interface MapInitial {
     type: OfferingDetailResponseDtoTypeEnum;
@@ -42,6 +45,10 @@ const RMap: FC<RMapProps> = ({ initial, currentStyle }) => {
     const mapRef = useRef<Map>();
 
     const { data: capabilities } = useCapabilities();
+
+    const bkLayer = useMemo(() => {
+        return new TileLayer({ properties: { title: null, description: null } });
+    }, []);
 
     // Extent dans la configuration
     const extent = useMemo(() => {
@@ -101,6 +108,7 @@ const RMap: FC<RMapProps> = ({ initial, currentStyle }) => {
         // Creation de la carte
         if (!mapRef.current) {
             const controls = [
+                new Attribution({ collapsible: true, collapsed: true }),
                 new LayerSwitcher(),
                 new SearchEngine({
                     collapsed: false,
@@ -143,30 +151,13 @@ const RMap: FC<RMapProps> = ({ initial, currentStyle }) => {
 
     useEffect(() => {
         (async () => {
-            if (!capabilities) return;
-
             // Suppression de tous les layers
             mapRef.current?.getLayers().clear();
 
             // Ajout de la couche de fond PlanIgnV2
-            const wmtsOptions = optionsFromCapabilities(capabilities, {
-                layer: olDefaults.default_background_layer,
-            });
+            addLayer(bkLayer);
 
-            if (wmtsOptions) {
-                const capLayer = capabilities?.Contents.Layer?.find((l) => {
-                    return l.Identifier === olDefaults.default_background_layer;
-                });
-
-                const layer = new TileLayer({
-                    opacity: 1,
-                    source: new WMTS(wmtsOptions),
-                });
-                layer.set("name", capLayer?.Identifier);
-                layer.set("title", capLayer?.Title);
-                addLayer(layer);
-            }
-
+            // Ajout des autres couches
             const layers = initial.layers;
 
             const gfiLayers: object[] = [];
@@ -183,7 +174,25 @@ const RMap: FC<RMapProps> = ({ initial, currentStyle }) => {
                 mapRef.current?.getView().fit(extent);
             }
         })();
-    }, [gfinfo, capabilities, extent, initial.layers, addLayer]);
+    }, [gfinfo, bkLayer, extent, initial.layers, addLayer]);
+
+    useEffect(() => {
+        if (!capabilities) return;
+
+        const wmtsOptions = optionsFromCapabilities(capabilities, {
+            layer: olDefaults.default_background_layer,
+        });
+
+        if (wmtsOptions) {
+            const capLayer = capabilities?.Contents.Layer?.find((l) => {
+                return l.Identifier === olDefaults.default_background_layer;
+            });
+
+            bkLayer.setSource(new WMTS(wmtsOptions));
+            bkLayer.set("name", capLayer?.Identifier);
+            bkLayer.set("title", capLayer?.Title);
+        }
+    }, [capabilities, bkLayer]);
 
     useEffect(() => {
         getWorkingLayers().forEach((layer) => StyleHelper.applyStyle(layer, currentStyle));

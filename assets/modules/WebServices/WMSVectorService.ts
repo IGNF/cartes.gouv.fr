@@ -6,13 +6,13 @@ import TileLayer from "ol/layer/Tile";
 import TileWMSSource from "ol/source/TileWMS.js";
 import BaseService from "./BaseService";
 import { getRequestInfo } from "../../utils";
-class WMSVectorService implements BaseService {
-    service: Service;
+class WMSVectorService extends BaseService {
     #requestInfo: Record<string, string>;
     #parser: WMSCapabilities;
 
     constructor(service: Service) {
-        this.service = service;
+        super(service);
+
         this.#requestInfo = getRequestInfo(service.urls[0].url);
         this.#parser = new WMSCapabilities();
     }
@@ -45,6 +45,7 @@ class WMSVectorService implements BaseService {
         layers.push(
             new TileLayer({
                 source: new TileWMSSource({
+                    attributions: this.getAttribution(),
                     url: this.#requestInfo.base_url,
                     params: {
                         LAYERS: this.#requestInfo.layers,

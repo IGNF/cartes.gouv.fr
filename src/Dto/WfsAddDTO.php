@@ -43,6 +43,13 @@ class WfsAddDTO
         #[Assert\NotBlank(['message' => 'common.projection_error'])]
         public readonly string $projection,
 
+        #[Assert\NotBlank(['message' => 'common.attribution_text_mandatory_error'])]
+        public readonly string $attribution_text,
+
+        #[Assert\NotBlank(['message' => 'common.attribution_url_mandatory_error'])]
+        #[Assert\Url(['message' => 'common.attribution_url_error'])]
+        public readonly string $attribution_url,
+
         /** @var array<string> */
         #[Assert\Count(min: 1, minMessage: 'common.language_min_error')]
         public readonly array $languages,

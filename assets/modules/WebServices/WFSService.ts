@@ -35,14 +35,14 @@ type FeatureType = {
     "ows:WGS84BoundingBox": WGS84BoundingBox;
 };
 
-class WFSService implements BaseService {
-    service: Service;
+class WFSService extends BaseService {
     #format: GeoJSON;
     #featureTypes: FeatureType[];
     #parser: XMLParser;
 
     constructor(service: Service) {
-        this.service = service;
+        super(service);
+
         this.#format = new GeoJSON();
         this.#featureTypes = [];
         this.#parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: "" });
@@ -79,6 +79,7 @@ class WFSService implements BaseService {
 
         const vectorSource = new VectorSource({
             format: format,
+            attributions: this.getAttribution(),
             loader: function (ext, resolution, projection, success, failure) {
                 const proj = projection.getCode();
                 const bbox = transformExtent(ext, proj, "EPSG:4326").join(",") + ",EPSG:4326";

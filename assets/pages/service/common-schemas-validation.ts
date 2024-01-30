@@ -64,6 +64,8 @@ export class CommonSchemasValidation {
     getMDAdditionalInfoSchema() {
         return yup
             .object({
+                attribution_text: yup.string().required(tValidMD("attribution.text_required_error")),
+                attribution_url: yup.string().url(tValidMD("attribution.url_error")).required(tValidMD("attribution.url_required_error")),
                 languages: yup
                     .array()
                     .of(

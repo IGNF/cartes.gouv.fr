@@ -25,6 +25,9 @@ export const { i18n } = declareComponentKeys<
     | "metadatas.charset_error"
     | "metadatas.encoding_error"
     | "metadatas.projection_error"
+    | "attribution.text_required_error"
+    | "attribution.url_required_error"
+    | "attribution.url_error"
     | "share_with_error"
 >()({
     ValidationMetadatas,
@@ -49,6 +52,9 @@ export const ValidationMetadatasFrTranslations: Translations<"fr">["ValidationMe
     "metadatas.charset_error": "Le jeu de caractères est obligatoire",
     "metadatas.encoding_error": "l'encodage de la ressource est obligatoire",
     "metadatas.projection_error": "La projection est obligatoire",
+    "attribution.text_required_error": "Le texte à afficher est obligatoire",
+    "attribution.url_required_error": "l'url est obligatoire",
+    "attribution.url_error": "l'url n'est pas correcte",
     share_with_error: "La restriction d'accès est obligatoire",
 };
 
@@ -71,5 +77,8 @@ export const ValidationMetadatasEnTranslations: Translations<"en">["ValidationMe
     "metadatas.charset_error": "Dataset is required",
     "metadatas.encoding_error": "Encoding of the resource is required",
     "metadatas.projection_error": "Projection is required",
+    "attribution.text_required_error": "Text to display is required",
+    "attribution.url_required_error": "Url is required",
+    "attribution.url_error": "Url is not correct",
     share_with_error: "Access restriction is required",
 };
