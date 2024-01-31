@@ -197,8 +197,7 @@ const CommunityMembers: FC<CommunityMembersProps> = ({ datastoreId, userId }) =>
             )}
             {!isLoadingMembers && isAuthorized === true && (
                 <>
-                    {/* TODO : translate */}
-                    <h1>Membres de la communauté {community?.name}</h1>
+                    <h1>{t("community_members", { communityName: community?.name ?? "" })}</h1>
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--right")}>
                         <Button priority={"primary"} iconId={"fr-icon-add-circle-line"} onClick={() => addMemberModal.open()}>
                             {t("add_user")}
@@ -207,8 +206,12 @@ const CommunityMembers: FC<CommunityMembersProps> = ({ datastoreId, userId }) =>
                     <table className={tableClassName}>
                         <thead>
                             <tr>
-                                {/* TODO : translate */}
-                                <th>Nom</th>
+                                <th />
+                                <th colSpan={5}>{t("rights")}</th>
+                                <th />
+                            </tr>
+                            <tr>
+                                <th>{t("name")}</th>
                                 {getTranslatedRightTypes().map((right) => (
                                     <th key={right}>{right}</th>
                                 ))}
@@ -219,9 +222,9 @@ const CommunityMembers: FC<CommunityMembersProps> = ({ datastoreId, userId }) =>
                             {members.map((member) => {
                                 return (
                                     <tr key={member.id}>
-                                        {/* TODO : translate */}
                                         <td>
-                                            {member.name} {member.isMe === true ? " (moi)" : ""} {member.isSupervisor === true ? " (superviseur)" : ""}
+                                            {member.name} {member.isMe === true ? " (" + t("me") + ")" : ""}{" "}
+                                            {member.isSupervisor === true ? " (" + t("supervisor") + ")" : ""}
                                         </td>
                                         {Object.keys(member.rights).map((r) => {
                                             return (
@@ -279,7 +282,12 @@ export default CommunityMembers;
 
 // traductions
 export const { i18n } = declareComponentKeys<
+    | { K: "community_members"; P: { communityName: string }; R: string }
     | { K: "already_member"; P: { userId: string }; R: string }
+    | "rights"
+    | "name"
+    | "me"
+    | "supervisor"
     | "add_user"
     | "remove_user"
     | { K: "add_remove_right_title"; P: { right: string }; R: string }
@@ -289,7 +297,12 @@ export const { i18n } = declareComponentKeys<
 });
 
 export const CommunityMembersFrTranslations: Translations<"fr">["CommunityMembers"] = {
+    community_members: ({ communityName }) => `Membres de ${communityName}`,
     already_member: ({ userId }) => `l'utilisateur ${userId} est déjà membre de cette communauté`,
+    rights: "Permissions du compte",
+    name: "Nom",
+    me: "moi",
+    supervisor: "superviseur",
     add_user: "Ajouter un utilisateur",
     remove_user: "Supprimer cet utilisateur",
     add_remove_right_title: ({ right }) => `Ajouter/supprimer le droit ${right}`,
@@ -297,7 +310,12 @@ export const CommunityMembersFrTranslations: Translations<"fr">["CommunityMember
 };
 
 export const CommunityMembersEnTranslations: Translations<"en">["CommunityMembers"] = {
+    community_members: ({ communityName }) => `Members of ${communityName}`,
     already_member: ({ userId }) => `User ${userId} is already a member of this community`,
+    rights: "User rights",
+    name: "Name",
+    me: "me",
+    supervisor: "supervisor",
     add_user: "Add user",
     remove_user: "Remove this user",
     add_remove_right_title: ({ right }) => `Add/remove right ${right} to user`,

@@ -17,7 +17,7 @@ const Home = () => {
                 <Alert
                     severity="error"
                     closable={true}
-                    title={"Connexion échouée"}
+                    title={"Échec de la connexion"}
                     description={
                         <p>
                             La tentative de connexion a échoué, veuillez <a href={SymfonyRouting.generate("cartesgouvfr_security_login")}>réessayer</a>.
