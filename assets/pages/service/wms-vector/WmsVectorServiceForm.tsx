@@ -1,5 +1,4 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import { format as datefnsFormat } from "date-fns";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
@@ -7,6 +6,8 @@ import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { DevTool } from "@hookform/devtools";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { format as datefnsFormat } from "date-fns";
+import { declareComponentKeys } from "i18nifty";
 import { FC, useCallback, useMemo, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { symToStr } from "tsafe/symToStr";
@@ -17,8 +18,8 @@ import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
 import LoadingIcon from "../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../components/Utils/LoadingText";
 import Wait from "../../../components/Utils/Wait";
+import { Translations, useTranslation } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/RQKeys";
-import Translator from "../../../modules/Translator";
 import { CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
 import { EndpointTypeEnum, type Service, type StoredDataRelation, type VectorDb } from "../../../types/app";
@@ -89,6 +90,10 @@ type WmsVectorServiceFormProps = {
     offeringId?: string;
 };
 const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vectorDbId, offeringId }) => {
+    const { t } = useTranslation("WmsVectorServiceForm");
+    const { t: tCommon } = useTranslation("Common");
+
+    const editMode = useMemo(() => !!offeringId, [offeringId]);
     const [currentStep, setCurrentStep] = useState(STEPS.TABLES_INFOS);
 
     const vectorDbQuery = useQuery({
@@ -111,7 +116,7 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
             }
             return Promise.resolve(null);
         },
-        enabled: !!offeringId,
+        enabled: editMode,
         staleTime: Infinity,
     });
 
@@ -145,12 +150,12 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
         }),
     });
     schemas[STEPS.METADATAS_UPLOAD] = commonValidation.getMDUploadFileSchema();
-    schemas[STEPS.METADATAS_DESCRIPTION] = commonValidation.getMDDescriptionSchema(offeringId);
+    schemas[STEPS.METADATAS_DESCRIPTION] = commonValidation.getMDDescriptionSchema(editMode);
     schemas[STEPS.METADATAS_ADDITIONALINFORMATIONS] = commonValidation.getMDAdditionalInfoSchema();
     schemas[STEPS.ACCESSRESTRICTIONS] = commonValidation.getAccessRestrictionSchema();
 
     const defaultValues: WmsVectorServiceFormValuesType = useMemo(() => {
-        if (offeringId) {
+        if (editMode) {
             const share_with = offeringQuery.data?.open === true ? "all_public" : "your_community";
             const typeInfos = offeringQuery.data?.configuration?.type_infos as ConfigurationWmsVectorDetailsContent | undefined;
 
@@ -181,7 +186,7 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
                 resource_genealogy: "",
             };
         }
-    }, [offeringId, offeringQuery.data, vectorDbQuery.data?.name]);
+    }, [editMode, offeringQuery.data, vectorDbQuery.data?.name]);
 
     const form = useForm({
         resolver: yupResolver(schemas[currentStep]),
@@ -239,28 +244,28 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
     }, [createServiceMutation, currentStep, trigger]);
 
     return (
-        <DatastoreLayout datastoreId={datastoreId} documentTitle="Créer et publier un service WMS-Vecteur">
-            <h1>{Translator.trans("service.wms_vector.new.title")}</h1>
+        <DatastoreLayout datastoreId={datastoreId} documentTitle={t("title", { editMode })}>
+            <h1>{t("title", { editMode })}</h1>
 
             {vectorDbQuery.isLoading || offeringQuery.isLoading ? (
-                <LoadingText message={Translator.trans("service.wms_vector.new.loading_stored_data")} />
+                <LoadingText message={t("stored_data.loading")} />
             ) : vectorDbQuery.data === undefined ? (
                 <Alert
                     severity="error"
                     closable={false}
-                    title="Récupération des informations sur la donnée stockée a échoué"
-                    description={<Button linkProps={routes.datasheet_list({ datastoreId }).link}>Retour à mes données</Button>}
+                    title={t("stored_data.fetch_failed")}
+                    description={<Button linkProps={routes.datasheet_list({ datastoreId }).link}>{t("back_to_data_list")}</Button>}
                 />
             ) : (
                 <>
                     <Stepper
                         currentStep={currentStep}
                         stepCount={Object.values(STEPS).length}
-                        nextTitle={currentStep < STEPS.ACCESSRESTRICTIONS && Translator.trans(`service.wms_vector.new.step${currentStep + 1}`)}
-                        title={Translator.trans(`service.wms_vector.new.step${currentStep}`)}
+                        nextTitle={currentStep < STEPS.ACCESSRESTRICTIONS && t("step.title", { stepNumber: currentStep + 1 })}
+                        title={t("step.title", { stepNumber: currentStep })}
                     />
                     {createServiceMutation.error && (
-                        <Alert closable description={createServiceMutation.error.message} severity="error" title={Translator.trans("commons.error")} />
+                        <Alert closable description={createServiceMutation.error.message} severity="error" title={tCommon("error")} />
                     )}
 
                     <TableSelection visible={currentStep === STEPS.TABLES_INFOS} vectorDb={vectorDbQuery.data} form={form} />
@@ -285,17 +290,14 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
                         alignment="between"
                         buttons={[
                             {
-                                children: Translator.trans("previous_step"),
+                                children: t("previous_step"),
                                 iconId: "fr-icon-arrow-left-fill",
                                 priority: "tertiary",
                                 onClick: previousStep,
                                 disabled: currentStep === 1,
                             },
                             {
-                                children:
-                                    currentStep < Object.values(STEPS).length
-                                        ? Translator.trans("continue")
-                                        : Translator.trans("service.wms_vector.new.publish"),
+                                children: currentStep < Object.values(STEPS).length ? t("continue") : t("publish"),
                                 onClick: nextStep,
                             },
                         ]}
@@ -311,7 +313,7 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
                                 <LoadingIcon largeIcon={true} />
                             </div>
                             <div className={fr.cx("fr-col-10")}>
-                                <h6 className={fr.cx("fr-h6", "fr-m-0")}>{"Création du service WMS-Vecteur en cours"}</h6>
+                                <h6 className={fr.cx("fr-h6", "fr-m-0")}>{t("publish.in_progress")}</h6>
                             </div>
                         </div>
                     </div>
@@ -325,3 +327,58 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
 WmsVectorServiceForm.displayName = symToStr({ WmsVectorServiceForm });
 
 export default WmsVectorServiceForm;
+
+export const { i18n } = declareComponentKeys<
+    | { K: "title"; P: { editMode: boolean }; R: string }
+    | "stored_data.loading"
+    | "stored_data.fetch_failed"
+    | { K: "step.title"; P: { stepNumber: number }; R: string }
+    | "previous_step"
+    | "continue"
+    | "publish"
+    | "publish.in_progress"
+    | "back_to_data_list"
+>()({
+    WmsVectorServiceForm,
+});
+
+export const WmsVectorServiceFormFrTranslations: Translations<"fr">["WmsVectorServiceForm"] = {
+    title: ({ editMode }) => (editMode ? "Modifier le service WMS-Vecteur" : "Créer et publier un service WMS-Vecteur"),
+    "stored_data.loading": "Chargement de la donnée stockée...",
+    "stored_data.fetch_failed": "Récupération des informations sur la donnée stockée a échoué",
+    "step.title": ({ stepNumber }) => {
+        switch (stepNumber) {
+            case 1:
+                return "Tables";
+            case 2:
+                return "Fichier de style SLD";
+            case 3:
+                return "Source des métadonnées";
+            case 4:
+                return "Description de la ressource";
+            case 5:
+                return "Informations supplémentaires";
+            case 6:
+                return "Restrictions d'accès";
+            default:
+                return "";
+        }
+    },
+    previous_step: "Étape précédente",
+    continue: "Continuer",
+    publish: "Publier le service maintenant",
+    "publish.in_progress": "Création du service WMS-Vecteur en cours",
+    back_to_data_list: "Retour à mes données",
+};
+
+export const WmsVectorServiceFormEnTranslations: Translations<"en">["WmsVectorServiceForm"] = {
+    title: undefined,
+    "stored_data.loading": undefined,
+    "stored_data.fetch_failed": undefined,
+    "step.title": undefined,
+    previous_step: undefined,
+    continue: undefined,
+    publish: undefined,
+    "publish.in_progress": undefined,
+    back_to_data_list: undefined,
+};

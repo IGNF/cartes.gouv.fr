@@ -21,6 +21,7 @@ import { commonFrTranslations } from "../Common";
 import { RightsFrTranslations } from "../Rights";
 import { StyleFrTranslations } from "../Style";
 import type { Translations } from "../i18n";
+import { WmsVectorServiceFormFrTranslations } from "../../pages/service/wms-vector/WmsVectorServiceForm";
 
 export const translations: Translations<"fr"> = {
     Common: commonFrTranslations,
@@ -45,4 +46,5 @@ export const translations: Translations<"fr"> = {
     mapboxStyleValidation: mapboxStyleValidationFrTranslations,
     TMSStyleFilesManager: TMSStyleFilesManagerFrTranslations,
     DatastoreManageStorage: DatastoreManageStorageFrTranslations,
+    WmsVectorServiceForm: WmsVectorServiceFormFrTranslations,
 };

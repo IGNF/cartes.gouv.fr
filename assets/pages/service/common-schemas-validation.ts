@@ -24,13 +24,13 @@ export class CommonSchemasValidation {
         });
     }
 
-    getMDDescriptionSchema(offeringId?: string) {
+    getMDDescriptionSchema(editMode: boolean = false) {
         let technicalName = yup
             .string()
             .required(tValidMD("metadatas.technical_name_error"))
             .matches(regex.name_constraint, tValidMD("metadatas.technical_name_regex"));
 
-        if (!offeringId) {
+        if (editMode === false) {
             technicalName = technicalName.test({
                 name: "is-unique",
                 message: tValidMD("metadatas.technical_name_unicity_error"),
