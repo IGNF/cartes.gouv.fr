@@ -252,7 +252,7 @@ const StyleManager: FC<StyleManagerProps> = ({ datastoreId, datasheetName, servi
                     )}
                     {isPending && (
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-2w")}>
-                            <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " icons-spin"} />
+                            <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " frx-icon-spin"} />
                             <h6 className={fr.cx("fr-m-0")}>{tCommon("adding")}</h6>
                         </div>
                     )}

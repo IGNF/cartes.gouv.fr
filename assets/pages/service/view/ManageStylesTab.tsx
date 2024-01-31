@@ -143,7 +143,7 @@ const ManageStylesTab: FC<ManageStylesTabProps> = ({ service, offeringId, datast
                 <Wait>
                     <div className={fr.cx("fr-container")}>
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " icons-spin"} />
+                            <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " frx-icon-spin"} />
                             <h6 className={fr.cx("fr-m-0")}>{isRemovePending ? "Suppression en cours ..." : "Changement de style en cours ..."}</h6>
                         </div>
                     </div>

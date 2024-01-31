@@ -2,11 +2,6 @@
     animation: spin 2s linear infinite;
 }
 
-// TODO : à supprimer une fois toutes les utilisations de icons-spin seront supprimées
-.icons-spin::before {
-    animation: spin 2s linear infinite;
-}
-
 @keyframes spin {
     0% {
         transform: rotate(0deg);

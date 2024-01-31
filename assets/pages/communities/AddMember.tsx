@@ -100,7 +100,7 @@ const AddMember: FC<AddMemberProps> = ({ datastoreId, communityId, communityMemb
 
     let title = t("add_user_title");
     if (isPending) {
-        title += `&nbsp;${t("running")}&nbsp;<i class="fr-icon-refresh-line icons-spin" />`;
+        title += `&nbsp;${t("running")}&nbsp;<i class="fr-icon-refresh-line frx-icon-spin" />`;
     }
 
     return createPortal(

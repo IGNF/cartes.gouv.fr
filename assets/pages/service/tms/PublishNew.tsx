@@ -173,7 +173,7 @@ const PublishNew: FC<PublishNewProps> = ({ datastoreId, pyramidId }) => {
                     <div className={fr.cx("fr-container")}>
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
                             <div className={fr.cx("fr-col-2")}>
-                                <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg") + " icons-spin"} />
+                                <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg") + " frx-icon-spin"} />
                             </div>
                             <div className={fr.cx("fr-col-10")}>
                                 <h6 className={fr.cx("fr-h6", "fr-m-0")}>{"Demande de publication d'un flux TMS en cours ..."}</h6>
