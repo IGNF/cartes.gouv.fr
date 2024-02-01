@@ -12,6 +12,7 @@ import { MetadatasFormEnTranslations } from "../../pages/service/metadatas/metad
 import { ValidationMetadatasEnTranslations } from "../../pages/service/metadatas/metadatas-validation-tr";
 import { mapboxStyleValidationEnTranslations } from "../../validations/MapboxStyleValidator";
 import { sldStyleValidationEnTranslations } from "../../validations/sldStyle";
+import { MeEnTranslations } from "../../pages/users/Me";
 import { commonEnTranslations } from "../Common";
 import { RightsEnTranslations } from "../Rights";
 import { StyleEnTranslations } from "../Style";
@@ -21,6 +22,7 @@ export const translations: Translations<"en"> = {
     Common: commonEnTranslations,
     Rights: RightsEnTranslations,
     Style: StyleEnTranslations,
+    Me: MeEnTranslations,
     AddMember: AddMemberEnTranslations,
     CommunityMembers: CommunityMembersEnTranslations,
     ValidationMetadatas: ValidationMetadatasEnTranslations,

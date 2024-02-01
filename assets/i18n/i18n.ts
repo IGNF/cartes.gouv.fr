@@ -19,6 +19,7 @@ export type ComponentKey =
     | typeof import("./Common").i18n
     | typeof import("./Rights").i18n
     | typeof import("./Style").i18n
+    | typeof import("../pages/users/Me").i18n
     | typeof import("../pages/communities/AddMember").i18n
     | typeof import("../pages/communities/CommunityMembers").i18n
     | typeof import("../pages/service/metadatas/metadatas-form-tr").i18n
