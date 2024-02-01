@@ -29,9 +29,6 @@ const routeDefs = {
     legal_notice: defineRoute(`${appRoot}/mentions-legales`),
     personal_data: defineRoute(`${appRoot}/donnees-personnelles`),
 
-    // TODO PROVISOIRE : A SUPPRIMER PAR LA SUITE (Utilisee pour faire des tests perso)
-    my_tries: defineRoute(`${appRoot}/mes-essais`),
-
     // routes protégées
     // utilisateur
     my_account: defineRoute(`${appRoot}/mon-compte`),
@@ -163,5 +160,4 @@ export const publicRoutes: typeof knownRoutes = [
     "accessibility",
     "legal_notice",
     "personal_data",
-    "my_tries", // TODO PROVISOIRE
 ];

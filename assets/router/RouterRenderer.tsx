@@ -20,7 +20,6 @@ const Sitemap = lazy(() => import("../pages/footer/Sitemap"));
 const Accessibility = lazy(() => import("../pages/footer/Accessibility"));
 const LegalNotice = lazy(() => import("../pages/footer/LegalNotice"));
 const PersonalData = lazy(() => import("../pages/footer/PersonalData"));
-const Tries = lazy(() => import("../pages/Tries")); // TODO PROVISOIRE
 
 const Me = lazy(() => import("../pages/users/Me"));
 
@@ -128,8 +127,6 @@ const RouterRenderer: FC = () => {
                 return <PublishTmsServiceNew datastoreId={route.params.datastoreId} pyramidId={route.params.pyramidId} />;
             case "datastore_service_view":
                 return <ServiceView datastoreId={route.params.datastoreId} offeringId={route.params.offeringId} datasheetName={route.params.datasheetName} />;
-            case "my_tries": // TODO PROVISOIRE
-                return <Tries />;
             default:
                 return <PageNotFound />;
         }
