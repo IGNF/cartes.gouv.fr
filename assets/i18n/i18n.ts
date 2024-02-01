@@ -40,7 +40,9 @@ export type ComponentKey =
     | typeof import("../modules/Style/TMSStyleFilesManager").i18n
     | typeof import("../modules/Style/TMSStyleFilesManager").i18n
     | typeof import("../pages/datastore/DatastoreManageStorage/DatastoreManageStorage").i18n
-    | typeof import("../pages/service/wms-vector/WmsVectorServiceForm").i18n;
+    | typeof import("../pages/service/wms-vector/WmsVectorServiceForm").i18n
+    | typeof import("../pages/service/TableSelection").i18n
+    | typeof import("../pages/service/wms-vector/UploadStyleFile").i18n;
 
 export type Translations<L extends Language> = GenericTranslations<ComponentKey, Language, typeof fallbackLanguage, L>;
 export type LocalizedString = Parameters<typeof resolveLocalizedString>[0];

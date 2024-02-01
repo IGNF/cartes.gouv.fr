@@ -4,7 +4,7 @@ import { FC, memo, useCallback, useMemo } from "react";
 import { useWatch, type UseFormReturn } from "react-hook-form";
 
 import { filterGeometricRelations } from "../../helpers";
-import Translator from "../../modules/Translator";
+import { Translations, declareComponentKeys, useTranslation } from "../../i18n/i18n";
 import { type VectorDb } from "../../types/app";
 import { WmsVectorServiceFormValuesType } from "./wms-vector/WmsVectorServiceForm";
 
@@ -16,6 +16,9 @@ type TablesSelectionProps = {
 };
 
 const TableSelection: FC<TablesSelectionProps> = ({ filterGeometric = false, vectorDb, visible, form }) => {
+    const { t } = useTranslation("TableSelection");
+    const { t: tCommon } = useTranslation("Common");
+
     const {
         formState: { errors },
         setValue: setFormValue,
@@ -48,9 +51,9 @@ const TableSelection: FC<TablesSelectionProps> = ({ filterGeometric = false, vec
 
     return (
         <div className={fr.cx(!visible && "fr-hidden")}>
-            <h3>{Translator.trans("service.wms_vector.new.step_tables.title")}</h3>
+            <h3>{t("title")}</h3>
 
-            <p>{Translator.trans("mandatory_fields")}</p>
+            <p>{tCommon("mandatory_fields")}</p>
 
             <Checkbox
                 options={tables.map((table) => ({
@@ -61,7 +64,7 @@ const TableSelection: FC<TablesSelectionProps> = ({ filterGeometric = false, vec
                         checked: selectedTableNamesList.includes(table.name),
                     },
                 }))}
-                hintText={<strong>{tables.length} table(s) détectée(s) </strong>}
+                legend={<strong>{t("tables_detected_hint", { nbTables: tables.length })}</strong>}
                 state={errors.selected_tables ? "error" : "default"}
                 stateRelatedMessage={errors?.selected_tables?.message?.toString()}
             />
@@ -70,3 +73,17 @@ const TableSelection: FC<TablesSelectionProps> = ({ filterGeometric = false, vec
 };
 
 export default memo(TableSelection, (prevProps, nextProps) => prevProps.form.formState.isDirty && nextProps.form.formState.isDirty);
+
+export const { i18n } = declareComponentKeys<"title" | { K: "tables_detected_hint"; P: { nbTables: number }; R: string }>()({
+    TableSelection,
+});
+
+export const TableSelectionFrTranslations: Translations<"fr">["TableSelection"] = {
+    title: "Sélectionnez les tables nécessaires au service",
+    tables_detected_hint: ({ nbTables }) => (nbTables > 1 ? `${nbTables} tables détectées` : "1 table détectée"),
+};
+
+export const TableSelectionEnTranslations: Translations<"en">["TableSelection"] = {
+    title: undefined,
+    tables_detected_hint: undefined,
+};

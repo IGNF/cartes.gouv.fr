@@ -140,4 +140,24 @@ const offeringTypeDisplayName = (type: OfferingTypeEnum): string => {
     }
 };
 
-export { getInspireKeywords, getLanguages, charsets, removeDiacritics, regex, decodeContentRange, offeringTypeDisplayName, getRequestInfo, niceBytes };
+const getProjectionCode = (epsg?: string) => {
+    if (!epsg) return null;
+    const parts = epsg.split(":");
+    if (parts.length === 2) {
+        return parts[1];
+    }
+    return null;
+};
+
+export {
+    getInspireKeywords,
+    getLanguages,
+    charsets,
+    removeDiacritics,
+    regex,
+    decodeContentRange,
+    offeringTypeDisplayName,
+    getRequestInfo,
+    niceBytes,
+    getProjectionCode,
+};
