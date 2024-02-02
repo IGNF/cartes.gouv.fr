@@ -1,6 +1,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Accordion from "@codegouvfr/react-dsfr/Accordion";
 import Alert from "@codegouvfr/react-dsfr/Alert";
+import Button from "@codegouvfr/react-dsfr/Button";
 import { useQuery } from "@tanstack/react-query";
 import { FC } from "react";
 
@@ -10,6 +11,7 @@ import LoadingText from "../../../components/Utils/LoadingText";
 import RQKeys from "../../../modules/RQKeys";
 import { CartesApiException } from "../../../modules/jsonFetch";
 import { StoredDataReport } from "../../../types/app";
+import { routes } from "../../../router/router";
 import ProcessingExecutionReport from "./ProcessingExecutionReport";
 import UploadCheckExecutionReport from "./UploadCheckExecutionReport";
 import UploadFileTree from "./UploadFileTree";
@@ -34,9 +36,24 @@ const StoredDataReport: FC<StoredDataReportProps> = ({ datastoreId, storedDataId
 
     const pageTitle = `Rapport de génération de donnée stockée ${reportQuery?.data?.stored_data?.name ?? ""}`;
 
+    const datasheetName = reportQuery?.data?.stored_data?.tags?.datasheet_name ?? "";
+
     return (
         <DatastoreLayout datastoreId={datastoreId} documentTitle={pageTitle}>
-            <h1>{pageTitle}</h1>
+            <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-4w")}>
+                {"" !== datasheetName ? (
+                    <Button
+                        iconId="fr-icon-arrow-left-s-line"
+                        priority="tertiary no outline"
+                        linkProps={routes.datastore_datasheet_view({ datastoreId, datasheetName, activeTab: "dataset" }).link}
+                        title="Retour à la fiche de donnée"
+                        size="large"
+                    />
+                ) : (
+                    ""
+                )}
+                <h1 className={fr.cx("fr-m-0")}>{pageTitle}</h1>
+            </div>
 
             {reportQuery.isLoading && <LoadingText as="h2" />}
 
