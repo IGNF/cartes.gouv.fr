@@ -9,7 +9,7 @@ import { Controller, useForm } from "react-hook-form";
 import * as yup from "yup";
 import InputCollection from "../../../components/Input/InputCollection";
 import AppLayout from "../../../components/Layout/AppLayout";
-import { defaultNavItems } from "../../../config/navItems";
+import { datastoreNavItems } from "../../../config/datastoreNavItems";
 import { ComponentKey, useTranslation } from "../../../i18n/i18n";
 import { UserKeyCreateDtoUserKeyInfoDtoTypeEnum } from "../../../types/entrepot";
 import { getSchema } from "./AddAccessKeyValidation";
@@ -18,8 +18,7 @@ import HashTypeInfoForm from "./HashTypeInfoForm";
 import isIP from "validator/lib/isIp";
 
 const AddAccessKeyForm: FC = () => {
-    const { t: tNavItems } = useTranslation("navItems");
-    const navItems = defaultNavItems(tNavItems);
+    const navItems = datastoreNavItems();
 
     const { t: tCommon } = useTranslation("Common");
     const { t } = useTranslation("AddAccessKey");
