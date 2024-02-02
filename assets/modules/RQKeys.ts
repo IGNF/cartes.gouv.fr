@@ -27,6 +27,8 @@ const RQKeys = {
     datastore_annexe_list: (datastoreId: string): string[] => ["datastore", datastoreId, "annexe"],
 
     catalogs_communities: (): string[] => ["catalogs", "communities"],
+
+    access_keys_and_permissions: (): string[] => ["access_keys_and_permissions"],
 };
 
 export default RQKeys;

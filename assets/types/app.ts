@@ -14,6 +14,7 @@ import {
     DatastoreEndpointResponseDto,
     EndpointDetailResponseDtoTypeEnum,
     OfferingDetailResponseDto,
+    PermissionWithOfferingsDetailsResponseDto,
     ProcessingExecutionDetailResponseDto,
     ProcessingExecutionOutputStoredDataDto,
     StoredDataDetailsRelationDto,
@@ -22,6 +23,7 @@ import {
     UploadPrivateDetailResponseDto,
     UploadTreeElementResponseDto,
     UserDetailsResponseDto,
+    UserKeyResponseDto,
 } from "./entrepot";
 
 /** user */
@@ -200,3 +202,8 @@ export type UserRightsResponseDto = {
 };
 
 export type Annexe = AnnexDetailResponseDto;
+
+export type AccessKeysAndPermissions = {
+    access_keys: UserKeyResponseDto[];
+    permissions: PermissionWithOfferingsDetailsResponseDto;
+};

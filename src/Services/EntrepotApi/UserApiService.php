@@ -54,4 +54,14 @@ class UserApiService extends AbstractEntrepotApiService
 
         return null;
     }
+
+    public function getMyAccessKeys(): array
+    {
+        return $this->requestAll("users/me/keys");
+    }
+
+    public function getPermissions(): array
+    {
+        return $this->requestAll("users/me/permissions");
+    }
 }

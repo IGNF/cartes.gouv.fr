@@ -32,6 +32,8 @@ const routeDefs = {
     // routes protégées
     // utilisateur
     my_account: defineRoute(`${appRoot}/mon-compte`),
+    my_access_keys: defineRoute(`${appRoot}/mes-cles-acces`),
+    add_access_key: defineRoute(`${appRoot}/ajout-cle-acces`),
 
     dashboard_pro: defineRoute(`${appRoot}/dashboard`),
 

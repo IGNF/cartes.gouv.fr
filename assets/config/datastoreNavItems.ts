@@ -86,15 +86,19 @@ export const datastoreNavItems = (datastoreList: Datastore[] = [], currentDatast
             text: t("my_account"),
             linkProps: routes.my_account().link,
         });
+        navItems.push({
+            text: t("my_access_keys"),
+            linkProps: routes.my_access_keys().link,
+        });
     }
 
     return navItems;
 };
 
 // traductions
-export const { i18n } = declareComponentKeys<"dashboard" | "data" | "members" | "manage_storage" | "choose" | "create_request" | "my_account">()(
-    "datastoreNavItems"
-);
+export const { i18n } = declareComponentKeys<
+    "dashboard" | "data" | "members" | "manage_storage" | "choose" | "create_request" | "my_account" | "my_access_keys"
+>()("datastoreNavItems");
 
 export const datastoreNavItemsFrTranslations: Translations<"fr">["datastoreNavItems"] = {
     dashboard: "Tableau de bord",
@@ -104,6 +108,7 @@ export const datastoreNavItemsFrTranslations: Translations<"fr">["datastoreNavIt
     choose: "Choisir un espace de travail",
     create_request: "Demande de création d'un espace de travail",
     my_account: "Mon compte",
+    my_access_keys: "Mes clés d'accès",
 };
 
 export const datastoreNavItemsEnTranslations: Translations<"en">["datastoreNavItems"] = {
@@ -114,4 +119,5 @@ export const datastoreNavItemsEnTranslations: Translations<"en">["datastoreNavIt
     choose: undefined,
     create_request: undefined,
     my_account: undefined,
+    my_access_keys: undefined,
 };

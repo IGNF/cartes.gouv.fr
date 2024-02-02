@@ -2156,7 +2156,7 @@ export interface PermissionDetailsResponseDto {
 
 export interface UserKeyResponseDto {
     name: string;
-    type?: UserKeyResponseDtoTypeEnum;
+    type: UserKeyResponseDtoTypeEnum;
     /**
      * identifiant technique
      * @format uuid

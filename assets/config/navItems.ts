@@ -42,13 +42,19 @@ export const defaultNavItems = (t: TranslationFunction<"navItems", ComponentKey>
             text: t("my_account"),
             linkProps: routes.my_account().link,
         });
+        navItems.push({
+            text: t("my_access_keys"),
+            linkProps: routes.my_access_keys().link,
+        });
     }
 
     return navItems;
 };
 
 // traductions
-export const { i18n } = declareComponentKeys<"documentation" | "faq" | "nous écrire" | "start" | "news" | "about" | "my_account">()("navItems");
+export const { i18n } = declareComponentKeys<"documentation" | "faq" | "nous écrire" | "start" | "news" | "about" | "my_account" | "my_access_keys">()(
+    "navItems"
+);
 
 export const navItemsFrTranslations: Translations<"fr">["navItems"] = {
     "nous écrire": "Nous écrire",
@@ -58,6 +64,7 @@ export const navItemsFrTranslations: Translations<"fr">["navItems"] = {
     news: "Actualités",
     about: "À propos",
     my_account: "Mon compte",
+    my_access_keys: "Mes clés d'accès",
 };
 
 export const navItemsEnTranslations: Translations<"en">["navItems"] = {
@@ -68,4 +75,5 @@ export const navItemsEnTranslations: Translations<"en">["navItems"] = {
     news: "News",
     about: "About",
     my_account: undefined,
+    my_access_keys: undefined,
 };

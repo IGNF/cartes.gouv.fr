@@ -1,7 +1,7 @@
 import SymfonyRouting from "../modules/Routing";
 
 import { jsonFetch } from "../modules/jsonFetch";
-import { Datastore } from "../types/app";
+import { AccessKeysAndPermissions, Datastore } from "../types/app";
 
 const getMe = () => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_user_me");
@@ -11,6 +11,13 @@ const getMe = () => {
 const getDatastoresList = (otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_user_datastores_list");
     return jsonFetch<Datastore[]>(url, { ...otherOptions });
+};
+
+const getAccessKeysAndPermissions = (otherOptions: RequestInit = {}) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_user_access_keys_and_permissions");
+    return jsonFetch<AccessKeysAndPermissions>(url, {
+        ...otherOptions,
+    });
 };
 
 const addToSandbox = () => {
@@ -27,6 +34,7 @@ const addToSandbox = () => {
 const user = {
     getMe,
     getDatastoresList,
+    getAccessKeysAndPermissions,
     addToSandbox,
 };
 

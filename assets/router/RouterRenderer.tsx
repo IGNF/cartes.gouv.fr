@@ -22,6 +22,8 @@ const LegalNotice = lazy(() => import("../pages/footer/LegalNotice"));
 const PersonalData = lazy(() => import("../pages/footer/PersonalData"));
 
 const Me = lazy(() => import("../pages/users/Me"));
+const MyAccessKeys = lazy(() => import("../pages/users/MyAccessKeys"));
+const AddAccessKeyForm = lazy(() => import("../pages/users/keys/AddAccessKeyForm"));
 
 const DatastoreManageStorage = lazy(() => import("../pages/datastore/DatastoreManageStorage/DatastoreManageStorage"));
 
@@ -93,6 +95,10 @@ const RouterRenderer: FC = () => {
                 return <PersonalData />;
             case "my_account":
                 return <Me />;
+            case "my_access_keys":
+                return <MyAccessKeys />;
+            case "add_access_key":
+                return <AddAccessKeyForm />;
             case "datastore_manage_storage":
                 return <DatastoreManageStorage datastoreId={route.params.datastoreId} />;
             case "dashboard_pro":

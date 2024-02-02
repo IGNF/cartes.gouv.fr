@@ -29,6 +29,14 @@ class UserController extends AbstractController implements ApiControllerInterfac
         return $this->json($this->getUser());
     }
 
+    #[Route('/me/access_keys_and_permissions', name: 'access_keys_and_permissions')]
+    public function getUserAccessKeysAndPermissions(): JsonResponse
+    {
+        $keys = $this->entrepotApiService->user->getMyAccessKeys();
+        $permissions = $this->entrepotApiService->user->getPermissions();
+        return $this->json(['access_keys' => $keys, 'permissions' => $permissions]);
+    }
+
     #[Route('/me/datastores', name: 'datastores_list')]
     public function getUserDatastores(ServiceAccount $serviceAccount): JsonResponse
     {

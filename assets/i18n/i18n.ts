@@ -22,18 +22,21 @@ export type ComponentKey =
     | typeof import("../pages/users/Me").i18n
     | typeof import("../pages/communities/AddMember").i18n
     | typeof import("../pages/communities/CommunityMembers").i18n
+    | typeof import("../pages/users/MyAccessKeys").i18n
+    | typeof import("../pages/users/keys/AccessKeysListTab").i18n
+    | typeof import("../pages/users/keys/AddAccessKeyTr").i18n
     | typeof import("../pages/service/metadatas/metadatas-form-tr").i18n
     | typeof import("../pages/service/metadatas/metadatas-validation-tr").i18n
     | typeof import("../pages/contact/Contact").i18n
-    | typeof import("../config/navItems").i18n
-    | typeof import("../config/datastoreNavItems").i18n
+    | typeof import("../pages/datastore/DatastoreManageStorage/DatastoreManageStorage").i18n
     | typeof import("../pages/datasheet/DatasheetView/DatasetListTab/VectorDbList/VectorDbListItem").i18n
     | typeof import("../pages/datasheet/DatasheetView/DatasetListTab/PyramidList/PyramidListItem").i18n
     | typeof import("../pages/datasheet/DatasheetView/DatasheetView").i18n
+    | typeof import("../config/navItems").i18n
+    | typeof import("../config/datastoreNavItems").i18n
     | typeof import("../validations/sldStyle").i18n
     | typeof import("../validations/MapboxStyleValidator").i18n
-    | typeof import("../modules/Style/TMSStyleFilesManager").i18n
-    | typeof import("../pages/datastore/DatastoreManageStorage/DatastoreManageStorage").i18n;
+    | typeof import("../modules/Style/TMSStyleFilesManager").i18n;
 
 export type Translations<L extends Language> = GenericTranslations<ComponentKey, Language, typeof fallbackLanguage, L>;
 export type LocalizedString = Parameters<typeof resolveLocalizedString>[0];
