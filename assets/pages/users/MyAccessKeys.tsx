@@ -6,14 +6,13 @@ import { FC } from "react";
 import api from "../../api";
 import AppLayout from "../../components/Layout/AppLayout";
 import LoadingText from "../../components/Utils/LoadingText";
-import { defaultNavItems } from "../../config/navItems";
+import { datastoreNavItems } from "../../config/datastoreNavItems";
 import { Translations, getTranslation } from "../../i18n/i18n";
 import RQKeys from "../../modules/RQKeys";
 import { AccessKeysAndPermissions } from "../../types/app";
 import AccessKeysListTab from "./keys/AccessKeysListTab";
 
 const { t } = getTranslation("MyAccessKeys");
-const { t: tNavItems } = getTranslation("navItems");
 
 /* const keys: UserKeyResponseDto[] = [
     {
@@ -29,7 +28,7 @@ const { t: tNavItems } = getTranslation("navItems");
 ]; */
 
 const MyAccessKeys: FC = () => {
-    const navItems = defaultNavItems(tNavItems);
+    const navItems = datastoreNavItems();
 
     // Les cles d'acces et les permissions
     const { data, isLoading } = useQuery<AccessKeysAndPermissions>({
