@@ -15,7 +15,7 @@ import { UserKeyCreateDtoUserKeyInfoDtoTypeEnum } from "../../../types/entrepot"
 import { getSchema } from "./AddAccessKeyValidation";
 import BasicTypeInfoForm from "./BasicTypeInfoForm";
 import HashTypeInfoForm from "./HashTypeInfoForm";
-import isIP from "validator/lib/isIp";
+import isIP from "validator/lib/isIP";
 
 const AddAccessKeyForm: FC = () => {
     const navItems = datastoreNavItems();
