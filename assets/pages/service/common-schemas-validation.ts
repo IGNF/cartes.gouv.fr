@@ -24,26 +24,26 @@ export class CommonSchemasValidation {
         });
     }
 
-    getMDDescriptionSchema(editMode: boolean = false) {
-        let technicalName = yup
-            .string()
-            .required(tValidMD("metadatas.technical_name_error"))
-            .matches(regex.name_constraint, tValidMD("metadatas.technical_name_regex"));
-
-        if (editMode === false) {
-            technicalName = technicalName.test({
-                name: "is-unique",
-                message: tValidMD("metadatas.technical_name_unicity_error"),
-                test: (technicalName) => {
-                    const technicalNameList = this._offeringList?.map((offering) => offering?.layer_name) ?? [];
-                    return !technicalNameList?.includes(technicalName);
-                },
-            });
-        }
-
+    getMDDescriptionSchema(editMode: boolean = false, oldTechnicalName?: string) {
         return yup
             .object({
-                technical_name: technicalName,
+                technical_name: yup
+                    .string()
+                    .required(tValidMD("metadatas.technical_name_error"))
+                    .matches(regex.name_constraint, tValidMD("metadatas.technical_name_regex"))
+                    .test({
+                        name: "is-unique",
+                        message: tValidMD("metadatas.technical_name_unicity_error"),
+                        test: (technicalName) => {
+                            let technicalNameList = this._offeringList?.map((offering) => offering?.layer_name) ?? [];
+
+                            if (editMode === true && oldTechnicalName !== undefined) {
+                                technicalNameList = technicalNameList.filter((name) => name !== oldTechnicalName);
+                            }
+
+                            return !technicalNameList?.includes(technicalName);
+                        },
+                    }),
                 public_name: yup.string().required(tValidMD("metadatas.public_name_error")),
                 description: yup.string().required(tValidMD("metadatas.description_error")),
                 identifier: yup

@@ -150,7 +150,7 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
         }),
     });
     schemas[STEPS.METADATAS_UPLOAD] = commonValidation.getMDUploadFileSchema();
-    schemas[STEPS.METADATAS_DESCRIPTION] = commonValidation.getMDDescriptionSchema(editMode);
+    schemas[STEPS.METADATAS_DESCRIPTION] = commonValidation.getMDDescriptionSchema(editMode, offeringQuery.data?.configuration.layer_name);
     schemas[STEPS.METADATAS_ADDITIONALINFORMATIONS] = commonValidation.getMDAdditionalInfoSchema();
     schemas[STEPS.ACCESSRESTRICTIONS] = commonValidation.getAccessRestrictionSchema();
 
