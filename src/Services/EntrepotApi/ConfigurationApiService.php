@@ -9,7 +9,7 @@ class ConfigurationApiService extends AbstractEntrepotApiService
      */
     public function getAll(string $datastoreId, $query = []): array
     {
-        return $this->requestAll("datastores/$datastoreId/configurations", [], $query);
+        return $this->requestAll("datastores/$datastoreId/configurations", $query);
     }
 
     /**
