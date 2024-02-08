@@ -1,6 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
-import { FC, memo, useCallback, useMemo } from "react";
+import { FC, useCallback, useMemo } from "react";
 import { useWatch, type UseFormReturn } from "react-hook-form";
 
 import { filterGeometricRelations } from "../../helpers";
@@ -55,6 +55,10 @@ const TableSelection: FC<TablesSelectionProps> = ({ filterGeometric = false, vec
 
             <p>{tCommon("mandatory_fields")}</p>
 
+            <p>
+                <strong>{t("tables_detected_hint", { nbTables: tables.length })}</strong>
+            </p>
+
             <Checkbox
                 options={tables.map((table) => ({
                     label: table.name,
@@ -64,7 +68,6 @@ const TableSelection: FC<TablesSelectionProps> = ({ filterGeometric = false, vec
                         checked: selectedTableNamesList.includes(table.name),
                     },
                 }))}
-                legend={<strong>{t("tables_detected_hint", { nbTables: tables.length })}</strong>}
                 state={errors.selected_tables ? "error" : "default"}
                 stateRelatedMessage={errors?.selected_tables?.message?.toString()}
             />
@@ -72,7 +75,7 @@ const TableSelection: FC<TablesSelectionProps> = ({ filterGeometric = false, vec
     );
 };
 
-export default memo(TableSelection, (prevProps, nextProps) => prevProps.form.formState.isDirty && nextProps.form.formState.isDirty);
+export default TableSelection;
 
 export const { i18n } = declareComponentKeys<"title" | { K: "tables_detected_hint"; P: { nbTables: number }; R: string }>()({
     TableSelection,

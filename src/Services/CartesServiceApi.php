@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Constants\EntrepotApi\ConfigurationStatuses;
 use App\Constants\EntrepotApi\OfferingTypes;
-use App\Constants\EntrepotApi\StaticFileTypes;
 use App\Exception\EntrepotApiException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -128,10 +127,8 @@ class CartesServiceApi
     /**
      * @param array<mixed> $offering
      */
-    private function wfsUnpublish(string $datastoreId, array $offering): void
+    public function wfsUnpublish(string $datastoreId, array $offering): void
     {
-        $offering['configuration'] = $this->entrepotApiService->configuration->get($datastoreId, $offering['configuration']['_id']);
-
         // suppression de l'offering
         $this->entrepotApiService->configuration->removeOffering($datastoreId, $offering['_id']);
         $configurationId = $offering['configuration']['_id'];
@@ -153,20 +150,12 @@ class CartesServiceApi
     /**
      * @param array<mixed> $offering
      */
-    private function wmsVectorUnpublish(string $datastoreId, array $offering): void
+    public function wmsVectorUnpublish(string $datastoreId, array $offering, bool $removeStyleFiles = true): void
     {
-        $offering['configuration'] = $this->entrepotApiService->configuration->get($datastoreId, $offering['configuration']['_id']);
-
-        // récup tous les fichiers statiques liés à la stored_data
-        $storedDataId = $offering['configuration']['type_infos']['used_data'][0]['stored_data'];
-        $staticFiles = $this->entrepotApiService->static->getAll($datastoreId, [
-            'type' => StaticFileTypes::GEOSERVER_STYLE,
-            'name' => sprintf('storeddata_%s_style_wmsv_%%', $storedDataId),
-        ]);
-
         // suppression de l'offering
         $this->entrepotApiService->configuration->removeOffering($datastoreId, $offering['_id']);
         $configurationId = $offering['configuration']['_id'];
+        $configuration = null;
 
         // suppression de la configuration
         // la suppression de l'offering nécessite quelques instants, et tant que la suppression de l'offering n'est pas faite, on ne peut pas demander la suppression de la configuration
@@ -179,18 +168,23 @@ class CartesServiceApi
         }
         $this->entrepotApiService->configuration->remove($datastoreId, $configurationId);
 
-        foreach ($staticFiles as $staticFile) {
-            $this->entrepotApiService->static->delete($datastoreId, $staticFile['_id']);
+        if (true === $removeStyleFiles) {
+            // récup tous les fichiers statiques liés à la config
+            $staticFilesIdList = array_map(function ($relation) {
+                return $relation['style'];
+            }, $configuration['type_infos']['used_data'][0]['relations']);
+
+            foreach ($staticFilesIdList as $staticId) {
+                $this->entrepotApiService->static->delete($datastoreId, $staticId);
+            }
         }
     }
 
     /**
      * @param array<mixed> $offering
      */
-    private function tmsUnpublish(string $datastoreId, array $offering): void
+    public function tmsUnpublish(string $datastoreId, array $offering): void
     {
-        $offering['configuration'] = $this->entrepotApiService->configuration->get($datastoreId, $offering['configuration']['_id']);
-
         // suppression de l'offering
         $this->entrepotApiService->configuration->removeOffering($datastoreId, $offering['_id']);
         $configurationId = $offering['configuration']['_id'];

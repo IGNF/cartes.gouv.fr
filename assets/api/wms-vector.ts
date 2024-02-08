@@ -22,6 +22,20 @@ const add = (datastoreId: string, storedDataId: string, formData: FormData | obj
     );
 };
 
+const edit = (datastoreId: string, storedDataId: string, offeringId: string, formData: FormData | object) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_wmsvector_edit", { datastoreId, storedDataId, offeringId });
+    return jsonFetch<Service>(
+        url,
+        {
+            method: "POST",
+        },
+        formData,
+        true,
+        true
+    );
+};
+
 export default {
     add,
+    edit,
 };

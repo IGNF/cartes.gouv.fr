@@ -10,10 +10,11 @@ import MarkdownEditor from "../../../components/Input/MarkdownEditor";
 import { getTranslation } from "../../../i18n/i18n";
 import { EndpointTypeEnum } from "../../../types/app";
 import { getInspireKeywords, regex } from "../../../utils";
+import { WmsVectorServiceFormValuesType } from "../wms-vector/WmsVectorServiceForm";
 
 type DescriptionProps = {
     visible: boolean;
-    form: UseFormReturn;
+    form: UseFormReturn<WmsVectorServiceFormValuesType>;
 };
 
 export const getEndpointSuffix = (endpointType: EndpointTypeEnum) => {
@@ -43,7 +44,7 @@ const Description: FC<DescriptionProps> = ({ visible, form }) => {
         control,
     } = form;
 
-    const metadata: File = watch("metadata_file_content")?.[0];
+    const metadata: File | undefined = watch("metadata_file_content")?.[0];
 
     useEffect(() => {
         (async () => {
@@ -89,15 +90,23 @@ const Description: FC<DescriptionProps> = ({ visible, form }) => {
                     ...register("public_name"),
                 }}
             />
-            <MarkdownEditor
-                label={t("metadata.description_form.description")}
-                hintText={t("metadata.description_form.hint_description")}
-                state={errors.description ? "error" : "default"}
-                stateRelatedMessage={errors?.description?.message?.toString()}
-                onChange={(values) => {
-                    setFormValue("description", values, { shouldValidate: true });
-                }}
+            <Controller
+                control={control}
+                name="description"
+                render={({ field }) => (
+                    <MarkdownEditor
+                        label={t("metadata.description_form.description")}
+                        hintText={t("metadata.description_form.hint_description")}
+                        state={errors.description ? "error" : "default"}
+                        stateRelatedMessage={errors?.description?.message?.toString()}
+                        defaultValue={field.value}
+                        onChange={(values) => {
+                            field.onChange(values);
+                        }}
+                    />
+                )}
             />
+
             <Input
                 label={t("metadata.description_form.identifier")}
                 hintText={t("metadata.description_form.hint_identifier")}
@@ -111,23 +120,22 @@ const Description: FC<DescriptionProps> = ({ visible, form }) => {
                 control={control}
                 name="category"
                 defaultValue={[]}
-                render={({ field }) => {
-                    return (
-                        <AutocompleteSelect
-                            label={t("metadata.description_form.category")}
-                            hintText={t("metadata.description_form.hint_category")}
-                            options={keywords}
-                            freeSolo={true}
-                            getOptionLabel={(option) => option}
-                            isOptionEqualToValue={(option, value) => option === value}
-                            state={errors.category ? "error" : "default"}
-                            stateRelatedMessage={errors?.category?.message?.toString()}
-                            onChange={(_, value) => field.onChange(value)}
-                            // @ts-expect-error fausse alerte
-                            controllerField={field}
-                        />
-                    );
-                }}
+                render={({ field }) => (
+                    <AutocompleteSelect
+                        label={t("metadata.description_form.category")}
+                        hintText={t("metadata.description_form.hint_category")}
+                        options={keywords}
+                        freeSolo={true}
+                        getOptionLabel={(option) => option}
+                        isOptionEqualToValue={(option, value) => option === value}
+                        state={errors.category ? "error" : "default"}
+                        stateRelatedMessage={errors?.category?.message?.toString()}
+                        defaultValue={field.value}
+                        onChange={(_, value) => field.onChange(value)}
+                        // @ts-expect-error fausse alerte
+                        controllerField={field}
+                    />
+                )}
             />
 
             <Input

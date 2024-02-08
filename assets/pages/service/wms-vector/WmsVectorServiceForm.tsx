@@ -5,7 +5,7 @@ import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { DevTool } from "@hookform/devtools";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format as datefnsFormat } from "date-fns";
 import { declareComponentKeys } from "i18nifty";
 import { FC, useCallback, useMemo, useState } from "react";
@@ -24,7 +24,7 @@ import { CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
 import { EndpointTypeEnum, type Service, type StoredDataRelation, type VectorDb } from "../../../types/app";
 import { ConfigurationWmsVectorDetailsContent } from "../../../types/entrepot";
-import { removeDiacritics } from "../../../utils";
+import { LanguageType, getProjectionCode, removeDiacritics } from "../../../utils";
 import SldStyleWmsVectorValidator from "../../../validations/sldStyle";
 import AccessRestrictions from "../AccessRestrictions";
 import TableSelection from "../TableSelection";
@@ -34,30 +34,32 @@ import Description, { getEndpointSuffix } from "../metadatas/Description";
 import UploadMDFile from "../metadatas/UploadMDFile";
 import UploadStyleFile from "./UploadStyleFile";
 
-const createFormData = (formValues: object) => {
+const createFormData = (formValues: WmsVectorServiceFormValuesType) => {
     const fd = new FormData();
 
-    fd.set("category", JSON.stringify(formValues["category"]));
-    fd.set("charset", formValues["charset"]);
-    fd.set("creation_date", formValues["creation_date"]);
-    fd.set("description", formValues["description"]);
-    fd.set("email_contact", formValues["email_contact"]);
-    fd.set("encoding", formValues["encoding"]);
-    fd.set("identifier", formValues["identifier"]);
-    fd.set("languages", JSON.stringify(formValues["languages"]));
-    fd.set("selected_tables", JSON.stringify(formValues["selected_tables"]));
-    fd.set("organization", formValues["organization"]);
-    fd.set("organization_email", formValues["organization_email"]);
-    fd.set("projection", formValues["projection"]);
-    fd.set("public_name", formValues["public_name"]);
-    fd.set("resolution", formValues["resolution"]);
-    fd.set("resource_genealogy", formValues["resource_genealogy"]);
-    fd.set("share_with", formValues["share_with"]);
-    fd.set("technical_name", formValues["technical_name"]);
+    fd.set("category", JSON.stringify(formValues.category!));
+    fd.set("attribution_text", formValues.attribution_text!);
+    fd.set("attribution_url", formValues.attribution_url!);
+    fd.set("charset", formValues.charset!);
+    fd.set("creation_date", formValues.creation_date!);
+    fd.set("description", formValues.description!);
+    fd.set("email_contact", formValues.email_contact!);
+    fd.set("encoding", formValues.encoding!);
+    fd.set("identifier", formValues.identifier!);
+    fd.set("languages", JSON.stringify(formValues.languages!));
+    fd.set("selected_tables", JSON.stringify(formValues.selected_tables!));
+    fd.set("organization", formValues.organization!);
+    fd.set("organization_email", formValues.organization_email!);
+    fd.set("projection", formValues.projection!);
+    fd.set("public_name", formValues.public_name!);
+    fd.set("resolution", formValues.resolution!);
+    fd.set("resource_genealogy", formValues.resource_genealogy!);
+    fd.set("share_with", formValues.share_with!);
+    fd.set("technical_name", formValues.technical_name!);
 
     // filtrer en fonction des tables sélectionnées
     formValues["selected_tables"].forEach((tableName: string) => {
-        fd.set(`style_${tableName}`, formValues["style_files"]?.[tableName]?.[0]);
+        fd.set(`style_${tableName}`, formValues.style_files![tableName]?.[0]);
     });
 
     return fd;
@@ -78,10 +80,22 @@ export type WmsVectorServiceFormValuesType = {
     metadata_file_content?: FileList;
     technical_name?: string;
     public_name?: string;
+    description?: string;
     identifier?: string;
     email_contact?: string;
     creation_date?: string;
     resource_genealogy?: string;
+    organization?: string;
+    organization_email?: string;
+    category?: string[];
+    attribution_text?: string;
+    attribution_url?: string;
+    charset?: string;
+    projection?: string;
+    encoding?: string;
+    resolution?: string;
+    languages?: LanguageType[];
+    share_with?: string;
 };
 
 type WmsVectorServiceFormProps = {
@@ -96,16 +110,62 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
     const editMode = useMemo(() => !!offeringId, [offeringId]);
     const [currentStep, setCurrentStep] = useState(STEPS.TABLES_INFOS);
 
+    const queryClient = useQueryClient();
+
+    const createServiceMutation = useMutation<Service, CartesApiException>({
+        mutationFn: () => {
+            const formValues = getFormValues();
+            const formData = createFormData(formValues);
+
+            return api.wmsVector.add(datastoreId, vectorDbId, formData);
+        },
+        onSuccess() {
+            if (vectorDbQuery.data?.tags?.datasheet_name) {
+                queryClient.invalidateQueries({
+                    queryKey: RQKeys.datastore_datasheet(datastoreId, vectorDbQuery.data?.tags.datasheet_name),
+                });
+                routes.datastore_datasheet_view({ datastoreId, datasheetName: vectorDbQuery.data?.tags.datasheet_name, activeTab: "services" }).push();
+            } else {
+                routes.datasheet_list({ datastoreId }).push();
+            }
+        },
+    });
+
+    const editServiceMutation = useMutation<Service, CartesApiException>({
+        mutationFn: () => {
+            const formValues = getFormValues();
+            const formData = createFormData(formValues);
+
+            if (offeringId === undefined) {
+                return Promise.reject();
+            }
+
+            return api.wmsVector.edit(datastoreId, vectorDbId, offeringId, formData);
+        },
+        onSuccess() {
+            if (vectorDbQuery.data?.tags?.datasheet_name) {
+                queryClient.invalidateQueries({
+                    queryKey: RQKeys.datastore_datasheet(datastoreId, vectorDbQuery.data?.tags.datasheet_name),
+                });
+                routes.datastore_datasheet_view({ datastoreId, datasheetName: vectorDbQuery.data?.tags.datasheet_name, activeTab: "services" }).push();
+            } else {
+                routes.datasheet_list({ datastoreId }).push();
+            }
+        },
+    });
+
     const vectorDbQuery = useQuery({
         queryKey: RQKeys.datastore_stored_data(datastoreId, vectorDbId),
         queryFn: () => api.storedData.get<VectorDb>(datastoreId, vectorDbId),
         staleTime: Infinity,
+        enabled: !(createServiceMutation.isPending || editServiceMutation.isPending),
     });
 
     const offeringsListQuery = useQuery({
         queryKey: RQKeys.datastore_offering_list(datastoreId),
         queryFn: () => api.service.getOfferings(datastoreId),
         refetchInterval: 30000,
+        enabled: !(createServiceMutation.isPending || editServiceMutation.isPending),
     });
 
     const offeringQuery = useQuery<Service | null, CartesApiException>({
@@ -116,7 +176,7 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
             }
             return Promise.resolve(null);
         },
-        enabled: editMode,
+        enabled: editMode && !(createServiceMutation.isPending || editServiceMutation.isPending),
         staleTime: Infinity,
     });
 
@@ -155,38 +215,57 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
     schemas[STEPS.ACCESSRESTRICTIONS] = commonValidation.getAccessRestrictionSchema();
 
     const defaultValues: WmsVectorServiceFormValuesType = useMemo(() => {
+        let defValues: WmsVectorServiceFormValuesType;
+        const now = datefnsFormat(new Date(), "yyyy-MM-dd");
+
         if (editMode) {
             const share_with = offeringQuery.data?.open === true ? "all_public" : "your_community";
             const typeInfos = offeringQuery.data?.configuration?.type_infos as ConfigurationWmsVectorDetailsContent | undefined;
 
-            return {
+            defValues = {
                 selected_tables: typeInfos?.used_data?.[0].relations?.map((rel) => rel.name) ?? [],
                 technical_name: offeringQuery.data?.configuration.layer_name,
                 public_name: typeInfos?.title,
                 share_with,
                 // TODO : à récupérer depuis les métadonnées
-                // creation_date,
-                // resource_genealogy: "",
-                // organization
-                // organization_email
-                // category
-                // ...
+                creation_date: now,
+                resource_genealogy: "",
+                email_contact: "email@ign.fr",
+                organization: "IGN",
+                organization_email: "email@ign.fr",
+                category: ["test", "test_2"],
+                description: "Ceci est un test",
+                identifier: "xxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                charset: "utf8",
+                attribution_text: "© IGN",
+                attribution_url: "https://www.ign.fr",
             };
         } else {
             const suffix = getEndpointSuffix(EndpointTypeEnum.WMSVECTOR);
             const storedDataName = vectorDbQuery.data?.name ?? "";
             const nice = removeDiacritics(storedDataName.toLowerCase()).replace(/ /g, "_");
-            const now = datefnsFormat(new Date(), "yyyy-MM-dd");
 
-            return {
+            defValues = {
                 selected_tables: [],
                 technical_name: `${nice}_${suffix}`,
                 public_name: storedDataName,
                 creation_date: now,
                 resource_genealogy: "",
+                charset: "utf8",
             };
         }
-    }, [editMode, offeringQuery.data, vectorDbQuery.data?.name]);
+
+        let projUrl = "";
+        const projCode = getProjectionCode(vectorDbQuery.data?.srs);
+        if (projCode) {
+            projUrl = `http://www.opengis.net/def/crs/EPSG/0/${projCode}`;
+        }
+
+        defValues["projection"] = projUrl;
+        defValues["languages"] = [{ language: "français", code: "fra" }];
+
+        return defValues;
+    }, [editMode, offeringQuery.data, vectorDbQuery.data]);
 
     const form = useForm({
         resolver: yupResolver(schemas[currentStep]),
@@ -210,22 +289,6 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
         return [];
     }, [selectedTableNamesList, vectorDbQuery.data]);
 
-    const createServiceMutation = useMutation<Service, CartesApiException>({
-        mutationFn: () => {
-            const formValues = getFormValues();
-            const formData = createFormData(formValues);
-
-            return api.wmsVector.add(datastoreId, vectorDbId, formData);
-        },
-        onSuccess() {
-            if (vectorDbQuery.data?.tags?.datasheet_name) {
-                routes.datastore_datasheet_view({ datastoreId, datasheetName: vectorDbQuery.data?.tags.datasheet_name, activeTab: "services" }).push();
-            } else {
-                routes.datasheet_list({ datastoreId }).push();
-            }
-        },
-    });
-
     const previousStep = useCallback(() => setCurrentStep((currentStep) => currentStep - 1), []);
 
     const nextStep = useCallback(async () => {
@@ -239,9 +302,14 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
             setCurrentStep((currentStep) => currentStep + 1);
         } else {
             // on est à la dernière étape du formulaire donc on envoie la sauce
-            createServiceMutation.mutate();
+
+            if (editMode) {
+                editServiceMutation.mutate();
+            } else {
+                createServiceMutation.mutate();
+            }
         }
-    }, [createServiceMutation, currentStep, trigger]);
+    }, [createServiceMutation, editServiceMutation, currentStep, trigger, editMode]);
 
     return (
         <DatastoreLayout datastoreId={datastoreId} documentTitle={t("title", { editMode })}>
@@ -305,7 +373,7 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
                     />
                 </>
             )}
-            {createServiceMutation.isPending && (
+            {(createServiceMutation.isPending || editServiceMutation.isPending) && (
                 <Wait>
                     <div className={fr.cx("fr-container")}>
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
@@ -313,7 +381,7 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
                                 <LoadingIcon largeIcon={true} />
                             </div>
                             <div className={fr.cx("fr-col-10")}>
-                                <h6 className={fr.cx("fr-h6", "fr-m-0")}>{t("publish.in_progress")}</h6>
+                                <h6 className={fr.cx("fr-h6", "fr-m-0")}>{editMode ? t("modify.in_progress") : t("publish.in_progress")}</h6>
                             </div>
                         </div>
                     </div>
@@ -337,6 +405,7 @@ export const { i18n } = declareComponentKeys<
     | "continue"
     | "publish"
     | "publish.in_progress"
+    | "modify.in_progress"
     | "back_to_data_list"
 >()({
     WmsVectorServiceForm,
@@ -368,6 +437,7 @@ export const WmsVectorServiceFormFrTranslations: Translations<"fr">["WmsVectorSe
     continue: "Continuer",
     publish: "Publier le service maintenant",
     "publish.in_progress": "Création du service WMS-Vecteur en cours",
+    "modify.in_progress": "Modification des informations du service WMS-Vecteur en cours",
     back_to_data_list: "Retour à mes données",
 };
 
@@ -380,5 +450,6 @@ export const WmsVectorServiceFormEnTranslations: Translations<"en">["WmsVectorSe
     continue: undefined,
     publish: undefined,
     "publish.in_progress": undefined,
+    "modify.in_progress": undefined,
     back_to_data_list: undefined,
 };

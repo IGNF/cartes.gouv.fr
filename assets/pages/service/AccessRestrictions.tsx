@@ -1,18 +1,20 @@
+import { fr } from "@codegouvfr/react-dsfr";
+import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { useQuery } from "@tanstack/react-query";
 import { FC } from "react";
 import { UseFormReturn } from "react-hook-form";
-import { DatastoreEndpoint, EndpointTypeEnum } from "../../types/app";
+
 import api from "../../api";
 import RQKeys from "../../modules/RQKeys";
 import Translator from "../../modules/Translator";
-import { fr } from "@codegouvfr/react-dsfr";
-import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
+import { DatastoreEndpoint, EndpointTypeEnum } from "../../types/app";
+import { WmsVectorServiceFormValuesType } from "./wms-vector/WmsVectorServiceForm";
 
 type AccessRestrictionProps = {
     datastoreId: string;
     endpointType: EndpointTypeEnum;
     visible: boolean;
-    form: UseFormReturn;
+    form: UseFormReturn<WmsVectorServiceFormValuesType>;
 };
 
 const AccessRestrictions: FC<AccessRestrictionProps> = ({ datastoreId, endpointType, visible, form }) => {
