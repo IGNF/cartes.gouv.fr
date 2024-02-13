@@ -29,14 +29,15 @@ const TableSelection: FC<TablesSelectionProps> = ({ filterGeometric = false, vec
         return filterGeometricRelations(relations, filterGeometric);
     }, [filterGeometric, vectorDb.type_infos?.relations]);
 
-    const selectedTableNamesList: string[] = useWatch({
+    const selectedTableNamesList: string[] | undefined = useWatch({
         control: form.control,
         name: "selected_tables",
+        defaultValue: [],
     });
 
     const toggleTable = useCallback(
         (tableName: string) => {
-            let prevSelectedTables = [...selectedTableNamesList];
+            let prevSelectedTables = selectedTableNamesList ? [...selectedTableNamesList] : [];
 
             if (prevSelectedTables.includes(tableName)) {
                 prevSelectedTables = prevSelectedTables.filter((el) => el !== tableName);
@@ -65,7 +66,7 @@ const TableSelection: FC<TablesSelectionProps> = ({ filterGeometric = false, vec
                     nativeInputProps: {
                         value: table.name,
                         onChange: () => toggleTable(table.name),
-                        checked: selectedTableNamesList.includes(table.name),
+                        checked: selectedTableNamesList?.includes(table.name),
                     },
                 }))}
                 state={errors.selected_tables ? "error" : "default"}

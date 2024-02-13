@@ -3,7 +3,6 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
-import { DevTool } from "@hookform/devtools";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format as datefnsFormat } from "date-fns";
@@ -22,9 +21,9 @@ import { Translations, useTranslation } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/RQKeys";
 import { CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
-import { EndpointTypeEnum, type Service, type StoredDataRelation, type VectorDb } from "../../../types/app";
+import { EndpointTypeEnum, ServiceFormValuesBaseType, type Service, type StoredDataRelation, type VectorDb } from "../../../types/app";
 import { ConfigurationWmsVectorDetailsContent } from "../../../types/entrepot";
-import { LanguageType, getProjectionCode, removeDiacritics } from "../../../utils";
+import { getProjectionCode, removeDiacritics } from "../../../utils";
 import SldStyleWmsVectorValidator from "../../../validations/sldStyle";
 import AccessRestrictions from "../AccessRestrictions";
 import TableSelection from "../TableSelection";
@@ -58,7 +57,7 @@ const createFormData = (formValues: WmsVectorServiceFormValuesType) => {
     fd.set("technical_name", formValues.technical_name!);
 
     // filtrer en fonction des tables sélectionnées
-    formValues["selected_tables"].forEach((tableName: string) => {
+    formValues["selected_tables"]!.forEach((tableName: string) => {
         fd.set(`style_${tableName}`, formValues.style_files![tableName]?.[0]);
     });
 
@@ -74,28 +73,9 @@ const STEPS = {
     ACCESSRESTRICTIONS: 6,
 };
 
-export type WmsVectorServiceFormValuesType = {
-    selected_tables: string[];
+export type WmsVectorServiceFormValuesType = ServiceFormValuesBaseType & {
+    selected_tables?: string[];
     style_files?: Record<string, FileList>;
-    metadata_file_content?: FileList;
-    technical_name?: string;
-    public_name?: string;
-    description?: string;
-    identifier?: string;
-    email_contact?: string;
-    creation_date?: string;
-    resource_genealogy?: string;
-    organization?: string;
-    organization_email?: string;
-    category?: string[];
-    attribution_text?: string;
-    attribution_url?: string;
-    charset?: string;
-    projection?: string;
-    encoding?: string;
-    resolution?: string;
-    languages?: LanguageType[];
-    share_with?: string;
 };
 
 type WmsVectorServiceFormProps = {
@@ -261,22 +241,26 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
             projUrl = `http://www.opengis.net/def/crs/EPSG/0/${projCode}`;
         }
 
-        defValues["projection"] = projUrl;
-        defValues["languages"] = [{ language: "français", code: "fra" }];
+        defValues = {
+            ...defValues,
+            projection: projUrl,
+            languages: [{ language: "français", code: "fra" }],
+        };
 
         return defValues;
     }, [editMode, offeringQuery.data, vectorDbQuery.data]);
 
-    const form = useForm({
+    const form = useForm<WmsVectorServiceFormValuesType>({
         resolver: yupResolver(schemas[currentStep]),
         mode: "onChange",
         values: defaultValues,
     });
     const { getValues: getFormValues, trigger } = form;
 
-    const selectedTableNamesList: string[] = useWatch({
+    const selectedTableNamesList: string[] | undefined = useWatch({
         control: form.control,
         name: "selected_tables",
+        defaultValue: [],
     });
 
     const selectedTables: StoredDataRelation[] = useMemo(() => {
@@ -335,6 +319,7 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
                     {createServiceMutation.error && (
                         <Alert closable description={createServiceMutation.error.message} severity="error" title={tCommon("error")} />
                     )}
+                    {editServiceMutation.error && <Alert closable description={editServiceMutation.error.message} severity="error" title={tCommon("error")} />}
 
                     <TableSelection visible={currentStep === STEPS.TABLES_INFOS} vectorDb={vectorDbQuery.data} form={form} />
                     <UploadStyleFile visible={currentStep === STEPS.STYLE_FILE} selectedTables={selectedTables} form={form} />
@@ -387,7 +372,6 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
                     </div>
                 </Wait>
             )}
-            <DevTool control={form.control} />
         </DatastoreLayout>
     );
 };

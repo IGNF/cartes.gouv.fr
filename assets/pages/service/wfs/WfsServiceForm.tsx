@@ -3,10 +3,13 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
+import { DevTool } from "@hookform/devtools";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useQuery } from "@tanstack/react-query";
-import { FC, useEffect, useMemo, useState } from "react";
+import { format as datefnsFormat } from "date-fns";
+import { FC, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
+import { symToStr } from "tsafe/symToStr";
 import * as yup from "yup";
 
 import api from "../../../api";
@@ -18,22 +21,30 @@ import RQKeys from "../../../modules/RQKeys";
 import Translator from "../../../modules/Translator";
 import { CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
-import { EndpointTypeEnum, StoredDataRelation, VectorDb } from "../../../types/app";
+import { EndpointTypeEnum, Service, ServiceFormValuesBaseType, StoredDataRelation, VectorDb } from "../../../types/app";
+import { ConfigurationWfsDetailsContent } from "../../../types/entrepot";
+import { getProjectionCode, removeDiacritics } from "../../../utils";
 import AccessRestrictions from "../AccessRestrictions";
 import { CommonSchemasValidation } from "../common-schemas-validation";
 import AdditionalInfo from "../metadatas/AdditionalInfo";
-import Description from "../metadatas/Description";
+import Description, { getEndpointSuffix } from "../metadatas/Description";
 import UploadMDFile from "../metadatas/UploadMDFile";
 import TableInfosForm from "./TablesInfoForm";
+
+export type WfsServiceFormValuesType = ServiceFormValuesBaseType & {
+    selected_tables?: string[];
+    table_infos?: Record<string, TableInfos>;
+};
 
 /**
  *
  * @param datastoreId identifiant du datastore
  * @param vectorDbId identifiant de la donnee stockée VECTOR-DB
  */
-type WfsServiceNewProps = {
+type WfsServiceFormProps = {
     datastoreId: string;
     vectorDbId: string;
+    offeringId?: string;
 };
 
 type TableInfos = {
@@ -47,7 +58,7 @@ type TableInfos = {
 /**
  * Formulaire general de création d'un service WFS
  */
-const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
+const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offeringId }) => {
     const STEPS = {
         TABLES_INFOS: 1,
         METADATAS_UPLOAD: 2,
@@ -58,7 +69,7 @@ const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
 
     /* l'etape courante */
     const [currentStep, setCurrentStep] = useState(STEPS.TABLES_INFOS);
-    const [tables, setTables] = useState<StoredDataRelation[]>([]);
+    const editMode = useMemo(() => !!offeringId, [offeringId]);
 
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [validationError, setValidationError] = useState<CartesApiException>();
@@ -73,6 +84,18 @@ const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
         queryKey: RQKeys.datastore_offering_list(datastoreId),
         queryFn: () => api.service.getOfferings(datastoreId),
         refetchInterval: 10000,
+    });
+
+    const offeringQuery = useQuery<Service | null, CartesApiException>({
+        queryKey: RQKeys.datastore_offering(datastoreId, offeringId ?? "xxxx"),
+        queryFn: ({ signal }) => {
+            if (offeringId) {
+                return api.service.getService(datastoreId, offeringId, { signal });
+            }
+            return Promise.resolve(null);
+        },
+        enabled: editMode,
+        staleTime: Infinity,
     });
 
     const commonValidation = useMemo(() => new CommonSchemasValidation(offeringsQuery.data), [offeringsQuery.data]);
@@ -103,16 +126,85 @@ const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
     schemas[STEPS.METADATAS_ADDITIONALINFORMATIONS] = commonValidation.getMDAdditionalInfoSchema();
     schemas[STEPS.ACCESSRESTRICTIONS] = commonValidation.getAccessRestrictionSchema();
 
-    useEffect(() => {
-        if (!vectorDbQuery.data) return;
-        const relations = vectorDbQuery.data.type_infos?.relations ?? [];
-        const tables = filterGeometricRelations(relations, true);
-        setTables(tables);
-    }, [vectorDbQuery.data]);
+    const defaultValues: WfsServiceFormValuesType = useMemo(() => {
+        let defValues: WfsServiceFormValuesType;
+        const now = datefnsFormat(new Date(), "yyyy-MM-dd");
 
-    const form = useForm({
+        if (editMode) {
+            const share_with = offeringQuery.data?.open === true ? "all_public" : "your_community";
+            const typeInfos = offeringQuery.data?.configuration?.type_infos as ConfigurationWfsDetailsContent | undefined;
+
+            const tableInfos: Record<string, TableInfos> = {};
+            typeInfos?.used_data?.[0].relations.forEach((rel) => {
+                tableInfos[rel.native_name] = {
+                    title: rel.title,
+                    description: rel.abstract,
+                    keywords: rel.keywords ?? [],
+                    public_name: rel.public_name,
+                };
+            });
+
+            defValues = {
+                selected_tables: typeInfos?.used_data?.[0].relations?.map((rel) => rel.native_name) ?? [],
+                table_infos: tableInfos,
+                technical_name: offeringQuery.data?.configuration.layer_name,
+                public_name: offeringQuery.data?.configuration.name,
+                share_with,
+                // TODO : à récupérer depuis les métadonnées
+                creation_date: now,
+                resource_genealogy: "",
+                email_contact: "email@ign.fr",
+                organization: "IGN",
+                organization_email: "email@ign.fr",
+                category: ["test", "test_2"],
+                description: "Ceci est un test",
+                identifier: "xxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                charset: "utf8",
+                attribution_text: "© IGN",
+                attribution_url: "https://www.ign.fr",
+            };
+        } else {
+            const suffix = getEndpointSuffix(EndpointTypeEnum.WFS);
+            const storedDataName = vectorDbQuery.data?.name ?? "";
+            const nice = removeDiacritics(storedDataName.toLowerCase()).replace(/ /g, "_");
+
+            defValues = {
+                selected_tables: [],
+                table_infos: {},
+                technical_name: `${nice}_${suffix}`,
+                public_name: storedDataName,
+                creation_date: now,
+                resource_genealogy: "",
+                charset: "utf8",
+            };
+        }
+
+        let projUrl = "";
+        const projCode = getProjectionCode(vectorDbQuery.data?.srs);
+        if (projCode) {
+            projUrl = `http://www.opengis.net/def/crs/EPSG/0/${projCode}`;
+        }
+
+        defValues = {
+            ...defValues,
+            projection: projUrl,
+            languages: [{ language: "français", code: "fra" }],
+        };
+
+        return defValues;
+    }, [editMode, vectorDbQuery.data, offeringQuery.data]);
+
+    const tables: StoredDataRelation[] = useMemo(() => {
+        if (!vectorDbQuery.data?.type_infos) return [];
+
+        const relations = vectorDbQuery.data.type_infos?.relations ?? [];
+        return filterGeometricRelations(relations, true);
+    }, [vectorDbQuery.data?.type_infos]);
+
+    const form = useForm<WfsServiceFormValuesType>({
         resolver: yupResolver(schemas[currentStep]),
         mode: "onChange",
+        values: defaultValues,
     });
     const {
         formState: { errors },
@@ -177,7 +269,7 @@ const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
     return (
         <DatastoreLayout datastoreId={datastoreId} documentTitle="Créer et publier un service WFS">
             <h1>{Translator.trans("service.wfs.new.title")}</h1>
-            {vectorDbQuery.isLoading ? (
+            {vectorDbQuery.isLoading || offeringQuery.isLoading ? (
                 <LoadingText message={Translator.trans("service.wfs.new.loading_stored_data")} />
             ) : vectorDbQuery.data === undefined ? (
                 <Alert
@@ -210,6 +302,7 @@ const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
                         state={errors.selected_tables ? "error" : "default"}
                         stateRelatedMessage={errors?.selected_tables?.message?.toString()}
                     />
+
                     <UploadMDFile visible={currentStep === STEPS.METADATAS_UPLOAD} form={form} />
                     <Description visible={currentStep === STEPS.METADATAS_DESCRIPTION} form={form} />
                     <AdditionalInfo
@@ -268,8 +361,11 @@ const WfsServiceNew: FC<WfsServiceNewProps> = ({ datastoreId, vectorDbId }) => {
                     </div>
                 </Wait>
             )}
+            <DevTool control={form.control} />
         </DatastoreLayout>
     );
 };
 
-export default WfsServiceNew;
+WfsServiceForm.displayName = symToStr({ WfsServiceForm });
+
+export default WfsServiceForm;

@@ -112,6 +112,15 @@ const routeDefs = {
         },
         (p) => `${appRoot}/datastores/${p.datastoreId}/service/wfs/new`
     ),
+    // Modifier les infos d'un service WFS
+    datastore_wfs_service_edit: defineRoute(
+        {
+            datastoreId: param.path.string,
+            vectorDbId: param.query.string,
+            offeringId: param.path.string,
+        },
+        (p) => `${appRoot}/datastores/${p.datastoreId}/service/wfs/${p.offeringId}/edit`
+    ),
 
     // Creer et publier un service WMS-VECTEUR
     datastore_wms_vector_service_new: defineRoute(
@@ -121,8 +130,8 @@ const routeDefs = {
         },
         (p) => `${appRoot}/datastores/${p.datastoreId}/service/wms-vector/new`
     ),
-    // Modifier les infos d'une publication existante
-    datastore_wms_vector_service_modify: defineRoute(
+    // Modifier les infos d'un service WMS-VECTEUR
+    datastore_wms_vector_service_edit: defineRoute(
         {
             datastoreId: param.path.string,
             vectorDbId: param.query.string,

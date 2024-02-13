@@ -7,14 +7,13 @@ import { UseFormReturn } from "react-hook-form";
 import api from "../../api";
 import RQKeys from "../../modules/RQKeys";
 import Translator from "../../modules/Translator";
-import { DatastoreEndpoint, EndpointTypeEnum } from "../../types/app";
-import { WmsVectorServiceFormValuesType } from "./wms-vector/WmsVectorServiceForm";
+import { DatastoreEndpoint, EndpointTypeEnum, ServiceFormValuesBaseType } from "../../types/app";
 
 type AccessRestrictionProps = {
     datastoreId: string;
     endpointType: EndpointTypeEnum;
     visible: boolean;
-    form: UseFormReturn<WmsVectorServiceFormValuesType>;
+    form: UseFormReturn<ServiceFormValuesBaseType>;
 };
 
 const AccessRestrictions: FC<AccessRestrictionProps> = ({ datastoreId, endpointType, visible, form }) => {

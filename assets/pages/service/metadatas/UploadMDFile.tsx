@@ -4,11 +4,19 @@ import { FC } from "react";
 import { UseFormReturn } from "react-hook-form";
 
 import { useTranslation } from "../../../i18n/i18n";
-import { WmsVectorServiceFormValuesType } from "../wms-vector/WmsVectorServiceForm";
+import { ServiceFormValuesBaseType } from "../../../types/app";
+
+// Test avec un type generic, mais ça ne marche pas trop, y a une erreur avec Path<TFieldValues>
+// type UploadMDFileProps<TFieldValues extends FieldValues> = {
+//     visible: boolean;
+//     form: UseFormReturn<TFieldValues>;
+// };
+
+// const UploadMDFile = <TFieldValues extends ServiceFormValuesBaseType>({ visible, form }: UploadMDFileProps<TFieldValues>) => {
 
 type UploadMDFileProps = {
     visible: boolean;
-    form: UseFormReturn<WmsVectorServiceFormValuesType>;
+    form: UseFormReturn<ServiceFormValuesBaseType>;
 };
 
 const UploadMDFile: FC<UploadMDFileProps> = ({ visible, form }) => {

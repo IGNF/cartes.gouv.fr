@@ -10,9 +10,8 @@ import AutocompleteSelect from "../../../components/Input/AutocompleteSelect";
 import ignProducts from "../../../data/md_resolutions.json";
 import { getTranslation } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/RQKeys";
-import { Pyramid, UploadTree, VectorDb } from "../../../types/app";
+import { Pyramid, ServiceFormValuesBaseType, UploadTree, VectorDb } from "../../../types/app";
 import { LanguageType, charsets, getLanguages } from "../../../utils";
-import { WmsVectorServiceFormValuesType } from "../wms-vector/WmsVectorServiceForm";
 
 /**
  * Récupère le type de fichier (undefined, csv ou geopackage)
@@ -34,7 +33,7 @@ const getUploadFileType = (fileTree) => {
 type AdditionalInfoProps = {
     storedData: VectorDb | Pyramid;
     visible: boolean;
-    form: UseFormReturn<WmsVectorServiceFormValuesType>;
+    form: UseFormReturn<ServiceFormValuesBaseType>;
     datastoreId: string;
 };
 

@@ -3,6 +3,7 @@
 namespace App\Controller\Api;
 
 use App\Constants\EntrepotApi\CommonTags;
+use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Constants\EntrepotApi\StaticFileTypes;
 use App\Exception\CartesApiException;
 use App\Exception\EntrepotApiException;
@@ -107,15 +108,11 @@ class WmsVectorController extends AbstractController implements ApiControllerInt
             // création de configuration
             $configRequestBody = $this->getConfigRequestBody($data, $tablesNamesList, $styleFilesByTable, $storedDataId);
 
-            $storedData = $this->entrepotApiService->storedData->get($datastoreId, $storedDataId);
-
             $endpoint = $this->getEndpointInfo($datastoreId, $data['share_with']);
 
             // Ajout de la configuration
             $configuration = $this->entrepotApiService->configuration->add($datastoreId, $configRequestBody);
-            $configuration = $this->entrepotApiService->configuration->addTags($datastoreId, $configuration['_id'], [
-                CommonTags::DATASHEET_NAME => $storedData['tags'][CommonTags::DATASHEET_NAME],
-            ]);
+            $configuration = $this->entrepotApiService->configuration->addTags($datastoreId, $configuration['_id'], $oldConfiguration['tags']);
 
             // remplace nom temporaire des fichiers statiques
             foreach ($styleFilesByTable as $tableName => $staticFileId) {
@@ -139,13 +136,13 @@ class WmsVectorController extends AbstractController implements ApiControllerInt
         // TODO : implémentation partielle, tous les partages ne sont pas couverts
         if ('all_public' === $shareWith) {
             $endpoints = $this->entrepotApiService->datastore->getEndpointsList($datastoreId, [
-                'type' => 'WMS-VECTOR',
+                'type' => ConfigurationTypes::WMSVECTOR,
                 'open' => true,
             ]);
             $isOfferingOpen = true;
         } elseif ('your_community' === $shareWith) {
             $endpoints = $this->entrepotApiService->datastore->getEndpointsList($datastoreId, [
-                'type' => 'WMS-VECTOR',
+                'type' => ConfigurationTypes::WMSVECTOR,
                 'open' => false,
             ]);
             $isOfferingOpen = false;
@@ -181,7 +178,7 @@ class WmsVectorController extends AbstractController implements ApiControllerInt
         }
 
         $body = [
-            'type' => 'WMS-VECTOR',
+            'type' => ConfigurationTypes::WMSVECTOR,
             'name' => $data['public_name'],
             'layer_name' => $data['technical_name'],
             'type_infos' => [

@@ -1,3 +1,4 @@
+import { LanguageType } from "../utils";
 import {
     AccessCreateDto,
     AccessDetailsResponseDto,
@@ -181,6 +182,28 @@ export type TypeInfosWithBbox =
     | ConfigurationWmsRasterDetailsContent
     | ConfigurationWmsVectorDetailsContent
     | ConfigurationWmtsTmsDetailsContent;
+
+export type ServiceFormValuesBaseType = {
+    metadata_file_content?: FileList;
+    technical_name?: string;
+    public_name?: string;
+    description?: string;
+    identifier?: string;
+    email_contact?: string;
+    creation_date?: string;
+    resource_genealogy?: string;
+    organization?: string;
+    organization_email?: string;
+    category?: string[];
+    attribution_text?: string;
+    attribution_url?: string;
+    charset?: string;
+    projection?: string;
+    encoding?: string;
+    resolution?: string;
+    languages?: LanguageType[];
+    share_with?: string;
+};
 
 /** endpoints */
 export type DatastoreEndpoint = DatastoreEndpointResponseDto;

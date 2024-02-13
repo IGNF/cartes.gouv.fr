@@ -8,13 +8,12 @@ import { Controller, UseFormReturn } from "react-hook-form";
 import AutocompleteSelect from "../../../components/Input/AutocompleteSelect";
 import MarkdownEditor from "../../../components/Input/MarkdownEditor";
 import { getTranslation } from "../../../i18n/i18n";
-import { EndpointTypeEnum } from "../../../types/app";
+import { EndpointTypeEnum, ServiceFormValuesBaseType } from "../../../types/app";
 import { getInspireKeywords, regex } from "../../../utils";
-import { WmsVectorServiceFormValuesType } from "../wms-vector/WmsVectorServiceForm";
 
 type DescriptionProps = {
     visible: boolean;
-    form: UseFormReturn<WmsVectorServiceFormValuesType>;
+    form: UseFormReturn<ServiceFormValuesBaseType>;
 };
 
 export const getEndpointSuffix = (endpointType: EndpointTypeEnum) => {

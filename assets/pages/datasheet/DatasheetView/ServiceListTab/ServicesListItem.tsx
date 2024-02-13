@@ -121,7 +121,14 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                                         linkProps: (() => {
                                             switch (service.type) {
                                                 case OfferingTypeEnum.WMSVECTOR:
-                                                    return routes.datastore_wms_vector_service_modify({
+                                                    return routes.datastore_wms_vector_service_edit({
+                                                        datastoreId,
+                                                        vectorDbId: service.configuration.type_infos.used_data[0].stored_data,
+                                                        offeringId: service._id,
+                                                    }).link;
+
+                                                case OfferingTypeEnum.WFS:
+                                                    return routes.datastore_wfs_service_edit({
                                                         datastoreId,
                                                         vectorDbId: service.configuration.type_infos.used_data[0].stored_data,
                                                         offeringId: service._id,

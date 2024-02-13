@@ -42,7 +42,7 @@ const Confirm = lazy(() => import("../pages/contact/datastore/Confirmation"));
 const CommunityMembers = lazy(() => import("../pages/communities/CommunityMembers"));
 const CommunityList = lazy(() => import("../pages/communities/CommunityList"));
 
-const WfsServiceNew = lazy(() => import("../pages/service/wfs/WfsServiceNew"));
+const WfsServiceForm = lazy(() => import("../pages/service/wfs/WfsServiceForm"));
 const WmsVectorServiceForm = lazy(() => import("../pages/service/wms-vector/WmsVectorServiceForm"));
 const PyramidVectorNew = lazy(() => import("../pages/service/tms/PyramidVectorNew"));
 const PublishTmsServiceNew = lazy(() => import("../pages/service/tms/PublishNew"));
@@ -124,10 +124,12 @@ const RouterRenderer: FC = () => {
             case "datastore_stored_data_report":
                 return <StoredDataReport datastoreId={route.params.datastoreId} storedDataId={route.params.storedDataId} />;
             case "datastore_wfs_service_new":
-                return <WfsServiceNew datastoreId={route.params.datastoreId} vectorDbId={route.params.vectorDbId} />;
+                return <WfsServiceForm datastoreId={route.params.datastoreId} vectorDbId={route.params.vectorDbId} />;
+            case "datastore_wfs_service_edit":
+                return <WfsServiceForm datastoreId={route.params.datastoreId} vectorDbId={route.params.vectorDbId} offeringId={route.params.offeringId} />;
             case "datastore_wms_vector_service_new":
                 return <WmsVectorServiceForm datastoreId={route.params.datastoreId} vectorDbId={route.params.vectorDbId} />;
-            case "datastore_wms_vector_service_modify":
+            case "datastore_wms_vector_service_edit":
                 return (
                     <WmsVectorServiceForm datastoreId={route.params.datastoreId} vectorDbId={route.params.vectorDbId} offeringId={route.params.offeringId} />
                 );
