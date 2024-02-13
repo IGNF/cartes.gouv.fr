@@ -7,6 +7,7 @@ import { DevTool } from "@hookform/devtools";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useQuery } from "@tanstack/react-query";
 import { format as datefnsFormat } from "date-fns";
+import { declareComponentKeys } from "i18nifty";
 import { FC, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { symToStr } from "tsafe/symToStr";
@@ -14,11 +15,12 @@ import * as yup from "yup";
 
 import api from "../../../api";
 import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
+import LoadingIcon from "../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../components/Utils/LoadingText";
 import Wait from "../../../components/Utils/Wait";
 import { filterGeometricRelations } from "../../../helpers";
+import { Translations, useTranslation } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/RQKeys";
-import Translator from "../../../modules/Translator";
 import { CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
 import { EndpointTypeEnum, Service, ServiceFormValuesBaseType, StoredDataRelation, VectorDb } from "../../../types/app";
@@ -55,17 +57,20 @@ type TableInfos = {
     keywords?: string[];
 };
 
+const STEPS = {
+    TABLES_INFOS: 1,
+    METADATAS_UPLOAD: 2,
+    METADATAS_DESCRIPTION: 3,
+    METADATAS_ADDITIONALINFORMATIONS: 4,
+    ACCESSRESTRICTIONS: 5,
+};
+
 /**
  * Formulaire general de création d'un service WFS
  */
 const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offeringId }) => {
-    const STEPS = {
-        TABLES_INFOS: 1,
-        METADATAS_UPLOAD: 2,
-        METADATAS_DESCRIPTION: 3,
-        METADATAS_ADDITIONALINFORMATIONS: 4,
-        ACCESSRESTRICTIONS: 5,
-    };
+    const { t } = useTranslation("WfsServiceForm");
+    const { t: tCommon } = useTranslation("Common");
 
     /* l'etape courante */
     const [currentStep, setCurrentStep] = useState(STEPS.TABLES_INFOS);
@@ -267,33 +272,28 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
     };
 
     return (
-        <DatastoreLayout datastoreId={datastoreId} documentTitle="Créer et publier un service WFS">
-            <h1>{Translator.trans("service.wfs.new.title")}</h1>
+        <DatastoreLayout datastoreId={datastoreId} documentTitle={t("title", { editMode })}>
+            <h1>{t("title", { editMode })}</h1>
+
             {vectorDbQuery.isLoading || offeringQuery.isLoading ? (
-                <LoadingText message={Translator.trans("service.wfs.new.loading_stored_data")} />
+                <LoadingText message={t("stored_data.loading")} />
             ) : vectorDbQuery.data === undefined ? (
                 <Alert
                     severity="error"
                     closable={false}
-                    title={Translator.trans("get_stored_data_failed")}
-                    description={<Button linkProps={routes.datasheet_list({ datastoreId }).link}>{Translator.trans("back_to_my_datas")}</Button>}
+                    title={t("stored_data.fetch_failed")}
+                    description={<Button linkProps={routes.datasheet_list({ datastoreId }).link}>{t("back_to_data_list")}</Button>}
                 />
             ) : (
                 <>
                     <Stepper
                         currentStep={currentStep}
-                        nextTitle={currentStep < STEPS.ACCESSRESTRICTIONS && Translator.trans(`service.wfs.new.step${currentStep + 1}`)}
-                        stepCount={5}
-                        title={Translator.trans(`service.wfs.new.step${currentStep}`)}
+                        stepCount={Object.values(STEPS).length}
+                        nextTitle={currentStep < STEPS.ACCESSRESTRICTIONS && t("step.title", { stepNumber: currentStep + 1 })}
+                        title={t("step.title", { stepNumber: currentStep })}
                     />
                     {validationError && (
-                        <Alert
-                            className="fr-preline"
-                            closable
-                            description={validationError.message}
-                            severity="error"
-                            title={Translator.trans("commons.error")}
-                        />
+                        <Alert className="fr-preline" closable description={validationError.message} severity="error" title={tCommon("error")} />
                     )}
                     <TableInfosForm
                         visible={currentStep === STEPS.TABLES_INFOS}
@@ -317,29 +317,20 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
                         visible={currentStep === STEPS.ACCESSRESTRICTIONS}
                         form={form}
                     />
-                    {validationError && (
-                        <Alert
-                            className="fr-preline"
-                            closable
-                            description={validationError.message}
-                            severity="error"
-                            title={Translator.trans("commons.error")}
-                        />
-                    )}
+
                     <ButtonsGroup
                         className={fr.cx("fr-mt-2w")}
                         alignment="between"
                         buttons={[
                             {
-                                children: Translator.trans("previous_step"),
+                                children: t("previous_step"),
                                 iconId: "fr-icon-arrow-left-fill",
                                 priority: "tertiary",
                                 onClick: previousStep,
                                 disabled: currentStep === STEPS.TABLES_INFOS,
                             },
                             {
-                                children:
-                                    currentStep < Object.values(STEPS).length ? Translator.trans("continue") : Translator.trans("service.wfs.new.publish"),
+                                children: currentStep < Object.values(STEPS).length ? t("continue") : t("publish"),
                                 onClick: nextStep,
                             },
                         ]}
@@ -352,10 +343,10 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
                     <div className={fr.cx("fr-container")}>
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
                             <div className={fr.cx("fr-col-2")}>
-                                <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg") + " frx-icon-spin"} />
+                                <LoadingIcon largeIcon={true} />
                             </div>
                             <div className={fr.cx("fr-col-10")}>
-                                <h6 className={fr.cx("fr-h6", "fr-m-0")}>{"Création du service WFS en cours"}</h6>
+                                <h6 className={fr.cx("fr-h6", "fr-m-0")}>{editMode ? t("modify.in_progress") : t("publish.in_progress")}</h6>
                             </div>
                         </div>
                     </div>
@@ -369,3 +360,59 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
 WfsServiceForm.displayName = symToStr({ WfsServiceForm });
 
 export default WfsServiceForm;
+
+export const { i18n } = declareComponentKeys<
+    | { K: "title"; P: { editMode: boolean }; R: string }
+    | "stored_data.loading"
+    | "stored_data.fetch_failed"
+    | { K: "step.title"; P: { stepNumber: number }; R: string }
+    | "previous_step"
+    | "continue"
+    | "publish"
+    | "publish.in_progress"
+    | "modify.in_progress"
+    | "back_to_data_list"
+>()({
+    WfsServiceForm,
+});
+
+export const WfsServiceFormFrTranslations: Translations<"fr">["WfsServiceForm"] = {
+    title: ({ editMode }) => (editMode ? "Modifier le service WFS" : "Créer et publier un service WFS"),
+    "stored_data.loading": "Chargement de la donnée stockée...",
+    "stored_data.fetch_failed": "Récupération des informations sur la donnée stockée a échoué",
+    "step.title": ({ stepNumber }) => {
+        switch (stepNumber) {
+            case 1:
+                return "Tables";
+            case 2:
+                return "Source des métadonnées";
+            case 3:
+                return "Description de la ressource";
+            case 4:
+                return "Informations supplémentaires";
+            case 5:
+                return "Restrictions d'accès";
+            default:
+                return "";
+        }
+    },
+    previous_step: "Étape précédente",
+    continue: "Continuer",
+    publish: "Publier le service maintenant",
+    "publish.in_progress": "Création du service WFS en cours",
+    "modify.in_progress": "Modification des informations du service WFS en cours",
+    back_to_data_list: "Retour à mes données",
+};
+
+export const WfsServiceFormEnTranslations: Translations<"en">["WfsServiceForm"] = {
+    title: undefined,
+    "stored_data.loading": undefined,
+    "stored_data.fetch_failed": undefined,
+    "step.title": undefined,
+    previous_step: undefined,
+    continue: undefined,
+    publish: undefined,
+    "publish.in_progress": undefined,
+    "modify.in_progress": undefined,
+    back_to_data_list: undefined,
+};

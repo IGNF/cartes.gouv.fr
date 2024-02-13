@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { FC, useEffect, useState } from "react";
 import RQKeys from "../../../modules/RQKeys";
 import * as yup from "yup";
-import { type StoredDataRelation, type VectorDb } from "../../../types/app";
+import { ServiceFormValuesBaseType, type StoredDataRelation, type VectorDb } from "../../../types/app";
 import api from "../../../api";
 import Translator from "../../../modules/Translator";
 import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
@@ -24,6 +24,10 @@ import formatForm from "./format-form";
 import olDefaults from "../../../data/ol-defaults.json";
 import { CartesApiException } from "../../../modules/jsonFetch";
 import Wait from "../../../components/Utils/Wait";
+
+export type PyramidVectorGenerateFormValuesType = ServiceFormValuesBaseType & {
+    selected_tables: string[];
+};
 
 type PyramidVectorNewProps = {
     datastoreId: string;
@@ -80,7 +84,7 @@ const PyramidVectorNew: FC<PyramidVectorNewProps> = ({ datastoreId, vectorDbId, 
         staleTime: 600000,
     });
 
-    const form = useForm({
+    const form = useForm<PyramidVectorGenerateFormValuesType>({
         resolver: yupResolver(schema[currentStep]),
         mode: "onChange",
     });

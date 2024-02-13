@@ -41,6 +41,7 @@ export type ComponentKey =
     | typeof import("../modules/Style/TMSStyleFilesManager").i18n
     | typeof import("../pages/datastore/DatastoreManageStorage/DatastoreManageStorage").i18n
     | typeof import("../pages/service/wms-vector/WmsVectorServiceForm").i18n
+    | typeof import("../pages/service/wfs/WfsServiceForm").i18n
     | typeof import("../pages/service/TableSelection").i18n
     | typeof import("../pages/service/wms-vector/UploadStyleFile").i18n;
 

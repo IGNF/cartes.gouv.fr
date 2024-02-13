@@ -24,6 +24,7 @@ import type { Translations } from "../i18n";
 import { WmsVectorServiceFormEnTranslations } from "../../pages/service/wms-vector/WmsVectorServiceForm";
 import { TableSelectionEnTranslations } from "../../pages/service/TableSelection";
 import { UploadStyleFileEnTranslations } from "../../pages/service/wms-vector/UploadStyleFile";
+import { WfsServiceFormEnTranslations } from "../../pages/service/wfs/WfsServiceForm";
 
 export const translations: Translations<"en"> = {
     Common: commonEnTranslations,
@@ -49,6 +50,7 @@ export const translations: Translations<"en"> = {
     TMSStyleFilesManager: TMSStyleFilesManagerEnTranslations,
     DatastoreManageStorage: DatastoreManageStorageEnTranslations,
     WmsVectorServiceForm: WmsVectorServiceFormEnTranslations,
+    WfsServiceForm: WfsServiceFormEnTranslations,
     TableSelection: TableSelectionEnTranslations,
     UploadStyleFile: UploadStyleFileEnTranslations,
 };
