@@ -15,9 +15,10 @@ import useToggle from "../../../../hooks/useToggle";
 import RQKeys from "../../../../modules/RQKeys";
 import { routes } from "../../../../router/router";
 import { useSnackbarStore } from "../../../../stores/SnackbarStore";
-import { OfferingTypeEnum, type Service } from "../../../../types/app";
+import { OfferingStatusEnum, OfferingTypeEnum, type Service } from "../../../../types/app";
 import { offeringTypeDisplayName } from "../../../../utils";
 import ServiceDesc from "./ServiceDesc";
+import OfferingStatusBadge from "../../../../components/Utils/Badges/OfferingStatusBadge";
 
 type ServicesListItemProps = {
     service: Service;
@@ -74,6 +75,7 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                             <p className={fr.cx("fr-m-auto", "fr-mr-2v")}>
                                 {service?.configuration?.last_event?.date && functions.date.format(service?.configuration?.last_event?.date)}
                             </p>
+                            <OfferingStatusBadge status={service.status as OfferingStatusEnum} />
                             <i className={fr.cx("fr-mr-2v", service.open ? "fr-icon-lock-unlock-fill" : "fr-icon-lock-fill")} />
 
                             <Button

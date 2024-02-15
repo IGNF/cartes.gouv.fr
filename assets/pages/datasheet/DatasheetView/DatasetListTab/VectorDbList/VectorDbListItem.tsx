@@ -14,7 +14,7 @@ import api from "../../../../../api";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import MenuList from "../../../../../components/Utils/MenuList";
-import StoredDataStatusBadge from "../../../../../components/Utils/StoredDataStatusBadge";
+import StoredDataStatusBadge from "../../../../../components/Utils/Badges/StoredDataStatusBadge";
 import Wait from "../../../../../components/Utils/Wait";
 import functions from "../../../../../functions";
 import useToggle from "../../../../../hooks/useToggle";
@@ -97,7 +97,7 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
                 if (!technicalName) {
                     return;
                 }
-                routes.datastore_pyramid_vector_new({ datastoreId, vectorDbId: vectorDb._id, technicalName }).push();
+                routes.datastore_pyramid_vector_generate({ datastoreId, vectorDbId: vectorDb._id, technicalName }).push();
                 break;
 
             default:

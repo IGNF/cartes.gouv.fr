@@ -12,7 +12,7 @@ import api from "../../../../../api";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import MenuList from "../../../../../components/Utils/MenuList";
-import StoredDataStatusBadge from "../../../../../components/Utils/StoredDataStatusBadge";
+import StoredDataStatusBadge from "../../../../../components/Utils/Badges/StoredDataStatusBadge";
 import Wait from "../../../../../components/Utils/Wait";
 import functions from "../../../../../functions";
 import useToggle from "../../../../../hooks/useToggle";
@@ -87,7 +87,7 @@ const PyramidListItem: FC<PyramidListItemProps> = ({ datasheetName, datastoreId,
                             <StoredDataStatusBadge status={pyramid.status} />
                             <Button
                                 onClick={() => {
-                                    routes.datastore_tms_vector_service_new({ datastoreId, pyramidId: pyramid._id }).push();
+                                    routes.datastore_pyramid_vector_tms_service_new({ datastoreId, pyramidId: pyramid._id }).push();
                                 }}
                                 className={fr.cx("fr-mr-2v")}
                                 priority="secondary"

@@ -156,6 +156,13 @@ export {
 
 export type Offering = OfferingDetailResponseDto;
 export { OfferingDetailResponseDtoTypeEnum as OfferingTypeEnum } from "./entrepot";
+export enum OfferingStatusEnum {
+    PUBLISHING = "PUBLISHING",
+    MODIFYING = "MODIFYING",
+    PUBLISHED = "PUBLISHED",
+    UNPUBLISHING = "UNPUBLISHING",
+    UNSTABLE = "UNSTABLE",
+}
 
 export type Service = Offering & {
     configuration: Configuration;
