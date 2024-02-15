@@ -58,7 +58,9 @@ const createFormData = (formValues: WmsVectorServiceFormValuesType) => {
 
     // filtrer en fonction des tables sélectionnées
     formValues["selected_tables"]!.forEach((tableName: string) => {
-        fd.set(`style_${tableName}`, formValues.style_files![tableName]?.[0]);
+        if (formValues?.style_files?.[tableName]?.[0] !== undefined) {
+            fd.set(`style_${tableName}`, formValues?.style_files?.[tableName]?.[0]);
+        }
     });
 
     return fd;
@@ -113,12 +115,12 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
 
     const editServiceMutation = useMutation<Service, CartesApiException>({
         mutationFn: () => {
-            const formValues = getFormValues();
-            const formData = createFormData(formValues);
-
             if (offeringId === undefined) {
                 return Promise.reject();
             }
+
+            const formValues = getFormValues();
+            const formData = createFormData(formValues);
 
             return api.wmsVector.edit(datastoreId, vectorDbId, offeringId, formData);
         },
@@ -217,8 +219,8 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
                 description: "Ceci est un test",
                 identifier: "xxxxxxxxxxxxxxxxxxxxxxxxxxxx",
                 charset: "utf8",
-                attribution_text: "© IGN",
-                attribution_url: "https://www.ign.fr",
+                attribution_text: offeringQuery.data?.configuration.attribution?.title,
+                attribution_url: offeringQuery.data?.configuration.attribution?.url,
             };
         } else {
             const suffix = getEndpointSuffix(EndpointTypeEnum.WMSVECTOR);
@@ -300,13 +302,30 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
             <h1>{t("title", { editMode })}</h1>
 
             {vectorDbQuery.isLoading || offeringQuery.isLoading ? (
-                <LoadingText message={t("stored_data.loading")} />
+                <LoadingText as="h2" message={editMode ? t("stored_data_and_offering.loading") : t("stored_data.loading")} />
             ) : vectorDbQuery.data === undefined ? (
                 <Alert
                     severity="error"
                     closable={false}
                     title={t("stored_data.fetch_failed")}
-                    description={<Button linkProps={routes.datasheet_list({ datastoreId }).link}>{t("back_to_data_list")}</Button>}
+                    description={
+                        <>
+                            <p>{vectorDbQuery.error?.message}</p>
+                            <Button linkProps={routes.datasheet_list({ datastoreId }).link}>{t("back_to_data_list")}</Button>
+                        </>
+                    }
+                />
+            ) : editMode === true && offeringQuery.data === undefined ? (
+                <Alert
+                    severity="error"
+                    closable={false}
+                    title={t("offering.fetch_failed")}
+                    description={
+                        <>
+                            <p>{offeringQuery.error?.message}</p>
+                            <Button linkProps={routes.datasheet_list({ datastoreId }).link}>{t("back_to_data_list")}</Button>
+                        </>
+                    }
                 />
             ) : (
                 <>
@@ -383,7 +402,9 @@ export default WmsVectorServiceForm;
 export const { i18n } = declareComponentKeys<
     | { K: "title"; P: { editMode: boolean }; R: string }
     | "stored_data.loading"
+    | "stored_data_and_offering.loading"
     | "stored_data.fetch_failed"
+    | "offering.fetch_failed"
     | { K: "step.title"; P: { stepNumber: number }; R: string }
     | "previous_step"
     | "continue"
@@ -398,7 +419,9 @@ export const { i18n } = declareComponentKeys<
 export const WmsVectorServiceFormFrTranslations: Translations<"fr">["WmsVectorServiceForm"] = {
     title: ({ editMode }) => (editMode ? "Modifier le service WMS-Vecteur" : "Créer et publier un service WMS-Vecteur"),
     "stored_data.loading": "Chargement de la donnée stockée...",
+    "stored_data_and_offering.loading": "Chargement de la donnée stockée et le service à modifier...",
     "stored_data.fetch_failed": "Récupération des informations sur la donnée stockée a échoué",
+    "offering.fetch_failed": "Récupération des informations sur le service à modifier a échoué",
     "step.title": ({ stepNumber }) => {
         switch (stepNumber) {
             case 1:
@@ -428,7 +451,9 @@ export const WmsVectorServiceFormFrTranslations: Translations<"fr">["WmsVectorSe
 export const WmsVectorServiceFormEnTranslations: Translations<"en">["WmsVectorServiceForm"] = {
     title: undefined,
     "stored_data.loading": undefined,
+    "stored_data_and_offering.loading": undefined,
     "stored_data.fetch_failed": undefined,
+    "offering.fetch_failed": undefined,
     "step.title": undefined,
     previous_step: undefined,
     continue: undefined,

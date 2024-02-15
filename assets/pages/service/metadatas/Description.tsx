@@ -59,7 +59,7 @@ const Description: FC<DescriptionProps> = ({ visible, form }) => {
             // TODO Utiliser la nouvelle route https://github.com/Geoplateforme/geoplateforme.github.io/issues/1
 
             if (regex.name_constraint.test(fileIdentifier)) {
-                setFormValue("resource_genealogy", hierarchyLevel);
+                setFormValue("identifier", fileIdentifier);
             }
             if (["dataset", "series"].includes(hierarchyLevel)) {
                 setFormValue("resource_genealogy", hierarchyLevel);

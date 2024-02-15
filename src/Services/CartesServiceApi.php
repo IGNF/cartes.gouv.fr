@@ -58,10 +58,10 @@ class CartesServiceApi
 
     /**
      * Recherche des styles et ajout de l'url.
+     * // NOTE Utilisation d'un annexe parce qu'un tag est limité à 99 caractères. Le champ "extra" pourrait être utilisé une fois implémenté dans l'API.
      *
      * @return array<mixed>
      */
-    // TODO PEUT ETRE S'APPUYER SUR LES TAGS
     public function getStyles(string $datastoreId, string $configId): array
     {
         $path = "/configuration/$configId/styles.json";
@@ -127,7 +127,7 @@ class CartesServiceApi
     /**
      * @param array<mixed> $offering
      */
-    public function wfsUnpublish(string $datastoreId, array $offering): void
+    public function wfsUnpublish(string $datastoreId, array $offering, bool $removeStyleFiles = true): void
     {
         // suppression de l'offering
         $this->entrepotApiService->configuration->removeOffering($datastoreId, $offering['_id']);
@@ -144,7 +144,9 @@ class CartesServiceApi
         }
         $this->entrepotApiService->configuration->remove($datastoreId, $configurationId);
 
-        // TODO : supprimer les fichiers de styles en annexe qui sont référencés dans les tags de la configuration
+        if (true === $removeStyleFiles) {
+            // TODO : supprimer les fichiers de styles en annexe qui sont référencés dans les tags/annexes de la configuration
+        }
     }
 
     /**

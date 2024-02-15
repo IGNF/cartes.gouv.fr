@@ -9,12 +9,10 @@ use App\Exception\CartesApiException;
 use App\Exception\EntrepotApiException;
 use App\Services\CartesServiceApi;
 use App\Services\EntrepotApiService;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Uid\Uuid;
 
@@ -24,13 +22,14 @@ use Symfony\Component\Uid\Uuid;
     options: ['expose' => true],
     condition: 'request.isXmlHttpRequest()'
 )]
-class WmsVectorController extends AbstractController implements ApiControllerInterface
+class WmsVectorController extends ServiceController implements ApiControllerInterface
 {
     public function __construct(
         private EntrepotApiService $entrepotApiService,
         private CartesServiceApi $cartesServiceApi,
         protected Filesystem $filesystem,
     ) {
+        parent::__construct($entrepotApiService, $cartesServiceApi);
     }
 
     #[Route('', name: 'add', methods: ['POST'])]
@@ -49,12 +48,12 @@ class WmsVectorController extends AbstractController implements ApiControllerInt
             // ajout ou mise à jour des fichiers de styles SLD
             $styleFilesByTable = $this->sendStyleFiles($datastoreId, $tablesNamesList, $files);
 
-            // création de configuration
+            // création de requête pour la config
             $configRequestBody = $this->getConfigRequestBody($data, $tablesNamesList, $styleFilesByTable, $storedDataId);
 
             $storedData = $this->entrepotApiService->storedData->get($datastoreId, $storedDataId);
 
-            $endpoint = $this->getEndpointInfo($datastoreId, $data['share_with']);
+            $endpoint = $this->getEndpointByShareType($datastoreId, ConfigurationTypes::WMSVECTOR, $data['share_with']);
 
             // Ajout de la configuration
             $configuration = $this->entrepotApiService->configuration->add($datastoreId, $configRequestBody);
@@ -105,10 +104,10 @@ class WmsVectorController extends AbstractController implements ApiControllerInt
             // suppression anciens configs et offering
             $this->cartesServiceApi->wmsVectorUnpublish($datastoreId, $oldOffering, false);
 
-            // création de configuration
+            // création de requête pour la config
             $configRequestBody = $this->getConfigRequestBody($data, $tablesNamesList, $styleFilesByTable, $storedDataId);
 
-            $endpoint = $this->getEndpointInfo($datastoreId, $data['share_with']);
+            $endpoint = $this->getEndpointByShareType($datastoreId, ConfigurationTypes::WMSVECTOR, $data['share_with']);
 
             // Ajout de la configuration
             $configuration = $this->entrepotApiService->configuration->add($datastoreId, $configRequestBody);
@@ -129,35 +128,6 @@ class WmsVectorController extends AbstractController implements ApiControllerInt
         } catch (EntrepotApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
-    }
-
-    private function getEndpointInfo(string $datastoreId, string $shareWith): array
-    {
-        // TODO : implémentation partielle, tous les partages ne sont pas couverts
-        if ('all_public' === $shareWith) {
-            $endpoints = $this->entrepotApiService->datastore->getEndpointsList($datastoreId, [
-                'type' => ConfigurationTypes::WMSVECTOR,
-                'open' => true,
-            ]);
-            $isOfferingOpen = true;
-        } elseif ('your_community' === $shareWith) {
-            $endpoints = $this->entrepotApiService->datastore->getEndpointsList($datastoreId, [
-                'type' => ConfigurationTypes::WMSVECTOR,
-                'open' => false,
-            ]);
-            $isOfferingOpen = false;
-        } else {
-            throw new CartesApiException('Valeur du champ [share_with] est invalide', Response::HTTP_BAD_REQUEST, ['share_with' => $shareWith]);
-        }
-
-        if (0 === count($endpoints)) {
-            throw new CartesApiException("Aucun point d'accès (endpoint) du datastore ne peut convenir à la demande", Response::HTTP_BAD_REQUEST, ['share_with' => $shareWith]);
-        }
-
-        return [
-            'open' => $isOfferingOpen,
-            '_id' => $endpoints[0]['endpoint']['_id'],
-        ];
     }
 
     /**

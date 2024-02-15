@@ -3,13 +3,12 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
-import { DevTool } from "@hookform/devtools";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format as datefnsFormat } from "date-fns";
 import { declareComponentKeys } from "i18nifty";
-import { FC, useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
+import { FC, useCallback, useMemo, useState } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import { symToStr } from "tsafe/symToStr";
 import * as yup from "yup";
 
@@ -32,6 +31,29 @@ import AdditionalInfo from "../metadatas/AdditionalInfo";
 import Description, { getEndpointSuffix } from "../metadatas/Description";
 import UploadMDFile from "../metadatas/UploadMDFile";
 import TableInfosForm from "./TablesInfoForm";
+
+// Ajout du nom natif et trim sur les mots cles
+const formatTablesInfos = (table_infos: Record<string, TableInfos>) => {
+    const tInfos: object[] = [];
+    for (const [name, infos] of Object.entries(table_infos)) {
+        tInfos.push({
+            native_name: name,
+            ...infos,
+        });
+    }
+    return tInfos;
+};
+
+const createRequestBody = (formValues: WfsServiceFormValuesType) => {
+    // Nettoyage => trim sur toutes les chaines
+    const values = JSON.parse(
+        JSON.stringify(formValues, (key, value) => {
+            return typeof value === "string" ? value.trim() : value;
+        })
+    );
+    values.table_infos = formatTablesInfos(values.table_infos);
+    return values;
+};
 
 export type WfsServiceFormValuesType = ServiceFormValuesBaseType & {
     selected_tables?: string[];
@@ -76,19 +98,62 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
     const [currentStep, setCurrentStep] = useState(STEPS.TABLES_INFOS);
     const editMode = useMemo(() => !!offeringId, [offeringId]);
 
-    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-    const [validationError, setValidationError] = useState<CartesApiException>();
+    const queryClient = useQueryClient();
+
+    const createServiceMutation = useMutation<Service, CartesApiException>({
+        mutationFn: () => {
+            let formValues = getFormValues();
+            formValues = createRequestBody(formValues);
+
+            return api.wfs.add(datastoreId, vectorDbId, formValues);
+        },
+        onSuccess() {
+            if (vectorDbQuery.data?.tags?.datasheet_name) {
+                queryClient.invalidateQueries({
+                    queryKey: RQKeys.datastore_datasheet(datastoreId, vectorDbQuery.data?.tags.datasheet_name),
+                });
+                routes.datastore_datasheet_view({ datastoreId, datasheetName: vectorDbQuery.data?.tags.datasheet_name, activeTab: "services" }).push();
+            } else {
+                routes.datasheet_list({ datastoreId }).push();
+            }
+        },
+    });
+
+    const editServiceMutation = useMutation<Service, CartesApiException>({
+        mutationFn: () => {
+            if (offeringId === undefined) {
+                return Promise.reject();
+            }
+
+            let formValues = getFormValues();
+            formValues = createRequestBody(formValues);
+
+            return api.wfs.edit(datastoreId, vectorDbId, offeringId, formValues);
+        },
+        onSuccess() {
+            if (vectorDbQuery.data?.tags?.datasheet_name) {
+                queryClient.invalidateQueries({
+                    queryKey: RQKeys.datastore_datasheet(datastoreId, vectorDbQuery.data?.tags.datasheet_name),
+                });
+                routes.datastore_datasheet_view({ datastoreId, datasheetName: vectorDbQuery.data?.tags.datasheet_name, activeTab: "services" }).push();
+            } else {
+                routes.datasheet_list({ datastoreId }).push();
+            }
+        },
+    });
 
     const vectorDbQuery = useQuery({
         queryKey: RQKeys.datastore_stored_data(datastoreId, vectorDbId),
         queryFn: () => api.storedData.get<VectorDb>(datastoreId, vectorDbId),
-        staleTime: 600000,
+        staleTime: Infinity,
+        enabled: !(createServiceMutation.isPending || editServiceMutation.isPending),
     });
 
     const offeringsQuery = useQuery({
         queryKey: RQKeys.datastore_offering_list(datastoreId),
         queryFn: () => api.service.getOfferings(datastoreId),
-        refetchInterval: 10000,
+        refetchInterval: 30000,
+        enabled: !(createServiceMutation.isPending || editServiceMutation.isPending),
     });
 
     const offeringQuery = useQuery<Service | null, CartesApiException>({
@@ -99,7 +164,7 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
             }
             return Promise.resolve(null);
         },
-        enabled: editMode,
+        enabled: editMode && !(createServiceMutation.isPending || editServiceMutation.isPending),
         staleTime: Infinity,
     });
 
@@ -110,12 +175,12 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
     schemas[STEPS.TABLES_INFOS] = yup.object().shape({
         selected_tables: yup.array(yup.string()).min(1, "Veuillez choisir au moins une table").required("Veuillez choisir au moins une table"),
         table_infos: yup.lazy(() => {
-            if (!selectedTables || selectedTables.length === 0) {
+            if (!selectedTableNamesList || selectedTableNamesList.length === 0) {
                 return yup.mixed().nullable().notRequired();
             }
 
             const table_schemas = {};
-            selectedTables.forEach((table) => {
+            selectedTableNamesList.forEach((table) => {
                 table_schemas[table] = yup.object({
                     public_name: yup.string().default(table),
                     title: yup.string().required(`Le titre de la table ${table} est obligatoire`),
@@ -127,7 +192,7 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
         }),
     });
     schemas[STEPS.METADATAS_UPLOAD] = commonValidation.getMDUploadFileSchema();
-    schemas[STEPS.METADATAS_DESCRIPTION] = commonValidation.getMDDescriptionSchema();
+    schemas[STEPS.METADATAS_DESCRIPTION] = commonValidation.getMDDescriptionSchema(editMode, offeringQuery.data?.configuration.layer_name);
     schemas[STEPS.METADATAS_ADDITIONALINFORMATIONS] = commonValidation.getMDAdditionalInfoSchema();
     schemas[STEPS.ACCESSRESTRICTIONS] = commonValidation.getAccessRestrictionSchema();
 
@@ -165,8 +230,8 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
                 description: "Ceci est un test",
                 identifier: "xxxxxxxxxxxxxxxxxxxxxxxxxxxx",
                 charset: "utf8",
-                attribution_text: "© IGN",
-                attribution_url: "https://www.ign.fr",
+                attribution_text: offeringQuery.data?.configuration.attribution?.title,
+                attribution_url: offeringQuery.data?.configuration.attribution?.url,
             };
         } else {
             const suffix = getEndpointSuffix(EndpointTypeEnum.WFS);
@@ -214,75 +279,67 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
     const {
         formState: { errors },
         getValues: getFormValues,
-        watch,
+
         trigger,
     } = form;
 
-    const selectedTables = watch("selected_tables");
+    const selectedTableNamesList: string[] | undefined = useWatch({
+        control: form.control,
+        name: "selected_tables",
+        defaultValue: [],
+    });
 
-    // Ajout du nom natif et trim sur les mots cles
-    const format = (table_infos: Record<string, TableInfos>) => {
-        const tInfos: object[] = [];
-        for (const [name, infos] of Object.entries(table_infos)) {
-            tInfos.push({
-                native_name: name,
-                ...infos,
-            });
-        }
-        return tInfos;
-    };
+    const previousStep = useCallback(() => setCurrentStep((currentStep) => currentStep - 1), []);
 
-    const previousStep = () => setCurrentStep((currentStep) => currentStep - 1);
-
-    const nextStep = async () => {
+    const nextStep = useCallback(async () => {
         const isStepValid = await trigger(undefined, { shouldFocus: true }); // demande de valider le formulaire
-        if (!isStepValid) return;
 
+        if (!isStepValid) return; // ne fait rien si formulaire invalide
+
+        // formulaire est valide
         if (currentStep < Object.values(STEPS).length) {
+            // on passe à la prochaine étape du formulaire
             setCurrentStep((currentStep) => currentStep + 1);
-            return;
+        } else {
+            // on est à la dernière étape du formulaire donc on envoie la sauce
+
+            if (editMode) {
+                editServiceMutation.mutate();
+            } else {
+                createServiceMutation.mutate();
+            }
         }
-
-        setIsSubmitting(true);
-
-        // Nettoyage => trim sur toutes les chaines
-        const values = JSON.parse(
-            JSON.stringify(getFormValues(), (key, value) => {
-                return typeof value === "string" ? value.trim() : value;
-            })
-        );
-        values.table_infos = format(values.table_infos);
-
-        api.wfs
-            .add(datastoreId, vectorDbId, values)
-            .then(() => {
-                if (vectorDbQuery.data?.tags?.datasheet_name) {
-                    routes.datastore_datasheet_view({ datastoreId, datasheetName: vectorDbQuery.data?.tags.datasheet_name, activeTab: "services" }).push();
-                } else {
-                    routes.datasheet_list({ datastoreId }).push();
-                }
-            })
-            .catch((error) => {
-                console.error(error);
-                setValidationError(error as CartesApiException);
-            })
-            .finally(() => {
-                setIsSubmitting(false);
-            });
-    };
+    }, [createServiceMutation, editServiceMutation, currentStep, trigger, editMode]);
 
     return (
         <DatastoreLayout datastoreId={datastoreId} documentTitle={t("title", { editMode })}>
             <h1>{t("title", { editMode })}</h1>
 
             {vectorDbQuery.isLoading || offeringQuery.isLoading ? (
-                <LoadingText message={t("stored_data.loading")} />
+                <LoadingText as="h2" message={editMode ? t("stored_data_and_offering.loading") : t("stored_data.loading")} />
             ) : vectorDbQuery.data === undefined ? (
                 <Alert
                     severity="error"
                     closable={false}
                     title={t("stored_data.fetch_failed")}
-                    description={<Button linkProps={routes.datasheet_list({ datastoreId }).link}>{t("back_to_data_list")}</Button>}
+                    description={
+                        <>
+                            <p>{vectorDbQuery.error?.message}</p>
+                            <Button linkProps={routes.datasheet_list({ datastoreId }).link}>{t("back_to_data_list")}</Button>
+                        </>
+                    }
+                />
+            ) : editMode === true && offeringQuery.data === undefined ? (
+                <Alert
+                    severity="error"
+                    closable={false}
+                    title={t("offering.fetch_failed")}
+                    description={
+                        <>
+                            <p>{offeringQuery.error?.message}</p>
+                            <Button linkProps={routes.datasheet_list({ datastoreId }).link}>{t("back_to_data_list")}</Button>
+                        </>
+                    }
                 />
             ) : (
                 <>
@@ -292,9 +349,11 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
                         nextTitle={currentStep < STEPS.ACCESSRESTRICTIONS && t("step.title", { stepNumber: currentStep + 1 })}
                         title={t("step.title", { stepNumber: currentStep })}
                     />
-                    {validationError && (
-                        <Alert className="fr-preline" closable description={validationError.message} severity="error" title={tCommon("error")} />
+                    {createServiceMutation.error && (
+                        <Alert closable description={createServiceMutation.error.message} severity="error" title={tCommon("error")} />
                     )}
+                    {editServiceMutation.error && <Alert closable description={editServiceMutation.error.message} severity="error" title={tCommon("error")} />}
+
                     <TableInfosForm
                         visible={currentStep === STEPS.TABLES_INFOS}
                         tables={tables}
@@ -338,7 +397,7 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
                     />
                 </>
             )}
-            {isSubmitting && (
+            {(createServiceMutation.isPending || editServiceMutation.isPending) && (
                 <Wait>
                     <div className={fr.cx("fr-container")}>
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
@@ -352,7 +411,6 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
                     </div>
                 </Wait>
             )}
-            <DevTool control={form.control} />
         </DatastoreLayout>
     );
 };
@@ -364,7 +422,9 @@ export default WfsServiceForm;
 export const { i18n } = declareComponentKeys<
     | { K: "title"; P: { editMode: boolean }; R: string }
     | "stored_data.loading"
+    | "stored_data_and_offering.loading"
     | "stored_data.fetch_failed"
+    | "offering.fetch_failed"
     | { K: "step.title"; P: { stepNumber: number }; R: string }
     | "previous_step"
     | "continue"
@@ -379,7 +439,9 @@ export const { i18n } = declareComponentKeys<
 export const WfsServiceFormFrTranslations: Translations<"fr">["WfsServiceForm"] = {
     title: ({ editMode }) => (editMode ? "Modifier le service WFS" : "Créer et publier un service WFS"),
     "stored_data.loading": "Chargement de la donnée stockée...",
+    "stored_data_and_offering.loading": "Chargement de la donnée stockée et le service à modifier...",
     "stored_data.fetch_failed": "Récupération des informations sur la donnée stockée a échoué",
+    "offering.fetch_failed": "Récupération des informations sur le service à modifier a échoué",
     "step.title": ({ stepNumber }) => {
         switch (stepNumber) {
             case 1:
@@ -407,7 +469,9 @@ export const WfsServiceFormFrTranslations: Translations<"fr">["WfsServiceForm"] 
 export const WfsServiceFormEnTranslations: Translations<"en">["WfsServiceForm"] = {
     title: undefined,
     "stored_data.loading": undefined,
+    "stored_data_and_offering.loading": undefined,
     "stored_data.fetch_failed": undefined,
+    "offering.fetch_failed": undefined,
     "step.title": undefined,
     previous_step: undefined,
     continue: undefined,
