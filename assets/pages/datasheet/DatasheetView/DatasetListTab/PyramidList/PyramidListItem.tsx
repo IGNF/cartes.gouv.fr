@@ -87,7 +87,7 @@ const PyramidListItem: FC<PyramidListItemProps> = ({ datasheetName, datastoreId,
                             <StoredDataStatusBadge status={pyramid.status} />
                             <Button
                                 onClick={() => {
-                                    routes.datastore_pyramid_vector_tms_service_new({ datastoreId, pyramidId: pyramid._id }).push();
+                                    routes.datastore_tms_vector_service_new({ datastoreId, pyramidId: pyramid._id }).push();
                                 }}
                                 className={fr.cx("fr-mr-2v")}
                                 priority="secondary"
