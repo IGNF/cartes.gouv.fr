@@ -183,11 +183,8 @@ export type TypeInfosWithBbox =
     | ConfigurationWmsVectorDetailsContent
     | ConfigurationWmtsTmsDetailsContent;
 
-export type ServiceFormValuesBaseType = {
+export type MetadataFormValuesType = {
     metadata_file_content?: FileList;
-    technical_name?: string;
-    public_name?: string;
-    description?: string;
     identifier?: string;
     email_contact?: string;
     creation_date?: string;
@@ -195,15 +192,25 @@ export type ServiceFormValuesBaseType = {
     organization?: string;
     organization_email?: string;
     category?: string[];
-    attribution_text?: string;
-    attribution_url?: string;
     charset?: string;
     projection?: string;
     encoding?: string;
     resolution?: string;
     languages?: LanguageType[];
-    share_with?: string;
 };
+
+export type AttributionFormValuesType = {
+    attribution_text?: string;
+    attribution_url?: string;
+};
+
+export type ServiceFormValuesBaseType = {
+    technical_name?: string;
+    public_name?: string;
+    description?: string;
+    share_with?: string;
+} & MetadataFormValuesType &
+    AttributionFormValuesType;
 
 /** endpoints */
 export type DatastoreEndpoint = DatastoreEndpointResponseDto;
