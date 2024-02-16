@@ -171,11 +171,9 @@ class PyramidController extends AbstractController implements ApiControllerInter
 
             // Creation d'une offering
             $offering = $this->entrepotApiService->configuration->addOffering($datastoreId, $configuration['_id'], $endpointId, $isOfferingOpen);
+            $offering['configuration'] = $configuration;
 
-            return $this->json([
-                'configuration' => $configuration,
-                'offering' => $offering,
-            ]);
+            return $this->json($offering);
         } catch (CartesApiException $ex) {
             return $this->json($ex->getDetails(), $ex->getCode());
         } catch (\Exception $ex) {

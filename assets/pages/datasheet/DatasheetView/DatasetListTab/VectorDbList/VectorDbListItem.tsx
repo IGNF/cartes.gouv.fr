@@ -1,4 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import Alert from "@codegouvfr/react-dsfr/Alert";
+import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
@@ -8,13 +10,11 @@ import { FC, memo, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { symToStr } from "tsafe/symToStr";
 
-import Alert from "@codegouvfr/react-dsfr/Alert";
-import Badge from "@codegouvfr/react-dsfr/Badge";
 import api from "../../../../../api";
+import StoredDataStatusBadge from "../../../../../components/Utils/Badges/StoredDataStatusBadge";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import MenuList from "../../../../../components/Utils/MenuList";
-import StoredDataStatusBadge from "../../../../../components/Utils/Badges/StoredDataStatusBadge";
 import Wait from "../../../../../components/Utils/Wait";
 import functions from "../../../../../functions";
 import useToggle from "../../../../../hooks/useToggle";
@@ -97,7 +97,7 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
                 if (!technicalName) {
                     return;
                 }
-                routes.datastore_pyramid_vector_new({ datastoreId, vectorDbId: vectorDb._id, technicalName }).push();
+                routes.datastore_pyramid_vector_generate({ datastoreId, vectorDbId: vectorDb._id, technicalName }).push();
                 break;
 
             default:

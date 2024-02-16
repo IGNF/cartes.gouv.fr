@@ -15,7 +15,7 @@ export type SampleType = {
 
 type SampleProps = {
     visible: boolean;
-    bottomZoomLevel: number;
+    bottomZoomLevel?: number;
     form: UseFormReturn;
 };
 

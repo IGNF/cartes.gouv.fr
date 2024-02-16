@@ -140,6 +140,7 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                                                     };
                                             }
                                         })(),
+                                        disabled: ![OfferingTypeEnum.WMSVECTOR, OfferingTypeEnum.WFS].includes(service.type),
                                     },
                                     {
                                         text: "Remplacer les données",

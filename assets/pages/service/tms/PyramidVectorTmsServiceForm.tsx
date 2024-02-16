@@ -4,7 +4,8 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { format as datefnsFormat } from "date-fns";
 import { FC, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -16,41 +17,33 @@ import RQKeys from "../../../modules/RQKeys";
 import Translator from "../../../modules/Translator";
 import { CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
-import { EndpointTypeEnum, Pyramid } from "../../../types/app";
+import { EndpointTypeEnum, Pyramid, Service, ServiceFormValuesBaseType } from "../../../types/app";
+import { getProjectionCode, removeDiacritics } from "../../../utils";
 import AccessRestrictions from "../AccessRestrictions";
 import { CommonSchemasValidation } from "../common-schemas-validation";
 import AdditionalInfo from "../metadatas/AdditionalInfo";
-import Description from "../metadatas/Description";
+import Description, { getEndpointSuffix } from "../metadatas/Description";
 import UploadMDFile from "../metadatas/UploadMDFile";
 
-type PublishNewProps = {
+type PyramidVectorTmsServiceFormValuesType = ServiceFormValuesBaseType;
+
+const STEPS = {
+    MD_UPLOAD_FILE: 1,
+    MD_DESCRIPTION: 2,
+    MD_ADDITIONNAL_INFOS: 3,
+    ACCESS_RESTRICTIONS: 4,
+};
+
+type PyramidVectorTmsServiceFormProps = {
     datastoreId: string;
     pyramidId: string;
 };
 
-const format = (values) => {
-    const languages = values.languages.map((language) => language.code);
-
-    const v = { ...values };
-    v.languages = languages;
-    delete v.metadata_file_content;
-
-    return v;
-};
-
-const PublishNew: FC<PublishNewProps> = ({ datastoreId, pyramidId }) => {
-    const STEPS = {
-        MD_UPLOAD_FILE: 1,
-        MD_DESCRIPTION: 2,
-        MD_ADDITIONNAL_INFOS: 3,
-        ACCESS_RESTRICTIONS: 4,
-    };
-
+const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ datastoreId, pyramidId }) => {
     /* l'etape courante */
     const [currentStep, setCurrentStep] = useState(STEPS.MD_UPLOAD_FILE);
 
-    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-    const [validationError, setValidationError] = useState<CartesApiException>();
+    const queryClient = useQueryClient();
 
     const pyramidQuery = useQuery({
         queryKey: RQKeys.datastore_stored_data(datastoreId, pyramidId),
@@ -73,12 +66,62 @@ const PublishNew: FC<PublishNewProps> = ({ datastoreId, pyramidId }) => {
     schemas[STEPS.MD_ADDITIONNAL_INFOS] = commonValidation.getMDAdditionalInfoSchema();
     schemas[STEPS.ACCESS_RESTRICTIONS] = commonValidation.getAccessRestrictionSchema();
 
-    const form = useForm({
+    const defaultValues: PyramidVectorTmsServiceFormValuesType = useMemo(() => {
+        let defValues: PyramidVectorTmsServiceFormValuesType;
+        const now = datefnsFormat(new Date(), "yyyy-MM-dd");
+
+        const suffix = getEndpointSuffix(EndpointTypeEnum.WMTSTMS);
+        const storedDataName = pyramidQuery.data?.name ?? "";
+        const nice = removeDiacritics(storedDataName.toLowerCase()).replace(/ /g, "_");
+
+        defValues = {
+            technical_name: `${nice}_${suffix}`,
+            public_name: storedDataName,
+            creation_date: now,
+            resource_genealogy: "",
+            charset: "utf8",
+            languages: [{ language: "français", code: "fra" }],
+        };
+
+        let projUrl = "";
+        const projCode = getProjectionCode(pyramidQuery.data?.srs);
+        if (projCode) {
+            projUrl = `http://www.opengis.net/def/crs/EPSG/0/${projCode}`;
+        }
+
+        defValues = {
+            ...defValues,
+            projection: projUrl,
+            languages: [{ language: "français", code: "fra" }],
+        };
+
+        return defValues;
+    }, [pyramidQuery.data]);
+
+    const form = useForm<PyramidVectorTmsServiceFormValuesType>({
         resolver: yupResolver(schemas[currentStep]),
         mode: "onChange",
+        values: defaultValues,
     });
 
     const { getValues: getFormValues, trigger } = form;
+
+    const createServiceMutation = useMutation<Service, CartesApiException>({
+        mutationFn: () => {
+            const formValues = getFormValues();
+            return api.pyramid.publish(datastoreId, pyramidId, formValues);
+        },
+        onSuccess() {
+            if (pyramidQuery.data?.tags?.datasheet_name) {
+                queryClient.invalidateQueries({
+                    queryKey: RQKeys.datastore_datasheet(datastoreId, pyramidQuery.data?.tags.datasheet_name),
+                });
+                routes.datastore_datasheet_view({ datastoreId, datasheetName: pyramidQuery.data?.tags.datasheet_name, activeTab: "services" }).push();
+            } else {
+                routes.datasheet_list({ datastoreId }).push();
+            }
+        },
+    });
 
     // Etape precedente
     const previousStep = () => setCurrentStep((currentStep) => currentStep - 1);
@@ -94,24 +137,7 @@ const PublishNew: FC<PublishNewProps> = ({ datastoreId, pyramidId }) => {
             return;
         }
 
-        setIsSubmitting(true);
-
-        const values = format(getFormValues());
-        api.pyramid
-            .publish(datastoreId, pyramidId, values)
-            .then(() => {
-                if (pyramidQuery.data?.tags?.datasheet_name) {
-                    routes.datastore_datasheet_view({ datastoreId, datasheetName: pyramidQuery.data?.tags.datasheet_name, activeTab: "dataset" }).push();
-                } else {
-                    routes.datasheet_list({ datastoreId }).push();
-                }
-            })
-            .catch((error) => {
-                setValidationError(error as CartesApiException);
-            })
-            .finally(() => {
-                setIsSubmitting(false);
-            });
+        createServiceMutation.mutate();
     };
 
     return (
@@ -144,11 +170,11 @@ const PublishNew: FC<PublishNewProps> = ({ datastoreId, pyramidId }) => {
                         visible={currentStep === STEPS.ACCESS_RESTRICTIONS}
                         form={form}
                     />
-                    {validationError && (
+                    {createServiceMutation.error && (
                         <Alert
                             className="fr-preline"
                             closable
-                            description={validationError.message}
+                            description={createServiceMutation.error.message}
                             severity="error"
                             title={Translator.trans("commons.error")}
                         />
@@ -174,7 +200,7 @@ const PublishNew: FC<PublishNewProps> = ({ datastoreId, pyramidId }) => {
                     />
                 </>
             )}
-            {isSubmitting && (
+            {createServiceMutation.isPending && (
                 <Wait>
                     <div className={fr.cx("fr-container")}>
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
@@ -192,4 +218,4 @@ const PublishNew: FC<PublishNewProps> = ({ datastoreId, pyramidId }) => {
     );
 };
 
-export default PublishNew;
+export default PyramidVectorTmsServiceForm;

@@ -144,7 +144,7 @@ class StoredDataController extends AbstractController implements ApiControllerIn
         try {
             // Suppression des offerings et configurations associees
             $offerings = $this->entrepotApiService->configuration->getAllOfferings($datastoreId, ['stored_data' => $storedDataId]);
-            foreach($offerings as $offering) {
+            foreach ($offerings as $offering) {
                 $cartesServiceApi->unpublish($datastoreId, $offering['_id']);
             }
 

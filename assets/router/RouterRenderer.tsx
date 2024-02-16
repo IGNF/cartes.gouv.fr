@@ -44,8 +44,8 @@ const CommunityList = lazy(() => import("../pages/communities/CommunityList"));
 
 const WfsServiceForm = lazy(() => import("../pages/service/wfs/WfsServiceForm"));
 const WmsVectorServiceForm = lazy(() => import("../pages/service/wms-vector/WmsVectorServiceForm"));
-const PyramidVectorNew = lazy(() => import("../pages/service/tms/PyramidVectorNew"));
-const PublishTmsServiceNew = lazy(() => import("../pages/service/tms/PublishNew"));
+const PyramidVectorGenerateForm = lazy(() => import("../pages/service/tms/PyramidVectorGenerateForm"));
+const PyramidVectorTmsServiceForm = lazy(() => import("../pages/service/tms/PyramidVectorTmsServiceForm"));
 
 const ServiceView = lazy(() => import("../pages/service/view/ServiceView"));
 
@@ -133,12 +133,16 @@ const RouterRenderer: FC = () => {
                 return (
                     <WmsVectorServiceForm datastoreId={route.params.datastoreId} vectorDbId={route.params.vectorDbId} offeringId={route.params.offeringId} />
                 );
-            case "datastore_pyramid_vector_new":
+            case "datastore_pyramid_vector_generate":
                 return (
-                    <PyramidVectorNew datastoreId={route.params.datastoreId} vectorDbId={route.params.vectorDbId} technicalName={route.params.technicalName} />
+                    <PyramidVectorGenerateForm
+                        datastoreId={route.params.datastoreId}
+                        vectorDbId={route.params.vectorDbId}
+                        technicalName={route.params.technicalName}
+                    />
                 );
-            case "datastore_tms_vector_service_new":
-                return <PublishTmsServiceNew datastoreId={route.params.datastoreId} pyramidId={route.params.pyramidId} />;
+            case "datastore_pyramid_vector_tms_service_new":
+                return <PyramidVectorTmsServiceForm datastoreId={route.params.datastoreId} pyramidId={route.params.pyramidId} />;
             case "datastore_service_view":
                 return <ServiceView datastoreId={route.params.datastoreId} offeringId={route.params.offeringId} datasheetName={route.params.datasheetName} />;
             default:

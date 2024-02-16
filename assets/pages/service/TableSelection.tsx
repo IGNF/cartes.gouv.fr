@@ -4,15 +4,16 @@ import { FC, useCallback, useMemo } from "react";
 import { useWatch, type UseFormReturn } from "react-hook-form";
 
 import { filterGeometricRelations } from "../../helpers";
-import { Translations, declareComponentKeys, useTranslation } from "../../i18n/i18n";
+import { type Translations, declareComponentKeys, useTranslation } from "../../i18n/i18n";
 import { type VectorDb } from "../../types/app";
-import { WmsVectorServiceFormValuesType } from "./wms-vector/WmsVectorServiceForm";
+import { type PyramidVectorGenerateFormValuesType } from "./tms/PyramidVectorGenerateForm";
+import { type WmsVectorServiceFormValuesType } from "./wms-vector/WmsVectorServiceForm";
 
 type TablesSelectionProps = {
     filterGeometric?: boolean;
     vectorDb: VectorDb;
     visible: boolean;
-    form: UseFormReturn<WmsVectorServiceFormValuesType>;
+    form: UseFormReturn<WmsVectorServiceFormValuesType | PyramidVectorGenerateFormValuesType>;
 };
 
 const TableSelection: FC<TablesSelectionProps> = ({ filterGeometric = false, vectorDb, visible, form }) => {

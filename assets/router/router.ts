@@ -140,8 +140,8 @@ const routeDefs = {
         (p) => `${appRoot}/datastores/${p.datastoreId}/service/wms-vector/${p.offeringId}/edit`
     ),
 
-    // Creation d'une pyramide vecteur
-    datastore_pyramid_vector_new: defineRoute(
+    // Création/génération d'une pyramide vecteur
+    datastore_pyramid_vector_generate: defineRoute(
         {
             datastoreId: param.path.string,
             vectorDbId: param.query.string,
@@ -150,8 +150,8 @@ const routeDefs = {
         (p) => `${appRoot}/datastores/${p.datastoreId}/pyramid-vector/new`
     ),
 
-    // Publier un service TMS
-    datastore_tms_vector_service_new: defineRoute(
+    // Publier une pyramide vecteur en tant que service TMS
+    datastore_pyramid_vector_tms_service_new: defineRoute(
         {
             datastoreId: param.path.string,
             pyramidId: param.query.string,
