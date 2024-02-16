@@ -134,13 +134,20 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                                                         offeringId: service._id,
                                                     }).link;
 
+                                                case OfferingTypeEnum.WMTSTMS:
+                                                    return routes.datastore_pyramid_vector_tms_service_edit({
+                                                        datastoreId,
+                                                        pyramidId: service.configuration.type_infos.used_data[0].stored_data,
+                                                        offeringId: service._id,
+                                                    }).link;
+
                                                 default:
                                                     return {
                                                         onClick: () => console.warn("Action non implémentée"),
                                                     };
                                             }
                                         })(),
-                                        disabled: ![OfferingTypeEnum.WMSVECTOR, OfferingTypeEnum.WFS].includes(service.type),
+                                        disabled: ![OfferingTypeEnum.WMSVECTOR, OfferingTypeEnum.WFS, OfferingTypeEnum.WMTSTMS].includes(service.type),
                                     },
                                     {
                                         text: "Remplacer les données",

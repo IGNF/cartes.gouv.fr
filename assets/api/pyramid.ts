@@ -18,7 +18,22 @@ const add = (datastoreId: string, formData: FormData | object) => {
 };
 
 const publish = (datastoreId: string, pyramidId: string, formData: FormData | object) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_pyramid_publish", { datastoreId, pyramidId });
+    const url = SymfonyRouting.generate("cartesgouvfr_api_pyramid_tms_add", { datastoreId, pyramidId });
+    return jsonFetch<Service>(
+        url,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+            },
+        },
+        formData
+    );
+};
+
+const publishEdit = (datastoreId: string, pyramidId: string, offeringId: string, formData: FormData | object) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_pyramid_tms_edit", { datastoreId, pyramidId, offeringId });
     return jsonFetch<Service>(
         url,
         {
@@ -35,4 +50,5 @@ const publish = (datastoreId: string, pyramidId: string, formData: FormData | ob
 export default {
     add,
     publish,
+    publishEdit,
 };

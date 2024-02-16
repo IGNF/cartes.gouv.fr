@@ -38,10 +38,10 @@ export type ComponentKey =
     | typeof import("../validations/sldStyle").i18n
     | typeof import("../validations/MapboxStyleValidator").i18n
     | typeof import("../modules/Style/TMSStyleFilesManager").i18n
-    | typeof import("../modules/Style/TMSStyleFilesManager").i18n
     | typeof import("../pages/datastore/DatastoreManageStorage/DatastoreManageStorage").i18n
     | typeof import("../pages/service/wms-vector/WmsVectorServiceForm").i18n
     | typeof import("../pages/service/wfs/WfsServiceForm").i18n
+    | typeof import("../pages/service/tms/PyramidVectorTmsServiceForm").i18n
     | typeof import("../pages/service/TableSelection").i18n
     | typeof import("../pages/service/wms-vector/UploadStyleFile").i18n;
 

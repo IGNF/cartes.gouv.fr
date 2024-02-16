@@ -25,6 +25,7 @@ import { WmsVectorServiceFormEnTranslations } from "../../pages/service/wms-vect
 import { TableSelectionEnTranslations } from "../../pages/service/TableSelection";
 import { UploadStyleFileEnTranslations } from "../../pages/service/wms-vector/UploadStyleFile";
 import { WfsServiceFormEnTranslations } from "../../pages/service/wfs/WfsServiceForm";
+import { PyramidVectorTmsServiceFormEnTranslations } from "../../pages/service/tms/PyramidVectorTmsServiceForm";
 
 export const translations: Translations<"en"> = {
     Common: commonEnTranslations,
@@ -53,4 +54,5 @@ export const translations: Translations<"en"> = {
     WfsServiceForm: WfsServiceFormEnTranslations,
     TableSelection: TableSelectionEnTranslations,
     UploadStyleFile: UploadStyleFileEnTranslations,
+    PyramidVectorTmsServiceForm: PyramidVectorTmsServiceFormEnTranslations,
 };

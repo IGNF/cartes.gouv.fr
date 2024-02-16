@@ -143,6 +143,14 @@ const RouterRenderer: FC = () => {
                 );
             case "datastore_pyramid_vector_tms_service_new":
                 return <PyramidVectorTmsServiceForm datastoreId={route.params.datastoreId} pyramidId={route.params.pyramidId} />;
+            case "datastore_pyramid_vector_tms_service_edit":
+                return (
+                    <PyramidVectorTmsServiceForm
+                        datastoreId={route.params.datastoreId}
+                        pyramidId={route.params.pyramidId}
+                        offeringId={route.params.offeringId}
+                    />
+                );
             case "datastore_service_view":
                 return <ServiceView datastoreId={route.params.datastoreId} offeringId={route.params.offeringId} datasheetName={route.params.datasheetName} />;
             default:

@@ -3,15 +3,16 @@
 namespace App\Controller\Api;
 
 use App\Constants\EntrepotApi\CommonTags;
+use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Dto\Pyramid\AddPyramidDTO;
 use App\Dto\Pyramid\CompositionDTO;
 use App\Dto\Pyramid\PublishPyramidDTO;
 use App\Exception\CartesApiException;
+use App\Exception\EntrepotApiException;
+use App\Services\CartesServiceApi;
 use App\Services\EntrepotApiService;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -21,15 +22,17 @@ use Symfony\Component\Routing\Annotation\Route;
     options: ['expose' => true],
     condition: 'request.isXmlHttpRequest()'
 )]
-class PyramidController extends AbstractController implements ApiControllerInterface
+class PyramidController extends ServiceController implements ApiControllerInterface
 {
     public const TOP_LEVEL_DEFAULT = 5;
     public const BOTTOM_LEVEL_DEFAULT = 18;
 
     public function __construct(
         private EntrepotApiService $entrepotApiService,
+        private CartesServiceApi $cartesServiceApi,
         private ParameterBagInterface $parameterBag
     ) {
+        parent::__construct($entrepotApiService, $cartesServiceApi);
     }
 
     #[Route('/add', name: 'add', methods: ['POST'])]
@@ -107,70 +110,33 @@ class PyramidController extends AbstractController implements ApiControllerInter
         }
     }
 
-    #[Route('/publish/{pyramidId}', name: 'publish', methods: ['POST'])]
-    public function publish(
+    #[Route('/{pyramidId}/tms', name: 'tms_add', methods: ['POST'])]
+    public function addTms(
         string $datastoreId,
         string $pyramidId,
-        #[MapRequestPayload] PublishPyramidDTO $dto): JsonResponse
-    {
+        #[MapRequestPayload] PublishPyramidDTO $dto
+    ): JsonResponse {
         try {
             $pyramid = $this->entrepotApiService->storedData->get($datastoreId, $pyramidId);
 
-            // Recherche de bottom_level et top_level
-            $levels = $this->getBottomAndToLevel($pyramid);
-
             // TODO Suppression de l'Upload ?
             // TODO Suppression de la base de donnees
+            // NOTE on peut difficilement supprimer la base de données parce qu'il y a peut-être d'autres entités qui en dépendent
+
+            // création de requête pour la config
+            $configRequestBody = $this->getConfigRequestBody($dto, $pyramid);
 
             // Restriction d'acces
-            $endpoints = [];
-            $isOfferingOpen = true;
-
-            if ('all_public' === $dto->share_with) {
-                $endpoints = $this->entrepotApiService->datastore->getEndpointsList($datastoreId, [
-                    'type' => 'WMTS-TMS',
-                    'open' => true,
-                ]);
-                $isOfferingOpen = true;
-            } elseif ('your_community' === $dto->share_with) {
-                $endpoints = $this->entrepotApiService->datastore->getEndpointsList($datastoreId, [
-                    'type' => 'WMTS-TMS',
-                    'open' => false,
-                ]);
-                $isOfferingOpen = false;
-            }
-
-            if (0 === count($endpoints)) {
-                throw new CartesApiException("Aucun point d'accès (endpoint) du datastore ne peut convenir à la demande", Response::HTTP_BAD_REQUEST, ['share_with' => $dto->share_with]);
-            }
-
-            $endpointId = $endpoints[0]['endpoint']['_id'];
-
-            // Ajout d'une execution de traitement
-            $requestBody = [
-                'type' => 'WMTS-TMS',
-                'name' => $dto->public_name,
-                'layer_name' => $dto->technical_name,
-                'type_infos' => [
-                    'title' => $dto->public_name,
-                    'abstract' => $dto->description,
-                    'keywords' => $dto->category,
-                    'used_data' => [[
-                        'bottom_level' => $levels['bottom_level'],
-                        'top_level' => $levels['top_level'],
-                        'stored_data' => $pyramidId,
-                    ]],
-                ],
-            ];
+            $endpoint = $this->getEndpointByShareType($datastoreId, ConfigurationTypes::WMTSTMS, $dto->share_with);
 
             // Ajout de la configuration
-            $configuration = $this->entrepotApiService->configuration->add($datastoreId, $requestBody);
+            $configuration = $this->entrepotApiService->configuration->add($datastoreId, $configRequestBody);
             $configuration = $this->entrepotApiService->configuration->addTags($datastoreId, $configuration['_id'], [
                 CommonTags::DATASHEET_NAME => $pyramid['tags'][CommonTags::DATASHEET_NAME],
             ]);
 
             // Creation d'une offering
-            $offering = $this->entrepotApiService->configuration->addOffering($datastoreId, $configuration['_id'], $endpointId, $isOfferingOpen);
+            $offering = $this->entrepotApiService->configuration->addOffering($datastoreId, $configuration['_id'], $endpoint['_id'], $endpoint['open']);
             $offering['configuration'] = $configuration;
 
             return $this->json($offering);
@@ -179,6 +145,73 @@ class PyramidController extends AbstractController implements ApiControllerInter
         } catch (\Exception $ex) {
             return $this->json(['message' => $ex->getMessage()], $ex->getCode());
         }
+    }
+
+    #[Route('/{pyramidId}/tms/{offeringId}/edit', name: 'tms_edit', methods: ['POST'])]
+    public function editTms(
+        string $datastoreId,
+        string $pyramidId,
+        string $offeringId,
+        #[MapRequestPayload] PublishPyramidDTO $dto
+    ): JsonResponse {
+        try {
+            // récup anciens config et offering
+            $oldOffering = $this->entrepotApiService->configuration->getOffering($datastoreId, $offeringId);
+            $oldConfiguration = $this->entrepotApiService->configuration->get($datastoreId, $oldOffering['configuration']['_id']);
+
+            $pyramid = $this->entrepotApiService->storedData->get($datastoreId, $pyramidId);
+
+            // suppression anciens configs et offering
+            $this->cartesServiceApi->tmsUnpublish($datastoreId, $oldOffering, false);
+
+            // création de requête pour la config
+            $configRequestBody = $this->getConfigRequestBody($dto, $pyramid);
+
+            $endpoint = $this->getEndpointByShareType($datastoreId, ConfigurationTypes::WMTSTMS, $dto->share_with);
+
+            // Ajout de la configuration
+            $configuration = $this->entrepotApiService->configuration->add($datastoreId, $configRequestBody);
+            $configuration = $this->entrepotApiService->configuration->addTags($datastoreId, $configuration['_id'], $oldConfiguration['tags']);
+
+            // Creation d'une offering
+            $offering = $this->entrepotApiService->configuration->addOffering($datastoreId, $configuration['_id'], $endpoint['_id'], $endpoint['open']);
+            $offering['configuration'] = $configuration;
+
+            return $this->json($offering);
+        } catch (EntrepotApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
+    /**
+     * @param array<mixed> $pyramid
+     */
+    private function getConfigRequestBody(PublishPyramidDTO $dto, array $pyramid): array
+    {
+        // Recherche de bottom_level et top_level
+        $levels = $this->getBottomAndToLevel($pyramid);
+
+        $requestBody = [
+            'type' => ConfigurationTypes::WMTSTMS,
+            'name' => $dto->public_name,
+            'layer_name' => $dto->technical_name,
+            'type_infos' => [
+                'title' => $dto->public_name,
+                'abstract' => $dto->description,
+                'keywords' => $dto->category,
+                'used_data' => [[
+                    'bottom_level' => $levels['bottom_level'],
+                    'top_level' => $levels['top_level'],
+                    'stored_data' => $pyramid['_id'],
+                ]],
+            ],
+            'attribution' => [
+                'title' => $dto->attribution_text,
+                'url' => $dto->attribution_url,
+            ],
+        ];
+
+        return $requestBody;
     }
 
     /**

@@ -158,6 +158,15 @@ const routeDefs = {
         },
         (p) => `${appRoot}/datastores/${p.datastoreId}/service/tms/new`
     ),
+    // Modifier les infos d'un service WMS-VECTEUR
+    datastore_pyramid_vector_tms_service_edit: defineRoute(
+        {
+            datastoreId: param.path.string,
+            pyramidId: param.query.string,
+            offeringId: param.path.string,
+        },
+        (p) => `${appRoot}/datastores/${p.datastoreId}/service/tms/${p.offeringId}/edit`
+    ),
 
     datastore_service_view: defineRoute(
         {

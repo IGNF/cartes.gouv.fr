@@ -185,7 +185,7 @@ class CartesServiceApi
     /**
      * @param array<mixed> $offering
      */
-    public function tmsUnpublish(string $datastoreId, array $offering): void
+    public function tmsUnpublish(string $datastoreId, array $offering, bool $removeStyleFiles = true): void
     {
         // suppression de l'offering
         $this->entrepotApiService->configuration->removeOffering($datastoreId, $offering['_id']);
@@ -202,6 +202,8 @@ class CartesServiceApi
         }
         $this->entrepotApiService->configuration->remove($datastoreId, $configurationId);
 
-        // TODO : supprimer les fichiers de styles en annexe qui sont référencés dans les tags de la configuration
+        if (true === $removeStyleFiles) {
+            // TODO : supprimer les fichiers de styles en annexe qui sont référencés dans les tags/annexes de la configuration
+        }
     }
 }
