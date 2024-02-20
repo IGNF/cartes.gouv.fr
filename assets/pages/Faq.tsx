@@ -23,7 +23,7 @@ const Faq = () => {
                                 héberger, contribuer, partager, visualiser et publier des données et des cartes en autonomie.
                             </p>
                         </Accordion>
-                        <Accordion label="Qui est derrière carte.gouv.fr&nbsp;?" titleAs="h2">
+                        <Accordion label="Qui est derrière cartes.gouv.fr&nbsp;?" titleAs="h2">
                             <p>
                                 Cartes.gouv.fr s’appuie sur une nouvelle infrastructure ouverte et collaborative, la Géoplateforme, soutenue par le Ministère de
                                 la Transition écologique et de la Cohésion des territoires ainsi que par le Fonds de transformation de l’action publique.
