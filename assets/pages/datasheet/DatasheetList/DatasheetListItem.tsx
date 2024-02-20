@@ -7,6 +7,8 @@ import { symToStr } from "tsafe/symToStr";
 import { routes } from "../../../router/router";
 import { type Datasheet } from "../../../types/app";
 
+import "../../../sass/pages/datasheetlist.scss";
+
 type DatasheetListItemProps = {
     datastoreId: string;
     datasheet: Datasheet;
@@ -20,7 +22,9 @@ const DatasheetListItem: FC<DatasheetListItemProps> = ({ datastoreId, datasheet 
             <div className={fr.cx("fr-col")}>
                 <Button linkProps={routes.datastore_datasheet_view({ datastoreId, datasheetName: datasheet.name }).link} priority="tertiary no outline">
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                        <img src={datasheet?.thumbnail?.url ?? defaultImgUrl} height={"64px"} className={fr.cx("fr-mr-1v")} />
+                        <div className="frx-thumbnail-container">
+                            <img src={datasheet?.thumbnail?.url ?? defaultImgUrl} className={fr.cx("fr-mr-1v")} />
+                        </div>
                         <strong className={fr.cx("fr-ml-2w")}>{datasheet.name}</strong>
 
                         {/* catégories thématiques */}
