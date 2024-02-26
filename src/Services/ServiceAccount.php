@@ -47,27 +47,31 @@ class ServiceAccount
         $this->token = $this->getAccessToken();
     }
 
-    public function getSandboxCommunity() : array
+    public function getSandboxCommunity() : array | null
     {
         // Id de la community "Bac à sable"
         $sandboxId = $this->parameters->get('sandbox_community_id');
         if (! $sandboxId) {
-            throw new EntrepotApiException('sandbox community does not exist', JsonResponse::HTTP_NOT_FOUND);
+            return null;
         }
 
         $options = $this->prepareOptions();
 
-        $response = $this->apiClient->request('GET', "communities/$sandboxId", $options);
-        $sandboxCommunity = $this->handleResponse($response);
+        try {
+            $response = $this->apiClient->request('GET', "communities/$sandboxId", $options);
+            $sandboxCommunity = $this->handleResponse($response);
 
-        $sandboxDatastoreId = $sandboxCommunity['datastore']['_id'];
-        $response = $this->apiClient->request('GET', "datastores/$sandboxDatastoreId", $options);
-        $sandboxDatastore = $this->handleResponse($response);
+            $sandboxDatastoreId = $sandboxCommunity['datastore']['_id'];
+            $response = $this->apiClient->request('GET', "datastores/$sandboxDatastoreId", $options);
+            $sandboxDatastore = $this->handleResponse($response);
 
-        return [
-            'community' => $sandboxCommunity,
-            'datastore' => $sandboxDatastore
-        ];
+            return [
+                'community' => $sandboxCommunity,
+                'datastore' => $sandboxDatastore
+            ];
+        } catch(EntrepotApiException $e) {
+            return null;
+        }
     }
 
     public function getSandboxDatastore() : array

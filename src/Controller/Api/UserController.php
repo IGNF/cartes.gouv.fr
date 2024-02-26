@@ -37,17 +37,29 @@ class UserController extends AbstractController implements ApiControllerInterfac
         return $this->json(['access_keys' => $keys, 'permissions' => $permissions]);
     }
 
+    #[Route('/me/permissions', name: 'permissions')]
+    public function getUserPermissions(): JsonResponse
+    {
+        $permissions = $this->entrepotApiService->user->getPermissions();
+        return $this->json($permissions);
+    }
+
     #[Route('/me/datastores', name: 'datastores_list')]
     public function getUserDatastores(ServiceAccount $serviceAccount): JsonResponse
     {
         try {
+            // Peut etre null si SANDBOX_COMMUNITY_ID n'est pas defini dans .env
+            // ou si cette valeur est erronee
             $sandboxCommunity = $serviceAccount->getSandboxCommunity();
 
             $myDatastores = $this->entrepotApiService->user->getMyDatastores();
-            $myDatastores = array_values(array_filter($myDatastores, function ($myDatastore) use ($sandboxCommunity) {
-                return $myDatastore['_id'] != $sandboxCommunity['datastore']['_id'];
-            }));
-            array_unshift($myDatastores, $sandboxCommunity['datastore']);
+            if (! is_null($sandboxCommunity)) {
+                $myDatastores = array_values(array_filter($myDatastores, function ($myDatastore) use ($sandboxCommunity) {
+                    return $myDatastore['_id'] != $sandboxCommunity['datastore']['_id'];
+                }));
+                array_unshift($myDatastores, $sandboxCommunity['datastore']);
+            }
+            
             return $this->json($myDatastores);
         } catch (EntrepotApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
