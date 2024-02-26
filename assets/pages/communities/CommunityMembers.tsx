@@ -87,8 +87,9 @@ const CommunityMembers: FC<CommunityMembersProps> = ({ datastoreId, userId }) =>
     }, [community]);
 
     const isAuthorized = useMemo(() => {
-        return userRights?.includes(CommunityMemberDtoRightsEnum.COMMUNITY);
-    }, [userRights]);
+        const isSupervisor = communitySupervisor === user?.id;
+        return isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.COMMUNITY);
+    }, [communitySupervisor, user?.id, userRights]);
 
     // Les membres de cette communauté
     const { data: communityMembers, isLoading: isLoadingMembers } = useQuery({
