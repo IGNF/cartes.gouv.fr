@@ -59,8 +59,9 @@ class UserController extends AbstractController implements ApiControllerInterfac
     
             // Ajout de la cle
             $key = $this->entrepotApiService->user->addKey($body);
-            return new JsonResponse($key);    
-
+            return new JsonResponse($key); 
+            
+            // TODO Ajout de l'acces
         }
         catch (EntrepotApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);

@@ -95,14 +95,14 @@ const AddUserKeyForm: FC = () => {
     // Les cles d'acces (recuperee car le nom des cles doit etre unique)
     const { data: keys, isLoading: isLoadingKeys } = useQuery<UserKeyResponseDto[]>({
         queryKey: RQKeys.me_keys(),
-        queryFn: ({ signal }) => api.user.getMeKeys({ signal }),
+        queryFn: ({ signal }) => api.user.getMyKeys({ signal }),
         staleTime: 3600000,
     });
 
     // Les permissions
     const { data: permissions, isLoading: isLoadingPermissions } = useQuery<PermissionWithOfferingsDetailsResponseDto[]>({
         queryKey: RQKeys.me_permissions(),
-        queryFn: ({ signal }) => api.user.getMePermissions({ signal }),
+        queryFn: ({ signal }) => api.user.getMyPermissions({ signal }),
         staleTime: 3600000,
     });
 
@@ -112,13 +112,13 @@ const AddUserKeyForm: FC = () => {
             return key.name;
         });
     }, [keys]);
-    console.log(keyNames);
 
     const queryClient = useQueryClient();
 
     /* Ajout d'une cle */
     const addKeyMutation = useMutation({
         mutationFn: (values: object) => api.user.addKey(values),
+        throwOnError: true,
         onSuccess() {
             queryClient.refetchQueries({ queryKey: RQKeys.me_keys() });
             routes.my_access_keys().push();
@@ -189,7 +189,6 @@ const AddUserKeyForm: FC = () => {
                                 <div />
                             )}
                             {/* whitelist et blacklist */}
-
                             <Controller
                                 control={control}
                                 name="whitelist"

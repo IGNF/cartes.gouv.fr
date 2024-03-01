@@ -19,14 +19,14 @@ const getDatastoresList = (otherOptions: RequestInit = {}) => {
     return jsonFetch<Datastore[]>(url, { ...otherOptions });
 };
 
-const getMeKeys = (otherOptions: RequestInit = {}) => {
+const getMyKeys = (otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_user_keys");
     return jsonFetch<UserKeyResponseDto[]>(url, {
         ...otherOptions,
     });
 };
 
-const getMePermissions = (otherOptions: RequestInit = {}) => {
+const getMyPermissions = (otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_user_permissions");
     return jsonFetch<PermissionWithOfferingsDetailsResponseDto[]>(url, {
         ...otherOptions,
@@ -67,8 +67,8 @@ const addToSandbox = () => {
 const user = {
     getMe,
     getDatastoresList,
-    getMeKeys,
-    getMePermissions,
+    getMyKeys,
+    getMyPermissions,
     addKey,
     removeKey,
     addToSandbox,
