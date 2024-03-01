@@ -33,9 +33,8 @@ class UserKeyDTO {
                 new Assert\NotBlank([
                     'message' => 'user_key.ip_not_blank'
                 ]),
-                new Assert\Ip([
-                    'message' => 'user_key.ip_error',
-                    'version' => 'all'
+                new Assert\Cidr([
+                    'message' => 'user_key.ip_error'
                 ])
             ]
         ])]
@@ -48,9 +47,8 @@ class UserKeyDTO {
                 new Assert\NotBlank([
                     'message' => 'user_key.ip_not_blank'
                 ]),
-                new Assert\Ip([
-                    'message' => 'user_key.ip_error',
-                    'version' => 'all'
+                new Assert\Cidr([
+                    'message' => 'user_key.ip_error'
                 ])
             ]
         ])]

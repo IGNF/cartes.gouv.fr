@@ -59,7 +59,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
     
             // Ajout de la cle
             $key = $this->entrepotApiService->user->addKey($body);
-            return new JsonResponse();    
+            return new JsonResponse($key);    
 
         }
         catch (EntrepotApiException $ex) {
