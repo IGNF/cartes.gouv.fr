@@ -12,8 +12,8 @@ import { MetadatasFormEnTranslations } from "../../pages/service/metadatas/metad
 import { ValidationMetadatasEnTranslations } from "../../pages/service/metadatas/metadatas-validation-tr";
 import { MeEnTranslations } from "../../pages/users/Me";
 import { MyAccessKeysEnTranslations } from "../../pages/users/MyAccessKeys";
-import { AccessKeysListTabEnTranslations } from "../../pages/users/keys/AccessKeysListTab";
-import { AddAccessKeyEnTranslations } from "../../pages/users/keys/AddAccessKeyTr";
+import { AddUserKeyEnTranslations } from "../../pages/users/keys/AddUserKeyTr";
+import { UserKeysListTabEnTranslations } from "../../pages/users/keys/UserKeysListTab";
 import { PermissionsEnTranslations } from "../../pages/users/permissions/PermissionsTr";
 import { mapboxStyleValidationEnTranslations } from "../../validations/MapboxStyleValidator";
 import { sldStyleValidationEnTranslations } from "../../validations/sldStyle";
@@ -30,8 +30,8 @@ export const translations: Translations<"en"> = {
     AddMember: AddMemberEnTranslations,
     CommunityMembers: CommunityMembersEnTranslations,
     MyAccessKeys: MyAccessKeysEnTranslations,
-    AccessKeysListTab: AccessKeysListTabEnTranslations,
-    AddAccessKey: AddAccessKeyEnTranslations,
+    UserKeysListTab: UserKeysListTabEnTranslations,
+    AddUserKey: AddUserKeyEnTranslations,
     Permissions: PermissionsEnTranslations,
     ValidationMetadatas: ValidationMetadatasEnTranslations,
     MetadatasForm: MetadatasFormEnTranslations,

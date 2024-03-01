@@ -13,13 +13,13 @@ import { routes } from "../../../router/router";
 import { UserKeyResponseDto } from "../../../types/entrepot";
 import RQKeys from "../../../modules/RQKeys";
 
-type AccessKeysListTabProps = {
+type UserKeysListTabProps = {
     access_keys: UserKeyResponseDto[] | undefined;
 };
 
-const AccessKeysListTab: FC<AccessKeysListTabProps> = ({ access_keys }) => {
+const UserKeysListTab: FC<UserKeysListTabProps> = ({ access_keys }) => {
     const { t: tCommon } = useTranslation("Common");
-    const { t } = useTranslation("AccessKeysListTab");
+    const { t } = useTranslation("UserKeysListTab");
 
     const [error, setError] = useState<CartesApiException | undefined>(undefined);
     const [currentKey, setCurrentKey] = useState<string | undefined>(undefined);
@@ -92,12 +92,12 @@ const AccessKeysListTab: FC<AccessKeysListTabProps> = ({ access_keys }) => {
     );
 };
 
-export default AccessKeysListTab;
+export default UserKeysListTab;
 
 // traductions
-export const { i18n } = declareComponentKeys<"no_access_keys" | "add" | "modify" | "remove" | "confirm_remove">()("AccessKeysListTab");
+export const { i18n } = declareComponentKeys<"no_access_keys" | "add" | "modify" | "remove" | "confirm_remove">()("UserKeysListTab");
 
-export const AccessKeysListTabFrTranslations: Translations<"fr">["AccessKeysListTab"] = {
+export const UserKeysListTabFrTranslations: Translations<"fr">["UserKeysListTab"] = {
     no_access_keys: "Vous n'avez aucune clé d'accès",
     add: "Ajouter une clé",
     modify: "Modifier la clé",
@@ -105,7 +105,7 @@ export const AccessKeysListTabFrTranslations: Translations<"fr">["AccessKeysList
     confirm_remove: "Êtes-vous sûr de vouloir supprimer cette clé ?",
 };
 
-export const AccessKeysListTabEnTranslations: Translations<"en">["AccessKeysListTab"] = {
+export const UserKeysListTabEnTranslations: Translations<"en">["UserKeysListTab"] = {
     no_access_keys: "You don't have any access keys",
     add: "Add key",
     modify: "Modify key",

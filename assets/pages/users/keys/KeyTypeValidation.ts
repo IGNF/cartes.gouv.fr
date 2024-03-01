@@ -3,7 +3,7 @@ import * as yup from "yup";
 import { ComponentKey } from "../../../i18n/i18n";
 import { UserKeyCreateDtoUserKeyInfoDtoTypeEnum } from "../../../types/entrepot";
 
-const getSchema = (type: UserKeyCreateDtoUserKeyInfoDtoTypeEnum, t: TranslationFunction<"AddAccessKey", ComponentKey>) => {
+const getSchema = (type: UserKeyCreateDtoUserKeyInfoDtoTypeEnum, t: TranslationFunction<"AddUserKey", ComponentKey>) => {
     // NOTE la clé de type header n'existe plus apparemment
     switch (type) {
         case UserKeyCreateDtoUserKeyInfoDtoTypeEnum.BASIC:

@@ -10,7 +10,7 @@ import { datastoreNavItems } from "../../config/datastoreNavItems";
 import { Translations, getTranslation } from "../../i18n/i18n";
 import RQKeys from "../../modules/RQKeys";
 import { PermissionWithOfferingsDetailsResponseDto, UserKeyResponseDto } from "../../types/entrepot";
-import AccessKeysListTab from "./keys/AccessKeysListTab";
+import UserKeysListTab from "./keys/UserKeysListTab";
 import PermissionsListTab from "./permissions/PermissionsListTab";
 
 const { t } = getTranslation("MyAccessKeys");
@@ -46,7 +46,7 @@ const MyAccessKeys: FC = () => {
                                     label: t("my_keys"),
                                     iconId: "ri-key-2-line",
                                     isDefault: true,
-                                    content: <AccessKeysListTab access_keys={keys} />,
+                                    content: <UserKeysListTab access_keys={keys} />,
                                 },
                                 {
                                     label: t("my_permissions"),

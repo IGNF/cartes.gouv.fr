@@ -9,7 +9,7 @@ type HashTypeInfoFormProps = {
 };
 
 const HashTypeInfoForm: FC<HashTypeInfoFormProps> = ({ form }) => {
-    const { t } = useTranslation("AddAccessKey");
+    const { t } = useTranslation("AddUserKey");
 
     const {
         register,

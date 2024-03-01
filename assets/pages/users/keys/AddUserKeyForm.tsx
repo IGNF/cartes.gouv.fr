@@ -19,18 +19,18 @@ import { ComponentKey, useTranslation } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/RQKeys";
 import { routes } from "../../../router/router";
 import { PermissionWithOfferingsDetailsResponseDto, UserKeyCreateDtoUserKeyInfoDtoTypeEnum, UserKeyResponseDto } from "../../../types/entrepot";
-import { getSchema } from "./AddAccessKeyValidation";
+import { getSchema } from "./KeyTypeValidation";
 import BasicTypeInfoForm from "./BasicTypeInfoForm";
 import HashTypeInfoForm from "./HashTypeInfoForm";
 import PermissionsForm from "./PermissionsForm";
 
-const AddAccessKeyForm: FC = () => {
+const AddUserKeyForm: FC = () => {
     const navItems = datastoreNavItems();
 
     const { t: tCommon } = useTranslation("Common");
-    const { t } = useTranslation("AddAccessKey");
+    const { t } = useTranslation("AddUserKey");
 
-    const schema = (t: TranslationFunction<"AddAccessKey", ComponentKey>) => {
+    const schema = (t: TranslationFunction<"AddUserKey", ComponentKey>) => {
         const ipSchema = yup
             .array()
             .of(yup.string())
@@ -236,4 +236,4 @@ const AddAccessKeyForm: FC = () => {
     );
 };
 
-export default AddAccessKeyForm;
+export default AddUserKeyForm;

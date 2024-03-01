@@ -12,8 +12,8 @@ import { MetadatasFormFrTranslations } from "../../pages/service/metadatas/metad
 import { ValidationMetadatasFrTranslations } from "../../pages/service/metadatas/metadatas-validation-tr";
 import { MeFrTranslations } from "../../pages/users/Me";
 import { MyAccessKeysFrTranslations } from "../../pages/users/MyAccessKeys";
-import { AccessKeysListTabFrTranslations } from "../../pages/users/keys/AccessKeysListTab";
-import { AddAccessKeyFrTranslations } from "../../pages/users/keys/AddAccessKeyTr";
+import { AddUserKeyFrTranslations } from "../../pages/users/keys/AddUserKeyTr";
+import { UserKeysListTabFrTranslations } from "../../pages/users/keys/UserKeysListTab";
 import { PermissionsFrTranslations } from "../../pages/users/permissions/PermissionsTr";
 import { mapboxStyleValidationFrTranslations } from "../../validations/MapboxStyleValidator";
 import { sldStyleValidationFrTranslations } from "../../validations/sldStyle";
@@ -30,8 +30,8 @@ export const translations: Translations<"fr"> = {
     AddMember: AddMemberFrTranslations,
     CommunityMembers: CommunityMembersFrTranslations,
     MyAccessKeys: MyAccessKeysFrTranslations,
-    AddAccessKey: AddAccessKeyFrTranslations,
-    AccessKeysListTab: AccessKeysListTabFrTranslations,
+    UserKeysListTab: UserKeysListTabFrTranslations,
+    AddUserKey: AddUserKeyFrTranslations,
     Permissions: PermissionsFrTranslations,
     MetadatasForm: MetadatasFormFrTranslations,
     ValidationMetadatas: ValidationMetadatasFrTranslations,

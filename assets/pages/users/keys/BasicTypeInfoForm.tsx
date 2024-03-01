@@ -9,7 +9,7 @@ type BasicTypeInfoFormProps = {
 };
 
 const BasicTypeInfoForm: FC<BasicTypeInfoFormProps> = ({ form }) => {
-    const { t } = useTranslation("AddAccessKey");
+    const { t } = useTranslation("AddUserKey");
 
     const {
         register,

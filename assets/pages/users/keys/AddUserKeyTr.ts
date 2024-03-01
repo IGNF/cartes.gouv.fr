@@ -20,9 +20,9 @@ export const { i18n } = declareComponentKeys<
     | "password_required"
     | "apikey_required"
     | { K: "ip_error"; P: { ip: string }; R: string }
->()("AddAccessKey");
+>()("AddUserKey");
 
-export const AddAccessKeyFrTranslations: Translations<"fr">["AddAccessKey"] = {
+export const AddUserKeyFrTranslations: Translations<"fr">["AddUserKey"] = {
     title: "Ajout d'une clé",
     key_name: "Nom de la clé",
     key_type: "Type",
@@ -42,7 +42,7 @@ export const AddAccessKeyFrTranslations: Translations<"fr">["AddAccessKey"] = {
     ip_error: ({ ip }) => `la plage d'adresses IP [${ip}] n'est pas correcte`,
 };
 
-export const AddAccessKeyEnTranslations: Translations<"en">["AddAccessKey"] = {
+export const AddUserKeyEnTranslations: Translations<"en">["AddUserKey"] = {
     title: "My access keys",
     key_name: "Key name",
     key_type: "Key type",
