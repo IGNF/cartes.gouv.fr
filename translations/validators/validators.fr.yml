@@ -40,6 +40,23 @@ pyramid_publish:
     resolution_error: "La résolution n'est pas valide"
     share_with_error: "La restriction n'est pas valide"
 
+user_key:
+    name_mandatory: "Le nom de la clé est obligatoire"
+    type_error: "Le type {{ value }} n'est pas valide"
+    ip_not_blank: "Une adresse IP ne doit pas être vide"
+    ip_error: "L'adresse IP {{ value }} n'est pas valide"
+    iplist_unique_error: "La liste des adresses IP doit être unique (pas de doublons)"
+    user_agent_not_blank: "Le User agent ne doit pas être vide"
+    referer_not_blank: "Le referer ne doit pas être vide"
+    type_infos_error: "La valeur de type_infos n'est pas correcte"
+    access:
+        permission_mandatory: "L'id de la permission est obligatoire"
+        permission_uuid_error: "L'id de la permission doit être un uuid"
+        offerings:
+            at_least_one: "La liste des offerings ne doit pas être vide"
+            unique_error: "La liste des offerings doit être unique (pas de doublons)"
+            uuid_error: "L'id d'un offering doit être un uuid "
+
 common:
     technical_name_error: "Le nom technique est obligatoire"
     technical_name_regex: "Le nom technique ne doit contenir que des lettres, chiffres, tirets (-), underscores (_), ou points (.)"

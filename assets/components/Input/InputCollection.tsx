@@ -10,49 +10,47 @@ interface InputCollectionProps {
     hintText?: string;
     state?: "default" | "error" | "success";
     stateRelatedMessage?: string;
-    defaultValue?: string[];
-    onChange?: (value: string[]) => void;
+    defaultValues?: string[];
+    onChange: (value: string[]) => void;
 }
-
-type RowData = Record<string, string>;
 
 const InputCollection: FC<InputCollectionProps> = (props: InputCollectionProps) => {
     const { t } = useTranslation("Common");
 
-    const { label, hintText, state, stateRelatedMessage, defaultValue = [], onChange } = props;
+    const { label, hintText, state, stateRelatedMessage, defaultValues = [], onChange } = props;
 
-    const [datas, setDatas] = useState<RowData>(() => {
+    const [datas, setDatas] = useState<Record<string, string>>(() => {
         // On met une ligne par defaut
-        const def = [...defaultValue];
+        const def = [...defaultValues];
         if (def.length === 0) {
             def.push("");
         }
 
-        const d: RowData = {};
+        const values: Record<string, string> = {};
         def.forEach((value) => {
             const uuid = uuidv4();
-            d[uuid] = value;
+            values[uuid] = value;
         });
-        return d;
+        return values;
     });
 
     useEffect(() => {
-        const result: string[] = [];
+        let result: string[] = [];
         Object.keys(datas).forEach((uuid) => {
             if (datas[uuid]) {
                 result.push(datas[uuid]);
             }
         });
-        console.log(result);
+        result = [...new Set(result)];
         onChange?.(result);
     }, [datas, onChange]);
+
+    const num = Object.keys(datas).length;
 
     // Ajout d'une ligne
     const handleAdd = () => {
         const d = { ...datas };
-
-        const uuid = uuidv4();
-        d[uuid] = "";
+        d[uuidv4()] = "";
         setDatas(d);
     };
 
@@ -70,19 +68,19 @@ const InputCollection: FC<InputCollectionProps> = (props: InputCollectionProps) 
     };
 
     return (
-        <div className={fr.cx("fr-mb-2v")}>
+        <div className={fr.cx("fr-mb-6v")}>
             <div className={fr.cx("fr-input-group", "fr-mb-1v")}>
                 <label className={fr.cx("fr-label")}>{label}</label>
                 {label && <span className={fr.cx("fr-hint-text")}>{hintText}</span>}
             </div>
-            <div>
+            <div className={fr.cx("fr-grid-row")}>
                 <Button className={fr.cx("fr-mb-1v")} iconId={"fr-icon-add-circle-line"} priority="tertiary" onClick={handleAdd}>
                     {t("add")}
                 </Button>
             </div>
-            {Object.keys(datas).map((key) => {
-                return (
-                    <div key={key} className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
+            {Object.keys(datas).map((key) => (
+                <div key={key} className="fr-grid-row fr-grid-row--middle">
+                    <div className={fr.cx("fr-col")}>
                         <Input
                             className={fr.cx("fr-mb-1v")}
                             label={null}
@@ -91,10 +89,16 @@ const InputCollection: FC<InputCollectionProps> = (props: InputCollectionProps) 
                                 onChange: (e) => handleChangeValue(key, e.currentTarget.value),
                             }}
                         />
-                        <Button title={t("delete")} priority={"tertiary no outline"} iconId={"fr-icon-delete-line"} onClick={() => handleRemove(key)} />
                     </div>
-                );
-            })}
+                    <Button
+                        title={t("delete")}
+                        priority={"tertiary no outline"}
+                        iconId={"fr-icon-delete-line"}
+                        disabled={num === 1}
+                        onClick={() => handleRemove(key)}
+                    />
+                </div>
+            ))}
             {state !== "default" && (
                 <p
                     className={fr.cx(

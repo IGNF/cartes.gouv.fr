@@ -25,6 +25,7 @@ export type ComponentKey =
     | typeof import("../pages/users/MyAccessKeys").i18n
     | typeof import("../pages/users/keys/AccessKeysListTab").i18n
     | typeof import("../pages/users/keys/AddAccessKeyTr").i18n
+    | typeof import("../pages/users/permissions/PermissionsTr").i18n
     | typeof import("../pages/service/metadatas/metadatas-form-tr").i18n
     | typeof import("../pages/service/metadatas/metadatas-validation-tr").i18n
     | typeof import("../pages/contact/Contact").i18n

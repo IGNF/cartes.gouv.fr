@@ -68,7 +68,7 @@ const PyramidListItem: FC<PyramidListItemProps> = ({ datasheetName, datastoreId,
             <div className={fr.cx("fr-p-2v", "fr-mt-2v")} style={{ backgroundColor: fr.colors.decisions.background.contrast.grey.default }}>
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
                     <div className={fr.cx("fr-col")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-my-2v")}>
                             <Button
                                 iconId={showDescription ? "ri-subtract-fill" : "ri-add-fill"}
                                 size="small"

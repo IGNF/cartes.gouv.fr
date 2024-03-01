@@ -2,6 +2,7 @@ import { FC } from "react";
 import { useTranslation } from "../../../i18n/i18n";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { UseFormReturn } from "react-hook-form";
+import { fr } from "@codegouvfr/react-dsfr";
 
 type HashTypeInfoFormProps = {
     form: UseFormReturn;
@@ -16,7 +17,7 @@ const HashTypeInfoForm: FC<HashTypeInfoFormProps> = ({ form }) => {
     } = form;
 
     return (
-        <div>
+        <div className={fr.cx("fr-mb-6v")}>
             <Input
                 label={t("apikey")}
                 // @ts-expect-error error

@@ -14,7 +14,6 @@ import {
     DatastoreEndpointResponseDto,
     EndpointDetailResponseDtoTypeEnum,
     OfferingDetailResponseDto,
-    PermissionWithOfferingsDetailsResponseDto,
     ProcessingExecutionDetailResponseDto,
     ProcessingExecutionOutputStoredDataDto,
     StoredDataDetailsRelationDto,
@@ -23,7 +22,6 @@ import {
     UploadPrivateDetailResponseDto,
     UploadTreeElementResponseDto,
     UserDetailsResponseDto,
-    UserKeyResponseDto,
 } from "./entrepot";
 
 /** user */
@@ -62,8 +60,8 @@ export type DatasheetDetailed = Datasheet & {
 /** stored_data (donnée stockée) */
 export type StoredData = StoredDataPrivateDetailResponseDto;
 export {
-    StoredDataPrivateDetailResponseDtoTypeEnum as StoredDataTypeEnum,
     StoredDataPrivateDetailResponseDtoStatusEnum as StoredDataStatusEnum,
+    StoredDataPrivateDetailResponseDtoTypeEnum as StoredDataTypeEnum,
     StoredDataPrivateDetailResponseDtoVisibilityEnum as StoredDataVisibilityEnum,
 } from "./entrepot";
 export type StoredDataRelation = StoredDataDetailsRelationDto;
@@ -104,8 +102,11 @@ export type Upload = UploadPrivateDetailResponseDto & {
 };
 
 export {
-    UploadPrivateDetailResponseDtoTypeEnum as UploadTypeEnum,
+    ConfigurationDetailResponseDtoStatusEnum as ConfigurationStatusEnum,
+    ConfigurationDetailResponseDtoTypeEnum as ConfigurationTypeEnum,
+    OfferingDetailResponseDtoTypeEnum as OfferingTypeEnum,
     UploadPrivateDetailResponseDtoStatusEnum as UploadStatusEnum,
+    UploadPrivateDetailResponseDtoTypeEnum as UploadTypeEnum,
     UploadPrivateDetailResponseDtoVisibilityEnum as UploadVisibilityEnum,
 } from "./entrepot";
 export type UploadTree = UploadTreeElementResponseDto[];
@@ -149,13 +150,8 @@ export type TmsMetadata = {
 
 /** configuration & offerings */
 export type Configuration = ConfigurationDetailResponseDto & { styles?: CartesStyle[] };
-export {
-    ConfigurationDetailResponseDtoStatusEnum as ConfigurationStatusEnum,
-    ConfigurationDetailResponseDtoTypeEnum as ConfigurationTypeEnum,
-} from "./entrepot";
 
 export type Offering = OfferingDetailResponseDto;
-export { OfferingDetailResponseDtoTypeEnum as OfferingTypeEnum } from "./entrepot";
 export enum OfferingStatusEnum {
     PUBLISHING = "PUBLISHING",
     MODIFYING = "MODIFYING",
@@ -209,8 +205,3 @@ export type UserRightsResponseDto = {
 };
 
 export type Annexe = AnnexDetailResponseDto;
-
-export type AccessKeysAndPermissions = {
-    access_keys: UserKeyResponseDto[];
-    permissions: PermissionWithOfferingsDetailsResponseDto;
-};

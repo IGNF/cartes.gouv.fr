@@ -2,6 +2,7 @@ import { FC } from "react";
 import { createPortal } from "react-dom";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { getTranslation } from "../../i18n/i18n";
+import { v4 as uuidv4 } from "uuid";
 
 const { t: tCommon } = getTranslation("Common");
 
@@ -13,7 +14,7 @@ type ConfirmDialogProps = {
 };
 
 const ConfirmDialogModal = createModal({
-    id: "confirm-modal",
+    id: `confirm-modal-${uuidv4()}`,
     isOpenedByDefault: false,
 });
 

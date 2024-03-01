@@ -2,6 +2,7 @@ import Input from "@codegouvfr/react-dsfr/Input";
 import { FC } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { useTranslation } from "../../../i18n/i18n";
+import { fr } from "@codegouvfr/react-dsfr";
 
 type BasicTypeInfoFormProps = {
     form: UseFormReturn;
@@ -16,7 +17,7 @@ const BasicTypeInfoForm: FC<BasicTypeInfoFormProps> = ({ form }) => {
     } = form;
 
     return (
-        <div>
+        <div className={fr.cx("fr-mb-6v")}>
             <Input
                 label={t("login")}
                 // @ts-expect-error error

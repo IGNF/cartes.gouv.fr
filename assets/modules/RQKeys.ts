@@ -28,7 +28,8 @@ const RQKeys = {
 
     catalogs_communities: (): string[] => ["catalogs", "communities"],
 
-    access_keys_and_permissions: (): string[] => ["access_keys_and_permissions"],
+    me_keys: (): string[] => ["me_keys"],
+    me_permissions: (): string[] => ["me_permissions"],
 };
 
 export default RQKeys;

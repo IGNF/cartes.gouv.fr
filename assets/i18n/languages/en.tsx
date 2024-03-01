@@ -10,12 +10,13 @@ import { DatasheetViewEnTranslations } from "../../pages/datasheet/DatasheetView
 import { DatastoreManageStorageEnTranslations } from "../../pages/datastore/DatastoreManageStorage/DatastoreManageStorage";
 import { MetadatasFormEnTranslations } from "../../pages/service/metadatas/metadatas-form-tr";
 import { ValidationMetadatasEnTranslations } from "../../pages/service/metadatas/metadatas-validation-tr";
-import { AccessKeysListEnTranslations } from "../../pages/users/keys/AccessKeysListTab";
-import { AddAccessKeyEnTranslations } from "../../pages/users/keys/AddAccessKeyTr";
+import { MeEnTranslations } from "../../pages/users/Me";
 import { MyAccessKeysEnTranslations } from "../../pages/users/MyAccessKeys";
+import { AccessKeysListTabEnTranslations } from "../../pages/users/keys/AccessKeysListTab";
+import { AddAccessKeyEnTranslations } from "../../pages/users/keys/AddAccessKeyTr";
+import { PermissionsEnTranslations } from "../../pages/users/permissions/PermissionsTr";
 import { mapboxStyleValidationEnTranslations } from "../../validations/MapboxStyleValidator";
 import { sldStyleValidationEnTranslations } from "../../validations/sldStyle";
-import { MeEnTranslations } from "../../pages/users/Me";
 import { commonEnTranslations } from "../Common";
 import { RightsEnTranslations } from "../Rights";
 import { StyleEnTranslations } from "../Style";
@@ -29,8 +30,9 @@ export const translations: Translations<"en"> = {
     AddMember: AddMemberEnTranslations,
     CommunityMembers: CommunityMembersEnTranslations,
     MyAccessKeys: MyAccessKeysEnTranslations,
-    AccessKeysList: AccessKeysListEnTranslations,
+    AccessKeysListTab: AccessKeysListTabEnTranslations,
     AddAccessKey: AddAccessKeyEnTranslations,
+    Permissions: PermissionsEnTranslations,
     ValidationMetadatas: ValidationMetadatasEnTranslations,
     MetadatasForm: MetadatasFormEnTranslations,
     Contact: contactEnTranslations,

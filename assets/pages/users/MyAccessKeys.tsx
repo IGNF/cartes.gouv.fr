@@ -9,38 +9,32 @@ import LoadingText from "../../components/Utils/LoadingText";
 import { datastoreNavItems } from "../../config/datastoreNavItems";
 import { Translations, getTranslation } from "../../i18n/i18n";
 import RQKeys from "../../modules/RQKeys";
-import { AccessKeysAndPermissions } from "../../types/app";
+import { PermissionWithOfferingsDetailsResponseDto, UserKeyResponseDto } from "../../types/entrepot";
 import AccessKeysListTab from "./keys/AccessKeysListTab";
+import PermissionsListTab from "./permissions/PermissionsListTab";
 
 const { t } = getTranslation("MyAccessKeys");
-
-/* const keys: UserKeyResponseDto[] = [
-    {
-        name: "Ma clé 1",
-        type: UserKeyResponseDtoTypeEnum.HASH,
-        _id: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-    },
-    {
-        name: "Ma clé 2",
-        type: UserKeyResponseDtoTypeEnum.HEADER,
-        _id: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-    },
-]; */
 
 const MyAccessKeys: FC = () => {
     const navItems = datastoreNavItems();
 
-    // Les cles d'acces et les permissions
-    const { data, isLoading } = useQuery<AccessKeysAndPermissions>({
-        queryKey: RQKeys.access_keys_and_permissions(),
-        queryFn: ({ signal }) => api.user.getAccessKeysAndPermissions({ signal }),
+    // Les cles d'acces
+    const { data: keys, isLoading: isLoadingKeys } = useQuery<UserKeyResponseDto[]>({
+        queryKey: RQKeys.me_keys(),
+        queryFn: ({ signal }) => api.user.getMeKeys({ signal }),
         staleTime: 3600000,
     });
-    console.log(data);
+
+    // Les permissions
+    const { data: permissions, isLoading: isLoadingPermissions } = useQuery<PermissionWithOfferingsDetailsResponseDto[]>({
+        queryKey: RQKeys.me_permissions(),
+        queryFn: ({ signal }) => api.user.getMePermissions({ signal }),
+        staleTime: 3600000,
+    });
 
     return (
         <AppLayout documentTitle={t("title")} navItems={navItems}>
-            {isLoading ? (
+            {isLoadingKeys || isLoadingPermissions ? (
                 <LoadingText />
             ) : (
                 <div className={fr.cx("fr-grid-row")}>
@@ -52,12 +46,12 @@ const MyAccessKeys: FC = () => {
                                     label: t("my_keys"),
                                     iconId: "ri-key-2-line",
                                     isDefault: true,
-                                    content: <AccessKeysListTab access_keys={data?.access_keys} />,
+                                    content: <AccessKeysListTab access_keys={keys} />,
                                 },
                                 {
                                     label: t("my_permissions"),
                                     iconId: "ri-lock-line",
-                                    content: <p>Content of tab2</p>,
+                                    content: <PermissionsListTab permissions={permissions} />,
                                 },
                             ]}
                         />
