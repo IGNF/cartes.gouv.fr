@@ -12,6 +12,7 @@ import { CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
 import { UserKeyResponseDto } from "../../../types/entrepot";
 import RQKeys from "../../../modules/RQKeys";
+import Wait from "../../../components/Utils/Wait";
 
 type UserKeysListTabProps = {
     access_keys: UserKeyResponseDto[] | undefined;
@@ -27,8 +28,9 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ access_keys }) => {
     const queryClient = useQueryClient();
 
     /* Suppression d'une cle */
-    const deleteKeyMutation = useMutation<null, CartesApiException, string>({
+    const { isPending: isRemovePending, mutate: mutateRemove } = useMutation<null, CartesApiException, string>({
         mutationFn: (keyId) => api.user.removeKey(keyId),
+        throwOnError: true,
         onSuccess() {
             queryClient.setQueryData<UserKeyResponseDto[]>(RQKeys.me_keys(), (keys) => {
                 const newkeys = keys?.filter((key) => key._id !== currentKey);
@@ -43,6 +45,16 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ access_keys }) => {
     return (
         <>
             {error && <Alert severity={"error"} title={tCommon("error")} description={error?.message} className={fr.cx("fr-my-3w")} />}
+            {isRemovePending /* || isModifyPending */ && (
+                <Wait>
+                    <div className={fr.cx("fr-container")}>
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
+                            <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " frx-icon-spin"} />
+                            <h6 className={fr.cx("fr-m-0")}>{isRemovePending ? tCommon("removing") : tCommon("modifying")}</h6>
+                        </div>
+                    </div>
+                </Wait>
+            )}
             {access_keys === undefined || access_keys.length === 0 ? (
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
                     <p>{t("no_access_keys")}</p>
@@ -84,7 +96,7 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ access_keys }) => {
                 title={t("confirm_remove")}
                 onConfirm={() => {
                     if (currentKey !== undefined) {
-                        deleteKeyMutation.mutate(currentKey);
+                        mutateRemove(currentKey);
                     }
                 }}
             />
