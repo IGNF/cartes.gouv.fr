@@ -37,7 +37,7 @@ type updateMember = {
     user_rights: string[];
 };
 
-const tableClassName = fr.cx("fr-table", "fr-table--bordered", "fr-table--no-caption", "fr-mt-2w") + " frx-table-member";
+const tableContainerClassName = fr.cx("fr-table", "fr-table--bordered", "fr-table--no-caption", "fr-mt-2w") + " frx-table-member";
 
 const getName = (member: UserDto) => {
     const lastName = member.last_name ?? "";
@@ -204,60 +204,62 @@ const CommunityMembers: FC<CommunityMembersProps> = ({ datastoreId, userId }) =>
                             {t("add_user")}
                         </Button>
                     </div>
-                    <table className={tableClassName}>
-                        <thead>
-                            <tr>
-                                <th />
-                                <th colSpan={5}>{t("rights")}</th>
-                                <th />
-                            </tr>
-                            <tr>
-                                <th>{t("name")}</th>
-                                {getTranslatedRightTypes().map((right) => (
-                                    <th key={right}>{right}</th>
-                                ))}
-                                <th />
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {members.map((member) => {
-                                return (
-                                    <tr key={member.id}>
-                                        <td>
-                                            {member.name} {member.isMe === true ? " (" + t("me") + ")" : ""}{" "}
-                                            {member.isSupervisor === true ? " (" + t("supervisor") + ")" : ""}
-                                        </td>
-                                        {Object.keys(member.rights).map((r) => {
-                                            return (
-                                                <td key={r}>
-                                                    <ToggleSwitch
-                                                        defaultChecked={member.rights[r] === true}
-                                                        disabled={member.isMe === true || member.isSupervisor === true}
-                                                        inputTitle={t("add_remove_right_title", { right: r })}
-                                                        label={null}
-                                                        showCheckedHint={false}
-                                                        onChange={(checked) => handleToggleChanged(member.id, r, checked)}
+                    <div className={tableContainerClassName}>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th />
+                                    <th colSpan={5}>{t("rights")}</th>
+                                    <th />
+                                </tr>
+                                <tr>
+                                    <th>{t("name")}</th>
+                                    {getTranslatedRightTypes().map((right) => (
+                                        <th key={right}>{right}</th>
+                                    ))}
+                                    <th />
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {members.map((member) => {
+                                    return (
+                                        <tr key={member.id}>
+                                            <td>
+                                                {member.name} {member.isMe === true ? " (" + t("me") + ")" : ""}{" "}
+                                                {member.isSupervisor === true ? " (" + t("supervisor") + ")" : ""}
+                                            </td>
+                                            {Object.keys(member.rights).map((r) => {
+                                                return (
+                                                    <td key={r}>
+                                                        <ToggleSwitch
+                                                            defaultChecked={member.rights[r] === true}
+                                                            disabled={member.isMe === true || member.isSupervisor === true}
+                                                            inputTitle={t("add_remove_right_title", { right: r })}
+                                                            label={null}
+                                                            showCheckedHint={false}
+                                                            onChange={(checked) => handleToggleChanged(member.id, r, checked)}
+                                                        />
+                                                    </td>
+                                                );
+                                            })}
+                                            {member.isMe === false && member.isSupervisor === false ? (
+                                                <td>
+                                                    <Button
+                                                        title={t("remove_user")}
+                                                        priority={"tertiary no outline"}
+                                                        iconId={"fr-icon-delete-line"}
+                                                        onClick={() => mutateRemove(member.id)}
                                                     />
                                                 </td>
-                                            );
-                                        })}
-                                        {member.isMe === false && member.isSupervisor === false ? (
-                                            <td>
-                                                <Button
-                                                    title={t("remove_user")}
-                                                    priority={"tertiary no outline"}
-                                                    iconId={"fr-icon-delete-line"}
-                                                    onClick={() => mutateRemove(member.id)}
-                                                />
-                                            </td>
-                                        ) : (
-                                            <td />
-                                        )}
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
+                                            ) : (
+                                                <td />
+                                            )}
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
                     <UserRights />
                     {(isRemovePending || isModifyPending) && (
                         <Wait>
