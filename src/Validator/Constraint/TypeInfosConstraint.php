@@ -32,9 +32,9 @@ class TypeInfosConstraint extends Compound
                             ])
                         ]),
                         'password' => new Assert\Optional([
-                            /*new Assert\NotBlank([
+                            new Assert\NotBlank([
                                 'message' => 'user_key.password_not_blank'
-                            ])*/
+                            ])
                         ])
                     ]
                 )
