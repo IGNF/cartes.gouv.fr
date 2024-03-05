@@ -2,7 +2,7 @@
 
 namespace App\Controller\Api;
 
-use App\Dto\UserKeyDTO;
+use App\Dto\User\UserKeyDTO;
 use App\Services\ServiceAccount;
 use App\Services\EntrepotApiService;
 use App\Exception\CartesApiException;
@@ -38,11 +38,33 @@ class UserController extends AbstractController implements ApiControllerInterfac
         return $this->json($keys);
     }
 
+    #[Route('/me/keys_with_acesses', name: 'keys_with_acesses')]
+    public function getUserKeysWithAccesses(): JsonResponse
+    {
+        $keys = $this->entrepotApiService->user->getMyKeys();
+        foreach($keys as &$key) {
+            $key['accesses'] = $this->entrepotApiService->user->getKeyAccesses($key['_id']);
+        }
+        return $this->json($keys);
+    }
+
     #[Route('/me/permissions', name: 'permissions')]
     public function getUserPermissions(): JsonResponse
     {
         $permissions = $this->entrepotApiService->user->getMyPermissions();
         return $this->json($permissions);
+    }
+
+    #[Route('/me/permissions_detailed', name: 'permissions_detailed')]
+    public function getUserPermissionsDetailed(): JsonResponse
+    {
+        $detailedPermissions = [];
+
+        $permissions = $this->entrepotApiService->user->getMyPermissions();
+        foreach($permissions as $permission) {
+            $detailedPermissions[] = $this->entrepotApiService->user->getPermission($permission['_id']);
+        }
+        return $this->json($detailedPermissions);
     }
 
     #[Route('/add_key', name: 'add_key', methods: ['POST'],

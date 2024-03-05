@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Dto;
+namespace App\Dto\User;
  
-use App\Dto\AccessDTO;
+use App\Dto\User\AccessDTO;
 use App\Constants\UserKeyTypes;
 use App\Validator\Constraint as CustomAssert;
 use Symfony\Component\Validator\Constraints as Assert;
