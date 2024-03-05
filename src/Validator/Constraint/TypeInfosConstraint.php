@@ -8,6 +8,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[\Attribute]
 class TypeInfosConstraint extends Compound
 {
+    /**
+     * @SuppressWarnings(UnusedFormalParameter)
+     */
     protected function getConstraints(mixed $options = null): array
     {
         return [
