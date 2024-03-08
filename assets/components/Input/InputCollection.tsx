@@ -6,22 +6,22 @@ import { v4 as uuidv4 } from "uuid";
 import { useTranslation } from "../../i18n/i18n";
 
 interface InputCollectionProps {
-    label: string;
+    label?: string;
     hintText?: string;
     state?: "default" | "error" | "success";
     stateRelatedMessage?: string;
-    defaultValues?: string[];
+    value?: string[];
     onChange: (value: string[]) => void;
 }
 
 const InputCollection: FC<InputCollectionProps> = (props: InputCollectionProps) => {
     const { t } = useTranslation("Common");
 
-    const { label, hintText, state, stateRelatedMessage, defaultValues = [], onChange } = props;
+    const { label, hintText, state, stateRelatedMessage, value = [], onChange } = props;
 
     const [datas, setDatas] = useState<Record<string, string>>(() => {
         // On met une ligne par defaut
-        const def = [...defaultValues];
+        const def = [...value];
         if (def.length === 0) {
             def.push("");
         }
@@ -68,12 +68,10 @@ const InputCollection: FC<InputCollectionProps> = (props: InputCollectionProps) 
     };
 
     return (
-        <div className={fr.cx("fr-mb-6v")}>
-            <div className={fr.cx("fr-input-group", "fr-mb-1v")}>
-                <label className={fr.cx("fr-label")}>{label}</label>
-                {label && <span className={fr.cx("fr-hint-text")}>{hintText}</span>}
-            </div>
-            <div className={fr.cx("fr-grid-row")}>
+        <div className={fr.cx("fr-input-group", state === "error" && "fr-input-group--error")}>
+            {label && <label className={fr.cx("fr-label")}>{label}</label>}
+            {hintText && <span className={fr.cx("fr-hint-text", "fr-mt-2v")}>{hintText}</span>}
+            <div className={fr.cx("fr-grid-row", "fr-mt-2v")}>
                 <Button className={fr.cx("fr-mb-1v")} iconId={"fr-icon-add-circle-line"} priority="tertiary" onClick={handleAdd}>
                     {t("add")}
                 </Button>

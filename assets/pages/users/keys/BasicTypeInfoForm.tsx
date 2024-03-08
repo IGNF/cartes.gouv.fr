@@ -3,9 +3,10 @@ import { FC } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { useTranslation } from "../../../i18n/i18n";
 import { fr } from "@codegouvfr/react-dsfr";
+import { AddKeyFormType } from "../../../types/app";
 
 type BasicTypeInfoFormProps = {
-    form: UseFormReturn;
+    form: UseFormReturn<AddKeyFormType>;
 };
 
 const BasicTypeInfoForm: FC<BasicTypeInfoFormProps> = ({ form }) => {

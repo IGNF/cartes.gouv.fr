@@ -1,4 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import Accordion from "@codegouvfr/react-dsfr/Accordion";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
@@ -7,23 +8,41 @@ import { declareComponentKeys } from "i18nifty";
 import { FC, useState } from "react";
 import api from "../../../api";
 import { ConfirmDialog, ConfirmDialogModal } from "../../../components/Utils/ConfirmDialog";
+import Wait from "../../../components/Utils/Wait";
 import { Translations, useTranslation } from "../../../i18n/i18n";
+import RQKeys from "../../../modules/RQKeys";
 import { CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
+import { UserKeysWithAccessesResponseDto } from "../../../types/app";
 import { UserKeyResponseDto } from "../../../types/entrepot";
-import RQKeys from "../../../modules/RQKeys";
-import Wait from "../../../components/Utils/Wait";
 
 type UserKeysListTabProps = {
-    access_keys: UserKeyResponseDto[] | undefined;
+    keys: UserKeysWithAccessesResponseDto[] | undefined;
+    hasPermissions: boolean;
 };
 
-const UserKeysListTab: FC<UserKeysListTabProps> = ({ access_keys }) => {
+const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, hasPermissions }) => {
     const { t: tCommon } = useTranslation("Common");
     const { t } = useTranslation("UserKeysListTab");
 
     const [error, setError] = useState<CartesApiException | undefined>(undefined);
     const [currentKey, setCurrentKey] = useState<string | undefined>(undefined);
+
+    /* TODO Plusieurs access peuvent avoir la meme offering */
+    /* const servicesByKey = useMemo(() => {
+        if (keys === undefined || keys.length === 0) {
+            return {};
+        }
+
+        const result = {};
+        keys.forEach((key) => {
+            const services = Array.from(key.accesses, (access) => access.offering._id);
+            result[key._id] = key._id in result ? [...result[key._id], ...services] : services;
+            result[key._id] = [...new Set(result[key._id])]; // unicite
+        });
+        return result;
+    }, [keys]);
+    console.log(servicesByKey); */
 
     const queryClient = useQueryClient();
 
@@ -55,43 +74,62 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ access_keys }) => {
                     </div>
                 </Wait>
             )}
-            {access_keys === undefined || access_keys.length === 0 ? (
-                <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
-                    <p>{t("no_access_keys")}</p>
-                </div>
+            {keys === undefined || keys.length === 0 ? (
+                <p>{t("no_keys")}</p>
             ) : (
-                access_keys.map((accessKey) => {
+                keys.map((accessKey) => {
                     return (
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-grid-row--middle")} key={accessKey._id}>
-                            <div className={fr.cx("fr-col", "fr-py-2v")}>
-                                <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                                    {accessKey.name}
-                                    <Badge className={fr.cx("fr-ml-2v")} noIcon={true} severity={"info"}>
-                                        {accessKey.type}
-                                    </Badge>
+                        <div key={accessKey._id} className={fr.cx("fr-my-1v")}>
+                            <Accordion
+                                label={
+                                    <div>
+                                        {accessKey.name}
+                                        <Badge className={fr.cx("fr-ml-2v")} noIcon={true} severity={"info"}>
+                                            {accessKey.type}
+                                        </Badge>
+                                    </div>
+                                }
+                            >
+                                <div>
+                                    {accessKey.accesses !== undefined && accessKey.accesses.length ? (
+                                        <>
+                                            <div className={fr.cx("fr-mb-1v")}>{t("services")}</div>
+                                            <ul className={fr.cx("fr-raw-list")}>
+                                                {accessKey.accesses.map((access) => (
+                                                    <li key={access.offering._id}>
+                                                        {access.offering.layer_name}
+                                                        <Badge className={fr.cx("fr-ml-2v")} noIcon={true} severity={"info"}>
+                                                            {access.offering.type}
+                                                        </Badge>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </>
+                                    ) : (
+                                        <div className={fr.cx("fr-mb-1v")}>{t("no_services")}</div>
+                                    )}
+                                    <div className={fr.cx("fr-grid-row", "fr-my-2v")}>
+                                        <Button onClick={() => {}}>{tCommon("modify")}</Button>
+                                        <Button
+                                            className={fr.cx("fr-ml-2v")}
+                                            onClick={() => {
+                                                setCurrentKey(accessKey._id);
+                                                ConfirmDialogModal.open();
+                                            }}
+                                        >
+                                            {tCommon("delete")}
+                                        </Button>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className={fr.cx("fr-col", "fr-py-2v")}>
-                                <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-grid-row--middle")}>
-                                    <Button title={t("modify")} priority={"tertiary no outline"} iconId={"fr-icon-pencil-fill"} onClick={() => {}} />
-                                    <Button
-                                        title={t("remove")}
-                                        priority={"tertiary no outline"}
-                                        iconId={"fr-icon-delete-line"}
-                                        onClick={() => {
-                                            setCurrentKey(accessKey._id);
-                                            ConfirmDialogModal.open();
-                                        }}
-                                    />
-                                </div>
-                            </div>
+                            </Accordion>
                         </div>
                     );
                 })
             )}
-            <div className={fr.cx("fr-grid-row", "fr-mt-2v")}>
-                <Button linkProps={routes.add_access_key().link}>{t("add")}</Button>
-            </div>
+            {hasPermissions === false && <p>{t("no_permission_warning")}</p>}
+            <Button className={fr.cx("fr-my-2v")} {...(hasPermissions ? { linkProps: routes.add_access_key().link } : { disabled: true })}>
+                {t("add")}
+            </Button>
             <ConfirmDialog
                 title={t("confirm_remove")}
                 onConfirm={() => {
@@ -107,10 +145,15 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ access_keys }) => {
 export default UserKeysListTab;
 
 // traductions
-export const { i18n } = declareComponentKeys<"no_access_keys" | "add" | "modify" | "remove" | "confirm_remove">()("UserKeysListTab");
+export const { i18n } = declareComponentKeys<
+    "no_keys" | "no_permission_warning" | "services" | "no_services" | "add" | "modify" | "remove" | "confirm_remove"
+>()("UserKeysListTab");
 
 export const UserKeysListTabFrTranslations: Translations<"fr">["UserKeysListTab"] = {
-    no_access_keys: "Vous n'avez aucune clé d'accès",
+    no_keys: "Vous n'avez aucune clé d'accès",
+    no_permission_warning: "Vous n'avez aucune permission, il n'est pas possible d'ajouter une clé",
+    services: "Services accessibles",
+    no_services: "Cette clé n'a accès à aucun service",
     add: "Ajouter une clé",
     modify: "Modifier la clé",
     remove: "Supprimer la clé",
@@ -118,7 +161,10 @@ export const UserKeysListTabFrTranslations: Translations<"fr">["UserKeysListTab"
 };
 
 export const UserKeysListTabEnTranslations: Translations<"en">["UserKeysListTab"] = {
-    no_access_keys: "You don't have any access keys",
+    no_keys: "You don't have any access keys",
+    no_permission_warning: "You have no permissions, it is not possible to add a key",
+    services: "Accessible services",
+    no_services: "This key does not have access to any services",
     add: "Add key",
     modify: "Modify key",
     remove: "Remove key",

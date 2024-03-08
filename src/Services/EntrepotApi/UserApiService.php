@@ -83,8 +83,16 @@ class UserApiService extends AbstractEntrepotApiService
         return $this->request('POST', "users/me/keys", $body);
     }
     
-    public function removeKey(string $key): array
+    public function removeKey(string $keyId): array
     {
-        return $this->request('DELETE', "users/me/keys/$key");
+        return $this->request('DELETE', "users/me/keys/$keyId");
+    }
+
+    /**
+     * @param array<mixed> $body
+     */
+    public function addAccess(string $keyId, array $body): array
+    {
+        return $this->request('POST', "users/me/keys/$keyId/accesses", $body); 
     }
 }

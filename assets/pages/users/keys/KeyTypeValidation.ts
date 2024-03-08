@@ -3,8 +3,7 @@ import * as yup from "yup";
 import { ComponentKey } from "../../../i18n/i18n";
 import { UserKeyCreateDtoUserKeyInfoDtoTypeEnum } from "../../../types/entrepot";
 
-const getSchema = (type: UserKeyCreateDtoUserKeyInfoDtoTypeEnum, t: TranslationFunction<"AddUserKey", ComponentKey>) => {
-    // NOTE la clé de type header n'existe plus apparemment
+const getSecuritySchema = (type: UserKeyCreateDtoUserKeyInfoDtoTypeEnum, t: TranslationFunction<"AddUserKey", ComponentKey>) => {
     switch (type) {
         case UserKeyCreateDtoUserKeyInfoDtoTypeEnum.BASIC:
             return yup.object().shape({
@@ -20,4 +19,4 @@ const getSchema = (type: UserKeyCreateDtoUserKeyInfoDtoTypeEnum, t: TranslationF
     }
 };
 
-export { getSchema };
+export { getSecuritySchema };

@@ -1,4 +1,6 @@
 import {
+    AccessCreateDto,
+    AccessDetailsResponseDto,
     AnnexDetailResponseDto,
     CheckingExecutionDetailResponseDto,
     CommunityMemberDto,
@@ -22,6 +24,8 @@ import {
     UploadPrivateDetailResponseDto,
     UploadTreeElementResponseDto,
     UserDetailsResponseDto,
+    UserKeyCreateDtoUserKeyInfoDtoTypeEnum,
+    UserKeyResponseDto,
 } from "./entrepot";
 
 /** user */
@@ -204,4 +208,27 @@ export type UserRightsResponseDto = {
     rights: CommunityUserResponseDtoRightsEnum[];
 };
 
+export type UserKeysWithAccessesResponseDto = UserKeyResponseDto & { accesses: AccessDetailsResponseDto[] };
+
 export type Annexe = AnnexDetailResponseDto;
+
+/* Pour le formulaire d'ajout d'une cle d'acces */
+type HashType = {
+    hash: string;
+};
+type BasicType = {
+    login: string;
+    password: string;
+};
+export type AddKeyFormType = {
+    name: string;
+    accesses: AccessCreateDto[];
+    type: UserKeyCreateDtoUserKeyInfoDtoTypeEnum;
+    type_infos: HashType | BasicType;
+    ip_list: {
+        name: "whitelist" | "blacklist";
+        addresses: string[];
+    };
+    user_agent: string;
+    referer: string;
+};

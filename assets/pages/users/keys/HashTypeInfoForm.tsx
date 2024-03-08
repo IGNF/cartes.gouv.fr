@@ -3,9 +3,10 @@ import { useTranslation } from "../../../i18n/i18n";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { UseFormReturn } from "react-hook-form";
 import { fr } from "@codegouvfr/react-dsfr";
+import { AddKeyFormType } from "../../../types/app";
 
 type HashTypeInfoFormProps = {
-    form: UseFormReturn;
+    form: UseFormReturn<AddKeyFormType>;
 };
 
 const HashTypeInfoForm: FC<HashTypeInfoFormProps> = ({ form }) => {

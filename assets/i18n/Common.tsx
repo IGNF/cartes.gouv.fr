@@ -1,6 +1,7 @@
 import { declareComponentKeys, type Translations } from "./i18n";
 
 export const { i18n } = declareComponentKeys<
+    | "warning"
     | "error"
     | "add"
     | "adding"
@@ -21,9 +22,12 @@ export const { i18n } = declareComponentKeys<
     | "mandatory_fields"
     | "none"
     | "new_window"
+    | "previous_step"
+    | "next_step"
 >()("Common");
 
 export const commonFrTranslations: Translations<"fr">["Common"] = {
+    warning: "Avertissement",
     error: "Une erreur est survenue",
     add: "Ajouter",
     adding: "Ajout en cours ...",
@@ -44,9 +48,12 @@ export const commonFrTranslations: Translations<"fr">["Common"] = {
     mandatory_fields: "Sauf mention contraire “(optionnel)” dans le label, tous les champs sont obligatoires.",
     none: "Aucune",
     new_window: "ouvre une nouvelle fenêtre",
+    previous_step: "Étape précédente",
+    next_step: "Étape suivante",
 };
 
 export const commonEnTranslations: Translations<"en">["Common"] = {
+    warning: "Warning",
     error: "An error occurred",
     add: "Add",
     adding: "Adding ...",
@@ -67,4 +74,6 @@ export const commonEnTranslations: Translations<"en">["Common"] = {
     mandatory_fields: "All fields are mandatory unless label states “optional”",
     none: "None",
     new_window: "new window",
+    previous_step: "Previous step",
+    next_step: "Next step",
 };

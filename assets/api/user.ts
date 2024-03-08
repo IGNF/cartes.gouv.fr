@@ -1,8 +1,9 @@
 import SymfonyRouting from "../modules/Routing";
 
 import { jsonFetch } from "../modules/jsonFetch";
-import { Datastore } from "../types/app";
+import { Datastore, UserKeysWithAccessesResponseDto } from "../types/app";
 import {
+    PermissionDetailsResponseDto,
     PermissionWithOfferingsDetailsResponseDto,
     UserKeyCreateDtoUserKeyInfoDto,
     UserKeyDetailsResponseDtoUserKeyInfoDto,
@@ -26,9 +27,23 @@ const getMyKeys = (otherOptions: RequestInit = {}) => {
     });
 };
 
+const getMyKeysWithAccesses = (otherOptions: RequestInit = {}) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_user_keys_with_accesses");
+    return jsonFetch<UserKeysWithAccessesResponseDto[]>(url, {
+        ...otherOptions,
+    });
+};
+
 const getMyPermissions = (otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_user_permissions");
     return jsonFetch<PermissionWithOfferingsDetailsResponseDto[]>(url, {
+        ...otherOptions,
+    });
+};
+
+const getMyDetailedPermissions = (otherOptions: RequestInit = {}) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_user_permissions_detailed");
+    return jsonFetch<PermissionDetailsResponseDto[]>(url, {
         ...otherOptions,
     });
 };
@@ -68,7 +83,9 @@ const user = {
     getMe,
     getDatastoresList,
     getMyKeys,
+    getMyKeysWithAccesses,
     getMyPermissions,
+    getMyDetailedPermissions,
     addKey,
     removeKey,
     addToSandbox,
