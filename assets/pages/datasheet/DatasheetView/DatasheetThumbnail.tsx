@@ -22,7 +22,7 @@ import type { Datasheet, DatasheetDetailed, DatasheetThumbnailAnnexe } from "../
 
 import "../../../sass/components/buttons.scss";
 
-const defaultImgUrl = "//www.gouvernement.fr/sites/default/files/static_assets/placeholder.1x1.png";
+import placeholder1x1 from "../../../img/placeholder.1x1.png";
 
 const addThumbnailModal = createModal({
     id: "add-thumbnail-modal",
@@ -210,7 +210,7 @@ const DatasheetThumbnail: FC<DatasheetThumbnailProps> = ({ datastoreId, datashee
                 <img
                     className={thumbnailAddBtnHover ? "frx-btn--transparent fr-img--transparent-transition" : ""}
                     loading="lazy"
-                    src={datasheet?.thumbnail?.url === undefined ? defaultImgUrl : datasheet?.thumbnail?.url}
+                    src={datasheet?.thumbnail?.url === undefined ? placeholder1x1 : datasheet?.thumbnail?.url}
                 />
                 {thumbnailAddBtnHover && (
                     <div className="frx-btn--hover-icon">
@@ -275,7 +275,7 @@ const DatasheetThumbnail: FC<DatasheetThumbnailProps> = ({ datastoreId, datashee
                             />
                         </div>
                         <div className={fr.cx("fr-col-3")}>
-                            <img src={modalImageUrl === "" ? defaultImgUrl : modalImageUrl} width="128px" />
+                            <img src={modalImageUrl === "" ? placeholder1x1 : modalImageUrl} width="128px" />
                         </div>
                     </div>
                     {addThumbnailMutation.isPending && (

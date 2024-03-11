@@ -9,12 +9,12 @@ import { type Datasheet } from "../../../types/app";
 
 import "../../../sass/pages/datasheetlist.scss";
 
+import placeholder1x1 from "../../../img/placeholder.1x1.png";
+
 type DatasheetListItemProps = {
     datastoreId: string;
     datasheet: Datasheet;
 };
-
-const defaultImgUrl = "//www.gouvernement.fr/sites/default/files/static_assets/placeholder.1x1.png";
 
 const DatasheetListItem: FC<DatasheetListItemProps> = ({ datastoreId, datasheet }) => {
     return (
@@ -23,7 +23,7 @@ const DatasheetListItem: FC<DatasheetListItemProps> = ({ datastoreId, datasheet 
                 <Button linkProps={routes.datastore_datasheet_view({ datastoreId, datasheetName: datasheet.name }).link} priority="tertiary no outline">
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
                         <div className="frx-thumbnail-container">
-                            <img src={datasheet?.thumbnail?.url ?? defaultImgUrl} className={fr.cx("fr-mr-1v")} />
+                            <img src={datasheet?.thumbnail?.url ?? placeholder1x1} className={fr.cx("fr-mr-1v")} />
                         </div>
                         <strong className={fr.cx("fr-ml-2w")}>{datasheet.name}</strong>
 
