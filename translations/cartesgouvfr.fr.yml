@@ -102,21 +102,21 @@ datastore_creation_request:
         message: "Rappel de votre demande"
 
 communities_list:
-    title: "Rejoindre une communauté publique"
+    title: "Rejoindre un espace de travail existant"
     community_technical_name: "Nom technique : %name%"
     join: "Rejoindre"
     modal:
-        title: 'Rejoindre la communauté "%name%"'
+        title: 'Rejoindre "%name%"'
         message: "Message (optionnel)"
-    success_message_title: "Votre demande à rejoindre la communauté %name% a été envoyée."
-    success_message_description: "Un accusé-réception vous a également été adressé"
+    success_message_title: "Votre demande à rejoindre %name% a été envoyée."
+    success_message_description: "Un accusé-réception vous a également été adressé."
 
 join_community:
     email_support:
-        heading: 'Un utilisateur demande à rejoindre la communauté "%name%" (id=%id%)'
+        heading: 'Un utilisateur demande à rejoindre "%name%" (id=%id%)'
         message: "Message :"
     email_acknowledgement:
-        heading: 'Votre demande pour rejoindre la communauté "%name%" a été envoyée à son adresse email de contact.'
+        heading: 'Votre demande pour rejoindre "%name%" a été envoyée à son adresse email de contact.'
         date: "Date d'envoi"
         message: "Votre message :"
 

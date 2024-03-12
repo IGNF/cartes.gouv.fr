@@ -301,7 +301,7 @@ export const { i18n } = declareComponentKeys<
 
 export const CommunityMembersFrTranslations: Translations<"fr">["CommunityMembers"] = {
     community_members: ({ communityName }) => `Membres de ${communityName}`,
-    already_member: ({ userId }) => `l'utilisateur ${userId} est déjà membre de cette communauté`,
+    already_member: ({ userId }) => `l'utilisateur ${userId} est déjà membre de cet espace de travail`,
     rights: "Permissions du compte",
     name: "Nom",
     me: "moi",
@@ -309,7 +309,7 @@ export const CommunityMembersFrTranslations: Translations<"fr">["CommunityMember
     add_user: "Ajouter un utilisateur",
     remove_user: "Supprimer cet utilisateur",
     add_remove_right_title: ({ right }) => `Ajouter/supprimer le droit ${right}`,
-    no_necessary_rights: "Vous n'avez pas les droits nécessaires pour visualiser les utilsateurs de cette communauté.",
+    no_necessary_rights: "Vous n'avez pas les droits nécessaires pour visualiser les membres de cet espace de travail.",
 };
 
 export const CommunityMembersEnTranslations: Translations<"en">["CommunityMembers"] = {

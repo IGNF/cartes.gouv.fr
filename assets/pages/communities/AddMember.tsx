@@ -163,7 +163,7 @@ export const AddMemberFrTranslations: Translations<"fr">["AddMember"] = {
     rights_granted: "Permissions accordées",
     id_mandatory: "L'identifiant est obligatoire",
     id_must_be_uuid: "L'Identifiant doit être un UUID",
-    already_member: ({ userId }) => `l'utilisateur ${userId} est déjà membre de cette communauté`,
+    already_member: ({ userId }) => `l'utilisateur ${userId} est déjà membre de cet espace de travail`,
     running: "en cours ...",
 };
 

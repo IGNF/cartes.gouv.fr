@@ -20,6 +20,8 @@ import { useAuthStore } from "../../stores/AuthStore";
 import { CommunityListResponseDto } from "../../types/entrepot";
 import { removeDiacritics } from "../../utils";
 
+import "../../sass/pages/community_list.scss";
+
 const joinCommunityModal = createModal({
     id: "join-community-modal",
     isOpenedByDefault: false,
@@ -108,8 +110,8 @@ const CommunityList: FC = () => {
                             <div className={fr.cx("fr-grid-row", "fr-mb-2v")}>
                                 <div className={fr.cx("fr-col-12", "fr-col-lg-6")}>
                                     <Input
-                                        label={"Recherchez une communauté"}
-                                        hintText={"Saisissez au moins 2 caractères pour filtrer les communautés par le nom"}
+                                        label={"Recherchez un espace de travail"}
+                                        hintText={"Saisissez au moins 2 caractères pour filtrer par le nom"}
                                         nativeInputProps={{
                                             onChange(e) {
                                                 setSearchText(e.target.value);
@@ -124,6 +126,7 @@ const CommunityList: FC = () => {
                             <div className={fr.cx("fr-grid-row")}>
                                 <div className={fr.cx("fr-col", "fr-col-lg-6")}>
                                     <Table
+                                        className="frx-community-list"
                                         data={filteredCommunities.map((community) => [
                                             community.name,
                                             <Button key={community._id} size="small" onClick={() => handleClick(community)} priority="secondary">
