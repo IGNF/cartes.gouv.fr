@@ -1,37 +1,54 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Input from "@codegouvfr/react-dsfr/Input";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
-import { FC } from "react";
+import { FC, useEffect } from "react";
 import { Controller, UseFormReturn } from "react-hook-form";
 import InputCollection from "../../../components/Input/InputCollection";
 import { useTranslation } from "../../../i18n/i18n";
-import { AddKeyFormType } from "../../../types/app";
+import { KeyFormValuesType, UserKeyInfoDtoTypeEnum } from "../../../types/app";
 import { UserKeyCreateDtoUserKeyInfoDtoTypeEnum } from "../../../types/entrepot";
 import BasicTypeInfoForm from "./BasicTypeInfoForm";
 import HashTypeInfoForm from "./HashTypeInfoForm";
 
 type SecurityOptionsFormProps = {
-    form: UseFormReturn<AddKeyFormType>;
+    editMode: boolean;
+    form: UseFormReturn<KeyFormValuesType>;
+    hasOauth2: boolean;
     visible: boolean;
 };
 
-const SecurityOptionsForm: FC<SecurityOptionsFormProps> = ({ form, visible }) => {
+const SecurityOptionsForm: FC<SecurityOptionsFormProps> = ({ editMode, form, hasOauth2, visible }) => {
     const { t: tCommon } = useTranslation("Common");
-    const { t } = useTranslation("AddUserKey");
+    const { t } = useTranslation("UserKey");
 
     const {
         control,
         register,
         formState: { errors },
         watch,
+        setValue: setFormValue,
     } = form;
 
     const keyType = watch("type");
 
-    // TODO SUPPRIMER
-    /*useEffect(() => {
-        watch((value, { name, type }) => console.log(value, name, type));
-    }, [watch]);*/
+    useEffect(() => {
+        if (editMode) {
+            return;
+        }
+
+        let value = {};
+        switch (keyType) {
+            case UserKeyInfoDtoTypeEnum.BASIC:
+                value = { login: "", password: "" };
+                break;
+            case UserKeyInfoDtoTypeEnum.HASH:
+                value = { hash: "" };
+                break;
+            default:
+                break;
+        }
+        setFormValue("type_infos", value);
+    }, [editMode, keyType, setFormValue]);
 
     return (
         <div className={fr.cx(!visible && "fr-hidden")}>
@@ -46,32 +63,34 @@ const SecurityOptionsForm: FC<SecurityOptionsFormProps> = ({ form, visible }) =>
                         label: UserKeyCreateDtoUserKeyInfoDtoTypeEnum.BASIC,
                         nativeInputProps: {
                             ...register("type"),
-                            value: UserKeyCreateDtoUserKeyInfoDtoTypeEnum.BASIC,
-                            checked: UserKeyCreateDtoUserKeyInfoDtoTypeEnum.BASIC === keyType,
+                            value: UserKeyInfoDtoTypeEnum.BASIC,
+                            checked: UserKeyInfoDtoTypeEnum.BASIC === keyType,
                         },
                     },
                     {
                         label: UserKeyCreateDtoUserKeyInfoDtoTypeEnum.HASH,
                         nativeInputProps: {
                             ...register("type"),
-                            value: UserKeyCreateDtoUserKeyInfoDtoTypeEnum.HASH,
-                            checked: UserKeyCreateDtoUserKeyInfoDtoTypeEnum.HASH === keyType,
+                            value: UserKeyInfoDtoTypeEnum.HASH,
+                            checked: UserKeyInfoDtoTypeEnum.HASH === keyType,
                         },
                     },
                     {
                         label: UserKeyCreateDtoUserKeyInfoDtoTypeEnum.OAUTH2,
                         nativeInputProps: {
                             ...register("type"),
-                            value: UserKeyCreateDtoUserKeyInfoDtoTypeEnum.OAUTH2,
-                            checked: UserKeyCreateDtoUserKeyInfoDtoTypeEnum.OAUTH2 === keyType,
+                            disabled: hasOauth2,
+                            value: UserKeyInfoDtoTypeEnum.OAUTH2,
+                            checked: UserKeyInfoDtoTypeEnum.OAUTH2 === keyType,
                         },
                     },
                 ]}
+                disabled={editMode}
             />
-            {keyType === UserKeyCreateDtoUserKeyInfoDtoTypeEnum.BASIC ? (
-                <BasicTypeInfoForm form={form} />
-            ) : keyType === UserKeyCreateDtoUserKeyInfoDtoTypeEnum.HASH ? (
-                <HashTypeInfoForm form={form} />
+            {keyType === UserKeyInfoDtoTypeEnum.BASIC ? (
+                <BasicTypeInfoForm editMode={editMode} form={form} />
+            ) : keyType === UserKeyInfoDtoTypeEnum.HASH ? (
+                <HashTypeInfoForm editMode={editMode} form={form} />
             ) : (
                 <div />
             )}
@@ -82,14 +101,14 @@ const SecurityOptionsForm: FC<SecurityOptionsFormProps> = ({ form, visible }) =>
                     {
                         label: t("ip_list.whitelist"),
                         nativeInputProps: {
-                            ...register("ip_list.name"),
+                            ...register("ip_list_name"),
                             value: "whitelist",
                         },
                     },
                     {
                         label: t("ip_list.blacklist"),
                         nativeInputProps: {
-                            ...register("ip_list.name"),
+                            ...register("ip_list_name"),
                             value: "blacklist",
                         },
                     },
@@ -98,15 +117,15 @@ const SecurityOptionsForm: FC<SecurityOptionsFormProps> = ({ form, visible }) =>
             />
             <Controller
                 control={control}
-                name="ip_list.addresses"
+                name="ip_list_addresses"
                 render={({ field: { value, onChange } }) => {
                     return (
                         <InputCollection
                             label={t("ip_adresses")}
                             hintText={t("iprange_explain")}
                             value={value}
-                            state={errors.ip_list?.addresses ? "error" : "default"}
-                            stateRelatedMessage={errors.ip_list?.addresses?.message?.toString()}
+                            state={errors.ip_list_addresses ? "error" : "default"}
+                            stateRelatedMessage={errors.ip_list_addresses?.message?.toString()}
                             onChange={onChange}
                         />
                     );

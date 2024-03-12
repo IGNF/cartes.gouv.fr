@@ -3,14 +3,15 @@ import { FC } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { useTranslation } from "../../../i18n/i18n";
 import { fr } from "@codegouvfr/react-dsfr";
-import { AddKeyFormType } from "../../../types/app";
+import { KeyFormValuesType } from "../../../types/app";
 
 type BasicTypeInfoFormProps = {
-    form: UseFormReturn<AddKeyFormType>;
+    editMode: boolean;
+    form: UseFormReturn<KeyFormValuesType>;
 };
 
-const BasicTypeInfoForm: FC<BasicTypeInfoFormProps> = ({ form }) => {
-    const { t } = useTranslation("AddUserKey");
+const BasicTypeInfoForm: FC<BasicTypeInfoFormProps> = ({ editMode, form }) => {
+    const { t } = useTranslation("UserKey");
 
     const {
         register,
@@ -26,6 +27,7 @@ const BasicTypeInfoForm: FC<BasicTypeInfoFormProps> = ({ form }) => {
                 // @ts-expect-error error
                 stateRelatedMessage={errors.type_infos?.login?.message?.toString()}
                 nativeInputProps={{ ...register("type_infos.login") }}
+                disabled={editMode}
             />
             <Input
                 label={t("password")}
@@ -33,7 +35,9 @@ const BasicTypeInfoForm: FC<BasicTypeInfoFormProps> = ({ form }) => {
                 state={errors.type_infos?.password ? "error" : "default"}
                 // @ts-expect-error error
                 stateRelatedMessage={errors.type_infos?.password?.message?.toString()}
+                // nativeInputProps={{ ...register("type_infos.password"), type: editMode ? "password" : "text" }}
                 nativeInputProps={{ ...register("type_infos.password") }}
+                disabled={editMode}
             />
         </div>
     );

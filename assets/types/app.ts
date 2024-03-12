@@ -2,6 +2,7 @@ import {
     AccessCreateDto,
     AccessDetailsResponseDto,
     AnnexDetailResponseDto,
+    BasicInfoDto,
     CheckingExecutionDetailResponseDto,
     CommunityMemberDto,
     CommunityUserResponseDtoRightsEnum,
@@ -15,6 +16,8 @@ import {
     DatastoreDetailResponseDto,
     DatastoreEndpointResponseDto,
     EndpointDetailResponseDtoTypeEnum,
+    HashInfoDto,
+    OAuth2InfoDto,
     OfferingDetailResponseDto,
     ProcessingExecutionDetailResponseDto,
     ProcessingExecutionOutputStoredDataDto,
@@ -24,7 +27,7 @@ import {
     UploadPrivateDetailResponseDto,
     UploadTreeElementResponseDto,
     UserDetailsResponseDto,
-    UserKeyCreateDtoUserKeyInfoDtoTypeEnum,
+    UserKeyDetailsResponseDtoUserKeyInfoDto,
     UserKeyResponseDto,
 } from "./entrepot";
 
@@ -209,26 +212,31 @@ export type UserRightsResponseDto = {
 };
 
 export type UserKeysWithAccessesResponseDto = UserKeyResponseDto & { accesses: AccessDetailsResponseDto[] };
+export type UserKeyDetailedWithAccessesResponseDto = UserKeyDetailsResponseDtoUserKeyInfoDto & { accesses: AccessDetailsResponseDto[] };
 
 export type Annexe = AnnexDetailResponseDto;
 
 /* Pour le formulaire d'ajout d'une cle d'acces */
-type HashType = {
-    hash: string;
-};
-type BasicType = {
-    login: string;
-    password: string;
-};
-export type AddKeyFormType = {
+export type IPListName = "whitelist" | "blacklist";
+
+export enum UserKeyInfoDtoTypeEnum {
+    HASH = "HASH",
+    HEADER = "HEADER",
+    BASIC = "BASIC",
+    OAUTH2 = "OAUTH2",
+}
+
+export type KeyFormValuesType = {
     name: string;
-    accesses: AccessCreateDto[];
-    type: UserKeyCreateDtoUserKeyInfoDtoTypeEnum;
-    type_infos: HashType | BasicType;
-    ip_list: {
-        name: "whitelist" | "blacklist";
+    type: UserKeyInfoDtoTypeEnum;
+    type_infos?: BasicInfoDto | HashInfoDto | OAuth2InfoDto;
+    ip_list_name: IPListName;
+    ip_list_addresses: string[];
+    ip_list?: {
+        name: IPListName;
         addresses: string[];
     };
     user_agent: string;
     referer: string;
+    accesses: AccessCreateDto[];
 };

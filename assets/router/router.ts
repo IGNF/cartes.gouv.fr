@@ -33,7 +33,13 @@ const routeDefs = {
     // utilisateur
     my_account: defineRoute(`${appRoot}/mon-compte`),
     my_access_keys: defineRoute(`${appRoot}/mes-cles-acces`),
-    add_access_key: defineRoute(`${appRoot}/ajout-cle-acces`),
+    user_key_add: defineRoute(`${appRoot}/add_key`),
+    user_key_edit: defineRoute(
+        {
+            keyId: param.path.string,
+        },
+        (p) => `${appRoot}/edit_key/${p.keyId}`
+    ),
 
     dashboard_pro: defineRoute(`${appRoot}/dashboard`),
 

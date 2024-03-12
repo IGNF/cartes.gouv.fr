@@ -23,7 +23,7 @@ const PersonalData = lazy(() => import("../pages/footer/PersonalData"));
 
 const Me = lazy(() => import("../pages/users/Me"));
 const MyAccessKeys = lazy(() => import("../pages/users/MyAccessKeys"));
-const AddUserKeyForm = lazy(() => import("../pages/users/keys/AddUserKeyForm"));
+const UserKeyForm = lazy(() => import("../pages/users/keys/UserKeyForm"));
 
 const DatastoreManageStorage = lazy(() => import("../pages/datastore/DatastoreManageStorage/DatastoreManageStorage"));
 
@@ -97,8 +97,10 @@ const RouterRenderer: FC = () => {
                 return <Me />;
             case "my_access_keys":
                 return <MyAccessKeys />;
-            case "add_access_key":
-                return <AddUserKeyForm />;
+            case "user_key_add":
+                return <UserKeyForm />;
+            case "user_key_edit":
+                return <UserKeyForm keyId={route.params.keyId} />;
             case "datastore_manage_storage":
                 return <DatastoreManageStorage datastoreId={route.params.datastoreId} />;
             case "dashboard_pro":

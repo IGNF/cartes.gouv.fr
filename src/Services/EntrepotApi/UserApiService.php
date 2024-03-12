@@ -55,6 +55,11 @@ class UserApiService extends AbstractEntrepotApiService
         return null;
     }
 
+    public function getMyKey(string $keyId): array
+    {
+        return $this->request('GET', "users/me/keys/$keyId");
+    }
+
     public function getMyKeys(): array
     {
         return $this->requestAll("users/me/keys");

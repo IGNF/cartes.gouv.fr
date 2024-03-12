@@ -3,14 +3,15 @@ import { useTranslation } from "../../../i18n/i18n";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { UseFormReturn } from "react-hook-form";
 import { fr } from "@codegouvfr/react-dsfr";
-import { AddKeyFormType } from "../../../types/app";
+import { KeyFormValuesType } from "../../../types/app";
 
 type HashTypeInfoFormProps = {
-    form: UseFormReturn<AddKeyFormType>;
+    editMode: boolean;
+    form: UseFormReturn<KeyFormValuesType>;
 };
 
-const HashTypeInfoForm: FC<HashTypeInfoFormProps> = ({ form }) => {
-    const { t } = useTranslation("AddUserKey");
+const HashTypeInfoForm: FC<HashTypeInfoFormProps> = ({ editMode, form }) => {
+    const { t } = useTranslation("UserKey");
 
     const {
         register,
@@ -26,6 +27,7 @@ const HashTypeInfoForm: FC<HashTypeInfoFormProps> = ({ form }) => {
                 // @ts-expect-error error
                 stateRelatedMessage={errors?.type_infos?.hash?.message?.toString()}
                 nativeInputProps={{ ...register("type_infos.hash") }}
+                disabled={editMode}
             />
         </div>
     );

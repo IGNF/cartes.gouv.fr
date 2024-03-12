@@ -845,7 +845,7 @@ export interface UserKeyCreateDtoUserKeyInfoDto {
     blacklist?: string[];
     user_agent?: string;
     referer?: string;
-    type_infos: UserBasicKeyCreateDto | UserHashKeyCreateDto;
+    type_infos: BasicInfoDto | HashInfoDto | OAuth2InfoDto;
 }
 
 export type UserKeyInfoDto = object;
@@ -861,7 +861,7 @@ export interface UserKeyDetailsResponseDtoUserKeyInfoDto {
     blacklist?: string[];
     user_agent?: string;
     referer?: string;
-    type_infos: UserKeyInfoDto;
+    type_infos: BasicInfoDto | HashInfoDto | OAuth2InfoDto;
     /**
      * identifiant technique
      * @format uuid

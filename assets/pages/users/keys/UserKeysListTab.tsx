@@ -51,7 +51,7 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, hasPermissions }) => 
         mutationFn: (keyId) => api.user.removeKey(keyId),
         throwOnError: true,
         onSuccess() {
-            queryClient.setQueryData<UserKeyResponseDto[]>(RQKeys.me_keys(), (keys) => {
+            queryClient.setQueryData<UserKeyResponseDto[]>(RQKeys.my_keys(), (keys) => {
                 const newkeys = keys?.filter((key) => key._id !== currentKey);
                 return newkeys;
             });
@@ -109,7 +109,14 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, hasPermissions }) => 
                                         <div className={fr.cx("fr-mb-1v")}>{t("no_services")}</div>
                                     )}
                                     <div className={fr.cx("fr-grid-row", "fr-my-2v")}>
-                                        <Button onClick={() => {}}>{tCommon("modify")}</Button>
+                                        <Button
+                                            disabled={true} // TODO A REACTIVER : La route /users/me/keys/{key} n'est qu'en qualif pour l'instant
+                                            onClick={() => {
+                                                routes.user_key_edit({ keyId: accessKey._id }).push();
+                                            }}
+                                        >
+                                            {tCommon("modify")}
+                                        </Button>
                                         <Button
                                             className={fr.cx("fr-ml-2v")}
                                             onClick={() => {
@@ -127,7 +134,7 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, hasPermissions }) => 
                 })
             )}
             {hasPermissions === false && <p>{t("no_permission_warning")}</p>}
-            <Button className={fr.cx("fr-my-2v")} {...(hasPermissions ? { linkProps: routes.add_access_key().link } : { disabled: true })}>
+            <Button className={fr.cx("fr-my-2v")} {...(hasPermissions ? { linkProps: routes.user_key_add().link } : { disabled: true })}>
                 {t("add")}
             </Button>
             <ConfirmDialog

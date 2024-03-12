@@ -3,19 +3,19 @@ import Input from "@codegouvfr/react-dsfr/Input";
 import { FC } from "react";
 import { Controller, UseFormReturn } from "react-hook-form";
 import { useTranslation } from "../../../i18n/i18n";
-import { AddKeyFormType } from "../../../types/app";
+import { KeyFormValuesType } from "../../../types/app";
 import { PermissionWithOfferingsDetailsResponseDto } from "../../../types/entrepot";
 import Accesses from "./Accesses";
 
 type ServicesFormProps = {
-    form: UseFormReturn<AddKeyFormType>;
+    form: UseFormReturn<KeyFormValuesType>;
     permissions: PermissionWithOfferingsDetailsResponseDto[];
     visible: boolean;
 };
 
 const ServicesForm: FC<ServicesFormProps> = ({ form, permissions, visible }) => {
     const { t: tCommon } = useTranslation("Common");
-    const { t } = useTranslation("AddUserKey");
+    const { t } = useTranslation("UserKey");
 
     const {
         control,

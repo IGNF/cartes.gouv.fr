@@ -40,6 +40,7 @@ const Accesses: FC<AccessesProps> = (props) => {
     const handleCheckboxChange = useCallback(
         (event: React.ChangeEvent<HTMLInputElement>, permissionId: string, offeringId: string) => {
             const checked = event.currentTarget.checked;
+
             const newAccesses = new AccessesManager(accesses).change(permissionId, offeringId, checked);
             setAccesses(newAccesses);
             onChange(newAccesses);

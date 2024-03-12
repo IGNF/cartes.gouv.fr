@@ -29,7 +29,7 @@ const InputCollection: FC<InputCollectionProps> = (props: InputCollectionProps) 
         const values: Record<string, string> = {};
         def.forEach((value) => {
             const uuid = uuidv4();
-            values[uuid] = value;
+            values[uuid] = value.trim();
         });
         return values;
     });
@@ -63,7 +63,7 @@ const InputCollection: FC<InputCollectionProps> = (props: InputCollectionProps) 
 
     const handleChangeValue = (key: string, value: string) => {
         const d = { ...datas };
-        d[key] = value;
+        d[key] = value.trim();
         setDatas(d);
     };
 

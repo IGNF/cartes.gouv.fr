@@ -3,7 +3,7 @@ import * as yup from "yup";
 import { ComponentKey } from "../../../i18n/i18n";
 import { UserKeyCreateDtoUserKeyInfoDtoTypeEnum } from "../../../types/entrepot";
 
-const getSecuritySchema = (type: UserKeyCreateDtoUserKeyInfoDtoTypeEnum, t: TranslationFunction<"AddUserKey", ComponentKey>) => {
+const getSecuritySchema = (type: UserKeyCreateDtoUserKeyInfoDtoTypeEnum, t: TranslationFunction<"UserKey", ComponentKey>) => {
     switch (type) {
         case UserKeyCreateDtoUserKeyInfoDtoTypeEnum.BASIC:
             return yup.object().shape({

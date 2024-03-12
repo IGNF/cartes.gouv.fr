@@ -23,7 +23,7 @@ class TypeInfosConstraint extends Compound
                             ])
                         ])
                     ]
-                            ),
+                ),
                 new Assert\Collection(
                     fields: [
                         'login' => new Assert\Required([

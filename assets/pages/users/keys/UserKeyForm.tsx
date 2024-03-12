@@ -7,7 +7,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { compareAsc } from "date-fns";
 import { FC, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import isIPRange from "validator/lib/isIPRange";
 import * as yup from "yup";
 import api from "../../../api";
 import AppLayout from "../../../components/Layout/AppLayout";
@@ -16,58 +15,79 @@ import Wait from "../../../components/Utils/Wait";
 import { datastoreNavItems } from "../../../config/datastoreNavItems";
 import { getTranslation, useTranslation } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/RQKeys";
+import { CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
-import { AddKeyFormType } from "../../../types/app";
-import { PermissionWithOfferingsDetailsResponseDto, UserKeyCreateDtoUserKeyInfoDtoTypeEnum, UserKeyResponseDto } from "../../../types/entrepot";
+import { KeyFormValuesType, UserKeyDetailedWithAccessesResponseDto, UserKeyInfoDtoTypeEnum } from "../../../types/app";
+import { PermissionWithOfferingsDetailsResponseDto, UserKeyResponseDto, UserKeyResponseDtoTypeEnum } from "../../../types/entrepot";
 import "./../../../../assets/sass/pages/my_keys.scss";
-import { getSecuritySchema } from "./KeyTypeValidation";
 import SecurityOptionsForm from "./SecurityOptionsForm";
 import ServicesForm from "./ServicesForm";
+import { getSecurityOptionsSchema, getServicesSchema } from "./ValidationSchemas";
+import { UserKeyDefaultValues, getDefaultValues } from "./utils/DefaultValues";
 
-const { t } = getTranslation("AddUserKey");
+const { t } = getTranslation("UserKey");
 
-/* Schema pour une liste de plages d'adresses IP */
-const ipSchema = yup
-    .array()
-    .of(yup.string())
-    .test({
-        name: "is-ip",
-        test: (values, context) => {
-            if (!values || (Array.isArray(values) && values.length === 0)) return true;
+type UserKeyFormProps = {
+    keyId?: string;
+};
 
-            const errors: string[] = [];
-            values.forEach((value) => {
-                if (value && !isIPRange(value)) {
-                    errors.push(t("ip_error", { ip: value }));
-                }
-            });
-            if (errors.length) {
-                const message = errors.join(", ");
-                return context.createError({ message: message });
-            }
+const createRequestBody = (editMode: boolean, formValues: KeyFormValuesType) => {
+    // Nettoyage => trim sur toutes les chaines
+    const values = JSON.parse(
+        JSON.stringify(formValues, (_, value) => {
+            return typeof value === "string" ? value.trim() : value;
+        })
+    );
 
-            return true;
-        },
-    });
+    if (values["type"] === UserKeyInfoDtoTypeEnum.OAUTH2) {
+        delete values["type_infos"];
+    }
 
-const AddUserKeyForm: FC = () => {
+    if (editMode) {
+        delete values["type"];
+    }
+
+    return values;
+};
+
+const UserKeyForm: FC<UserKeyFormProps> = ({ keyId }) => {
     const navItems = datastoreNavItems();
-
     const { t: tCommon } = useTranslation("Common");
+
+    /* Mode edition ? */
+    const editMode = useMemo(() => !!keyId, [keyId]);
+
+    // La cle d'acces en mode edition
+    const { data: key, isLoading: isLoadingKey } = useQuery<UserKeyDetailedWithAccessesResponseDto | undefined>({
+        queryKey: RQKeys.my_key(keyId ?? ""),
+        queryFn: ({ signal }) => {
+            if (keyId) {
+                return api.user.getMyKeyDetailedWithAccesses(keyId, { signal });
+            }
+            return Promise.resolve(undefined);
+        },
+        enabled: editMode,
+        staleTime: 3600000,
+    });
 
     // Les cles d'acces (recuperee car le nom des cles doit etre unique)
     const { data: keys, isLoading: isLoadingKeys } = useQuery<UserKeyResponseDto[]>({
-        queryKey: RQKeys.me_keys(),
+        queryKey: RQKeys.my_keys(),
         queryFn: ({ signal }) => api.user.getMyKeys({ signal }),
         staleTime: 3600000,
     });
 
     // Les permissions
     const { data: permissions, isLoading: isLoadingPermissions } = useQuery<PermissionWithOfferingsDetailsResponseDto[]>({
-        queryKey: RQKeys.me_permissions(),
+        queryKey: RQKeys.my_permissions(),
         queryFn: ({ signal }) => api.user.getMyPermissions({ signal }),
         staleTime: 3600000,
     });
+
+    /* Le nom de la cle */
+    const keyName = useMemo(() => {
+        return key?.name ?? "";
+    }, [key]);
 
     /* Les noms de toutes les cles */
     const keyNames = useMemo<string[]>(() => {
@@ -75,6 +95,12 @@ const AddUserKeyForm: FC = () => {
         return Array.from(keys, (key) => {
             return key.name;
         });
+    }, [keys]);
+
+    /* Y-a-t-il deja une cle OAUTH2 */
+    const hasOauth2 = useMemo(() => {
+        const f = keys?.find((key) => key.type === UserKeyResponseDtoTypeEnum.OAUTH2);
+        return !!f;
     }, [keys]);
 
     /* Les permissions non expirees */
@@ -91,68 +117,35 @@ const AddUserKeyForm: FC = () => {
     };
 
     const schema = {};
-    schema[STEPS.ACCESSIBLE_SERVICES] = yup.object().shape({
-        name: yup
-            .string()
-            .required(t("name_required"))
-            .test("is-unique", t("name_exists"), (name) => {
-                return !keyNames.includes(name);
-            }),
-        type: yup.string(),
-        accesses: yup
-            .array()
-            .of(
-                yup.object().shape({
-                    permission: yup.string(),
-                    offerings: yup.array().of(yup.string()),
-                })
-            )
-            .min(1, t("accesses_required"))
-            .required(t("accesses_required")),
+    schema[STEPS.ACCESSIBLE_SERVICES] = yup.lazy(() => {
+        return getServicesSchema(editMode, keyName, keyNames);
     });
-    schema[STEPS.SECURITY_OPTIONS] = yup.object().shape({
-        type: yup.string(),
-        type_infos: yup.lazy(() => {
-            return getSecuritySchema(keyType, t);
-        }),
-        ip_list: yup.object({
-            type: yup.string(),
-            adresses: ipSchema,
-        }),
-        user_agent: yup.string(), // TODO Validation
-        referer: yup.string(), // TODO Validation
+    schema[STEPS.SECURITY_OPTIONS] = yup.lazy(() => {
+        return getSecurityOptionsSchema(editMode, keyType);
     });
 
     /* l'etape courante */
     const [currentStep, setCurrentStep] = useState(STEPS.ACCESSIBLE_SERVICES);
 
+    const defaultValues = useMemo(() => {
+        if (key === undefined) return UserKeyDefaultValues;
+        return getDefaultValues(editMode, key);
+    }, [editMode, key]);
+
     // Formulaire
-    const form = useForm<AddKeyFormType>({
+    const form = useForm<KeyFormValuesType>({
         mode: "onChange",
         resolver: yupResolver(schema[currentStep]),
-        defaultValues: {
-            name: "",
-            accesses: [
-                /*{
-                    permission: "1eb4b782-7672-4ed1-8c4a-5172cfed4394",
-                    offerings: ["6c67e296-c399-456f-942f-8816a5766e2b", "17c8e804-4651-471b-8d08-410859307ccb"],
-                },*/
-            ],
-            type: UserKeyCreateDtoUserKeyInfoDtoTypeEnum.HASH,
-            type_infos: { hash: "" },
-            ip_list: {
-                name: "whitelist",
-                addresses: [
-                    /*"192.168.1.1/32", "192.168.0.1/24"*/
-                ],
-            },
-            user_agent: "",
-            referer: "",
-        },
+        values: defaultValues,
     });
 
     const { getValues: getFormValues, trigger, watch } = form;
     const keyType = watch("type");
+
+    // TODO SUPPRIMER
+    /*useEffect(() => {
+        watch((value, { name, type }) => console.log(value, name, type));
+    }, [watch]);*/
 
     const previousStep = () => setCurrentStep((currentStep) => currentStep - 1);
     const nextStep = async () => {
@@ -164,26 +157,40 @@ const AddUserKeyForm: FC = () => {
             return;
         }
 
-        mutate(getFormValues());
+        const values = createRequestBody(editMode, getFormValues());
+        editMode ? mutateUpdate(values) : mutateAdd(values);
     };
 
     const queryClient = useQueryClient();
 
     /* Ajout d'une cle */
-    const { isPending: addkeyIsPending, mutate } = useMutation({
+    const { isPending: addkeyIsPending, mutate: mutateAdd } = useMutation({
         mutationFn: (values: object) => api.user.addKey(values),
         throwOnError: true,
         onSuccess() {
-            // TODO A VOIR POURQUOI refetchQueries
+            // TODO A VOIR POURQUOI refetchQueries ne fonctionne pas
             // queryClient.refetchQueries({ queryKey: RQKeys.me_keys() });
-            queryClient.invalidateQueries({ queryKey: RQKeys.me_keys() });
+            queryClient.invalidateQueries({ queryKey: RQKeys.my_keys() });
+            routes.my_access_keys().push();
+        },
+    });
+
+    /* Modification d'une cle */
+    const { isPending: updatekeyIsPending, mutate: mutateUpdate } = useMutation<null, CartesApiException, object>({
+        mutationFn: (datas) => {
+            if (key) return api.user.updateKey(key._id, datas);
+            return Promise.resolve(null);
+        },
+        throwOnError: true,
+        onSuccess() {
+            queryClient.invalidateQueries({ queryKey: RQKeys.my_keys() });
             routes.my_access_keys().push();
         },
     });
 
     return (
-        <AppLayout documentTitle={t("title")} navItems={navItems}>
-            <h1>{t("title")}</h1>
+        <AppLayout documentTitle={t("title", { editMode: editMode })} navItems={navItems}>
+            <h1>{t("title", { editMode: editMode })}</h1>
             {addkeyIsPending && (
                 <Wait>
                     <div className={fr.cx("fr-container")}>
@@ -194,7 +201,17 @@ const AddUserKeyForm: FC = () => {
                     </div>
                 </Wait>
             )}
-            {isLoadingKeys || isLoadingPermissions ? (
+            {updatekeyIsPending && (
+                <Wait>
+                    <div className={fr.cx("fr-container")}>
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
+                            <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " frx-icon-spin"} />
+                            <h6 className={fr.cx("fr-m-0")}>{tCommon("modifying")}</h6>
+                        </div>
+                    </div>
+                </Wait>
+            )}
+            {isLoadingKey || isLoadingKeys || isLoadingPermissions ? (
                 <LoadingText />
             ) : validPermissions.length === 0 ? (
                 <Alert severity="warning" closable={false} title={tCommon("warning")} description={t("no_permission")} />
@@ -207,7 +224,7 @@ const AddUserKeyForm: FC = () => {
                         title={t("step", { num: currentStep })}
                     />
                     <ServicesForm form={form} permissions={validPermissions} visible={currentStep === STEPS.ACCESSIBLE_SERVICES} />
-                    <SecurityOptionsForm form={form} visible={currentStep === STEPS.SECURITY_OPTIONS} />
+                    <SecurityOptionsForm editMode={editMode} form={form} visible={currentStep === STEPS.SECURITY_OPTIONS} hasOauth2={hasOauth2} />
                     <ButtonsGroup
                         className={fr.cx("fr-mt-2w")}
                         alignment="between"
@@ -219,7 +236,7 @@ const AddUserKeyForm: FC = () => {
                                 disabled: currentStep === STEPS.ACCESSIBLE_SERVICES,
                             },
                             {
-                                children: currentStep < Object.values(STEPS).length ? tCommon("next_step") : tCommon("add"),
+                                children: currentStep < Object.values(STEPS).length ? tCommon("next_step") : editMode ? tCommon("modify") : tCommon("add"),
                                 onClick: nextStep,
                             },
                         ]}
@@ -231,4 +248,4 @@ const AddUserKeyForm: FC = () => {
     );
 };
 
-export default AddUserKeyForm;
+export default UserKeyForm;

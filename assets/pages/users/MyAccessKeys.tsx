@@ -21,14 +21,14 @@ const MyAccessKeys: FC = () => {
 
     // Les cles d'acces
     const { data: keys, isLoading: isLoadingKeys } = useQuery<UserKeysWithAccessesResponseDto[]>({
-        queryKey: RQKeys.me_keys(),
+        queryKey: RQKeys.my_keys(),
         queryFn: ({ signal }) => api.user.getMyKeysWithAccesses({ signal }),
         staleTime: 3600000,
     });
 
     // Les permissions
     const { data: permissions, isLoading: isLoadingPermissions } = useQuery<PermissionDetailsResponseDto[]>({
-        queryKey: RQKeys.me_permissions(),
+        queryKey: RQKeys.my_permissions(),
         queryFn: ({ signal }) => api.user.getMyDetailedPermissions({ signal }),
         staleTime: 3600000,
     });

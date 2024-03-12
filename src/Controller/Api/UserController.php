@@ -49,6 +49,14 @@ class UserController extends AbstractController implements ApiControllerInterfac
         return $this->json($keys);
     }
 
+    #[Route('/me/key_with_accesses/{keyId}', name: 'key_with_accesses')]
+    public function getUserKeyWithAccesses(string $keyId): JsonResponse
+    {
+        $key = $this->entrepotApiService->user->getMyKey($keyId);
+        $key['accesses'] = $this->entrepotApiService->user->getKeyAccesses($key['_id']);
+        return $this->json($key);
+    }
+
     #[Route('/me/permissions', name: 'permissions')]
     public function getUserPermissions(): JsonResponse
     {
@@ -74,16 +82,20 @@ class UserController extends AbstractController implements ApiControllerInterfac
     ]
     public function addKey(#[MapRequestPayload] UserKeyDTO $dto): JsonResponse
     {
-        try {            
-            $body = array_filter((array) $dto, function($value) {
-                return ! ($value === null || $value === '');
-            });
-            unset($body['accesses']);
-            unset($body['ip_list']);
+        try {   
+            $filter = ['accesses', 'ip_list_name', 'ip_list_addresses'];
+
+            $body = array_filter((array) $dto, function($value, $key) use ($filter) {
+                return ! ($value === null || $value === '' || in_array($key, $filter));
+            }, ARRAY_FILTER_USE_BOTH);
 
             // Les adresses IP
-            if (isset($dto->ip_list) && 0 !== count($dto->ip_list->addresses)) {
-                $body[$dto->ip_list->name] = $dto->ip_list->addresses;  
+            if (0 !== count($dto->ip_list_addresses)) {
+                $body[$dto->ip_list_name] = $dto->ip_list_addresses;  
+            }
+
+            if ($dto->type === "OAUTH2") {
+                $body['type_infos'] = ['fake' => null]; // TODO Pas trouv un autre moyen
             }
 
             // Ajout de la cle
@@ -94,6 +106,48 @@ class UserController extends AbstractController implements ApiControllerInterfac
                 $accessBody = (array)$access;
                 $this->entrepotApiService->user->addAccess($key['_id'], $accessBody);    
             }
+
+            return new JsonResponse(); 
+
+        }
+        catch (EntrepotApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
+    #[Route('/update_key/{key}', name: 'update_key', methods: ['PATCH'],
+        options: ['expose' => true],
+        condition: 'request.isXmlHttpRequest()')
+    ]
+    public function updateKey(string $key, #[MapRequestPayload] UserKeyDTO $dto): JsonResponse
+    {
+        $filter = ['type', 'type_infos', 'accesses', 'ip_list_name', 'ip_list_addresses', ];
+      
+        try {            
+            $body = array_filter((array) $dto, function($value, $key) use ($filter) {
+                return ! ($value === null || $value === '' || in_array($key, $filter));
+            }, ARRAY_FILTER_USE_BOTH);
+            
+            /*unset($body['accesses']);
+            unset($body['ip_list']);*/
+
+            // Les adresses IP
+            /*if (isset($dto->ip_list) && 0 !== count($dto->ip_list->addresses)) {
+                $body[$dto->ip_list->name] = $dto->ip_list->addresses;  
+            }
+
+            if ($dto->type === "OAUTH2") {
+                $body['type_infos'] = ['fake' => null]; // TODO Pas trouv un autre moyen
+            }
+
+            // Ajout de la cle
+            $key = $this->entrepotApiService->user->addKey($body);
+            
+            // Ajout des acces
+            foreach($dto->accesses as $access) {
+                $accessBody = (array)$access;
+                $this->entrepotApiService->user->addAccess($key['_id'], $accessBody);    
+            }*/
 
             return new JsonResponse(); 
 

@@ -3,7 +3,7 @@ import { Translations } from "../../../i18n/i18n";
 
 // traductions
 export const { i18n } = declareComponentKeys<
-    | "title"
+    | { K: "title"; P: { editMode: boolean }; R: string }
     | { K: "step"; P: { num: number }; R: string }
     | "services"
     | "key_name"
@@ -27,10 +27,10 @@ export const { i18n } = declareComponentKeys<
     | "apikey_required"
     | { K: "ip_error"; P: { ip: string }; R: string }
     | "no_permission"
->()("AddUserKey");
+>()("UserKey");
 
-export const AddUserKeyFrTranslations: Translations<"fr">["AddUserKey"] = {
-    title: "Ajout d'une clé",
+export const UserKeyFrTranslations: Translations<"fr">["UserKey"] = {
+    title: ({ editMode }) => (editMode ? "Modification d'une clé" : "Ajout d'une clé"),
     step: ({ num }) => (num === 1 ? "Services accessibles" : "Options de sécurisation"),
     services: "Services",
     key_name: "Nom de la clé",
@@ -57,8 +57,8 @@ export const AddUserKeyFrTranslations: Translations<"fr">["AddUserKey"] = {
     no_permission: "Vous n'avez aucune permission, vous ne pouvez pas créer une clé",
 };
 
-export const AddUserKeyEnTranslations: Translations<"en">["AddUserKey"] = {
-    title: "My access keys",
+export const UserKeyEnTranslations: Translations<"en">["UserKey"] = {
+    title: ({ editMode }) => (editMode ? "Modify key" : "Add key"),
     step: ({ num }) => (num === 1 ? "Accessible services" : "Security options"),
     services: "Services",
     key_name: "Key name",

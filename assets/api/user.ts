@@ -1,13 +1,14 @@
 import SymfonyRouting from "../modules/Routing";
 
 import { jsonFetch } from "../modules/jsonFetch";
-import { Datastore, UserKeysWithAccessesResponseDto } from "../types/app";
+import { Datastore, UserKeyDetailedWithAccessesResponseDto, UserKeysWithAccessesResponseDto } from "../types/app";
 import {
     PermissionDetailsResponseDto,
     PermissionWithOfferingsDetailsResponseDto,
     UserKeyCreateDtoUserKeyInfoDto,
     UserKeyDetailsResponseDtoUserKeyInfoDto,
     UserKeyResponseDto,
+    UserKeyUpdateDto,
 } from "../types/entrepot";
 
 const getMe = () => {
@@ -20,6 +21,15 @@ const getDatastoresList = (otherOptions: RequestInit = {}) => {
     return jsonFetch<Datastore[]>(url, { ...otherOptions });
 };
 
+/* Retourne la cle detaillee de l'utilisateur courant avec ses access */
+const getMyKeyDetailedWithAccesses = (keyId: string, otherOptions: RequestInit = {}) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_user_key_with_accesses", { keyId: keyId });
+    return jsonFetch<UserKeyDetailedWithAccessesResponseDto>(url, {
+        ...otherOptions,
+    });
+};
+
+/* Retourne les cles de de l'utilisateur courant */
 const getMyKeys = (otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_user_keys");
     return jsonFetch<UserKeyResponseDto[]>(url, {
@@ -27,6 +37,7 @@ const getMyKeys = (otherOptions: RequestInit = {}) => {
     });
 };
 
+/* Retourne les cles de de l'utilisateur courant avec leur acces */
 const getMyKeysWithAccesses = (otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_user_keys_with_accesses");
     return jsonFetch<UserKeysWithAccessesResponseDto[]>(url, {
@@ -34,6 +45,7 @@ const getMyKeysWithAccesses = (otherOptions: RequestInit = {}) => {
     });
 };
 
+/* Retourne les permissions de l'utilisateur */
 const getMyPermissions = (otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_user_permissions");
     return jsonFetch<PermissionWithOfferingsDetailsResponseDto[]>(url, {
@@ -63,6 +75,21 @@ const addKey = (formData: UserKeyCreateDtoUserKeyInfoDto | object) => {
     );
 };
 
+const updateKey = (key: string, formData: UserKeyUpdateDto | object) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_user_update_key", { key: key });
+    return jsonFetch<null>(
+        url,
+        {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+            },
+        },
+        formData
+    );
+};
+
 const removeKey = (key: string) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_user_remove_key", { key });
     return jsonFetch<null>(url, { method: "DELETE" });
@@ -82,11 +109,13 @@ const addToSandbox = () => {
 const user = {
     getMe,
     getDatastoresList,
+    getMyKeyDetailedWithAccesses,
     getMyKeys,
     getMyKeysWithAccesses,
     getMyPermissions,
     getMyDetailedPermissions,
     addKey,
+    updateKey,
     removeKey,
     addToSandbox,
 };
