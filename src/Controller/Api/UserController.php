@@ -115,6 +115,12 @@ class UserController extends AbstractController implements ApiControllerInterfac
         }
     }
 
+    /**
+     * Mise à jour d'une clé
+     * 
+     * TODO : remove lorsque fonction terminée :
+     * @SuppressWarnings(UnusedLocalVariable)
+     */ 
     #[Route('/update_key/{key}', name: 'update_key', methods: ['PATCH'],
         options: ['expose' => true],
         condition: 'request.isXmlHttpRequest()')
@@ -123,7 +129,8 @@ class UserController extends AbstractController implements ApiControllerInterfac
     {
         $filter = ['type', 'type_infos', 'accesses', 'ip_list_name', 'ip_list_addresses', ];
       
-        try {            
+        try {
+                       
             $body = array_filter((array) $dto, function($value, $key) use ($filter) {
                 return ! ($value === null || $value === '' || in_array($key, $filter));
             }, ARRAY_FILTER_USE_BOTH);
