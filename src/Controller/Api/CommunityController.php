@@ -69,9 +69,9 @@ class CommunityController extends AbstractController implements ApiControllerInt
                 throw new CartesApiException("Vous n'êtes pas membre de cette communauté", JsonResponse::HTTP_BAD_REQUEST);
             }
 
-            // Ai-je les droits (COMMUNITY)
-            if (!in_array('COMMUNITY', $communityMember[0]['rights'])) {
-                throw new CartesApiException("Vous n'avez pas les droits pour ajouter un utilisateur", JsonResponse::HTTP_BAD_REQUEST);
+            // Ai-je le droit de modifier les membres ?
+            if (!$this->_allowedToModifyMembers($communityMember[1], $me)) {
+                throw new CartesApiException("Vous n'avez pas les droits pour ajouter un utilisateur ou modifier ses permissions", JsonResponse::HTTP_BAD_REQUEST);
             }
 
             $data = json_decode($request->getContent(), true);
@@ -119,9 +119,9 @@ class CommunityController extends AbstractController implements ApiControllerInt
                 throw new CartesApiException("Vous n'êtes pas membre de cette communauté", JsonResponse::HTTP_BAD_REQUEST);
             }
 
-            // Ai-je les droits (COMMUNITY)
-            if (!in_array('COMMUNITY', $communityMember[0]['rights'])) {
-                throw new CartesApiException("Vous n'avez pas les droits pour ajouter un utilisateur", JsonResponse::HTTP_BAD_REQUEST);
+            // Ai-je le droit de modifier les membres ?
+            if (!$this->_allowedToModifyMembers($communityMember[1], $me)) {
+                throw new CartesApiException("Vous n'avez pas les droits pour supprimer un membre de cette communauté", JsonResponse::HTTP_BAD_REQUEST);
             }
 
             $data = json_decode($request->getContent(), true);
@@ -149,5 +149,28 @@ class CommunityController extends AbstractController implements ApiControllerInt
                 throw new CartesApiException("Le droit $right n'existe pas", JsonResponse::HTTP_BAD_REQUEST);
             }
         }
+    }
+
+    /**
+     * Vérifie que je peux modifier les membres de la communauté :
+     *  - si je suis superviseur
+     *  - si j'ai le droit COMMUNITY
+     *
+     * @param array<mixed> $communityMember
+     * @param array<mixed> $me
+     *
+     * @return boolean
+     */
+    private function _allowedToModifyMembers($communityMember, $me)
+    {
+        if ($me['_id'] === $communityMember['community']['supervisor']) {
+            return true;
+        }
+
+        if (in_array('COMMUNITY', $communityMember['rights'])) {
+            return true;
+        }
+
+        return false;
     }
 }
