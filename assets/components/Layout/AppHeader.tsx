@@ -42,15 +42,15 @@ const AppHeader: FC<AppHeaderProps> = ({ navItems = [] }) => {
         // });
     } else {
         // utilisateur est connecté
-        let btnMyAccountText = `${user.firstName} ${user.lastName}`;
+        let btnMyAccountText = `${user.firstName ?? ""} ${user.lastName ?? ""}`;
         if (btnMyAccountText.replace(/\s+/g, "") === "") {
-            btnMyAccountText = "Mon compte";
+            btnMyAccountText = user.userName;
         }
 
         quickAccessItems.push({
             iconId: "fr-icon-account-fill",
             linkProps: routes.dashboard_pro().link,
-            text: btnMyAccountText,
+            text: btnMyAccountText.trim(),
         });
         quickAccessItems.push({
             iconId: "fr-icon-logout-box-r-line",

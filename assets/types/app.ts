@@ -35,8 +35,9 @@ import {
 export type CartesUser = {
     id: string;
     email: string;
-    firstName: string;
-    lastName: string;
+    userName: string;
+    firstName?: string | null;
+    lastName?: string | null;
     roles: string[];
     communitiesMember: CommunityMemberDto[];
     accountCreationDate: string;

@@ -1,9 +1,10 @@
 import Button from "@codegouvfr/react-dsfr/Button";
 import { useMemo } from "react";
-import { Translations, declareComponentKeys, getTranslation, useTranslation } from "../../i18n/i18n";
+
 import AppLayout from "../../components/Layout/AppLayout";
 import { datastoreNavItems } from "../../config/datastoreNavItems";
 import functions from "../../functions";
+import { Translations, declareComponentKeys, getTranslation, useTranslation } from "../../i18n/i18n";
 import SymfonyRouting from "../../modules/Routing";
 import { useAuthStore } from "../../stores/AuthStore";
 
@@ -19,8 +20,9 @@ const Me = () => {
 
             {user && (
                 <>
-                    <p>{t("firstname", { firstName: user.firstName })}</p>
-                    <p>{t("lastname", { lastName: user.lastName })}</p>
+                    <p>{t("firstname", { firstName: user?.firstName ?? "" })}</p>
+                    <p>{t("lastname", { lastName: user?.lastName ?? "" })}</p>
+                    <p>{t("username", { userName: user?.userName ?? "" })}</p>
                     <p>{t("email", { email: user.email })}</p>
                     <p>{t("registration_date", { date: functions.date.format(user.accountCreationDate) })}</p>
                     <p>{t("id", { id: user.id })}</p>
@@ -47,6 +49,7 @@ export const { i18n } = declareComponentKeys<
     | "my_account"
     | { K: "firstname"; P: { firstName: string }; R: JSX.Element }
     | { K: "lastname"; P: { lastName: string }; R: JSX.Element }
+    | { K: "username"; P: { userName: string }; R: JSX.Element }
     | { K: "email"; P: { email: string }; R: JSX.Element }
     | { K: "registration_date"; P: { date: string }; R: JSX.Element }
     | { K: "id"; P: { id: string }; R: JSX.Element }
@@ -65,6 +68,11 @@ export const MeFrTranslations: Translations<"fr">["Me"] = {
     lastname: ({ lastName }) => (
         <>
             <strong>Nom</strong>&nbsp;: {lastName}
+        </>
+    ),
+    username: ({ userName }) => (
+        <>
+            <strong>Pseudo</strong>&nbsp;: {userName}
         </>
     ),
     email: ({ email }) => (
@@ -95,6 +103,11 @@ export const MeEnTranslations: Translations<"en">["Me"] = {
     lastname: ({ lastName }) => (
         <>
             <strong>Name</strong>: {lastName}
+        </>
+    ),
+    username: ({ userName }) => (
+        <>
+            <strong>Username</strong>&nbsp;: {userName}
         </>
     ),
     email: ({ email }) => (

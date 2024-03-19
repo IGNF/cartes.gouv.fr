@@ -7,13 +7,14 @@ use Symfony\Component\Security\Core\User\UserInterface;
 class User implements UserInterface
 {
     private string $email;
+    private string $userName;
     private string $id;
 
     /** @var array<string> */
     private array $roles = [];
 
-    private string $firstName;
-    private string $lastName;
+    private ?string $firstName;
+    private ?string $lastName;
 
     /** @var array<string,mixed> */
     private array $communitiesMember = [];
@@ -29,8 +30,9 @@ class User implements UserInterface
     {
         $this->email = $keycloakUserInfo['email'];
         $this->id = $apiUserInfo['_id'];
-        $this->firstName = $keycloakUserInfo['given_name'];
-        $this->lastName = $keycloakUserInfo['family_name'];
+        $this->firstName = $keycloakUserInfo['given_name'] ?? null;
+        $this->lastName = $keycloakUserInfo['family_name'] ?? null;
+        $this->userName = $keycloakUserInfo['preferred_username'];
 
         $this->accountCreationDate = new \DateTime($apiUserInfo['creation']);
         $this->lastApiCallDate = new \DateTime($apiUserInfo['last_call']);
@@ -53,6 +55,11 @@ class User implements UserInterface
     public function getUserIdentifier(): string
     {
         return (string) $this->email;
+    }
+
+    public function getUserName(): string
+    {
+        return $this->userName;
     }
 
     /**
