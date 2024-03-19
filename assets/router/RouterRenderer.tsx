@@ -42,10 +42,10 @@ const Confirm = lazy(() => import("../pages/contact/datastore/Confirmation"));
 const CommunityMembers = lazy(() => import("../pages/communities/CommunityMembers"));
 const CommunityList = lazy(() => import("../pages/communities/CommunityList"));
 
-const WfsServiceNew = lazy(() => import("../pages/service/wfs/WfsServiceNew"));
-const WmsVectorServiceNew = lazy(() => import("../pages/service/wms-vector/WmsVectorServiceNew"));
-const PyramidVectorNew = lazy(() => import("../pages/service/tms/PyramidVectorNew"));
-const PublishTmsServiceNew = lazy(() => import("../pages/service/tms/PublishNew"));
+const WfsServiceForm = lazy(() => import("../pages/service/wfs/WfsServiceForm"));
+const WmsVectorServiceForm = lazy(() => import("../pages/service/wms-vector/WmsVectorServiceForm"));
+const PyramidVectorGenerateForm = lazy(() => import("../pages/service/tms/PyramidVectorGenerateForm"));
+const PyramidVectorTmsServiceForm = lazy(() => import("../pages/service/tms/PyramidVectorTmsServiceForm"));
 
 const ServiceView = lazy(() => import("../pages/service/view/ServiceView"));
 
@@ -124,15 +124,33 @@ const RouterRenderer: FC = () => {
             case "datastore_stored_data_report":
                 return <StoredDataReport datastoreId={route.params.datastoreId} storedDataId={route.params.storedDataId} />;
             case "datastore_wfs_service_new":
-                return <WfsServiceNew datastoreId={route.params.datastoreId} vectorDbId={route.params.vectorDbId} />;
+                return <WfsServiceForm datastoreId={route.params.datastoreId} vectorDbId={route.params.vectorDbId} />;
+            case "datastore_wfs_service_edit":
+                return <WfsServiceForm datastoreId={route.params.datastoreId} vectorDbId={route.params.vectorDbId} offeringId={route.params.offeringId} />;
             case "datastore_wms_vector_service_new":
-                return <WmsVectorServiceNew datastoreId={route.params.datastoreId} vectorDbId={route.params.vectorDbId} />;
-            case "datastore_pyramid_vector_new":
+                return <WmsVectorServiceForm datastoreId={route.params.datastoreId} vectorDbId={route.params.vectorDbId} />;
+            case "datastore_wms_vector_service_edit":
                 return (
-                    <PyramidVectorNew datastoreId={route.params.datastoreId} vectorDbId={route.params.vectorDbId} technicalName={route.params.technicalName} />
+                    <WmsVectorServiceForm datastoreId={route.params.datastoreId} vectorDbId={route.params.vectorDbId} offeringId={route.params.offeringId} />
                 );
-            case "datastore_tms_vector_service_new":
-                return <PublishTmsServiceNew datastoreId={route.params.datastoreId} pyramidId={route.params.pyramidId} />;
+            case "datastore_pyramid_vector_generate":
+                return (
+                    <PyramidVectorGenerateForm
+                        datastoreId={route.params.datastoreId}
+                        vectorDbId={route.params.vectorDbId}
+                        technicalName={route.params.technicalName}
+                    />
+                );
+            case "datastore_pyramid_vector_tms_service_new":
+                return <PyramidVectorTmsServiceForm datastoreId={route.params.datastoreId} pyramidId={route.params.pyramidId} />;
+            case "datastore_pyramid_vector_tms_service_edit":
+                return (
+                    <PyramidVectorTmsServiceForm
+                        datastoreId={route.params.datastoreId}
+                        pyramidId={route.params.pyramidId}
+                        offeringId={route.params.offeringId}
+                    />
+                );
             case "datastore_service_view":
                 return <ServiceView datastoreId={route.params.datastoreId} offeringId={route.params.offeringId} datasheetName={route.params.datasheetName} />;
             default:

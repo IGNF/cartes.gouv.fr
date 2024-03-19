@@ -21,6 +21,11 @@ import { commonFrTranslations } from "../Common";
 import { RightsFrTranslations } from "../Rights";
 import { StyleFrTranslations } from "../Style";
 import type { Translations } from "../i18n";
+import { WmsVectorServiceFormFrTranslations } from "../../pages/service/wms-vector/WmsVectorServiceForm";
+import { TableSelectionFrTranslations } from "../../pages/service/TableSelection";
+import { UploadStyleFileFrTranslations } from "../../pages/service/wms-vector/UploadStyleFile";
+import { WfsServiceFormFrTranslations } from "../../pages/service/wfs/WfsServiceForm";
+import { PyramidVectorTmsServiceFormFrTranslations } from "../../pages/service/tms/PyramidVectorTmsServiceForm";
 
 export const translations: Translations<"fr"> = {
     Common: commonFrTranslations,
@@ -45,4 +50,9 @@ export const translations: Translations<"fr"> = {
     mapboxStyleValidation: mapboxStyleValidationFrTranslations,
     TMSStyleFilesManager: TMSStyleFilesManagerFrTranslations,
     DatastoreManageStorage: DatastoreManageStorageFrTranslations,
+    WmsVectorServiceForm: WmsVectorServiceFormFrTranslations,
+    WfsServiceForm: WfsServiceFormFrTranslations,
+    TableSelection: TableSelectionFrTranslations,
+    UploadStyleFile: UploadStyleFileFrTranslations,
+    PyramidVectorTmsServiceForm: PyramidVectorTmsServiceFormFrTranslations,
 };

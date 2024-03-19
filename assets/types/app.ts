@@ -1,3 +1,4 @@
+import { LanguageType } from "../utils";
 import {
     AccessCreateDto,
     AccessDetailsResponseDto,
@@ -182,9 +183,38 @@ export type TypeInfosWithBbox =
     | ConfigurationWmsVectorDetailsContent
     | ConfigurationWmtsTmsDetailsContent;
 
+export type MetadataFormValuesType = {
+    metadata_file_content?: FileList;
+    identifier?: string;
+    email_contact?: string;
+    creation_date?: string;
+    resource_genealogy?: string;
+    organization?: string;
+    organization_email?: string;
+    category?: string[];
+    charset?: string;
+    projection?: string;
+    encoding?: string;
+    resolution?: string;
+    languages?: LanguageType[];
+};
+
+export type AttributionFormValuesType = {
+    attribution_text?: string;
+    attribution_url?: string;
+};
+
+export type ServiceFormValuesBaseType = {
+    technical_name?: string;
+    public_name?: string;
+    description?: string;
+    share_with?: string;
+} & MetadataFormValuesType &
+    AttributionFormValuesType;
+
 /** endpoints */
 export type DatastoreEndpoint = DatastoreEndpointResponseDto;
-export type EndpointTypes = `${EndpointDetailResponseDtoTypeEnum}`;
+export { EndpointDetailResponseDtoTypeEnum as EndpointTypeEnum };
 
 export type CheckOrProcessingExecutionLogs = [string];
 export type CheckDetailed = CheckingExecutionDetailResponseDto & {

@@ -1,46 +1,39 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Input from "@codegouvfr/react-dsfr/Input";
-import { format as datefnsFormat } from "date-fns";
+import Select from "@codegouvfr/react-dsfr/Select";
 import { XMLParser } from "fast-xml-parser";
 import { FC, useEffect } from "react";
 import { Controller, UseFormReturn } from "react-hook-form";
+
 import AutocompleteSelect from "../../../components/Input/AutocompleteSelect";
 import MarkdownEditor from "../../../components/Input/MarkdownEditor";
-import { Pyramid, VectorDb } from "../../../types/app";
-import { getInspireKeywords, removeDiacritics } from "../../../utils";
-import Select from "@codegouvfr/react-dsfr/Select";
-import { regex } from "../../../utils";
-import { EndpointTypes } from "../../../types/app";
 import { getTranslation } from "../../../i18n/i18n";
+import { EndpointTypeEnum, ServiceFormValuesBaseType } from "../../../types/app";
+import { getInspireKeywords, regex } from "../../../utils";
 
 type DescriptionProps = {
-    storedData: VectorDb | Pyramid;
-    endpointType: EndpointTypes;
     visible: boolean;
-    form: UseFormReturn;
+    form: UseFormReturn<ServiceFormValuesBaseType>;
 };
 
-const getSuffix = (endpointType) => {
+export const getEndpointSuffix = (endpointType: EndpointTypeEnum) => {
     switch (endpointType) {
-        case "WFS":
+        case EndpointTypeEnum.WFS:
             return "wfs";
-        case "WMS-VECTOR":
+        case EndpointTypeEnum.WMSVECTOR:
             return "wmsv";
-        case "WMTS-TMS":
+        case EndpointTypeEnum.WMTSTMS:
             return "tms";
         default:
             return "other"; // TODO
     }
 };
 
-const Description: FC<DescriptionProps> = ({ storedData, endpointType, visible, form }) => {
+const keywords = getInspireKeywords();
+
+const Description: FC<DescriptionProps> = ({ visible, form }) => {
     const { t: tCommon } = getTranslation("Common");
     const { t } = getTranslation("MetadatasForm");
-
-    const keywords = getInspireKeywords();
-    const now = datefnsFormat(new Date(), "yyyy-MM-dd");
-
-    const suffix = getSuffix(endpointType);
 
     const {
         register,
@@ -50,15 +43,7 @@ const Description: FC<DescriptionProps> = ({ storedData, endpointType, visible, 
         control,
     } = form;
 
-    const metadata: File = watch("metadata_file_content")?.[0];
-
-    useEffect(() => {
-        const storedDataName = storedData?.name ?? "";
-        const nice = removeDiacritics(storedDataName.toLowerCase()).replace(/ /g, "_");
-
-        setFormValue("technical_name", `${nice}_${suffix}`);
-        setFormValue("public_name", storedDataName);
-    }, [setFormValue, storedData, suffix]);
+    const metadata: File | undefined = watch("metadata_file_content")?.[0];
 
     useEffect(() => {
         (async () => {
@@ -74,7 +59,7 @@ const Description: FC<DescriptionProps> = ({ storedData, endpointType, visible, 
             // TODO Utiliser la nouvelle route https://github.com/Geoplateforme/geoplateforme.github.io/issues/1
 
             if (regex.name_constraint.test(fileIdentifier)) {
-                setFormValue("resource_genealogy", hierarchyLevel);
+                setFormValue("identifier", fileIdentifier);
             }
             if (["dataset", "series"].includes(hierarchyLevel)) {
                 setFormValue("resource_genealogy", hierarchyLevel);
@@ -104,15 +89,23 @@ const Description: FC<DescriptionProps> = ({ storedData, endpointType, visible, 
                     ...register("public_name"),
                 }}
             />
-            <MarkdownEditor
-                label={t("metadata.description_form.description")}
-                hintText={t("metadata.description_form.hint_description")}
-                state={errors.description ? "error" : "default"}
-                stateRelatedMessage={errors?.description?.message?.toString()}
-                onChange={(values) => {
-                    setFormValue("description", values, { shouldValidate: true });
-                }}
+            <Controller
+                control={control}
+                name="description"
+                render={({ field }) => (
+                    <MarkdownEditor
+                        label={t("metadata.description_form.description")}
+                        hintText={t("metadata.description_form.hint_description")}
+                        state={errors.description ? "error" : "default"}
+                        stateRelatedMessage={errors?.description?.message?.toString()}
+                        defaultValue={field.value}
+                        onChange={(values) => {
+                            field.onChange(values);
+                        }}
+                    />
+                )}
             />
+
             <Input
                 label={t("metadata.description_form.identifier")}
                 hintText={t("metadata.description_form.hint_identifier")}
@@ -126,23 +119,22 @@ const Description: FC<DescriptionProps> = ({ storedData, endpointType, visible, 
                 control={control}
                 name="category"
                 defaultValue={[]}
-                render={({ field }) => {
-                    return (
-                        <AutocompleteSelect
-                            label={t("metadata.description_form.category")}
-                            hintText={t("metadata.description_form.hint_category")}
-                            options={keywords}
-                            freeSolo={true}
-                            getOptionLabel={(option) => option}
-                            isOptionEqualToValue={(option, value) => option === value}
-                            state={errors.category ? "error" : "default"}
-                            stateRelatedMessage={errors?.category?.message?.toString()}
-                            onChange={(_, value) => field.onChange(value)}
-                            // @ts-expect-error fausse alerte
-                            controllerField={field}
-                        />
-                    );
-                }}
+                render={({ field }) => (
+                    <AutocompleteSelect
+                        label={t("metadata.description_form.category")}
+                        hintText={t("metadata.description_form.hint_category")}
+                        options={keywords}
+                        freeSolo={true}
+                        getOptionLabel={(option) => option}
+                        isOptionEqualToValue={(option, value) => option === value}
+                        state={errors.category ? "error" : "default"}
+                        stateRelatedMessage={errors?.category?.message?.toString()}
+                        defaultValue={field.value}
+                        onChange={(_, value) => field.onChange(value)}
+                        // @ts-expect-error fausse alerte
+                        controllerField={field}
+                    />
+                )}
             />
 
             <Input
@@ -163,7 +155,6 @@ const Description: FC<DescriptionProps> = ({ storedData, endpointType, visible, 
                 nativeInputProps={{
                     ...register("creation_date"),
                     type: "date",
-                    defaultValue: now,
                 }}
             />
             <Select
@@ -173,7 +164,6 @@ const Description: FC<DescriptionProps> = ({ storedData, endpointType, visible, 
                 stateRelatedMessage={errors?.resource_genealogy?.message?.toString()}
                 nativeSelectProps={{
                     ...register("resource_genealogy"),
-                    defaultValue: "",
                 }}
             >
                 <option value="">{tCommon("none")}</option>

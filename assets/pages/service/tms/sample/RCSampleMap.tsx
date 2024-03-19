@@ -20,7 +20,7 @@ import "../../../../sass/components/ol.scss";
 type RCSampleMapProps = {
     form: UseFormReturn;
     center: number[];
-    bottomZoomLevel: number;
+    bottomZoomLevel?: number;
     onChange: (center: number[], area: string) => void;
 };
 

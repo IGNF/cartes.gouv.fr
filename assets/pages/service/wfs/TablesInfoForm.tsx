@@ -7,6 +7,7 @@ import { Controller, UseFormReturn } from "react-hook-form";
 import AutocompleteSelect from "../../../components/Input/AutocompleteSelect";
 import Translator from "../../../modules/Translator";
 import { StoredDataDetailsRelationDto } from "../../../types/entrepot";
+import { WfsServiceFormValuesType } from "./WfsServiceForm";
 
 // Themes et mot cles INSPIRE
 import { getInspireKeywords } from "../../../utils";
@@ -14,10 +15,12 @@ import { getInspireKeywords } from "../../../utils";
 type TablesInfoFormProps = {
     tables: StoredDataDetailsRelationDto[];
     visible: boolean;
-    form: UseFormReturn;
+    form: UseFormReturn<WfsServiceFormValuesType>;
     state?: "default" | "error" | "success";
     stateRelatedMessage?: string;
 };
+
+const keywords = getInspireKeywords();
 
 const TableInfosForm: FC<TablesInfoFormProps> = ({ visible, tables, state, stateRelatedMessage, form }) => {
     const {
@@ -28,8 +31,6 @@ const TableInfosForm: FC<TablesInfoFormProps> = ({ visible, tables, state, state
         control,
         watch,
     } = form;
-
-    const keywords = getInspireKeywords();
 
     const selectedTables = watch("selected_tables") ?? [];
 

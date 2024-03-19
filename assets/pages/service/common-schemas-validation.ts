@@ -24,7 +24,7 @@ export class CommonSchemasValidation {
         });
     }
 
-    getMDDescriptionSchema() {
+    getMDDescriptionSchema(editMode: boolean = false, oldTechnicalName?: string) {
         return yup
             .object({
                 technical_name: yup
@@ -35,7 +35,14 @@ export class CommonSchemasValidation {
                         name: "is-unique",
                         message: tValidMD("metadatas.technical_name_unicity_error"),
                         test: (technicalName) => {
-                            const technicalNameList = this._offeringList?.map((offering) => offering?.layer_name) ?? [];
+                            // récupération des noms des offerings existants, interdiction de prendre un nom qui fait partie de cette liste
+                            let technicalNameList = this._offeringList?.map((offering) => offering?.layer_name) ?? [];
+
+                            // si editMode est vraie, on autorise de prendre le nom de l'offering actuel
+                            if (editMode === true && oldTechnicalName !== undefined) {
+                                technicalNameList = technicalNameList.filter((name) => name !== oldTechnicalName);
+                            }
+
                             return !technicalNameList?.includes(technicalName);
                         },
                     }),

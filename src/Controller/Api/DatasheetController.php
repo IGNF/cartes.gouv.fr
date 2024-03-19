@@ -126,18 +126,13 @@ class DatasheetController extends AbstractController implements ApiControllerInt
     {
         $datastore = $this->entrepotApiService->datastore->get($datastoreId);
 
-        $nbPublications = 0;
         $configurations = $this->entrepotApiService->configuration->getAll($datastoreId, [
             'tags' => [
                 CommonTags::DATASHEET_NAME => $datasheetName,
             ],
+            'status' => ConfigurationStatuses::PUBLISHED,
         ]);
-
-        foreach ($configurations as $configuration) {
-            if (isset($configuration['status']) && ConfigurationStatuses::PUBLISHED === $configuration['status']) {
-                ++$nbPublications;
-            }
-        }
+        $nbPublications = count($configurations);
 
         $annexeUrl = $this->getParameter('annexes_url');
         $annexes = $this->entrepotApiService->annexe->getAll($datastoreId, null, null, ["datasheet_name=$datasheetName", 'type=thumbnail']);

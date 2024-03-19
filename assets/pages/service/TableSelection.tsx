@@ -1,48 +1,65 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
-import { FC } from "react";
-import { type UseFormReturn } from "react-hook-form";
+import { FC, useCallback, useMemo } from "react";
+import { useWatch, type UseFormReturn } from "react-hook-form";
 
 import { filterGeometricRelations } from "../../helpers";
-import Translator from "../../modules/Translator";
+import { type Translations, declareComponentKeys, useTranslation } from "../../i18n/i18n";
 import { type VectorDb } from "../../types/app";
+import { type PyramidVectorGenerateFormValuesType } from "./tms/PyramidVectorGenerateForm";
+import { type WmsVectorServiceFormValuesType } from "./wms-vector/WmsVectorServiceForm";
 
 type TablesSelectionProps = {
     filterGeometric?: boolean;
     vectorDb: VectorDb;
     visible: boolean;
-    form: UseFormReturn;
+    form: UseFormReturn<WmsVectorServiceFormValuesType | PyramidVectorGenerateFormValuesType>;
 };
 
 const TableSelection: FC<TablesSelectionProps> = ({ filterGeometric = false, vectorDb, visible, form }) => {
+    const { t } = useTranslation("TableSelection");
+    const { t: tCommon } = useTranslation("Common");
+
     const {
         formState: { errors },
         setValue: setFormValue,
-        watch,
     } = form;
 
-    const relations = vectorDb.type_infos?.relations || [];
-    const tables = filterGeometricRelations(relations, filterGeometric);
+    const tables = useMemo(() => {
+        const relations = vectorDb.type_infos?.relations || [];
+        return filterGeometricRelations(relations, filterGeometric);
+    }, [filterGeometric, vectorDb.type_infos?.relations]);
 
-    const selectedTables = watch("selected_tables") ?? [];
+    const selectedTableNamesList: string[] | undefined = useWatch({
+        control: form.control,
+        name: "selected_tables",
+        defaultValue: [],
+    });
 
-    const toggleTable = (tableName: string) => {
-        let prevSelectedTables = [...selectedTables];
+    const toggleTable = useCallback(
+        (tableName: string) => {
+            let prevSelectedTables = selectedTableNamesList ? [...selectedTableNamesList] : [];
 
-        if (prevSelectedTables.includes(tableName)) {
-            prevSelectedTables = prevSelectedTables.filter((el) => el !== tableName);
-        } else {
-            prevSelectedTables.push(tableName);
-        }
+            if (prevSelectedTables.includes(tableName)) {
+                prevSelectedTables = prevSelectedTables.filter((el) => el !== tableName);
+            } else {
+                prevSelectedTables.push(tableName);
+            }
 
-        setFormValue("selected_tables", Array.from(new Set(prevSelectedTables)), { shouldValidate: true });
-    };
+            setFormValue("selected_tables", Array.from(new Set(prevSelectedTables)), { shouldValidate: true });
+        },
+        [selectedTableNamesList, setFormValue]
+    );
 
     return (
         <div className={fr.cx(!visible && "fr-hidden")}>
-            <h3>{Translator.trans("service.wms_vector.new.step_tables.title")}</h3>
+            <h3>{t("title")}</h3>
 
-            <p>{Translator.trans("mandatory_fields")}</p>
+            <p>{tCommon("mandatory_fields")}</p>
+
+            <p>
+                <strong>{t("tables_detected_hint", { nbTables: tables.length })}</strong>
+            </p>
 
             <Checkbox
                 options={tables.map((table) => ({
@@ -50,10 +67,9 @@ const TableSelection: FC<TablesSelectionProps> = ({ filterGeometric = false, vec
                     nativeInputProps: {
                         value: table.name,
                         onChange: () => toggleTable(table.name),
-                        checked: selectedTables.includes(table.name),
+                        checked: selectedTableNamesList?.includes(table.name),
                     },
                 }))}
-                hintText={<strong>{tables.length} table(s) détectée(s) </strong>}
                 state={errors.selected_tables ? "error" : "default"}
                 stateRelatedMessage={errors?.selected_tables?.message?.toString()}
             />
@@ -62,3 +78,17 @@ const TableSelection: FC<TablesSelectionProps> = ({ filterGeometric = false, vec
 };
 
 export default TableSelection;
+
+export const { i18n } = declareComponentKeys<"title" | { K: "tables_detected_hint"; P: { nbTables: number }; R: string }>()({
+    TableSelection,
+});
+
+export const TableSelectionFrTranslations: Translations<"fr">["TableSelection"] = {
+    title: "Sélectionnez les tables nécessaires au service",
+    tables_detected_hint: ({ nbTables }) => (nbTables > 1 ? `${nbTables} tables détectées` : "1 table détectée"),
+};
+
+export const TableSelectionEnTranslations: Translations<"en">["TableSelection"] = {
+    title: undefined,
+    tables_detected_hint: undefined,
+};

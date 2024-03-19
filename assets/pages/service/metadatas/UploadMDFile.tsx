@@ -2,17 +2,19 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { Upload } from "@codegouvfr/react-dsfr/Upload";
 import { FC } from "react";
 import { UseFormReturn } from "react-hook-form";
-import { getTranslation } from "../../../i18n/i18n";
 
-const { t } = getTranslation("MetadatasForm");
-const { t: tCommon } = getTranslation("Common");
+import { useTranslation } from "../../../i18n/i18n";
+import { ServiceFormValuesBaseType } from "../../../types/app";
 
 type UploadMDFileProps = {
     visible: boolean;
-    form: UseFormReturn;
+    form: UseFormReturn<ServiceFormValuesBaseType>;
 };
 
 const UploadMDFile: FC<UploadMDFileProps> = ({ visible, form }) => {
+    const { t } = useTranslation("MetadatasForm");
+    const { t: tCommon } = useTranslation("Common");
+
     const {
         formState: { errors },
         register,

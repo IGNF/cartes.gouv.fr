@@ -112,6 +112,15 @@ const routeDefs = {
         },
         (p) => `${appRoot}/datastores/${p.datastoreId}/service/wfs/new`
     ),
+    // Modifier les infos d'un service WFS
+    datastore_wfs_service_edit: defineRoute(
+        {
+            datastoreId: param.path.string,
+            vectorDbId: param.query.string,
+            offeringId: param.path.string,
+        },
+        (p) => `${appRoot}/datastores/${p.datastoreId}/service/wfs/${p.offeringId}/edit`
+    ),
 
     // Creer et publier un service WMS-VECTEUR
     datastore_wms_vector_service_new: defineRoute(
@@ -121,9 +130,18 @@ const routeDefs = {
         },
         (p) => `${appRoot}/datastores/${p.datastoreId}/service/wms-vector/new`
     ),
+    // Modifier les infos d'un service WMS-VECTEUR
+    datastore_wms_vector_service_edit: defineRoute(
+        {
+            datastoreId: param.path.string,
+            vectorDbId: param.query.string,
+            offeringId: param.path.string,
+        },
+        (p) => `${appRoot}/datastores/${p.datastoreId}/service/wms-vector/${p.offeringId}/edit`
+    ),
 
-    // Creation d'une pyramide vecteur
-    datastore_pyramid_vector_new: defineRoute(
+    // Création/génération d'une pyramide vecteur
+    datastore_pyramid_vector_generate: defineRoute(
         {
             datastoreId: param.path.string,
             vectorDbId: param.query.string,
@@ -132,13 +150,22 @@ const routeDefs = {
         (p) => `${appRoot}/datastores/${p.datastoreId}/pyramid-vector/new`
     ),
 
-    // Publier un service TMS
-    datastore_tms_vector_service_new: defineRoute(
+    // Publier une pyramide vecteur en tant que service TMS
+    datastore_pyramid_vector_tms_service_new: defineRoute(
         {
             datastoreId: param.path.string,
             pyramidId: param.query.string,
         },
         (p) => `${appRoot}/datastores/${p.datastoreId}/service/tms/new`
+    ),
+    // Modifier les infos d'un service WMS-VECTEUR
+    datastore_pyramid_vector_tms_service_edit: defineRoute(
+        {
+            datastoreId: param.path.string,
+            pyramidId: param.query.string,
+            offeringId: param.path.string,
+        },
+        (p) => `${appRoot}/datastores/${p.datastoreId}/service/tms/${p.offeringId}/edit`
     ),
 
     datastore_service_view: defineRoute(

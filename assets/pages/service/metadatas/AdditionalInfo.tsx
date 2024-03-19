@@ -10,17 +10,8 @@ import AutocompleteSelect from "../../../components/Input/AutocompleteSelect";
 import ignProducts from "../../../data/md_resolutions.json";
 import { getTranslation } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/RQKeys";
-import { Pyramid, UploadTree, VectorDb } from "../../../types/app";
+import { Pyramid, ServiceFormValuesBaseType, UploadTree, VectorDb } from "../../../types/app";
 import { LanguageType, charsets, getLanguages } from "../../../utils";
-
-const getCode = (epsg) => {
-    if (!epsg) return null;
-    const parts = epsg.split(":");
-    if (parts.length === 2) {
-        return parts[1];
-    }
-    return null;
-};
 
 /**
  * Récupère le type de fichier (undefined, csv ou geopackage)
@@ -42,7 +33,7 @@ const getUploadFileType = (fileTree) => {
 type AdditionalInfoProps = {
     storedData: VectorDb | Pyramid;
     visible: boolean;
-    form: UseFormReturn;
+    form: UseFormReturn<ServiceFormValuesBaseType>;
     datastoreId: string;
 };
 
@@ -56,12 +47,6 @@ const AdditionalInfo: FC<AdditionalInfoProps> = ({ storedData, datastoreId, visi
         control,
         setValue: setFormValue,
     } = form;
-
-    let projUrl;
-    const code = getCode(storedData.srs);
-    if (code) {
-        projUrl = `http://www.opengis.net/def/crs/EPSG/0/${code}`;
-    }
 
     const languagesOptions: LanguageType[] = useMemo(getLanguages, []);
 
@@ -107,7 +92,6 @@ const AdditionalInfo: FC<AdditionalInfoProps> = ({ storedData, datastoreId, visi
             <Controller
                 control={control}
                 name="languages"
-                defaultValue={[{ language: "français", code: "fra" }]}
                 render={({ field }) => {
                     return (
                         <AutocompleteSelect
@@ -116,7 +100,7 @@ const AdditionalInfo: FC<AdditionalInfoProps> = ({ storedData, datastoreId, visi
                             state={errors.languages ? "error" : "default"}
                             stateRelatedMessage={errors?.languages?.message?.toString()}
                             freeSolo={false}
-                            defaultValue={[{ language: "français", code: "fra" }]}
+                            defaultValue={field.value}
                             getOptionLabel={(option) => (option as LanguageType).language}
                             isOptionEqualToValue={(option, value) => option.code === value.code}
                             options={languagesOptions}
@@ -136,7 +120,6 @@ const AdditionalInfo: FC<AdditionalInfoProps> = ({ storedData, datastoreId, visi
                 stateRelatedMessage={errors?.charset?.message?.toString()}
                 nativeSelectProps={{
                     ...register("charset"),
-                    defaultValue: "utf8",
                 }}
             >
                 {Object.keys(charsets).map((code) => {
@@ -156,7 +139,6 @@ const AdditionalInfo: FC<AdditionalInfoProps> = ({ storedData, datastoreId, visi
                 nativeInputProps={{
                     ...register("projection"),
                     readOnly: true,
-                    defaultValue: projUrl,
                 }}
             />
             <Input
@@ -177,7 +159,6 @@ const AdditionalInfo: FC<AdditionalInfoProps> = ({ storedData, datastoreId, visi
                 stateRelatedMessage={errors?.resolution?.message?.toString()}
                 nativeSelectProps={{
                     ...register("resolution"),
-                    defaultValue: "",
                 }}
             >
                 <option value="">Aucune</option>

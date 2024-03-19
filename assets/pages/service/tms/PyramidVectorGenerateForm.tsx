@@ -1,29 +1,46 @@
+import { fr } from "@codegouvfr/react-dsfr";
+import Alert from "@codegouvfr/react-dsfr/Alert";
+import Button from "@codegouvfr/react-dsfr/Button";
+import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
+import Stepper from "@codegouvfr/react-dsfr/Stepper";
+import { yupResolver } from "@hookform/resolvers/yup";
 import { useQuery } from "@tanstack/react-query";
 import { FC, useEffect, useState } from "react";
-import RQKeys from "../../../modules/RQKeys";
+import { useForm } from "react-hook-form";
 import * as yup from "yup";
-import { type StoredDataRelation, type VectorDb } from "../../../types/app";
+
 import api from "../../../api";
-import Translator from "../../../modules/Translator";
 import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
-import Button from "@codegouvfr/react-dsfr/Button";
 import LoadingText from "../../../components/Utils/LoadingText";
-import Alert from "@codegouvfr/react-dsfr/Alert";
-import Stepper from "@codegouvfr/react-dsfr/Stepper";
+import Wait from "../../../components/Utils/Wait";
+import olDefaults from "../../../data/ol-defaults.json";
+import RQKeys from "../../../modules/RQKeys";
+import Translator from "../../../modules/Translator";
+import { CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
+import { type StoredDataRelation, type VectorDb } from "../../../types/app";
 import TableSelection from "../TableSelection";
+import formatForm from "./format-form";
+import Sample, { type SampleType } from "./sample/Sample";
 import TableAttributeSelection from "./tables/TableAttributeSelection";
 import TableZoomLevels from "./tables/TableZoomLevels";
-import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
-import { fr } from "@codegouvfr/react-dsfr";
 import TippeCanoe from "./tippecanoes/Tippecanoe";
-import Sample, { type SampleType } from "./sample/Sample";
-import formatForm from "./format-form";
-import olDefaults from "../../../data/ol-defaults.json";
-import { CartesApiException } from "../../../modules/jsonFetch";
-import Wait from "../../../components/Utils/Wait";
+
+export type PyramidVectorGenerateFormValuesType = {
+    selected_tables?: string[];
+    bottom_zoom_level?: number;
+    sample?: SampleType;
+    zoom_levels?: number[];
+    tippecanoe?: string;
+};
+
+const STEPS = {
+    TABLES_SELECTION: 1,
+    ATTRIBUTES_SELECTION: 2,
+    ZOOM_LEVELS: 3,
+    GENERALIZE_OPTIONS: 4,
+    SAMPLE: 5,
+};
 
 type PyramidVectorNewProps = {
     datastoreId: string;
@@ -31,15 +48,7 @@ type PyramidVectorNewProps = {
     technicalName: string;
 };
 
-const PyramidVectorNew: FC<PyramidVectorNewProps> = ({ datastoreId, vectorDbId, technicalName }) => {
-    const STEPS = {
-        TABLES_SELECTION: 1,
-        ATTRIBUTES_SELECTION: 2,
-        ZOOM_LEVELS: 3,
-        GENERALIZE_OPTIONS: 4,
-        SAMPLE: 5,
-    };
-
+const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, vectorDbId, technicalName }) => {
     // Definition du schema
     const schema = {};
     schema[STEPS.TABLES_SELECTION] = yup.object({
@@ -80,7 +89,7 @@ const PyramidVectorNew: FC<PyramidVectorNewProps> = ({ datastoreId, vectorDbId, 
         staleTime: 600000,
     });
 
-    const form = useForm({
+    const form = useForm<PyramidVectorGenerateFormValuesType>({
         resolver: yupResolver(schema[currentStep]),
         mode: "onChange",
     });
@@ -92,11 +101,11 @@ const PyramidVectorNew: FC<PyramidVectorNewProps> = ({ datastoreId, vectorDbId, 
         trigger,
     } = form;
 
-    const selectedTableNamesList: string[] = watch("selected_tables");
+    const selectedTableNamesList: string[] | undefined = watch("selected_tables");
     const [selectedTables, setSelectedTables] = useState<StoredDataRelation[]>([]);
 
     const bottomZoomLevel = watch("bottom_zoom_level", olDefaults.zoom_levels.BOTTOM);
-    const sample: SampleType = watch("sample");
+    const sample: SampleType | undefined = watch("sample");
 
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [validationError, setValidationError] = useState<CartesApiException>();
@@ -232,4 +241,4 @@ const PyramidVectorNew: FC<PyramidVectorNewProps> = ({ datastoreId, vectorDbId, 
     );
 };
 
-export default PyramidVectorNew;
+export default PyramidVectorGenerateForm;

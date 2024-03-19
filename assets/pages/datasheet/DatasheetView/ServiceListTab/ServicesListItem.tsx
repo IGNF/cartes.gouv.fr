@@ -118,23 +118,36 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                                     {
                                         text: "Modifier les informations de publication",
                                         iconId: "ri-edit-box-line",
-                                        onClick: () => console.warn("Action non implémentée"),
+                                        linkProps: (() => {
+                                            switch (service.type) {
+                                                case OfferingTypeEnum.WMSVECTOR:
+                                                    return routes.datastore_wms_vector_service_edit({
+                                                        datastoreId,
+                                                        vectorDbId: service.configuration.type_infos.used_data[0].stored_data,
+                                                        offeringId: service._id,
+                                                    }).link;
 
-                                        // linkProps: (() => {
-                                        //     switch (service.type) {
-                                        //         case OfferingTypeEnum.WMSVECTOR:
-                                        //             return routes.datastore_wms_vector_service_modify({
-                                        //                 datastoreId,
-                                        //                 vectorDbId: service.configuration.type_infos.used_data[0].stored_data,
-                                        //                 offeringId: service._id,
-                                        //             }).link;
+                                                case OfferingTypeEnum.WFS:
+                                                    return routes.datastore_wfs_service_edit({
+                                                        datastoreId,
+                                                        vectorDbId: service.configuration.type_infos.used_data[0].stored_data,
+                                                        offeringId: service._id,
+                                                    }).link;
 
-                                        //         default:
-                                        //             return {
-                                        //                 onClick: () => console.warn("Action non implémentée"),
-                                        //             };
-                                        //     }
-                                        // })(),
+                                                case OfferingTypeEnum.WMTSTMS:
+                                                    return routes.datastore_pyramid_vector_tms_service_edit({
+                                                        datastoreId,
+                                                        pyramidId: service.configuration.type_infos.used_data[0].stored_data,
+                                                        offeringId: service._id,
+                                                    }).link;
+
+                                                default:
+                                                    return {
+                                                        onClick: () => console.warn("Action non implémentée"),
+                                                    };
+                                            }
+                                        })(),
+                                        disabled: ![OfferingTypeEnum.WMSVECTOR, OfferingTypeEnum.WFS, OfferingTypeEnum.WMTSTMS].includes(service.type),
                                     },
                                     {
                                         text: "Remplacer les données",

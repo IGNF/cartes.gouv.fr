@@ -7,81 +7,109 @@ import { Translations, getTranslation } from "../i18n/i18n";
 
 const { t: tSld } = getTranslation("sldStyleValidation");
 
-const test = async (tableName: string, value: FileList, ctx: TestContext) => {
-    if (value instanceof FileList && value.length === 0) {
-        return ctx.createError({ message: tSld("no_file_provided", { tableName }) });
-    }
-
-    const file = value?.[0] ?? undefined;
-
+export default class SldStyleWmsVectorValidator {
     /**
-     * // TODO : il manque la validation des contraintes suivantes :
-     * - type de symbologie (symbolizer) doit correspondre au type de geometrie
+     * - applique la condition "exists" que si offering n'est pas undefined (on est en mode édition)
+     * - applique la condition "isValid" si "exists" est true
      */
-    if (file instanceof File) {
-        if (functions.path.getFileExtension(file.name)?.toLowerCase() !== "sld") {
-            return ctx.createError({ message: tSld("unaccepted_extension", { fileName: file.name }) });
-        }
+    async validate(tableName: string, value: FileList, ctx: TestContext, offeringId: string | undefined) {
+        const exists = this.#exists(tableName, value as FileList, ctx);
+        const isValid = await this.#isValid(tableName, value as FileList, ctx);
 
-        const styleString = await file.text();
-
-        const domParser = new DOMParser();
-        const xmlDoc = domParser.parseFromString(styleString, "application/xml");
-        const version = xmlDoc.getElementsByTagName("StyledLayerDescriptor")[0].attributes?.["version"]?.nodeValue ?? "";
-
-        if (version === "") {
-            return ctx.createError({ message: tSld("sld_version_missing") });
-        } else if (version !== "1.0.0") {
-            return ctx.createError({ message: tSld("sld_version_unaccepted") });
-        }
-
-        const sldParser = new SldStyleParser({ sldVersion: "1.0.0" });
-        const result = await sldParser.readStyle(styleString);
-
-        const { output, warnings, errors, unsupportedProperties } = result;
-
-        if (errors) {
-            const invalidXmlSyntax = !!errors.find((e) => e instanceof TypeError);
-
-            if (invalidXmlSyntax) {
-                return ctx.createError({ message: tSld("xml_invalid") });
-            } else {
-                return ctx.createError({ message: JSON.stringify(errors) });
+        if (offeringId !== undefined) {
+            if (exists === true) {
+                return isValid;
             }
+        } else {
+            if (exists !== true) {
+                return exists;
+            }
+            return isValid;
         }
 
-        if (unsupportedProperties) {
-            return ctx.createError({ message: JSON.stringify(unsupportedProperties) });
-        }
-
-        if (warnings) {
-            return ctx.createError({ message: JSON.stringify(warnings) });
-        }
-
-        if (output) {
-            if (output?.name === "") {
-                return ctx.createError({ message: tSld("field_name_invalid_or_unspecified") });
-            }
-
-            if (output.name !== tableName) {
-                return ctx.createError({ message: tSld("field_name_does_not_correspond_table_name", { fieldNameValue: output.name, tableName }) });
-            }
-
-            if (output.rules.length === 0) {
-                return ctx.createError({ message: tSld("no_style_declared") });
-            }
-
-            const rulesWithNoSymbolizers = output.rules.filter((rule) => rule.symbolizers.length === 0);
-            if (rulesWithNoSymbolizers.length > 0) {
-                return ctx.createError({ message: tSld("rules_with_no_symbolizers", { ruleNames: rulesWithNoSymbolizers.map((rule) => rule.name) }) });
-            }
-        }
-    } else {
-        return ctx.createError({ message: tSld("file_missing_corrupted_or_reading_error") });
+        return true;
     }
 
-    return true;
-};
+    #exists(tableName: string, value: FileList, ctx: TestContext) {
+        if (value instanceof FileList && value.length === 0) {
+            return ctx.createError({ message: tSld("no_file_provided", { tableName }) });
+        }
+
+        return true;
+    }
+
+    async #isValid(tableName: string, value: FileList, ctx: TestContext) {
+        const file = value?.[0] ?? undefined;
+
+        /**
+         * // TODO : il manque la validation des contraintes suivantes :
+         * - type de symbologie (symbolizer) doit correspondre au type de geometrie
+         */
+        if (file instanceof File) {
+            if (functions.path.getFileExtension(file.name)?.toLowerCase() !== "sld") {
+                return ctx.createError({ message: tSld("unaccepted_extension", { fileName: file.name }) });
+            }
+
+            const styleString = await file.text();
+
+            const domParser = new DOMParser();
+            const xmlDoc = domParser.parseFromString(styleString, "application/xml");
+            const version = xmlDoc.getElementsByTagName("StyledLayerDescriptor")[0].attributes?.["version"]?.nodeValue ?? "";
+
+            if (version === "") {
+                return ctx.createError({ message: tSld("sld_version_missing") });
+            } else if (version !== "1.0.0") {
+                return ctx.createError({ message: tSld("sld_version_unaccepted") });
+            }
+
+            const sldParser = new SldStyleParser({ sldVersion: "1.0.0" });
+            const result = await sldParser.readStyle(styleString);
+
+            const { output, warnings, errors, unsupportedProperties } = result;
+
+            if (errors) {
+                const invalidXmlSyntax = !!errors.find((e) => e instanceof TypeError);
+
+                if (invalidXmlSyntax) {
+                    return ctx.createError({ message: tSld("xml_invalid") });
+                } else {
+                    return ctx.createError({ message: JSON.stringify(errors) });
+                }
+            }
+
+            if (unsupportedProperties) {
+                return ctx.createError({ message: JSON.stringify(unsupportedProperties) });
+            }
+
+            if (warnings) {
+                return ctx.createError({ message: JSON.stringify(warnings) });
+            }
+
+            if (output) {
+                if (output?.name === "") {
+                    return ctx.createError({ message: tSld("field_name_invalid_or_unspecified") });
+                }
+
+                if (output.name !== tableName) {
+                    return ctx.createError({ message: tSld("field_name_does_not_correspond_table_name", { fieldNameValue: output.name, tableName }) });
+                }
+
+                if (output.rules.length === 0) {
+                    return ctx.createError({ message: tSld("no_style_declared") });
+                }
+
+                const rulesWithNoSymbolizers = output.rules.filter((rule) => rule.symbolizers.length === 0);
+                if (rulesWithNoSymbolizers.length > 0) {
+                    return ctx.createError({ message: tSld("rules_with_no_symbolizers", { ruleNames: rulesWithNoSymbolizers.map((rule) => rule.name) }) });
+                }
+            }
+        } else {
+            return ctx.createError({ message: tSld("file_missing_corrupted_or_reading_error") });
+        }
+
+        return true;
+    }
+}
 
 export const { i18n } = declareComponentKeys<
     | { K: "no_file_provided"; P: { tableName: string }; R: string }
@@ -127,9 +155,3 @@ export const sldStyleValidationEnTranslations: Translations<"en">["sldStyleValid
     file_missing_corrupted_or_reading_error: undefined,
     rules_with_no_symbolizers: undefined,
 };
-
-const sldStyle = {
-    test,
-};
-
-export default sldStyle;
