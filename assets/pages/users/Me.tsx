@@ -1,9 +1,10 @@
 import Button from "@codegouvfr/react-dsfr/Button";
 import { useMemo } from "react";
-import { Translations, declareComponentKeys, getTranslation, useTranslation } from "../../i18n/i18n";
+
 import AppLayout from "../../components/Layout/AppLayout";
 import { datastoreNavItems } from "../../config/datastoreNavItems";
 import functions from "../../functions";
+import { Translations, declareComponentKeys, getTranslation, useTranslation } from "../../i18n/i18n";
 import SymfonyRouting from "../../modules/Routing";
 import { useAuthStore } from "../../stores/AuthStore";
 
@@ -19,8 +20,8 @@ const Me = () => {
 
             {user && (
                 <>
-                    <p>{t("firstname", { firstName: user.firstName })}</p>
-                    <p>{t("lastname", { lastName: user.lastName })}</p>
+                    <p>{t("firstname", { firstName: user?.firstName ?? "" })}</p>
+                    <p>{t("lastname", { lastName: user?.lastName ?? "" })}</p>
                     <p>{t("email", { email: user.email })}</p>
                     <p>{t("registration_date", { date: functions.date.format(user.accountCreationDate) })}</p>
                     <p>{t("id", { id: user.id })}</p>

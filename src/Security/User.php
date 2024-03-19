@@ -12,8 +12,8 @@ class User implements UserInterface
     /** @var array<string> */
     private array $roles = [];
 
-    private string $firstName;
-    private string $lastName;
+    private ?string $firstName;
+    private ?string $lastName;
 
     /** @var array<string,mixed> */
     private array $communitiesMember = [];
@@ -29,8 +29,8 @@ class User implements UserInterface
     {
         $this->email = $keycloakUserInfo['email'];
         $this->id = $apiUserInfo['_id'];
-        $this->firstName = $keycloakUserInfo['given_name'];
-        $this->lastName = $keycloakUserInfo['family_name'];
+        $this->firstName = $keycloakUserInfo['given_name'] ?? null;
+        $this->lastName = $keycloakUserInfo['family_name'] ?? null;
 
         $this->accountCreationDate = new \DateTime($apiUserInfo['creation']);
         $this->lastApiCallDate = new \DateTime($apiUserInfo['last_call']);
