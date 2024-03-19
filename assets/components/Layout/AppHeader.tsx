@@ -44,7 +44,7 @@ const AppHeader: FC<AppHeaderProps> = ({ navItems = [] }) => {
         // utilisateur est connecté
         let btnMyAccountText = `${user.firstName ?? ""} ${user.lastName ?? ""}`;
         if (btnMyAccountText.replace(/\s+/g, "") === "") {
-            btnMyAccountText = "Tableau de bord";
+            btnMyAccountText = user.userName;
         }
 
         quickAccessItems.push({

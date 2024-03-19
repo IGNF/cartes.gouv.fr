@@ -35,6 +35,7 @@ import {
 export type CartesUser = {
     id: string;
     email: string;
+    userName: string;
     firstName?: string | null;
     lastName?: string | null;
     roles: string[];
