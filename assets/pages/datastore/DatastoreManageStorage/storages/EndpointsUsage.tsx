@@ -61,6 +61,8 @@ const EndpointsUsage: FC<EndpointsUsageProps> = ({ datastore }) => {
                 return offeringsList.filter((offering) => offering._id !== currentOffering?._id);
             });
 
+            queryClient.refetchQueries({ queryKey: RQKeys.datastore(datastore._id) });
+
             setCurrentOffering(undefined);
         },
         onError() {
