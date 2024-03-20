@@ -20,9 +20,10 @@ parameters:
 
     http_proxy: "%env(resolve:HTTP_PROXY)%"
 
-    upload_path: "%kernel.project_dir%/var/data/uploaded_files"
-    style_files_path: "%kernel.project_dir%/var/data/style_files"
-    capabilities_path: "%kernel.project_dir%/var/data/capabilities"
+    var_data_path: "%kernel.project_dir%/var/data"
+    upload_path: "%var_data_path%/uploaded_files"
+    style_files_path: "%var_data_path%/style_files"
+    capabilities_path: "%var_data_path%/capabilities"
 
     support_contact_mail: "%env(resolve:SUPPORT_CONTACT_EMAIL)%"
     mailer_sender_address: "%env(resolve:MAILER_SENDER_ADDRESS)%"
