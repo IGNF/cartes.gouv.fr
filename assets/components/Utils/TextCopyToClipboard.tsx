@@ -28,7 +28,7 @@ const TextCopyToClipboard: FC<TextCopyToClipboardProps> = ({ text, successMessag
     const copyToClipboard = async () => {
         await navigator.clipboard.writeText(text);
 
-        setMessage(successMessage ?? "L'URL copiée");
+        setMessage(successMessage ?? "URL copiée");
     };
 
     return (
