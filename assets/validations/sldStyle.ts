@@ -53,7 +53,12 @@ export default class SldStyleWmsVectorValidator {
             const styleString = await file.text();
 
             const domParser = new DOMParser();
-            const xmlDoc = domParser.parseFromString(styleString, "application/xml");
+            const xmlDoc: XMLDocument = domParser.parseFromString(styleString, "application/xml");
+
+            if (xmlDoc.getElementsByTagName("StyledLayerDescriptor").length === 0) {
+                return ctx.createError({ message: tSld("file_invalid") });
+            }
+
             const version = xmlDoc.getElementsByTagName("StyledLayerDescriptor")[0].attributes?.["version"]?.nodeValue ?? "";
 
             if (version === "") {
@@ -71,7 +76,7 @@ export default class SldStyleWmsVectorValidator {
                 const invalidXmlSyntax = !!errors.find((e) => e instanceof TypeError);
 
                 if (invalidXmlSyntax) {
-                    return ctx.createError({ message: tSld("xml_invalid") });
+                    return ctx.createError({ message: tSld("file_invalid") });
                 } else {
                     return ctx.createError({ message: JSON.stringify(errors) });
                 }
@@ -116,7 +121,7 @@ export const { i18n } = declareComponentKeys<
     | { K: "unaccepted_extension"; P: { fileName: string }; R: string }
     | "sld_version_missing"
     | "sld_version_unaccepted"
-    | "xml_invalid"
+    | "file_invalid"
     | "field_name_invalid_or_unspecified"
     | { K: "field_name_does_not_correspond_table_name"; P: { fieldNameValue: string; tableName: string }; R: string }
     | "no_style_declared"
@@ -129,7 +134,7 @@ export const sldStyleValidationFrTranslations: Translations<"fr">["sldStyleValid
     unaccepted_extension: ({ fileName }) => `L'extension du fichier de style ${fileName} n'est pas correcte. Seule l'extension sld est acceptée.`,
     sld_version_missing: "La version de SLD n'est pas spécifiée.",
     sld_version_unaccepted: "Seule la version 1.0.0 de SLD est acceptée.",
-    xml_invalid: "Le contenu du fichier a une syntaxe XML invalide.",
+    file_invalid: "Ce fichier n'est pas un fichier de style valide. Erreur de syntaxe XML.",
     field_name_invalid_or_unspecified: "Le champ 'name' est invalide ou n'est pas spécifié.",
     field_name_does_not_correspond_table_name: ({ fieldNameValue, tableName }) =>
         `Le champ 'name' (${fieldNameValue}) ne correspond pas au nom de la table (${tableName}).`,
@@ -148,7 +153,7 @@ export const sldStyleValidationEnTranslations: Translations<"en">["sldStyleValid
     unaccepted_extension: undefined,
     sld_version_missing: undefined,
     sld_version_unaccepted: undefined,
-    xml_invalid: undefined,
+    file_invalid: undefined,
     field_name_invalid_or_unspecified: undefined,
     field_name_does_not_correspond_table_name: undefined,
     no_style_declared: undefined,
