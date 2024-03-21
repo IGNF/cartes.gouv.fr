@@ -36,7 +36,7 @@ const NewsListItem: FC<NewsListItemProps> = ({ slug, newsArticle }) => {
                 }
                 detail={newsArticle?.date && functions.date.format(newsArticle?.date)}
                 enlargeLink
-                imageAlt={newsArticle?.thumbnail_alt}
+                imageAlt={newsArticle?.thumbnail_alt ?? "Vignette de l'article"}
                 imageUrl={`${appRoot}/${newsArticle.thumbnail_url}`}
                 linkProps={routes.news_article({ slug }).link}
                 title={<span dangerouslySetInnerHTML={{ __html: newsArticle?.title ?? "" }} />}
