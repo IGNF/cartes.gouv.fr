@@ -3,6 +3,7 @@
 namespace App\Services\EntrepotApi;
 
 use App\Constants\EntrepotApi\UploadStatuses;
+use App\Constants\EntrepotApi\UploadTags;
 use App\Exception\AppException;
 use App\Exception\EntrepotApiException;
 
@@ -152,8 +153,8 @@ class UploadApiService extends AbstractEntrepotApiService
     {
         $upload = $this->get($datastoreId, $uploadId);
         if (UploadStatuses::DELETED == $upload['status'] || UploadStatuses::OPEN == $upload['status']) {
-            if (array_key_exists('file_tree', $upload['tags'])) {
-                return json_decode($upload['tags']['file_tree'], true);
+            if (array_key_exists(UploadTags::FILE_TREE, $upload['tags'])) {
+                return json_decode($upload['tags'][UploadTags::FILE_TREE], true);
             }
 
             return [];
@@ -212,16 +213,11 @@ class UploadApiService extends AbstractEntrepotApiService
 
     public function remove(string $datastoreId, string $uploadId): mixed
     {
-        $upload = $this->get($datastoreId, $uploadId);
-        if (UploadStatuses::OPEN == $upload['status']) {
-            $this->close($datastoreId, $uploadId);
-        }
-
         // sauvegarde dans les tags de l'aborescence de fichiers de la livraison avant de la supprimer, parce qu'une fois supprimée elle ne sera plus récupérable
         try {
             $fileTree = $this->getFileTree($datastoreId, $uploadId);
             $this->addTags($datastoreId, $uploadId, [
-                'file_tree' => json_encode($fileTree),
+                UploadTags::FILE_TREE => json_encode($fileTree),
             ]);
         } catch (EntrepotApiException $ex) {
             // ne rien faire, tant pis si la récupération de l'arborescence a échoué
