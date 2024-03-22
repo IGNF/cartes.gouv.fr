@@ -32,6 +32,14 @@ const fileExtensions = ["gpkg", "zip"];
 
 const fileUploader = new FileUploader();
 
+const getDataTechNameSuggestion = (fileName: string) => {
+    let dataTechName = fileName.replace(/ /g, "_");
+    dataTechName = dataTechName.replace(/\./g, "_");
+    dataTechName += "_" + datefnsFormat(new Date(), "dd-MM-yyyy");
+
+    return dataTechName;
+};
+
 type DatasheetUploadFormProps = {
     datastoreId: string;
 };
@@ -39,8 +47,6 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
     const route = useRoute();
 
     const datasheetName: string | undefined = useMemo(() => route.params?.["datasheetName"], [route.params]);
-
-    let uuid = "";
 
     const schema = yup
         .object({
@@ -88,8 +94,6 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
     const [showDataInfos, setShowDataInfos] = useState(false);
     const [projections, setProjections] = useState(defaultProjections);
 
-    const [srid, setSrid] = useState(""); // srid
-
     const [dataFileError, setDataFileError] = useState<string>();
     const dataFileRef = useRef<HTMLInputElement>(null);
 
@@ -104,6 +108,7 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
         handleSubmit,
         formState: { errors, isValid, isValidating },
         setValue: setFormValue,
+        trigger,
     } = useForm({ resolver: yupResolver(schema) });
 
     const dataListQuery = useQuery({
@@ -126,9 +131,6 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
     }, [showDataInfos, setFormValue]);
 
     const onSubmit = async (formData) => {
-        console.debug("errors", errors);
-        console.debug("formData", formData);
-
         const dataFile = dataFileRef.current?.files?.[0];
 
         if (isValid && validateDataFile(dataFile)) {
@@ -174,7 +176,7 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
             return;
         }
 
-        uuid = uuidv4();
+        const uuid = uuidv4();
         setShowProgress(true);
         setProgressMax(file.size);
 
@@ -187,7 +189,7 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                         const srid = data?.srid;
 
                         if (srid in projections) {
-                            setSrid(srid);
+                            setFormValue("data_srid", srid);
                         } else {
                             api.epsg
                                 .getProjFromEpsg(srid)
@@ -195,7 +197,8 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                                     const projectionsClone = { ...projections };
                                     projectionsClone[srid] = proj.name;
                                     setProjections(projectionsClone);
-                                    setSrid(srid);
+
+                                    setFormValue("data_srid", srid);
                                 })
                                 .catch((err) => console.error(err));
                         }
@@ -203,6 +206,7 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                         setFormValue("data_technical_name", getDataTechNameSuggestion(file.name), { shouldValidate: true });
                         setFormValue("data_type", "vector", { shouldValidate: true }); // TODO : vector pour l'instant
                         setFormValue("data_upload_path", data?.filename, { shouldValidate: true });
+                        trigger();
 
                         setShowDataInfos(true);
                         setShowProgress(false);
@@ -218,14 +222,6 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                 setShowProgress(false);
                 setDataFileError(err?.msg);
             });
-    };
-
-    const getDataTechNameSuggestion = (fileName) => {
-        let dataTechName = fileName.replace(/ /g, "_");
-        dataTechName = dataTechName.replace(/\./g, "_");
-        dataTechName += "_" + datefnsFormat(new Date(), "dd-MM-yyyy");
-
-        return dataTechName;
     };
 
     return (
@@ -283,8 +279,6 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                         label="Projection de vos données"
                         nativeSelectProps={{
                             ...register("data_srid"),
-                            onChange: (e) => setSrid(e.target.value),
-                            value: srid,
                         }}
                         state={errors.data_srid ? "error" : "default"}
                         stateRelatedMessage={errors?.data_srid?.message}
