@@ -9,7 +9,7 @@ class MetadataApi extends AbstractEntrepotApiService
      */
     public function getAll(string $datastoreId, array $query = []): array
     {
-        return $this->request('GET', "datastores/$datastoreId/metadata", [], $query);
+        return $this->requestAll("datastores/$datastoreId/metadata", $query);
     }
 
     public function get(string $datastoreId, string $metadataId): array
@@ -17,10 +17,11 @@ class MetadataApi extends AbstractEntrepotApiService
         return $this->request('GET', "datastores/$datastoreId/metadata/$metadataId");
     }
 
-    public function add(string $datastoreId, string $filepath, string $type): array
+    public function add(string $datastoreId, string $filepath, string $type, bool $openData): array
     {
         return $this->sendFile('POST', "datastores/$datastoreId/metadata", $filepath, [], [
             'type' => $type,
+            'open_data' => $openData,
         ]);
     }
 
@@ -29,12 +30,12 @@ class MetadataApi extends AbstractEntrepotApiService
         return $this->sendFile('PUT', "datastores/$datastoreId/metadata/$metadataId", $filepath);
     }
 
-    /**
-     * @param array<mixed> $body
-     */
-    public function modifyInfo(string $datastoreId, string $metadataId, array $body): array
+    public function modifyInfo(string $datastoreId, string $metadataId, string $type, bool $openData): array
     {
-        return $this->request('PATCH', "datastores/$datastoreId/metadata/$metadataId", $body);
+        return $this->request('PATCH', "datastores/$datastoreId/metadata/$metadataId", [
+            'type' => $type,
+            'open_data' => $openData,
+        ]);
     }
 
     public function delete(string $datastoreId, string $metadataId): array
@@ -47,13 +48,37 @@ class MetadataApi extends AbstractEntrepotApiService
         return $this->request('GET', "datastores/$datastoreId/metadata/$metadataId/file");
     }
 
-    public function publish(string $datastoreId, string $metadataId): array
+    /**
+     * @param array<string,string> $tags
+     */
+    public function addTags(string $datastoreId, string $metadataId, array $tags): array
     {
-        return $this->request('POST', "datastores/$datastoreId/metadata/$metadataId/publication");
+        return $this->request('POST', "datastores/$datastoreId/metadata/$metadataId/tags", $tags);
     }
 
-    public function unpublish(string $datastoreId, string $metadataId): array
+    /**
+     * @param array<string> $tags
+     */
+    public function removeTags(string $datastoreId, string $metadataId, array $tags): array
     {
-        return $this->request('POST', "datastores/$datastoreId/metadata/$metadataId/unpublication");
+        return $this->request('DELETE', "datastores/$datastoreId/metadata/$metadataId/tags", [], [
+            'tags' => $tags,
+        ]);
+    }
+
+    public function publish(string $datastoreId, string $fileIdentifier, string $endpointId): array
+    {
+        return $this->request('POST', "datastores/{$datastoreId}/metadata/publication", [
+            'file_identifiers' => [$fileIdentifier],
+            'endpoint' => $endpointId,
+        ]);
+    }
+
+    public function unpublish(string $datastoreId, string $fileIdentifier, string $endpointId): array
+    {
+        return $this->request('POST', "datastores/{$datastoreId}/metadata/unpublication", [
+            'file_identifiers' => [$fileIdentifier],
+            'endpoint' => $endpointId,
+        ]);
     }
 }
