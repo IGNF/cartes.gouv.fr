@@ -6,7 +6,7 @@ import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
 import { Select } from "@codegouvfr/react-dsfr/Select";
 import { Upload } from "@codegouvfr/react-dsfr/Upload";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { format as datefnsFormat } from "date-fns";
 import { FC, useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -17,6 +17,7 @@ import * as yup from "yup";
 import api from "../../../api";
 import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
 import LoadingIcon from "../../../components/Utils/LoadingIcon";
+import LoadingText from "../../../components/Utils/LoadingText";
 import Progress from "../../../components/Utils/Progress";
 import Wait from "../../../components/Utils/Wait";
 import defaultProjections from "../../../data/default_projections.json";
@@ -71,7 +72,7 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                             return true;
                         }
 
-                        const existingDataList = dataListQuery?.data?.map((data) => data?.name);
+                        const existingDataList = datasheetListQuery?.data?.map((data) => data?.name);
                         if (existingDataList?.includes(dataName)) {
                             return ctx.createError({ message: `Une fiche de donnée existe déjà avec le nom "${dataName}"` });
                         }
@@ -97,12 +98,6 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
     const [dataFileError, setDataFileError] = useState<string>();
     const dataFileRef = useRef<HTMLInputElement>(null);
 
-    const [uploadCreationInProgress, setUploadCreationInProgress] = useState<boolean>(false);
-    const [uploadCreatedSuccessfully, setUploadCreatedSuccessfully] = useState<boolean>(false);
-    const [uploadId, setUploadId] = useState<string>();
-
-    const [shouldFetchDataList, setShouldFetchDataList] = useState<boolean>(true);
-
     const {
         register,
         handleSubmit,
@@ -111,11 +106,17 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
         trigger,
     } = useForm({ resolver: yupResolver(schema) });
 
-    const dataListQuery = useQuery({
+    const addUploadMutation = useMutation({
+        mutationFn: (formData: object) => {
+            return api.upload.add(datastoreId, formData);
+        },
+    });
+
+    const datasheetListQuery = useQuery({
         queryKey: RQKeys.datastore_datasheet_list(datastoreId),
         queryFn: () => api.datasheet.getList(datastoreId),
         refetchInterval: 20000,
-        enabled: shouldFetchDataList,
+        enabled: !addUploadMutation.isSuccess,
     });
 
     useEffect(() => {
@@ -134,18 +135,11 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
         const dataFile = dataFileRef.current?.files?.[0];
 
         if (isValid && validateDataFile(dataFile)) {
-            setUploadCreationInProgress(true);
-
-            api.upload.add(datastoreId, formData).then((response) => {
-                console.debug(response);
-                setUploadCreatedSuccessfully(true);
-                setUploadId(response?._id);
-                setShouldFetchDataList(false);
-            });
+            addUploadMutation.mutate(formData);
         }
     };
 
-    const validateDataFile = (file) => {
+    const validateDataFile = (file?: File) => {
         if (!file) {
             setDataFileError("Aucun fichier téléversé");
             return false;
@@ -345,16 +339,17 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                 </Wait>
             )}
 
-            {uploadCreationInProgress && uploadId && (
+            {addUploadMutation.isPending && (
                 <Wait>
-                    {uploadCreatedSuccessfully ? (
-                        <DatasheetUploadIntegrationDialog datastoreId={datastoreId} uploadId={uploadId} />
-                    ) : (
-                        <>
-                            <LoadingIcon largeIcon={true} />
-                            <p>Création de la fiche en cours</p>
-                        </>
-                    )}
+                    <div className={fr.cx("fr-grid-row")}>
+                        <LoadingText as="h6" message="Création de la fiche en cours" withSpinnerIcon={true} />
+                    </div>
+                </Wait>
+            )}
+
+            {addUploadMutation.isSuccess && addUploadMutation.data?._id !== undefined && (
+                <Wait>
+                    <DatasheetUploadIntegrationDialog datastoreId={datastoreId} uploadId={addUploadMutation.data?._id} />
                 </Wait>
             )}
         </DatastoreLayout>
