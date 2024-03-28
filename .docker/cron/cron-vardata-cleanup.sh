@@ -1,3 +1,3 @@
 #!/bin/bash
 
-symfony console cartesgouvfr:var-data-cleanup --env=prod
+php bin/console cartesgouvfr:var-data-cleanup --env=prod

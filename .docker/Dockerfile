@@ -49,9 +49,6 @@ RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm
 RUN npm i -g yarn pnpm npx
 # RUN yarn set version stable
 
-RUN curl -sS --no-progress-meter https://get.symfony.com/cli/installer | bash \
-    && mv ~/.symfony5/bin/symfony /usr/local/bin/symfony
-
 #----------------------------------------------------------------------
 # Nettoyage Cache APT
 #----------------------------------------------------------------------
