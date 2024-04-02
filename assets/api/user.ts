@@ -75,8 +75,8 @@ const addKey = (formData: UserKeyCreateDtoUserKeyInfoDto | object) => {
     );
 };
 
-const updateKey = (key: string, formData: UserKeyUpdateDto | object) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_user_update_key", { key: key });
+const updateKey = (keyId: string, formData: UserKeyUpdateDto | object) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_user_update_key", { keyId: keyId });
     return jsonFetch<null>(
         url,
         {
@@ -90,8 +90,8 @@ const updateKey = (key: string, formData: UserKeyUpdateDto | object) => {
     );
 };
 
-const removeKey = (key: string) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_user_remove_key", { key });
+const removeKey = (keyId: string) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_user_remove_key", { keyId: keyId });
     return jsonFetch<null>(url, { method: "DELETE" });
 };
 

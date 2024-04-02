@@ -3,7 +3,7 @@ import { Translations } from "../../../i18n/i18n";
 
 // traductions
 export const { i18n } = declareComponentKeys<
-    | { K: "title"; P: { editMode: boolean }; R: string }
+    | { K: "title"; P: { keyId: string | undefined }; R: string }
     | { K: "step"; P: { num: number }; R: string }
     | "services"
     | "key_name"
@@ -12,7 +12,7 @@ export const { i18n } = declareComponentKeys<
     | "ip_list.hintText"
     | "ip_list.whitelist"
     | "ip_list.blacklist"
-    | "ip_adresses"
+    | "ip_addresses"
     | "iprange_explain"
     | "user_agent"
     | "referer"
@@ -25,12 +25,16 @@ export const { i18n } = declareComponentKeys<
     | "login_required"
     | "password_required"
     | "apikey_required"
+    | "apikey_error"
+    | "apikey_min_error"
+    | "apikey_max_error"
     | { K: "ip_error"; P: { ip: string }; R: string }
     | "no_permission"
+    | "key_not_found"
 >()("UserKey");
 
 export const UserKeyFrTranslations: Translations<"fr">["UserKey"] = {
-    title: ({ editMode }) => (editMode ? "Modification d'une clé" : "Ajout d'une clé"),
+    title: ({ keyId }) => (keyId ? `Modification de la clé ${keyId}` : "Ajout d'une clé"),
     step: ({ num }) => (num === 1 ? "Services accessibles" : "Options de sécurisation"),
     services: "Services",
     key_name: "Nom de la clé",
@@ -40,7 +44,7 @@ export const UserKeyFrTranslations: Translations<"fr">["UserKey"] = {
         "Vous pouvez limiter les adresses IP qui pourront utiliser cette clé en listant soit les adresses autorisées (liste blanche), soit les adresses interdites (liste noire)",
     "ip_list.whitelist": "Liste blanche",
     "ip_list.blacklist": "Liste noire",
-    ip_adresses: "Adresses IP",
+    ip_addresses: "Adresses IP",
     iprange_explain: "Cette plage d'IP doit être au format CIDR (exemples: 192.168.1.1/32, 192.168.0.1/24)",
     user_agent: "User-agent (optionnel)",
     referer: "Referer (optionnel)",
@@ -53,12 +57,16 @@ export const UserKeyFrTranslations: Translations<"fr">["UserKey"] = {
     login_required: "Le nom d'utilisateur est obligatoire",
     password_required: "Le mot de passe est obligatoire",
     apikey_required: "Hash est obligatoire",
+    apikey_error: "Les caractères autorisés pour le hash sont les chiffres, lettres, _, - et .",
+    apikey_min_error: "Le hash doit faire au minimum 4 caractères",
+    apikey_max_error: "Le hash doit faire au maximum 64 caractères",
     ip_error: ({ ip }) => `la plage d'adresses IP [${ip}] n'est pas correcte`,
-    no_permission: "Vous n'avez aucune permission, vous ne pouvez pas créer une clé",
+    no_permission: "Volus n'avez aucune permission, vous ne pouvez pas créer une clé",
+    key_not_found: "Cette clé n'a pas été trouvée",
 };
 
 export const UserKeyEnTranslations: Translations<"en">["UserKey"] = {
-    title: ({ editMode }) => (editMode ? "Modify key" : "Add key"),
+    title: ({ keyId }) => (keyId ? `Modify key ${keyId}` : "Add key"),
     step: ({ num }) => (num === 1 ? "Accessible services" : "Security options"),
     services: "Services",
     key_name: "Key name",
@@ -68,7 +76,7 @@ export const UserKeyEnTranslations: Translations<"en">["UserKey"] = {
         "You can limit the IP addresses that can use this key by listing either the authorized addresses (white list) or the prohibited addresses (black list)",
     "ip_list.whitelist": "Whitelist",
     "ip_list.blacklist": "Blacklist",
-    ip_adresses: "IP Adresses",
+    ip_addresses: "IP Adresses",
     iprange_explain: "This IP range must be in CIDR format (examples: 192.168.1.1/32, 192.168.0.1/24)",
     user_agent: "User-agent (optional)",
     referer: "Referer (optional)",
@@ -81,6 +89,10 @@ export const UserKeyEnTranslations: Translations<"en">["UserKey"] = {
     login_required: "Login is mandatory",
     password_required: "Password is mandatory",
     apikey_required: "Hash is mandatory",
+    apikey_error: "The allowed characters for the hash are numbers, letters, _, - and .",
+    apikey_min_error: "The hash must be at least 4 characters long",
+    apikey_max_error: "The hash must be a maximum of 64 characters",
     ip_error: ({ ip }) => `IP address range [${ip}] is not correct`,
     no_permission: "You have no permissions, you cannot create a key",
+    key_not_found: "Key not found",
 };

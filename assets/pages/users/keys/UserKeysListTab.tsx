@@ -25,7 +25,6 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, hasPermissions }) => 
     const { t: tCommon } = useTranslation("Common");
     const { t } = useTranslation("UserKeysListTab");
 
-    const [error, setError] = useState<CartesApiException | undefined>(undefined);
     const [currentKey, setCurrentKey] = useState<string | undefined>(undefined);
 
     /* TODO Plusieurs access peuvent avoir la meme offering */
@@ -47,29 +46,29 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, hasPermissions }) => 
     const queryClient = useQueryClient();
 
     /* Suppression d'une cle */
-    const { isPending: isRemovePending, mutate: mutateRemove } = useMutation<null, CartesApiException, string>({
+    const {
+        status: removeStatus,
+        error: removeError,
+        mutate: mutateRemove,
+    } = useMutation<null, CartesApiException, string>({
         mutationFn: (keyId) => api.user.removeKey(keyId),
-        throwOnError: true,
         onSuccess() {
             queryClient.setQueryData<UserKeyResponseDto[]>(RQKeys.my_keys(), (keys) => {
                 const newkeys = keys?.filter((key) => key._id !== currentKey);
                 return newkeys;
             });
         },
-        onError() {
-            setError(error);
-        },
     });
 
     return (
         <>
-            {error && <Alert severity={"error"} title={tCommon("error")} description={error?.message} className={fr.cx("fr-my-3w")} />}
-            {isRemovePending /* || isModifyPending */ && (
+            {removeStatus === "error" && <Alert severity={"error"} closable title={tCommon("error")} description={removeError.message} />}
+            {removeStatus === "pending" && (
                 <Wait>
                     <div className={fr.cx("fr-container")}>
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
                             <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " frx-icon-spin"} />
-                            <h6 className={fr.cx("fr-m-0")}>{isRemovePending ? tCommon("removing") : tCommon("modifying")}</h6>
+                            <h6 className={fr.cx("fr-m-0")}>{tCommon("removing")}</h6>
                         </div>
                     </div>
                 </Wait>
@@ -110,7 +109,6 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, hasPermissions }) => 
                                     )}
                                     <div className={fr.cx("fr-grid-row", "fr-my-2v")}>
                                         <Button
-                                            disabled={true} // TODO A REACTIVER : La route /users/me/keys/{key} n'est qu'en qualif pour l'instant
                                             onClick={() => {
                                                 routes.user_key_edit({ keyId: accessKey._id }).push();
                                             }}

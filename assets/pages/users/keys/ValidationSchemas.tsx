@@ -39,7 +39,12 @@ const getSecuritySchema = (type: UserKeyInfoDtoTypeEnum) => {
             });
         case UserKeyInfoDtoTypeEnum.HASH:
             return yup.object().shape({
-                hash: yup.string().required(t("apikey_required")),
+                hash: yup
+                    .string()
+                    .required(t("apikey_required"))
+                    .matches(/^[a-zA-Z0-9_\-.]+$/, t("apikey_error"))
+                    .min(4, t("apikey_min_error"))
+                    .max(64, t("apikey_max_error")),
             });
         default:
             return yup.mixed().nullable().notRequired();

@@ -2,6 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
+import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { compareAsc } from "date-fns";
@@ -164,9 +165,12 @@ const UserKeyForm: FC<UserKeyFormProps> = ({ keyId }) => {
     const queryClient = useQueryClient();
 
     /* Ajout d'une cle */
-    const { isPending: addkeyIsPending, mutate: mutateAdd } = useMutation({
+    const {
+        status: addKeyStatus,
+        error: addKeyError,
+        mutate: mutateAdd,
+    } = useMutation({
         mutationFn: (values: object) => api.user.addKey(values),
-        throwOnError: true,
         onSuccess() {
             // TODO A VOIR POURQUOI refetchQueries ne fonctionne pas
             // queryClient.refetchQueries({ queryKey: RQKeys.me_keys() });
@@ -176,45 +180,45 @@ const UserKeyForm: FC<UserKeyFormProps> = ({ keyId }) => {
     });
 
     /* Modification d'une cle */
-    const { isPending: updatekeyIsPending, mutate: mutateUpdate } = useMutation<null, CartesApiException, object>({
+    const {
+        status: updatekeyStatus,
+        error: updatekeyError,
+        mutate: mutateUpdate,
+    } = useMutation<null, CartesApiException, object>({
         mutationFn: (datas) => {
             if (key) return api.user.updateKey(key._id, datas);
             return Promise.resolve(null);
         },
-        throwOnError: true,
         onSuccess() {
             queryClient.invalidateQueries({ queryKey: RQKeys.my_keys() });
+            if (key) {
+                queryClient.invalidateQueries({ queryKey: RQKeys.my_key(key._id) });
+            }
             routes.my_access_keys().push();
         },
     });
 
     return (
-        <AppLayout documentTitle={t("title", { editMode: editMode })} navItems={navItems}>
-            <h1>{t("title", { editMode: editMode })}</h1>
-            {addkeyIsPending && (
+        <AppLayout documentTitle={t("title", { keyId: keyId })} navItems={navItems}>
+            <h1>{t("title", { keyId: keyId })}</h1>
+            {(addKeyStatus === "pending" || updatekeyStatus === "pending") && (
                 <Wait>
                     <div className={fr.cx("fr-container")}>
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " frx-icon-spin"} />
-                            <h6 className={fr.cx("fr-m-0")}>{tCommon("adding")}</h6>
+                            <i className={cx(fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v"), "frx-icon-spin")} />
+                            <h6 className={fr.cx("fr-m-0")}>{addKeyStatus === "pending" ? tCommon("adding") : tCommon("modifying")}</h6>
                         </div>
                     </div>
                 </Wait>
             )}
-            {updatekeyIsPending && (
-                <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " frx-icon-spin"} />
-                            <h6 className={fr.cx("fr-m-0")}>{tCommon("modifying")}</h6>
-                        </div>
-                    </div>
-                </Wait>
-            )}
+            {addKeyError && <Alert severity="warning" closable title={tCommon("error")} description={addKeyError.message} />}
+            {updatekeyError && <Alert severity="warning" closable title={tCommon("error")} description={updatekeyError.message} />}
             {isLoadingKey || isLoadingKeys || isLoadingPermissions ? (
                 <LoadingText />
             ) : validPermissions.length === 0 ? (
                 <Alert severity="warning" closable={false} title={tCommon("warning")} description={t("no_permission")} />
+            ) : editMode === true && key === undefined ? (
+                <Alert severity="error" closable={false} title={tCommon("error")} description={t("key_not_found")} />
             ) : (
                 <>
                     <Stepper

@@ -88,6 +88,15 @@ class UserApiService extends AbstractEntrepotApiService
         return $this->request('POST', "users/me/keys", $body);
     }
     
+    /**
+     * @param array<mixed> $body
+     */
+    public function updateKey(string $keyId, array $body): array
+    {
+        $this->request('PATCH', "users/me/keys/$keyId", $body);
+        return $this->getMyKey($keyId);
+    }
+
     public function removeKey(string $keyId): array
     {
         return $this->request('DELETE', "users/me/keys/$keyId");
@@ -99,5 +108,10 @@ class UserApiService extends AbstractEntrepotApiService
     public function addAccess(string $keyId, array $body): array
     {
         return $this->request('POST', "users/me/keys/$keyId/accesses", $body); 
+    }
+
+    public function removeAccess(string $keyId, string $accessId): array
+    {
+        return $this->request('DELETE', "users/me/keys/$keyId/accesses/$accessId");
     }
 }

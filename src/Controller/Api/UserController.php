@@ -2,7 +2,6 @@
 
 namespace App\Controller\Api;
 
-use ArrayIterator;
 use App\Dto\User\UserKeyDTO;
 use App\Services\ServiceAccount;
 use App\Services\EntrepotApiService;
@@ -95,7 +94,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
             }
 
             if ($dto->type === "OAUTH2") {
-                $body['type_infos'] = ['fake' => null]; // TODO Pas trouv un autre moyen
+                $body['type_infos'] = (object) null;
             }
 
             // Ajout de la cle
@@ -107,71 +106,70 @@ class UserController extends AbstractController implements ApiControllerInterfac
                 $this->entrepotApiService->user->addAccess($key['_id'], $accessBody);    
             }
 
-            return new JsonResponse(); 
-
-        }
-        catch (EntrepotApiException $ex) {
+            // TODO A VOIR key avec acces dans la reponse ?
+            return new JsonResponse();
+        } catch (EntrepotApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
     }
 
-    /**
-     * Mise à jour d'une clé
-     * 
-     * TODO : remove lorsque fonction terminée :
-     * @SuppressWarnings(UnusedLocalVariable)
-     */ 
-    #[Route('/update_key/{key}', name: 'update_key', methods: ['PATCH'],
+    #[Route('/update_key/{keyId}', name: 'update_key', methods: ['PATCH'],
         options: ['expose' => true],
         condition: 'request.isXmlHttpRequest()')
     ]
-    public function updateKey(string $key, #[MapRequestPayload] UserKeyDTO $dto): JsonResponse
+    public function updateKey(string $keyId, #[MapRequestPayload] UserKeyDTO $dto): JsonResponse
     {
         $filter = ['type', 'type_infos', 'accesses', 'ip_list_name', 'ip_list_addresses', ];
       
-        try {
-                       
+        try { 
             $body = array_filter((array) $dto, function($value, $key) use ($filter) {
                 return ! ($value === null || $value === '' || in_array($key, $filter));
             }, ARRAY_FILTER_USE_BOTH);
-            
-            /*unset($body['accesses']);
-            unset($body['ip_list']);*/
+           
+            $key = $this->entrepotApiService->user->getMyKey($keyId);
 
-            // Les adresses IP
-            /*if (isset($dto->ip_list) && 0 !== count($dto->ip_list->addresses)) {
-                $body[$dto->ip_list->name] = $dto->ip_list->addresses;  
+            // Nom identique, on supprime du body
+            if ($dto->name === $key['name']) {
+                unset($body['name']);
             }
 
-            if ($dto->type === "OAUTH2") {
-                $body['type_infos'] = ['fake' => null]; // TODO Pas trouv un autre moyen
+            // Les adresses IP : elles sont exclusives => soit whitelist, soit blacklist peut
+            // contenir des adresses
+            $body['whitelist'] = $body['blacklist'] = [];
+            if (0 !== count($dto->ip_list_addresses)) {
+                $body[$dto->ip_list_name] = $dto->ip_list_addresses;
             }
 
-            // Ajout de la cle
-            $key = $this->entrepotApiService->user->addKey($body);
+            // Modification de la cle
+            $this->entrepotApiService->user->updateKey($keyId, $body);
+
+            // Suppression de tous les accces pour cette cle
+            $accesses = $this->entrepotApiService->user->getKeyAccesses($keyId);
+            foreach($accesses as $access) {
+                $this->entrepotApiService->user->removeAccess($keyId, $access['_id']);      
+            }
             
-            // Ajout des acces
+            // Ajout des nouveaux access
             foreach($dto->accesses as $access) {
                 $accessBody = (array)$access;
                 $this->entrepotApiService->user->addAccess($key['_id'], $accessBody);    
-            }*/
+            }
 
-            return new JsonResponse(); 
-
-        }
-        catch (EntrepotApiException $ex) {
+           // TODO A VOIR key avec acces ?
+           return new JsonResponse();
+        } catch (EntrepotApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
     }
 
-    #[Route('/remove_key/{key}', name: 'remove_key', methods: ['DELETE'],
+    #[Route('/remove_key/{keyId}', name: 'remove_key', methods: ['DELETE'],
         options: ['expose' => true],
         condition: 'request.isXmlHttpRequest()')
     ]
-    public function removeKey(string $key): JsonResponse
+    public function removeKey(string $keyId): JsonResponse
     {
         try {
-            $this->entrepotApiService->user->removeKey($key);
+            $this->entrepotApiService->user->removeKey($keyId);
             return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
         } catch (EntrepotApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);

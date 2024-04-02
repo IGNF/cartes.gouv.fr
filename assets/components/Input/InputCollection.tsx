@@ -1,7 +1,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
-import { FC, useEffect, useState } from "react";
+import { FC, useCallback, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useTranslation } from "../../i18n/i18n";
 
@@ -19,7 +19,13 @@ const InputCollection: FC<InputCollectionProps> = (props: InputCollectionProps) 
 
     const { label, hintText, state, stateRelatedMessage, value = [], onChange } = props;
 
-    const [datas, setDatas] = useState<Record<string, string>>(() => {
+    /* Calcul de la valeur finale */
+    const compute = useCallback((values: Record<string, string>) => {
+        const result: string[] = Object.values(values).filter((v) => v.trim().length);
+        return [...new Set(result)];
+    }, []);
+
+    const [internals, setInternals] = useState<Record<string, string>>(() => {
         // On met une ligne par defaut
         const def = [...value];
         if (def.length === 0) {
@@ -29,43 +35,43 @@ const InputCollection: FC<InputCollectionProps> = (props: InputCollectionProps) 
         const values: Record<string, string> = {};
         def.forEach((value) => {
             const uuid = uuidv4();
-            values[uuid] = value.trim();
+            values[uuid] = value;
         });
         return values;
     });
 
-    useEffect(() => {
-        let result: string[] = [];
-        Object.keys(datas).forEach((uuid) => {
-            if (datas[uuid]) {
-                result.push(datas[uuid]);
-            }
-        });
-        result = [...new Set(result)];
-        onChange?.(result);
-    }, [datas, onChange]);
+    const num = Object.keys(internals).length;
 
-    const num = Object.keys(datas).length;
-
-    // Ajout d'une ligne
+    /* Ajout d'une ligne */
     const handleAdd = () => {
-        const d = { ...datas };
+        const d = { ...internals };
         d[uuidv4()] = "";
-        setDatas(d);
+        setInternals(d);
     };
 
-    // Suppression d'une ligne
+    /* Suppression d'une ligne */
     const handleRemove = (key: string) => {
-        const d = { ...datas };
-        delete d[key];
-        setDatas(d);
+        const datas = { ...internals };
+        const value = datas[key];
+        delete datas[key];
+
+        setInternals(datas);
+        if (value) {
+            onChange(compute(datas));
+        }
     };
 
-    const handleChangeValue = (key: string, value: string) => {
-        const d = { ...datas };
-        d[key] = value.trim();
-        setDatas(d);
-    };
+    /* Modification d'une valeur */
+    const handleChangeValue = useCallback(
+        (key: string, value: string) => {
+            const datas = { ...internals };
+            datas[key] = value;
+            setInternals(datas);
+
+            onChange(compute(datas));
+        },
+        [internals, compute, onChange]
+    );
 
     return (
         <div className={fr.cx("fr-input-group", state === "error" && "fr-input-group--error")}>
@@ -76,14 +82,14 @@ const InputCollection: FC<InputCollectionProps> = (props: InputCollectionProps) 
                     {t("add")}
                 </Button>
             </div>
-            {Object.keys(datas).map((key) => (
+            {Object.keys(internals).map((key) => (
                 <div key={key} className="fr-grid-row fr-grid-row--middle">
                     <div className={fr.cx("fr-col")}>
                         <Input
                             className={fr.cx("fr-mb-1v")}
                             label={null}
                             nativeInputProps={{
-                                defaultValue: datas[key],
+                                defaultValue: internals[key],
                                 onChange: (e) => handleChangeValue(key, e.currentTarget.value),
                             }}
                         />

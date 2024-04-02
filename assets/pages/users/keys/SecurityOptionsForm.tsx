@@ -121,7 +121,7 @@ const SecurityOptionsForm: FC<SecurityOptionsFormProps> = ({ editMode, form, has
                 render={({ field: { value, onChange } }) => {
                     return (
                         <InputCollection
-                            label={t("ip_adresses")}
+                            label={t("ip_addresses")}
                             hintText={t("iprange_explain")}
                             value={value}
                             state={errors.ip_list_addresses ? "error" : "default"}
