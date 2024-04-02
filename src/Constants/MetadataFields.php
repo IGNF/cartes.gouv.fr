@@ -2,7 +2,7 @@
 
 namespace App\Constants;
 
-final class Metadata
+final class MetadataFields
 {
     public const FILE_IDENTIFIER = 'file_identifier';
     public const HIERARCHY_LEVEL = 'hierarchy_level';

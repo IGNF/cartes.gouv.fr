@@ -80,7 +80,10 @@ const niceBytes = (x: string) => {
 };
 
 const regex = {
-    name_constraint: /^[\w-.]+$/,
+    // /^(?=.{1,99}$)[a-zA-Z0-9À-ÿ\-._~!$&'()*+,;:@%\s]+$/g
+    datasheet_name: /^[\wÀ-ÿ\-._~!$&'()*+,;:@%\s]+$/g, // alphanumérique avec accents, certains caractères spéciaux, espaces blancs
+    file_identifier: /^[\wÀ-ÿ\-._~!$&'()*+,;:@%]+$/g, // alphanumérique avec accents, certains caractères spéciaux
+    technical_name: /^[\w-.]+$/,
     email: /^[\w-.]+@([\w-]+\.)+[\w-]{2,}$/,
     uuid: /^[A-F\d]{8}-[A-F\d]{4}-[A-F\d]{4}-[A-F\d]{4}-[A-F\d]{12}$/i,
 };

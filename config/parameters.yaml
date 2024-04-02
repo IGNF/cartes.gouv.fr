@@ -24,6 +24,7 @@ parameters:
     upload_path: "%var_data_path%/uploaded_files"
     style_files_path: "%var_data_path%/style_files"
     capabilities_path: "%var_data_path%/capabilities"
+    metadata_path: "%var_data_path%/metadata"
 
     support_contact_mail: "%env(resolve:SUPPORT_CONTACT_EMAIL)%"
     mailer_sender_address: "%env(resolve:MAILER_SENDER_ADDRESS)%"

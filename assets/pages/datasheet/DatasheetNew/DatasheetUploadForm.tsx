@@ -26,6 +26,7 @@ import FileUploader from "../../../modules/FileUploader";
 import RQKeys from "../../../modules/RQKeys";
 import Translator from "../../../modules/Translator";
 import { routes, useRoute } from "../../../router/router";
+import { regex } from "../../../utils";
 import DatasheetUploadIntegrationDialog from "./DatasheetUploadIntegration/DatasheetUploadIntegrationDialog";
 
 const maxFileSize = 2000000000; // 2 GB
@@ -54,16 +55,11 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
             data_name: yup
                 .string()
                 .required("Le nom de la donnée est obligatoire")
-                .test({
-                    name: "does-not-contain-equals",
-                    test(dataName, ctx) {
-                        if (dataName.includes("=")) {
-                            return ctx.createError({ message: "Le nom de la fiche de donnée ne peut pas contenir le symbole égal `=`" });
-                        }
-
-                        return true;
-                    },
-                })
+                .max(99, "Le nom de la fiche de donnée peut avoir une longueur maximale de 99 caractères")
+                .matches(
+                    regex.datasheet_name,
+                    "Le nom de la fiche de donnée ne peut contenir que des caractères alphanumériques, espaces blancs et certains caractères spéciaux"
+                )
                 .test({
                     name: "is-unique",
                     test(dataName, ctx) {
@@ -103,12 +99,31 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
         handleSubmit,
         formState: { errors, isValid, isValidating },
         setValue: setFormValue,
+        getValues: getFormValues,
         trigger,
     } = useForm({ resolver: yupResolver(schema) });
 
     const addUploadMutation = useMutation({
         mutationFn: (formData: object) => {
             return api.upload.add(datastoreId, formData);
+        },
+        onSuccess: () => {
+            // crée une métadonnée vide uniquement si création de fiche de donnée
+            if (datasheetName === undefined) {
+                addMetadataMutation.mutate();
+            }
+        },
+    });
+
+    const addMetadataMutation = useMutation({
+        mutationFn: () => {
+            return api.metadata.add(
+                datastoreId,
+                {},
+                {
+                    datasheet_name: getFormValues("data_name"),
+                }
+            );
         },
     });
 

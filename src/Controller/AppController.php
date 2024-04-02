@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Constants\Metadata;
+use App\Constants\MetadataFields;
 use App\Services\MetadataBuilder;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -62,22 +62,24 @@ class AppController extends AbstractController
 
         $thematicCategories = ['administration', 'altitude', 'aspects militaires', 'bâtiments', 'eau', 'énergie', 'géographie', 'hydrographie', 'industrie', 'information', 'installations agricoles et aquacoles', 'lieux de production et sites industriels', 'occupation des terres', 'référentiels de coordonnées', 'répartition de la population, démographie', 'toponymie', 'transport', 'unités administratives', 'usage des sols', 'végétation'];
 
-        $xml = $metadataBuilder->build([
-            Metadata::FILE_IDENTIFIER => 'IGN_donnée_quelque_chose',
-            Metadata::HIERARCHY_LEVEL => 'dataset',
-            Metadata::LANGUAGE => 'fre',
-            Metadata::CHARSET => 'utf8',
-            Metadata::TITLE => "C'est l'intitulé",
-            Metadata::ABSTRACT => $abstract,
-            Metadata::CREATION_DATE => (new \DateTime())->format('Y-m-d'),
-            Metadata::THEMATIC_CATEGORIES => $thematicCategories,
-            Metadata::CONTACT_EMAIL => $contactEmail,
-            Metadata::ORGANISATION_NAME => $organisationName,
-            Metadata::ORGANISATION_EMAIL => $organisationEmail,
-            Metadata::LAYER_NAMES => ['hydro-ardennes-l93_gpkg_04-07-2023:cours_d_eau', 'hydro-ardennes-l93_gpkg_04-07-2023:troncon_hydrographique', 'hydro-ardennes-l93_gpkg_04-07-2023:plan_d_eau'],
-            Metadata::ENDPOINT_URL => 'https://geoplateforme-gpf-apim.qua.gpf-tech.ign.fr/wfs',
-            Metadata::ENDPOINT_TYPE => 'OGC:WFS',
+        $xml = $metadataBuilder->buildXml([
+            MetadataFields::FILE_IDENTIFIER => 'IGN_donnée_quelque_chose',
+            MetadataFields::HIERARCHY_LEVEL => 'series',
+            MetadataFields::LANGUAGE => 'fre',
+            MetadataFields::CHARSET => 'utf8',
+            MetadataFields::TITLE => "C'est l'intitulé",
+            MetadataFields::ABSTRACT => $abstract,
+            MetadataFields::CREATION_DATE => (new \DateTime())->format('Y-m-d'),
+            MetadataFields::THEMATIC_CATEGORIES => $thematicCategories,
+            MetadataFields::CONTACT_EMAIL => $contactEmail,
+            MetadataFields::ORGANISATION_NAME => $organisationName,
+            MetadataFields::ORGANISATION_EMAIL => $organisationEmail,
+            MetadataFields::LAYER_NAMES => ['hydro-ardennes-l93_gpkg_04-07-2023:cours_d_eau', 'hydro-ardennes-l93_gpkg_04-07-2023:troncon_hydrographique', 'hydro-ardennes-l93_gpkg_04-07-2023:plan_d_eau'],
+            MetadataFields::ENDPOINT_URL => 'https://geoplateforme-gpf-apim.qua.gpf-tech.ign.fr/wfs',
+            MetadataFields::ENDPOINT_TYPE => 'OGC:WFS',
         ]);
+        $metadataBuilder->saveToFile($xml);
+
         $response = new Response($xml);
         $response->headers->set('Content-Type', 'application/xml');
 

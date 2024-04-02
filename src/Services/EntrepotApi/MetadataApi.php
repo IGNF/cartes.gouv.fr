@@ -17,20 +17,28 @@ class MetadataApi extends AbstractEntrepotApiService
         return $this->request('GET', "datastores/$datastoreId/metadata/$metadataId");
     }
 
-    public function add(string $datastoreId, string $filepath, string $type, bool $openData): array
+    public function add(string $datastoreId, string $filepath, ?string $type = 'ISOAP', ?bool $openData = false): array
     {
-        return $this->sendFile('POST', "datastores/$datastoreId/metadata", $filepath, [], [
+        $response = $this->sendFile('POST', "datastores/$datastoreId/metadata", $filepath, [], [
             'type' => $type,
             'open_data' => $openData,
         ]);
+
+        $this->filesystem->remove($filepath);
+
+        return $response;
     }
 
     public function replaceFile(string $datastoreId, string $metadataId, string $filepath): array
     {
-        return $this->sendFile('PUT', "datastores/$datastoreId/metadata/$metadataId", $filepath);
+        $response = $this->sendFile('PUT', "datastores/$datastoreId/metadata/$metadataId", $filepath);
+
+        $this->filesystem->remove($filepath);
+
+        return $response;
     }
 
-    public function modifyInfo(string $datastoreId, string $metadataId, string $type, bool $openData): array
+    public function modifyInfo(string $datastoreId, string $metadataId, ?string $type = 'ISOAP', ?bool $openData = false): array
     {
         return $this->request('PATCH', "datastores/$datastoreId/metadata/$metadataId", [
             'type' => $type,

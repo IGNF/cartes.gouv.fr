@@ -1,5 +1,4 @@
 import SymfonyRouting from "../modules/Routing";
-
 import { jsonFetch } from "../modules/jsonFetch";
 import { Datasheet, DatasheetDetailed, Service } from "../types/app";
 

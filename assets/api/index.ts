@@ -13,11 +13,12 @@ import service from "./service";
 import epsg from "./epsg";
 import annexe from "./annexe";
 import style from "./style";
+import metadata from "./metadata";
 
 const api = {
     contact,
-    catalogs,
     // Entrepot
+    catalogs,
     datasheet,
     datastore,
     storedData,
@@ -28,9 +29,10 @@ const api = {
     wmsVector,
     pyramid,
     service,
-    // epsg.io
-    epsg,
     annexe,
     style,
+    metadata,
+    // epsg.io
+    epsg,
 };
 export default api;

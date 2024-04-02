@@ -30,7 +30,7 @@ export class CommonSchemasValidation {
                 technical_name: yup
                     .string()
                     .required(tValidMD("metadatas.technical_name_error"))
-                    .matches(regex.name_constraint, tValidMD("metadatas.technical_name_regex"))
+                    .matches(regex.technical_name, tValidMD("metadatas.technical_name_regex"))
                     .test({
                         name: "is-unique",
                         message: tValidMD("metadatas.technical_name_unicity_error"),
@@ -50,7 +50,7 @@ export class CommonSchemasValidation {
                 description: yup.string().required(tValidMD("metadatas.description_error")),
                 identifier: yup
                     .string()
-                    .matches(regex.name_constraint, tValidMD("metadatas.identifier_regex"))
+                    .matches(regex.file_identifier, tValidMD("metadatas.identifier_regex"))
                     .required(tValidMD("metadatas.identifier_error")),
                 category: yup.array(yup.string()).min(1, tValidMD("metadatas.category_error")).required(tValidMD("metadatas.category_error")),
                 email_contact: yup
