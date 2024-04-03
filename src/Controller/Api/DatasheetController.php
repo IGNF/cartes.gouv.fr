@@ -31,14 +31,6 @@ class DatasheetController extends AbstractController implements ApiControllerInt
     #[Route('', name: 'get_list', methods: ['GET'])]
     public function getDatasheetList(string $datastoreId): JsonResponse
     {
-        $metadataList = $this->entrepotApiService->metadata->getAll($datastoreId);
-
-        $metadataDatasheetNames = array_map(function ($metadata) {
-            if (isset($metadata['tags'][CommonTags::DATASHEET_NAME])) {
-                return $metadata['tags'][CommonTags::DATASHEET_NAME];
-            }
-        }, $metadataList);
-
         $uploads = $this->entrepotApiService->upload->getAllDetailed($datastoreId, [
             'sort' => 'lastEvent,desc',
         ]);
@@ -59,7 +51,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             }
         }, $storedDataList);
 
-        $uniqueDatasheetNames = array_unique(array_merge($uploadDatasheetNames, $storedDataDatasheetNames, $metadataDatasheetNames));
+        $uniqueDatasheetNames = array_unique(array_merge($uploadDatasheetNames, $storedDataDatasheetNames));
         $uniqueDatasheetNames = array_filter($uniqueDatasheetNames);
         $uniqueDatasheetNames = array_values($uniqueDatasheetNames);
 

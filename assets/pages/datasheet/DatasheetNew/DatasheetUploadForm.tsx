@@ -99,31 +99,12 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
         handleSubmit,
         formState: { errors, isValid, isValidating },
         setValue: setFormValue,
-        getValues: getFormValues,
         trigger,
     } = useForm({ resolver: yupResolver(schema) });
 
     const addUploadMutation = useMutation({
         mutationFn: (formData: object) => {
             return api.upload.add(datastoreId, formData);
-        },
-        onSuccess: () => {
-            // crée une métadonnée vide uniquement si création de fiche de donnée
-            if (datasheetName === undefined) {
-                addMetadataMutation.mutate();
-            }
-        },
-    });
-
-    const addMetadataMutation = useMutation({
-        mutationFn: () => {
-            return api.metadata.add(
-                datastoreId,
-                {},
-                {
-                    datasheet_name: getFormValues("data_name"),
-                }
-            );
         },
     });
 
