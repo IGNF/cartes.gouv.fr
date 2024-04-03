@@ -9,7 +9,7 @@ import LoadingText from "../../components/Utils/LoadingText";
 import { datastoreNavItems } from "../../config/datastoreNavItems";
 import { Translations, getTranslation } from "../../i18n/i18n";
 import RQKeys from "../../modules/RQKeys";
-import { UserKeysWithAccessesResponseDto } from "../../types/app";
+import { UserKeyWithAccessesResponseDto } from "../../types/app";
 import { PermissionDetailsResponseDto } from "../../types/entrepot";
 import UserKeysListTab from "./keys/UserKeysListTab";
 import PermissionsListTab from "./permissions/PermissionsListTab";
@@ -20,7 +20,7 @@ const MyAccessKeys: FC = () => {
     const navItems = datastoreNavItems();
 
     // Les cles d'acces
-    const { data: keys, isLoading: isLoadingKeys } = useQuery<UserKeysWithAccessesResponseDto[]>({
+    const { data: keys, isLoading: isLoadingKeys } = useQuery<UserKeyWithAccessesResponseDto[]>({
         queryKey: RQKeys.my_keys(),
         queryFn: ({ signal }) => api.user.getMyKeysWithAccesses({ signal }),
         staleTime: 3600000,

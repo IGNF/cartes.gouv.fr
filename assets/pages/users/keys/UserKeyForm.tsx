@@ -18,7 +18,7 @@ import { getTranslation, useTranslation } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/RQKeys";
 import { CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
-import { KeyFormValuesType, UserKeyDetailedWithAccessesResponseDto, UserKeyInfoDtoTypeEnum } from "../../../types/app";
+import { KeyFormValuesType, UserKeyDetailedWithAccessesResponseDto, UserKeyInfoDtoTypeEnum, UserKeyWithAccessesResponseDto } from "../../../types/app";
 import { PermissionWithOfferingsDetailsResponseDto, UserKeyResponseDto, UserKeyResponseDtoTypeEnum } from "../../../types/entrepot";
 import "./../../../../assets/sass/pages/my_keys.scss";
 import SecurityOptionsForm from "./SecurityOptionsForm";
@@ -171,10 +171,11 @@ const UserKeyForm: FC<UserKeyFormProps> = ({ keyId }) => {
         mutate: mutateAdd,
     } = useMutation({
         mutationFn: (values: object) => api.user.addKey(values),
-        onSuccess() {
-            // TODO A VOIR POURQUOI refetchQueries ne fonctionne pas
-            // queryClient.refetchQueries({ queryKey: RQKeys.me_keys() });
-            queryClient.invalidateQueries({ queryKey: RQKeys.my_keys() });
+        onSuccess(keyWithAccesses) {
+            queryClient.setQueryData<UserKeyWithAccessesResponseDto[]>(RQKeys.my_keys(), (keys) => {
+                keys?.push(keyWithAccesses);
+                return keys;
+            });
             routes.my_access_keys().push();
         },
     });
@@ -184,15 +185,22 @@ const UserKeyForm: FC<UserKeyFormProps> = ({ keyId }) => {
         status: updatekeyStatus,
         error: updatekeyError,
         mutate: mutateUpdate,
-    } = useMutation<null, CartesApiException, object>({
+    } = useMutation<UserKeyWithAccessesResponseDto | null, CartesApiException, object>({
         mutationFn: (datas) => {
             if (key) return api.user.updateKey(key._id, datas);
             return Promise.resolve(null);
         },
-        onSuccess() {
-            queryClient.invalidateQueries({ queryKey: RQKeys.my_keys() });
-            if (key) {
-                queryClient.invalidateQueries({ queryKey: RQKeys.my_key(key._id) });
+        onSuccess(keyWithAccesses) {
+            if (keyWithAccesses) {
+                queryClient.setQueryData<UserKeyWithAccessesResponseDto[]>(RQKeys.my_keys(), (keys) => {
+                    const newKeys = keys?.filter((k) => k._id !== keyWithAccesses._id) || [];
+                    newKeys.push(keyWithAccesses);
+                    return newKeys;
+                });
+            }
+
+            if (keyId && keyWithAccesses) {
+                queryClient.setQueryData<UserKeyWithAccessesResponseDto>(RQKeys.my_key(keyId), keyWithAccesses);
             }
             routes.my_access_keys().push();
         },

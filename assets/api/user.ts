@@ -1,12 +1,11 @@
 import SymfonyRouting from "../modules/Routing";
 
 import { jsonFetch } from "../modules/jsonFetch";
-import { Datastore, UserKeyDetailedWithAccessesResponseDto, UserKeysWithAccessesResponseDto } from "../types/app";
+import { Datastore, UserKeyDetailedWithAccessesResponseDto, UserKeyWithAccessesResponseDto } from "../types/app";
 import {
     PermissionDetailsResponseDto,
     PermissionWithOfferingsDetailsResponseDto,
     UserKeyCreateDtoUserKeyInfoDto,
-    UserKeyDetailsResponseDtoUserKeyInfoDto,
     UserKeyResponseDto,
     UserKeyUpdateDto,
 } from "../types/entrepot";
@@ -40,7 +39,7 @@ const getMyKeys = (otherOptions: RequestInit = {}) => {
 /* Retourne les cles de de l'utilisateur courant avec leur acces */
 const getMyKeysWithAccesses = (otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_user_keys_with_accesses");
-    return jsonFetch<UserKeysWithAccessesResponseDto[]>(url, {
+    return jsonFetch<UserKeyWithAccessesResponseDto[]>(url, {
         ...otherOptions,
     });
 };
@@ -62,7 +61,7 @@ const getMyDetailedPermissions = (otherOptions: RequestInit = {}) => {
 
 const addKey = (formData: UserKeyCreateDtoUserKeyInfoDto | object) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_user_add_key");
-    return jsonFetch<UserKeyDetailsResponseDtoUserKeyInfoDto>(
+    return jsonFetch<UserKeyWithAccessesResponseDto>(
         url,
         {
             method: "POST",

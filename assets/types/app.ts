@@ -242,7 +242,7 @@ export type UserRightsResponseDto = {
     rights: CommunityUserResponseDtoRightsEnum[];
 };
 
-export type UserKeysWithAccessesResponseDto = UserKeyResponseDto & { accesses: AccessDetailsResponseDto[] };
+export type UserKeyWithAccessesResponseDto = UserKeyResponseDto & { accesses: AccessDetailsResponseDto[] };
 export type UserKeyDetailedWithAccessesResponseDto = UserKeyDetailsResponseDtoUserKeyInfoDto & { accesses: AccessDetailsResponseDto[] };
 
 export type Annexe = AnnexDetailResponseDto;

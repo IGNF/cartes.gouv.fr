@@ -1,5 +1,5 @@
 import { IPListName, KeyFormValuesType, UserKeyDetailedWithAccessesResponseDto, UserKeyInfoDtoTypeEnum } from "../../../../types/app";
-import { HashInfoDto, UserKeyDetailsResponseDtoUserKeyInfoDtoTypeEnum } from "../../../../types/entrepot";
+import { BasicInfoDto, HashInfoDto, UserKeyDetailsResponseDtoUserKeyInfoDtoTypeEnum } from "../../../../types/entrepot";
 import AccessesTransformer from "./AccessesTransformer";
 
 const UserKeyDefaultValues: KeyFormValuesType = {
@@ -25,8 +25,7 @@ const getDefaultValues = (editMode: boolean, key: UserKeyDetailedWithAccessesRes
     if (key.type === UserKeyDetailsResponseDtoUserKeyInfoDtoTypeEnum.HASH) {
         typeInfos = key.type_infos as HashInfoDto;
     } else if (key.type === UserKeyDetailsResponseDtoUserKeyInfoDtoTypeEnum.BASIC) {
-        // typeInfos = key.type_infos as BasicInfoDto;
-        typeInfos = { ...key.type_infos, ...{ password: "XXXXXXXXXXXXXX" } };
+        typeInfos = key.type_infos as BasicInfoDto;
     }
 
     const ipName = key.whitelist?.length !== 0 ? "whitelist" : key?.blacklist?.length !== 0 ? "blacklist" : "whitelist";

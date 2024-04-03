@@ -29,16 +29,17 @@ const BasicTypeInfoForm: FC<BasicTypeInfoFormProps> = ({ editMode, form }) => {
                 nativeInputProps={{ ...register("type_infos.login") }}
                 disabled={editMode}
             />
-            <Input
-                label={t("password")}
-                // @ts-expect-error error
-                state={errors.type_infos?.password ? "error" : "default"}
-                // @ts-expect-error error
-                stateRelatedMessage={errors.type_infos?.password?.message?.toString()}
-                // nativeInputProps={{ ...register("type_infos.password"), type: editMode ? "password" : "text" }}
-                nativeInputProps={{ ...register("type_infos.password") }}
-                disabled={editMode}
-            />
+            {editMode === false && (
+                <Input
+                    label={t("password")}
+                    // @ts-expect-error error
+                    state={errors.type_infos?.password ? "error" : "default"}
+                    // @ts-expect-error error
+                    stateRelatedMessage={errors.type_infos?.password?.message?.toString()}
+                    // nativeInputProps={{ ...register("type_infos.password"), type: editMode ? "password" : "text" }}
+                    nativeInputProps={{ ...register("type_infos.password"), type: "password" }}
+                />
+            )}
         </div>
     );
 };

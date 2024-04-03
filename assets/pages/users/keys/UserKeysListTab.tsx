@@ -13,11 +13,11 @@ import { Translations, useTranslation } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/RQKeys";
 import { CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
-import { UserKeysWithAccessesResponseDto } from "../../../types/app";
+import { UserKeyWithAccessesResponseDto } from "../../../types/app";
 import { UserKeyResponseDto } from "../../../types/entrepot";
 
 type UserKeysListTabProps = {
-    keys: UserKeysWithAccessesResponseDto[] | undefined;
+    keys: UserKeyWithAccessesResponseDto[] | undefined;
     hasPermissions: boolean;
 };
 
@@ -54,8 +54,7 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, hasPermissions }) => 
         mutationFn: (keyId) => api.user.removeKey(keyId),
         onSuccess() {
             queryClient.setQueryData<UserKeyResponseDto[]>(RQKeys.my_keys(), (keys) => {
-                const newkeys = keys?.filter((key) => key._id !== currentKey);
-                return newkeys;
+                return keys?.filter((key) => key._id !== currentKey);
             });
         },
     });
@@ -109,6 +108,10 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, hasPermissions }) => 
                                     )}
                                     <div className={fr.cx("fr-grid-row", "fr-my-2v")}>
                                         <Button
+                                            title={tCommon("modify")}
+                                            priority="secondary"
+                                            iconId="fr-icon-edit-line"
+                                            size="small"
                                             onClick={() => {
                                                 routes.user_key_edit({ keyId: accessKey._id }).push();
                                             }}
@@ -116,7 +119,11 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, hasPermissions }) => 
                                             {tCommon("modify")}
                                         </Button>
                                         <Button
+                                            title={tCommon("delete")}
                                             className={fr.cx("fr-ml-2v")}
+                                            priority="secondary"
+                                            iconId="fr-icon-delete-line"
+                                            size="small"
                                             onClick={() => {
                                                 setCurrentKey(accessKey._id);
                                                 ConfirmDialogModal.open();
