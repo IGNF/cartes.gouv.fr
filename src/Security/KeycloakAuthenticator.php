@@ -21,7 +21,7 @@ use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPasspor
 use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
 
-class KeycloakAuthenticator extends OAuth2Authenticator implements AuthenticationEntrypointInterface
+class KeycloakAuthenticator extends OAuth2Authenticator implements AuthenticationEntryPointInterface
 {
     use TargetPathTrait;
 
@@ -42,7 +42,7 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
      * //
      * {@inheritDoc}
      */
-    public function start(Request $request, AuthenticationException $authException = null): Response
+    public function start(Request $request, ?AuthenticationException $authException = null): Response
     {
         return new RedirectResponse($this->router->generate(self::LOGIN_ROUTE), Response::HTTP_TEMPORARY_REDIRECT);
     }
@@ -81,24 +81,13 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
      */
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
-        // if ($request->getSession()->get('side_login', false)) {
-        //     return new RedirectResponse($this->urlGenerator->generate('plage_security_side_login_success', ['side_login' => true]));
-        // }
-
-        $referer = $request->getSession()->get('referer', false);
-        if ($referer) {
-            $request->getSession()->remove('referer');
-
-            return new RedirectResponse($referer);
-        }
-
+        $referer = $request->getSession()->get('referer', null);
         $targetPath = $this->getTargetPath($request->getSession(), $firewallName);
 
-        if ($targetPath) {
-            return new RedirectResponse($targetPath);
-        }
+        $redirectUrl = $referer ?? $targetPath ?? $this->router->generate(self::SUCCESS_ROUTE);
+        $redirectUrl = str_replace('authentication_failed=1', '', $redirectUrl);
 
-        return new RedirectResponse($this->router->generate(self::SUCCESS_ROUTE));
+        return new RedirectResponse($redirectUrl);
     }
 
     /**

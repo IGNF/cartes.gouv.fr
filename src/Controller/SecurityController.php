@@ -43,10 +43,6 @@ class SecurityController extends AbstractController
         /** @var KeycloakClient */
         $client = $clientRegistry->getClient('keycloak');
 
-        if ($request->query->get('side_login', false)) {
-            $request->getSession()->set('side_login', true);
-        }
-
         return $client->redirect(['openid', 'profile', 'email']);
     }
 

@@ -1,15 +1,24 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
+import { useEffect } from "react";
 
 import AppLayout from "../components/Layout/AppLayout";
 import SymfonyRouting from "../modules/Routing";
-import { appRoot, useRoute } from "../router/router";
+import { appRoot, routes, useRoute } from "../router/router";
+import { useAuthStore } from "../stores/AuthStore";
 
 import hp from "../img/home/home.png";
 import "../sass/pages/home.scss";
 
 const Home = () => {
     const { params } = useRoute();
+    const user = useAuthStore((state) => state.user);
+
+    useEffect(() => {
+        if (user !== undefined && params?.["authentication_failed"] !== undefined) {
+            routes.home().push();
+        }
+    }, [params, user]);
 
     return (
         <AppLayout documentTitle="Le service public des cartes et données du territoire">
