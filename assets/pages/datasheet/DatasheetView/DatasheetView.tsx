@@ -118,7 +118,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                             <Tabs
                                 tabs={[
                                     {
-                                        label: t("tab_label.metadatas"),
+                                        label: t("tab_label.metadata"),
                                         isDefault: route.params["activeTab"] === "metadata",
                                         content: <p>Liste des métadonnées à venir (bloqué par une évolution nécessaire sur les tags des entités metadata)</p>,
                                     },
@@ -215,7 +215,7 @@ export default DatasheetView;
 
 // Traductions
 export const { i18n } = declareComponentKeys<
-    | "tab_label.metadatas"
+    | "tab_label.metadata"
     | { K: "tab_label.datasets"; P: { num: number }; R: string }
     | { K: "tab_label.services"; P: { num: number }; R: string }
     | "datasheet.back_to_list"
@@ -237,7 +237,7 @@ export const { i18n } = declareComponentKeys<
 });
 
 export const DatasheetViewFrTranslations: Translations<"fr">["DatasheetView"] = {
-    "tab_label.metadatas": "Métadonnées (0)",
+    "tab_label.metadata": "Métadonnées",
     "tab_label.datasets": ({ num }) => `Jeux de données (${num})`,
     "tab_label.services": ({ num }) => `Services (${num})`,
     "datasheet.back_to_list": "Retour à ma liste de données",
@@ -275,7 +275,7 @@ export const DatasheetViewFrTranslations: Translations<"fr">["DatasheetView"] = 
 };
 
 export const DatasheetViewEnTranslations: Translations<"en">["DatasheetView"] = {
-    "tab_label.metadatas": "Metadatas (0)",
+    "tab_label.metadata": "Metadata",
     "tab_label.datasets": ({ num }) => `Datasets (${num})`,
     "tab_label.services": ({ num }) => `Services (${num})`,
     "datasheet.back_to_list": "Back to my data list",
