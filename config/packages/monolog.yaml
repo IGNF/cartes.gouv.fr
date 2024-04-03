@@ -56,6 +56,7 @@ when@prod:
                 type: stream
                 path: php://stdout
                 level: info
+                formatter: monolog.formatter.logstash
             mailer:
                 type: rotating_file
                 path: "%kernel.logs_dir%/mailer.log"
@@ -63,7 +64,7 @@ when@prod:
             nested:
                 type: stream
                 path: php://stderr
-                level: debug
+                level: error
                 formatter: monolog.formatter.json
             console:
                 type: console
