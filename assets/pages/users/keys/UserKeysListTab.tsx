@@ -5,7 +5,7 @@ import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { declareComponentKeys } from "i18nifty";
-import { FC, useState } from "react";
+import { FC, useMemo, useState } from "react";
 import api from "../../../api";
 import { ConfirmDialog, ConfirmDialogModal } from "../../../components/Utils/ConfirmDialog";
 import Wait from "../../../components/Utils/Wait";
@@ -14,34 +14,39 @@ import RQKeys from "../../../modules/RQKeys";
 import { CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
 import { UserKeyWithAccessesResponseDto } from "../../../types/app";
-import { UserKeyResponseDto } from "../../../types/entrepot";
+import { PermissionDetailsResponseDto, UserKeyResponseDto, UserKeyResponseDtoTypeEnum } from "../../../types/entrepot";
 
 type UserKeysListTabProps = {
     keys: UserKeyWithAccessesResponseDto[] | undefined;
-    hasPermissions: boolean;
+    permissions: PermissionDetailsResponseDto[] | undefined;
 };
 
-const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, hasPermissions }) => {
+const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
     const { t: tCommon } = useTranslation("Common");
     const { t } = useTranslation("UserKeysListTab");
 
     const [currentKey, setCurrentKey] = useState<string | undefined>(undefined);
 
-    /* TODO Plusieurs access peuvent avoir la meme offering */
-    /* const servicesByKey = useMemo(() => {
-        if (keys === undefined || keys.length === 0) {
-            return {};
-        }
-
-        const result = {};
-        keys.forEach((key) => {
-            const services = Array.from(key.accesses, (access) => access.offering._id);
-            result[key._id] = key._id in result ? [...result[key._id], ...services] : services;
-            result[key._id] = [...new Set(result[key._id])]; // unicite
-        });
-        return result;
+    /* Y-a-t-il deja une cle OAUTH2 */
+    const hasOauth2 = useMemo(() => {
+        const f = keys?.find((key) => key.type === UserKeyResponseDtoTypeEnum.OAUTH2);
+        return !!f;
     }, [keys]);
-    console.log(servicesByKey); */
+
+    /* l'utilisateur a-t-il des permissions */
+    const hasPermissions = useMemo(() => {
+        return permissions !== undefined && permissions.length > 0;
+    }, [permissions]);
+
+    /* Ces permissions sont-elles toutes only_oauth a true */
+    const permissionsAreAllOnlyOauth = useMemo(() => {
+        const oauths = permissions?.filter((permission) => permission.only_oauth) ?? [];
+        return oauths.length === permissions?.length;
+    }, [permissions]);
+
+    const canAdd = useMemo(() => {
+        return hasPermissions && !(hasOauth2 && permissionsAreAllOnlyOauth);
+    }, [hasPermissions, hasOauth2, permissionsAreAllOnlyOauth]);
 
     const queryClient = useQueryClient();
 
@@ -139,7 +144,7 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, hasPermissions }) => 
                 })
             )}
             {hasPermissions === false && <p>{t("no_permission_warning")}</p>}
-            <Button className={fr.cx("fr-my-2v")} {...(hasPermissions ? { linkProps: routes.user_key_add().link } : { disabled: true })}>
+            <Button className={fr.cx("fr-my-2v")} {...(canAdd ? { linkProps: routes.user_key_add().link } : { disabled: true })}>
                 {t("add")}
             </Button>
             <ConfirmDialog

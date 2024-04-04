@@ -33,7 +33,11 @@ const PermissionsListTab: FC<PermissionsListTabProps> = ({ permissions }) => {
                     <div key={permission._id} className={className}>
                         <div className={fr.cx("fr-mb-1v")}>
                             {grantedBy && <div className={fr.cx("fr-grid-row")}>{t("permission_granted_by", { name: grantedBy })}</div>}
-                            {expired ? <Badge severity="warning">{t("expired")}</Badge> : expiresOn && <div>{t("expires_on", { date: expiresOn })}</div>}
+                            {expired ? (
+                                <Badge severity="warning">{t("expired", { date: expiresOn })}</Badge>
+                            ) : (
+                                expiresOn && <div>{t("expires_on", { date: expiresOn })}</div>
+                            )}
                         </div>
                         <ul className={fr.cx("fr-raw-list")}>
                             {permission.offerings.map((offering) => (

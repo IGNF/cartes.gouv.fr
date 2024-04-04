@@ -2,7 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Tabs from "@codegouvfr/react-dsfr/Tabs";
 import { useQuery } from "@tanstack/react-query";
 import { declareComponentKeys } from "i18nifty";
-import { FC, useMemo } from "react";
+import { FC } from "react";
 import api from "../../api";
 import AppLayout from "../../components/Layout/AppLayout";
 import LoadingText from "../../components/Utils/LoadingText";
@@ -33,10 +33,6 @@ const MyAccessKeys: FC = () => {
         staleTime: 3600000,
     });
 
-    const hasPermissions = useMemo(() => {
-        return permissions !== undefined && permissions.length > 0;
-    }, [permissions]);
-
     return (
         <AppLayout documentTitle={t("title")} navItems={navItems}>
             {isLoadingKeys || isLoadingPermissions ? (
@@ -51,7 +47,7 @@ const MyAccessKeys: FC = () => {
                                     label: t("my_keys"),
                                     iconId: "ri-key-2-line",
                                     isDefault: true,
-                                    content: <UserKeysListTab keys={keys} hasPermissions={hasPermissions} />,
+                                    content: <UserKeysListTab keys={keys} permissions={permissions} />,
                                 },
                                 {
                                     label: t("permissions"),

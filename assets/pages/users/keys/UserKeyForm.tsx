@@ -104,13 +104,19 @@ const UserKeyForm: FC<UserKeyFormProps> = ({ keyId }) => {
         return !!f;
     }, [keys]);
 
-    /* Les permissions non expirees */
-    const validPermissions = useMemo(() => {
-        if (permissions === undefined) return [];
-        return permissions.filter((permission) => {
-            return !(permission.end_date && compareAsc(new Date(permission.end_date), new Date()) < 0);
-        });
-    }, [permissions]);
+    /**
+     * On filtre les permissions avec les conditions suivantes :
+     *  - La date de fin est non definie ou superieure a la date du jour
+     *  - S'il possède une clé de type OAUTH2, on prend uniquement celles dont only_oauth === false
+     */
+    const filteredPermissions = useMemo(() => {
+        return (
+            permissions?.filter((permission) => {
+                const isValid = permission.end_date === undefined || compareAsc(new Date(permission.end_date), new Date()) > 0;
+                return hasOauth2 ? isValid && permission.only_oauth === false : isValid;
+            }) ?? []
+        );
+    }, [permissions, hasOauth2]);
 
     const STEPS = {
         ACCESSIBLE_SERVICES: 1,
@@ -223,7 +229,7 @@ const UserKeyForm: FC<UserKeyFormProps> = ({ keyId }) => {
             {updatekeyError && <Alert severity="warning" closable title={tCommon("error")} description={updatekeyError.message} />}
             {isLoadingKey || isLoadingKeys || isLoadingPermissions ? (
                 <LoadingText />
-            ) : validPermissions.length === 0 ? (
+            ) : filteredPermissions.length === 0 ? (
                 <Alert severity="warning" closable={false} title={tCommon("warning")} description={t("no_permission")} />
             ) : editMode === true && key === undefined ? (
                 <Alert severity="error" closable={false} title={tCommon("error")} description={t("key_not_found")} />
@@ -235,7 +241,7 @@ const UserKeyForm: FC<UserKeyFormProps> = ({ keyId }) => {
                         nextTitle={currentStep < STEPS.SECURITY_OPTIONS && t("step", { num: currentStep + 1 })}
                         title={t("step", { num: currentStep })}
                     />
-                    <ServicesForm form={form} permissions={validPermissions} visible={currentStep === STEPS.ACCESSIBLE_SERVICES} />
+                    <ServicesForm form={form} permissions={filteredPermissions} visible={currentStep === STEPS.ACCESSIBLE_SERVICES} />
                     <SecurityOptionsForm editMode={editMode} form={form} visible={currentStep === STEPS.SECURITY_OPTIONS} hasOauth2={hasOauth2} />
                     <ButtonsGroup
                         className={fr.cx("fr-mt-2w")}
