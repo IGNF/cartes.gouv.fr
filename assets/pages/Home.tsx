@@ -15,8 +15,8 @@ const Home = () => {
     const user = useAuthStore((state) => state.user);
 
     useEffect(() => {
-        if (user !== undefined && params?.["authentication_failed"] !== undefined) {
-            routes.home().push();
+        if (user !== null && params?.["authentication_failed"] !== undefined) {
+            routes.home().replace();
         }
     }, [params, user]);
 
