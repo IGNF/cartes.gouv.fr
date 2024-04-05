@@ -6,10 +6,11 @@ import Input from "@codegouvfr/react-dsfr/Input";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FC, memo, useMemo, useState } from "react";
+import { FC, ReactNode, memo, useCallback, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { symToStr } from "tsafe/symToStr";
 
+import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
 import api from "../../../../../api";
 import StoredDataStatusBadge from "../../../../../components/Utils/Badges/StoredDataStatusBadge";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
@@ -18,10 +19,11 @@ import MenuList from "../../../../../components/Utils/MenuList";
 import Wait from "../../../../../components/Utils/Wait";
 import functions from "../../../../../functions";
 import useToggle from "../../../../../hooks/useToggle";
-import { Translations, declareComponentKeys, getTranslation, useTranslation } from "../../../../../i18n/i18n";
+import { ComponentKey, Translations, declareComponentKeys, getTranslation, useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/RQKeys";
 import { routes } from "../../../../../router/router";
 import { DatastoreEndpoint, StoredDataStatusEnum, VectorDb } from "../../../../../types/app";
+import { EndpointDetailResponseDtoTypeEnum } from "../../../../../types/entrepot";
 import { offeringTypeDisplayName } from "../../../../../utils";
 import VectorDbDesc from "./VectorDbDesc";
 
@@ -34,6 +36,52 @@ type VectorDbListItemProps = {
 };
 
 const { t: tCommon } = getTranslation("Common");
+
+type QuotaType = {
+    name: string;
+    quota: number;
+    use: number;
+    available: number;
+};
+
+const getHintText = (
+    quotas: Record<string, QuotaType[]>,
+    type: EndpointDetailResponseDtoTypeEnum,
+    t: TranslationFunction<"VectorDbListItem", ComponentKey>
+): JSX.Element => {
+    const parts: ReactNode[] = [];
+
+    switch (type) {
+        case EndpointDetailResponseDtoTypeEnum.WFS:
+            parts.push(<span>{t("wfs_hint_text")}</span>);
+            break;
+        case EndpointDetailResponseDtoTypeEnum.WMTSTMS:
+            parts.push(<span>{t("tms_hint_text")}</span>);
+            break;
+        case EndpointDetailResponseDtoTypeEnum.WMSVECTOR:
+            parts.push(<span>{t("wms_hint_text")}</span>);
+            break;
+        default:
+            break;
+    }
+
+    if (type in quotas) {
+        const availables = quotas[type].reduce((accumulator, v) => accumulator + v.available, 0);
+        const style = availables ? {} : { color: fr.colors.decisions.text.default.warning.default };
+        quotas[type].forEach((q) => parts.push(<span style={style}>{`${q.available} publications possibles sur ${q.name}`}</span>));
+    }
+
+    return (
+        <>
+            {parts.map((part) => (
+                <>
+                    {part}
+                    <br />
+                </>
+            ))}
+        </>
+    );
+};
 
 const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreId, vectorDb }) => {
     const { t } = useTranslation({ VectorDbListItem });
@@ -70,6 +118,31 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
 
         return { wfsEndpoints, wmsVectorEndpoints, tmsEndpoints };
     }, [endpointsQuery.data]);
+
+    const quotas = useMemo<Record<string, QuotaType[]>>(() => {
+        const endpoints = endpointsQuery?.data ?? [];
+        const result = {};
+        endpoints.forEach((e) => {
+            const endpoint = e.endpoint;
+
+            const def = { name: endpoint.name, quota: e.quota, use: e.use, available: e.quota - e.use };
+            if (!(endpoint.type in result)) {
+                result[endpoint.type] = [def];
+            } else result[endpoint.type].push(def);
+        });
+        return result;
+    }, [endpointsQuery.data]);
+
+    const isAvailable = useCallback(
+        (type: string) => {
+            if (!(type in quotas)) {
+                return true;
+            }
+            const availables = quotas[type].reduce((accumulator, v) => accumulator + v.available, 0);
+            return availables !== 0;
+        },
+        [quotas]
+    );
 
     /* Suppression de la base de donnees */
     const queryClient = useQueryClient();
@@ -229,38 +302,29 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
                         options={[
                             {
                                 label: "Tile Map Service (TMS)",
-                                hintText: t("tms_hint_text"),
+                                hintText: getHintText(quotas, EndpointDetailResponseDtoTypeEnum.WMTSTMS, t),
                                 nativeInputProps: {
                                     checked: serviceType === "tms",
                                     onChange: () => setServiceType("tms"),
-                                    disabled: tmsEndpoints?.length === 0,
+                                    disabled: tmsEndpoints?.length === 0 || !isAvailable("WMTS-TMS"),
                                 },
                             },
                             {
                                 label: "Web Feature Service (WFS)",
-                                hintText: t("wfs_hint_text"),
+                                hintText: getHintText(quotas, EndpointDetailResponseDtoTypeEnum.WFS, t),
                                 nativeInputProps: {
                                     checked: serviceType === "wfs",
                                     onChange: () => setServiceType("wfs"),
-                                    disabled: wfsEndpoints?.length === 0,
+                                    disabled: wfsEndpoints?.length === 0 || !isAvailable("WFS"),
                                 },
                             },
                             {
                                 label: "Web Map Service (WMS-Vecteur)",
-                                hintText: t("wms_hint_text"),
+                                hintText: getHintText(quotas, EndpointDetailResponseDtoTypeEnum.WMSVECTOR, t),
                                 nativeInputProps: {
                                     checked: serviceType === "wms-vector",
                                     onChange: () => setServiceType("wms-vector"),
-                                    disabled: wmsVectorEndpoints?.length === 0,
-                                },
-                            },
-                            {
-                                label: t("prepaquet_label"),
-                                hintText: t("prepaquet_hint_text"),
-                                nativeInputProps: {
-                                    checked: serviceType === "pre-paquet",
-                                    onChange: () => setServiceType("pre-paquet"),
-                                    disabled: true, // TODO : temporaire
+                                    disabled: wmsVectorEndpoints?.length === 0 || !isAvailable("WMS-VECTOR"),
                                 },
                             },
                         ]}

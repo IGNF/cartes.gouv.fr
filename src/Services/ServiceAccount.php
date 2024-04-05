@@ -49,6 +49,10 @@ class ServiceAccount
 
     public function getSandboxCommunity() : array | null
     {
+        if (! $this->token) {
+            return null;
+        }
+
         // Id de la community "Bac à sable"
         $sandboxId = $this->parameters->get('sandbox_community_id');
         if (! $sandboxId) {
