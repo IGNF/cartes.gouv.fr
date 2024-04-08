@@ -98,7 +98,7 @@ const Description: FC<DescriptionProps> = ({ visible, form }) => {
                         hintText={t("metadata.description_form.hint_description")}
                         state={errors.description ? "error" : "default"}
                         stateRelatedMessage={errors?.description?.message?.toString()}
-                        defaultValue={field.value}
+                        value={field.value ?? ""}
                         onChange={(values) => {
                             field.onChange(values);
                         }}
@@ -129,7 +129,7 @@ const Description: FC<DescriptionProps> = ({ visible, form }) => {
                         isOptionEqualToValue={(option, value) => option === value}
                         state={errors.category ? "error" : "default"}
                         stateRelatedMessage={errors?.category?.message?.toString()}
-                        defaultValue={field.value}
+                        value={field.value}
                         onChange={(_, value) => field.onChange(value)}
                         // @ts-expect-error fausse alerte
                         controllerField={field}

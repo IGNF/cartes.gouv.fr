@@ -27,6 +27,16 @@ const RQKeys = {
 
     datastore_annexe_list: (datastoreId: string): string[] => ["datastore", datastoreId, "annexe"],
 
+    datastore_metadata_list: (datastoreId: string): string[] => ["datastore", datastoreId, "metadata"],
+    datastore_metadata_by_datasheet_name: (datastoreId: string, datasheetName: string): string[] => [
+        "datastore",
+        datastoreId,
+        "metadata",
+        "datasheet",
+        datasheetName,
+    ],
+    datastore_metadata: (datastoreId: string, metadataId: string): string[] => ["datastore", datastoreId, "metadata", metadataId],
+
     catalogs_communities: (): string[] => ["catalogs", "communities"],
 
     my_keys: (): string[] => ["my_keys"],

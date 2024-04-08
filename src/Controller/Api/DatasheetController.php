@@ -128,6 +128,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
     {
         $datastore = $this->entrepotApiService->datastore->get($datastoreId);
 
+        // recherche du nombre de services publiés
         $configurations = $this->entrepotApiService->configuration->getAll($datastoreId, [
             'tags' => [
                 CommonTags::DATASHEET_NAME => $datasheetName,
@@ -136,11 +137,12 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         ]);
         $nbPublications = count($configurations);
 
+        // recherche de vignette
         $annexeUrl = $this->getParameter('annexes_url');
         $annexes = $this->entrepotApiService->annexe->getAll($datastoreId, null, null, ["datasheet_name=$datasheetName", 'type=thumbnail']);
 
         $thumbnail = null;
-        if (1 == count($annexes)) {
+        if (count($annexes) > 0) {
             $thumbnail = $annexes[0];
             $thumbnail['url'] = $annexeUrl.'/'.$datastore['technical_name'].$thumbnail['paths'][0];
         }

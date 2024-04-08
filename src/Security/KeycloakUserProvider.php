@@ -55,14 +55,18 @@ class KeycloakUserProvider implements UserProviderInterface
             throw new TokenNotFoundException();
         }
 
-        if ($accessToken->hasExpired()) {
+        if (($accessToken->getExpires() - 300) < time()) {
+            $this->logger->debug('{class}: Token expiring in 2 mins, attempting to refresh [{id_token}]', ['id_token' => $accessToken->getValues()['id_token'], 'class' => self::class]);
+
             try {
                 /** @var AccessToken */
                 $accessToken = $keycloakClient->refreshAccessToken($accessToken->getRefreshToken());
                 $session->set(KeycloakToken::SESSION_KEY, $accessToken);
+
+                $this->logger->debug('{class}: Token refreshed successfully [{id_token}]', ['id_token' => $accessToken->getValues()['id_token'], 'class' => self::class]);
             } catch (IdentityProviderException $ex) {
-                $this->logger->debug('{class}: Unable to refresh keycloak access token', ['class' => self::class]);
-                throw new AuthenticationExpiredException('Unable to refresh keycloak access token', Response::HTTP_UNAUTHORIZED, $ex);
+                $this->logger->debug('{class}: Failed to refresh keycloak access token', ['class' => self::class]);
+                throw new AuthenticationExpiredException('Failed to refresh keycloak access token', Response::HTTP_UNAUTHORIZED, $ex);
             }
         }
 
@@ -70,15 +74,15 @@ class KeycloakUserProvider implements UserProviderInterface
             /** @var KeycloakResourceOwner */
             $keycloakUser = $keycloakClient->fetchUserFromToken($accessToken);
         } catch (\Throwable $th) {
-            $this->logger->debug('{class}: Unable to fetch user from token', ['class' => self::class]);
-            throw new AuthenticationExpiredException('Unable to fetch user from token', Response::HTTP_UNAUTHORIZED, $th);
+            $this->logger->debug('{class}: Failed to fetch user from token', ['class' => self::class]);
+            throw new AuthenticationExpiredException('Failed to fetch user from token', Response::HTTP_UNAUTHORIZED, $th);
         }
 
         try {
             $apiUser = $this->entrepotApiService->user->getMe();
         } catch (TimeoutException $ex) {
-            $this->logger->debug('{class}: Unable to refresh logged-in user', ['class' => self::class]);
-            throw new UserNotFoundException('Unable to refresh logged-in user', Response::HTTP_UNAUTHORIZED, $ex);
+            $this->logger->debug('{class}: Failed to fetch logged-in user', ['class' => self::class]);
+            throw new UserNotFoundException('Failed to fetch logged-in user', Response::HTTP_UNAUTHORIZED, $ex);
         }
 
         $user = new User($keycloakUser->toArray(), $apiUser);

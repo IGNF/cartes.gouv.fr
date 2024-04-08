@@ -7,7 +7,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format as datefnsFormat } from "date-fns";
 import { declareComponentKeys } from "i18nifty";
-import { FC, useCallback, useMemo, useState } from "react";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { symToStr } from "tsafe/symToStr";
 import * as yup from "yup";
@@ -168,6 +168,12 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
         staleTime: Infinity,
     });
 
+    const metadataQuery = useQuery({
+        queryKey: RQKeys.datastore_metadata_by_datasheet_name(datastoreId, vectorDbQuery.data?.tags?.datasheet_name ?? "XX"),
+        queryFn: ({ signal }) => api.metadata.getByDatasheetName(datastoreId, vectorDbQuery.data?.tags?.datasheet_name ?? "XX", { signal }),
+        enabled: !!vectorDbQuery.data?.tags?.datasheet_name,
+    });
+
     const commonValidation = useMemo(() => new CommonSchemasValidation(offeringsQuery.data), [offeringsQuery.data]);
 
     // Definition du schema
@@ -214,22 +220,13 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
                 };
             });
 
+            // valeurs récupérées depuis anciens config et offering existants
             defValues = {
                 selected_tables: typeInfos?.used_data?.[0].relations?.map((rel) => rel.native_name) ?? [],
                 table_infos: tableInfos,
                 technical_name: offeringQuery.data?.configuration.layer_name,
                 public_name: offeringQuery.data?.configuration.name,
                 share_with,
-                // TODO : à récupérer depuis les métadonnées
-                creation_date: now,
-                resource_genealogy: "",
-                email_contact: "",
-                organization: "",
-                organization_email: "",
-                category: [],
-                description: "",
-                identifier: "",
-                charset: "utf8",
                 attribution_text: offeringQuery.data?.configuration.attribution?.title,
                 attribution_url: offeringQuery.data?.configuration.attribution?.url,
             };
@@ -238,6 +235,7 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
             const storedDataName = vectorDbQuery.data?.name ?? "";
             const nice = removeDiacritics(storedDataName.toLowerCase()).replace(/ /g, "_");
 
+            // valeurs par défaut lors de la création de nouveaux config et offering
             defValues = {
                 selected_tables: [],
                 table_infos: {},
@@ -258,11 +256,20 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
         defValues = {
             ...defValues,
             projection: projUrl,
-            languages: [{ language: "français", code: "fra" }],
+            languages: metadataQuery?.data?.content?.language ? [metadataQuery?.data?.content?.language] : [{ language: "français", code: "fra" }],
+            creation_date: metadataQuery?.data?.content?.creation_date,
+            resource_genealogy: metadataQuery?.data?.content?.hierarchy_level,
+            email_contact: metadataQuery?.data?.content?.contact_email,
+            organization: metadataQuery?.data?.content?.organisation_name,
+            organization_email: metadataQuery?.data?.content?.organisation_email,
+            category: metadataQuery?.data?.content?.thematic_categories,
+            description: metadataQuery?.data?.content?.abstract,
+            identifier: metadataQuery?.data?.content?.file_identifier,
+            charset: metadataQuery?.data?.content?.charset ?? "utf8",
         };
 
         return defValues;
-    }, [editMode, vectorDbQuery.data, offeringQuery.data]);
+    }, [editMode, vectorDbQuery.data, offeringQuery.data, metadataQuery?.data?.content]);
 
     const tables: StoredDataRelation[] = useMemo(() => {
         if (!vectorDbQuery.data?.type_infos) return [];
@@ -279,7 +286,6 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
     const {
         formState: { errors },
         getValues: getFormValues,
-
         trigger,
     } = form;
 
@@ -288,6 +294,10 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
         name: "selected_tables",
         defaultValue: [],
     });
+
+    useEffect(() => {
+        window?.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+    }, [currentStep]);
 
     const previousStep = useCallback(() => setCurrentStep((currentStep) => currentStep - 1), []);
 

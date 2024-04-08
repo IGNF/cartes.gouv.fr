@@ -1,7 +1,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { useIsDark } from "@codegouvfr/react-dsfr/useIsDark";
 import MDEditor from "@uiw/react-md-editor";
-import { CSSProperties, FC, useState } from "react";
+import { CSSProperties, FC } from "react";
 
 import getLocaleCommands from "../../modules/react-md/react-md-commands";
 import Translator from "../../modules/Translator";
@@ -9,18 +9,16 @@ import Translator from "../../modules/Translator";
 type MarkdownEditorProps = {
     label?: string;
     hintText?: string;
-    defaultValue?: string;
+    value: string;
+    onChange: (values: string) => void;
     state?: "default" | "error" | "success";
     stateRelatedMessage?: string;
     placeholder?: string;
-    onChange?: (values: string) => void;
 };
 
 const MarkdownEditor: FC<MarkdownEditorProps> = (props) => {
-    const { label, hintText, defaultValue = "", state, stateRelatedMessage, placeholder, onChange } = props;
+    const { label, hintText, value, state, stateRelatedMessage, placeholder, onChange } = props;
     const { isDark } = useIsDark();
-
-    const [value, setValue] = useState<string>(defaultValue);
 
     const customStyle: CSSProperties = {
         backgroundColor: fr.colors.decisions.background.contrast.grey.default,
@@ -46,12 +44,7 @@ const MarkdownEditor: FC<MarkdownEditorProps> = (props) => {
                 textareaProps={{
                     placeholder: placeholder ?? Translator.trans("service.wfs.new.description_form.markdown_placeholder"),
                 }}
-                onChange={(newValue = "") => {
-                    setValue(newValue);
-                    if (onChange) {
-                        onChange(newValue);
-                    }
-                }}
+                onChange={(newValue = "") => onChange(newValue)}
                 style={customStyle}
                 previewOptions={{ style: customStyle }}
             />

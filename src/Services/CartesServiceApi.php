@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Constants\EntrepotApi\ConfigurationStatuses;
 use App\Constants\EntrepotApi\OfferingTypes;
-use App\Exception\EntrepotApiException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -38,10 +37,9 @@ class CartesServiceApi
             $url = $urls[0]['url'].'/metadata.json';
 
             $response = $this->httpClient->request('GET', $url);
-            if (Response::HTTP_OK != $response->getStatusCode()) {
-                throw new EntrepotApiException("Request $url failed");
+            if (Response::HTTP_OK === $response->getStatusCode()) {
+                $offering['tms_metadata'] = $response->toArray();
             }
-            $offering['tms_metadata'] = $response->toArray();
         }
 
         $styles = [];
@@ -147,6 +145,8 @@ class CartesServiceApi
         if (true === $removeStyleFiles) {
             // TODO : supprimer les fichiers de styles en annexe qui sont référencés dans les tags/annexes de la configuration
         }
+
+        // TODO mettre à jour métadonnée
     }
 
     /**
@@ -180,6 +180,8 @@ class CartesServiceApi
                 $this->entrepotApiService->static->delete($datastoreId, $staticId);
             }
         }
+
+        // TODO mettre à jour métadonnée
     }
 
     /**
@@ -205,5 +207,7 @@ class CartesServiceApi
         if (true === $removeStyleFiles) {
             // TODO : supprimer les fichiers de styles en annexe qui sont référencés dans les tags/annexes de la configuration
         }
+
+        // TODO mettre à jour métadonnée
     }
 }

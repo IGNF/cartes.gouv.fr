@@ -100,7 +100,7 @@ const AdditionalInfo: FC<AdditionalInfoProps> = ({ storedData, datastoreId, visi
                             state={errors.languages ? "error" : "default"}
                             stateRelatedMessage={errors?.languages?.message?.toString()}
                             freeSolo={false}
-                            defaultValue={field.value}
+                            value={field.value}
                             getOptionLabel={(option) => (option as LanguageType).language}
                             isOptionEqualToValue={(option, value) => option.code === value.code}
                             options={languagesOptions}

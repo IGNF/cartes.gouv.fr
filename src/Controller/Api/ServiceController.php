@@ -74,13 +74,11 @@ class ServiceController extends AbstractController implements ApiControllerInter
                 'type' => $configType,
                 'open' => true,
             ]);
-            $isOfferingOpen = true;
         } elseif ('your_community' === $shareWith) {
             $endpoints = $this->entrepotApiService->datastore->getEndpointsList($datastoreId, [
                 'type' => $configType,
                 'open' => false,
             ]);
-            $isOfferingOpen = false;
         } else {
             throw new CartesApiException('Valeur du champ [share_with] est invalide', Response::HTTP_BAD_REQUEST, ['share_with' => $shareWith]);
         }
@@ -89,9 +87,6 @@ class ServiceController extends AbstractController implements ApiControllerInter
             throw new CartesApiException("Aucun point d'accès (endpoint) du datastore ne peut convenir à la demande", Response::HTTP_BAD_REQUEST, ['share_with' => $shareWith]);
         }
 
-        return [
-            'open' => $isOfferingOpen,
-            '_id' => $endpoints[0]['endpoint']['_id'],
-        ];
+        return $endpoints[0]['endpoint'];
     }
 }
