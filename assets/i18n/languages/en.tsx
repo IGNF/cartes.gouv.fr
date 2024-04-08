@@ -7,7 +7,7 @@ import { contactEnTranslations } from "../../pages/contact/Contact";
 import { PyramidListItemFrTranslations } from "../../pages/datasheet/DatasheetView/DatasetListTab/PyramidList/PyramidListItem";
 import { VectorDbListItemEnTranslations } from "../../pages/datasheet/DatasheetView/DatasetListTab/VectorDbList/VectorDbListItem";
 import { DatasheetViewEnTranslations } from "../../pages/datasheet/DatasheetView/DatasheetView";
-import { DatastoreManageStorageEnTranslations } from "../../pages/datastore/DatastoreManageStorage/DatastoreManageStorage";
+import { DatastoreManageStorageEnTranslations } from "../../pages/datastore/ManageStorage/DatastoreManageStorage";
 import { MetadatasFormEnTranslations } from "../../pages/service/metadatas/metadatas-form-tr";
 import { ValidationMetadatasEnTranslations } from "../../pages/service/metadatas/metadatas-validation-tr";
 import { MeEnTranslations } from "../../pages/users/Me";

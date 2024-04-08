@@ -8,7 +8,7 @@ import { PyramidListItemFrTranslations } from "../../pages/datasheet/DatasheetVi
 import { VectorDbListItemFrTranslations } from "../../pages/datasheet/DatasheetView/DatasetListTab/VectorDbList/VectorDbListItem";
 import { DatasheetViewFrTranslations } from "../../pages/datasheet/DatasheetView/DatasheetView";
 import { DatastoreManagePermissionsFrTranslations } from "../../pages/datastore/ManagePermissions/DatastoreManagePermissions";
-import { DatastoreManageStorageFrTranslations } from "../../pages/datastore/DatastoreManageStorage/DatastoreManageStorage";
+import { DatastoreManageStorageFrTranslations } from "../../pages/datastore/ManageStorage/DatastoreManageStorage";
 import { TableSelectionFrTranslations } from "../../pages/service/TableSelection";
 import { MetadatasFormFrTranslations } from "../../pages/service/metadatas/metadatas-form-tr";
 import { ValidationMetadatasFrTranslations } from "../../pages/service/metadatas/metadatas-validation-tr";

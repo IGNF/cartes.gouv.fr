@@ -29,7 +29,7 @@ export type ComponentKey =
     | typeof import("../pages/service/metadatas/metadatas-form-tr").i18n
     | typeof import("../pages/service/metadatas/metadatas-validation-tr").i18n
     | typeof import("../pages/contact/Contact").i18n
-    | typeof import("../pages/datastore/DatastoreManageStorage/DatastoreManageStorage").i18n
+    | typeof import("../pages/datastore/ManageStorage/DatastoreManageStorage").i18n
     | typeof import("../pages/datastore/ManagePermissions/DatastoreManagePermissions").i18n
     | typeof import("../pages/datasheet/DatasheetView/DatasetListTab/VectorDbList/VectorDbListItem").i18n
     | typeof import("../pages/datasheet/DatasheetView/DatasetListTab/PyramidList/PyramidListItem").i18n
@@ -39,7 +39,6 @@ export type ComponentKey =
     | typeof import("../validations/sldStyle").i18n
     | typeof import("../validations/MapboxStyleValidator").i18n
     | typeof import("../modules/Style/TMSStyleFilesManager").i18n
-    | typeof import("../pages/datastore/DatastoreManageStorage/DatastoreManageStorage").i18n
     | typeof import("../pages/service/wms-vector/WmsVectorServiceForm").i18n
     | typeof import("../pages/service/wfs/WfsServiceForm").i18n
     | typeof import("../pages/service/tms/PyramidVectorTmsServiceForm").i18n

@@ -25,7 +25,7 @@ const Me = lazy(() => import("../pages/users/Me"));
 const MyAccessKeys = lazy(() => import("../pages/users/MyAccessKeys"));
 const UserKeyForm = lazy(() => import("../pages/users/keys/UserKeyForm"));
 
-const DatastoreManageStorage = lazy(() => import("../pages/datastore/DatastoreManageStorage/DatastoreManageStorage"));
+const DatastoreManageStorage = lazy(() => import("../pages/datastore/ManageStorage/DatastoreManageStorage"));
 const DatastoreManagePermissions = lazy(() => import("../pages/datastore/ManagePermissions/DatastoreManagePermissions"));
 const AddPermissionForm = lazy(() => import("../pages/datastore/ManagePermissions/AddPermissionForm"));
 
