@@ -87,9 +87,11 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
                                 label={
                                     <div>
                                         {accessKey.name}
-                                        <Badge className={fr.cx("fr-ml-2v")} noIcon={true} severity={"info"}>
-                                            {accessKey.type}
-                                        </Badge>
+                                        {accessKey.type && (
+                                            <Badge className={fr.cx("fr-ml-2v")} noIcon={true} severity={"info"}>
+                                                {accessKey.type}
+                                            </Badge>
+                                        )}
                                     </div>
                                 }
                             >

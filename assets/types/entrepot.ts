@@ -157,8 +157,10 @@ export interface OfferingDetailResponseDto {
 
 export interface MetadataResponseDto {
     type: MetadataResponseDtoTypeEnum;
+    open_data: boolean;
     level: MetadataResponseDtoLevelEnum;
     file_identifier: string;
+    tags?: Record<string, string>;
     endpoints?: EndpointListResponseDto[];
     /**
      * identifiant technique
@@ -228,14 +230,23 @@ export interface ConfigurationAttributionLogo {
 export type ConfigurationDetailsContent = object;
 
 export type ConfigurationDownloadDetailsContent = ConfigurationDetailsContent & {
-    title: string;
+    /** Titre dans les différentes langues disponibles */
+    title: Record<string, string>;
     /**
      * Mots clés
      * @uniqueItems true
      */
     keywords?: string[];
+    /** Identifiant produit de la ressource */
+    product_identifier?: string;
+    /** Namespace de la ressource */
+    namespace?: string;
+    /** Droits applicables */
+    rights?: string;
+    /** Données utilisées */
     used_data: ConfigurationUsedDataDownloadDetailsContent[];
-    abstract: string;
+    /** Description dans les différentes langues disponibles */
+    abstract: Record<string, string>;
 };
 
 export type ConfigurationGetFeatureInfoIsStoredDataWmtsTmsDetailsContent = {
@@ -248,8 +259,9 @@ export type ConfigurationGetFeatureInfoServerUrlWmtsTmsDetailsContent = {
 };
 
 /** Ressource cible du GetFeatureInfo */
-export type ConfigurationGetFeatureInfoWmtsTmsDetailsContent = ConfigurationGetFeatureInfoIsStoredDataWmtsTmsDetailsContent &
-    ConfigurationGetFeatureInfoServerUrlWmtsTmsDetailsContent;
+export type ConfigurationGetFeatureInfoWmtsTmsDetailsContent =
+    | ConfigurationGetFeatureInfoIsStoredDataWmtsTmsDetailsContent
+    | ConfigurationGetFeatureInfoServerUrlWmtsTmsDetailsContent;
 
 export type ConfigurationItineraryIsocurveDetailsContent = ConfigurationDetailsContent & {
     /** Bounding box */
@@ -394,22 +406,37 @@ export interface ConfigurationUsedDataAttributeItineraryIsocurveDetailsContent {
     default?: boolean;
 }
 
+/** Données utilisées */
 export interface ConfigurationUsedDataDownloadDetailsContent {
+    /**
+     * Nom technique de la sous-ressource. Ce nom doit être unique au sein de la configuration. Uniquement des caractères alphanumériques, tiret, tiret bas, point
+     * @pattern ^[A-Za-z0-9_\-.]+$
+     */
     sub_name: string;
-    title?: string;
+    /** Titre dans les différentes langues disponibles */
+    title?: Record<string, string>;
     /**
      * Mots clés
      * @uniqueItems true
      */
     keywords?: string[];
+    /** Format des fichiers */
     format?: string;
+    /** Zone géographique concernée */
     zone?: string;
+    /** Droits applicables */
+    rights?: string;
+    /** Thématique des données */
+    thematic?: string;
+    /** Résolution des données */
+    resolution?: string;
     /**
      * Identifiant de la donnée stockée
      * @format uuid
      */
     stored_data: string;
-    abstract?: string;
+    /** Description dans les différentes langues disponibles */
+    abstract?: Record<string, string>;
 }
 
 export interface ConfigurationUsedDataItineraryIsocurveDetailsContent {
@@ -513,6 +540,7 @@ export interface ConfigurationUsedDataVectorTmsDetailsContent {
 
 export interface ConfigurationUsedDataWfsDetailsContent {
     relations: ConfigurationUsedDataRelationWfsDetailsContent[];
+    expose_primary_key?: boolean;
     /**
      * Identifiant de la donnée stockée
      * @format uuid
@@ -833,19 +861,18 @@ export type UserHashKeyCreateDto = UtilRequiredKeys<UserKeyCreateDtoUserKeyInfoD
     type_infos: HashInfoDto;
 };
 
-/*export type UserHeaderKeyCreateDto = UtilRequiredKeys<UserKeyCreateDtoUserKeyInfoDto, "name" | "type_infos"> & {
+export type UserHeaderKeyCreateDto = UtilRequiredKeys<UserKeyCreateDtoUserKeyInfoDto, "name" | "type_infos"> & {
     type_infos: HeaderInfoDto;
-};*/
+};
 
-// TODO OAUTH
 export interface UserKeyCreateDtoUserKeyInfoDto {
     name: string;
-    type: UserKeyCreateDtoUserKeyInfoDtoTypeEnum;
+    type?: UserKeyCreateDtoUserKeyInfoDtoTypeEnum;
     whitelist?: string[];
     blacklist?: string[];
     user_agent?: string;
     referer?: string;
-    type_infos: BasicInfoDto | HashInfoDto | OAuth2InfoDto;
+    type_infos: UserKeyInfoDto;
 }
 
 export type UserKeyInfoDto = object;
@@ -856,12 +883,12 @@ export type UserOauth2KeyCreateDto = UtilRequiredKeys<UserKeyCreateDtoUserKeyInf
 
 export interface UserKeyDetailsResponseDtoUserKeyInfoDto {
     name: string;
-    type: UserKeyDetailsResponseDtoUserKeyInfoDtoTypeEnum;
+    type?: UserKeyDetailsResponseDtoUserKeyInfoDtoTypeEnum;
     whitelist?: string[];
     blacklist?: string[];
     user_agent?: string;
     referer?: string;
-    type_infos: BasicInfoDto | HashInfoDto | OAuth2InfoDto;
+    type_infos: UserKeyInfoDto;
     /**
      * identifiant technique
      * @format uuid
@@ -974,19 +1001,19 @@ export interface Geometry {
     length?: number;
     empty?: boolean;
     valid?: boolean;
-    envelope_internal?: Envelope;
     /** @format int32 */
     num_geometries?: number;
+    envelope_internal?: Envelope;
     coordinate?: Coordinate;
     precision_model?: PrecisionModel;
     /** @format int32 */
     srid?: number;
     /** @format int32 */
     dimension?: number;
-    /** @format int32 */
-    boundary_dimension?: number;
     geometry_type?: string;
     coordinates?: Coordinate[];
+    /** @format int32 */
+    boundary_dimension?: number;
     /** @format int32 */
     num_points?: number;
     rectangle?: boolean;
@@ -1019,9 +1046,9 @@ export interface Point {
     y?: number;
     /** @format int32 */
     dimension?: number;
+    geometry_type?: string;
     /** @format int32 */
     boundary_dimension?: number;
-    geometry_type?: string;
     /** @format int32 */
     num_points?: number;
     boundary?: Geometry;
@@ -1029,9 +1056,9 @@ export interface Point {
     /** @format double */
     length?: number;
     valid?: boolean;
-    envelope_internal?: Envelope;
     /** @format int32 */
     num_geometries?: number;
+    envelope_internal?: Envelope;
     precision_model?: PrecisionModel;
     /** @format int32 */
     srid?: number;
@@ -1047,12 +1074,12 @@ export interface PrecisionModel {
     scale?: number;
     type?: Type;
     floating?: boolean;
-    /** @format int32 */
-    maximum_significant_digits?: number;
     /** @format double */
     offset_x?: number;
     /** @format double */
     offset_y?: number;
+    /** @format int32 */
+    maximum_significant_digits?: number;
 }
 
 export type Type = object;
@@ -1105,6 +1132,13 @@ export interface StoredDataDetailsRelationDto {
     type: StoredDataDetailsRelationDtoTypeEnum;
     attributes: Record<string, string>;
     primary_key?: string[];
+}
+
+export interface StoredDataEdition {
+    /** @format date */
+    from?: string;
+    /** @format date */
+    to?: string;
 }
 
 /** Informations spécifiques d'une donnée stockée graphe d'itinéraire DB */
@@ -1164,6 +1198,8 @@ export interface StoredDataPrivateDetailResponseDto {
     type: StoredDataPrivateDetailResponseDtoTypeEnum;
     visibility: StoredDataPrivateDetailResponseDtoVisibilityEnum;
     srs?: string;
+    description?: string;
+    edition?: StoredDataEdition;
     contact: string;
     extent?: Geometry;
     /** Informations sur l'évènement */
@@ -1648,6 +1684,31 @@ export enum StorageType {
     POSTGRESQLROUTING = "POSTGRESQL-ROUTING",
 }
 
+/** Paramètres de la nomenclature à créer */
+export interface NomenclatureCreateDto {
+    /** Type de famille à laquelle appartient la nomenclature */
+    type: NomenclatureCreateDtoTypeEnum;
+    /** Label de la nomenclature */
+    label: string;
+    /** Code de la nomenclature */
+    term: string;
+}
+
+/** Informations détaillées sur la nomenclature */
+export interface NomenclatureDetailsResponseDto {
+    /** Type de famille à laquelle appartient la nomenclature */
+    type?: NomenclatureDetailsResponseDtoTypeEnum;
+    /** Label de la nomenclature */
+    label?: string;
+    /** Code de la nomenclature */
+    term?: string;
+    /**
+     * identifiant technique
+     * @format uuid
+     */
+    _id: string;
+}
+
 /** Paramètres du point d'accès à ajouter */
 export interface EndpointCreateDto {
     /** Nom du point d'accès. ce nom doit être unique. le nom est insensible à la casse */
@@ -1840,6 +1901,8 @@ export interface CommunityCreateDto {
     name: string;
     /**
      * Nom technique de la communauté
+     * @minLength 0
+     * @maxLength 30
      * @pattern ^[A-Za-z0-9_\-\.]+$
      */
     technical_name: string;
@@ -1952,6 +2015,9 @@ export interface UploadUpdateDto {
 export interface StoredDataUpdateDto {
     name?: string;
     visibility?: StoredDataUpdateDtoVisibilityEnum;
+    description?: string;
+    edition?: StoredDataEdition;
+    extent?: Geometry;
 }
 
 /** Paramètres du statique à modifier */
@@ -1979,7 +2045,8 @@ export interface OfferingUpdateDto {
 }
 
 export interface MetadataUpdateDto {
-    type: MetadataUpdateDtoTypeEnum;
+    type?: MetadataUpdateDtoTypeEnum;
+    open_data?: boolean;
 }
 
 /** Paramètres modifiables de l'annexe */
@@ -2026,6 +2093,12 @@ export interface ProcessingUpdateDto {
     priority?: ProcessingUpdateDtoPriorityEnum;
 }
 
+/** Paramètres de la nomenclature à modifier */
+export interface NomenclatureUpdateDto {
+    /** Label de la nomenclature */
+    label: string;
+}
+
 /** Paramètres du point d'accès à modifier */
 export interface EndpointUpdateDto {
     /** Nom du point d'accès. ce nom doit être unique. le nom est insensible à la casse */
@@ -2040,9 +2113,9 @@ export interface DatastoreStoragesUpdateDto {
     /** @uniqueItems true */
     data?: DatastoreStorageDto[];
     /** Informations sur le stockage */
-    uploads?: DatastoreStorageDto;
+    upload?: DatastoreStorageDto;
     /** Informations sur le stockage */
-    annexes?: DatastoreStorageDto;
+    annexe?: DatastoreStorageDto;
 }
 
 /** Nouvelle configuration de l'entrepôt */
@@ -2157,7 +2230,7 @@ export interface PermissionDetailsResponseDto {
 
 export interface UserKeyResponseDto {
     name: string;
-    type: UserKeyResponseDtoTypeEnum;
+    type?: UserKeyResponseDtoTypeEnum;
     /**
      * identifiant technique
      * @format uuid
@@ -2353,6 +2426,8 @@ export interface StoredDataSharedDetailResponseDto {
     type: StoredDataSharedDetailResponseDtoTypeEnum;
     visibility: StoredDataSharedDetailResponseDtoVisibilityEnum;
     srs?: string;
+    description?: string;
+    edition?: StoredDataEdition;
     contact: string;
     extent?: Geometry;
     /** @format uuid */
@@ -2645,6 +2720,22 @@ export interface DatastoreListResponseDto {
     _id: string;
     /** Datastore actif ou non */
     active: boolean;
+}
+
+export interface MetadataAdminResponseDto {
+    type: MetadataAdminResponseDtoTypeEnum;
+    open_data: boolean;
+    level: MetadataAdminResponseDtoLevelEnum;
+    file_identifier: string;
+    tags?: Record<string, string>;
+    endpoints?: EndpointListResponseDto[];
+    /** Informations sur l'entrepôt */
+    datastore?: DatastoreListResponseDto;
+    /**
+     * identifiant technique
+     * @format uuid
+     */
+    _id: string;
 }
 
 /** Type du fichier statique */
@@ -3073,6 +3164,22 @@ export enum StorageCreateDtoTypeEnum {
     POSTGRESQLROUTING = "POSTGRESQL-ROUTING",
 }
 
+/** Type de famille à laquelle appartient la nomenclature */
+export enum NomenclatureCreateDtoTypeEnum {
+    CRS = "CRS",
+    ZONE = "ZONE",
+    FORMAT = "FORMAT",
+    RESOLUTION = "RESOLUTION",
+}
+
+/** Type de famille à laquelle appartient la nomenclature */
+export enum NomenclatureDetailsResponseDtoTypeEnum {
+    CRS = "CRS",
+    ZONE = "ZONE",
+    FORMAT = "FORMAT",
+    RESOLUTION = "RESOLUTION",
+}
+
 /** Type du point d'accès */
 export enum EndpointCreateDtoTypeEnum {
     WMSVECTOR = "WMS-VECTOR",
@@ -3383,6 +3490,16 @@ export enum AccountResponseDtoStateEnum {
     DELETED = "DELETED",
 }
 
+export enum MetadataAdminResponseDtoTypeEnum {
+    INSPIRE = "INSPIRE",
+    ISOAP = "ISOAP",
+}
+
+export enum MetadataAdminResponseDtoLevelEnum {
+    DATASET = "DATASET",
+    SERIES = "SERIES",
+}
+
 /** Type de livraisons */
 export enum GetAll1ParamsTypeEnum {
     VECTOR = "VECTOR",
@@ -3502,6 +3619,14 @@ export enum GetAll12ParamsOutputStoredDataTypeEnum {
     INDEX = "INDEX",
 }
 
+/** Type de la nomenclature */
+export enum FindAll1ParamsTypeEnum {
+    CRS = "CRS",
+    ZONE = "ZONE",
+    FORMAT = "FORMAT",
+    RESOLUTION = "RESOLUTION",
+}
+
 /** Type de point d'accès voulu */
 export enum GetAll13ParamsTypeEnum {
     WMSVECTOR = "WMS-VECTOR",
@@ -3537,6 +3662,14 @@ export enum GetUserPermissionsParamsTypeEnum {
     ALTIMETRY = "ALTIMETRY",
     SEARCH = "SEARCH",
     VECTORTMS = "VECTOR-TMS",
+}
+
+/** Type de famille à laquelle appartient la nomenclature */
+export enum FindAllParamsTypeEnum {
+    CRS = "CRS",
+    ZONE = "ZONE",
+    FORMAT = "FORMAT",
+    RESOLUTION = "RESOLUTION",
 }
 
 /** Type de donnée stockée */
