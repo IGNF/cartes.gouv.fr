@@ -53,7 +53,7 @@ class MetadataApi extends AbstractEntrepotApiService
 
     public function downloadFile(string $datastoreId, string $metadataId): mixed
     {
-        return $this->request('GET', "datastores/$datastoreId/metadata/$metadataId/file");
+        return $this->request('GET', "datastores/$datastoreId/metadata/$metadataId/file", [], [], [], false, false);
     }
 
     /**
