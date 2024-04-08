@@ -26,6 +26,7 @@ import { TableSelectionEnTranslations } from "../../pages/service/TableSelection
 import { UploadStyleFileEnTranslations } from "../../pages/service/wms-vector/UploadStyleFile";
 import { WfsServiceFormEnTranslations } from "../../pages/service/wfs/WfsServiceForm";
 import { PyramidVectorTmsServiceFormEnTranslations } from "../../pages/service/tms/PyramidVectorTmsServiceForm";
+import { DatastoreManagePermissionsEnTranslations } from "../../pages/datastore/ManagePermissions/DatastoreManagePermissions";
 
 export const translations: Translations<"en"> = {
     Common: commonEnTranslations,
@@ -50,6 +51,7 @@ export const translations: Translations<"en"> = {
     mapboxStyleValidation: mapboxStyleValidationEnTranslations,
     TMSStyleFilesManager: TMSStyleFilesManagerEnTranslations,
     DatastoreManageStorage: DatastoreManageStorageEnTranslations,
+    DatastoreManagePermissions: DatastoreManagePermissionsEnTranslations,
     WmsVectorServiceForm: WmsVectorServiceFormEnTranslations,
     WfsServiceForm: WfsServiceFormEnTranslations,
     TableSelection: TableSelectionEnTranslations,

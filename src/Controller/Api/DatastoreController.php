@@ -40,4 +40,11 @@ class DatastoreController extends AbstractController implements ApiControllerInt
 
         return $this->json($endpoints);
     }
+
+    #[Route('/{datastoreId}/permissions', name: 'get_permissions', methods: ['GET'])]
+    public function getPermissions(string $datastoreId): JsonResponse
+    {
+        $permissions = $this->entrepotApiService->datastore->getPermissions($datastoreId);
+        return $this->json($permissions);
+    }
 }

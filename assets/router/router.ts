@@ -33,7 +33,7 @@ const routeDefs = {
     // utilisateur
     my_account: defineRoute(`${appRoot}/mon-compte`),
     my_access_keys: defineRoute(`${appRoot}/mes-cles-acces`),
-    user_key_add: defineRoute(`${appRoot}/add_key`),
+    user_key_add: defineRoute(`${appRoot}/add-key`),
     user_key_edit: defineRoute(
         {
             keyId: param.path.string,
@@ -44,10 +44,10 @@ const routeDefs = {
     dashboard_pro: defineRoute(`${appRoot}/dashboard`),
 
     // Demande de creation d'un datastore
-    datastore_create_request: defineRoute(`${appRoot}/datastores/create_request`),
+    datastore_create_request: defineRoute(`${appRoot}/datastores/create-request`),
 
     // Demande pour rejoindre une communaute
-    join_community: defineRoute(`${appRoot}/join_community`),
+    join_community: defineRoute(`${appRoot}/join-community`),
 
     // Liste des membres d'une communaute
     members_list: defineRoute(
@@ -65,6 +65,20 @@ const routeDefs = {
             datastoreId: param.path.string,
         },
         (p) => `${appRoot}/datastores/${p.datastoreId}/manage-storage`
+    ),
+
+    datastore_manage_permissions: defineRoute(
+        {
+            datastoreId: param.path.string,
+        },
+        (p) => `${appRoot}/datastores/${p.datastoreId}/manage-permissions`
+    ),
+
+    datastore_add_permission: defineRoute(
+        {
+            datastoreId: param.path.string,
+        },
+        (p) => `${appRoot}/datastores/${p.datastoreId}/add-permissions`
     ),
 
     // fiche de données

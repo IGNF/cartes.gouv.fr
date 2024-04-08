@@ -8,7 +8,7 @@ import { Datastore } from "../types/app";
 
 const { t } = getTranslation("datastoreNavItems");
 
-export const datastoreNavItems = (datastoreList: Datastore[] = [], currentDatastore?: Datastore): MainNavigationProps.Item[] => {
+export const datastoreNavItems = (currentDatastore?: Datastore): MainNavigationProps.Item[] => {
     const user = useAuthStore.getState().user;
 
     const navItems: MainNavigationProps.Item[] = [
@@ -16,36 +16,6 @@ export const datastoreNavItems = (datastoreList: Datastore[] = [], currentDatast
             text: t("dashboard"),
             linkProps: routes.dashboard_pro().link,
         },
-        // {
-        //     text: "Visualisation",
-        //     linkProps: {
-        //         href: "#",
-        //     },
-        // },
-        // {
-        //     text: "Outils & Traitements",
-        //     linkProps: {
-        //         href: "#",
-        //     },
-        // },
-        // {
-        //     text: "Collaboration",
-        //     linkProps: {
-        //         href: "#",
-        //     },
-        // },
-        // {
-        //     text: "Portails",
-        //     linkProps: {
-        //         href: "#",
-        //     },
-        // },
-        // {
-        //     text: "Utilisateurs & Groupes",
-        //     linkProps: {
-        //         href: "#",
-        //     },
-        // },
     ];
 
     if (currentDatastore !== undefined) {
@@ -59,26 +29,17 @@ export const datastoreNavItems = (datastoreList: Datastore[] = [], currentDatast
         });
         navItems.push({
             text: t("manage_storage"),
-            linkProps: routes.datastore_manage_storage({ datastoreId: currentDatastore._id }).link,
+            menuLinks: [
+                {
+                    text: t("consumption_monitoring"),
+                    linkProps: routes.datastore_manage_storage({ datastoreId: currentDatastore._id }).link,
+                },
+                {
+                    text: t("permissions_granted"),
+                    linkProps: routes.datastore_manage_permissions({ datastoreId: currentDatastore._id }).link,
+                },
+            ],
         });
-    }
-
-    if (datastoreList.length > 0) {
-        const datastoreLinks: MainNavigationProps.Item.Menu = {
-            text: currentDatastore?.name ?? t("choose"),
-            menuLinks:
-                datastoreList?.map((datastore) => ({
-                    linkProps: routes.datasheet_list({ datastoreId: datastore._id }).link,
-                    text: datastore.name,
-                    isActive: datastore._id === currentDatastore?._id,
-                })) || [],
-        };
-
-        datastoreLinks.menuLinks.push({
-            text: t("create_request"),
-            linkProps: routes.datastore_create_request().link,
-        });
-        navItems.push(datastoreLinks);
     }
 
     if (user !== null) {
@@ -97,7 +58,7 @@ export const datastoreNavItems = (datastoreList: Datastore[] = [], currentDatast
 
 // traductions
 export const { i18n } = declareComponentKeys<
-    "dashboard" | "data" | "members" | "manage_storage" | "choose" | "create_request" | "my_account" | "my_access_keys"
+    "dashboard" | "data" | "members" | "manage_storage" | "consumption_monitoring" | "permissions_granted" | "my_account" | "my_access_keys"
 >()("datastoreNavItems");
 
 export const datastoreNavItemsFrTranslations: Translations<"fr">["datastoreNavItems"] = {
@@ -105,8 +66,8 @@ export const datastoreNavItemsFrTranslations: Translations<"fr">["datastoreNavIt
     data: "Données",
     members: "Membres",
     manage_storage: "Gérer l'espace de travail",
-    choose: "Choisir un espace de travail",
-    create_request: "Demande de création d'un espace de travail",
+    consumption_monitoring: "Suivi des consommations",
+    permissions_granted: "Permissions accordées",
     my_account: "Mon compte",
     my_access_keys: "Mes clés d'accès",
 };
@@ -116,8 +77,8 @@ export const datastoreNavItemsEnTranslations: Translations<"en">["datastoreNavIt
     data: undefined,
     members: undefined,
     manage_storage: undefined,
-    choose: undefined,
-    create_request: undefined,
+    consumption_monitoring: undefined,
+    permissions_granted: undefined,
     my_account: undefined,
     my_access_keys: undefined,
 };

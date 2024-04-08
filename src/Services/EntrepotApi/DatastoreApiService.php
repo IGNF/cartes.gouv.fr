@@ -65,4 +65,9 @@ class DatastoreApiService extends AbstractEntrepotApiService
 
         throw new EntrepotApiException("Aucun endpoint trouvé avec l'identifiant {$endpointId}", Response::HTTP_NOT_FOUND);
     }
+
+    public function getPermissions(string $datastoreId, array $query = []): array
+    {
+        return $this->requestAll("datastores/$datastoreId/permissions", $query);
+    }
 }

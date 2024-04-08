@@ -61,7 +61,7 @@ export const UserKeyFrTranslations: Translations<"fr">["UserKey"] = {
     apikey_min_error: "Le hash doit faire au minimum 4 caractères",
     apikey_max_error: "Le hash doit faire au maximum 64 caractères",
     ip_error: ({ ip }) => `la plage d'adresses IP [${ip}] n'est pas correcte`,
-    no_permission: "Volus n'avez aucune permission, vous ne pouvez pas créer une clé",
+    no_permission: "Vous n'avez aucune permission, vous ne pouvez pas créer une clé",
     key_not_found: "Cette clé n'a pas été trouvée",
 };
 

@@ -26,6 +26,8 @@ const MyAccessKeys = lazy(() => import("../pages/users/MyAccessKeys"));
 const UserKeyForm = lazy(() => import("../pages/users/keys/UserKeyForm"));
 
 const DatastoreManageStorage = lazy(() => import("../pages/datastore/DatastoreManageStorage/DatastoreManageStorage"));
+const DatastoreManagePermissions = lazy(() => import("../pages/datastore/ManagePermissions/DatastoreManagePermissions"));
+const AddPermissionForm = lazy(() => import("../pages/datastore/ManagePermissions/AddPermissionForm"));
 
 const DashboardPro = lazy(() => import("../pages/dashboard/DashboardPro"));
 const DatasheetList = lazy(() => import("../pages/datasheet/DatasheetList/DatasheetList"));
@@ -103,6 +105,10 @@ const RouterRenderer: FC = () => {
                 return <UserKeyForm keyId={route.params.keyId} />;
             case "datastore_manage_storage":
                 return <DatastoreManageStorage datastoreId={route.params.datastoreId} />;
+            case "datastore_manage_permissions":
+                return <DatastoreManagePermissions datastoreId={route.params.datastoreId} />;
+            case "datastore_add_permission":
+                return <AddPermissionForm datastoreId={route.params.datastoreId} />;
             case "dashboard_pro":
                 return <DashboardPro />;
             case "datasheet_list":

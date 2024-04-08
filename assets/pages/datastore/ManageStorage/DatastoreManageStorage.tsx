@@ -149,7 +149,7 @@ export const { i18n } = declareComponentKeys<
 });
 
 export const DatastoreManageStorageFrTranslations: Translations<"fr">["DatastoreManageStorage"] = {
-    title: ({ datastoreName }) => `Gérer l'espace de travail${datastoreName ? " " + datastoreName : ""}`,
+    title: ({ datastoreName }) => `Suivi des consommations de l'espace de travail${datastoreName ? " " + datastoreName : ""}`,
     explanation:
         "Cette page vous permet de voir en un seul coup d'œil le volume de vos données et votre situation par rapport aux différents quotas qui vous sont alloués.",
     "storage.not_found": "Aucun stockage de ce type n'est attribué à votre espace de travail.",

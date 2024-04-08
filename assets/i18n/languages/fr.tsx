@@ -7,9 +7,15 @@ import { contactFrTranslations } from "../../pages/contact/Contact";
 import { PyramidListItemFrTranslations } from "../../pages/datasheet/DatasheetView/DatasetListTab/PyramidList/PyramidListItem";
 import { VectorDbListItemFrTranslations } from "../../pages/datasheet/DatasheetView/DatasetListTab/VectorDbList/VectorDbListItem";
 import { DatasheetViewFrTranslations } from "../../pages/datasheet/DatasheetView/DatasheetView";
+import { DatastoreManagePermissionsFrTranslations } from "../../pages/datastore/ManagePermissions/DatastoreManagePermissions";
 import { DatastoreManageStorageFrTranslations } from "../../pages/datastore/DatastoreManageStorage/DatastoreManageStorage";
+import { TableSelectionFrTranslations } from "../../pages/service/TableSelection";
 import { MetadatasFormFrTranslations } from "../../pages/service/metadatas/metadatas-form-tr";
 import { ValidationMetadatasFrTranslations } from "../../pages/service/metadatas/metadatas-validation-tr";
+import { PyramidVectorTmsServiceFormFrTranslations } from "../../pages/service/tms/PyramidVectorTmsServiceForm";
+import { WfsServiceFormFrTranslations } from "../../pages/service/wfs/WfsServiceForm";
+import { UploadStyleFileFrTranslations } from "../../pages/service/wms-vector/UploadStyleFile";
+import { WmsVectorServiceFormFrTranslations } from "../../pages/service/wms-vector/WmsVectorServiceForm";
 import { MeFrTranslations } from "../../pages/users/Me";
 import { MyAccessKeysFrTranslations } from "../../pages/users/MyAccessKeys";
 import { UserKeyFrTranslations } from "../../pages/users/keys/UserKeyTr";
@@ -21,11 +27,6 @@ import { commonFrTranslations } from "../Common";
 import { RightsFrTranslations } from "../Rights";
 import { StyleFrTranslations } from "../Style";
 import type { Translations } from "../i18n";
-import { WmsVectorServiceFormFrTranslations } from "../../pages/service/wms-vector/WmsVectorServiceForm";
-import { TableSelectionFrTranslations } from "../../pages/service/TableSelection";
-import { UploadStyleFileFrTranslations } from "../../pages/service/wms-vector/UploadStyleFile";
-import { WfsServiceFormFrTranslations } from "../../pages/service/wfs/WfsServiceForm";
-import { PyramidVectorTmsServiceFormFrTranslations } from "../../pages/service/tms/PyramidVectorTmsServiceForm";
 
 export const translations: Translations<"fr"> = {
     Common: commonFrTranslations,
@@ -50,6 +51,7 @@ export const translations: Translations<"fr"> = {
     mapboxStyleValidation: mapboxStyleValidationFrTranslations,
     TMSStyleFilesManager: TMSStyleFilesManagerFrTranslations,
     DatastoreManageStorage: DatastoreManageStorageFrTranslations,
+    DatastoreManagePermissions: DatastoreManagePermissionsFrTranslations,
     WmsVectorServiceForm: WmsVectorServiceFormFrTranslations,
     WfsServiceForm: WfsServiceFormFrTranslations,
     TableSelection: TableSelectionFrTranslations,
