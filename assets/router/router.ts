@@ -78,7 +78,7 @@ const routeDefs = {
         {
             datastoreId: param.path.string,
         },
-        (p) => `${appRoot}/datastores/${p.datastoreId}/add-permissions`
+        (p) => `${appRoot}/datastores/${p.datastoreId}/add-permission`
     ),
 
     // fiche de données

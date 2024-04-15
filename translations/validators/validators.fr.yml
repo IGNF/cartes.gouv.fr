@@ -60,6 +60,19 @@ user_key:
             unique_error: "La liste des offerings doit être unique (pas de doublons)"
             uuid_error: "L'id d'un offering doit être un uuid "
 
+permission:
+    licence_mandatory: "La licence est obligatoire"
+    type_error: "Le type doit être COMMUNITY ou ACCOUNT"
+    beneficiaries:
+        at_least_one: "La liste des bénéficiaires ne doit pas être vide"
+        unique_error: "La liste des bénéficiaires doit être unique (pas de doublons)"
+        uuid_error: "L'id d'un bénéficiaire doit être un uuid"
+    offerings:
+        at_least_one: "La liste des services ne doit pas être vide"
+        unique_error: "La liste des services doit être unique (pas de doublons)"
+        uuid_error: "L'id d'un service doit être un uuid"
+    only_oauth_error: "only_auth doit être de type booléen"
+
 common:
     technical_name_error: "Le nom technique est obligatoire"
     technical_name_regex: "Le nom technique ne doit contenir que des lettres, chiffres, tirets (-), underscores (_), ou points (.)"

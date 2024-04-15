@@ -73,4 +73,17 @@ class DatastoreApiService extends AbstractEntrepotApiService
     {
         return $this->requestAll("datastores/$datastoreId/permissions", $query);
     }
+
+    /**
+     * @param array<mixed> $body
+     */
+    public function addPermission(string $datastoreId, array $body): array
+    {
+        return $this->request('POST', "datastores/$datastoreId/permissions", $body);
+    }
+
+    public function removePermission(string $datastoreId, string $permissionId): array
+    {
+        return $this->request('DELETE', "datastores/$datastoreId/permissions/$permissionId");
+    }
 }

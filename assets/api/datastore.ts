@@ -25,10 +25,32 @@ const getPermissions = (datastoreId: string, otherOptions: RequestInit = {}) => 
     });
 };
 
+const addPermission = (datastoreId: string, formData: object) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_datastore_add_permission", { datastoreId: datastoreId });
+    return jsonFetch<DatastorePermissionResponseDto>(
+        url,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+            },
+        },
+        formData
+    );
+};
+
+const removePermission = (datastoreId: string, permissionId: string) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_datastore_remove_permission", { datastoreId: datastoreId, permissionId: permissionId });
+    return jsonFetch<null>(url, { method: "DELETE" });
+};
+
 const datastore = {
     get,
     getEndpoints,
     getPermissions,
+    addPermission,
+    removePermission,
 };
 
 export default datastore;

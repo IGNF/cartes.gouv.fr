@@ -30,7 +30,7 @@ export type ComponentKey =
     | typeof import("../pages/service/metadatas/metadatas-validation-tr").i18n
     | typeof import("../pages/contact/Contact").i18n
     | typeof import("../pages/datastore/ManageStorage/DatastoreManageStorage").i18n
-    | typeof import("../pages/datastore/ManagePermissions/DatastoreManagePermissions").i18n
+    | typeof import("../pages/datastore/ManagePermissions/DatastorePermissionsTr").i18n
     | typeof import("../pages/datasheet/DatasheetView/DatasetListTab/VectorDbList/VectorDbListItem").i18n
     | typeof import("../pages/datasheet/DatasheetView/DatasetListTab/PyramidList/PyramidListItem").i18n
     | typeof import("../pages/datasheet/DatasheetView/DatasheetView").i18n

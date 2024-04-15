@@ -3,26 +3,30 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Table from "@codegouvfr/react-dsfr/Table";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { compareAsc } from "date-fns";
-import { declareComponentKeys } from "i18nifty";
-import { FC, ReactNode, useMemo } from "react";
+import { FC, ReactNode, useMemo, useState } from "react";
 import api from "../../../api";
 import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
 import LoadingText from "../../../components/Utils/LoadingText";
-import functions from "../../../functions";
-import { Translations, useTranslation } from "../../../i18n/i18n";
+import { useTranslation } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/RQKeys";
+import { routes } from "../../../router/router";
 import { Datastore } from "../../../types/app";
-import { DatastorePermissionResponseDto, PermissionBeneficiaryDto } from "../../../types/entrepot";
+import { DatastorePermissionResponseDto } from "../../../types/entrepot";
+import ConfirmDialog, { ConfirmDialogModal } from "../../../components/Utils/ConfirmDialog";
+import { CartesApiException } from "../../../modules/jsonFetch";
+import Wait from "../../../components/Utils/Wait";
 
 type DatastoreManagePermissionsProps = {
     datastoreId: string;
 };
 
 const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datastoreId }) => {
-    const { t } = useTranslation("DatastoreManagePermissions");
+    const { t } = useTranslation("DatastorePermissions");
     const { t: tCommon } = useTranslation("Common");
+
+    const queryClient = useQueryClient();
 
     // Le datastore
     const { data: datastore, status: datastoreStatus } = useQuery<Datastore>({
@@ -38,7 +42,26 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
         staleTime: 3600000,
     });
 
-    const headers = useMemo(() => [t("h_licence"), t("h_expiration_date"), t("h_granted_to"), t("h_services"), t("h_actions")], [t]);
+    /* Suppression d'une permission */
+    const {
+        status: removeStatus,
+        error: removeError,
+        mutate: mutateRemove,
+    } = useMutation<null, CartesApiException, string>({
+        mutationFn: (permissionId) => api.datastore.removePermission(datastoreId, permissionId),
+        onSuccess() {
+            queryClient.setQueryData<DatastorePermissionResponseDto[]>(RQKeys.datastore_permissions(datastoreId), (permissions) => {
+                return permissions?.filter((permission) => permission._id !== currentPermission);
+            });
+        },
+    });
+
+    const [currentPermission, setCurrentPermission] = useState<string | undefined>(undefined);
+
+    const headers = useMemo(
+        () => [t("list.licence_header"), t("list.expiration_date_header"), t("list.granted_to_header"), t("list.services_header"), t("list.actions_header")],
+        [t]
+    );
     const datas = useMemo(() => {
         const result: ReactNode[][] = [[]];
         if (permissions === undefined) return result;
@@ -47,11 +70,11 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
             const expired = permission.end_date !== undefined && compareAsc(new Date(permission.end_date), new Date()) < 0;
             const expiredNode = (
                 <span style={expired ? { color: fr.colors.decisions.text.default.warning.default } : {}}>
-                    {t("expires_on", { endDate: permission.end_date })}
+                    {t("list.expires_on", { endDate: permission.end_date })}
                 </span>
             );
 
-            const data: ReactNode[] = [permission.licence, expiredNode, t("granted_to", { beneficiary: permission.beneficiary })];
+            const data: ReactNode[] = [permission.licence, expiredNode, t("list.granted_to", { beneficiary: permission.beneficiary })];
             data.push(
                 <ul /*className={fr.cx("fr-raw-list")}*/>
                     {permission.offerings.map((offering) => (
@@ -83,10 +106,10 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
                         priority="secondary"
                         iconId="fr-icon-delete-line"
                         size="small"
-                        /*onClick={() => {
-                            setCurrentKey(accessKey._id);
+                        onClick={() => {
+                            setCurrentPermission(permission._id);
                             ConfirmDialogModal.open();
-                        }}*/
+                        }}
                     />
                 </div>
             );
@@ -95,80 +118,37 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
     }, [permissions, tCommon, t]);
 
     return (
-        <DatastoreLayout datastoreId={datastoreId} documentTitle={t("title", { datastoreName: datastore?.name })}>
-            <h1>{t("title", { datastoreName: datastore?.name })}</h1>
-            {datastoreStatus === "pending" || (permissionStatus === "pending" && <LoadingText />)}
-            {datas.length === 0 ? (
-                <Alert className={fr.cx("fr-mb-1w")} severity={"info"} title={t("no_permissions")} closable />
+        <DatastoreLayout datastoreId={datastoreId} documentTitle={t("list.title", { datastoreName: datastore?.name })}>
+            <h1>{t("list.title", { datastoreName: datastore?.name })}</h1>
+            {removeStatus === "error" && <Alert severity={"error"} closable title={tCommon("error")} description={removeError.message} />}
+            {removeStatus === "pending" && (
+                <Wait>
+                    <div className={fr.cx("fr-container")}>
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
+                            <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " frx-icon-spin"} />
+                            <h6 className={fr.cx("fr-m-0")}>{tCommon("removing")}</h6>
+                        </div>
+                    </div>
+                </Wait>
+            )}
+            {datastoreStatus === "pending" || permissionStatus === "pending" ? (
+                <LoadingText />
+            ) : datas.length === 0 ? (
+                <Alert className={fr.cx("fr-mb-1w")} severity={"info"} title={t("list.no_permissions")} closable />
             ) : (
                 <Table headers={headers} data={datas} />
             )}
-            <Button className={fr.cx("fr-my-2v")}>{t("add_permission")}</Button>
+            <Button linkProps={routes.datastore_add_permission({ datastoreId: datastoreId }).link}>{t("list.add_permission")}</Button>
+            <ConfirmDialog
+                title={t("list.confirm_remove")}
+                onConfirm={() => {
+                    if (currentPermission !== undefined) {
+                        mutateRemove(currentPermission);
+                    }
+                }}
+            />
         </DatastoreLayout>
     );
 };
 
 export default DatastoreManagePermissions;
-
-/* ---------------------------- TRADUCTIONS ----------------------------- */
-
-export const { i18n } = declareComponentKeys<
-    | { K: "title"; P: { datastoreName?: string }; R: string }
-    | "h_licence"
-    | "h_expiration_date"
-    | "h_granted_to"
-    | "h_services"
-    | "h_actions"
-    | { K: "expires_on"; P: { endDate?: string }; R: string }
-    | { K: "granted_to"; P: { beneficiary?: PermissionBeneficiaryDto }; R: string }
-    | "no_permissions"
-    | "add_permission"
->()({
-    DatastoreManagePermissions,
-});
-
-const getExpiredDate = (lang: "fr" | "en", endDate?: string) => {
-    if (endDate === undefined) {
-        return lang === "fr" ? "Aucune" : "None";
-    }
-
-    const fmtDate = functions.date.format(endDate);
-    if (compareAsc(new Date(endDate), new Date()) < 0) {
-        return lang === "fr" ? `A expirée le ${fmtDate}` : `Expired on ${fmtDate}`;
-    } else return lang === "fr" ? `Expire le ${fmtDate}` : `Expires on ${fmtDate}`;
-};
-
-const getGrantedTo = (lang: "fr" | "en", beneficiary?: PermissionBeneficiaryDto) => {
-    if (beneficiary === undefined) return lang === "fr" ? "Personne" : "None";
-
-    if ("name" in beneficiary) {
-        return lang === "fr" ? `La communauté ${beneficiary.name}` : `Community ${beneficiary.name}`;
-    } else
-        return lang === "fr" ? `L'utilisateur ${beneficiary.first_name} ${beneficiary.last_name}` : `User ${beneficiary.first_name} ${beneficiary.last_name}`;
-};
-
-export const DatastoreManagePermissionsFrTranslations: Translations<"fr">["DatastoreManagePermissions"] = {
-    title: ({ datastoreName }) => `Gérer les permissions de l'espace de travail${datastoreName ? " " + datastoreName : ""}`,
-    h_licence: "Licence",
-    h_expiration_date: "Date d'expiration",
-    h_granted_to: "Accordée à",
-    h_services: "Services",
-    h_actions: "Actions",
-    expires_on: ({ endDate }) => getExpiredDate("fr", endDate),
-    granted_to: ({ beneficiary }) => getGrantedTo("fr", beneficiary),
-    no_permissions: "Aucune permission",
-    add_permission: "Ajouter une permission",
-};
-
-export const DatastoreManagePermissionsEnTranslations: Translations<"en">["DatastoreManagePermissions"] = {
-    title: ({ datastoreName }) => `Manage workspace permissions${datastoreName ? " " + datastoreName : ""}`,
-    h_licence: "Licence",
-    h_expiration_date: "Expiration date",
-    h_granted_to: "Granted to",
-    h_services: "Services",
-    h_actions: "Actions",
-    expires_on: ({ endDate }) => getExpiredDate("en", endDate),
-    granted_to: ({ beneficiary }) => getGrantedTo("en", beneficiary),
-    no_permissions: "No permissions",
-    add_permission: "Add permission",
-};

@@ -7,7 +7,7 @@ import { contactFrTranslations } from "../../pages/contact/Contact";
 import { PyramidListItemFrTranslations } from "../../pages/datasheet/DatasheetView/DatasetListTab/PyramidList/PyramidListItem";
 import { VectorDbListItemFrTranslations } from "../../pages/datasheet/DatasheetView/DatasetListTab/VectorDbList/VectorDbListItem";
 import { DatasheetViewFrTranslations } from "../../pages/datasheet/DatasheetView/DatasheetView";
-import { DatastoreManagePermissionsFrTranslations } from "../../pages/datastore/ManagePermissions/DatastoreManagePermissions";
+import { DatastorePermissionsFrTranslations } from "../../pages/datastore/ManagePermissions/DatastorePermissionsTr";
 import { DatastoreManageStorageFrTranslations } from "../../pages/datastore/ManageStorage/DatastoreManageStorage";
 import { TableSelectionFrTranslations } from "../../pages/service/TableSelection";
 import { MetadatasFormFrTranslations } from "../../pages/service/metadatas/metadatas-form-tr";
@@ -51,7 +51,7 @@ export const translations: Translations<"fr"> = {
     mapboxStyleValidation: mapboxStyleValidationFrTranslations,
     TMSStyleFilesManager: TMSStyleFilesManagerFrTranslations,
     DatastoreManageStorage: DatastoreManageStorageFrTranslations,
-    DatastoreManagePermissions: DatastoreManagePermissionsFrTranslations,
+    DatastorePermissions: DatastorePermissionsFrTranslations,
     WmsVectorServiceForm: WmsVectorServiceFormFrTranslations,
     WfsServiceForm: WfsServiceFormFrTranslations,
     TableSelection: TableSelectionFrTranslations,
