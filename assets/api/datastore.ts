@@ -18,6 +18,13 @@ const getEndpoints = (datastoreId: string, query: { type?: string; open?: boolea
     });
 };
 
+const getPermission = (datastoreId: string, permissionId: string, otherOptions: RequestInit = {}) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_datastore_get_permission", { datastoreId, permissionId });
+    return jsonFetch<DatastorePermissionResponseDto>(url, {
+        ...otherOptions,
+    });
+};
+
 const getPermissions = (datastoreId: string, otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_datastore_get_permissions", { datastoreId });
     return jsonFetch<DatastorePermissionResponseDto[]>(url, {
@@ -27,10 +34,25 @@ const getPermissions = (datastoreId: string, otherOptions: RequestInit = {}) => 
 
 const addPermission = (datastoreId: string, formData: object) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_datastore_add_permission", { datastoreId: datastoreId });
-    return jsonFetch<DatastorePermissionResponseDto>(
+    return jsonFetch<DatastorePermissionResponseDto[]>(
         url,
         {
             method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+            },
+        },
+        formData
+    );
+};
+
+const updatePermission = (datastoreId: string, permissionId: string, formData: object) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_datastore_update_permission", { datastoreId: datastoreId, permissionId: permissionId });
+    return jsonFetch<DatastorePermissionResponseDto>(
+        url,
+        {
+            method: "PATCH",
             headers: {
                 "Content-Type": "application/json",
                 Accept: "application/json",
@@ -48,8 +70,10 @@ const removePermission = (datastoreId: string, permissionId: string) => {
 const datastore = {
     get,
     getEndpoints,
+    getPermission,
     getPermissions,
     addPermission,
+    updatePermission,
     removePermission,
 };
 

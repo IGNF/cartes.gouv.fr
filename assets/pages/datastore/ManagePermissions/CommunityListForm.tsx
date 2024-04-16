@@ -41,7 +41,7 @@ const CommunityListForm: FC<CommunityListFormProps> = (props: CommunityListFormP
     };
 
     return (
-        <div className={cx(fr.cx("fr-ml-2v", "fr-my-2v", "fr-pl-2v"), state === "error" && "frx-community-error")}>
+        <div className={cx(fr.cx("fr-my-2v", "fr-pl-2v"), state === "error" && "frx-community-error")}>
             <Checkbox
                 className={"frx-scroll-list"}
                 legend={t("add_form.communities_list")}

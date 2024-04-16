@@ -5,6 +5,7 @@ import LoadingText from "../components/Utils/LoadingText";
 import SymfonyRouting from "../modules/Routing";
 import Home from "../pages/Home";
 import RedirectToLogin from "../pages/RedirectToLogin";
+import EditPermissionForm from "../pages/datastore/ManagePermissions/EditPermissionForm";
 import PageNotFound from "../pages/error/PageNotFound";
 import { useAuthStore } from "../stores/AuthStore";
 import { knownRoutes, publicRoutes, useRoute } from "./router";
@@ -109,6 +110,8 @@ const RouterRenderer: FC = () => {
                 return <DatastoreManagePermissions datastoreId={route.params.datastoreId} />;
             case "datastore_add_permission":
                 return <AddPermissionForm datastoreId={route.params.datastoreId} />;
+            case "datastore_edit_permission":
+                return <EditPermissionForm datastoreId={route.params.datastoreId} permissionId={route.params.permissionId} />;
             case "dashboard_pro":
                 return <DashboardPro />;
             case "datasheet_list":

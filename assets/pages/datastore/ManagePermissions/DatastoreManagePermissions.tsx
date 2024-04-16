@@ -96,9 +96,9 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
                         priority="secondary"
                         iconId="fr-icon-edit-line"
                         size="small"
-                        /*onClick={() => {
-                            routes.user_key_edit({ keyId: accessKey._id }).push();
-                        }}*/
+                        onClick={() => {
+                            routes.datastore_edit_permission({ datastoreId: datastoreId, permissionId: permission._id }).push();
+                        }}
                     />
                     <Button
                         title={tCommon("delete")}
@@ -115,7 +115,7 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
             );
             return data;
         });
-    }, [permissions, tCommon, t]);
+    }, [datastoreId, permissions, tCommon, t]);
 
     return (
         <DatastoreLayout datastoreId={datastoreId} documentTitle={t("list.title", { datastoreName: datastore?.name })}>

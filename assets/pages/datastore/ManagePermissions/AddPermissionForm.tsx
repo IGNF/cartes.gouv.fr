@@ -1,9 +1,10 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import Button from "@codegouvfr/react-dsfr/Button";
+import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Input from "@codegouvfr/react-dsfr/Input";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import ToggleSwitch from "@codegouvfr/react-dsfr/ToggleSwitch";
+import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useEffect, useMemo } from "react";
@@ -14,48 +15,19 @@ import DatePicker from "../../../components/Input/DatePicker";
 import InputCollection from "../../../components/Input/InputCollection";
 import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
 import LoadingText from "../../../components/Utils/LoadingText";
+import Wait from "../../../components/Utils/Wait";
 import { useTranslation } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/RQKeys";
+import { routes } from "../../../router/router";
 import { useAuthStore } from "../../../stores/AuthStore";
-import { DatastorePermissionResponseDto, PermissionAccountCreateDto, PermissionCommunityCreateDto, PermissionCreateDtoTypeEnum } from "../../../types/entrepot";
+import { DatastorePermissionResponseDto, PermissionCreateDtoTypeEnum } from "../../../types/entrepot";
 import CommunityListForm from "./CommunityListForm";
 import ScrollOfferingList from "./ScrollOfferingList";
 import { getAddSchema } from "./ValidationSchemas";
-import Wait from "../../../components/Utils/Wait";
-import { cx } from "@codegouvfr/react-dsfr/tools/cx";
-import { routes } from "../../../router/router";
+import createRequestBody, { type AddPermissionFormType } from "./utils";
 
 type AddPermissionFormProps = {
     datastoreId: string;
-};
-
-type AddPermissionFormType = {
-    licence: string;
-    type: string;
-    beneficiaries: string[];
-    end_date?: Date;
-    offerings: string[];
-    only_oauth: boolean;
-};
-
-const createRequestBody = (formValues: AddPermissionFormType): PermissionCommunityCreateDto | PermissionAccountCreateDto => {
-    // Nettoyage => trim sur toutes les chaines
-    const values = JSON.parse(
-        JSON.stringify(formValues, (_, value) => {
-            return typeof value === "string" ? value.trim() : value;
-        })
-    );
-
-    if (!("end_date" in values)) {
-        values["end_date"] = null;
-    }
-    if (values.end_date !== null) {
-        const date = new Date(values.end_date);
-        date.setUTCHours(23, 59, 59, 0);
-        values.end_date = date.toISOString();
-    }
-
-    return values;
 };
 
 const AddPermissionForm: FC<AddPermissionFormProps> = ({ datastoreId }) => {
@@ -100,10 +72,11 @@ const AddPermissionForm: FC<AddPermissionFormProps> = ({ datastoreId }) => {
         mutate: mutateAdd,
     } = useMutation({
         mutationFn: (values: object) => api.datastore.addPermission(datastoreId, values),
-        onSuccess(permission: DatastorePermissionResponseDto) {
-            queryClient.setQueryData<DatastorePermissionResponseDto[]>(RQKeys.datastore_permissions(datastoreId), (permissions) => {
-                permissions?.push(permission);
-                return permissions;
+        onSuccess(permissions: DatastorePermissionResponseDto[]) {
+            queryClient.setQueryData<DatastorePermissionResponseDto[]>(RQKeys.datastore_permissions(datastoreId), (oldPermissions) => {
+                if (oldPermissions) {
+                    return [...oldPermissions, ...permissions];
+                }
             });
             routes.datastore_manage_permissions({ datastoreId: datastoreId }).push();
         },
@@ -198,7 +171,7 @@ const AddPermissionForm: FC<AddPermissionFormProps> = ({ datastoreId }) => {
                     />
                     <RadioButtons
                         legend={t("add_form.type")}
-                        hintText={t("add_form.hint_licence")}
+                        hintText={<span className={fr.cx("fr-icon-warning-line")}>{t("add_form.hint_type")}</span>}
                         state={errors.type ? "error" : "default"}
                         stateRelatedMessage={errors?.type?.message?.toString()}
                         orientation="horizontal"
@@ -271,7 +244,22 @@ const AddPermissionForm: FC<AddPermissionFormProps> = ({ datastoreId }) => {
                         onChange={(checked) => handleOauthChange(checked)}
                     />
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--right")}>
-                        <Button onClick={handleSubmit(onSubmit)}>{tCommon("add")}</Button>
+                        <ButtonsGroup
+                            buttons={[
+                                {
+                                    linkProps: routes.datastore_manage_permissions({ datastoreId: datastoreId }).link,
+                                    children: tCommon("cancel"),
+                                    priority: "secondary",
+                                },
+                                {
+                                    children: tCommon("add"),
+                                    onClick: () => handleSubmit(onSubmit)(),
+                                },
+                            ]}
+                            inlineLayoutWhen="always"
+                            alignment="right"
+                            className={fr.cx("fr-mt-2w")}
+                        />
                     </div>
                 </div>
             )}

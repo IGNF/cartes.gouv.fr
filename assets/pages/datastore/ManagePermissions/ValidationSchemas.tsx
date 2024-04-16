@@ -44,4 +44,6 @@ const getAddSchema = (t: TranslationFunction<"DatastorePermissions", ComponentKe
     );
 };
 
-export { getAddSchema };
+const getEditSchema = (t: TranslationFunction<"DatastorePermissions", ComponentKey>) => getSchema(t);
+
+export { getAddSchema, getEditSchema };

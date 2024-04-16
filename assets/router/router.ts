@@ -81,6 +81,14 @@ const routeDefs = {
         (p) => `${appRoot}/datastores/${p.datastoreId}/add-permission`
     ),
 
+    datastore_edit_permission: defineRoute(
+        {
+            datastoreId: param.path.string,
+            permissionId: param.path.string,
+        },
+        (p) => `${appRoot}/datastores/${p.datastoreId}/edit-permission/${p.permissionId}`
+    ),
+
     // fiche de données
     datasheet_list: defineRoute(
         {
