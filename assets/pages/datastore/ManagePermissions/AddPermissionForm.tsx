@@ -9,7 +9,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useEffect, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
-import "../../../../assets/sass/scrolled_list.scss";
+import "../../../../assets/sass/pages/permission.scss";
 import api from "../../../api";
 import DatePicker from "../../../components/Input/DatePicker";
 import InputCollection from "../../../components/Input/InputCollection";

@@ -2,7 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import { FC, useCallback, useMemo, useState } from "react";
-import "../../../../assets/sass/scrolled_list.scss";
+import "../../../../assets/sass/pages/permission.scss";
 import { OfferingListResponseDto } from "../../../types/entrepot";
 
 type ScrollOfferingListProps = {
