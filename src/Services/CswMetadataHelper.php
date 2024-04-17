@@ -3,47 +3,70 @@
 namespace App\Services;
 
 use App\Constants\MetadataFields;
+use App\Entity\CswMetadata\CswMetadata;
 use App\Exception\AppException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Uid\Uuid;
 use Twig\Environment as Twig;
 
-class MetadataHelper
+class CswMetadataHelper
 {
     private Filesystem $fs;
 
     public function __construct(
         private Twig $twig,
-        private ParameterBagInterface $params
+        private ParameterBagInterface $params,
+        private SerializerInterface $serializer,
     ) {
         $this->fs = new Filesystem();
     }
 
-    /**
-     * @param array<string,mixed> $args
-     */
-    public function convertArrayToXml(array $args): string
+    public function toArray(CswMetadata $metadata): array
     {
-        $requiredFields = [
-            MetadataFields::FILE_IDENTIFIER,
-            MetadataFields::HIERARCHY_LEVEL,
-            MetadataFields::LANGUAGE,
-            MetadataFields::CHARSET,
-        ];
+        $metadataJson = $this->toJson($metadata);
 
-        foreach ($requiredFields as $fieldName) {
-            if (!array_key_exists($fieldName, $args)) {
-                throw new AppException(sprintf('Required field "%s" not provided', $fieldName));
-            }
-        }
+        return json_decode($metadataJson, true);
+    }
 
-        $content = $this->twig->render('metadata/metadata_dataset_iso.xml.twig', $args);
+    public function toJson(CswMetadata $metadata): string
+    {
+        return $this->serializer->serialize($metadata, 'json');
+    }
+
+    /**
+     * @param array<mixed> $metadataArray
+     */
+    public function fromArray(array $metadataArray): CswMetadata
+    {
+        $metadataJson = json_encode($metadataArray);
+
+        return $this->fromJson($metadataJson);
+    }
+
+    public function fromJson(string $metadataJson): CswMetadata
+    {
+        return $this->serializer->deserialize($metadataJson, CswMetadata::class, 'json');
+    }
+
+    public function toXml(CswMetadata $metadata): string
+    {
+        $metadataArray = $this->toArray($metadata);
+
+        $content = $this->twig->render('metadata/metadata_dataset_iso.xml.twig', $metadataArray);
 
         return $content;
     }
 
-    public function convertXmlToArray(string $metadataXml): array
+    public function fromXml(string $metadataXml): CswMetadata
+    {
+        $metadataArray = $this->xmlToArray($metadataXml);
+
+        return $this->fromArray($metadataArray);
+    }
+
+    public function xmlToArray(string $metadataXml): array
     {
         $doc = new \DOMDocument();
         $loaded = $doc->loadXML($metadataXml);
@@ -69,9 +92,7 @@ class MetadataHelper
                                                     ?->getElementsByTagName('onLine');
 
         $layersList = array_map(function (\DOMElement $layer) {
-            /**
-             * @var ?\DOMElement $onlineEl
-             */
+            /** @var ?\DOMElement $onlineEl */
             $onlineEl = $layer->getElementsByTagName('CI_OnlineResource')[0];
 
             return [
@@ -83,8 +104,7 @@ class MetadataHelper
         }, iterator_to_array($layersNodesList));
 
         /** @var ?\DOMElement */
-        $languageNode = $doc->getElementsByTagName('language')[0]
-        ?->getElementsByTagName('LanguageCode')[0];
+        $languageNode = $doc->getElementsByTagName('language')[0]?->getElementsByTagName('LanguageCode')[0];
         $language = [
             MetadataFields::LANGUAGE_CODE => $languageNode?->getAttribute('codeListValue'),
             MetadataFields::LANGUAGE_TEXT => $languageNode->textContent,

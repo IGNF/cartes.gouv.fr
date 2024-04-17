@@ -90,13 +90,15 @@ abstract class AbstractEntrepotApiService
 
         $allResources = $response['content'];
 
-        $contentRange = $response['headers']['content-range'][0];
-        $pageCount = $this->getResultsPageCount($contentRange, $query['limit']);
+        if (isset($response['headers']['content-range'][0])) {
+            $contentRange = $response['headers']['content-range'][0];
+            $pageCount = $this->getResultsPageCount($contentRange, $query['limit']);
 
-        // on a déjà le contenu de la page 1, donc on commence à 2 et on va jusqu'à $pageCount
-        for ($i = 2; $i <= $pageCount; ++$i) {
-            $query['page'] = $i;
-            $allResources = array_merge($allResources, $this->request('GET', $url, [], $query, $headers));
+            // on a déjà le contenu de la page 1, donc on commence à 2 et on va jusqu'à $pageCount
+            for ($i = 2; $i <= $pageCount; ++$i) {
+                $query['page'] = $i;
+                $allResources = array_merge($allResources, $this->request('GET', $url, [], $query, $headers));
+            }
         }
 
         return $allResources;

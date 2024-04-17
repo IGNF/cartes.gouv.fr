@@ -4,14 +4,18 @@ namespace App\Controller\Api;
 
 use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationTypes;
-use App\Constants\MetadataFields;
+use App\Constants\EntrepotApi\OfferingTypes;
 use App\Dto\WfsAddDTO;
 use App\Dto\WfsTableDTO;
+use App\Entity\CswMetadata\CswHierarchyLevel;
+use App\Entity\CswMetadata\CswLanguage;
+use App\Entity\CswMetadata\CswMetadata;
+use App\Entity\CswMetadata\CswMetadataLayer;
 use App\Exception\CartesApiException;
 use App\Exception\EntrepotApiException;
 use App\Services\CartesServiceApi;
+use App\Services\CswMetadataHelper;
 use App\Services\EntrepotApiService;
-use App\Services\MetadataHelper;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Annotation\Route;
@@ -36,7 +40,7 @@ class WfsController extends ServiceController implements ApiControllerInterface
         string $datastoreId,
         string $storedDataId,
         #[MapRequestPayload] WfsAddDTO $dto,
-        MetadataHelper $metadataHelper
+        CswMetadataHelper $metadataHelper
     ): JsonResponse {
         try {
             // création de requête pour la config
@@ -58,7 +62,7 @@ class WfsController extends ServiceController implements ApiControllerInterface
             $offering['configuration'] = $configuration;
 
             // création de metadata
-            $this->createOrUpdateMetadata($dto, $offering, $endpoint, $metadataHelper, $datastoreId, $datasheetName);
+            $this->createOrUpdateMetadata($dto, $metadataHelper, $datastoreId, $datasheetName);
 
             return $this->json($offering);
         } catch (EntrepotApiException $ex) {
@@ -75,7 +79,7 @@ class WfsController extends ServiceController implements ApiControllerInterface
         string $storedDataId,
         string $offeringId,
         #[MapRequestPayload] WfsAddDTO $dto,
-        MetadataHelper $metadataHelper
+        CswMetadataHelper $metadataHelper
     ): JsonResponse {
         try {
             // récup anciens config et offering
@@ -100,7 +104,7 @@ class WfsController extends ServiceController implements ApiControllerInterface
             $offering['configuration'] = $configuration;
 
             // création de metadata
-            $this->createOrUpdateMetadata($dto, $offering, $endpoint, $metadataHelper, $datastoreId, $datasheetName, $oldOffering['_id']);
+            $this->createOrUpdateMetadata($dto, $metadataHelper, $datastoreId, $datasheetName);
 
             return $this->json($offering);
         } catch (EntrepotApiException $ex) {
@@ -148,11 +152,7 @@ class WfsController extends ServiceController implements ApiControllerInterface
         return $body;
     }
 
-    /**
-     * @param array<mixed> $offering
-     * @param array<mixed> $serviceEndpoint
-     */
-    private function createOrUpdateMetadata(WfsAddDTO $dto, array $offering, array $serviceEndpoint, MetadataHelper $metadataHelper, string $datastoreId, string $datasheetName, ?string $oldOfferingId = null): void
+    private function createOrUpdateMetadata(WfsAddDTO $dto, CswMetadataHelper $metadataHelper, string $datastoreId, string $datasheetName): void
     {
         $metadataList = $this->entrepotApiService->metadata->getAll($datastoreId, [
             'tags' => [
@@ -162,81 +162,114 @@ class WfsController extends ServiceController implements ApiControllerInterface
 
         $metadataEndpoint = $this->getEndpointByShareType($datastoreId, 'METADATA', 'all_public');
 
+        // apiMetadata : objet metadata issu de l'API Entrepot
+        // cswMetadata : objet metadata issu du fichier lié à la metadata API
+
         if (0 === count($metadataList)) {
             // nouvelle métadonnée à créer
 
-            $newMetadataArray = $this->getMetadataArray($dto, $offering, $serviceEndpoint);
+            $newCswMetadata = $this->getNewCswMetadata($dto, $datastoreId, $datasheetName);
 
-            $newMetadataXml = $metadataHelper->convertArrayToXml($newMetadataArray);
+            $newMetadataXml = $metadataHelper->toXml($newCswMetadata);
             $newMetadataFilePath = $metadataHelper->saveToFile($newMetadataXml);
 
-            $metadata = $this->entrepotApiService->metadata->add($datastoreId, $newMetadataFilePath);
-            $metadata = $this->entrepotApiService->metadata->addTags($datastoreId, $metadata['_id'], [
+            $apiMetadata = $this->entrepotApiService->metadata->add($datastoreId, $newMetadataFilePath);
+            $apiMetadata = $this->entrepotApiService->metadata->addTags($datastoreId, $apiMetadata['_id'], [
                 CommonTags::DATASHEET_NAME => $datasheetName,
             ]);
 
-            $this->entrepotApiService->metadata->publish($datastoreId, $metadata['file_identifier'], $metadataEndpoint['_id']);
+            $this->entrepotApiService->metadata->publish($datastoreId, $apiMetadata['file_identifier'], $metadataEndpoint['_id']);
         } else {
             // une métadonnée existe déjà qu'on va mettre à jour
 
             $oldMetadata = $metadataList[0];
 
             $oldMetadataFileXml = $this->entrepotApiService->metadata->downloadFile($datastoreId, $oldMetadata['_id']);
-            $oldMetadataFileArray = $metadataHelper->convertXmlToArray($oldMetadataFileXml);
+            $oldCswMetadata = $metadataHelper->fromXml($oldMetadataFileXml);
 
-            // suppression layers correspondantes à l'ancienne offering
-            $oldLayers = array_filter($oldMetadataFileArray[MetadataFields::LAYERS], fn ($l) => $l[MetadataFields::LAYER_OFFERING_ID] !== $oldOfferingId);
+            $newCswMetadata = $this->getNewCswMetadata($dto, $datastoreId, $datasheetName);
+            $newMetadataXml = $metadataHelper->toXml($newCswMetadata);
 
-            $newMetadataArray = $this->getMetadataArray($dto, $offering, $serviceEndpoint, $oldLayers);
-            $newMetadataXml = $metadataHelper->convertArrayToXml($newMetadataArray);
             $newMetadataFilePath = $metadataHelper->saveToFile($newMetadataXml);
 
             // suppression et recréation de métadonnées si changement de file_identifier
-            if ($oldMetadataFileArray[MetadataFields::FILE_IDENTIFIER] !== $newMetadataArray[MetadataFields::FILE_IDENTIFIER]) {
-                $this->entrepotApiService->metadata->unpublish($datastoreId, $oldMetadataFileArray[MetadataFields::FILE_IDENTIFIER], $metadataEndpoint['_id']);
+            if ($oldCswMetadata->fileIdentifier !== $newCswMetadata->fileIdentifier) {
+                $this->entrepotApiService->metadata->unpublish($datastoreId, $oldCswMetadata->fileIdentifier, $metadataEndpoint['_id']);
                 $this->entrepotApiService->metadata->delete($datastoreId, $oldMetadata['_id']);
 
-                $metadata = $this->entrepotApiService->metadata->add($datastoreId, $newMetadataFilePath);
+                $apiMetadata = $this->entrepotApiService->metadata->add($datastoreId, $newMetadataFilePath);
             } else {
-                $metadata = $this->entrepotApiService->metadata->replaceFile($datastoreId, $oldMetadata['_id'], $newMetadataFilePath);
+                $apiMetadata = $this->entrepotApiService->metadata->replaceFile($datastoreId, $oldMetadata['_id'], $newMetadataFilePath);
             }
-            $metadata = $this->entrepotApiService->metadata->addTags($datastoreId, $metadata['_id'], $oldMetadata['tags']);
+            $apiMetadata = $this->entrepotApiService->metadata->addTags($datastoreId, $apiMetadata['_id'], $oldMetadata['tags']);
 
-            $this->entrepotApiService->metadata->publish($datastoreId, $metadata['file_identifier'], $metadataEndpoint['_id']);
+            $this->entrepotApiService->metadata->publish($datastoreId, $apiMetadata['file_identifier'], $metadataEndpoint['_id']);
         }
     }
 
-    /**
-     * @param array<mixed> $offering
-     * @param array<mixed> $serviceEndpoint
-     * @param array<mixed> $oldLayers
-     */
-    private function getMetadataArray(WfsAddDTO $dto, array $offering, array $serviceEndpoint, ?array $oldLayers = []): array
+    private function getNewCswMetadata(WfsAddDTO $dto, string $datastoreId, string $datasheetName): CswMetadata
     {
-        $layers = array_map(function (WfsTableDTO $tableInfo) use ($offering, $serviceEndpoint) {
-            return [
-                MetadataFields::LAYER_NAME => sprintf('%s:%s', $offering['layer_name'], $tableInfo->native_name),
-                MetadataFields::LAYER_ENDPOINT_TYPE => 'OGC:WFS',
-                MetadataFields::LAYER_ENDPOINT_URL => $serviceEndpoint['urls'][0]['url'],
-                MetadataFields::LAYER_OFFERING_ID => $offering['_id'],
-            ];
-        }, iterator_to_array($dto->table_infos));
+        $layers = $this->getMetadataLayers($datastoreId, $datasheetName);
 
-        $layers = array_merge($oldLayers, $layers);
+        $language = $dto->languages[0] ?
+             new CswLanguage($dto->languages[0]['code'], $dto->languages[0]['language'])
+             : CswLanguage::default();
 
-        return [
-            MetadataFields::HIERARCHY_LEVEL => '' === $dto->resource_genealogy ? 'series' : $dto->resource_genealogy,
-            MetadataFields::LANGUAGE => $dto->languages[0] ?? 'fra',
-            MetadataFields::CHARSET => $dto->charset ?? 'utf8',
-            MetadataFields::FILE_IDENTIFIER => $dto->identifier,
-            MetadataFields::TITLE => $dto->public_name,
-            MetadataFields::ABSTRACT => $dto->description,
-            MetadataFields::CREATION_DATE => (new \DateTime($dto->creation_date))->format('Y-m-d'),
-            MetadataFields::THEMATIC_CATEGORIES => $dto->category,
-            MetadataFields::CONTACT_EMAIL => $dto->email_contact,
-            MetadataFields::ORGANISATION_NAME => $dto->organization,
-            MetadataFields::ORGANISATION_EMAIL => $dto->organization_email,
-            MetadataFields::LAYERS => $layers,
-        ];
+        return new CswMetadata($dto->identifier, CswHierarchyLevel::from('' === $dto->resource_genealogy ? 'series' : $dto->resource_genealogy), $language, $dto->charset, $dto->public_name, $dto->description, $dto->creation_date, $dto->category, $dto->email_contact, $dto->organization, $dto->organization_email, $layers);
+    }
+
+    /**
+     * @return array<CswMetadataLayer>
+     */
+    private function getMetadataLayers(string $datastoreId, string $datasheetName): array
+    {
+        $configList = $this->entrepotApiService->configuration->getAllDetailed($datastoreId, [
+            'tags' => [
+                CommonTags::DATASHEET_NAME => $datasheetName,
+            ],
+        ]);
+
+        $layers = array_map(function (array $configuration) use ($datastoreId) {
+            $configRelations = $configuration['type_infos']['used_data'][0]['relations'];
+
+            $offering = $this->entrepotApiService->configuration->getConfigurationOfferings($datastoreId, $configuration['_id'])[0];
+            $offering = $this->entrepotApiService->configuration->getOffering($datastoreId, $offering['_id']);
+
+            $serviceEndpoint = $this->entrepotApiService->datastore->getEndpoint($datastoreId, $offering['endpoint']['_id']);
+
+            $relationLayers = array_map(function ($relation) use ($offering, $serviceEndpoint) {
+                $layerName = null;
+                $endpointType = null;
+
+                switch ($offering['type']) {
+                    case OfferingTypes::WFS:
+                        $layerName = sprintf('%s:%s', $offering['layer_name'], $relation['native_name']);
+                        $endpointType = 'OGC:WFS';
+                        break;
+
+                    case OfferingTypes::WMSVECTOR:
+                        $layerName = sprintf('%s:%s', $offering['layer_name'], $relation['name']);
+                        $endpointType = 'OGC:WMS';
+                        break;
+
+                    case OfferingTypes::WMTSTMS:
+                        $layerName = $offering['layer_name'];
+                        $endpointType = 'OGC:TMS';
+                        break;
+                    default:
+                        $layerName = $offering['layer_name'];
+                        $endpointType = '';
+                        break;
+                }
+
+                return new CswMetadataLayer($layerName, $endpointType, $serviceEndpoint['endpoint']['urls'][0]['url'], $offering['_id']);
+            }, $configRelations);
+
+            return $relationLayers;
+        }, $configList);
+
+        $layers = array_merge(...$layers);
+
+        return $layers;
     }
 }

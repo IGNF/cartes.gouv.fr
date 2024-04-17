@@ -6,8 +6,8 @@ use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\MetadataFields;
 use App\Exception\CartesApiException;
 use App\Exception\EntrepotApiException;
+use App\Services\CswMetadataHelper;
 use App\Services\EntrepotApiService;
-use App\Services\MetadataHelper;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -26,7 +26,7 @@ class MetadataController extends AbstractController implements ApiControllerInte
 {
     public function __construct(
         private EntrepotApiService $entrepotApiService,
-        private MetadataHelper $metadataHelper
+        private CswMetadataHelper $metadataHelper
     ) {
     }
 
@@ -46,39 +46,40 @@ class MetadataController extends AbstractController implements ApiControllerInte
         }
     }
 
-    #[Route('/', name: 'add', methods: ['POST'])]
-    public function add(string $datastoreId, Request $request): JsonResponse
-    {
-        try {
-            $metadataArgs = json_decode($request->getContent(), true);
-            $datasheetName = $request->query->get(CommonTags::DATASHEET_NAME, null);
+    // FIXME revoir convertArrayToXml
+    // #[Route('/', name: 'add', methods: ['POST'])]
+    // public function add(string $datastoreId, Request $request): JsonResponse
+    // {
+    //     try {
+    //         $metadataArgs = json_decode($request->getContent(), true);
+    //         $datasheetName = $request->query->get(CommonTags::DATASHEET_NAME, null);
 
-            $metadataArgs = [
-                ...$metadataArgs,
-                MetadataFields::HIERARCHY_LEVEL => $metadataArgs[MetadataFields::HIERARCHY_LEVEL] ?? 'series',
-                MetadataFields::LANGUAGE => $metadataArgs[MetadataFields::LANGUAGE] ?? 'fre',
-                MetadataFields::CHARSET => $metadataArgs[MetadataFields::CHARSET] ?? 'utf8',
-                MetadataFields::FILE_IDENTIFIER => $metadataArgs[MetadataFields::FILE_IDENTIFIER] ?? Uuid::v4(),
-            ];
+    //         $metadataArgs = [
+    //             ...$metadataArgs,
+    //             MetadataFields::HIERARCHY_LEVEL => $metadataArgs[MetadataFields::HIERARCHY_LEVEL] ?? 'series',
+    //             MetadataFields::LANGUAGE => $metadataArgs[MetadataFields::LANGUAGE] ?? 'fre',
+    //             MetadataFields::CHARSET => $metadataArgs[MetadataFields::CHARSET] ?? 'utf8',
+    //             MetadataFields::FILE_IDENTIFIER => $metadataArgs[MetadataFields::FILE_IDENTIFIER] ?? Uuid::v4(),
+    //         ];
 
-            $xmlContent = $this->metadataHelper->convertArrayToXml($metadataArgs);
-            $filePath = $this->metadataHelper->saveToFile($xmlContent);
+    //         $xmlContent = $this->metadataHelper->convertArrayToXml($metadataArgs);
+    //         $filePath = $this->metadataHelper->saveToFile($xmlContent);
 
-            $metadata = $this->entrepotApiService->metadata->add($datastoreId, $filePath);
+    //         $metadata = $this->entrepotApiService->metadata->add($datastoreId, $filePath);
 
-            if (null !== $datasheetName) {
-                $metadata = $this->entrepotApiService->metadata->addTags($datastoreId, $metadata['_id'], [
-                    CommonTags::DATASHEET_NAME => $datasheetName,
-                ]);
-            }
+    //         if (null !== $datasheetName) {
+    //             $metadata = $this->entrepotApiService->metadata->addTags($datastoreId, $metadata['_id'], [
+    //                 CommonTags::DATASHEET_NAME => $datasheetName,
+    //             ]);
+    //         }
 
-            return $this->json($metadata);
-        } catch (EntrepotApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        } catch (\Exception $ex) {
-            throw new CartesApiException($ex->getMessage(), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
-        }
-    }
+    //         return $this->json($metadata);
+    //     } catch (EntrepotApiException $ex) {
+    //         throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+    //     } catch (\Exception $ex) {
+    //         throw new CartesApiException($ex->getMessage(), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+    //     }
+    // }
 
     #[Route('/{metadataId}', name: 'get', methods: ['GET'], requirements: ['metadataId' => Requirement::UUID_V4])]
     public function get(string $datastoreId, string $metadataId): JsonResponse
@@ -87,7 +88,7 @@ class MetadataController extends AbstractController implements ApiControllerInte
             $metadata = $this->entrepotApiService->metadata->get($datastoreId, $metadataId);
             $fileContent = $this->entrepotApiService->metadata->downloadFile($datastoreId, $metadataId);
 
-            $metadata['content'] = $this->metadataHelper->convertXmlToArray($fileContent);
+            $metadata['content'] = $this->metadataHelper->xmlToArray($fileContent);
 
             return $this->json($metadata);
         } catch (EntrepotApiException $ex) {
@@ -114,7 +115,7 @@ class MetadataController extends AbstractController implements ApiControllerInte
             $metadata = $metadataList[0];
             $fileContent = $this->entrepotApiService->metadata->downloadFile($datastoreId, $metadata['_id']);
 
-            $metadata['content'] = $this->metadataHelper->convertXmlToArray($fileContent);
+            $metadata['content'] = $this->metadataHelper->xmlToArray($fileContent);
 
             return $this->json($metadata);
         } catch (EntrepotApiException $ex) {
@@ -131,7 +132,7 @@ class MetadataController extends AbstractController implements ApiControllerInte
             $format = $request->query->get('format', 'xml');
 
             if ('json' === $format) {
-                $contentJson = $this->metadataHelper->convertXmlToArray($fileContent);
+                $contentJson = $this->metadataHelper->xmlToArray($fileContent);
 
                 return $this->json($contentJson);
             }
