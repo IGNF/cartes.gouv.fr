@@ -18,6 +18,7 @@ import { AddMember, addMemberModal } from "./AddMember";
 import Wait from "../../components/Utils/Wait";
 import "../../sass/pages/community_members.scss";
 import { routes } from "../../router/router";
+import ConfirmDialog, { ConfirmDialogModal } from "../../components/Utils/ConfirmDialog";
 
 type CommunityMembersProps = {
     datastoreId: string;
@@ -54,6 +55,7 @@ const CommunityMembers: FC<CommunityMembersProps> = ({ datastoreId, userId }) =>
 
     const { user } = useAuthStore();
     const [members, setMembers] = useState<Member[]>([]);
+    const [currentMember, setCurrentMember] = useState<string | undefined>(undefined);
 
     // Le datastore
     const { data: datastore, isLoading: isLoadingDatastore } = useQuery({
@@ -248,7 +250,10 @@ const CommunityMembers: FC<CommunityMembersProps> = ({ datastoreId, userId }) =>
                                                         title={t("remove_user")}
                                                         priority={"tertiary no outline"}
                                                         iconId={"fr-icon-delete-line"}
-                                                        onClick={() => mutateRemove(member.id)}
+                                                        onClick={() => {
+                                                            setCurrentMember(member.id);
+                                                            ConfirmDialogModal.open();
+                                                        }}
                                                     />
                                                 </td>
                                             ) : (
@@ -277,6 +282,14 @@ const CommunityMembers: FC<CommunityMembersProps> = ({ datastoreId, userId }) =>
                 <Alert className={fr.cx("fr-mb-2w")} title={tCommon("information")} closable description={t("no_necessary_rights")} severity={"info"} />
             )}
             <AddMember datastoreId={datastoreId} communityId={communityId} communityMemberIds={communityMemberIds} userId={userId} />
+            <ConfirmDialog
+                title={t("confirm_remove")}
+                onConfirm={() => {
+                    if (currentMember !== undefined) {
+                        mutateRemove(currentMember);
+                    }
+                }}
+            />
         </DatastoreLayout>
     );
 };
@@ -293,6 +306,7 @@ export const { i18n } = declareComponentKeys<
     | "supervisor"
     | "add_user"
     | "remove_user"
+    | "confirm_remove"
     | { K: "add_remove_right_title"; P: { right: string }; R: string }
     | "no_necessary_rights"
 >()({
@@ -308,6 +322,7 @@ export const CommunityMembersFrTranslations: Translations<"fr">["CommunityMember
     supervisor: "superviseur",
     add_user: "Ajouter un utilisateur",
     remove_user: "Supprimer cet utilisateur",
+    confirm_remove: "Êtes-vous sûr de vouloir supprimer cet utilisateur ?",
     add_remove_right_title: ({ right }) => `Ajouter/supprimer le droit ${right}`,
     no_necessary_rights: "Vous n'avez pas les droits nécessaires pour visualiser les membres de cet espace de travail.",
 };
@@ -321,6 +336,7 @@ export const CommunityMembersEnTranslations: Translations<"en">["CommunityMember
     supervisor: "supervisor",
     add_user: "Add user",
     remove_user: "Remove this user",
+    confirm_remove: "Are you sure you want to delete this user ?",
     add_remove_right_title: ({ right }) => `Add/remove right ${right} to user`,
     no_necessary_rights: "You do not have the necessary rights to view and modify the users of this community.",
 };
