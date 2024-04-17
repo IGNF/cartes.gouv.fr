@@ -103,8 +103,8 @@ const Contact = () => {
                         label={t("form.lastName")}
                         nativeInputProps={{
                             ...register("last_name"),
-                            defaultValue: user?.lastName ?? "",
-                            readOnly: user?.lastName ? true : false,
+                            defaultValue: user?.last_name ?? "",
+                            readOnly: user?.last_name ? true : false,
                             autoComplete: "family-name",
                         }}
                     />
@@ -112,8 +112,8 @@ const Contact = () => {
                         label={t("form.firstName")}
                         nativeInputProps={{
                             ...register("first_name"),
-                            defaultValue: user?.firstName ?? "",
-                            readOnly: user?.firstName ? true : false,
+                            defaultValue: user?.first_name ?? "",
+                            readOnly: user?.first_name ? true : false,
                             autoComplete: "given-name",
                         }}
                     />

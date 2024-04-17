@@ -20,11 +20,11 @@ const Me = () => {
 
             {user && (
                 <>
-                    <p>{t("firstname", { firstName: user?.firstName ?? "" })}</p>
-                    <p>{t("lastname", { lastName: user?.lastName ?? "" })}</p>
-                    <p>{t("username", { userName: user?.userName ?? "" })}</p>
+                    <p>{t("firstname", { firstName: user?.first_name ?? "" })}</p>
+                    <p>{t("lastname", { lastName: user?.last_name ?? "" })}</p>
+                    <p>{t("username", { userName: user?.user_name ?? "" })}</p>
                     <p>{t("email", { email: user.email })}</p>
-                    <p>{t("registration_date", { date: functions.date.format(user.accountCreationDate) })}</p>
+                    <p>{t("registration_date", { date: functions.date.format(user.account_creation_date) })}</p>
                     <p>{t("id", { id: user.id })}</p>
                 </>
             )}

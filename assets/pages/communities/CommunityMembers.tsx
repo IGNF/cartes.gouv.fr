@@ -80,9 +80,9 @@ const CommunityMembers: FC<CommunityMembersProps> = ({ datastoreId, userId }) =>
 
     // Les droits sur cette communauté
     const userRights = useMemo(() => {
-        const communityMember = user?.communitiesMember.filter((member) => member.community?._id === communityId);
+        const communityMember = user?.communities_member.filter((member) => member.community?._id === communityId);
         return communityMember?.length ? communityMember[0].rights : undefined;
-    }, [user?.communitiesMember, communityId]);
+    }, [user?.communities_member, communityId]);
 
     const communitySupervisor = useMemo(() => {
         return community?.supervisor._id;

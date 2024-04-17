@@ -37,7 +37,7 @@ const CommunityList: FC = () => {
     const refMsg = useRef<HTMLTextAreaElement>(null);
 
     // Communautes auxquelles l'utilisateur appartient
-    const userCommunitiesIds = useMemo(() => user?.communitiesMember.map((member) => member.community?._id), [user?.communitiesMember]);
+    const userCommunitiesIds = useMemo(() => user?.communities_member.map((member) => member.community?._id), [user?.communities_member]);
 
     const [selectedCommunity, setSelectedCommunity] = useState<CommunityListResponseDto>();
 

@@ -37,13 +37,13 @@ import {
 export type CartesUser = {
     id: string;
     email: string;
-    userName: string;
-    firstName?: string | null;
-    lastName?: string | null;
+    user_name: string;
+    first_name?: string | null;
+    last_name?: string | null;
     roles: string[];
-    communitiesMember: CommunityMemberDto[];
-    accountCreationDate: string;
-    lastApiCallDate: string;
+    communities_member: CommunityMemberDto[];
+    account_creation_date: string;
+    last_api_call_date: string;
 };
 
 /** datastore */
