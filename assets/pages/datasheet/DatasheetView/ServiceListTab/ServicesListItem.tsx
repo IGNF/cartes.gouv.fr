@@ -100,7 +100,7 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
 
                                             await navigator.clipboard.writeText(service.share_url);
 
-                                            setMessage("L'URL copiée");
+                                            setMessage("URL copiée");
                                         },
                                     },
                                     {
