@@ -18,7 +18,7 @@ import Translator from "../../modules/Translator";
 import { CartesApiException } from "../../modules/jsonFetch";
 import { useAuthStore } from "../../stores/AuthStore";
 import { CommunityListResponseDto } from "../../types/entrepot";
-import { removeDiacritics } from "../../utils";
+import { regex, removeDiacritics } from "../../utils";
 
 import "../../sass/pages/community_list.scss";
 
@@ -47,10 +47,11 @@ const CommunityList: FC = () => {
         refetchOnWindowFocus: false,
     });
 
-    // liste des communautés publiques auxquelles l'utilisateur n'appartient pas déjà
+    /* liste des communautés publiques auxquelles l'utilisateur n'appartient pas déjà
+       On enleve les communauté dont l'email est foireux */
     const allPublicCommunities = useMemo(() => {
         if (communitiesQuery.data) {
-            return communitiesQuery.data.filter((community) => !userCommunitiesIds?.includes(community._id));
+            return communitiesQuery.data.filter((community) => !userCommunitiesIds?.includes(community._id) && regex.email.test(community.contact));
         }
         return [];
     }, [communitiesQuery.data, userCommunitiesIds]);
