@@ -37,13 +37,13 @@ import {
 export type CartesUser = {
     id: string;
     email: string;
-    userName: string;
-    firstName?: string | null;
-    lastName?: string | null;
+    user_name: string;
+    first_name?: string | null;
+    last_name?: string | null;
     roles: string[];
-    communitiesMember: CommunityMemberDto[];
-    accountCreationDate: string;
-    lastApiCallDate: string;
+    communities_member: CommunityMemberDto[];
+    account_creation_date: string;
+    last_api_call_date: string;
 };
 
 /** datastore */
@@ -273,26 +273,28 @@ export type KeyFormValuesType = {
     accesses: AccessCreateDto[];
 };
 
-export type MetadataLayer = {
+export type CswMetadataLayer = {
     name?: string;
     endpoint_type?: string;
     endpoint_url?: string;
     offering_id?: string;
 };
 
+export type CswMetadata = {
+    file_identifier?: string;
+    hierarchy_level?: string;
+    language?: LanguageType;
+    charset?: string;
+    title?: string;
+    abstract?: string;
+    creation_date?: string;
+    thematic_categories?: string[];
+    contact_email?: string;
+    organisation_name?: string;
+    organisation_email?: string;
+    layers?: CswMetadataLayer[];
+};
+
 export type Metadata = MetadataResponseDto & {
-    content?: {
-        file_identifier?: string;
-        hierarchy_level?: string;
-        language?: LanguageType;
-        charset?: string;
-        title?: string;
-        abstract?: string;
-        creation_date?: string;
-        thematic_categories?: string[];
-        contact_email?: string;
-        organisation_name?: string;
-        organisation_email?: string;
-        layers?: MetadataLayer[];
-    };
+    csw_metadata?: CswMetadata;
 };

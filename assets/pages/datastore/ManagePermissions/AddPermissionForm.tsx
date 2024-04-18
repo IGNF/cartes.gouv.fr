@@ -85,7 +85,7 @@ const AddPermissionForm: FC<AddPermissionFormProps> = ({ datastoreId }) => {
     const communities = useMemo(() => {
         const communities: Record<string, string> = publicCommunities?.reduce((acc, community) => ({ ...acc, [community._id]: community.name }), {}) ?? {};
         if (user) {
-            user.communitiesMember.forEach((communityMember) => {
+            user.communities_member.forEach((communityMember) => {
                 const community = communityMember.community;
                 if (community && !(community._id in communities)) {
                     communities[community._id] = community.name;

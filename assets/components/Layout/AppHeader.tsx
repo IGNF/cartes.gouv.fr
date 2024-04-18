@@ -42,9 +42,9 @@ const AppHeader: FC<AppHeaderProps> = ({ navItems = [] }) => {
         // });
     } else {
         // utilisateur est connecté
-        let btnMyAccountText = `${user.firstName ?? ""} ${user.lastName ?? ""}`;
+        let btnMyAccountText = `${user.first_name ?? ""} ${user.last_name ?? ""}`;
         if (btnMyAccountText.replace(/\s+/g, "") === "") {
-            btnMyAccountText = user.userName;
+            btnMyAccountText = user.user_name;
         }
 
         quickAccessItems.push({

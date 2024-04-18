@@ -18,8 +18,7 @@ framework:
         storage_factory_id: session.storage.factory.native
 
     trusted_proxies: "127.0.0.1,REMOTE_ADDR"
-    trusted_headers:
-        ["x-forwarded-for", "x-forwarded-host", "x-forwarded-proto", "x-forwarded-port", "x-forwarded-prefix"]
+    trusted_headers: ["x-forwarded-for", "x-forwarded-host", "x-forwarded-proto", "x-forwarded-port", "x-forwarded-prefix"]
 
     ide: vscode
 
@@ -27,6 +26,9 @@ framework:
     #fragments: true
     php_errors:
         log: true
+
+    serializer:
+        name_converter: "serializer.name_converter.camel_case_to_snake_case"
 
 when@test:
     framework:

@@ -51,7 +51,7 @@ class MetadataApi extends AbstractEntrepotApiService
         return $this->request('DELETE', "datastores/$datastoreId/metadata/$metadataId");
     }
 
-    public function downloadFile(string $datastoreId, string $metadataId): mixed
+    public function downloadFile(string $datastoreId, string $metadataId): string
     {
         return $this->request('GET', "datastores/$datastoreId/metadata/$metadataId/file", [], [], [], false, false);
     }

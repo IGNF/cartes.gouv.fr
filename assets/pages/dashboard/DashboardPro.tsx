@@ -33,7 +33,7 @@ const DashboardPro = () => {
                 <LoadingText />
             ) : (
                 <>
-                    <h1>Bienvenue {user?.firstName ?? user?.userName}</h1>
+                    <h1>Bienvenue {user?.first_name ?? user?.user_name}</h1>
 
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
                         {datastoreListQuery.data?.map((datastore) => {
