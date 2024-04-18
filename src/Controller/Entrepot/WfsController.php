@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Controller\Api;
+namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Constants\EntrepotApi\OfferingTypes;
+use App\Controller\ApiControllerInterface;
 use App\Dto\WfsAddDTO;
 use App\Dto\WfsTableDTO;
 use App\Entity\CswMetadata\CswHierarchyLevel;

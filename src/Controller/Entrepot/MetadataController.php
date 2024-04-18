@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Controller\Api;
+namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\CommonTags;
+use App\Controller\ApiControllerInterface;
 use App\Exception\CartesApiException;
 use App\Exception\EntrepotApiException;
 use App\Services\CswMetadataHelper;

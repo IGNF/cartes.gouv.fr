@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Controller\Api;
+namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationTypes;
+use App\Controller\ApiControllerInterface;
 use App\Dto\Pyramid\AddPyramidDTO;
 use App\Dto\Pyramid\CompositionDTO;
 use App\Dto\Pyramid\PublishPyramidDTO;
@@ -17,7 +18,7 @@ use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route(
-    '/api/datastore/{datastoreId}/pyramid',
+    '/api/datastores/{datastoreId}/pyramid',
     name: 'cartesgouvfr_api_pyramid_',
     options: ['expose' => true],
     condition: 'request.isXmlHttpRequest()'

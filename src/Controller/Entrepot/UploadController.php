@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller\Api;
+namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ProcessingStatuses;
@@ -10,6 +10,7 @@ use App\Constants\EntrepotApi\UploadStatuses;
 use App\Constants\EntrepotApi\UploadTags;
 use App\Constants\EntrepotApi\UploadTypes;
 use App\Constants\JobStatuses;
+use App\Controller\ApiControllerInterface;
 use App\Exception\AppException;
 use App\Exception\CartesApiException;
 use App\Exception\EntrepotApiException;
@@ -22,7 +23,7 @@ use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route(
-    '/api/datastore/{datastoreId}/upload',
+    '/api/datastores/{datastoreId}/upload',
     name: 'cartesgouvfr_api_upload_',
     options: ['expose' => true],
     condition: 'request.isXmlHttpRequest()'
@@ -38,7 +39,7 @@ class UploadController extends AbstractController implements ApiControllerInterf
     #[Route('', name: 'get_list', methods: ['GET'])]
     public function getUploadList(
         string $datastoreId,
-        #[MapQueryParameter] string $type = null,
+        #[MapQueryParameter] ?string $type = null,
     ): JsonResponse {
         try {
             $query = [];

@@ -17,7 +17,7 @@ class StaticApi extends AbstractEntrepotApiService
         return $this->request('GET', "datastores/$datastoreId/statics/$staticId");
     }
 
-    public function add(string $datastoreId, string $filepath, string $name, string $type, string $description = null): array
+    public function add(string $datastoreId, string $filepath, string $name, string $type, ?string $description = null): array
     {
         $formFields = [
             'type' => $type,

@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Controller\Api;
+namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Constants\EntrepotApi\StaticFileTypes;
+use App\Controller\ApiControllerInterface;
 use App\Exception\CartesApiException;
 use App\Exception\EntrepotApiException;
 use App\Services\CartesServiceApi;
@@ -180,7 +181,7 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
      *
      * @return array<string,string>
      */
-    private function sendStyleFiles(string $datastoreId, array $tablesNamesList, array $files, array $oldConfiguration = null): array
+    private function sendStyleFiles(string $datastoreId, array $tablesNamesList, array $files, ?array $oldConfiguration = null): array
     {
         $directory = $this->getParameter('style_files_path');
 

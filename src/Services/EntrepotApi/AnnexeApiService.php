@@ -7,7 +7,7 @@ class AnnexeApiService extends AbstractEntrepotApiService
     /**
      * @param array<string> $labels
      */
-    public function getAll(string $datastoreId, string $mimeType = null, string $path = null, array $labels = null): array
+    public function getAll(string $datastoreId, ?string $mimeType = null, ?string $path = null, ?array $labels = null): array
     {
         $query = [];
         if ($mimeType) {
@@ -26,7 +26,7 @@ class AnnexeApiService extends AbstractEntrepotApiService
     /**
      * @param array<string> $labels
      */
-    public function getAllDetailed(string $datastoreId, string $mimeType = null, string $path = null, array $labels = null): array
+    public function getAllDetailed(string $datastoreId, ?string $mimeType = null, ?string $path = null, ?array $labels = null): array
     {
         $annexes = $this->getAll($datastoreId, $mimeType, $path, $labels);
 
@@ -46,7 +46,7 @@ class AnnexeApiService extends AbstractEntrepotApiService
      * @param array<string> $paths
      * @param array<string> $labels
      */
-    public function add(string $datastoreId, string $annexeFilePath, array $paths, array $labels = null, bool $published = true): array
+    public function add(string $datastoreId, string $annexeFilePath, array $paths, ?array $labels = null, bool $published = true): array
     {
         $response = $this->sendFile('POST', "datastores/$datastoreId/annexes", $annexeFilePath, [
             'published' => true === $published ? 'true' : 'false',
@@ -66,7 +66,7 @@ class AnnexeApiService extends AbstractEntrepotApiService
      * @param array<string> $paths
      * @param array<string> $labels
      */
-    public function modify(string $datastoreId, string $annexeId, array $paths = null, array $labels = null, bool $published = null): array
+    public function modify(string $datastoreId, string $annexeId, ?array $paths = null, ?array $labels = null, ?bool $published = null): array
     {
         $body = [];
 

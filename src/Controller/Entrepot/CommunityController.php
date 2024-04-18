@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Controller\Api;
+namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\Community;
+use App\Controller\ApiControllerInterface;
 use App\Exception\CartesApiException;
 use App\Exception\EntrepotApiException;
 use App\Services\EntrepotApiService;
@@ -159,7 +160,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
      * @param array<mixed> $communityMember
      * @param array<mixed> $me
      *
-     * @return boolean
+     * @return bool
      */
     private function _allowedToModifyMembers($communityMember, $me)
     {

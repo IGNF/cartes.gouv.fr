@@ -1,17 +1,16 @@
 <?php
 
 namespace App\Dto\User;
- 
-use App\Dto\User\AccessDTO;
-use App\Dto\User\IPListDTO;
+
 use App\Constants\UserKeyTypes;
 use App\Validator\Constraint as CustomAssert;
 use Symfony\Component\Validator\Constraints as Assert;
 
-class UserKeyDTO {
+class UserKeyDTO
+{
     public function __construct(
         #[Assert\NotBlank([
-            'message' => 'user_key.name_mandatory'
+            'message' => 'user_key.name_mandatory',
         ])]
         public readonly string $name,
 
@@ -21,7 +20,7 @@ class UserKeyDTO {
 
         #[Assert\Choice([
             'choices' => [UserKeyTypes::HASH, UserKeyTypes::BASIC, UserKeyTypes::OAUTH2],
-            'message' => 'user_key.type_error'
+            'message' => 'user_key.type_error',
         ])]
         public readonly ?string $type,
 
@@ -36,8 +35,8 @@ class UserKeyDTO {
         public readonly ?string $referer,
 
         #[Assert\Choice([
-            'choices' => ["whitelist", "blacklist"],
-            'message' => 'user_key.ip_list.name_error'
+            'choices' => ['whitelist', 'blacklist'],
+            'message' => 'user_key.ip_list.name_error',
         ])]
         public readonly string $ip_list_name,
 
@@ -46,12 +45,12 @@ class UserKeyDTO {
         #[Assert\All([
             'constraints' => [
                 new Assert\NotBlank([
-                    'message' => 'user_key.ip_list.ip_not_blank'
+                    'message' => 'user_key.ip_list.ip_not_blank',
                 ]),
                 new Assert\Cidr([
-                    'message' => 'user_key.ip_list.ip_error'
-                ])
-            ]
+                    'message' => 'user_key.ip_list.ip_error',
+                ]),
+            ],
         ])]
         public readonly array $ip_list_addresses,
     ) {

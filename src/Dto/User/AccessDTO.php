@@ -4,7 +4,8 @@ namespace App\Dto\User;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
-class AccessDTO {
+class AccessDTO
+{
     public function __construct(
         #[Assert\NotBlank(['message' => 'user_key.access.permission_mandatory'])]
         #[Assert\Uuid(['message' => 'user_key.access.permission_uuid_error'])]

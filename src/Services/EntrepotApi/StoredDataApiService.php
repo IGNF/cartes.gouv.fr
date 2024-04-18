@@ -2,7 +2,6 @@
 
 namespace App\Services\EntrepotApi;
 
-use App\Constants\EntrepotApi\StoredDataStatuses;
 use App\Constants\EntrepotApi\StoredDataTypes;
 
 class StoredDataApiService extends AbstractEntrepotApiService
@@ -50,8 +49,8 @@ class StoredDataApiService extends AbstractEntrepotApiService
             }
         } elseif (StoredDataTypes::ROK4_PYRAMID_VECTOR == $storedData['type']) {
             $offerings = $this->entrepotApiService->configuration->getAllOfferings($datastoreId, [
-                    'stored_data' => $storedData['_id'],
-                ]);
+                'stored_data' => $storedData['_id'],
+            ]);
 
             // check if pyramid is already published or not
             if (0 == count($offerings)) {

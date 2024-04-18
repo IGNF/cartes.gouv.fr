@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Controller\Api;
+namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\CommonTags;
+use App\Controller\ApiControllerInterface;
 use App\Exception\CartesApiException;
 use App\Exception\EntrepotApiException;
 use App\Services\EntrepotApiService;
@@ -15,7 +16,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Uid\Uuid;
 
 #[Route(
-    '/api/datastore/{datastoreId}/style',
+    '/api/datastores/{datastoreId}/style',
     name: 'cartesgouvfr_api_style_'
 )]
 class StyleController extends AbstractController implements ApiControllerInterface
@@ -32,8 +33,8 @@ class StyleController extends AbstractController implements ApiControllerInterfa
     public function add(string $datastoreId, string $offeringId, Request $request): JsonResponse
     {
         try {
-            $styleName = $request->request->get("style_name");
-            
+            $styleName = $request->request->get('style_name');
+
             $datastore = $this->entrepotApiService->datastore->get($datastoreId);
             $offering = $this->entrepotApiService->configuration->getOffering($datastoreId, $offeringId);
 
@@ -92,7 +93,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             $styleName = $data['style_name'];
 
             $offering = $this->entrepotApiService->configuration->getOffering($datastoreId, $offeringId);
-            
+
             $configId = $offering['configuration']['_id'];
 
             // Recuperation des styles de la configuration
@@ -162,7 +163,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             $styleName = $data['style_name'];
 
             $offering = $this->entrepotApiService->configuration->getOffering($datastoreId, $offeringId);
-            
+
             $configId = $offering['configuration']['_id'];
 
             // Recuperation des styles de la configuration
@@ -197,23 +198,24 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
     }
-    
+
     /**
-     * Ajout des urls des annexes
-     * 
+     * Ajout des urls des annexes.
+     *
      * @param array<mixed> $datastore
      * @param array<mixed> $styles
+     *
      * @return void
      */
     private function _addUrls($datastore, &$styles)
     {
         $annexeUrl = $this->getParameter('annexes_url');
 
-        foreach($styles as &$style) {
-            foreach($style['layers'] as &$layer) {
+        foreach ($styles as &$style) {
+            foreach ($style['layers'] as &$layer) {
                 $annexe = $this->entrepotApiService->annexe->get($datastore['_id'], $layer['annexe_id']);
-                $layer['url'] = $annexeUrl . '/' . $datastore['technical_name'] . $annexe['paths'][0];
-            }    
+                $layer['url'] = $annexeUrl.'/'.$datastore['technical_name'].$annexe['paths'][0];
+            }
         }
     }
 

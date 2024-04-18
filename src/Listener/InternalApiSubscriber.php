@@ -2,7 +2,7 @@
 
 namespace App\Listener;
 
-use App\Controller\Api\ApiControllerInterface;
+use App\Controller\ApiControllerInterface;
 use App\Exception\CartesApiException;
 use App\Security\KeycloakToken;
 use App\Security\User;

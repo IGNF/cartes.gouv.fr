@@ -54,7 +54,8 @@
         "symfony/debug-bundle": "6.4.*",
         "symfony/maker-bundle": "^1.0",
         "symfony/stopwatch": "6.4.*",
-        "symfony/web-profiler-bundle": "6.4.*"
+        "symfony/web-profiler-bundle": "6.4.*",
+        "vincentlanglet/twig-cs-fixer": "^2.7"
     },
     "config": {
         "allow-plugins": {
@@ -100,12 +101,14 @@
             "php bin/console lint:container",
             "php bin/console lint:yaml translations",
             "vendor/bin/phpmd src text ./phpmd.xml",
-            "vendor/bin/phpstan analyse -c phpstan.neon"
+            "vendor/bin/phpstan analyse -c phpstan.neon",
+            "vendor/bin/twig-cs-fixer lint ./templates"
         ],
         "check-todolist": "grep -rn \"TODO\" ./src ./templates ./assets",
         "fix-style": [
             "vendor/bin/php-cs-fixer fix src",
-            "vendor/bin/php-cs-fixer fix tests"
+            "vendor/bin/php-cs-fixer fix tests",
+            "vendor/bin/twig-cs-fixer lint --fix ./templates"
         ]
     },
     "conflict": {

@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Controller\Api;
+namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\CommonTags;
+use App\Controller\ApiControllerInterface;
 use App\Exception\CartesApiException;
 use App\Exception\EntrepotApiException;
 use App\Services\EntrepotApiService;
@@ -16,7 +17,7 @@ use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 #[Route(
-    '/api/datastore/{datastoreId}/annexe',
+    '/api/datastores/{datastoreId}/annexe',
     name: 'cartesgouvfr_api_annexe_',
     options: ['expose' => true],
     condition: 'request.isXmlHttpRequest()'

@@ -29,3 +29,7 @@ yarn-error.log
 ###
 
 /tests/mock
+
+###> vincentlanglet/twig-cs-fixer ###
+/.twig-cs-fixer.cache
+###< vincentlanglet/twig-cs-fixer ###

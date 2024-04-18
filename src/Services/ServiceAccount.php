@@ -2,16 +2,15 @@
 
 namespace App\Services;
 
-use App\Services\EntrepotApiService;
 use App\Exception\EntrepotApiException;
-use Symfony\Component\HttpClient\HttpClient;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Contracts\HttpClient\ResponseInterface;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
-use Symfony\Component\HttpClient\Exception\JsonException;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpClient\Exception\JsonException;
+use Symfony\Component\HttpClient\HttpClient;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Contracts\HttpClient\ResponseInterface;
 
 class ServiceAccount
 {
@@ -22,7 +21,7 @@ class ServiceAccount
     private $me;
 
     /** @var array<mixed> */
-    private $token = null;
+    private $token;
 
     /** @var string */
     private $sandBoxCommunityId;
@@ -30,15 +29,14 @@ class ServiceAccount
     public function __construct(
         private EntrepotApiService $entrepotApiService,
         private ParameterBagInterface $parameters
-    )
-    {      
+    ) {
         // L'id de la community liee au datastore "Bac à sable"
         $this->sandBoxCommunityId = $this->parameters->get('sandbox_community_id');
 
         $this->apiClient = HttpClient::createForBaseUri($this->parameters->get('api_entrepot_url'), [
             'proxy' => $this->parameters->get('http_proxy'),
             'verify_peer' => false,
-            'verify_host' => false,    
+            'verify_host' => false,
         ]);
 
         $this->me = $this->entrepotApiService->user->getMe();
@@ -47,15 +45,15 @@ class ServiceAccount
         $this->token = $this->getAccessToken();
     }
 
-    public function getSandboxCommunity() : array | null
+    public function getSandboxCommunity(): ?array
     {
-        if (! $this->token) {
+        if (!$this->token) {
             return null;
         }
 
         // Id de la community "Bac à sable"
         $sandboxId = $this->parameters->get('sandbox_community_id');
-        if (! $sandboxId) {
+        if (!$sandboxId) {
             return null;
         }
 
@@ -71,48 +69,51 @@ class ServiceAccount
 
             return [
                 'community' => $sandboxCommunity,
-                'datastore' => $sandboxDatastore
+                'datastore' => $sandboxDatastore,
             ];
-        } catch(EntrepotApiException $e) {
+        } catch (EntrepotApiException $e) {
             return null;
         }
     }
 
-    public function getSandboxDatastore() : array
+    public function getSandboxDatastore(): array
     {
         // Id de la community "Bac à sable"
         $sandboxId = $this->parameters->get('sandbox_community_id');
-        if (! $sandboxId) {
+        if (!$sandboxId) {
             throw new EntrepotApiException('sandbox community does not exist', JsonResponse::HTTP_NOT_FOUND);
         }
 
         $options = $this->prepareOptions();
 
         $response = $this->apiClient->request('GET', "communities/$sandboxId", $options);
+
         return $this->handleResponse($response);
     }
 
     /**
-     * Ajout de l'utilisateur courant (logge) a la communaute liee au datastore "Bac à sable"
+     * Ajout de l'utilisateur courant (logge) a la communaute liee au datastore "Bac à sable".
      */
-    public function addCurrentUserToSandbox() : void
+    public function addCurrentUserToSandbox(): void
     {
         if (!$this->token) {
             throw new AccessDeniedException();
         }
-        
+
         $alreadyMember = false;
-        foreach($this->me['communities_member'] as $member) {
+        foreach ($this->me['communities_member'] as $member) {
             if ($this->sandBoxCommunityId == $member['community']['_id']) {
                 $alreadyMember = true;
-                break;    
+                break;
             }
         }
 
-        if ($alreadyMember) return;
+        if ($alreadyMember) {
+            return;
+        }
 
         $options = $this->prepareOptions([
-            'rights' => ['ANNEX', 'BROADCAST', 'PROCESSING', 'UPLOAD'],    
+            'rights' => ['ANNEX', 'BROADCAST', 'PROCESSING', 'UPLOAD'],
         ]);
 
         $response = $this->apiClient->request('PUT', "communities/{$this->sandBoxCommunityId}/users/{$this->me['_id']}", $options);
@@ -122,7 +123,7 @@ class ServiceAccount
     /**
      * Recuperation du Token.
      */
-    private function getAccessToken(): Array | null
+    private function getAccessToken(): ?array
     {
         $uri = $this->parameters->get('iam_url').'/realms/'.$this->parameters->get('iam_realm').'/protocol/openid-connect/';
 
@@ -131,11 +132,11 @@ class ServiceAccount
             'verify_peer' => false,
             'verify_host' => false,
         ]);
-        
+
         $body = [
             'grant_type' => 'client_credentials',
             'client_id' => $this->parameters->get('service_account')['client_id'],
-            'client_secret' => $this->parameters->get('service_account')['client_secret']
+            'client_secret' => $this->parameters->get('service_account')['client_secret'],
         ];
 
         $response = $client->request('POST', 'token', [
@@ -154,14 +155,13 @@ class ServiceAccount
     }
 
     /**
-     * Undocumented function
+     * Undocumented function.
      *
      * @param array<mixed> $body
      * @param array<mixed> $query
      * @param array<mixed> $headers
-     * @return Array
      */
-    private function prepareOptions($body = [], $query = [], $headers = []): Array
+    private function prepareOptions($body = [], $query = [], $headers = []): array
     {
         $defaultHeaders = [
             'Content-Type' => 'application/json',

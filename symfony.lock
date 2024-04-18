@@ -254,6 +254,15 @@
     "twig/extra-bundle": {
         "version": "v3.7.1"
     },
+    "vincentlanglet/twig-cs-fixer": {
+        "version": "2.7",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "main",
+            "version": "0.6",
+            "ref": "e4da12a48e8138479bd24a675321bcfd84950266"
+        }
+    },
     "willdurand/js-translation-bundle": {
         "version": "5.1",
         "recipe": {
