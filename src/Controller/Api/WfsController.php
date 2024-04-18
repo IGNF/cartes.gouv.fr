@@ -170,8 +170,7 @@ class WfsController extends ServiceController implements ApiControllerInterface
 
             $newCswMetadata = $this->getNewCswMetadata($dto, $datastoreId, $datasheetName);
 
-            $newMetadataXml = $metadataHelper->toXml($newCswMetadata);
-            $newMetadataFilePath = $metadataHelper->saveToFile($newMetadataXml);
+            $newMetadataFilePath = $metadataHelper->saveToFile($newCswMetadata);
 
             $apiMetadata = $this->entrepotApiService->metadata->add($datastoreId, $newMetadataFilePath);
             $apiMetadata = $this->entrepotApiService->metadata->addTags($datastoreId, $apiMetadata['_id'], [
@@ -188,9 +187,8 @@ class WfsController extends ServiceController implements ApiControllerInterface
             $oldCswMetadata = $metadataHelper->fromXml($oldMetadataFileXml);
 
             $newCswMetadata = $this->getNewCswMetadata($dto, $datastoreId, $datasheetName);
-            $newMetadataXml = $metadataHelper->toXml($newCswMetadata);
 
-            $newMetadataFilePath = $metadataHelper->saveToFile($newMetadataXml);
+            $newMetadataFilePath = $metadataHelper->saveToFile($newCswMetadata);
 
             // suppression et recréation de métadonnées si changement de file_identifier
             if ($oldCswMetadata->fileIdentifier !== $newCswMetadata->fileIdentifier) {
@@ -203,7 +201,9 @@ class WfsController extends ServiceController implements ApiControllerInterface
             }
             $apiMetadata = $this->entrepotApiService->metadata->addTags($datastoreId, $apiMetadata['_id'], $oldMetadata['tags']);
 
-            $this->entrepotApiService->metadata->publish($datastoreId, $apiMetadata['file_identifier'], $metadataEndpoint['_id']);
+            if (0 === count($apiMetadata['endpoints'])) {
+                $this->entrepotApiService->metadata->publish($datastoreId, $apiMetadata['file_identifier'], $metadataEndpoint['_id']);
+            }
         }
     }
 
@@ -215,7 +215,7 @@ class WfsController extends ServiceController implements ApiControllerInterface
              new CswLanguage($dto->languages[0]['code'], $dto->languages[0]['language'])
              : CswLanguage::default();
 
-        return new CswMetadata($dto->identifier, CswHierarchyLevel::from('' === $dto->resource_genealogy ? 'series' : $dto->resource_genealogy), $language, $dto->charset, $dto->public_name, $dto->description, $dto->creation_date, $dto->category, $dto->email_contact, $dto->organization, $dto->organization_email, $layers);
+        return CswMetadata::createFromParams($dto->identifier, CswHierarchyLevel::from('' === $dto->resource_genealogy ? 'series' : $dto->resource_genealogy), $language, $dto->charset, $dto->public_name, $dto->description, $dto->creation_date, $dto->category, $dto->email_contact, $dto->organization, $dto->organization_email, $layers);
     }
 
     /**

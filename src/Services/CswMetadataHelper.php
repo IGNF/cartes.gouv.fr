@@ -2,8 +2,10 @@
 
 namespace App\Services;
 
-use App\Constants\MetadataFields;
+use App\Entity\CswMetadata\CswHierarchyLevel;
+use App\Entity\CswMetadata\CswLanguage;
 use App\Entity\CswMetadata\CswMetadata;
+use App\Entity\CswMetadata\CswMetadataLayer;
 use App\Exception\AppException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
@@ -30,11 +32,6 @@ class CswMetadataHelper
         return json_decode($metadataJson, true);
     }
 
-    public function toJson(CswMetadata $metadata): string
-    {
-        return $this->serializer->serialize($metadata, 'json');
-    }
-
     /**
      * @param array<mixed> $metadataArray
      */
@@ -43,6 +40,11 @@ class CswMetadataHelper
         $metadataJson = json_encode($metadataArray);
 
         return $this->fromJson($metadataJson);
+    }
+
+    public function toJson(CswMetadata $metadata): string
+    {
+        return $this->serializer->serialize($metadata, 'json');
     }
 
     public function fromJson(string $metadataJson): CswMetadata
@@ -61,117 +63,63 @@ class CswMetadataHelper
 
     public function fromXml(string $metadataXml): CswMetadata
     {
-        $metadataArray = $this->xmlToArray($metadataXml);
-
-        return $this->fromArray($metadataArray);
-    }
-
-    public function xmlToArray(string $metadataXml): array
-    {
         $doc = new \DOMDocument();
         $loaded = $doc->loadXML($metadataXml);
+
+        $xpath = new \DOMXPath($doc);
 
         if (!$loaded) {
             throw new AppException('Load XML failed');
         }
 
-        /** @var \DOMNodeList<\DOMElement> $keywordsNodes */
-        $keywordsNodes = $doc->getElementsByTagName('identificationInfo')[0]
-                                                    ?->getElementsByTagName('MD_DataIdentification')[0]
-                                                    ?->getElementsByTagName('descriptiveKeywords')[0]
-                                                    ?->getElementsByTagName('MD_Keywords')[0]
-                                                    ?->getElementsByTagName('keyword');
+        $cswMetadata = CswMetadata::createEmpty();
 
-        $keywordsList = array_map(fn (\DOMElement $keyword) => $keyword->textContent, iterator_to_array($keywordsNodes));
+        /** @var \DOMNodeList<\DOMElement> $keywordsNodesList */
+        $keywordsNodesList = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:keyword');
+
+        $keywordsList = array_map(fn (\DOMElement $keyword) => $keyword->textContent, iterator_to_array($keywordsNodesList));
 
         /** @var \DOMNodeList<\DOMElement> $layersNodesList */
-        $layersNodesList = $doc->getElementsByTagName('distributionInfo')[0]
-                                                    ?->getElementsByTagName('MD_Distribution')[0]
-                                                    ?->getElementsByTagName('transferOptions')[0]
-                                                    ?->getElementsByTagName('MD_DigitalTransferOptions')[0]
-                                                    ?->getElementsByTagName('onLine');
+        $layersNodesList = $xpath->query('/gmd:MD_Metadata/gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine');
 
         $layersList = array_map(function (\DOMElement $layer) {
-            /** @var ?\DOMElement $onlineEl */
+            /** @var \DOMElement $onlineEl */
             $onlineEl = $layer->getElementsByTagName('CI_OnlineResource')[0];
 
-            return [
-                MetadataFields::LAYER_NAME => $onlineEl?->getElementsByTagName('name')[0]?->getElementsByTagName('CharacterString')[0]?->textContent,
-                MetadataFields::LAYER_ENDPOINT_TYPE => $onlineEl?->getElementsByTagName('protocol')[0]?->getElementsByTagName('CharacterString')[0]?->textContent,
-                MetadataFields::LAYER_ENDPOINT_URL => $onlineEl?->getElementsByTagName('linkage')[0]?->getElementsByTagName('URL')[0]?->textContent,
-                MetadataFields::LAYER_OFFERING_ID => $layer->getAttribute('offeringId'),
-            ];
+            return new CswMetadataLayer(
+                $onlineEl->getElementsByTagName('name')[0]?->getElementsByTagName('CharacterString')[0]?->textContent,
+                $onlineEl->getElementsByTagName('protocol')[0]?->getElementsByTagName('CharacterString')[0]?->textContent,
+                $onlineEl->getElementsByTagName('linkage')[0]?->getElementsByTagName('URL')[0]?->textContent,
+                $layer->getAttribute('offeringId'),
+            );
         }, iterator_to_array($layersNodesList));
 
-        /** @var ?\DOMElement */
-        $languageNode = $doc->getElementsByTagName('language')[0]?->getElementsByTagName('LanguageCode')[0];
-        $language = [
-            MetadataFields::LANGUAGE_CODE => $languageNode?->getAttribute('codeListValue'),
-            MetadataFields::LANGUAGE_TEXT => $languageNode->textContent,
-        ];
+        $cswMetadata->fileIdentifier = $xpath->query('/gmd:MD_Metadata/gmd:fileIdentifier/gco:CharacterString')->item(0)->textContent;
+        $cswMetadata->hierarchyLevel = CswHierarchyLevel::from(trim($xpath->query('/gmd:MD_Metadata/gmd:hierarchyLevel/gmd:MD_ScopeCode')->item(0)->textContent));
 
-        $metadataArray = [
-            MetadataFields::FILE_IDENTIFIER => $doc->getElementsByTagName('fileIdentifier')[0]
-                                                    ?->getElementsByTagName('CharacterString')[0]
-                                                    ?->textContent,
-            MetadataFields::HIERARCHY_LEVEL => $doc->getElementsByTagName('hierarchyLevel')[0]
-                                                    ?->getElementsByTagName('MD_ScopeCode')[0]
-                                                    ?->textContent,
-            MetadataFields::LANGUAGE => $language,
-            MetadataFields::CHARSET => $doc->getElementsByTagName('characterSet')[0]
-                                                    ?->getElementsByTagName('MD_CharacterSetCode')[0]
-                                                    ?->getAttribute('codeListValue'),
-            MetadataFields::TITLE => $doc->getElementsByTagName('identificationInfo')[0]
-                                                    ?->getElementsByTagName('MD_DataIdentification')[0]
-                                                    ?->getElementsByTagName('citation')[0]
-                                                    ?->getElementsByTagName('CI_Citation')[0]
-                                                    ?->getElementsByTagName('title')[0]
-                                                    ?->getElementsByTagName('CharacterString')[0]
-                                                    ?->textContent,
-            MetadataFields::ABSTRACT => $doc->getElementsByTagName('identificationInfo')[0]
-                                                    ?->getElementsByTagName('MD_DataIdentification')[0]
-                                                    ?->getElementsByTagName('abstract')[0]
-                                                    ?->getElementsByTagName('CharacterString')[0]
-                                                    ?->textContent,
-            MetadataFields::CREATION_DATE => $doc->getElementsByTagName('dateStamp')[0]
-                                                    ?->getElementsByTagName('Date')[0]
-                                                    ?->textContent,
-            MetadataFields::THEMATIC_CATEGORIES => $keywordsList,
-            MetadataFields::CONTACT_EMAIL => $doc->getElementsByTagName('identificationInfo')[0]
-                                                    ?->getElementsByTagName('MD_DataIdentification')[0]
-                                                    ?->getElementsByTagName('pointOfContact')[0]
-                                                    ?->getElementsByTagName('CI_ResponsibleParty')[0]
-                                                    ?->getElementsByTagName('contactInfo')[0]
-                                                    ?->getElementsByTagName('CI_Contact')[0]
-                                                    ?->getElementsByTagName('address')[0]
-                                                    ?->getElementsByTagName('CI_Address')[0]
-                                                    ?->getElementsByTagName('electronicMailAddress')[0]
-                                                    ?->getElementsByTagName('CharacterString')[0]
-                                                    ?->textContent,
-            MetadataFields::ORGANISATION_NAME => $doc->getElementsByTagName('contact')[0]
-                                                    ?->getElementsByTagName('CI_ResponsibleParty')[0]
-                                                    ?->getElementsByTagName('organisationName')[0]
-                                                    ?->getElementsByTagName('CharacterString')[0]
-                                                    ?->textContent,
-            MetadataFields::ORGANISATION_EMAIL => $doc->getElementsByTagName('contact')[0]
-                                                    ?->getElementsByTagName('CI_ResponsibleParty')[0]
-                                                    ?->getElementsByTagName('contactInfo')[0]
-                                                    ?->getElementsByTagName('CI_Contact')[0]
-                                                    ?->getElementsByTagName('address')[0]
-                                                    ?->getElementsByTagName('CI_Address')[0]
-                                                    ?->getElementsByTagName('electronicMailAddress')[0]
-                                                    ?->getElementsByTagName('CharacterString')[0]
-                                                    ?->textContent,
-            MetadataFields::LAYERS => $layersList,
-        ];
+        $cswMetadata->language = new CswLanguage(
+            $xpath->query('/gmd:MD_Metadata/gmd:language/gmd:LanguageCode/@codeListValue')->item(0)->textContent,
+            $xpath->query('/gmd:MD_Metadata/gmd:language/gmd:LanguageCode')->item(0)->textContent
+        );
 
-        $metadataArray = $this->trimArrayValues($metadataArray);
+        $cswMetadata->charset = $xpath->query('/gmd:MD_Metadata/gmd:characterSet/gmd:MD_CharacterSetCode')->item(0)->textContent;
+        $cswMetadata->title = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:title/gco:CharacterString')->item(0)->textContent;
+        $cswMetadata->abstract = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:abstract/gco:CharacterString')->item(0)->textContent;
+        $cswMetadata->creationDate = $xpath->query('/gmd:MD_Metadata/gmd:dateStamp/gco:Date')->item(0)->textContent;
+        $cswMetadata->thematicCategories = $keywordsList;
+        $cswMetadata->contactEmail = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:pointOfContact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress/gco:CharacterString')->item(0)->textContent;
+        $cswMetadata->organisationName = $xpath->query('/gmd:MD_Metadata/gmd:contact/gmd:CI_ResponsibleParty/gmd:organisationName/gco:CharacterString')->item(0)->textContent;
+        $cswMetadata->organisationEmail = $xpath->query('/gmd:MD_Metadata/gmd:contact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress/gco:CharacterString')->item(0)->textContent;
 
-        return $metadataArray;
+        $cswMetadata->layers = $layersList;
+
+        return $cswMetadata;
     }
 
-    public function saveToFile(string $content): string
+    public function saveToFile(CswMetadata $cswMetadata): string
     {
+        $content = $this->toXml($cswMetadata);
+
         $directory = $this->params->get('metadata_path');
         $uuid = Uuid::v4();
         $filePath = $directory.DIRECTORY_SEPARATOR."{$uuid}.xml";
@@ -179,13 +127,5 @@ class CswMetadataHelper
         $this->fs->dumpFile($filePath, $content);
 
         return $filePath;
-    }
-
-    /**
-     * @param array<mixed> $array
-     */
-    private function trimArrayValues(array $array): array
-    {
-        return array_map(fn ($value) => is_array($value) ? $this->trimArrayValues($value) : trim($value), $array);
     }
 }

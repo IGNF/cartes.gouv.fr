@@ -8,6 +8,8 @@ class CswLanguage
         public string $code,
         public string $language,
     ) {
+        $this->code = trim($code);
+        $this->language = trim($language);
     }
 
     public static function default(): self

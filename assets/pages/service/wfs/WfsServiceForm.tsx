@@ -256,20 +256,20 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
         defValues = {
             ...defValues,
             projection: projUrl,
-            languages: metadataQuery?.data?.content?.language ? [metadataQuery?.data?.content?.language] : [{ language: "français", code: "fra" }],
-            creation_date: metadataQuery?.data?.content?.creation_date,
-            resource_genealogy: metadataQuery?.data?.content?.hierarchy_level,
-            email_contact: metadataQuery?.data?.content?.contact_email,
-            organization: metadataQuery?.data?.content?.organisation_name,
-            organization_email: metadataQuery?.data?.content?.organisation_email,
-            category: metadataQuery?.data?.content?.thematic_categories,
-            description: metadataQuery?.data?.content?.abstract,
-            identifier: metadataQuery?.data?.content?.file_identifier,
-            charset: metadataQuery?.data?.content?.charset ?? "utf8",
+            languages: metadataQuery?.data?.csw_metadata?.language ? [metadataQuery?.data?.csw_metadata?.language] : [{ language: "français", code: "fra" }],
+            creation_date: metadataQuery?.data?.csw_metadata?.creation_date,
+            resource_genealogy: metadataQuery?.data?.csw_metadata?.hierarchy_level,
+            email_contact: metadataQuery?.data?.csw_metadata?.contact_email,
+            organization: metadataQuery?.data?.csw_metadata?.organisation_name,
+            organization_email: metadataQuery?.data?.csw_metadata?.organisation_email,
+            category: metadataQuery?.data?.csw_metadata?.thematic_categories,
+            description: metadataQuery?.data?.csw_metadata?.abstract,
+            identifier: metadataQuery?.data?.csw_metadata?.file_identifier,
+            charset: metadataQuery?.data?.csw_metadata?.charset ?? "utf8",
         };
 
         return defValues;
-    }, [editMode, vectorDbQuery.data, offeringQuery.data, metadataQuery?.data?.content]);
+    }, [editMode, vectorDbQuery.data, offeringQuery.data, metadataQuery?.data?.csw_metadata]);
 
     const tables: StoredDataRelation[] = useMemo(() => {
         if (!vectorDbQuery.data?.type_infos) return [];

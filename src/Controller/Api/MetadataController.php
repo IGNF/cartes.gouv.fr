@@ -3,7 +3,6 @@
 namespace App\Controller\Api;
 
 use App\Constants\EntrepotApi\CommonTags;
-use App\Constants\MetadataFields;
 use App\Exception\CartesApiException;
 use App\Exception\EntrepotApiException;
 use App\Services\CswMetadataHelper;
@@ -14,7 +13,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
-use Symfony\Component\Uid\Uuid;
 
 #[Route(
     '/api/datastores/{datastoreId}/metadata',
@@ -46,40 +44,32 @@ class MetadataController extends AbstractController implements ApiControllerInte
         }
     }
 
-    // FIXME revoir convertArrayToXml
-    // #[Route('/', name: 'add', methods: ['POST'])]
-    // public function add(string $datastoreId, Request $request): JsonResponse
-    // {
-    //     try {
-    //         $metadataArgs = json_decode($request->getContent(), true);
-    //         $datasheetName = $request->query->get(CommonTags::DATASHEET_NAME, null);
+    #[Route('/', name: 'add', methods: ['POST'])]
+    public function add(string $datastoreId, Request $request): JsonResponse
+    {
+        try {
+            $metadataArray = json_decode($request->getContent(), true);
+            $datasheetName = $request->query->get(CommonTags::DATASHEET_NAME, null);
 
-    //         $metadataArgs = [
-    //             ...$metadataArgs,
-    //             MetadataFields::HIERARCHY_LEVEL => $metadataArgs[MetadataFields::HIERARCHY_LEVEL] ?? 'series',
-    //             MetadataFields::LANGUAGE => $metadataArgs[MetadataFields::LANGUAGE] ?? 'fre',
-    //             MetadataFields::CHARSET => $metadataArgs[MetadataFields::CHARSET] ?? 'utf8',
-    //             MetadataFields::FILE_IDENTIFIER => $metadataArgs[MetadataFields::FILE_IDENTIFIER] ?? Uuid::v4(),
-    //         ];
+            $cswMetadata = $this->metadataHelper->fromArray($metadataArray);
+            $filePath = $this->metadataHelper->saveToFile($cswMetadata);
 
-    //         $xmlContent = $this->metadataHelper->convertArrayToXml($metadataArgs);
-    //         $filePath = $this->metadataHelper->saveToFile($xmlContent);
+            $metadata = $this->entrepotApiService->metadata->add($datastoreId, $filePath);
+            $metadata['csw_metadata'] = $cswMetadata;
 
-    //         $metadata = $this->entrepotApiService->metadata->add($datastoreId, $filePath);
+            if (null !== $datasheetName) {
+                $metadata = $this->entrepotApiService->metadata->addTags($datastoreId, $metadata['_id'], [
+                    CommonTags::DATASHEET_NAME => $datasheetName,
+                ]);
+            }
 
-    //         if (null !== $datasheetName) {
-    //             $metadata = $this->entrepotApiService->metadata->addTags($datastoreId, $metadata['_id'], [
-    //                 CommonTags::DATASHEET_NAME => $datasheetName,
-    //             ]);
-    //         }
-
-    //         return $this->json($metadata);
-    //     } catch (EntrepotApiException $ex) {
-    //         throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-    //     } catch (\Exception $ex) {
-    //         throw new CartesApiException($ex->getMessage(), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
-    //     }
-    // }
+            return $this->json($metadata);
+        } catch (EntrepotApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        } catch (\Exception $ex) {
+            throw new CartesApiException($ex->getMessage(), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 
     #[Route('/{metadataId}', name: 'get', methods: ['GET'], requirements: ['metadataId' => Requirement::UUID_V4])]
     public function get(string $datastoreId, string $metadataId): JsonResponse
@@ -88,7 +78,7 @@ class MetadataController extends AbstractController implements ApiControllerInte
             $metadata = $this->entrepotApiService->metadata->get($datastoreId, $metadataId);
             $fileContent = $this->entrepotApiService->metadata->downloadFile($datastoreId, $metadataId);
 
-            $metadata['content'] = $this->metadataHelper->xmlToArray($fileContent);
+            $metadata['csw_metadata'] = $this->metadataHelper->fromXml($fileContent);
 
             return $this->json($metadata);
         } catch (EntrepotApiException $ex) {
@@ -115,7 +105,7 @@ class MetadataController extends AbstractController implements ApiControllerInte
             $metadata = $metadataList[0];
             $fileContent = $this->entrepotApiService->metadata->downloadFile($datastoreId, $metadata['_id']);
 
-            $metadata['content'] = $this->metadataHelper->xmlToArray($fileContent);
+            $metadata['csw_metadata'] = $this->metadataHelper->fromXml($fileContent);
 
             return $this->json($metadata);
         } catch (EntrepotApiException $ex) {
@@ -127,17 +117,17 @@ class MetadataController extends AbstractController implements ApiControllerInte
     public function getFileContent(string $datastoreId, string $metadataId, Request $request): Response
     {
         try {
-            $fileContent = $this->entrepotApiService->metadata->downloadFile($datastoreId, $metadataId);
+            $xmlFileContent = $this->entrepotApiService->metadata->downloadFile($datastoreId, $metadataId);
 
             $format = $request->query->get('format', 'xml');
 
             if ('json' === $format) {
-                $contentJson = $this->metadataHelper->xmlToArray($fileContent);
+                $cswMetadata = $this->metadataHelper->fromXml($xmlFileContent);
 
-                return $this->json($contentJson);
+                return $this->json($cswMetadata);
             }
 
-            return new Response($fileContent, Response::HTTP_OK, [
+            return new Response($xmlFileContent, Response::HTTP_OK, [
                 'Content-Type' => 'application/xml',
             ]);
         } catch (EntrepotApiException $ex) {
