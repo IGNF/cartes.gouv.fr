@@ -22,6 +22,7 @@ export type ComponentKey =
     | typeof import("../pages/users/Me").i18n
     | typeof import("../pages/communities/AddMember").i18n
     | typeof import("../pages/communities/CommunityMembers").i18n
+    | typeof import("../pages/dashboard/DashboardPro").i18n
     | typeof import("../pages/users/MyAccessKeys").i18n
     | typeof import("../pages/users/keys/UserKeysListTab").i18n
     | typeof import("../pages/users/keys/UserKeyTr").i18n

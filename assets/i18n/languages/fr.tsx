@@ -4,6 +4,7 @@ import { TMSStyleFilesManagerFrTranslations } from "../../modules/Style/TMSStyle
 import { AddMemberFrTranslations } from "../../pages/communities/AddMember";
 import { CommunityMembersFrTranslations } from "../../pages/communities/CommunityMembers";
 import { contactFrTranslations } from "../../pages/contact/Contact";
+import { DashboardProFrTranslations } from "../../pages/dashboard/DashboardPro";
 import { PyramidListItemFrTranslations } from "../../pages/datasheet/DatasheetView/DatasetListTab/PyramidList/PyramidListItem";
 import { VectorDbListItemFrTranslations } from "../../pages/datasheet/DatasheetView/DatasetListTab/VectorDbList/VectorDbListItem";
 import { DatasheetViewFrTranslations } from "../../pages/datasheet/DatasheetView/DatasheetView";
@@ -35,6 +36,7 @@ export const translations: Translations<"fr"> = {
     Me: MeFrTranslations,
     AddMember: AddMemberFrTranslations,
     CommunityMembers: CommunityMembersFrTranslations,
+    DashboardPro: DashboardProFrTranslations,
     MyAccessKeys: MyAccessKeysFrTranslations,
     UserKeysListTab: UserKeysListTabFrTranslations,
     UserKey: UserKeyFrTranslations,

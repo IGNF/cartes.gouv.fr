@@ -4,6 +4,7 @@ import { TMSStyleFilesManagerEnTranslations } from "../../modules/Style/TMSStyle
 import { AddMemberEnTranslations } from "../../pages/communities/AddMember";
 import { CommunityMembersEnTranslations } from "../../pages/communities/CommunityMembers";
 import { contactEnTranslations } from "../../pages/contact/Contact";
+import { DashboardProEnTranslations } from "../../pages/dashboard/DashboardPro";
 import { PyramidListItemFrTranslations } from "../../pages/datasheet/DatasheetView/DatasetListTab/PyramidList/PyramidListItem";
 import { VectorDbListItemEnTranslations } from "../../pages/datasheet/DatasheetView/DatasetListTab/VectorDbList/VectorDbListItem";
 import { DatasheetViewEnTranslations } from "../../pages/datasheet/DatasheetView/DatasheetView";
@@ -35,6 +36,7 @@ export const translations: Translations<"en"> = {
     Me: MeEnTranslations,
     AddMember: AddMemberEnTranslations,
     CommunityMembers: CommunityMembersEnTranslations,
+    DashboardPro: DashboardProEnTranslations,
     MyAccessKeys: MyAccessKeysEnTranslations,
     UserKeysListTab: UserKeysListTabEnTranslations,
     UserKey: UserKeyEnTranslations,

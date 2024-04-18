@@ -11,11 +11,19 @@ import { useAuthStore } from "../../stores/AuthStore";
 import { useMutation } from "@tanstack/react-query";
 import { CartesApiException } from "../../modules/jsonFetch";
 import api from "../../api";
+import Button from "@codegouvfr/react-dsfr/Button";
+import { useApiEspaceCoStore } from "../../stores/ApiEspaceCoStore";
+import { declareComponentKeys } from "i18nifty";
+import { Translations, useTranslation } from "../../i18n/i18n";
 
 const DashboardPro = () => {
     const datastoreListQuery = useDatastoreList();
     const navItems = datastoreNavItems();
+
     const { user } = useAuthStore();
+    const isApiEspaceCoDefined = useApiEspaceCoStore((state) => state.isUrlDefined);
+
+    const { t } = useTranslation("DashboardPro");
 
     const { mutate } = useMutation<undefined, CartesApiException>({
         mutationFn: () => {
@@ -28,7 +36,7 @@ const DashboardPro = () => {
     };
 
     return (
-        <AppLayout navItems={navItems} documentTitle="Tableau de bord professionnel">
+        <AppLayout navItems={navItems} documentTitle={t("document_title")}>
             {datastoreListQuery.isLoading ? (
                 <LoadingText />
             ) : (
@@ -51,6 +59,11 @@ const DashboardPro = () => {
                             <Tile linkProps={routes.join_community().link} grey={true} title={Translator.trans("communities_list.title")} />
                         </div>
                     </div>
+                    {isApiEspaceCoDefined() && (
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--left", "fr-mt-4w")}>
+                            <Button /*linkProps={routes.home().link*}*/>{t("espaceco_frontoffice_list")}</Button>
+                        </div>
+                    )}
                 </>
             )}
         </AppLayout>
@@ -58,3 +71,15 @@ const DashboardPro = () => {
 };
 
 export default DashboardPro;
+
+export const { i18n } = declareComponentKeys<"document_title" | "espaceco_frontoffice_list">()("DashboardPro");
+
+export const DashboardProFrTranslations: Translations<"fr">["DashboardPro"] = {
+    document_title: "Tableau de bord professionnel",
+    espaceco_frontoffice_list: "Liste des guichets de l'espace collaboratif",
+};
+
+export const DashboardProEnTranslations: Translations<"fr">["DashboardPro"] = {
+    document_title: "Professional dashboard",
+    espaceco_frontoffice_list: "List of collaborative space front offices",
+};
