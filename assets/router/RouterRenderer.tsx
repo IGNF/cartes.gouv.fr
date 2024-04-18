@@ -5,7 +5,7 @@ import LoadingText from "../components/Utils/LoadingText";
 import SymfonyRouting from "../modules/Routing";
 import Home from "../pages/Home";
 import RedirectToLogin from "../pages/RedirectToLogin";
-import EditPermissionForm from "../pages/datastore/ManagePermissions/EditPermissionForm";
+import EditPermissionForm from "../entrepot/pages/datastore/ManagePermissions/EditPermissionForm";
 import PageNotFound from "../pages/error/PageNotFound";
 import { useAuthStore } from "../stores/AuthStore";
 import { knownRoutes, publicRoutes, useRoute } from "./router";
@@ -22,35 +22,35 @@ const Accessibility = lazy(() => import("../pages/footer/Accessibility"));
 const LegalNotice = lazy(() => import("../pages/footer/LegalNotice"));
 const PersonalData = lazy(() => import("../pages/footer/PersonalData"));
 
-const Me = lazy(() => import("../pages/users/Me"));
-const MyAccessKeys = lazy(() => import("../pages/users/MyAccessKeys"));
-const UserKeyForm = lazy(() => import("../pages/users/keys/UserKeyForm"));
+const Me = lazy(() => import("../entrepot/pages/users/Me"));
+const MyAccessKeys = lazy(() => import("../entrepot/pages/users/MyAccessKeys"));
+const UserKeyForm = lazy(() => import("../entrepot/pages/users/keys/UserKeyForm"));
 
-const DatastoreManageStorage = lazy(() => import("../pages/datastore/ManageStorage/DatastoreManageStorage"));
-const DatastoreManagePermissions = lazy(() => import("../pages/datastore/ManagePermissions/DatastoreManagePermissions"));
-const AddPermissionForm = lazy(() => import("../pages/datastore/ManagePermissions/AddPermissionForm"));
+const DatastoreManageStorage = lazy(() => import("../entrepot/pages/datastore/ManageStorage/DatastoreManageStorage"));
+const DatastoreManagePermissions = lazy(() => import("../entrepot/pages/datastore/ManagePermissions/DatastoreManagePermissions"));
+const AddPermissionForm = lazy(() => import("../entrepot/pages/datastore/ManagePermissions/AddPermissionForm"));
 
-const DashboardPro = lazy(() => import("../pages/dashboard/DashboardPro"));
-const DatasheetList = lazy(() => import("../pages/datasheet/DatasheetList/DatasheetList"));
+const DashboardPro = lazy(() => import("../entrepot/pages/dashboard/DashboardPro"));
+const DatasheetList = lazy(() => import("../entrepot/pages/datasheet/DatasheetList/DatasheetList"));
 
-const DatasheetUploadForm = lazy(() => import("../pages/datasheet/DatasheetNew/DatasheetUploadForm"));
-const DatasheetUploadIntegrationPage = lazy(() => import("../pages/datasheet/DatasheetNew/DatasheetUploadIntegration/DatasheetUploadIntegrationPage"));
-const DatasheetView = lazy(() => import("../pages/datasheet/DatasheetView/DatasheetView"));
+const DatasheetUploadForm = lazy(() => import("../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadForm"));
+const DatasheetUploadIntegrationPage = lazy(() => import("../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadIntegration/DatasheetUploadIntegrationPage"));
+const DatasheetView = lazy(() => import("../entrepot/pages/datasheet/DatasheetView/DatasheetView"));
 
-const StoredDataReport = lazy(() => import("../pages/stored_data/StoredDataReport/StoredDataReport"));
+const StoredDataReport = lazy(() => import("../entrepot/pages/stored_data/StoredDataReport/StoredDataReport"));
 
-const DatastoreCreationForm = lazy(() => import("../pages/contact/datastore/DatastoreCreationForm"));
-const Confirm = lazy(() => import("../pages/contact/datastore/Confirmation"));
+const DatastoreCreationForm = lazy(() => import("../entrepot/pages/datastore/DatastoreCreationForm"));
+const Confirm = lazy(() => import("../entrepot/pages/datastore/Confirmation"));
 
-const CommunityMembers = lazy(() => import("../pages/communities/CommunityMembers"));
-const CommunityList = lazy(() => import("../pages/communities/CommunityList"));
+const CommunityMembers = lazy(() => import("../entrepot/pages/communities/CommunityMembers"));
+const CommunityList = lazy(() => import("../entrepot/pages/communities/CommunityList"));
 
-const WfsServiceForm = lazy(() => import("../pages/service/wfs/WfsServiceForm"));
-const WmsVectorServiceForm = lazy(() => import("../pages/service/wms-vector/WmsVectorServiceForm"));
-const PyramidVectorGenerateForm = lazy(() => import("../pages/service/tms/PyramidVectorGenerateForm"));
-const PyramidVectorTmsServiceForm = lazy(() => import("../pages/service/tms/PyramidVectorTmsServiceForm"));
+const WfsServiceForm = lazy(() => import("../entrepot/pages/service/wfs/WfsServiceForm"));
+const WmsVectorServiceForm = lazy(() => import("../entrepot/pages/service/wms-vector/WmsVectorServiceForm"));
+const PyramidVectorGenerateForm = lazy(() => import("../entrepot/pages/service/tms/PyramidVectorGenerateForm"));
+const PyramidVectorTmsServiceForm = lazy(() => import("../entrepot/pages/service/tms/PyramidVectorTmsServiceForm"));
 
-const ServiceView = lazy(() => import("../pages/service/view/ServiceView"));
+const ServiceView = lazy(() => import("../entrepot/pages/service/view/ServiceView"));
 
 const RouterRenderer: FC = () => {
     const route = useRoute();

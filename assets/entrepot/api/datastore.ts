@@ -1,0 +1,80 @@
+import SymfonyRouting from "../../modules/Routing";
+
+import { jsonFetch } from "../../modules/jsonFetch";
+import { type Datastore, type DatastoreEndpoint } from "../../types/app";
+import { DatastorePermissionResponseDto } from "../../types/entrepot";
+
+const get = (datastoreId: string, otherOptions: RequestInit = {}) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_datastore_get", { datastoreId });
+    return jsonFetch<Datastore>(url, {
+        ...otherOptions,
+    });
+};
+
+const getEndpoints = (datastoreId: string, query: { type?: string; open?: boolean }, otherOptions: RequestInit = {}) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_datastore_get_endpoints", { datastoreId, ...query });
+    return jsonFetch<DatastoreEndpoint[]>(url, {
+        ...otherOptions,
+    });
+};
+
+const getPermission = (datastoreId: string, permissionId: string, otherOptions: RequestInit = {}) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_datastore_get_permission", { datastoreId, permissionId });
+    return jsonFetch<DatastorePermissionResponseDto>(url, {
+        ...otherOptions,
+    });
+};
+
+const getPermissions = (datastoreId: string, otherOptions: RequestInit = {}) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_datastore_get_permissions", { datastoreId });
+    return jsonFetch<DatastorePermissionResponseDto[]>(url, {
+        ...otherOptions,
+    });
+};
+
+const addPermission = (datastoreId: string, formData: object) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_datastore_add_permission", { datastoreId: datastoreId });
+    return jsonFetch<DatastorePermissionResponseDto[]>(
+        url,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+            },
+        },
+        formData
+    );
+};
+
+const updatePermission = (datastoreId: string, permissionId: string, formData: object) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_datastore_update_permission", { datastoreId: datastoreId, permissionId: permissionId });
+    return jsonFetch<DatastorePermissionResponseDto>(
+        url,
+        {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+            },
+        },
+        formData
+    );
+};
+
+const removePermission = (datastoreId: string, permissionId: string) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_datastore_remove_permission", { datastoreId: datastoreId, permissionId: permissionId });
+    return jsonFetch<null>(url, { method: "DELETE" });
+};
+
+const datastore = {
+    get,
+    getEndpoints,
+    getPermission,
+    getPermissions,
+    addPermission,
+    updatePermission,
+    removePermission,
+};
+
+export default datastore;
