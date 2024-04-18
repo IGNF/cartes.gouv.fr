@@ -4,7 +4,7 @@
     "minimum-stability": "stable",
     "prefer-stable": true,
     "require": {
-        "php": "^7.4||^8.0",
+        "php": "^7.4||^8.2",
         "ext-ctype": "*",
         "ext-iconv": "*",
         "cweagans/composer-patches": "^1.7",
