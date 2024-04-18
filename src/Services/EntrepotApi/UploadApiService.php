@@ -7,7 +7,7 @@ use App\Constants\EntrepotApi\UploadTags;
 use App\Exception\AppException;
 use App\Exception\EntrepotApiException;
 
-class UploadApiService extends AbstractEntrepotApiService
+class UploadApiService extends BaseEntrepotApiService
 {
     /**
      * @param array<mixed> $query

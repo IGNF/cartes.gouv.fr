@@ -2,7 +2,7 @@
 
 namespace App\Services\EntrepotApi;
 
-class StaticApi extends AbstractEntrepotApiService
+class StaticApi extends BaseEntrepotApiService
 {
     /**
      * @param array<mixed> $query

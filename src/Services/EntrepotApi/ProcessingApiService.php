@@ -2,7 +2,7 @@
 
 namespace App\Services\EntrepotApi;
 
-class ProcessingApiService extends AbstractEntrepotApiService
+class ProcessingApiService extends BaseEntrepotApiService
 {
     /**
      * @param array<mixed> $query

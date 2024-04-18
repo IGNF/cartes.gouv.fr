@@ -5,7 +5,7 @@ namespace App\Services\EntrepotApi;
 use App\Exception\EntrepotApiException;
 use Symfony\Component\HttpFoundation\Response;
 
-class DatastoreApiService extends AbstractEntrepotApiService
+class DatastoreApiService extends BaseEntrepotApiService
 {
     public function get(string $datastoreId): array
     {

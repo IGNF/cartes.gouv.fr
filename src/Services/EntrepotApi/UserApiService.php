@@ -4,7 +4,7 @@ namespace App\Services\EntrepotApi;
 
 use App\Exception\EntrepotApiException;
 
-class UserApiService extends AbstractEntrepotApiService
+class UserApiService extends BaseEntrepotApiService
 {
     public function getMe(): array
     {

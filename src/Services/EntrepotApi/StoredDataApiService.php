@@ -4,7 +4,7 @@ namespace App\Services\EntrepotApi;
 
 use App\Constants\EntrepotApi\StoredDataTypes;
 
-class StoredDataApiService extends AbstractEntrepotApiService
+class StoredDataApiService extends BaseEntrepotApiService
 {
     /**
      * @param array<mixed> $query

@@ -2,7 +2,7 @@
 
 namespace App\Services\EntrepotApi;
 
-class CatalogsApiService extends AbstractEntrepotApiService
+class CatalogsApiService extends BaseEntrepotApiService
 {
     public function getAllPublicCommunities(): mixed
     {

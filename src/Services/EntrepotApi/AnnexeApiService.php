@@ -2,7 +2,7 @@
 
 namespace App\Services\EntrepotApi;
 
-class AnnexeApiService extends AbstractEntrepotApiService
+class AnnexeApiService extends BaseEntrepotApiService
 {
     /**
      * @param array<string> $labels

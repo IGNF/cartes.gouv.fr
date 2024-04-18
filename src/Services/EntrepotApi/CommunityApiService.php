@@ -2,7 +2,7 @@
 
 namespace App\Services\EntrepotApi;
 
-class CommunityApiService extends AbstractEntrepotApiService
+class CommunityApiService extends BaseEntrepotApiService
 {
     public function get(string $communityId): array
     {

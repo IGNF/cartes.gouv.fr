@@ -2,26 +2,20 @@
 
 namespace App\Services\EntrepotApi;
 
-use App\Exception\EntrepotApiException;
 use App\Security\KeycloakToken;
-use App\Services\EntrepotApiFakeService;
-use App\Services\EntrepotApiService;
 use League\OAuth2\Client\Token\AccessToken;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\HttpClient\Exception\JsonException;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Mime\Part\DataPart;
 use Symfony\Component\Mime\Part\Multipart\FormDataPart;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
-abstract class AbstractEntrepotApiService
+abstract class AbstractApiService
 {
-    protected EntrepotApiService $entrepotApiService;
     private HttpClientInterface $apiClient;
 
     public function __construct(
@@ -29,31 +23,24 @@ abstract class AbstractEntrepotApiService
         protected ParameterBagInterface $parameters,
         protected Filesystem $filesystem,
         private RequestStack $requestStack,
-        private EntrepotApiFakeService $entrepotApiFakeService,
-        private LoggerInterface $logger
+        private LoggerInterface $logger,
+        string $api,
     ) {
         $this->apiClient = $httpClient->withOptions([
-            'base_uri' => $parameters->get('api_entrepot_url'),
+            'base_uri' => $parameters->get($api),
             'proxy' => $parameters->get('http_proxy'),
             'verify_peer' => false,
             'verify_host' => false,
         ]);
     }
 
-    public function setEntrepotApiService(EntrepotApiService $entrepotApiService): self
-    {
-        $this->entrepotApiService = $entrepotApiService;
-
-        return $this;
-    }
-
     /**
      * @param array<mixed> $formFields correspond à "Request Body" dans le swagger
      * @param array<mixed> $query      correspond aux paramètes "Query" dans le swagger
      */
-    protected function sendFile(string $method, string $url, string $filepath, array $formFields = [], array $query = []): array
+    protected function sendFile(string $method, string $url, string $filepath, array $formFields = [], array $query = [], string $fileFieldName = 'file'): array
     {
-        $formFields['file'] = DataPart::fromPath($filepath); // ajout du fichier dans $formFields
+        $formFields[$fileFieldName] = DataPart::fromPath($filepath); // ajout du fichier dans $formFields
         $formData = new FormDataPart($formFields);
 
         $body = $formData->bodyToIterable();
@@ -115,23 +102,6 @@ abstract class AbstractEntrepotApiService
      */
     protected function request(string $method, string $url, iterable $body = [], array $query = [], array $headers = [], bool $fileUpload = false, bool $expectJson = true, bool $includeHeaders = false): mixed
     {
-        // Si mode test activé
-        if ('test' === $this->parameters->get('app_env')) {
-            $responseContent = $this->entrepotApiFakeService->fakeRequest($method, $url, $query);
-
-            if ($includeHeaders) {
-                return [
-                    'content' => $responseContent,
-                    'headers' => [
-                        'content-range' => ['1-9/9'],
-                    ],
-                ];
-            }
-
-            return $responseContent;
-        }
-
-        // Si mode test désactivé
         $options = $this->prepareOptions($body, $query, $headers, $fileUpload);
 
         $response = $this->apiClient->request($method, $url, $options);
@@ -142,11 +112,6 @@ abstract class AbstractEntrepotApiService
         $this->logger->debug(self::class, [$method, $url, $body, $query, $response->getContent(false), $finalUrl]);
 
         $responseContent = $this->handleResponse($response, $expectJson);
-
-        // stocker toutes les réponses en local si variable d'environnement API_HARVEST_MODE=1 et APP_ENV != test
-        if ('test' !== $this->parameters->get('app_env') && '1' === $this->parameters->get('api_harvest_mode')) {
-            $this->entrepotApiFakeService->storeResponse($responseContent, $method, $url, $query);
-        }
 
         if ($includeHeaders) {
             return [
@@ -161,34 +126,7 @@ abstract class AbstractEntrepotApiService
     /**
      * @SuppressWarnings(ElseExpression)
      */
-    protected function handleResponse(ResponseInterface $response, bool $expectJson): mixed
-    {
-        $content = null;
-        $statusCode = $response->getStatusCode();
-
-        if ($statusCode >= 200 && $statusCode < 300) { // requête réussie
-            if (Response::HTTP_NO_CONTENT === $statusCode || '' === $response->getContent()) {
-                $content = [];
-            } else {
-                // si on attend une réponse au format JSON
-                $content = $expectJson ? $response->toArray() : $response->getContent();
-            }
-
-            return $content;
-        } else {
-            // TODO : error_description est un tableau, pas string
-            $errorMsg = 'Entrepot API Error';
-            try {
-                $errorResponse = $response->toArray(false);
-                if (array_key_exists('error_description', $errorResponse)) {
-                    $errorMsg = is_array($errorResponse['error_description']) ? implode(', ', $errorResponse['error_description']) : $errorResponse['error_description'];
-                }
-            } catch (JsonException $ex) {
-                $errorResponse = $response->getContent(false);
-            }
-            throw new EntrepotApiException($errorMsg, $statusCode, $errorResponse);
-        }
-    }
+    abstract protected function handleResponse(ResponseInterface $response, bool $expectJson): mixed;
 
     /**
      * @param iterable<mixed> $body
