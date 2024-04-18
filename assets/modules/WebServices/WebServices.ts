@@ -1,8 +1,8 @@
 import WFSService from "./WFSService";
 import WMSVectorService from "./WMSVectorService";
 import TMSService from "./TMSService";
-import { OfferingDetailResponseDtoTypeEnum } from "../../types/entrepot";
-import { type Service } from "../../types/app";
+import { OfferingDetailResponseDtoTypeEnum } from "../../@types/entrepot";
+import { type Service } from "../../@types/app";
 
 const getWebService = (service: Service) => {
     switch (service.type) {

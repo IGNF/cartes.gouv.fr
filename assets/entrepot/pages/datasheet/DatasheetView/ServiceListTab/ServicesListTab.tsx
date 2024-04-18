@@ -3,7 +3,7 @@ import { FC } from "react";
 import { symToStr } from "tsafe/symToStr";
 
 import Translator from "../../../../../modules/Translator";
-import { DatasheetDetailed } from "../../../../../types/app";
+import { DatasheetDetailed } from "../../../../../@types/app";
 import ServicesListItem from "./ServicesListItem";
 
 type ServicesListTabProps = {

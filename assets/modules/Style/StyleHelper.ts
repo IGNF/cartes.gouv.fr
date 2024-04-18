@@ -5,7 +5,7 @@ import SldStyleParser from "geostyler-sld-parser";
 import QGISStyleParser from "geostyler-qgis-parser";
 import MapboxStyleParser from "geostyler-mapbox-parser";
 import OpenLayersParser from "geostyler-openlayers-parser";
-import { CartesStyle } from "../../types/app";
+import { CartesStyle } from "../../@types/app";
 import { Geometry } from "ol/geom";
 import BaseLayer from "ol/layer/Base";
 import { getFileExtension } from "../../utils";

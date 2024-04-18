@@ -1,8 +1,8 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { FC } from "react";
 
-import { CheckOrProcessingExecutionLogs, ProcessingExecution } from "../../../../types/app";
-import { ProcessingExecutionOutputStoredDataDto } from "../../../../types/entrepot";
+import { CheckOrProcessingExecutionLogs, ProcessingExecution } from "../../../../@types/app";
+import { ProcessingExecutionOutputStoredDataDto } from "../../../../@types/entrepot";
 import CheckOrProcessingStatusBadge from "./CheckOrProcessingStatusBadge";
 import Logs from "./Logs";
 

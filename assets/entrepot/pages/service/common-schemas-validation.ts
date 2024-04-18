@@ -1,7 +1,7 @@
 import * as yup from "yup";
 import validations from "../../../validations";
 import { regex } from "../../../utils";
-import { OfferingListResponseDto } from "../../../types/entrepot";
+import { OfferingListResponseDto } from "../../../@types/entrepot";
 import { getTranslation } from "../../../i18n/i18n";
 
 const { t: tValidMD } = getTranslation("ValidationMetadatas");

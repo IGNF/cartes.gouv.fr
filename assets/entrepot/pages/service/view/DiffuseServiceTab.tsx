@@ -2,7 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { FC } from "react";
 
 import TextCopyToClipboard from "../../../../components/Utils/TextCopyToClipboard";
-import { Service } from "../../../../types/app";
+import { Service } from "../../../../@types/app";
 
 type DiffuseServiceTabProps = {
     service?: Service;

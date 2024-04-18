@@ -2,8 +2,8 @@ import { XMLParser } from "fast-xml-parser";
 import MVT from "ol/format/MVT.js";
 import VectorTileLayer from "ol/layer/VectorTile";
 import VectorTileSource from "ol/source/VectorTile";
-import { Service } from "../../types/app";
-import { type TMSResponse } from "../../types/tms";
+import { Service } from "../../@types/app";
+import { type TMSResponse } from "../../@types/tms";
 import BaseService from "./BaseService";
 
 type VectorLayerType = {

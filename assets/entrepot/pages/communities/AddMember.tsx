@@ -12,7 +12,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { regex } from "../../../utils";
 import { getRights, rightTypes } from "./UserRights";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { UserRightsResponseDto } from "../../../types/app";
+import { UserRightsResponseDto } from "../../../@types/app";
 import { CartesApiException } from "../../../modules/jsonFetch";
 import api from "../../api";
 import Alert from "@codegouvfr/react-dsfr/Alert";

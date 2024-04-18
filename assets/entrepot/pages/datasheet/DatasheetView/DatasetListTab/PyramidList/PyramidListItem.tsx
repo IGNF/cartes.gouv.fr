@@ -16,7 +16,7 @@ import useToggle from "../../../../../../hooks/useToggle";
 import { Translations, declareComponentKeys, getTranslation, useTranslation } from "../../../../../../i18n/i18n";
 import RQKeys from "../../../../../../modules/RQKeys";
 import { routes } from "../../../../../../router/router";
-import { Pyramid, StoredDataStatusEnum } from "../../../../../../types/app";
+import { Pyramid, StoredDataStatusEnum } from "../../../../../../@types/app";
 import { formatDateFromISO, offeringTypeDisplayName } from "../../../../../../utils";
 import api from "../../../../../api";
 import PyramidDesc from "./PyramidDesc";

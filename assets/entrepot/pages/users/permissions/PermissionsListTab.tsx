@@ -4,7 +4,7 @@ import { compareAsc } from "date-fns";
 import { FC } from "react";
 
 import { useTranslation } from "../../../../i18n/i18n";
-import { PermissionDetailsResponseDto } from "../../../../types/entrepot";
+import { PermissionDetailsResponseDto } from "../../../../@types/entrepot";
 import { formatDateFromISO } from "../../../../utils";
 
 import "../../../../sass/pages/my_keys.scss";

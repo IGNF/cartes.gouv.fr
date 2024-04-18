@@ -15,7 +15,7 @@ import Wait from "../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/RQKeys";
 import { routes } from "../../../../router/router";
-import { DatastorePermissionResponseDto } from "../../../../types/entrepot";
+import { DatastorePermissionResponseDto } from "../../../../@types/entrepot";
 import ScrollOfferingList from "./ScrollOfferingList";
 import { getEditSchema } from "./ValidationSchemas";
 import createRequestBody, { EditPermissionFormType } from "./utils";

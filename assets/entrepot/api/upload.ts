@@ -1,6 +1,6 @@
 import SymfonyRouting from "../../modules/Routing";
 import { jsonFetch } from "../../modules/jsonFetch";
-import { Upload, UploadTree, UploadTypeEnum } from "../../types/app";
+import { Upload, UploadTree, UploadTypeEnum } from "../../@types/app";
 
 const getList = (datastoreId: string, type?: UploadTypeEnum, otherOptions: RequestInit = {}) => {
     const params = { datastoreId };

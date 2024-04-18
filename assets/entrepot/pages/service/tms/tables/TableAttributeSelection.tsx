@@ -5,7 +5,7 @@ import { FC, useEffect } from "react";
 import { type UseFormReturn } from "react-hook-form";
 
 import Translator from "../../../../../modules/Translator";
-import { type StoredDataRelation } from "../../../../../types/app";
+import { type StoredDataRelation } from "../../../../../@types/app";
 
 type TableAttributeSelectionProps = {
     visible: boolean;

@@ -3,7 +3,7 @@ import Badge from "@codegouvfr/react-dsfr/Badge";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import { CSSProperties, ComponentProps, FC, ReactNode, useCallback, useMemo, useState } from "react";
 import "../../../../sass/pages/my_keys.scss";
-import { AccessCreateDto, PermissionWithOfferingsDetailsResponseDto } from "../../../../types/entrepot";
+import { AccessCreateDto, PermissionWithOfferingsDetailsResponseDto } from "../../../../@types/entrepot";
 import AccessesManager from "./utils/AccessesManager";
 
 type AccessesProps = {

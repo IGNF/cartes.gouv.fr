@@ -13,8 +13,8 @@ import { Translations, useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import { routes } from "../../../../router/router";
-import { UserKeyWithAccessesResponseDto } from "../../../../types/app";
-import { PermissionDetailsResponseDto, UserKeyResponseDto, UserKeyResponseDtoTypeEnum } from "../../../../types/entrepot";
+import { UserKeyWithAccessesResponseDto } from "../../../../@types/app";
+import { PermissionDetailsResponseDto, UserKeyResponseDto, UserKeyResponseDtoTypeEnum } from "../../../../@types/entrepot";
 
 type UserKeysListTabProps = {
     keys: UserKeyWithAccessesResponseDto[] | undefined;

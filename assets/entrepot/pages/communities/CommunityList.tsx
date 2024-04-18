@@ -17,7 +17,7 @@ import RQKeys from "../../../modules/RQKeys";
 import Translator from "../../../modules/Translator";
 import { CartesApiException } from "../../../modules/jsonFetch";
 import { useAuthStore } from "../../../stores/AuthStore";
-import { CommunityListResponseDto } from "../../../types/entrepot";
+import { CommunityListResponseDto } from "../../../@types/entrepot";
 import { regex, removeDiacritics } from "../../../utils";
 
 import "../../../sass/pages/community_list.scss";

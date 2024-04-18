@@ -1,7 +1,7 @@
 import SymfonyRouting from "../../modules/Routing";
 import { jsonFetch } from "../../modules/jsonFetch";
-import { StoredData, StoredDataReport, StoredDataTypeEnum } from "../../types/app";
-import { OfferingListResponseDto, ProcessingExecutionStoredDataDto } from "../../types/entrepot";
+import { StoredData, StoredDataReport, StoredDataTypeEnum } from "../../@types/app";
+import { OfferingListResponseDto, ProcessingExecutionStoredDataDto } from "../../@types/entrepot";
 
 const getList = <T = StoredData[]>(datastoreId: string, type?: StoredDataTypeEnum, otherOptions: RequestInit = {}) => {
     const params = { datastoreId };

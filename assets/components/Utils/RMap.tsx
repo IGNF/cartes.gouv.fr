@@ -15,8 +15,8 @@ import WMTS, { optionsFromCapabilities } from "ol/source/WMTS";
 import olDefaults from "../../data/ol-defaults.json";
 import useCapabilities from "../../hooks/useCapabilities";
 import StyleHelper from "../../modules/Style/StyleHelper";
-import type { CartesStyle } from "../../types/app";
-import { OfferingDetailResponseDtoTypeEnum } from "../../types/entrepot";
+import type { CartesStyle } from "../../@types/app";
+import { OfferingDetailResponseDtoTypeEnum } from "../../@types/entrepot";
 
 import "ol/ol.css";
 import "geoportal-extensions-openlayers/dist/GpPluginOpenLayers.css";

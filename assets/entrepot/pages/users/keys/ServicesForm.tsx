@@ -3,8 +3,8 @@ import Input from "@codegouvfr/react-dsfr/Input";
 import { FC } from "react";
 import { Controller, UseFormReturn } from "react-hook-form";
 import { useTranslation } from "../../../../i18n/i18n";
-import { KeyFormValuesType } from "../../../../types/app";
-import { PermissionWithOfferingsDetailsResponseDto } from "../../../../types/entrepot";
+import { KeyFormValuesType } from "../../../../@types/app";
+import { PermissionWithOfferingsDetailsResponseDto } from "../../../../@types/entrepot";
 import Accesses from "./Accesses";
 
 type ServicesFormProps = {

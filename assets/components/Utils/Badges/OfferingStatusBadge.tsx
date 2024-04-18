@@ -3,7 +3,7 @@ import { AlertProps } from "@codegouvfr/react-dsfr/Alert";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import { FC, memo, useMemo } from "react";
 
-import { OfferingStatusEnum } from "../../../types/app";
+import { OfferingStatusEnum } from "../../../@types/app";
 
 type OfferingStatusBadgeProps = {
     status: OfferingStatusEnum;

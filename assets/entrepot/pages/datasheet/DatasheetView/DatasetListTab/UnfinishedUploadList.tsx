@@ -4,7 +4,7 @@ import { FC, memo } from "react";
 import { symToStr } from "tsafe/symToStr";
 
 import { routes } from "../../../../../router/router";
-import { Upload } from "../../../../../types/app";
+import { Upload } from "../../../../../@types/app";
 
 type UnfinishedUploadListProps = {
     datastoreId: string;

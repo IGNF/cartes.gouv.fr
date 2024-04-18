@@ -1,7 +1,7 @@
 import { TestContext, ValidationError } from "yup";
 import StyleValidator from "./StyleValidator";
 import SldStyleParser from "geostyler-sld-parser";
-import { Service, StyleFormat } from "../types/app";
+import { Service, StyleFormat } from "../@types/app";
 
 export default class SldStyleValidator extends StyleValidator {
     constructor(service: Service, format: StyleFormat) {

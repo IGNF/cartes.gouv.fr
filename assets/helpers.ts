@@ -1,4 +1,4 @@
-import { StoredDataDetailsRelationDto } from "./types/entrepot";
+import { StoredDataDetailsRelationDto } from "./@types/entrepot";
 
 /**
  * Ne conserve que les tables geometriques

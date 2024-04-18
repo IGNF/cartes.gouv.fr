@@ -5,7 +5,7 @@ import { FC, useMemo } from "react";
 import api from "../../../../api";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import RQKeys from "../../../../../modules/RQKeys";
-import { ConfigurationTypeEnum, Pyramid, Service, VectorDb } from "../../../../../types/app";
+import { ConfigurationTypeEnum, Pyramid, Service, VectorDb } from "../../../../../@types/app";
 
 type ServiceDescProps = {
     service: Service;

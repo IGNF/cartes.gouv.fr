@@ -3,7 +3,7 @@ import { AlertProps } from "@codegouvfr/react-dsfr/Alert";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import { FC, memo, useMemo } from "react";
 
-import { StoredData, StoredDataStatusEnum } from "../../../types/app";
+import { StoredData, StoredDataStatusEnum } from "../../../@types/app";
 
 type StoredDataStatusBadgeProps = {
     status: StoredData["status"];

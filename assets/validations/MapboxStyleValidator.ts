@@ -2,7 +2,7 @@ import { TestContext, ValidationError } from "yup";
 import StyleValidator from "./StyleValidator";
 import MapboxParser from "geostyler-mapbox-parser";
 import getWebService from "../modules/WebServices/WebServices";
-import { Service, StyleFormat } from "../types/app";
+import { Service, StyleFormat } from "../@types/app";
 import { declareComponentKeys } from "i18nifty";
 import { Translations, getTranslation } from "../i18n/i18n";
 

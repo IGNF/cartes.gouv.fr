@@ -1,6 +1,6 @@
 import WMSCapabilities from "ol/format/WMSCapabilities";
 import { transformExtent } from "ol/proj";
-import { Service } from "../../types/app";
+import { Service } from "../../@types/app";
 import olDefaults from "../../data/ol-defaults.json";
 import TileLayer from "ol/layer/Tile";
 import TileWMSSource from "ol/source/TileWMS.js";

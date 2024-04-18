@@ -1,4 +1,4 @@
-import { Service, StyleForm, StyleFormat } from "../../types/app";
+import { Service, StyleForm, StyleFormat } from "../../@types/app";
 import BaseStyleFilesManager from "./BaseStyleFilesManager";
 
 export default class WFSStyleFilesManager implements BaseStyleFilesManager {

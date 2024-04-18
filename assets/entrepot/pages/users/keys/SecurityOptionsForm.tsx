@@ -5,8 +5,8 @@ import { FC, useEffect } from "react";
 import { Controller, UseFormReturn } from "react-hook-form";
 import InputCollection from "../../../../components/Input/InputCollection";
 import { useTranslation } from "../../../../i18n/i18n";
-import { KeyFormValuesType, UserKeyInfoDtoTypeEnum } from "../../../../types/app";
-import { UserKeyCreateDtoUserKeyInfoDtoTypeEnum } from "../../../../types/entrepot";
+import { KeyFormValuesType, UserKeyInfoDtoTypeEnum } from "../../../../@types/app";
+import { UserKeyCreateDtoUserKeyInfoDtoTypeEnum } from "../../../../@types/entrepot";
 import BasicTypeInfoForm from "./BasicTypeInfoForm";
 import HashTypeInfoForm from "./HashTypeInfoForm";
 

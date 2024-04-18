@@ -1,7 +1,7 @@
 import { compareAsc } from "date-fns";
 import { declareComponentKeys } from "i18nifty";
 import { Translations } from "../../../../i18n/i18n";
-import { DatastorePermissionResponseDto, PermissionBeneficiaryDto } from "../../../../types/entrepot";
+import { DatastorePermissionResponseDto, PermissionBeneficiaryDto } from "../../../../@types/entrepot";
 import { formatDateFromISO } from "../../../../utils";
 
 // traductions

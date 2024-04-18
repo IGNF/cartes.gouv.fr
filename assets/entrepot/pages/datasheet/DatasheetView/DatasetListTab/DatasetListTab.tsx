@@ -4,7 +4,7 @@ import { FC, memo, useMemo } from "react";
 import { symToStr } from "tsafe/symToStr";
 
 import { routes } from "../../../../../router/router";
-import { type DatasheetDetailed } from "../../../../../types/app";
+import { type DatasheetDetailed } from "../../../../../@types/app";
 import PyramidList from "./PyramidList/PyramidList";
 import UnfinishedUploadList from "./UnfinishedUploadList";
 import VectorDbList from "./VectorDbList/VectorDbList";

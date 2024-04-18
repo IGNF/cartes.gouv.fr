@@ -1,7 +1,7 @@
 import SymfonyRouting from "../../modules/Routing";
 
 import { jsonFetch } from "../../modules/jsonFetch";
-import { CommunityListResponseDto } from "../../types/entrepot";
+import { CommunityListResponseDto } from "../../@types/entrepot";
 
 const getAllPublicCommunities = (otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_catalogs_communities");

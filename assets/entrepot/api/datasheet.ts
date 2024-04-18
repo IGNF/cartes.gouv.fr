@@ -1,6 +1,6 @@
 import SymfonyRouting from "../../modules/Routing";
 import { jsonFetch } from "../../modules/jsonFetch";
-import { Datasheet, DatasheetDetailed, Service } from "../../types/app";
+import { Datasheet, DatasheetDetailed, Service } from "../../@types/app";
 
 const getList = (datastoreId: string, otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_datasheet_get_list", { datastoreId });

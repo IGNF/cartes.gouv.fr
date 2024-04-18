@@ -1,7 +1,7 @@
 import { TestContext, ValidationError } from "yup";
 import StyleValidator from "./StyleValidator";
 import QGISStyleParser from "geostyler-qgis-parser";
-import { Service, StyleFormat } from "../types/app";
+import { Service, StyleFormat } from "../@types/app";
 
 export default class QGisStyleValidator extends StyleValidator {
     constructor(service: Service, format: StyleFormat) {

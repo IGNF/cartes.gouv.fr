@@ -4,7 +4,7 @@ import { FC } from "react";
 import { type UseFormReturn } from "react-hook-form";
 
 import { Translations, declareComponentKeys, useTranslation } from "../../../../i18n/i18n";
-import { type StoredDataRelation } from "../../../../types/app";
+import { type StoredDataRelation } from "../../../../@types/app";
 import { WmsVectorServiceFormValuesType } from "./WmsVectorServiceForm";
 
 type UploadStyleFileProps = {

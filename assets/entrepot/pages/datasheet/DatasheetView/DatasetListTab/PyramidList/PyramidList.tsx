@@ -2,7 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { FC, memo } from "react";
 import { symToStr } from "tsafe/symToStr";
 
-import { Pyramid } from "../../../../../../types/app";
+import { Pyramid } from "../../../../../../@types/app";
 import PyramidListItem from "./PyramidListItem";
 
 type PyramidListProps = {

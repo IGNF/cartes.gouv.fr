@@ -6,7 +6,7 @@ import { symToStr } from "tsafe/symToStr";
 import AppLayout from "../../components/Layout/AppLayout";
 import articles from "../../data/actualites.json";
 import { appRoot } from "../../router/router";
-import { type NewsArticle } from "../../types/newsArticle";
+import { type NewsArticle } from "../../@types/newsArticle";
 import { formatDateFromISO } from "../../utils";
 import PageNotFound from "../error/PageNotFound";
 
