@@ -2,7 +2,7 @@
 
 namespace App\Controller\Entrepot;
 
-use App\Constants\PermissionTypes;
+use App\Constants\EntrepotApi\PermissionTypes;
 use App\Controller\ApiControllerInterface;
 use App\Dto\Datastore\PermissionDTO;
 use App\Dto\Datastore\UpdatePermissionDTO;

@@ -2,7 +2,7 @@
 
 namespace App\Dto\Datastore;
 
-use App\Constants\PermissionTypes;
+use App\Constants\EntrepotApi\PermissionTypes;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class PermissionDTO

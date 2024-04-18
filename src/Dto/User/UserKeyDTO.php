@@ -2,7 +2,7 @@
 
 namespace App\Dto\User;
 
-use App\Constants\UserKeyTypes;
+use App\Constants\EntrepotApi\UserKeyTypes;
 use App\Validator\Constraint as CustomAssert;
 use Symfony\Component\Validator\Constraints as Assert;
 
