@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\EntrepotApi;
 
-use App\Exception\EntrepotApiException;
+use App\Exception\ApiException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpClient\Exception\JsonException;
 use Symfony\Component\HttpClient\HttpClient;
@@ -27,8 +27,8 @@ class ServiceAccount
     private $sandBoxCommunityId;
 
     public function __construct(
-        private EntrepotApiService $entrepotApiService,
-        private ParameterBagInterface $parameters
+        private ParameterBagInterface $parameters,
+        private UserApiService $userApiService,
     ) {
         // L'id de la community liee au datastore "Bac à sable"
         $this->sandBoxCommunityId = $this->parameters->get('sandbox_community_id');
@@ -39,7 +39,7 @@ class ServiceAccount
             'verify_host' => false,
         ]);
 
-        $this->me = $this->entrepotApiService->user->getMe();
+        $this->me = $this->userApiService->getMe();
 
         // Recuperation du token du compte de service
         $this->token = $this->getAccessToken();
@@ -71,7 +71,7 @@ class ServiceAccount
                 'community' => $sandboxCommunity,
                 'datastore' => $sandboxDatastore,
             ];
-        } catch (EntrepotApiException $e) {
+        } catch (ApiException $e) {
             return null;
         }
     }
@@ -81,7 +81,7 @@ class ServiceAccount
         // Id de la community "Bac à sable"
         $sandboxId = $this->parameters->get('sandbox_community_id');
         if (!$sandboxId) {
-            throw new EntrepotApiException('sandbox community does not exist', JsonResponse::HTTP_NOT_FOUND);
+            throw new ApiException('sandbox community does not exist', JsonResponse::HTTP_NOT_FOUND);
         }
 
         $options = $this->prepareOptions();
@@ -203,6 +203,6 @@ class ServiceAccount
             $errorResponse = $response->getContent(false);
         }
 
-        throw new EntrepotApiException($errorMsg, $statusCode, $errorResponse);
+        throw new ApiException($errorMsg, $statusCode, $errorResponse);
     }
 }

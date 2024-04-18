@@ -6,10 +6,13 @@ use App\Constants\EntrepotApi\OfferingStatuses;
 use App\Constants\EntrepotApi\ProcessingStatuses;
 use App\Constants\EntrepotApi\StoredDataStatuses;
 use App\Controller\ApiControllerInterface;
+use App\Exception\ApiException;
 use App\Exception\CartesApiException;
-use App\Exception\EntrepotApiException;
-use App\Services\CartesServiceApi;
-use App\Services\EntrepotApiService;
+use App\Services\EntrepotApi\CartesServiceApi;
+use App\Services\EntrepotApi\ConfigurationApiService;
+use App\Services\EntrepotApi\ProcessingApiService;
+use App\Services\EntrepotApi\StoredDataApiService;
+use App\Services\EntrepotApi\UploadApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -25,7 +28,10 @@ use Symfony\Component\Routing\Annotation\Route;
 class StoredDataController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        private EntrepotApiService $entrepotApiService
+        private StoredDataApiService $storedDataApiService,
+        private ConfigurationApiService $configurationApiService,
+        private ProcessingApiService $processingApiService,
+        private UploadApiService $uploadApiService,
     ) {
     }
 
@@ -40,10 +46,10 @@ class StoredDataController extends AbstractController implements ApiControllerIn
                 $query['type'] = $type;
             }
 
-            $storedDataList = $this->entrepotApiService->storedData->getAllDetailed($datastoreId, $query);
+            $storedDataList = $this->storedDataApiService->getAllDetailed($datastoreId, $query);
 
             return $this->json($storedDataList);
-        } catch (EntrepotApiException $ex) {
+        } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
         }
     }
@@ -52,10 +58,10 @@ class StoredDataController extends AbstractController implements ApiControllerIn
     public function getStoredData(string $datastoreId, string $storedDataId): JsonResponse
     {
         try {
-            $storedData = $this->entrepotApiService->storedData->get($datastoreId, $storedDataId);
+            $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId);
 
             return $this->json($storedData);
-        } catch (EntrepotApiException $ex) {
+        } catch (ApiException $ex) {
             if (Response::HTTP_NOT_FOUND === $ex->getStatusCode()) {
                 throw new CartesApiException("La donnée stockée [$storedDataId] n'existe pas", $ex->getStatusCode(), $ex->getDetails());
             } elseif (Response::HTTP_BAD_REQUEST === $ex->getStatusCode()) {
@@ -72,12 +78,12 @@ class StoredDataController extends AbstractController implements ApiControllerIn
             $storedDataList = [];
             $offeringsList = [];
 
-            $procExecList = $this->entrepotApiService->processing->getAllExecutions($datastoreId, [
+            $procExecList = $this->processingApiService->getAllExecutions($datastoreId, [
                 'input_stored_data' => $storedDataId,
             ]);
             foreach ($procExecList as &$procExec) {
                 if (ProcessingStatuses::SUCCESS === $procExec['status']) {
-                    $procExec = $this->entrepotApiService->processing->getExecution($datastoreId, $procExec['_id']);
+                    $procExec = $this->processingApiService->getExecution($datastoreId, $procExec['_id']);
 
                     if (isset($procExec['output']['stored_data']['status']) && StoredDataStatuses::DELETED !== $procExec['output']['stored_data']['status']) {
                         $storedDataList[] = $procExec['output']['stored_data'];
@@ -85,7 +91,7 @@ class StoredDataController extends AbstractController implements ApiControllerIn
                 }
             }
 
-            $offeringsList = $this->entrepotApiService->configuration->getAllOfferings($datastoreId, [
+            $offeringsList = $this->configurationApiService->getAllOfferings($datastoreId, [
                 'stored_data' => $storedDataId,
                 'status' => OfferingStatuses::PUBLISHED,
             ]);
@@ -94,7 +100,7 @@ class StoredDataController extends AbstractController implements ApiControllerIn
                 'stored_data_list' => $storedDataList,
                 'offerings_list' => $offeringsList,
             ]);
-        } catch (EntrepotApiException $ex) {
+        } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
         }
     }
@@ -103,30 +109,30 @@ class StoredDataController extends AbstractController implements ApiControllerIn
     public function getReport(string $datastoreId, string $storedDataId): JsonResponse
     {
         try {
-            $storedData = $this->entrepotApiService->storedData->get($datastoreId, $storedDataId);
+            $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId);
 
             // récupération de détails sur l'upload qui a servi à créer la stored_data
-            $inputUpload = $this->entrepotApiService->upload->get($datastoreId, $storedData['tags']['upload_id']);
-            $inputUpload['file_tree'] = $this->entrepotApiService->upload->getFileTree($datastoreId, $inputUpload['_id']);
+            $inputUpload = $this->uploadApiService->get($datastoreId, $storedData['tags']['upload_id']);
+            $inputUpload['file_tree'] = $this->uploadApiService->getFileTree($datastoreId, $inputUpload['_id']);
             $inputUpload['checks'] = [];
-            $uploadChecks = $this->entrepotApiService->upload->getCheckExecutions($datastoreId, $inputUpload['_id']);
+            $uploadChecks = $this->uploadApiService->getCheckExecutions($datastoreId, $inputUpload['_id']);
 
             foreach ($uploadChecks as &$checkType) {
                 foreach ($checkType as &$checkExecution) {
-                    $checkExecution = array_merge($checkExecution, $this->entrepotApiService->upload->getCheckExecution($datastoreId, $checkExecution['_id']));
-                    $checkExecution['logs'] = $this->entrepotApiService->upload->getCheckExecutionLogs($datastoreId, $checkExecution['_id']);
+                    $checkExecution = array_merge($checkExecution, $this->uploadApiService->getCheckExecution($datastoreId, $checkExecution['_id']));
+                    $checkExecution['logs'] = $this->uploadApiService->getCheckExecutionLogs($datastoreId, $checkExecution['_id']);
                     $inputUpload['checks'][] = $checkExecution;
                 }
             }
 
             // récupération de l'exécution traitement (ou des exécutions, normalement y en a qu'une) qui a créé cette stored_data
-            $procExecList = $this->entrepotApiService->processing->getAllExecutions($datastoreId, [
+            $procExecList = $this->processingApiService->getAllExecutions($datastoreId, [
                 'output_stored_data' => $storedDataId,
             ]);
 
             foreach ($procExecList as &$procExec) {
-                $procExec = array_merge($procExec, $this->entrepotApiService->processing->getExecution($datastoreId, $procExec['_id']));
-                $procExec['logs'] = $this->entrepotApiService->processing->getExecutionLogs($datastoreId, $procExec['_id']);
+                $procExec = array_merge($procExec, $this->processingApiService->getExecution($datastoreId, $procExec['_id']));
+                $procExec['logs'] = $this->processingApiService->getExecutionLogs($datastoreId, $procExec['_id']);
             }
 
             return $this->json([
@@ -134,7 +140,7 @@ class StoredDataController extends AbstractController implements ApiControllerIn
                 'input_upload' => $inputUpload,
                 'processing_executions' => $procExecList,
             ]);
-        } catch (EntrepotApiException $ex) {
+        } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
         }
     }
@@ -144,16 +150,16 @@ class StoredDataController extends AbstractController implements ApiControllerIn
     {
         try {
             // Suppression des offerings et configurations associees
-            $offerings = $this->entrepotApiService->configuration->getAllOfferings($datastoreId, ['stored_data' => $storedDataId]);
+            $offerings = $this->configurationApiService->getAllOfferings($datastoreId, ['stored_data' => $storedDataId]);
             foreach ($offerings as $offering) {
                 $cartesServiceApi->unpublish($datastoreId, $offering['_id']);
             }
 
             // Suppression de la donnee stockee
-            $this->entrepotApiService->storedData->remove($datastoreId, $storedDataId);
+            $this->storedDataApiService->remove($datastoreId, $storedDataId);
 
             return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
-        } catch (EntrepotApiException $ex) {
+        } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         } catch (\Exception $ex) {
             throw new CartesApiException($ex->getMessage(), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);

@@ -5,7 +5,7 @@ namespace App\Exception;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
-class EntrepotApiException extends HttpException
+class ApiException extends HttpException
 {
     /** @var array<mixed>|string */
     private array|string $details;

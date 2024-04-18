@@ -2,8 +2,8 @@
 
 namespace App\Services\EntrepotApi;
 
-use App\Exception\EntrepotApiException;
-use App\Services\EntrepotApiService;
+use App\Exception\ApiException;
+use App\Services\AbstractApiService;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
@@ -15,8 +15,6 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
 
 class BaseEntrepotApiService extends AbstractApiService
 {
-    protected EntrepotApiService $entrepotApiService;
-
     public function __construct(
         HttpClientInterface $httpClient,
         ParameterBagInterface $parameters,
@@ -25,13 +23,6 @@ class BaseEntrepotApiService extends AbstractApiService
         LoggerInterface $logger
     ) {
         parent::__construct($httpClient, $parameters, $filesystem, $requestStack, $logger, 'api_entrepot_url');
-    }
-
-    public function setEntrepotApiService(EntrepotApiService $entrepotApiService): self
-    {
-        $this->entrepotApiService = $entrepotApiService;
-
-        return $this;
     }
 
     /**
@@ -62,7 +53,7 @@ class BaseEntrepotApiService extends AbstractApiService
             } catch (JsonException $ex) {
                 $errorResponse = $response->getContent(false);
             }
-            throw new EntrepotApiException($errorMsg, $statusCode, $errorResponse);
+            throw new ApiException($errorMsg, $statusCode, $errorResponse);
         }
     }
 }

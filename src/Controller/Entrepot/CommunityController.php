@@ -4,9 +4,10 @@ namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\Community;
 use App\Controller\ApiControllerInterface;
+use App\Exception\ApiException;
 use App\Exception\CartesApiException;
-use App\Exception\EntrepotApiException;
-use App\Services\EntrepotApiService;
+use App\Services\EntrepotApi\CommunityApiService;
+use App\Services\EntrepotApi\UserApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,7 +20,8 @@ use Symfony\Component\Routing\Annotation\Route;
 class CommunityController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        private EntrepotApiService $entrepotApiService
+        private CommunityApiService $communityApiService,
+        private UserApiService $userApiService,
     ) {
     }
 
@@ -30,10 +32,10 @@ class CommunityController extends AbstractController implements ApiControllerInt
     public function get(string $communityId): JsonResponse
     {
         try {
-            $community = $this->entrepotApiService->community->get($communityId);
+            $community = $this->communityApiService->get($communityId);
 
             return new JsonResponse($community);
-        } catch (EntrepotApiException $ex) {
+        } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
     }
@@ -45,10 +47,10 @@ class CommunityController extends AbstractController implements ApiControllerInt
     public function getMembers(string $communityId): JsonResponse
     {
         try {
-            $members = $this->entrepotApiService->community->getMembers($communityId);
+            $members = $this->communityApiService->getMembers($communityId);
 
             return new JsonResponse($members);
-        } catch (EntrepotApiException $ex) {
+        } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
     }
@@ -60,7 +62,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
     public function updateMember(string $communityId, Request $request): JsonResponse
     {
         try {
-            $me = $this->entrepotApiService->user->getMe();
+            $me = $this->userApiService->getMe();
 
             // Suis-je membre de cette communaute
             $communityMember = array_filter($me['communities_member'], function ($member) use ($communityId) {
@@ -81,7 +83,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
 
             // Si c'est une creation, on verifie qu'il n'existe pas deja
             if (isset($data['user_creation'])) {
-                $communityMembers = $this->entrepotApiService->community->getMembers($communityId);
+                $communityMembers = $this->communityApiService->getMembers($communityId);
                 foreach ($communityMembers as $member) {
                     if ($member['user']['_id'] == $userId) {
                         throw new CartesApiException("l'utilisateur $userId est déjà membre de cette communauté", JsonResponse::HTTP_BAD_REQUEST);
@@ -92,13 +94,13 @@ class CommunityController extends AbstractController implements ApiControllerInt
             // Verification des droits
             $this->_checkRights($rights);
 
-            $this->entrepotApiService->community->addOrModifyUserRights($communityId, $userId, ['rights' => $rights]);
+            $this->communityApiService->addOrModifyUserRights($communityId, $userId, ['rights' => $rights]);
 
             return new JsonResponse([
                 'user' => $userId,
                 'rights' => $rights,
             ]);
-        } catch (EntrepotApiException $ex) {
+        } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
     }
@@ -110,7 +112,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
     public function removeMember(string $communityId, Request $request): JsonResponse
     {
         try {
-            $me = $this->entrepotApiService->user->getMe();
+            $me = $this->userApiService->getMe();
 
             // Suis-je membre de cette communaute
             $communityMember = array_filter($me['communities_member'], function ($member) use ($communityId) {
@@ -128,10 +130,10 @@ class CommunityController extends AbstractController implements ApiControllerInt
             $data = json_decode($request->getContent(), true);
             $userId = $data['user_id'];
 
-            $this->entrepotApiService->community->removeUserRights($communityId, $userId);
+            $this->communityApiService->removeUserRights($communityId, $userId);
 
             return new JsonResponse(['user' => $userId]);
-        } catch (EntrepotApiException $ex) {
+        } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
     }

@@ -4,9 +4,11 @@ namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\CommonTags;
 use App\Controller\ApiControllerInterface;
+use App\Exception\ApiException;
 use App\Exception\CartesApiException;
-use App\Exception\EntrepotApiException;
-use App\Services\EntrepotApiService;
+use App\Services\EntrepotApi\AnnexeApiService;
+use App\Services\EntrepotApi\ConfigurationApiService;
+use App\Services\EntrepotApi\DatastoreApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -22,7 +24,9 @@ use Symfony\Component\Uid\Uuid;
 class StyleController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        private EntrepotApiService $entrepotApiService
+        private DatastoreApiService $datastoreApiService,
+        private ConfigurationApiService $configurationApiService,
+        private AnnexeApiService $annexeApiService,
     ) {
     }
 
@@ -35,20 +39,20 @@ class StyleController extends AbstractController implements ApiControllerInterfa
         try {
             $styleName = $request->request->get('style_name');
 
-            $datastore = $this->entrepotApiService->datastore->get($datastoreId);
-            $offering = $this->entrepotApiService->configuration->getOffering($datastoreId, $offeringId);
+            $datastore = $this->datastoreApiService->get($datastoreId);
+            $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId);
 
             $configId = $offering['configuration']['_id'];
-            $configuration = $this->entrepotApiService->configuration->get($datastoreId, $configId);
+            $configuration = $this->configurationApiService->get($datastoreId, $configId);
             $datasheetName = $configuration['tags'][CommonTags::DATASHEET_NAME];
 
             // Recuperation des styles de la configuration
             $path = "/configuration/$configId/styles.json";
-            $styleAnnexes = $this->entrepotApiService->annexe->getAll($datastoreId, null, $path);
+            $styleAnnexes = $this->annexeApiService->getAll($datastoreId, null, $path);
 
             $styles = [];
             if (count($styleAnnexes)) {
-                $content = $this->entrepotApiService->annexe->download($datastoreId, $styleAnnexes[0]['_id']);
+                $content = $this->annexeApiService->download($datastoreId, $styleAnnexes[0]['_id']);
                 $styles = json_decode($content, true);
             }
 
@@ -76,7 +80,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             $this->writeStyleFile($datastoreId, $annexeId, $styles, $path);
 
             return new JsonResponse($styles);
-        } catch (EntrepotApiException $ex) {
+        } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
     }
@@ -92,17 +96,17 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             $data = json_decode($request->getContent(), true);
             $styleName = $data['style_name'];
 
-            $offering = $this->entrepotApiService->configuration->getOffering($datastoreId, $offeringId);
+            $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId);
 
             $configId = $offering['configuration']['_id'];
 
             // Recuperation des styles de la configuration
             $path = "/configuration/$configId/styles.json";
-            $styleAnnexes = $this->entrepotApiService->annexe->getAll($datastoreId, null, $path);
+            $styleAnnexes = $this->annexeApiService->getAll($datastoreId, null, $path);
 
             $styles = [];
             if (0 != count($styleAnnexes)) {
-                $content = $this->entrepotApiService->annexe->download($datastoreId, $styleAnnexes[0]['_id']);
+                $content = $this->annexeApiService->download($datastoreId, $styleAnnexes[0]['_id']);
                 $styles = json_decode($content, true);
             }
 
@@ -117,7 +121,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             // Suppression de toutes les annexes liees au style
             foreach ($style[0]['layers'] as $layer) {
                 $annexeId = $layer['annexe_id'];
-                $this->entrepotApiService->annexe->remove($datastoreId, $annexeId);
+                $this->annexeApiService->remove($datastoreId, $annexeId);
             }
 
             // On enleve le style
@@ -138,7 +142,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             // Plus de style, on supprime le fichier
             $annexeId = count($styleAnnexes) ? $styleAnnexes[0]['_id'] : null;
             if ($annexeId && 0 == count($styles)) {
-                $this->entrepotApiService->annexe->remove($datastoreId, $styleAnnexes[0]['_id']);
+                $this->annexeApiService->remove($datastoreId, $styleAnnexes[0]['_id']);
 
                 return new JsonResponse([]);
             }
@@ -147,7 +151,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             $this->writeStyleFile($datastoreId, $annexeId, $styles, $path);
 
             return new JsonResponse($styles);
-        } catch (EntrepotApiException $ex) {
+        } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
     }
@@ -162,17 +166,17 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             $data = json_decode($request->getContent(), true);
             $styleName = $data['style_name'];
 
-            $offering = $this->entrepotApiService->configuration->getOffering($datastoreId, $offeringId);
+            $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId);
 
             $configId = $offering['configuration']['_id'];
 
             // Recuperation des styles de la configuration
             $path = "/configuration/$configId/styles.json";
-            $styleAnnexes = $this->entrepotApiService->annexe->getAll($datastoreId, null, $path);
+            $styleAnnexes = $this->annexeApiService->getAll($datastoreId, null, $path);
 
             $styles = [];
             if (0 != count($styleAnnexes)) {
-                $content = $this->entrepotApiService->annexe->download($datastoreId, $styleAnnexes[0]['_id']);
+                $content = $this->annexeApiService->download($datastoreId, $styleAnnexes[0]['_id']);
                 $styles = json_decode($content, true);
             }
 
@@ -194,7 +198,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             $this->writeStyleFile($datastoreId, $annexeId, $styles, $path);
 
             return new JsonResponse($styles);
-        } catch (EntrepotApiException $ex) {
+        } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
     }
@@ -213,7 +217,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
 
         foreach ($styles as &$style) {
             foreach ($style['layers'] as &$layer) {
-                $annexe = $this->entrepotApiService->annexe->get($datastore['_id'], $layer['annexe_id']);
+                $annexe = $this->annexeApiService->get($datastore['_id'], $layer['annexe_id']);
                 $layer['url'] = $annexeUrl.'/'.$datastore['technical_name'].$annexe['paths'][0];
             }
         }
@@ -238,7 +242,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             'type=style',
         ];
 
-        return $this->entrepotApiService->annexe->add($datastoreId, $file->getRealPath(), [$path], $labels);
+        return $this->annexeApiService->add($datastoreId, $file->getRealPath(), [$path], $labels);
     }
 
     /**
@@ -295,9 +299,9 @@ class StyleController extends AbstractController implements ApiControllerInterfa
         file_put_contents($filePath, json_encode($styles));
 
         if ($annexeId) {    // PUT
-            $this->entrepotApiService->annexe->replaceFile($datastoreId, $annexeId, $filePath);
+            $this->annexeApiService->replaceFile($datastoreId, $annexeId, $filePath);
         } else {
-            $this->entrepotApiService->annexe->add($datastoreId, $filePath, [$path], null);
+            $this->annexeApiService->add($datastoreId, $filePath, [$path], null);
         }
     }
 }

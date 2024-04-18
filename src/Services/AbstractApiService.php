@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\EntrepotApi;
+namespace App\Services;
 
 use App\Security\KeycloakToken;
 use League\OAuth2\Client\Token\AccessToken;

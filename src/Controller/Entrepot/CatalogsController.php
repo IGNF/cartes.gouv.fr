@@ -3,9 +3,9 @@
 namespace App\Controller\Entrepot;
 
 use App\Controller\ApiControllerInterface;
+use App\Exception\ApiException;
 use App\Exception\CartesApiException;
-use App\Exception\EntrepotApiException;
-use App\Services\EntrepotApiService;
+use App\Services\EntrepotApi\CatalogsApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
@@ -19,7 +19,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class CatalogsController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        private EntrepotApiService $entrepotApiService,
+        private CatalogsApiService $catalogsApiService,
     ) {
     }
 
@@ -27,10 +27,10 @@ class CatalogsController extends AbstractController implements ApiControllerInte
     public function communities(): JsonResponse
     {
         try {
-            $response = $this->entrepotApiService->catalogs->getAllPublicCommunities();
+            $response = $this->catalogsApiService->getAllPublicCommunities();
 
             return $this->json($response);
-        } catch (EntrepotApiException $ex) {
+        } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         } catch (\Exception $ex) {
             return $this->json(['message' => $ex->getMessage()], $ex->getCode());

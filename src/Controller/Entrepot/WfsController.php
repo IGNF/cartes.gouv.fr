@@ -12,11 +12,14 @@ use App\Entity\CswMetadata\CswHierarchyLevel;
 use App\Entity\CswMetadata\CswLanguage;
 use App\Entity\CswMetadata\CswMetadata;
 use App\Entity\CswMetadata\CswMetadataLayer;
+use App\Exception\ApiException;
 use App\Exception\CartesApiException;
-use App\Exception\EntrepotApiException;
-use App\Services\CartesServiceApi;
 use App\Services\CswMetadataHelper;
-use App\Services\EntrepotApiService;
+use App\Services\EntrepotApi\CartesServiceApi;
+use App\Services\EntrepotApi\ConfigurationApiService;
+use App\Services\EntrepotApi\DatastoreApiService;
+use App\Services\EntrepotApi\MetadataApiService;
+use App\Services\EntrepotApi\StoredDataApiService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Annotation\Route;
@@ -30,10 +33,13 @@ use Symfony\Component\Routing\Annotation\Route;
 class WfsController extends ServiceController implements ApiControllerInterface
 {
     public function __construct(
-        private EntrepotApiService $entrepotApiService,
+        private DatastoreApiService $datastoreApiService,
+        private ConfigurationApiService $configurationApiService,
+        private StoredDataApiService $storedDataApiService,
+        private MetadataApiService $metadataApiService,
         private CartesServiceApi $cartesServiceApi,
     ) {
-        parent::__construct($entrepotApiService, $cartesServiceApi);
+        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApi);
     }
 
     #[Route('/', name: 'add', methods: ['POST'])]
@@ -47,26 +53,26 @@ class WfsController extends ServiceController implements ApiControllerInterface
             // création de requête pour la config
             $configRequestBody = $this->getConfigRequestBody($dto, $storedDataId);
 
-            $storedData = $this->entrepotApiService->storedData->get($datastoreId, $storedDataId);
+            $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId);
             $datasheetName = $storedData['tags'][CommonTags::DATASHEET_NAME];
 
             $endpoint = $this->getEndpointByShareType($datastoreId, ConfigurationTypes::WFS, $dto->share_with);
 
             // Ajout de la configuration
-            $configuration = $this->entrepotApiService->configuration->add($datastoreId, $configRequestBody);
-            $configuration = $this->entrepotApiService->configuration->addTags($datastoreId, $configuration['_id'], [
+            $configuration = $this->configurationApiService->add($datastoreId, $configRequestBody);
+            $configuration = $this->configurationApiService->addTags($datastoreId, $configuration['_id'], [
                 CommonTags::DATASHEET_NAME => $datasheetName,
             ]);
 
             // Creation d'une offering
-            $offering = $this->entrepotApiService->configuration->addOffering($datastoreId, $configuration['_id'], $endpoint['_id'], $endpoint['open']);
+            $offering = $this->configurationApiService->addOffering($datastoreId, $configuration['_id'], $endpoint['_id'], $endpoint['open']);
             $offering['configuration'] = $configuration;
 
             // création de metadata
             $this->createOrUpdateMetadata($dto, $metadataHelper, $datastoreId, $datasheetName);
 
             return $this->json($offering);
-        } catch (EntrepotApiException $ex) {
+        } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
     }
@@ -84,8 +90,8 @@ class WfsController extends ServiceController implements ApiControllerInterface
     ): JsonResponse {
         try {
             // récup anciens config et offering
-            $oldOffering = $this->entrepotApiService->configuration->getOffering($datastoreId, $offeringId);
-            $oldConfiguration = $this->entrepotApiService->configuration->get($datastoreId, $oldOffering['configuration']['_id']);
+            $oldOffering = $this->configurationApiService->getOffering($datastoreId, $offeringId);
+            $oldConfiguration = $this->configurationApiService->get($datastoreId, $oldOffering['configuration']['_id']);
             $datasheetName = $oldConfiguration['tags'][CommonTags::DATASHEET_NAME];
 
             // suppression anciens configs et offering
@@ -97,18 +103,18 @@ class WfsController extends ServiceController implements ApiControllerInterface
             $endpoint = $this->getEndpointByShareType($datastoreId, ConfigurationTypes::WFS, $dto->share_with);
 
             // Ajout de la configuration
-            $configuration = $this->entrepotApiService->configuration->add($datastoreId, $configRequestBody);
-            $configuration = $this->entrepotApiService->configuration->addTags($datastoreId, $configuration['_id'], $oldConfiguration['tags']);
+            $configuration = $this->configurationApiService->add($datastoreId, $configRequestBody);
+            $configuration = $this->configurationApiService->addTags($datastoreId, $configuration['_id'], $oldConfiguration['tags']);
 
             // Creation d'une offering
-            $offering = $this->entrepotApiService->configuration->addOffering($datastoreId, $configuration['_id'], $endpoint['_id'], $endpoint['open']);
+            $offering = $this->configurationApiService->addOffering($datastoreId, $configuration['_id'], $endpoint['_id'], $endpoint['open']);
             $offering['configuration'] = $configuration;
 
             // création de metadata
             $this->createOrUpdateMetadata($dto, $metadataHelper, $datastoreId, $datasheetName);
 
             return $this->json($offering);
-        } catch (EntrepotApiException $ex) {
+        } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
     }
@@ -155,7 +161,7 @@ class WfsController extends ServiceController implements ApiControllerInterface
 
     private function createOrUpdateMetadata(WfsAddDTO $dto, CswMetadataHelper $metadataHelper, string $datastoreId, string $datasheetName): void
     {
-        $metadataList = $this->entrepotApiService->metadata->getAll($datastoreId, [
+        $metadataList = $this->metadataApiService->getAll($datastoreId, [
             'tags' => [
                 CommonTags::DATASHEET_NAME => $datasheetName,
             ],
@@ -173,18 +179,18 @@ class WfsController extends ServiceController implements ApiControllerInterface
 
             $newMetadataFilePath = $metadataHelper->saveToFile($newCswMetadata);
 
-            $apiMetadata = $this->entrepotApiService->metadata->add($datastoreId, $newMetadataFilePath);
-            $apiMetadata = $this->entrepotApiService->metadata->addTags($datastoreId, $apiMetadata['_id'], [
+            $apiMetadata = $this->metadataApiService->add($datastoreId, $newMetadataFilePath);
+            $apiMetadata = $this->metadataApiService->addTags($datastoreId, $apiMetadata['_id'], [
                 CommonTags::DATASHEET_NAME => $datasheetName,
             ]);
 
-            $this->entrepotApiService->metadata->publish($datastoreId, $apiMetadata['file_identifier'], $metadataEndpoint['_id']);
+            $this->metadataApiService->publish($datastoreId, $apiMetadata['file_identifier'], $metadataEndpoint['_id']);
         } else {
             // une métadonnée existe déjà qu'on va mettre à jour
 
             $oldMetadata = $metadataList[0];
 
-            $oldMetadataFileXml = $this->entrepotApiService->metadata->downloadFile($datastoreId, $oldMetadata['_id']);
+            $oldMetadataFileXml = $this->metadataApiService->downloadFile($datastoreId, $oldMetadata['_id']);
             $oldCswMetadata = $metadataHelper->fromXml($oldMetadataFileXml);
 
             $newCswMetadata = $this->getNewCswMetadata($dto, $datastoreId, $datasheetName);
@@ -193,17 +199,17 @@ class WfsController extends ServiceController implements ApiControllerInterface
 
             // suppression et recréation de métadonnées si changement de file_identifier
             if ($oldCswMetadata->fileIdentifier !== $newCswMetadata->fileIdentifier) {
-                $this->entrepotApiService->metadata->unpublish($datastoreId, $oldCswMetadata->fileIdentifier, $metadataEndpoint['_id']);
-                $this->entrepotApiService->metadata->delete($datastoreId, $oldMetadata['_id']);
+                $this->metadataApiService->unpublish($datastoreId, $oldCswMetadata->fileIdentifier, $metadataEndpoint['_id']);
+                $this->metadataApiService->delete($datastoreId, $oldMetadata['_id']);
 
-                $apiMetadata = $this->entrepotApiService->metadata->add($datastoreId, $newMetadataFilePath);
+                $apiMetadata = $this->metadataApiService->add($datastoreId, $newMetadataFilePath);
             } else {
-                $apiMetadata = $this->entrepotApiService->metadata->replaceFile($datastoreId, $oldMetadata['_id'], $newMetadataFilePath);
+                $apiMetadata = $this->metadataApiService->replaceFile($datastoreId, $oldMetadata['_id'], $newMetadataFilePath);
             }
-            $apiMetadata = $this->entrepotApiService->metadata->addTags($datastoreId, $apiMetadata['_id'], $oldMetadata['tags']);
+            $apiMetadata = $this->metadataApiService->addTags($datastoreId, $apiMetadata['_id'], $oldMetadata['tags']);
 
             if (0 === count($apiMetadata['endpoints'])) {
-                $this->entrepotApiService->metadata->publish($datastoreId, $apiMetadata['file_identifier'], $metadataEndpoint['_id']);
+                $this->metadataApiService->publish($datastoreId, $apiMetadata['file_identifier'], $metadataEndpoint['_id']);
             }
         }
     }
@@ -224,7 +230,7 @@ class WfsController extends ServiceController implements ApiControllerInterface
      */
     private function getMetadataLayers(string $datastoreId, string $datasheetName): array
     {
-        $configList = $this->entrepotApiService->configuration->getAllDetailed($datastoreId, [
+        $configList = $this->configurationApiService->getAllDetailed($datastoreId, [
             'tags' => [
                 CommonTags::DATASHEET_NAME => $datasheetName,
             ],
@@ -233,10 +239,10 @@ class WfsController extends ServiceController implements ApiControllerInterface
         $layers = array_map(function (array $configuration) use ($datastoreId) {
             $configRelations = $configuration['type_infos']['used_data'][0]['relations'];
 
-            $offering = $this->entrepotApiService->configuration->getConfigurationOfferings($datastoreId, $configuration['_id'])[0];
-            $offering = $this->entrepotApiService->configuration->getOffering($datastoreId, $offering['_id']);
+            $offering = $this->configurationApiService->getConfigurationOfferings($datastoreId, $configuration['_id'])[0];
+            $offering = $this->configurationApiService->getOffering($datastoreId, $offering['_id']);
 
-            $serviceEndpoint = $this->entrepotApiService->datastore->getEndpoint($datastoreId, $offering['endpoint']['_id']);
+            $serviceEndpoint = $this->datastoreApiService->getEndpoint($datastoreId, $offering['endpoint']['_id']);
 
             $relationLayers = array_map(function ($relation) use ($offering, $serviceEndpoint) {
                 $layerName = null;

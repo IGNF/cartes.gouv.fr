@@ -2,7 +2,7 @@
 
 namespace App\Security;
 
-use App\Services\EntrepotApiService;
+use App\Services\EntrepotApi\UserApiService;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use KnpU\OAuth2ClientBundle\Client\Provider\KeycloakClient;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
@@ -30,7 +30,7 @@ class KeycloakUserProvider implements UserProviderInterface
         private ClientRegistry $clientRegistry,
         private RequestStack $requestStack,
         private ParameterBagInterface $params,
-        private EntrepotApiService $entrepotApiService,
+        private UserApiService $userApiService,
         private LoggerInterface $logger,
     ) {
     }
@@ -79,7 +79,7 @@ class KeycloakUserProvider implements UserProviderInterface
         }
 
         try {
-            $apiUser = $this->entrepotApiService->user->getMe();
+            $apiUser = $this->userApiService->getMe();
         } catch (TimeoutException $ex) {
             $this->logger->debug('{class}: Failed to fetch logged-in user', ['class' => self::class]);
             throw new UserNotFoundException('Failed to fetch logged-in user', Response::HTTP_UNAUTHORIZED, $ex);

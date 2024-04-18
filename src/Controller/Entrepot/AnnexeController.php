@@ -4,9 +4,11 @@ namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\CommonTags;
 use App\Controller\ApiControllerInterface;
+use App\Exception\ApiException;
 use App\Exception\CartesApiException;
-use App\Exception\EntrepotApiException;
-use App\Services\EntrepotApiService;
+use App\Services\EntrepotApi\AnnexeApiService;
+use App\Services\EntrepotApi\ConfigurationApiService;
+use App\Services\EntrepotApi\DatastoreApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
@@ -25,7 +27,9 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 class AnnexeController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        private EntrepotApiService $entrepotApiService,
+        private AnnexeApiService $annexeApiService,
+        private DatastoreApiService $datastoreApiService,
+        private ConfigurationApiService $configurationApiService,
         private ParameterBagInterface $parameterBag,
         private HttpClientInterface $httpClient,
     ) {
@@ -40,10 +44,10 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
     public function getAnnexeList(string $datastoreId): JsonResponse
     {
         try {
-            $annexeList = $this->entrepotApiService->annexe->getAllDetailed($datastoreId);
+            $annexeList = $this->annexeApiService->getAllDetailed($datastoreId);
 
             return $this->json($annexeList);
-        } catch (EntrepotApiException $ex) {
+        } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
         }
     }
@@ -52,7 +56,7 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
     public function addThumbnail(string $datastoreId, Request $request): JsonResponse
     {
         try {
-            $datastore = $this->entrepotApiService->datastore->get($datastoreId);
+            $datastore = $this->datastoreApiService->get($datastoreId);
             $annexeUrl = $this->parameterBag->get('annexes_url');
 
             $uuid = Uuid::v4();
@@ -67,17 +71,17 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
             ];
 
             // On regarde s'il existe deja une vignette
-            $annexes = $this->entrepotApiService->annexe->getAll($datastoreId, null, null, $labels);
+            $annexes = $this->annexeApiService->getAll($datastoreId, null, null, $labels);
 
             if (count($annexes)) {  // Elle existe, on la supprime sinon le path ne change pas
-                $this->entrepotApiService->annexe->remove($datastoreId, $annexes[0]['_id']);
+                $this->annexeApiService->remove($datastoreId, $annexes[0]['_id']);
             }
 
-            $annexe = $this->entrepotApiService->annexe->add($datastoreId, $file->getRealPath(), [$path], $labels);
+            $annexe = $this->annexeApiService->add($datastoreId, $file->getRealPath(), [$path], $labels);
             $annexe['url'] = $annexeUrl.'/'.$datastore['technical_name'].$annexe['paths'][0];
 
             return new JsonResponse($annexe);
-        } catch (EntrepotApiException $ex) {
+        } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
     }
@@ -86,10 +90,10 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
     public function deleteAnnexe(string $datastoreId, string $annexeId): JsonResponse
     {
         try {
-            $this->entrepotApiService->annexe->remove($datastoreId, $annexeId);
+            $this->annexeApiService->remove($datastoreId, $annexeId);
 
             return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
-        } catch (EntrepotApiException $ex) {
+        } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         } catch (\Exception $ex) {
             throw new CartesApiException($ex->getMessage(), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
@@ -107,9 +111,9 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
                 $fs->mkdir($capsPath);
             }
 
-            $datastore = $this->entrepotApiService->datastore->get($datastoreId);
-            $offering = $this->entrepotApiService->configuration->getOffering($datastoreId, $offeringId);
-            $configuration = $this->entrepotApiService->configuration->get($datastoreId, $offering['configuration']['_id']);
+            $datastore = $this->datastoreApiService->get($datastoreId);
+            $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId);
+            $configuration = $this->configurationApiService->get($datastoreId, $offering['configuration']['_id']);
 
             // Recherche du endpoint
             $endpoint = null;
@@ -120,7 +124,7 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
                 }
             }
 
-            $allOfferings = $this->entrepotApiService->configuration->getAllOfferings($datastoreId, ['type' => $endpoint['type']]);
+            $allOfferings = $this->configurationApiService->getAllOfferings($datastoreId, ['type' => $endpoint['type']]);
 
             // TODO Les autres (WMS-VECTOR, TMS ...)
             $xmlStr = null;
@@ -141,16 +145,16 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
             // On regarde s'il existe deja un fichier avec ce path
             $path = join('/', [$endpoint['technical_name'], 'capabilities.xml']);
 
-            $annexes = $this->entrepotApiService->annexe->getAll($datastoreId, null, $path);
+            $annexes = $this->annexeApiService->getAll($datastoreId, null, $path);
             if (count($annexes)) {  // Il existe, on le met a jour
-                $this->entrepotApiService->annexe->replaceFile($datastoreId, $annexes[0]['_id'], $filePath);
+                $this->annexeApiService->replaceFile($datastoreId, $annexes[0]['_id'], $filePath);
             } else {
                 $label = CommonTags::DATASHEET_NAME.'='.$configuration['tags'][CommonTags::DATASHEET_NAME];
-                $this->entrepotApiService->annexe->add($datastoreId, $filePath, [$path], [$label]);
+                $this->annexeApiService->add($datastoreId, $filePath, [$path], [$label]);
             }
 
             return new JsonResponse("C'est la fête");   // TODO
-        } catch (EntrepotApiException $ex) {
+        } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         } catch (\Exception $ex) {
             throw new CartesApiException($ex->getMessage(), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);

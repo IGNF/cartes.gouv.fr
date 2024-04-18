@@ -6,10 +6,13 @@ use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Constants\EntrepotApi\StaticFileTypes;
 use App\Controller\ApiControllerInterface;
+use App\Exception\ApiException;
 use App\Exception\CartesApiException;
-use App\Exception\EntrepotApiException;
-use App\Services\CartesServiceApi;
-use App\Services\EntrepotApiService;
+use App\Services\EntrepotApi\CartesServiceApi;
+use App\Services\EntrepotApi\ConfigurationApiService;
+use App\Services\EntrepotApi\DatastoreApiService;
+use App\Services\EntrepotApi\StaticApiService;
+use App\Services\EntrepotApi\StoredDataApiService;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -26,11 +29,14 @@ use Symfony\Component\Uid\Uuid;
 class WmsVectorController extends ServiceController implements ApiControllerInterface
 {
     public function __construct(
-        private EntrepotApiService $entrepotApiService,
+        DatastoreApiService $datastoreApiService,
+        private ConfigurationApiService $configurationApiService,
+        private StoredDataApiService $storedDataApiService,
         private CartesServiceApi $cartesServiceApi,
+        private StaticApiService $staticApiService,
         protected Filesystem $filesystem,
     ) {
-        parent::__construct($entrepotApiService, $cartesServiceApi);
+        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApi);
     }
 
     #[Route('', name: 'add', methods: ['POST'])]
@@ -52,29 +58,29 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
             // création de requête pour la config
             $configRequestBody = $this->getConfigRequestBody($data, $tablesNamesList, $styleFilesByTable, $storedDataId);
 
-            $storedData = $this->entrepotApiService->storedData->get($datastoreId, $storedDataId);
+            $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId);
 
             $endpoint = $this->getEndpointByShareType($datastoreId, ConfigurationTypes::WMSVECTOR, $data['share_with']);
 
             // Ajout de la configuration
-            $configuration = $this->entrepotApiService->configuration->add($datastoreId, $configRequestBody);
-            $configuration = $this->entrepotApiService->configuration->addTags($datastoreId, $configuration['_id'], [
+            $configuration = $this->configurationApiService->add($datastoreId, $configRequestBody);
+            $configuration = $this->configurationApiService->addTags($datastoreId, $configuration['_id'], [
                 CommonTags::DATASHEET_NAME => $storedData['tags'][CommonTags::DATASHEET_NAME],
             ]);
 
             // remplace nom temporaire des fichiers statiques
             foreach ($styleFilesByTable as $tableName => $staticFileId) {
-                $this->entrepotApiService->static->modifyInfo($datastoreId, $staticFileId, [
+                $this->staticApiService->modifyInfo($datastoreId, $staticFileId, [
                     'name' => sprintf('config_%s_style_wmsv_%s', $configuration['_id'], $tableName),
                 ]);
             }
 
             // Creation d'une offering
-            $offering = $this->entrepotApiService->configuration->addOffering($datastoreId, $configuration['_id'], $endpoint['_id'], $endpoint['open']);
+            $offering = $this->configurationApiService->addOffering($datastoreId, $configuration['_id'], $endpoint['_id'], $endpoint['open']);
             $offering['configuration'] = $configuration;
 
             return $this->json($offering);
-        } catch (EntrepotApiException $ex) {
+        } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
     }
@@ -96,8 +102,8 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
 
         try {
             // récup anciens config et offering
-            $oldOffering = $this->entrepotApiService->configuration->getOffering($datastoreId, $offeringId);
-            $oldConfiguration = $this->entrepotApiService->configuration->get($datastoreId, $oldOffering['configuration']['_id']);
+            $oldOffering = $this->configurationApiService->getOffering($datastoreId, $offeringId);
+            $oldConfiguration = $this->configurationApiService->get($datastoreId, $oldOffering['configuration']['_id']);
 
             // ajout ou mise à jour des fichiers de styles SLD
             $styleFilesByTable = $this->sendStyleFiles($datastoreId, $tablesNamesList, $files, $oldConfiguration);
@@ -111,22 +117,22 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
             $endpoint = $this->getEndpointByShareType($datastoreId, ConfigurationTypes::WMSVECTOR, $data['share_with']);
 
             // Ajout de la configuration
-            $configuration = $this->entrepotApiService->configuration->add($datastoreId, $configRequestBody);
-            $configuration = $this->entrepotApiService->configuration->addTags($datastoreId, $configuration['_id'], $oldConfiguration['tags']);
+            $configuration = $this->configurationApiService->add($datastoreId, $configRequestBody);
+            $configuration = $this->configurationApiService->addTags($datastoreId, $configuration['_id'], $oldConfiguration['tags']);
 
             // remplace nom temporaire des fichiers statiques
             foreach ($styleFilesByTable as $tableName => $staticFileId) {
-                $this->entrepotApiService->static->modifyInfo($datastoreId, $staticFileId, [
+                $this->staticApiService->modifyInfo($datastoreId, $staticFileId, [
                     'name' => sprintf('config_%s_style_wmsv_%s', $configuration['_id'], $tableName),
                 ]);
             }
 
             // Creation d'une offering
-            $offering = $this->entrepotApiService->configuration->addOffering($datastoreId, $configuration['_id'], $endpoint['_id'], $endpoint['open']);
+            $offering = $this->configurationApiService->addOffering($datastoreId, $configuration['_id'], $endpoint['_id'], $endpoint['open']);
             $offering['configuration'] = $configuration;
 
             return $this->json($offering);
-        } catch (EntrepotApiException $ex) {
+        } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
     }
@@ -201,7 +207,7 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
 
                 $file->move($directory, $file->getClientOriginalName());
 
-                $staticStyleFile = $this->entrepotApiService->static->add($datastoreId, $directory.'/'.$file->getClientOriginalName(), $styleFileName, StaticFileTypes::GEOSERVER_STYLE);
+                $staticStyleFile = $this->staticApiService->add($datastoreId, $directory.'/'.$file->getClientOriginalName(), $styleFileName, StaticFileTypes::GEOSERVER_STYLE);
                 $styleFilesByTable[$tableName] = $staticStyleFile['_id'];
             }
         }
@@ -223,7 +229,7 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
                 if (null !== $file) {
                     $file->move($directory, $file->getClientOriginalName());
 
-                    $staticStyleFile = $this->entrepotApiService->static->replaceFile($datastoreId, $oldStyleFilesByTable[$tableName], $directory.'/'.$file->getClientOriginalName());
+                    $staticStyleFile = $this->staticApiService->replaceFile($datastoreId, $oldStyleFilesByTable[$tableName], $directory.'/'.$file->getClientOriginalName());
                 }
                 $styleFilesByTable[$tableName] = $oldStyleFilesByTable[$tableName];
             }

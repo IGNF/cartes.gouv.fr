@@ -6,9 +6,9 @@ use App\Constants\PermissionTypes;
 use App\Controller\ApiControllerInterface;
 use App\Dto\Datastore\PermissionDTO;
 use App\Dto\Datastore\UpdatePermissionDTO;
+use App\Exception\ApiException;
 use App\Exception\CartesApiException;
-use App\Exception\EntrepotApiException;
-use App\Services\EntrepotApiService;
+use App\Services\EntrepotApi\DatastoreApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
@@ -24,14 +24,14 @@ use Symfony\Component\Routing\Annotation\Route;
 class DatastoreController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        private EntrepotApiService $entrepotApiService
+        private DatastoreApiService $datastoreApiService
     ) {
     }
 
     #[Route('/{datastoreId}', name: 'get', methods: ['GET'])]
     public function getDatastore(string $datastoreId): JsonResponse
     {
-        return $this->json($this->entrepotApiService->datastore->get($datastoreId));
+        return $this->json($this->datastoreApiService->get($datastoreId));
     }
 
     #[Route('/{datastoreId}/endpoints', name: 'get_endpoints', methods: ['GET'])]
@@ -40,7 +40,7 @@ class DatastoreController extends AbstractController implements ApiControllerInt
         #[MapQueryParameter] ?string $type = null,
         #[MapQueryParameter] ?bool $open = null
     ): JsonResponse {
-        $endpoints = $this->entrepotApiService->datastore->getEndpointsList($datastoreId, [
+        $endpoints = $this->datastoreApiService->getEndpointsList($datastoreId, [
             'type' => $type,
             'open' => $open,
         ]);
@@ -51,7 +51,7 @@ class DatastoreController extends AbstractController implements ApiControllerInt
     #[Route('/{datastoreId}/permissions', name: 'get_permissions', methods: ['GET'])]
     public function getPermissions(string $datastoreId): JsonResponse
     {
-        $permissions = $this->entrepotApiService->datastore->getPermissions($datastoreId);
+        $permissions = $this->datastoreApiService->getPermissions($datastoreId);
 
         return $this->json($permissions);
     }
@@ -59,7 +59,7 @@ class DatastoreController extends AbstractController implements ApiControllerInt
     #[Route('/{datastoreId}/permission/{permissionId}', name: 'get_permission', methods: ['GET'])]
     public function getPermission(string $datastoreId, string $permissionId): JsonResponse
     {
-        $permission = $this->entrepotApiService->datastore->getPermission($datastoreId, $permissionId);
+        $permission = $this->datastoreApiService->getPermission($datastoreId, $permissionId);
 
         return $this->json($permission);
     }
@@ -79,7 +79,7 @@ class DatastoreController extends AbstractController implements ApiControllerInt
         unset($body['beneficiaries']);
 
         // Ajout de la permission
-        $permission = $this->entrepotApiService->datastore->addPermission($datastoreId, $body);
+        $permission = $this->datastoreApiService->addPermission($datastoreId, $body);
 
         return $this->json($permission);
     }
@@ -92,10 +92,10 @@ class DatastoreController extends AbstractController implements ApiControllerInt
     {
         try {
             $body = json_decode(json_encode($dto), true);
-            $permission = $this->entrepotApiService->datastore->updatePermission($datastoreId, $permissionId, $body);
+            $permission = $this->datastoreApiService->updatePermission($datastoreId, $permissionId, $body);
 
             return $this->json($permission);
-        } catch (EntrepotApiException $ex) {
+        } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
     }
@@ -107,10 +107,10 @@ class DatastoreController extends AbstractController implements ApiControllerInt
     public function removePermission(string $datastoreId, string $permissionId): JsonResponse
     {
         try {
-            $this->entrepotApiService->datastore->removePermission($datastoreId, $permissionId);
+            $this->datastoreApiService->removePermission($datastoreId, $permissionId);
 
             return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
-        } catch (EntrepotApiException $ex) {
+        } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
     }

@@ -2,7 +2,7 @@
 
 namespace App\Services\EntrepotApi;
 
-use App\Exception\EntrepotApiException;
+use App\Exception\ApiException;
 use Symfony\Component\HttpFoundation\Response;
 
 class DatastoreApiService extends BaseEntrepotApiService
@@ -63,7 +63,7 @@ class DatastoreApiService extends BaseEntrepotApiService
             return $filteredEndpoints[0];
         }
 
-        throw new EntrepotApiException("Aucun endpoint trouvé avec l'identifiant {$endpointId}", Response::HTTP_NOT_FOUND);
+        throw new ApiException("Aucun endpoint trouvé avec l'identifiant {$endpointId}", Response::HTTP_NOT_FOUND);
     }
 
     /**

@@ -8,10 +8,13 @@ use App\Controller\ApiControllerInterface;
 use App\Dto\Pyramid\AddPyramidDTO;
 use App\Dto\Pyramid\CompositionDTO;
 use App\Dto\Pyramid\PublishPyramidDTO;
+use App\Exception\ApiException;
 use App\Exception\CartesApiException;
-use App\Exception\EntrepotApiException;
-use App\Services\CartesServiceApi;
-use App\Services\EntrepotApiService;
+use App\Services\EntrepotApi\CartesServiceApi;
+use App\Services\EntrepotApi\ConfigurationApiService;
+use App\Services\EntrepotApi\DatastoreApiService;
+use App\Services\EntrepotApi\ProcessingApiService;
+use App\Services\EntrepotApi\StoredDataApiService;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
@@ -29,11 +32,14 @@ class PyramidController extends ServiceController implements ApiControllerInterf
     public const BOTTOM_LEVEL_DEFAULT = 18;
 
     public function __construct(
-        private EntrepotApiService $entrepotApiService,
+        DatastoreApiService $datastoreApiService,
+        private ConfigurationApiService $configurationApiService,
+        private StoredDataApiService $storedDataApiService,
+        private ProcessingApiService $processingApiService,
         private CartesServiceApi $cartesServiceApi,
         private ParameterBagInterface $parameterBag
     ) {
-        parent::__construct($entrepotApiService, $cartesServiceApi);
+        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApi);
     }
 
     #[Route('/add', name: 'add', methods: ['POST'])]
@@ -43,7 +49,7 @@ class PyramidController extends ServiceController implements ApiControllerInterf
             // TODO
             // $samplePyramidId = $request->query->get('samplePyramidId', null);
 
-            $vectordb = $this->entrepotApiService->storedData->get($datastoreId, $dto->vectorDbId);
+            $vectordb = $this->storedDataApiService->get($datastoreId, $dto->vectorDbId);
 
             // TODO Suppression de l'upload ?
 
@@ -84,10 +90,10 @@ class PyramidController extends ServiceController implements ApiControllerInterf
             ];
 
             // Ajout d'une execution de traitement
-            $processingExecution = $this->entrepotApiService->processing->addExecution($datastoreId, $requestBody);
+            $processingExecution = $this->processingApiService->addExecution($datastoreId, $requestBody);
             $pyramidId = $processingExecution['output']['stored_data']['_id'];
 
-            $this->entrepotApiService->storedData->addTags($datastoreId, $dto->vectorDbId, [
+            $this->storedDataApiService->addTags($datastoreId, $dto->vectorDbId, [
                 'pyramid_id' => $pyramidId,
             ]);
 
@@ -100,8 +106,8 @@ class PyramidController extends ServiceController implements ApiControllerInterf
                 'is_sample' => is_null($dto->area) ? 'false' : 'true',
             ];
 
-            $this->entrepotApiService->storedData->addTags($datastoreId, $pyramidId, $pyramidTags);
-            $this->entrepotApiService->processing->launchExecution($datastoreId, $processingExecution['_id']);
+            $this->storedDataApiService->addTags($datastoreId, $pyramidId, $pyramidTags);
+            $this->processingApiService->launchExecution($datastoreId, $processingExecution['_id']);
 
             return new JsonResponse();
         } catch (CartesApiException $ex) {
@@ -118,7 +124,7 @@ class PyramidController extends ServiceController implements ApiControllerInterf
         #[MapRequestPayload] PublishPyramidDTO $dto
     ): JsonResponse {
         try {
-            $pyramid = $this->entrepotApiService->storedData->get($datastoreId, $pyramidId);
+            $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId);
 
             // TODO Suppression de l'Upload ?
             // TODO Suppression de la base de donnees
@@ -131,13 +137,13 @@ class PyramidController extends ServiceController implements ApiControllerInterf
             $endpoint = $this->getEndpointByShareType($datastoreId, ConfigurationTypes::WMTSTMS, $dto->share_with);
 
             // Ajout de la configuration
-            $configuration = $this->entrepotApiService->configuration->add($datastoreId, $configRequestBody);
-            $configuration = $this->entrepotApiService->configuration->addTags($datastoreId, $configuration['_id'], [
+            $configuration = $this->configurationApiService->add($datastoreId, $configRequestBody);
+            $configuration = $this->configurationApiService->addTags($datastoreId, $configuration['_id'], [
                 CommonTags::DATASHEET_NAME => $pyramid['tags'][CommonTags::DATASHEET_NAME],
             ]);
 
             // Creation d'une offering
-            $offering = $this->entrepotApiService->configuration->addOffering($datastoreId, $configuration['_id'], $endpoint['_id'], $endpoint['open']);
+            $offering = $this->configurationApiService->addOffering($datastoreId, $configuration['_id'], $endpoint['_id'], $endpoint['open']);
             $offering['configuration'] = $configuration;
 
             return $this->json($offering);
@@ -157,10 +163,10 @@ class PyramidController extends ServiceController implements ApiControllerInterf
     ): JsonResponse {
         try {
             // récup anciens config et offering
-            $oldOffering = $this->entrepotApiService->configuration->getOffering($datastoreId, $offeringId);
-            $oldConfiguration = $this->entrepotApiService->configuration->get($datastoreId, $oldOffering['configuration']['_id']);
+            $oldOffering = $this->configurationApiService->getOffering($datastoreId, $offeringId);
+            $oldConfiguration = $this->configurationApiService->get($datastoreId, $oldOffering['configuration']['_id']);
 
-            $pyramid = $this->entrepotApiService->storedData->get($datastoreId, $pyramidId);
+            $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId);
 
             // suppression anciens configs et offering
             $this->cartesServiceApi->tmsUnpublish($datastoreId, $oldOffering, false);
@@ -171,15 +177,15 @@ class PyramidController extends ServiceController implements ApiControllerInterf
             $endpoint = $this->getEndpointByShareType($datastoreId, ConfigurationTypes::WMTSTMS, $dto->share_with);
 
             // Ajout de la configuration
-            $configuration = $this->entrepotApiService->configuration->add($datastoreId, $configRequestBody);
-            $configuration = $this->entrepotApiService->configuration->addTags($datastoreId, $configuration['_id'], $oldConfiguration['tags']);
+            $configuration = $this->configurationApiService->add($datastoreId, $configRequestBody);
+            $configuration = $this->configurationApiService->addTags($datastoreId, $configuration['_id'], $oldConfiguration['tags']);
 
             // Creation d'une offering
-            $offering = $this->entrepotApiService->configuration->addOffering($datastoreId, $configuration['_id'], $endpoint['_id'], $endpoint['open']);
+            $offering = $this->configurationApiService->addOffering($datastoreId, $configuration['_id'], $endpoint['_id'], $endpoint['open']);
             $offering['configuration'] = $configuration;
 
             return $this->json($offering);
-        } catch (EntrepotApiException $ex) {
+        } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
     }

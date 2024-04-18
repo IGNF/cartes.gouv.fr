@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\EntrepotApi;
 
 use App\Constants\EntrepotApi\ConfigurationStatuses;
 use App\Constants\EntrepotApi\OfferingTypes;
@@ -15,8 +15,14 @@ class CartesServiceApi
 {
     private HttpClientInterface $httpClient;
 
-    public function __construct(private EntrepotApiService $entrepotApiService, private ParameterBagInterface $params, HttpClientInterface $httpClient)
-    {
+    public function __construct(
+        private ParameterBagInterface $params,
+        private ConfigurationApiService $configurationApiService,
+        private AnnexeApiService $annexeApiService,
+        private DatastoreApiService $datastoreApiService,
+        private StaticApiService $staticApiService,
+        HttpClientInterface $httpClient,
+    ) {
         $this->httpClient = $httpClient->withOptions([
             'proxy' => $params->get('http_proxy'),
             'verify_peer' => false,
@@ -26,8 +32,8 @@ class CartesServiceApi
 
     public function getService(string $datastoreId, string $offeringId): array
     {
-        $offering = $this->entrepotApiService->configuration->getOffering($datastoreId, $offeringId);
-        $offering['configuration'] = $this->entrepotApiService->configuration->get($datastoreId, $offering['configuration']['_id']);
+        $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId);
+        $offering['configuration'] = $this->configurationApiService->get($datastoreId, $offering['configuration']['_id']);
 
         // Metadatas (TMS)
         if (OfferingTypes::WMTSTMS === $offering['type']) {
@@ -63,11 +69,11 @@ class CartesServiceApi
     public function getStyles(string $datastoreId, string $configId): array
     {
         $path = "/configuration/$configId/styles.json";
-        $styleAnnexes = $this->entrepotApiService->annexe->getAll($datastoreId, null, $path);
+        $styleAnnexes = $this->annexeApiService->getAll($datastoreId, null, $path);
 
         $styles = [];
         if (count($styleAnnexes)) {
-            $content = $this->entrepotApiService->annexe->download($datastoreId, $styleAnnexes[0]['_id']);
+            $content = $this->annexeApiService->download($datastoreId, $styleAnnexes[0]['_id']);
             $styles = json_decode($content, true);
         }
 
@@ -79,10 +85,10 @@ class CartesServiceApi
      */
     public function getShareUrl(string $datastoreId, array $offering): ?string
     {
-        $datastore = $this->entrepotApiService->datastore->get($datastoreId);
+        $datastore = $this->datastoreApiService->get($datastoreId);
         $endpointId = $offering['endpoint']['_id'];
 
-        $endpoint = $this->entrepotApiService->datastore->getEndpoint($datastoreId, $endpointId);
+        $endpoint = $this->datastoreApiService->getEndpoint($datastoreId, $endpointId);
         $shareUrl = null;
 
         switch ($offering['type']) {
@@ -107,7 +113,7 @@ class CartesServiceApi
 
     public function unpublish(string $datastoreId, string $offeringId): void
     {
-        $offering = $this->entrepotApiService->configuration->getOffering($datastoreId, $offeringId);
+        $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId);
 
         switch ($offering['type']) {
             case OfferingTypes::WFS:
@@ -128,19 +134,19 @@ class CartesServiceApi
     public function wfsUnpublish(string $datastoreId, array $offering, bool $removeStyleFiles = true): void
     {
         // suppression de l'offering
-        $this->entrepotApiService->configuration->removeOffering($datastoreId, $offering['_id']);
+        $this->configurationApiService->removeOffering($datastoreId, $offering['_id']);
         $configurationId = $offering['configuration']['_id'];
 
         // suppression de la configuration
         // la suppression de l'offering nécessite quelques instants, et tant que la suppression de l'offering n'est pas faite, on ne peut pas demander la suppression de la configuration
         while (1) {
             sleep(3);
-            $configuration = $this->entrepotApiService->configuration->get($datastoreId, $configurationId);
+            $configuration = $this->configurationApiService->get($datastoreId, $configurationId);
             if (ConfigurationStatuses::UNPUBLISHED === $configuration['status']) {
                 break;
             }
         }
-        $this->entrepotApiService->configuration->remove($datastoreId, $configurationId);
+        $this->configurationApiService->remove($datastoreId, $configurationId);
 
         if (true === $removeStyleFiles) {
             // TODO : supprimer les fichiers de styles en annexe qui sont référencés dans les tags/annexes de la configuration
@@ -155,7 +161,7 @@ class CartesServiceApi
     public function wmsVectorUnpublish(string $datastoreId, array $offering, bool $removeStyleFiles = true): void
     {
         // suppression de l'offering
-        $this->entrepotApiService->configuration->removeOffering($datastoreId, $offering['_id']);
+        $this->configurationApiService->removeOffering($datastoreId, $offering['_id']);
         $configurationId = $offering['configuration']['_id'];
         $configuration = null;
 
@@ -163,12 +169,12 @@ class CartesServiceApi
         // la suppression de l'offering nécessite quelques instants, et tant que la suppression de l'offering n'est pas faite, on ne peut pas demander la suppression de la configuration
         while (1) {
             sleep(3);
-            $configuration = $this->entrepotApiService->configuration->get($datastoreId, $configurationId);
+            $configuration = $this->configurationApiService->get($datastoreId, $configurationId);
             if (ConfigurationStatuses::UNPUBLISHED === $configuration['status']) {
                 break;
             }
         }
-        $this->entrepotApiService->configuration->remove($datastoreId, $configurationId);
+        $this->configurationApiService->remove($datastoreId, $configurationId);
 
         if (true === $removeStyleFiles) {
             // récup tous les fichiers statiques liés à la config
@@ -177,7 +183,7 @@ class CartesServiceApi
             }, $configuration['type_infos']['used_data'][0]['relations']);
 
             foreach ($staticFilesIdList as $staticId) {
-                $this->entrepotApiService->static->delete($datastoreId, $staticId);
+                $this->staticApiService->delete($datastoreId, $staticId);
             }
         }
 
@@ -190,19 +196,19 @@ class CartesServiceApi
     public function tmsUnpublish(string $datastoreId, array $offering, bool $removeStyleFiles = true): void
     {
         // suppression de l'offering
-        $this->entrepotApiService->configuration->removeOffering($datastoreId, $offering['_id']);
+        $this->configurationApiService->removeOffering($datastoreId, $offering['_id']);
         $configurationId = $offering['configuration']['_id'];
 
         // suppression de la configuration
         // la suppression de l'offering nécessite quelques instants, et tant que la suppression de l'offering n'est pas faite, on ne peut pas demander la suppression de la configuration
         while (1) {
             sleep(3);
-            $configuration = $this->entrepotApiService->configuration->get($datastoreId, $configurationId);
+            $configuration = $this->configurationApiService->get($datastoreId, $configurationId);
             if (ConfigurationStatuses::UNPUBLISHED === $configuration['status']) {
                 break;
             }
         }
-        $this->entrepotApiService->configuration->remove($datastoreId, $configurationId);
+        $this->configurationApiService->remove($datastoreId, $configurationId);
 
         if (true === $removeStyleFiles) {
             // TODO : supprimer les fichiers de styles en annexe qui sont référencés dans les tags/annexes de la configuration

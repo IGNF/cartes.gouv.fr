@@ -2,10 +2,26 @@
 
 namespace App\Services\EntrepotApi;
 
-use App\Exception\EntrepotApiException;
+use App\Exception\ApiException;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class UserApiService extends BaseEntrepotApiService
 {
+    public function __construct(
+        HttpClientInterface $httpClient,
+        ParameterBagInterface $parameters,
+        Filesystem $filesystem,
+        RequestStack $requestStack,
+        LoggerInterface $logger,
+        private DatastoreApiService $datastoreApiService,
+    ) {
+        parent::__construct($httpClient, $parameters, $filesystem, $requestStack, $logger);
+    }
+
     public function getMe(): array
     {
         return $this->request('GET', 'users/me');
@@ -30,8 +46,8 @@ class UserApiService extends BaseEntrepotApiService
         $datastores = [];
         foreach ($datastoresList as $datastoreId) {
             try {
-                $datastores[] = $this->entrepotApiService->datastore->get($datastoreId);
-            } catch (EntrepotApiException $ex) {
+                $datastores[] = $this->datastoreApiService->get($datastoreId);
+            } catch (ApiException $ex) {
                 // Rien à faire de particulier. On ignore silencieusement l'erreur et pour l'utilisateur c'est comme si ce datastore n'existait pas.
             }
         }

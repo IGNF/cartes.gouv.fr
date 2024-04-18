@@ -6,10 +6,14 @@ use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationStatuses;
 use App\Constants\EntrepotApi\StoredDataTypes;
 use App\Controller\ApiControllerInterface;
+use App\Exception\ApiException;
 use App\Exception\CartesApiException;
-use App\Exception\EntrepotApiException;
-use App\Services\CartesServiceApi;
-use App\Services\EntrepotApiService;
+use App\Services\EntrepotApi\AnnexeApiService;
+use App\Services\EntrepotApi\CartesServiceApi;
+use App\Services\EntrepotApi\ConfigurationApiService;
+use App\Services\EntrepotApi\DatastoreApiService;
+use App\Services\EntrepotApi\StoredDataApiService;
+use App\Services\EntrepotApi\UploadApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,7 +28,11 @@ use Symfony\Component\Routing\Annotation\Route;
 class DatasheetController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        private EntrepotApiService $entrepotApiService,
+        private UploadApiService $uploadApiService,
+        private StoredDataApiService $storedDataApiService,
+        private DatastoreApiService $datastoreApiService,
+        private ConfigurationApiService $configurationApiService,
+        private AnnexeApiService $annexeApiService,
         private CartesServiceApi $cartesServiceApi,
     ) {
     }
@@ -32,7 +40,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
     #[Route('', name: 'get_list', methods: ['GET'])]
     public function getDatasheetList(string $datastoreId): JsonResponse
     {
-        $uploads = $this->entrepotApiService->upload->getAllDetailed($datastoreId, [
+        $uploads = $this->uploadApiService->getAllDetailed($datastoreId, [
             'sort' => 'lastEvent,desc',
         ]);
 
@@ -42,7 +50,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             }
         }, $uploads);
 
-        $storedDataList = $this->entrepotApiService->storedData->getAllDetailed($datastoreId, [
+        $storedDataList = $this->storedDataApiService->getAllDetailed($datastoreId, [
             'sort' => 'lastEvent,desc',
         ]);
 
@@ -69,13 +77,13 @@ class DatasheetController extends AbstractController implements ApiControllerInt
     public function getDetailed(string $datastoreId, string $datasheetName): JsonResponse
     {
         // recherche d'entités API qui représente une fiche de données : upload, stored_data
-        $uploadList = $this->entrepotApiService->upload->getAllDetailed($datastoreId, [
+        $uploadList = $this->uploadApiService->getAllDetailed($datastoreId, [
             'tags' => [
                 CommonTags::DATASHEET_NAME => $datasheetName,
             ],
         ]);
 
-        $vectorDbList = $this->entrepotApiService->storedData->getAllDetailed($datastoreId, [
+        $vectorDbList = $this->storedDataApiService->getAllDetailed($datastoreId, [
             'type' => StoredDataTypes::VECTOR_DB,
             'tags' => [
                 CommonTags::DATASHEET_NAME => $datasheetName,
@@ -83,7 +91,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         ]);
 
         // Pyramid vector
-        $pyramidList = $this->entrepotApiService->storedData->getAllDetailed($datastoreId, [
+        $pyramidList = $this->storedDataApiService->getAllDetailed($datastoreId, [
             'type' => StoredDataTypes::ROK4_PYRAMID_VECTOR,
             'tags' => [
                 CommonTags::DATASHEET_NAME => $datasheetName,
@@ -114,7 +122,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
     #[Route('/{datasheetName}/services', name: 'get_services', methods: ['GET'])]
     public function getServices(string $datastoreId, string $datasheetName): JsonResponse
     {
-        $storedDataList = $this->entrepotApiService->storedData->getAllDetailed($datastoreId, [
+        $storedDataList = $this->storedDataApiService->getAllDetailed($datastoreId, [
             'tags' => [
                 CommonTags::DATASHEET_NAME => $datasheetName,
             ],
@@ -127,10 +135,10 @@ class DatasheetController extends AbstractController implements ApiControllerInt
 
     private function getBasicInfo(string $datastoreId, string $datasheetName): array
     {
-        $datastore = $this->entrepotApiService->datastore->get($datastoreId);
+        $datastore = $this->datastoreApiService->get($datastoreId);
 
         // recherche du nombre de services publiés
-        $configurations = $this->entrepotApiService->configuration->getAll($datastoreId, [
+        $configurations = $this->configurationApiService->getAll($datastoreId, [
             'tags' => [
                 CommonTags::DATASHEET_NAME => $datasheetName,
             ],
@@ -140,7 +148,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
 
         // recherche de vignette
         $annexeUrl = $this->getParameter('annexes_url');
-        $annexes = $this->entrepotApiService->annexe->getAll($datastoreId, null, null, ["datasheet_name=$datasheetName", 'type=thumbnail']);
+        $annexes = $this->annexeApiService->getAll($datastoreId, null, null, ["datasheet_name=$datasheetName", 'type=thumbnail']);
 
         $thumbnail = null;
         if (count($annexes) > 0) {
@@ -167,7 +175,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         $offerings = [];
 
         foreach ($storedDataList as $storedData) {
-            $tmpOfferings = $this->entrepotApiService->configuration->getAllOfferingsDetailed($datastoreId, [
+            $tmpOfferings = $this->configurationApiService->getAllOfferingsDetailed($datastoreId, [
                 'stored_data' => $storedData['_id'],
             ]);
             $offerings = array_merge($offerings, $tmpOfferings);
@@ -188,23 +196,23 @@ class DatasheetController extends AbstractController implements ApiControllerInt
 
             if (isset($datasheet['service_list'])) {
                 foreach ($datasheet['service_list'] as $offering) {
-                    $this->entrepotApiService->configuration->removeOffering($datastoreId, $offering['_id']);
+                    $this->configurationApiService->removeOffering($datastoreId, $offering['_id']);
                     $configurationId = $offering['configuration']['_id'];
 
                     while (1) {
                         sleep(3);
-                        $configuration = $this->entrepotApiService->configuration->get($datastoreId, $configurationId);
+                        $configuration = $this->configurationApiService->get($datastoreId, $configurationId);
                         if (ConfigurationStatuses::UNPUBLISHED === $configuration['status']) {
                             break;
                         }
                     }
-                    $this->entrepotApiService->configuration->remove($datastoreId, $configurationId);
+                    $this->configurationApiService->remove($datastoreId, $configurationId);
                 }
             }
 
             if (isset($datasheet['upload_list'])) {
                 foreach ($datasheet['upload_list'] as $upload) {
-                    $this->entrepotApiService->upload->remove($datastoreId, $upload['_id']);
+                    $this->uploadApiService->remove($datastoreId, $upload['_id']);
                 }
             }
 
@@ -215,18 +223,18 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             }
 
             foreach ($storedDataList as $storedData) {
-                $this->entrepotApiService->storedData->remove($datastoreId, $storedData['_id']);
+                $this->storedDataApiService->remove($datastoreId, $storedData['_id']);
             }
 
             // TODO : autres données à supprimer
             // Suppression des annexes
-            $annexes = $this->entrepotApiService->annexe->getAll($datastoreId, null, null, ["datasheet_name=$datasheetName"]);
+            $annexes = $this->annexeApiService->getAll($datastoreId, null, null, ["datasheet_name=$datasheetName"]);
             foreach ($annexes as $annexe) {
-                $this->entrepotApiService->annexe->remove($datastoreId, $annexe['_id']);
+                $this->annexeApiService->remove($datastoreId, $annexe['_id']);
             }
 
             return new JsonResponse(null, Response::HTTP_NO_CONTENT);
-        } catch (EntrepotApiException $ex) {
+        } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
     }

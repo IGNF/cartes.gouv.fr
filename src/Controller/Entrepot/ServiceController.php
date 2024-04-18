@@ -3,10 +3,11 @@
 namespace App\Controller\Entrepot;
 
 use App\Controller\ApiControllerInterface;
+use App\Exception\ApiException;
 use App\Exception\CartesApiException;
-use App\Exception\EntrepotApiException;
-use App\Services\CartesServiceApi;
-use App\Services\EntrepotApiService;
+use App\Services\EntrepotApi\CartesServiceApi;
+use App\Services\EntrepotApi\ConfigurationApiService;
+use App\Services\EntrepotApi\DatastoreApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,7 +23,8 @@ use Symfony\Component\Routing\Annotation\Route;
 class ServiceController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        private EntrepotApiService $entrepotApiService,
+        private DatastoreApiService $datastoreApiService,
+        private ConfigurationApiService $configurationApiService,
         private CartesServiceApi $cartesServiceApi,
     ) {
     }
@@ -32,13 +34,13 @@ class ServiceController extends AbstractController implements ApiControllerInter
     {
         try {
             if (true === $detailed) {
-                $offerings = $this->entrepotApiService->configuration->getAllOfferingsDetailed($datastoreId);
+                $offerings = $this->configurationApiService->getAllOfferingsDetailed($datastoreId);
             } else {
-                $offerings = $this->entrepotApiService->configuration->getAllOfferings($datastoreId);
+                $offerings = $this->configurationApiService->getAllOfferings($datastoreId);
             }
 
             return $this->json($offerings);
-        } catch (EntrepotApiException $ex) {
+        } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
     }
@@ -50,7 +52,7 @@ class ServiceController extends AbstractController implements ApiControllerInter
             $offering = $this->cartesServiceApi->getService($datastoreId, $offeringId);
 
             return $this->json($offering);
-        } catch (EntrepotApiException $ex) {
+        } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
     }
@@ -62,7 +64,7 @@ class ServiceController extends AbstractController implements ApiControllerInter
             $this->cartesServiceApi->unpublish($datastoreId, $offeringId);
 
             return new JsonResponse(null, Response::HTTP_NO_CONTENT);
-        } catch (EntrepotApiException $ex) {
+        } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
     }
@@ -71,12 +73,12 @@ class ServiceController extends AbstractController implements ApiControllerInter
     {
         // TODO : implémentation partielle, tous les partages ne sont pas couverts
         if ('all_public' === $shareWith) {
-            $endpoints = $this->entrepotApiService->datastore->getEndpointsList($datastoreId, [
+            $endpoints = $this->datastoreApiService->getEndpointsList($datastoreId, [
                 'type' => $configType,
                 'open' => true,
             ]);
         } elseif ('your_community' === $shareWith) {
-            $endpoints = $this->entrepotApiService->datastore->getEndpointsList($datastoreId, [
+            $endpoints = $this->datastoreApiService->getEndpointsList($datastoreId, [
                 'type' => $configType,
                 'open' => false,
             ]);

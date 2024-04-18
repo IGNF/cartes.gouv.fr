@@ -4,10 +4,10 @@ namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\CommonTags;
 use App\Controller\ApiControllerInterface;
+use App\Exception\ApiException;
 use App\Exception\CartesApiException;
-use App\Exception\EntrepotApiException;
 use App\Services\CswMetadataHelper;
-use App\Services\EntrepotApiService;
+use App\Services\EntrepotApi\MetadataApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -24,7 +24,7 @@ use Symfony\Component\Routing\Requirement\Requirement;
 class MetadataController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        private EntrepotApiService $entrepotApiService,
+        private MetadataApiService $metadataApiService,
         private CswMetadataHelper $metadataHelper
     ) {
     }
@@ -37,10 +37,10 @@ class MetadataController extends AbstractController implements ApiControllerInte
         try {
             $query = $request->query->all();
 
-            $metadataList = $this->entrepotApiService->metadata->getAll($datastoreId, $query);
+            $metadataList = $this->metadataApiService->getAll($datastoreId, $query);
 
             return $this->json($metadataList);
-        } catch (EntrepotApiException $ex) {
+        } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
         }
     }
@@ -55,17 +55,17 @@ class MetadataController extends AbstractController implements ApiControllerInte
             $cswMetadata = $this->metadataHelper->fromArray($metadataArray);
             $filePath = $this->metadataHelper->saveToFile($cswMetadata);
 
-            $metadata = $this->entrepotApiService->metadata->add($datastoreId, $filePath);
+            $metadata = $this->metadataApiService->add($datastoreId, $filePath);
             $metadata['csw_metadata'] = $cswMetadata;
 
             if (null !== $datasheetName) {
-                $metadata = $this->entrepotApiService->metadata->addTags($datastoreId, $metadata['_id'], [
+                $metadata = $this->metadataApiService->addTags($datastoreId, $metadata['_id'], [
                     CommonTags::DATASHEET_NAME => $datasheetName,
                 ]);
             }
 
             return $this->json($metadata);
-        } catch (EntrepotApiException $ex) {
+        } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         } catch (\Exception $ex) {
             throw new CartesApiException($ex->getMessage(), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
@@ -76,13 +76,13 @@ class MetadataController extends AbstractController implements ApiControllerInte
     public function get(string $datastoreId, string $metadataId): JsonResponse
     {
         try {
-            $metadata = $this->entrepotApiService->metadata->get($datastoreId, $metadataId);
-            $fileContent = $this->entrepotApiService->metadata->downloadFile($datastoreId, $metadataId);
+            $metadata = $this->metadataApiService->get($datastoreId, $metadataId);
+            $fileContent = $this->metadataApiService->downloadFile($datastoreId, $metadataId);
 
             $metadata['csw_metadata'] = $this->metadataHelper->fromXml($fileContent);
 
             return $this->json($metadata);
-        } catch (EntrepotApiException $ex) {
+        } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         } catch (\Exception $ex) {
             throw new CartesApiException($ex->getMessage(), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
@@ -93,7 +93,7 @@ class MetadataController extends AbstractController implements ApiControllerInte
     public function getByDatasheetName(string $datastoreId, string $datasheetName): JsonResponse
     {
         try {
-            $metadataList = $this->entrepotApiService->metadata->getAll($datastoreId, [
+            $metadataList = $this->metadataApiService->getAll($datastoreId, [
                 'tags' => [
                     CommonTags::DATASHEET_NAME => $datasheetName,
                 ],
@@ -104,12 +104,12 @@ class MetadataController extends AbstractController implements ApiControllerInte
             }
 
             $metadata = $metadataList[0];
-            $fileContent = $this->entrepotApiService->metadata->downloadFile($datastoreId, $metadata['_id']);
+            $fileContent = $this->metadataApiService->downloadFile($datastoreId, $metadata['_id']);
 
             $metadata['csw_metadata'] = $this->metadataHelper->fromXml($fileContent);
 
             return $this->json($metadata);
-        } catch (EntrepotApiException $ex) {
+        } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
         }
     }
@@ -118,7 +118,7 @@ class MetadataController extends AbstractController implements ApiControllerInte
     public function getFileContent(string $datastoreId, string $metadataId, Request $request): Response
     {
         try {
-            $xmlFileContent = $this->entrepotApiService->metadata->downloadFile($datastoreId, $metadataId);
+            $xmlFileContent = $this->metadataApiService->downloadFile($datastoreId, $metadataId);
 
             $format = $request->query->get('format', 'xml');
 
@@ -131,7 +131,7 @@ class MetadataController extends AbstractController implements ApiControllerInte
             return new Response($xmlFileContent, Response::HTTP_OK, [
                 'Content-Type' => 'application/xml',
             ]);
-        } catch (EntrepotApiException $ex) {
+        } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         } catch (\Exception $ex) {
             throw new CartesApiException($ex->getMessage(), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
@@ -142,10 +142,10 @@ class MetadataController extends AbstractController implements ApiControllerInte
     public function delete(string $datastoreId, string $metadataId): JsonResponse
     {
         try {
-            $this->entrepotApiService->metadata->delete($datastoreId, $metadataId);
+            $this->metadataApiService->delete($datastoreId, $metadataId);
 
             return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
-        } catch (EntrepotApiException $ex) {
+        } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         } catch (\Exception $ex) {
             throw new CartesApiException($ex->getMessage(), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);

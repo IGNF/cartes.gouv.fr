@@ -11,10 +11,12 @@ use App\Constants\EntrepotApi\UploadTags;
 use App\Constants\EntrepotApi\UploadTypes;
 use App\Constants\JobStatuses;
 use App\Controller\ApiControllerInterface;
+use App\Exception\ApiException;
 use App\Exception\AppException;
 use App\Exception\CartesApiException;
-use App\Exception\EntrepotApiException;
-use App\Services\EntrepotApiService;
+use App\Services\EntrepotApi\ProcessingApiService;
+use App\Services\EntrepotApi\StoredDataApiService;
+use App\Services\EntrepotApi\UploadApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -31,7 +33,9 @@ use Symfony\Component\Routing\Annotation\Route;
 class UploadController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        private EntrepotApiService $entrepotApiService,
+        private UploadApiService $uploadApiService,
+        private ProcessingApiService $processingApiService,
+        private StoredDataApiService $storedDataApiService,
         private ParameterBagInterface $parameterBag,
     ) {
     }
@@ -47,10 +51,10 @@ class UploadController extends AbstractController implements ApiControllerInterf
                 $query['type'] = $type;
             }
 
-            $uploadList = $this->entrepotApiService->upload->getAllDetailed($datastoreId, $query);
+            $uploadList = $this->uploadApiService->getAllDetailed($datastoreId, $query);
 
             return $this->json($uploadList);
-        } catch (EntrepotApiException $ex) {
+        } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
         }
     }
@@ -68,7 +72,7 @@ class UploadController extends AbstractController implements ApiControllerInterf
                 'type' => UploadTypes::VECTOR,
                 'srs' => $content['data_srid'],
             ];
-            $upload = $this->entrepotApiService->upload->add($datastoreId, $uploadData);
+            $upload = $this->uploadApiService->add($datastoreId, $uploadData);
 
             // ajout tags sur la livraison
             $tags = [
@@ -76,7 +80,7 @@ class UploadController extends AbstractController implements ApiControllerInterf
                 CommonTags::DATASHEET_NAME => $content['data_name'],
                 // statut des checks et du processing intégration
             ];
-            $upload = $this->entrepotApiService->upload->addTags($datastoreId, $upload['_id'], $tags);
+            $upload = $this->uploadApiService->addTags($datastoreId, $upload['_id'], $tags);
 
             // retourne l'upload au frontend, qui se chargera de lancer l'intégration VECTOR-DB
             return $this->json($upload);
@@ -91,8 +95,8 @@ class UploadController extends AbstractController implements ApiControllerInterf
     public function get(string $datastoreId, string $uploadId): JsonResponse
     {
         try {
-            return $this->json($this->entrepotApiService->upload->get($datastoreId, $uploadId));
-        } catch (EntrepotApiException $ex) {
+            return $this->json($this->uploadApiService->get($datastoreId, $uploadId));
+        } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         } catch (\Exception $ex) {
             throw new CartesApiException($ex->getMessage(), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
@@ -103,7 +107,7 @@ class UploadController extends AbstractController implements ApiControllerInterf
     public function getFileTree(string $datastoreId, string $uploadId): JsonResponse
     {
         try {
-            $fileTree = $this->entrepotApiService->upload->getFileTree($datastoreId, $uploadId);
+            $fileTree = $this->uploadApiService->getFileTree($datastoreId, $uploadId);
 
             return $this->json($fileTree);
         } catch (AppException $ex) {
@@ -119,7 +123,7 @@ class UploadController extends AbstractController implements ApiControllerInterf
         string $uploadId,
         #[MapQueryParameter] bool $getOnlyProgress = false,
     ): JsonResponse {
-        $upload = $this->entrepotApiService->upload->get($datastoreId, $uploadId);
+        $upload = $this->uploadApiService->get($datastoreId, $uploadId);
 
         // construction de progress initial
         $initialIntegProgress = [
@@ -149,11 +153,11 @@ class UploadController extends AbstractController implements ApiControllerInterf
 
             // mise à jour état des étapes de l'intégration uniquement si changement
             if ($integCurrStepClone !== $integCurrentStep || $integProgressClone !== $integProgress) {
-                $upload = $this->entrepotApiService->upload->addTags($datastoreId, $uploadId, $uploadTags);
+                $upload = $this->uploadApiService->addTags($datastoreId, $uploadId, $uploadTags);
             }
 
             return $this->json($uploadTags);
-        } catch (EntrepotApiException $ex) {
+        } catch (ApiException $ex) {
             return $this->json($ex->getDetails(), $ex->getCode());
         }
     }
@@ -174,10 +178,10 @@ class UploadController extends AbstractController implements ApiControllerInterf
                         case JobStatuses::WAITING:
                             // si l'étape est prête et en attente à être exécutée, on lance l'étape
                             if (UploadStatuses::CLOSED === $upload['status']) {
-                                $this->entrepotApiService->upload->open($datastoreId, $upload['_id']);
+                                $this->uploadApiService->open($datastoreId, $upload['_id']);
                             }
 
-                            $this->entrepotApiService->upload->addFile($datastoreId, $upload['_id'], $upload['tags'][UploadTags::DATA_UPLOAD_PATH]);
+                            $this->uploadApiService->addFile($datastoreId, $upload['_id'], $upload['tags'][UploadTags::DATA_UPLOAD_PATH]);
 
                             $currentStepStatus = JobStatuses::IN_PROGRESS;
                             break;
@@ -203,7 +207,7 @@ class UploadController extends AbstractController implements ApiControllerInterf
                             }
                             break;
                         case JobStatuses::IN_PROGRESS:
-                            $uploadChecks = $this->entrepotApiService->upload->getCheckExecutions($datastoreId, $upload['_id']);
+                            $uploadChecks = $this->uploadApiService->getCheckExecutions($datastoreId, $upload['_id']);
 
                             if (0 == count($uploadChecks[UploadCheckTypes::ASKED]) && 0 == count($uploadChecks[UploadCheckTypes::IN_PROGRESS])) {
                                 // il ne reste plus de check dans les catégories "asked" ou "in_progress"
@@ -241,17 +245,17 @@ class UploadController extends AbstractController implements ApiControllerInterf
                                 ],
                             ];
 
-                            $processingExec = $this->entrepotApiService->processing->addExecution($datastoreId, $procExecBody);
+                            $processingExec = $this->processingApiService->addExecution($datastoreId, $procExecBody);
                             $vectorDb = $processingExec['output']['stored_data'];
 
                             // ajout tags sur l'upload
-                            $this->entrepotApiService->upload->addTags($datastoreId, $upload['_id'], [
+                            $this->uploadApiService->addTags($datastoreId, $upload['_id'], [
                                 'vectordb_id' => $vectorDb['_id'],
                                 'proc_int_id' => $processingExec['_id'],
                             ]);
 
                             // ajout tags sur la stored_data
-                            $this->entrepotApiService->storedData->addTags($datastoreId, $vectorDb['_id'], [
+                            $this->storedDataApiService->addTags($datastoreId, $vectorDb['_id'], [
                                 'upload_id' => $upload['_id'],
                                 'proc_int_id' => $processingExec['_id'],
                                 CommonTags::DATASHEET_NAME => $upload['tags'][CommonTags::DATASHEET_NAME],
@@ -259,13 +263,13 @@ class UploadController extends AbstractController implements ApiControllerInterf
 
                             // // TODO : mise à jour ?
 
-                            $this->entrepotApiService->processing->launchExecution($datastoreId, $processingExec['_id']);
+                            $this->processingApiService->launchExecution($datastoreId, $processingExec['_id']);
                             $currentStepStatus = JobStatuses::IN_PROGRESS;
                             break;
 
                         case JobStatuses::IN_PROGRESS:
-                            $processingExec = $this->entrepotApiService->processing->getExecution($datastoreId, $upload['tags']['proc_int_id']);
-                            $vectordb = $this->entrepotApiService->storedData->get($datastoreId, $upload['tags']['vectordb_id']);
+                            $processingExec = $this->processingApiService->getExecution($datastoreId, $upload['tags']['proc_int_id']);
+                            $vectordb = $this->storedDataApiService->get($datastoreId, $upload['tags']['vectordb_id']);
 
                             if (!in_array($processingExec['status'], [ProcessingStatuses::CREATED, ProcessingStatuses::WAITING, ProcessingStatuses::PROGRESS])) {
                                 if (ProcessingStatuses::SUCCESS == $processingExec['status'] && StoredDataStatuses::GENERATED == $vectordb['status']) {
@@ -295,10 +299,10 @@ class UploadController extends AbstractController implements ApiControllerInterf
     public function delete(string $datastoreId, string $uploadId): JsonResponse
     {
         try {
-            $this->entrepotApiService->upload->remove($datastoreId, $uploadId);
+            $this->uploadApiService->remove($datastoreId, $uploadId);
 
             return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
-        } catch (EntrepotApiException $ex) {
+        } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         } catch (\Exception $ex) {
             throw new CartesApiException($ex->getMessage(), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);

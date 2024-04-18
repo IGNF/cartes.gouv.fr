@@ -4,8 +4,8 @@ namespace App\Services\EntrepotApi;
 
 use App\Constants\EntrepotApi\UploadStatuses;
 use App\Constants\EntrepotApi\UploadTags;
+use App\Exception\ApiException;
 use App\Exception\AppException;
-use App\Exception\EntrepotApiException;
 
 class UploadApiService extends BaseEntrepotApiService
 {
@@ -56,8 +56,8 @@ class UploadApiService extends BaseEntrepotApiService
                 'type' => $uploadData['type'],
                 'srs' => $uploadData['srs'],
             ]);
-        } catch (EntrepotApiException $ex) {
-            throw new EntrepotApiException('Création de la livraison échouée');
+        } catch (ApiException $ex) {
+            throw new ApiException('Création de la livraison échouée');
         }
     }
 
@@ -219,7 +219,7 @@ class UploadApiService extends BaseEntrepotApiService
             $this->addTags($datastoreId, $uploadId, [
                 UploadTags::FILE_TREE => json_encode($fileTree),
             ]);
-        } catch (EntrepotApiException $ex) {
+        } catch (ApiException $ex) {
             // ne rien faire, tant pis si la récupération de l'arborescence a échoué
         }
 

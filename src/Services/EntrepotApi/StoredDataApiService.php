@@ -3,9 +3,27 @@
 namespace App\Services\EntrepotApi;
 
 use App\Constants\EntrepotApi\StoredDataTypes;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class StoredDataApiService extends BaseEntrepotApiService
 {
+    public function __construct(
+        HttpClientInterface $httpClient,
+        ParameterBagInterface $parameters,
+        Filesystem $filesystem,
+        RequestStack $requestStack,
+        LoggerInterface $logger,
+        private ProcessingApiService $processingApiService,
+        private ConfigurationApiService $configurationApiService,
+        private AnnexeApiService $annexeApiService
+    ) {
+        parent::__construct($httpClient, $parameters, $filesystem, $requestStack, $logger);
+    }
+
     /**
      * @param array<mixed> $query
      */
@@ -44,11 +62,11 @@ class StoredDataApiService extends BaseEntrepotApiService
         // fetch information specific to the type of stored data
         if (StoredDataTypes::VECTOR_DB == $storedData['type']) {
             if (array_key_exists('proc_int_id', $storedData['tags'])) {
-                $vectordbProcInt = $this->entrepotApiService->processing->getExecution($datastoreId, $storedData['tags']['proc_int_id']);
+                $vectordbProcInt = $this->processingApiService->getExecution($datastoreId, $storedData['tags']['proc_int_id']);
                 $storedData['input_upload_id'] = $vectordbProcInt['inputs']['upload'][0]['_id'];
             }
         } elseif (StoredDataTypes::ROK4_PYRAMID_VECTOR == $storedData['type']) {
-            $offerings = $this->entrepotApiService->configuration->getAllOfferings($datastoreId, [
+            $offerings = $this->configurationApiService->getAllOfferings($datastoreId, [
                 'stored_data' => $storedData['_id'],
             ]);
 
@@ -134,7 +152,7 @@ class StoredDataApiService extends BaseEntrepotApiService
         if (isset($storedData['tags']['styles'])) {
             $tagStyles = json_decode($storedData['tags']['styles'], true);
             foreach ($tagStyles as $id => $name) {
-                $annexe = $this->entrepotApiService->annexe->get($datastoreId, $id);
+                $annexe = $this->annexeApiService->get($datastoreId, $id);
                 $styles[$id] = ['name' => $name, 'url' => $annexe['paths'][0]];
             }
         }
