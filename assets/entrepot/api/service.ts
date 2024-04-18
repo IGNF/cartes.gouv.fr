@@ -1,7 +1,7 @@
 import SymfonyRouting from "../../modules/Routing";
 import { jsonFetch } from "../../modules/jsonFetch";
-import { Service } from "../../types/app";
-import { OfferingDetailResponseDto, OfferingListResponseDto } from "../../types/entrepot";
+import { Service } from "../../@types/app";
+import { OfferingDetailResponseDto, OfferingListResponseDto } from "../../@types/entrepot";
 
 const getService = (datastoreId: string, offeringId: string, otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_service_get_service", { datastoreId, offeringId });

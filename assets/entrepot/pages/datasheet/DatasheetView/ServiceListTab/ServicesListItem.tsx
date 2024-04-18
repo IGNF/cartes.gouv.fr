@@ -14,7 +14,7 @@ import useToggle from "../../../../../hooks/useToggle";
 import RQKeys from "../../../../../modules/RQKeys";
 import { routes } from "../../../../../router/router";
 import { useSnackbarStore } from "../../../../../stores/SnackbarStore";
-import { OfferingStatusEnum, OfferingTypeEnum, type Service } from "../../../../../types/app";
+import { OfferingStatusEnum, OfferingTypeEnum, type Service } from "../../../../../@types/app";
 import { formatDateFromISO, offeringTypeDisplayName } from "../../../../../utils";
 import api from "../../../../api";
 import ServiceDesc from "./ServiceDesc";

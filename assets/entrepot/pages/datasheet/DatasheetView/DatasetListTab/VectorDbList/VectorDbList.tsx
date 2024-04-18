@@ -2,7 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { FC, memo } from "react";
 import { symToStr } from "tsafe/symToStr";
 
-import { type VectorDb } from "../../../../../../types/app";
+import { type VectorDb } from "../../../../../../@types/app";
 import VectorDbListItem from "./VectorDbListItem";
 
 type VectorDbListProps = {

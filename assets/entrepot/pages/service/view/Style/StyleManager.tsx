@@ -1,5 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import { CartesStyle, Service, StyleFormat } from "../../../../../types/app";
+import { CartesStyle, Service, StyleFormat } from "../../../../../@types/app";
 import { FC, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
@@ -16,7 +16,7 @@ import { CartesApiException } from "../../../../../modules/jsonFetch";
 import StyleHelper from "../../../../../modules/Style/StyleHelper";
 import validations from "../../../../../validations";
 import api from "../../../../api";
-import { OfferingDetailResponseDtoTypeEnum } from "../../../../../types/entrepot";
+import { OfferingDetailResponseDtoTypeEnum } from "../../../../../@types/entrepot";
 import RQKeys from "../../../../../modules/RQKeys";
 import UploadLayerStyles from "./UploadLayerStyles";
 import getWebService from "../../../../../modules/WebServices/WebServices";

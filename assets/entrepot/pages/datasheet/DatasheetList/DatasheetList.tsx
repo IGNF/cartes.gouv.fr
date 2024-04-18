@@ -9,7 +9,7 @@ import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import RQKeys from "../../../../modules/RQKeys";
 import { routes } from "../../../../router/router";
-import { Datasheet } from "../../../../types/app";
+import { Datasheet } from "../../../../@types/app";
 import DatasheetListItem from "./DatasheetListItem";
 
 type DatasheetListProps = {

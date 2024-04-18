@@ -9,7 +9,7 @@ import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import { useTranslation, type Translations } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/RQKeys";
-import { StoredDataTypeEnum, UploadTypeEnum } from "../../../../types/app";
+import { StoredDataTypeEnum, UploadTypeEnum } from "../../../../@types/app";
 import AnnexeUsage from "./storages/AnnexeUsage";
 import EndpointsUsage from "./storages/EndpointsUsage";
 import FilesystemUsage from "./storages/FilesystemUsage";

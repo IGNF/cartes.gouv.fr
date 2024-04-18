@@ -1,7 +1,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { FC } from "react";
 
-import { UploadTree } from "../../../../types/app";
+import { UploadTree } from "../../../../@types/app";
 
 type UploadFileTreeProps = {
     fileTree: UploadTree;

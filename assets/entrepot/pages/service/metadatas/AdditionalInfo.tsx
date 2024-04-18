@@ -10,7 +10,7 @@ import AutocompleteSelect from "../../../../components/Input/AutocompleteSelect"
 import ignProducts from "../../../../data/md_resolutions.json";
 import { getTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/RQKeys";
-import { Pyramid, ServiceFormValuesBaseType, UploadTree, VectorDb } from "../../../../types/app";
+import { Pyramid, ServiceFormValuesBaseType, UploadTree, VectorDb } from "../../../../@types/app";
 import { LanguageType, charsets, getLanguages } from "../../../../utils";
 
 /**

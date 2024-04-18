@@ -1,5 +1,5 @@
-import { IPListName, KeyFormValuesType, UserKeyDetailedWithAccessesResponseDto, UserKeyInfoDtoTypeEnum } from "../../../../../types/app";
-import { BasicInfoDto, HashInfoDto, UserKeyDetailsResponseDtoUserKeyInfoDtoTypeEnum } from "../../../../../types/entrepot";
+import { IPListName, KeyFormValuesType, UserKeyDetailedWithAccessesResponseDto, UserKeyInfoDtoTypeEnum } from "../../../../../@types/app";
+import { BasicInfoDto, HashInfoDto, UserKeyDetailsResponseDtoUserKeyInfoDtoTypeEnum } from "../../../../../@types/entrepot";
 import AccessesTransformer from "./AccessesTransformer";
 
 const UserKeyDefaultValues: KeyFormValuesType = {

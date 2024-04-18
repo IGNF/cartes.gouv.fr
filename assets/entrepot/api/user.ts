@@ -1,14 +1,14 @@
 import SymfonyRouting from "../../modules/Routing";
 
 import { jsonFetch } from "../../modules/jsonFetch";
-import { Datastore, UserKeyDetailedWithAccessesResponseDto, UserKeyWithAccessesResponseDto } from "../../types/app";
+import { Datastore, UserKeyDetailedWithAccessesResponseDto, UserKeyWithAccessesResponseDto } from "../../@types/app";
 import {
     PermissionDetailsResponseDto,
     PermissionWithOfferingsDetailsResponseDto,
     UserKeyCreateDtoUserKeyInfoDto,
     UserKeyResponseDto,
     UserKeyUpdateDto,
-} from "../../types/entrepot";
+} from "../../@types/entrepot";
 
 const getMe = () => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_user_me");

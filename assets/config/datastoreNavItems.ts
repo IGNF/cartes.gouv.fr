@@ -4,7 +4,7 @@ import { declareComponentKeys } from "i18nifty";
 import { Translations, getTranslation } from "../i18n/i18n";
 import { routes } from "../router/router";
 import { useAuthStore } from "../stores/AuthStore";
-import { Datastore } from "../types/app";
+import { Datastore } from "../@types/app";
 
 const { t } = getTranslation("datastoreNavItems");
 

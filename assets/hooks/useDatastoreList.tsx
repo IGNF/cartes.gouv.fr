@@ -4,7 +4,7 @@ import api from "../entrepot/api";
 import RQKeys from "../modules/RQKeys";
 import { CartesApiException } from "../modules/jsonFetch";
 import { useAuthStore } from "../stores/AuthStore";
-import { Datastore } from "../types/app";
+import { Datastore } from "../@types/app";
 
 const useDatastoreList = () => {
     const user = useAuthStore((state) => state.user);

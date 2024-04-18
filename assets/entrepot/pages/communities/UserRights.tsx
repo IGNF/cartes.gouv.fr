@@ -1,6 +1,6 @@
 import { FC } from "react";
 import { getTranslation } from "../../../i18n/i18n";
-import { CommunityUserResponseDtoRightsEnum } from "../../../types/entrepot";
+import { CommunityUserResponseDtoRightsEnum } from "../../../@types/entrepot";
 
 const { t } = getTranslation("Rights");
 

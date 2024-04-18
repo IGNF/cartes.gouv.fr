@@ -3,7 +3,7 @@ import { FC } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { useTranslation } from "../../../../i18n/i18n";
 import { fr } from "@codegouvfr/react-dsfr";
-import { KeyFormValuesType } from "../../../../types/app";
+import { KeyFormValuesType } from "../../../../@types/app";
 
 type BasicTypeInfoFormProps = {
     editMode: boolean;

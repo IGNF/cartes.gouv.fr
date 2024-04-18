@@ -20,7 +20,7 @@ import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/RQKeys";
 import { routes } from "../../../../router/router";
 import { useAuthStore } from "../../../../stores/AuthStore";
-import { DatastorePermissionResponseDto, PermissionCreateDtoTypeEnum } from "../../../../types/entrepot";
+import { DatastorePermissionResponseDto, PermissionCreateDtoTypeEnum } from "../../../../@types/entrepot";
 import CommunityListForm from "./CommunityListForm";
 import ScrollOfferingList from "./ScrollOfferingList";
 import { getAddSchema } from "./ValidationSchemas";

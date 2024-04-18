@@ -1,6 +1,6 @@
 import { TestContext, ValidationError } from "yup";
 
-import { Service, StyleFormat } from "../types/app";
+import { Service, StyleFormat } from "../@types/app";
 import { getFileExtension } from "../utils";
 
 class StyleValidator {

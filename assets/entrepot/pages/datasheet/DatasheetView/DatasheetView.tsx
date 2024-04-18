@@ -19,7 +19,7 @@ import { Translations, declareComponentKeys, useTranslation } from "../../../../
 import RQKeys from "../../../../modules/RQKeys";
 import { type CartesApiException } from "../../../../modules/jsonFetch";
 import { routes, useRoute } from "../../../../router/router";
-import { Datasheet, type DatasheetDetailed } from "../../../../types/app";
+import { Datasheet, type DatasheetDetailed } from "../../../../@types/app";
 import DatasetListTab from "./DatasetListTab/DatasetListTab";
 import DatasheetThumbnail, { type ThumbnailAction } from "./DatasheetThumbnail";
 import ServicesListTab from "./ServiceListTab/ServicesListTab";

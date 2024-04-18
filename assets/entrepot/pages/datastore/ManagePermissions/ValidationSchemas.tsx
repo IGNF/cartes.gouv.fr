@@ -1,6 +1,6 @@
 import { isUUID } from "validator";
 import * as yup from "yup";
-import { PermissionCreateDtoTypeEnum } from "../../../../types/entrepot";
+import { PermissionCreateDtoTypeEnum } from "../../../../@types/entrepot";
 import { ComponentKey } from "../../../../i18n/i18n";
 import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
 

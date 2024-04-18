@@ -4,8 +4,8 @@ import { UseQueryResult } from "@tanstack/react-query";
 import { FC, memo, useMemo } from "react";
 
 import LoadingText from "../../../../../../components/Utils/LoadingText";
-import { StoredDataStatusEnum, StoredDataTypeEnum } from "../../../../../../types/app";
-import { OfferingListResponseDto, ProcessingExecutionStoredDataDto } from "../../../../../../types/entrepot";
+import { StoredDataStatusEnum, StoredDataTypeEnum } from "../../../../../../@types/app";
+import { OfferingListResponseDto, ProcessingExecutionStoredDataDto } from "../../../../../../@types/entrepot";
 import { offeringTypeDisplayName } from "../../../../../../utils";
 
 type VectorDbDescProps = {

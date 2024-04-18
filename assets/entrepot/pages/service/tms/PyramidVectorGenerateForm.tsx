@@ -18,7 +18,7 @@ import RQKeys from "../../../../modules/RQKeys";
 import Translator from "../../../../modules/Translator";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import { routes } from "../../../../router/router";
-import { type StoredDataRelation, type VectorDb } from "../../../../types/app";
+import { type StoredDataRelation, type VectorDb } from "../../../../@types/app";
 import TableSelection from "../TableSelection";
 import formatForm from "./format-form";
 import Sample, { type SampleType } from "./sample/Sample";

@@ -1,6 +1,6 @@
 import SymfonyRouting from "../../modules/Routing";
 import { jsonFetch } from "../../modules/jsonFetch";
-import { Metadata } from "../../types/app";
+import { Metadata } from "../../@types/app";
 
 const add = (datastoreId: string, body: object, queryParams: object = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_metadata_add", { datastoreId, ...queryParams });

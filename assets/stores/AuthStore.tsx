@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { CartesUser } from "../types/app";
+import { CartesUser } from "../@types/app";
 
 interface AuthStore {
     user: CartesUser | null;

@@ -1,5 +1,5 @@
-import { Service } from "../../types/app";
-import { LayerTypes } from "../../types/ol";
+import { Service } from "../../@types/app";
+import { LayerTypes } from "../../@types/ol";
 abstract class BaseService {
     readonly service: Service;
 

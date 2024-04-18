@@ -1,4 +1,4 @@
-import { AccessCreateDto } from "../../../../../types/entrepot";
+import { AccessCreateDto } from "../../../../../@types/entrepot";
 
 export default class AccessesManager {
     private _accesses: AccessCreateDto[];

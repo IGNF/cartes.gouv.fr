@@ -9,8 +9,8 @@ import LoadingText from "../../../components/Utils/LoadingText";
 import { datastoreNavItems } from "../../../config/datastoreNavItems";
 import { Translations, getTranslation } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/RQKeys";
-import { UserKeyWithAccessesResponseDto } from "../../../types/app";
-import { PermissionDetailsResponseDto } from "../../../types/entrepot";
+import { UserKeyWithAccessesResponseDto } from "../../../@types/app";
+import { PermissionDetailsResponseDto } from "../../../@types/entrepot";
 import UserKeysListTab from "./keys/UserKeysListTab";
 import PermissionsListTab from "./permissions/PermissionsListTab";
 

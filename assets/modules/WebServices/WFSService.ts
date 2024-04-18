@@ -5,7 +5,7 @@ import { bbox as bboxStrategy } from "ol/loadingstrategy";
 import GeoJSON from "ol/format/GeoJSON";
 import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
-import { Service } from "../../types/app";
+import { Service } from "../../@types/app";
 import BaseService from "./BaseService";
 import { getRequestInfo } from "../../utils";
 import olDefaults from "../../data/ol-defaults.json";

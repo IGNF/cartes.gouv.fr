@@ -10,7 +10,7 @@ import charsets from "./data/charset_list.json";
 // Langues iso639-2
 // https://github.com/haliaeetus/iso-639/blob/master/data/iso_639-2.json
 import langs from "./data/iso_639-2.json";
-import { OfferingTypeEnum } from "./types/app";
+import { OfferingTypeEnum } from "./@types/app";
 
 export type LanguageType = {
     language: string;

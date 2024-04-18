@@ -1,7 +1,7 @@
 import SymfonyRouting from "../../modules/Routing";
 
 import { jsonFetch } from "../../modules/jsonFetch";
-import { CartesStyle } from "../../types/app";
+import { CartesStyle } from "../../@types/app";
 
 const add = (datastoreId: string, offeringId: string, data: FormData) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_style_add", { datastoreId, offeringId });

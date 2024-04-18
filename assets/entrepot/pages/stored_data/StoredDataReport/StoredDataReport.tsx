@@ -10,7 +10,7 @@ import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import RQKeys from "../../../../modules/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
-import { StoredDataReport } from "../../../../types/app";
+import { StoredDataReport } from "../../../../@types/app";
 import { routes } from "../../../../router/router";
 import ProcessingExecutionReport from "./ProcessingExecutionReport";
 import UploadCheckExecutionReport from "./UploadCheckExecutionReport";

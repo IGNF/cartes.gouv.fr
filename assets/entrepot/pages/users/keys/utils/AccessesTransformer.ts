@@ -1,4 +1,4 @@
-import { AccessCreateDto, AccessDetailsResponseDto } from "../../../../../types/entrepot";
+import { AccessCreateDto, AccessDetailsResponseDto } from "../../../../../@types/entrepot";
 
 export default class AccessesTransformer {
     static transformToArray(accesses: AccessDetailsResponseDto[]): AccessCreateDto[] {

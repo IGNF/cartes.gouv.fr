@@ -16,7 +16,7 @@ import Wait from "../../../../components/Utils/Wait";
 import { ComponentKey, useTranslation } from "../../../../i18n/i18n";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import RQKeys from "../../../../modules/RQKeys";
-import type { Datasheet, DatasheetDetailed, DatasheetThumbnailAnnexe } from "../../../../types/app";
+import type { Datasheet, DatasheetDetailed, DatasheetThumbnailAnnexe } from "../../../../@types/app";
 import { getFileExtension } from "../../../../utils";
 import api from "../../../api";
 

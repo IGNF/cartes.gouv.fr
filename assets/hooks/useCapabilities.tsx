@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import WMTSCapabilities from "ol/format/WMTSCapabilities";
-import { Capabilities } from "../types/ol";
+import { Capabilities } from "../@types/ol";
 
 const useCapabilities = (key: string = "cartes") => {
     return useQuery<Capabilities>({

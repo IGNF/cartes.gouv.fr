@@ -5,7 +5,7 @@ import { FC } from "react";
 import { symToStr } from "tsafe/symToStr";
 
 import { routes } from "../../../../router/router";
-import { type Datasheet } from "../../../../types/app";
+import { type Datasheet } from "../../../../@types/app";
 
 import "../../../../sass/pages/datasheetlist.scss";
 

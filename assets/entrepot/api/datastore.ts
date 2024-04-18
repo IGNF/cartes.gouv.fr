@@ -1,8 +1,8 @@
 import SymfonyRouting from "../../modules/Routing";
 
 import { jsonFetch } from "../../modules/jsonFetch";
-import { type Datastore, type DatastoreEndpoint } from "../../types/app";
-import { DatastorePermissionResponseDto } from "../../types/entrepot";
+import { type Datastore, type DatastoreEndpoint } from "../../@types/app";
+import { DatastorePermissionResponseDto } from "../../@types/entrepot";
 
 const get = (datastoreId: string, otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_datastore_get", { datastoreId });

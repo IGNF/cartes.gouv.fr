@@ -4,7 +4,7 @@ import { FC } from "react";
 import { UseFormReturn } from "react-hook-form";
 
 import { useTranslation } from "../../../../i18n/i18n";
-import { ServiceFormValuesBaseType } from "../../../../types/app";
+import { ServiceFormValuesBaseType } from "../../../../@types/app";
 
 type UploadMDFileProps = {
     visible: boolean;

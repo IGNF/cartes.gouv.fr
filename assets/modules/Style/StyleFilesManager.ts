@@ -1,5 +1,5 @@
-import { Service, StyleFormat } from "../../types/app";
-import { OfferingDetailResponseDtoTypeEnum } from "../../types/entrepot";
+import { Service, StyleFormat } from "../../@types/app";
+import { OfferingDetailResponseDtoTypeEnum } from "../../@types/entrepot";
 import WFSStyleFilesManager from "./WFSStyleFilesManager";
 import TMSStyleFilesManager from "./TMSStyleFilesManager";
 

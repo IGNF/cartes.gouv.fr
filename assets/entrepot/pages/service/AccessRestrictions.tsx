@@ -7,7 +7,7 @@ import { UseFormReturn } from "react-hook-form";
 import api from "../../api";
 import RQKeys from "../../../modules/RQKeys";
 import Translator from "../../../modules/Translator";
-import { DatastoreEndpoint, EndpointTypeEnum, ServiceFormValuesBaseType } from "../../../types/app";
+import { DatastoreEndpoint, EndpointTypeEnum, ServiceFormValuesBaseType } from "../../../@types/app";
 
 type AccessRestrictionProps = {
     datastoreId: string;

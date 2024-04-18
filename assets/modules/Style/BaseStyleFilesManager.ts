@@ -1,4 +1,4 @@
-import { Service, StyleForm, StyleFormat } from "../../types/app";
+import { Service, StyleForm, StyleFormat } from "../../@types/app";
 
 interface BaseStyleFilesManager {
     readonly service: Service;

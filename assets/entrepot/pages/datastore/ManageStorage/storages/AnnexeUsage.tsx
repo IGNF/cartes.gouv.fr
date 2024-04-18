@@ -17,7 +17,7 @@ import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/RQKeys";
 import { CartesApiException } from "../../../../../modules/jsonFetch";
 import { routes } from "../../../../../router/router";
-import { Annexe, Datastore } from "../../../../../types/app";
+import { Annexe, Datastore } from "../../../../../@types/app";
 import { niceBytes } from "../../../../../utils";
 
 const TAGS_PREFIX = {

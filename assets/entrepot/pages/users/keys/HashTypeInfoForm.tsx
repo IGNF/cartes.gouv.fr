@@ -3,7 +3,7 @@ import { useTranslation } from "../../../../i18n/i18n";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { UseFormReturn } from "react-hook-form";
 import { fr } from "@codegouvfr/react-dsfr";
-import { KeyFormValuesType } from "../../../../types/app";
+import { KeyFormValuesType } from "../../../../@types/app";
 
 type HashTypeInfoFormProps = {
     editMode: boolean;

@@ -15,7 +15,7 @@ import Wait from "../../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/RQKeys";
 import { CartesApiException } from "../../../../../modules/jsonFetch";
-import { Datastore, Offering, OfferingTypeEnum } from "../../../../../types/app";
+import { Datastore, Offering, OfferingTypeEnum } from "../../../../../@types/app";
 
 const confirmDialogModal = createModal({
     id: "confirm-unpublish-offering-modal",

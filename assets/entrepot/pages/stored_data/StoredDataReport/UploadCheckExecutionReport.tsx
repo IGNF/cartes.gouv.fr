@@ -1,7 +1,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { FC } from "react";
 
-import { CheckDetailed } from "../../../../types/app";
+import { CheckDetailed } from "../../../../@types/app";
 import CheckOrProcessingStatusBadge from "./CheckOrProcessingStatusBadge";
 import Logs from "./Logs";
 

@@ -6,7 +6,7 @@ import { Controller, UseFormReturn } from "react-hook-form";
 
 import AutocompleteSelect from "../../../../components/Input/AutocompleteSelect";
 import Translator from "../../../../modules/Translator";
-import { StoredDataDetailsRelationDto } from "../../../../types/entrepot";
+import { StoredDataDetailsRelationDto } from "../../../../@types/entrepot";
 import { WfsServiceFormValuesType } from "./WfsServiceForm";
 
 // Themes et mot cles INSPIRE

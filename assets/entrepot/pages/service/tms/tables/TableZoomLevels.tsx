@@ -1,7 +1,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { FC, useEffect, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
-import { StoredDataRelation } from "../../../../../types/app";
+import { StoredDataRelation } from "../../../../../@types/app";
 import Translator from "../../../../../modules/Translator";
 import Accordion from "@codegouvfr/react-dsfr/Accordion";
 import ZoomRange from "../../../../../components/Utils/ZoomRange";

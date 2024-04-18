@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 import SldStyleParser from "geostyler-sld-parser";
 import MapboxParser from "geostyler-mapbox-parser";
-import { Service, StyleForm, StyleFormat, TmsMetadata } from "../../types/app";
+import { Service, StyleForm, StyleFormat, TmsMetadata } from "../../@types/app";
 import BaseStyleFilesManager from "./BaseStyleFilesManager";
 import { Sources } from "mapbox-gl";
 import QGISStyleParser from "geostyler-qgis-parser";

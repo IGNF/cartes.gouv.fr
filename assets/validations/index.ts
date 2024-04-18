@@ -3,7 +3,7 @@ import sldStyle from "./sldStyle";
 import SldStyleValidator from "./SldStyleValidator";
 import QGisStyleValidator from "./QGisStyleValidator";
 import MapboxStyleValidator from "./MapboxStyleValidator";
-import { Service, StyleFormat } from "../types/app";
+import { Service, StyleFormat } from "../@types/app";
 
 const getValidator = (service: Service, format: StyleFormat | undefined) => {
     if (service === undefined) {

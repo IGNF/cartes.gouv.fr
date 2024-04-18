@@ -1,7 +1,7 @@
 import isIPRange from "validator/lib/isIPRange";
 import * as yup from "yup";
 import { getTranslation } from "../../../../i18n/i18n";
-import { UserKeyInfoDtoTypeEnum } from "../../../../types/app";
+import { UserKeyInfoDtoTypeEnum } from "../../../../@types/app";
 
 const { t } = getTranslation("UserKey");
 

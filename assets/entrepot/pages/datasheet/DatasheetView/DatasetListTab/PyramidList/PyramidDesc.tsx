@@ -6,8 +6,8 @@ import { FC, memo, useMemo } from "react";
 import api from "../../../../../api";
 import LoadingText from "../../../../../../components/Utils/LoadingText";
 import RQKeys from "../../../../../../modules/RQKeys";
-import { Pyramid, VectorDb } from "../../../../../../types/app";
-import { OfferingListResponseDto, ProcessingExecutionStoredDataDto } from "../../../../../../types/entrepot";
+import { Pyramid, VectorDb } from "../../../../../../@types/app";
+import { OfferingListResponseDto, ProcessingExecutionStoredDataDto } from "../../../../../../@types/entrepot";
 import { offeringTypeDisplayName } from "../../../../../../utils";
 
 type PyramidDescProps = {

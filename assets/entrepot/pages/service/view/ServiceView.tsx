@@ -16,7 +16,7 @@ import getWebService from "../../../../modules/WebServices/WebServices";
 import { type CartesApiException } from "../../../../modules/jsonFetch";
 import { routes, useRoute } from "../../../../router/router";
 import "../../../../sass/pages/service_view.scss";
-import { CartesStyle, OfferingTypeEnum, Service, TypeInfosWithBbox } from "../../../../types/app";
+import { CartesStyle, OfferingTypeEnum, Service, TypeInfosWithBbox } from "../../../../@types/app";
 import DiffuseServiceTab from "./DiffuseServiceTab";
 import ManageStylesTab from "./ManageStylesTab";
 
