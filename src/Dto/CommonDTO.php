@@ -1,10 +1,11 @@
 <?php
 
 namespace App\Dto;
- 
+
 use Symfony\Component\Validator\Constraints as Assert;
 
-class CommonDTO {
+class CommonDTO
+{
     public function __construct(
         #[Assert\NotBlank(['message' => 'metadatas.technical_name_error'])]
         #[Assert\Regex(['pattern' => '/^[\w\-\.]+$/', 'message' => 'metadatas.technical_name_regex'])]
@@ -32,7 +33,7 @@ class CommonDTO {
         public readonly string $creation_date,
 
         #[Assert\NotBlank(['message' => 'metadatas.organization_error'])]
-        public readonly  string $organization,
+        public readonly string $organization,
 
         #[Assert\NotBlank(['message' => 'metadatas.organization_email_error'])]
         #[Assert\Email(message: 'organization_email {{ value }} n\est pas une adresse email valide')]
@@ -52,22 +53,22 @@ class CommonDTO {
         public readonly string $encoding,
 
         #[Assert\Choice([
-            'choices' => ['','25000','75000','100000','150000', '200000','250000', '1000000'], // TODO NON EXHAUSTI
-            'message' => 'metadatas.resolution_error'
+            'choices' => ['', '25000', '75000', '100000', '150000', '200000', '250000', '1000000'], // TODO NON EXHAUSTI
+            'message' => 'metadatas.resolution_error',
         ])]
         public readonly string $resolution,
 
         #[Assert\Choice([
-            'choices' => ['','dataset','series'], 
-            'message' => 'metadatas.resource_genealogy_error'
+            'choices' => ['', 'dataset', 'series'],
+            'message' => 'metadatas.resource_genealogy_error',
         ])]
         public readonly string $resource_genealogy,
 
         #[Assert\Choice([
-            'choices' => ['all_public','your_community'], 	// TODO NON EXHAUSTIF
-            'message' => 'metadatas.share_with_error'
+            'choices' => ['all_public', 'your_community'], 	// TODO NON EXHAUSTIF
+            'message' => 'metadatas.share_with_error',
         ])]
-        public readonly string $share_with    
+        public readonly string $share_with
     ) {
     }
 }

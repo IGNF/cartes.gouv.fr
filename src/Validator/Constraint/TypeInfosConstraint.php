@@ -2,8 +2,8 @@
 
 namespace App\Validator\Constraint;
 
-use Symfony\Component\Validator\Constraints\Compound;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Constraints\Compound;
 
 #[\Attribute]
 class TypeInfosConstraint extends Compound
@@ -19,26 +19,26 @@ class TypeInfosConstraint extends Compound
                     fields: [
                         'hash' => new Assert\Required([
                             new Assert\NotBlank([
-                                'message' => 'user_key.hash_not_blank'
-                            ])
-                        ])
+                                'message' => 'user_key.hash_not_blank',
+                            ]),
+                        ]),
                     ]
                 ),
                 new Assert\Collection(
                     fields: [
                         'login' => new Assert\Required([
                             new Assert\NotBlank([
-                                'message' => 'user_key.login_not_blank'
-                            ])
+                                'message' => 'user_key.login_not_blank',
+                            ]),
                         ]),
                         'password' => new Assert\Optional([
                             new Assert\NotBlank([
-                                'message' => 'user_key.password_not_blank'
-                            ])
-                        ])
+                                'message' => 'user_key.password_not_blank',
+                            ]),
+                        ]),
                     ]
-                )
-            ])
+                ),
+            ]),
         ];
     }
 }

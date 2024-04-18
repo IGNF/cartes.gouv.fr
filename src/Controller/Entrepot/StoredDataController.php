@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Controller\Api;
+namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\OfferingStatuses;
 use App\Constants\EntrepotApi\ProcessingStatuses;
 use App\Constants\EntrepotApi\StoredDataStatuses;
+use App\Controller\ApiControllerInterface;
 use App\Exception\CartesApiException;
 use App\Exception\EntrepotApiException;
 use App\Services\CartesServiceApi;
@@ -31,7 +32,7 @@ class StoredDataController extends AbstractController implements ApiControllerIn
     #[Route('', name: 'get_list', methods: ['GET'])]
     public function getStoredDataList(
         string $datastoreId,
-        #[MapQueryParameter] string $type = null,
+        #[MapQueryParameter] ?string $type = null,
     ): JsonResponse {
         try {
             $query = [];
@@ -120,7 +121,7 @@ class StoredDataController extends AbstractController implements ApiControllerIn
 
             // récupération de l'exécution traitement (ou des exécutions, normalement y en a qu'une) qui a créé cette stored_data
             $procExecList = $this->entrepotApiService->processing->getAllExecutions($datastoreId, [
-               'output_stored_data' => $storedDataId,
+                'output_stored_data' => $storedDataId,
             ]);
 
             foreach ($procExecList as &$procExec) {

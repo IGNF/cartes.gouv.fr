@@ -2,9 +2,9 @@
 
 {% block body %}
     <div id="root" data-app-root="{{ app_root }}" data-app-env="{{ app.request.server.get('APP_ENV') }}" data-site-title="cartes.gouv.fr"></div>
-    
+
     {# variable globale twig avec l'url de l'espace collaboratif (si celle-ci est configuree) #}
-    {% if  api_espaceco_url is defined and api_espaceco_url is not empty %}
+    {% if api_espaceco_url is defined and api_espaceco_url is not empty %}
         <div id="app_env" data-espaceco-url="{{ api_espaceco_url }}"></div>
     {% endif %}
 

@@ -3,10 +3,10 @@
 
 {% block body %}
     <div>
-        <p>{{ 'join_community.email_acknowledgement.heading'|trans({'%name%': community.name }) }}</p>
+        <p>{{ 'join_community.email_acknowledgement.heading'|trans({'%name%': community.name}) }}</p>
         <hr />
         <p><strong>{{ 'join_community.email_acknowledgement.date'|trans }} : </strong>{{ sendDate|date('d-m-Y H:i', "Europe/Paris") }}</p>
         <strong>{{ 'join_community.email_acknowledgement.message'|trans }}</strong><br>
-        {{ message|e}}
+        {{ message|e }}
     </div>
 {% endblock %}

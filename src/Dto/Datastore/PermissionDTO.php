@@ -5,32 +5,33 @@ namespace App\Dto\Datastore;
 use App\Constants\PermissionTypes;
 use Symfony\Component\Validator\Constraints as Assert;
 
-class PermissionDTO {
+class PermissionDTO
+{
     public function __construct(
         #[Assert\NotBlank([
-            'message' => 'permission.licence_mandatory'
+            'message' => 'permission.licence_mandatory',
         ])]
         public readonly string $licence,
 
         #[Assert\Choice([
             'choices' => [PermissionTypes::ACCOUNT, PermissionTypes::COMMUNITY],
-            'message' => 'permission.type_error'
+            'message' => 'permission.type_error',
         ])]
         public readonly string $type,
 
-        public ? string $end_date,
+        public ?string $end_date,
 
         /** @var array<string> */
         #[Assert\Unique(['message' => 'permission.beneficiaries.unique_error'])]
         #[Assert\All([
             'constraints' => [
                 new Assert\NotBlank([
-                    'message' => 'permission.beneficiaries.at_least_one'
+                    'message' => 'permission.beneficiaries.at_least_one',
                 ]),
                 new Assert\Uuid([
-                    'message' => 'permission.beneficiaries.uuid_error'
-                ])
-            ]
+                    'message' => 'permission.beneficiaries.uuid_error',
+                ]),
+            ],
         ])]
         public readonly array $beneficiaries,
 
@@ -39,12 +40,12 @@ class PermissionDTO {
         #[Assert\All([
             'constraints' => [
                 new Assert\NotBlank([
-                    'message' => 'permission.offerings.at_least_one'
+                    'message' => 'permission.offerings.at_least_one',
                 ]),
                 new Assert\Uuid([
-                    'message' => 'permission.offerings.uuid_error'
-                ])
-            ]
+                    'message' => 'permission.offerings.uuid_error',
+                ]),
+            ],
         ])]
         public readonly array $offerings,
 

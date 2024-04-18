@@ -1,16 +1,17 @@
 <?php
 
-namespace App\Controller\Api;
+namespace App\Controller\Entrepot;
 
+use App\Controller\ApiControllerInterface;
 use App\Dto\User\UserKeyDTO;
-use App\Services\ServiceAccount;
-use App\Services\EntrepotApiService;
 use App\Exception\CartesApiException;
 use App\Exception\EntrepotApiException;
-use Symfony\Component\Routing\Annotation\Route;
+use App\Services\EntrepotApiService;
+use App\Services\ServiceAccount;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Routing\Annotation\Route;
 
 #[Route(
     '/api/user',
@@ -35,6 +36,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
     public function getUserKeys(): JsonResponse
     {
         $keys = $this->entrepotApiService->user->getMyKeys();
+
         return $this->json($keys);
     }
 
@@ -42,9 +44,10 @@ class UserController extends AbstractController implements ApiControllerInterfac
     public function getUserKeysWithAccesses(): JsonResponse
     {
         $keys = $this->entrepotApiService->user->getMyKeys();
-        foreach($keys as &$key) {
+        foreach ($keys as &$key) {
             $key['accesses'] = $this->entrepotApiService->user->getKeyAccesses($key['_id']);
         }
+
         return $this->json($keys);
     }
 
@@ -52,6 +55,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
     public function getUserKeyWithAccesses(string $keyId): JsonResponse
     {
         $keyWithAccesses = $this->_getUserKeyWithAccesses($keyId);
+
         return $this->json($keyWithAccesses);
     }
 
@@ -59,6 +63,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
     public function getUserPermissions(): JsonResponse
     {
         $permissions = $this->entrepotApiService->user->getMyPermissions();
+
         return $this->json($permissions);
     }
 
@@ -68,9 +73,10 @@ class UserController extends AbstractController implements ApiControllerInterfac
         $detailedPermissions = [];
 
         $permissions = $this->entrepotApiService->user->getMyPermissions();
-        foreach($permissions as $permission) {
+        foreach ($permissions as $permission) {
             $detailedPermissions[] = $this->entrepotApiService->user->getPermission($permission['_id']);
         }
+
         return $this->json($detailedPermissions);
     }
 
@@ -80,32 +86,33 @@ class UserController extends AbstractController implements ApiControllerInterfac
     ]
     public function addKey(#[MapRequestPayload] UserKeyDTO $dto): JsonResponse
     {
-        try {   
+        try {
             $filter = ['accesses', 'ip_list_name', 'ip_list_addresses'];
 
-            $body = array_filter((array) $dto, function($value, $key) use ($filter) {
-                return ! ($value === null || $value === '' || in_array($key, $filter));
+            $body = array_filter((array) $dto, function ($value, $key) use ($filter) {
+                return !(null === $value || '' === $value || in_array($key, $filter));
             }, ARRAY_FILTER_USE_BOTH);
 
             // Les adresses IP
             if (0 !== count($dto->ip_list_addresses)) {
-                $body[$dto->ip_list_name] = $dto->ip_list_addresses;  
+                $body[$dto->ip_list_name] = $dto->ip_list_addresses;
             }
 
-            if ($dto->type === "OAUTH2") {
+            if ('OAUTH2' === $dto->type) {
                 $body['type_infos'] = (object) null;
             }
 
             // Ajout de la cle
             $key = $this->entrepotApiService->user->addKey($body);
-            
+
             // Ajout des acces
-            foreach($dto->accesses as $access) {
-                $accessBody = (array)$access;
-                $this->entrepotApiService->user->addAccess($key['_id'], $accessBody);    
+            foreach ($dto->accesses as $access) {
+                $accessBody = (array) $access;
+                $this->entrepotApiService->user->addAccess($key['_id'], $accessBody);
             }
 
             $keyWithAccesses = $this->_getUserKeyWithAccesses($key['_id']);
+
             return new JsonResponse($keyWithAccesses);
         } catch (EntrepotApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
@@ -118,13 +125,13 @@ class UserController extends AbstractController implements ApiControllerInterfac
     ]
     public function updateKey(string $keyId, #[MapRequestPayload] UserKeyDTO $dto): JsonResponse
     {
-        $filter = ['type', 'type_infos', 'accesses', 'ip_list_name', 'ip_list_addresses', ];
-      
-        try { 
-            $body = array_filter((array) $dto, function($value, $key) use ($filter) {
-                return ! ($value === null || $value === '' || in_array($key, $filter));
+        $filter = ['type', 'type_infos', 'accesses', 'ip_list_name', 'ip_list_addresses'];
+
+        try {
+            $body = array_filter((array) $dto, function ($value, $key) use ($filter) {
+                return !(null === $value || '' === $value || in_array($key, $filter));
             }, ARRAY_FILTER_USE_BOTH);
-           
+
             $key = $this->entrepotApiService->user->getMyKey($keyId);
 
             // Nom identique, on supprime du body
@@ -144,17 +151,18 @@ class UserController extends AbstractController implements ApiControllerInterfac
 
             // Suppression de tous les accces pour cette cle
             $accesses = $this->entrepotApiService->user->getKeyAccesses($keyId);
-            foreach($accesses as $access) {
-                $this->entrepotApiService->user->removeAccess($keyId, $access['_id']);      
+            foreach ($accesses as $access) {
+                $this->entrepotApiService->user->removeAccess($keyId, $access['_id']);
             }
-            
+
             // Ajout des nouveaux access
-            foreach($dto->accesses as $access) {
-                $accessBody = (array)$access;
-                $this->entrepotApiService->user->addAccess($key['_id'], $accessBody);    
+            foreach ($dto->accesses as $access) {
+                $accessBody = (array) $access;
+                $this->entrepotApiService->user->addAccess($key['_id'], $accessBody);
             }
 
             $updatedKey['accesses'] = $this->entrepotApiService->user->getKeyAccesses($key['_id']);
+
             return new JsonResponse($updatedKey);
         } catch (EntrepotApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
@@ -169,6 +177,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
     {
         try {
             $this->entrepotApiService->user->removeKey($keyId);
+
             return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
         } catch (EntrepotApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
@@ -184,13 +193,13 @@ class UserController extends AbstractController implements ApiControllerInterfac
             $sandboxCommunity = $serviceAccount->getSandboxCommunity();
 
             $myDatastores = $this->entrepotApiService->user->getMyDatastores();
-            if (! is_null($sandboxCommunity)) {
+            if (!is_null($sandboxCommunity)) {
                 $myDatastores = array_values(array_filter($myDatastores, function ($myDatastore) use ($sandboxCommunity) {
                     return $myDatastore['_id'] != $sandboxCommunity['datastore']['_id'];
                 }));
                 array_unshift($myDatastores, $sandboxCommunity['datastore']);
             }
-            
+
             return $this->json($myDatastores);
         } catch (EntrepotApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
@@ -201,13 +210,15 @@ class UserController extends AbstractController implements ApiControllerInterfac
     public function addMemberToSandbox(ServiceAccount $serviceAccount): JsonResponse
     {
         $serviceAccount->addCurrentUserToSandbox();
+
         return new JsonResponse();
     }
 
-    private function _getUserKeyWithAccesses(string $keyId): Array
+    private function _getUserKeyWithAccesses(string $keyId): array
     {
         $key = $this->entrepotApiService->user->getMyKey($keyId);
         $key['accesses'] = $this->entrepotApiService->user->getKeyAccesses($key['_id']);
+
         return $key;
     }
 }
