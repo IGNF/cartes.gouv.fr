@@ -2,8 +2,8 @@ import SldStyleParser from "geostyler-sld-parser";
 import { declareComponentKeys } from "i18nifty";
 import { TestContext } from "yup";
 
-import functions from "../functions";
 import { Translations, getTranslation } from "../i18n/i18n";
+import { getFileExtension } from "../utils";
 
 const { t: tSld } = getTranslation("sldStyleValidation");
 
@@ -46,7 +46,7 @@ export default class SldStyleWmsVectorValidator {
          * - type de symbologie (symbolizer) doit correspondre au type de geometrie
          */
         if (file instanceof File) {
-            if (functions.path.getFileExtension(file.name)?.toLowerCase() !== "sld") {
+            if (getFileExtension(file.name)?.toLowerCase() !== "sld") {
                 return ctx.createError({ message: tSld("unaccepted_extension", { fileName: file.name }) });
             }
 

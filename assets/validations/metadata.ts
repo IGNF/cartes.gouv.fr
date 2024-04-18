@@ -1,6 +1,6 @@
 import { TestContext } from "yup";
 
-import functions from "../functions";
+import { getFileExtension } from "../utils";
 
 const test = (value: FileList, ctx: TestContext) => {
     // TODO VOIR AVEC ARNEST
@@ -10,7 +10,7 @@ const test = (value: FileList, ctx: TestContext) => {
     const file = value?.[0] ?? undefined;
 
     if (file instanceof File) {
-        if (functions.path.getFileExtension(file.name)?.toLowerCase() !== "xml") {
+        if (getFileExtension(file.name)?.toLowerCase() !== "xml") {
             return ctx.createError({
                 message: `L'extension du fichier de métadonnées ${file.name} n'est pas correcte. Seule l'extension xml est acceptée.`,
             });

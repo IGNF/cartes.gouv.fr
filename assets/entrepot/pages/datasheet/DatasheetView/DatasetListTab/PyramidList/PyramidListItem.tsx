@@ -7,19 +7,18 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, memo, useMemo } from "react";
 import { createPortal } from "react-dom";
 
-import api from "../../../../../api";
 import StoredDataStatusBadge from "../../../../../../components/Utils/Badges/StoredDataStatusBadge";
 import LoadingIcon from "../../../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../../../components/Utils/LoadingText";
 import MenuList from "../../../../../../components/Utils/MenuList";
 import Wait from "../../../../../../components/Utils/Wait";
-import functions from "../../../../../../functions";
 import useToggle from "../../../../../../hooks/useToggle";
 import { Translations, declareComponentKeys, getTranslation, useTranslation } from "../../../../../../i18n/i18n";
 import RQKeys from "../../../../../../modules/RQKeys";
 import { routes } from "../../../../../../router/router";
 import { Pyramid, StoredDataStatusEnum } from "../../../../../../types/app";
-import { offeringTypeDisplayName } from "../../../../../../utils";
+import { formatDateFromISO, offeringTypeDisplayName } from "../../../../../../utils";
+import api from "../../../../../api";
 import PyramidDesc from "./PyramidDesc";
 
 type PyramidListItemProps = {
@@ -82,7 +81,7 @@ const PyramidListItem: FC<PyramidListItemProps> = ({ datasheetName, datastoreId,
 
                     <div className={fr.cx("fr-col")}>
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-grid-row--middle")}>
-                            <p className={fr.cx("fr-m-auto", "fr-mr-2v")}>{pyramid?.last_event?.date && functions.date.format(pyramid?.last_event?.date)}</p>
+                            <p className={fr.cx("fr-m-auto", "fr-mr-2v")}>{pyramid?.last_event?.date && formatDateFromISO(pyramid?.last_event?.date)}</p>
                             <StoredDataStatusBadge status={pyramid.status} />
                             <Button
                                 onClick={() => {

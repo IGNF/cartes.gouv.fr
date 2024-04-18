@@ -6,9 +6,9 @@ import { symToStr } from "tsafe/symToStr";
 
 import AppLayout from "../../components/Layout/AppLayout";
 import articles from "../../data/actualites.json";
-import functions from "../../functions";
 import { appRoot, routes } from "../../router/router";
 import { type NewsArticle } from "../../types/newsArticle";
+import { formatDateFromISO } from "../../utils";
 
 type NewsListItemProps = {
     slug: string;
@@ -34,7 +34,7 @@ const NewsListItem: FC<NewsListItemProps> = ({ slug, newsArticle }) => {
                         }}
                     />
                 }
-                detail={newsArticle?.date && functions.date.format(newsArticle?.date)}
+                detail={newsArticle?.date && formatDateFromISO(newsArticle?.date)}
                 enlargeLink
                 imageAlt={newsArticle?.thumbnail_alt ?? "Vignette de l'article"}
                 imageUrl={`${appRoot}/${newsArticle.thumbnail_url}`}

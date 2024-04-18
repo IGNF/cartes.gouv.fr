@@ -1,8 +1,8 @@
 import { compareAsc } from "date-fns";
 import { declareComponentKeys } from "i18nifty";
-import functions from "../../../../functions";
 import { Translations } from "../../../../i18n/i18n";
 import { DatastorePermissionResponseDto, PermissionBeneficiaryDto } from "../../../../types/entrepot";
+import { formatDateFromISO } from "../../../../utils";
 
 // traductions
 export const { i18n } = declareComponentKeys<
@@ -53,7 +53,7 @@ const getExpiredDate = (lang: "fr" | "en", endDate?: string) => {
         return lang === "fr" ? "Aucune" : "None";
     }
 
-    const fmtDate = functions.date.format(endDate);
+    const fmtDate = formatDateFromISO(endDate);
     if (compareAsc(new Date(endDate), new Date()) < 0) {
         return lang === "fr" ? `A expirée le ${fmtDate}` : `Expired on ${fmtDate}`;
     } else return lang === "fr" ? `Expire le ${fmtDate}` : `Expires on ${fmtDate}`;

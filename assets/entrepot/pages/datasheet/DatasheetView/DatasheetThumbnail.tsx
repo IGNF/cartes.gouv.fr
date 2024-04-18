@@ -11,14 +11,14 @@ import { createPortal } from "react-dom";
 import * as yup from "yup";
 
 import { useForm } from "react-hook-form";
-import api from "../../../api";
 import { ConfirmDialog, ConfirmDialogModal } from "../../../../components/Utils/ConfirmDialog";
 import Wait from "../../../../components/Utils/Wait";
-import functions from "../../../../functions";
 import { ComponentKey, useTranslation } from "../../../../i18n/i18n";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import RQKeys from "../../../../modules/RQKeys";
 import type { Datasheet, DatasheetDetailed, DatasheetThumbnailAnnexe } from "../../../../types/app";
+import { getFileExtension } from "../../../../utils";
+import api from "../../../api";
 
 import "../../../../sass/components/buttons.scss";
 
@@ -51,7 +51,7 @@ const schema = (t: TranslationFunction<"DatasheetView", ComponentKey>) =>
             .test("check-file-type", t("file_validation.format_error"), (files) => {
                 const file = files?.[0] ?? undefined;
                 if (file) {
-                    const extension = functions.path.getFileExtension(file.name);
+                    const extension = getFileExtension(file.name);
                     if (!extension) {
                         return false;
                     }

@@ -1,3 +1,6 @@
+import { format as datefnsFormat } from "date-fns";
+import { fr } from "date-fns/locale";
+
 // Themes et mot cles INSPIRE
 import inspireKeywords from "./data/thematic-inspire.json";
 
@@ -152,6 +155,17 @@ const getProjectionCode = (epsg?: string) => {
     return null;
 };
 
+const getFileExtension = (filename: string) => {
+    if (!filename) return "";
+    return filename.split(".").pop()?.toLowerCase();
+};
+
+const formatDateFromISO = (isoDateString: string): string => {
+    const d = new Date(isoDateString);
+
+    return datefnsFormat(d, "dd MMMM yyyy, HH", { locale: fr }) + "h" + datefnsFormat(d, "mm", { locale: fr });
+};
+
 export {
     getInspireKeywords,
     getLanguages,
@@ -163,4 +177,6 @@ export {
     getRequestInfo,
     niceBytes,
     getProjectionCode,
+    getFileExtension,
+    formatDateFromISO,
 };

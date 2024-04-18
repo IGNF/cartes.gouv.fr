@@ -1,7 +1,6 @@
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import VectorTileLayer from "ol/layer/VectorTile";
-import path from "../../functions/path";
 import SldStyleParser from "geostyler-sld-parser";
 import QGISStyleParser from "geostyler-qgis-parser";
 import MapboxStyleParser from "geostyler-mapbox-parser";
@@ -9,6 +8,7 @@ import OpenLayersParser from "geostyler-openlayers-parser";
 import { CartesStyle } from "../../types/app";
 import { Geometry } from "ol/geom";
 import BaseLayer from "ol/layer/Base";
+import { getFileExtension } from "../../utils";
 
 type AddStyleFormType = {
     style_name: string;
@@ -77,7 +77,7 @@ class StyleHelper {
         if (!response.ok) return undefined;
         const xmlString = await response.text();
 
-        const extension = path.getFileExtension(styleUrl);
+        const extension = getFileExtension(styleUrl);
 
         let parser;
         switch (extension) {
