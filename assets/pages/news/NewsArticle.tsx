@@ -5,9 +5,9 @@ import { symToStr } from "tsafe/symToStr";
 
 import AppLayout from "../../components/Layout/AppLayout";
 import articles from "../../data/actualites.json";
-import functions from "../../functions";
 import { appRoot } from "../../router/router";
 import { type NewsArticle } from "../../types/newsArticle";
+import { formatDateFromISO } from "../../utils";
 import PageNotFound from "../error/PageNotFound";
 
 type NewsArticleProps = {
@@ -48,7 +48,7 @@ const NewsArticle: FC<NewsArticleProps> = ({ slug }) => {
                             }}
                         >
                             <i className="ri-article-line" />
-                            &nbsp;Publié le {functions.date.format(newsArticle.date)}
+                            &nbsp;Publié le {formatDateFromISO(newsArticle.date)}
                         </p>
                     </div>
 

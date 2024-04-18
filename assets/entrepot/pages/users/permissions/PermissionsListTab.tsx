@@ -2,9 +2,11 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import { compareAsc } from "date-fns";
 import { FC } from "react";
-import functions from "../../../../functions";
+
 import { useTranslation } from "../../../../i18n/i18n";
 import { PermissionDetailsResponseDto } from "../../../../types/entrepot";
+import { formatDateFromISO } from "../../../../utils";
+
 import "../../../../sass/pages/my_keys.scss";
 
 type PermissionsListTabProps = {
@@ -27,7 +29,7 @@ const PermissionsListTab: FC<PermissionsListTabProps> = ({ permissions }) => {
                 if (permission.end_date && compareAsc(new Date(permission.end_date), new Date()) < 0) {
                     expired = true;
                 }
-                const expiresOn = permission.end_date ? functions.date.format(permission.end_date) : null;
+                const expiresOn = permission.end_date ? formatDateFromISO(permission.end_date) : null;
 
                 return (
                     <div key={permission._id} className={className}>

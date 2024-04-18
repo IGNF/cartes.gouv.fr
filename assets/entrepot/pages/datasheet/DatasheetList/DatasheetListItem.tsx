@@ -38,7 +38,7 @@ const DatasheetListItem: FC<DatasheetListItemProps> = ({ datastoreId, datasheet 
                 </Button>
             </div>
             {/* // TODO : désactivé car pour le moment on se sait pas ça correspond à la date de quoi */}
-            {/* <div className={fr.cx("fr-col-2")}>{datasheet?.date ? functions.date.format(datasheet.date) : ""}</div> */}
+            {/* <div className={fr.cx("fr-col-2")}>{datasheet?.date ? formatDateFromISO(datasheet.date) : ""}</div> */}
             <div className={fr.cx("fr-col-2")}>
                 <Badge noIcon={true} severity="info">
                     {datasheet?.nb_publications > 0 ? `Publié (${datasheet?.nb_publications})` : "Non Publié"}

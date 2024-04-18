@@ -1,6 +1,7 @@
 import { TestContext, ValidationError } from "yup";
-import functions from "../functions";
+
 import { Service, StyleFormat } from "../types/app";
+import { getFileExtension } from "../utils";
 
 class StyleValidator {
     readonly service: Service;
@@ -15,7 +16,7 @@ class StyleValidator {
         const extension = this.format === "mapbox" ? "json" : this.format;
 
         const file = files[0];
-        if (file !== undefined && functions.path.getFileExtension(file?.name)?.toLowerCase() !== extension) {
+        if (file !== undefined && getFileExtension(file?.name)?.toLowerCase() !== extension) {
             return ctx.createError({ message: "unaccepted_extension" });
         }
 

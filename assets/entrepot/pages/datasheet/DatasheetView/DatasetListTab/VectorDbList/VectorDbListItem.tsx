@@ -11,20 +11,19 @@ import { createPortal } from "react-dom";
 import { symToStr } from "tsafe/symToStr";
 
 import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
-import api from "../../../../../api";
 import StoredDataStatusBadge from "../../../../../../components/Utils/Badges/StoredDataStatusBadge";
 import LoadingIcon from "../../../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../../../components/Utils/LoadingText";
 import MenuList from "../../../../../../components/Utils/MenuList";
 import Wait from "../../../../../../components/Utils/Wait";
-import functions from "../../../../../../functions";
 import useToggle from "../../../../../../hooks/useToggle";
 import { ComponentKey, Translations, declareComponentKeys, getTranslation, useTranslation } from "../../../../../../i18n/i18n";
 import RQKeys from "../../../../../../modules/RQKeys";
 import { routes } from "../../../../../../router/router";
 import { DatastoreEndpoint, StoredDataStatusEnum, VectorDb } from "../../../../../../types/app";
 import { EndpointDetailResponseDtoTypeEnum } from "../../../../../../types/entrepot";
-import { offeringTypeDisplayName } from "../../../../../../utils";
+import { formatDateFromISO, offeringTypeDisplayName } from "../../../../../../utils";
+import api from "../../../../../api";
 import VectorDbDesc from "./VectorDbDesc";
 
 type ServiceTypes = "tms" | "wfs" | "wms-vector" | "pre-paquet";
@@ -220,7 +219,7 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
 
                     <div className={fr.cx("fr-col")}>
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-grid-row--middle")}>
-                            <p className={fr.cx("fr-m-auto", "fr-mr-2v")}>{vectorDb?.last_event?.date && functions.date.format(vectorDb?.last_event?.date)}</p>
+                            <p className={fr.cx("fr-m-auto", "fr-mr-2v")}>{vectorDb?.last_event?.date && formatDateFromISO(vectorDb?.last_event?.date)}</p>
                             <StoredDataStatusBadge status={vectorDb.status} />
                             <Button
                                 onClick={() => {

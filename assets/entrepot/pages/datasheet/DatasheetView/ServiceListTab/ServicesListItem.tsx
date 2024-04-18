@@ -7,18 +7,17 @@ import { FC } from "react";
 import { createPortal } from "react-dom";
 import { symToStr } from "tsafe/symToStr";
 
-import api from "../../../../api";
+import OfferingStatusBadge from "../../../../../components/Utils/Badges/OfferingStatusBadge";
 import MenuList from "../../../../../components/Utils/MenuList";
 import Wait from "../../../../../components/Utils/Wait";
-import functions from "../../../../../functions";
 import useToggle from "../../../../../hooks/useToggle";
 import RQKeys from "../../../../../modules/RQKeys";
 import { routes } from "../../../../../router/router";
 import { useSnackbarStore } from "../../../../../stores/SnackbarStore";
 import { OfferingStatusEnum, OfferingTypeEnum, type Service } from "../../../../../types/app";
-import { offeringTypeDisplayName } from "../../../../../utils";
+import { formatDateFromISO, offeringTypeDisplayName } from "../../../../../utils";
+import api from "../../../../api";
 import ServiceDesc from "./ServiceDesc";
-import OfferingStatusBadge from "../../../../../components/Utils/Badges/OfferingStatusBadge";
 
 type ServicesListItemProps = {
     service: Service;
@@ -73,7 +72,7 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-grid-row--middle")}>
                             <Badge>{offeringTypeDisplayName(service.type)}</Badge>
                             <p className={fr.cx("fr-m-auto", "fr-mr-2v")}>
-                                {service?.configuration?.last_event?.date && functions.date.format(service?.configuration?.last_event?.date)}
+                                {service?.configuration?.last_event?.date && formatDateFromISO(service?.configuration?.last_event?.date)}
                             </p>
                             <OfferingStatusBadge status={service.status as OfferingStatusEnum} />
                             <i className={fr.cx("fr-mr-2v", service.open ? "fr-icon-lock-unlock-fill" : "fr-icon-lock-fill")} />

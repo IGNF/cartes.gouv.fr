@@ -14,19 +14,18 @@ import { symToStr } from "tsafe/symToStr";
 import { v4 as uuidv4 } from "uuid";
 import * as yup from "yup";
 
-import api from "../../../api";
 import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import Progress from "../../../../components/Utils/Progress";
 import Wait from "../../../../components/Utils/Wait";
 import defaultProjections from "../../../../data/default_projections.json";
-import functions from "../../../../functions";
 import FileUploader from "../../../../modules/FileUploader";
 import RQKeys from "../../../../modules/RQKeys";
 import Translator from "../../../../modules/Translator";
 import { routes, useRoute } from "../../../../router/router";
-import { regex } from "../../../../utils";
+import { getFileExtension, regex } from "../../../../utils";
+import api from "../../../api";
 import DatasheetUploadIntegrationDialog from "./DatasheetUploadIntegration/DatasheetUploadIntegrationDialog";
 
 const maxFileSize = 2000000000; // 2 GB
@@ -141,7 +140,7 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
             return false;
         }
 
-        const extension = functions.path.getFileExtension(file.name);
+        const extension = getFileExtension(file.name);
         if (!extension || !fileExtensions.includes(extension)) {
             setDataFileError(`L'extension du fichier ${file.name} n'est pas correcte`);
             return false;
