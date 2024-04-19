@@ -16,9 +16,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 )]
 class CommunityController extends AbstractController implements ApiControllerInterface
 {
-    #[Route('/get', name: 'get', methods: ['GET'],
-    options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()')]
+    #[Route('/get', name: 'get', methods: ['GET'])]
     public function get(
         #[MapQueryParameter] ?int $page = 1,
         #[MapQueryParameter] ?int $limit = 10
