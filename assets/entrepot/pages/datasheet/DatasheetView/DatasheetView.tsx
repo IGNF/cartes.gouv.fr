@@ -10,7 +10,7 @@ import { FC } from "react";
 import { createPortal } from "react-dom";
 import { symToStr } from "tsafe/symToStr";
 
-import api from "../../../api";
+import type { Datasheet, DatasheetDetailed, Metadata } from "../../../../@types/app";
 import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../components/Utils/LoadingText";
@@ -19,9 +19,10 @@ import { Translations, declareComponentKeys, useTranslation } from "../../../../
 import RQKeys from "../../../../modules/RQKeys";
 import { type CartesApiException } from "../../../../modules/jsonFetch";
 import { routes, useRoute } from "../../../../router/router";
-import { Datasheet, type DatasheetDetailed } from "../../../../@types/app";
+import api from "../../../api";
 import DatasetListTab from "./DatasetListTab/DatasetListTab";
 import DatasheetThumbnail, { type ThumbnailAction } from "./DatasheetThumbnail";
+import MetadataTab from "./MetadataTab/MetadataTab";
 import ServicesListTab from "./ServiceListTab/ServicesListTab";
 
 const deleteDataConfirmModal = createModal({
@@ -59,6 +60,14 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
         refetchInterval: 20000,
         retry: false,
         enabled: !datasheetDeleteMutation.isPending,
+    });
+
+    const metadataQuery = useQuery<Metadata, CartesApiException>({
+        queryKey: RQKeys.datastore_metadata_by_datasheet_name(datastoreId, datasheetName),
+        queryFn: ({ signal }) => api.metadata.getByDatasheetName(datastoreId, datasheetName, { signal }),
+        enabled: datasheetQuery.isSuccess && !datasheetDeleteMutation.isPending,
+        staleTime: 20000,
+        retry: false,
     });
 
     return (
@@ -120,7 +129,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                                     {
                                         label: t("tab_label.metadata"),
                                         isDefault: route.params["activeTab"] === "metadata",
-                                        content: <p>Liste des métadonnées à venir (bloqué par une évolution nécessaire sur les tags des entités metadata)</p>,
+                                        content: <MetadataTab datastoreId={datastoreId} metadataQuery={metadataQuery} />,
                                     },
                                     {
                                         label: t("tab_label.datasets", {
@@ -232,6 +241,8 @@ export const { i18n } = declareComponentKeys<
     | "thumbnail_confirm_delete_modal.title"
     | { K: "datasheet_confirm_delete_modal.title"; P: { datasheetName: string }; R: string }
     | "datasheet_confirm_delete_modal.text"
+    | "metadata_tab.metadata.absent"
+    | "metadata_tab.metadata.is_loading"
 >()({
     DatasheetView,
 });
@@ -272,6 +283,9 @@ export const DatasheetViewFrTranslations: Translations<"fr">["DatasheetView"] = 
     "thumbnail_confirm_delete_modal.title": "Êtes-vous sûr de vouloir supprimer la vignette de cette fiche de données ?",
     "datasheet_confirm_delete_modal.title": ({ datasheetName }) => `Êtes-vous sûr de supprimer la fiche de données ${datasheetName} ?`,
     "datasheet_confirm_delete_modal.text": "Les éléments suivants seront supprimés :",
+    "metadata_tab.metadata.absent":
+        "Les métadonnées de cette fiche ne sont pas encore disponibles. Créez un premier service à partir d'un de vos jeux de données pour les compléter.",
+    "metadata_tab.metadata.is_loading": "Les métadonnées sont en cours de chargement",
 };
 
 export const DatasheetViewEnTranslations: Translations<"en">["DatasheetView"] = {
@@ -310,4 +324,6 @@ export const DatasheetViewEnTranslations: Translations<"en">["DatasheetView"] = 
     "thumbnail_confirm_delete_modal.title": "Are you sure you want to remove the thumbnail from this data sheet",
     "datasheet_confirm_delete_modal.title": ({ datasheetName }) => `Are you sure you want to delete datasheet ${datasheetName} ?`,
     "datasheet_confirm_delete_modal.text": "The following items will be deleted :",
+    "metadata_tab.metadata.absent": undefined,
+    "metadata_tab.metadata.is_loading": undefined,
 };

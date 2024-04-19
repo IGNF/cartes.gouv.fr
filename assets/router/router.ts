@@ -114,7 +114,7 @@ const routeDefs = {
         {
             datastoreId: param.path.string,
             datasheetName: param.path.string,
-            activeTab: param.query.optional.string.default("dataset"),
+            activeTab: param.query.optional.string.default("metadata"),
         },
         (p) => `${appRoot}/datastores/${p.datastoreId}/datasheet/${p.datasheetName}`
     ),
