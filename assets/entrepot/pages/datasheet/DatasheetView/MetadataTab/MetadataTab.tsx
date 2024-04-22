@@ -23,8 +23,6 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, metadataQuery }) => {
 
     const { data: metadata } = metadataQuery;
 
-    console.log(metadata);
-
     return (
         <>
             {metadataQuery.isLoading && <LoadingText message={tDatasheet("metadata_tab.metadata.is_loading")} withSpinnerIcon={true} as="p" />}

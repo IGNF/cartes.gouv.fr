@@ -5,7 +5,7 @@ Grâce à l'outil en ligne de commande [swagger-typescript-api](https://github.c
 1. Générer les déclarations typescript dans un fichier temporaire `entrepot-generated.ts`
 
 ```bash
-npx swagger-typescript-api@latest -p <chemin/vers/fichier/openapi> -o assets/types -n entrepot-generated.ts --extract-enums --no-client
+npx swagger-typescript-api@latest -p <chemin/vers/fichier/openapi> -o assets/@types -n entrepot-generated.ts --extract-enums --no-client
 ```
 
 2. Corriger le fichier auto-généré et ensuite sauvegarder dans un autre fichier `entrepot.ts`

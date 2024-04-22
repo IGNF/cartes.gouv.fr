@@ -68,5 +68,5 @@ export async function jsonFetch<T>(
 }
 
 const hasSessionExpired = (error) => {
-    return error.code === 401 && error?.details?.controller === "App\\Controller\\Api\\ApiControllerInterface" && error?.details?.session_expired === true;
+    return error.code === 401 && error?.details?.controller === "App\\Controller\\ApiControllerInterface" && error?.details?.session_expired === true;
 };
