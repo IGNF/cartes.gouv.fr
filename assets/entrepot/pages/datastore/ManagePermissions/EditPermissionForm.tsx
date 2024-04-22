@@ -13,7 +13,7 @@ import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../i18n/i18n";
-import RQKeys from "../../../../modules/RQKeys";
+import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { routes } from "../../../../router/router";
 import { DatastorePermissionResponseDto } from "../../../../@types/entrepot";
 import ScrollOfferingList from "./ScrollOfferingList";

@@ -7,7 +7,7 @@ import React, { FC, useCallback, useMemo } from "react";
 import api from "../../../api";
 import Wait from "../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../i18n/i18n";
-import RQKeys from "../../../../modules/RQKeys";
+import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import { CartesStyle, Service } from "../../../../@types/app";
 import { StyleManager, addStyleModal } from "./Style/StyleManager";

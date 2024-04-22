@@ -8,7 +8,7 @@ import { FC } from "react";
 import api from "../../../api";
 import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
 import LoadingText from "../../../../components/Utils/LoadingText";
-import RQKeys from "../../../../modules/RQKeys";
+import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import { StoredDataReport } from "../../../../@types/app";
 import { routes } from "../../../../router/router";

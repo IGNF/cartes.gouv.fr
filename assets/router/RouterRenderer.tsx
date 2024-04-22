@@ -52,6 +52,8 @@ const PyramidVectorTmsServiceForm = lazy(() => import("../entrepot/pages/service
 
 const ServiceView = lazy(() => import("../entrepot/pages/service/view/ServiceView"));
 
+const EspaceCoCommunityList = lazy(() => import("../espaceco/pages/communities/CommunityList"));
+
 const RouterRenderer: FC = () => {
     const route = useRoute();
     const user = useAuthStore((state) => state.user);
@@ -162,6 +164,8 @@ const RouterRenderer: FC = () => {
                 );
             case "datastore_service_view":
                 return <ServiceView datastoreId={route.params.datastoreId} offeringId={route.params.offeringId} datasheetName={route.params.datasheetName} />;
+            case "espaceco_community_list":
+                return <EspaceCoCommunityList />;
             default:
                 return <PageNotFound />;
         }

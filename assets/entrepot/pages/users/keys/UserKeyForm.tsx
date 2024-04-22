@@ -15,7 +15,7 @@ import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
 import { datastoreNavItems } from "../../../../config/datastoreNavItems";
 import { getTranslation, useTranslation } from "../../../../i18n/i18n";
-import RQKeys from "../../../../modules/RQKeys";
+import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import { routes } from "../../../../router/router";
 import { KeyFormValuesType, UserKeyDetailedWithAccessesResponseDto, UserKeyInfoDtoTypeEnum, UserKeyWithAccessesResponseDto } from "../../../../@types/app";

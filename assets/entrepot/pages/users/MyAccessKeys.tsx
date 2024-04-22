@@ -8,7 +8,7 @@ import AppLayout from "../../../components/Layout/AppLayout";
 import LoadingText from "../../../components/Utils/LoadingText";
 import { datastoreNavItems } from "../../../config/datastoreNavItems";
 import { Translations, getTranslation } from "../../../i18n/i18n";
-import RQKeys from "../../../modules/RQKeys";
+import RQKeys from "../../../modules/entrepot/RQKeys";
 import { UserKeyWithAccessesResponseDto } from "../../../@types/app";
 import { PermissionDetailsResponseDto } from "../../../@types/entrepot";
 import UserKeysListTab from "./keys/UserKeysListTab";

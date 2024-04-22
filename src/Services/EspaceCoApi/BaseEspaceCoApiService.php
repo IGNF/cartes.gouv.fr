@@ -3,13 +3,13 @@
 namespace App\Services\EspaceCoApi;
 
 use Psr\Log\LoggerInterface;
+use App\Exception\ApiException;
 use App\Services\AbstractApiService;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
-use Symfony\Component\HttpClient\Exception\JsonException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 
@@ -42,20 +42,10 @@ class BaseEspaceCoApiService extends AbstractApiService
             }
 
             return $content;
-        } /* else {
+        } else {
             $errorMsg = 'EspaceCo API Error';
-            try {
-                $errorResponse = $response->toArray(false);
-                if (array_key_exists('error_description', $errorResponse)) {
-                    $errorMsg = is_array($errorResponse['error_description']) ? implode(', ', $errorResponse['error_description']) : $errorResponse['error_description'];
-                }
-            } catch (JsonException $ex) {
-                $errorResponse = $response->getContent(false);
-            }
-            TODO throw new ApiException($errorMsg, $statusCode, $errorResponse);
-        } */
-
-        // TODO SUPPRIMER
-        return [];
+            $errorResponse = $response->toArray(false);
+            throw new ApiException($errorMsg, $statusCode, $errorResponse['message']);
+        }
     }
 }

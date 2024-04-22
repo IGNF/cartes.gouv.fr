@@ -17,7 +17,7 @@ import StyleHelper from "../../../../../modules/Style/StyleHelper";
 import validations from "../../../../../validations";
 import api from "../../../../api";
 import { OfferingDetailResponseDtoTypeEnum } from "../../../../../@types/entrepot";
-import RQKeys from "../../../../../modules/RQKeys";
+import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import UploadLayerStyles from "./UploadLayerStyles";
 import getWebService from "../../../../../modules/WebServices/WebServices";
 import getStyleFilesManager from "../../../../../modules/Style/StyleFilesManager";

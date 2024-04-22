@@ -6,7 +6,7 @@ import { FC, useEffect, useState } from "react";
 
 import api from "../../../../api";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
-import RQKeys from "../../../../../modules/RQKeys";
+import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import Translator from "../../../../../modules/Translator";
 import { routes } from "../../../../../router/router";
 

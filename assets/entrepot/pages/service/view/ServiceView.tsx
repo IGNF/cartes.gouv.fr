@@ -11,7 +11,7 @@ import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import type { MapInitial } from "../../../../components/Utils/RMap";
 import RMap from "../../../../components/Utils/RMap";
-import RQKeys from "../../../../modules/RQKeys";
+import RQKeys from "../../../../modules/entrepot/RQKeys";
 import getWebService from "../../../../modules/WebServices/WebServices";
 import { type CartesApiException } from "../../../../modules/jsonFetch";
 import { routes, useRoute } from "../../../../router/router";

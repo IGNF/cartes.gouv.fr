@@ -2,8 +2,11 @@
 
 namespace App\Controller\EspaceCo;
 
+use App\Exception\ApiException;
+use App\Exception\CartesApiException;
 use App\Controller\ApiControllerInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use App\Services\EspaceCoApi\CommunityApiService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -16,18 +19,22 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 )]
 class CommunityController extends AbstractController implements ApiControllerInterface
 {
+    public function __construct(
+        private CommunityApiService $communityApiService,
+    ) {
+    }
+
     #[Route('/get', name: 'get', methods: ['GET'])]
     public function get(
         #[MapQueryParameter] ?int $page = 1,
         #[MapQueryParameter] ?int $limit = 10
     ): JsonResponse
     {
-        /* try {
-
-            return new JsonResponse($community);
+        try {
+            $response = $this->communityApiService->get($page, $limit);
+            return new JsonResponse($response);
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        } */
-        return new JsonResponse();
+        }
     }
 }

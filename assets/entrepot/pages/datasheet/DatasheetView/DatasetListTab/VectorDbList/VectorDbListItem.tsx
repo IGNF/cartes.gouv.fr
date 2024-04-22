@@ -18,7 +18,7 @@ import MenuList from "../../../../../../components/Utils/MenuList";
 import Wait from "../../../../../../components/Utils/Wait";
 import useToggle from "../../../../../../hooks/useToggle";
 import { ComponentKey, Translations, declareComponentKeys, getTranslation, useTranslation } from "../../../../../../i18n/i18n";
-import RQKeys from "../../../../../../modules/RQKeys";
+import RQKeys from "../../../../../../modules/entrepot/RQKeys";
 import { routes } from "../../../../../../router/router";
 import { DatastoreEndpoint, StoredDataStatusEnum, VectorDb } from "../../../../../../@types/app";
 import { EndpointDetailResponseDtoTypeEnum } from "../../../../../../@types/entrepot";

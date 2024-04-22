@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import api from "../entrepot/api";
-import RQKeys from "../modules/RQKeys";
+import RQKeys from "../modules/entrepot/RQKeys";
 import { CartesApiException } from "../modules/jsonFetch";
 import { useAuthStore } from "../stores/AuthStore";
 import { Datastore } from "../@types/app";

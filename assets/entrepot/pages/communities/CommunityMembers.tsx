@@ -5,7 +5,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { ToggleSwitch } from "@codegouvfr/react-dsfr/ToggleSwitch";
-import RQKeys from "../../../modules/RQKeys";
+import RQKeys from "../../../modules/entrepot/RQKeys";
 import api from "../../api";
 import { CommunityMemberDtoRightsEnum, CommunityUserResponseDto, UserDto } from "../../../@types/entrepot";
 import { UserRightsResponseDto } from "../../../@types/app";

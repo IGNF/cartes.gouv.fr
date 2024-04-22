@@ -11,7 +11,7 @@ import OfferingStatusBadge from "../../../../../components/Utils/Badges/Offering
 import MenuList from "../../../../../components/Utils/MenuList";
 import Wait from "../../../../../components/Utils/Wait";
 import useToggle from "../../../../../hooks/useToggle";
-import RQKeys from "../../../../../modules/RQKeys";
+import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import { routes } from "../../../../../router/router";
 import { useSnackbarStore } from "../../../../../stores/SnackbarStore";
 import { OfferingStatusEnum, OfferingTypeEnum, type Service } from "../../../../../@types/app";

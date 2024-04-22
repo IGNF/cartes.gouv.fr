@@ -3,7 +3,7 @@ import { FC, PropsWithChildren, memo, useMemo } from "react";
 
 import api from "../../entrepot/api";
 import { datastoreNavItems } from "../../config/datastoreNavItems";
-import RQKeys from "../../modules/RQKeys";
+import RQKeys from "../../modules/entrepot/RQKeys";
 import AppLayout from "./AppLayout";
 
 type DatastoreLayoutProps = {

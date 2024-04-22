@@ -16,7 +16,7 @@ import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
 import { Translations, declareComponentKeys, useTranslation } from "../../../../i18n/i18n";
-import RQKeys from "../../../../modules/RQKeys";
+import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { type CartesApiException } from "../../../../modules/jsonFetch";
 import { routes, useRoute } from "../../../../router/router";
 import api from "../../../api";

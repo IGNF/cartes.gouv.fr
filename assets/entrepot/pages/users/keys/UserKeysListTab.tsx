@@ -10,7 +10,7 @@ import api from "../../../api";
 import { ConfirmDialog, ConfirmDialogModal } from "../../../../components/Utils/ConfirmDialog";
 import Wait from "../../../../components/Utils/Wait";
 import { Translations, useTranslation } from "../../../../i18n/i18n";
-import RQKeys from "../../../../modules/RQKeys";
+import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import { routes } from "../../../../router/router";
 import { UserKeyWithAccessesResponseDto } from "../../../../@types/app";

@@ -13,7 +13,7 @@ import AppLayout from "../../../components/Layout/AppLayout";
 import LoadingText from "../../../components/Utils/LoadingText";
 import Wait from "../../../components/Utils/Wait";
 import { datastoreNavItems } from "../../../config/datastoreNavItems";
-import RQKeys from "../../../modules/RQKeys";
+import RQKeys from "../../../modules/entrepot/RQKeys";
 import Translator from "../../../modules/Translator";
 import { CartesApiException } from "../../../modules/jsonFetch";
 import { useAuthStore } from "../../../stores/AuthStore";

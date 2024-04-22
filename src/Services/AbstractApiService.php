@@ -70,9 +70,9 @@ abstract class AbstractApiService
      */
     protected function requestAll(string $url, array $query = [], array $headers = []): array
     {
-        $query['page'] = 1;
-        $query['limit'] = 50;
-
+        $query['page']  = 1;   
+        $query['limit'] = 50;   
+        
         $response = $this->request('GET', $url, [], $query, $headers, false, true, true);
 
         $allResources = $response['content'];

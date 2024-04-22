@@ -14,7 +14,7 @@ import MenuList from "../../../../../../components/Utils/MenuList";
 import Wait from "../../../../../../components/Utils/Wait";
 import useToggle from "../../../../../../hooks/useToggle";
 import { Translations, declareComponentKeys, getTranslation, useTranslation } from "../../../../../../i18n/i18n";
-import RQKeys from "../../../../../../modules/RQKeys";
+import RQKeys from "../../../../../../modules/entrepot/RQKeys";
 import { routes } from "../../../../../../router/router";
 import { Pyramid, StoredDataStatusEnum } from "../../../../../../@types/app";
 import { formatDateFromISO, offeringTypeDisplayName } from "../../../../../../utils";

@@ -14,7 +14,7 @@ import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
 import olDefaults from "../../../../data/ol-defaults.json";
-import RQKeys from "../../../../modules/RQKeys";
+import RQKeys from "../../../../modules/entrepot/RQKeys";
 import Translator from "../../../../modules/Translator";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import { routes } from "../../../../router/router";

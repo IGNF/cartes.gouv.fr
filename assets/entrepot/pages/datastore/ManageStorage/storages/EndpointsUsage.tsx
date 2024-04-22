@@ -13,7 +13,7 @@ import LoadingText from "../../../../../components/Utils/LoadingText";
 import Progress from "../../../../../components/Utils/Progress";
 import Wait from "../../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../../i18n/i18n";
-import RQKeys from "../../../../../modules/RQKeys";
+import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../../modules/jsonFetch";
 import { Datastore, Offering, OfferingTypeEnum } from "../../../../../@types/app";
 

@@ -10,7 +10,7 @@ import api from "../../../api";
 import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import { useTranslation } from "../../../../i18n/i18n";
-import RQKeys from "../../../../modules/RQKeys";
+import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { routes } from "../../../../router/router";
 import { Datastore } from "../../../../@types/app";
 import { DatastorePermissionResponseDto } from "../../../../@types/entrepot";

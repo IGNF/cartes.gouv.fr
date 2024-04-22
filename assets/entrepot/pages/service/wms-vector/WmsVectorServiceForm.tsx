@@ -18,7 +18,7 @@ import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
 import { Translations, useTranslation } from "../../../../i18n/i18n";
-import RQKeys from "../../../../modules/RQKeys";
+import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import { routes } from "../../../../router/router";
 import { EndpointTypeEnum, ServiceFormValuesBaseType, type Service, type StoredDataRelation, type VectorDb } from "../../../../@types/app";

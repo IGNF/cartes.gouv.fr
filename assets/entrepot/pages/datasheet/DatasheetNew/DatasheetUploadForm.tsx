@@ -21,7 +21,7 @@ import Progress from "../../../../components/Utils/Progress";
 import Wait from "../../../../components/Utils/Wait";
 import defaultProjections from "../../../../data/default_projections.json";
 import FileUploader from "../../../../modules/FileUploader";
-import RQKeys from "../../../../modules/RQKeys";
+import RQKeys from "../../../../modules/entrepot/RQKeys";
 import Translator from "../../../../modules/Translator";
 import { routes, useRoute } from "../../../../router/router";
 import { getFileExtension, regex } from "../../../../utils";

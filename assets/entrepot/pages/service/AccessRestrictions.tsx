@@ -5,7 +5,7 @@ import { FC } from "react";
 import { UseFormReturn } from "react-hook-form";
 
 import api from "../../api";
-import RQKeys from "../../../modules/RQKeys";
+import RQKeys from "../../../modules/entrepot/RQKeys";
 import Translator from "../../../modules/Translator";
 import { DatastoreEndpoint, EndpointTypeEnum, ServiceFormValuesBaseType } from "../../../@types/app";
 
