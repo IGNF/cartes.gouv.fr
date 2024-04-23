@@ -9,16 +9,16 @@ import { FC, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
-import api from "../../../api";
+import { type StoredDataRelation, type VectorDb } from "../../../../@types/app";
 import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
 import olDefaults from "../../../../data/ol-defaults.json";
-import RQKeys from "../../../../modules/entrepot/RQKeys";
 import Translator from "../../../../modules/Translator";
+import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import { routes } from "../../../../router/router";
-import { type StoredDataRelation, type VectorDb } from "../../../../@types/app";
+import api from "../../../api";
 import TableSelection from "../TableSelection";
 import formatForm from "./format-form";
 import Sample, { type SampleType } from "./sample/Sample";
@@ -118,6 +118,10 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, vec
             setSelectedTables(selectedTables);
         }
     }, [selectedTableNamesList, vectorDbQuery.data]);
+
+    useEffect(() => {
+        window?.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+    }, [currentStep]);
 
     const previousStep = () => setCurrentStep((currentStep) => currentStep - 1);
 

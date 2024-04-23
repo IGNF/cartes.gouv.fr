@@ -5,14 +5,13 @@ import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { format as datefnsFormat } from "date-fns";
 import { declareComponentKeys } from "i18nifty";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { symToStr } from "tsafe/symToStr";
 import * as yup from "yup";
 
-import api from "../../../api";
+import { EndpointTypeEnum, Service, ServiceFormValuesBaseType, StoredDataRelation, VectorDb } from "../../../../@types/app";
 import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../components/Utils/LoadingText";
@@ -22,18 +21,17 @@ import { Translations, useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import { routes } from "../../../../router/router";
-import { EndpointTypeEnum, Service, ServiceFormValuesBaseType, StoredDataRelation, VectorDb } from "../../../../@types/app";
-import { ConfigurationWfsDetailsContent } from "../../../../@types/entrepot";
-import { getProjectionCode, removeDiacritics } from "../../../../utils";
+import api from "../../../api";
 import AccessRestrictions from "../AccessRestrictions";
 import { CommonSchemasValidation } from "../common-schemas-validation";
+import { getWfsServiceFormDefaultValues } from "../default-values";
 import AdditionalInfo from "../metadatas/AdditionalInfo";
-import Description, { getEndpointSuffix } from "../metadatas/Description";
+import Description from "../metadatas/Description";
 import UploadMDFile from "../metadatas/UploadMDFile";
 import TableInfosForm from "./TablesInfoForm";
 
 // Ajout du nom natif et trim sur les mots cles
-const formatTablesInfos = (table_infos: Record<string, TableInfos>) => {
+const formatTablesInfos = (table_infos: Record<string, WfsTableInfos>) => {
     const tInfos: object[] = [];
     for (const [name, infos] of Object.entries(table_infos)) {
         tInfos.push({
@@ -57,7 +55,7 @@ const createRequestBody = (formValues: WfsServiceFormValuesType) => {
 
 export type WfsServiceFormValuesType = ServiceFormValuesBaseType & {
     selected_tables?: string[];
-    table_infos?: Record<string, TableInfos>;
+    table_infos?: Record<string, WfsTableInfos>;
 };
 
 /**
@@ -71,7 +69,7 @@ type WfsServiceFormProps = {
     offeringId?: string;
 };
 
-type TableInfos = {
+export type WfsTableInfos = {
     native_name?: string;
     public_name?: string;
     title: string;
@@ -136,6 +134,7 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
                     queryKey: RQKeys.datastore_datasheet(datastoreId, vectorDbQuery.data?.tags.datasheet_name),
                 });
                 routes.datastore_datasheet_view({ datastoreId, datasheetName: vectorDbQuery.data?.tags.datasheet_name, activeTab: "services" }).push();
+                queryClient.refetchQueries({ queryKey: RQKeys.datastore_metadata_by_datasheet_name(datastoreId, vectorDbQuery.data?.tags?.datasheet_name) });
             } else {
                 routes.datasheet_list({ datastoreId }).push();
             }
@@ -202,74 +201,10 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
     schemas[STEPS.METADATAS_ADDITIONALINFORMATIONS] = commonValidation.getMDAdditionalInfoSchema();
     schemas[STEPS.ACCESSRESTRICTIONS] = commonValidation.getAccessRestrictionSchema();
 
-    const defaultValues: WfsServiceFormValuesType = useMemo(() => {
-        let defValues: WfsServiceFormValuesType;
-        const now = datefnsFormat(new Date(), "yyyy-MM-dd");
-
-        if (editMode) {
-            const share_with = offeringQuery.data?.open === true ? "all_public" : "your_community";
-            const typeInfos = offeringQuery.data?.configuration?.type_infos as ConfigurationWfsDetailsContent | undefined;
-
-            const tableInfos: Record<string, TableInfos> = {};
-            typeInfos?.used_data?.[0].relations.forEach((rel) => {
-                tableInfos[rel.native_name] = {
-                    title: rel.title,
-                    description: rel.abstract,
-                    keywords: rel.keywords ?? [],
-                    public_name: rel.public_name,
-                };
-            });
-
-            // valeurs récupérées depuis anciens config et offering existants
-            defValues = {
-                selected_tables: typeInfos?.used_data?.[0].relations?.map((rel) => rel.native_name) ?? [],
-                table_infos: tableInfos,
-                technical_name: offeringQuery.data?.configuration.layer_name,
-                public_name: offeringQuery.data?.configuration.name,
-                share_with,
-                attribution_text: offeringQuery.data?.configuration.attribution?.title,
-                attribution_url: offeringQuery.data?.configuration.attribution?.url,
-            };
-        } else {
-            const suffix = getEndpointSuffix(EndpointTypeEnum.WFS);
-            const storedDataName = vectorDbQuery.data?.name ?? "";
-            const nice = removeDiacritics(storedDataName.toLowerCase()).replace(/ /g, "_");
-
-            // valeurs par défaut lors de la création de nouveaux config et offering
-            defValues = {
-                selected_tables: [],
-                table_infos: {},
-                technical_name: `${nice}_${suffix}`,
-                public_name: storedDataName,
-                creation_date: now,
-                resource_genealogy: "",
-                charset: "utf8",
-            };
-        }
-
-        let projUrl = "";
-        const projCode = getProjectionCode(vectorDbQuery.data?.srs);
-        if (projCode) {
-            projUrl = `http://www.opengis.net/def/crs/EPSG/0/${projCode}`;
-        }
-
-        defValues = {
-            ...defValues,
-            projection: projUrl,
-            languages: metadataQuery?.data?.csw_metadata?.language ? [metadataQuery?.data?.csw_metadata?.language] : [{ language: "français", code: "fra" }],
-            creation_date: metadataQuery?.data?.csw_metadata?.creation_date,
-            resource_genealogy: metadataQuery?.data?.csw_metadata?.hierarchy_level,
-            email_contact: metadataQuery?.data?.csw_metadata?.contact_email,
-            organization: metadataQuery?.data?.csw_metadata?.organisation_name,
-            organization_email: metadataQuery?.data?.csw_metadata?.organisation_email,
-            category: metadataQuery?.data?.csw_metadata?.thematic_categories,
-            description: metadataQuery?.data?.csw_metadata?.abstract,
-            identifier: metadataQuery?.data?.csw_metadata?.file_identifier,
-            charset: metadataQuery?.data?.csw_metadata?.charset ?? "utf8",
-        };
-
-        return defValues;
-    }, [editMode, vectorDbQuery.data, offeringQuery.data, metadataQuery?.data?.csw_metadata]);
+    const defaultValues: WfsServiceFormValuesType = useMemo(
+        () => getWfsServiceFormDefaultValues(offeringQuery.data, editMode, vectorDbQuery.data, metadataQuery.data),
+        [editMode, vectorDbQuery.data, offeringQuery.data, metadataQuery?.data]
+    );
 
     const tables: StoredDataRelation[] = useMemo(() => {
         if (!vectorDbQuery.data?.type_infos) return [];

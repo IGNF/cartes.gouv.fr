@@ -187,6 +187,8 @@ export type TypeInfosWithBbox =
 export type MetadataFormValuesType = {
     metadata_file_content?: FileList;
     identifier?: string;
+    public_name?: string;
+    description?: string;
     email_contact?: string;
     creation_date?: string;
     resource_genealogy?: string;
@@ -297,4 +299,7 @@ export type CswMetadata = {
 
 export type Metadata = MetadataResponseDto & {
     csw_metadata?: CswMetadata;
+    tags: {
+        datasheet_name?: string;
+    };
 };

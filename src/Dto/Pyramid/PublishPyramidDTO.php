@@ -50,7 +50,7 @@ class PublishPyramidDTO
         #[Assert\Url(['message' => 'common.attribution_url_error'])]
         public readonly string $attribution_url,
 
-        /** @var array<string> */
+        /** @var array<mixed> */
         #[Assert\Count(min: 1, minMessage: 'common.language_min_error')]
         public readonly array $languages,
 

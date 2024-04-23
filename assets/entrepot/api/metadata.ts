@@ -15,7 +15,7 @@ const add = (datastoreId: string, body: object, queryParams: object = {}) => {
 
 const getList = (datastoreId: string, queryParams: object = {}, otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_metadata_get_list", { datastoreId, ...queryParams });
-    return jsonFetch<Omit<Metadata, "content">[]>(url, {
+    return jsonFetch<Omit<Metadata, "csw_metadata">[]>(url, {
         method: "GET",
         ...otherOptions,
     });

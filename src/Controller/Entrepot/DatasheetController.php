@@ -12,6 +12,7 @@ use App\Services\EntrepotApi\AnnexeApiService;
 use App\Services\EntrepotApi\CartesServiceApi;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
+use App\Services\EntrepotApi\MetadataApiService;
 use App\Services\EntrepotApi\StoredDataApiService;
 use App\Services\EntrepotApi\UploadApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -34,6 +35,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         private ConfigurationApiService $configurationApiService,
         private AnnexeApiService $annexeApiService,
         private CartesServiceApi $cartesServiceApi,
+        private MetadataApiService $metadataApiService,
     ) {
     }
 
@@ -194,36 +196,45 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         try {
             $datasheet = json_decode($this->getDetailed($datastoreId, $datasheetName)->getContent(), true);
 
+            // suppr des services (config et offering)
             if (isset($datasheet['service_list'])) {
                 foreach ($datasheet['service_list'] as $offering) {
-                    $this->configurationApiService->removeOffering($datastoreId, $offering['_id']);
-                    $configurationId = $offering['configuration']['_id'];
-
-                    while (1) {
-                        sleep(3);
-                        $configuration = $this->configurationApiService->get($datastoreId, $configurationId);
-                        if (ConfigurationStatuses::UNPUBLISHED === $configuration['status']) {
-                            break;
-                        }
-                    }
-                    $this->configurationApiService->remove($datastoreId, $configurationId);
+                    $this->cartesServiceApi->unpublish($datastoreId, $offering['_id']);
                 }
             }
 
+            // suppr des uploads
             if (isset($datasheet['upload_list'])) {
                 foreach ($datasheet['upload_list'] as $upload) {
                     $this->uploadApiService->remove($datastoreId, $upload['_id']);
                 }
             }
 
+            // suppr des stored_data
             $storedDataList = [];
 
             if (isset($datasheet['vector_db_list'])) {
                 $storedDataList = array_merge($storedDataList, $datasheet['vector_db_list']);
             }
 
+            if (isset($datasheet['pyramid_list'])) {
+                $storedDataList = array_merge($storedDataList, $datasheet['pyramid_list']);
+            }
+
             foreach ($storedDataList as $storedData) {
                 $this->storedDataApiService->remove($datastoreId, $storedData['_id']);
+            }
+
+            // suppr des métadonnées
+            $metadataList = $this->metadataApiService->getAll($datastoreId, [
+                'tags' => [
+                    CommonTags::DATASHEET_NAME => $datasheetName,
+                ],
+            ]);
+
+            if (count($metadataList) > 0) {
+                $metadata = $metadataList[0];
+                $this->metadataApiService->delete($datastoreId, $metadata['_id']);
             }
 
             // TODO : autres données à supprimer

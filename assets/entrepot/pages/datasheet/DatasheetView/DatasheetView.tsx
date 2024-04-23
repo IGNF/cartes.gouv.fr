@@ -196,17 +196,19 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                         <strong>{t("datasheet_confirm_delete_modal.text")}</strong>
                         <ul>
                             {datasheetQuery?.data?.vector_db_list?.length && datasheetQuery?.data?.vector_db_list.length > 0 ? (
-                                <li> {datasheetQuery?.data?.vector_db_list.length} base(s) de données</li>
+                                <li>{datasheetQuery?.data?.vector_db_list.length} base(s) de données</li>
                             ) : null}
                             {datasheetQuery?.data?.pyramid_list?.length && datasheetQuery?.data?.pyramid_list.length > 0 ? (
-                                <li> {datasheetQuery?.data?.pyramid_list.length} pyramide(s) de tuiles vectorielles</li>
+                                <li>{datasheetQuery?.data?.pyramid_list.length} pyramide(s) de tuiles vectorielles</li>
                             ) : null}
                             {datasheetQuery?.data?.service_list?.length && datasheetQuery?.data?.service_list.length > 0 ? (
-                                <li> {datasheetQuery?.data?.service_list.length} service(s) publié(s)</li>
+                                <li>{datasheetQuery?.data?.service_list.length} service(s) publié(s)</li>
                             ) : null}
                             {datasheetQuery?.data?.upload_list?.length && datasheetQuery?.data?.upload_list.length > 0 ? (
-                                <li> {datasheetQuery?.data?.upload_list.length} livraison(s)</li>
+                                <li>{datasheetQuery?.data?.upload_list.length} livraison(s)</li>
                             ) : null}
+
+                            {metadataQuery.data && <li>La métadonnée associée ({metadataQuery.data.file_identifier})</li>}
 
                             {/* TODO : pyramides tuiles vectorielles, raster, métadonnées etc... */}
                         </ul>

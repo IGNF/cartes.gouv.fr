@@ -36,7 +36,7 @@ const RQKeys = {
         "datasheet",
         datasheetName,
     ],
-    datastore_metadata: (datastoreId: string, metadataId: string): string[] => ["datastore", datastoreId, "metadata", metadataId],
+    datastore_metadata_by_id: (datastoreId: string, metadataId: string): string[] => ["datastore", datastoreId, "metadata", metadataId],
 
     catalogs_communities: (): string[] => ["catalogs", "communities"],
 

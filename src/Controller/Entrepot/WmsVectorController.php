@@ -8,9 +8,11 @@ use App\Constants\EntrepotApi\StaticFileTypes;
 use App\Controller\ApiControllerInterface;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
+use App\Services\CswMetadataHelper;
 use App\Services\EntrepotApi\CartesServiceApi;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
+use App\Services\EntrepotApi\MetadataApiService;
 use App\Services\EntrepotApi\StaticApiService;
 use App\Services\EntrepotApi\StoredDataApiService;
 use Symfony\Component\Filesystem\Filesystem;
@@ -35,8 +37,10 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
         private CartesServiceApi $cartesServiceApi,
         private StaticApiService $staticApiService,
         protected Filesystem $filesystem,
+        MetadataApiService $metadataApiService,
+        CswMetadataHelper $cswMetadataHelper,
     ) {
-        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApi);
+        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApi, $metadataApiService, $cswMetadataHelper);
     }
 
     #[Route('', name: 'add', methods: ['POST'])]
@@ -59,6 +63,7 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
             $configRequestBody = $this->getConfigRequestBody($data, $tablesNamesList, $styleFilesByTable, $storedDataId);
 
             $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId);
+            $datasheetName = $storedData['tags'][CommonTags::DATASHEET_NAME];
 
             $endpoint = $this->getEndpointByShareType($datastoreId, ConfigurationTypes::WMSVECTOR, $data['share_with']);
 
@@ -78,6 +83,11 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
             // Creation d'une offering
             $offering = $this->configurationApiService->addOffering($datastoreId, $configuration['_id'], $endpoint['_id'], $endpoint['open']);
             $offering['configuration'] = $configuration;
+
+            // création ou mise à jour de metadata
+            $data['languages'] = json_decode($data['languages'], true);
+            $data['category'] = json_decode($data['category'], true);
+            $this->createOrUpdateMetadata($data, $datastoreId, $datasheetName);
 
             return $this->json($offering);
         } catch (ApiException $ex) {
@@ -104,6 +114,7 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
             // récup anciens config et offering
             $oldOffering = $this->configurationApiService->getOffering($datastoreId, $offeringId);
             $oldConfiguration = $this->configurationApiService->get($datastoreId, $oldOffering['configuration']['_id']);
+            $datasheetName = $oldConfiguration['tags'][CommonTags::DATASHEET_NAME];
 
             // ajout ou mise à jour des fichiers de styles SLD
             $styleFilesByTable = $this->sendStyleFiles($datastoreId, $tablesNamesList, $files, $oldConfiguration);
@@ -130,6 +141,11 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
             // Creation d'une offering
             $offering = $this->configurationApiService->addOffering($datastoreId, $configuration['_id'], $endpoint['_id'], $endpoint['open']);
             $offering['configuration'] = $configuration;
+
+            // création ou mise à jour de metadata
+            $data['languages'] = json_decode($data['languages'], true);
+            $data['category'] = json_decode($data['category'], true);
+            $this->createOrUpdateMetadata($data, $datastoreId, $datasheetName);
 
             return $this->json($offering);
         } catch (ApiException $ex) {

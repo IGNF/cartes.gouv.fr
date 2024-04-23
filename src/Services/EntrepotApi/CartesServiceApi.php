@@ -42,9 +42,12 @@ class CartesServiceApi
             }));
             $url = $urls[0]['url'].'/metadata.json';
 
-            $response = $this->httpClient->request('GET', $url);
-            if (Response::HTTP_OK === $response->getStatusCode()) {
-                $offering['tms_metadata'] = $response->toArray();
+            try {
+                $response = $this->httpClient->request('GET', $url);
+                if (Response::HTTP_OK === $response->getStatusCode()) {
+                    $offering['tms_metadata'] = $response->toArray();
+                }
+            } catch (\Throwable $th) {
             }
         }
 

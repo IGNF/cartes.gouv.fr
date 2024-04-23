@@ -45,6 +45,7 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
         },
         onSettled() {
             queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
+            queryClient.refetchQueries({ queryKey: RQKeys.datastore_metadata_by_datasheet_name(datastoreId, datasheetName) });
         },
     });
 

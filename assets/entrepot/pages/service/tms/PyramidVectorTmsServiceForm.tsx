@@ -5,12 +5,11 @@ import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { format as datefnsFormat } from "date-fns";
 import { declareComponentKeys } from "i18nifty";
-import { FC, useCallback, useMemo, useState } from "react";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 
-import api from "../../../api";
+import { EndpointTypeEnum, Pyramid, Service, ServiceFormValuesBaseType } from "../../../../@types/app";
 import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../components/Utils/LoadingText";
@@ -19,16 +18,15 @@ import { Translations, useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import { routes } from "../../../../router/router";
-import { EndpointTypeEnum, Pyramid, Service, ServiceFormValuesBaseType } from "../../../../@types/app";
-import { ConfigurationWmtsTmsDetailsContent } from "../../../../@types/entrepot";
-import { getProjectionCode, removeDiacritics } from "../../../../utils";
+import api from "../../../api";
 import AccessRestrictions from "../AccessRestrictions";
 import { CommonSchemasValidation } from "../common-schemas-validation";
+import { getPyramidVectorTmsServiceFormDefaultValues } from "../default-values";
 import AdditionalInfo from "../metadatas/AdditionalInfo";
-import Description, { getEndpointSuffix } from "../metadatas/Description";
+import Description from "../metadatas/Description";
 import UploadMDFile from "../metadatas/UploadMDFile";
 
-type PyramidVectorTmsServiceFormValuesType = ServiceFormValuesBaseType;
+export type PyramidVectorTmsServiceFormValuesType = ServiceFormValuesBaseType;
 
 const STEPS = {
     METADATAS_UPLOAD: 1,
@@ -87,6 +85,7 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
                     queryKey: RQKeys.datastore_datasheet(datastoreId, pyramidQuery.data?.tags.datasheet_name),
                 });
                 routes.datastore_datasheet_view({ datastoreId, datasheetName: pyramidQuery.data?.tags.datasheet_name, activeTab: "services" }).push();
+                queryClient.refetchQueries({ queryKey: RQKeys.datastore_metadata_by_datasheet_name(datastoreId, pyramidQuery.data?.tags?.datasheet_name) });
             } else {
                 routes.datasheet_list({ datastoreId }).push();
             }
@@ -119,6 +118,12 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
         staleTime: Infinity,
     });
 
+    const metadataQuery = useQuery({
+        queryKey: RQKeys.datastore_metadata_by_datasheet_name(datastoreId, pyramidQuery.data?.tags?.datasheet_name ?? "XX"),
+        queryFn: ({ signal }) => api.metadata.getByDatasheetName(datastoreId, pyramidQuery.data?.tags?.datasheet_name ?? "XX", { signal }),
+        enabled: !!pyramidQuery.data?.tags?.datasheet_name,
+    });
+
     const commonValidation = useMemo(() => new CommonSchemasValidation(offeringsQuery.data), [offeringsQuery.data]);
 
     // Definition du schema
@@ -128,59 +133,10 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
     schemas[STEPS.METADATAS_ADDITIONALINFORMATIONS] = commonValidation.getMDAdditionalInfoSchema();
     schemas[STEPS.ACCESSRESTRICTIONS] = commonValidation.getAccessRestrictionSchema();
 
-    const defaultValues: PyramidVectorTmsServiceFormValuesType = useMemo(() => {
-        let defValues: PyramidVectorTmsServiceFormValuesType;
-        const now = datefnsFormat(new Date(), "yyyy-MM-dd");
-
-        if (editMode) {
-            const share_with = offeringQuery.data?.open === true ? "all_public" : "your_community";
-            const typeInfos = offeringQuery.data?.configuration?.type_infos as ConfigurationWmtsTmsDetailsContent | undefined;
-
-            defValues = {
-                technical_name: offeringQuery.data?.configuration.layer_name,
-                public_name: typeInfos?.title,
-                share_with,
-                // TODO : à récupérer depuis les métadonnées
-                creation_date: now,
-                resource_genealogy: "",
-                email_contact: "",
-                organization: "",
-                organization_email: "",
-                category: [],
-                description: "",
-                identifier: "",
-                charset: "utf8",
-                attribution_text: offeringQuery.data?.configuration.attribution?.title,
-                attribution_url: offeringQuery.data?.configuration.attribution?.url,
-            };
-        } else {
-            const suffix = getEndpointSuffix(EndpointTypeEnum.WMSVECTOR);
-            const storedDataName = pyramidQuery.data?.name ?? "";
-            const nice = removeDiacritics(storedDataName.toLowerCase()).replace(/ /g, "_");
-
-            defValues = {
-                technical_name: `${nice}_${suffix}`,
-                public_name: storedDataName,
-                creation_date: now,
-                resource_genealogy: "",
-                charset: "utf8",
-            };
-        }
-
-        let projUrl = "";
-        const projCode = getProjectionCode(pyramidQuery.data?.srs);
-        if (projCode) {
-            projUrl = `http://www.opengis.net/def/crs/EPSG/0/${projCode}`;
-        }
-
-        defValues = {
-            ...defValues,
-            projection: projUrl,
-            languages: [{ language: "français", code: "fra" }],
-        };
-
-        return defValues;
-    }, [editMode, pyramidQuery.data, offeringQuery.data]);
+    const defaultValues: PyramidVectorTmsServiceFormValuesType = useMemo(
+        () => getPyramidVectorTmsServiceFormDefaultValues(offeringQuery.data, editMode, pyramidQuery.data, metadataQuery.data),
+        [editMode, offeringQuery.data, pyramidQuery.data, metadataQuery.data]
+    );
 
     const form = useForm<PyramidVectorTmsServiceFormValuesType>({
         resolver: yupResolver(schemas[currentStep]),
@@ -189,6 +145,10 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
     });
 
     const { getValues: getFormValues, trigger } = form;
+
+    useEffect(() => {
+        window?.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+    }, [currentStep]);
 
     // Etape precedente
     const previousStep = useCallback(() => setCurrentStep((currentStep) => currentStep - 1), []);

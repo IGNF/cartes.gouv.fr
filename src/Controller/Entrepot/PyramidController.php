@@ -10,9 +10,11 @@ use App\Dto\Pyramid\CompositionDTO;
 use App\Dto\Pyramid\PublishPyramidDTO;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
+use App\Services\CswMetadataHelper;
 use App\Services\EntrepotApi\CartesServiceApi;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
+use App\Services\EntrepotApi\MetadataApiService;
 use App\Services\EntrepotApi\ProcessingApiService;
 use App\Services\EntrepotApi\StoredDataApiService;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -37,9 +39,11 @@ class PyramidController extends ServiceController implements ApiControllerInterf
         private StoredDataApiService $storedDataApiService,
         private ProcessingApiService $processingApiService,
         private CartesServiceApi $cartesServiceApi,
-        private ParameterBagInterface $parameterBag
+        private ParameterBagInterface $parameterBag,
+        MetadataApiService $metadataApiService,
+        CswMetadataHelper $cswMetadataHelper,
     ) {
-        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApi);
+        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApi, $metadataApiService, $cswMetadataHelper);
     }
 
     #[Route('/add', name: 'add', methods: ['POST'])]
@@ -110,10 +114,8 @@ class PyramidController extends ServiceController implements ApiControllerInterf
             $this->processingApiService->launchExecution($datastoreId, $processingExecution['_id']);
 
             return new JsonResponse();
-        } catch (CartesApiException $ex) {
-            return $this->json($ex->getDetails(), $ex->getCode());
-        } catch (\Exception $ex) {
-            return $this->json(['message' => $ex->getMessage()], $ex->getCode());
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
     }
 
@@ -125,6 +127,7 @@ class PyramidController extends ServiceController implements ApiControllerInterf
     ): JsonResponse {
         try {
             $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId);
+            $datasheetName = $pyramid['tags'][CommonTags::DATASHEET_NAME];
 
             // TODO Suppression de l'Upload ?
             // TODO Suppression de la base de donnees
@@ -146,11 +149,13 @@ class PyramidController extends ServiceController implements ApiControllerInterf
             $offering = $this->configurationApiService->addOffering($datastoreId, $configuration['_id'], $endpoint['_id'], $endpoint['open']);
             $offering['configuration'] = $configuration;
 
+            // création ou mise à jour de metadata
+            $formData = json_decode(json_encode($dto), true);
+            $this->createOrUpdateMetadata($formData, $datastoreId, $datasheetName);
+
             return $this->json($offering);
-        } catch (CartesApiException $ex) {
-            return $this->json($ex->getDetails(), $ex->getCode());
-        } catch (\Exception $ex) {
-            return $this->json(['message' => $ex->getMessage()], $ex->getCode());
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
     }
 
@@ -167,6 +172,7 @@ class PyramidController extends ServiceController implements ApiControllerInterf
             $oldConfiguration = $this->configurationApiService->get($datastoreId, $oldOffering['configuration']['_id']);
 
             $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId);
+            $datasheetName = $pyramid['tags'][CommonTags::DATASHEET_NAME];
 
             // suppression anciens configs et offering
             $this->cartesServiceApi->tmsUnpublish($datastoreId, $oldOffering, false);
@@ -183,6 +189,10 @@ class PyramidController extends ServiceController implements ApiControllerInterf
             // Creation d'une offering
             $offering = $this->configurationApiService->addOffering($datastoreId, $configuration['_id'], $endpoint['_id'], $endpoint['open']);
             $offering['configuration'] = $configuration;
+
+            // création ou mise à jour de metadata
+            $formData = json_decode(json_encode($dto), true);
+            $this->createOrUpdateMetadata($formData, $datastoreId, $datasheetName);
 
             return $this->json($offering);
         } catch (ApiException $ex) {
@@ -204,7 +214,7 @@ class PyramidController extends ServiceController implements ApiControllerInterf
             'layer_name' => $dto->technical_name,
             'type_infos' => [
                 'title' => $dto->public_name,
-                'abstract' => $dto->description,
+                'abstract' => '.', // json_encode($dto->description), // TODO temporairement description vide, parce que les caractères spéciaux font planter le endpoint tms
                 'keywords' => $dto->category,
                 'used_data' => [[
                     'bottom_level' => $levels['bottom_level'],

@@ -4,14 +4,9 @@ namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationTypes;
-use App\Constants\EntrepotApi\OfferingTypes;
 use App\Controller\ApiControllerInterface;
 use App\Dto\WfsAddDTO;
 use App\Dto\WfsTableDTO;
-use App\Entity\CswMetadata\CswHierarchyLevel;
-use App\Entity\CswMetadata\CswLanguage;
-use App\Entity\CswMetadata\CswMetadata;
-use App\Entity\CswMetadata\CswMetadataLayer;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\CswMetadataHelper;
@@ -33,13 +28,14 @@ use Symfony\Component\Routing\Annotation\Route;
 class WfsController extends ServiceController implements ApiControllerInterface
 {
     public function __construct(
-        private DatastoreApiService $datastoreApiService,
+        DatastoreApiService $datastoreApiService,
         private ConfigurationApiService $configurationApiService,
         private StoredDataApiService $storedDataApiService,
-        private MetadataApiService $metadataApiService,
+        MetadataApiService $metadataApiService,
         private CartesServiceApi $cartesServiceApi,
+        CswMetadataHelper $cswMetadataHelper,
     ) {
-        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApi);
+        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApi, $metadataApiService, $cswMetadataHelper);
     }
 
     #[Route('/', name: 'add', methods: ['POST'])]
@@ -47,7 +43,6 @@ class WfsController extends ServiceController implements ApiControllerInterface
         string $datastoreId,
         string $storedDataId,
         #[MapRequestPayload] WfsAddDTO $dto,
-        CswMetadataHelper $metadataHelper
     ): JsonResponse {
         try {
             // création de requête pour la config
@@ -68,8 +63,9 @@ class WfsController extends ServiceController implements ApiControllerInterface
             $offering = $this->configurationApiService->addOffering($datastoreId, $configuration['_id'], $endpoint['_id'], $endpoint['open']);
             $offering['configuration'] = $configuration;
 
-            // création de metadata
-            $this->createOrUpdateMetadata($dto, $metadataHelper, $datastoreId, $datasheetName);
+            // création ou mise à jour de metadata
+            $formData = json_decode(json_encode($dto), true);
+            $this->createOrUpdateMetadata($formData, $datastoreId, $datasheetName);
 
             return $this->json($offering);
         } catch (ApiException $ex) {
@@ -86,7 +82,6 @@ class WfsController extends ServiceController implements ApiControllerInterface
         string $storedDataId,
         string $offeringId,
         #[MapRequestPayload] WfsAddDTO $dto,
-        CswMetadataHelper $metadataHelper
     ): JsonResponse {
         try {
             // récup anciens config et offering
@@ -110,8 +105,9 @@ class WfsController extends ServiceController implements ApiControllerInterface
             $offering = $this->configurationApiService->addOffering($datastoreId, $configuration['_id'], $endpoint['_id'], $endpoint['open']);
             $offering['configuration'] = $configuration;
 
-            // création de metadata
-            $this->createOrUpdateMetadata($dto, $metadataHelper, $datastoreId, $datasheetName);
+            // création ou mise à jour de metadata
+            $formData = json_decode(json_encode($dto), true);
+            $this->createOrUpdateMetadata($formData, $datastoreId, $datasheetName);
 
             return $this->json($offering);
         } catch (ApiException $ex) {
@@ -157,126 +153,5 @@ class WfsController extends ServiceController implements ApiControllerInterface
         ];
 
         return $body;
-    }
-
-    private function createOrUpdateMetadata(WfsAddDTO $dto, CswMetadataHelper $metadataHelper, string $datastoreId, string $datasheetName): void
-    {
-        $metadataList = $this->metadataApiService->getAll($datastoreId, [
-            'tags' => [
-                CommonTags::DATASHEET_NAME => $datasheetName,
-            ],
-        ]);
-
-        $metadataEndpoint = $this->getEndpointByShareType($datastoreId, 'METADATA', 'all_public');
-
-        // apiMetadata : objet metadata issu de l'API Entrepot
-        // cswMetadata : objet metadata issu du fichier lié à la metadata API
-
-        if (0 === count($metadataList)) {
-            // nouvelle métadonnée à créer
-
-            $newCswMetadata = $this->getNewCswMetadata($dto, $datastoreId, $datasheetName);
-
-            $newMetadataFilePath = $metadataHelper->saveToFile($newCswMetadata);
-
-            $apiMetadata = $this->metadataApiService->add($datastoreId, $newMetadataFilePath);
-            $apiMetadata = $this->metadataApiService->addTags($datastoreId, $apiMetadata['_id'], [
-                CommonTags::DATASHEET_NAME => $datasheetName,
-            ]);
-
-            $this->metadataApiService->publish($datastoreId, $apiMetadata['file_identifier'], $metadataEndpoint['_id']);
-        } else {
-            // une métadonnée existe déjà qu'on va mettre à jour
-
-            $oldMetadata = $metadataList[0];
-
-            $oldMetadataFileXml = $this->metadataApiService->downloadFile($datastoreId, $oldMetadata['_id']);
-            $oldCswMetadata = $metadataHelper->fromXml($oldMetadataFileXml);
-
-            $newCswMetadata = $this->getNewCswMetadata($dto, $datastoreId, $datasheetName);
-
-            $newMetadataFilePath = $metadataHelper->saveToFile($newCswMetadata);
-
-            // suppression et recréation de métadonnées si changement de file_identifier
-            if ($oldCswMetadata->fileIdentifier !== $newCswMetadata->fileIdentifier) {
-                $this->metadataApiService->unpublish($datastoreId, $oldCswMetadata->fileIdentifier, $metadataEndpoint['_id']);
-                $this->metadataApiService->delete($datastoreId, $oldMetadata['_id']);
-
-                $apiMetadata = $this->metadataApiService->add($datastoreId, $newMetadataFilePath);
-            } else {
-                $apiMetadata = $this->metadataApiService->replaceFile($datastoreId, $oldMetadata['_id'], $newMetadataFilePath);
-            }
-            $apiMetadata = $this->metadataApiService->addTags($datastoreId, $apiMetadata['_id'], $oldMetadata['tags']);
-
-            if (0 === count($apiMetadata['endpoints'])) {
-                $this->metadataApiService->publish($datastoreId, $apiMetadata['file_identifier'], $metadataEndpoint['_id']);
-            }
-        }
-    }
-
-    private function getNewCswMetadata(WfsAddDTO $dto, string $datastoreId, string $datasheetName): CswMetadata
-    {
-        $layers = $this->getMetadataLayers($datastoreId, $datasheetName);
-
-        $language = $dto->languages[0] ?
-             new CswLanguage($dto->languages[0]['code'], $dto->languages[0]['language'])
-             : CswLanguage::default();
-
-        return CswMetadata::createFromParams($dto->identifier, CswHierarchyLevel::from('' === $dto->resource_genealogy ? 'series' : $dto->resource_genealogy), $language, $dto->charset, $dto->public_name, $dto->description, $dto->creation_date, $dto->category, $dto->email_contact, $dto->organization, $dto->organization_email, $layers);
-    }
-
-    /**
-     * @return array<CswMetadataLayer>
-     */
-    private function getMetadataLayers(string $datastoreId, string $datasheetName): array
-    {
-        $configList = $this->configurationApiService->getAllDetailed($datastoreId, [
-            'tags' => [
-                CommonTags::DATASHEET_NAME => $datasheetName,
-            ],
-        ]);
-
-        $layers = array_map(function (array $configuration) use ($datastoreId) {
-            $configRelations = $configuration['type_infos']['used_data'][0]['relations'];
-
-            $offering = $this->configurationApiService->getConfigurationOfferings($datastoreId, $configuration['_id'])[0];
-            $offering = $this->configurationApiService->getOffering($datastoreId, $offering['_id']);
-
-            $serviceEndpoint = $this->datastoreApiService->getEndpoint($datastoreId, $offering['endpoint']['_id']);
-
-            $relationLayers = array_map(function ($relation) use ($offering, $serviceEndpoint) {
-                $layerName = null;
-                $endpointType = null;
-
-                switch ($offering['type']) {
-                    case OfferingTypes::WFS:
-                        $layerName = sprintf('%s:%s', $offering['layer_name'], $relation['native_name']);
-                        $endpointType = 'OGC:WFS';
-                        break;
-
-                    case OfferingTypes::WMSVECTOR:
-                        $layerName = sprintf('%s:%s', $offering['layer_name'], $relation['name']);
-                        $endpointType = 'OGC:WMS';
-                        break;
-
-                    case OfferingTypes::WMTSTMS:
-                        $layerName = $offering['layer_name'];
-                        $endpointType = 'OGC:TMS';
-                        break;
-                    default:
-                        $layerName = $offering['layer_name'];
-                        $endpointType = '';
-                        break;
-                }
-
-                return new CswMetadataLayer($layerName, $endpointType, $serviceEndpoint['endpoint']['urls'][0]['url'], $offering['_id']);
-            }, $configRelations);
-
-            return $relationLayers;
-        }, $configList);
-
-        $layers = array_merge(...$layers);
-
-        return $layers;
     }
 }

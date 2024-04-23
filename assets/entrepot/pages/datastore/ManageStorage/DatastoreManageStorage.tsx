@@ -144,6 +144,10 @@ export const { i18n } = declareComponentKeys<
     | { K: "storage.endpoints.deletion.confirmation"; P: { offeringName?: string; offeringId?: string }; R: string }
     | "storage.endpoints.deletion.in_progress"
     | "storage.endpoints.explanation"
+
+    // endpoint metadata
+    | { K: "storage.endpoints.metadata.deletion.confirmation"; P: { metadataIdentifier?: string; metadataId?: string }; R: string }
+    | "storage.endpoints.metadata.deletion.in_progress"
 >()({
     DatastoreManageStorage,
 });
@@ -244,10 +248,14 @@ export const DatastoreManageStorageFrTranslations: Translations<"fr">["Datastore
             Points de <br /> publication
         </span>
     ),
-    "storage.endpoints.loading": "Chargement des flux publiés en cours",
+    "storage.endpoints.loading": "Chargement des flux publiés et des métadonnées en cours",
     "storage.endpoints.deletion.confirmation": ({ offeringName, offeringId }) => `Êtes-vous sûr de vouloir dépublier le flux ${offeringName} (${offeringId}) ?`,
     "storage.endpoints.deletion.in_progress": "Suppression du flux en cours",
-    "storage.endpoints.explanation": "Il s'agit du nombre de couches publiées par point de publication dans votre espace de travail.",
+    "storage.endpoints.explanation": "Il s'agit du nombre de couches et de métadonnées publiées par point de publication dans votre espace de travail.",
+
+    "storage.endpoints.metadata.deletion.confirmation": ({ metadataIdentifier, metadataId }) =>
+        `Êtes-vous sûr de vouloir supprimer la métadonnée ${metadataIdentifier} (${metadataId}) ?`,
+    "storage.endpoints.metadata.deletion.in_progress": "Suppression de la métadonnée en cours",
 };
 export const DatastoreManageStorageEnTranslations: Translations<"en">["DatastoreManageStorage"] = {
     title: undefined,
@@ -293,4 +301,7 @@ export const DatastoreManageStorageEnTranslations: Translations<"en">["Datastore
     "storage.endpoints.deletion.confirmation": undefined,
     "storage.endpoints.deletion.in_progress": undefined,
     "storage.endpoints.explanation": undefined,
+
+    "storage.endpoints.metadata.deletion.confirmation": undefined,
+    "storage.endpoints.metadata.deletion.in_progress": undefined,
 };
