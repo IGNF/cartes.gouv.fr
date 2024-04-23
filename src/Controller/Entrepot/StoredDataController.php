@@ -2,7 +2,6 @@
 
 namespace App\Controller\Entrepot;
 
-use App\Constants\EntrepotApi\OfferingStatuses;
 use App\Constants\EntrepotApi\ProcessingStatuses;
 use App\Constants\EntrepotApi\StoredDataStatuses;
 use App\Controller\ApiControllerInterface;
@@ -93,7 +92,6 @@ class StoredDataController extends AbstractController implements ApiControllerIn
 
             $offeringsList = $this->configurationApiService->getAllOfferings($datastoreId, [
                 'stored_data' => $storedDataId,
-                'status' => OfferingStatuses::PUBLISHED,
             ]);
 
             return $this->json([
