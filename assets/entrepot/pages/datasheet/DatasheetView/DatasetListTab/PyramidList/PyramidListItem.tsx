@@ -38,6 +38,7 @@ const PyramidListItem: FC<PyramidListItemProps> = ({ datasheetName, datastoreId,
         queryKey: RQKeys.datastore_stored_data_uses(datastoreId, pyramid._id),
         queryFn: ({ signal }) => api.storedData.getUses(datastoreId, pyramid._id, { signal }),
         staleTime: 600000,
+        enabled: showDescription,
     });
 
     /* Suppression de la pyramide */

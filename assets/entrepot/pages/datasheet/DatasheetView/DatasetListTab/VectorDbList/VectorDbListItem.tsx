@@ -91,6 +91,9 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
     const [technicalName, setTechnicalName] = useState<string>(vectorDb.name);
     const [technicalNameError, setTechnicalNameError] = useState<string>();
 
+    // description de vectordb
+    const [showDescription, toggleShowDescription] = useToggle(false);
+
     const endpointsQuery = useQuery<DatastoreEndpoint[]>({
         queryKey: RQKeys.datastore_endpoints(datastoreId),
         queryFn: ({ signal }) => api.datastore.getEndpoints(datastoreId, {}, { signal }),
@@ -102,6 +105,7 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
         queryKey: RQKeys.datastore_stored_data_uses(datastoreId, vectorDb._id),
         queryFn: ({ signal }) => api.storedData.getUses(datastoreId, vectorDb._id, { signal }),
         staleTime: 600000,
+        enabled: showDescription,
     });
 
     const { wfsEndpoints, wmsVectorEndpoints, tmsEndpoints } = useMemo(() => {
@@ -195,9 +199,6 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
             }),
         [vectorDb._id]
     );
-
-    // description de vectordb
-    const [showDescription, toggleShowDescription] = useToggle(false);
 
     return (
         <>
