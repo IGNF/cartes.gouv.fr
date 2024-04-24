@@ -227,23 +227,37 @@ class ServiceController extends AbstractController implements ApiControllerInter
         $layers = [];
 
         foreach ($configurationsList as $configuration) {
-            $offering = $this->configurationApiService->getConfigurationOfferings($datastoreId, $configuration['_id'])[0];
-            $offering = $this->configurationApiService->getOffering($datastoreId, $offering['_id']);
+            $configurationOfferings = $this->configurationApiService->getConfigurationOfferings($datastoreId, $configuration['_id']);
 
-            $serviceEndpoint = $this->datastoreApiService->getEndpoint($datastoreId, $offering['endpoint']['_id']);
+            if (count($configurationOfferings) > 0) {
+                $offering = $configurationOfferings[0];
+                $offering = $this->configurationApiService->getOffering($datastoreId, $offering['_id']);
 
-            switch ($configuration['type']) {
-                case ConfigurationTypes::WFS:
-                case ConfigurationTypes::WMSVECTOR:
-                    $subLayers = $this->getSubLayers($configuration, $offering, $serviceEndpoint['endpoint']['urls'][0]['url']);
-                    $layers = array_merge($layers, $subLayers);
-                    break;
+                $serviceEndpoint = $this->datastoreApiService->getEndpoint($datastoreId, $offering['endpoint']['_id']);
 
-                case ConfigurationTypes::WMTSTMS:
-                    $layerName = $offering['layer_name'];
-                    $endpointType = 'OGC:TMS';
-                    $layers[] = new CswMetadataLayer($layerName, $endpointType, $serviceEndpoint['endpoint']['urls'][0]['url'], $offering['_id']);
-                    break;
+                switch ($configuration['type']) {
+                    case ConfigurationTypes::WFS:
+                    case ConfigurationTypes::WMSVECTOR:
+                        $subLayers = $this->getSubLayers($configuration, $offering, $serviceEndpoint['endpoint']['urls'][0]['url']);
+                        $layers = array_merge($layers, $subLayers);
+                        break;
+
+                    case ConfigurationTypes::WMTSTMS:
+                        $layerName = $offering['layer_name'];
+                        $endpointType = 'OGC:TMS';
+
+                        // dd($serviceEndpoint['endpoint']['urls']);
+                        $tmsEndpoints = array_filter($serviceEndpoint['endpoint']['urls'], function (array $url) {
+                            return 'TMS' === $url['type'];
+                        });
+                        $tmsEndpoints = array_values($tmsEndpoints);
+
+                        if (count($tmsEndpoints) > 0) {
+                            $layers[] = new CswMetadataLayer($layerName, $endpointType, $tmsEndpoints[0]['url'], $offering['_id']);
+                        }
+
+                        break;
+                }
             }
         }
 
