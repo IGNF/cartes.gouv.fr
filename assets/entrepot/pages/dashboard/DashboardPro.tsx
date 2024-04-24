@@ -61,7 +61,7 @@ const DashboardPro = () => {
                     </div>
                     {isApiEspaceCoDefined() && (
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--left", "fr-mt-4w")}>
-                            <Button /*linkProps={routes.home().link*}*/>{t("espaceco_frontoffice_list")}</Button>
+                            <Button linkProps={routes.espaceco_community_list().link}>{t("espaceco_frontoffice_list")}</Button>
                         </div>
                     )}
                 </>

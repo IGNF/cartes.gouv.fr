@@ -44,7 +44,8 @@ export type ComponentKey =
     | typeof import("../entrepot/pages/service/wfs/WfsServiceForm").i18n
     | typeof import("../entrepot/pages/service/tms/PyramidVectorTmsServiceForm").i18n
     | typeof import("../entrepot/pages/service/TableSelection").i18n
-    | typeof import("../entrepot/pages/service/wms-vector/UploadStyleFile").i18n;
+    | typeof import("../entrepot/pages/service/wms-vector/UploadStyleFile").i18n
+    | typeof import("../espaceco/pages/communities/EspaceCoCommunitiesTr").i18n;
 
 export type Translations<L extends Language> = GenericTranslations<ComponentKey, Language, typeof fallbackLanguage, L>;
 export type LocalizedString = Parameters<typeof resolveLocalizedString>[0];

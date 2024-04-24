@@ -52,7 +52,7 @@ const PyramidVectorTmsServiceForm = lazy(() => import("../entrepot/pages/service
 
 const ServiceView = lazy(() => import("../entrepot/pages/service/view/ServiceView"));
 
-const EspaceCoCommunityList = lazy(() => import("../espaceco/pages/communities/CommunityList"));
+const EspaceCoCommunityList = lazy(() => import("../espaceco/pages/communities/Communities"));
 
 const RouterRenderer: FC = () => {
     const route = useRoute();

@@ -1,6 +1,7 @@
 export interface CommunityResponseDTO {
     id: number;
     description: string | null;
+    detailed_description?: string | null;
     name: string;
     active: boolean;
     shared_georem: "all" | "restrained" | "personal";

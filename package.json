@@ -33,6 +33,7 @@
         "simple-zustand-devtools": "^1.1.0",
         "tsafe": "^1.6.5",
         "type-route": "^1.0.1",
+        "usehooks-ts": "^3.1.0",
         "uuid": "^9.0.0",
         "validator": "^13.11.0",
         "yup": "^1.2.0",

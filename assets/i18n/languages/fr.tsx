@@ -28,6 +28,7 @@ import { commonFrTranslations } from "../Common";
 import { RightsFrTranslations } from "../Rights";
 import { StyleFrTranslations } from "../Style";
 import type { Translations } from "../i18n";
+import { EspaceCoCommunitiesFrTranslations } from "../../espaceco/pages/communities/EspaceCoCommunitiesTr";
 
 export const translations: Translations<"fr"> = {
     Common: commonFrTranslations,
@@ -59,4 +60,5 @@ export const translations: Translations<"fr"> = {
     TableSelection: TableSelectionFrTranslations,
     UploadStyleFile: UploadStyleFileFrTranslations,
     PyramidVectorTmsServiceForm: PyramidVectorTmsServiceFormFrTranslations,
+    EspaceCoCommunities: EspaceCoCommunitiesFrTranslations,
 };

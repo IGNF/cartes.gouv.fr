@@ -15,11 +15,20 @@ type PaginationProps = {
 
 const Pagination: FC<PaginationProps> = (props: PaginationProps) => {
     const { page, count, shape = "rounded", size = "small", onChange } = props;
-    console.log("count : ", count);
 
     return (
         <MuiDsfrThemeProvider>
-            <MuiPagination page={page} count={count} size={size} shape={shape} variant={"outlined"} showFirstButton showLastButton onChange={onChange} />
+            <MuiPagination
+                className={fr.cx("fr-my-2v")}
+                page={page}
+                count={count}
+                size={size}
+                shape={shape}
+                variant={"outlined"}
+                showFirstButton
+                showLastButton
+                onChange={onChange}
+            />
         </MuiDsfrThemeProvider>
     );
 };

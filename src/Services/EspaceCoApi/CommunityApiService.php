@@ -4,9 +4,9 @@ namespace App\Services\EspaceCoApi;
 
 class CommunityApiService extends BaseEspaceCoApiService
 {
-    public function get(int $page = 1,int $limit = 10): array
+    public function getCommunities(string $name, int $page,int $limit, string $sort): array
     {
-        $response = $this->request('GET', "communities", [], ['page' => $page, 'limit' => $limit], [], false, true, true);
+        $response = $this->request('GET', "communities", [], ['name' => $name, 'page' => $page, 'limit' => $limit, 'sort' => $sort], [], false, true, true);
         
         $contentRange = $response['headers']['content-range'][0];
         $totalPages = $this->getResultsPageCount($contentRange, $limit);
@@ -20,5 +20,13 @@ class CommunityApiService extends BaseEspaceCoApiService
             'previousPage' => $previousPage,
             'nextPage' => $nextPage,
         ];
+    }
+
+    /**
+     * @param string $communityId
+     * @return array<mixed>
+     */
+    public function getCommunity(string $communityId) : array {
+        return $this->request('GET', "communities/$communityId");
     }
 }
