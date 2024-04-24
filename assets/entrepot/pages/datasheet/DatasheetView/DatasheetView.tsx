@@ -93,7 +93,8 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                         />
                         <h1 className={fr.cx("fr-m-0")}>{datasheetName}</h1>
                         <Badge noIcon={true} severity="info" className={fr.cx("fr-ml-2w")}>
-                            {datasheetQuery?.data?.nb_publications && datasheetQuery?.data?.nb_publications > 0
+                            {(datasheetQuery?.data?.nb_publications && datasheetQuery?.data?.nb_publications > 0) ||
+                            datasheetQuery.data?.metadata_published === true
                                 ? tCommon("published")
                                 : tCommon("not_published")}
                         </Badge>

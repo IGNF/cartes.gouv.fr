@@ -41,7 +41,11 @@ const DatasheetListItem: FC<DatasheetListItemProps> = ({ datastoreId, datasheet 
             {/* <div className={fr.cx("fr-col-2")}>{datasheet?.date ? formatDateFromISO(datasheet.date) : ""}</div> */}
             <div className={fr.cx("fr-col-2")}>
                 <Badge noIcon={true} severity="info">
-                    {datasheet?.nb_publications > 0 ? `Publié (${datasheet?.nb_publications})` : "Non Publié"}
+                    {datasheet?.nb_publications > 0
+                        ? `Publié (${datasheet?.nb_publications})`
+                        : datasheet.metadata_published === true
+                          ? "Publié"
+                          : "Non Publié"}
                 </Badge>
             </div>
         </div>

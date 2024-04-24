@@ -62,7 +62,15 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             }
         }, $storedDataList);
 
-        $uniqueDatasheetNames = array_unique(array_merge($uploadDatasheetNames, $storedDataDatasheetNames));
+        $metadataList = $this->metadataApiService->getAll($datastoreId);
+
+        $metadataDatasheetNames = array_map(function ($apiMetadata) {
+            if (isset($apiMetadata['tags'][CommonTags::DATASHEET_NAME])) {
+                return $apiMetadata['tags'][CommonTags::DATASHEET_NAME];
+            }
+        }, $metadataList);
+
+        $uniqueDatasheetNames = array_unique(array_merge($uploadDatasheetNames, $storedDataDatasheetNames, $metadataDatasheetNames));
         $uniqueDatasheetNames = array_filter($uniqueDatasheetNames);
         $uniqueDatasheetNames = array_values($uniqueDatasheetNames);
 
@@ -100,9 +108,13 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             ],
         ]);
 
-        // TODO récup liste metadata
+        $metadataList = $this->metadataApiService->getAll($datastoreId, [
+            'tags' => [
+                CommonTags::DATASHEET_NAME => $datasheetName,
+            ],
+        ]);
 
-        if (0 === count($uploadList) && 0 === count($vectorDbList) && 0 === count($pyramidList)) {
+        if (0 === count($uploadList) && 0 === count($vectorDbList) && 0 === count($pyramidList) && 0 === count($metadataList)) {
             throw new CartesApiException("La fiche de donnée [$datasheetName] n'existe pas", Response::HTTP_NOT_FOUND);
         }
 
@@ -148,6 +160,14 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         ]);
         $nbPublications = count($configurations);
 
+        // recherche de metadata associée
+        $metadataList = $this->metadataApiService->getAll($datastoreId, [
+            'tags' => [
+                CommonTags::DATASHEET_NAME => $datasheetName,
+            ],
+        ]);
+        $metadataPublished = count($metadataList) > 0;
+
         // recherche de vignette
         $annexeUrl = $this->getParameter('annexes_url');
         $annexes = $this->annexeApiService->getAll($datastoreId, null, null, ["datasheet_name=$datasheetName", 'type=thumbnail']);
@@ -164,6 +184,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             'categories' => [],
             'nb_publications' => $nbPublications,
             'thumbnail' => $thumbnail,
+            'metadata_published' => $metadataPublished,
         ];
     }
 
@@ -234,6 +255,11 @@ class DatasheetController extends AbstractController implements ApiControllerInt
 
             if (count($metadataList) > 0) {
                 $metadata = $metadataList[0];
+
+                foreach ($metadata['endpoints'] as $metadataEndpoint) {
+                    $this->metadataApiService->unpublish($datastoreId, $metadata['file_identifier'], $metadataEndpoint['_id']);
+                }
+
                 $this->metadataApiService->delete($datastoreId, $metadata['_id']);
             }
 
