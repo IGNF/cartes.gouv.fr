@@ -6,17 +6,18 @@ import { Upload } from "@codegouvfr/react-dsfr/Upload";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
-import { FC, memo, useCallback, useEffect, useMemo, useState } from "react";
+import { FC, memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useForm } from "react-hook-form";
+import { useHover } from "usehooks-ts";
 import * as yup from "yup";
 
-import { useForm } from "react-hook-form";
+import type { Datasheet, DatasheetDetailed, DatasheetThumbnailAnnexe } from "../../../../@types/app";
 import { ConfirmDialog, ConfirmDialogModal } from "../../../../components/Utils/ConfirmDialog";
 import Wait from "../../../../components/Utils/Wait";
 import { ComponentKey, useTranslation } from "../../../../i18n/i18n";
-import { CartesApiException } from "../../../../modules/jsonFetch";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
-import type { Datasheet, DatasheetDetailed, DatasheetThumbnailAnnexe } from "../../../../@types/app";
+import { CartesApiException } from "../../../../modules/jsonFetch";
 import { getFileExtension } from "../../../../utils";
 import api from "../../../api";
 
@@ -74,7 +75,8 @@ const DatasheetThumbnail: FC<DatasheetThumbnailProps> = ({ datastoreId, datashee
 
     // Boite modale, gestion de l'image
     const [modalImageUrl, setModalImageUrl] = useState<string>("");
-    const [thumbnailAddBtnHover, setThumbnailAddBtnHover] = useState(false);
+    const thumbnailDivRef = useRef(null);
+    const thumbnailIsHovered = useHover(thumbnailDivRef);
 
     // Ajout/modification de la vignette
     const addThumbnailMutation = useMutation<DatasheetThumbnailAnnexe, CartesApiException>({
@@ -200,19 +202,13 @@ const DatasheetThumbnail: FC<DatasheetThumbnailProps> = ({ datastoreId, datashee
 
     return (
         <>
-            <div
-                className={"frx-thumbnail"}
-                aria-label={t("button.title")}
-                title={t("button.title")}
-                onMouseOver={() => setThumbnailAddBtnHover(true)}
-                onMouseOut={() => setThumbnailAddBtnHover(false)}
-            >
+            <div className={"frx-thumbnail"} aria-label={t("button.title")} title={t("button.title")} ref={thumbnailDivRef}>
                 <img
-                    className={thumbnailAddBtnHover ? "frx-btn--transparent fr-img--transparent-transition" : ""}
+                    className={thumbnailIsHovered ? "frx-btn--transparent fr-img--transparent-transition" : ""}
                     loading="lazy"
                     src={datasheet?.thumbnail?.url === undefined ? placeholder1x1 : datasheet?.thumbnail?.url}
                 />
-                {thumbnailAddBtnHover && (
+                {thumbnailIsHovered && (
                     <div className="frx-btn--hover-icon">
                         <Button
                             title={t("thumbnail_action", { action: action })}
