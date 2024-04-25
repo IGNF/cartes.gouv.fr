@@ -6,11 +6,13 @@ import Input from "@codegouvfr/react-dsfr/Input";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FC, ReactNode, memo, useCallback, useMemo, useState } from "react";
+import { FC, Fragment, ReactNode, memo, useCallback, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { symToStr } from "tsafe/symToStr";
 
 import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
+import { DatastoreEndpoint, StoredDataStatusEnum, VectorDb } from "../../../../../../@types/app";
+import { EndpointDetailResponseDtoTypeEnum } from "../../../../../../@types/entrepot";
 import StoredDataStatusBadge from "../../../../../../components/Utils/Badges/StoredDataStatusBadge";
 import LoadingIcon from "../../../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../../../components/Utils/LoadingText";
@@ -20,8 +22,6 @@ import useToggle from "../../../../../../hooks/useToggle";
 import { ComponentKey, Translations, declareComponentKeys, getTranslation, useTranslation } from "../../../../../../i18n/i18n";
 import RQKeys from "../../../../../../modules/entrepot/RQKeys";
 import { routes } from "../../../../../../router/router";
-import { DatastoreEndpoint, StoredDataStatusEnum, VectorDb } from "../../../../../../@types/app";
-import { EndpointDetailResponseDtoTypeEnum } from "../../../../../../@types/entrepot";
 import { formatDateFromISO, offeringTypeDisplayName } from "../../../../../../utils";
 import api from "../../../../../api";
 import VectorDbDesc from "./VectorDbDesc";
@@ -48,17 +48,29 @@ const getHintText = (
     type: EndpointDetailResponseDtoTypeEnum,
     t: TranslationFunction<"VectorDbListItem", ComponentKey>
 ): JSX.Element => {
-    const parts: ReactNode[] = [];
+    const parts: {
+        reactNode: ReactNode;
+        id: string;
+    }[] = [];
 
     switch (type) {
         case EndpointDetailResponseDtoTypeEnum.WFS:
-            parts.push(<span>{t("wfs_hint_text")}</span>);
+            parts.push({
+                reactNode: <li>{t("wfs_hint_text")}</li>,
+                id: "endpoint-hint-text",
+            });
             break;
         case EndpointDetailResponseDtoTypeEnum.WMTSTMS:
-            parts.push(<span>{t("tms_hint_text")}</span>);
+            parts.push({
+                reactNode: <li>{t("tms_hint_text")}</li>,
+                id: "endpoint-hint-text",
+            });
             break;
         case EndpointDetailResponseDtoTypeEnum.WMSVECTOR:
-            parts.push(<span>{t("wms_hint_text")}</span>);
+            parts.push({
+                reactNode: <li>{t("wms_hint_text")}</li>,
+                id: "endpoint-hint-text",
+            });
             break;
         default:
             break;
@@ -67,18 +79,20 @@ const getHintText = (
     if (type in quotas) {
         const availables = quotas[type].reduce((accumulator, v) => accumulator + v.available, 0);
         const style = availables ? {} : { color: fr.colors.decisions.text.default.warning.default };
-        quotas[type].forEach((q) => parts.push(<span style={style}>{`${q.available} publications possibles sur ${q.name}`}</span>));
+        quotas[type].forEach((q) =>
+            parts.push({
+                reactNode: <li style={style}>{`${q.available} publications possibles sur ${q.name}`}</li>,
+                id: q.name,
+            })
+        );
     }
 
     return (
-        <>
+        <ul className={fr.cx("fr-raw-list")}>
             {parts.map((part) => (
-                <>
-                    {part}
-                    <br />
-                </>
+                <Fragment key={part.id}>{part.reactNode}</Fragment>
             ))}
-        </>
+        </ul>
     );
 };
 
