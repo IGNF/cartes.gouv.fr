@@ -28,7 +28,14 @@ const MetadataField: FC<MetadataFieldProps> = ({ title, content: value, hintText
             {hintText && <p className={fr.cx("fr-m-0", "fr-text--sm", "fr-text--light")}>{hintText}</p>}
 
             {markdown && typeof value === "string" ? (
-                <MDEditor.Markdown className={fr.cx()} source={value} style={customStyle} />
+                <MDEditor.Markdown
+                    className={fr.cx()}
+                    source={value}
+                    style={customStyle}
+                    components={{
+                        a: (props) => <a target="_blank" rel="noreferrer" {...props} />,
+                    }}
+                />
             ) : typeof value === "string" ? (
                 <p className={fr.cx("fr-m-0")}>{value}</p>
             ) : (
