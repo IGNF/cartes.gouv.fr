@@ -5,7 +5,7 @@ import { StoredDataDetailsRelationDto } from "./@types/entrepot";
  * @param relation : StoredDataDetailsRelationDto
  */
 const filterGeometricRelations = (relations: StoredDataDetailsRelationDto[], filter: boolean = false): StoredDataDetailsRelationDto[] => {
-    return relations.filter((relation) => {
+    const filtered = relations.filter((relation) => {
         const hasGeometry = (attributes) => {
             for (const type of Object.values(attributes)) {
                 if (/^geometry\(/.test(type as string)) return true;
@@ -16,6 +16,10 @@ const filterGeometricRelations = (relations: StoredDataDetailsRelationDto[], fil
         if ("type" in relation && relation.type !== "TABLE") return false;
         if (!filter) return true;
         return "attributes" in relation && hasGeometry(relation.attributes);
+    });
+
+    return filtered.sort((r1, r2) => {
+        return r1.name === r2.name ? 0 : r1.name < r2.name ? -1 : 1;
     });
 };
 
