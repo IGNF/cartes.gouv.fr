@@ -76,8 +76,10 @@ class DatasheetController extends AbstractController implements ApiControllerInt
 
         $datasheetList = [];
 
+        $datastore = $this->datastoreApiService->get($datastoreId);
+
         foreach ($uniqueDatasheetNames as $datasheetName) {
-            $datasheetList[] = $this->getBasicInfo($datastoreId, $datasheetName);
+            $datasheetList[] = $this->getBasicInfo($datastore, $datasheetName);
         }
 
         return $this->json($datasheetList);
@@ -118,14 +120,15 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             throw new CartesApiException("La fiche de donnée [$datasheetName] n'existe pas", Response::HTTP_NOT_FOUND);
         }
 
-        $data = $this->getBasicInfo($datastoreId, $datasheetName);
+        $datastore = $this->datastoreApiService->get($datastoreId);
+        $datasheet = $this->getBasicInfo($datastore, $datasheetName);
 
         // Recherche de services (configuration et offering)
         $storedDataList = array_merge($vectorDbList, $pyramidList);
         $services = $this->_getServices($datastoreId, $storedDataList);
 
         return $this->json([
-            ...$data,
+            ...$datasheet,
             'vector_db_list' => $vectorDbList,
             'pyramid_list' => $pyramidList,
             'upload_list' => $uploadList,
@@ -147,12 +150,13 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         return $this->json($services);
     }
 
-    private function getBasicInfo(string $datastoreId, string $datasheetName): array
+    /**
+     * @param array<mixed> $datastore
+     */
+    private function getBasicInfo(array $datastore, string $datasheetName): array
     {
-        $datastore = $this->datastoreApiService->get($datastoreId);
-
         // recherche du nombre de services publiés
-        $configurations = $this->configurationApiService->getAll($datastoreId, [
+        $configurations = $this->configurationApiService->getAll($datastore['_id'], [
             'tags' => [
                 CommonTags::DATASHEET_NAME => $datasheetName,
             ],
@@ -161,7 +165,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         $nbPublications = count($configurations);
 
         // recherche de metadata associée
-        $metadataList = $this->metadataApiService->getAll($datastoreId, [
+        $metadataList = $this->metadataApiService->getAll($datastore['_id'], [
             'tags' => [
                 CommonTags::DATASHEET_NAME => $datasheetName,
             ],
@@ -170,7 +174,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
 
         // recherche de vignette
         $annexeUrl = $this->getParameter('annexes_url');
-        $annexes = $this->annexeApiService->getAll($datastoreId, null, null, ["datasheet_name=$datasheetName", 'type=thumbnail']);
+        $annexes = $this->annexeApiService->getAll($datastore['_id'], null, null, ["datasheet_name=$datasheetName", 'type=thumbnail']);
 
         $thumbnail = null;
         if (count($annexes) > 0) {
@@ -180,8 +184,6 @@ class DatasheetController extends AbstractController implements ApiControllerInt
 
         return [
             'name' => $datasheetName,
-            'date' => new \DateTime(), // TODO : pour le moment on se sait pas ça correspond à la date de quoi
-            'categories' => [],
             'nb_publications' => $nbPublications,
             'thumbnail' => $thumbnail,
             'metadata_published' => $metadataPublished,
@@ -198,7 +200,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         $offerings = [];
 
         foreach ($storedDataList as $storedData) {
-            $tmpOfferings = $this->configurationApiService->getAllOfferingsDetailed($datastoreId, [
+            $tmpOfferings = $this->configurationApiService->getAllOfferings($datastoreId, [
                 'stored_data' => $storedData['_id'],
             ]);
             $offerings = array_merge($offerings, $tmpOfferings);

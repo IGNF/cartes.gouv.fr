@@ -52,8 +52,6 @@ export type Datastore = DatastoreDetailResponseDto;
 /** fiche de donnée */
 export type Datasheet = {
     name: string;
-    date: string;
-    categories: string[];
     nb_publications: number;
     thumbnail?: DatasheetThumbnailAnnexe;
     metadata_published: boolean;
