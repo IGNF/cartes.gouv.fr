@@ -1,21 +1,26 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { useQuery } from "@tanstack/react-query";
-import { FC } from "react";
+import { FC, useMemo } from "react";
 
-import api from "../../../api";
+import { declareComponentKeys } from "i18nifty";
+import { Datasheet, EndpointTypeEnum } from "../../../../@types/app";
 import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
-import LoadingText from "../../../../components/Utils/LoadingText";
+import Skeleton from "../../../../components/Utils/Skeleton";
+import { Translations, useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { routes } from "../../../../router/router";
-import { Datasheet } from "../../../../@types/app";
+import api from "../../../api";
 import DatasheetListItem from "./DatasheetListItem";
 
 type DatasheetListProps = {
     datastoreId: string;
 };
 const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
+    const { t } = useTranslation("DatasheetList");
+
     const datastoreQuery = useQuery({
         queryKey: RQKeys.datastore(datastoreId),
         queryFn: ({ signal }) => api.datastore.get(datastoreId, { signal }),
@@ -27,35 +32,62 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
         queryFn: ({ signal }) => api.datasheet.getList(datastoreId, { signal }),
         staleTime: 30000,
         refetchInterval: 30000,
+        enabled: datastoreQuery.data !== undefined,
     });
+
+    const metadataEndpoint = useMemo(
+        () => datastoreQuery.data?.endpoints.find((endpoint) => endpoint.endpoint.type === EndpointTypeEnum.METADATA),
+        [datastoreQuery.data?.endpoints]
+    );
 
     return (
         <DatastoreLayout datastoreId={datastoreId} documentTitle="Mes données">
-            {datastoreQuery.data === undefined ? (
-                <LoadingText />
+            <div className={fr.cx("fr-grid-row")}>
+                <h1>
+                    {t("title", { datastoreName: datastoreQuery?.data?.name })}
+                    {(datastoreQuery?.isFetching || datasheetListQuery?.isFetching) && <LoadingIcon className={fr.cx("fr-ml-2w")} largeIcon={true} />}
+                </h1>
+            </div>
+
+            <div className={fr.cx("fr-grid-row")}>
+                {metadataEndpoint?.quota && metadataEndpoint?.use && metadataEndpoint?.quota === metadataEndpoint?.use ? (
+                    <Alert severity="warning" title={t("datasheet_creation_impossible")} description={t("metadata_endpoint_quota_reached")} />
+                ) : (
+                    <Button linkProps={routes.datastore_datasheet_upload({ datastoreId: datastoreId }).link} iconId={"fr-icon-add-line"}>
+                        {t("create_datasheet")}
+                    </Button>
+                )}
+            </div>
+
+            {datasheetListQuery.data === undefined ? (
+                <Skeleton count={12} rectangleHeight={80} />
             ) : (
-                <>
-                    <div className={fr.cx("fr-grid-row")}>
-                        <h1>
-                            Données {datastoreQuery?.data && datastoreQuery?.data?.name}
-                            {(datastoreQuery?.isFetching || datasheetListQuery?.isFetching) && <LoadingIcon className={fr.cx("fr-ml-2w")} largeIcon={true} />}
-                        </h1>
-                    </div>
-
-                    <div className={fr.cx("fr-grid-row")}>
-                        <Button linkProps={routes.datastore_datasheet_upload({ datastoreId: datastoreId }).link} iconId={"fr-icon-add-line"}>
-                            Créer une fiche de données
-                        </Button>
-                    </div>
-
-                    {!datasheetListQuery.isLoading &&
-                        datasheetListQuery?.data?.map((datasheet: Datasheet) => (
-                            <DatasheetListItem key={datasheet.name} datastoreId={datastoreId} datasheet={datasheet} />
-                        ))}
-                </>
+                datasheetListQuery?.data?.map((datasheet: Datasheet) => (
+                    <DatasheetListItem key={datasheet.name} datastoreId={datastoreId} datasheet={datasheet} />
+                ))
             )}
         </DatastoreLayout>
     );
 };
 
 export default DatasheetList;
+
+export const { i18n } = declareComponentKeys<
+    { K: "title"; P: { datastoreName?: string }; R: string } | "create_datasheet" | "datasheet_creation_impossible" | "metadata_endpoint_quota_reached"
+>()({
+    DatasheetList,
+});
+
+export const DatasheetListFrTranslations: Translations<"fr">["DatasheetList"] = {
+    title: ({ datastoreName }) => `Données ${datastoreName}`,
+    create_datasheet: "Créer une fiche de données",
+    datasheet_creation_impossible: "Création d'une nouvelle fiche de données impossible",
+    metadata_endpoint_quota_reached: "Quota du point d'accès de métadonnées atteint",
+};
+
+export const DatasheetListEnTranslations: Translations<"en">["DatasheetList"] = {
+    title: undefined,
+    create_datasheet: undefined,
+    datasheet_creation_impossible: undefined,
+    metadata_endpoint_quota_reached: undefined,
+};

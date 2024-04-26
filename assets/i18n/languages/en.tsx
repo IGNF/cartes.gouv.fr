@@ -29,6 +29,7 @@ import { RightsEnTranslations } from "../Rights";
 import { StyleEnTranslations } from "../Style";
 import type { Translations } from "../i18n";
 import { EspaceCoCommunitiesEnTranslations } from "../../espaceco/pages/communities/EspaceCoCommunitiesTr";
+import { DatasheetListEnTranslations } from "../../entrepot/pages/datasheet/DatasheetList/DatasheetList";
 
 export const translations: Translations<"en"> = {
     Common: commonEnTranslations,
@@ -61,4 +62,5 @@ export const translations: Translations<"en"> = {
     UploadStyleFile: UploadStyleFileEnTranslations,
     PyramidVectorTmsServiceForm: PyramidVectorTmsServiceFormEnTranslations,
     EspaceCoCommunities: EspaceCoCommunitiesEnTranslations,
+    DatasheetList: DatasheetListEnTranslations,
 };

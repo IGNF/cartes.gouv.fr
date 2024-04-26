@@ -5,12 +5,13 @@ import { FC } from "react";
 
 type SkeletonProps = {
     count: number;
+    rectangleHeight?: number;
 };
-const Skeleton: FC<SkeletonProps> = ({ count }) => {
+const Skeleton: FC<SkeletonProps> = ({ count, rectangleHeight = 50 }) => {
     return (
         <MuiDsfrThemeProvider>
             {[...Array(count).keys()].map((n) => (
-                <MuiSkeleton className={fr.cx("fr-my-2v")} key={n} variant="rectangular" height={50} />
+                <MuiSkeleton className={fr.cx("fr-my-2v")} key={n} variant="rectangular" height={rectangleHeight} />
             ))}
         </MuiDsfrThemeProvider>
     );
