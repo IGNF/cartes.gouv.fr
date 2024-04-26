@@ -115,11 +115,11 @@ const Communities: FC = () => {
                     {communityQuery.isLoading || communitiesAsMember.isLoading ? (
                         <Skeleton count={10} />
                     ) : community ? (
-                        <CommunityList communities={[community]} filter={filter} />
+                        <CommunityList communities={[community]} />
                     ) : filter === "public" ? (
-                        communityQuery.data && (
+                        communityQuery.data && communityQuery.data.content.length ? (
                             <div>
-                                <CommunityList communities={communityQuery.data.content} filter={filter} />
+                                <CommunityList communities={communityQuery.data.content} />
                                 <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
                                     <Pagination
                                         count={communityQuery.data.totalPages}
@@ -128,20 +128,26 @@ const Communities: FC = () => {
                                     />
                                 </div>
                             </div>
-                        )
-                    ) : (
-                        communitiesAsMember.data && (
-                            <div>
-                                <CommunityList communities={communitiesAsMember.data.content} filter={filter} />
-                                <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
-                                    <Pagination
-                                        count={communitiesAsMember.data.totalPages}
-                                        defaultPage={queryParams.page}
-                                        getPageLinkProps={(pageNumber) => routes.espaceco_community_list({ filter: filter, page: pageNumber }).link}
-                                    />
-                                </div>
+                        ) : (
+                            <div className={fr.cx("fr-my-2v")}>
+                                <Alert severity={"info"} title={t("no_result", { filter: filter })} closable />
                             </div>
                         )
+                    ) : communitiesAsMember.data && communitiesAsMember.data.content.length ? (
+                        <div>
+                            <CommunityList communities={communitiesAsMember.data.content} />
+                            <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
+                                <Pagination
+                                    count={communitiesAsMember.data.totalPages}
+                                    defaultPage={queryParams.page}
+                                    getPageLinkProps={(pageNumber) => routes.espaceco_community_list({ filter: filter, page: pageNumber }).link}
+                                />
+                            </div>
+                        </div>
+                    ) : (
+                        <div className={fr.cx("fr-my-2v")}>
+                            <Alert severity={"info"} title={t("no_result", { filter: filter })} closable />
+                        </div>
                     )}
                 </div>
             </div>
