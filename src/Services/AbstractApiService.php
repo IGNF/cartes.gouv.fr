@@ -27,7 +27,7 @@ abstract class AbstractApiService
         string $api,
     ) {
         $this->apiClient = $httpClient->withOptions([
-            'base_uri' => $parameters->get($api),
+            'base_uri' => $parameters->get($api).'/',
             'proxy' => $parameters->get('http_proxy'),
             'verify_peer' => false,
             'verify_host' => false,
@@ -70,9 +70,9 @@ abstract class AbstractApiService
      */
     protected function requestAll(string $url, array $query = [], array $headers = []): array
     {
-        $query['page']  = 1;   
-        $query['limit'] = 50;   
-        
+        $query['page'] = 1;
+        $query['limit'] = 50;
+
         $response = $this->request('GET', $url, [], $query, $headers, false, true, true);
 
         $allResources = $response['content'];
