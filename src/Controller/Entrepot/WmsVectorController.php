@@ -185,11 +185,14 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
                     ],
                 ],
             ],
-            'attribution' => [
+        ];
+
+        if ('' !== $data['attribution_text'] && '' !== $data['attribution_url']) {
+            $body['attribution'] = [
                 'title' => $data['attribution_text'],
                 'url' => $data['attribution_url'],
-            ],
-        ];
+            ];
+        }
 
         return $body;
     }

@@ -222,11 +222,14 @@ class PyramidController extends ServiceController implements ApiControllerInterf
                     'stored_data' => $pyramid['_id'],
                 ]],
             ],
-            'attribution' => [
+        ];
+
+        if ('' !== $dto->attribution_text && '' !== $dto->attribution_url) {
+            $requestBody['attribution'] = [
                 'title' => $dto->attribution_text,
                 'url' => $dto->attribution_url,
-            ],
-        ];
+            ];
+        }
 
         return $requestBody;
     }

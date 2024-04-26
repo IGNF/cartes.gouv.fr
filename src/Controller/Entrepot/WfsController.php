@@ -140,10 +140,6 @@ class WfsController extends ServiceController implements ApiControllerInterface
             'type' => ConfigurationTypes::WFS,
             'name' => $dto->public_name,
             'layer_name' => $dto->technical_name,
-            'attribution' => [
-                'title' => $dto->attribution_text,
-                'url' => $dto->attribution_url,
-            ],
             'type_infos' => [
                 'used_data' => [[
                     'relations' => $relations,
@@ -151,6 +147,13 @@ class WfsController extends ServiceController implements ApiControllerInterface
                 ]],
             ],
         ];
+
+        if ('' !== $dto->attribution_text && '' !== $dto->attribution_url) {
+            $body['attribution'] = [
+                'title' => $dto->attribution_text,
+                'url' => $dto->attribution_url,
+            ];
+        }
 
         return $body;
     }

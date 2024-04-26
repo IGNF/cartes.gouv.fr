@@ -215,6 +215,7 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
                     {createServiceMutation.error && (
                         <Alert closable description={createServiceMutation.error.message} severity="error" title={tCommon("error")} />
                     )}
+                    {editServiceMutation.error && <Alert closable description={editServiceMutation.error.message} severity="error" title={tCommon("error")} />}
 
                     <UploadMDFile visible={currentStep === STEPS.METADATAS_UPLOAD} form={form} />
                     <Description visible={currentStep === STEPS.METADATAS_DESCRIPTION} form={form} />
