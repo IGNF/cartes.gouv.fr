@@ -75,7 +75,7 @@ const Communities: FC = () => {
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-3", "fr-px-2v")}>
                     {/* <div className={fr.cx("fr-mb-2v")}>
-                        <label className={fr.cx("fr-text--bold")}>{t("filters")}</label>
+                        <span className={fr.cx("fr-text--lg")}>{t("filters")}</span>
                     </div> */}
                     <div className={fr.cx("fr-mb-4v")}>
                         <SearchCommunity
