@@ -5,4 +5,5 @@ export type GetResponse<T> = {
     nextPage: number;
 };
 
-export type CommunityListFilter = "public" | "iam_member" | "affiliation";
+export const arrCommunityListFilters = ["public", "iam_member", "affiliation"];
+export type CommunityListFilter = (typeof arrCommunityListFilters)[number];

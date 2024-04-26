@@ -1,59 +1,68 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
+import { Pagination } from "@codegouvfr/react-dsfr/Pagination";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { useQuery } from "@tanstack/react-query";
-import { FC, useState } from "react";
-import { CommunityListFilter, GetResponse } from "../../../@types/app_espaceco";
+import { FC, useMemo, useState } from "react";
+import { CommunityListFilter, GetResponse, arrCommunityListFilters } from "../../../@types/app_espaceco";
 import { CommunityResponseDTO } from "../../../@types/espaceco";
 import Skeleton from "../../../components/Utils/Skeleton";
 import { useTranslation } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/espaceco/RQKeys";
 import { CartesApiException } from "../../../modules/jsonFetch";
+import { routes, useRoute } from "../../../router/router";
 import api from "../../api";
 import CommunityList from "./CommunityList";
 import SearchCommunity from "./SearchCommunity";
-import Pagination from "../../../components/Utils/Pagination";
 
 const defaultLimit = 10;
 
-type commonParams = {
+type QueryParamsType = {
     page: number;
     limit: number;
+    pending?: boolean;
 };
 
-type Pending = commonParams & { pending: boolean };
-
 const Communities: FC = () => {
+    const route = useRoute();
     const { t } = useTranslation("EspaceCoCommunities");
 
-    const [filter, setFilter] = useState<CommunityListFilter>("public");
-    const [params, setParams] = useState<commonParams>({ page: 1, limit: defaultLimit });
-    const [communitiesAsMemberParams, setCommunitiesAsMemberParams] = useState<Pending>({ pending: false, page: 1, limit: defaultLimit });
+    const filter = useMemo<CommunityListFilter>(() => {
+        const f = route.params["filter"];
+        return arrCommunityListFilters.includes(f) ? f : "public";
+    }, [route]);
+
+    const queryParams = useMemo<QueryParamsType>(() => {
+        const page = Number.isInteger(route.params["page"]) ? route.params["page"] : 1;
+
+        const params: QueryParamsType = { page: page, limit: defaultLimit };
+        if (["iam_member", "affiliation"].includes(filter)) {
+            params["pending"] = filter === "iam_member" ? false : true;
+        }
+        return params;
+    }, [route, filter]);
+
     const [community, setCommunity] = useState<CommunityResponseDTO | null>(null);
 
     const communityQuery = useQuery<GetResponse<CommunityResponseDTO>, CartesApiException>({
-        queryKey: RQKeys.community_list(params.page, params.limit),
-        queryFn: ({ signal }) => api.community.get(params, signal),
+        queryKey: RQKeys.community_list(queryParams.page, queryParams.limit),
+        queryFn: ({ signal }) => api.community.get(queryParams, signal),
         staleTime: 3600000,
         retry: false,
         enabled: filter === "public",
     });
 
     const communitiesAsMember = useQuery<GetResponse<CommunityResponseDTO>, CartesApiException>({
-        queryKey: RQKeys.communities_as_member(communitiesAsMemberParams.pending, communitiesAsMemberParams.page, communitiesAsMemberParams.limit),
-        queryFn: ({ signal }) => api.community.getAsMember(communitiesAsMemberParams, signal),
+        queryKey: RQKeys.communities_as_member(queryParams.pending ?? false, queryParams.page, queryParams.limit),
+        queryFn: ({ signal }) => api.community.getAsMember(queryParams, signal),
         staleTime: 3600000,
         retry: false,
         enabled: filter === "iam_member" || filter === "affiliation",
     });
 
     const handleFilterChange = (filter: CommunityListFilter) => {
-        setFilter(filter);
         setCommunity(null);
-        if (filter === "iam_member" || filter === "affiliation") {
-            // TODO A VOIR SI 2 REQUETES DIFFERENTES
-            setCommunitiesAsMemberParams({ ...communitiesAsMemberParams, page: 1, pending: filter === "affiliation" });
-        }
+        routes.espaceco_community_list({ filter: filter, page: 1 }).push();
     };
 
     return (
@@ -64,8 +73,10 @@ const Communities: FC = () => {
                 {communitiesAsMember.isError && <Alert severity="error" closable={false} title={communitiesAsMember.error?.message} />}
             </div>
             <div className={fr.cx("fr-grid-row")}>
-                <div className={fr.cx("fr-col-4", "fr-px-2v")}>
-                    <label className={fr.cx("fr-text--bold")}>{t("filters")}</label>
+                <div className={fr.cx("fr-col-3", "fr-px-2v")}>
+                    {/* <div className={fr.cx("fr-mb-2v")}>
+                        <label className={fr.cx("fr-text--bold")}>{t("filters")}</label>
+                    </div> */}
                     <div className={fr.cx("fr-mb-4v")}>
                         <SearchCommunity
                             filter={filter}
@@ -100,7 +111,7 @@ const Communities: FC = () => {
                         ]}
                     />
                 </div>
-                <div className={fr.cx("fr-col-8", "fr-px-2v")}>
+                <div className={fr.cx("fr-col-9", "fr-px-2v")}>
                     {communityQuery.isLoading || communitiesAsMember.isLoading ? (
                         <Skeleton count={10} />
                     ) : community ? (
@@ -111,10 +122,9 @@ const Communities: FC = () => {
                                 <CommunityList communities={communityQuery.data.content} filter={filter} />
                                 <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
                                     <Pagination
-                                        size={"large"}
                                         count={communityQuery.data.totalPages}
-                                        page={params.page}
-                                        onChange={(_, page) => setParams({ ...params, page: page, limit: defaultLimit })}
+                                        defaultPage={queryParams.page}
+                                        getPageLinkProps={(pageNumber) => routes.espaceco_community_list({ filter: filter, page: pageNumber }).link}
                                     />
                                 </div>
                             </div>
@@ -125,10 +135,9 @@ const Communities: FC = () => {
                                 <CommunityList communities={communitiesAsMember.data.content} filter={filter} />
                                 <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
                                     <Pagination
-                                        size={"large"}
                                         count={communitiesAsMember.data.totalPages}
-                                        page={communitiesAsMemberParams.page}
-                                        onChange={(_, page) => setCommunitiesAsMemberParams({ ...communitiesAsMemberParams, page: page, limit: defaultLimit })}
+                                        defaultPage={queryParams.page}
+                                        getPageLinkProps={(pageNumber) => routes.espaceco_community_list({ filter: filter, page: pageNumber }).link}
                                     />
                                 </div>
                             </div>

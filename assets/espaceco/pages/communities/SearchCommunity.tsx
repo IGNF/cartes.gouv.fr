@@ -9,6 +9,7 @@ import { CommunityResponseDTO } from "../../../@types/espaceco";
 import { useTranslation } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/espaceco/RQKeys";
 import api from "../../api";
+import { fr } from "@codegouvfr/react-dsfr";
 
 type SearchCommunityProps = {
     filter: CommunityListFilter;
@@ -27,28 +28,33 @@ const SearchCommunity: FC<SearchCommunityProps> = ({ filter, onChange }) => {
     });
 
     return (
-        <MuiDsfrThemeProvider>
-            <Autocomplete
-                loading={searchQuery.isLoading}
-                loadingText={t("loading")}
-                noOptionsText={t("no_options")}
-                getOptionLabel={(option) => option.name}
-                options={searchQuery.data || []}
-                renderInput={(params) => (
-                    <TextField
-                        {...params}
-                        label={t("search_placeholder")}
-                        InputProps={{
-                            ...params.InputProps,
-                            type: "search",
-                        }}
-                    />
-                )}
-                isOptionEqualToValue={(option, v) => option.id === v.id}
-                onInputChange={(_, v) => setSearch(v)}
-                onChange={(_, v) => onChange(v)}
-            />
-        </MuiDsfrThemeProvider>
+        <div>
+            <div className={fr.cx("fr-mb-2v")}>
+                <label>Nom du guichet :</label>
+            </div>
+            <MuiDsfrThemeProvider>
+                <Autocomplete
+                    loading={searchQuery.isLoading}
+                    loadingText={t("loading")}
+                    noOptionsText={t("no_options")}
+                    getOptionLabel={(option) => option.name}
+                    options={searchQuery.data || []}
+                    renderInput={(params) => (
+                        <TextField
+                            {...params}
+                            //label={t("search_placeholder")}
+                            InputProps={{
+                                ...params.InputProps,
+                                type: "search",
+                            }}
+                        />
+                    )}
+                    isOptionEqualToValue={(option, v) => option.id === v.id}
+                    onInputChange={(_, v) => setSearch(v)}
+                    onChange={(_, v) => onChange(v)}
+                />
+            </MuiDsfrThemeProvider>
+        </div>
     );
 };
 

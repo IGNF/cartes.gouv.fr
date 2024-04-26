@@ -200,7 +200,13 @@ const routeDefs = {
         (p) => `${appRoot}/datastores/${p.datastoreId}/service/${p.offeringId}`
     ),
 
-    espaceco_community_list: defineRoute(`${appRoot}/espaceco/community`),
+    espaceco_community_list: defineRoute(
+        {
+            page: param.query.optional.number.default(1),
+            filter: param.query.optional.string.default("public"),
+        },
+        () => `${appRoot}/espaceco/community`
+    ),
 };
 
 export const { RouteProvider, useRoute, routes, session } = createRouter(routeDefs);
