@@ -4,6 +4,6 @@
 /vendor/
 /node_modules/
 /docs
-/cypress
+/cypress**
 
-docker-compose*.yml
+compose*.yml
