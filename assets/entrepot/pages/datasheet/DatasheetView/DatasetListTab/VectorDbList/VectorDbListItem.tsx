@@ -252,12 +252,13 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
                                     priority: "secondary",
                                 }}
                                 items={[
-                                    {
-                                        text: t("replace_datas"),
-                                        iconId: "fr-icon-refresh-line",
-                                        onClick: () => console.warn("Action non implémentée"),
-                                        disabled: vectorDb.status !== StoredDataStatusEnum.GENERATED,
-                                    },
+                                    // NOTE : reporté cf. issue #249
+                                    // {
+                                    //     text: t("replace_datas"),
+                                    //     iconId: "fr-icon-refresh-line",
+                                    //     onClick: () => console.warn("Action non implémentée"),
+                                    //     disabled: vectorDb.status !== StoredDataStatusEnum.GENERATED,
+                                    // },
                                     {
                                         text: t("show_details"),
                                         iconId: "fr-icon-file-text-fill",

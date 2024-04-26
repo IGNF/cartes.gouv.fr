@@ -149,11 +149,12 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                                         })(),
                                         disabled: ![OfferingTypeEnum.WMSVECTOR, OfferingTypeEnum.WFS, OfferingTypeEnum.WMTSTMS].includes(service.type),
                                     },
-                                    {
-                                        text: "Remplacer les données",
-                                        iconId: "fr-icon-refresh-line",
-                                        onClick: () => console.warn("Action non implémentée"),
-                                    },
+                                    // NOTE : reporté cf. issue #249
+                                    // {
+                                    //     text: "Remplacer les données",
+                                    //     iconId: "fr-icon-refresh-line",
+                                    //     onClick: () => console.warn("Action non implémentée"),
+                                    // },
                                     {
                                         text: "Dépublier",
                                         iconId: "ri-arrow-go-back-line",
