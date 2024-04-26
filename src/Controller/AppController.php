@@ -36,7 +36,7 @@ class AppController extends AbstractController
         methods: ['GET'],
         options: ['expose' => true]
     )]
-    public function userInfoEdit(string $fileIdentifier, ParameterBagInterface $params): RedirectResponse
+    public function catalogueDatasheetView(string $fileIdentifier, ParameterBagInterface $params): RedirectResponse
     {
         $catalogueUrl = $params->get('catalogue_url');
 
