@@ -2,10 +2,10 @@ import { FC, JSX, Suspense, lazy, useMemo } from "react";
 
 import AppLayout from "../components/Layout/AppLayout";
 import LoadingText from "../components/Utils/LoadingText";
-import SymfonyRouting from "../modules/Routing";
+import EditPermissionForm from "../entrepot/pages/datastore/ManagePermissions/EditPermissionForm";
+import { useIsI18nFetching } from "../i18n/i18n";
 import Home from "../pages/Home";
 import RedirectToLogin from "../pages/RedirectToLogin";
-import EditPermissionForm from "../entrepot/pages/datastore/ManagePermissions/EditPermissionForm";
 import PageNotFound from "../pages/error/PageNotFound";
 import { useAuthStore } from "../stores/AuthStore";
 import { knownRoutes, publicRoutes, useRoute } from "./router";
@@ -58,6 +58,8 @@ const RouterRenderer: FC = () => {
     const route = useRoute();
     const user = useAuthStore((state) => state.user);
 
+    const isI18nFetching = useIsI18nFetching();
+
     const content: JSX.Element = useMemo(() => {
         // vérification si la route demandée est bien connue/enregistrée
         if (route.name === false || !knownRoutes.includes(route.name)) {
@@ -67,8 +69,6 @@ const RouterRenderer: FC = () => {
         if (!publicRoutes.includes(route.name)) {
             // vérifier si l'utilisateur est authentifié et éventuellement ses droits à la ressource demandée
             if (user === null) {
-                // window.location.href = SymfonyRouting.generate("cartesgouvfr_security_login");
-                window.location.assign(SymfonyRouting.generate("cartesgouvfr_security_login"));
                 return <RedirectToLogin />;
             }
         }
@@ -179,7 +179,14 @@ const RouterRenderer: FC = () => {
                 </AppLayout>
             }
         >
-            {content}
+            {/* on s'assure que les textes de traductions sont chargés */}
+            {isI18nFetching ? (
+                <AppLayout>
+                    <LoadingText />
+                </AppLayout>
+            ) : (
+                content
+            )}
         </Suspense>
     );
 };
