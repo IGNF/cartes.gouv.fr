@@ -14,6 +14,7 @@ import epsg from "./epsg";
 import annexe from "./annexe";
 import style from "./style";
 import metadata from "./metadata";
+import statics from "./statics";
 
 const api = {
     contact,
@@ -32,6 +33,7 @@ const api = {
     annexe,
     style,
     metadata,
+    statics,
     // epsg.io
     epsg,
 };

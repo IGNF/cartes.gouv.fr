@@ -90,7 +90,7 @@ const UploadUsage: FC<UploadUsageProps> = ({ datastore }) => {
                     className={fr.cx("fr-mt-4v")}
                     data={uploadListQuery.data.map((upload) => [
                         upload.name,
-                        t("upload.type.title", { type: upload.type }),
+                        t("storage.upload.type.title", { type: upload.type }),
                         upload.size ? niceBytes(upload.size?.toString()) : t("data.size.unknown"),
                         upload?.tags?.datasheet_name && (
                             <Tag

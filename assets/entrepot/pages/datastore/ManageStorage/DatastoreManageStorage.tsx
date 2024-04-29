@@ -4,17 +4,18 @@ import { useQuery } from "@tanstack/react-query";
 import { declareComponentKeys } from "i18nifty";
 import { FC, JSX, useMemo } from "react";
 
-import api from "../../../api";
+import { StoredDataTypeEnum, UploadTypeEnum } from "../../../../@types/app";
 import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import { useTranslation, type Translations } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
-import { StoredDataTypeEnum, UploadTypeEnum } from "../../../../@types/app";
+import api from "../../../api";
 import AnnexeUsage from "./storages/AnnexeUsage";
 import EndpointsUsage from "./storages/EndpointsUsage";
 import FilesystemUsage from "./storages/FilesystemUsage";
 import PostgresqlUsage from "./storages/PostgresqlUsage";
 import S3Usage from "./storages/S3Usage";
+import StaticsUsage from "./storages/StaticsUsage";
 import UploadUsage from "./storages/UploadUsage";
 
 type DatastoreManageStorageProps = {
@@ -57,6 +58,10 @@ const DatastoreManageStorage: FC<DatastoreManageStorageProps> = ({ datastoreId }
             {
                 label: t("storage.endpoints.label"),
                 content: <EndpointsUsage datastore={datastoreQuery.data} />,
+            },
+            {
+                label: t("storage.statics.label"),
+                content: <StaticsUsage datastore={datastoreQuery.data} />,
             },
         ];
 
@@ -128,7 +133,7 @@ export const { i18n } = declareComponentKeys<
     | { K: "storage.upload.deletion.confirmation"; P: { uploadName?: string; uploadId?: string }; R: string }
     | "storage.upload.deletion.in_progress"
     | "storage.upload.explanation"
-    | { K: "upload.type.title"; P: { type: UploadTypeEnum }; R: string }
+    | { K: "storage.upload.type.title"; P: { type: UploadTypeEnum }; R: string }
 
     // annexe
     | { K: "storage.annexe.label"; R: JSX.Element }
@@ -148,6 +153,13 @@ export const { i18n } = declareComponentKeys<
     // endpoint metadata
     | { K: "storage.endpoints.metadata.deletion.confirmation"; P: { metadataIdentifier?: string; metadataId?: string }; R: string }
     | "storage.endpoints.metadata.deletion.in_progress"
+
+    // statics
+    | { K: "storage.statics.label"; R: JSX.Element }
+    | "storage.statics.loading"
+    | { K: "storage.statics.deletion.confirmation"; P: { staticId?: string }; R: string }
+    | "storage.statics.deletion.in_progress"
+    | "storage.statics.explanation"
 >()({
     DatastoreManageStorage,
 });
@@ -170,7 +182,7 @@ export const DatastoreManageStorageFrTranslations: Translations<"fr">["Datastore
                 return type;
         }
     },
-    "upload.type.title": ({ type }) => {
+    "storage.upload.type.title": ({ type }) => {
         switch (type) {
             case UploadTypeEnum.VECTOR:
                 return "Vecteur";
@@ -256,6 +268,17 @@ export const DatastoreManageStorageFrTranslations: Translations<"fr">["Datastore
     "storage.endpoints.metadata.deletion.confirmation": ({ metadataIdentifier, metadataId }) =>
         `Êtes-vous sûr de vouloir supprimer la métadonnée ${metadataIdentifier} (${metadataId}) ?`,
     "storage.endpoints.metadata.deletion.in_progress": "Suppression de la métadonnée en cours",
+
+    "storage.statics.label": (
+        <span>
+            Fichiers <br /> statiques
+        </span>
+    ),
+    "storage.statics.loading": "Chargement des fichiers statiques",
+    "storage.statics.deletion.confirmation": ({ staticId }) => `Êtes-vous sûr de vouloir supprimer le fichier statique ${staticId} ?`,
+    "storage.statics.deletion.in_progress": "Suppression du fichier statique en cours",
+    "storage.statics.explanation":
+        "Cet espace est occupé par des fichiers statiques. Il s'agit généralement des fichiers de styles au format SLD ou FTL déposés lors de la publication d'un service WMS-VECTOR.",
 };
 export const DatastoreManageStorageEnTranslations: Translations<"en">["DatastoreManageStorage"] = {
     title: undefined,
@@ -263,7 +286,7 @@ export const DatastoreManageStorageEnTranslations: Translations<"en">["Datastore
     "storage.not_found": undefined,
     "data.size.unknown": undefined,
     "stored_data.type.title": undefined,
-    "upload.type.title": undefined,
+    "storage.upload.type.title": undefined,
 
     "storage.filesystem.label": undefined,
     "storage.filesystem.stored_data_list.loading": undefined,
@@ -304,4 +327,10 @@ export const DatastoreManageStorageEnTranslations: Translations<"en">["Datastore
 
     "storage.endpoints.metadata.deletion.confirmation": undefined,
     "storage.endpoints.metadata.deletion.in_progress": undefined,
+
+    "storage.statics.label": undefined,
+    "storage.statics.loading": undefined,
+    "storage.statics.deletion.confirmation": undefined,
+    "storage.statics.deletion.in_progress": undefined,
+    "storage.statics.explanation": undefined,
 };
