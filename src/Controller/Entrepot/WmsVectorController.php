@@ -138,6 +138,8 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
                 ]);
             }
 
+            $this->cleanUnusedStyleFiles($datastoreId, $oldConfiguration, $styleFilesByTable);
+
             // Creation d'une offering
             $offering = $this->configurationApiService->addOffering($datastoreId, $configuration['_id'], $endpoint['_id'], $endpoint['open']);
             $offering['configuration'] = $configuration;
@@ -223,10 +225,11 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
 
                 /** @var UploadedFile|null */
                 $file = $files["style_{$tableName}"] ?? null;
+                $tmpFileDir = $directory.'/'.Uuid::v4();
 
-                $file->move($directory, $file->getClientOriginalName());
+                $file->move($tmpFileDir, $file->getClientOriginalName());
 
-                $staticStyleFile = $this->staticApiService->add($datastoreId, $directory.'/'.$file->getClientOriginalName(), $styleFileName, StaticFileTypes::GEOSERVER_STYLE);
+                $staticStyleFile = $this->staticApiService->add($datastoreId, $tmpFileDir.'/'.$file->getClientOriginalName(), $styleFileName, StaticFileTypes::GEOSERVER_STYLE);
                 $styleFilesByTable[$tableName] = $staticStyleFile['_id'];
             }
         }
@@ -243,17 +246,47 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
             foreach ($tablesNamesList as $tableName) {
                 /** @var UploadedFile|null */
                 $file = $files["style_{$tableName}"] ?? null;
+                $tmpFileDir = $directory.'/'.Uuid::v4();
 
-                // si un nouveau fichier est fourni pour cette table, on remplace le fichier
+                // si un nouveau fichier est fourni pour une table existante de la configuration, on remplace le fichier, sinon on publie un nouveau fichier statique
                 if (null !== $file) {
-                    $file->move($directory, $file->getClientOriginalName());
+                    $file->move($tmpFileDir, $file->getClientOriginalName());
 
-                    $staticStyleFile = $this->staticApiService->replaceFile($datastoreId, $oldStyleFilesByTable[$tableName], $directory.'/'.$file->getClientOriginalName());
+                    if (isset($oldStyleFilesByTable[$tableName])) {
+                        $staticStyleFile = $this->staticApiService->replaceFile($datastoreId, $oldStyleFilesByTable[$tableName], $tmpFileDir.'/'.$file->getClientOriginalName());
+                    } else {
+                        $styleFileName = sprintf('config_%s_style_wmsv_%s', $oldConfiguration['_id'], $tableName);
+
+                        $staticStyleFile = $this->staticApiService->add($datastoreId, $tmpFileDir.'/'.$file->getClientOriginalName(), $styleFileName, StaticFileTypes::GEOSERVER_STYLE);
+                    }
+                    $styleFilesByTable[$tableName] = $staticStyleFile['_id'];
+                } else {
+                    $styleFilesByTable[$tableName] = $oldStyleFilesByTable[$tableName];
                 }
-                $styleFilesByTable[$tableName] = $oldStyleFilesByTable[$tableName];
             }
         }
 
         return $styleFilesByTable;
+    }
+
+    /**
+     * @param array<mixed>         $oldConfiguration
+     * @param array<string,string> $styleFilesByTable
+     */
+    private function cleanUnusedStyleFiles(string $datastoreId, array $oldConfiguration, array $styleFilesByTable): void
+    {
+        $relations = $oldConfiguration['type_infos']['used_data'][0]['relations'];
+        $oldStyleFilesByTable = [];
+
+        foreach ($relations as $relation) {
+            $oldStyleFilesByTable[$relation['name']] = $relation['style'];
+        }
+
+        // suppr des fichiers statiques existant qui ne sont plus utilisés après la mise à jour
+        foreach ($oldStyleFilesByTable as $tableName => $staticFileId) {
+            if (!array_key_exists($tableName, $styleFilesByTable)) {
+                $this->staticApiService->delete($datastoreId, $staticFileId);
+            }
+        }
     }
 }

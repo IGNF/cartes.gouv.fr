@@ -2,21 +2,29 @@ import SldStyleParser from "geostyler-sld-parser";
 import { declareComponentKeys } from "i18nifty";
 import { TestContext } from "yup";
 
+import { Service } from "../@types/app";
 import { Translations, getTranslation } from "../i18n/i18n";
 import { getFileExtension } from "../utils";
+import { ConfigurationWmsVectorDetailsContent } from "../@types/entrepot";
 
 const { t: tSld } = getTranslation("sldStyleValidation");
 
+const SLD_ACCEPTED_VERSIONS = ["1.0.0", "1.1.0"];
 export default class SldStyleWmsVectorValidator {
     /**
-     * - applique la condition "exists" que si offering n'est pas undefined (on est en mode édition)
-     * - applique la condition "isValid" si "exists" est true
+     * - Si mode création, les 2 conditions sont appliquées
+     * - Si mode édition, la condition "exists" est appliquée pour une nouvelle table qui n'était pas déjà présente dans la configuration. Et la condition "isValid" est appliquée si "exists" est true
+     *
+     * En gros, un fichier de style pour toutes les tables est obligatoire en mode création. En édition, le fichier de style est obligatoire seulement pour une nouvelle table.
      */
-    async validate(tableName: string, value: FileList, ctx: TestContext, offeringId: string | undefined) {
+    async validate(tableName: string, value: FileList, ctx: TestContext, offering: Service | undefined | null) {
         const exists = this.#exists(tableName, value as FileList, ctx);
         const isValid = await this.#isValid(tableName, value as FileList, ctx);
 
-        if (offeringId !== undefined) {
+        const typeInfos = offering?.configuration?.type_infos as ConfigurationWmsVectorDetailsContent | undefined;
+        const oldTables = typeInfos?.used_data[0].relations.map((rel) => rel.name);
+
+        if (oldTables?.includes(tableName)) {
             if (exists === true) {
                 return isValid;
             }
@@ -63,11 +71,11 @@ export default class SldStyleWmsVectorValidator {
 
             if (version === "") {
                 return ctx.createError({ message: tSld("sld_version_missing") });
-            } else if (version !== "1.0.0") {
-                return ctx.createError({ message: tSld("sld_version_unaccepted") });
+            } else if (!SLD_ACCEPTED_VERSIONS.includes(version)) {
+                return ctx.createError({ message: tSld("sld_version_unaccepted", { version }) });
             }
 
-            const sldParser = new SldStyleParser({ sldVersion: "1.0.0" });
+            const sldParser = new SldStyleParser({ sldVersion: version });
             const result = await sldParser.readStyle(styleString);
 
             const { output, warnings, errors, unsupportedProperties } = result;
@@ -120,7 +128,7 @@ export const { i18n } = declareComponentKeys<
     | { K: "no_file_provided"; P: { tableName: string }; R: string }
     | { K: "unaccepted_extension"; P: { fileName: string }; R: string }
     | "sld_version_missing"
-    | "sld_version_unaccepted"
+    | { K: "sld_version_unaccepted"; P: { version: string }; R: string }
     | "file_invalid"
     | "field_name_invalid_or_unspecified"
     | { K: "field_name_does_not_correspond_table_name"; P: { fieldNameValue: string; tableName: string }; R: string }
@@ -133,7 +141,7 @@ export const sldStyleValidationFrTranslations: Translations<"fr">["sldStyleValid
     no_file_provided: ({ tableName }) => `Veuillez fournir un fichier de style pour la table ${tableName}`,
     unaccepted_extension: ({ fileName }) => `L'extension du fichier de style ${fileName} n'est pas correcte. Seule l'extension sld est acceptée.`,
     sld_version_missing: "La version de SLD n'est pas spécifiée.",
-    sld_version_unaccepted: "Seule la version 1.0.0 de SLD est acceptée.",
+    sld_version_unaccepted: ({ version }) => `La version ${version} n'est pas acceptée. Seules les versions 1.0.0 et 1.1.0 de SLD sont acceptées.`,
     file_invalid: "Ce fichier n'est pas un fichier de style valide. Erreur de syntaxe XML.",
     field_name_invalid_or_unspecified: "Le champ 'name' est invalide ou n'est pas spécifié.",
     field_name_does_not_correspond_table_name: ({ fieldNameValue, tableName }) =>

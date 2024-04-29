@@ -1,3 +1,4 @@
+import SldStyleParser from "geostyler-sld-parser";
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
@@ -31,7 +32,34 @@ import Description from "../metadatas/Description";
 import UploadMDFile from "../metadatas/UploadMDFile";
 import UploadStyleFile from "./UploadStyleFile";
 
-const createFormData = (formValues: WmsVectorServiceFormValuesType) => {
+/**
+ * Convertir en v1.0.0 si l'utilisateur a déposé un sld en v1.1.0
+ */
+const getSld100 = async (originalFile: File): Promise<File> => {
+    const fileContent = await originalFile.text();
+
+    const domParser = new DOMParser();
+    const xmlDoc: XMLDocument = domParser.parseFromString(fileContent, "application/xml");
+
+    const version = xmlDoc.getElementsByTagName("StyledLayerDescriptor")[0].attributes?.["version"]?.nodeValue ?? "";
+
+    if (version === "1.1.0") {
+        const sld110Parser = new SldStyleParser({ sldVersion: "1.1.0" });
+        const sld100Parser = new SldStyleParser({ sldVersion: "1.0.0" });
+
+        const result = await sld110Parser.readStyle(fileContent);
+
+        const convertedStyle = await sld100Parser.writeStyle(result.output!);
+
+        const blob = new Blob([convertedStyle.output!]);
+        const newFile = new File([blob], originalFile.name);
+        return newFile;
+    } else {
+        return originalFile;
+    }
+};
+
+const createFormData = async (formValues: WmsVectorServiceFormValuesType) => {
     const fd = new FormData();
 
     fd.set("category", JSON.stringify(formValues.category!));
@@ -55,11 +83,11 @@ const createFormData = (formValues: WmsVectorServiceFormValuesType) => {
     fd.set("technical_name", formValues.technical_name!);
 
     // filtrer en fonction des tables sélectionnées
-    formValues["selected_tables"]!.forEach((tableName: string) => {
+    for (const tableName of formValues.selected_tables!) {
         if (formValues?.style_files?.[tableName]?.[0] !== undefined) {
-            fd.set(`style_${tableName}`, formValues?.style_files?.[tableName]?.[0]);
+            fd.set(`style_${tableName}`, await getSld100(formValues?.style_files?.[tableName]?.[0]));
         }
-    });
+    }
 
     return fd;
 };
@@ -93,9 +121,9 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
     const queryClient = useQueryClient();
 
     const createServiceMutation = useMutation<Service, CartesApiException>({
-        mutationFn: () => {
+        mutationFn: async () => {
             const formValues = getFormValues();
-            const formData = createFormData(formValues);
+            const formData = await createFormData(formValues);
 
             return api.wmsVector.add(datastoreId, vectorDbId, formData);
         },
@@ -112,13 +140,13 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
     });
 
     const editServiceMutation = useMutation<Service, CartesApiException>({
-        mutationFn: () => {
+        mutationFn: async () => {
             if (offeringId === undefined) {
                 return Promise.reject();
             }
 
             const formValues = getFormValues();
-            const formData = createFormData(formValues);
+            const formData = await createFormData(formValues);
 
             return api.wmsVector.edit(datastoreId, vectorDbId, offeringId, formData);
         },
@@ -189,7 +217,7 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
                 styleFiles[table.name] = yup.mixed().test({
                     name: "is-valid-sld",
                     async test(value, ctx) {
-                        return new SldStyleWmsVectorValidator().validate(table.name, value as FileList, ctx, offeringId);
+                        return new SldStyleWmsVectorValidator().validate(table.name, value as FileList, ctx, offeringQuery.data);
                     },
                 });
             });
