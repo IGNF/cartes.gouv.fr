@@ -28,7 +28,7 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
 
                     <div className={fr.cx("fr-col")}>
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-grid-row--middle")}>
-                            <Button linkProps={routes.datastore_datasheet_new_integration({ datastoreId, uploadId: upload._id }).link}>
+                            <Button linkProps={routes.datastore_datasheet_upload_integration({ datastoreId, uploadId: upload._id }).link}>
                                 {"Reprendre l'intégration"}
                             </Button>
                         </div>

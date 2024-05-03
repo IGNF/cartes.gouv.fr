@@ -128,7 +128,7 @@ const RouterRenderer: FC = () => {
                 return <CommunityList />;
             case "datastore_datasheet_upload":
                 return <DatasheetUploadForm datastoreId={route.params.datastoreId} />;
-            case "datastore_datasheet_new_integration":
+            case "datastore_datasheet_upload_integration":
                 return <DatasheetUploadIntegrationPage datastoreId={route.params.datastoreId} uploadId={route.params.uploadId} />;
             case "datastore_datasheet_view":
                 return <DatasheetView datastoreId={route.params.datastoreId} datasheetName={route.params.datasheetName} />;

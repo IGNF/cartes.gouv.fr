@@ -222,7 +222,7 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                     linkProps={
                         datasheetName === undefined
                             ? routes.datasheet_list({ datastoreId }).link
-                            : routes.datastore_datasheet_view({ datastoreId, datasheetName }).link
+                            : routes.datastore_datasheet_view({ datastoreId, datasheetName, activeTab: "dataset" }).link
                     }
                     title={datasheetName === undefined ? "Retour à ma liste de données" : "Retour à ma fiche de données"}
                     size="large"

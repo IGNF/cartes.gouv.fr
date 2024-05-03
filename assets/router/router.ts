@@ -101,14 +101,14 @@ const routeDefs = {
             datastoreId: param.path.string,
             datasheetName: param.query.optional.string,
         },
-        (p) => `${appRoot}/datastores/${p.datastoreId}/datasheet/new`
+        (p) => `${appRoot}/datastores/${p.datastoreId}/datasheet/upload`
     ),
-    datastore_datasheet_new_integration: defineRoute(
+    datastore_datasheet_upload_integration: defineRoute(
         {
             datastoreId: param.path.string,
             uploadId: param.query.string,
         },
-        (p) => `${appRoot}/datastores/${p.datastoreId}/datasheet/new/integration`
+        (p) => `${appRoot}/datastores/${p.datastoreId}/datasheet/upload/integration`
     ),
     datastore_datasheet_view: defineRoute(
         {
