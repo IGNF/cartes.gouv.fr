@@ -68,7 +68,7 @@ const getHintText = (
             break;
         case EndpointDetailResponseDtoTypeEnum.WMSVECTOR:
             parts.push({
-                reactNode: <li>{t("wms_hint_text")}</li>,
+                reactNode: <li>{t("wmsv_hint_text")}</li>,
                 id: "endpoint-hint-text",
             });
             break;
@@ -309,6 +309,7 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
                             onClick: handleCreateService,
                             doClosesModal: true,
                             priority: "primary",
+                            disabled: serviceType === undefined,
                         },
                     ]}
                     concealingBackdrop={false}
@@ -316,7 +317,7 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
                     <RadioButtons
                         options={[
                             {
-                                label: "Tile Map Service (TMS)",
+                                label: t("tms_label"),
                                 hintText: getHintText(quotas, EndpointDetailResponseDtoTypeEnum.WMTSTMS, t),
                                 nativeInputProps: {
                                     checked: serviceType === "tms",
@@ -325,7 +326,7 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
                                 },
                             },
                             {
-                                label: "Web Feature Service (WFS)",
+                                label: t("wfs_label"),
                                 hintText: getHintText(quotas, EndpointDetailResponseDtoTypeEnum.WFS, t),
                                 nativeInputProps: {
                                     checked: serviceType === "wfs",
@@ -334,7 +335,7 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
                                 },
                             },
                             {
-                                label: "Web Map Service (WMS-Vecteur)",
+                                label: t("wmsv_label"),
                                 hintText: getHintText(quotas, EndpointDetailResponseDtoTypeEnum.WMSVECTOR, t),
                                 nativeInputProps: {
                                     checked: serviceType === "wms-vector",
@@ -415,11 +416,12 @@ export const { i18n } = declareComponentKeys<
     | "other_actions"
     | "replace_datas"
     | "show_details"
+    | "tms_label"
+    | "wfs_label"
+    | "wmsv_label"
     | "tms_hint_text"
     | "wfs_hint_text"
-    | "wms_hint_text"
-    | "prepaquet_label"
-    | "prepaquet_hint_text"
+    | "wmsv_hint_text"
     | "tile_technical_name"
     | "tile_technical_name_hint_text"
     | "technical_name_is_mandatory"
@@ -432,16 +434,19 @@ export const { i18n } = declareComponentKeys<
 
 export const VectorDbListItemFrTranslations: Translations<"fr">["VectorDbListItem"] = {
     create_service: "Créer un service",
-    define_service: "Définissez le service à créer",
+    define_service: "Choisir le service à configurer",
     show_linked_datas: "Voir les données liées",
     other_actions: "Autres actions",
     replace_datas: "Remplacer les données",
     show_details: "Voir les détails",
-    tms_hint_text: "Dans une première étape  vous allez créer une pyramide de tuiles vectorielles que vous devrez ensuite publier",
-    wfs_hint_text: "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Dolor, dolore unde! Autem eos nam fugiat!",
-    wms_hint_text: "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Dolor, dolore unde! Autem eos nam fugiat!",
-    prepaquet_label: "Fichier pré-paquets",
-    prepaquet_hint_text: "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Dolor, dolore unde! Autem eos nam fugiat!",
+    tms_label: "Service de tuiles vectorielles (Tile Map Service - TMS)",
+    wfs_label: "Service de sélection WFS (Web Feature Service - WFS)",
+    wmsv_label: "Service d'images (Web Map Service - WMS)",
+    tms_hint_text:
+        "Création puis publication d'une pyramide de tuiles vectorielles dont le rendu peut être personnalisable avec des fichiers de style proposés par vos soins ou définis par un utilisateur final. Ce service s'appuie sur le protocole TMS en version 1.0.0.",
+    wfs_hint_text:
+        "Création puis publication d'un service permettant de manipuler des objets géographiques. Ce service s'appuie sur le protocole WFS en version 2.0.0",
+    wmsv_hint_text: "Création puis publication d'images à partir de données vectorielles. Ce service s'appuie sur le protocole WMS en version 1.3.0",
     tile_technical_name: "Nom technique de la pyramide de tuiles vectorielles",
     tile_technical_name_hint_text:
         "II s'agit du nom technique du service qui apparaitra dans votre espace de travail, il ne sera pas publié en ligne. Si vous le renommez, choisissez un nom explicite.",
@@ -458,11 +463,12 @@ export const VectorDbListItemEnTranslations: Translations<"en">["VectorDbListIte
     other_actions: "Other actions",
     replace_datas: "Replace datas",
     show_details: "Show details",
-    tms_hint_text: "In a first step you will create a pyramid of vector tiles which you will then have to publish",
-    wfs_hint_text: "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Dolor, dolore unde! Autem eos nam fugiat!",
-    wms_hint_text: "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Dolor, dolore unde! Autem eos nam fugiat!",
-    prepaquet_label: "[TODO]",
-    prepaquet_hint_text: "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Dolor, dolore unde! Autem eos nam fugiat!",
+    tms_label: undefined,
+    wfs_label: undefined,
+    wmsv_label: undefined,
+    tms_hint_text: undefined,
+    wfs_hint_text: undefined,
+    wmsv_hint_text: undefined,
     tile_technical_name: "Technical name of vector tile pyramid [TODO]",
     tile_technical_name_hint_text:
         "This is the technical name of the service which will appear in your workspace, it will not be published online. If you rename it, choose a meaningful name. [TODO]",
