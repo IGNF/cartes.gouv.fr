@@ -136,7 +136,7 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
     if (uploadQuery.data?.tags?.vectordb_id) {
         bottomButtons.unshift({
             children: "Voir le rapport d'erreur",
-            linkProps: routes.datastore_stored_data_report({ datastoreId, storedDataId: uploadQuery.data?.tags.vectordb_id }).link,
+            linkProps: routes.datastore_stored_data_details({ datastoreId, storedDataId: uploadQuery.data?.tags.vectordb_id }).link,
         });
     }
 

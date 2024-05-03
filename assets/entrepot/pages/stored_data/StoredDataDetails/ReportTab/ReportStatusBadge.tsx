@@ -1,12 +1,13 @@
 import { AlertProps } from "@codegouvfr/react-dsfr/Alert";
 import Badge from "@codegouvfr/react-dsfr/Badge";
-import { FC } from "react";
+import { FC, memo } from "react";
 
-type CheckOrProcessingStatusBadgeProps = {
+type ReportStatusBadgeProps = {
     status: string;
+    className?: string;
 };
-const CheckOrProcessingStatusBadge: FC<CheckOrProcessingStatusBadgeProps> = ({ status }) => {
-    let text;
+const ReportStatusBadge: FC<ReportStatusBadgeProps> = ({ status, className }) => {
+    let text: string;
     let severity: AlertProps.Severity | "new" | undefined = undefined;
 
     switch (status) {
@@ -19,14 +20,18 @@ const CheckOrProcessingStatusBadge: FC<CheckOrProcessingStatusBadgeProps> = ({ s
             text = "En attente de lancement";
             break;
         case "PROGRESS":
+        case "GENERATING":
+        case "MODIFYING":
             severity = "info";
             text = "En cours d'exécution";
             break;
         case "SUCCESS":
+        case "GENERATED":
             severity = "success";
             text = "Réussie";
             break;
         case "FAILURE":
+        case "UNSTABLE":
             severity = "error";
             text = "Echouée";
             break;
@@ -34,9 +39,15 @@ const CheckOrProcessingStatusBadge: FC<CheckOrProcessingStatusBadgeProps> = ({ s
             severity = "error";
             text = "Annulée";
             break;
+        default:
+            text = "";
     }
 
-    return <Badge severity={severity}>{text}</Badge>;
+    return (
+        <Badge severity={severity} className={className}>
+            {text}
+        </Badge>
+    );
 };
 
-export default CheckOrProcessingStatusBadge;
+export default memo(ReportStatusBadge);

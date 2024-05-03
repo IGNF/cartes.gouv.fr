@@ -1,8 +1,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { FC } from "react";
 
-import { CheckDetailed } from "../../../../@types/app";
-import CheckOrProcessingStatusBadge from "./CheckOrProcessingStatusBadge";
+import { CheckDetailed } from "../../../../../@types/app";
 import Logs from "./Logs";
 
 type UploadCheckExecutionReportProps = {
@@ -12,9 +11,6 @@ type UploadCheckExecutionReportProps = {
 const UploadCheckExecutionReport: FC<UploadCheckExecutionReportProps> = ({ check, datastoreName }) => {
     return (
         <ul className={fr.cx("fr-raw-list")}>
-            <li>
-                <strong>{"Statut :"}</strong> <CheckOrProcessingStatusBadge status={check.status} />
-            </li>
             <li>
                 <strong>{"Espace de travail :"}</strong> {datastoreName}
             </li>

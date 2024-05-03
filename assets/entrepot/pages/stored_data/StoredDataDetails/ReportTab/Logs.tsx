@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { CheckOrProcessingExecutionLogs } from "../../../../@types/app";
+import { CheckOrProcessingExecutionLogs } from "../../../../../@types/app";
 
 type LogsProps = {
     logs: CheckOrProcessingExecutionLogs;

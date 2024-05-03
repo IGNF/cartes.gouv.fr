@@ -2,9 +2,9 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { useQuery } from "@tanstack/react-query";
+import { declareComponentKeys } from "i18nifty";
 import { FC, useMemo } from "react";
 
-import { declareComponentKeys } from "i18nifty";
 import { Datasheet, EndpointTypeEnum } from "../../../../@types/app";
 import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
@@ -60,7 +60,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
             </div>
 
             {datasheetListQuery.data === undefined ? (
-                <Skeleton count={12} rectangleHeight={80} />
+                <Skeleton count={12} rectangleHeight={100} />
             ) : (
                 datasheetListQuery?.data?.map((datasheet: Datasheet) => (
                     <DatasheetListItem key={datasheet.name} datastoreId={datastoreId} datasheet={datasheet} />
@@ -79,7 +79,7 @@ export const { i18n } = declareComponentKeys<
 });
 
 export const DatasheetListFrTranslations: Translations<"fr">["DatasheetList"] = {
-    title: ({ datastoreName }) => `Données ${datastoreName}`,
+    title: ({ datastoreName }) => `Données ${datastoreName ?? ""}`,
     create_datasheet: "Créer une fiche de données",
     datasheet_creation_impossible: "Création d'une nouvelle fiche de données impossible",
     metadata_endpoint_quota_reached: "Quota du point d'accès de métadonnées atteint",

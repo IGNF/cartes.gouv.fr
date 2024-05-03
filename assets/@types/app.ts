@@ -229,14 +229,14 @@ export type StoredDataReport = {
     stored_data: StoredData;
     input_upload: Upload & {
         file_tree: UploadTree;
-        checks: [CheckDetailed];
+        checks: CheckDetailed[];
     };
-    processing_executions: [
-        ProcessingExecution & {
-            output: ProcessingExecutionOutputStoredDataDto;
-            logs: CheckOrProcessingExecutionLogs;
-        },
-    ];
+    processing_executions: StoredDataReportProcessingExecution[];
+};
+
+type StoredDataReportProcessingExecution = ProcessingExecution & {
+    output: ProcessingExecutionOutputStoredDataDto;
+    logs: CheckOrProcessingExecutionLogs;
 };
 
 export type UserRightsResponseDto = {

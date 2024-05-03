@@ -118,7 +118,7 @@ const routeDefs = {
         },
         (p) => `${appRoot}/datastores/${p.datastoreId}/datasheet/${p.datasheetName}`
     ),
-    datastore_stored_data_report: defineRoute(
+    datastore_stored_data_details: defineRoute(
         {
             datastoreId: param.path.string,
             storedDataId: param.path.string,

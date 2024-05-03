@@ -123,20 +123,28 @@ class StoredDataController extends AbstractController implements ApiControllerIn
                 }
             }
 
-            // récupération de l'exécution traitement (ou des exécutions, normalement y en a qu'une) qui a créé cette stored_data
-            $procExecList = $this->processingApiService->getAllExecutions($datastoreId, [
-                'output_stored_data' => $storedDataId,
-            ]);
+            $procIntegrationId = $storedData['tags']['proc_int_id'] ?? null;
+            $procPyramidCreationId = $storedData['tags']['proc_pyr_creat_id'] ?? null;
+            $procExections = [];
 
-            foreach ($procExecList as &$procExec) {
-                $procExec = array_merge($procExec, $this->processingApiService->getExecution($datastoreId, $procExec['_id']));
-                $procExec['logs'] = $this->processingApiService->getExecutionLogs($datastoreId, $procExec['_id']);
+            // récupération de l'exécution de traitement d'intégration en base de données
+            if ($procIntegrationId) {
+                $procIntegrationExec = $this->processingApiService->getExecution($datastoreId, $procIntegrationId);
+                $procIntegrationExec['logs'] = $this->processingApiService->getExecutionLogs($datastoreId, $procIntegrationId);
+                $procExections[] = $procIntegrationExec;
+            }
+
+            // récupération de l'exécution de traitement de création de pyramide vecteur
+            if ($procPyramidCreationId) {
+                $procPyramidCreationExec = $this->processingApiService->getExecution($datastoreId, $procPyramidCreationId);
+                $procPyramidCreationExec['logs'] = $this->processingApiService->getExecutionLogs($datastoreId, $procPyramidCreationId);
+                $procExections[] = $procPyramidCreationExec;
             }
 
             return $this->json([
                 'stored_data' => $storedData,
                 'input_upload' => $inputUpload,
-                'processing_executions' => $procExecList,
+                'processing_executions' => $procExections,
             ]);
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
