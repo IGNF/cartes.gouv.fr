@@ -30,7 +30,7 @@ export type PyramidVectorGenerateFormValuesType = {
     selected_tables?: string[];
     bottom_zoom_level?: number;
     sample?: SampleType;
-    zoom_levels?: number[];
+    table_zoom_levels?: Record<string, number[]>;
     tippecanoe?: string;
 };
 
@@ -95,7 +95,6 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, vec
     });
     const {
         formState: { errors },
-        setValue: setFormValue,
         getValues: getFormValues,
         watch,
         trigger,
@@ -189,12 +188,7 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, vec
                     )}
                     <TableSelection filterGeometric={true} visible={currentStep === STEPS.TABLES_SELECTION} vectorDb={vectorDbQuery.data} form={form} />
                     <TableAttributeSelection visible={currentStep === STEPS.ATTRIBUTES_SELECTION} form={form} selectedTables={selectedTables} />
-                    <TableZoomLevels
-                        visible={currentStep === STEPS.ZOOM_LEVELS}
-                        form={form}
-                        selectedTables={selectedTables}
-                        onChange={(v) => setFormValue("zoom_levels", v)}
-                    />
+                    <TableZoomLevels visible={currentStep === STEPS.ZOOM_LEVELS} form={form} selectedTables={selectedTables} />
                     <TippeCanoe
                         visible={currentStep === STEPS.GENERALIZE_OPTIONS}
                         state={errors.tippecanoe ? "error" : "default"}

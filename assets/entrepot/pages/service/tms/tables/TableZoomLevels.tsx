@@ -1,17 +1,18 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import Accordion from "@codegouvfr/react-dsfr/Accordion";
 import { FC, useEffect, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
+
 import { StoredDataRelation } from "../../../../../@types/app";
-import Translator from "../../../../../modules/Translator";
-import Accordion from "@codegouvfr/react-dsfr/Accordion";
 import ZoomRange from "../../../../../components/Utils/ZoomRange";
 import olDefaults from "../../../../../data/ol-defaults.json";
+import Translator from "../../../../../modules/Translator";
+import { PyramidVectorGenerateFormValuesType } from "../PyramidVectorGenerateForm";
 
 type TableZoomLevelsProps = {
     visible: boolean;
-    form: UseFormReturn;
+    form: UseFormReturn<PyramidVectorGenerateFormValuesType>;
     selectedTables: StoredDataRelation[];
-    onChange?: (values: number[]) => void;
 };
 
 const TableZoomLevels: FC<TableZoomLevelsProps> = ({ visible, form, selectedTables }) => {
@@ -52,16 +53,18 @@ const TableZoomLevels: FC<TableZoomLevelsProps> = ({ visible, form, selectedTabl
         <div className={fr.cx("fr-my-2v", !visible && "fr-hidden")}>
             <h3>{Translator.trans("pyramid_vector.new.step_zoom_levels.title")}</h3>
             <p>{Translator.trans("pyramid_vector.new.step_zoom_levels.explain")}</p>
-            {selectedTables.map((table) => (
-                <Accordion key={table.name} label={table.name} titleAs="h4" defaultExpanded={true}>
-                    <ZoomRange
-                        min={olDefaults.zoom_levels.TOP}
-                        max={olDefaults.zoom_levels.BOTTOM}
-                        initialValues={tableZoomLevels[table.name]}
-                        onChange={(values) => onZoomChanged(table.name, values)}
-                    />
-                </Accordion>
-            ))}
+
+            {visible &&
+                selectedTables.map((table) => (
+                    <Accordion key={table.name} label={table.name} titleAs="h4" defaultExpanded={true}>
+                        <ZoomRange
+                            min={olDefaults.zoom_levels.TOP}
+                            max={olDefaults.zoom_levels.BOTTOM}
+                            values={tableZoomLevels[table.name]}
+                            onChange={(values) => onZoomChanged(table.name, values)}
+                        />
+                    </Accordion>
+                ))}
         </div>
     );
 };

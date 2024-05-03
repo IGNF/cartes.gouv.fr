@@ -1,35 +1,34 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import { FC, useEffect, useRef, useState } from "react";
-
-// Openlayers
 import Map from "ol/Map";
-import View from "ol/View";
+import { MapOptions } from "ol/PluggableMap";
+import View, { ViewOptions } from "ol/View";
+import { ScaleLine } from "ol/control";
+import BaseLayer from "ol/layer/Base";
 import TileLayer from "ol/layer/Tile";
-// import TileSourceType from "ol/source/Tile"
 import { fromLonLat } from "ol/proj";
 import WMTS, { optionsFromCapabilities } from "ol/source/WMTS";
+import { FC, memo, useCallback, useEffect, useRef } from "react";
+
+import olDefaults from "../../data/ol-defaults.json";
 import useCapabilities from "../../hooks/useCapabilities";
 import RangeSlider from "./RangeSlider";
-import olDefaults from "../../data/ol-defaults.json";
-import "./../../sass/components/zoom-range.scss";
+
+import "ol/ol.css";
+
+import "../../sass/components/zoom-range.scss";
 
 type ZoomRangeProps = {
     min: number;
     max: number;
-    initialValues?: number[];
+    values: number[];
+    onChange: (values: number[]) => void;
     center?: number[];
-    onChange?: (values: number[]) => void;
 };
 
 const ZoomRange: FC<ZoomRangeProps> = (props) => {
     const { data: capabilities } = useCapabilities();
 
-    const { min, max, initialValues = [olDefaults.zoom_levels.TOP, olDefaults.zoom_levels.BOTTOM], center = olDefaults.center, onChange = null } = props;
-
-    const minZoom = Math.max(min, initialValues[0]),
-        maxZoom = Math.min(max, initialValues[1]);
-
-    const [values, setValues] = useState([minZoom, maxZoom]);
+    const { min, max, values, center = olDefaults.center, onChange } = props;
 
     // References sur les deux cartes
     const leftMapRef = useRef<Map>();
@@ -38,65 +37,80 @@ const ZoomRange: FC<ZoomRangeProps> = (props) => {
     const rightMapRef = useRef<Map>();
     const rightMapTargetRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-        const viewOptions = {
-            projection: "EPSG:3857",
-            center: fromLonLat(center),
-        };
+    const getBgLayer = useCallback(() => {
+        if (!capabilities) return;
 
-        if (!leftMapRef.current) {
-            leftMapRef.current = new Map({
-                view: new View({ ...viewOptions, zoom: values[0] }),
-                interactions: [],
-                controls: [],
+        const wmtsOptions = optionsFromCapabilities(capabilities, {
+            layer: olDefaults.default_background_layer,
+        });
+
+        if (!wmtsOptions) return;
+
+        const bgLayer = new TileLayer();
+        bgLayer.setSource(new WMTS(wmtsOptions));
+
+        return bgLayer;
+    }, [capabilities]);
+
+    const getMapOptions = useCallback((bgLayer: BaseLayer) => {
+        const controls = [new ScaleLine()];
+        const mapOptions: MapOptions = {
+            layers: [bgLayer],
+            controls: controls,
+            interactions: [],
+        };
+        return mapOptions;
+    }, []);
+
+    const getViewOptions = useCallback(
+        (zoomLevel: number) => {
+            const viewOptions: ViewOptions = {
+                projection: olDefaults.projection,
+                center: fromLonLat(center),
+                zoom: zoomLevel,
+            };
+            return viewOptions;
+        },
+        [center]
+    );
+
+    const createMap = useCallback(
+        (target: string | HTMLElement, zoomLevel: number) => {
+            const bgLayer = getBgLayer();
+
+            if (!bgLayer) return;
+
+            return new Map({
+                ...getMapOptions(bgLayer),
+                target,
+                view: new View(getViewOptions(zoomLevel)),
             });
-            rightMapRef.current = new Map({
-                view: new View({ ...viewOptions, zoom: values[1] }),
-                interactions: [],
-                controls: [],
-            });
+        },
+        [getBgLayer, getViewOptions, getMapOptions]
+    );
+
+    useEffect(() => {
+        if (leftMapTargetRef.current) {
+            leftMapRef.current = createMap(leftMapTargetRef.current, olDefaults.zoom_levels.TOP);
         }
 
-        leftMapRef.current?.setTarget(leftMapTargetRef.current ?? "");
-        rightMapRef.current?.setTarget(rightMapTargetRef.current ?? "");
+        if (rightMapTargetRef.current) {
+            rightMapRef.current = createMap(rightMapTargetRef.current, olDefaults.zoom_levels.BOTTOM);
+        }
 
-        /* We set map target to undefined to represent a
-         * nonexistent HTML element ID, when the React component is unmounted.
-         * This prevents multiple maps being added to the map container on a
-         * re-render.
-         */
         return () => {
             leftMapRef.current?.setTarget(undefined);
             rightMapRef.current?.setTarget(undefined);
         };
-    }, [center, values]);
+    }, [createMap]);
 
     useEffect(() => {
-        const getTileLayer = (wmtsOptions) => {
-            return new TileLayer({
-                opacity: 1,
-                source: new WMTS(wmtsOptions),
-            });
-        };
+        leftMapRef.current?.getView().setZoom(values[0]);
+        rightMapRef.current?.getView().setZoom(values[1]);
 
-        if (capabilities) {
-            const wmtsOptions = optionsFromCapabilities(capabilities, {
-                layer: olDefaults.default_background_layer,
-            });
-
-            if (wmtsOptions) {
-                leftMapRef.current?.addLayer(getTileLayer(wmtsOptions));
-                rightMapRef.current?.addLayer(getTileLayer(wmtsOptions));
-            }
-        }
-    }, [capabilities]);
-
-    const handleOnChange = (v: number[]) => {
-        leftMapRef.current?.getView().setZoom(v[0]);
-        rightMapRef.current?.getView().setZoom(v[1]);
-        setValues(v);
-        onChange?.(v);
-    };
+        leftMapRef.current?.updateSize();
+        rightMapRef.current?.updateSize();
+    }, [values]);
 
     return (
         <div className={fr.cx("fr-my-2v")}>
@@ -104,9 +118,9 @@ const ZoomRange: FC<ZoomRangeProps> = (props) => {
                 <div ref={leftMapTargetRef} className="ui-top-zoom-level" />
                 <div ref={rightMapTargetRef} className="ui-bottom-zoom-level" />
             </div>
-            <RangeSlider min={min} max={max} initialValues={[minZoom, maxZoom]} onChange={handleOnChange} />
+            <RangeSlider min={min} max={max} values={values} onChange={(newValues) => onChange(newValues)} />
         </div>
     );
 };
 
-export default ZoomRange;
+export default memo(ZoomRange);

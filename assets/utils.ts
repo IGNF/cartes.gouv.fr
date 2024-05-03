@@ -166,6 +166,9 @@ const formatDateFromISO = (isoDateString: string): string => {
     return datefnsFormat(d, "dd MMMM yyyy, HH", { locale: fr }) + "h" + datefnsFormat(d, "mm", { locale: fr });
 };
 
+const getArrayRange = (start: number, stop: number, step: number = 1): number[] =>
+    Array.from({ length: (stop - start) / step + 1 }, (_, index) => start + index * step);
+
 export {
     getInspireKeywords,
     getLanguages,
@@ -179,4 +182,5 @@ export {
     getProjectionCode,
     getFileExtension,
     formatDateFromISO,
+    getArrayRange,
 };
