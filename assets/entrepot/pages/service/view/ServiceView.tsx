@@ -6,17 +6,17 @@ import { Tabs, TabsProps } from "@codegouvfr/react-dsfr/Tabs";
 import { useQuery } from "@tanstack/react-query";
 import { FC, useEffect, useMemo, useState } from "react";
 
-import api from "../../../api";
+import { CartesStyle, OfferingStatusEnum, OfferingTypeEnum, Service, TypeInfosWithBbox } from "../../../../@types/app";
 import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import type { MapInitial } from "../../../../components/Utils/RMap";
 import RMap from "../../../../components/Utils/RMap";
-import RQKeys from "../../../../modules/entrepot/RQKeys";
 import getWebService from "../../../../modules/WebServices/WebServices";
+import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { type CartesApiException } from "../../../../modules/jsonFetch";
 import { routes, useRoute } from "../../../../router/router";
 import "../../../../sass/pages/service_view.scss";
-import { CartesStyle, OfferingTypeEnum, Service, TypeInfosWithBbox } from "../../../../@types/app";
+import api from "../../../api";
 import DiffuseServiceTab from "./DiffuseServiceTab";
 import ManageStylesTab from "./ManageStylesTab";
 
@@ -120,6 +120,17 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
                             </Badge>
                         )}
                     </div>
+
+                    {serviceQuery.data?.status === OfferingStatusEnum.UNSTABLE && (
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-4w")}>
+                            <Alert
+                                severity="info"
+                                closable={false}
+                                title={"Flux instable"}
+                                description={"Ce flux est considéré instable par l'API Entrepôt. Il est possible qu'il ne s'affiche pas correctement."}
+                            />
+                        </div>
+                    )}
 
                     <div className={fr.cx("fr-grid-row", "fr-mb-4w")}>
                         <div className={fr.cx("fr-col-12", "fr-col-md-8")}>{initialValues && <RMap initial={initialValues} currentStyle={currentStyle} />}</div>
