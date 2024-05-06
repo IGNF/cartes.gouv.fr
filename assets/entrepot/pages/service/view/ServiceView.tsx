@@ -15,10 +15,11 @@ import getWebService from "../../../../modules/WebServices/WebServices";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { type CartesApiException } from "../../../../modules/jsonFetch";
 import { routes, useRoute } from "../../../../router/router";
-import "../../../../sass/pages/service_view.scss";
 import api from "../../../api";
 import DiffuseServiceTab from "./DiffuseServiceTab";
 import ManageStylesTab from "./ManageStylesTab";
+
+import "../../../../sass/pages/service_view.scss";
 
 type ServiceViewProps = {
     datastoreId: string;
