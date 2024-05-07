@@ -1,10 +1,9 @@
-import { FC, useCallback, useEffect, useMemo, useRef } from "react";
-
 import GetFeatureInfo from "geoportal-extensions-openlayers/src/OpenLayers/Controls/GetFeatureInfo";
 import LayerSwitcher from "geoportal-extensions-openlayers/src/OpenLayers/Controls/LayerSwitcher";
 import SearchEngine from "geoportal-extensions-openlayers/src/OpenLayers/Controls/SearchEngine";
 import Map from "ol/Map";
 import View from "ol/View";
+import { defaults as defaultControls } from "ol/control";
 import Attribution from "ol/control/Attribution";
 import { createOrUpdate } from "ol/extent";
 import { defaults as defaultInteractions } from "ol/interaction";
@@ -12,15 +11,20 @@ import BaseLayer from "ol/layer/Base";
 import TileLayer from "ol/layer/Tile";
 import { fromLonLat, transformExtent } from "ol/proj";
 import WMTS, { optionsFromCapabilities } from "ol/source/WMTS";
+import { FC, useCallback, useEffect, useMemo, useRef } from "react";
+
+import type { CartesStyle } from "../../@types/app";
+import { OfferingDetailResponseDtoTypeEnum } from "../../@types/entrepot";
 import olDefaults from "../../data/ol-defaults.json";
 import useCapabilities from "../../hooks/useCapabilities";
 import StyleHelper from "../../modules/Style/StyleHelper";
-import type { CartesStyle } from "../../@types/app";
-import { OfferingDetailResponseDtoTypeEnum } from "../../@types/entrepot";
 
 import "ol/ol.css";
+
 import "geoportal-extensions-openlayers/dist/GpPluginOpenLayers.css";
+
 import "../../sass/components/ol.scss";
+
 import "../../sass/components/map-view.scss";
 
 export interface MapInitial {
@@ -107,16 +111,17 @@ const RMap: FC<RMapProps> = ({ initial, currentStyle }) => {
     useEffect(() => {
         // Creation de la carte
         if (!mapRef.current) {
-            const controls = [
-                new Attribution({ collapsible: true, collapsed: true }),
-                new LayerSwitcher(),
+            const controls = defaultControls();
+            controls.push(new Attribution({ collapsible: true, collapsed: true }));
+            controls.push(new LayerSwitcher());
+            controls.push(
                 new SearchEngine({
                     collapsed: false,
                     displayAdvancedSearch: false,
                     apiKey: "essentiels",
                     zoomTo: "auto",
-                }),
-            ];
+                })
+            );
 
             if (gfinfo) {
                 controls.push(
