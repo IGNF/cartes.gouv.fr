@@ -31,7 +31,7 @@ class AppController extends AbstractController
     }
 
     #[Route(
-        '/catalogue/metadata/{fileIdentifier}',
+        '/redirect/catalogue/metadata/{fileIdentifier}',
         name: 'cartesgouvfr_catalogue_datasheet_view',
         methods: ['GET'],
         options: ['expose' => true]
