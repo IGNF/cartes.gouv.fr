@@ -1,6 +1,6 @@
 import SymfonyRouting from "../../modules/Routing";
 import { jsonFetch } from "../../modules/jsonFetch";
-import { Service } from "../../@types/app";
+import { ConfigurationTypeEnum, OfferingTypeEnum, Service } from "../../@types/app";
 import { OfferingDetailResponseDto, OfferingListResponseDto } from "../../@types/entrepot";
 
 const getService = (datastoreId: string, offeringId: string, otherOptions: RequestInit = {}) => {
@@ -31,11 +31,19 @@ const unpublishService = (datastoreId: string, offeringId: string) => {
     });
 };
 
+const getExistingLayerNames = (datastoreId: string, type: ConfigurationTypeEnum | OfferingTypeEnum, otherOptions: RequestInit = {}) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_service_get_existing_layer_names", { datastoreId, type });
+    return jsonFetch<string[]>(url, {
+        ...otherOptions,
+    });
+};
+
 const service = {
     getService,
     getOfferings,
     getOfferingsDetailed,
     unpublishService,
+    getExistingLayerNames,
 };
 
 export default service;

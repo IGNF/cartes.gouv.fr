@@ -11,7 +11,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { symToStr } from "tsafe/symToStr";
 import * as yup from "yup";
 
-import { EndpointTypeEnum, Service, ServiceFormValuesBaseType, StoredDataRelation, VectorDb } from "../../../../@types/app";
+import { ConfigurationTypeEnum, EndpointTypeEnum, Service, ServiceFormValuesBaseType, StoredDataRelation, VectorDb } from "../../../../@types/app";
 import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../components/Utils/LoadingText";
@@ -85,6 +85,8 @@ const STEPS = {
     ACCESSRESTRICTIONS: 5,
 };
 
+const commonValidation = new CommonSchemasValidation();
+
 /**
  * Formulaire general de création d'un service WFS
  */
@@ -148,9 +150,9 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
         enabled: !(createServiceMutation.isPending || editServiceMutation.isPending),
     });
 
-    const offeringsQuery = useQuery({
-        queryKey: RQKeys.datastore_offering_list(datastoreId),
-        queryFn: () => api.service.getOfferings(datastoreId),
+    const existingLayerNamesQuery = useQuery<string[], CartesApiException>({
+        queryKey: RQKeys.datastore_layernames_list(datastoreId, ConfigurationTypeEnum.WFS),
+        queryFn: ({ signal }) => api.service.getExistingLayerNames(datastoreId, ConfigurationTypeEnum.WFS, { signal }),
         refetchInterval: 30000,
         enabled: !(createServiceMutation.isPending || editServiceMutation.isPending),
     });
@@ -172,8 +174,6 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
         queryFn: ({ signal }) => api.metadata.getByDatasheetName(datastoreId, vectorDbQuery.data?.tags?.datasheet_name ?? "XX", { signal }),
         enabled: !!vectorDbQuery.data?.tags?.datasheet_name,
     });
-
-    const commonValidation = useMemo(() => new CommonSchemasValidation(offeringsQuery.data), [offeringsQuery.data]);
 
     // Definition du schema
     const schemas = {};
@@ -197,7 +197,11 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
         }),
     });
     schemas[STEPS.METADATAS_UPLOAD] = commonValidation.getMDUploadFileSchema();
-    schemas[STEPS.METADATAS_DESCRIPTION] = commonValidation.getMDDescriptionSchema(editMode, offeringQuery.data?.configuration.layer_name);
+    schemas[STEPS.METADATAS_DESCRIPTION] = commonValidation.getMDDescriptionSchema(
+        existingLayerNamesQuery.data,
+        editMode,
+        offeringQuery.data?.configuration.layer_name
+    );
     schemas[STEPS.METADATAS_ADDITIONALINFORMATIONS] = commonValidation.getMDAdditionalInfoSchema();
     schemas[STEPS.ACCESSRESTRICTIONS] = commonValidation.getAccessRestrictionSchema();
 

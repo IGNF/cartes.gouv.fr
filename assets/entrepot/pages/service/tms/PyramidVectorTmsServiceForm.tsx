@@ -9,7 +9,7 @@ import { declareComponentKeys } from "i18nifty";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 
-import { EndpointTypeEnum, Pyramid, Service, ServiceFormValuesBaseType } from "../../../../@types/app";
+import { ConfigurationTypeEnum, EndpointTypeEnum, Pyramid, Service, ServiceFormValuesBaseType } from "../../../../@types/app";
 import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../components/Utils/LoadingText";
@@ -27,6 +27,8 @@ import Description from "../metadatas/Description";
 import UploadMDFile from "../metadatas/UploadMDFile";
 
 export type PyramidVectorTmsServiceFormValuesType = ServiceFormValuesBaseType;
+
+const commonValidation = new CommonSchemasValidation();
 
 const STEPS = {
     METADATAS_UPLOAD: 1,
@@ -99,9 +101,9 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
         enabled: !(createServiceMutation.isPending || editServiceMutation.isPending),
     });
 
-    const offeringsQuery = useQuery({
-        queryKey: RQKeys.datastore_offering_list(datastoreId),
-        queryFn: () => api.service.getOfferings(datastoreId),
+    const existingLayerNamesQuery = useQuery<string[], CartesApiException>({
+        queryKey: RQKeys.datastore_layernames_list(datastoreId, ConfigurationTypeEnum.WMTSTMS),
+        queryFn: ({ signal }) => api.service.getExistingLayerNames(datastoreId, ConfigurationTypeEnum.WMTSTMS, { signal }),
         refetchInterval: 30000,
         enabled: !(createServiceMutation.isPending || editServiceMutation.isPending),
     });
@@ -124,12 +126,14 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
         enabled: !!pyramidQuery.data?.tags?.datasheet_name,
     });
 
-    const commonValidation = useMemo(() => new CommonSchemasValidation(offeringsQuery.data), [offeringsQuery.data]);
-
     // Definition du schema
     const schemas = {};
     schemas[STEPS.METADATAS_UPLOAD] = commonValidation.getMDUploadFileSchema();
-    schemas[STEPS.METADATAS_DESCRIPTION] = commonValidation.getMDDescriptionSchema(editMode, offeringQuery.data?.configuration.layer_name);
+    schemas[STEPS.METADATAS_DESCRIPTION] = commonValidation.getMDDescriptionSchema(
+        existingLayerNamesQuery.data,
+        editMode,
+        offeringQuery.data?.configuration.layer_name
+    );
     schemas[STEPS.METADATAS_ADDITIONALINFORMATIONS] = commonValidation.getMDAdditionalInfoSchema();
     schemas[STEPS.ACCESSRESTRICTIONS] = commonValidation.getAccessRestrictionSchema();
 

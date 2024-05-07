@@ -1,4 +1,3 @@
-import SldStyleParser from "geostyler-sld-parser";
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
@@ -6,13 +5,21 @@ import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import SldStyleParser from "geostyler-sld-parser";
 import { declareComponentKeys } from "i18nifty";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { symToStr } from "tsafe/symToStr";
 import * as yup from "yup";
 
-import { EndpointTypeEnum, type Service, type ServiceFormValuesBaseType, type StoredDataRelation, type VectorDb } from "../../../../@types/app";
+import {
+    ConfigurationTypeEnum,
+    EndpointTypeEnum,
+    type Service,
+    type ServiceFormValuesBaseType,
+    type StoredDataRelation,
+    type VectorDb,
+} from "../../../../@types/app";
 import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../components/Utils/LoadingText";
@@ -92,6 +99,8 @@ const createFormData = async (formValues: WmsVectorServiceFormValuesType) => {
     return fd;
 };
 
+const commonValidation = new CommonSchemasValidation();
+
 const STEPS = {
     TABLES_INFOS: 1,
     STYLE_FILE: 2,
@@ -170,9 +179,9 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
         enabled: !(createServiceMutation.isPending || editServiceMutation.isPending),
     });
 
-    const offeringsListQuery = useQuery({
-        queryKey: RQKeys.datastore_offering_list(datastoreId),
-        queryFn: () => api.service.getOfferings(datastoreId),
+    const existingLayerNamesQuery = useQuery<string[], CartesApiException>({
+        queryKey: RQKeys.datastore_layernames_list(datastoreId, ConfigurationTypeEnum.WMSVECTOR),
+        queryFn: ({ signal }) => api.service.getExistingLayerNames(datastoreId, ConfigurationTypeEnum.WMSVECTOR, { signal }),
         refetchInterval: 30000,
         enabled: !(createServiceMutation.isPending || editServiceMutation.isPending),
     });
@@ -194,8 +203,6 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
         queryFn: ({ signal }) => api.metadata.getByDatasheetName(datastoreId, vectorDbQuery.data?.tags?.datasheet_name ?? "XX", { signal }),
         enabled: !!vectorDbQuery.data?.tags?.datasheet_name,
     });
-
-    const commonValidation = useMemo(() => new CommonSchemasValidation(offeringsListQuery.data), [offeringsListQuery.data]);
 
     // Definition du schema
     const schemas = {};
@@ -225,7 +232,11 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
         }),
     });
     schemas[STEPS.METADATAS_UPLOAD] = commonValidation.getMDUploadFileSchema();
-    schemas[STEPS.METADATAS_DESCRIPTION] = commonValidation.getMDDescriptionSchema(editMode, offeringQuery.data?.configuration.layer_name);
+    schemas[STEPS.METADATAS_DESCRIPTION] = commonValidation.getMDDescriptionSchema(
+        existingLayerNamesQuery.data,
+        editMode,
+        offeringQuery.data?.configuration.layer_name
+    );
     schemas[STEPS.METADATAS_ADDITIONALINFORMATIONS] = commonValidation.getMDAdditionalInfoSchema();
     schemas[STEPS.ACCESSRESTRICTIONS] = commonValidation.getAccessRestrictionSchema();
 

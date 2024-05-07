@@ -22,6 +22,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Requirement\Requirement;
 
 #[Route(
     '/api/datastores/{datastoreId}/offerings',
@@ -56,7 +57,7 @@ class ServiceController extends AbstractController implements ApiControllerInter
         }
     }
 
-    #[Route('/{offeringId}', name: 'get_service', methods: ['GET'])]
+    #[Route('/{offeringId}', name: 'get_service', methods: ['GET'], requirements: ['offeringId' => Requirement::UUID_V4])]
     public function getService(string $datastoreId, string $offeringId): JsonResponse
     {
         try {
@@ -99,6 +100,28 @@ class ServiceController extends AbstractController implements ApiControllerInter
             }
 
             return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
+    #[Route('/layernames', name: 'get_existing_layer_names', methods: ['GET'])]
+    public function getExistingLayerNames(string $datastoreId, #[MapQueryParameter] string $type): JsonResponse
+    {
+        try {
+            $configurations = $this->configurationApiService->getAll($datastoreId, [
+                'type' => $type,
+            ]);
+            $offerings = $this->configurationApiService->getAllOfferings($datastoreId, [
+                'type' => $type,
+            ]);
+
+            $configLayerNames = array_map(fn ($config) => $config['layer_name'], $configurations);
+            $offeringLayerNames = array_map(fn ($offering) => $offering['layer_name'], $offerings);
+
+            $existingLayerNames = array_values(array_unique(array_merge([], $configLayerNames, $offeringLayerNames)));
+
+            return $this->json($existingLayerNames);
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }

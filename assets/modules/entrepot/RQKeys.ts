@@ -1,3 +1,5 @@
+import { ConfigurationTypeEnum, OfferingTypeEnum } from "../../@types/app";
+
 /**
  * Factory pour créer des query keys pour react-query
  */
@@ -24,6 +26,12 @@ const RQKeys = {
     datastore_datasheet_service_list: (datastoreId: string, dataName: string) => ["datastore", datastoreId, "datasheet", dataName, "services"],
 
     datastore_offering_list: (datastoreId: string): string[] => ["datastore", datastoreId, "offering"],
+    datastore_layernames_list: (datastoreId: string, configurationType: ConfigurationTypeEnum | OfferingTypeEnum): string[] => [
+        "datastore",
+        datastoreId,
+        "layernames",
+        configurationType,
+    ],
     datastore_offering: (datastoreId: string, offeringId: string): string[] => ["datastore", datastoreId, "offering", offeringId],
 
     datastore_annexe_list: (datastoreId: string): string[] => ["datastore", datastoreId, "annexe"],

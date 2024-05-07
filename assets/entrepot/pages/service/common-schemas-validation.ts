@@ -1,17 +1,11 @@
 import * as yup from "yup";
-import validations from "../../../validations";
-import { regex } from "../../../utils";
-import { OfferingListResponseDto } from "../../../@types/entrepot";
+
 import { getTranslation } from "../../../i18n/i18n";
+import { regex } from "../../../utils";
+import validations from "../../../validations";
 
 const { t: tValidMD } = getTranslation("ValidationMetadatas");
 export class CommonSchemasValidation {
-    _offeringList: OfferingListResponseDto[] | undefined;
-
-    constructor(offeringList: OfferingListResponseDto[] | undefined) {
-        this._offeringList = offeringList;
-    }
-
     getMDUploadFileSchema() {
         return yup.object().shape({
             metadata_file_content: yup.mixed().test({
@@ -24,7 +18,7 @@ export class CommonSchemasValidation {
         });
     }
 
-    getMDDescriptionSchema(editMode: boolean = false, oldTechnicalName?: string) {
+    getMDDescriptionSchema(existingLayerNames: string[] = [], editMode: boolean = false, oldTechnicalName?: string) {
         return yup
             .object({
                 technical_name: yup
@@ -35,15 +29,14 @@ export class CommonSchemasValidation {
                         name: "is-unique",
                         message: tValidMD("metadatas.technical_name_unicity_error"),
                         test: (technicalName) => {
-                            // récupération des noms des offerings existants, interdiction de prendre un nom qui fait partie de cette liste
-                            let technicalNameList = this._offeringList?.map((offering) => offering?.layer_name) ?? [];
+                            // interdiction de choisir un nom qui fait partie de la liste des layername déjà pris
 
-                            // si editMode est vraie, on autorise de prendre le nom de l'offering actuel
+                            // si editMode est vraie, on autorise de choisir le nom de l'offering actuel
                             if (editMode === true && oldTechnicalName !== undefined) {
-                                technicalNameList = technicalNameList.filter((name) => name !== oldTechnicalName);
+                                existingLayerNames = existingLayerNames.filter((name) => name !== oldTechnicalName);
                             }
 
-                            return !technicalNameList?.includes(technicalName);
+                            return !existingLayerNames?.includes(technicalName);
                         },
                     }),
                 public_name: yup.string().required(tValidMD("metadatas.public_name_error")),
