@@ -134,8 +134,7 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, vec
         }
 
         const values = getFormValues();
-        const formatted = formatForm(technicalName, values);
-        formatted["vectorDbId"] = vectorDbId;
+        const formatted = formatForm(technicalName, vectorDbId, values);
 
         setIsSubmitting(true);
 

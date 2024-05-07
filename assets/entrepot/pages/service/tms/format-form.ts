@@ -18,13 +18,14 @@ const getComposition = (attributes, zoomLevels) => {
     return composition;
 };
 
-const format = (technicalName, values) => {
+const format = (technicalName, vectorDbId, values) => {
     const composition = getComposition(values.table_attributes, values.table_zoom_levels);
 
     const result = {
-        technicalName: technicalName,
+        technical_name: technicalName,
         composition: composition,
         tippecanoe: values.tippecanoe,
+        vectordb_id: vectorDbId,
     };
     if (values.sample.is_sample === "true") {
         result["area"] = values.sample.area;

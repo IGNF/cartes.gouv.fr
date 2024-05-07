@@ -53,7 +53,7 @@ class PyramidController extends ServiceController implements ApiControllerInterf
             // TODO
             // $samplePyramidId = $request->query->get('samplePyramidId', null);
 
-            $vectordb = $this->storedDataApiService->get($datastoreId, $dto->vectorDbId);
+            $vectordb = $this->storedDataApiService->get($datastoreId, $dto->vectordb_id);
 
             // TODO Suppression de l'upload ?
 
@@ -85,9 +85,9 @@ class PyramidController extends ServiceController implements ApiControllerInterf
 
             $requestBody = [
                 'processing' => $apiEntrepotProcessings['create_vect_pyr'],
-                'inputs' => ['stored_data' => [$dto->vectorDbId]],
+                'inputs' => ['stored_data' => [$dto->vectordb_id]],
                 'output' => ['stored_data' => [
-                    'name' => $dto->technicalName,
+                    'name' => $dto->technical_name,
                     'storage_tags' => ['PYRAMIDE'],
                 ]],
                 'parameters' => $parameters,
@@ -97,7 +97,7 @@ class PyramidController extends ServiceController implements ApiControllerInterf
             $processingExecution = $this->processingApiService->addExecution($datastoreId, $requestBody);
             $pyramidId = $processingExecution['output']['stored_data']['_id'];
 
-            $this->storedDataApiService->addTags($datastoreId, $dto->vectorDbId, [
+            $this->storedDataApiService->addTags($datastoreId, $dto->vectordb_id, [
                 'pyramid_id' => $pyramidId,
             ]);
 
@@ -105,7 +105,7 @@ class PyramidController extends ServiceController implements ApiControllerInterf
                 CommonTags::DATASHEET_NAME => $vectordb['tags'][CommonTags::DATASHEET_NAME],
                 'upload_id' => $vectordb['tags']['upload_id'],
                 'proc_int_id' => $vectordb['tags']['proc_int_id'],
-                'vectordb_id' => $dto->vectorDbId,
+                'vectordb_id' => $dto->vectordb_id,
                 'proc_pyr_creat_id' => $processingExecution['_id'],
                 'is_sample' => is_null($dto->area) ? 'false' : 'true',
             ];
