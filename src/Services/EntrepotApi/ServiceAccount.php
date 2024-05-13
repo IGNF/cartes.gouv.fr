@@ -33,7 +33,7 @@ class ServiceAccount
         // L'id de la community liee au datastore "Bac à sable"
         $this->sandBoxCommunityId = $this->parameters->get('sandbox_community_id');
 
-        $this->apiClient = HttpClient::createForBaseUri($this->parameters->get('api_entrepot_url'), [
+        $this->apiClient = HttpClient::createForBaseUri($this->parameters->get('api_entrepot_url').'/', [
             'proxy' => $this->parameters->get('http_proxy'),
             'verify_peer' => false,
             'verify_host' => false,
