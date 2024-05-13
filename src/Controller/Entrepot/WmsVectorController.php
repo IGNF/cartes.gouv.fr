@@ -9,7 +9,7 @@ use App\Controller\ApiControllerInterface;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\CswMetadataHelper;
-use App\Services\EntrepotApi\CartesServiceApi;
+use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\MetadataApiService;
@@ -34,13 +34,13 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
         DatastoreApiService $datastoreApiService,
         private ConfigurationApiService $configurationApiService,
         private StoredDataApiService $storedDataApiService,
-        private CartesServiceApi $cartesServiceApi,
+        private CartesServiceApiService $cartesServiceApiService,
         private StaticApiService $staticApiService,
         protected Filesystem $filesystem,
         MetadataApiService $metadataApiService,
         CswMetadataHelper $cswMetadataHelper,
     ) {
-        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApi, $metadataApiService, $cswMetadataHelper);
+        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $metadataApiService, $cswMetadataHelper);
     }
 
     #[Route('', name: 'add', methods: ['POST'])]
@@ -120,7 +120,7 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
             $styleFilesByTable = $this->sendStyleFiles($datastoreId, $tablesNamesList, $files, $oldConfiguration);
 
             // suppression anciens configs et offering
-            $this->cartesServiceApi->wmsVectorUnpublish($datastoreId, $oldOffering, false);
+            $this->cartesServiceApiService->wmsVectorUnpublish($datastoreId, $oldOffering, false);
 
             // création de requête pour la config
             $configRequestBody = $this->getConfigRequestBody($data, $tablesNamesList, $styleFilesByTable, $storedDataId);

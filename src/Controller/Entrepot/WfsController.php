@@ -10,7 +10,7 @@ use App\Dto\WfsTableDTO;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\CswMetadataHelper;
-use App\Services\EntrepotApi\CartesServiceApi;
+use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\MetadataApiService;
@@ -32,10 +32,10 @@ class WfsController extends ServiceController implements ApiControllerInterface
         private ConfigurationApiService $configurationApiService,
         private StoredDataApiService $storedDataApiService,
         MetadataApiService $metadataApiService,
-        private CartesServiceApi $cartesServiceApi,
+        private CartesServiceApiService $cartesServiceApiService,
         CswMetadataHelper $cswMetadataHelper,
     ) {
-        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApi, $metadataApiService, $cswMetadataHelper);
+        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $metadataApiService, $cswMetadataHelper);
     }
 
     #[Route('/', name: 'add', methods: ['POST'])]
@@ -90,7 +90,7 @@ class WfsController extends ServiceController implements ApiControllerInterface
             $datasheetName = $oldConfiguration['tags'][CommonTags::DATASHEET_NAME];
 
             // suppression anciens configs et offering
-            $this->cartesServiceApi->wfsUnpublish($datastoreId, $oldOffering, false);
+            $this->cartesServiceApiService->wfsUnpublish($datastoreId, $oldOffering, false);
 
             // création de requête pour la config
             $configRequestBody = $this->getConfigRequestBody($dto, $storedDataId);

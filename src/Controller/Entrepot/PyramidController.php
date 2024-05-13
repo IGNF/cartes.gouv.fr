@@ -11,7 +11,7 @@ use App\Dto\Pyramid\PublishPyramidDTO;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\CswMetadataHelper;
-use App\Services\EntrepotApi\CartesServiceApi;
+use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\MetadataApiService;
@@ -38,12 +38,12 @@ class PyramidController extends ServiceController implements ApiControllerInterf
         private ConfigurationApiService $configurationApiService,
         private StoredDataApiService $storedDataApiService,
         private ProcessingApiService $processingApiService,
-        private CartesServiceApi $cartesServiceApi,
+        private CartesServiceApiService $cartesServiceApiService,
         private ParameterBagInterface $parameterBag,
         MetadataApiService $metadataApiService,
         CswMetadataHelper $cswMetadataHelper,
     ) {
-        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApi, $metadataApiService, $cswMetadataHelper);
+        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $metadataApiService, $cswMetadataHelper);
     }
 
     #[Route('/add', name: 'add', methods: ['POST'])]
@@ -175,7 +175,7 @@ class PyramidController extends ServiceController implements ApiControllerInterf
             $datasheetName = $pyramid['tags'][CommonTags::DATASHEET_NAME];
 
             // suppression anciens configs et offering
-            $this->cartesServiceApi->tmsUnpublish($datastoreId, $oldOffering, false);
+            $this->cartesServiceApiService->tmsUnpublish($datastoreId, $oldOffering, false);
 
             // création de requête pour la config
             $configRequestBody = $this->getConfigRequestBody($dto, $pyramid);

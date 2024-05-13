@@ -11,7 +11,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 /**
  * `Service` sur cartes.gouv.fr qui représente un `offering` et une `configuration` de l'`API Entrepôt`, ainsi que les fichiers de style (`styles`), `tms_metadata` et url de partage (`share_url`).
  */
-class CartesServiceApi
+class CartesServiceApiService
 {
     private HttpClientInterface $httpClient;
 
@@ -154,8 +154,6 @@ class CartesServiceApi
         if (true === $removeStyleFiles) {
             // TODO : supprimer les fichiers de styles en annexe qui sont référencés dans les tags/annexes de la configuration
         }
-
-        // TODO mettre à jour métadonnée
     }
 
     /**
@@ -189,8 +187,6 @@ class CartesServiceApi
                 $this->staticApiService->delete($datastoreId, $staticId);
             }
         }
-
-        // TODO mettre à jour métadonnée
     }
 
     /**
@@ -216,7 +212,5 @@ class CartesServiceApi
         if (true === $removeStyleFiles) {
             // TODO : supprimer les fichiers de styles en annexe qui sont référencés dans les tags/annexes de la configuration
         }
-
-        // TODO mettre à jour métadonnée
     }
 }

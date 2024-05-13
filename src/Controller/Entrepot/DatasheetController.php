@@ -9,7 +9,7 @@ use App\Controller\ApiControllerInterface;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\EntrepotApi\AnnexeApiService;
-use App\Services\EntrepotApi\CartesServiceApi;
+use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\MetadataApiService;
@@ -34,7 +34,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         private DatastoreApiService $datastoreApiService,
         private ConfigurationApiService $configurationApiService,
         private AnnexeApiService $annexeApiService,
-        private CartesServiceApi $cartesServiceApi,
+        private CartesServiceApiService $cartesServiceApiService,
         private MetadataApiService $metadataApiService,
     ) {
     }
@@ -207,7 +207,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         }
 
         foreach ($offerings as &$offering) {
-            $offering = $this->cartesServiceApi->getService($datastoreId, $offering['_id']);
+            $offering = $this->cartesServiceApiService->getService($datastoreId, $offering['_id']);
         }
 
         return $offerings;
@@ -222,7 +222,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             // suppr des services (config et offering)
             if (isset($datasheet['service_list'])) {
                 foreach ($datasheet['service_list'] as $offering) {
-                    $this->cartesServiceApi->unpublish($datastoreId, $offering['_id']);
+                    $this->cartesServiceApiService->unpublish($datastoreId, $offering['_id']);
                 }
             }
 

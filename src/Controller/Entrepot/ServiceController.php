@@ -13,7 +13,7 @@ use App\Entity\CswMetadata\CswMetadataLayer;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\CswMetadataHelper;
-use App\Services\EntrepotApi\CartesServiceApi;
+use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\MetadataApiService;
@@ -35,7 +35,7 @@ class ServiceController extends AbstractController implements ApiControllerInter
     public function __construct(
         private DatastoreApiService $datastoreApiService,
         private ConfigurationApiService $configurationApiService,
-        private CartesServiceApi $cartesServiceApi,
+        private CartesServiceApiService $cartesServiceApiService,
         private MetadataApiService $metadataApiService,
         private CswMetadataHelper $cswMetadataHelper,
     ) {
@@ -61,7 +61,7 @@ class ServiceController extends AbstractController implements ApiControllerInter
     public function getService(string $datastoreId, string $offeringId): JsonResponse
     {
         try {
-            $offering = $this->cartesServiceApi->getService($datastoreId, $offeringId);
+            $offering = $this->cartesServiceApiService->getService($datastoreId, $offeringId);
 
             return $this->json($offering);
         } catch (ApiException $ex) {
@@ -76,7 +76,7 @@ class ServiceController extends AbstractController implements ApiControllerInter
             $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId);
             $configuration = $this->configurationApiService->get($datastoreId, $offering['configuration']['_id']);
 
-            $this->cartesServiceApi->unpublish($datastoreId, $offeringId);
+            $this->cartesServiceApiService->unpublish($datastoreId, $offeringId);
 
             $datasheetName = $configuration['tags'][CommonTags::DATASHEET_NAME];
 

@@ -15,14 +15,12 @@ use Twig\Environment as Twig;
 
 class CswMetadataHelper
 {
-    private Filesystem $fs;
-
     public function __construct(
         private Twig $twig,
         private ParameterBagInterface $params,
         private SerializerInterface $serializer,
+        private Filesystem $fs
     ) {
-        $this->fs = new Filesystem();
     }
 
     public function toArray(CswMetadata $metadata): array
