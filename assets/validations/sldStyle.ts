@@ -86,7 +86,13 @@ export default class SldStyleWmsVectorValidator {
                 if (invalidXmlSyntax) {
                     return ctx.createError({ message: tSld("file_invalid") });
                 } else {
-                    return ctx.createError({ message: JSON.stringify(errors) });
+                    try {
+                        return ctx.createError({ message: tSld("geostyler_parse_error", { geostylerError: errors.map((e) => e.message).join(" ") }) });
+                    } catch (e) {
+                        console.error(errors, e);
+
+                        return ctx.createError({ message: tSld("geostyler_unexpected_error", { geostylerError: JSON.stringify(errors) }) });
+                    }
                 }
             }
 
@@ -135,6 +141,8 @@ export const { i18n } = declareComponentKeys<
     | "no_style_declared"
     | "file_missing_corrupted_or_reading_error"
     | { K: "rules_with_no_symbolizers"; P: { ruleNames: string[] }; R: string }
+    | { K: "geostyler_parse_error"; P: { geostylerError: string }; R: string }
+    | { K: "geostyler_unexpected_error"; P: { geostylerError: string }; R: string }
 >()("sldStyleValidation");
 
 export const sldStyleValidationFrTranslations: Translations<"fr">["sldStyleValidation"] = {
@@ -154,6 +162,8 @@ export const sldStyleValidationFrTranslations: Translations<"fr">["sldStyleValid
             plural ? "n'ont" : "n'a"
         } pas de symbolisation spécifiée.`;
     },
+    geostyler_parse_error: ({ geostylerError }) => `Erreur de lecture : ${geostylerError}`,
+    geostyler_unexpected_error: ({ geostylerError }) => `Une erreur inattendue est survenue : ${geostylerError}`,
 };
 
 export const sldStyleValidationEnTranslations: Translations<"en">["sldStyleValidation"] = {
@@ -167,4 +177,6 @@ export const sldStyleValidationEnTranslations: Translations<"en">["sldStyleValid
     no_style_declared: undefined,
     file_missing_corrupted_or_reading_error: undefined,
     rules_with_no_symbolizers: undefined,
+    geostyler_parse_error: undefined,
+    geostyler_unexpected_error: undefined,
 };
