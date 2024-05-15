@@ -1,10 +1,9 @@
 import { datastoreNavItemsFrTranslations } from "../../config/datastoreNavItems";
 import { navItemsFrTranslations } from "../../config/navItems";
-import { TMSStyleFilesManagerFrTranslations } from "../../modules/Style/TMSStyleFilesManager";
 import { AddMemberFrTranslations } from "../../entrepot/pages/communities/AddMember";
 import { CommunityMembersFrTranslations } from "../../entrepot/pages/communities/CommunityMembers";
-import { contactFrTranslations } from "../../pages/contact/Contact";
 import { DashboardProFrTranslations } from "../../entrepot/pages/dashboard/DashboardPro";
+import { DatasheetListFrTranslations } from "../../entrepot/pages/datasheet/DatasheetList/DatasheetList";
 import { PyramidListItemFrTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidList/PyramidListItem";
 import { VectorDbListItemFrTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasetListTab/VectorDbList/VectorDbListItem";
 import { DatasheetViewFrTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasheetView";
@@ -22,14 +21,15 @@ import { MyAccessKeysFrTranslations } from "../../entrepot/pages/users/MyAccessK
 import { UserKeyFrTranslations } from "../../entrepot/pages/users/keys/UserKeyTr";
 import { UserKeysListTabFrTranslations } from "../../entrepot/pages/users/keys/UserKeysListTab";
 import { PermissionsFrTranslations } from "../../entrepot/pages/users/permissions/PermissionsTr";
+import { EspaceCoCommunitiesFrTranslations } from "../../espaceco/pages/communities/EspaceCoCommunitiesTr";
+import { TMSStyleFilesManagerFrTranslations } from "../../modules/Style/TMSStyleFilesManager";
+import { contactFrTranslations } from "../../pages/contact/Contact";
 import { mapboxStyleValidationFrTranslations } from "../../validations/MapboxStyleValidator";
-import { sldStyleValidationFrTranslations } from "../../validations/sldStyle";
+import { SldStyleValidationErrorsFrTranslations } from "../../validations/SldStyleValidationErrorsTr";
 import { commonFrTranslations } from "../Common";
 import { RightsFrTranslations } from "../Rights";
 import { StyleFrTranslations } from "../Style";
 import type { Translations } from "../i18n";
-import { EspaceCoCommunitiesFrTranslations } from "../../espaceco/pages/communities/EspaceCoCommunitiesTr";
-import { DatasheetListFrTranslations } from "../../entrepot/pages/datasheet/DatasheetList/DatasheetList";
 
 export const translations: Translations<"fr"> = {
     Common: commonFrTranslations,
@@ -51,7 +51,7 @@ export const translations: Translations<"fr"> = {
     VectorDbListItem: VectorDbListItemFrTranslations,
     PyramidListItem: PyramidListItemFrTranslations,
     DatasheetView: DatasheetViewFrTranslations,
-    sldStyleValidation: sldStyleValidationFrTranslations,
+    SldStyleValidationErrors: SldStyleValidationErrorsFrTranslations,
     mapboxStyleValidation: mapboxStyleValidationFrTranslations,
     TMSStyleFilesManager: TMSStyleFilesManagerFrTranslations,
     DatastoreManageStorage: DatastoreManageStorageFrTranslations,

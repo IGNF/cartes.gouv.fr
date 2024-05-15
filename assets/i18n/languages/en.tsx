@@ -23,13 +23,13 @@ import { UserKeyEnTranslations } from "../../entrepot/pages/users/keys/UserKeyTr
 import { UserKeysListTabEnTranslations } from "../../entrepot/pages/users/keys/UserKeysListTab";
 import { PermissionsEnTranslations } from "../../entrepot/pages/users/permissions/PermissionsTr";
 import { mapboxStyleValidationEnTranslations } from "../../validations/MapboxStyleValidator";
-import { sldStyleValidationEnTranslations } from "../../validations/sldStyle";
 import { commonEnTranslations } from "../Common";
 import { RightsEnTranslations } from "../Rights";
 import { StyleEnTranslations } from "../Style";
 import type { Translations } from "../i18n";
 import { EspaceCoCommunitiesEnTranslations } from "../../espaceco/pages/communities/EspaceCoCommunitiesTr";
 import { DatasheetListEnTranslations } from "../../entrepot/pages/datasheet/DatasheetList/DatasheetList";
+import { SldStyleValidationErrorsEnTranslations } from "../../validations/SldStyleValidationErrorsTr";
 
 export const translations: Translations<"en"> = {
     Common: commonEnTranslations,
@@ -51,7 +51,7 @@ export const translations: Translations<"en"> = {
     VectorDbListItem: VectorDbListItemEnTranslations,
     PyramidListItem: PyramidListItemFrTranslations,
     DatasheetView: DatasheetViewEnTranslations,
-    sldStyleValidation: sldStyleValidationEnTranslations,
+    SldStyleValidationErrors: SldStyleValidationErrorsEnTranslations,
     mapboxStyleValidation: mapboxStyleValidationEnTranslations,
     TMSStyleFilesManager: TMSStyleFilesManagerEnTranslations,
     DatastoreManageStorage: DatastoreManageStorageEnTranslations,

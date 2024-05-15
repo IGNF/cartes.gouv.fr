@@ -2,6 +2,10 @@ import { TestContext, ValidationError } from "yup";
 import StyleValidator from "./StyleValidator";
 import SldStyleParser from "geostyler-sld-parser";
 import { Service, StyleFormat } from "../@types/app";
+import { getTranslation } from "../i18n/i18n";
+import { SLD_ACCEPTED_VERSIONS } from "./SldStyleValidationErrorsTr";
+
+const { t: tSld } = getTranslation("SldStyleValidationErrors");
 
 export default class SldStyleValidator extends StyleValidator {
     constructor(service: Service, format: StyleFormat) {
@@ -22,12 +26,12 @@ export default class SldStyleValidator extends StyleValidator {
         const version = xmlDoc.getElementsByTagName("StyledLayerDescriptor")[0].attributes?.["version"]?.nodeValue ?? "";
 
         if (version === "") {
-            return ctx.createError({ message: "sld_version_missing" });
-        } else if (version !== "1.0.0") {
-            return ctx.createError({ message: "sld_version_unaccepted" });
+            return ctx.createError({ message: tSld("sld_version_missing") });
+        } else if (!SLD_ACCEPTED_VERSIONS.includes(version)) {
+            return ctx.createError({ message: tSld("sld_version_unaccepted", { version }) });
         }
 
-        const sldParser = new SldStyleParser({ sldVersion: "1.0.0" });
+        const sldParser = new SldStyleParser({ sldVersion: version });
         const result = await sldParser.readStyle(styleString);
 
         const { output, warnings, errors, unsupportedProperties } = result;
@@ -36,7 +40,7 @@ export default class SldStyleValidator extends StyleValidator {
             const invalidXmlSyntax = !!errors.find((e) => e instanceof TypeError);
 
             if (invalidXmlSyntax) {
-                return ctx.createError({ message: "xml_invalid" });
+                return ctx.createError({ message: tSld("file_invalid") });
             } else {
                 return ctx.createError({ message: JSON.stringify(errors) });
             }
@@ -52,16 +56,16 @@ export default class SldStyleValidator extends StyleValidator {
 
         if (output) {
             if (output?.name === "") {
-                return ctx.createError({ message: "field_name_invalid_or_unspecified" });
+                return ctx.createError({ message: tSld("field_name_invalid_or_unspecified") });
             }
 
             if (output.rules.length === 0) {
-                return ctx.createError({ message: "no_style_declared" });
+                return ctx.createError({ message: tSld("no_style_declared") });
             }
 
             const rulesWithNoSymbolizers = output.rules.filter((rule) => rule.symbolizers.length === 0);
             if (rulesWithNoSymbolizers.length > 0) {
-                return ctx.createError({ message: "rules_with_no_symbolizers" });
+                return ctx.createError({ message: tSld("rules_with_no_symbolizers", { ruleNames: rulesWithNoSymbolizers.map((rule) => rule.name) }) });
             }
         }
 

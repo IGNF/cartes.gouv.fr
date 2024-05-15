@@ -38,7 +38,7 @@ export type ComponentKey =
     | typeof import("../entrepot/pages/datasheet/DatasheetView/DatasheetView").i18n
     | typeof import("../config/navItems").i18n
     | typeof import("../config/datastoreNavItems").i18n
-    | typeof import("../validations/sldStyle").i18n
+    | typeof import("../validations/SldStyleValidationErrorsTr").i18n
     | typeof import("../validations/MapboxStyleValidator").i18n
     | typeof import("../modules/Style/TMSStyleFilesManager").i18n
     | typeof import("../entrepot/pages/service/wms-vector/WmsVectorServiceForm").i18n
