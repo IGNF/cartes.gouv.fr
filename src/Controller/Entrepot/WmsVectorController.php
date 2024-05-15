@@ -8,6 +8,7 @@ use App\Constants\EntrepotApi\StaticFileTypes;
 use App\Controller\ApiControllerInterface;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
+use App\Services\CapabilitiesService;
 use App\Services\CswMetadataHelper;
 use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
@@ -36,11 +37,12 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
         private StoredDataApiService $storedDataApiService,
         private CartesServiceApiService $cartesServiceApiService,
         private StaticApiService $staticApiService,
+        private CapabilitiesService $capabilitiesService,
         protected Filesystem $filesystem,
         MetadataApiService $metadataApiService,
         CswMetadataHelper $cswMetadataHelper,
     ) {
-        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $metadataApiService, $cswMetadataHelper);
+        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $metadataApiService, $capabilitiesService, $cswMetadataHelper);
     }
 
     #[Route('', name: 'add', methods: ['POST'])]
@@ -88,6 +90,11 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
             $data['languages'] = json_decode($data['languages'], true);
             $data['category'] = json_decode($data['category'], true);
             $this->createOrUpdateMetadata($data, $datastoreId, $datasheetName);
+
+            // Création ou mise à jour du capabilities
+            try {
+                $this->capabilitiesService->createOrUpdate($datastoreId, $endpoint, $offering['urls'][0]['url']);
+            } catch(\Exception $e) {}
 
             return $this->json($offering);
         } catch (ApiException $ex) {

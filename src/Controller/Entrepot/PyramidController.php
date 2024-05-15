@@ -10,6 +10,7 @@ use App\Dto\Pyramid\CompositionDTO;
 use App\Dto\Pyramid\PublishPyramidDTO;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
+use App\Services\CapabilitiesService;
 use App\Services\CswMetadataHelper;
 use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
@@ -41,9 +42,10 @@ class PyramidController extends ServiceController implements ApiControllerInterf
         private CartesServiceApiService $cartesServiceApiService,
         private ParameterBagInterface $parameterBag,
         MetadataApiService $metadataApiService,
+        CapabilitiesService $capabilitiesService,
         CswMetadataHelper $cswMetadataHelper,
     ) {
-        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $metadataApiService, $cswMetadataHelper);
+        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $metadataApiService, $capabilitiesService, $cswMetadataHelper);
     }
 
     #[Route('/add', name: 'add', methods: ['POST'])]

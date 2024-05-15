@@ -12,6 +12,7 @@ use App\Entity\CswMetadata\CswMetadata;
 use App\Entity\CswMetadata\CswMetadataLayer;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
+use App\Services\CapabilitiesService;
 use App\Services\CswMetadataHelper;
 use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
@@ -37,6 +38,7 @@ class ServiceController extends AbstractController implements ApiControllerInter
         private ConfigurationApiService $configurationApiService,
         private CartesServiceApiService $cartesServiceApiService,
         private MetadataApiService $metadataApiService,
+        private CapabilitiesService $capabilitiesService,
         private CswMetadataHelper $cswMetadataHelper,
     ) {
     }
@@ -73,6 +75,8 @@ class ServiceController extends AbstractController implements ApiControllerInter
     public function unpublishService(string $datastoreId, string $offeringId): Response
     {
         try {
+            $datastore = $this->datastoreApiService->get($datastoreId);
+
             $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId);
             $configuration = $this->configurationApiService->get($datastoreId, $offering['configuration']['_id']);
 
@@ -98,6 +102,17 @@ class ServiceController extends AbstractController implements ApiControllerInter
                     $this->metadataApiService->replaceFile($datastoreId, $apiMetadata['_id'], $xmlFilePath);
                 }
             }
+
+            // Mise a jour du capabilities
+            try {
+                // Recherche du endpoint
+                $endpoints = array_filter($datastore['endpoints'], function($ep) use ($offering) {
+                    return $ep['endpoint']['_id'] === $offering['endpoint']['_id'];
+                });
+                if (count($endpoints) == 1) {
+                    $this->capabilitiesService->createOrUpdate($datastoreId, $endpoints[0], $offering['urls'][0]['url']);
+                } 
+            } catch(\Exception $e) {}
 
             return new JsonResponse(null, Response::HTTP_NO_CONTENT);
         } catch (ApiException $ex) {
