@@ -4,7 +4,6 @@ namespace App\Services\EntrepotApi;
 
 use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationTypes;
-use App\Constants\EntrepotApi\OfferingTypes;
 use App\Entity\CswMetadata\CswHierarchyLevel;
 use App\Entity\CswMetadata\CswLanguage;
 use App\Entity\CswMetadata\CswMetadata;
@@ -208,9 +207,17 @@ class CartesMetadataApiService
 
                 switch ($configuration['type']) {
                     case ConfigurationTypes::WFS:
-                    case ConfigurationTypes::WMSVECTOR:
-                        $subLayers = $this->getSubLayers($configuration, $offering, $serviceEndpoint['endpoint']['urls'][0]['url']);
+                        $subLayers = $this->getWfsSubLayers($configuration, $offering, $serviceEndpoint['endpoint']['urls'][0]['url']);
                         $layers = array_merge($layers, $subLayers);
+
+                        break;
+
+                    case ConfigurationTypes::WMSVECTOR:
+                        $layerName = $offering['layer_name'];
+                        $endpointType = 'OGC:WMS';
+                        $getCapUrl = $this->capabilitiesService->getGetCapUrl($serviceEndpoint['endpoint']['urls'][0]['url'], $offering['urls'][0]['url'], 'WMS');
+
+                        $layers[] = new CswMetadataLayer($layerName, $endpointType, $getCapUrl, $offering['_id']);
                         break;
 
                     case ConfigurationTypes::WMTSTMS:
@@ -238,28 +245,14 @@ class CartesMetadataApiService
      *
      * @return array<CswMetadataLayer>
      */
-    private function getSubLayers(array $configuration, array $offering, string $serviceEndpointUrl): array
+    private function getWfsSubLayers(array $configuration, array $offering, string $serviceEndpointUrl): array
     {
         $configRelations = $configuration['type_infos']['used_data'][0]['relations'];
 
         $relationLayers = array_map(function ($relation) use ($offering, $serviceEndpointUrl) {
-            $layerName = null;
-            $endpointType = null;
-            $getCapUrl = null;
-
-            switch ($offering['type']) {
-                case OfferingTypes::WFS:
-                    $layerName = sprintf('%s:%s', $offering['layer_name'], $relation['native_name']);
-                    $endpointType = 'OGC:WFS';
-                    $getCapUrl = $this->capabilitiesService->getGetCapUrl($serviceEndpointUrl, $offering['urls'][0]['url'], 'WFS');
-                    break;
-
-                case OfferingTypes::WMSVECTOR:
-                    $layerName = sprintf('%s:%s', $offering['layer_name'], $relation['name']);
-                    $endpointType = 'OGC:WMS';
-                    $getCapUrl = $this->capabilitiesService->getGetCapUrl($serviceEndpointUrl, $offering['urls'][0]['url'], 'WMS');
-                    break;
-            }
+            $layerName = sprintf('%s:%s', $offering['layer_name'], $relation['native_name']);
+            $endpointType = 'OGC:WFS';
+            $getCapUrl = $this->capabilitiesService->getGetCapUrl($serviceEndpointUrl, $offering['urls'][0]['url'], 'WFS');
 
             return new CswMetadataLayer($layerName, $endpointType, $getCapUrl, $offering['_id']);
         }, $configRelations);

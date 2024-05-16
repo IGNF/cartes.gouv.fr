@@ -65,7 +65,7 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                                 priority="secondary"
                                 onClick={toggleShowDescription}
                             />
-                            {service.configuration.name}
+                            {service.layer_name}
                         </div>
                     </div>
 
