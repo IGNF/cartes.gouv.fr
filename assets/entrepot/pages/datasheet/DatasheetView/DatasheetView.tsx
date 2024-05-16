@@ -131,7 +131,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                                     {
                                         label: t("tab_label.metadata"),
                                         isDefault: route.params["activeTab"] === "metadata",
-                                        content: <MetadataTab datastoreId={datastoreId} metadataQuery={metadataQuery} />,
+                                        content: <MetadataTab datastoreId={datastoreId} datasheet={datasheetQuery?.data} metadataQuery={metadataQuery} />,
                                     },
                                     {
                                         label: t("tab_label.datasets", {

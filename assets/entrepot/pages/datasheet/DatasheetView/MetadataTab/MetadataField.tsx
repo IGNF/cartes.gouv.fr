@@ -3,7 +3,7 @@ import MDEditor from "@uiw/react-md-editor";
 import { CSSProperties, FC, ReactNode } from "react";
 
 type MetadataFieldProps = {
-    title: ReactNode;
+    title?: ReactNode;
     content: string | ReactNode;
     hintText?: ReactNode;
     markdown?: boolean;
@@ -19,27 +19,31 @@ const customStyle: CSSProperties = {
     padding: "10px 20px",
 };
 
-const MetadataField: FC<MetadataFieldProps> = ({ title, content: value, hintText, markdown }) => {
+const MetadataField: FC<MetadataFieldProps> = ({ title, content, hintText, markdown }) => {
     return (
         <div className={fr.cx("fr-mb-3w")}>
-            <p className={fr.cx("fr-m-0", "fr-text--lg")}>
-                <strong>{title}</strong>
-            </p>
-            {hintText && <p className={fr.cx("fr-m-0", "fr-text--sm", "fr-text--light")}>{hintText}</p>}
+            {title && (
+                <>
+                    <p className={fr.cx("fr-m-0", "fr-text--lg")}>
+                        <strong>{title}</strong>
+                    </p>
+                    {hintText && <p className={fr.cx("fr-m-0", "fr-text--sm", "fr-text--light")}>{hintText}</p>}
+                </>
+            )}
 
-            {markdown && typeof value === "string" ? (
+            {markdown && typeof content === "string" ? (
                 <MDEditor.Markdown
                     className={fr.cx()}
-                    source={value}
+                    source={content}
                     style={customStyle}
                     components={{
                         a: (props) => <a target="_blank" rel="noreferrer" {...props} />,
                     }}
                 />
-            ) : typeof value === "string" ? (
-                <p className={fr.cx("fr-m-0")}>{value}</p>
+            ) : typeof content === "string" ? (
+                <p className={fr.cx("fr-m-0")}>{content}</p>
             ) : (
-                value
+                content
             )}
         </div>
     );

@@ -12,33 +12,39 @@ import VectorSource from "ol/source/Vector";
 import WMTS, { optionsFromCapabilities } from "ol/source/WMTS";
 import { FC, useEffect, useMemo, useRef } from "react";
 
-import { Geometry as EntrepotGeometry } from "../../../../../@types/entrepot";
-import olDefaults from "../../../../../data/ol-defaults.json";
-import useCapabilities from "../../../../../hooks/useCapabilities";
+import { Geometry as EntrepotGeometry } from "../../@types/entrepot";
+import olDefaults from "../../data/ol-defaults.json";
+import useCapabilities from "../../hooks/useCapabilities";
 
 import "ol/ol.css";
 
 import "geoportal-extensions-openlayers/dist/GpPluginOpenLayers.css";
-import "../../../../../sass/components/map-view.scss";
-import "../../../../../sass/components/ol.scss";
+import "../../sass/components/map-view.scss";
+import "../../sass/components/ol.scss";
 
 type ExtentMapProps = {
-    extent?: EntrepotGeometry;
+    extents?: EntrepotGeometry | EntrepotGeometry[];
 };
 
-const ExtentMap: FC<ExtentMapProps> = ({ extent }) => {
+const ExtentMap: FC<ExtentMapProps> = ({ extents }) => {
     const mapTargetRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<Map>();
 
     const { data: capabilities } = useCapabilities();
 
     const extentLayer = useMemo(() => {
-        if (!extent) return;
+        if (!extents) return;
 
-        const extentFeatures = new GeoJSON({
-            dataProjection: "EPSG:4326",
-            featureProjection: "EPSG:3857",
-        }).readFeatures(extent);
+        const _extents = Array.isArray(extents) ? extents : [extents];
+
+        const extentFeatures = _extents
+            .map((ext) =>
+                new GeoJSON({
+                    dataProjection: "EPSG:4326",
+                    featureProjection: "EPSG:3857",
+                }).readFeatures(ext)
+            )
+            .flat();
 
         const extentSource = new VectorSource({
             features: extentFeatures,
@@ -47,7 +53,7 @@ const ExtentMap: FC<ExtentMapProps> = ({ extent }) => {
         return new VectorLayer({
             source: extentSource,
         });
-    }, [extent]);
+    }, [extents]);
 
     const bgLayer = useMemo(() => {
         if (!capabilities) return;

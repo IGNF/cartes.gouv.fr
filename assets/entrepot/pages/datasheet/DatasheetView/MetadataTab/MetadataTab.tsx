@@ -4,9 +4,10 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import { CallOut } from "@codegouvfr/react-dsfr/CallOut";
 import Tag from "@codegouvfr/react-dsfr/Tag";
 import { UseQueryResult } from "@tanstack/react-query";
-import { FC } from "react";
+import { FC, useMemo } from "react";
 
-import { Metadata } from "../../../../../@types/app";
+import { DatasheetDetailed, Metadata, StoredData } from "../../../../../@types/app";
+import ExtentMap from "../../../../../components/Utils/ExtentMap";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import TextCopyToClipboard from "../../../../../components/Utils/TextCopyToClipboard";
 import { useTranslation } from "../../../../../i18n/i18n";
@@ -16,12 +17,18 @@ import MetadataField from "./MetadataField";
 
 type MetadataTabProps = {
     datastoreId: string;
+    datasheet?: DatasheetDetailed;
     metadataQuery: UseQueryResult<Metadata, CartesApiException>;
 };
-const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, metadataQuery }) => {
+const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, datasheet, metadataQuery }) => {
     const { t: tDatasheet } = useTranslation("DatasheetView");
 
     const { data: metadata } = metadataQuery;
+
+    const storedDataList: StoredData[] = useMemo(
+        () => [...(datasheet?.vector_db_list ?? []), ...(datasheet?.pyramid_list ?? [])],
+        [datasheet?.vector_db_list, datasheet?.pyramid_list]
+    );
 
     return (
         <>
@@ -78,11 +85,14 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, metadataQuery }) => {
                             />
                         </Accordion>
 
-                        <Accordion titleAs="h2" defaultExpanded={true} label={"Délimitation géographique"}>
-                            <MetadataField title={"Délimitation géographique (localisation physique de la donnée)"} content={"A venir"} />
-                            <MetadataField title={"Région"} content={"A venir"} />
-                            <MetadataField title={"Département"} content={"A venir"} />
-                            <MetadataField title={"Commune"} content={"A venir"} />
+                        <Accordion titleAs="h2" defaultExpanded={true} label={"Délimitation géographique (localisation physique de la donnée)"}>
+                            <MetadataField
+                                content={
+                                    storedDataList.length > 0 && (
+                                        <ExtentMap extents={storedDataList.map((sd) => sd.extent).filter((extent) => extent !== undefined)} />
+                                    )
+                                }
+                            />
                         </Accordion>
 
                         <Accordion titleAs="h2" defaultExpanded={true} label={"Référence temporelle"}>

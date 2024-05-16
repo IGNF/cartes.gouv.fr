@@ -5,13 +5,13 @@ import { UseQueryResult, useQuery } from "@tanstack/react-query";
 import { FC, Fragment, useMemo } from "react";
 
 import { Pyramid, StoredDataTypeEnum, VectorDb } from "../../../../../@types/app";
+import ExtentMap from "../../../../../components/Utils/ExtentMap";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../../modules/jsonFetch";
 import { niceBytes } from "../../../../../utils";
 import api from "../../../../api";
 import ReportStatusBadge from "../ReportTab/ReportStatusBadge";
 import ReportTab from "../ReportTab/ReportTab";
-import ExtentMap from "./ExtentMap";
 
 type PreviewTabProps = {
     datastoreId: string;
@@ -84,7 +84,7 @@ const PreviewTab: FC<PreviewTabProps> = ({ datastoreId, reportQuery }) => {
 
             {(storedData?.extent ?? vectorDbQuery.data?.extent) && (
                 <Accordion titleAs="h2" label="Emprise" defaultExpanded={true}>
-                    <ExtentMap extent={storedData?.extent ?? vectorDbQuery.data?.extent} />
+                    <ExtentMap extents={storedData?.extent ?? vectorDbQuery.data?.extent} />
                 </Accordion>
             )}
         </>
