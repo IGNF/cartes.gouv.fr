@@ -78,7 +78,7 @@ class CswMetadataHelper
         $keywordsList = array_map(fn (\DOMElement $keyword) => $keyword->textContent, iterator_to_array($keywordsNodesList));
 
         /** @var \DOMNodeList<\DOMElement> $layersNodesList */
-        $layersNodesList = $xpath->query('/gmd:MD_Metadata/gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine');
+        $layersNodesList = $xpath->query('/gmd:MD_Metadata/gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine[@type="offering"]');
 
         $layersList = array_map(function (\DOMElement $layer) {
             /** @var \DOMElement $onlineEl */
@@ -93,7 +93,7 @@ class CswMetadataHelper
         }, iterator_to_array($layersNodesList));
 
         $cswMetadata->fileIdentifier = $xpath->query('/gmd:MD_Metadata/gmd:fileIdentifier/gco:CharacterString')->item(0)->textContent;
-        $cswMetadata->hierarchyLevel = CswHierarchyLevel::from(trim($xpath->query('/gmd:MD_Metadata/gmd:hierarchyLevel/gmd:MD_ScopeCode')->item(0)->textContent));
+        $cswMetadata->hierarchyLevel = CswHierarchyLevel::tryFrom(trim($xpath->query('/gmd:MD_Metadata/gmd:hierarchyLevel/gmd:MD_ScopeCode')->item(0)->textContent));
 
         $cswMetadata->language = new CswLanguage(
             $xpath->query('/gmd:MD_Metadata/gmd:language/gmd:LanguageCode/@codeListValue')->item(0)->textContent,
@@ -111,7 +111,7 @@ class CswMetadataHelper
 
         $cswMetadata->layers = $layersList;
 
-        return $cswMetadata;
+        return $this->trim($cswMetadata);
     }
 
     public function saveToFile(CswMetadata $cswMetadata): string
@@ -125,5 +125,30 @@ class CswMetadataHelper
         $this->fs->dumpFile($filePath, $content);
 
         return $filePath;
+    }
+
+    private function trim(CswMetadata $cswMetadata): CswMetadata
+    {
+        $properties = get_object_vars($cswMetadata);
+
+        foreach ($properties as $property => $value) {
+            if (is_string($value)) {
+                $cswMetadata->$property = trim($value);
+            }
+
+            if (is_array($value)) {
+                $cswMetadata->$property = $this->trimStringArray($value);
+            }
+        }
+
+        return $cswMetadata;
+    }
+
+    /**
+     * @param array<mixed> $array
+     */
+    private function trimStringArray(array $array): array
+    {
+        return array_map(fn ($value) => is_string($value) ? trim($value) : $value, $array);
     }
 }

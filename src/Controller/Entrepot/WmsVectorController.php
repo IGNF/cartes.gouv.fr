@@ -9,11 +9,10 @@ use App\Controller\ApiControllerInterface;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\CapabilitiesService;
-use App\Services\CswMetadataHelper;
+use App\Services\EntrepotApi\CartesMetadataApiService;
 use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
-use App\Services\EntrepotApi\MetadataApiService;
 use App\Services\EntrepotApi\StaticApiService;
 use App\Services\EntrepotApi\StoredDataApiService;
 use Symfony\Component\Filesystem\Filesystem;
@@ -39,10 +38,9 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
         private StaticApiService $staticApiService,
         private CapabilitiesService $capabilitiesService,
         protected Filesystem $filesystem,
-        MetadataApiService $metadataApiService,
-        CswMetadataHelper $cswMetadataHelper,
+        private CartesMetadataApiService $cartesMetadataApiService,
     ) {
-        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $metadataApiService, $capabilitiesService, $cswMetadataHelper);
+        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $capabilitiesService, $cartesMetadataApiService);
     }
 
     #[Route('', name: 'add', methods: ['POST'])]
@@ -89,12 +87,13 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
             // création ou mise à jour de metadata
             $data['languages'] = json_decode($data['languages'], true);
             $data['category'] = json_decode($data['category'], true);
-            $this->createOrUpdateMetadata($data, $datastoreId, $datasheetName);
+            $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $data);
 
             // Création ou mise à jour du capabilities
             try {
                 $this->capabilitiesService->createOrUpdate($datastoreId, $endpoint, $offering['urls'][0]['url']);
-            } catch(\Exception $e) {}
+            } catch (\Exception $e) {
+            }
 
             return $this->json($offering);
         } catch (ApiException $ex) {
@@ -154,7 +153,13 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
             // création ou mise à jour de metadata
             $data['languages'] = json_decode($data['languages'], true);
             $data['category'] = json_decode($data['category'], true);
-            $this->createOrUpdateMetadata($data, $datastoreId, $datasheetName);
+            $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $data);
+
+            // Création ou mise à jour du capabilities
+            try {
+                $this->capabilitiesService->createOrUpdate($datastoreId, $endpoint, $offering['urls'][0]['url']);
+            } catch (\Exception $e) {
+            }
 
             return $this->json($offering);
         } catch (ApiException $ex) {

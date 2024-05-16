@@ -126,7 +126,7 @@
                         {# https://cnig.gouv.fr/IMG/pdf/guide_recherche_inspire.pdf #}
                         {# Le champ linkage précise l’adresse du service, le champ « protocol » précise de quel type de service il s’agit (OGC:WMS, OGC:WFS, OGC:WMTS, OGC:CSW) et le champ « name » contient le nom de la couche. #}
                         {% for layer in layers %}
-                            <gmd:onLine offeringId="{{ layer.offering_id }}">
+                            <gmd:onLine type="offering" offeringId="{{ layer.offering_id }}">
                                 <gmd:CI_OnlineResource>
                                     <gmd:linkage>
                                         <gmd:URL>{{ layer.endpoint_url }}</gmd:URL>

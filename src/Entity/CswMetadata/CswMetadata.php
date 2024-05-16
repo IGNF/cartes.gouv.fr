@@ -10,22 +10,24 @@ namespace App\Entity\CswMetadata;
  */
 class CswMetadata
 {
-    public string $fileIdentifier;
-    public CswHierarchyLevel $hierarchyLevel;
-    public CswLanguage $language;
-    public string $charset;
-    public string $title;
-    public string $abstract;
-    public string $creationDate;
+    public ?string $fileIdentifier;
+    public ?CswHierarchyLevel $hierarchyLevel;
+    public ?CswLanguage $language;
+    public ?string $charset;
+    public ?string $title;
+    public ?string $abstract;
+    public ?string $creationDate;
 
     /** @var array<string> */
-    public array $thematicCategories;
-    public string $contactEmail;
-    public string $organisationName;
-    public string $organisationEmail;
+    public ?array $thematicCategories;
+    public ?string $contactEmail;
+    public ?string $organisationName;
+    public ?string $organisationEmail;
 
     /** @var array<CswMetadataLayer> */
-    public array $layers;
+    public ?array $layers;
+
+    public ?string $thumbnailUrl;
 
     public static function createEmpty(): self
     {
@@ -37,46 +39,9 @@ class CswMetadata
         return $empty;
     }
 
-    /**
-     * @param array<string>           $thematicCategories
-     * @param array<CswMetadataLayer> $layers
-     */
-    public static function createFromParams(
-        string $fileIdentifier,
-        CswHierarchyLevel $hierarchyLevel,
-        CswLanguage $language,
-        string $charset,
-        string $title,
-        string $abstract,
-        string $creationDate,
-        array $thematicCategories,
-        string $contactEmail,
-        string $organisationName,
-        string $organisationEmail,
-        array $layers,
-    ): self {
-        $cswMetadata = self::createEmpty();
-        $cswMetadata->fileIdentifier = trim($fileIdentifier);
-        $cswMetadata->hierarchyLevel = $hierarchyLevel;
-        $cswMetadata->language = $language;
-        $cswMetadata->charset = trim($charset);
-        $cswMetadata->title = trim($title);
-        $cswMetadata->abstract = trim($abstract);
-        $cswMetadata->creationDate = trim($creationDate);
-        $cswMetadata->thematicCategories = self::trimStringArray($thematicCategories);
-        $cswMetadata->contactEmail = trim($contactEmail);
-        $cswMetadata->organisationName = trim($organisationName);
-        $cswMetadata->organisationEmail = trim($organisationEmail);
-        $cswMetadata->layers = $layers;
-
-        return $cswMetadata;
-    }
-
-    /**
-     * @param array<string> $array
-     */
-    private static function trimStringArray(array $array): array
+    public function __clone()
     {
-        return array_map(fn ($value) => trim($value), $array);
+        $this->hierarchyLevel = CswHierarchyLevel::tryFrom($this->hierarchyLevel->value);
+        $this->language = new CswLanguage($this->language->code, $this->language->language);
     }
 }

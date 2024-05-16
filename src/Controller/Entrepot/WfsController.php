@@ -10,11 +10,10 @@ use App\Dto\WfsTableDTO;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\CapabilitiesService;
-use App\Services\CswMetadataHelper;
+use App\Services\EntrepotApi\CartesMetadataApiService;
 use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
-use App\Services\EntrepotApi\MetadataApiService;
 use App\Services\EntrepotApi\StoredDataApiService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
@@ -32,12 +31,11 @@ class WfsController extends ServiceController implements ApiControllerInterface
         DatastoreApiService $datastoreApiService,
         private ConfigurationApiService $configurationApiService,
         private StoredDataApiService $storedDataApiService,
-        MetadataApiService $metadataApiService,
         private CartesServiceApiService $cartesServiceApiService,
         private CapabilitiesService $capabilitiesService,
-        CswMetadataHelper $cswMetadataHelper,
+        private CartesMetadataApiService $cartesMetadataApiService,
     ) {
-        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $metadataApiService, $capabilitiesService, $cswMetadataHelper);
+        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $capabilitiesService, $cartesMetadataApiService);
     }
 
     #[Route('/', name: 'add', methods: ['POST'])]
@@ -67,13 +65,14 @@ class WfsController extends ServiceController implements ApiControllerInterface
 
             // création ou mise à jour de metadata
             $formData = json_decode(json_encode($dto), true);
-            $this->createOrUpdateMetadata($formData, $datastoreId, $datasheetName);
+            $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $formData);
 
             // Création ou mise à jour du capabilities
             try {
                 $this->capabilitiesService->createOrUpdate($datastoreId, $endpoint, $offering['urls'][0]['url']);
-            } catch(\Exception $e) {}
-            
+            } catch (\Exception $e) {
+            }
+
             return $this->json($offering);
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
@@ -114,7 +113,13 @@ class WfsController extends ServiceController implements ApiControllerInterface
 
             // création ou mise à jour de metadata
             $formData = json_decode(json_encode($dto), true);
-            $this->createOrUpdateMetadata($formData, $datastoreId, $datasheetName);
+            $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $formData);
+
+            // Création ou mise à jour du capabilities
+            try {
+                $this->capabilitiesService->createOrUpdate($datastoreId, $endpoint, $offering['urls'][0]['url']);
+            } catch (\Exception $e) {
+            }
 
             return $this->json($offering);
         } catch (ApiException $ex) {
