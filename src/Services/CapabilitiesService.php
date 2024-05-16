@@ -3,13 +3,13 @@
 namespace App\Services;
 
 use App\Constants\EntrepotApi\CommonTags;
-use Symfony\Component\Filesystem\Filesystem;
-use App\Services\EntrepotApi\AnnexeApiService;
 use App\Constants\EntrepotApi\ConfigurationTypes;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Services\EntrepotApi\AnnexeApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class CapabilitiesService
 {
@@ -26,16 +26,14 @@ class CapabilitiesService
             'verify_peer' => false,
             'verify_host' => false,
         ]);
-        
+
         $this->fs = new Filesystem();
     }
 
     /**
      * Creation ou mise a jour de l'annexe capabilities lorsque d'un service est ajouté, mis à jour
-     * ou supprimé
+     * ou supprimé.
      *
-     * @param string $datastoreId
-     * @param string $offeringId
      * @return void
      */
     /*public function createOrUpdate(string $datastoreId, string $offeringId)
@@ -91,25 +89,23 @@ class CapabilitiesService
 
     /**
      * Creation ou mise a jour de l'annexe capabilities lorsque d'un service est ajouté, mis à jour
-     * ou supprimé
+     * ou supprimé.
      *
-     * @param string $datastoreId
      * @param array<mixed> $endpoint
-     * @param string $url
-     * @return array | null
      */
-    public function createOrUpdate(string $datastoreId, array $endpoint, string $url) : array | null {
+    public function createOrUpdate(string $datastoreId, array $endpoint, string $url): ?array
+    {
         $capsPath = $this->parameterBag->get('capabilities_path');
         if (!$this->fs->exists($capsPath)) {
             $this->fs->mkdir($capsPath);
         }
 
         // Endpoint privé, on sort
-        if (! $endpoint['open']) {
+        if (!$endpoint['open']) {
             return null;
         }
 
-        if (! in_array($endpoint['type'], [ConfigurationTypes::WFS, ConfigurationTypes::WMSVECTOR])) {
+        if (!in_array($endpoint['type'], [ConfigurationTypes::WFS, ConfigurationTypes::WMSVECTOR])) {
             return null;
         }
 
@@ -144,7 +140,15 @@ class CapabilitiesService
         }
 
         $this->fs->remove($filePath);
+
         return $annexe;
+    }
+
+    public function getGetCapUrl(string $endpointUrl, string $offeringUrl, string $serviceType): string
+    {
+        $version = $this->getServiceVersion($offeringUrl);
+
+        return sprintf('%s?SERVICE=%s&VERSION=%s&request=GetCapabilities', $endpointUrl, $serviceType, $version);
     }
 
     private function filterWFSCapabilities(mixed $endpoint, string $url, mixed $allOfferings): string
@@ -155,8 +159,7 @@ class CapabilitiesService
             $layerNames[] = $off['layer_name'];
         }
 
-        $version = $this->getServiceVersion($url);
-        $getCapUrl = $endpoint['urls'][0]['url'] . "?SERVICE=WFS&VERSION=$version&request=GetCapabilities";
+        $getCapUrl = $this->getGetCapUrl($endpoint['urls'][0]['url'], $url, 'WFS');
 
         $response = $this->httpClient->request('GET', $getCapUrl);
         if (JsonResponse::HTTP_OK != $response->getStatusCode()) {
@@ -201,8 +204,7 @@ class CapabilitiesService
             $layerNames[] = $off['layer_name'];
         }
 
-        $version = $this->getServiceVersion($url);
-        $getCapUrl = $endpoint['urls'][0]['url'] . "?SERVICE=WMS&VERSION=$version&request=GetCapabilities";
+        $getCapUrl = $this->getGetCapUrl($endpoint['urls'][0]['url'], $url, 'WMS');
 
         $response = $this->httpClient->request('GET', $getCapUrl);
         if (JsonResponse::HTTP_OK != $response->getStatusCode()) {
@@ -215,16 +217,16 @@ class CapabilitiesService
             throw new \Exception('Parsing GetCapabilities failed');
         }
 
-        $cap = $doc->getElementsByTagName("Capability");
-        $layers = $cap[0]?->getElementsByTagName("Layer")[0]?->getElementsByTagName('Layer');
+        $cap = $doc->getElementsByTagName('Capability');
+        $layers = $cap[0]?->getElementsByTagName('Layer')[0]?->getElementsByTagName('Layer');
 
         $index = $layers->count() - 1;
         while ($index >= 0) {
             $child = $layers->item($index);
-	        $name = $child->getElementsByTagName('Name')[0]->textContent;
+            $name = $child->getElementsByTagName('Name')[0]->textContent;
 
-            if (! in_array($name, $layerNames)) {
-                $child->remove();    
+            if (!in_array($name, $layerNames)) {
+                $child->remove();
             }
             --$index;
         }

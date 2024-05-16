@@ -11,6 +11,7 @@ use App\Entity\CswMetadata\CswMetadata;
 use App\Entity\CswMetadata\CswMetadataLayer;
 use App\Exception\AppException;
 use App\Exception\CartesApiException;
+use App\Services\CapabilitiesService;
 use App\Services\CswMetadataHelper;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -27,6 +28,7 @@ class CartesMetadataApiService
         private MetadataApiService $metadataApiService,
         private ConfigurationApiService $configurationApiService,
         private CswMetadataHelper $cswMetadataHelper,
+        private CapabilitiesService $capabilitiesService
     ) {
     }
 
@@ -64,6 +66,7 @@ class CartesMetadataApiService
 
         $cswMetadata = $this->cswMetadataHelper->fromXml($apiMetadataXml);
         $cswMetadata->layers = $this->getMetadataLayers($datastoreId, $datasheetName);
+        // dd($cswMetadata->layers);
 
         $xmlFilePath = $this->cswMetadataHelper->saveToFile($cswMetadata);
         $this->metadataApiService->replaceFile($datastoreId, $apiMetadata['_id'], $xmlFilePath);
@@ -242,24 +245,23 @@ class CartesMetadataApiService
         $relationLayers = array_map(function ($relation) use ($offering, $serviceEndpointUrl) {
             $layerName = null;
             $endpointType = null;
+            $getCapUrl = null;
 
             switch ($offering['type']) {
                 case OfferingTypes::WFS:
                     $layerName = sprintf('%s:%s', $offering['layer_name'], $relation['native_name']);
                     $endpointType = 'OGC:WFS';
+                    $getCapUrl = $this->capabilitiesService->getGetCapUrl($serviceEndpointUrl, $offering['urls'][0]['url'], 'WFS');
                     break;
 
                 case OfferingTypes::WMSVECTOR:
                     $layerName = sprintf('%s:%s', $offering['layer_name'], $relation['name']);
                     $endpointType = 'OGC:WMS';
+                    $getCapUrl = $this->capabilitiesService->getGetCapUrl($serviceEndpointUrl, $offering['urls'][0]['url'], 'WMS');
                     break;
             }
 
-            // TODO revoir l'URL
-            // $version = $this->getServiceEndpointVersion($url);
-            // $getCapUrl = $endpoint['urls'][0]['url'] . "?SERVICE=WMS&VERSION=$version&request=GetCapabilities";
-
-            return new CswMetadataLayer($layerName, $endpointType, $serviceEndpointUrl, $offering['_id']);
+            return new CswMetadataLayer($layerName, $endpointType, $getCapUrl, $offering['_id']);
         }, $configRelations);
 
         return $relationLayers;
@@ -277,14 +279,4 @@ class CartesMetadataApiService
 
         return $endpointsList[0]['endpoint'];
     }
-
-    // private function getServiceEndpointVersion(string $url): string
-    // {
-    //     $parsed = parse_url($url);
-
-    //     $res = [];
-    //     parse_str($parsed['query'], $res);
-
-    //     return $res['version'];
-    // }
 }
