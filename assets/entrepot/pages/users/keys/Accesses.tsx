@@ -1,10 +1,10 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
-import { CSSProperties, ComponentProps, FC, ReactNode, useCallback, useMemo, useState } from "react";
+import { CSSProperties, FC, useCallback, useEffect, useMemo, useState } from "react";
+import { AccessCreateDto, PermissionOfferingResponseDto, PermissionWithOfferingsDetailsResponseDto } from "../../../../@types/entrepot";
 import "../../../../sass/pages/my_keys.scss";
-import { AccessCreateDto, PermissionWithOfferingsDetailsResponseDto } from "../../../../@types/entrepot";
-import AccessesManager from "./utils/AccessesManager";
+import { getNewAccesses } from "./utils/AccessesManager";
 
 type AccessesProps = {
     label: string;
@@ -25,15 +25,20 @@ const style: CSSProperties = {
 const Accesses: FC<AccessesProps> = (props) => {
     const { value = [], permissions, label, hintText, state, stateRelatedMessage, onChange } = props;
 
-    const [accesses, setAccesses] = useState<AccessCreateDto[]>(value);
+    const [internal, setInternal] = useState<AccessCreateDto[]>([]);
+
+    useEffect(() => {
+        setInternal(value);
+    }, [value]);
 
     const exists = useCallback(
         (permission, offering) => {
-            if (value === undefined) return false;
-            const f = value.find((v) => v.permission === permission && v.offerings.includes(offering));
+            const f = internal.find((v) => {
+                return v.permission === permission && v.offerings.includes(offering);
+            });
             return f !== undefined;
         },
-        [value]
+        [internal]
     );
 
     /* Changement d'etat d'une checkbox */
@@ -41,45 +46,51 @@ const Accesses: FC<AccessesProps> = (props) => {
         (event: React.ChangeEvent<HTMLInputElement>, permissionId: string, offeringId: string) => {
             const checked = event.currentTarget.checked;
 
-            const newAccesses = new AccessesManager(accesses).change(permissionId, offeringId, checked);
-            setAccesses(newAccesses);
+            const newAccesses = getNewAccesses(internal, permissionId, offeringId, checked);
             onChange(newAccesses);
         },
-        [accesses, onChange]
+        [internal, onChange]
     );
 
     /* Calcul des options */
     const services = useMemo(() => {
         if (permissions === undefined) return [];
 
-        let result: {
-            label: ReactNode;
-            hintText?: ReactNode;
-            nativeInputProps: ComponentProps<"input">;
-        }[] = [];
-
+        // Trie des layer_name des offerings
+        const temp: { permissionId: string; offering: PermissionOfferingResponseDto }[] = [];
         permissions.forEach((permission) => {
-            const options = permission.offerings.map((offering) => {
+            permission.offerings.forEach((offering) => {
+                temp.push({
+                    permissionId: permission._id,
+                    offering: offering,
+                });
+            });
+        });
+        return temp
+            .sort((a, b) => {
+                return a.offering.layer_name.toLocaleLowerCase() < b.offering.layer_name.toLocaleLowerCase()
+                    ? -1
+                    : a.offering.layer_name.toLocaleLowerCase() > b.offering.layer_name.toLocaleLowerCase()
+                      ? 1
+                      : 0;
+            })
+            .map((t) => {
                 return {
                     label: (
                         <span className={"layer-name"}>
-                            {offering.layer_name}
+                            {t.offering.layer_name}
                             <Badge className={fr.cx("fr-ml-1v")} noIcon severity="info">
-                                {offering.type}
+                                {t.offering.type}
                             </Badge>
                         </span>
                     ),
                     nativeInputProps: {
-                        value: offering._id,
-                        onChange: (event) => handleCheckboxChange(event, permission._id, offering._id),
-                        checked: exists(permission._id, offering._id),
+                        value: t.offering._id,
+                        onChange: (event) => handleCheckboxChange(event, t.permissionId, t.offering._id),
+                        checked: exists(t.permissionId, t.offering._id),
                     },
                 };
             });
-            result = [...result, ...options];
-        });
-
-        return result;
     }, [permissions, handleCheckboxChange, exists]);
 
     return (

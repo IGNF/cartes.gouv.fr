@@ -6,11 +6,10 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { KeyFormValuesType } from "../../../../@types/app";
 
 type BasicTypeInfoFormProps = {
-    editMode: boolean;
     form: UseFormReturn<KeyFormValuesType>;
 };
 
-const BasicTypeInfoForm: FC<BasicTypeInfoFormProps> = ({ editMode, form }) => {
+const BasicTypeInfoForm: FC<BasicTypeInfoFormProps> = ({ form }) => {
     const { t } = useTranslation("UserKey");
 
     const {
@@ -27,19 +26,16 @@ const BasicTypeInfoForm: FC<BasicTypeInfoFormProps> = ({ editMode, form }) => {
                 // @ts-expect-error error
                 stateRelatedMessage={errors.type_infos?.login?.message?.toString()}
                 nativeInputProps={{ ...register("type_infos.login") }}
-                disabled={editMode}
             />
-            {editMode === false && (
-                <Input
-                    label={t("password")}
-                    // @ts-expect-error error
-                    state={errors.type_infos?.password ? "error" : "default"}
-                    // @ts-expect-error error
-                    stateRelatedMessage={errors.type_infos?.password?.message?.toString()}
-                    // nativeInputProps={{ ...register("type_infos.password"), type: editMode ? "password" : "text" }}
-                    nativeInputProps={{ ...register("type_infos.password"), type: "password" }}
-                />
-            )}
+            <Input
+                label={t("password")}
+                // @ts-expect-error error
+                state={errors.type_infos?.password ? "error" : "default"}
+                // @ts-expect-error error
+                stateRelatedMessage={errors.type_infos?.password?.message?.toString()}
+                // nativeInputProps={{ ...register("type_infos.password"), type: editMode ? "password" : "text" }}
+                nativeInputProps={{ ...register("type_infos.password"), type: "password" }}
+            />
         </div>
     );
 };

@@ -30,6 +30,7 @@ const SecurityOptionsForm: FC<SecurityOptionsFormProps> = ({ editMode, form, has
     } = form;
 
     const keyType = watch("type");
+    const ipListName = watch("ip_list_name");
 
     useEffect(() => {
         if (editMode) {
@@ -53,51 +54,67 @@ const SecurityOptionsForm: FC<SecurityOptionsFormProps> = ({ editMode, form, has
     return (
         <div className={fr.cx(!visible && "fr-hidden")}>
             <p>{tCommon("mandatory_fields")}</p>
-            <RadioButtons
-                legend={t("key_type")}
-                state={errors.type ? "error" : "default"}
-                stateRelatedMessage={errors?.type?.message?.toString()}
-                orientation="horizontal"
-                options={[
-                    {
-                        label: UserKeyCreateDtoUserKeyInfoDtoTypeEnum.BASIC,
-                        nativeInputProps: {
-                            ...register("type"),
-                            value: UserKeyInfoDtoTypeEnum.BASIC,
-                            checked: UserKeyInfoDtoTypeEnum.BASIC === keyType,
-                        },
-                    },
-                    {
-                        label: UserKeyCreateDtoUserKeyInfoDtoTypeEnum.HASH,
-                        nativeInputProps: {
-                            ...register("type"),
-                            value: UserKeyInfoDtoTypeEnum.HASH,
-                            checked: UserKeyInfoDtoTypeEnum.HASH === keyType,
-                        },
-                    },
-                    {
-                        label: UserKeyCreateDtoUserKeyInfoDtoTypeEnum.OAUTH2,
-                        nativeInputProps: {
-                            ...register("type"),
-                            disabled: hasOauth2,
-                            value: UserKeyInfoDtoTypeEnum.OAUTH2,
-                            checked: UserKeyInfoDtoTypeEnum.OAUTH2 === keyType,
-                        },
-                    },
-                ]}
-                disabled={editMode}
-            />
-            {keyType === UserKeyInfoDtoTypeEnum.BASIC ? (
-                <BasicTypeInfoForm editMode={editMode} form={form} />
-            ) : keyType === UserKeyInfoDtoTypeEnum.HASH ? (
-                <HashTypeInfoForm editMode={editMode} form={form} />
+            {editMode ? (
+                t("key_is_type", { type: keyType })
             ) : (
-                <div />
+                <RadioButtons
+                    legend={t("key_type")}
+                    state={errors.type ? "error" : "default"}
+                    stateRelatedMessage={errors?.type?.message?.toString()}
+                    orientation="horizontal"
+                    options={[
+                        {
+                            label: UserKeyCreateDtoUserKeyInfoDtoTypeEnum.BASIC,
+                            nativeInputProps: {
+                                ...register("type"),
+                                value: UserKeyInfoDtoTypeEnum.BASIC,
+                                checked: UserKeyInfoDtoTypeEnum.BASIC === keyType,
+                            },
+                        },
+                        {
+                            label: UserKeyCreateDtoUserKeyInfoDtoTypeEnum.HASH,
+                            nativeInputProps: {
+                                ...register("type"),
+                                value: UserKeyInfoDtoTypeEnum.HASH,
+                                checked: UserKeyInfoDtoTypeEnum.HASH === keyType,
+                            },
+                        },
+                        {
+                            label: UserKeyCreateDtoUserKeyInfoDtoTypeEnum.OAUTH2,
+                            nativeInputProps: {
+                                ...register("type"),
+                                disabled: hasOauth2,
+                                value: UserKeyInfoDtoTypeEnum.OAUTH2,
+                                checked: UserKeyInfoDtoTypeEnum.OAUTH2 === keyType,
+                            },
+                        },
+                    ]}
+                />
+            )}
+            {keyType === UserKeyInfoDtoTypeEnum.BASIC && editMode === false ? (
+                <>
+                    {t("basic_type_explain")}
+                    <BasicTypeInfoForm form={form} />
+                </>
+            ) : keyType === UserKeyInfoDtoTypeEnum.HASH && editMode === false ? (
+                <>
+                    {t("hash_type_explain")}
+                    <HashTypeInfoForm form={form} />
+                </>
+            ) : (
+                editMode === false && t("oauth2_type_explain")
             )}
             <RadioButtons
                 legend={t("ip_list.label")}
                 hintText={t("ip_list.hintText")}
                 options={[
+                    {
+                        label: t("ip_list.no_filter"),
+                        nativeInputProps: {
+                            ...register("ip_list_name"),
+                            value: "none",
+                        },
+                    },
                     {
                         label: t("ip_list.whitelist"),
                         nativeInputProps: {
@@ -115,24 +132,26 @@ const SecurityOptionsForm: FC<SecurityOptionsFormProps> = ({ editMode, form, has
                 ]}
                 orientation="horizontal"
             />
-            <Controller
-                control={control}
-                name="ip_list_addresses"
-                render={({ field: { value, onChange } }) => {
-                    return (
-                        <InputCollection
-                            label={t("ip_addresses")}
-                            hintText={t("iprange_explain")}
-                            value={value}
-                            state={errors.ip_list_addresses ? "error" : "default"}
-                            stateRelatedMessage={errors.ip_list_addresses?.message?.toString()}
-                            onChange={onChange}
-                        />
-                    );
-                }}
-            />
-            <Input label={t("user_agent")} nativeInputProps={{ ...register("user_agent") }} />
-            <Input label={t("referer")} nativeInputProps={{ ...register("referer") }} />
+            {(ipListName === "whitelist" || ipListName === "blacklist") && (
+                <Controller
+                    control={control}
+                    name="ip_list_addresses"
+                    render={({ field: { value, onChange } }) => {
+                        return (
+                            <InputCollection
+                                label={t("ip_addresses")}
+                                hintText={t("iprange_explain")}
+                                value={value}
+                                state={errors.ip_list_addresses ? "error" : "default"}
+                                stateRelatedMessage={errors.ip_list_addresses?.message?.toString()}
+                                onChange={onChange}
+                            />
+                        );
+                    }}
+                />
+            )}
+            <Input label={t("user_agent")} hintText={t("user_agent_hintext")} nativeInputProps={{ ...register("user_agent") }} />
+            <Input label={t("referer")} hintText={t("referer_hintext")} nativeInputProps={{ ...register("referer") }} />
         </div>
     );
 };

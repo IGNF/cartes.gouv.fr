@@ -10,6 +10,7 @@ export const { i18n } = declareComponentKeys<
     | "removing"
     | "loading"
     | "continue"
+    | "copy"
     | "send"
     | "cancel"
     | "delete"
@@ -37,6 +38,7 @@ export const commonFrTranslations: Translations<"fr">["Common"] = {
     removing: "Suppression en cours ...",
     loading: "Chargement ...",
     continue: "Continuer",
+    copy: "Copier",
     send: "Envoyer",
     cancel: "Annuler",
     delete: "Supprimer",
@@ -64,6 +66,7 @@ export const commonEnTranslations: Translations<"en">["Common"] = {
     removing: "Removing ...",
     loading: "Loading ...",
     continue: "Continue",
+    copy: "Copy",
     send: "Send",
     cancel: "Cancel",
     delete: "Delete",

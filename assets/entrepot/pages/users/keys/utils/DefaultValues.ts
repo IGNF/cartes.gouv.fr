@@ -6,7 +6,7 @@ const UserKeyDefaultValues: KeyFormValuesType = {
     name: "",
     type: UserKeyInfoDtoTypeEnum.HASH,
     type_infos: { hash: "" },
-    ip_list_name: "whitelist",
+    ip_list_name: "none",
     ip_list_addresses: [],
     user_agent: "",
     referer: "",
@@ -28,7 +28,7 @@ const getDefaultValues = (editMode: boolean, key: UserKeyDetailedWithAccessesRes
         typeInfos = key.type_infos as BasicInfoDto;
     }
 
-    const ipName = key.whitelist?.length !== 0 ? "whitelist" : key?.blacklist?.length !== 0 ? "blacklist" : "whitelist";
+    const ipName = key.whitelist?.length !== 0 ? "whitelist" : key.blacklist?.length !== 0 ? "blacklist" : "none";
     const accesses = AccessesTransformer.transformToArray(key.accesses);
 
     return {
@@ -36,7 +36,7 @@ const getDefaultValues = (editMode: boolean, key: UserKeyDetailedWithAccessesRes
         type: key.type as unknown as UserKeyInfoDtoTypeEnum,
         type_infos: typeInfos,
         ip_list_name: ipName as IPListName,
-        ip_list_addresses: key[ipName] ?? [],
+        ip_list_addresses: (ipName !== "none" ? key[ipName] : []) ?? [],
         user_agent: key.user_agent ?? "",
         referer: key.referer ?? "",
         accesses: accesses,

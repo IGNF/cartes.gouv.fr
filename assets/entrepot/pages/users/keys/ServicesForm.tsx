@@ -28,6 +28,7 @@ const ServicesForm: FC<ServicesFormProps> = ({ form, permissions, visible }) => 
             <p>{tCommon("mandatory_fields")}</p>
             <Input
                 label={t("key_name")}
+                hintText={t("key_explain")}
                 state={errors.name ? "error" : "default"}
                 stateRelatedMessage={errors.name?.message?.toString()}
                 nativeInputProps={{ ...register("name") }}

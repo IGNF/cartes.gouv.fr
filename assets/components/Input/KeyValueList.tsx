@@ -35,7 +35,6 @@ const KeyValueList: FC<KeyValueListProps> = (props: KeyValueListProps) => {
                 result[datas[uuid].name] = datas[uuid].value;
             }
         });
-        console.log(result);
         onChange?.(result);
     }, [datas, onChange]);
 
@@ -123,11 +122,3 @@ const KeyValueList: FC<KeyValueListProps> = (props: KeyValueListProps) => {
 };
 
 export default KeyValueList;
-
-/* export const { i18n } = declareComponentKeys<"key" | { K: "function"; P: { param1: ParamType }; R: JSX.Element }>()({
-    KeyValueList,
-});
-
-export const KeyValueListFrTranslations: Translations<"fr">["KeyValueList"] = {};
-
-export const KeyValueListEnTranslations: Translations<"en">["KeyValueList"] = {}; */

@@ -3,8 +3,8 @@ import Badge from "@codegouvfr/react-dsfr/Badge";
 import { compareAsc } from "date-fns";
 import { FC } from "react";
 
-import { useTranslation } from "../../../../i18n/i18n";
 import { PermissionDetailsResponseDto } from "../../../../@types/entrepot";
+import { useTranslation } from "../../../../i18n/i18n";
 import { formatDateFromISO } from "../../../../utils";
 
 import "../../../../sass/pages/my_keys.scss";
@@ -42,16 +42,24 @@ const PermissionsListTab: FC<PermissionsListTabProps> = ({ permissions }) => {
                             )}
                         </div>
                         <ul className={fr.cx("fr-raw-list")}>
-                            {permission.offerings.map((offering) => (
-                                <li key={offering._id}>
-                                    <span>
-                                        {offering.layer_name}
-                                        <Badge className={fr.cx("fr-ml-1v")} noIcon severity="info">
-                                            {offering.type}
-                                        </Badge>
-                                    </span>
-                                </li>
-                            ))}
+                            {permission.offerings
+                                .sort((a, b) => {
+                                    return a.layer_name.toLocaleLowerCase() < b.layer_name.toLocaleLowerCase()
+                                        ? -1
+                                        : a.layer_name.toLocaleLowerCase() > b.layer_name.toLocaleLowerCase()
+                                          ? 1
+                                          : 0;
+                                })
+                                .map((offering) => (
+                                    <li key={offering._id}>
+                                        <span>
+                                            {offering.layer_name}
+                                            <Badge className={fr.cx("fr-ml-1v")} noIcon severity="info">
+                                                {offering.type}
+                                            </Badge>
+                                        </span>
+                                    </li>
+                                ))}
                         </ul>
                     </div>
                 );

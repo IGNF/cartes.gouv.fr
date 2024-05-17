@@ -250,7 +250,7 @@ export type UserKeyDetailedWithAccessesResponseDto = UserKeyDetailsResponseDtoUs
 export type Annexe = AnnexDetailResponseDto;
 
 /* Pour le formulaire d'ajout d'une cle d'acces */
-export type IPListName = "whitelist" | "blacklist";
+export type IPListName = "none" | "whitelist" | "blacklist";
 
 export enum UserKeyInfoDtoTypeEnum {
     HASH = "HASH",
@@ -265,10 +265,6 @@ export type KeyFormValuesType = {
     type_infos?: BasicInfoDto | HashInfoDto | OAuth2InfoDto;
     ip_list_name: IPListName;
     ip_list_addresses: string[];
-    ip_list?: {
-        name: IPListName;
-        addresses: string[];
-    };
     user_agent: string;
     referer: string;
     accesses: AccessCreateDto[];

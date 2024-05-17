@@ -38,7 +38,7 @@ class UserKeyDTO
             'choices' => ['whitelist', 'blacklist'],
             'message' => 'user_key.ip_list.name_error',
         ])]
-        public readonly string $ip_list_name,
+        public readonly ?string $ip_list_name,
 
         /** @var array<string> */
         #[Assert\Unique(['message' => 'user_key.ip_list.unique_error'])]
@@ -52,7 +52,7 @@ class UserKeyDTO
                 ]),
             ],
         ])]
-        public readonly array $ip_list_addresses,
+        public readonly ?array $ip_list_addresses,
     ) {
     }
 }

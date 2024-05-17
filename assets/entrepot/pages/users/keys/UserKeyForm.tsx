@@ -9,7 +9,8 @@ import { compareAsc } from "date-fns";
 import { FC, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
-import api from "../../../api";
+import { KeyFormValuesType, UserKeyDetailedWithAccessesResponseDto, UserKeyInfoDtoTypeEnum, UserKeyWithAccessesResponseDto } from "../../../../@types/app";
+import { PermissionWithOfferingsDetailsResponseDto, UserKeyResponseDto, UserKeyResponseDtoTypeEnum } from "../../../../@types/entrepot";
 import AppLayout from "../../../../components/Layout/AppLayout";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
@@ -18,9 +19,8 @@ import { getTranslation, useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import { routes } from "../../../../router/router";
-import { KeyFormValuesType, UserKeyDetailedWithAccessesResponseDto, UserKeyInfoDtoTypeEnum, UserKeyWithAccessesResponseDto } from "../../../../@types/app";
-import { PermissionWithOfferingsDetailsResponseDto, UserKeyResponseDto, UserKeyResponseDtoTypeEnum } from "../../../../@types/entrepot";
 import "../../../../sass/pages/my_keys.scss";
+import api from "../../../api";
 
 import SecurityOptionsForm from "./SecurityOptionsForm";
 import ServicesForm from "./ServicesForm";
@@ -41,6 +41,11 @@ const createRequestBody = (editMode: boolean, formValues: KeyFormValuesType) => 
         })
     );
 
+    // Pas de filtrage, on supprime la liste des adresses IP
+    if (values["ip_list_name"] === "none") {
+        delete values["ip_list_name"];
+        delete values["ip_list_addresses"];
+    }
     if (values["type"] === UserKeyInfoDtoTypeEnum.OAUTH2) {
         delete values["type_infos"];
     }
@@ -153,7 +158,7 @@ const UserKeyForm: FC<UserKeyFormProps> = ({ keyId }) => {
     // TODO SUPPRIMER
     /*useEffect(() => {
         watch((value, { name, type }) => console.log(value, name, type));
-    }, [watch]);*/
+    }, [watch]); */
 
     const previousStep = () => setCurrentStep((currentStep) => currentStep - 1);
     const nextStep = async () => {

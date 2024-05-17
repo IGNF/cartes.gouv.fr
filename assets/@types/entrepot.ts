@@ -844,11 +844,7 @@ export interface BasicInfoDto {
 }
 
 export interface HashInfoDto {
-    hash?: string;
-}
-
-export interface HeaderInfoDto {
-    headers?: Record<string, string>;
+    hash: string;
 }
 
 export type OAuth2InfoDto = object;
@@ -861,10 +857,6 @@ export type UserHashKeyCreateDto = UtilRequiredKeys<UserKeyCreateDtoUserKeyInfoD
     type_infos: HashInfoDto;
 };
 
-export type UserHeaderKeyCreateDto = UtilRequiredKeys<UserKeyCreateDtoUserKeyInfoDto, "name" | "type_infos"> & {
-    type_infos: HeaderInfoDto;
-};
-
 export interface UserKeyCreateDtoUserKeyInfoDto {
     name: string;
     type?: UserKeyCreateDtoUserKeyInfoDtoTypeEnum;
@@ -875,7 +867,7 @@ export interface UserKeyCreateDtoUserKeyInfoDto {
     type_infos: UserKeyInfoDto;
 }
 
-export type UserKeyInfoDto = object;
+export type UserKeyInfoDto = HashInfoDto | BasicInfoDto;
 
 export type UserOauth2KeyCreateDto = UtilRequiredKeys<UserKeyCreateDtoUserKeyInfoDto, "name" | "type_infos"> & {
     type_infos: OAuth2InfoDto;
@@ -888,7 +880,7 @@ export interface UserKeyDetailsResponseDtoUserKeyInfoDto {
     blacklist?: string[];
     user_agent?: string;
     referer?: string;
-    type_infos: UserKeyInfoDto;
+    type_infos?: UserKeyInfoDto;
     /**
      * identifiant technique
      * @format uuid
