@@ -37,9 +37,9 @@ const getMyKeys = (otherOptions: RequestInit = {}) => {
 };
 
 /* Retourne les cles de de l'utilisateur courant avec leur acces */
-const getMyKeysWithAccesses = (otherOptions: RequestInit = {}) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_user_keys_with_accesses");
-    return jsonFetch<UserKeyWithAccessesResponseDto[]>(url, {
+const getMyKeysDetailedWithAccesses = (otherOptions: RequestInit = {}) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_user_keys_detailed_with_accesses");
+    return jsonFetch<UserKeyDetailedWithAccessesResponseDto[]>(url, {
         ...otherOptions,
     });
 };
@@ -108,9 +108,9 @@ const addToSandbox = () => {
 const user = {
     getMe,
     getDatastoresList,
-    getMyKeyDetailedWithAccesses,
     getMyKeys,
-    getMyKeysWithAccesses,
+    getMyKeyDetailedWithAccesses,
+    getMyKeysDetailedWithAccesses,
     getMyPermissions,
     getMyDetailedPermissions,
     addKey,
