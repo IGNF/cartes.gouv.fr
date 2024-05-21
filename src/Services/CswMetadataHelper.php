@@ -109,6 +109,12 @@ class CswMetadataHelper
         $cswMetadata->organisationName = $xpath->query('/gmd:MD_Metadata/gmd:contact/gmd:CI_ResponsibleParty/gmd:organisationName/gco:CharacterString')->item(0)->textContent;
         $cswMetadata->organisationEmail = $xpath->query('/gmd:MD_Metadata/gmd:contact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress/gco:CharacterString')->item(0)->textContent;
 
+        // Thumbnail
+        $thumbnailList = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:graphicOverview/gmd:MD_BrowseGraphic/gmd:fileName/gco:CharacterString');
+        if (0 !== $thumbnailList->count()) {
+            $cswMetadata->thumbnailUrl = $thumbnailList->item(0)->textContent;
+        }
+
         $cswMetadata->layers = $layersList;
 
         return $this->trim($cswMetadata);

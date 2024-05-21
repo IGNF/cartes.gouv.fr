@@ -12,6 +12,7 @@ use App\Exception\AppException;
 use App\Exception\CartesApiException;
 use App\Services\CapabilitiesService;
 use App\Services\CswMetadataHelper;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -23,7 +24,9 @@ use Symfony\Component\HttpFoundation\Response;
 class CartesMetadataApiService
 {
     public function __construct(
+        private ParameterBagInterface $parameterBag,
         private DatastoreApiService $datastoreApiService,
+        private AnnexeApiService $annexeApiService,
         private MetadataApiService $metadataApiService,
         private ConfigurationApiService $configurationApiService,
         private CswMetadataHelper $cswMetadataHelper,
@@ -49,6 +52,23 @@ class CartesMetadataApiService
         }
 
         return $metadataList[0];
+    }
+
+    public function getThumbnailUrl(string $datastoreId, string $datasheetName): ?string
+    {
+        $annexeList = $this->annexeApiService->getAll($datastoreId, null, null, [
+            CommonTags::DATASHEET_NAME => $datasheetName,
+            'type' => 'thumbnail'  
+        ]);
+        
+        if (0 === count($annexeList)) {
+            return null;
+        }
+
+        $datastore = $this->datastoreApiService->get($datastoreId);
+
+        $annexeUrl = $this->parameterBag->get('annexes_url');
+        return $annexeUrl.'/'.$datastore['technical_name'].$annexeList[0]['paths'][0];
     }
 
     /**
@@ -104,6 +124,12 @@ class CartesMetadataApiService
 
         $newCswMetadata = $this->getNewCswMetadata($datastoreId, $datasheetName, null, $formData);
 
+        // Ajout de l'etiquette si elle n'existe pas deja
+        $thumbnailUrl = $this->getThumbnailUrl($datastoreId, $datasheetName);
+        if (! is_null($thumbnailUrl)) {
+            $newCswMetadata->thumbnailUrl = $thumbnailUrl;   
+        }
+
         $newMetadataFilePath = $this->cswMetadataHelper->saveToFile($newCswMetadata);
 
         $newApiMetadata = $this->metadataApiService->add($datastoreId, $newMetadataFilePath);
@@ -126,6 +152,12 @@ class CartesMetadataApiService
         $oldCswMetadata = $this->cswMetadataHelper->fromXml($oldMetadataFileXml);
 
         $newCswMetadata = $this->getNewCswMetadata($datastoreId, $datasheetName, $oldCswMetadata, $formData);
+
+        // Mise a jour de l'etiquette
+        $thumbnailUrl = $this->getThumbnailUrl($datastoreId, $datasheetName);
+        if ($newCswMetadata->thumbnailUrl !== $thumbnailUrl) {
+            $newCswMetadata->thumbnailUrl = $thumbnailUrl;   
+        }
 
         $newMetadataFilePath = $this->cswMetadataHelper->saveToFile($newCswMetadata);
 
