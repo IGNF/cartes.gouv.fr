@@ -1,11 +1,13 @@
 import Button from "@codegouvfr/react-dsfr/Button";
 import { useMemo } from "react";
 
+import { fr } from "@codegouvfr/react-dsfr";
 import AppLayout from "../../../components/Layout/AppLayout";
 import { datastoreNavItems } from "../../../config/datastoreNavItems";
 import { Translations, declareComponentKeys, getTranslation, useTranslation } from "../../../i18n/i18n";
 import SymfonyRouting from "../../../modules/Routing";
 import { useAuthStore } from "../../../stores/AuthStore";
+import { useSnackbarStore } from "../../../stores/SnackbarStore";
 import { formatDateFromISO } from "../../../utils";
 
 const Me = () => {
@@ -13,6 +15,8 @@ const Me = () => {
     const { t } = useTranslation({ Me });
     const user = useAuthStore((state) => state.user);
     const navItems = useMemo(() => datastoreNavItems(), []);
+
+    const setMessage = useSnackbarStore((state) => state.setMessage);
 
     return (
         <AppLayout documentTitle={t("my_account")} navItems={navItems}>
@@ -25,7 +29,19 @@ const Me = () => {
                     <p>{t("username", { userName: user?.user_name ?? "" })}</p>
                     <p>{t("email", { email: user.email })}</p>
                     <p>{t("registration_date", { date: formatDateFromISO(user.account_creation_date) })}</p>
-                    <p>{t("id", { id: user.id })}</p>
+                    <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-6v")}>
+                        {t("id", { id: user.id })}
+                        <Button
+                            className={fr.cx("fr-ml-2v")}
+                            title={tCommon("copy")}
+                            priority={"tertiary no outline"}
+                            iconId={"ri-file-copy-2-line"}
+                            onClick={async () => {
+                                await navigator.clipboard.writeText(user.id);
+                                setMessage(t("userid_copied"));
+                            }}
+                        />
+                    </div>
                 </>
             )}
 
@@ -53,6 +69,7 @@ export const { i18n } = declareComponentKeys<
     | { K: "email"; P: { email: string }; R: JSX.Element }
     | { K: "registration_date"; P: { date: string }; R: JSX.Element }
     | { K: "id"; P: { id: string }; R: JSX.Element }
+    | "userid_copied"
     | "manage_my_account"
 >()({
     Me,
@@ -87,9 +104,10 @@ export const MeFrTranslations: Translations<"fr">["Me"] = {
     ),
     id: ({ id }) => (
         <>
-            <strong>Identifiant technique</strong>&nbsp;: {id}
+            <strong>Identifiant utilisateur</strong>&nbsp;: {id}
         </>
     ),
+    userid_copied: "Identifiant utilisateur copié",
     manage_my_account: "Modifier mes informations",
 };
 
@@ -122,8 +140,9 @@ export const MeEnTranslations: Translations<"en">["Me"] = {
     ),
     id: ({ id }) => (
         <>
-            <strong>Technical Id</strong>: {id}
+            <strong>User Id</strong>: {id}
         </>
     ),
+    userid_copied: "User Id copied",
     manage_my_account: "Manage my account",
 };
