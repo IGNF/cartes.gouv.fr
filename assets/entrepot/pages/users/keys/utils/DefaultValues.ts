@@ -1,11 +1,11 @@
 import { IPListName, KeyFormValuesType, UserKeyDetailedWithAccessesResponseDto, UserKeyInfoDtoTypeEnum } from "../../../../../@types/app";
-import { BasicInfoDto, HashInfoDto, UserKeyDetailsResponseDtoUserKeyInfoDtoTypeEnum } from "../../../../../@types/entrepot";
+import { BasicInfoDto, UserKeyDetailsResponseDtoUserKeyInfoDtoTypeEnum } from "../../../../../@types/entrepot";
 import AccessesTransformer from "./AccessesTransformer";
 
 const UserKeyDefaultValues: KeyFormValuesType = {
     name: "",
     type: UserKeyInfoDtoTypeEnum.HASH,
-    type_infos: { hash: "" },
+    type_infos: {},
     ip_list_name: "none",
     ip_list_addresses: [],
     user_agent: "",
@@ -22,9 +22,7 @@ const getDefaultValues = (editMode: boolean, key: UserKeyDetailedWithAccessesRes
     if (!editMode) return UserKeyDefaultValues;
 
     let typeInfos = {};
-    if (key.type === UserKeyDetailsResponseDtoUserKeyInfoDtoTypeEnum.HASH) {
-        typeInfos = key.type_infos as HashInfoDto;
-    } else if (key.type === UserKeyDetailsResponseDtoUserKeyInfoDtoTypeEnum.BASIC) {
+    if (key.type === UserKeyDetailsResponseDtoUserKeyInfoDtoTypeEnum.BASIC) {
         typeInfos = key.type_infos as BasicInfoDto;
     }
 

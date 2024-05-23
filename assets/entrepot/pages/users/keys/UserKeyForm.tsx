@@ -46,7 +46,7 @@ const createRequestBody = (editMode: boolean, formValues: KeyFormValuesType) => 
         delete values["ip_list_name"];
         delete values["ip_list_addresses"];
     }
-    if (values["type"] === UserKeyInfoDtoTypeEnum.OAUTH2) {
+    if ([UserKeyInfoDtoTypeEnum.HASH, UserKeyInfoDtoTypeEnum.OAUTH2].includes(values["type"])) {
         delete values["type_infos"];
     }
 

@@ -48,10 +48,11 @@ user_key:
         ip_not_blank: "Une adresse IP ne doit pas être vide"
         ip_error: "La plage d'adresses IP {{ value }} n'est pas valide"
         unique_error: "Les plages d'adresses IP doivent être uniques (pas de doublons)"
-
     user_agent_not_blank: "Le User agent ne doit pas être vide"
     referer_not_blank: "Le referer ne doit pas être vide"
     type_infos_error: "La valeur de type_infos n'est pas correcte"
+    login_not_blank: "Le login est obligatoire",
+    password_not_blank: "Le mot de passe est obligatoire",
     access:
         permission_mandatory: "L'id de la permission est obligatoire"
         permission_uuid_error: "L'id de la permission doit être un uuid"

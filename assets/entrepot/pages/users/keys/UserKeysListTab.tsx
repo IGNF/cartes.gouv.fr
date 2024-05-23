@@ -109,7 +109,6 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
                                                         title={tCommon("copy")}
                                                         priority={"tertiary no outline"}
                                                         iconId={"ri-file-copy-2-line"}
-                                                        size={"small"}
                                                         onClick={async () => {
                                                             await navigator.clipboard.writeText((accessKey.type_infos as HashInfoDto).hash);
                                                             setMessage(t("hash_value_copied"));

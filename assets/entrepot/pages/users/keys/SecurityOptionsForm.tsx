@@ -3,12 +3,11 @@ import Input from "@codegouvfr/react-dsfr/Input";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { FC, useEffect } from "react";
 import { Controller, UseFormReturn } from "react-hook-form";
-import InputCollection from "../../../../components/Input/InputCollection";
-import { useTranslation } from "../../../../i18n/i18n";
 import { KeyFormValuesType, UserKeyInfoDtoTypeEnum } from "../../../../@types/app";
 import { UserKeyCreateDtoUserKeyInfoDtoTypeEnum } from "../../../../@types/entrepot";
+import InputCollection from "../../../../components/Input/InputCollection";
+import { useTranslation } from "../../../../i18n/i18n";
 import BasicTypeInfoForm from "./BasicTypeInfoForm";
-import HashTypeInfoForm from "./HashTypeInfoForm";
 
 type SecurityOptionsFormProps = {
     editMode: boolean;
@@ -96,11 +95,8 @@ const SecurityOptionsForm: FC<SecurityOptionsFormProps> = ({ editMode, form, has
                     {t("basic_type_explain")}
                     <BasicTypeInfoForm form={form} />
                 </>
-            ) : keyType === UserKeyInfoDtoTypeEnum.HASH && editMode === false ? (
-                <>
-                    {t("hash_type_explain")}
-                    <HashTypeInfoForm form={form} />
-                </>
+            ) : keyType === UserKeyInfoDtoTypeEnum.HASH ? (
+                editMode === false && t("hash_type_explain")
             ) : (
                 editMode === false && t("oauth2_type_explain")
             )}

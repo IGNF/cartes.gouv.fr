@@ -857,6 +857,10 @@ export type UserHashKeyCreateDto = UtilRequiredKeys<UserKeyCreateDtoUserKeyInfoD
     type_infos: HashInfoDto;
 };
 
+export type UserOauth2KeyCreateDto = UtilRequiredKeys<UserKeyCreateDtoUserKeyInfoDto, "name" | "type_infos"> & {
+    type_infos: OAuth2InfoDto;
+};
+
 export interface UserKeyCreateDtoUserKeyInfoDto {
     name: string;
     type?: UserKeyCreateDtoUserKeyInfoDtoTypeEnum;
@@ -864,14 +868,10 @@ export interface UserKeyCreateDtoUserKeyInfoDto {
     blacklist?: string[];
     user_agent?: string;
     referer?: string;
-    type_infos: UserKeyInfoDto;
+    type_infos?: BasicInfoDto;
 }
 
 export type UserKeyInfoDto = HashInfoDto | BasicInfoDto;
-
-export type UserOauth2KeyCreateDto = UtilRequiredKeys<UserKeyCreateDtoUserKeyInfoDto, "name" | "type_infos"> & {
-    type_infos: OAuth2InfoDto;
-};
 
 export interface UserKeyDetailsResponseDtoUserKeyInfoDto {
     name: string;

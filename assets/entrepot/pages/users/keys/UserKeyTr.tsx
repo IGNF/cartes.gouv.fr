@@ -27,16 +27,11 @@ export const { i18n } = declareComponentKeys<
     | "referer_hintext"
     | "login"
     | "password"
-    | "apikey"
     | "name_required"
     | "name_exists"
     | "accesses_required"
     | "login_required"
     | "password_required"
-    | "apikey_required"
-    | "apikey_error"
-    | "apikey_min_error"
-    | "apikey_max_error"
     | { K: "ip_error"; P: { ip: string }; R: string }
     | "no_permission"
     | "key_not_found"
@@ -52,7 +47,7 @@ export const UserKeyFrTranslations: Translations<"fr">["UserKey"] = {
     hash_type_explain: (
         <p>
             {
-                "Définissez une chaine de caractère à fournir comme paramètre supplémentaire apiKey dans les requêtes de consultation des flux. Ce type d'authentification est adapté en particulier pour une utilisation sur un site internet."
+                "Une valeur de hash (chaine de caractère) sera calculée automatiquement et devra être fournie comme paramètre supplémentaire dans les requêtes de consultation des flux. Ce type d'authentification est adapté en particulier pour une utilisation sur un site internet."
             }
         </p>
     ),
@@ -85,16 +80,11 @@ export const UserKeyFrTranslations: Translations<"fr">["UserKey"] = {
     referer_hintext: "En-tête des requêtes permettant d'identifier votre site internet",
     login: "Nom d'utilisateur",
     password: "Mot de passe",
-    apikey: "Hash",
     name_required: "Le nom de la clé est obligatoire",
     name_exists: "Une clé avec ce nom existe déjà",
     accesses_required: "Veuillez choisir au moins un accès à un service",
     login_required: "Le nom d'utilisateur est obligatoire",
     password_required: "Le mot de passe est obligatoire",
-    apikey_required: "Hash est obligatoire",
-    apikey_error: "Les caractères autorisés pour le hash sont les chiffres, lettres, _, - et .",
-    apikey_min_error: "Le hash doit faire au minimum 4 caractères",
-    apikey_max_error: "Le hash doit faire au maximum 64 caractères",
     ip_error: ({ ip }) => `la plage d'adresses IP [${ip}] n'est pas correcte`,
     no_permission: "Vous n'avez aucune permission, vous ne pouvez pas créer une clé",
     key_not_found: "Cette clé n'a pas été trouvée",
@@ -111,7 +101,7 @@ export const UserKeyEnTranslations: Translations<"en">["UserKey"] = {
     basic_type_explain: (
         <p>
             {
-                "Define a character string to provide as an additional apiKey parameter in feed consultation requests. This type of authentication is particularly suitable for use on a website"
+                "A hash value (character string) will be calculated automatically and must be provided as an additional parameter in feed consultation requests. This type of authentication is particularly suitable for use on a website."
             }
         </p>
     ),
@@ -137,16 +127,11 @@ export const UserKeyEnTranslations: Translations<"en">["UserKey"] = {
     referer_hintext: undefined,
     login: "Login",
     password: "Password",
-    apikey: "Hash",
     name_required: "Key name is mandatory",
     name_exists: "A key with this name already exists",
     accesses_required: "Please choose at least one access to a service",
     login_required: "Login is mandatory",
     password_required: "Password is mandatory",
-    apikey_required: "Hash is mandatory",
-    apikey_error: "The allowed characters for the hash are numbers, letters, _, - and .",
-    apikey_min_error: "The hash must be at least 4 characters long",
-    apikey_max_error: "The hash must be a maximum of 64 characters",
     ip_error: ({ ip }) => `IP address range [${ip}] is not correct`,
     no_permission: "You have no permissions, you cannot create a key",
     key_not_found: "Key not found",

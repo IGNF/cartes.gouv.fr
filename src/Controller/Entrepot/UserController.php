@@ -12,6 +12,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Constants\EntrepotApi\UserKeyTypes;
 
 #[Route(
     '/api/user',
@@ -100,7 +101,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
                 $body[$dto->ip_list_name] = $dto->ip_list_addresses;
             }
 
-            if ('OAUTH2' === $dto->type) {
+            if (UserKeyTypes::HASH === $dto->type || UserKeyTypes::OAUTH2 === $dto->type) {
                 $body['type_infos'] = (object) null;
             }
 
