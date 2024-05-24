@@ -6,14 +6,14 @@ Cette entité `static` a seulement une propriété `name`, pas de `tags` ni de `
 
 ## fichiers de style SLD pour une configuration du type `WMS-VECTOR`
 
-Syntaxe :
+Syntaxe du `name` :
 
 ```
-storeddata_[stored_data_id]_style_[type_config]_[table_name]
+config_[configuration_id]_style_[type_config]_[table_name]
 ```
 
-| tag              | description                                                                                          |        |
-| ---------------- | ---------------------------------------------------------------------------------------------------- | ------ |
-| `stored_data_id` | identifiant de la `stored_data` du type `VECTOR-DB` utilisé en entrée de la configuration WMS-VECTOR | uuidv4 |
-| `type_config`    | type de configuration, ici WMS-VECTOR                                                                | string |
-| `table_name`     | nom de la table                                                                                      | string |
+| variable           | description                                            |        |
+| ------------------ | ------------------------------------------------------ | ------ |
+| `configuration_id` | identifiant de la `configuration` du type `WMS-VECTOR` | uuidv4 |
+| `type_config`      | type de configuration, `wmsv` pour WMS-VECTOR          | string |
+| `table_name`       | nom de la table                                        | string |

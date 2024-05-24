@@ -49,32 +49,6 @@ Certaines entités portent une propriété `tags`, qui est un dictionnaire clé/
 
 ## `configuration`
 
-| tag              | description                             |         |
-| ---------------- | --------------------------------------- | ------- |
-| `datasheet_name` | pareil que `datasheet_name` de `upload` | string  |
-| `styles`         | informations sur les fichiers de style  | json(2) |
-
-(2) structure de json :
-
-```json
-[
-    {
-        "name": "nom du style 1",
-        "current": true,
-        "layers": [
-            {
-                "name": "nom de la table 1",
-                "annexe_id": "identifant de l'annexe"
-            },
-            {
-                "name": "nom de la table 2",
-                "annexe_id": "identifant de l'annexe"
-            }
-        ]
-    },
-    {
-        "name": "nom du style 2",
-        "layers": ["..."]
-    }
-]
-```
+| tag              | description                             |        |
+| ---------------- | --------------------------------------- | ------ |
+| `datasheet_name` | pareil que `datasheet_name` de `upload` | string |

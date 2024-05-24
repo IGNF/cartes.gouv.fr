@@ -12,3 +12,10 @@ Mais nous utilisons les labels comme des `tags` de la manière suivante : "[clé
 | ---------------- | ------------------------- | ------ |
 | `datasheet_name` | nom de la fiche de donnée | string |
 | `type`           | valeur fixe : "thumbnail" | string |
+
+### fichier de style individuel (par ex. contenu du SLD, QML etc)
+
+| label            | description               |        |
+| ---------------- | ------------------------- | ------ |
+| `datasheet_name` | nom de la fiche de donnée | string |
+| `type`           | valeur fixe : "style"     | string |
