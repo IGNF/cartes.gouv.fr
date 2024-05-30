@@ -146,8 +146,14 @@ class PyramidController extends ServiceController implements ApiControllerInterf
             ]);
 
             // Creation d'une offering
-            $offering = $this->configurationApiService->addOffering($datastoreId, $configuration['_id'], $endpoint['_id'], $endpoint['open']);
-            $offering['configuration'] = $configuration;
+            try {
+                $offering = $this->configurationApiService->addOffering($datastoreId, $configuration['_id'], $endpoint['_id'], $endpoint['open']);
+                $offering['configuration'] = $configuration;
+            } catch (\Throwable $th) {
+                // si la création de l'offering plante, on défait la création de la config
+                $this->configurationApiService->remove($datastoreId, $configuration['_id']);
+                throw $th;
+            }
 
             // création ou mise à jour de metadata
             $formData = json_decode(json_encode($dto), true);
