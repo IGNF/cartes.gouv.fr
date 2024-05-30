@@ -22,7 +22,7 @@ const addThumbnail = (datastoreId: string, data: object) => {
 };
 
 const removeThumbnail = (datastoreId: string, datasheetName: string, annexeId: string) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_thumbnail_delete", { datastoreId, datasheetName, annexeId });
+    const url = SymfonyRouting.generate("cartesgouvfr_api_annexe_thumbnail_delete", { datastoreId, datasheetName, annexeId });
     return jsonFetch<null>(url, { method: "DELETE" });
 };
 
