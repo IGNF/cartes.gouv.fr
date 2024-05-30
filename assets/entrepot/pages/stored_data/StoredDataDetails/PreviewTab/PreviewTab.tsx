@@ -50,14 +50,22 @@ const PreviewTab: FC<PreviewTabProps> = ({ datastoreId, reportQuery }) => {
                         <strong>Type :</strong> {storedData?.type}
                     </li>
 
-                    {storedData?.type === StoredDataTypeEnum.ROK4PYRAMIDVECTOR && storedData.type_infos?.levels && (
-                        <li>
-                            <strong>Liste des niveaux :</strong>{" "}
-                            {storedData.type_infos?.levels
-                                .map((l) => parseInt(l))
-                                .sort((a, b) => a - b)
-                                .join(", ")}
-                        </li>
+                    {storedData?.type === StoredDataTypeEnum.ROK4PYRAMIDVECTOR && (
+                        <>
+                            <li>
+                                <strong>Echantillon :</strong> {storedData?.tags?.is_sample === "true" ? "Oui" : "Non"}
+                            </li>
+
+                            {storedData.type_infos?.levels && (
+                                <li>
+                                    <strong>Liste des niveaux :</strong>{" "}
+                                    {storedData.type_infos?.levels
+                                        .map((l) => parseInt(l))
+                                        .sort((a, b) => a - b)
+                                        .join(", ")}
+                                </li>
+                            )}
+                        </>
                     )}
                 </ul>
             </Accordion>
