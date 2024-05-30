@@ -242,6 +242,7 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                     defaultValue: datasheetName,
                     readOnly: !!datasheetName,
                 }}
+                className={fr.cx(!!datasheetName && "fr-hidden")}
             />
             <Upload
                 label="Déposez votre fichier de données"
