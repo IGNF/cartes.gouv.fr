@@ -31,7 +31,7 @@ class WfsController extends ServiceController implements ApiControllerInterface
         DatastoreApiService $datastoreApiService,
         private ConfigurationApiService $configurationApiService,
         private StoredDataApiService $storedDataApiService,
-        private CartesServiceApiService $cartesServiceApiService,
+        CartesServiceApiService $cartesServiceApiService,
         private CapabilitiesService $capabilitiesService,
         private CartesMetadataApiService $cartesMetadataApiService,
     ) {
@@ -96,25 +96,19 @@ class WfsController extends ServiceController implements ApiControllerInterface
         #[MapRequestPayload] WfsAddDTO $dto,
     ): JsonResponse {
         try {
-            // récup anciens config et offering
-            $oldOffering = $this->configurationApiService->getOffering($datastoreId, $offeringId);
-            $oldConfiguration = $this->configurationApiService->get($datastoreId, $oldOffering['configuration']['_id']);
-            $datasheetName = $oldConfiguration['tags'][CommonTags::DATASHEET_NAME];
-
-            // suppression anciens configs et offering
-            $this->cartesServiceApiService->wfsUnpublish($datastoreId, $oldOffering, false);
+            // récup config et offering existants
+            $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId);
+            $configuration = $this->configurationApiService->get($datastoreId, $offering['configuration']['_id']);
+            $datasheetName = $configuration['tags'][CommonTags::DATASHEET_NAME];
 
             // création de requête pour la config
-            $configRequestBody = $this->getConfigRequestBody($dto, $storedDataId);
+            $configRequestBody = $this->getConfigRequestBody($dto, $storedDataId, true);
 
             $endpoint = $this->getEndpointByShareType($datastoreId, ConfigurationTypes::WFS, $dto->share_with);
 
-            // Ajout de la configuration
-            $configuration = $this->configurationApiService->add($datastoreId, $configRequestBody);
-            $configuration = $this->configurationApiService->addTags($datastoreId, $configuration['_id'], $oldConfiguration['tags']);
-
-            // Creation d'une offering
-            $offering = $this->configurationApiService->addOffering($datastoreId, $configuration['_id'], $endpoint['_id'], $endpoint['open']);
+            // Mise à jour de la configuration et offering
+            $configuration = $this->configurationApiService->replace($datastoreId, $configuration['_id'], $configRequestBody);
+            $offering = $this->configurationApiService->syncOffering($datastoreId, $offeringId);
             $offering['configuration'] = $configuration;
 
             // création ou mise à jour de metadata
@@ -133,7 +127,7 @@ class WfsController extends ServiceController implements ApiControllerInterface
         }
     }
 
-    private function getConfigRequestBody(WfsAddDTO $dto, string $storedDataId): array
+    private function getConfigRequestBody(WfsAddDTO $dto, string $storedDataId, bool $editMode = false): array
     {
         $relations = [];
 
@@ -157,7 +151,6 @@ class WfsController extends ServiceController implements ApiControllerInterface
         $body = [
             'type' => ConfigurationTypes::WFS,
             'name' => $dto->public_name,
-            'layer_name' => $dto->technical_name,
             'type_infos' => [
                 'used_data' => [[
                     'relations' => $relations,
@@ -165,6 +158,10 @@ class WfsController extends ServiceController implements ApiControllerInterface
                 ]],
             ],
         ];
+
+        if (false === $editMode) {
+            $body['layer_name'] = $dto->technical_name;
+        }
 
         if ('' !== $dto->attribution_text && '' !== $dto->attribution_url) {
             $body['attribution'] = [

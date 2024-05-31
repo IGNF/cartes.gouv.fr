@@ -34,7 +34,7 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
         DatastoreApiService $datastoreApiService,
         private ConfigurationApiService $configurationApiService,
         private StoredDataApiService $storedDataApiService,
-        private CartesServiceApiService $cartesServiceApiService,
+        CartesServiceApiService $cartesServiceApiService,
         private StaticApiService $staticApiService,
         private CapabilitiesService $capabilitiesService,
         protected Filesystem $filesystem,
@@ -123,38 +123,25 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
         $tablesNamesList = isset($data['selected_tables']) ? json_decode($data['selected_tables'], true) : [];
 
         try {
-            // récup anciens config et offering
-            $oldOffering = $this->configurationApiService->getOffering($datastoreId, $offeringId);
-            $oldConfiguration = $this->configurationApiService->get($datastoreId, $oldOffering['configuration']['_id']);
-            $datasheetName = $oldConfiguration['tags'][CommonTags::DATASHEET_NAME];
+            // récup config et offering existants
+            $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId);
+            $configuration = $this->configurationApiService->get($datastoreId, $offering['configuration']['_id']);
+            $datasheetName = $configuration['tags'][CommonTags::DATASHEET_NAME];
 
             // ajout ou mise à jour des fichiers de styles SLD
-            $styleFilesByTable = $this->sendStyleFiles($datastoreId, $tablesNamesList, $files, $oldConfiguration);
-
-            // suppression anciens configs et offering
-            $this->cartesServiceApiService->wmsVectorUnpublish($datastoreId, $oldOffering, false);
+            $styleFilesByTable = $this->sendStyleFiles($datastoreId, $tablesNamesList, $files, $configuration);
 
             // création de requête pour la config
-            $configRequestBody = $this->getConfigRequestBody($data, $tablesNamesList, $styleFilesByTable, $storedDataId);
+            $configRequestBody = $this->getConfigRequestBody($data, $tablesNamesList, $styleFilesByTable, $storedDataId, true);
 
             $endpoint = $this->getEndpointByShareType($datastoreId, ConfigurationTypes::WMSVECTOR, $data['share_with']);
 
-            // Ajout de la configuration
-            $configuration = $this->configurationApiService->add($datastoreId, $configRequestBody);
-            $configuration = $this->configurationApiService->addTags($datastoreId, $configuration['_id'], $oldConfiguration['tags']);
-
-            // remplace nom temporaire des fichiers statiques
-            foreach ($styleFilesByTable as $tableName => $staticFileId) {
-                $this->staticApiService->modifyInfo($datastoreId, $staticFileId, [
-                    'name' => sprintf('config_%s_style_wmsv_%s', $configuration['_id'], $tableName),
-                ]);
-            }
-
-            $this->cleanUnusedStyleFiles($datastoreId, $oldConfiguration, $styleFilesByTable);
-
-            // Creation d'une offering
-            $offering = $this->configurationApiService->addOffering($datastoreId, $configuration['_id'], $endpoint['_id'], $endpoint['open']);
+            // Mise à jour de la configuration et offering
+            $configuration = $this->configurationApiService->replace($datastoreId, $configuration['_id'], $configRequestBody);
+            $offering = $this->configurationApiService->syncOffering($datastoreId, $offeringId);
             $offering['configuration'] = $configuration;
+
+            $this->cleanUnusedStyleFiles($datastoreId, $configuration, $styleFilesByTable);
 
             // création ou mise à jour de metadata
             $data['languages'] = json_decode($data['languages'], true);
@@ -180,7 +167,7 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
      *
      * @return array<mixed>
      */
-    private function getConfigRequestBody(array $data, array $tablesNamesList, array $tables, string $storedDataId): array
+    private function getConfigRequestBody(array $data, array $tablesNamesList, array $tables, string $storedDataId, bool $editMode = false): array
     {
         $relations = [];
         foreach ($tablesNamesList as $tableName) {
@@ -193,7 +180,6 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
         $body = [
             'type' => ConfigurationTypes::WMSVECTOR,
             'name' => $data['public_name'],
-            'layer_name' => $data['technical_name'],
             'type_infos' => [
                 'title' => $data['public_name'],
                 'abstract' => $data['description'],
@@ -206,6 +192,10 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
                 ],
             ],
         ];
+
+        if (false === $editMode) {
+            $body['layer_name'] = $data['technical_name'];
+        }
 
         if ('' !== $data['attribution_text'] && '' !== $data['attribution_url']) {
             $body['attribution'] = [

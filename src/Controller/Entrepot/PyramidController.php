@@ -38,7 +38,7 @@ class PyramidController extends ServiceController implements ApiControllerInterf
         private ConfigurationApiService $configurationApiService,
         private StoredDataApiService $storedDataApiService,
         private ProcessingApiService $processingApiService,
-        private CartesServiceApiService $cartesServiceApiService,
+        CartesServiceApiService $cartesServiceApiService,
         private ParameterBagInterface $parameterBag,
         CapabilitiesService $capabilitiesService,
         private CartesMetadataApiService $cartesMetadataApiService,
@@ -173,27 +173,19 @@ class PyramidController extends ServiceController implements ApiControllerInterf
         #[MapRequestPayload] PublishPyramidDTO $dto
     ): JsonResponse {
         try {
-            // récup anciens config et offering
-            $oldOffering = $this->configurationApiService->getOffering($datastoreId, $offeringId);
-            $oldConfiguration = $this->configurationApiService->get($datastoreId, $oldOffering['configuration']['_id']);
+            // récup config et offering existants
+            $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId);
+            $configuration = $this->configurationApiService->get($datastoreId, $offering['configuration']['_id']);
 
             $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId);
             $datasheetName = $pyramid['tags'][CommonTags::DATASHEET_NAME];
 
-            // suppression anciens configs et offering
-            $this->cartesServiceApiService->tmsUnpublish($datastoreId, $oldOffering, false);
-
             // création de requête pour la config
-            $configRequestBody = $this->getConfigRequestBody($dto, $pyramid);
+            $configRequestBody = $this->getConfigRequestBody($dto, $pyramid, true);
 
-            $endpoint = $this->getEndpointByShareType($datastoreId, ConfigurationTypes::WMTSTMS, $dto->share_with);
-
-            // Ajout de la configuration
-            $configuration = $this->configurationApiService->add($datastoreId, $configRequestBody);
-            $configuration = $this->configurationApiService->addTags($datastoreId, $configuration['_id'], $oldConfiguration['tags']);
-
-            // Creation d'une offering
-            $offering = $this->configurationApiService->addOffering($datastoreId, $configuration['_id'], $endpoint['_id'], $endpoint['open']);
+            // Mise à jour de la configuration et offering
+            $configuration = $this->configurationApiService->replace($datastoreId, $configuration['_id'], $configRequestBody);
+            $offering = $this->configurationApiService->syncOffering($datastoreId, $offeringId);
             $offering['configuration'] = $configuration;
 
             // création ou mise à jour de metadata
@@ -209,7 +201,7 @@ class PyramidController extends ServiceController implements ApiControllerInterf
     /**
      * @param array<mixed> $pyramid
      */
-    private function getConfigRequestBody(PublishPyramidDTO $dto, array $pyramid): array
+    private function getConfigRequestBody(PublishPyramidDTO $dto, array $pyramid, bool $editMode = false): array
     {
         // Recherche de bottom_level et top_level
         $levels = $this->getBottomAndToLevel($pyramid);
@@ -217,7 +209,6 @@ class PyramidController extends ServiceController implements ApiControllerInterf
         $requestBody = [
             'type' => ConfigurationTypes::WMTSTMS,
             'name' => $dto->public_name,
-            'layer_name' => $dto->technical_name,
             'type_infos' => [
                 'title' => $dto->public_name,
                 'abstract' => '.', // json_encode($dto->description), // TODO temporairement description vide, parce que les caractères spéciaux font planter le endpoint tms
@@ -229,6 +220,10 @@ class PyramidController extends ServiceController implements ApiControllerInterf
                 ]],
             ],
         ];
+
+        if (false === $editMode) {
+            $requestBody['layer_name'] = $dto->technical_name;
+        }
 
         if ('' !== $dto->attribution_text && '' !== $dto->attribution_url) {
             $requestBody['attribution'] = [

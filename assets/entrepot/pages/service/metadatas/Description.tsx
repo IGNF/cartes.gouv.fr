@@ -14,6 +14,7 @@ import { getInspireKeywords, regex } from "../../../../utils";
 type DescriptionProps = {
     visible: boolean;
     form: UseFormReturn<ServiceFormValuesBaseType>;
+    editMode?: boolean;
 };
 
 export const getEndpointSuffix = (endpointType: EndpointTypeEnum) => {
@@ -31,7 +32,7 @@ export const getEndpointSuffix = (endpointType: EndpointTypeEnum) => {
 
 const keywords = getInspireKeywords();
 
-const Description: FC<DescriptionProps> = ({ visible, form }) => {
+const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
     const { t: tCommon } = getTranslation("Common");
     const { t } = getTranslation("MetadatasForm");
 
@@ -79,6 +80,7 @@ const Description: FC<DescriptionProps> = ({ visible, form }) => {
                 nativeInputProps={{
                     ...register("technical_name"),
                 }}
+                disabled={editMode === true}
             />
             <Input
                 label={t("metadata.description_form.public_name")}

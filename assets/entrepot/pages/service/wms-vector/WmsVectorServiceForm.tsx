@@ -340,7 +340,7 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
                     <TableSelection visible={currentStep === STEPS.TABLES_INFOS} vectorDb={vectorDbQuery.data} form={form} />
                     <UploadStyleFile visible={currentStep === STEPS.STYLE_FILE} selectedTables={selectedTables} form={form} />
                     <UploadMDFile visible={currentStep === STEPS.METADATAS_UPLOAD} form={form} />
-                    <Description visible={currentStep === STEPS.METADATAS_DESCRIPTION} form={form} />
+                    <Description visible={currentStep === STEPS.METADATAS_DESCRIPTION} form={form} editMode={editMode} />
                     <AdditionalInfo
                         datastoreId={datastoreId}
                         storedData={vectorDbQuery.data}

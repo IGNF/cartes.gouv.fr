@@ -39,6 +39,14 @@ class ConfigurationApiService extends BaseEntrepotApiService
         return $this->request('POST', "datastores/$datastoreId/configurations", $body);
     }
 
+    /**
+     * @param array<mixed> $body
+     */
+    public function replace(string $datastoreId, string $configurationId, $body = []): array
+    {
+        return $this->request('PUT', "datastores/$datastoreId/configurations/$configurationId", $body);
+    }
+
     public function remove(string $datastoreId, string $configurationId): array
     {
         return $this->request('DELETE', "datastores/$datastoreId/configurations/$configurationId");
@@ -116,6 +124,11 @@ class ConfigurationApiService extends BaseEntrepotApiService
         ];
 
         return $this->request('POST', "datastores/$datastoreId/configurations/$configurationId/offerings", $body);
+    }
+
+    public function syncOffering(string $datastoreId, string $offeringId): array
+    {
+        return $this->request('PUT', "datastores/$datastoreId/offerings/$offeringId");
     }
 
     public function removeOffering(string $datastoreId, string $offeringId): array
