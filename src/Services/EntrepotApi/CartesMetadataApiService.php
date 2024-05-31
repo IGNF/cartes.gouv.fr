@@ -57,10 +57,10 @@ class CartesMetadataApiService
     public function getThumbnailUrl(string $datastoreId, string $datasheetName): ?string
     {
         $annexeList = $this->annexeApiService->getAll($datastoreId, null, null, [
-            CommonTags::DATASHEET_NAME => $datasheetName,
-            'type' => 'thumbnail'  
+            sprintf('%s=%s', CommonTags::DATASHEET_NAME, $datasheetName),
+            'type=thumbnail',
         ]);
-        
+
         if (0 === count($annexeList)) {
             return null;
         }
@@ -68,6 +68,7 @@ class CartesMetadataApiService
         $datastore = $this->datastoreApiService->get($datastoreId);
 
         $annexeUrl = $this->parameterBag->get('annexes_url');
+
         return $annexeUrl.'/'.$datastore['technical_name'].$annexeList[0]['paths'][0];
     }
 
@@ -85,7 +86,6 @@ class CartesMetadataApiService
 
         $cswMetadata = $this->cswMetadataHelper->fromXml($apiMetadataXml);
         $cswMetadata->layers = $this->getMetadataLayers($datastoreId, $datasheetName);
-        // dd($cswMetadata->layers);
 
         $xmlFilePath = $this->cswMetadataHelper->saveToFile($cswMetadata);
         $this->metadataApiService->replaceFile($datastoreId, $apiMetadata['_id'], $xmlFilePath);
@@ -126,8 +126,8 @@ class CartesMetadataApiService
 
         // Ajout de l'etiquette si elle n'existe pas deja
         $thumbnailUrl = $this->getThumbnailUrl($datastoreId, $datasheetName);
-        if (! is_null($thumbnailUrl)) {
-            $newCswMetadata->thumbnailUrl = $thumbnailUrl;   
+        if (!is_null($thumbnailUrl)) {
+            $newCswMetadata->thumbnailUrl = $thumbnailUrl;
         }
 
         $newMetadataFilePath = $this->cswMetadataHelper->saveToFile($newCswMetadata);
@@ -156,7 +156,7 @@ class CartesMetadataApiService
         // Mise a jour de l'etiquette
         $thumbnailUrl = $this->getThumbnailUrl($datastoreId, $datasheetName);
         if ($newCswMetadata->thumbnailUrl !== $thumbnailUrl) {
-            $newCswMetadata->thumbnailUrl = $thumbnailUrl;   
+            $newCswMetadata->thumbnailUrl = $thumbnailUrl;
         }
 
         $newMetadataFilePath = $this->cswMetadataHelper->saveToFile($newCswMetadata);
