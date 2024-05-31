@@ -2,6 +2,7 @@ twig:
     default_path: "%kernel.project_dir%/templates"
     globals:
         api_espaceco_url: "%api_espaceco_url%"
+        catalogue_url: "%catalogue_url%"
 
 when@test:
     twig:

@@ -4,7 +4,7 @@ import { FC, ReactNode, memo } from "react";
 
 // import { useLang } from "../../i18n/i18n";
 import SymfonyRouting from "../../modules/Routing";
-import { routes } from "../../router/router";
+import { routes, publicRoutes, useRoute } from "../../router/router";
 import { useAuthStore } from "../../stores/AuthStore";
 // import LanguageSelector from "../Utils/LanguageSelector";
 
@@ -16,10 +16,11 @@ type AppHeaderProps = {
 const AppHeader: FC<AppHeaderProps> = ({ navItems = [] }) => {
     const user = useAuthStore((state) => state.user);
     // const { lang, setLang } = useLang();
+    const route = useRoute();
 
     const quickAccessItems: (HeaderProps.QuickAccessItem | ReactNode)[] = [];
 
-    quickAccessItems.push({
+    const geoportailQuickAccessItem: HeaderProps.QuickAccessItem = {
         iconId: "fr-icon-arrow-right-line",
         linkProps: {
             href: "https://www.geoportail.gouv.fr/carte",
@@ -29,19 +30,41 @@ const AppHeader: FC<AppHeaderProps> = ({ navItems = [] }) => {
             title: "Accéder au Géoportail - ouvre une nouvelle fenêtre",
         },
         text: "Accéder au Géoportail",
-    });
+    };
+    const catalogue_url = (document.getElementById("app_env") as HTMLDivElement)?.dataset?.["catalogueUrl"] ?? "/catalogue";
+    const catalogueQuickAccessItem: HeaderProps.QuickAccessItem = {
+        iconId: "fr-icon-arrow-right-line",
+        linkProps: {
+            href: catalogue_url,
+            className: "fr-btn--icon-right",
+            target: "_blank",
+            rel: "noreferrer",
+            title: "Catalogue - ouvre une nouvelle fenêtre",
+        },
+        text: "Catalogue",
+    };
 
     if (!user) {
         // utilisateur n'est pas connecté
-        // quickAccessItems.push({
-        //     iconId: "fr-icon-account-fill",
-        //     linkProps: {
-        //         href: SymfonyRouting.generate("cartesgouvfr_security_login"),
-        //     },
-        //     text: "Se connecter",
-        // });
+        quickAccessItems.push(geoportailQuickAccessItem);
+
+        quickAccessItems.push({
+            iconId: "fr-icon-account-fill",
+            linkProps: {
+                href: SymfonyRouting.generate("cartesgouvfr_security_login"),
+            },
+            text: "Se connecter",
+        });
     } else {
         // utilisateur est connecté
+        if (route.name === false || publicRoutes.includes(route.name)) {
+            // on garde le lien vers le géoportail sur les pages également accessibles publiquement
+            quickAccessItems.push(geoportailQuickAccessItem);
+        } else {
+            // on met plutôt le lien catalogue sur les pages accessibles uniquement connecté
+            quickAccessItems.push(catalogueQuickAccessItem);
+        }
+
         let btnMyAccountText = `${user.first_name ?? ""} ${user.last_name ?? ""}`;
         if (btnMyAccountText.replace(/\s+/g, "") === "") {
             btnMyAccountText = user.user_name;
