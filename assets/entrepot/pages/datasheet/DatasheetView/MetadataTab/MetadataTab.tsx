@@ -11,8 +11,8 @@ import ExtentMap from "../../../../../components/Utils/ExtentMap";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import TextCopyToClipboard from "../../../../../components/Utils/TextCopyToClipboard";
 import { useTranslation } from "../../../../../i18n/i18n";
-import SymfonyRouting from "../../../../../modules/Routing";
 import { CartesApiException } from "../../../../../modules/jsonFetch";
+import { catalogueUrl } from "../../../../../router/router";
 import MetadataField from "./MetadataField";
 
 type MetadataTabProps = {
@@ -29,6 +29,8 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, datasheet, metadataQue
         () => [...(datasheet?.vector_db_list ?? []), ...(datasheet?.pyramid_list ?? [])],
         [datasheet?.vector_db_list, datasheet?.pyramid_list]
     );
+
+    const catalogueDatasheetUrl = useMemo(() => `${catalogueUrl}/dataset/${metadata?.file_identifier}`, [metadata?.file_identifier]);
 
     return (
         <>
@@ -48,7 +50,7 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, datasheet, metadataQue
                             buttonProps={{
                                 children: "Consulter le catalogue",
                                 linkProps: {
-                                    href: SymfonyRouting.generate("cartesgouvfr_catalogue_datasheet_view", { fileIdentifier: metadata.file_identifier }),
+                                    href: catalogueDatasheetUrl,
                                     rel: "noreferrer",
                                     target: "_blank",
                                 },
@@ -146,12 +148,8 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, datasheet, metadataQue
                             <MetadataField
                                 title={"Lien vers la métadonnée"}
                                 content={
-                                    <a
-                                        href={SymfonyRouting.generate("cartesgouvfr_catalogue_datasheet_view", { fileIdentifier: metadata.file_identifier })}
-                                        rel={"noreferrer"}
-                                        target={"_blank"}
-                                    >
-                                        {SymfonyRouting.generate("cartesgouvfr_catalogue_datasheet_view", { fileIdentifier: metadata.file_identifier }, true)}
+                                    <a href={catalogueDatasheetUrl} rel={"noreferrer"} target={"_blank"}>
+                                        {catalogueDatasheetUrl}
                                     </a>
                                 }
                             />

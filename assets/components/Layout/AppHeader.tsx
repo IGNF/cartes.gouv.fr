@@ -4,7 +4,7 @@ import { FC, ReactNode, memo } from "react";
 
 // import { useLang } from "../../i18n/i18n";
 import SymfonyRouting from "../../modules/Routing";
-import { routes, publicRoutes, useRoute } from "../../router/router";
+import { routes, publicRoutes, useRoute, catalogueUrl } from "../../router/router";
 import { useAuthStore } from "../../stores/AuthStore";
 // import LanguageSelector from "../Utils/LanguageSelector";
 
@@ -31,11 +31,11 @@ const AppHeader: FC<AppHeaderProps> = ({ navItems = [] }) => {
         },
         text: "Accéder au Géoportail",
     };
-    const catalogue_url = (document.getElementById("app_env") as HTMLDivElement)?.dataset?.["catalogueUrl"] ?? "/catalogue";
+
     const catalogueQuickAccessItem: HeaderProps.QuickAccessItem = {
         iconId: "fr-icon-arrow-right-line",
         linkProps: {
-            href: catalogue_url,
+            href: catalogueUrl,
             className: "fr-btn--icon-right",
             target: "_blank",
             rel: "noreferrer",

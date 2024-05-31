@@ -74,9 +74,9 @@ class ServiceController extends AbstractController implements ApiControllerInter
 
             $this->cartesServiceApiService->unpublish($datastoreId, $offeringId);
 
-            $datasheetName = $configuration['tags'][CommonTags::DATASHEET_NAME];
+            if (isset($configuration['tags'][CommonTags::DATASHEET_NAME])) {
+                $datasheetName = $configuration['tags'][CommonTags::DATASHEET_NAME];
 
-            if ($datasheetName) {
                 $this->cartesMetadataApiService->updateLayers($datastoreId, $datasheetName);
             }
 
