@@ -1,14 +1,14 @@
-{% extends "Mailer/base.html.twig" %}
-{% trans_default_domain "cartesgouvfr" %}
+{% extends 'Mailer/base.html.twig' %}
+{% trans_default_domain 'cartesgouvfr' %}
 
 {% block body %}
     <div>
         <p>{{ 'datastore_creation_request.email_acknowledgement.heading'|trans }}</p>
         <hr />
-        <p><strong>{{ 'datastore_creation_request.email_support.date'|trans }} : </strong>{{ sendDate|date('d-m-Y H:i', "Europe/Paris") }}</p>
+        <p><strong>{{ 'datastore_creation_request.email_support.date'|trans }} : </strong>{{ sendDate|date('d-m-Y H:i', 'Europe/Paris') }}</p>
         <p>
             <strong>{{ 'datastore_creation_request.email_acknowledgement.message'|trans }} : </strong>
-            {% include "Mailer/datastore_create_details.html.twig" %}
+            {{ include('Mailer/datastore_create_details.html.twig') }}
         </p>
     </div>
 {% endblock %}

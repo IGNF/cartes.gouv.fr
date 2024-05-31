@@ -1,12 +1,12 @@
-{% extends "Mailer/base.html.twig" %}
-{% trans_default_domain "cartesgouvfr" %}
+{% extends 'Mailer/base.html.twig' %}
+{% trans_default_domain 'cartesgouvfr' %}
 
 {% block body %}
     <div>
         <p>{{ 'contact.email_acknowledgement.heading'|trans }}</p>
         <hr />
 
-        <p><strong>{{ 'contact.email_acknowledgement.date'|trans }} : </strong>{{ sendDate|date('d-m-Y H:i', "Europe/Paris") }}</p>
+        <p><strong>{{ 'contact.email_acknowledgement.date'|trans }} : </strong>{{ sendDate|date('d-m-Y H:i', 'Europe/Paris') }}</p>
 
         <p>
             <strong>{{ 'contact.email_acknowledgement.message'|trans }} : </strong><br />{{ message|raw|nl2br }}

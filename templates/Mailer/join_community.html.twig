@@ -1,5 +1,5 @@
-{% extends "Mailer/base.html.twig" %}
-{% trans_default_domain "cartesgouvfr" %}
+{% extends 'Mailer/base.html.twig' %}
+{% trans_default_domain 'cartesgouvfr' %}
 
 {% block body %}
     <div>
@@ -10,7 +10,7 @@
             <strong>{{ 'mailer.last_name'|trans }} : </strong>{% if app.user.lastName is not empty %}{{ app.user.lastName }}{% else %}{{ 'contact.email_support.not_specified'|trans }}{% endif %}<br>
             <strong>{{ 'mailer.first_name'|trans }} : </strong>{% if app.user.firstName is not empty %}{{ app.user.firstName }}{% else %}{{ 'contact.email_support.not_specified'|trans }}{% endif %}<br>
             <strong>{{ 'mailer.user_id'|trans }} : </strong>{{ app.user.id }}<br>
-            <strong>{{ 'mailer.date'|trans }} : </strong>{{ sendDate|date('d-m-Y H:i', "Europe/Paris") }}
+            <strong>{{ 'mailer.date'|trans }} : </strong>{{ sendDate|date('d-m-Y H:i', 'Europe/Paris') }}
         </p>
         <strong>{{ 'join_community.email_support.message'|trans }}</strong><br>
         {{ message|e }}
