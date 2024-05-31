@@ -5,10 +5,10 @@ import { memo } from "react";
 import { FooterConsentManagementItem, FooterPersonalDataPolicyItem } from "../../config/consentManagement";
 import { routes } from "../../router/router";
 
-import logoIgn from "../../img/logo-ign.png";
-import logoMinistereTransformation from "../../img/logo-ministere-transformation-2.jpg";
-import logoMinistereEcologie from "../../img/logo-ministere-ecologie-2.jpg";
-import logoCnig from "../../img/logo-cnig-2.jpg";
+import logoIgn from "../../img/partners-logos/logo-ign.png";
+import logoMinistereTransformation from "../../img/partners-logos/logo-ministere-transformation.jpg";
+import logoMinistereEcologie from "../../img/partners-logos/logo-ministere-ecologie.jpg";
+import logoCnig from "../../img/partners-logos/logo-rf-cnig.jpg";
 
 const AppFooter = () => {
     return (
