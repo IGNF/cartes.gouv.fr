@@ -6,9 +6,9 @@ import { FooterConsentManagementItem, FooterPersonalDataPolicyItem } from "../..
 import { routes } from "../../router/router";
 
 import logoIgn from "../../img/logo-ign.png";
-import logoMinistereTransformation from "../../img/logo-ministere-transformation.png";
-import logoMinistereEcologie from "../../img/logo-ministere-ecologie.png";
-import logoCnig from "../../img/logo-cnig.png";
+import logoMinistereTransformation from "../../img/logo-ministere-transformation-2.jpg";
+import logoMinistereEcologie from "../../img/logo-ministere-ecologie-2.jpg";
+import logoCnig from "../../img/logo-cnig-2.jpg";
 
 const AppFooter = () => {
     return (
