@@ -42,7 +42,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
     const route = useRoute();
     const queryClient = useQueryClient();
 
-    const datasheetDeleteMutation = useMutation({
+    const datasheetDeleteMutation = useMutation<null, CartesApiException>({
         mutationFn: () => api.datasheet.remove(datastoreId, datasheetName),
         onSuccess() {
             queryClient.setQueryData<Datasheet[]>(RQKeys.datastore_datasheet_list(datastoreId), (datasheetList = []) => {
@@ -100,6 +100,12 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                         </Badge>
                         {(datasheetQuery.isFetching || metadataQuery.isFetching) && <LoadingIcon largeIcon={true} />}
                     </div>
+
+                    {datasheetDeleteMutation.error && (
+                        <div className={fr.cx("fr-grid-row", "fr-mb-4w")}>
+                            <Alert severity="error" closable={true} title={datasheetDeleteMutation.error.message} />
+                        </div>
+                    )}
 
                     <div className={fr.cx("fr-grid-row", "fr-mb-4w")}>
                         <div className={fr.cx("fr-col-2")}>

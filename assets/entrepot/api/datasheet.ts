@@ -26,7 +26,7 @@ const getServices = (datastoreId: string, datasheetName: string, otherOptions: R
 
 const remove = (datastoreId: string, datasheetName: string) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_datasheet_delete", { datastoreId, datasheetName });
-    return jsonFetch(url, {
+    return jsonFetch<null>(url, {
         method: "DELETE",
     });
 };
