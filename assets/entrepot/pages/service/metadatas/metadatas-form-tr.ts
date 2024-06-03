@@ -77,9 +77,9 @@ export const MetadatasFormFrTranslations: Translations<"fr">["MetadatasForm"] = 
     "attribution.title": "Attribution",
     "attribution.explain":
         "L'attribution est une mention que les consommateurs de ce service doivent afficher de manière visible sur les cartes qui l'utilise. Elle est généralement brève et désigne la source des données tout en pointant vers une page web qui décrit ses conditions d'utilisation ou la page d'accueil de l'organisme producteur. ll est généralement choisi de faire figurer cette attribution en petits caractères au bas des cartes.",
-    "attribution_form.text": "Texte à afficher",
+    "attribution_form.text": "Texte à afficher (optionnel)",
     "attribution_form.hint_text": "Texte bref à faire figurer sur les cartes pour désigner la source des données",
-    "attribution_form.url": "URL de l'attribution",
+    "attribution_form.url": "URL de l'attribution (optionnel)",
     "attribution_form.hint_url":
         "Adresse de la page web vers laquelle doit pointer l'attribution. Il peut s'agir du site web de l'organisme producteur, d'une page de conditions d'utilisation des données ou de toute autre URL valide en lien avec les données représentées.",
     "metadata.additionnal_infos_form.language": "Langue des métadonnées",
