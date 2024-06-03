@@ -3,6 +3,7 @@
 namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\CommonTags;
+use App\Constants\EntrepotApi\PermissionTypes;
 use App\Controller\ApiControllerInterface;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
@@ -122,25 +123,46 @@ class ServiceController extends AbstractController implements ApiControllerInter
 
     protected function getEndpointByShareType(string $datastoreId, string $configType, string $shareWith): array
     {
-        // TODO : implémentation partielle, tous les partages ne sont pas couverts
         if ('all_public' === $shareWith) {
-            $endpoints = $this->datastoreApiService->getEndpointsList($datastoreId, [
-                'type' => $configType,
-                'open' => true,
-            ]);
+            $open = true;
         } elseif ('your_community' === $shareWith) {
-            $endpoints = $this->datastoreApiService->getEndpointsList($datastoreId, [
-                'type' => $configType,
-                'open' => false,
-            ]);
+            $open = false;
         } else {
             throw new CartesApiException('Valeur du champ [share_with] est invalide', Response::HTTP_BAD_REQUEST, ['share_with' => $shareWith]);
         }
+
+        $endpoints = $this->datastoreApiService->getEndpointsList($datastoreId, [
+            'type' => $configType,
+            'open' => $open,
+        ]);
 
         if (0 === count($endpoints)) {
             throw new CartesApiException("Aucun point d'accès (endpoint) du datastore ne peut convenir à la demande", Response::HTTP_BAD_REQUEST, ['share_with' => $shareWith]);
         }
 
         return $endpoints[0]['endpoint'];
+    }
+
+    /**
+     * @param array<mixed> $offering
+     */
+    protected function addPermissionForCurrentCommunity(string $datastoreId, array $offering): void
+    {
+        $endDate = new \DateTime();
+        $endDate->add(new \DateInterval('P3M')); // date du jour + 3 mois
+        $endDate->setTime(23, 59, 0);
+
+        $datastore = $this->datastoreApiService->get($datastoreId);
+
+        $permissionRequestBody = [
+            'end_date' => $endDate->format(\DateTime::ATOM),
+            'licence' => sprintf('Utilisation de %s', $offering['layer_name']),
+            'offerings' => [$offering['_id']],
+            'type' => PermissionTypes::COMMUNITY,
+            'only_oauth' => false,
+            'communities' => [$datastore['community']['_id']],
+        ];
+
+        $this->datastoreApiService->addPermission($datastoreId, $permissionRequestBody);
     }
 }

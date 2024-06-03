@@ -324,6 +324,7 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
                         endpointType={EndpointTypeEnum.WFS}
                         visible={currentStep === STEPS.ACCESSRESTRICTIONS}
                         form={form}
+                        service={offeringQuery.data}
                     />
 
                     <ButtonsGroup

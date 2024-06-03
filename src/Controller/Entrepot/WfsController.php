@@ -69,6 +69,11 @@ class WfsController extends ServiceController implements ApiControllerInterface
                 throw $th;
             }
 
+            // création d'une permission pour la communauté actuelle
+            if ('your_community' === $dto->share_with) {
+                $this->addPermissionForCurrentCommunity($datastoreId, $offering);
+            }
+
             // création ou mise à jour de metadata
             $formData = json_decode(json_encode($dto), true);
             $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $formData);
@@ -97,18 +102,32 @@ class WfsController extends ServiceController implements ApiControllerInterface
     ): JsonResponse {
         try {
             // récup config et offering existants
-            $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId);
-            $configuration = $this->configurationApiService->get($datastoreId, $offering['configuration']['_id']);
-            $datasheetName = $configuration['tags'][CommonTags::DATASHEET_NAME];
+            $oldOffering = $this->configurationApiService->getOffering($datastoreId, $offeringId);
+            $oldConfiguration = $this->configurationApiService->get($datastoreId, $oldOffering['configuration']['_id']);
+            $datasheetName = $oldConfiguration['tags'][CommonTags::DATASHEET_NAME];
 
             // création de requête pour la config
             $configRequestBody = $this->getConfigRequestBody($dto, $storedDataId, true);
 
             $endpoint = $this->getEndpointByShareType($datastoreId, ConfigurationTypes::WFS, $dto->share_with);
 
-            // Mise à jour de la configuration et offering
-            $configuration = $this->configurationApiService->replace($datastoreId, $configuration['_id'], $configRequestBody);
-            $offering = $this->configurationApiService->syncOffering($datastoreId, $offeringId);
+            // Mise à jour de la configuration
+            $configuration = $this->configurationApiService->replace($datastoreId, $oldConfiguration['_id'], $configRequestBody);
+
+            // on recrée l'offering si changement d'endpoint, sinon demande la synchronisation
+            if ($oldOffering['open'] !== $endpoint['open']) {
+                $this->configurationApiService->removeOffering($datastoreId, $oldOffering['_id']);
+
+                $offering = $this->configurationApiService->addOffering($datastoreId, $oldConfiguration['_id'], $endpoint['_id'], $endpoint['open']);
+
+                if (false === $offering['open']) {
+                    // création d'une permission pour la communauté actuelle
+                    $this->addPermissionForCurrentCommunity($datastoreId, $offering);
+                }
+            } else {
+                $offering = $this->configurationApiService->syncOffering($datastoreId, $offeringId);
+            }
+
             $offering['configuration'] = $configuration;
 
             // création ou mise à jour de metadata

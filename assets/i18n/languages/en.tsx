@@ -30,6 +30,7 @@ import type { Translations } from "../i18n";
 import { EspaceCoCommunitiesEnTranslations } from "../../espaceco/pages/communities/EspaceCoCommunitiesTr";
 import { DatasheetListEnTranslations } from "../../entrepot/pages/datasheet/DatasheetList/DatasheetList";
 import { SldStyleValidationErrorsEnTranslations } from "../../validations/SldStyleValidationErrorsTr";
+import { AccessRestrictionsEnTranslations } from "../../entrepot/pages/service/AccessRestrictions";
 
 export const translations: Translations<"en"> = {
     Common: commonEnTranslations,
@@ -63,4 +64,5 @@ export const translations: Translations<"en"> = {
     PyramidVectorTmsServiceForm: PyramidVectorTmsServiceFormEnTranslations,
     EspaceCoCommunities: EspaceCoCommunitiesEnTranslations,
     DatasheetList: DatasheetListEnTranslations,
+    AccessRestrictions: AccessRestrictionsEnTranslations,
 };

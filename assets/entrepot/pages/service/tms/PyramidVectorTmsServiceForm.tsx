@@ -234,6 +234,7 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
                         endpointType={EndpointTypeEnum.WMTSTMS}
                         visible={currentStep === STEPS.ACCESSRESTRICTIONS}
                         form={form}
+                        service={offeringQuery.data}
                     />
 
                     <ButtonsGroup

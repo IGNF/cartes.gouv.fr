@@ -9,6 +9,7 @@ import { VectorDbListItemFrTranslations } from "../../entrepot/pages/datasheet/D
 import { DatasheetViewFrTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasheetView";
 import { DatastorePermissionsFrTranslations } from "../../entrepot/pages/datastore/ManagePermissions/DatastorePermissionsTr";
 import { DatastoreManageStorageFrTranslations } from "../../entrepot/pages/datastore/ManageStorage/DatastoreManageStorage";
+import { AccessRestrictionsFrTranslations } from "../../entrepot/pages/service/AccessRestrictions";
 import { TableSelectionFrTranslations } from "../../entrepot/pages/service/TableSelection";
 import { MetadatasFormFrTranslations } from "../../entrepot/pages/service/metadatas/metadatas-form-tr";
 import { ValidationMetadatasFrTranslations } from "../../entrepot/pages/service/metadatas/metadatas-validation-tr";
@@ -63,4 +64,5 @@ export const translations: Translations<"fr"> = {
     PyramidVectorTmsServiceForm: PyramidVectorTmsServiceFormFrTranslations,
     EspaceCoCommunities: EspaceCoCommunitiesFrTranslations,
     DatasheetList: DatasheetListFrTranslations,
+    AccessRestrictions: AccessRestrictionsFrTranslations,
 };

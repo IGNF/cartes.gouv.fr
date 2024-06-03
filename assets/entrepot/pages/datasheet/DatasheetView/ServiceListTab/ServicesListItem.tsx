@@ -116,6 +116,12 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                                         onClick: () => console.warn("Action non implémentée"),
                                     },
                                     {
+                                        text: "Gérer les permissions d'accès",
+                                        iconId: "ri-lock-line",
+                                        linkProps: routes.datastore_manage_permissions({ datastoreId }).link,
+                                        disabled: service.open === true,
+                                    },
+                                    {
                                         text: "Modifier les informations de publication",
                                         iconId: "ri-edit-box-line",
                                         linkProps: (() => {

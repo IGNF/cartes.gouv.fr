@@ -352,6 +352,7 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
                         endpointType={EndpointTypeEnum.WMSVECTOR}
                         visible={currentStep === STEPS.ACCESSRESTRICTIONS}
                         form={form}
+                        service={offeringQuery.data}
                     />
 
                     <ButtonsGroup

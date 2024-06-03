@@ -90,6 +90,11 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
                 throw $th;
             }
 
+            // création d'une permission pour la communauté actuelle
+            if ('your_community' === $data['share_with']) {
+                $this->addPermissionForCurrentCommunity($datastoreId, $offering);
+            }
+
             // création ou mise à jour de metadata
             $data['languages'] = json_decode($data['languages'], true);
             $data['category'] = json_decode($data['category'], true);
@@ -124,24 +129,38 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
 
         try {
             // récup config et offering existants
-            $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId);
-            $configuration = $this->configurationApiService->get($datastoreId, $offering['configuration']['_id']);
-            $datasheetName = $configuration['tags'][CommonTags::DATASHEET_NAME];
+            $oldOffering = $this->configurationApiService->getOffering($datastoreId, $offeringId);
+            $oldConfiguration = $this->configurationApiService->get($datastoreId, $oldOffering['configuration']['_id']);
+            $datasheetName = $oldConfiguration['tags'][CommonTags::DATASHEET_NAME];
 
             // ajout ou mise à jour des fichiers de styles SLD
-            $styleFilesByTable = $this->sendStyleFiles($datastoreId, $tablesNamesList, $files, $configuration);
+            $styleFilesByTable = $this->sendStyleFiles($datastoreId, $tablesNamesList, $files, $oldConfiguration);
 
             // création de requête pour la config
             $configRequestBody = $this->getConfigRequestBody($data, $tablesNamesList, $styleFilesByTable, $storedDataId, true);
 
             $endpoint = $this->getEndpointByShareType($datastoreId, ConfigurationTypes::WMSVECTOR, $data['share_with']);
 
-            // Mise à jour de la configuration et offering
-            $configuration = $this->configurationApiService->replace($datastoreId, $configuration['_id'], $configRequestBody);
-            $offering = $this->configurationApiService->syncOffering($datastoreId, $offeringId);
+            // Mise à jour de la configuration
+            $configuration = $this->configurationApiService->replace($datastoreId, $oldConfiguration['_id'], $configRequestBody);
+
+            // on recrée l'offering si changement d'endpoint, sinon demande la synchronisation
+            if ($oldOffering['open'] !== $endpoint['open']) {
+                $this->configurationApiService->removeOffering($datastoreId, $oldOffering['_id']);
+
+                $offering = $this->configurationApiService->addOffering($datastoreId, $oldConfiguration['_id'], $endpoint['_id'], $endpoint['open']);
+
+                if (false === $offering['open']) {
+                    // création d'une permission pour la communauté actuelle
+                    $this->addPermissionForCurrentCommunity($datastoreId, $offering);
+                }
+            } else {
+                $offering = $this->configurationApiService->syncOffering($datastoreId, $offeringId);
+            }
+
             $offering['configuration'] = $configuration;
 
-            $this->cleanUnusedStyleFiles($datastoreId, $configuration, $styleFilesByTable);
+            $this->cleanUnusedStyleFiles($datastoreId, $oldConfiguration, $styleFilesByTable);
 
             // création ou mise à jour de metadata
             $data['languages'] = json_decode($data['languages'], true);
