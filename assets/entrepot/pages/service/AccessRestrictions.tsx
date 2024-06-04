@@ -92,7 +92,17 @@ const AccessRestrictions: FC<AccessRestrictionProps> = ({ datastoreId, endpointT
                     severity="warning"
                     closable={false}
                     title={t("share_with_value_change_warning_title")}
-                    description={t("share_with_value_change_warning_desc")}
+                    description={t("share_with_value_change_warning_desc_restricted_to_public")}
+                />
+            )}
+
+            {/* message d'avertissement quand on passe de tout public à restreint */}
+            {service?.open === true && shareWith === "your_community" && (
+                <Alert
+                    severity="warning"
+                    closable={false}
+                    title={t("share_with_value_change_warning_title")}
+                    description={t("share_with_value_change_warning_desc_public_to_restricted")}
                 />
             )}
         </div>
@@ -109,7 +119,8 @@ export const { i18n } = declareComponentKeys<
     | "share_with_your_community"
     | "share_with_your_community_hint_text"
     | "share_with_value_change_warning_title"
-    | "share_with_value_change_warning_desc"
+    | "share_with_value_change_warning_desc_restricted_to_public"
+    | "share_with_value_change_warning_desc_public_to_restricted"
 >()({
     AccessRestrictions,
 });
@@ -123,9 +134,12 @@ export const AccessRestrictionsFrTranslations: Translations<"fr">["AccessRestric
     share_with_your_community_hint_text:
         "Vous devrez accorder une permission aux communautés et/ou utilisateurs souhaités pour leur autoriser l'accès. Ils devront par la suite configurer une clé à partir de cette permission pour accéder au service. Une permission va être créée automatiquement votre propre communauté.",
     share_with_value_change_warning_title: "Changement de restrictions d'accès",
-    share_with_value_change_warning_desc:
+    share_with_value_change_warning_desc_restricted_to_public:
         // eslint-disable-next-line quotes
-        'Vous êtes sur le point de modifier les restrictions d\'accès de "Restreint" à "Tout public". Vous allez donc perdre les permissions créées sur ce service définitivement.',
+        'Vous êtes sur le point de modifier les restrictions d\'accès de "Restreint" à "Tout public". Le service changera d\'adresse et les permissions que vous aviez configurées seront supprimées définitivement car elles ne seront plus nécessaires.',
+    share_with_value_change_warning_desc_public_to_restricted:
+        // eslint-disable-next-line quotes
+        'Vous êtes sur le point de modifier les restrictions d\'accès de "Tout public" à "Restreint". Le service changera d\'adresse.',
 };
 
 export const AccessRestrictionsEnTranslations: Translations<"en">["AccessRestrictions"] = {
@@ -136,5 +150,6 @@ export const AccessRestrictionsEnTranslations: Translations<"en">["AccessRestric
     share_with_your_community: undefined,
     share_with_your_community_hint_text: undefined,
     share_with_value_change_warning_title: undefined,
-    share_with_value_change_warning_desc: undefined,
+    share_with_value_change_warning_desc_restricted_to_public: undefined,
+    share_with_value_change_warning_desc_public_to_restricted: undefined,
 };
