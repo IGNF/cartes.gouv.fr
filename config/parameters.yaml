@@ -35,5 +35,5 @@ parameters:
             create_vect_pyr: "%env(resolve:API_ENTREPOT_PROC_CREATE_VECT_PYR)%"
 
     api_espaceco_url: "%env(resolve:API_ESPACE_COLLABORATIF_URL)%"
-
     catalogue_url: "%env(resolve:CATALOGUE_URL)%"
+    geonetwork_url: "%env(resolve:GEONETWORK_URL)%"

@@ -298,3 +298,15 @@ export type Metadata = MetadataResponseDto & {
         datasheet_name?: string;
     };
 };
+
+export type GeonetworkMetadataLayers = {
+    name?: string;
+    endpointType?: string;
+    endpointUrl?: string;
+    offeringId?: string;
+};
+
+export type GeonetworkMetadataResponse = {
+    contact_email: string;
+    private_layers: GeonetworkMetadataLayers[];
+};

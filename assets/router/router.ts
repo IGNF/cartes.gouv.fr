@@ -59,6 +59,13 @@ const routeDefs = {
         (p) => `${appRoot}/datastore/${p.datastoreId}/members`
     ),
 
+    ask_for_accesses: defineRoute(
+        {
+            fileIdentifier: param.path.string,
+        },
+        (p) => `${appRoot}/ask-for-accesses/${p.fileIdentifier}`
+    ),
+
     datastore_create_request_confirm: defineRoute(`${appRoot}/confirmation`),
 
     datastore_manage_storage: defineRoute(

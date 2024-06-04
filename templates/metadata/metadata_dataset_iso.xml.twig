@@ -133,6 +133,12 @@
         </gmd:dateStamp>
     {% endif %}
 
+    {% if update_date is defined %}
+        <gmd:dateStamp>
+            <gco:DateTime>{{ update_date }}</gco:DateTime>
+        </gmd:dateStamp>
+    {% endif %}
+
     {% if layers is defined %}
         <gmd:distributionInfo>
             <gmd:MD_Distribution>

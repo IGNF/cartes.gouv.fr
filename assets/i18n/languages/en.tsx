@@ -31,6 +31,7 @@ import { EspaceCoCommunitiesEnTranslations } from "../../espaceco/pages/communit
 import { DatasheetListEnTranslations } from "../../entrepot/pages/datasheet/DatasheetList/DatasheetList";
 import { SldStyleValidationErrorsEnTranslations } from "../../validations/SldStyleValidationErrorsTr";
 import { AccessRestrictionsEnTranslations } from "../../entrepot/pages/service/AccessRestrictions";
+import { AskForAccessesEnTranslations } from "../../entrepot/pages/ask_for_accesses";
 
 export const translations: Translations<"en"> = {
     Common: commonEnTranslations,
@@ -47,6 +48,7 @@ export const translations: Translations<"en"> = {
     ValidationMetadatas: ValidationMetadatasEnTranslations,
     MetadatasForm: MetadatasFormEnTranslations,
     Contact: contactEnTranslations,
+    AskForAccesses: AskForAccessesEnTranslations,
     navItems: navItemsEnTranslations,
     datastoreNavItems: datastoreNavItemsEnTranslations,
     VectorDbListItem: VectorDbListItemEnTranslations,

@@ -15,6 +15,7 @@ import annexe from "./annexe";
 import style from "./style";
 import metadata from "./metadata";
 import statics from "./statics";
+import geonetwork from "./geonetwork";
 
 const api = {
     contact,
@@ -36,5 +37,6 @@ const api = {
     statics,
     // epsg.io
     epsg,
+    geonetwork,
 };
 export default api;

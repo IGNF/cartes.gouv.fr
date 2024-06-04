@@ -53,6 +53,8 @@ const RQKeys = {
     my_keys: (): string[] => ["my_keys"],
     my_key: (keyId: string): string[] => ["my_key", keyId],
     my_permissions: (): string[] => ["my_permissions"],
+
+    ask_for_accesses: (fileIdentifier: string): string[] => ["ask_for_accesses", fileIdentifier],
 };
 
 export default RQKeys;

@@ -17,6 +17,7 @@ class CswMetadata
     public ?string $title;
     public ?string $abstract;
     public ?string $creationDate;
+    public ?string $updateDate;
 
     /** @var array<string> */
     public ?array $thematicCategories;

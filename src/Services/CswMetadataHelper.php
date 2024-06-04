@@ -103,7 +103,17 @@ class CswMetadataHelper
         $cswMetadata->charset = $xpath->query('/gmd:MD_Metadata/gmd:characterSet/gmd:MD_CharacterSetCode')->item(0)->textContent;
         $cswMetadata->title = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:title/gco:CharacterString')->item(0)->textContent;
         $cswMetadata->abstract = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:abstract/gco:CharacterString')->item(0)->textContent;
-        $cswMetadata->creationDate = $xpath->query('/gmd:MD_Metadata/gmd:dateStamp/gco:Date')->item(0)->textContent;
+        
+        $list = $xpath->query('/gmd:MD_Metadata/gmd:dateStamp/gco:Date');
+        if (1 === count($list)) {
+            $cswMetadata->creationDate = $list->item(0)->textContent;   
+        }
+
+        $list = $xpath->query('/gmd:MD_Metadata/gmd:dateStamp/gco:DateTime');
+        if (1 === count($list)) {
+            $cswMetadata->updateDate = $list->item(0)->textContent;   
+        }
+        
         $cswMetadata->thematicCategories = $keywordsList;
         $cswMetadata->contactEmail = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:pointOfContact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress/gco:CharacterString')->item(0)->textContent;
         $cswMetadata->organisationName = $xpath->query('/gmd:MD_Metadata/gmd:contact/gmd:CI_ResponsibleParty/gmd:organisationName/gco:CharacterString')->item(0)->textContent;

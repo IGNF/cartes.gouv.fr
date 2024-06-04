@@ -9,6 +9,7 @@ import RedirectToLogin from "../pages/RedirectToLogin";
 import PageNotFound from "../pages/error/PageNotFound";
 import { useAuthStore } from "../stores/AuthStore";
 import { knownRoutes, publicRoutes, useRoute } from "./router";
+import AskForAccesses from "../entrepot/pages/ask_for_accesses";
 
 const About = lazy(() => import("../pages/About"));
 const Documentation = lazy(() => import("../pages/Documentation"));
@@ -106,6 +107,8 @@ const RouterRenderer: FC = () => {
                 return <UserKeyForm />;
             case "user_key_edit":
                 return <UserKeyForm keyId={route.params.keyId} />;
+            case "ask_for_accesses":
+                return <AskForAccesses fileIdentifier={route.params.fileIdentifier} />;
             case "datastore_manage_storage":
                 return <DatastoreManageStorage datastoreId={route.params.datastoreId} />;
             case "datastore_manage_permissions":

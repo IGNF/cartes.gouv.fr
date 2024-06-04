@@ -25,6 +25,7 @@ import { PermissionsFrTranslations } from "../../entrepot/pages/users/permission
 import { EspaceCoCommunitiesFrTranslations } from "../../espaceco/pages/communities/EspaceCoCommunitiesTr";
 import { TMSStyleFilesManagerFrTranslations } from "../../modules/Style/TMSStyleFilesManager";
 import { contactFrTranslations } from "../../pages/contact/Contact";
+import { AskForAccessesFrTranslations } from "../../entrepot/pages/ask_for_accesses";
 import { mapboxStyleValidationFrTranslations } from "../../validations/MapboxStyleValidator";
 import { SldStyleValidationErrorsFrTranslations } from "../../validations/SldStyleValidationErrorsTr";
 import { commonFrTranslations } from "../Common";
@@ -47,6 +48,7 @@ export const translations: Translations<"fr"> = {
     MetadatasForm: MetadatasFormFrTranslations,
     ValidationMetadatas: ValidationMetadatasFrTranslations,
     Contact: contactFrTranslations,
+    AskForAccesses: AskForAccessesFrTranslations,
     navItems: navItemsFrTranslations,
     datastoreNavItems: datastoreNavItemsFrTranslations,
     VectorDbListItem: VectorDbListItemFrTranslations,
