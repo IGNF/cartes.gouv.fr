@@ -70,34 +70,43 @@ const DatastoreCreationForm: FC = () => {
     return (
         <AppLayout navItems={navItems} documentTitle={Translator.trans("datastore_creation_request.title")}>
             <div className={fr.cx("fr-grid-row")}>
-                <h1>{Translator.trans("datastore_creation_request.title")}</h1>
-                <p>
-                    Lorem ipsum, dolor sit amet consectetur adipisicing elit. Vel labore tempora id aspernatur culpa, ducimus repudiandae doloribus a
-                    doloremque, maiores fugit velit accusamus libero molestias?
-                </p>
-                <p>{Translator.trans("mandatory_fields")}</p>
-                {error && <Alert title={Translator.trans("datastore_creation_request.form.error_title")} closable description={error} severity="error" />}
-                <div className={fr.cx("fr-col-12", "fr-col-md-12")}>
-                    <Input
-                        label={Translator.trans("datastore_creation_request.form.name")}
-                        hintText={Translator.trans("datastore_creation_request.form.name_hint")}
-                        state={errors.name ? "error" : "default"}
-                        stateRelatedMessage={errors?.name?.message}
-                        nativeInputProps={{
-                            ...register("name"),
-                        }}
-                    />
-                    <Input
-                        label={Translator.trans("datastore_creation_request.form.information")}
-                        hintText={Translator.trans("datastore_creation_request.form.information_hint")}
-                        textArea
-                        nativeTextAreaProps={{
-                            ...register("information"),
-                            rows: 3,
-                        }}
-                    />
-                    <div className={fr.cx("fr-grid-row", "fr-grid-row--right")}>
-                        <Button onClick={handleSubmit(onSubmit)}>{Translator.trans("datastore_creation_request.form.send")}</Button>
+                <div className={fr.cx("fr-col-12")}>
+                    <h1>{Translator.trans("datastore_creation_request.title")}</h1>
+                    <p>Un espace de travail permet de disposer&nbsp;:</p>
+                    <ul>
+                        <li>
+                            d’un entrepôt permettant le stockage de données, de fichiers statiques et de configurations pour la publication de
+                            géoservices&nbsp;;
+                        </li>
+                        <li>
+                            d’une communauté d’utilisateurs pour laquelle vous pourrez gérer les droits de ses membres suivant les modalités de l’offre
+                            «&nbsp;Essentiel&nbsp;».
+                        </li>
+                    </ul>
+                    <p>{Translator.trans("mandatory_fields")}</p>
+                    {error && <Alert title={Translator.trans("datastore_creation_request.form.error_title")} closable description={error} severity="error" />}
+                    <div className={fr.cx("fr-col-12", "fr-col-md-12")}>
+                        <Input
+                            label={Translator.trans("datastore_creation_request.form.name")}
+                            hintText={Translator.trans("datastore_creation_request.form.name_hint")}
+                            state={errors.name ? "error" : "default"}
+                            stateRelatedMessage={errors?.name?.message}
+                            nativeInputProps={{
+                                ...register("name"),
+                            }}
+                        />
+                        <Input
+                            label={Translator.trans("datastore_creation_request.form.information")}
+                            hintText={Translator.trans("datastore_creation_request.form.information_hint")}
+                            textArea
+                            nativeTextAreaProps={{
+                                ...register("information"),
+                                rows: 3,
+                            }}
+                        />
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--right")}>
+                            <Button onClick={handleSubmit(onSubmit)}>{Translator.trans("datastore_creation_request.form.send")}</Button>
+                        </div>
                     </div>
                 </div>
             </div>
