@@ -120,6 +120,22 @@ join_community:
         date: "Date d'envoi"
         message: "Votre message :"
 
+accesses_request:
+    email_support:
+        heading: "Un utilisateur a fait une demande d'accès à des services de diffusion restreints.<br/>Voici les informations utiles pour que vous puissiez donner suite à cette demande."
+        services_title: "Services concernés par la demande :"
+        datasheet_catalog_url: "<strong>Fiche catalogue :</strong>&nbsp;%url%"
+        name: "<strong>Nom : </strong>&nbsp;%name%"
+        type: "<strong>Type : </strong>&nbsp;%type%"
+        asking_permission_title: "Le demandeur souhaite des permissions pour :"
+        himself: "Lui-même"
+        community: "La communauté %community% (id=%id%)"
+        rendez_vous: "Rendez-vous dans l'espace de travail à partir duquel vous avez publier ces services pour ajouter les permissions nécessaires."
+    email_acknowledgement:
+        heading: "Votre demande a été envoyée à l'IGN et une réponse vous sera apportée dans les meilleurs délais."
+        date: "Date d'envoi"
+        message: "Rappel de votre demande"
+
 service:
     wfs:
         new:

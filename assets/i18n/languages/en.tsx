@@ -1,15 +1,16 @@
 import { datastoreNavItemsEnTranslations } from "../../config/datastoreNavItems";
 import { navItemsEnTranslations } from "../../config/navItems";
-import { TMSStyleFilesManagerEnTranslations } from "../../modules/Style/TMSStyleFilesManager";
+import { AccessesRequestEnTranslations } from "../../entrepot/pages/AccessesRequest";
 import { AddMemberEnTranslations } from "../../entrepot/pages/communities/AddMember";
 import { CommunityMembersEnTranslations } from "../../entrepot/pages/communities/CommunityMembers";
-import { contactEnTranslations } from "../../pages/contact/Contact";
 import { DashboardProEnTranslations } from "../../entrepot/pages/dashboard/DashboardPro";
+import { DatasheetListEnTranslations } from "../../entrepot/pages/datasheet/DatasheetList/DatasheetList";
 import { PyramidListItemFrTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidList/PyramidListItem";
 import { VectorDbListItemEnTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasetListTab/VectorDbList/VectorDbListItem";
 import { DatasheetViewEnTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasheetView";
 import { DatastorePermissionsEnTranslations } from "../../entrepot/pages/datastore/ManagePermissions/DatastorePermissionsTr";
 import { DatastoreManageStorageEnTranslations } from "../../entrepot/pages/datastore/ManageStorage/DatastoreManageStorage";
+import { AccessRestrictionsEnTranslations } from "../../entrepot/pages/service/AccessRestrictions";
 import { TableSelectionEnTranslations } from "../../entrepot/pages/service/TableSelection";
 import { MetadatasFormEnTranslations } from "../../entrepot/pages/service/metadatas/metadatas-form-tr";
 import { ValidationMetadatasEnTranslations } from "../../entrepot/pages/service/metadatas/metadatas-validation-tr";
@@ -22,16 +23,15 @@ import { MyAccessKeysEnTranslations } from "../../entrepot/pages/users/MyAccessK
 import { UserKeyEnTranslations } from "../../entrepot/pages/users/keys/UserKeyTr";
 import { UserKeysListTabEnTranslations } from "../../entrepot/pages/users/keys/UserKeysListTab";
 import { PermissionsEnTranslations } from "../../entrepot/pages/users/permissions/PermissionsTr";
+import { EspaceCoCommunitiesEnTranslations } from "../../espaceco/pages/communities/EspaceCoCommunitiesTr";
+import { TMSStyleFilesManagerEnTranslations } from "../../modules/Style/TMSStyleFilesManager";
+import { contactEnTranslations } from "../../pages/contact/Contact";
 import { mapboxStyleValidationEnTranslations } from "../../validations/MapboxStyleValidator";
+import { SldStyleValidationErrorsEnTranslations } from "../../validations/SldStyleValidationErrorsTr";
 import { commonEnTranslations } from "../Common";
 import { RightsEnTranslations } from "../Rights";
 import { StyleEnTranslations } from "../Style";
 import type { Translations } from "../i18n";
-import { EspaceCoCommunitiesEnTranslations } from "../../espaceco/pages/communities/EspaceCoCommunitiesTr";
-import { DatasheetListEnTranslations } from "../../entrepot/pages/datasheet/DatasheetList/DatasheetList";
-import { SldStyleValidationErrorsEnTranslations } from "../../validations/SldStyleValidationErrorsTr";
-import { AccessRestrictionsEnTranslations } from "../../entrepot/pages/service/AccessRestrictions";
-import { AskForAccessesEnTranslations } from "../../entrepot/pages/ask_for_accesses";
 
 export const translations: Translations<"en"> = {
     Common: commonEnTranslations,
@@ -48,7 +48,7 @@ export const translations: Translations<"en"> = {
     ValidationMetadatas: ValidationMetadatasEnTranslations,
     MetadatasForm: MetadatasFormEnTranslations,
     Contact: contactEnTranslations,
-    AskForAccesses: AskForAccessesEnTranslations,
+    AccessesRequest: AccessesRequestEnTranslations,
     navItems: navItemsEnTranslations,
     datastoreNavItems: datastoreNavItemsEnTranslations,
     VectorDbListItem: VectorDbListItemEnTranslations,

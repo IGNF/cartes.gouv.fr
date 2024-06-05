@@ -30,7 +30,7 @@ export type ComponentKey =
     | typeof import("../entrepot/pages/service/metadatas/metadatas-form-tr").i18n
     | typeof import("../entrepot/pages/service/metadatas/metadatas-validation-tr").i18n
     | typeof import("../pages/contact/Contact").i18n
-    | typeof import("../entrepot/pages/ask_for_accesses").i18n
+    | typeof import("../entrepot/pages/AccessesRequest").i18n
     | typeof import("../entrepot/pages/datastore/ManageStorage/DatastoreManageStorage").i18n
     | typeof import("../entrepot/pages/datastore/ManagePermissions/DatastorePermissionsTr").i18n
     | typeof import("../entrepot/pages/datasheet/DatasheetList/DatasheetList").i18n

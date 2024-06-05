@@ -1,0 +1,14 @@
+{% extends 'Mailer/base.html.twig' %}
+{% trans_default_domain 'cartesgouvfr' %}
+
+{% block body %}
+    <div>
+        <p>{{ 'accesses_request.email_acknowledgement.heading'|trans }}</p>
+        <hr />
+        <p><strong>{{ 'accesses_request.email_acknowledgement.date'|trans }} : </strong>{{ sendDate|date('d-m-Y H:i', 'Europe/Paris') }}</p>
+        <p>
+            <strong>{{ 'accesses_request.email_acknowledgement.message'|trans }} : </strong>
+            {{ include('Mailer/accesses_request_details.html.twig') }}
+        </p>
+    </div>
+{% endblock %}

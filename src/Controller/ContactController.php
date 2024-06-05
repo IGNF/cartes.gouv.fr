@@ -211,4 +211,62 @@ class ContactController extends AbstractController
             return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
+    #[Route(
+        '/accesses_request',
+        name: 'accesses_request',
+        options: ['expose' => true],
+        methods: ['POST'],
+        condition: 'request.isXmlHttpRequest()'
+    )]
+    public function accessesRequest(Request $request): JsonResponse
+    {
+        /** @var User */
+        $user = $this->getUser();
+
+        $data = json_decode($request->getContent(), true);
+
+        try {
+            $now = new \DateTime();
+
+            $userEmail = $user->getEmail();
+
+            $mailParams = [
+                'sendDate' => $now,
+                'catalogueDatasheetUrl' => $data['catalogueDatasheetUrl'],
+                'layers' => $data['layers'],
+            ];
+            if (isset($data['myself'])) {
+                $mailParams['myself'] = true;   
+            }
+            if (isset($data['beneficiaries'])) {
+                $mailParams['beneficiaries'] = $data['beneficiaries'];
+            }
+            
+            $context = array_merge(['userEmail' => $userEmail], $mailParams);
+            $this->mailerLogger->info('User ({userEmail}) : Demande d\'accès à des services de diffusion de données dont l\'accès est restreint', $context);
+
+            // Envoi du mail à l'adresse de contact des données
+            $this->mailerService->sendMail(
+                $data['emailContact'],
+                "[cartes.gouv.fr] Demande d'accès à des services de diffusion restreints",
+                'Mailer/accesses_request.html.twig',
+                $mailParams
+            );
+
+            // Envoi du mail d'accusé de réception à l'utilisateur
+            $this->mailerService->sendMail(
+                $userEmail,
+                '[cartes.gouv.fr] Accusé de réception de votre demande',
+                'Mailer/accesses_request_acknowledgement.html.twig',
+                $mailParams
+            );
+
+            return new JsonResponse(['state' => 'success']);
+        } catch (BadRequestHttpException|AppException $e) {
+            return new JsonResponse(['state' => 'error', 'message' => $e->getMessage()], $e->getStatusCode());
+        } catch (\Exception $e) {
+            return new JsonResponse(['state' => 'error', 'message' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 }
