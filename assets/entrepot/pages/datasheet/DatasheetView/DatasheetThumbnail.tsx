@@ -23,6 +23,7 @@ import api from "../../../api";
 
 import "../../../../sass/components/buttons.scss";
 
+import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import placeholder1x1 from "../../../../img/placeholder.1x1.png";
 
 const addThumbnailModal = createModal({
@@ -270,7 +271,7 @@ const DatasheetThumbnail: FC<DatasheetThumbnailProps> = ({ datastoreId, datashee
                                 className={fr.cx("fr-input-group")}
                             />
                         </div>
-                        <div className={fr.cx("fr-col-3")}>
+                        <div className={cx(fr.cx("fr-col-3"), "frx-thumbnail-modal")}>
                             <img src={modalImageUrl === "" ? placeholder1x1 : modalImageUrl} width="128px" />
                         </div>
                     </div>
