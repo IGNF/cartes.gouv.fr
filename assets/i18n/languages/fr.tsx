@@ -25,7 +25,7 @@ import { UserKeysListTabFrTranslations } from "../../entrepot/pages/users/keys/U
 import { PermissionsFrTranslations } from "../../entrepot/pages/users/permissions/PermissionsTr";
 import { EspaceCoCommunitiesFrTranslations } from "../../espaceco/pages/communities/EspaceCoCommunitiesTr";
 import { TMSStyleFilesManagerFrTranslations } from "../../modules/Style/TMSStyleFilesManager";
-import { contactFrTranslations } from "../../pages/contact/Contact";
+import { contactFrTranslations } from "../../pages/assistance/contact/Contact";
 import { mapboxStyleValidationFrTranslations } from "../../validations/MapboxStyleValidator";
 import { SldStyleValidationErrorsFrTranslations } from "../../validations/SldStyleValidationErrorsTr";
 import { commonFrTranslations } from "../Common";

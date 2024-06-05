@@ -3,6 +3,7 @@ import { navItemsEnTranslations } from "../../config/navItems";
 import { AccessesRequestEnTranslations } from "../../entrepot/pages/AccessesRequest";
 import { AddMemberEnTranslations } from "../../entrepot/pages/communities/AddMember";
 import { CommunityMembersEnTranslations } from "../../entrepot/pages/communities/CommunityMembers";
+import { contactEnTranslations } from "../../pages/assistance/contact/Contact";
 import { DashboardProEnTranslations } from "../../entrepot/pages/dashboard/DashboardPro";
 import { DatasheetListEnTranslations } from "../../entrepot/pages/datasheet/DatasheetList/DatasheetList";
 import { PyramidListItemFrTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidList/PyramidListItem";
@@ -25,7 +26,6 @@ import { UserKeysListTabEnTranslations } from "../../entrepot/pages/users/keys/U
 import { PermissionsEnTranslations } from "../../entrepot/pages/users/permissions/PermissionsTr";
 import { EspaceCoCommunitiesEnTranslations } from "../../espaceco/pages/communities/EspaceCoCommunitiesTr";
 import { TMSStyleFilesManagerEnTranslations } from "../../modules/Style/TMSStyleFilesManager";
-import { contactEnTranslations } from "../../pages/contact/Contact";
 import { mapboxStyleValidationEnTranslations } from "../../validations/MapboxStyleValidator";
 import { SldStyleValidationErrorsEnTranslations } from "../../validations/SldStyleValidationErrorsTr";
 import { commonEnTranslations } from "../Common";

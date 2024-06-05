@@ -1,7 +1,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { Accordion } from "@codegouvfr/react-dsfr/Accordion";
 
-import AppLayout from "../components/Layout/AppLayout";
+import AppLayout from "../../components/Layout/AppLayout";
 
 const Faq = () => {
     return (

@@ -100,6 +100,7 @@ const AppHeader: FC<AppHeaderProps> = ({ navItems = [] }) => {
                 title: "Accueil - cartes.gouv.fr",
             }}
             serviceTitle="cartes.gouv.fr"
+            serviceTagline="Le service public des cartes et données du territoire"
             quickAccessItems={quickAccessItems}
             // renderSearchInput={({ className, id, name, placeholder, type }) => (
             //     <input className={className} id={id} name={name} placeholder={placeholder} type={type} />

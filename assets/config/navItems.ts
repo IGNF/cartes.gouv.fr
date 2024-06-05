@@ -14,6 +14,31 @@ export const defaultNavItems = (t: TranslationFunction<"navItems", ComponentKey>
                     text: t("documentation"),
                 },
                 {
+                    linkProps: routes.offer().link,
+                    text: t("offer"),
+                },
+                {
+                    linkProps: routes.join().link,
+                    text: t("join"),
+                },
+            ],
+            text: t("start"),
+        },
+        {
+            text: t("catalog"),
+            linkProps: { href: "#" },
+        },
+        {
+            text: t("maps"),
+            linkProps: { href: "#" },
+        },
+        {
+            text: t("news"),
+            linkProps: routes.news_list().link,
+        },
+        {
+            menuLinks: [
+                {
                     linkProps: routes.faq().link,
                     text: t("faq"),
                 },
@@ -21,12 +46,12 @@ export const defaultNavItems = (t: TranslationFunction<"navItems", ComponentKey>
                     linkProps: routes.contact().link,
                     text: t("nous écrire"),
                 },
+                {
+                    linkProps: routes.service_status().link,
+                    text: t("service status"),
+                },
             ],
-            text: t("start"),
-        },
-        {
-            text: t("news"),
-            linkProps: routes.news_list().link,
+            text: t("assistance"),
         },
         {
             text: t("about"),
@@ -38,22 +63,36 @@ export const defaultNavItems = (t: TranslationFunction<"navItems", ComponentKey>
 };
 
 // traductions
-export const { i18n } = declareComponentKeys<"documentation" | "faq" | "nous écrire" | "start" | "news" | "about">()("navItems");
+export const { i18n } = declareComponentKeys<
+    "documentation" | "offer" | "join" | "faq" | "nous écrire" | "start" | "maps" | "catalog" | "news" | "assistance" | "service status" | "about"
+>()("navItems");
 
 export const navItemsFrTranslations: Translations<"fr">["navItems"] = {
     "nous écrire": "Nous écrire",
-    documentation: "Documentation Géoplateforme",
+    documentation: "Documentation",
+    offer: "Offre",
+    join: "Nous rejoindre",
     faq: "Questions fréquentes",
     start: "Commencer avec cartes.gouv",
+    catalog: "Catalogue",
+    maps: "Cartes",
     news: "Actualités",
+    assistance: "Assistance",
+    "service status": "Niveau de service",
     about: "À propos",
 };
 
 export const navItemsEnTranslations: Translations<"en">["navItems"] = {
     "nous écrire": "Contact us",
-    documentation: undefined,
+    documentation: "Documentation",
+    offer: "Offer",
+    join: "Join us",
     faq: "Frequently asked questions",
     start: "Start with cartes.gouv",
+    catalog: "Catalog",
+    maps: "Maps",
     news: "News",
+    assistance: "Assistance",
+    "service status": "Level of service",
     about: "About",
 };

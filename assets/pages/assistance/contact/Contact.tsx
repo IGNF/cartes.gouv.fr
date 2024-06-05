@@ -10,17 +10,17 @@ import { JSX, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
-import AppLayout from "../../components/Layout/AppLayout";
-import LoadingIcon from "../../components/Utils/LoadingIcon";
-import Wait from "../../components/Utils/Wait";
-import { ComponentKey, declareComponentKeys, useTranslation, type Translations } from "../../i18n/i18n";
-import SymfonyRouting from "../../modules/Routing";
-import { jsonFetch } from "../../modules/jsonFetch";
-import { routes } from "../../router/router";
-import { useAuthStore } from "../../stores/AuthStore";
-import { regex } from "../../utils";
+import AppLayout from "../../../components/Layout/AppLayout";
+import LoadingIcon from "../../../components/Utils/LoadingIcon";
+import Wait from "../../../components/Utils/Wait";
+import { ComponentKey, declareComponentKeys, useTranslation, type Translations } from "../../../i18n/i18n";
+import SymfonyRouting from "../../../modules/Routing";
+import { jsonFetch } from "../../../modules/jsonFetch";
+import { routes } from "../../../router/router";
+import { useAuthStore } from "../../../stores/AuthStore";
+import { regex } from "../../../utils";
 
-import "../../sass/pages/nous_ecrire.scss";
+import "../../../sass/pages/nous_ecrire.scss";
 
 const charRange = [10, 8000];
 

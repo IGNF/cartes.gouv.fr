@@ -28,6 +28,10 @@ const AppFooter = () => {
                 Cartes.gouv.fr est développé par l’Institut national de l’information géographique et forestière (IGN) et ses partenaires. Le site s’appuie sur la Géoplateforme, la nouvelle infrastructure publique, ouverte et collaborative des données géographiques.
             "
             bottomItems={[
+                {
+                    linkProps: routes.terms_of_service().link,
+                    text: "Conditions générales d’utilisation",
+                },
                 <FooterPersonalDataPolicyItem key="footer-personal-data-policy-item" />,
                 <FooterConsentManagementItem key="footer-consent-management-item" />,
                 // Choix du thème clair/sombre

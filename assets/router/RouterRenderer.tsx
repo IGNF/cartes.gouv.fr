@@ -13,15 +13,19 @@ import AccessesRequest from "../entrepot/pages/AccessesRequest";
 
 const About = lazy(() => import("../pages/About"));
 const Documentation = lazy(() => import("../pages/Documentation"));
-const Contact = lazy(() => import("../pages/contact/Contact"));
-const Thanks = lazy(() => import("../pages/contact/Thanks"));
+const Offer = lazy(() => import("../pages/Offer"));
+const Join = lazy(() => import("../pages/Join"));
+const Faq = lazy(() => import("../pages/assistance/Faq"));
+const Contact = lazy(() => import("../pages/assistance/contact/Contact"));
+const Thanks = lazy(() => import("../pages/assistance/contact/Thanks"));
+const ServiceStatus = lazy(() => import("../pages/assistance/ServiceStatus"));
 const NewsList = lazy(() => import("../pages/news/NewsList"));
 const NewsArticle = lazy(() => import("../pages/news/NewsArticle"));
-const Faq = lazy(() => import("../pages/Faq"));
 const Sitemap = lazy(() => import("../pages/footer/Sitemap"));
 const Accessibility = lazy(() => import("../pages/footer/Accessibility"));
 const LegalNotice = lazy(() => import("../pages/footer/LegalNotice"));
 const PersonalData = lazy(() => import("../pages/footer/PersonalData"));
+const TermsOfService = lazy(() => import("../pages/footer/TermsOfService"));
 
 const Me = lazy(() => import("../entrepot/pages/users/Me"));
 const MyAccessKeys = lazy(() => import("../entrepot/pages/users/MyAccessKeys"));
@@ -81,6 +85,10 @@ const RouterRenderer: FC = () => {
                 return <About />;
             case "documentation":
                 return <Documentation />;
+            case "offer":
+                return <Offer />;
+            case "join":
+                return <Join />;
             case "contact":
                 return <Contact />;
             case "contact_thanks":
@@ -99,6 +107,10 @@ const RouterRenderer: FC = () => {
                 return <LegalNotice />;
             case "personal_data":
                 return <PersonalData />;
+            case "terms_of_service":
+                return <TermsOfService />;
+            case "service_status":
+                return <ServiceStatus />;
             case "my_account":
                 return <Me />;
             case "my_access_keys":

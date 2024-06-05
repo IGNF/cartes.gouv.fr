@@ -29,6 +29,10 @@ const routeDefs = {
     accessibility: defineRoute(`${appRoot}/accessibilite`),
     legal_notice: defineRoute(`${appRoot}/mentions-legales`),
     personal_data: defineRoute(`${appRoot}/donnees-personnelles`),
+    offer: defineRoute(`${appRoot}/offre`),
+    join: defineRoute(`${appRoot}/nous-rejoindre`),
+    terms_of_service: defineRoute(`${appRoot}/cgu`),
+    service_status: defineRoute(`${appRoot}/niveau-de-service`),
 
     // routes protégées
     // utilisateur
@@ -233,4 +237,8 @@ export const publicRoutes: typeof knownRoutes = [
     "accessibility",
     "legal_notice",
     "personal_data",
+    "offer",
+    "join",
+    "terms_of_service",
+    "service_status",
 ];
