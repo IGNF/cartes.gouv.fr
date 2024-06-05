@@ -19,6 +19,8 @@ import { catalogueUrl, routes } from "../../router/router";
 import api from "../api";
 import { useAuthStore } from "../../stores/AuthStore";
 import SymfonyRouting from "../../modules/Routing";
+import AppHeader from "../../components/Layout/AppHeader";
+import AppFooter from "../../components/Layout/AppFooter";
 
 type AskForAccesses = {
     fileIdentifier: string;
@@ -120,9 +122,7 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
 
     return (
         <div className={fr.cx("fr-container", "fr-py-2w")}>
-            {query.isLoading ? (
-                <LoadingText />
-            ) : query.error ? (
+            {query.error ? (
                 <Alert
                     severity="error"
                     closable={false}
@@ -131,7 +131,9 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
                 />
             ) : (
                 <>
+                    <AppHeader />
                     <h1>{t("title")}</h1>
+                    {query.isLoading && <LoadingText />}
                     {sendError !== undefined && <Alert severity={"error"} title={tCommon("error")} description={sendError} className={fr.cx("fr-my-3w")} />}
                     {query.data?.private_layers.length ? (
                         <div>
@@ -200,6 +202,7 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
                             <Button linkProps={routes.dashboard_pro().link}>{t("back_to_dashboard")}</Button>
                         </div>
                     )}
+                    <AppFooter />
                 </>
             )}
             {isSending && (
