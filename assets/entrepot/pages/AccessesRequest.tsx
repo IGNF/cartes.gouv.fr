@@ -133,9 +133,11 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
                 <>
                     <AppHeader />
                     <h1>{t("title")}</h1>
-                    {query.isLoading && <LoadingText />}
-                    {sendError !== undefined && <Alert severity={"error"} title={tCommon("error")} description={sendError} className={fr.cx("fr-my-3w")} />}
-                    {query.data?.private_layers.length ? (
+                    {query.isLoading ? (
+                        <LoadingText />
+                    ) : sendError !== undefined ? (
+                        <Alert severity={"error"} title={tCommon("error")} description={sendError} className={fr.cx("fr-my-3w")} />
+                    ) : query.data?.private_layers.length ? (
                         <div>
                             {t("explain", { url: catalogueDatasheetUrl })}
                             <Checkbox
