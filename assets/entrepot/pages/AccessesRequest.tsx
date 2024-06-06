@@ -165,11 +165,12 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
                                 />
                                 <Checkbox
                                     legend={t("beneficiaries")}
+                                    hintText={t("beneficiaries_hintext")}
                                     options={[
                                         {
                                             label: t("myself"),
                                             nativeInputProps: {
-                                                onClick: (e) => {
+                                                onChange: (e) => {
                                                     const checked = e.currentTarget.checked;
                                                     setValue("myself", checked);
                                                 },
@@ -233,6 +234,7 @@ export const { i18n } = declareComponentKeys<
     | "explain_no_access"
     | "back_to_dashboard"
     | "beneficiaries"
+    | { K: "beneficiaries_hintext"; R: JSX.Element }
     | "myself"
     | { K: "community"; P: { name: string }; R: string }
     | "min_layers_error"
@@ -253,6 +255,13 @@ export const AccessesRequestFrTranslations: Translations<"fr">["AccessesRequest"
     explain_no_access: "Cette fiche ne décrit aucun service de diffusion dont l'accès est restreint. Vous avez déjà accès à toutes les données décrites.",
     back_to_dashboard: "Retour au tableau de bord",
     beneficiaries: "Bénéficiaires",
+    beneficiaries_hintext: (
+        <span>
+            Vous pouvez demander au producteur des données de vous accorder une permission d&apos;accès personnelle ou
+            <br />
+            demander qu&apos;il accorde cette permission à tous les membres d&apos;une communauté à laquelle vous appartenez.
+        </span>
+    ),
     myself: "Moi-même",
     community: ({ name }) => `La communauté ${name}`,
     min_layers_error: "Vous devez sélectionner au moins une couche",
@@ -265,6 +274,7 @@ export const AccessesRequestEnTranslations: Translations<"en">["AccessesRequest"
     explain_no_access: undefined,
     back_to_dashboard: undefined,
     beneficiaries: "Bénéficiaries",
+    beneficiaries_hintext: undefined,
     myself: "Myself",
     community: ({ name }) => `Community ${name}`,
     min_layers_error: undefined,
