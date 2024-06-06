@@ -32,6 +32,7 @@ import { commonEnTranslations } from "../Common";
 import { RightsEnTranslations } from "../Rights";
 import { StyleEnTranslations } from "../Style";
 import type { Translations } from "../i18n";
+import { DatasheetUploadFormEnTranslations } from "../../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadForm";
 
 export const translations: Translations<"en"> = {
     Common: commonEnTranslations,
@@ -65,6 +66,7 @@ export const translations: Translations<"en"> = {
     UploadStyleFile: UploadStyleFileEnTranslations,
     PyramidVectorTmsServiceForm: PyramidVectorTmsServiceFormEnTranslations,
     EspaceCoCommunities: EspaceCoCommunitiesEnTranslations,
+    DatasheetUploadForm: DatasheetUploadFormEnTranslations,
     DatasheetList: DatasheetListEnTranslations,
     AccessRestrictions: AccessRestrictionsEnTranslations,
 };

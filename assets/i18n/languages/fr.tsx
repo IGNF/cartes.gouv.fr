@@ -5,6 +5,7 @@ import { AddMemberFrTranslations } from "../../entrepot/pages/communities/AddMem
 import { CommunityMembersFrTranslations } from "../../entrepot/pages/communities/CommunityMembers";
 import { DashboardProFrTranslations } from "../../entrepot/pages/dashboard/DashboardPro";
 import { DatasheetListFrTranslations } from "../../entrepot/pages/datasheet/DatasheetList/DatasheetList";
+import { DatasheetUploadFormFrTranslations } from "../../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadForm";
 import { PyramidListItemFrTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidList/PyramidListItem";
 import { VectorDbListItemFrTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasetListTab/VectorDbList/VectorDbListItem";
 import { DatasheetViewFrTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasheetView";
@@ -65,6 +66,7 @@ export const translations: Translations<"fr"> = {
     UploadStyleFile: UploadStyleFileFrTranslations,
     PyramidVectorTmsServiceForm: PyramidVectorTmsServiceFormFrTranslations,
     EspaceCoCommunities: EspaceCoCommunitiesFrTranslations,
+    DatasheetUploadForm: DatasheetUploadFormFrTranslations,
     DatasheetList: DatasheetListFrTranslations,
     AccessRestrictions: AccessRestrictionsFrTranslations,
 };

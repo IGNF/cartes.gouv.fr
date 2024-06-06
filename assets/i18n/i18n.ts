@@ -33,6 +33,7 @@ export type ComponentKey =
     | typeof import("../pages/assistance/contact/Contact").i18n
     | typeof import("../entrepot/pages/datastore/ManageStorage/DatastoreManageStorage").i18n
     | typeof import("../entrepot/pages/datastore/ManagePermissions/DatastorePermissionsTr").i18n
+    | typeof import("../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadForm").i18n
     | typeof import("../entrepot/pages/datasheet/DatasheetList/DatasheetList").i18n
     | typeof import("../entrepot/pages/datasheet/DatasheetView/DatasetListTab/VectorDbList/VectorDbListItem").i18n
     | typeof import("../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidList/PyramidListItem").i18n

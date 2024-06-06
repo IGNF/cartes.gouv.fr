@@ -2,7 +2,6 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { Input } from "@codegouvfr/react-dsfr/Input";
-import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
 import { Select } from "@codegouvfr/react-dsfr/Select";
 import { Upload } from "@codegouvfr/react-dsfr/Upload";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -20,9 +19,9 @@ import LoadingText from "../../../../components/Utils/LoadingText";
 import Progress from "../../../../components/Utils/Progress";
 import Wait from "../../../../components/Utils/Wait";
 import defaultProjections from "../../../../data/default_projections.json";
+import { Translations, declareComponentKeys, useTranslation } from "../../../../i18n/i18n";
 import FileUploader from "../../../../modules/FileUploader";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
-import Translator from "../../../../modules/Translator";
 import { routes, useRoute } from "../../../../router/router";
 import { getFileExtension, regex } from "../../../../utils";
 import api from "../../../api";
@@ -45,6 +44,9 @@ type DatasheetUploadFormProps = {
     datastoreId: string;
 };
 const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
+    const { t } = useTranslation("DatasheetUploadForm");
+    const { t: tCommon } = useTranslation("Common");
+
     const route = useRoute();
 
     const datasheetName: string | undefined = useMemo(() => route.params?.["datasheetName"], [route.params]);
@@ -53,12 +55,9 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
         .object({
             data_name: yup
                 .string()
-                .required("Le nom de la donnée est obligatoire")
-                .max(99, "Le nom de la fiche de donnée peut avoir une longueur maximale de 99 caractères")
-                .matches(
-                    regex.datasheet_name,
-                    "Le nom de la fiche de donnée ne peut contenir que des caractères alphanumériques, espaces blancs et certains caractères spéciaux"
-                )
+                .required(t("datasheet.name_mandatory_error"))
+                .max(99, t("datasheet.name_max_length_error"))
+                .matches(regex.datasheet_name, t("datasheet.name_regex_error"))
                 .test({
                     name: "is-unique",
                     test(dataName, ctx) {
@@ -69,15 +68,14 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
 
                         const existingDataList = datasheetListQuery?.data?.map((data) => data?.name);
                         if (existingDataList?.includes(dataName)) {
-                            return ctx.createError({ message: `Une fiche de donnée existe déjà avec le nom "${dataName}"` });
+                            return ctx.createError({ message: t("datasheet.name_already_exists_error", { datasheetName: dataName }) });
                         }
 
                         return true;
                     },
                 }),
-            data_technical_name: yup.string().required("Le nom technique de la donnée est obligatoire"),
-            data_srid: yup.string().required("La projection (srid) est obligatoire"),
-            data_type: yup.string().required("Le format de donnée est obligatoire"),
+            data_technical_name: yup.string().required(t("technical_name_mandatory_error")),
+            data_srid: yup.string().required(t("projection_mandatory_error")),
             data_upload_path: yup.string(),
         })
         .required();
@@ -122,7 +120,6 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
         if (!showDataInfos) {
             setFormValue("data_upload_path", "");
             setFormValue("data_technical_name", "");
-            setFormValue("data_type", "");
         }
     }, [showDataInfos, setFormValue]);
 
@@ -136,18 +133,18 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
 
     const validateDataFile = (file?: File) => {
         if (!file) {
-            setDataFileError("Aucun fichier téléversé");
+            setDataFileError(t("upload_nofile_error"));
             return false;
         }
 
         const extension = getFileExtension(file.name);
         if (!extension || !fileExtensions.includes(extension)) {
-            setDataFileError(`L'extension du fichier ${file.name} n'est pas correcte`);
+            setDataFileError(t("upload_extension_error", { filename: file.name }));
             return false;
         }
 
         if (file.size > maxFileSize) {
-            setDataFileError(`La taille maximale pour un fichier est de ${maxFileSize}`);
+            setDataFileError(t("upload_max_size_error", { maxSize: maxFileSize }));
             return false;
         }
 
@@ -193,7 +190,6 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                         }
 
                         setFormValue("data_technical_name", getDataTechNameSuggestion(file.name), { shouldValidate: true });
-                        setFormValue("data_type", "vector", { shouldValidate: true }); // TODO : vector pour l'instant
                         setFormValue("data_upload_path", data?.filename, { shouldValidate: true });
                         trigger();
 
@@ -214,7 +210,7 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
     };
 
     return (
-        <DatastoreLayout datastoreId={datastoreId} documentTitle={datasheetName === undefined ? "Créer une fiche de données" : "Ajouter un fichier de données"}>
+        <DatastoreLayout datastoreId={datastoreId} documentTitle={t("title", { datasheetName: datasheetName })}>
             <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-4w")}>
                 <Button
                     iconId="fr-icon-arrow-left-s-line"
@@ -224,17 +220,17 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                             ? routes.datasheet_list({ datastoreId }).link
                             : routes.datastore_datasheet_view({ datastoreId, datasheetName, activeTab: "dataset" }).link
                     }
-                    title={datasheetName === undefined ? "Retour à ma liste de données" : "Retour à ma fiche de données"}
+                    title={t("back_to", { datasheetName: datasheetName })}
                     size="large"
                 />
-                <h1 className={fr.cx("fr-m-0")}>{datasheetName === undefined ? "Créer une fiche de données" : "Ajouter un fichier de données"}</h1>
+                <h1 className={fr.cx("fr-m-0")}>{t("title", { datasheetName: datasheetName })}</h1>
             </div>
 
-            <p>{Translator.trans("mandatory_fields")}</p>
+            <p>{tCommon("mandatory_fields")}</p>
 
             <Input
-                label="Nom de votre fiche de donnée"
-                hintText="Ce nom vous permettra d’identifier votre donnée dans la géoplateforme, soyez aussi clair que possible."
+                label={t("datasheet.name")}
+                hintText={t("datasheet.name_hint")}
                 state={errors.data_name ? "error" : "default"}
                 stateRelatedMessage={errors?.data_name?.message}
                 nativeInputProps={{
@@ -245,20 +241,20 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                 className={fr.cx(!!datasheetName && "fr-hidden")}
             />
             <Upload
-                label="Déposez votre fichier de données"
-                hint="Formats de fichiers autorisés : archive zip contenant un Geopackage (recommandé) ou un CSV..."
+                label={t("upload")}
+                hint={t("upload_hint")}
                 state={dataFileError === undefined ? "default" : "error"}
                 stateRelatedMessage={dataFileError}
                 nativeInputProps={{ onChange: postDataFile, ref: dataFileRef }}
                 className={fr.cx("fr-input-group")}
             />
-            {showProgress && <Progress label={"Upload en cours ..."} value={progressValue} max={progressMax} />}
+            {showProgress && <Progress label={t("upload_running")} value={progressValue} max={progressMax} />}
             {showDataInfos && (
                 <div className={fr.cx("fr-mt-2v")}>
-                    <h5>Les données suivantes ont été détectées. Modifiez les si besoin</h5>
+                    <h5>{t("data_infos_title")}</h5>
                     <Input
-                        label="Nom technique de votre donnée:"
-                        hintText="Ce nom technique est invisible par votre utilisateur final. Il apparaitra uniquement dans votre espace de travail"
+                        label={t("technical_name")}
+                        hintText={t("technical_name_hint")}
                         state={errors.data_technical_name ? "error" : "default"}
                         stateRelatedMessage={errors?.data_technical_name?.message}
                         nativeInputProps={{
@@ -266,7 +262,7 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                         }}
                     />
                     <Select
-                        label="Projection de vos données"
+                        label={t("projection")}
                         nativeSelectProps={{
                             ...register("data_srid"),
                         }}
@@ -274,37 +270,14 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                         stateRelatedMessage={errors?.data_srid?.message}
                     >
                         <option value="" disabled>
-                            Selectionnez une Projection
+                            {t("select_projection")}
                         </option>
-
                         {Object.entries(projections).map(([code, name]) => (
                             <option key={code} value={code}>
                                 {name}
                             </option>
                         ))}
                     </Select>
-                    <RadioButtons
-                        state={errors.data_type ? "error" : "default"}
-                        stateRelatedMessage={errors?.data_type?.message}
-                        legend="Format du fichier déposé"
-                        options={[
-                            {
-                                label: "Vecteur",
-                                nativeInputProps: {
-                                    ...register("data_type"),
-                                    value: "vector",
-                                },
-                            },
-                            {
-                                label: "Raster",
-                                nativeInputProps: {
-                                    ...register("data_type"),
-                                    value: "raster",
-                                },
-                            },
-                        ]}
-                        orientation="horizontal"
-                    />
                     <input type="hidden" {...register("data_upload_path")} />
                 </div>
             )}
@@ -312,16 +285,16 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                 buttons={[
                     {
                         linkProps: routes.datasheet_list({ datastoreId }).link,
-                        children: "Annuler",
+                        children: tCommon("cancel"),
                         priority: "secondary",
                     },
                     {
+                        children: t("upload_file"),
                         onClick: () => {
                             const dataFile = dataFileRef.current?.files?.[0];
                             validateDataFile(dataFile);
                             handleSubmit(onSubmit)();
                         },
-                        children: "Déposer votre fichier",
                     },
                 ]}
                 inlineLayoutWhen="always"
@@ -338,7 +311,7 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
             {addUploadMutation.isPending && (
                 <Wait>
                     <div className={fr.cx("fr-grid-row")}>
-                        <LoadingText as="h6" message="Création de la fiche en cours" withSpinnerIcon={true} />
+                        <LoadingText as="h6" message={t("datasheet.creation_running")} withSpinnerIcon={true} />
                     </div>
                 </Wait>
             )}
@@ -355,3 +328,85 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
 DatasheetUploadForm.displayName = symToStr({ DatasheetNewForm: DatasheetUploadForm });
 
 export default DatasheetUploadForm;
+
+// traductions
+export const { i18n } = declareComponentKeys<
+    | { K: "title"; P: { datasheetName: string | undefined }; R: string }
+    | { K: "back_to"; P: { datasheetName: string | undefined }; R: string }
+    | "datasheet.name"
+    | "datasheet.name_hint"
+    | "datasheet.name_mandatory_error"
+    | "datasheet.name_max_length_error"
+    | "datasheet.name_regex_error"
+    | { K: "datasheet.name_already_exists_error"; P: { datasheetName: string }; R: string }
+    | "datasheet.creation_running"
+    | "upload"
+    | "upload_hint"
+    | "upload_nofile_error"
+    | { K: "upload_extension_error"; P: { filename: string }; R: string }
+    | { K: "upload_max_size_error"; P: { maxSize: number }; R: string }
+    | "upload_running"
+    | "technical_name"
+    | "technical_name_hint"
+    | "technical_name_mandatory_error"
+    | "projection"
+    | "projection_mandatory_error"
+    | "select_projection"
+    | "upload_file"
+    | "data_infos_title"
+>()({
+    DatasheetUploadForm,
+});
+
+export const DatasheetUploadFormFrTranslations: Translations<"fr">["DatasheetUploadForm"] = {
+    title: ({ datasheetName }) => (datasheetName === undefined ? "Créer une fiche de données" : "Ajouter un fichier de données"),
+    back_to: ({ datasheetName }) => (datasheetName === undefined ? "Retour à ma liste de données" : "Retour à ma fiche de données"),
+    "datasheet.name": "Nom de votre fiche de donnée",
+    "datasheet.name_hint": "Ce nom vous permettra d'identifier votre donnée dans la géoplateforme, soyez aussi clair que possible.",
+    "datasheet.name_mandatory_error": "Le nom de la donnée est obligatoire",
+    "datasheet.name_max_length_error": "Le nombre maximal de caractères pour le nom de la fiche de donnée est de 99",
+    "datasheet.name_regex_error":
+        "Le nom de la fiche de donnée ne peut contenir que des caractères alphanumériques, espaces blancs et certains caractères spéciaux",
+    "datasheet.name_already_exists_error": ({ datasheetName }) => `Une fiche de donnée existe déjà avec le nom "${datasheetName}"`,
+    "datasheet.creation_running": "Création de la fiche en cours ...",
+    upload: "Déposez votre fichier de données",
+    upload_hint: "Formats de fichiers autorisés : archive zip contenant un Geopackage (recommandé) ou un CSV...",
+    upload_nofile_error: "Aucun fichier téléversé",
+    upload_extension_error: ({ filename }) => `L'extension du fichier ${filename} n'est pas correcte`,
+    upload_max_size_error: ({ maxSize }) => `La taille maximale pour un fichier est de ${maxSize}`,
+    upload_running: "Upload en cours ...",
+    technical_name: "Nom technique de votre donnée",
+    technical_name_hint: "Ce nom technique est invisible par votre utilisateur final. Il apparaitra uniquement dans votre espace de travail",
+    technical_name_mandatory_error: "Le nom technique de la donnée est obligatoire",
+    projection: "Projection de vos données",
+    projection_mandatory_error: "La projection (srid) est obligatoire",
+    select_projection: "Selectionnez une projection",
+    upload_file: "Déposer votre fichier",
+    data_infos_title: "Les données suivantes ont été détectées. Modifiez les si besoin",
+};
+
+export const DatasheetUploadFormEnTranslations: Translations<"en">["DatasheetUploadForm"] = {
+    title: undefined,
+    back_to: undefined,
+    "datasheet.name": undefined,
+    "datasheet.name_hint": undefined,
+    "datasheet.name_mandatory_error": undefined,
+    "datasheet.name_max_length_error": undefined,
+    "datasheet.name_regex_error": undefined,
+    "datasheet.name_already_exists_error": undefined,
+    "datasheet.creation_running": undefined,
+    upload: undefined,
+    upload_hint: undefined,
+    upload_nofile_error: undefined,
+    upload_extension_error: undefined,
+    upload_max_size_error: undefined,
+    upload_running: undefined,
+    technical_name: undefined,
+    technical_name_hint: undefined,
+    technical_name_mandatory_error: undefined,
+    projection: undefined,
+    projection_mandatory_error: undefined,
+    select_projection: undefined,
+    upload_file: undefined,
+    data_infos_title: undefined,
+};
