@@ -9,6 +9,7 @@
     height: 15rem;
     overflow-x: hidden;
     overflow-y: scroll;
+    align-items: flex-start;
     span {
         color: var(--text-label-grey);
     }
