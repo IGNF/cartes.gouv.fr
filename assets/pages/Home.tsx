@@ -42,24 +42,20 @@ const Home = () => {
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
                             <div className={fr.cx("fr-col-12", "fr-col-lg-6", "fr-px-0", "fr-pl-md-14v")}>
                                 <p className={fr.cx("fr-mt-4w", "fr-mt-md-7w") + " frx-display--xxs"}>
-                                    Bienvenue sur le futur service public des cartes et données du territoire
-                                </p>
-
-                                <p className={fr.cx("fr-mt-4v", "fr-mt-md-7v", "fr-text--xl")}>
-                                    <strong>En construction, le site Cartes.gouv.fr arrive bientôt&nbsp;!</strong>
+                                    Bienvenue sur le service public des cartes et données du territoire
                                 </p>
 
                                 <p className={fr.cx("fr-text--lg", "fr-pr-10v")}>
-                                    La carte et le territoire bientôt réunis&nbsp;? Le besoin en données explose pour connaître la réalité terrain, analyser des
+                                    La carte et le territoire enfin réunis&nbsp;? Le besoin en données explose pour connaître la réalité terrain, analyser des
                                     phénomènes, piloter des activités multiples.
                                 </p>
                                 <p className={fr.cx("fr-text--lg", "fr-pr-10v")}>
                                     Collectivités territoriales, acteurs publics, entreprises, associations, citoyens…
                                 </p>
                                 <p className={fr.cx("fr-text--lg", "fr-pr-10v")}>
-                                    <strong>Cartes.gouv.fr</strong> offrira à tous les bases de données et les outils utiles pour se saisir de ces opportunités,
+                                    <strong>Cartes.gouv.fr</strong> offre à tous les bases de données et les outils utiles pour se saisir de ces opportunités,
                                     avec en premier lieu des cartes et données publiques librement accessibles sur de nombreux thèmes (topographie, écologie,
-                                    sécurité, foncier, réglementations…).
+                                    sécurité, foncier, réglementations…) ainsi que la diffusion en toute autonomie de vos propres données géographiques.
                                 </p>
                             </div>
                             <div className={fr.cx("fr-col-12", "fr-col-lg-6", "fr-pb-4w", "fr-pl-md-8w", "fr-pr-md-2w", "fr-mt-4w")}>
@@ -87,8 +83,8 @@ const Home = () => {
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
                             <div className={fr.cx("fr-col-12", "fr-px-0", "fr-px-md-14v")}>
                                 <p className={fr.cx("fr-text--lg")}>
-                                    Le site proposera également des services qui vont s’enrichir pour permettre à chacun de créer, héberger, contribuer,
-                                    partager, visualiser et publier des données et des cartes en autonomie.
+                                    Le site s’enrichira de nouveaux services pour la contribution, le partage et la visualisation des données et cartes, en
+                                    s’appuyant sur les besoins et attentes des utilisateurs.
                                 </p>
                             </div>
                         </div>
