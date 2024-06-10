@@ -21,6 +21,10 @@ class CswMetadata
 
     /** @var array<string> */
     public ?array $thematicCategories;
+
+    /** @var array<string> */
+    public ?array $topicCategories;
+    
     public ?string $contactEmail;
     public ?string $organisationName;
     public ?string $organisationEmail;
@@ -36,7 +40,8 @@ class CswMetadata
         $empty->hierarchyLevel = CswHierarchyLevel::Series;
         $empty->language = CswLanguage::default();
         $empty->charset = 'utf8';
-
+        $empty->topicCategories = [];
+        
         return $empty;
     }
 

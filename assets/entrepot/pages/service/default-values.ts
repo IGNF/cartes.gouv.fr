@@ -9,7 +9,7 @@ import { WmsVectorServiceFormValuesType } from "./wms-vector/WmsVectorServiceFor
 import { PyramidVectorTmsServiceFormValuesType } from "./tms/PyramidVectorTmsServiceForm";
 
 const DEFAULT_CHARSET = "utf8";
-const DEFAULT_LANGUAGE = { language: "français", code: "fra" };
+const DEFAULT_LANGUAGE = { language: "français", code: "fre" };
 
 const getMetadataFormDefaultValues = (metadata?: Metadata): MetadataFormValuesType => {
     return {
@@ -19,7 +19,8 @@ const getMetadataFormDefaultValues = (metadata?: Metadata): MetadataFormValuesTy
         email_contact: metadata?.csw_metadata?.contact_email,
         organization: metadata?.csw_metadata?.organisation_name,
         organization_email: metadata?.csw_metadata?.organisation_email,
-        category: metadata?.csw_metadata?.thematic_categories,
+        category: metadata?.csw_metadata?.topic_categories,
+        keywords: metadata?.csw_metadata?.thematic_categories,
         public_name: metadata?.csw_metadata?.title,
         description: metadata?.csw_metadata?.abstract,
         identifier: metadata?.csw_metadata?.file_identifier,

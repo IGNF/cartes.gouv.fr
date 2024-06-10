@@ -228,6 +228,10 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
         trigger,
     } = form;
 
+    /*useEffect(() => {
+        watch((value, { name, type }) => console.log(value, name, type));
+    }, [watch]); */
+
     const selectedTableNamesList: string[] | undefined = useWatch({
         control: form.control,
         name: "selected_tables",

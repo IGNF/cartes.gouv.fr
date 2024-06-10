@@ -15,12 +15,19 @@ use Twig\Environment as Twig;
 
 class CswMetadataHelper
 {
+    /** @var array<string> */
+    private array $allTopics = [];
+
     public function __construct(
         private Twig $twig,
         private ParameterBagInterface $params,
         private SerializerInterface $serializer,
         private Filesystem $fs
     ) {
+        $content = file_get_contents($params->get('assets_directory') . '/data/topic_categories.json');
+        if ($content !== false) {
+            $this->allTopics = json_decode($content, true);
+        }
     }
 
     public function toArray(CswMetadata $metadata): array
@@ -54,6 +61,15 @@ class CswMetadataHelper
     {
         $metadataArray = $this->toArray($metadata);
 
+        $englishTopics = [];
+        $allTopics = array_flip($this->allTopics);  // français => anglais
+        foreach($metadataArray['topic_categories'] as $topic) {
+            if (isset($allTopics[$topic])) {
+                $englishTopics[] = $allTopics[$topic];
+            }
+        }
+        $metadataArray['topic_categories'] = $englishTopics;
+
         $content = $this->twig->render('metadata/metadata_dataset_iso.xml.twig', $metadataArray);
 
         return $content;
@@ -74,9 +90,17 @@ class CswMetadataHelper
 
         /** @var \DOMNodeList<\DOMElement> $keywordsNodesList */
         $keywordsNodesList = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:keyword');
-
         $keywordsList = array_map(fn (\DOMElement $keyword) => $keyword->textContent, iterator_to_array($keywordsNodesList));
 
+        /** @var \DOMNodeList<\DOMElement> $topicsNodesList */
+        $topicsNodesList = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:topicCategory/gmd:MD_TopicCategoryCode');
+        foreach(iterator_to_array($topicsNodesList) as $topicElement) {
+            $topic = $topicElement->textContent;
+            if (isset($this->allTopics[$topic])) {
+                $cswMetadata->topicCategories[] = $this->allTopics[$topic]; // En français
+            }
+        }
+       
         /** @var \DOMNodeList<\DOMElement> $layersNodesList */
         $layersNodesList = $xpath->query('/gmd:MD_Metadata/gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine[@type="offering"]');
 

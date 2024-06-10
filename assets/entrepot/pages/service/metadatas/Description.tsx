@@ -10,12 +10,9 @@ import MarkdownEditor from "../../../../components/Input/MarkdownEditor";
 import { getTranslation } from "../../../../i18n/i18n";
 import { EndpointTypeEnum, ServiceFormValuesBaseType } from "../../../../@types/app";
 import { getInspireKeywords, regex } from "../../../../utils";
+import categories from "../../../../data/topic_categories.json";
 
-type DescriptionProps = {
-    visible: boolean;
-    form: UseFormReturn<ServiceFormValuesBaseType>;
-    editMode?: boolean;
-};
+const keywords = getInspireKeywords();
 
 export const getEndpointSuffix = (endpointType: EndpointTypeEnum) => {
     switch (endpointType) {
@@ -30,7 +27,11 @@ export const getEndpointSuffix = (endpointType: EndpointTypeEnum) => {
     }
 };
 
-const keywords = getInspireKeywords();
+type DescriptionProps = {
+    visible: boolean;
+    form: UseFormReturn<ServiceFormValuesBaseType>;
+    editMode?: boolean;
+};
 
 const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
     const { t: tCommon } = getTranslation("Common");
@@ -119,16 +120,15 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
             />
             <Controller
                 control={control}
-                name="category"
-                defaultValue={[]}
+                name="category" /* themes */
                 render={({ field }) => (
                     <AutocompleteSelect
                         label={t("metadata.description_form.category")}
                         hintText={t("metadata.description_form.hint_category")}
-                        options={keywords}
-                        freeSolo={true}
+                        options={Object.values(categories).sort()}
                         getOptionLabel={(option) => option}
                         isOptionEqualToValue={(option, value) => option === value}
+                        searchFilter={{ limit: 40 }}
                         state={errors.category ? "error" : "default"}
                         stateRelatedMessage={errors?.category?.message?.toString()}
                         value={field.value}
@@ -138,7 +138,26 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
                     />
                 )}
             />
-
+            <Controller
+                control={control}
+                name="keywords"
+                render={({ field }) => (
+                    <AutocompleteSelect
+                        label={t("metadata.description_form.keywords")}
+                        hintText={t("metadata.description_form.hint_keywords")}
+                        options={keywords}
+                        freeSolo={true}
+                        getOptionLabel={(option) => option}
+                        isOptionEqualToValue={(option, value) => option === value}
+                        state={errors.keywords ? "error" : "default"}
+                        stateRelatedMessage={errors?.keywords?.message?.toString()}
+                        value={field.value}
+                        onChange={(_, value) => field.onChange(value)}
+                        // @ts-expect-error fausse alerte
+                        controllerField={field}
+                    />
+                )}
+            />
             <Input
                 label={t("metadata.description_form.contact_email")}
                 hintText={t("metadata.description_form.hint_contact_email")}

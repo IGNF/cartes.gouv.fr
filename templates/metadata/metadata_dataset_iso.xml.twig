@@ -81,6 +81,14 @@
                         </gmd:MD_Keywords>
                     </gmd:descriptiveKeywords>
                 {% endif %}
+                {% if topic_categories|length %}
+                    {% for topic in topic_categories %}
+                        <gmd:topicCategory>
+                            <gmd:MD_TopicCategoryCode>{{ topic }}</gmd:MD_TopicCategoryCode>
+                        </gmd:topicCategory>
+                    {% endfor %}    
+                {% endif %}
+
                 {% if thumbnail_url %}
                     <gmd:graphicOverview>
                         <gmd:MD_BrowseGraphic>
