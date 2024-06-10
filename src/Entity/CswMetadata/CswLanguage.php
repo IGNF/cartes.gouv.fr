@@ -14,6 +14,6 @@ class CswLanguage
 
     public static function default(): self
     {
-        return new self('fra', 'français');
+        return new self('fre', 'français');
     }
 }

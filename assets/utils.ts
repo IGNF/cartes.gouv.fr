@@ -19,8 +19,12 @@ export type LanguageType = {
 const getLanguages = (): LanguageType[] => {
     const languages: LanguageType[] = [];
     for (const def of Object.values(langs)) {
-        const code = def["639-2"];
+        let code = def["639-2"];
         if (code !== "und") {
+            // Cas special pour le francais, le geocatalogue ne connait que "fre"
+            if (code === "fra") {
+                code = "fre";
+            }
             languages.push({ language: def.fr[0], code: code });
         }
     }

@@ -9,7 +9,7 @@ import { WmsVectorServiceFormValuesType } from "./wms-vector/WmsVectorServiceFor
 import { PyramidVectorTmsServiceFormValuesType } from "./tms/PyramidVectorTmsServiceForm";
 
 const DEFAULT_CHARSET = "utf8";
-const DEFAULT_LANGUAGE = { language: "français", code: "fra" };
+const DEFAULT_LANGUAGE = { language: "français", code: "fre" };
 
 const getMetadataFormDefaultValues = (metadata?: Metadata): MetadataFormValuesType => {
     return {
