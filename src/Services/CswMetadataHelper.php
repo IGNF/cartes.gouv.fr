@@ -193,7 +193,12 @@ class CswMetadataHelper
         return array_map(fn ($value) => is_string($value) ? trim($value) : $value, $array);
     }
 
-    private function getKeywords(CswMetadata $cswMetadata, \DOMNodeList $keywordsNodesList) : void
+    /**
+     * @param CswMetadata $cswMetadata
+     * @param \DOMNodeList<\DOMElement> $keywordsNodesList
+     * @return void
+     */
+    private function getKeywords(CswMetadata $cswMetadata, $keywordsNodesList) : void
     {
         foreach($keywordsNodesList as $list) {
             $hasThesaurus = false;
