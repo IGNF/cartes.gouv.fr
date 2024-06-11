@@ -76,7 +76,7 @@ export const { i18n } = declareComponentKeys<"document_title" | "espaceco_fronto
 
 export const DashboardProFrTranslations: Translations<"fr">["DashboardPro"] = {
     document_title: "Tableau de bord professionnel",
-    espaceco_frontoffice_list: "Liste des guichets de l'espace collaboratif",
+    espaceco_frontoffice_list: "Liste des guichets de l’espace collaboratif",
 };
 
 export const DashboardProEnTranslations: Translations<"fr">["DashboardPro"] = {

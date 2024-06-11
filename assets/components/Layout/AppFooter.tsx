@@ -65,7 +65,7 @@ const AppFooter = () => {
                         imgUrl: logoMinistereEcologie,
                     },
                     {
-                        alt: "Conseil National de l'Information Géolocalisée",
+                        alt: "Conseil National de l’Information Géolocalisée",
                         href: "https://cnig.gouv.fr/",
                         imgUrl: logoCnig,
                     },

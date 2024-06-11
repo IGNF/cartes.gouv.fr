@@ -38,7 +38,7 @@ export const { i18n } = declareComponentKeys<
 >()("UserKey");
 
 export const UserKeyFrTranslations: Translations<"fr">["UserKey"] = {
-    title: ({ keyId }) => (keyId ? `Modification de la clé ${keyId}` : "Ajout d'une clé"),
+    title: ({ keyId }) => (keyId ? `Modification de la clé ${keyId}` : "Ajout d’une clé"),
     step: ({ num }) => (num === 1 ? "Services accessibles" : "Options de sécurisation"),
     services: "Services",
     key_name: "Nom de la clé",
@@ -47,21 +47,21 @@ export const UserKeyFrTranslations: Translations<"fr">["UserKey"] = {
     hash_type_explain: (
         <p>
             {
-                "Une valeur de hash (chaine de caractère) sera calculée automatiquement et devra être fournie comme paramètre supplémentaire dans les requêtes de consultation des flux. Ce type d'authentification est adapté en particulier pour une utilisation sur un site internet."
+                "Une valeur de hash (chaine de caractère) sera calculée automatiquement et devra être fournie comme paramètre supplémentaire dans les requêtes de consultation des flux. Ce type d’authentification est adapté en particulier pour une utilisation sur un site internet."
             }
         </p>
     ),
     basic_type_explain: (
         <p>
             {
-                "Définissez un nom d'utilisateur et un mot de passe utilisables pour consulter les flux. Ce type d'authentification est adapté pour une utilisation sous SIG."
+                "Définissez un nom d’utilisateur et un mot de passe utilisables pour consulter les flux. Ce type d’authentification est adapté pour une utilisation sous SIG."
             }
         </p>
     ),
     oauth2_type_explain: (
         <p>
             {
-                "Ce type d'authentification consiste à utiliser votre compte Géoplateforme. Vous ne pouvez donc avoir qu'une seule clé de ce type. Ce type est adapté pour une utilisation dans un logiciel SIG ou tout outil nécessitant une authentification forte. "
+                "Ce type d’authentification consiste à utiliser votre compte Géoplateforme. Vous ne pouvez donc avoir qu'une seule clé de ce type. Ce type est adapté pour une utilisation dans un logiciel SIG ou tout outil nécessitant une authentification forte. "
             }
         </p>
     ),
@@ -73,19 +73,19 @@ export const UserKeyFrTranslations: Translations<"fr">["UserKey"] = {
     "ip_list.whitelist": "Liste blanche",
     "ip_list.blacklist": "Liste noire",
     ip_addresses: "Adresses IP",
-    iprange_explain: "Cette plage d'IP doit être au format CIDR (exemples: 192.168.1.1/32, 192.168.0.1/24)",
+    iprange_explain: "Cette plage d’IP doit être au format CIDR (exemples: 192.168.1.1/32, 192.168.0.1/24)",
     user_agent: "User-agent (optionnel)",
     user_agent_hintext: "Code associé à votre application cliente",
     referer: "Referer (optionnel)",
-    referer_hintext: "En-tête des requêtes permettant d'identifier votre site internet",
-    login: "Nom d'utilisateur",
+    referer_hintext: "En-tête des requêtes permettant d’identifier votre site internet",
+    login: "Nom d’utilisateur",
     password: "Mot de passe",
     name_required: "Le nom de la clé est obligatoire",
     name_exists: "Une clé avec ce nom existe déjà",
     accesses_required: "Veuillez choisir au moins un accès à un service",
-    login_required: "Le nom d'utilisateur est obligatoire",
+    login_required: "Le nom d’utilisateur est obligatoire",
     password_required: "Le mot de passe est obligatoire",
-    ip_error: ({ ip }) => `la plage d'adresses IP [${ip}] n'est pas correcte`,
+    ip_error: ({ ip }) => `la plage d’adresses IP [${ip}] n'est pas correcte`,
     no_permission: "Vous n'avez aucune permission, vous ne pouvez pas créer une clé",
     key_not_found: "Cette clé n'a pas été trouvée",
 };

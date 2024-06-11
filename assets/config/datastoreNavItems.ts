@@ -65,11 +65,11 @@ export const datastoreNavItemsFrTranslations: Translations<"fr">["datastoreNavIt
     dashboard: "Tableau de bord",
     data: "Données",
     members: "Membres",
-    manage_storage: "Gérer l'espace de travail",
+    manage_storage: "Gérer l’espace de travail",
     consumption_monitoring: "Suivi des consommations",
     permissions_granted: "Permissions accordées",
     my_account: "Mon compte",
-    my_access_keys: "Mes clés d'accès",
+    my_access_keys: "Mes clés d’accès",
 };
 
 export const datastoreNavItemsEnTranslations: Translations<"en">["datastoreNavItems"] = {

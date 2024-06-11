@@ -81,8 +81,8 @@ export const { i18n } = declareComponentKeys<
 export const DatasheetListFrTranslations: Translations<"fr">["DatasheetList"] = {
     title: ({ datastoreName }) => `Données ${datastoreName ?? ""}`,
     create_datasheet: "Créer une fiche de données",
-    datasheet_creation_impossible: "Création d'une nouvelle fiche de données impossible",
-    metadata_endpoint_quota_reached: "Quota du point d'accès de métadonnées atteint",
+    datasheet_creation_impossible: "Création d’une nouvelle fiche de données impossible",
+    metadata_endpoint_quota_reached: "Quota du point d’accès de métadonnées atteint",
 };
 
 export const DatasheetListEnTranslations: Translations<"en">["DatasheetList"] = {

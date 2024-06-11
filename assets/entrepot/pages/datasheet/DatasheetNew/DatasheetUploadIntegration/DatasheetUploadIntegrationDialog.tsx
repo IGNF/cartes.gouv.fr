@@ -135,7 +135,7 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
 
     if (uploadQuery.data?.tags?.vectordb_id) {
         bottomButtons.unshift({
-            children: "Voir le rapport d'erreur",
+            children: "Voir le rapport d’erreur",
             linkProps: routes.datastore_stored_data_details({ datastoreId, storedDataId: uploadQuery.data?.tags.vectordb_id }).link,
         });
     }
@@ -148,7 +148,7 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
                         <i className={fr.cx("fr-icon-close-circle-line", "fr-icon--lg")} />
                     </div>
                     <div className={fr.cx("fr-col-11")}>
-                        <h6 className={fr.cx("fr-h6")}>{"L'intégration de vos données a échoué"}</h6>
+                        <h6 className={fr.cx("fr-h6")}>{"L’intégration de vos données a échoué"}</h6>
                     </div>
                 </div>
             ) : (

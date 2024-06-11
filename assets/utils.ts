@@ -139,9 +139,9 @@ const offeringTypeDisplayName = (type: OfferingTypeEnum): string => {
         case OfferingTypeEnum.DOWNLOAD:
             return "Service de Téléchargement";
         case OfferingTypeEnum.ITINERARYISOCURVE:
-            return "Service de calcul d'itinéraire / isochrone";
+            return "Service de calcul d’itinéraire / isochrone";
         case OfferingTypeEnum.ALTIMETRY:
-            return "Service d'altimétrie";
+            return "Service d’altimétrie";
         default:
             return type;
     }

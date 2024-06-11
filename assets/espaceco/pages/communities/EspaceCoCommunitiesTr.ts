@@ -26,11 +26,11 @@ export const EspaceCoCommunitiesFrTranslations: Translations<"fr">["EspaceCoComm
         filter === "public"
             ? "Aucun guichet public"
             : filter === "iam_member"
-              ? "Vous n'êtes membre d'aucun guichet"
+              ? "Vous n'êtes membre d’aucun guichet"
               : filter === "affiliation"
                 ? "Aucune affiliation en cours"
                 : "[TODO]",
-    search_placeholder: "Recherche d'un guichet par son nom",
+    search_placeholder: "Recherche d’un guichet par son nom",
     no_options: "Aucun guichet",
     loading: "Recherche en cours ...",
     show_details: "Afficher les détails",

@@ -20,7 +20,7 @@ export const { i18n } = declareComponentKeys<
 
 export const SldStyleValidationErrorsFrTranslations: Translations<"fr">["SldStyleValidationErrors"] = {
     no_file_provided: ({ tableName }) => `Veuillez fournir un fichier de style pour la table ${tableName}`,
-    unaccepted_extension: ({ fileName }) => `L'extension du fichier de style ${fileName} n'est pas correcte. Seule l'extension sld est acceptée.`,
+    unaccepted_extension: ({ fileName }) => `L’extension du fichier de style ${fileName} n'est pas correcte. Seule l’extension sld est acceptée.`,
     sld_version_missing: "La version de SLD n'est pas spécifiée.",
     sld_version_unaccepted: ({ version }) => `La version ${version} n'est pas acceptée. Seules les versions 1.0.0 et 1.1.0 de SLD sont acceptées.`,
     file_invalid: "Ce fichier n'est pas un fichier de style valide. Erreur de syntaxe XML.",

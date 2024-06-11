@@ -171,7 +171,7 @@ const Contact = () => {
                                         <LoadingIcon largeIcon={true} />
                                     </div>
                                     <div className={fr.cx("fr-col-10")}>
-                                        <h6 className={fr.cx("fr-h6", "fr-m-0")}>{"Votre message est en cours d'envoi"}</h6>
+                                        <h6 className={fr.cx("fr-h6", "fr-m-0")}>{"Votre message est en cours d’envoi"}</h6>
                                     </div>
                                 </div>
                             </div>
@@ -216,9 +216,9 @@ export const contactFrTranslations: Translations<"fr">["Contact"] = {
     "form.error_title": "Votre message n'a pas pu être envoyé",
     "form.explanation": ({ docsLinkProps }) => (
         <>
-            {"Vous n'avez pas trouvé la réponse à votre question dans "}
-            <a {...docsLinkProps}>{"l'aide en ligne"}</a>
-            {" ? Vous souhaitez la configuration d'un espace de travail pour vos besoins ? Utilisez ce formulaire pour nous contacter."}
+            {"Vous n’avez pas trouvé la réponse à votre question dans "}
+            <a {...docsLinkProps}>{"l’aide en ligne"}</a>
+            {" ? Vous souhaitez la configuration d’un espace de travail pour vos besoins ? Utilisez ce formulaire pour nous contacter."}
         </>
     ),
     "form.email_contact": "Votre email",
@@ -230,15 +230,15 @@ export const contactFrTranslations: Translations<"fr">["Contact"] = {
     "form.organization": "Votre organisme (optionnel)",
     "form.message": "Votre demande",
     "form.message_placeholder": "Décrivez votre demande en quelques lignes",
-    "form.message_minlength_error": ({ min }) => `Veuillez saisir une demande d'au moins ${min} caractères.`,
+    "form.message_minlength_error": ({ min }) => `Veuillez saisir une demande d’au moins ${min} caractères.`,
     "form.message_maxlength_error": ({ max }) => `Votre demande ne peut contenir que ${max} caractères.`,
     remaining_characters: ({ num }) => `${num} caractères restants`,
-    message_sent: "Votre message est en cours d'envoi",
+    message_sent: "Votre message est en cours d’envoi",
     send: "Envoyer",
     "form.infos": ({ personalDataLinkProps }) => (
         <>
-            {"Les informations recueillies à partir de ce formulaire sont nécessaires à la gestion de votre demande par les services de l'IGN concernés. "}
-            <a {...personalDataLinkProps}>{"En savoir plus sur la gestion des données à caractère personnel."}</a>
+            {"Les informations recueillies à partir de ce formulaire sont nécessaires à la gestion de votre demande par les services de l’IGN concernés. "}
+            <a {...personalDataLinkProps}>{"En savoir plus sur la gestion des données à caractère personnel"}</a>.
         </>
     ),
 };
@@ -271,7 +271,7 @@ export const contactEnTranslations: Translations<"en">["Contact"] = {
     "form.infos": ({ personalDataLinkProps }) => (
         <>
             {"The information collected from this form is necessary to process your request by the appropriate services at IGN. "}
-            <a {...personalDataLinkProps}>{"Learn more about how personal data is stored and used."}</a>
+            <a {...personalDataLinkProps}>{"Learn more about how personal data is stored and used"}</a>.
         </>
     ),
 };

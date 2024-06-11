@@ -128,7 +128,7 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
                                 severity="info"
                                 closable={false}
                                 title={"Flux instable"}
-                                description={"Ce flux est considéré instable par l'API Entrepôt. Il est possible qu'il ne s'affiche pas correctement."}
+                                description={"Ce flux est considéré instable par l’API Entrepôt. Il est possible qu'il ne s'affiche pas correctement."}
                             />
                         </div>
                     )}

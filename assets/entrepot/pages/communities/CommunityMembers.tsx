@@ -315,7 +315,7 @@ export const { i18n } = declareComponentKeys<
 
 export const CommunityMembersFrTranslations: Translations<"fr">["CommunityMembers"] = {
     community_members: ({ communityName }) => `Membres de ${communityName}`,
-    already_member: ({ userId }) => `l'utilisateur ${userId} est déjà membre de cet espace de travail`,
+    already_member: ({ userId }) => `l’utilisateur ${userId} est déjà membre de cet espace de travail`,
     rights: "Permissions du compte",
     name: "Nom",
     me: "moi",

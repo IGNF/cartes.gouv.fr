@@ -15,7 +15,7 @@ const UploadCheckExecutionReport: FC<UploadCheckExecutionReportProps> = ({ check
                 <strong>{"Espace de travail :"}</strong> {datastoreName}
             </li>
             <li>
-                <strong>{"Identifiant technique de l'exécution de vérification :"}</strong> {check._id}
+                <strong>{"Identifiant technique de l’exécution de vérification :"}</strong> {check._id}
             </li>
             <li>
                 <Logs logs={check.logs} />

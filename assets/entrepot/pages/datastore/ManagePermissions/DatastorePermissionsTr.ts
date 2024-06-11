@@ -65,7 +65,7 @@ const getGrantedTo = (lang: "fr" | "en", beneficiary?: PermissionBeneficiaryDto)
     if ("name" in beneficiary) {
         return lang === "fr" ? `La communauté ${beneficiary.name}` : `Community ${beneficiary.name}`;
     } else {
-        return lang === "fr" ? `L'utilisateur ${beneficiary.first_name} ${beneficiary.last_name}` : `User ${beneficiary.first_name} ${beneficiary.last_name}`;
+        return lang === "fr" ? `L’utilisateur ${beneficiary.first_name} ${beneficiary.last_name}` : `User ${beneficiary.first_name} ${beneficiary.last_name}`;
     }
 };
 
@@ -79,16 +79,16 @@ const getTitle = (lang: "fr" | "en", permission?: DatastorePermissionResponseDto
     } else {
         title +=
             lang === "fr"
-                ? `l'utilisateur ${permission.beneficiary.first_name} ${permission.beneficiary.last_name}`
+                ? `l’utilisateur ${permission.beneficiary.first_name} ${permission.beneficiary.last_name}`
                 : `user ${permission.beneficiary.first_name} ${permission.beneficiary.last_name}`;
     }
     return title;
 };
 
 export const DatastorePermissionsFrTranslations: Translations<"fr">["DatastorePermissions"] = {
-    "list.title": ({ datastoreName }) => `Gérer les permissions de l'espace de travail${datastoreName ? " " + datastoreName : ""}`,
+    "list.title": ({ datastoreName }) => `Gérer les permissions de l’espace de travail${datastoreName ? " " + datastoreName : ""}`,
     "list.licence_header": "Licence",
-    "list.expiration_date_header": "Date d'expiration",
+    "list.expiration_date_header": "Date d’expiration",
     "list.granted_to_header": "Accordée à",
     "list.services_header": "Services",
     "list.actions_header": "Actions",
@@ -97,28 +97,28 @@ export const DatastorePermissionsFrTranslations: Translations<"fr">["DatastorePe
     "list.no_permissions": "Aucune permission",
     "list.add_permission": "Ajouter une permission",
     "list.confirm_remove": "Êtes-vous sûr de vouloir supprimer cette permission ?",
-    "add_form.title": "Ajout d'une permission",
+    "add_form.title": "Ajout d’une permission",
     "add_form.licence": "Licence",
     "add_form.hint_licence":
         "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Omnis nulla praesentium corrupti error hic enim recusandae quaerat accusamus rem sed!",
     "add_form.type": "Accorder à",
-    "add_form.hint_type": "L'ajout de plusieurs bénéficiaires va entrainer la création de plusieurs permissions",
+    "add_form.hint_type": "L’ajout de plusieurs bénéficiaires va entrainer la création de plusieurs permissions",
     "add_form.communities": "Des communautés",
     "add_form.users": "Des utilisateurs",
     "add_form.communities_list": "Liste des communautés (publiques et auxquelles j'appartiens)",
     "add_form.other_communities": "Autres communautés",
-    "add_form.expiration_date": "Date d'expiration (optionnel)",
+    "add_form.expiration_date": "Date d’expiration (optionnel)",
     "add_form.services": "Services",
     "add_form.hint_services": "Sélectionner les services auxquels cette permission donne accès",
-    "add_form.no_services": "Aucun service, impossible d'ajouter une permission",
+    "add_form.no_services": "Aucun service, impossible d’ajouter une permission",
     "add_form.only_oath": "Authentification forte requise",
-    "add_form.hint_only_oath": "Ne permettre l'utilisation de cette permission qu'avec des clés de type OAUTH2",
+    "add_form.hint_only_oath": "Ne permettre l’utilisation de cette permission qu'avec des clés de type OAUTH2",
     "edit_form.document_title": ({ id }) => `Mise à jour de la permission ${id}`,
     "edit_form.title": ({ permission }) => getTitle("fr", permission),
     "edit_form.licence": "Licence",
     "edit_form.hint_licence":
         "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Omnis nulla praesentium corrupti error hic enim recusandae quaerat accusamus rem sed!",
-    "edit_form.expiration_date": "Date d'expiration (optionnel)",
+    "edit_form.expiration_date": "Date d’expiration (optionnel)",
     "edit_form.record": "Enregister les modifications",
     "validation.licence_required": "La licence est obligatoire",
     "validation.type_required": "Le type est obligatoire",

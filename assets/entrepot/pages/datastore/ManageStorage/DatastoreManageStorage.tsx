@@ -165,7 +165,7 @@ export const { i18n } = declareComponentKeys<
 });
 
 export const DatastoreManageStorageFrTranslations: Translations<"fr">["DatastoreManageStorage"] = {
-    title: ({ datastoreName }) => `Suivi des consommations de l'espace de travail${datastoreName ? " " + datastoreName : ""}`,
+    title: ({ datastoreName }) => `Suivi des consommations de l’espace de travail${datastoreName ? " " + datastoreName : ""}`,
     explanation:
         "Cette page vous permet de voir en un seul coup d'œil le volume de vos données et votre situation par rapport aux différents quotas qui vous sont alloués.",
     "storage.not_found": "Aucun stockage de ce type n'est attribué à votre espace de travail.",
@@ -212,7 +212,7 @@ export const DatastoreManageStorageFrTranslations: Translations<"fr">["Datastore
         `Êtes-vous sûr de vouloir supprimer la donnée stockée ${storedDataName} (${storedDataId}) ?`,
     "storage.postgresql.deletion.in_progress": "Suppression de la donnée stockée en cours",
     "storage.postgresql.explanation":
-        "Il s'agit de l'espace occupé par des données sur les serveurs PostgreSQL de votre espace de travail. Il s'agit de données intermédiaires qui ne sont pas directement visibles de vos utilisateurs.",
+        "Il s'agit de l’espace occupé par des données sur les serveurs PostgreSQL de votre espace de travail. Il s'agit de données intermédiaires qui ne sont pas directement visibles de vos utilisateurs.",
     "storage.s3.label": (
         <span>
             Stockage <br /> de masse
@@ -233,7 +233,7 @@ export const DatastoreManageStorageFrTranslations: Translations<"fr">["Datastore
     "storage.upload.deletion.confirmation": ({ uploadName, uploadId }) => `Êtes-vous sûr de vouloir supprimer la donnée déposée ${uploadName} (${uploadId}) ?`,
     "storage.upload.deletion.in_progress": "Suppression de la donnée déposée en cours",
     "storage.upload.explanation":
-        "Il s'agit de l'espace occupé par les fichiers de données bruts que vous avez téléversés (fichiers csv, geopackage...). Ces fichiers sont normalement supprimés dès l'intégration en base réussie de vos données. Il est possible qu'il reste des traces de fichiers dans cet espace lorsque les intégrations en base ont échoué.",
+        "Il s'agit de l’espace occupé par les fichiers de données bruts que vous avez téléversés (fichiers csv, geopackage...). Ces fichiers sont normalement supprimés dès l’intégration en base réussie de vos données. Il est possible qu'il reste des traces de fichiers dans cet espace lorsque les intégrations en base ont échoué.",
 
     "storage.annexe.label": (
         <span>
@@ -241,8 +241,8 @@ export const DatastoreManageStorageFrTranslations: Translations<"fr">["Datastore
         </span>
     ),
     "storage.annexe.loading": "Chargement des annexes",
-    "storage.annexe.deletion.confirmation": ({ annexeId }) => `Êtes-vous sûr de vouloir supprimer l'annexe ${annexeId} ?`,
-    "storage.annexe.deletion.in_progress": "Suppression de l'annexe en cours",
+    "storage.annexe.deletion.confirmation": ({ annexeId }) => `Êtes-vous sûr de vouloir supprimer l’annexe ${annexeId} ?`,
+    "storage.annexe.deletion.in_progress": "Suppression de l’annexe en cours",
     "storage.annexe.explanation":
         "Cet espace est occupé par les fichiers mis à disposition de vos utilisateurs via des adresses publiques. Il s'agit généralement des fichiers de style au format JSON qui servent à symboliser vos pyramides de tuiles vectorielles.",
     "storage.annexe.labels.type": ({ type }) => {

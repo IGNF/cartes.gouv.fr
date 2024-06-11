@@ -12,7 +12,7 @@ const test = (value: FileList, ctx: TestContext) => {
     if (file instanceof File) {
         if (getFileExtension(file.name)?.toLowerCase() !== "xml") {
             return ctx.createError({
-                message: `L'extension du fichier de métadonnées ${file.name} n'est pas correcte. Seule l'extension xml est acceptée.`,
+                message: `L’extension du fichier de métadonnées ${file.name} n'est pas correcte. Seule l’extension xml est acceptée.`,
             });
         }
 

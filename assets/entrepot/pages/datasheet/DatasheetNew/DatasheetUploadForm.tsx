@@ -362,7 +362,7 @@ export const DatasheetUploadFormFrTranslations: Translations<"fr">["DatasheetUpl
     title: ({ datasheetName }) => (datasheetName === undefined ? "Créer une fiche de données" : "Ajouter un fichier de données"),
     back_to: ({ datasheetName }) => (datasheetName === undefined ? "Retour à ma liste de données" : "Retour à ma fiche de données"),
     "datasheet.name": "Nom de votre fiche de donnée",
-    "datasheet.name_hint": "Ce nom vous permettra d'identifier votre donnée dans la géoplateforme, soyez aussi clair que possible.",
+    "datasheet.name_hint": "Ce nom vous permettra d’identifier votre donnée dans la géoplateforme, soyez aussi clair que possible.",
     "datasheet.name_mandatory_error": "Le nom de la donnée est obligatoire",
     "datasheet.name_max_length_error": "Le nombre maximal de caractères pour le nom de la fiche de donnée est de 99",
     "datasheet.name_regex_error":
@@ -372,7 +372,7 @@ export const DatasheetUploadFormFrTranslations: Translations<"fr">["DatasheetUpl
     upload: "Déposez votre fichier de données",
     upload_hint: "Formats de fichiers autorisés : archive zip contenant un Geopackage (recommandé) ou un CSV...",
     upload_nofile_error: "Aucun fichier téléversé",
-    upload_extension_error: ({ filename }) => `L'extension du fichier ${filename} n'est pas correcte`,
+    upload_extension_error: ({ filename }) => `L’extension du fichier ${filename} n'est pas correcte`,
     upload_max_size_error: ({ maxSize }) => `La taille maximale pour un fichier est de ${maxSize}`,
     upload_running: "Upload en cours ...",
     technical_name: "Nom technique de votre donnée",

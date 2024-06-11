@@ -244,7 +244,7 @@ export const { i18n } = declareComponentKeys<
 });
 
 export const AccessesRequestFrTranslations: Translations<"fr">["AccessesRequest"] = {
-    title: "Demande d'accès",
+    title: "Demande d’accès",
     explain: ({ url }) => (
         <p>
             Vous souhaitez demander au producteur des données décrites sur cette <a href={url}>fiche du catalogue</a> un accès aux services de diffusion de
@@ -252,7 +252,7 @@ export const AccessesRequestFrTranslations: Translations<"fr">["AccessesRequest"
             moins une couche)
         </p>
     ),
-    explain_no_access: "Cette fiche ne décrit aucun service de diffusion dont l'accès est restreint. Vous avez déjà accès à toutes les données décrites.",
+    explain_no_access: "Cette fiche ne décrit aucun service de diffusion dont l’accès est restreint. Vous avez déjà accès à toutes les données décrites.",
     back_to_dashboard: "Retour au tableau de bord",
     beneficiaries: "Bénéficiaires",
     beneficiaries_hintext: (
@@ -265,7 +265,7 @@ export const AccessesRequestFrTranslations: Translations<"fr">["AccessesRequest"
     myself: "Moi-même",
     community: ({ name }) => `La communauté ${name}`,
     min_layers_error: "Vous devez sélectionner au moins une couche",
-    sending_message: "Votre message est en cours d'envoi ...",
+    sending_message: "Votre message est en cours d’envoi ...",
 };
 
 export const AccessesRequestEnTranslations: Translations<"en">["AccessesRequest"] = {

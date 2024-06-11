@@ -441,12 +441,12 @@ export const VectorDbListItemFrTranslations: Translations<"fr">["VectorDbListIte
     show_details: "Voir les détails",
     tms_label: "Service de tuiles vectorielles (Tile Map Service - TMS)",
     wfs_label: "Service de sélection WFS (Web Feature Service - WFS)",
-    wmsv_label: "Service d'images (Web Map Service - WMS)",
+    wmsv_label: "Service d’images (Web Map Service - WMS)",
     tms_hint_text:
-        "Création puis publication d'une pyramide de tuiles vectorielles dont le rendu peut être personnalisable avec des fichiers de style proposés par vos soins ou définis par un utilisateur final. Ce service s'appuie sur le protocole TMS en version 1.0.0.",
+        "Création puis publication d’une pyramide de tuiles vectorielles dont le rendu peut être personnalisable avec des fichiers de style proposés par vos soins ou définis par un utilisateur final. Ce service s'appuie sur le protocole TMS en version 1.0.0.",
     wfs_hint_text:
-        "Création puis publication d'un service permettant de manipuler des objets géographiques. Ce service s'appuie sur le protocole WFS en version 2.0.0",
-    wmsv_hint_text: "Création puis publication d'images à partir de données vectorielles. Ce service s'appuie sur le protocole WMS en version 1.3.0",
+        "Création puis publication d’un service permettant de manipuler des objets géographiques. Ce service s'appuie sur le protocole WFS en version 2.0.0",
+    wmsv_hint_text: "Création puis publication d’images à partir de données vectorielles. Ce service s'appuie sur le protocole WMS en version 1.3.0",
     tile_technical_name: "Nom technique de la pyramide de tuiles vectorielles",
     tile_technical_name_hint_text:
         "II s'agit du nom technique du service qui apparaitra dans votre espace de travail, il ne sera pas publié en ligne. Si vous le renommez, choisissez un nom explicite.",

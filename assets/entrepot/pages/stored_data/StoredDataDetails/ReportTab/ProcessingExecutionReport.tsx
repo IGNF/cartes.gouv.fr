@@ -19,7 +19,7 @@ const ProcessingExecutionReport: FC<ProcessingExecutionReportProps> = ({ process
                 <strong>{"Espace de travail :"}</strong> {datastoreName}
             </li>
             <li>
-                <strong>{"Identifiant technique de l'exécution de traitement :"}</strong> {processingExecution?._id}
+                <strong>{"Identifiant technique de l’exécution de traitement :"}</strong> {processingExecution?._id}
             </li>
             <li>
                 <strong>{"Identifiant technique de la donnée en sortie :"}</strong> {processingExecution?.output?.stored_data._id}{" "}

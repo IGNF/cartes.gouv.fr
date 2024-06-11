@@ -93,7 +93,7 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                                 }}
                                 items={[
                                     {
-                                        text: "Copier l'URL de diffusion",
+                                        text: "Copier l’URL de diffusion",
                                         iconId: "ri-file-copy-2-line",
                                         onClick: async () => {
                                             if (!service.share_url) return;
@@ -116,7 +116,7 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                                         onClick: () => console.warn("Action non implémentée"),
                                     },
                                     {
-                                        text: "Gérer les permissions d'accès",
+                                        text: "Gérer les permissions d’accès",
                                         iconId: "ri-lock-line",
                                         linkProps: routes.datastore_manage_permissions({ datastoreId }).link,
                                         disabled: service.open === true,

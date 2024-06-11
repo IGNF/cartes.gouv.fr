@@ -132,8 +132,8 @@ export const AccessRestrictionsFrTranslations: Translations<"fr">["AccessRestric
     share_with_all_public_hint_text: "Le service sera accessible à tout utilisateur sans restriction.",
     share_with_your_community: "Restreint",
     share_with_your_community_hint_text:
-        "Vous devrez accorder une permission aux communautés et/ou utilisateurs souhaités pour leur autoriser l'accès. Ils devront par la suite configurer une clé à partir de cette permission pour accéder au service. Une permission va être créée automatiquement votre propre communauté.",
-    share_with_value_change_warning_title: "Changement de restrictions d'accès",
+        "Vous devrez accorder une permission aux communautés et/ou utilisateurs souhaités pour leur autoriser l’accès. Ils devront par la suite configurer une clé à partir de cette permission pour accéder au service. Une permission va être créée automatiquement votre propre communauté.",
+    share_with_value_change_warning_title: "Changement de restrictions d’accès",
     share_with_value_change_warning_desc_restricted_to_public:
         // eslint-disable-next-line quotes
         'Vous êtes sur le point de modifier les restrictions d\'accès de "Restreint" à "Tout public". Le service changera d\'adresse et les permissions que vous aviez configurées seront supprimées définitivement car elles ne seront plus nécessaires.',

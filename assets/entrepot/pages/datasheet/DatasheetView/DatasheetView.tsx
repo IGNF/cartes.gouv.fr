@@ -294,7 +294,7 @@ export const DatasheetViewFrTranslations: Translations<"fr">["DatasheetView"] = 
     "datasheet_confirm_delete_modal.title": ({ datasheetName }) => `Êtes-vous sûr de supprimer la fiche de données ${datasheetName} ?`,
     "datasheet_confirm_delete_modal.text": "Les éléments suivants seront supprimés :",
     "metadata_tab.metadata.absent":
-        "Les métadonnées de cette fiche ne sont pas encore disponibles. Créez un premier service à partir d'un de vos jeux de données pour les compléter.",
+        "Les métadonnées de cette fiche ne sont pas encore disponibles. Créez un premier service à partir d’un de vos jeux de données pour les compléter.",
     "metadata_tab.metadata.is_loading": "Les métadonnées sont en cours de chargement",
 };
 

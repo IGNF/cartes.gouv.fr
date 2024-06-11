@@ -146,8 +146,8 @@ export const { i18n } = declareComponentKeys<"metadata_not_defined" | "parsing_e
 
 export const TMSStyleFilesManagerFrTranslations: Translations<"fr">["TMSStyleFilesManager"] = {
     metadata_not_defined: "tms_metadata n'est pas defini dans le service",
-    parsing_error: "Erreur dans l'analyse du fichier",
-    writing_error: "Erreur dans l'écriture du style mapbox",
+    parsing_error: "Erreur dans l’analyse du fichier",
+    writing_error: "Erreur dans l’écriture du style mapbox",
 };
 export const TMSStyleFilesManagerEnTranslations: Translations<"en">["TMSStyleFilesManager"] = {
     metadata_not_defined: "tms_metadata is not defined in service",

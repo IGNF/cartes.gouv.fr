@@ -204,13 +204,13 @@ export const { i18n } = declareComponentKeys<
 >()("UserKeysListTab");
 
 export const UserKeysListTabFrTranslations: Translations<"fr">["UserKeysListTab"] = {
-    no_keys: "Vous n'avez aucune clé d'accès",
-    no_permission_warning: "Vous n'avez aucune permission, il n'est pas possible d'ajouter une clé",
+    no_keys: "Vous n'avez aucune clé d’accès",
+    no_permission_warning: "Vous n'avez aucune permission, il n'est pas possible d’ajouter une clé",
     hash_value: ({ value }) => `Valeur du hash : ${value}`,
     hash_value_copied: "Valeur du hash copiée",
     services: "Services accessibles",
     no_services: "Cette clé n'a accès à aucun service",
-    add: "Créer une clé d'accès",
+    add: "Créer une clé d’accès",
     modify: "Modifier la clé",
     remove: "Supprimer la clé",
     confirm_remove: "Êtes-vous sûr de vouloir supprimer cette clé ?",
