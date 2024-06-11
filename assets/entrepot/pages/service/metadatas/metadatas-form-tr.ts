@@ -17,6 +17,8 @@ export const { i18n } = declareComponentKeys<
     | "metadata.description_form.hint_category"
     | "metadata.description_form.keywords"
     | "metadata.description_form.hint_keywords"
+    | "metadata.description_form.free_keywords"
+    | "metadata.description_form.hint_free_keywords"
     | "metadata.description_form.contact_email"
     | "metadata.description_form.hint_contact_email"
     | "metadata.description_form.time_reference_title"
@@ -67,6 +69,8 @@ export const MetadatasFormFrTranslations: Translations<"fr">["MetadatasForm"] = 
     "metadata.description_form.keywords": "Mots clés",
     "metadata.description_form.hint_keywords":
         "Thème dont relèvent les données géographiques, conformément aux définitions des annexes I, II ou III de la directive Inspire",
+    "metadata.description_form.free_keywords": "Mots clés libres",
+    "metadata.description_form.hint_free_keywords": "Saisissez librement des mots clés en appuyant sur Entrée après chaque mot",
     "metadata.description_form.contact_email": "Email de contact sur les métadonnées",
     "metadata.description_form.hint_contact_email": "E-mail auprès duquel des compléments d'information peuvent être obtenus",
     "metadata.description_form.time_reference_title": "Référence temporelle",
@@ -120,6 +124,8 @@ export const MetadatasFormEnTranslations: Translations<"en">["MetadatasForm"] = 
     "metadata.description_form.hint_category": "Use autocomplete or freely type keywords by pressing Enter after each word",
     "metadata.description_form.keywords": "Keywords",
     "metadata.description_form.hint_keywords": undefined,
+    "metadata.description_form.free_keywords": "Free keywords",
+    "metadata.description_form.hint_free_keywords": undefined,
     "metadata.description_form.contact_email": "Metadata contact email",
     "metadata.description_form.hint_contact_email": "Email from which additional information can be obtained",
     "metadata.description_form.time_reference_title": "Time reference",

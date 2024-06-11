@@ -65,11 +65,44 @@
                     </gmd:pointOfContact>
                 {% endif %}
 
-                {% if thematic_categories is defined %}
+                {% if inspire_keywords|length %}
                     <gmd:descriptiveKeywords>
                         <gmd:MD_Keywords>
                             {% apply spaceless %}
-                            {% for item in thematic_categories %}
+                            {% for item in inspire_keywords %}
+                                <gmd:keyword>
+                                    <gco:CharacterString>{{ item }}</gco:CharacterString>
+                                </gmd:keyword>
+                            {% endfor %}
+                            {% endapply %}
+                            <gmd:thesaurusName>
+                                <gmd:CI_Citation>
+                                    <gmd:title>
+                                        <gco:CharacterString>GEMET - INSPIRE themes, version 1.0</gco:CharacterString>
+                                    </gmd:title>
+                                    <gmd:date>
+                                        <gmd:CI_Date>
+                                            <gmd:date>
+                                                <gco:Date>2008-06-01</gco:Date>
+                                            </gmd:date>
+                                            <gmd:dateType>
+                                                <gmd:CI_DateTypeCode
+                                                    codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode"
+                                                    codeListValue="publication" />
+                                            </gmd:dateType>
+                                        </gmd:CI_Date>
+                                    </gmd:date>
+                                </gmd:CI_Citation>
+                            </gmd:thesaurusName>
+                        </gmd:MD_Keywords>
+                    </gmd:descriptiveKeywords>
+                {% endif %}
+
+                {% if free_keywords|length %}
+                    <gmd:descriptiveKeywords>
+                        <gmd:MD_Keywords>
+                            {% apply spaceless %}
+                            {% for item in free_keywords %}
                                 <gmd:keyword>
                                     <gco:CharacterString>{{ item }}</gco:CharacterString>
                                 </gmd:keyword>
@@ -81,6 +114,7 @@
                         </gmd:MD_Keywords>
                     </gmd:descriptiveKeywords>
                 {% endif %}
+
                 {% if topic_categories|length %}
                     {% for topic in topic_categories %}
                         <gmd:topicCategory>

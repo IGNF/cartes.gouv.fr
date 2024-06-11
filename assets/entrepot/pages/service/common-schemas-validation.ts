@@ -47,6 +47,7 @@ export class CommonSchemasValidation {
                     .required(tValidMD("metadatas.identifier_error")),
                 category: yup.array(yup.string()).min(1, tValidMD("metadatas.category_error")).required(tValidMD("metadatas.category_error")),
                 keywords: yup.array(yup.string()).min(1, tValidMD("metadatas.keywords_error")).required(tValidMD("metadatas.keywords_error")),
+                free_keywords: yup.array(yup.string()),
                 email_contact: yup
                     .string()
                     .required(tValidMD("metadatas.email_contact_required_error"))

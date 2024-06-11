@@ -195,6 +195,7 @@ export type MetadataFormValuesType = {
     organization_email?: string;
     category?: string[];
     keywords?: string[];
+    free_keywords?: string[];
     charset?: string;
     projection?: string;
     encoding?: string;
@@ -286,8 +287,9 @@ export type CswMetadata = {
     title?: string;
     abstract?: string;
     creation_date?: string;
-    thematic_categories?: string[];
     topic_categories?: string[];
+    inspire_keywords?: string[];
+    free_keywords?: string[];
     contact_email?: string;
     organisation_name?: string;
     organisation_email?: string;

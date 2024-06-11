@@ -26,6 +26,13 @@ class WfsAddDTO
         #[Assert\Count(min: 1, minMessage: 'common.category_min_error')]
         public readonly array $category,
 
+        /** @var array<string> */
+        #[Assert\Count(min: 1, minMessage: 'common.keywords_min_error')]
+        public readonly array $keywords,
+
+        /** @var array<string> */
+        public readonly array $free_keywords,
+
         #[Assert\NotBlank(['message' => 'common.email_contact_error'])]
         #[Assert\Email(message: 'email_contact {{ value }} n\'est pas une adresse email valide')]
         public readonly string $email_contact,

@@ -21,7 +21,8 @@ const getLanguages = (): LanguageType[] => {
     for (const def of Object.values(langs)) {
         const code = def["639-2"];
         if (code !== "und") {
-            languages.push({ language: def.fr[0], code: code });
+            // Cas special pour le francais, le geocatalogue ne connait que "fre"
+            languages.push({ language: def.fr[0], code: code === "fra" ? "fre" : code });
         }
     }
 

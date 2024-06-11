@@ -81,10 +81,28 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, datasheet, metadataQue
                                 title={"Catégories thématiques"}
                                 content={
                                     <div className={fr.cx("fr-tags-group")}>
-                                        {metadata.csw_metadata?.thematic_categories?.map((keyword) => <Tag key={keyword}>{keyword}</Tag>)}
+                                        {metadata.csw_metadata?.topic_categories?.map((keyword) => <Tag key={keyword}>{keyword}</Tag>)}
                                     </div>
                                 }
                             />
+                            <MetadataField
+                                title={"Mots clés INSPIRE"}
+                                content={
+                                    <div className={fr.cx("fr-tags-group")}>
+                                        {metadata.csw_metadata?.inspire_keywords?.map((keyword) => <Tag key={keyword}>{keyword}</Tag>)}
+                                    </div>
+                                }
+                            />
+                            {metadata.csw_metadata?.free_keywords?.length && (
+                                <MetadataField
+                                    title={"Mots clés libres"}
+                                    content={
+                                        <div className={fr.cx("fr-tags-group")}>
+                                            {metadata.csw_metadata?.free_keywords?.map((keyword) => <Tag key={keyword}>{keyword}</Tag>)}
+                                        </div>
+                                    }
+                                />
+                            )}
                         </Accordion>
 
                         <Accordion titleAs="h2" defaultExpanded={true} label={"Délimitation géographique (localisation physique de la donnée)"}>
