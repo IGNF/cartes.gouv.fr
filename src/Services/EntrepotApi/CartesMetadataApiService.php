@@ -205,7 +205,9 @@ class CartesMetadataApiService
             $newCswMetadata->title = $formData['public_name'];
             $newCswMetadata->abstract = $formData['description'];
             $newCswMetadata->creationDate = $formData['creation_date'];
-            $newCswMetadata->thematicCategories = $formData['category'];
+            $newCswMetadata->topicCategories = $formData['category'];
+            $newCswMetadata->inspireKeywords = $formData['keywords'];
+            $newCswMetadata->freeKeywords = $formData['free_keywords'];
             $newCswMetadata->contactEmail = $formData['email_contact'];
             $newCswMetadata->organisationName = $formData['organization'];
             $newCswMetadata->organisationEmail = $formData['organization_email'];

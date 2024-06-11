@@ -70,6 +70,8 @@ const createFormData = async (formValues: WmsVectorServiceFormValuesType) => {
     const fd = new FormData();
 
     fd.set("category", JSON.stringify(formValues.category!));
+    fd.set("keywords", JSON.stringify(formValues.keywords!));
+    fd.set("free_keywords", JSON.stringify(formValues.free_keywords!));
     fd.set("attribution_text", formValues.attribution_text!);
     fd.set("attribution_url", formValues.attribution_url!);
     fd.set("charset", formValues.charset!);

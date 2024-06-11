@@ -20,7 +20,14 @@ class CswMetadata
     public ?string $updateDate;
 
     /** @var array<string> */
-    public ?array $thematicCategories;
+    public ?array $inspireKeywords;
+
+    /** @var array<string> */
+    public ?array $freeKeywords;
+
+    /** @var array<string> */
+    public ?array $topicCategories;
+    
     public ?string $contactEmail;
     public ?string $organisationName;
     public ?string $organisationEmail;
@@ -36,7 +43,12 @@ class CswMetadata
         $empty->hierarchyLevel = CswHierarchyLevel::Series;
         $empty->language = CswLanguage::default();
         $empty->charset = 'utf8';
-
+        $empty->thumbnailUrl = null;
+        
+        $empty->topicCategories = [];
+        $empty->inspireKeywords = [];
+        $empty->freeKeywords = [];
+        
         return $empty;
     }
 

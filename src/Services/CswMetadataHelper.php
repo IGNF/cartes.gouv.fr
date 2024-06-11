@@ -2,25 +2,33 @@
 
 namespace App\Services;
 
-use App\Entity\CswMetadata\CswHierarchyLevel;
+use SimpleXMLElement;
+use Twig\Environment as Twig;
+use App\Exception\AppException;
+use Symfony\Component\Uid\Uuid;
 use App\Entity\CswMetadata\CswLanguage;
 use App\Entity\CswMetadata\CswMetadata;
 use App\Entity\CswMetadata\CswMetadataLayer;
-use App\Exception\AppException;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
+use App\Entity\CswMetadata\CswHierarchyLevel;
 use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Uid\Uuid;
-use Twig\Environment as Twig;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class CswMetadataHelper
 {
+    /** @var array<string> */
+    private array $allTopics = [];
+
     public function __construct(
         private Twig $twig,
         private ParameterBagInterface $params,
         private SerializerInterface $serializer,
         private Filesystem $fs
     ) {
+        $content = file_get_contents($params->get('assets_directory') . '/data/topic_categories.json');
+        if ($content !== false) {
+            $this->allTopics = json_decode($content, true);
+        }
     }
 
     public function toArray(CswMetadata $metadata): array
@@ -54,6 +62,15 @@ class CswMetadataHelper
     {
         $metadataArray = $this->toArray($metadata);
 
+        $englishTopics = [];
+        $allTopics = array_flip($this->allTopics);  // français => anglais
+        foreach($metadataArray['topic_categories'] as $topic) {
+            if (isset($allTopics[$topic])) {
+                $englishTopics[] = $allTopics[$topic];
+            }
+        }
+        $metadataArray['topic_categories'] = $englishTopics;
+
         $content = $this->twig->render('metadata/metadata_dataset_iso.xml.twig', $metadataArray);
 
         return $content;
@@ -71,12 +88,20 @@ class CswMetadataHelper
         }
 
         $cswMetadata = CswMetadata::createEmpty();
-
+    
         /** @var \DOMNodeList<\DOMElement> $keywordsNodesList */
-        $keywordsNodesList = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:keyword');
-
-        $keywordsList = array_map(fn (\DOMElement $keyword) => $keyword->textContent, iterator_to_array($keywordsNodesList));
-
+        $keywordsNodesList = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:descriptiveKeywords/gmd:MD_Keywords');
+        $this->getKeywords($cswMetadata, $keywordsNodesList);
+        
+        /** @var \DOMNodeList<\DOMElement> $topicsNodesList */
+        $topicsNodesList = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:topicCategory/gmd:MD_TopicCategoryCode');
+        foreach(iterator_to_array($topicsNodesList) as $topicElement) {
+            $topic = $topicElement->textContent;
+            if (isset($this->allTopics[$topic])) {
+                $cswMetadata->topicCategories[] = $this->allTopics[$topic]; // En français
+            }
+        }
+       
         /** @var \DOMNodeList<\DOMElement> $layersNodesList */
         $layersNodesList = $xpath->query('/gmd:MD_Metadata/gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine[@type="offering"]');
 
@@ -114,7 +139,7 @@ class CswMetadataHelper
             $cswMetadata->updateDate = $list->item(0)->textContent;   
         }
         
-        $cswMetadata->thematicCategories = $keywordsList;
+        // TODO $cswMetadata->thematicCategories = $keywordsList;
         $cswMetadata->contactEmail = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:pointOfContact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress/gco:CharacterString')->item(0)->textContent;
         $cswMetadata->organisationName = $xpath->query('/gmd:MD_Metadata/gmd:contact/gmd:CI_ResponsibleParty/gmd:organisationName/gco:CharacterString')->item(0)->textContent;
         $cswMetadata->organisationEmail = $xpath->query('/gmd:MD_Metadata/gmd:contact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress/gco:CharacterString')->item(0)->textContent;
@@ -166,5 +191,32 @@ class CswMetadataHelper
     private function trimStringArray(array $array): array
     {
         return array_map(fn ($value) => is_string($value) ? trim($value) : $value, $array);
+    }
+
+    /**
+     * @param CswMetadata $cswMetadata
+     * @param \DOMNodeList<\DOMElement> $keywordsNodesList
+     * @return void
+     */
+    private function getKeywords(CswMetadata $cswMetadata, $keywordsNodesList) : void
+    {
+        foreach($keywordsNodesList as $list) {
+            $hasThesaurus = false;
+            
+            $keywords = [];
+            foreach($list->childNodes as $child) {
+                if ('gmd:thesaurusName' === $child->nodeName) {
+                    $hasThesaurus = true;    
+                } else if ('gmd:keyword' === $child->nodeName) {
+                    $keywords[] = $child->textContent;
+                }
+            }
+
+            if ($hasThesaurus) {
+                $cswMetadata->inspireKeywords = array_merge($cswMetadata->inspireKeywords, $keywords);
+            } else {
+                $cswMetadata->freeKeywords = array_merge($cswMetadata->freeKeywords, $keywords);   
+            }
+        }  
     }
 }

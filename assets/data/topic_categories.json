@@ -1,0 +1,20 @@
+{
+    "farming": "Agriculture, agroforesterie, élevage, sylviculture",
+    "biota": "Biodiversité",
+    "climatologyMeteorologyAtmosphere": "Climat, météorologie",
+    "economy": "Economie, emploi, population",
+    "elevation": "Altimétrie, topographie, relief",
+    "environment": "Environnement, zones naturelles, paysages, écosystèmes",
+    "geoscientificInformation": "Géologie",
+    "health": "Santé",
+    "imageryBaseMapsEarthCover": "Cartes topographiques, imagerie, occupation du sol",
+    "intelligenceMilitary": "Sécurité civile, militaire",
+    "inlandWaters": "Hydrographie",
+    "location": "Administration, éducation, services et commerces",
+    "oceans": "Mer et littoral",
+    "planningCadastre": "Cadastre, foncier et adresse",
+    "society": "Société, culture, sport et tourisme",
+    "structure": "Aménagement, urbanisme, bâtiment",
+    "transportation": "Transport",
+    "utilitiesCommunication": "Infrastructures : énergie, télécommunications"
+}

@@ -3,6 +3,7 @@ parameters:
     api_harvest_mode: "%env(resolve:API_HARVEST_MODE)%"
 
     public_path: "%env(resolve:ENCORE_PUBLIC_PATH)%"
+    assets_directory: "%kernel.project_dir%/assets"
 
     iam_url: "%env(resolve:IAM_URL)%"
     iam_realm: "%env(resolve:IAM_REALM)%"
