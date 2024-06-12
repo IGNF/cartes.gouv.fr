@@ -211,6 +211,7 @@ class CartesMetadataApiService
             $newCswMetadata->contactEmail = $formData['email_contact'];
             $newCswMetadata->organisationName = $formData['organization'];
             $newCswMetadata->organisationEmail = $formData['organization_email'];
+            $newCswMetadata->resolution = $formData['resolution'];
             $newCswMetadata->layers = $layers;
         }
 

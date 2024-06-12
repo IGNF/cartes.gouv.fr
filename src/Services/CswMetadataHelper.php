@@ -2,17 +2,16 @@
 
 namespace App\Services;
 
-use SimpleXMLElement;
-use Twig\Environment as Twig;
-use App\Exception\AppException;
-use Symfony\Component\Uid\Uuid;
+use App\Entity\CswMetadata\CswHierarchyLevel;
 use App\Entity\CswMetadata\CswLanguage;
 use App\Entity\CswMetadata\CswMetadata;
 use App\Entity\CswMetadata\CswMetadataLayer;
-use Symfony\Component\Filesystem\Filesystem;
-use App\Entity\CswMetadata\CswHierarchyLevel;
-use Symfony\Component\Serializer\SerializerInterface;
+use App\Exception\AppException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Uid\Uuid;
+use Twig\Environment as Twig;
 
 class CswMetadataHelper
 {
@@ -25,8 +24,8 @@ class CswMetadataHelper
         private SerializerInterface $serializer,
         private Filesystem $fs
     ) {
-        $content = file_get_contents($params->get('assets_directory') . '/data/topic_categories.json');
-        if ($content !== false) {
+        $content = file_get_contents($params->get('assets_directory').'/data/topic_categories.json');
+        if (false !== $content) {
             $this->allTopics = json_decode($content, true);
         }
     }
@@ -64,7 +63,7 @@ class CswMetadataHelper
 
         $englishTopics = [];
         $allTopics = array_flip($this->allTopics);  // français => anglais
-        foreach($metadataArray['topic_categories'] as $topic) {
+        foreach ($metadataArray['topic_categories'] as $topic) {
             if (isset($allTopics[$topic])) {
                 $englishTopics[] = $allTopics[$topic];
             }
@@ -88,20 +87,20 @@ class CswMetadataHelper
         }
 
         $cswMetadata = CswMetadata::createEmpty();
-    
+
         /** @var \DOMNodeList<\DOMElement> $keywordsNodesList */
         $keywordsNodesList = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:descriptiveKeywords/gmd:MD_Keywords');
         $this->getKeywords($cswMetadata, $keywordsNodesList);
-        
+
         /** @var \DOMNodeList<\DOMElement> $topicsNodesList */
         $topicsNodesList = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:topicCategory/gmd:MD_TopicCategoryCode');
-        foreach(iterator_to_array($topicsNodesList) as $topicElement) {
+        foreach (iterator_to_array($topicsNodesList) as $topicElement) {
             $topic = $topicElement->textContent;
             if (isset($this->allTopics[$topic])) {
                 $cswMetadata->topicCategories[] = $this->allTopics[$topic]; // En français
             }
         }
-       
+
         /** @var \DOMNodeList<\DOMElement> $layersNodesList */
         $layersNodesList = $xpath->query('/gmd:MD_Metadata/gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine[@type="offering"]');
 
@@ -128,26 +127,25 @@ class CswMetadataHelper
         $cswMetadata->charset = $xpath->query('/gmd:MD_Metadata/gmd:characterSet/gmd:MD_CharacterSetCode')->item(0)->textContent;
         $cswMetadata->title = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:title/gco:CharacterString')->item(0)->textContent;
         $cswMetadata->abstract = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:abstract/gco:CharacterString')->item(0)->textContent;
-        
+
         $list = $xpath->query('/gmd:MD_Metadata/gmd:dateStamp/gco:Date');
         if (1 === count($list)) {
-            $cswMetadata->creationDate = $list->item(0)->textContent;   
+            $cswMetadata->creationDate = $list->item(0)->textContent;
         }
 
         $list = $xpath->query('/gmd:MD_Metadata/gmd:dateStamp/gco:DateTime');
         if (1 === count($list)) {
-            $cswMetadata->updateDate = $list->item(0)->textContent;   
+            $cswMetadata->updateDate = $list->item(0)->textContent;
         }
-        
+
         $cswMetadata->contactEmail = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:pointOfContact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress/gco:CharacterString')->item(0)->textContent;
         $cswMetadata->organisationName = $xpath->query('/gmd:MD_Metadata/gmd:contact/gmd:CI_ResponsibleParty/gmd:organisationName/gco:CharacterString')->item(0)->textContent;
         $cswMetadata->organisationEmail = $xpath->query('/gmd:MD_Metadata/gmd:contact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress/gco:CharacterString')->item(0)->textContent;
 
         // Thumbnail
-        $thumbnailList = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:graphicOverview/gmd:MD_BrowseGraphic/gmd:fileName/gco:CharacterString');
-        if (0 !== $thumbnailList->count()) {
-            $cswMetadata->thumbnailUrl = $thumbnailList->item(0)->textContent;
-        }
+        $cswMetadata->thumbnailUrl = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:graphicOverview/gmd:MD_BrowseGraphic/gmd:fileName/gco:CharacterString')->item(0)?->textContent;
+
+        $cswMetadata->resolution = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:spatialResolution/gmd:MD_Resolution/gmd:equivalentScale/gmd:MD_RepresentativeFraction/gmd:denominator/gco:Integer')->item(0)?->textContent;
 
         $cswMetadata->layers = $layersList;
 
@@ -193,20 +191,18 @@ class CswMetadataHelper
     }
 
     /**
-     * @param CswMetadata $cswMetadata
      * @param \DOMNodeList<\DOMElement> $keywordsNodesList
-     * @return void
      */
-    private function getKeywords(CswMetadata $cswMetadata, $keywordsNodesList) : void
+    private function getKeywords(CswMetadata $cswMetadata, $keywordsNodesList): void
     {
-        foreach($keywordsNodesList as $list) {
+        foreach ($keywordsNodesList as $list) {
             $hasThesaurus = false;
-            
+
             $keywords = [];
-            foreach($list->childNodes as $child) {
+            foreach ($list->childNodes as $child) {
                 if ('gmd:thesaurusName' === $child->nodeName) {
-                    $hasThesaurus = true;    
-                } else if ('gmd:keyword' === $child->nodeName) {
+                    $hasThesaurus = true;
+                } elseif ('gmd:keyword' === $child->nodeName) {
                     $keywords[] = $child->textContent;
                 }
             }
@@ -214,8 +210,8 @@ class CswMetadataHelper
             if ($hasThesaurus) {
                 $cswMetadata->inspireKeywords = array_merge($cswMetadata->inspireKeywords, $keywords);
             } else {
-                $cswMetadata->freeKeywords = array_merge($cswMetadata->freeKeywords, $keywords);   
+                $cswMetadata->freeKeywords = array_merge($cswMetadata->freeKeywords, $keywords);
             }
-        }  
+        }
     }
 }

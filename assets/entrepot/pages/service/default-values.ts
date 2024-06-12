@@ -26,6 +26,7 @@ const getMetadataFormDefaultValues = (metadata?: Metadata): MetadataFormValuesTy
         description: metadata?.csw_metadata?.abstract,
         identifier: metadata?.csw_metadata?.file_identifier,
         charset: metadata?.csw_metadata?.charset ?? DEFAULT_CHARSET,
+        resolution: metadata?.csw_metadata?.resolution,
     };
 };
 

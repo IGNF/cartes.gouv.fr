@@ -27,10 +27,12 @@ class CswMetadata
 
     /** @var array<string> */
     public ?array $topicCategories;
-    
+
     public ?string $contactEmail;
     public ?string $organisationName;
     public ?string $organisationEmail;
+
+    public ?string $resolution;
 
     /** @var array<CswMetadataLayer> */
     public ?array $layers;
@@ -44,11 +46,13 @@ class CswMetadata
         $empty->language = CswLanguage::default();
         $empty->charset = 'utf8';
         $empty->thumbnailUrl = null;
-        
+        $empty->resolution = null;
+
         $empty->topicCategories = [];
         $empty->inspireKeywords = [];
         $empty->freeKeywords = [];
-        
+        $empty->layers = [];
+
         return $empty;
     }
 

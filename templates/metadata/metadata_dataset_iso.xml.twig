@@ -25,7 +25,7 @@
         <gco:CharacterString>{{ hierarchy_level_name }}</gco:CharacterString>
     </gmd:hierarchyLevelName>
 
-    {% if title is defined or abstract is defined or contact_email is defined or thematic_categories is defined %}
+    {% if title is defined or abstract is defined or contact_email is defined or thematic_categories is defined or resolution is defined %}
         <gmd:identificationInfo>
             <gmd:MD_DataIdentification>
                 {% if title is defined %}
@@ -86,9 +86,7 @@
                                                 <gco:Date>2008-06-01</gco:Date>
                                             </gmd:date>
                                             <gmd:dateType>
-                                                <gmd:CI_DateTypeCode
-                                                    codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode"
-                                                    codeListValue="publication" />
+                                                <gmd:CI_DateTypeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication" />
                                             </gmd:dateType>
                                         </gmd:CI_Date>
                                     </gmd:date>
@@ -138,6 +136,24 @@
                         </gmd:MD_BrowseGraphic>
                     </gmd:graphicOverview>
                 {% endif %}
+
+                {% if resolution %}
+                    <gmd:spatialResolution>
+                        <gmd:MD_Resolution>
+                            <gmd:equivalentScale>
+                                <gmd:MD_RepresentativeFraction>
+                                    <gmd:denominator>
+                                        <gco:Integer>{{ resolution }}</gco:Integer>
+                                    </gmd:denominator>
+                                </gmd:MD_RepresentativeFraction>
+                            </gmd:equivalentScale>
+                        </gmd:MD_Resolution>
+                    </gmd:spatialResolution>
+                {% endif %}
+
+                <gmd:spatialRepresentationType>
+                    <gmd:MD_SpatialRepresentationTypeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_SpatialRepresentationTypeCode" codeListValue="vector" />
+                </gmd:spatialRepresentationType>
             </gmd:MD_DataIdentification>
         </gmd:identificationInfo>
     {% endif %}

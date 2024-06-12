@@ -293,6 +293,7 @@ export type CswMetadata = {
     contact_email?: string;
     organisation_name?: string;
     organisation_email?: string;
+    resolution?: string;
     layers?: CswMetadataLayer[];
 };
 
