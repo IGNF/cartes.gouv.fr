@@ -49,15 +49,17 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                 </h1>
             </div>
 
-            <div className={fr.cx("fr-grid-row")}>
-                {metadataEndpoint?.quota && metadataEndpoint?.use && metadataEndpoint?.quota === metadataEndpoint?.use ? (
-                    <Alert severity="warning" title={t("datasheet_creation_impossible")} description={t("metadata_endpoint_quota_reached")} />
-                ) : (
-                    <Button linkProps={routes.datastore_datasheet_upload({ datastoreId: datastoreId }).link} iconId={"fr-icon-add-line"}>
-                        {t("create_datasheet")}
-                    </Button>
-                )}
-            </div>
+            {metadataEndpoint && (
+                <div className={fr.cx("fr-grid-row")}>
+                    {metadataEndpoint?.quota && metadataEndpoint?.use && metadataEndpoint?.quota === metadataEndpoint?.use ? (
+                        <Alert severity="warning" title={t("datasheet_creation_impossible")} description={t("metadata_endpoint_quota_reached")} />
+                    ) : (
+                        <Button linkProps={routes.datastore_datasheet_upload({ datastoreId: datastoreId }).link} iconId={"fr-icon-add-line"}>
+                            {t("create_datasheet")}
+                        </Button>
+                    )}
+                </div>
+            )}
 
             {datasheetListQuery.data === undefined ? (
                 <Skeleton count={12} rectangleHeight={100} />
