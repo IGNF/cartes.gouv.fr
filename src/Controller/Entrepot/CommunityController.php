@@ -65,15 +65,15 @@ class CommunityController extends AbstractController implements ApiControllerInt
             $me = $this->userApiService->getMe();
 
             // Suis-je membre de cette communaute
-            $communityMember = array_filter($me['communities_member'], function ($member) use ($communityId) {
+            $communityMember = array_values(array_filter($me['communities_member'], function ($member) use ($communityId) {
                 return $member['community']['_id'] == $communityId;
-            });
+            }));
             if (0 === count($communityMember)) {
                 throw new CartesApiException("Vous n'êtes pas membre de cette communauté", JsonResponse::HTTP_BAD_REQUEST);
             }
 
             // Ai-je le droit de modifier les membres ?
-            if (!$this->_allowedToModifyMembers($communityMember[1], $me)) {
+            if (!$this->_allowedToModifyMembers($communityMember[0], $me)) {
                 throw new CartesApiException("Vous n'avez pas les droits pour ajouter un utilisateur ou modifier ses permissions", JsonResponse::HTTP_BAD_REQUEST);
             }
 
@@ -115,15 +115,15 @@ class CommunityController extends AbstractController implements ApiControllerInt
             $me = $this->userApiService->getMe();
 
             // Suis-je membre de cette communaute
-            $communityMember = array_filter($me['communities_member'], function ($member) use ($communityId) {
+            $communityMember = array_values(array_filter($me['communities_member'], function ($member) use ($communityId) {
                 return $member['community']['_id'] == $communityId;
-            });
+            }));
             if (0 === count($communityMember)) {
                 throw new CartesApiException("Vous n'êtes pas membre de cette communauté", JsonResponse::HTTP_BAD_REQUEST);
             }
 
             // Ai-je le droit de modifier les membres ?
-            if (!$this->_allowedToModifyMembers($communityMember[1], $me)) {
+            if (!$this->_allowedToModifyMembers($communityMember[0], $me)) {
                 throw new CartesApiException("Vous n'avez pas les droits pour supprimer un membre de cette communauté", JsonResponse::HTTP_BAD_REQUEST);
             }
 
