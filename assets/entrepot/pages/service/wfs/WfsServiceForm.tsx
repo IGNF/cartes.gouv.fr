@@ -29,33 +29,31 @@ import AdditionalInfo from "../metadatas/AdditionalInfo";
 import Description from "../metadatas/Description";
 import UploadMDFile from "../metadatas/UploadMDFile";
 import TableInfosForm from "./TablesInfoForm";
+import { trimObject } from "../../../../utils";
 
-// Ajout du nom natif et trim sur les mots cles
-const formatTablesInfos = (table_infos: Record<string, WfsTableInfos>) => {
-    const tInfos: object[] = [];
+// Ajout du nom natif sur les tables et suppression des mots clés en doublon
+const formatTablesInfos = (table_infos: Record<string, WfsTableInfos>): WfsTableInfos[] => {
+    const tInfos: WfsTableInfos[] = [];
     for (const [name, infos] of Object.entries(table_infos)) {
-        tInfos.push({
-            native_name: name,
-            ...infos,
-        });
+        const i = { native_name: name, ...infos };
+        i.keywords = Array.from(new Set(i.keywords)); // Suppression des doublons
+        tInfos.push(i);
     }
     return tInfos;
 };
 
 const createRequestBody = (formValues: WfsServiceFormValuesType) => {
     // Nettoyage => trim sur toutes les chaines
-    const values = JSON.parse(
-        JSON.stringify(formValues, (key, value) => {
-            return typeof value === "string" ? value.trim() : value;
-        })
-    );
-    values.table_infos = formatTablesInfos(values.table_infos);
+    const values = trimObject(formValues) as WfsServiceFormValuesType;
+
+    values.free_keywords = Array.from(new Set(values.free_keywords)); // Suppression des doublons
+    values.table_infos = formatTablesInfos(values.table_infos as Record<string, WfsTableInfos>);
     return values;
 };
 
 export type WfsServiceFormValuesType = ServiceFormValuesBaseType & {
     selected_tables?: string[];
-    table_infos?: Record<string, WfsTableInfos>;
+    table_infos?: Record<string, WfsTableInfos> | WfsTableInfos[];
 };
 
 /**
@@ -188,8 +186,8 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
             selectedTableNamesList.forEach((table) => {
                 table_schemas[table] = yup.object({
                     public_name: yup.string().default(table),
-                    title: yup.string().required(`Le titre de la table ${table} est obligatoire`),
-                    description: yup.string().required(`Le résumé du contenu de la table ${table} est obligatoire`),
+                    title: yup.string().trim(t("trimmed_error")).strict(true).required(`Le titre de la table ${table} est obligatoire`),
+                    description: yup.string().trim(t("trimmed_error")).strict(true).required(`Le résumé du contenu de la table ${table} est obligatoire`),
                     keywords: yup.array().of(yup.string()),
                 });
             });
@@ -226,11 +224,12 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
         formState: { errors },
         getValues: getFormValues,
         trigger,
+        watch,
     } = form;
 
-    /*useEffect(() => {
+    useEffect(() => {
         watch((value, { name, type }) => console.log(value, name, type));
-    }, [watch]); */
+    }, [watch]);
 
     const selectedTableNamesList: string[] | undefined = useWatch({
         control: form.control,
@@ -386,6 +385,7 @@ export const { i18n } = declareComponentKeys<
     | "publish.in_progress"
     | "modify.in_progress"
     | "back_to_data_list"
+    | "trimmed_error"
 >()({
     WfsServiceForm,
 });
@@ -418,6 +418,7 @@ export const WfsServiceFormFrTranslations: Translations<"fr">["WfsServiceForm"] 
     "publish.in_progress": "Création du service WFS en cours",
     "modify.in_progress": "Modification des informations du service WFS en cours",
     back_to_data_list: "Retour à mes données",
+    trimmed_error: "La chaîne de caractères ne doit contenir aucun espace en début et fin",
 };
 
 export const WfsServiceFormEnTranslations: Translations<"en">["WfsServiceForm"] = {
@@ -433,4 +434,5 @@ export const WfsServiceFormEnTranslations: Translations<"en">["WfsServiceForm"] 
     "publish.in_progress": undefined,
     "modify.in_progress": undefined,
     back_to_data_list: undefined,
+    trimmed_error: undefined,
 };

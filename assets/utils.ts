@@ -170,6 +170,34 @@ const formatDateFromISO = (isoDateString: string): string => {
 const getArrayRange = (start: number, stop: number, step: number = 1): number[] =>
     Array.from({ length: (stop - start) / step + 1 }, (_, index) => start + index * step);
 
+const trimObject = (obj: object): object => {
+    if (typeof obj !== "object" || obj === null) {
+        return obj;
+    }
+
+    if (Array.isArray(obj)) {
+        return obj.map((elem) => {
+            if (typeof elem === "string") {
+                return elem.trim();
+            }
+            return trimObject(elem);
+        });
+    }
+
+    const newObject = Object.keys(obj).reduce((acc, key) => {
+        let value = obj[key];
+
+        if (typeof value === "string") {
+            value = value.trim();
+        } else if (typeof value === "object") {
+            value = trimObject(value);
+        }
+        return { ...acc, [key]: value };
+    }, {});
+
+    return newObject;
+};
+
 export {
     getInspireKeywords,
     getLanguages,
@@ -184,4 +212,5 @@ export {
     getFileExtension,
     formatDateFromISO,
     getArrayRange,
+    trimObject,
 };

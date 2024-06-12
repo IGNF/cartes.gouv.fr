@@ -139,7 +139,6 @@ class CswMetadataHelper
             $cswMetadata->updateDate = $list->item(0)->textContent;   
         }
         
-        // TODO $cswMetadata->thematicCategories = $keywordsList;
         $cswMetadata->contactEmail = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:pointOfContact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress/gco:CharacterString')->item(0)->textContent;
         $cswMetadata->organisationName = $xpath->query('/gmd:MD_Metadata/gmd:contact/gmd:CI_ResponsibleParty/gmd:organisationName/gco:CharacterString')->item(0)->textContent;
         $cswMetadata->organisationEmail = $xpath->query('/gmd:MD_Metadata/gmd:contact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress/gco:CharacterString')->item(0)->textContent;
