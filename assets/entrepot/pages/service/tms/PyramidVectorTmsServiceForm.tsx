@@ -298,7 +298,7 @@ export const { i18n } = declareComponentKeys<
 export const PyramidVectorTmsServiceFormFrTranslations: Translations<"fr">["PyramidVectorTmsServiceForm"] = {
     title: ({ editMode }) => (editMode ? "Modifier le service TMS" : "Publier un service TMS"),
     "stored_data.loading": "Chargement de la donnée stockée...",
-    "stored_data_and_offering.loading": "Chargement de la donnée stockée et le service à modifier...",
+    "stored_data_and_offering.loading": "Chargement de la donnée stockée et du service à modifier...",
     "stored_data.fetch_failed": "Récupération des informations sur la donnée stockée a échoué",
     "offering.fetch_failed": "Récupération des informations sur le service à modifier a échoué",
     "step.title": ({ stepNumber }) => {
