@@ -119,6 +119,7 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, vec
     }, [selectedTableNamesList, vectorDbQuery.data]);
 
     useEffect(() => {
+        window.focus();
         window?.scrollTo({ top: 0, left: 0, behavior: "smooth" });
     }, [currentStep]);
 

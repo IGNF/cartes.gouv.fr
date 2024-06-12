@@ -224,12 +224,7 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
         formState: { errors },
         getValues: getFormValues,
         trigger,
-        watch,
     } = form;
-
-    useEffect(() => {
-        watch((value, { name, type }) => console.log(value, name, type));
-    }, [watch]);
 
     const selectedTableNamesList: string[] | undefined = useWatch({
         control: form.control,
@@ -238,6 +233,7 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
     });
 
     useEffect(() => {
+        window.focus();
         window?.scrollTo({ top: 0, left: 0, behavior: "smooth" });
     }, [currentStep]);
 

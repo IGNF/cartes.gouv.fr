@@ -271,6 +271,7 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
     }, [selectedTableNamesList, vectorDbQuery.data]);
 
     useEffect(() => {
+        window.focus();
         window?.scrollTo({ top: 0, left: 0, behavior: "smooth" });
     }, [currentStep]);
 

@@ -151,6 +151,7 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
     const { getValues: getFormValues, trigger } = form;
 
     useEffect(() => {
+        window.focus();
         window?.scrollTo({ top: 0, left: 0, behavior: "smooth" });
     }, [currentStep]);
 
