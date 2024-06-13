@@ -11,6 +11,7 @@
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
         "pflannery.vscode-versionlens",
-        "rvest.vs-code-prettier-eslint"
+        "rvest.vs-code-prettier-eslint",
+        "yoavbls.pretty-ts-errors"
     ]
 }

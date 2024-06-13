@@ -2,7 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { Input } from "@codegouvfr/react-dsfr/Input";
-import { Select } from "@codegouvfr/react-dsfr/Select";
+import { Select as SelectNext } from "@codegouvfr/react-dsfr/SelectNext";
 import { Upload } from "@codegouvfr/react-dsfr/Upload";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -19,6 +19,7 @@ import LoadingText from "../../../../components/Utils/LoadingText";
 import Progress from "../../../../components/Utils/Progress";
 import Wait from "../../../../components/Utils/Wait";
 import defaultProjections from "../../../../data/default_projections.json";
+import ignfProjections from "../../../../data/ignf_projections.json";
 import { Translations, declareComponentKeys, useTranslation } from "../../../../i18n/i18n";
 import FileUploader from "../../../../modules/FileUploader";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
@@ -75,13 +76,44 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                     },
                 }),
             data_technical_name: yup.string().required(t("technical_name_mandatory_error")),
-            data_srid: yup.string().required(t("projection_mandatory_error")),
+            data_srid: yup
+                .string()
+                .required(t("projection_mandatory_error"))
+                .test({
+                    name: "srid-is-accepted",
+                    async test(srid, ctx) {
+                        // vérifier si le srid est présent dans la liste des proj EPSG par défaut
+                        if (srid in projections) {
+                            return true;
+                        } else {
+                            // sinon voir si le srid est bien une proj EPSG
+                            try {
+                                // on ajoute le srid à la liste des projections (donc nouvelle valeur dans le select)
+                                const proj = await api.epsg.getProjFromEpsg(srid);
+                                const projectionsClone = { ...projections };
+                                projectionsClone[srid] = proj.name;
+                                setProjections(projectionsClone);
+
+                                if (srid in projectionsClone) {
+                                    return true;
+                                }
+                            } catch (error) {
+                                console.error(error);
+                                if (error instanceof Error) {
+                                    return ctx.createError({ message: error.message });
+                                }
+                            }
+
+                            return ctx.createError({ message: `Projection ${srid} inconnue` });
+                        }
+                    },
+                }),
             data_upload_path: yup.string(),
         })
         .required();
 
     // Progress
-    const [showProgress, setShowProgress] = useState(false);
+    const [fileUploadInProgress, setFileUploadInProgress] = useState(false);
     const [progressValue, setProgressValue] = useState(0);
     const [progressMax, setProgressMax] = useState(0);
 
@@ -97,7 +129,10 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
         formState: { errors, isValid, isValidating },
         setValue: setFormValue,
         trigger,
+        watch,
     } = useForm({ resolver: yupResolver(schema) });
+
+    const selectedSrid = watch("data_srid");
 
     const addUploadMutation = useMutation({
         mutationFn: (formData: object) => {
@@ -107,14 +142,14 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
 
     const datasheetListQuery = useQuery({
         queryKey: RQKeys.datastore_datasheet_list(datastoreId),
-        queryFn: () => api.datasheet.getList(datastoreId),
+        queryFn: ({ signal }) => api.datasheet.getList(datastoreId, { signal }),
         refetchInterval: 20000,
-        enabled: !addUploadMutation.isSuccess,
+        enabled: !addUploadMutation.isSuccess && !fileUploadInProgress,
     });
 
     useEffect(() => {
         setProgressValue(0);
-    }, [showProgress]);
+    }, [fileUploadInProgress]);
 
     useEffect(() => {
         if (!showDataInfos) {
@@ -163,7 +198,7 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
         }
 
         const uuid = uuidv4();
-        setShowProgress(true);
+        setFileUploadInProgress(true);
         setProgressMax(file.size);
 
         fileUploader
@@ -171,40 +206,27 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
             .then(() => {
                 fileUploader
                     .uploadComplete(uuid, file)
-                    .then((data) => {
-                        const srid = data?.srid;
+                    .then(async (data) => {
+                        let srid = data?.srid;
+                        srid = srid in ignfProjections ? ignfProjections[srid] : srid; // récupérer la proj EPSG correspondante si une proj IGNF est détectée
 
-                        if (srid in projections) {
-                            setFormValue("data_srid", srid);
-                        } else {
-                            api.epsg
-                                .getProjFromEpsg(srid)
-                                .then((proj) => {
-                                    const projectionsClone = { ...projections };
-                                    projectionsClone[srid] = proj.name;
-                                    setProjections(projectionsClone);
-
-                                    setFormValue("data_srid", srid);
-                                })
-                                .catch((err) => console.error(err));
-                        }
-
+                        setFormValue("data_srid", srid, { shouldValidate: true });
                         setFormValue("data_technical_name", getDataTechNameSuggestion(file.name), { shouldValidate: true });
                         setFormValue("data_upload_path", data?.filename, { shouldValidate: true });
                         trigger();
 
                         setShowDataInfos(true);
-                        setShowProgress(false);
+                        setFileUploadInProgress(false);
                     })
                     .catch((err) => {
                         console.error(err);
-                        setShowProgress(false);
+                        setFileUploadInProgress(false);
                         setDataFileError(err?.msg);
                     });
             })
             .catch((err) => {
                 console.error(err);
-                setShowProgress(false);
+                setFileUploadInProgress(false);
                 setDataFileError(err?.msg);
             });
     };
@@ -245,13 +267,15 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                 hint={t("upload_hint")}
                 state={dataFileError === undefined ? "default" : "error"}
                 stateRelatedMessage={dataFileError}
-                nativeInputProps={{ onChange: postDataFile, ref: dataFileRef }}
+                nativeInputProps={{ onChange: postDataFile, ref: dataFileRef, accept: ".gpkg,.zip" }}
                 className={fr.cx("fr-input-group")}
             />
-            {showProgress && <Progress label={t("upload_running")} value={progressValue} max={progressMax} />}
+            {fileUploadInProgress && <Progress label={t("upload_running")} value={progressValue} max={progressMax} />}
+
             {showDataInfos && (
                 <div className={fr.cx("fr-mt-2v")}>
                     <h5>{t("data_infos_title")}</h5>
+
                     <Input
                         label={t("technical_name")}
                         hintText={t("technical_name_hint")}
@@ -261,26 +285,26 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                             ...register("data_technical_name"),
                         }}
                     />
-                    <Select
+
+                    <SelectNext
                         label={t("projection")}
-                        nativeSelectProps={{
-                            ...register("data_srid"),
-                        }}
                         state={errors.data_srid ? "error" : "default"}
                         stateRelatedMessage={errors?.data_srid?.message}
-                    >
-                        <option value="" disabled>
-                            {t("select_projection")}
-                        </option>
-                        {Object.entries(projections).map(([code, name]) => (
-                            <option key={code} value={code}>
-                                {name}
-                            </option>
-                        ))}
-                    </Select>
+                        nativeSelectProps={{
+                            ...register("data_srid"),
+                            value: selectedSrid,
+                        }}
+                        placeholder={t("select_projection")}
+                        options={Object.entries(projections).map(([code, name]) => ({
+                            label: name,
+                            value: code,
+                        }))}
+                    />
+
                     <input type="hidden" {...register("data_upload_path")} />
                 </div>
             )}
+
             <ButtonsGroup
                 buttons={[
                     {
@@ -370,11 +394,11 @@ export const DatasheetUploadFormFrTranslations: Translations<"fr">["DatasheetUpl
     "datasheet.name_already_exists_error": ({ datasheetName }) => `Une fiche de donnée existe déjà avec le nom "${datasheetName}"`,
     "datasheet.creation_running": "Création de la fiche en cours ...",
     upload: "Déposez votre fichier de données",
-    upload_hint: "Formats de fichiers autorisés : archive zip contenant un Geopackage (recommandé) ou un CSV...",
+    upload_hint: "Formats de fichiers autorisés : Geopackage ou archive zip contenant un Geopackage (recommandé)",
     upload_nofile_error: "Aucun fichier téléversé",
     upload_extension_error: ({ filename }) => `L’extension du fichier ${filename} n'est pas correcte`,
     upload_max_size_error: ({ maxSize }) => `La taille maximale pour un fichier est de ${maxSize}`,
-    upload_running: "Upload en cours ...",
+    upload_running: "Téléversement en cours ...",
     technical_name: "Nom technique de votre donnée",
     technical_name_hint: "Ce nom technique est invisible par votre utilisateur final. Il apparaitra uniquement dans votre espace de travail",
     technical_name_mandatory_error: "Le nom technique de la donnée est obligatoire",
