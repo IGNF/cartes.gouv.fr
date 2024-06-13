@@ -132,7 +132,7 @@ accesses_request:
         community: "La communauté %community% (id=%id%)"
         rendez_vous: "Rendez-vous dans l'espace de travail à partir duquel vous avez publier ces services pour ajouter les permissions nécessaires."
     email_acknowledgement:
-        heading: "Votre demande a été envoyée à l'IGN et une réponse vous sera apportée dans les meilleurs délais."
+        heading: "Votre demande a été envoyée à l’IGN et une réponse vous sera apportée dans les meilleurs délais."
         date: "Date d'envoi"
         message: "Rappel de votre demande"
 

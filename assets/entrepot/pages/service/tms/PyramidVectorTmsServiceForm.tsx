@@ -310,7 +310,7 @@ export const PyramidVectorTmsServiceFormFrTranslations: Translations<"fr">["Pyra
             case 3:
                 return "Informations supplémentaires";
             case 4:
-                return "Restrictions d'accès";
+                return "Restrictions d’accès";
 
             default:
                 return "";

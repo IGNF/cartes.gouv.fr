@@ -23,7 +23,7 @@ const ReportStatusBadge: FC<ReportStatusBadgeProps> = ({ status, className }) =>
         case "GENERATING":
         case "MODIFYING":
             severity = "info";
-            text = "En cours d'exécution";
+            text = "En cours d’exécution";
             break;
         case "SUCCESS":
         case "GENERATED":
