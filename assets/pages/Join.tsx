@@ -8,7 +8,7 @@ const Join = () => {
         <AppLayout documentTitle="Nous rejoindre">
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
-                    <h1>Nous rejoindre</h1>
+                    <h1>Rejoignez la communauté des utilisateurs et contributeurs de la Géoplateforme et cartes.gouv.fr</h1>
                     <ul>
                         <li>Pour suivre l’actualité du programme Géoplateforme</li>
                         <li>Pour contribuer à des groupes de travail et co-construire l’offre de services Géoplateforme - cartes.gouv.fr</li>
