@@ -38,6 +38,7 @@ class CswMetadata
     public ?array $layers;
 
     public ?string $thumbnailUrl;
+    public ?string $frequencyCode;
 
     public static function createEmpty(): self
     {
@@ -47,6 +48,7 @@ class CswMetadata
         $empty->charset = 'utf8';
         $empty->thumbnailUrl = null;
         $empty->resolution = null;
+        $empty->frequencyCode = "unknown";
 
         $empty->topicCategories = [];
         $empty->inspireKeywords = [];

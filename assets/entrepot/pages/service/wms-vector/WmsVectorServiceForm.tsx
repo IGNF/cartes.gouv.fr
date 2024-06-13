@@ -88,6 +88,7 @@ const createFormData = async (formValues: WmsVectorServiceFormValuesType) => {
     fd.set("public_name", formValues.public_name!);
     fd.set("resolution", formValues.resolution!);
     fd.set("resource_genealogy", formValues.resource_genealogy!);
+    fd.set("frequency_code", formValues.frequency_code!);
     fd.set("share_with", formValues.share_with!);
     fd.set("technical_name", formValues.technical_name!);
 

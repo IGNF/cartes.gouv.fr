@@ -115,6 +115,7 @@ class CswMetadataHelper
                 $layer->getAttribute('offeringId'),
             );
         }, iterator_to_array($layersNodesList));
+        $cswMetadata->layers = $layersList;
 
         $cswMetadata->fileIdentifier = $xpath->query('/gmd:MD_Metadata/gmd:fileIdentifier/gco:CharacterString')->item(0)->textContent;
         $cswMetadata->hierarchyLevel = CswHierarchyLevel::tryFrom(trim($xpath->query('/gmd:MD_Metadata/gmd:hierarchyLevel/gmd:MD_ScopeCode')->item(0)->textContent));
@@ -142,12 +143,19 @@ class CswMetadataHelper
         $cswMetadata->organisationName = $xpath->query('/gmd:MD_Metadata/gmd:contact/gmd:CI_ResponsibleParty/gmd:organisationName/gco:CharacterString')->item(0)->textContent;
         $cswMetadata->organisationEmail = $xpath->query('/gmd:MD_Metadata/gmd:contact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress/gco:CharacterString')->item(0)->textContent;
 
-        // Thumbnail
-        $cswMetadata->thumbnailUrl = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:graphicOverview/gmd:MD_BrowseGraphic/gmd:fileName/gco:CharacterString')->item(0)?->textContent;
-
         $cswMetadata->resolution = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:spatialResolution/gmd:MD_Resolution/gmd:equivalentScale/gmd:MD_RepresentativeFraction/gmd:denominator/gco:Integer')->item(0)?->textContent;
+        
+        // Thumbnail
+        $thumbnailList = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:MD_MaintenanceInformation/gmd:maintenanceAndUpdateFrequency');
+        if (0 !== $thumbnailList->count()) {
+            $cswMetadata->thumbnailUrl = $thumbnailList->item(0)->textContent;
+        }
 
-        $cswMetadata->layers = $layersList;
+        // Frequency
+        $frequency = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:resourceMaintenance/gmd:MD_MaintenanceInformation/gmd:maintenanceAndUpdateFrequency/gmd:MD_MaintenanceFrequencyCode/@codeListValue');
+        if (0 !== $frequency->count()) {
+            $cswMetadata->frequencyCode = $frequency->item(0)->textContent;  
+        }
 
         return $this->trim($cswMetadata);
     }

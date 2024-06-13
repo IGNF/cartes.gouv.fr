@@ -15,6 +15,8 @@ import { CartesApiException } from "../../../../../modules/jsonFetch";
 import { catalogueUrl } from "../../../../../router/router";
 import MetadataField from "./MetadataField";
 
+import frequencyCodes from "../../../../../data/maintenance_frequency.json";
+
 type MetadataTabProps = {
     datastoreId: string;
     datasheet?: DatasheetDetailed;
@@ -24,6 +26,11 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, datasheet, metadataQue
     const { t: tDatasheet } = useTranslation("DatasheetView");
 
     const { data: metadata } = metadataQuery;
+
+    const frequencyCode = useMemo(() => {
+        const code = metadata?.csw_metadata?.frequency_code;
+        return code ? frequencyCodes[code] : frequencyCodes["unknown"];
+    }, [metadata]);
 
     const storedDataList: StoredData[] = useMemo(
         () => [...(datasheet?.vector_db_list ?? []), ...(datasheet?.pyramid_list ?? [])],
@@ -77,6 +84,7 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, datasheet, metadataQue
                                 hintText={"Valeur identifiant la ressource de manière unique sur le catalogue"}
                                 content={metadata.csw_metadata?.file_identifier}
                             />
+                            <MetadataField title={"Fréquence de mise à jour"} content={frequencyCode} />
                             <MetadataField
                                 title={"Catégories thématiques"}
                                 content={

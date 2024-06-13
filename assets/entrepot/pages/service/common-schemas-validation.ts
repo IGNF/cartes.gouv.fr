@@ -54,6 +54,7 @@ export class CommonSchemasValidation {
                     .matches(regex.email, tValidMD("metadatas.email_contact_error")),
                 creation_date: yup.date().required(tValidMD("metadatas.creation_date_error")),
                 resource_genealogy: yup.string(),
+                frequency_code: yup.string().required(),
                 organization: yup.string().required(tValidMD("metadatas.organization_error")),
                 organization_email: yup
                     .string()

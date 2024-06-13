@@ -201,6 +201,7 @@ export type MetadataFormValuesType = {
     encoding?: string;
     resolution?: string;
     languages?: LanguageType[];
+    frequency_code?: string;
 };
 
 export type AttributionFormValuesType = {
@@ -290,6 +291,7 @@ export type CswMetadata = {
     topic_categories?: string[];
     inspire_keywords?: string[];
     free_keywords?: string[];
+    frequency_code?: string;
     contact_email?: string;
     organisation_name?: string;
     organisation_email?: string;

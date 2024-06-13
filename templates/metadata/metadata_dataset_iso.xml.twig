@@ -137,6 +137,16 @@
                     </gmd:graphicOverview>
                 {% endif %}
 
+                {% if frequency_code %}
+                    <gmd:resourceMaintenance>
+                        <gmd:MD_MaintenanceInformation>
+                            <gmd:maintenanceAndUpdateFrequency>
+                                <gmd:MD_MaintenanceFrequencyCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_MaintenanceFrequencyCode" codeListValue="{{ frequency_code }}" />
+                            </gmd:maintenanceAndUpdateFrequency>
+                        </gmd:MD_MaintenanceInformation>
+                    </gmd:resourceMaintenance>
+                {% endif %}
+
                 {% if resolution %}
                     <gmd:spatialResolution>
                         <gmd:MD_Resolution>

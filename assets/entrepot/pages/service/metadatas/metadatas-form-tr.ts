@@ -25,6 +25,7 @@ export const { i18n } = declareComponentKeys<
     | "metadata.description_form.creation_date"
     | "metadata.description_form.resource_genealogy"
     | "metadata.description_form.hint_resource_genealogy"
+    | "metadata.description_form.frequency_code"
     | "metadata.description_form.resource_manager_title"
     | "metadata.description_form.organization"
     | "metadata.description_form.hint_organization"
@@ -77,6 +78,7 @@ export const MetadatasFormFrTranslations: Translations<"fr">["MetadatasForm"] = 
     "metadata.description_form.creation_date": "Date de la création de la ressource",
     "metadata.description_form.resource_genealogy": "Généalogie de la ressource (optionnel)",
     "metadata.description_form.hint_resource_genealogy": "Description du mode de production de la ressource",
+    "metadata.description_form.frequency_code": "Fréquence de mise à jour",
     "metadata.description_form.resource_manager_title": "Responsable de la ressource",
     "metadata.description_form.organization": "Organisme",
     "metadata.description_form.hint_organization":
@@ -132,6 +134,7 @@ export const MetadatasFormEnTranslations: Translations<"en">["MetadatasForm"] = 
     "metadata.description_form.creation_date": "Resource creation date",
     "metadata.description_form.resource_genealogy": "Genealogy of the resource (optional)",
     "metadata.description_form.hint_resource_genealogy": "Description of the resource production mode",
+    "metadata.description_form.frequency_code": "Update frequency",
     "metadata.description_form.resource_manager_title": "Resource manager",
     "metadata.description_form.organization": "Organization",
     "metadata.description_form.hint_organization":

@@ -79,6 +79,9 @@ class WfsAddDTO
         ])]
         public readonly ?string $resource_genealogy,
 
+        #[Assert\NotBlank(['message' => 'common.frequency_code_error'])]
+        public readonly ?string $frequency_code,
+
         #[Assert\Choice([
             'choices' => ['all_public', 'your_community'], 	// TODO NON EXHAUSTIF
             'message' => 'common.share_with_error',

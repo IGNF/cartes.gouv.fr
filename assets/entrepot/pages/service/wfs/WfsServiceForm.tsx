@@ -31,10 +31,22 @@ import UploadMDFile from "../metadatas/UploadMDFile";
 import TableInfosForm from "./TablesInfoForm";
 import { trimObject } from "../../../../utils";
 
-// Ajout du nom natif sur les tables et suppression des mots clés en doublon
-const formatTablesInfos = (table_infos: Record<string, WfsTableInfos>): WfsTableInfos[] => {
+type TableInfoType = Record<string, WfsTableInfos>;
+
+/* On ne garde dans table_infos que les tables sélectionnées
+ Ajout du nom natif sur les tables et suppression des mots clés en doublon */
+const formatTablesInfos = (selectedTables: string[] | undefined, table_infos: TableInfoType): WfsTableInfos[] => {
+    const tables = selectedTables ?? [];
+
+    const filteredInfos: TableInfoType = Object.keys(table_infos)
+        .filter((key) => tables.includes(key))
+        .reduce((obj, key) => {
+            obj[key] = table_infos[key];
+            return obj;
+        }, {});
+
     const tInfos: WfsTableInfos[] = [];
-    for (const [name, infos] of Object.entries(table_infos)) {
+    for (const [name, infos] of Object.entries(filteredInfos)) {
         const i = { native_name: name, ...infos };
         i.keywords = Array.from(new Set(i.keywords)); // Suppression des doublons
         tInfos.push(i);
@@ -47,13 +59,13 @@ const createRequestBody = (formValues: WfsServiceFormValuesType) => {
     const values = trimObject(formValues) as WfsServiceFormValuesType;
 
     values.free_keywords = Array.from(new Set(values.free_keywords)); // Suppression des doublons
-    values.table_infos = formatTablesInfos(values.table_infos as Record<string, WfsTableInfos>);
+    values.table_infos = formatTablesInfos(values.selected_tables, values.table_infos as TableInfoType);
     return values;
 };
 
 export type WfsServiceFormValuesType = ServiceFormValuesBaseType & {
     selected_tables?: string[];
-    table_infos?: Record<string, WfsTableInfos> | WfsTableInfos[];
+    table_infos?: TableInfoType | WfsTableInfos[];
 };
 
 /**

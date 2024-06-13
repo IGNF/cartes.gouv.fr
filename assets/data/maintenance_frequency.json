@@ -1,0 +1,14 @@
+{
+    "continual": "En continu",
+    "daily": "Journalière",
+    "weekly": "Hebdomadaire",
+    "fortnightly": "Bimensuelle",
+    "monthly": "Mensuelle",
+    "quaterly": "Trimestrielle",
+    "biannually": "Biannuelle",
+    "annually": "Annuelle",
+    "asNeeded": "En fonction du besoin",
+    "irregular": "Irrégulière",
+    "notPlanned": "Non planifiée",
+    "unknown": "Inconnue"
+}

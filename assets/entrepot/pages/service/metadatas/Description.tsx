@@ -11,6 +11,7 @@ import { getTranslation } from "../../../../i18n/i18n";
 import { EndpointTypeEnum, ServiceFormValuesBaseType } from "../../../../@types/app";
 import { getInspireKeywords, regex } from "../../../../utils";
 import categories from "../../../../data/topic_categories.json";
+import frequencyCodes from "../../../../data/maintenance_frequency.json";
 
 const keywords = getInspireKeywords();
 
@@ -209,6 +210,20 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
                 <option value="">{tCommon("none")}</option>
                 <option value="dataset">Lot</option>
                 <option value="series">Produit</option>
+            </Select>
+            <Select
+                label={t("metadata.description_form.frequency_code")}
+                state={errors.frequency_code ? "error" : "default"}
+                stateRelatedMessage={errors?.frequency_code?.message?.toString()}
+                nativeSelectProps={{
+                    ...register("frequency_code"),
+                }}
+            >
+                {Object.keys(frequencyCodes).map((k) => (
+                    <option key={k} value={k}>
+                        {frequencyCodes[k]}
+                    </option>
+                ))}
             </Select>
             <h3>{t("metadata.description_form.resource_manager_title")}</h3>
             <Input
