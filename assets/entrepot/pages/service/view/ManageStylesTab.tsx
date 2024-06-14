@@ -12,6 +12,8 @@ import { CartesApiException } from "../../../../modules/jsonFetch";
 import { CartesStyle, Service } from "../../../../@types/app";
 import { StyleManager, addStyleModal } from "./Style/StyleManager";
 
+import "../../../../sass/components/style-tab.scss";
+
 type ManageStylesTabProps = {
     datastoreId: string;
     datasheetName: string;
@@ -113,6 +115,7 @@ const ManageStylesTab: FC<ManageStylesTabProps> = ({ service, offeringId, datast
                 </div> */}
                 {styles && styles.length !== 0 && (
                     <RadioButtons
+                        classes={{ content: "style" }}
                         legend={"Mes styles :"}
                         options={styles.map((style) => ({
                             label: style.name,
