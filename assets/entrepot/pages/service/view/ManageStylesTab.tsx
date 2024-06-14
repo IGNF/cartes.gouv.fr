@@ -1,15 +1,15 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import React, { FC, useCallback, useMemo } from "react";
 
-import api from "../../../api";
+import { CartesStyle, Service } from "../../../../@types/app";
 import Wait from "../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
-import { CartesStyle, Service } from "../../../../@types/app";
+import api from "../../../api";
 import { StyleManager, addStyleModal } from "./Style/StyleManager";
 
 import "../../../../sass/components/style-tab.scss";
@@ -25,12 +25,12 @@ const ManageStylesTab: FC<ManageStylesTabProps> = ({ service, offeringId, datast
     const { t: tStyle } = useTranslation("Style");
 
     // Recherche des services (offerings) contenant le tag datasheet_name a datasheetName
-    const serviceListQuery = useQuery<Service[], CartesApiException>({
+    /*const serviceListQuery = useQuery<Service[], CartesApiException>({
         queryKey: RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName),
         queryFn: ({ signal }) => api.datasheet.getServices(datastoreId, datasheetName, { signal }),
         staleTime: 60000,
         refetchInterval: 60000,
-    });
+    }); */
 
     // Les styles
     const styles: CartesStyle[] = useMemo(() => {
@@ -38,7 +38,7 @@ const ManageStylesTab: FC<ManageStylesTabProps> = ({ service, offeringId, datast
     }, [service?.configuration.styles]);
 
     // Recherche du nom des styles dans tous les services de la fiche de donnees datasheetName
-    const styleNames = useMemo<string[]>(() => {
+    /* const styleNames = useMemo<string[]>(() => {
         let styles: CartesStyle[] = [];
         serviceListQuery.data?.forEach((service) => {
             const configuration = service.configuration;
@@ -47,7 +47,11 @@ const ManageStylesTab: FC<ManageStylesTabProps> = ({ service, offeringId, datast
             }
         });
         return styles.map((style) => style.name);
-    }, [serviceListQuery.data]);
+    }, [serviceListQuery.data]); */
+
+    const styleNames = useMemo<string[]>(() => {
+        return Array.from(styles, (s) => s.name);
+    }, [styles]);
 
     const queryClient = useQueryClient();
 

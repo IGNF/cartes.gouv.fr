@@ -75,14 +75,15 @@ class StyleHelper {
         const response = await fetch(styleUrl);
 
         if (!response.ok) return undefined;
-        const xmlString = await response.text();
+        const styleString = await response.text();
 
         const extension = getFileExtension(styleUrl);
 
         let parser;
         switch (extension) {
             case "sld": {
-                parser = new SldStyleParser({ sldVersion: "1.0.0" });
+                const version = this.#getVersion(styleString);
+                parser = new SldStyleParser({ sldVersion: version });
                 break;
             }
             case "qml": {
@@ -97,12 +98,23 @@ class StyleHelper {
 
         if (!parser) return undefined;
 
-        const { output } = await parser.readStyle(xmlString);
+        let style;
+        if (["sld", "qml"].includes(extension!)) {
+            style = await parser.readStyle(styleString);
+        } else style = await parser.readStyle(JSON.parse(styleString));
 
+        const { output } = style;
         if (output) {
             const parsed = await olParser.writeStyle(output);
             return parsed.output;
         }
+    }
+
+    static #getVersion(styleString: string) {
+        const domParser = new DOMParser();
+        const xmlDoc = domParser.parseFromString(styleString, "application/xml");
+
+        return xmlDoc.getElementsByTagName("StyledLayerDescriptor")[0].attributes?.["version"]?.nodeValue ?? "";
     }
 }
 

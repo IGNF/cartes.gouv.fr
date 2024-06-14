@@ -7,17 +7,7 @@ import { Sources } from "mapbox-gl";
 import QGISStyleParser from "geostyler-qgis-parser";
 import { declareComponentKeys } from "i18nifty";
 import { Translations, getTranslation } from "../../i18n/i18n";
-
-type PartialAnyLayer =
-    | mapboxgl.BackgroundLayer
-    | mapboxgl.CircleLayer
-    | mapboxgl.FillExtrusionLayer
-    | mapboxgl.FillLayer
-    | mapboxgl.HeatmapLayer
-    | mapboxgl.HillshadeLayer
-    | mapboxgl.LineLayer
-    | mapboxgl.RasterLayer
-    | mapboxgl.SymbolLayer;
+import { AnyLayer } from "mapbox-gl/index";
 
 const { t } = getTranslation("TMSStyleFilesManager");
 
@@ -51,8 +41,8 @@ export default class TMSStyleFilesManager implements BaseStyleFilesManager {
 
         for (const [uuid, files] of Object.entries(values.style_files)) {
             if (0 !== files.length) {
-                const layer = await this.#toMapboxLayer(layersMapping[uuid], files[0]);
-                style.layers.push(layer);
+                const layers = await this.#toMapboxLayer(layersMapping[uuid], files[0]);
+                style.layers = [...style.layers, ...layers];
             }
         }
 
@@ -100,24 +90,27 @@ export default class TMSStyleFilesManager implements BaseStyleFilesManager {
         return formData;
     }
 
-    async #toMapboxLayer(layerName: string, file: File) {
+    async #toMapboxLayer(layerName, file) {
         const styleString = await file.text();
 
-        const parser = this.inputFormat === "sld" ? new SldStyleParser({ sldVersion: "1.0.0" }) : new QGISStyleParser();
-        const { output } = await parser.readStyle(styleString);
+        const version = this.inputFormat === "sld" ? this.#getVersion(styleString) : null;
+        const parser = this.inputFormat === "sld" ? new SldStyleParser({ sldVersion: version }) : new QGISStyleParser();
 
+        const { output } = await parser.readStyle(styleString);
         if (output === undefined) throw Error(t("parsing_error"));
 
         const mbParser = new MapboxParser();
         const { output: mbStyle } = await mbParser.writeStyle(output);
         if (mbStyle === undefined) throw Error(t("writing_error"));
 
-        const layer = mbStyle.layers[0] as PartialAnyLayer;
+        const layers: AnyLayer[] = [];
+        mbStyle.layers.forEach((layer) => {
+            layer["source"] = this.#metadata?.name;
+            layer["source-layer"] = layerName;
+            layers.push(layer);
+        });
 
-        layer.id = uuidv4();
-        layer.source = this.#metadata?.name;
-        layer["source-layer"] = layerName;
-        return layer;
+        return layers;
     }
 
     #buildEmptyStyle(): mapboxgl.Style {
@@ -139,6 +132,13 @@ export default class TMSStyleFilesManager implements BaseStyleFilesManager {
             sources: sources,
             layers: [],
         };
+    }
+
+    #getVersion(styleString: string) {
+        const domParser = new DOMParser();
+        const xmlDoc = domParser.parseFromString(styleString, "application/xml");
+
+        return xmlDoc.getElementsByTagName("StyledLayerDescriptor")[0].attributes?.["version"]?.nodeValue ?? "";
     }
 }
 
