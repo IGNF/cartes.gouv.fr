@@ -26,11 +26,11 @@ export const defaultNavItems = (t: TranslationFunction<"navItems", ComponentKey>
         },
         {
             text: t("catalog"),
-            linkProps: { href: "#" },
+            linkProps: { href: "./catalogue" },
         },
         {
             text: t("maps"),
-            linkProps: { href: "#" },
+            linkProps: { href: "./cartes" },
         },
         {
             text: t("news"),
