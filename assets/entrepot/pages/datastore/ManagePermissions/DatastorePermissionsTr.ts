@@ -99,8 +99,7 @@ export const DatastorePermissionsFrTranslations: Translations<"fr">["DatastorePe
     "list.confirm_remove": "Êtes-vous sûr de vouloir supprimer cette permission ?",
     "add_form.title": "Ajout d’une permission",
     "add_form.licence": "Licence",
-    "add_form.hint_licence":
-        "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Omnis nulla praesentium corrupti error hic enim recusandae quaerat accusamus rem sed!",
+    "add_form.hint_licence": "Donner un nom explicite à cette permission",
     "add_form.type": "Accorder à",
     "add_form.hint_type": "L’ajout de plusieurs bénéficiaires va entrainer la création de plusieurs permissions",
     "add_form.communities": "Des communautés",
