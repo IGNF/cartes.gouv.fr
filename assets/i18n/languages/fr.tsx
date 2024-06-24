@@ -30,12 +30,14 @@ import { contactFrTranslations } from "../../pages/assistance/contact/Contact";
 import { mapboxStyleValidationFrTranslations } from "../../validations/MapboxStyleValidator";
 import { SldStyleValidationErrorsFrTranslations } from "../../validations/SldStyleValidationErrorsTr";
 import { commonFrTranslations } from "../Common";
+import { BreadcrumbFrTranslations } from "../Breadcrumb";
 import { RightsFrTranslations } from "../Rights";
 import { StyleFrTranslations } from "../Style";
 import type { Translations } from "../i18n";
 
 export const translations: Translations<"fr"> = {
     Common: commonFrTranslations,
+    Breadcrumb: BreadcrumbFrTranslations,
     Rights: RightsFrTranslations,
     Style: StyleFrTranslations,
     Me: MeFrTranslations,

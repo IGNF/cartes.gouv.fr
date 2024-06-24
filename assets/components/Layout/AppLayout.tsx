@@ -13,6 +13,12 @@ import SessionExpiredAlert from "../Utils/SessionExpiredAlert";
 import SnackbarMessage from "../Utils/SnackbarMessage";
 import AppFooter from "./AppFooter";
 import AppHeader from "./AppHeader";
+import { useRoute } from "../../router/router";
+import { useQuery } from "@tanstack/react-query";
+import RQKeys from "../../modules/entrepot/RQKeys";
+import api from "../../entrepot/api";
+import { Breadcrumb } from "@codegouvfr/react-dsfr/Breadcrumb";
+import getBreadcrumb from "../../modules/entrepot/breadcrumbs";
 
 const HiddenElements: FC = () => {
     return (
@@ -44,6 +50,22 @@ const AppLayout: FC<PropsWithChildren<AppLayoutProps>> = ({ children, navItems, 
     useDocumentTitle(documentTitle);
     const { t } = useTranslation("navItems");
 
+    const route = useRoute();
+
+    const datastoreQuery = useQuery({
+        // @ts-expect-error fausse alerte
+        queryKey: RQKeys.datastore(route.params.datastoreId),
+        // @ts-expect-error fausse alerte
+        queryFn: ({ signal }) => api.datastore.get(route.params.datastoreId, { signal }),
+        staleTime: 3600000,
+        enabled: "datastoreId" in route.params,
+    });
+
+    const breadcrumbProps = useMemo(() => {
+        const datastoreName = datastoreQuery.data?.name;
+        return getBreadcrumb(route, datastoreName);
+    }, [route, datastoreQuery.data]);
+
     navItems = useMemo(() => navItems ?? defaultNavItems(t), [navItems, t]);
 
     return (
@@ -56,6 +78,7 @@ const AppLayout: FC<PropsWithChildren<AppLayoutProps>> = ({ children, navItems, 
 
                 <div className={fr.cx("fr-container", "fr-py-2w")}>
                     <SessionExpiredAlert />
+                    {breadcrumbProps && <Breadcrumb {...breadcrumbProps} />}
                     {children}
                 </div>
             </main>

@@ -29,6 +29,7 @@ import { TMSStyleFilesManagerEnTranslations } from "../../modules/Style/TMSStyle
 import { mapboxStyleValidationEnTranslations } from "../../validations/MapboxStyleValidator";
 import { SldStyleValidationErrorsEnTranslations } from "../../validations/SldStyleValidationErrorsTr";
 import { commonEnTranslations } from "../Common";
+import { BreadcrumbEnTranslations } from "../Breadcrumb";
 import { RightsEnTranslations } from "../Rights";
 import { StyleEnTranslations } from "../Style";
 import type { Translations } from "../i18n";
@@ -36,6 +37,7 @@ import { DatasheetUploadFormEnTranslations } from "../../entrepot/pages/datashee
 
 export const translations: Translations<"en"> = {
     Common: commonEnTranslations,
+    Breadcrumb: BreadcrumbEnTranslations,
     Rights: RightsEnTranslations,
     Style: StyleEnTranslations,
     Me: MeEnTranslations,
