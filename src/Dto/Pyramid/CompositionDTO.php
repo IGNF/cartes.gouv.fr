@@ -2,6 +2,7 @@
 
 namespace App\Dto\Pyramid;
 
+use App\Constants\EntrepotApi\ZoomLevels;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class CompositionDTO
@@ -17,16 +18,20 @@ class CompositionDTO
         public readonly array $attributes,
 
         #[Assert\Range(
-            min: 5,
-            max: 18,
+            min: ZoomLevels::TOP_LEVEL_DEFAULT,
+            max: ZoomLevels::BOTTOM_LEVEL_DEFAULT,
             notInRangeMessage: 'pyramid_add.composition.bottom_level_error'
         )]
         public readonly int $bottom_level,
 
         #[Assert\Range(
-            min: 5,
-            max: 18,
+            min: ZoomLevels::TOP_LEVEL_DEFAULT,
+            max: ZoomLevels::BOTTOM_LEVEL_DEFAULT,
             notInRangeMessage: 'pyramid_add.composition.top_level_error'
+        )]
+        #[Assert\Expression(
+            'value <= this.bottom_level',
+            message: 'pyramid_add.composition.level_error' 
         )]
         public readonly int $top_level
     ) {

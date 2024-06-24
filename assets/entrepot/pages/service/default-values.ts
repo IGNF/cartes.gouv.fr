@@ -27,7 +27,7 @@ const getMetadataFormDefaultValues = (metadata?: Metadata): MetadataFormValuesTy
         identifier: metadata?.csw_metadata?.file_identifier,
         charset: metadata?.csw_metadata?.charset ?? DEFAULT_CHARSET,
         resolution: metadata?.csw_metadata?.resolution,
-        frequency_code: metadata?.csw_metadata?.frequency_code,
+        frequency_code: metadata?.csw_metadata?.frequency_code ?? "unknown",
     };
 };
 
@@ -87,7 +87,6 @@ export const getWfsServiceFormDefaultValues = (
             public_name: storedDataName,
             creation_date: now,
             resource_genealogy: "",
-            charset: DEFAULT_CHARSET,
         };
     }
 
@@ -134,14 +133,12 @@ export const getWmsVectorServiceFormDefaultValues = (
             public_name: storedDataName,
             creation_date: now,
             resource_genealogy: "",
-            charset: DEFAULT_CHARSET,
         };
     }
 
     defValues = {
         ...defValues,
         projection: getProjUrl(vectorDb?.srs),
-        languages: metadata?.csw_metadata?.language ? [metadata?.csw_metadata?.language] : [DEFAULT_LANGUAGE],
         ...getMetadataFormDefaultValues(metadata),
     };
 
@@ -180,14 +177,12 @@ export const getPyramidVectorTmsServiceFormDefaultValues = (
             public_name: storedDataName,
             creation_date: now,
             resource_genealogy: "",
-            charset: DEFAULT_CHARSET,
         };
     }
 
     defValues = {
         ...defValues,
         projection: getProjUrl(pyramid?.srs),
-        languages: metadata?.csw_metadata?.language ? [metadata?.csw_metadata?.language] : [DEFAULT_LANGUAGE],
         ...getMetadataFormDefaultValues(metadata),
     };
 

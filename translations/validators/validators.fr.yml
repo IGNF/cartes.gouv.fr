@@ -20,8 +20,9 @@ pyramid_add:
     composition:
         table_error: "Le nom de la table est obligatoire"
         attributes_error: "Il doit y avoir au moins un attribut"
-        bottom_level_error: "bottom_level doit être en {min} et {max}"
-        top_level_error: "top_level est doit être en {min} et {max}"
+        bottom_level_error: "Le niveau de zoom maximum doit être en {{min}} et {{max}}"
+        top_level_error: "Le niveau de zoom minimum doit être entre {{min} et {{max}}"
+        level_error: "Les niveaux de zoom ne sont pas cohérents"
 
 pyramid_publish:
     technical_name_error: "Le nom technique est obligatoire"

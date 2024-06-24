@@ -2,25 +2,26 @@
 
 namespace App\Controller\Entrepot;
 
-use App\Constants\EntrepotApi\CommonTags;
-use App\Constants\EntrepotApi\ConfigurationTypes;
-use App\Controller\ApiControllerInterface;
+use App\Exception\ApiException;
 use App\Dto\Pyramid\AddPyramidDTO;
 use App\Dto\Pyramid\CompositionDTO;
-use App\Dto\Pyramid\PublishPyramidDTO;
-use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\CapabilitiesService;
-use App\Services\EntrepotApi\CartesMetadataApiService;
-use App\Services\EntrepotApi\CartesServiceApiService;
-use App\Services\EntrepotApi\ConfigurationApiService;
+use App\Dto\Pyramid\PublishPyramidDTO;
+use App\Constants\EntrepotApi\CommonTags;
+use App\Constants\EntrepotApi\ZoomLevels;
+use App\Controller\ApiControllerInterface;
+use Symfony\Component\Routing\Annotation\Route;
+use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\ProcessingApiService;
 use App\Services\EntrepotApi\StoredDataApiService;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Services\EntrepotApi\CartesServiceApiService;
+use App\Services\EntrepotApi\ConfigurationApiService;
+use App\Services\EntrepotApi\CartesMetadataApiService;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 #[Route(
     '/api/datastores/{datastoreId}/pyramid',
@@ -30,9 +31,6 @@ use Symfony\Component\Routing\Annotation\Route;
 )]
 class PyramidController extends ServiceController implements ApiControllerInterface
 {
-    public const TOP_LEVEL_DEFAULT = 5;
-    public const BOTTOM_LEVEL_DEFAULT = 18;
-
     public function __construct(
         DatastoreApiService $datastoreApiService,
         private ConfigurationApiService $configurationApiService,
@@ -280,7 +278,7 @@ class PyramidController extends ServiceController implements ApiControllerInterf
     private function getBottomAndToLevel(array $pyramid)
     {
         if (!isset($pyramid['type_infos']) || !isset($pyramid['type_infos']['levels'])) {
-            return ['bottom_level' => strval(self::BOTTOM_LEVEL_DEFAULT), 'top_level' => strval(self::TOP_LEVEL_DEFAULT)];
+            return ['bottom_level' => strval(ZoomLevels::BOTTOM_LEVEL_DEFAULT), 'top_level' => strval(ZoomLevels::TOP_LEVEL_DEFAULT)];
         }
 
         $levels = $pyramid['type_infos']['levels'];
