@@ -12,7 +12,7 @@ type ScrollOfferingListProps = {
     stateRelatedMessage?: string;
     onChange: (value: string[]) => void;
     value?: string[];
-    offerings: OfferingListResponseDto[] | undefined;
+    offerings: OfferingListResponseDto[];
 };
 
 const ScrollOfferingList: FC<ScrollOfferingListProps> = (props) => {
@@ -34,8 +34,7 @@ const ScrollOfferingList: FC<ScrollOfferingListProps> = (props) => {
 
     /* Calcul des options */
     const options = useMemo(() => {
-        const privates = offerings?.filter((offering) => offering.open === false) ?? [];
-        return privates.map((offering) => ({
+        return offerings.map((offering) => ({
             label: (
                 <span>
                     {offering.layer_name}

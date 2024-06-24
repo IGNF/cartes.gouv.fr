@@ -56,6 +56,10 @@ const EditPermissionForm: FC<EditPermissionFormProps> = ({ datastoreId, permissi
         },
     });
 
+    const privateOfferings = useMemo(() => {
+        return offeringsQuery.data?.filter((offering) => offering.open === false) ?? [];
+    }, [offeringsQuery.data]);
+
     const endDate = useMemo(() => {
         if (permissionQuery.data && permissionQuery.data.end_date) {
             return new Date(permissionQuery.data.end_date);
@@ -110,7 +114,7 @@ const EditPermissionForm: FC<EditPermissionFormProps> = ({ datastoreId, permissi
                 <Alert severity="error" closable title={offeringsQuery.error?.message} />
             ) : permissionQuery.error ? (
                 <Alert severity="error" closable title={permissionQuery.error?.message} />
-            ) : offeringsQuery.data?.length === 0 ? (
+            ) : privateOfferings.length === 0 ? (
                 <Alert severity="error" closable title={t("add_form.no_services")} />
             ) : (
                 <div>
@@ -144,7 +148,7 @@ const EditPermissionForm: FC<EditPermissionFormProps> = ({ datastoreId, permissi
                                 hintText={t("add_form.hint_services")}
                                 state={errors.offerings ? "error" : "default"}
                                 stateRelatedMessage={errors?.offerings?.message?.toString()}
-                                offerings={offeringsQuery.data}
+                                offerings={privateOfferings}
                                 value={value}
                                 onChange={onChange}
                             />

@@ -95,6 +95,10 @@ const AddPermissionForm: FC<AddPermissionFormProps> = ({ datastoreId }) => {
         return Object.entries(communities).map(([id, name]) => ({ id: id, name: name }));
     }, [user, publicCommunities]);
 
+    const privateOfferings = useMemo(() => {
+        return data?.filter((offering) => offering.open === false) ?? [];
+    }, [data]);
+
     // Formulaire,
     const form = useForm<AddPermissionFormType>({
         mode: "onChange",
@@ -157,7 +161,7 @@ const AddPermissionForm: FC<AddPermissionFormProps> = ({ datastoreId }) => {
                 <Alert severity="error" closable title={error?.message} />
             ) : offeringsError ? (
                 <Alert severity="error" closable title={offeringsError?.message} />
-            ) : data?.length === 0 ? (
+            ) : privateOfferings.length === 0 ? (
                 <Alert severity="error" closable title={t("add_form.no_services")} />
             ) : (
                 <div>
@@ -226,7 +230,7 @@ const AddPermissionForm: FC<AddPermissionFormProps> = ({ datastoreId }) => {
                         name="offerings"
                         render={({ field: { onChange } }) => (
                             <ScrollOfferingList
-                                offerings={data}
+                                offerings={privateOfferings}
                                 label={t("add_form.hint_services")}
                                 hintText={t("add_form.hint_services")}
                                 state={errors.offerings ? "error" : "default"}
