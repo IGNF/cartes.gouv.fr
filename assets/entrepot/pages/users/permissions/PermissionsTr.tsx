@@ -16,7 +16,7 @@ export const PermissionsFrTranslations: Translations<"fr">["Permissions"] = {
     title: "Permissions",
     services: "Services",
     no_permission: "Vous n'avez aucune permission",
-    expired: ({ date }) => (date ? `Expirée le ${date}` : "Expirée"),
+    expired: ({ date }) => (date ? `A expiré le ${date}` : "A expirée"),
     expires_on: ({ date }) => `Expire le ${date}`,
     permission_expires_on: ({ date }) => `Cette permission expire le ${date}`,
     permission_granted_by: ({ name }) => `Permission accordée par ${name}`,

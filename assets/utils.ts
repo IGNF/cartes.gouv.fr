@@ -167,6 +167,12 @@ const formatDateFromISO = (isoDateString: string): string => {
     return datefnsFormat(d, "dd MMMM yyyy, HH", { locale: fr }) + "h" + datefnsFormat(d, "mm", { locale: fr });
 };
 
+const formatDateWithoutTimeFromISO = (isoDateString: string): string => {
+    const d = new Date(isoDateString);
+
+    return datefnsFormat(d, "dd MMMM yyyy", { locale: fr });
+};
+
 const getArrayRange = (start: number, stop: number, step: number = 1): number[] =>
     Array.from({ length: (stop - start) / step + 1 }, (_, index) => start + index * step);
 
@@ -211,6 +217,7 @@ export {
     getProjectionCode,
     getFileExtension,
     formatDateFromISO,
+    formatDateWithoutTimeFromISO,
     getArrayRange,
     trimObject,
 };

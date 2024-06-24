@@ -5,7 +5,7 @@ import { FC } from "react";
 
 import { PermissionDetailsResponseDto } from "../../../../@types/entrepot";
 import { useTranslation } from "../../../../i18n/i18n";
-import { formatDateFromISO } from "../../../../utils";
+import { formatDateWithoutTimeFromISO } from "../../../../utils";
 
 import "../../../../sass/pages/my_keys.scss";
 
@@ -29,7 +29,7 @@ const PermissionsListTab: FC<PermissionsListTabProps> = ({ permissions }) => {
                 if (permission.end_date && compareAsc(new Date(permission.end_date), new Date()) < 0) {
                     expired = true;
                 }
-                const expiresOn = permission.end_date ? formatDateFromISO(permission.end_date) : null;
+                const expiresOn = permission.end_date ? formatDateWithoutTimeFromISO(permission.end_date) : null;
 
                 return (
                     <div key={permission._id} className={className}>
