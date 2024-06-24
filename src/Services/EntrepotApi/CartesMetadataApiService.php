@@ -212,6 +212,7 @@ class CartesMetadataApiService
             $newCswMetadata->organisationName = $formData['organization'];
             $newCswMetadata->organisationEmail = $formData['organization_email'];
             $newCswMetadata->resolution = $formData['resolution'];
+            $newCswMetadata->frequencyCode = $formData['frequency_code'];
             $newCswMetadata->layers = $layers;
         }
 
