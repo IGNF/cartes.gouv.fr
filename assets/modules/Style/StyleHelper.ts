@@ -83,7 +83,7 @@ class StyleHelper {
         switch (extension) {
             case "sld": {
                 const version = this.#getVersion(styleString);
-                parser = new SldStyleParser({ sldVersion: version });
+                parser = new SldStyleParser({ sldVersion: version, locale: "fr" });
                 break;
             }
             case "qml": {

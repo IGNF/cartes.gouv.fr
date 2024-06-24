@@ -983,6 +983,13 @@
   dependencies:
     regenerator-runtime "^0.14.0"
 
+"@babel/runtime@^7.23.2":
+  version "7.24.7"
+  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.24.7.tgz#f4f0d5530e8dbdf59b3451b9b3e594b6ba082e12"
+  integrity sha512-UwgBRMjJP+xv857DCngvqXI3Iq6J4v0wXmwc6sapg+zyhbwmQX67LUEFrkK5tbyJ30jGuG3ZvWpBiB9LCy1kWw==
+  dependencies:
+    regenerator-runtime "^0.14.0"
+
 "@babel/template@^7.22.15", "@babel/template@^7.24.0":
   version "7.24.0"
   resolved "https://registry.yarnpkg.com/@babel/template/-/template-7.24.0.tgz#c6a524aa93a4a05d66aaf31654258fae69d87d50"
@@ -4495,13 +4502,14 @@ geostyler-qgis-parser@^2.0.0:
     xml2js "^0.4.23"
     xmldom "^0.6.0"
 
-geostyler-sld-parser@^5.1.0:
-  version "5.3.1"
-  resolved "https://registry.yarnpkg.com/geostyler-sld-parser/-/geostyler-sld-parser-5.3.1.tgz#f7033a1bbc7418f92de06555720c4879d5c33955"
-  integrity sha512-JwK1S+ZL5iHdXge96KrM468mOS2/MOH3+6L3RfoABrt+DF3SKSp1Yt94uzctswIHF4MUaamBtqJMIMWFVyk7tA==
+geostyler-sld-parser@^5.4.0:
+  version "5.4.0"
+  resolved "https://registry.yarnpkg.com/geostyler-sld-parser/-/geostyler-sld-parser-5.4.0.tgz#01eba5df52c702ebbc3d71ac7d2efa76fa802408"
+  integrity sha512-TY/gwMoE/M8Xv8ykviC1NqygykrojvrFSCRIc/+CNww5VS0Qf9pu9JxiSQONGfR6QWDPtQrfFIoazyH67c0jTg==
   dependencies:
     fast-xml-parser "^4.2.2"
     geostyler-style "^8.1.0"
+    i18next "^23.11.5"
     lodash "^4.17.21"
 
 geostyler-style@^7.2.0:
@@ -5050,6 +5058,13 @@ human-signals@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/human-signals/-/human-signals-2.1.0.tgz#dc91fcba42e4d06e4abaed33b3e7a3c02f514ea0"
   integrity sha512-B4FFZ6q/T2jhhksgkbEW3HBvWIfDW85snkQgawt07S7J5QXTk6BkNV+0yAeZrM5QpMAdYlocGoljn0sJ/WQkFw==
+
+i18next@^23.11.5:
+  version "23.11.5"
+  resolved "https://registry.yarnpkg.com/i18next/-/i18next-23.11.5.tgz#d71eb717a7e65498d87d0594f2664237f9e361ef"
+  integrity sha512-41pvpVbW9rhZPk5xjCX2TPJi2861LEig/YRhUkY+1FQ2IQPS0bKUDYnEqY8XPPbB48h1uIwLnP9iiEfuSl20CA==
+  dependencies:
+    "@babel/runtime" "^7.23.2"
 
 i18nifty@^3.0.0:
   version "3.2.1"

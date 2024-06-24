@@ -74,7 +74,7 @@ export default class SldStyleWmsVectorValidator {
                 return ctx.createError({ message: tSld("sld_version_unaccepted", { version }) });
             }
 
-            const sldParser = new SldStyleParser({ sldVersion: version });
+            const sldParser = new SldStyleParser({ sldVersion: version, locale: "fr" });
             const result = await sldParser.readStyle(styleString);
 
             const { output, warnings, errors, unsupportedProperties } = result;

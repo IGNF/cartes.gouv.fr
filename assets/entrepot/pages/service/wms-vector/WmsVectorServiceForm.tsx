@@ -51,8 +51,8 @@ const getSld100 = async (originalFile: File): Promise<File> => {
     const version = xmlDoc.getElementsByTagName("StyledLayerDescriptor")[0].attributes?.["version"]?.nodeValue ?? "";
 
     if (version === "1.1.0") {
-        const sld110Parser = new SldStyleParser({ sldVersion: "1.1.0" });
-        const sld100Parser = new SldStyleParser({ sldVersion: "1.0.0" });
+        const sld110Parser = new SldStyleParser({ sldVersion: "1.1.0", locale: "fr" });
+        const sld100Parser = new SldStyleParser({ sldVersion: "1.0.0", locale: "fr" });
 
         const result = await sld110Parser.readStyle(fileContent);
 

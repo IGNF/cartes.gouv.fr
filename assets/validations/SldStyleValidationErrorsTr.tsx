@@ -35,7 +35,7 @@ export const SldStyleValidationErrorsFrTranslations: Translations<"fr">["SldStyl
             plural ? "n'ont" : "n'a"
         } pas de symbolisation spécifiée.`;
     },
-    geostyler_parse_error: ({ geostylerError }) => `Erreur de lecture : ${geostylerError}`,
+    geostyler_parse_error: ({ geostylerError }) => decodeHTMLEntities(geostylerError),
     geostyler_unexpected_error: ({ geostylerError }) => `Une erreur inattendue est survenue : ${geostylerError}`,
 };
 
@@ -52,4 +52,10 @@ export const SldStyleValidationErrorsEnTranslations: Translations<"en">["SldStyl
     rules_with_no_symbolizers: undefined,
     geostyler_parse_error: undefined,
     geostyler_unexpected_error: undefined,
+};
+
+const decodeHTMLEntities = (text: string) => {
+    const textArea = document.createElement("textarea");
+    textArea.innerHTML = text;
+    return textArea.value;
 };
