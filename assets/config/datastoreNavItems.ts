@@ -1,12 +1,14 @@
 import { type MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation/MainNavigation";
 import { declareComponentKeys } from "i18nifty";
 
+import { Datastore } from "../@types/app";
 import { Translations, getTranslation } from "../i18n/i18n";
 import { routes } from "../router/router";
 import { useAuthStore } from "../stores/AuthStore";
-import { Datastore } from "../@types/app";
+import { assistanceNavItems } from "./assistanceNavItems";
 
 const { t } = getTranslation("datastoreNavItems");
+const { t: tNavItems } = getTranslation("navItems");
 
 export const datastoreNavItems = (currentDatastore?: Datastore): MainNavigationProps.Item[] => {
     const user = useAuthStore.getState().user;
@@ -52,6 +54,8 @@ export const datastoreNavItems = (currentDatastore?: Datastore): MainNavigationP
             linkProps: routes.my_access_keys().link,
         });
     }
+
+    navItems.push(assistanceNavItems(tNavItems));
 
     return navItems;
 };

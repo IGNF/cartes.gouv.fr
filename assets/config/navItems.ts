@@ -1,8 +1,9 @@
-import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
 import { MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation";
+import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
 
 import { ComponentKey, Translations, declareComponentKeys } from "../i18n/i18n";
 import { routes } from "../router/router";
+import { assistanceNavItems } from "./assistanceNavItems";
 
 // dans ce cas précise, getTranslation ne marche pas parce que les traductions sont pas encore chargées, on est donc obglié de passer la fonction t en paramètre
 export const defaultNavItems = (t: TranslationFunction<"navItems", ComponentKey>): MainNavigationProps.Item[] => {
@@ -36,23 +37,7 @@ export const defaultNavItems = (t: TranslationFunction<"navItems", ComponentKey>
             text: t("news"),
             linkProps: routes.news_list().link,
         },
-        {
-            menuLinks: [
-                {
-                    linkProps: routes.faq().link,
-                    text: t("faq"),
-                },
-                {
-                    linkProps: routes.contact().link,
-                    text: t("nous écrire"),
-                },
-                {
-                    linkProps: routes.service_status().link,
-                    text: t("service status"),
-                },
-            ],
-            text: t("assistance"),
-        },
+        assistanceNavItems(t),
         {
             text: t("about"),
             linkProps: routes.about().link,
