@@ -52,7 +52,8 @@ export class CommonSchemasValidation {
                     .string()
                     .required(tValidMD("metadatas.email_contact_required_error"))
                     .matches(regex.email, tValidMD("metadatas.email_contact_error")),
-                creation_date: yup.date().required(tValidMD("metadatas.creation_date_error")),
+                // NOTE : typeError permet de spécifier le message d'erreur quand la valeur ne correspond pas au type (yup.string(), yup.date() etc)
+                creation_date: yup.date().typeError(tValidMD("metadatas.creation_date_error")).required(tValidMD("metadatas.creation_date_error")),
                 resource_genealogy: yup.string(),
                 frequency_code: yup.string().required(),
                 organization: yup.string().required(tValidMD("metadatas.organization_error")),
