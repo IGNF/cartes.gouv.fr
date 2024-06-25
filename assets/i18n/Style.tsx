@@ -14,7 +14,7 @@ export const StyleFrTranslations: Translations<"fr">["Style"] = {
     add_file: ({ format }) => `Ajouter un fichier ${format} par couche présente dans votre service`,
     select_file: ({ format }) => `Sélectionner un fichier au format ${format}`,
     remove_style: ({ styleName }) =>
-        styleName !== undefined ? `Êtes-vous sûr de vouloir supprimer le style ${styleName}` : "Êtes-vous sûr de vouloir supprimer ce style",
+        styleName !== undefined ? `Êtes-vous sûr de vouloir supprimer le style ${styleName} ?` : "Êtes-vous sûr de vouloir supprimer ce style ?",
 };
 
 export const StyleEnTranslations: Translations<"en">["Style"] = {
