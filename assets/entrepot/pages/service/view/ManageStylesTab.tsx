@@ -2,9 +2,10 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import React, { FC, useCallback, useMemo } from "react";
+import React, { FC, useCallback, useMemo, useState } from "react";
 
 import { CartesStyle, Service } from "../../../../@types/app";
+import ConfirmDialog, { ConfirmDialogModal } from "../../../../components/Utils/ConfirmDialog";
 import Wait from "../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
@@ -21,8 +22,12 @@ type ManageStylesTabProps = {
     service?: Service;
     setCurrentStyle: React.Dispatch<React.SetStateAction<CartesStyle | undefined>>;
 };
+
 const ManageStylesTab: FC<ManageStylesTabProps> = ({ service, offeringId, datastoreId, datasheetName, setCurrentStyle }) => {
     const { t: tStyle } = useTranslation("Style");
+    const { t: tCommon } = useTranslation("Common");
+
+    const [styleToRemove, setStyleToRemove] = useState<string>();
 
     // Recherche des services (offerings) contenant le tag datasheet_name a datasheetName
     /*const serviceListQuery = useQuery<Service[], CartesApiException>({
@@ -120,16 +125,17 @@ const ManageStylesTab: FC<ManageStylesTabProps> = ({ service, offeringId, datast
                 {styles && styles.length !== 0 && (
                     <RadioButtons
                         classes={{ content: "style" }}
-                        legend={"Mes styles :"}
+                        legend={tStyle("my_styles")}
                         options={styles.map((style) => ({
                             label: style.name,
                             illustration: (
                                 <Button
-                                    title={tStyle("remove_style")}
+                                    title={tStyle("remove_style", { styleName: style.name })}
                                     priority={"tertiary no outline"}
                                     iconId={"fr-icon-delete-line"}
                                     onClick={() => {
-                                        mutateRemove(style.name);
+                                        setStyleToRemove(style.name);
+                                        ConfirmDialogModal.open();
                                     }}
                                 />
                             ),
@@ -141,7 +147,7 @@ const ManageStylesTab: FC<ManageStylesTabProps> = ({ service, offeringId, datast
                     />
                 )}
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
-                    <Button onClick={() => addStyleModal.open()}>Ajouter un style</Button>
+                    <Button onClick={() => addStyleModal.open()}>{tStyle("add_style")}</Button>
                 </div>
             </div>
             {service !== undefined && <StyleManager datastoreId={datastoreId} datasheetName={datasheetName} service={service} styleNames={styleNames} />}
@@ -151,11 +157,19 @@ const ManageStylesTab: FC<ManageStylesTabProps> = ({ service, offeringId, datast
                     <div className={fr.cx("fr-container")}>
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
                             <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " frx-icon-spin"} />
-                            <h6 className={fr.cx("fr-m-0")}>{isRemovePending ? "Suppression en cours ..." : "Changement de style en cours ..."}</h6>
+                            <h6 className={fr.cx("fr-m-0")}>{isRemovePending ? tCommon("removing") : tCommon("modifying")}</h6>
                         </div>
                     </div>
                 </Wait>
             )}
+            <ConfirmDialog
+                title={tStyle("remove_style", { styleName: styleToRemove })}
+                onConfirm={() => {
+                    if (styleToRemove !== undefined) {
+                        mutateRemove(styleToRemove);
+                    }
+                }}
+            />
         </>
     );
 };
