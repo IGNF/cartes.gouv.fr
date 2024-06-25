@@ -12,6 +12,7 @@ use App\Exception\AppException;
 use App\Exception\CartesApiException;
 use App\Services\CapabilitiesService;
 use App\Services\CswMetadataHelper;
+use App\Services\GeonetworkApiService;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -30,7 +31,8 @@ class CartesMetadataApiService
         private MetadataApiService $metadataApiService,
         private ConfigurationApiService $configurationApiService,
         private CswMetadataHelper $cswMetadataHelper,
-        private CapabilitiesService $capabilitiesService
+        private CapabilitiesService $capabilitiesService,
+        private GeonetworkApiService $geonetworkApiService,
     ) {
     }
 
@@ -82,7 +84,7 @@ class CartesMetadataApiService
             return;
         }
 
-        $apiMetadataXml = $this->metadataApiService->downloadFile($datastoreId, $apiMetadata['_id']);
+        $apiMetadataXml = $this->geonetworkApiService->getMetadataXml($apiMetadata['file_identifier']);
 
         $cswMetadata = $this->cswMetadataHelper->fromXml($apiMetadataXml);
         $cswMetadata->layers = $this->getMetadataLayers($datastoreId, $datasheetName);
@@ -148,7 +150,7 @@ class CartesMetadataApiService
     {
         $metadataEndpoint = $this->getMetadataEndpoint($datastoreId);
 
-        $oldMetadataFileXml = $this->metadataApiService->downloadFile($datastoreId, $oldApiMetadata['_id']);
+        $oldMetadataFileXml = $this->geonetworkApiService->getMetadataXml($oldApiMetadata['file_identifier']);
         $oldCswMetadata = $this->cswMetadataHelper->fromXml($oldMetadataFileXml);
 
         $newCswMetadata = $this->getNewCswMetadata($datastoreId, $datasheetName, $oldCswMetadata, $formData);

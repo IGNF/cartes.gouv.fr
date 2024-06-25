@@ -125,8 +125,6 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, datasheet, metadataQue
 
                         <Accordion titleAs="h2" defaultExpanded={true} label={"Référence temporelle"}>
                             <MetadataField title={"Date de la création de la ressource"} content={metadata.csw_metadata?.creation_date} />
-                            <MetadataField title={"Publication de la ressource"} content={"A venir"} />
-                            <MetadataField title={"Dernière révision de la ressource"} content={"A venir"} />
                             <MetadataField
                                 title={"Généalogie de la ressource"}
                                 content={(() => {

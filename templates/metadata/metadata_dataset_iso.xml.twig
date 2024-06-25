@@ -25,7 +25,7 @@
         <gco:CharacterString>{{ hierarchy_level_name }}</gco:CharacterString>
     </gmd:hierarchyLevelName>
 
-    {% if title is defined or abstract is defined or contact_email is defined or thematic_categories is defined or resolution is defined %}
+    {% if title is defined or abstract is defined or contact_email is defined or thematic_categories is defined or resolution is defined or creation_date is defined %}
         <gmd:identificationInfo>
             <gmd:MD_DataIdentification>
                 {% if title is defined %}
@@ -35,6 +35,19 @@
                                 {# intitulé #}
                                 <gco:CharacterString>{{ title }}</gco:CharacterString>
                             </gmd:title>
+
+                            {% if creation_date is defined %}
+                                <gmd:date>
+                                    <gmd:CI_Date>
+                                        <gmd:date>
+                                            <gco:Date>{{ creation_date }}</gco:Date>
+                                        </gmd:date>
+                                        <gmd:dateType>
+                                            <gmd:CI_DateTypeCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/ML_gmxCodelists.xml#CI_DateTypeCode" codeListValue="creation">creation</gmd:CI_DateTypeCode>
+                                        </gmd:dateType>
+                                    </gmd:CI_Date>
+                                </gmd:date>
+                            {% endif %}
                         </gmd:CI_Citation>
                     </gmd:citation>
                 {% endif %}
@@ -193,12 +206,6 @@
                 {% endif %}
             </gmd:CI_ResponsibleParty>
         </gmd:contact>
-    {% endif %}
-
-    {% if creation_date is defined %}
-        <gmd:dateStamp>
-            <gco:Date>{{ creation_date }}</gco:Date>
-        </gmd:dateStamp>
     {% endif %}
 
     {% if update_date is defined %}

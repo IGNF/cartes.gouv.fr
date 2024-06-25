@@ -2,22 +2,22 @@
 
 namespace App\Controller\Entrepot;
 
-use App\Exception\ApiException;
-use Symfony\Component\Uid\Uuid;
-use App\Services\CswMetadataHelper;
-use App\Exception\CartesApiException;
-use App\Entity\CswMetadata\CswMetadata;
 use App\Constants\EntrepotApi\CommonTags;
 use App\Controller\ApiControllerInterface;
-use Symfony\Component\HttpFoundation\Request;
+use App\Exception\ApiException;
+use App\Exception\CartesApiException;
+use App\Services\CswMetadataHelper;
 use App\Services\EntrepotApi\AnnexeApiService;
 use App\Services\EntrepotApi\CartesMetadataApiService;
-use Symfony\Component\Routing\Annotation\Route;
-use App\Services\EntrepotApi\MetadataApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Services\EntrepotApi\MetadataApiService;
+use App\Services\GeonetworkApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Uid\Uuid;
 
 #[Route(
     '/api/datastores/{datastoreId}/annexe',
@@ -33,8 +33,9 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
         private MetadataApiService $metadataApiService,
         private CartesMetadataApiService $cartesMetadataApiService,
         private CswMetadataHelper $metadataHelper,
+        private GeonetworkApiService $geonetworkApiService,
         private ParameterBagInterface $parameterBag,
-    ) {        
+    ) {
     }
 
     #[Route('', name: 'get_list', methods: ['GET'])]
@@ -55,7 +56,6 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
         try {
             $datastore = $this->datastoreApiService->get($datastoreId);
             $datasheetName = $request->request->get('datasheetName');
-            
             $annexeUrl = $this->parameterBag->get('annexes_url');
 
             $uuid = Uuid::v4();
@@ -82,16 +82,16 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
             // Creation ou mise a jour des métadonnées
             $metadata = $this->cartesMetadataApiService->getMetadataByDatasheetName($datastoreId, $datasheetName);
             if (is_null($metadata)) {
-                return new JsonResponse($annexe);    
+                return new JsonResponse($annexe);
             }
-            
-            $xmlFileContent = $this->metadataApiService->downloadFile($datastoreId, $metadata['_id']);
+
+            $xmlFileContent = $this->geonetworkApiService->getMetadataXml($metadata['file_identifier']);
             $cswMetadata = $this->metadataHelper->fromXml($xmlFileContent);
             $cswMetadata->thumbnailUrl = $annexe['url'];
 
             $xmlFilePath = $this->metadataHelper->saveToFile($cswMetadata);
             $this->metadataApiService->replaceFile($datastoreId, $metadata['_id'], $xmlFilePath);
-            
+
             return new JsonResponse($annexe);
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
@@ -106,10 +106,10 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
         // Mise a jour des métadonnées
         $metadata = $this->cartesMetadataApiService->getMetadataByDatasheetName($datastoreId, $datasheetName);
         if (is_null($metadata)) {
-            return $response; 
+            return $response;
         }
-            
-        $xmlFileContent = $this->metadataApiService->downloadFile($datastoreId, $metadata['_id']);
+
+        $xmlFileContent = $this->geonetworkApiService->getMetadataXml($metadata['file_identifier']);
         $cswMetadata = $this->metadataHelper->fromXml($xmlFileContent);
         $cswMetadata->thumbnailUrl = null;
 
