@@ -6,7 +6,7 @@ import LoadingText from "../../../components/Utils/LoadingText";
 import { datastoreNavItems } from "../../../config/datastoreNavItems";
 import useDatastoreList from "../../../hooks/useDatastoreList";
 import Translator from "../../../modules/Translator";
-import { routes } from "../../../router/router";
+import { appRoot, routes } from "../../../router/router";
 import { useAuthStore } from "../../../stores/AuthStore";
 import { useMutation } from "@tanstack/react-query";
 import { CartesApiException } from "../../../modules/jsonFetch";
@@ -43,6 +43,29 @@ const DashboardPro = () => {
                 <>
                     <h1>Bienvenue {user?.first_name ?? user?.user_name}</h1>
 
+                    <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mb-3w")}>
+                        <div className={fr.cx("fr-col-12", "fr-col-sm-6")}>
+                            <Tile
+                                linkProps={routes.my_account()}
+                                imageUrl={`${appRoot}/dsfr/artwork/pictograms/digital/avatar.svg`}
+                                desc="Consulter et modifier mes informations personnelles"
+                                horizontal={true}
+                                title="Mon compte"
+                            />
+                        </div>
+                        <div className={fr.cx("fr-col-12", "fr-col-sm-6")}>
+                            <Tile
+                                linkProps={routes.my_access_keys()}
+                                imageUrl={`${appRoot}/dsfr/artwork/pictograms/system/padlock.svg`}
+                                desc="Consulter et modifier mes clés d'accès aux services privés"
+                                horizontal={true}
+                                title="Mes clés d’accès"
+                            />
+                        </div>
+                    </div>
+
+                    <h2>Espaces de travail</h2>
+
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
                         {datastoreListQuery.data?.map((datastore) => {
                             const link = { ...routes.datasheet_list({ datastoreId: datastore._id }).link, onClick: () => handleClick(datastore._id) };
@@ -52,13 +75,29 @@ const DashboardPro = () => {
                                 </div>
                             );
                         })}
-                        <div className={fr.cx("fr-col-12", "fr-col-sm-6", "fr-col-md-4", "fr-col-lg-3")}>
-                            <Tile linkProps={routes.datastore_create_request().link} grey={true} title={Translator.trans("datastore_creation_request.title")} />
+                    </div>
+
+                    <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
+                        <div className={fr.cx("fr-col-12", "fr-col-sm-6")}>
+                            <Tile
+                                linkProps={routes.datastore_create_request().link}
+                                imageUrl={`${appRoot}/dsfr/artwork/pictograms/digital/mail-send.svg`}
+                                desc="Contacter le support pour créer un nouvel espace de travail"
+                                horizontal={true}
+                                title={Translator.trans("datastore_creation_request.title")}
+                            />
                         </div>
-                        <div className={fr.cx("fr-col-12", "fr-col-sm-6", "fr-col-md-4", "fr-col-lg-3")}>
-                            <Tile linkProps={routes.join_community().link} grey={true} title={Translator.trans("communities_list.title")} />
+                        <div className={fr.cx("fr-col-12", "fr-col-sm-6")}>
+                            <Tile
+                                linkProps={routes.join_community().link}
+                                imageUrl={`${appRoot}/dsfr/artwork/pictograms/environment/human-cooperation.svg`}
+                                desc="Demander à rejoindre une communauté publique"
+                                horizontal={true}
+                                title={Translator.trans("communities_list.title")}
+                            />
                         </div>
                     </div>
+
                     {isApiEspaceCoDefined() && (
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--left", "fr-mt-4w")}>
                             <Button linkProps={routes.espaceco_community_list().link}>{t("espaceco_frontoffice_list")}</Button>
