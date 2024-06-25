@@ -46,7 +46,7 @@ const DashboardPro = () => {
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mb-3w")}>
                         <div className={fr.cx("fr-col-12", "fr-col-sm-6")}>
                             <Tile
-                                linkProps={routes.my_account()}
+                                linkProps={routes.my_account().link}
                                 imageUrl={`${appRoot}/dsfr/artwork/pictograms/digital/avatar.svg`}
                                 desc="Consulter et modifier mes informations personnelles"
                                 horizontal={true}
@@ -55,7 +55,7 @@ const DashboardPro = () => {
                         </div>
                         <div className={fr.cx("fr-col-12", "fr-col-sm-6")}>
                             <Tile
-                                linkProps={routes.my_access_keys()}
+                                linkProps={routes.my_access_keys().link}
                                 imageUrl={`${appRoot}/dsfr/artwork/pictograms/system/padlock.svg`}
                                 desc="Consulter et modifier mes clés d'accès aux services privés"
                                 horizontal={true}
