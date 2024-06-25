@@ -79,8 +79,11 @@ const DatastoreCreationForm: FC = () => {
                             géoservices&nbsp;;
                         </li>
                         <li>
-                            d’une communauté d’utilisateurs pour laquelle vous pourrez gérer les droits de ses membres suivant les modalités de l’offre
-                            «&nbsp;Essentiel&nbsp;».
+                            d’une communauté d’utilisateurs pour laquelle vous pourrez gérer les droits de ses membres suivant les modalités de{" "}
+                            <a {...routes.offer().link} title="Offre - cartes.gouv.fr - Ouvre une nouvelle fenêtre" target="_blank" rel="norefferer">
+                                l’offre «&nbsp;Essentielle&nbsp;»
+                            </a>
+                            .
                         </li>
                     </ul>
                     <p>{Translator.trans("mandatory_fields")}</p>
