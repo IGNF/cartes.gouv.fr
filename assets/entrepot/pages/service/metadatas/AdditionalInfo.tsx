@@ -1,34 +1,31 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Input from "@codegouvfr/react-dsfr/Input";
 import Select from "@codegouvfr/react-dsfr/Select";
-import { useQuery } from "@tanstack/react-query";
-import { FC, useEffect, useMemo } from "react";
+import { FC, useMemo } from "react";
 import { Controller, UseFormReturn } from "react-hook-form";
 
-import api from "../../../api";
+import type { Pyramid, ServiceFormValuesBaseType, VectorDb } from "../../../../@types/app";
 import AutocompleteSelect from "../../../../components/Input/AutocompleteSelect";
 import ignProducts from "../../../../data/md_resolutions.json";
 import { getTranslation } from "../../../../i18n/i18n";
-import RQKeys from "../../../../modules/entrepot/RQKeys";
-import { Pyramid, ServiceFormValuesBaseType, UploadTree, VectorDb } from "../../../../@types/app";
 import { LanguageType, charsets, getLanguages } from "../../../../utils";
 
 /**
  * Récupère le type de fichier (undefined, csv ou geopackage)
  */
-const getUploadFileType = (fileTree) => {
-    if (!fileTree) return undefined;
-    let fileType: string | undefined = undefined;
+// const getUploadFileType = (fileTree) => {
+//     if (!fileTree) return undefined;
+//     let fileType: string | undefined = undefined;
 
-    const directory = fileTree.filter((tree) => tree?.type === "DIRECTORY" && tree?.name === "data");
-    if (directory.length) {
-        const extensions = directory[0]?.children?.filter((child) => child.type === "FILE").map((file) => file.name.split(".").pop().toLowerCase());
-        if (extensions.length) {
-            fileType = extensions[0];
-        }
-    }
-    return fileType;
-};
+//     const directory = fileTree.filter((tree) => tree?.type === "DIRECTORY" && tree?.name === "data");
+//     if (directory.length) {
+//         const extensions = directory[0]?.children?.filter((child) => child.type === "FILE").map((file) => file.name.split(".").pop().toLowerCase());
+//         if (extensions.length) {
+//             fileType = extensions[0];
+//         }
+//     }
+//     return fileType;
+// };
 
 type AdditionalInfoProps = {
     storedData: VectorDb | Pyramid;
@@ -37,7 +34,7 @@ type AdditionalInfoProps = {
     datastoreId: string;
 };
 
-const AdditionalInfo: FC<AdditionalInfoProps> = ({ storedData, datastoreId, visible, form }) => {
+const AdditionalInfo: FC<AdditionalInfoProps> = ({ /*storedData, datastoreId,*/ visible, form }) => {
     const { t: tCommon } = getTranslation("Common");
     const { t } = getTranslation("MetadatasForm");
 
@@ -45,25 +42,25 @@ const AdditionalInfo: FC<AdditionalInfoProps> = ({ storedData, datastoreId, visi
         register,
         formState: { errors },
         control,
-        setValue: setFormValue,
+        // setValue: setFormValue,
     } = form;
 
     const languagesOptions: LanguageType[] = useMemo(getLanguages, []);
 
-    const fileTreeQuery = useQuery<UploadTree>({
-        queryKey: RQKeys.datastore_upload_file_tree(datastoreId, storedData.tags.upload_id),
-        queryFn: () => api.upload.getFileTree(datastoreId, storedData.tags.upload_id!),
-        staleTime: 1800000,
-        enabled: !!storedData.tags.upload_id,
-    });
+    // const fileTreeQuery = useQuery<UploadTree, CartesApiException>({
+    //     queryKey: RQKeys.datastore_upload_file_tree(datastoreId, storedData.tags.upload_id),
+    //     queryFn: () => api.upload.getFileTree(datastoreId, storedData.tags.upload_id!),
+    //     staleTime: 1800000,
+    //     enabled: !!storedData.tags.upload_id,
+    // });
 
-    const fileType = useMemo(() => {
-        return getUploadFileType(fileTreeQuery.data);
-    }, [fileTreeQuery.data]);
+    // const fileType = useMemo(() => {
+    //     return getUploadFileType(fileTreeQuery.data);
+    // }, [fileTreeQuery.data]);
 
-    useEffect(() => {
-        setFormValue("encoding", fileType);
-    }, [fileType, setFormValue]);
+    // useEffect(() => {
+    //     setFormValue("encoding", fileType);
+    // }, [fileType, setFormValue]);
 
     return (
         <div className={fr.cx(!visible && "fr-hidden")}>
@@ -141,7 +138,7 @@ const AdditionalInfo: FC<AdditionalInfoProps> = ({ storedData, datastoreId, visi
                     readOnly: true,
                 }}
             />
-            <Input
+            {/* <Input
                 label={t("metadata.additionnal_infos_form.encoding")}
                 hintText={t("metadata.additionnal_infos_form.hint_encoding")}
                 state={errors.encoding ? "error" : "default"}
@@ -151,7 +148,7 @@ const AdditionalInfo: FC<AdditionalInfoProps> = ({ storedData, datastoreId, visi
                     readOnly: fileType !== undefined,
                     defaultValue: fileType,
                 }}
-            />
+            /> */}
             <Select
                 label={t("metadata.additionnal_infos_form.hint_spatial_resolution")}
                 hint={t("metadata.additionnal_infos_form.hint_spatial_resolution")}

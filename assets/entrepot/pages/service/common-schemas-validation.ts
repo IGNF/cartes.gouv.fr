@@ -83,7 +83,7 @@ export class CommonSchemasValidation {
                     .min(1, tValidMD("metadatas.language_error")),
                 charset: yup.string().required(tValidMD("metadatas.charset_error")),
                 projection: yup.string().required(tValidMD("metadatas.projection_error")),
-                encoding: yup.string().required(tValidMD("metadatas.encoding_error")),
+                // encoding: yup.string().required(tValidMD("metadatas.encoding_error")),
                 resolution: yup.string(),
             })
             .required();

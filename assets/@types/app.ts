@@ -198,7 +198,7 @@ export type MetadataFormValuesType = {
     free_keywords?: string[];
     charset?: string;
     projection?: string;
-    encoding?: string;
+    // encoding?: string;
     resolution?: string;
     languages?: LanguageType[];
     frequency_code?: string;

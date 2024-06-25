@@ -78,7 +78,7 @@ const createFormData = async (formValues: WmsVectorServiceFormValuesType) => {
     fd.set("creation_date", formValues.creation_date!);
     fd.set("description", formValues.description!);
     fd.set("email_contact", formValues.email_contact!);
-    fd.set("encoding", formValues.encoding!);
+    // fd.set("encoding", formValues.encoding!);
     fd.set("identifier", formValues.identifier!);
     fd.set("languages", JSON.stringify(formValues.languages!));
     fd.set("selected_tables", JSON.stringify(formValues.selected_tables!));

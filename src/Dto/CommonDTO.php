@@ -49,8 +49,8 @@ class CommonDTO
         #[Assert\NotBlank(['message' => 'metadatas.charset_error'])]
         public readonly string $charset,
 
-        #[Assert\NotBlank(['message' => 'metadatas.encoding_error'])]
-        public readonly string $encoding,
+        // #[Assert\NotBlank(['message' => 'metadatas.encoding_error'])]
+        // public readonly string $encoding,
 
         #[Assert\Choice([
             'choices' => ['', '25000', '75000', '100000', '150000', '200000', '250000', '1000000'], // TODO NON EXHAUSTI
