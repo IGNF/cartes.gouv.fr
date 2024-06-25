@@ -9,7 +9,7 @@ previous_step: "Étape précédente"
 continue: "Continuer"
 pursue: "Poursuivre"
 send: "Envoyer"
-stored_data_does_not_exists: "La stored_data %stored_data% n'existe pas."
+stored_data_does_not_exists: "La stored_data %stored_data% n’existe pas."
 get_stored_data_failed: "La récupération des informations sur la donnée stockée a échoué"
 get_filetree_failed: "La récupération du fichier associé à la donnée a échoué"
 back_to_my_datas: "Retour à mes données"
@@ -20,8 +20,8 @@ mandatory_fields: "Sauf mention contraire “(optionnel)” dans le label, tous 
 # mailer
 mailer:
     hello: "Bonjour"
-    signature: "Cordialement, l'équipe de <a href='%href%'>cartes.gouv.fr</a>"
-    login_info: "Votre nom d'utilisateur est : %login%"
+    signature: "Cordialement, l’équipe de <a href='%href%'>cartes.gouv.fr</a>"
+    login_info: "Votre nom d’utilisateur est : %login%"
     applicant_informations: "Informations sur le demandeur :"
     user_email: "Adresse mail"
     last_name: "Nom"
@@ -31,7 +31,7 @@ mailer:
 
 # pages:
 home:
-    heading: "Transformez vos données géographiques en tuiles vectorielles simplement et diffusez-les n'importe où"
+    heading: "Transformez vos données géographiques en tuiles vectorielles simplement et diffusez-les n’importe où"
     start: "Commencer"
 
 datasheet:
@@ -47,8 +47,8 @@ datasheet:
 contact:
     title: "Nous écrire"
     form:
-        error_title: "Votre message n'a pas pu être envoyé"
-        explain: 'Vous n''avez pas trouvé la réponse à votre question dans <a href="%href%">l''aide en ligne</a> ? Vous souhaitez la configuration d''un espace de travail pour vos besoins ? Utilisez ce formulaire pour nous contacter.'
+        error_title: "Votre message n’a pas pu être envoyé"
+        explain: 'Vous n’avez pas trouvé la réponse à votre question dans <a href="%href%">l’aide en ligne</a> ? Vous souhaitez la configuration d’un espace de travail pour vos besoins ? Utilisez ce formulaire pour nous contacter.'
         email_contact: "Votre email"
         email_contact_mandatory_error: "Veuillez saisir une adresse email"
         email_contact_error: "Veuillez saisir une adresse email valide"
@@ -57,20 +57,20 @@ contact:
         organization: "Votre organisme (optionnel)"
         message: "Votre demande"
         message_placeholder: "Décrivez votre demande en quelques lignes"
-        message_minlength_error: "Veuillez saisir une demande d'au moins 10 caractères."
+        message_minlength_error: "Veuillez saisir une demande d’au moins 10 caractères."
         infos: 'Les informations recueillies à partir de ce formulaire sont nécessaires à la gestion de votre demande par les services de l’IGN concernés. <a href="%href%">En savoir plus sur la gestion des données à caractère personnel</a>'
     email_support:
         heading: "Un utilisateur a utilisé le formulaire de contact de cartes.gouv.fr."
-        user_id: "Identifiant unique de l'utilisateur"
-        user_email: "Adresse mail de l'utilisateur"
-        last_name: "Nom de l'utilisateur"
-        first_name: "Prénom de l'utilisateur"
-        date: "Date d'envoi"
+        user_id: "Identifiant unique de l’utilisateur"
+        user_email: "Adresse mail de l’utilisateur"
+        last_name: "Nom de l’utilisateur"
+        first_name: "Prénom de l’utilisateur"
+        date: "Date d’envoi"
         message: "Corps du message"
         not_specified: "Non renseigné"
     email_acknowledgement:
         heading: "Votre demande a été envoyée à l’IGN et une réponse vous sera apportée dans les meilleurs délais."
-        date: "Date d'envoi"
+        date: "Date d’envoi"
         message: "Rappel de votre demande"
     thanks:
         title: "Votre message a bien été envoyé"
@@ -78,27 +78,27 @@ contact:
         continue: "Poursuivre la navigation"
 
 datastore_creation_request:
-    title: "Demande de création d'un espace de travail"
+    title: "Demande de création d’un espace de travail"
     form:
-        error_title: "Votre message n'a pas pu être envoyé"
-        name: "Nom de l'espace de travail"
-        name_hint: "Ce nom vous permettra d'identifier l'espace de travail susceptible d'être partagé avec d'autres utilisateurs, soyez aussi clair que possible"
-        name_error: "Le nom de l'espace de travail est obligatoire"
-        name_minlength_error: "Le nom de l'espace de travail doit faire au minimum 10 caractères"
+        error_title: "Votre message n’a pas pu être envoyé"
+        name: "Nom de l’espace de travail"
+        name_hint: "Ce nom vous permettra d’identifier l’espace de travail susceptible d’être partagé avec d’autres utilisateurs, soyez aussi clair que possible"
+        name_error: "Le nom de l’espace de travail est obligatoire"
+        name_minlength_error: "Le nom de l’espace de travail doit faire au minimum 10 caractères"
         information: "Informations complémentaires (optionnel)"
         information_hint: "Saisissez toute information que vous aimeriez porter à la connaissance des administrateurs et qui vous paraissent utiles dans le contexte de cette demande"
         send: "Envoyer la demande"
-    is_sending: "Votre demande est en cours d'envoi"
+    is_sending: "Votre demande est en cours d’envoi"
     email_support:
-        heading: "Un utilisateur a fait une demande de création d'un espace de travail"
+        heading: "Un utilisateur a fait une demande de création d’un espace de travail"
         details: "Détails de la demande"
-        date: "Date d'envoi"
-        datastore_name: "Nom de l'espace de travail"
-        datastore_technical_name: "Nom technique de l'espace de travail"
-        is_member: "L'utilisateur est un simple membre des communautés suivantes :"
-        is_supervisor: "L'utilisateur est superviseur des communautés suivantes :"
+        date: "Date d’envoi"
+        datastore_name: "Nom de l’espace de travail"
+        datastore_technical_name: "Nom technique de l’espace de travail"
+        is_member: "L’utilisateur est un simple membre des communautés suivantes :"
+        is_supervisor: "L’utilisateur est superviseur des communautés suivantes :"
     email_acknowledgement:
-        heading: "Votre demande de création d'un espace de travail a été envoyée à l’IGN et une réponse vous sera apportée dans les meilleurs délais."
+        heading: "Votre demande de création d’un espace de travail a été envoyée à l’IGN et une réponse vous sera apportée dans les meilleurs délais."
         message: "Rappel de votre demande"
 
 communities_list:
@@ -122,7 +122,7 @@ join_community:
 
 accesses_request:
     email_support:
-        heading: "Un utilisateur a fait une demande d'accès à des services de diffusion restreints.<br/>Voici les informations utiles pour que vous puissiez donner suite à cette demande."
+        heading: "Un utilisateur a fait une demande d’accès à des services de diffusion restreints.<br/>Voici les informations utiles pour que vous puissiez donner suite à cette demande."
         services_title: "Services concernés par la demande :"
         datasheet_catalog_url: "<strong>Fiche catalogue :</strong>&nbsp;%url%"
         name: "<strong>Nom : </strong>&nbsp;%name%"
@@ -130,10 +130,10 @@ accesses_request:
         asking_permission_title: "Le demandeur souhaite des permissions pour :"
         himself: "Lui-même"
         community: "La communauté %community% (id=%id%)"
-        rendez_vous: "Rendez-vous dans l'espace de travail à partir duquel vous avez publier ces services pour ajouter les permissions nécessaires."
+        rendez_vous: "Rendez-vous dans l’espace de travail à partir duquel vous avez publier ces services pour ajouter les permissions nécessaires."
     email_acknowledgement:
         heading: "Votre demande a été envoyée à l’IGN et une réponse vous sera apportée dans les meilleurs délais."
-        date: "Date d'envoi"
+        date: "Date d’envoi"
         message: "Rappel de votre demande"
 
 service:
@@ -144,7 +144,7 @@ service:
             step2: "Source des métadonnées"
             step3: "Description de la ressource"
             step4: "Informations supplémentaires"
-            step5: "Restrictions d'accès"
+            step5: "Restrictions d’accès"
             loading_stored_data: "Chargement de la donnée stockée..."
             publish: "Publier le service maintenant"
             tables_form:
@@ -153,10 +153,10 @@ service:
                 manyTables: "%num% tables détectées"
                 table:
                     public_name: "Nom public de la table (optionnel)"
-                    hint_public_name: "Ce nom permettra d'identifier la table dans les services que vous configurerez, veuillez choisir un nom explicite."
+                    hint_public_name: "Ce nom permettra d’identifier la table dans les services que vous configurerez, veuillez choisir un nom explicite."
                     title: "Titre de la table"
                     title_error: "Le titre de la table est obligatoire"
-                    hint_title: "Ce titre permet  de faciliter l'identification de la table par les utilisateurs."
+                    hint_title: "Ce titre permet  de faciliter l’identification de la table par les utilisateurs."
                     description: "Résumé du contenu de la table"
                     hint_description: "Bref résumé narratif du contenu de la table"
                     description_error: "La description de la table est obligatoire"
@@ -166,7 +166,7 @@ service:
                 error_mandatory: "Les champs [Titre] et [Description] sont obligatoires"
             metadata_upload_form:
                 title: "Source des métadonnées"
-                help: "Apportez un maximum d'informations à vos utilisateurs en décrivant votre service le plus précisément possible."
+                help: "Apportez un maximum d’informations à vos utilisateurs en décrivant votre service le plus précisément possible."
                 # legend: "Comment allez-vous remplir les métadonnées"
                 # hint_legend: "Vous avez plusieurs méthodes pour fournir les données. Pour plus d’information, consultez"
                 import: "Importez un fichier de métadonnées (optionnel)"
@@ -179,24 +179,24 @@ service:
                 technical_name: "Nom technique du service"
                 technical_name_error: "Le nom technique est obligatoire"
                 technical_name_regex: "Le nom technique ne doit contenir que des lettres, chiffres, tirets (-), underscores (_), ou points (.)"
-                hint_technical_name: "Nom technique qui sera visible de vos utilisateurs dans l'adresse de votre service"
+                hint_technical_name: "Nom technique qui sera visible de vos utilisateurs dans l’adresse de votre service"
                 public_name: "Intitulé (nom public)"
                 hint_public_name: "Nom caractéristique et souvent unique sous lequel la ressource est connue"
-                public_name_error: "L'intitulé (nom public) est obligatoire"
+                public_name_error: "L’intitulé (nom public) est obligatoire"
                 description: "Résumé"
                 hint_description: "Bref résumé narratif du contenu de la ressource"
                 description_error: "Un résumé est obligatoire"
                 markdown_placeholder: "Veuillez saisir le texte Markdown"
                 identifier: "Identificateur de ressource unique"
                 hint_identifier: "Entrez une valeur identifiant la ressource de manière unique"
-                identifier_error: "L'identificateur est obligatoire"
+                identifier_error: "L’identificateur est obligatoire"
                 category: "Catégorie thématique"
                 hint_category: "Utilisez l’auto-complétion ou saisissez librement des mots clés en appuyant sur Entrée après chaque mot"
                 category_error: "La catégorie thématique est obligatoire"
                 email_contact: "Email de contact sur les métadonnées"
-                hint_email_contact: "E-mail auprès duquel des compléments d'information peuvent être obtenus"
-                email_contact_mandatory_error: "l'email de contact est obligatoire"
-                email_contact_error: "l'email de contact n'est pas correct"
+                hint_email_contact: "E-mail auprès duquel des compléments d’information peuvent être obtenus"
+                email_contact_mandatory_error: "l’email de contact est obligatoire"
+                email_contact_error: "l’email de contact n’est pas correct"
                 time_reference_title: "Référence temporelle"
                 creation_date: "Date de la création de la ressource"
                 creation_date_error: "La date de création de la ressource est obligatoire"
@@ -204,12 +204,12 @@ service:
                 hint_resource_genealogy: "Description du mode de production de la ressource"
                 resource_manager_title: "Responsable de la ressource"
                 organization: "Organisme"
-                hint_organization: "Nom de l'organisme responsable de la ressource  qui prend la responsabilité de la diffuser ou  qui est légitime pour rendre celle-ci visible et décider de son mode de diffusion"
-                organization_error: "l'organisme est obligatoire"
+                hint_organization: "Nom de l’organisme responsable de la ressource  qui prend la responsabilité de la diffuser ou  qui est légitime pour rendre celle-ci visible et décider de son mode de diffusion"
+                organization_error: "l’organisme est obligatoire"
                 organization_email: "Email"
-                hint_organization_email: "Email de contact de l'organisme"
-                organization_email_mandatory_error: "l'email de l'organisme est obligatoire"
-                organization_email_error: "l'email de l'organisme n'est pas correct"
+                hint_organization_email: "Email de contact de l’organisme"
+                organization_email_mandatory_error: "l’email de l’organisme est obligatoire"
+                organization_email_error: "l’email de l’organisme n’est pas correct"
             additional_information_form:
                 metadata_information_title: "Informations sur les métadonnées"
                 language: "Langue des métadonnées"
@@ -221,21 +221,21 @@ service:
                 hint_charset: "Codification utilisée par la métadonnée pour restituer les caractères spécifiques de la langue (accents, caractères spéciaux …). Utf8 correspond à un codage souvent employé pour les caractères du français."
                 type_of_spatial_representation_title: "Type de représentation spatiale"
                 projection: "Référentiel de coordonnées (projection)"
-                hint_projection: "Permet de décrire le système de coordonnées, pour une donnée géographique, il s'agit de son système de projection"
+                hint_projection: "Permet de décrire le système de coordonnées, pour une donnée géographique, il s’agit de son système de projection"
                 projection_error: "La projection est obligatoire"
                 encoding: "Encodage de la ressource"
                 hint_encoding: "Codification utilisée dans la ressource pour restituer les caractères"
-                encoding_error: "l'encodage de la ressource est obligatoire"
+                encoding_error: "l’encodage de la ressource est obligatoire"
                 spatial_resolution: "Résolution spatiale (optionnel)"
                 hint_spatial_resolution: "Résolution indiquée en échelle (1/x)"
                 select_spatial_resolution: "Sélectionnez un produit (série)"
             access_retrictions:
-                title: Restrictions d'accès
+                title: Restrictions d’accès
                 share_with: Avec qui voulez-vous partager le service ?
-                share_with_error: La restrictions d'accès est obligatoire
+                share_with_error: La restrictions d’accès est obligatoire
                 share_with_choices:
                     all_public: Tout public
-                    your_community: Votre communauté d'appartenance
+                    your_community: Votre communauté d’appartenance
                     communities_or_users: Communautés ou utilisateurs choisis
 
     wms_vector:
@@ -248,14 +248,14 @@ service:
             step3: "Source des métadonnées"
             step4: "Description de la ressource"
             step5: "Informations supplémentaires"
-            step6: "Restrictions d'accès"
+            step6: "Restrictions d’accès"
             step_tables:
                 title: "Sélectionnez les tables nécessaires au service"
             step_style_file:
                 title: "Déposez vos fichiers de style SLD"
             step_metadata:
                 title: "Source des métadonnées"
-                help: "Apportez un maximum d'informations à vos utilisateurs en décrivant votre service le plus précisément possible."
+                help: "Apportez un maximum d’informations à vos utilisateurs en décrivant votre service le plus précisément possible."
                 legend: "Comment allez-vous remplir les métadonnées"
                 legend_hint: "Vous avez plusieurs méthodes pour fournir les données. Pour plus d’information, consultez"
                 option_import_file: "Importez un fichier de métadonnées (optionnel)"
@@ -267,24 +267,24 @@ service:
                 technical_name: "Nom technique du service"
                 technical_name_error: "Le nom technique est obligatoire"
                 technical_name_regex: "Le nom technique ne doit contenir que des lettres, chiffres, tirets (-), underscores (_), ou points (.)"
-                hint_technical_name: "Nom technique qui sera visible de vos utilisateurs dans l'adresse de votre service"
+                hint_technical_name: "Nom technique qui sera visible de vos utilisateurs dans l’adresse de votre service"
                 public_name: "Intitulé (nom public)"
                 hint_public_name: "Nom caractéristique et souvent unique sous lequel la ressource est connue"
-                public_name_error: "L'intitulé (nom public) est obligatoire"
+                public_name_error: "L’intitulé (nom public) est obligatoire"
                 description: "Résumé"
                 hint_description: "Bref résumé narratif du contenu de la ressource"
                 description_error: "Un résumé est obligatoire"
                 markdown_placeholder: "Veuillez saisir le texte Markdown"
                 identifier: "Identificateur de ressource unique"
                 hint_identifier: "Entrez une valeur identifiant la ressource de manière unique"
-                identifier_error: "L'identificateur est obligatoire"
+                identifier_error: "L’identificateur est obligatoire"
                 category: "Catégorie thématique"
                 hint_category: "Utilisez l’auto-complétion ou saisissez librement des mots clés en appuyant sur Entrée après chaque mot"
                 category_error: "La catégorie thématique est obligatoire"
                 email_contact: "Email de contact sur les métadonnées"
-                hint_email_contact: "E-mail auprès duquel des compléments d'information peuvent être obtenus"
-                email_contact_mandatory_error: "l'email de contact est obligatoire"
-                email_contact_error: "l'email de contact n'est pas correct"
+                hint_email_contact: "E-mail auprès duquel des compléments d’information peuvent être obtenus"
+                email_contact_mandatory_error: "l’email de contact est obligatoire"
+                email_contact_error: "l’email de contact n’est pas correct"
                 time_reference_title: "Référence temporelle"
                 creation_date: "Date de la création de la ressource"
                 creation_date_error: "La date de création de la ressource est obligatoire"
@@ -292,12 +292,12 @@ service:
                 hint_resource_genealogy: "Description du mode de production de la ressource"
                 resource_manager_title: "Responsable de la ressource"
                 organization: "Organisme"
-                hint_organization: "Nom de l'organisme responsable de la ressource  qui prend la responsabilité de la diffuser ou  qui est légitime pour rendre celle-ci visible et décider de son mode de diffusion"
-                organization_error: "l'organisme est obligatoire"
+                hint_organization: "Nom de l’organisme responsable de la ressource  qui prend la responsabilité de la diffuser ou  qui est légitime pour rendre celle-ci visible et décider de son mode de diffusion"
+                organization_error: "l’organisme est obligatoire"
                 organization_email: "Email"
-                hint_organization_email: "Email de contact de l'organisme"
-                organization_email_mandatory_error: "l'email de l'organisme est obligatoire"
-                organization_email_error: "l'email de l'organisme n'est pas correct"
+                hint_organization_email: "Email de contact de l’organisme"
+                organization_email_mandatory_error: "l’email de l’organisme est obligatoire"
+                organization_email_error: "l’email de l’organisme n’est pas correct"
             step_additional_information:
                 metadata_information_title: "Informations sur les métadonnées"
                 language: "Langue des métadonnées"
@@ -309,11 +309,11 @@ service:
                 hint_charset: "Codification utilisée par la métadonnée pour restituer les caractères spécifiques de la langue (accents, caractères spéciaux …). Utf8 correspond à un codage souvent employé pour les caractères du français."
                 type_of_spatial_representation_title: "Type de représentation spatiale"
                 projection: "Référentiel de coordonnées (projection)"
-                hint_projection: "Permet de décrire le système de coordonnées, pour une donnée géographique, il s'agit de son système de projection"
+                hint_projection: "Permet de décrire le système de coordonnées, pour une donnée géographique, il s’agit de son système de projection"
                 projection_error: "La projection est obligatoire"
                 encoding: "Encodage de la ressource"
                 hint_encoding: "Codification utilisée dans la ressource pour restituer les caractères"
-                encoding_error: "l'encodage de la ressource est obligatoire"
+                encoding_error: "l’encodage de la ressource est obligatoire"
                 spatial_resolution: "Résolution spatiale (optionnel)"
                 hint_spatial_resolution: "Résolution indiquée en échelle (1/x)"
                 select_spatial_resolution: "Sélectionnez un produit (série)"
@@ -323,7 +323,7 @@ service:
                 share_with_error: La restrictions d’accès est obligatoire
                 share_with_choices:
                     all_public: Tout public
-                    your_community: Votre communauté d'appartenance
+                    your_community: Votre communauté d’appartenance
                     communities_or_users: Communautés ou utilisateurs choisis
     tms:
         new:
@@ -339,25 +339,25 @@ service:
                 technical_name: "Nom technique du service"
                 technical_name_error: "Le nom technique est obligatoire"
                 technical_name_regex: "Le nom technique ne doit contenir que des lettres, chiffres, tirets (-), underscores (_), ou points (.)"
-                hint_technical_name: "Nom technique qui sera visible de vos utilisateurs dans l'adresse de votre service"
+                hint_technical_name: "Nom technique qui sera visible de vos utilisateurs dans l’adresse de votre service"
                 public_name: "Intitulé (nom public)"
                 hint_public_name: "Nom caractéristique et souvent unique sous lequel la ressource est connue"
-                public_name_error: "L'intitulé (nom public) est obligatoire"
+                public_name_error: "L’intitulé (nom public) est obligatoire"
                 description: "Résumé"
                 hint_description: "Bref résumé narratif du contenu de la ressource"
                 description_error: "Un résumé est obligatoire"
                 markdown_placeholder: "Veuillez saisir le texte Markdown"
                 identifier: "Identificateur de ressource unique"
                 hint_identifier: "Entrez une valeur identifiant la ressource de manière unique"
-                identifier_error: "L'identificateur est obligatoire"
-                identifier_regex: "L'identificateur ne doit contenir que des lettres, chiffres, tirets (-), underscores (_), ou points (.)"
+                identifier_error: "L’identificateur est obligatoire"
+                identifier_regex: "L’identificateur ne doit contenir que des lettres, chiffres, tirets (-), underscores (_), ou points (.)"
                 category: "Catégorie thématique"
                 hint_category: "Utilisez l’auto-complétion ou saisissez librement des mots clés en appuyant sur Entrée après chaque mot"
                 category_error: "La catégorie thématique est obligatoire"
                 email_contact: "Email de contact sur les métadonnées"
-                hint_email_contact: "E-mail auprès duquel des compléments d'information peuvent être obtenus"
-                email_contact_mandatory_error: "l'email de contact est obligatoire"
-                email_contact_error: "l'email de contact n'est pas correct"
+                hint_email_contact: "E-mail auprès duquel des compléments d’information peuvent être obtenus"
+                email_contact_mandatory_error: "l’email de contact est obligatoire"
+                email_contact_error: "l’email de contact n’est pas correct"
                 time_reference_title: "Référence temporelle"
                 creation_date: "Date de la création de la ressource"
                 creation_date_error: "La date de création de la ressource est obligatoire"
@@ -365,12 +365,12 @@ service:
                 hint_resource_genealogy: "Description du mode de production de la ressource"
                 resource_manager_title: "Responsable de la ressource"
                 organization: "Organisme"
-                hint_organization: "Nom de l'organisme responsable de la ressource  qui prend la responsabilité de la diffuser ou  qui est légitime pour rendre celle-ci visible et décider de son mode de diffusion"
-                organization_error: "l'organisme est obligatoire"
+                hint_organization: "Nom de l’organisme responsable de la ressource  qui prend la responsabilité de la diffuser ou  qui est légitime pour rendre celle-ci visible et décider de son mode de diffusion"
+                organization_error: "l’organisme est obligatoire"
                 organization_email: "Email"
-                hint_organization_email: "Email de contact de l'organisme"
-                organization_email_mandatory_error: "l'email de l'organisme est obligatoire"
-                organization_email_error: "l'email de l'organisme n'est pas correct"
+                hint_organization_email: "Email de contact de l’organisme"
+                organization_email_mandatory_error: "l’email de l’organisme est obligatoire"
+                organization_email_error: "l’email de l’organisme n’est pas correct"
 
 pyramid_vector:
     new:
@@ -391,15 +391,15 @@ pyramid_vector:
             explain: "Les niveaux de zoom de la pyramide de tuiles vectorielles sont prédéfinis. Choisissez les bornes minimum et maximum de votre pyramide de tuiles en vous aidant des deux cartes. Tous les niveaux intermédiaires seront générés."
         step_tippecanoe:
             title: "Choisissez une option de généralisation"
-            mandatory_error: "l'option de généralisation est obligatoire"
+            mandatory_error: "l’option de généralisation est obligatoire"
         step_sample:
-            title: "Définition d'un échantillon (Optionnel)"
+            title: "Définition d’un échantillon (Optionnel)"
             doubts: "Des doutes sur votre configuration ?"
-            explain: "En choisissant de générer un échantillon, vous pourrez visualiser votre pyramide de tuiles vectorielles sur une zone restreinte et ainsi confirmer votre paramétrage ou le modifier s'il ne vous convient pas. Vous obtiendrez ainsi un résultat plus rapide que si vous générez les tuiles vectorielles sur l'intégralité de vos données."
+            explain: "En choisissant de générer un échantillon, vous pourrez visualiser votre pyramide de tuiles vectorielles sur une zone restreinte et ainsi confirmer votre paramétrage ou le modifier s’il ne vous convient pas. Vous obtiendrez ainsi un résultat plus rapide que si vous générez les tuiles vectorielles sur l’intégralité de vos données."
             define_sample: "Définir un échantillon"
-            sample_explain: "Déplacez la carte ou utilisez l'outil de recherche pour choisir l'emplacement de votre échantillon. Choisissez un endroit où vous êtes certain de trouver des données. La taille de l'échantillon est limité à 10x10 tuiles vectorielles au niveau de zoom maximum que vous avez défini."
+            sample_explain: "Déplacez la carte ou utilisez l’outil de recherche pour choisir l’emplacement de votre échantillon. Choisissez un endroit où vous êtes certain de trouver des données. La taille de l’échantillon est limité à 10x10 tuiles vectorielles au niveau de zoom maximum que vous avez défini."
         generate_pyramid: "Générer la pyramide complète"
-        generate_sample: "Générer l'échantillon"
+        generate_sample: "Générer l’échantillon"
 
 metadatas:
     drag_and_drop_file: "Glissez-déposez votre fichier de métadonnées ici (optionnel)"
@@ -407,23 +407,23 @@ metadatas:
 
     technical_name_error: "Le nom technique est obligatoire"
     technical_name_regex: "Le nom technique ne doit contenir que des lettres, chiffres, tirets (-), underscores (_), ou points (.)"
-    public_name_error: "L'intitulé est obligatoire"
+    public_name_error: "L’intitulé est obligatoire"
     description_error: "Le résumé est obligatoire"
-    identifier_error: "L'identificateur de resource est obligatoire"
-    identifier_regex: "L'identificateur de resource ne doit contenir que des lettres, chiffres, tirets (-), underscores (_), ou points (.)"
+    identifier_error: "L’identificateur de resource est obligatoire"
+    identifier_regex: "L’identificateur de resource ne doit contenir que des lettres, chiffres, tirets (-), underscores (_), ou points (.)"
     resource_genealogy_error: "La généalogie de la resource doit être [dataset] ou [series]"
-    organization_error: "Le nom de l'organisme est obligatoire"
+    organization_error: "Le nom de l’organisme est obligatoire"
     category_error: "La catégorie thématique est obligatoire"
     category_min_error: "Il doit y avoir au moins une catégorie thématique"
-    email_contact_mandatory_error: "l'email de contact est obligatoire"
-    email_contact_error: "l'email de contact n'est pas une adresse email valide"
-    organization_email_mandatory_error: "l'email de l'organisme est obligatoire"
-    organization_email_error: "l'email de l'organisme n'est pas une adresse email valide"
+    email_contact_mandatory_error: "l’email de contact est obligatoire"
+    email_contact_error: "l’email de contact n’est pas une adresse email valide"
+    organization_email_mandatory_error: "l’email de l’organisme est obligatoire"
+    organization_email_error: "l’email de l’organisme n’est pas une adresse email valide"
     projection_error: "La projection est obligatoire"
     charset_error: "Le jeux de caractères est obligatoire"
-    encoding_error: "L'encodage de la ressource est obligatoire"
+    encoding_error: "L’encodage de la ressource est obligatoire"
     language_error: "La langue est obligatoire"
     language_min_error: "Il doit y avoir au moins une langue sélectionnée"
-    resolution_error: "La résolution n'est pas valide"
+    resolution_error: "La résolution n’est pas valide"
 
-share_with_error: "La restriction n'est pas valide"
+share_with_error: "La restriction n’est pas valide"
