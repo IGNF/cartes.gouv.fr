@@ -1,6 +1,7 @@
 export type NewsArticle = {
     date: string;
     title: string;
+    breadcrumb?: string;
     thumbnail_url?: string;
     thumbnail_alt?: string;
     thumbnail_caption?: string;

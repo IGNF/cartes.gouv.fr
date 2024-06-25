@@ -2,6 +2,7 @@
     "temoignage-mnhn": {
         "date": "2024-05-27T08:00:00.000Z",
         "title": "Témoignage : Contribution des données de l’inventaire national du patrimoine naturel à la Géoplateforme",
+        "breadcrumb": "Témoignage MNHN",
         "tags": ["Partenaires", "Usages", "Géoplateforme", "API"],
         "thumbnail_url": "build/img/actualites/14_temoignage_mnhn.png",
         "thumbnail_alt": "Témoignage : Contribution des données de l’inventaire national du patrimoine naturel à la Géoplateforme. Museum d'Histoire Naturelle",
@@ -11,6 +12,7 @@
     "temoignage-schapi": {
         "date": "2024-05-27T08:00:00.000Z",
         "title": "Témoignage : Diffusion de périmètres de zones inondables",
+        "breadcrumb": "Témoignage SCHAPI",
         "tags": ["Partenaires", "Usages", "Géoplateforme", "API"],
         "thumbnail_url": "build/img/actualites/13_temoignage_schapi.png",
         "thumbnail_alt": "Témoignage : Diffusion de périmètres de zones inondables SCHAPI",
@@ -20,6 +22,7 @@
     "temoignage-nantes-metropole":{
         "date": "2024-05-27T08:00:00.000Z",
         "title": "Témoignage : Hébergement et diffusion des données publiques de Nantes métropole",
+        "breadcrumb": "Témoignage Nantes Métropole",
         "tags": ["Partenaires", "Usages", "Géoplateforme", "API"],
         "thumbnail_url": "build/img/actualites/12_temoignage_nantes_metropole.png",
         "thumbnail_alt": "Témoignage : Hébergement et diggusion des données publiques. Nantes métropole",

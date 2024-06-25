@@ -2,6 +2,11 @@ import { Route } from "type-route";
 import { routes } from "../../router/router";
 import { BreadcrumbProps } from "@codegouvfr/react-dsfr/Breadcrumb";
 import { getTranslation } from "../../i18n/i18n";
+import articles from "../../data/actualites.json";
+
+const getArticleBreadcrumb = (slug: string) => {
+    return articles?.[slug]?.breadcrumb ?? articles[slug].title;
+};
 
 const { t } = getTranslation("Breadcrumb");
 
@@ -34,7 +39,7 @@ const getBreadcrumb = (route: Route<typeof routes>, datastoreName?: string): Bre
             return { ...defaultProps, currentPageLabel: t("news") };
         case "news_article":
             defaultProps.segments.push({ label: t("news"), linkProps: routes.news_list().link });
-            return { ...defaultProps, currentPageLabel: route.params.slug };
+            return { ...defaultProps, currentPageLabel: getArticleBreadcrumb(route.params.slug) };
 
         case "my_account":
         case "my_access_keys":
