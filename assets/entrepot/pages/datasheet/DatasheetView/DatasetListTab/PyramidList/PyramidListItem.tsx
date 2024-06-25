@@ -22,7 +22,7 @@ import api from "../../../../../api";
 import PyramidDesc from "./PyramidDesc";
 
 type PyramidListItemProps = {
-    datasheetName?: string;
+    datasheetName: string;
     pyramid: Pyramid;
     datastoreId: string;
 };
@@ -86,7 +86,7 @@ const PyramidListItem: FC<PyramidListItemProps> = ({ datasheetName, datastoreId,
                             <StoredDataStatusBadge status={pyramid.status} />
                             <Button
                                 onClick={() => {
-                                    routes.datastore_pyramid_vector_tms_service_new({ datastoreId, pyramidId: pyramid._id }).push();
+                                    routes.datastore_pyramid_vector_tms_service_new({ datastoreId, pyramidId: pyramid._id, datasheetName }).push();
                                 }}
                                 className={fr.cx("fr-mr-2v")}
                                 priority="secondary"

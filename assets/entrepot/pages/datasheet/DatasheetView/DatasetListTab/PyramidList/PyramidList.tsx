@@ -6,7 +6,7 @@ import { Pyramid } from "../../../../../../@types/app";
 import PyramidListItem from "./PyramidListItem";
 
 type PyramidListProps = {
-    datasheetName?: string;
+    datasheetName: string;
     datastoreId: string;
     pyramidList: Pyramid[] | undefined;
 };

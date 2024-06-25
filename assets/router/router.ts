@@ -143,6 +143,7 @@ const routeDefs = {
         {
             datastoreId: param.path.string,
             vectorDbId: param.query.string,
+            datasheetName: param.query.string,
         },
         (p) => `${appRoot}/entrepot/${p.datastoreId}/service/wfs/ajout`
     ),
@@ -152,6 +153,7 @@ const routeDefs = {
             datastoreId: param.path.string,
             vectorDbId: param.query.string,
             offeringId: param.path.string,
+            datasheetName: param.query.string,
         },
         (p) => `${appRoot}/entrepot/${p.datastoreId}/service/wfs/${p.offeringId}/modification`
     ),
@@ -161,6 +163,7 @@ const routeDefs = {
         {
             datastoreId: param.path.string,
             vectorDbId: param.query.string,
+            datasheetName: param.query.string,
         },
         (p) => `${appRoot}/entrepot/${p.datastoreId}/service/wms-vecteur/ajout`
     ),
@@ -170,6 +173,7 @@ const routeDefs = {
             datastoreId: param.path.string,
             vectorDbId: param.query.string,
             offeringId: param.path.string,
+            datasheetName: param.query.string,
         },
         (p) => `${appRoot}/entrepot/${p.datastoreId}/service/wms-vecteur/${p.offeringId}/modification`
     ),
@@ -180,6 +184,7 @@ const routeDefs = {
             datastoreId: param.path.string,
             vectorDbId: param.query.string,
             technicalName: param.query.string,
+            datasheetName: param.query.string,
         },
         (p) => `${appRoot}/entrepot/${p.datastoreId}/pyramide-vecteur/ajout`
     ),
@@ -189,6 +194,7 @@ const routeDefs = {
         {
             datastoreId: param.path.string,
             pyramidId: param.query.string,
+            datasheetName: param.query.string,
         },
         (p) => `${appRoot}/entrepot/${p.datastoreId}/service/tms/ajout`
     ),
@@ -198,6 +204,7 @@ const routeDefs = {
             datastoreId: param.path.string,
             pyramidId: param.query.string,
             offeringId: param.path.string,
+            datasheetName: param.query.string,
         },
         (p) => `${appRoot}/entrepot/${p.datastoreId}/service/tms/${p.offeringId}/modification`
     ),

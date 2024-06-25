@@ -1,8 +1,9 @@
-import { Route } from "type-route";
-import { routes } from "../../router/router";
 import { BreadcrumbProps } from "@codegouvfr/react-dsfr/Breadcrumb";
-import { getTranslation } from "../../i18n/i18n";
+import { Route } from "type-route";
+
 import articles from "../../data/actualites.json";
+import { getTranslation } from "../../i18n/i18n";
+import { routes } from "../../router/router";
 
 const getArticleBreadcrumb = (slug: string) => {
     return articles?.[slug]?.breadcrumb ?? articles[slug].title;
@@ -41,6 +42,7 @@ const getBreadcrumb = (route: Route<typeof routes>, datastoreName?: string): Bre
             defaultProps.segments.push({ label: t("news"), linkProps: routes.news_list().link });
             return { ...defaultProps, currentPageLabel: getArticleBreadcrumb(route.params.slug) };
 
+        case "accesses_request":
         case "my_account":
         case "my_access_keys":
             defaultProps.segments.push({ label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link });
@@ -177,10 +179,20 @@ const getBreadcrumb = (route: Route<typeof routes>, datastoreName?: string): Bre
                 ...[
                     { label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link },
                     { label: datastoreName, linkProps: routes.datasheet_list({ datastoreId: route.params.datastoreId }).link },
+                    {
+                        label: route.params.datasheetName,
+                        linkProps: routes.datastore_datasheet_view({
+                            datastoreId: route.params.datastoreId,
+                            datasheetName: route.params.datasheetName,
+                            activeTab: "offeringId" in route.params ? "services" : "dataset",
+                        }).link,
+                    },
                 ],
             ];
             return { ...defaultProps, currentPageLabel: t(route.name) };
 
+        case "espaceco_community_list":
+        case "home":
         default:
             return undefined;
     }

@@ -15,6 +15,7 @@ export const { i18n } = declareComponentKeys<
     | "join"
     | "terms_of_service"
     | "service_status"
+    | "accesses_request"
     | "my_account"
     | "my_access_keys"
     | "user_key_add"
@@ -56,6 +57,7 @@ export const BreadcrumbFrTranslations: Translations<"fr">["Breadcrumb"] = {
     join: "Nous rejoindre",
     terms_of_service: "Conditions générales d'utilisation",
     service_status: "Niveau de service",
+    accesses_request: "Demande d'accès à un service privé",
     my_account: "Mon compte",
     my_access_keys: "Mes clés d'accès",
     user_key_add: "Création d'une clé",
@@ -97,6 +99,7 @@ export const BreadcrumbEnTranslations: Translations<"en">["Breadcrumb"] = {
     join: "Join us",
     terms_of_service: "Terms of Service",
     service_status: "TODO",
+    accesses_request: "Request to private resources",
     my_account: "My account",
     my_access_keys: "My access keys",
     user_key_add: "Create key",

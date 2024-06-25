@@ -65,7 +65,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
     const metadataQuery = useQuery<Metadata, CartesApiException>({
         queryKey: RQKeys.datastore_metadata_by_datasheet_name(datastoreId, datasheetName),
         queryFn: ({ signal }) => api.metadata.getByDatasheetName(datastoreId, datasheetName, { signal }),
-        enabled: datasheetQuery.isSuccess && !datasheetDeleteMutation.isPending,
+        enabled: !datasheetQuery.isFetching && !datasheetDeleteMutation.isPending,
         staleTime: 20000,
         retry: false,
     });
@@ -130,46 +130,48 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                         </div>
                     </div>
 
-                    <div className={fr.cx("fr-grid-row")}>
-                        <div className={fr.cx("fr-col")}>
-                            <Tabs
-                                tabs={[
-                                    {
-                                        label: t("tab_label.metadata"),
-                                        isDefault: route.params["activeTab"] === "metadata",
-                                        content: <MetadataTab datastoreId={datastoreId} datasheet={datasheetQuery?.data} metadataQuery={metadataQuery} />,
-                                    },
-                                    {
-                                        label: t("tab_label.datasets", {
-                                            num: (datasheetQuery?.data?.vector_db_list?.length || 0) + (datasheetQuery?.data?.pyramid_list?.length || 0),
-                                        }),
-                                        isDefault: route.params["activeTab"] === "dataset",
-                                        content: <DatasetListTab datastoreId={datastoreId} datasheet={datasheetQuery?.data} />,
-                                    },
-                                    {
-                                        label: t("tab_label.services", { num: datasheetQuery?.data?.service_list?.length || 0 }),
-                                        isDefault: route.params["activeTab"] === "services",
-                                        content: <ServicesListTab datastoreId={datastoreId} datasheet={datasheetQuery?.data} />,
-                                    },
-                                ]}
-                                onTabChange={({ tabIndex }) => {
-                                    let activeTab = "dataset";
-                                    switch (tabIndex) {
-                                        case 0:
-                                            activeTab = "metadata";
-                                            break;
-                                        case 1:
-                                            activeTab = "dataset";
-                                            break;
-                                        case 2:
-                                            activeTab = "services";
-                                            break;
-                                    }
-                                    routes.datastore_datasheet_view({ datastoreId, datasheetName, activeTab }).replace();
-                                }}
-                            />
+                    {datasheetQuery.data !== undefined && (
+                        <div className={fr.cx("fr-grid-row")}>
+                            <div className={fr.cx("fr-col")}>
+                                <Tabs
+                                    tabs={[
+                                        {
+                                            label: t("tab_label.metadata"),
+                                            isDefault: route.params["activeTab"] === "metadata",
+                                            content: <MetadataTab datastoreId={datastoreId} datasheet={datasheetQuery.data} metadataQuery={metadataQuery} />,
+                                        },
+                                        {
+                                            label: t("tab_label.datasets", {
+                                                num: (datasheetQuery.data?.vector_db_list?.length || 0) + (datasheetQuery.data?.pyramid_list?.length || 0),
+                                            }),
+                                            isDefault: route.params["activeTab"] === "dataset",
+                                            content: <DatasetListTab datastoreId={datastoreId} datasheet={datasheetQuery.data} />,
+                                        },
+                                        {
+                                            label: t("tab_label.services", { num: datasheetQuery.data?.service_list?.length || 0 }),
+                                            isDefault: route.params["activeTab"] === "services",
+                                            content: <ServicesListTab datastoreId={datastoreId} datasheet={datasheetQuery.data} />,
+                                        },
+                                    ]}
+                                    onTabChange={({ tabIndex }) => {
+                                        let activeTab = "dataset";
+                                        switch (tabIndex) {
+                                            case 0:
+                                                activeTab = "metadata";
+                                                break;
+                                            case 1:
+                                                activeTab = "dataset";
+                                                break;
+                                            case 2:
+                                                activeTab = "services";
+                                                break;
+                                        }
+                                        routes.datastore_datasheet_view({ datastoreId, datasheetName, activeTab }).replace();
+                                    }}
+                                />
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </>
             )}
 

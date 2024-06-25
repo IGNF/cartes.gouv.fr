@@ -29,7 +29,7 @@ import VectorDbDesc from "./VectorDbDesc";
 type ServiceTypes = "tms" | "wfs" | "wms-vector" | "pre-paquet";
 
 type VectorDbListItemProps = {
-    datasheetName?: string;
+    datasheetName: string;
     datastoreId: string;
     vectorDb: VectorDb;
 };
@@ -176,18 +176,18 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
     const handleCreateService = () => {
         switch (serviceType) {
             case "wfs":
-                routes.datastore_wfs_service_new({ datastoreId, vectorDbId: vectorDb._id }).push();
+                routes.datastore_wfs_service_new({ datastoreId, vectorDbId: vectorDb._id, datasheetName }).push();
                 break;
 
             case "wms-vector":
-                routes.datastore_wms_vector_service_new({ datastoreId, vectorDbId: vectorDb._id }).push();
+                routes.datastore_wms_vector_service_new({ datastoreId, vectorDbId: vectorDb._id, datasheetName }).push();
                 break;
 
             case "tms":
                 if (!technicalName) {
                     return;
                 }
-                routes.datastore_pyramid_vector_generate({ datastoreId, vectorDbId: vectorDb._id, technicalName }).push();
+                routes.datastore_pyramid_vector_generate({ datastoreId, vectorDbId: vectorDb._id, technicalName, datasheetName }).push();
                 break;
 
             default:

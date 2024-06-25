@@ -6,7 +6,7 @@ import { type VectorDb } from "../../../../../../@types/app";
 import VectorDbListItem from "./VectorDbListItem";
 
 type VectorDbListProps = {
-    datasheetName?: string;
+    datasheetName: string;
     datastoreId: string;
     vectorDbList: VectorDb[] | undefined;
 };

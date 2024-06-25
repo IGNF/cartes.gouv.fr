@@ -11,7 +11,7 @@ import VectorDbList from "./VectorDbList/VectorDbList";
 
 type DataListTabProps = {
     datastoreId: string;
-    datasheet?: DatasheetDetailed;
+    datasheet: DatasheetDetailed;
 };
 
 const DatasetListTab: FC<DataListTabProps> = ({ datastoreId, datasheet }) => {
@@ -19,7 +19,7 @@ const DatasetListTab: FC<DataListTabProps> = ({ datastoreId, datasheet }) => {
 
     // liste des uploads/livraisons dont l'intégration en base de données n'a pas réussi ou n'a pas terminé
     const unfinishedUploads = useMemo(() => {
-        return datasheet?.upload_list?.filter((upload) => {
+        return datasheet.upload_list?.filter((upload) => {
             if (upload.tags.integration_progress === undefined) {
                 return true;
             }
@@ -27,12 +27,12 @@ const DatasetListTab: FC<DataListTabProps> = ({ datastoreId, datasheet }) => {
             const integrationProgress = JSON.parse(upload.tags.integration_progress);
             return ["waiting", "in_progress"].includes(Object.values(integrationProgress)?.[2] as string);
         });
-    }, [datasheet?.upload_list]);
+    }, [datasheet.upload_list]);
 
     return (
         <>
             <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-grid-row--middle")}>
-                <Button iconId="fr-icon-add-line" linkProps={routes.datastore_datasheet_upload({ datastoreId, datasheetName: datasheet?.name }).link}>
+                <Button iconId="fr-icon-add-line" linkProps={routes.datastore_datasheet_upload({ datastoreId, datasheetName: datasheet.name }).link}>
                     Ajouter un fichier de données
                 </Button>
             </div>
@@ -47,12 +47,12 @@ const DatasetListTab: FC<DataListTabProps> = ({ datastoreId, datasheet }) => {
                 className={fr.cx("fr-grid-row", "fr-grid-row--center", "fr-grid-row--middle", unfinishedUploads && unfinishedUploads.length > 0 && "fr-mt-4w")}
             >
                 <div className={fr.cx("fr-col")}>
-                    <VectorDbList datastoreId={datastoreId} datasheetName={datasheet?.name} vectorDbList={datasheet?.vector_db_list} />
+                    <VectorDbList datastoreId={datastoreId} datasheetName={datasheet.name} vectorDbList={datasheet.vector_db_list} />
                 </div>
             </div>
             <div className={fr.cx("fr-grid-row", "fr-grid-row--center", "fr-grid-row--middle", "fr-mt-4w")}>
                 <div className={fr.cx("fr-col")}>
-                    <PyramidList datastoreId={datastoreId} datasheetName={datasheet?.name} pyramidList={datasheet?.pyramid_list} />
+                    <PyramidList datastoreId={datastoreId} datasheetName={datasheet.name} pyramidList={datasheet.pyramid_list} />
                 </div>
             </div>
         </>

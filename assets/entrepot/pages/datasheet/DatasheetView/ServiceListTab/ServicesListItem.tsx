@@ -131,6 +131,7 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                                                         datastoreId,
                                                         vectorDbId: service.configuration.type_infos.used_data[0].stored_data,
                                                         offeringId: service._id,
+                                                        datasheetName,
                                                     }).link;
 
                                                 case OfferingTypeEnum.WFS:
@@ -138,6 +139,7 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                                                         datastoreId,
                                                         vectorDbId: service.configuration.type_infos.used_data[0].stored_data,
                                                         offeringId: service._id,
+                                                        datasheetName,
                                                     }).link;
 
                                                 case OfferingTypeEnum.WMTSTMS:
@@ -145,6 +147,7 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                                                         datastoreId,
                                                         pyramidId: service.configuration.type_infos.used_data[0].stored_data,
                                                         offeringId: service._id,
+                                                        datasheetName,
                                                     }).link;
 
                                                 default:
