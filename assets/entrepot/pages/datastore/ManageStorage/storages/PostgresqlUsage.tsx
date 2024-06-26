@@ -33,7 +33,7 @@ const PostgresqlUsage: FC<PostgresqlUsageProps> = ({ datastore }) => {
     const { t: tCommon } = useTranslation("Common");
 
     const pgUsage = useMemo(() => {
-        return datastore?.storages.data.find((data) => data.storage.type === "POSTGRESQL");
+        return datastore?.storages.data?.find((data) => data.storage.type === "POSTGRESQL");
     }, [datastore]);
 
     const storedDataListQuery = useQuery<StoredData[], CartesApiException>({

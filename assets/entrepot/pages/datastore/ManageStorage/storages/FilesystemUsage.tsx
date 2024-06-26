@@ -33,7 +33,7 @@ const FilesystemUsage: FC<FilesystemUsageProps> = ({ datastore }) => {
     const { t: tCommon } = useTranslation("Common");
 
     const filesystemUsage = useMemo(() => {
-        return datastore?.storages.data.find((data) => data.storage.type === "FILESYSTEM");
+        return datastore?.storages.data?.find((data) => data.storage.type === "FILESYSTEM");
     }, [datastore?.storages.data]);
 
     const storedDataListQuery = useQuery<StoredData[], CartesApiException>({

@@ -1865,11 +1865,11 @@ export interface DatastoreStorageResponseDto {
 /** Stockages rattachés à l'entrepôt */
 export interface DatastoreStoragesResponseDto {
     /** @uniqueItems true */
-    data: DatastoreStorageResponseDto[];
+    data?: DatastoreStorageResponseDto[];
     /** Informations sur le stockage */
-    upload: DatastoreStorageResponseDto;
+    uploads?: DatastoreStorageResponseDto;
     /** Informations sur le stockage */
-    annexe: DatastoreStorageResponseDto;
+    annexes?: DatastoreStorageResponseDto;
 }
 
 /** Informations sur le stockage */

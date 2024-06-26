@@ -36,7 +36,7 @@ const DatastoreManageStorage: FC<DatastoreManageStorageProps> = ({ datastoreId }
         }
 
         // NOTE : d'après les utilisations de l'API vues jusque là, seul le stockage FILESYSTEM est optionnel, les autres sont forcément là
-        const hasFilesystemStorage = datastoreQuery.data?.storages.data.find((data) => data.storage.type === "FILESYSTEM") !== undefined;
+        const hasFilesystemStorage = datastoreQuery.data?.storages.data?.find((data) => data.storage.type === "FILESYSTEM") !== undefined;
 
         const tabs: TabsProps["tabs"] = [
             {

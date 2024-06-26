@@ -33,7 +33,7 @@ const S3Usage: FC<S3UsageProps> = ({ datastore }) => {
     const { t: tCommon } = useTranslation("Common");
 
     const s3Usage = useMemo(() => {
-        return datastore?.storages.data.find((data) => data.storage.type === "S3");
+        return datastore?.storages.data?.find((data) => data.storage.type === "S3");
     }, [datastore]);
 
     const storedDataListQuery = useQuery<StoredData[], CartesApiException>({
