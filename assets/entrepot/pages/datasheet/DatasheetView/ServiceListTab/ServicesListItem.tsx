@@ -96,11 +96,13 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                                         text: "Copier l’URL de diffusion",
                                         iconId: "ri-file-copy-2-line",
                                         onClick: async () => {
-                                            if (!service.share_url) return;
+                                            if (!service.share_url) {
+                                                setMessage("URL de diffusion indisponible");
+                                            } else {
+                                                await navigator.clipboard.writeText(service.share_url);
 
-                                            await navigator.clipboard.writeText(service.share_url);
-
-                                            setMessage("URL copiée");
+                                                setMessage("URL copiée");
+                                            }
                                         },
                                     },
                                     {
