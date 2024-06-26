@@ -139,7 +139,6 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, datasheet, metadataQue
                         </Accordion>
 
                         <Accordion titleAs="h2" defaultExpanded={true} label={"Contact sur les métadonnées"}>
-                            <MetadataField title={"Organisme"} content={metadata.csw_metadata?.organisation_name} />
                             <MetadataField title={"Email"} content={metadata.csw_metadata?.contact_email} />
                         </Accordion>
 

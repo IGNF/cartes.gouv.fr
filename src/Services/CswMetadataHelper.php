@@ -118,27 +118,27 @@ class CswMetadataHelper
         $cswMetadata->layers = $layersList;
 
         $cswMetadata->fileIdentifier = $xpath->query('/gmd:MD_Metadata/gmd:fileIdentifier/gco:CharacterString')->item(0)->textContent;
-        $cswMetadata->hierarchyLevel = CswHierarchyLevel::tryFrom(trim($xpath->query('/gmd:MD_Metadata/gmd:hierarchyLevel/gmd:MD_ScopeCode/@codeListValue')->item(0)->textContent));
+        $cswMetadata->hierarchyLevel = CswHierarchyLevel::tryFrom(trim($xpath->query('/gmd:MD_Metadata/gmd:hierarchyLevel/gmd:MD_ScopeCode/@codeListValue')->item(0)?->textContent));
 
         $cswMetadata->language = new CswLanguage(
             $xpath->query('/gmd:MD_Metadata/gmd:language/gmd:LanguageCode/@codeListValue')->item(0)->textContent,
             $xpath->query('/gmd:MD_Metadata/gmd:language/gmd:LanguageCode')->item(0)->textContent
         );
 
-        $cswMetadata->charset = $xpath->query('/gmd:MD_Metadata/gmd:characterSet/gmd:MD_CharacterSetCode/@codeListValue')->item(0)->textContent;
-        $cswMetadata->title = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:title/gco:CharacterString')->item(0)->textContent;
-        $cswMetadata->abstract = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:abstract/gco:CharacterString')->item(0)->textContent;
+        $cswMetadata->charset = $xpath->query('/gmd:MD_Metadata/gmd:characterSet/gmd:MD_CharacterSetCode/@codeListValue')->item(0)?->textContent;
+        $cswMetadata->title = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:title/gco:CharacterString')->item(0)?->textContent;
+        $cswMetadata->abstract = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:abstract/gco:CharacterString')->item(0)?->textContent;
 
         // creation_date
         /** @var ?\DOMElement $creationDateElement */
         $creationDateElement = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date/gmd:dateType/gmd:CI_DateTypeCode[@codeListValue="creation"]')->item(0)?->parentNode?->parentNode;
-        $cswMetadata->creationDate = $creationDateElement?->getElementsByTagName('date')[0]?->getElementsByTagName('Date')[0]->textContent;
+        $cswMetadata->creationDate = $creationDateElement?->getElementsByTagName('date')[0]?->getElementsByTagName('Date')[0]?->textContent;
 
         $cswMetadata->updateDate = $xpath->query('/gmd:MD_Metadata/gmd:dateStamp/gco:DateTime')->item(0)?->textContent;
 
-        $cswMetadata->contactEmail = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:pointOfContact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress/gco:CharacterString')->item(0)->textContent;
-        $cswMetadata->organisationName = $xpath->query('/gmd:MD_Metadata/gmd:contact/gmd:CI_ResponsibleParty/gmd:organisationName/gco:CharacterString')->item(0)->textContent;
-        $cswMetadata->organisationEmail = $xpath->query('/gmd:MD_Metadata/gmd:contact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress/gco:CharacterString')->item(0)->textContent;
+        $cswMetadata->organisationEmail = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:pointOfContact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress/gco:CharacterString')->item(0)?->textContent;
+        $cswMetadata->organisationName = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:pointOfContact/gmd:CI_ResponsibleParty/gmd:organisationName/gco:CharacterString')->item(0)?->textContent;
+        $cswMetadata->contactEmail = $xpath->query('/gmd:MD_Metadata/gmd:contact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress/gco:CharacterString')->item(0)?->textContent;
 
         $cswMetadata->resolution = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:spatialResolution/gmd:MD_Resolution/gmd:equivalentScale/gmd:MD_RepresentativeFraction/gmd:denominator/gco:Integer')->item(0)?->textContent;
 

@@ -25,7 +25,7 @@
         <gco:CharacterString>{{ hierarchy_level_name }}</gco:CharacterString>
     </gmd:hierarchyLevelName>
 
-    {% if title is defined or abstract is defined or contact_email is defined or thematic_categories is defined or resolution is defined or creation_date is defined %}
+    {% if title is defined or abstract is defined or organisation_name is defined or organisation_email is defined or thematic_categories is defined or resolution is defined or creation_date is defined %}
         <gmd:identificationInfo>
             <gmd:MD_DataIdentification>
                 {% if title is defined %}
@@ -59,16 +59,22 @@
                     </gmd:abstract>
                 {% endif %}
 
-                {% if contact_email is defined %}
+                {% if organisation_email is defined or organisation_name is defined %}
                     {# email de contact sur les métadonnées #}
                     <gmd:pointOfContact>
                         <gmd:CI_ResponsibleParty>
+                            {% if organisation_name is defined %}
+                                <gmd:organisationName>
+                                    <gco:CharacterString>{{ organisation_name }}</gco:CharacterString>
+                                </gmd:organisationName>
+                            {% endif %}
+
                             <gmd:contactInfo>
                                 <gmd:CI_Contact>
                                     <gmd:address>
                                         <gmd:CI_Address>
                                             <gmd:electronicMailAddress>
-                                                <gco:CharacterString>{{ contact_email }}</gco:CharacterString>
+                                                <gco:CharacterString>{{ organisation_email }}</gco:CharacterString>
                                             </gmd:electronicMailAddress>
                                         </gmd:CI_Address>
                                     </gmd:address>
@@ -181,29 +187,21 @@
         </gmd:identificationInfo>
     {% endif %}
 
-    {% if organisation_name is defined or organisation_email is defined %}
+    {% if contact_email is defined %}
         {# responsable de la ressource #}
         <gmd:contact>
             <gmd:CI_ResponsibleParty>
-                {% if organisation_name is defined %}
-                    <gmd:organisationName>
-                        <gco:CharacterString>{{ organisation_name }}</gco:CharacterString>
-                    </gmd:organisationName>
-                {% endif %}
-
-                {% if organisation_email is defined %}
-                    <gmd:contactInfo>
-                        <gmd:CI_Contact>
-                            <gmd:address>
-                                <gmd:CI_Address>
-                                    <gmd:electronicMailAddress>
-                                        <gco:CharacterString>{{ organisation_email }}</gco:CharacterString>
-                                    </gmd:electronicMailAddress>
-                                </gmd:CI_Address>
-                            </gmd:address>
-                        </gmd:CI_Contact>
-                    </gmd:contactInfo>
-                {% endif %}
+                <gmd:contactInfo>
+                    <gmd:CI_Contact>
+                        <gmd:address>
+                            <gmd:CI_Address>
+                                <gmd:electronicMailAddress>
+                                    <gco:CharacterString>{{ contact_email }}</gco:CharacterString>
+                                </gmd:electronicMailAddress>
+                            </gmd:CI_Address>
+                        </gmd:address>
+                    </gmd:CI_Contact>
+                </gmd:contactInfo>
             </gmd:CI_ResponsibleParty>
         </gmd:contact>
     {% endif %}
