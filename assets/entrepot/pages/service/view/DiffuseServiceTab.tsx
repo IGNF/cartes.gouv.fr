@@ -35,20 +35,24 @@ const DiffuseServiceTab: FC<DiffuseServiceTabProps> = ({ service }) => {
 
             <TextCopyToClipboard text={service?.share_url ?? "Indisponible"} disabled={!service?.share_url} className="fr-mb-1w" />
 
-            <div className={fr.cx("fr-grid-row", "fr-mt-4v")}>
-                <strong>Adresse des fichiers de style courant</strong>
-            </div>
-            {currentStyleLayers?.map((layer) => (
-                <div key={layer.annexe_id} className={fr.cx("fr-mt-2v")}>
-                    <span>
-                        {(() => {
-                            const splitLayerName = layer.name?.split(":");
-                            return splitLayerName?.[1] ?? splitLayerName?.[0] ?? layer.name;
-                        })()}
-                    </span>
-                    <TextCopyToClipboard text={layer.url} successMessage="URL copiée" />
-                </div>
-            ))}
+            {currentStyleLayers && (
+                <>
+                    <div className={fr.cx("fr-grid-row", "fr-mt-4v")}>
+                        <strong>Adresse des fichiers de style courant</strong>
+                    </div>
+                    {currentStyleLayers?.map((layer) => (
+                        <div key={layer.annexe_id} className={fr.cx("fr-mt-2v")}>
+                            <span>
+                                {(() => {
+                                    const splitLayerName = layer.name?.split(":");
+                                    return splitLayerName?.[1] ?? splitLayerName?.[0] ?? layer.name;
+                                })()}
+                            </span>
+                            <TextCopyToClipboard text={layer.url} successMessage="URL copiée" />
+                        </div>
+                    ))}
+                </>
+            )}
         </div>
     );
 };
