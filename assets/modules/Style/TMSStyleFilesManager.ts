@@ -93,8 +93,7 @@ export default class TMSStyleFilesManager implements BaseStyleFilesManager {
     async #toMapboxLayer(layerName, file) {
         const styleString = await file.text();
 
-        const version = this.inputFormat === "sld" ? this.#getVersion(styleString) : null;
-        const parser = this.inputFormat === "sld" ? new SldStyleParser({ sldVersion: version, locale: "fr" }) : new QGISStyleParser();
+        const parser = this.inputFormat === "sld" ? new SldStyleParser({ locale: "fr" }) : new QGISStyleParser();
 
         const { output } = await parser.readStyle(styleString);
         if (output === undefined) throw Error(t("parsing_error"));
@@ -132,13 +131,6 @@ export default class TMSStyleFilesManager implements BaseStyleFilesManager {
             sources: sources,
             layers: [],
         };
-    }
-
-    #getVersion(styleString: string) {
-        const domParser = new DOMParser();
-        const xmlDoc = domParser.parseFromString(styleString, "application/xml");
-
-        return xmlDoc.getElementsByTagName("StyledLayerDescriptor")[0].attributes?.["version"]?.nodeValue ?? "";
     }
 }
 

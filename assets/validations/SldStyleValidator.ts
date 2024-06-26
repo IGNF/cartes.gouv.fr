@@ -1,9 +1,8 @@
-import { TestContext, ValidationError } from "yup";
-import StyleValidator from "./StyleValidator";
 import SldStyleParser from "geostyler-sld-parser";
+import { TestContext, ValidationError } from "yup";
 import { Service, StyleFormat } from "../@types/app";
 import { getTranslation } from "../i18n/i18n";
-import { SLD_ACCEPTED_VERSIONS } from "./SldStyleValidationErrorsTr";
+import StyleValidator from "./StyleValidator";
 
 const { t: tSld } = getTranslation("SldStyleValidationErrors");
 
@@ -21,17 +20,7 @@ export default class SldStyleValidator extends StyleValidator {
         const file = files[0];
         const styleString = await file.text();
 
-        const domParser = new DOMParser();
-        const xmlDoc = domParser.parseFromString(styleString, "application/xml");
-        const version = xmlDoc.getElementsByTagName("StyledLayerDescriptor")[0].attributes?.["version"]?.nodeValue ?? "";
-
-        if (version === "") {
-            return ctx.createError({ message: tSld("sld_version_missing") });
-        } else if (!SLD_ACCEPTED_VERSIONS.includes(version)) {
-            return ctx.createError({ message: tSld("sld_version_unaccepted", { version }) });
-        }
-
-        const sldParser = new SldStyleParser({ sldVersion: version, locale: "fr" });
+        const sldParser = new SldStyleParser({ locale: "fr" });
         const result = await sldParser.readStyle(styleString);
 
         const { output, warnings, errors, unsupportedProperties } = result;

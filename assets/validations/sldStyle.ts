@@ -2,10 +2,9 @@ import SldStyleParser from "geostyler-sld-parser";
 import { TestContext } from "yup";
 
 import { Service } from "../@types/app";
+import { ConfigurationWmsVectorDetailsContent } from "../@types/entrepot";
 import { getTranslation } from "../i18n/i18n";
 import { getFileExtension } from "../utils";
-import { ConfigurationWmsVectorDetailsContent } from "../@types/entrepot";
-import { SLD_ACCEPTED_VERSIONS } from "./SldStyleValidationErrorsTr";
 
 const { t: tSld } = getTranslation("SldStyleValidationErrors");
 
@@ -59,22 +58,7 @@ export default class SldStyleWmsVectorValidator {
 
             const styleString = await file.text();
 
-            const domParser = new DOMParser();
-            const xmlDoc: XMLDocument = domParser.parseFromString(styleString, "application/xml");
-
-            if (xmlDoc.getElementsByTagName("StyledLayerDescriptor").length === 0) {
-                return ctx.createError({ message: tSld("file_invalid") });
-            }
-
-            const version = xmlDoc.getElementsByTagName("StyledLayerDescriptor")[0].attributes?.["version"]?.nodeValue ?? "";
-
-            if (version === "") {
-                return ctx.createError({ message: tSld("sld_version_missing") });
-            } else if (!SLD_ACCEPTED_VERSIONS.includes(version)) {
-                return ctx.createError({ message: tSld("sld_version_unaccepted", { version }) });
-            }
-
-            const sldParser = new SldStyleParser({ sldVersion: version, locale: "fr" });
+            const sldParser = new SldStyleParser({ locale: "fr" });
             const result = await sldParser.readStyle(styleString);
 
             const { output, warnings, errors, unsupportedProperties } = result;

@@ -45,18 +45,12 @@ import UploadStyleFile from "./UploadStyleFile";
 const getSld100 = async (originalFile: File): Promise<File> => {
     const fileContent = await originalFile.text();
 
-    const domParser = new DOMParser();
-    const xmlDoc: XMLDocument = domParser.parseFromString(fileContent, "application/xml");
+    const sldParser = new SldStyleParser({ locale: "fr" });
 
-    const version = xmlDoc.getElementsByTagName("StyledLayerDescriptor")[0].attributes?.["version"]?.nodeValue ?? "";
-
-    if (version === "1.1.0") {
-        const sld110Parser = new SldStyleParser({ sldVersion: "1.1.0", locale: "fr" });
-        const sld100Parser = new SldStyleParser({ sldVersion: "1.0.0", locale: "fr" });
-
-        const result = await sld110Parser.readStyle(fileContent);
-
-        const convertedStyle = await sld100Parser.writeStyle(result.output!);
+    const result = await sldParser.readStyle(fileContent);
+    if (sldParser.readingSldVersion === "1.1.0") {
+        sldParser.sldVersion = "1.0.0";
+        const convertedStyle = await sldParser.writeStyle(result.output!);
 
         const blob = new Blob([convertedStyle.output!]);
         const newFile = new File([blob], originalFile.name);

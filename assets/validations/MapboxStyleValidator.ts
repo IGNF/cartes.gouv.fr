@@ -1,10 +1,10 @@
-import { TestContext, ValidationError } from "yup";
-import StyleValidator from "./StyleValidator";
 import MapboxParser from "geostyler-mapbox-parser";
-import getWebService from "../modules/WebServices/WebServices";
-import { Service, StyleFormat } from "../@types/app";
 import { declareComponentKeys } from "i18nifty";
+import { TestContext, ValidationError } from "yup";
+import { Service, StyleFormat } from "../@types/app";
 import { Translations, getTranslation } from "../i18n/i18n";
+import getWebService from "../modules/WebServices/WebServices";
+import StyleValidator from "./StyleValidator";
 
 const { t: tMapbox } = getTranslation("mapboxStyleValidation");
 

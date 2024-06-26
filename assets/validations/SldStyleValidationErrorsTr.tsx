@@ -1,8 +1,6 @@
 import { declareComponentKeys } from "i18nifty/declareComponentKeys";
 import { Translations } from "../i18n/i18n";
 
-export const SLD_ACCEPTED_VERSIONS = ["1.0.0", "1.1.0"];
-
 export const { i18n } = declareComponentKeys<
     | { K: "no_file_provided"; P: { tableName: string }; R: string }
     | { K: "unaccepted_extension"; P: { fileName: string }; R: string }

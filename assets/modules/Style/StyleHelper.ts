@@ -1,13 +1,13 @@
-import VectorLayer from "ol/layer/Vector";
-import VectorSource from "ol/source/Vector";
-import VectorTileLayer from "ol/layer/VectorTile";
-import SldStyleParser from "geostyler-sld-parser";
-import QGISStyleParser from "geostyler-qgis-parser";
 import MapboxStyleParser from "geostyler-mapbox-parser";
 import OpenLayersParser from "geostyler-openlayers-parser";
-import { CartesStyle } from "../../@types/app";
+import QGISStyleParser from "geostyler-qgis-parser";
+import SldStyleParser from "geostyler-sld-parser";
 import { Geometry } from "ol/geom";
 import BaseLayer from "ol/layer/Base";
+import VectorLayer from "ol/layer/Vector";
+import VectorTileLayer from "ol/layer/VectorTile";
+import VectorSource from "ol/source/Vector";
+import { CartesStyle } from "../../@types/app";
 import { getFileExtension } from "../../utils";
 
 type AddStyleFormType = {
@@ -82,8 +82,7 @@ class StyleHelper {
         let parser;
         switch (extension) {
             case "sld": {
-                const version = this.#getVersion(styleString);
-                parser = new SldStyleParser({ sldVersion: version, locale: "fr" });
+                parser = new SldStyleParser({ locale: "fr" });
                 break;
             }
             case "qml": {
@@ -108,13 +107,6 @@ class StyleHelper {
             const parsed = await olParser.writeStyle(output);
             return parsed.output;
         }
-    }
-
-    static #getVersion(styleString: string) {
-        const domParser = new DOMParser();
-        const xmlDoc = domParser.parseFromString(styleString, "application/xml");
-
-        return xmlDoc.getElementsByTagName("StyledLayerDescriptor")[0].attributes?.["version"]?.nodeValue ?? "";
     }
 }
 
