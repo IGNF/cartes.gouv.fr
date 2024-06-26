@@ -110,11 +110,11 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                                             .link,
                                         disabled: ![OfferingTypeEnum.WFS, OfferingTypeEnum.WMTSTMS].includes(service.type),
                                     },
-                                    {
-                                        text: "Mettre à jour la légende",
-                                        iconId: "ri-list-check",
-                                        onClick: () => console.warn("Action non implémentée"),
-                                    },
+                                    // {
+                                    //     text: "Mettre à jour la légende",
+                                    //     iconId: "ri-list-check",
+                                    //     onClick: () => console.warn("Action non implémentée"),
+                                    // },
                                     {
                                         text: "Gérer les permissions d’accès",
                                         iconId: "ri-lock-line",
