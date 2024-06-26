@@ -1,4 +1,4 @@
-import { format as datefnsFormat } from "date-fns";
+import { format as datefnsFormat } from "date-fns-tz";
 import { fr } from "date-fns/locale";
 
 // Themes et mot cles INSPIRE
@@ -163,15 +163,23 @@ const getFileExtension = (filename: string) => {
 };
 
 const formatDateFromISO = (isoDateString: string): string => {
+    isoDateString = isoDateString.includes("Z") ? isoDateString : isoDateString + "Z";
+
     const d = new Date(isoDateString);
 
-    return datefnsFormat(d, "dd MMMM yyyy, HH", { locale: fr }) + "h" + datefnsFormat(d, "mm", { locale: fr });
+    return (
+        datefnsFormat(d, "dd MMMM yyyy, HH", { locale: fr, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }) +
+        "h" +
+        datefnsFormat(d, "mm", { locale: fr, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone })
+    );
 };
 
 const formatDateWithoutTimeFromISO = (isoDateString: string): string => {
+    isoDateString = isoDateString.includes("Z") ? isoDateString : isoDateString + "Z";
+
     const d = new Date(isoDateString);
 
-    return datefnsFormat(d, "dd MMMM yyyy", { locale: fr });
+    return datefnsFormat(d, "dd MMMM yyyy", { locale: fr, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone });
 };
 
 const getArrayRange = (start: number, stop: number, step: number = 1): number[] =>
