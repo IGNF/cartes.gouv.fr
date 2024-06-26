@@ -4,8 +4,6 @@ import { Translations } from "../i18n/i18n";
 export const { i18n } = declareComponentKeys<
     | { K: "no_file_provided"; P: { tableName: string }; R: string }
     | { K: "unaccepted_extension"; P: { fileName: string }; R: string }
-    | "sld_version_missing"
-    | { K: "sld_version_unaccepted"; P: { version: string }; R: string }
     | "file_invalid"
     | "field_name_invalid_or_unspecified"
     | { K: "field_name_does_not_correspond_table_name"; P: { fieldNameValue: string; tableName: string }; R: string }
@@ -19,8 +17,6 @@ export const { i18n } = declareComponentKeys<
 export const SldStyleValidationErrorsFrTranslations: Translations<"fr">["SldStyleValidationErrors"] = {
     no_file_provided: ({ tableName }) => `Veuillez fournir un fichier de style pour la table ${tableName}`,
     unaccepted_extension: ({ fileName }) => `L’extension du fichier de style ${fileName} n'est pas correcte. Seule l’extension sld est acceptée.`,
-    sld_version_missing: "La version de SLD n'est pas spécifiée.",
-    sld_version_unaccepted: ({ version }) => `La version ${version} n'est pas acceptée. Seules les versions 1.0.0 et 1.1.0 de SLD sont acceptées.`,
     file_invalid: "Ce fichier n'est pas un fichier de style valide. Erreur de syntaxe XML.",
     field_name_invalid_or_unspecified: "Le champ 'name' est invalide ou n'est pas spécifié.",
     field_name_does_not_correspond_table_name: ({ fieldNameValue, tableName }) =>
@@ -40,8 +36,6 @@ export const SldStyleValidationErrorsFrTranslations: Translations<"fr">["SldStyl
 export const SldStyleValidationErrorsEnTranslations: Translations<"en">["SldStyleValidationErrors"] = {
     no_file_provided: undefined,
     unaccepted_extension: undefined,
-    sld_version_missing: undefined,
-    sld_version_unaccepted: undefined,
     file_invalid: undefined,
     field_name_invalid_or_unspecified: undefined,
     field_name_does_not_correspond_table_name: undefined,

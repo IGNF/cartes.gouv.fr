@@ -67,10 +67,10 @@ export const MetadatasFormFrTranslations: Translations<"fr">["MetadatasForm"] = 
     "metadata.description_form.category": "Catégorie thématique",
     "metadata.description_form.hint_category":
         "Système de classification de haut niveau qui permet de regrouper et de chercher par thème les ressources de données géographiques disponibles",
-    "metadata.description_form.keywords": "Mots clés",
+    "metadata.description_form.keywords": "Mots clés (optionnel)",
     "metadata.description_form.hint_keywords":
         "Thème dont relèvent les données géographiques, conformément aux définitions des annexes I, II ou III de la directive Inspire",
-    "metadata.description_form.free_keywords": "Mots clés libres",
+    "metadata.description_form.free_keywords": "Mots clés libres (optionnel)",
     "metadata.description_form.hint_free_keywords": "Saisissez librement des mots clés en appuyant sur Entrée après chaque mot",
     "metadata.description_form.contact_email": "Email de contact sur les métadonnées",
     "metadata.description_form.hint_contact_email": "E-mail auprès duquel des compléments d’information peuvent être obtenus",
@@ -106,7 +106,7 @@ export const MetadatasFormFrTranslations: Translations<"fr">["MetadatasForm"] = 
     "metadata.additionnal_infos_form.encoding": "Encodage de la ressource",
     "metadata.additionnal_infos_form.hint_encoding": "[TODO]",
     "metadata.additionnal_infos_form.spatial_resolution": "Résolution indiquée en échelle (1/x)",
-    "metadata.additionnal_infos_form.hint_spatial_resolution": "Sélectionnez un produit (série)",
+    "metadata.additionnal_infos_form.hint_spatial_resolution": "Sélectionnez un produit (série) (optionnel)",
 };
 
 export const MetadatasFormEnTranslations: Translations<"en">["MetadatasForm"] = {

@@ -127,8 +127,6 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
                         label={t("metadata.description_form.category")}
                         hintText={t("metadata.description_form.hint_category")}
                         options={Object.values(categories).sort()}
-                        /*getOptionLabel={(option) => option}
-                        isOptionEqualToValue={(option, value) => option === value}*/
                         searchFilter={{ limit: 40 }}
                         state={errors.category ? "error" : "default"}
                         stateRelatedMessage={errors?.category?.message?.toString()}
@@ -147,8 +145,6 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
                         label={t("metadata.description_form.keywords")}
                         hintText={t("metadata.description_form.hint_keywords")}
                         options={keywords}
-                        /*getOptionLabel={(option) => option}
-                        isOptionEqualToValue={(option, value) => option === value}*/
                         state={errors.keywords ? "error" : "default"}
                         stateRelatedMessage={errors?.keywords?.message?.toString()}
                         value={field.value}
@@ -167,8 +163,6 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
                         hintText={t("metadata.description_form.hint_free_keywords")}
                         options={[]}
                         freeSolo={true}
-                        /*getOptionLabel={(option) => option}
-                        isOptionEqualToValue={(option, value) => option === value}*/
                         state={errors.free_keywords ? "error" : "default"}
                         stateRelatedMessage={errors?.free_keywords?.message?.toString()}
                         value={field.value}

@@ -27,7 +27,6 @@ class WfsAddDTO
         public readonly array $category,
 
         /** @var array<string> */
-        #[Assert\Count(min: 1, minMessage: 'common.keywords_min_error')]
         public readonly array $keywords,
 
         /** @var array<string> */

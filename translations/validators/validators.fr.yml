@@ -87,7 +87,7 @@ common:
     organization_error: "Le nom de l'organisme est obligatoire"
     category_error: "La catégorie thématique est obligatoire"
     category_min_error: "Il doit y avoir au moins une catégorie thématique"
-    keywords_error: "Les mots clés sont obligatoires"
+    # keywords_error: "Les mots clés sont obligatoires"
     keywords_min_error: "Il doit y avoir au moins un mot clé"
     email_contact_mandatory_error: "l'email de contact est obligatoire"
     email_contact_error: "l'email de contact n'est pas une adresse email valide"

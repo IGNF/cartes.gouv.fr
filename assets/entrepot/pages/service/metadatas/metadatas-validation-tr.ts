@@ -15,7 +15,6 @@ export const { i18n } = declareComponentKeys<
     | "metadatas.identifier_error"
     | "metadatas.identifier_regex"
     | "metadatas.category_error"
-    | "metadatas.keywords_error"
     | "metadatas.email_contact_required_error"
     | "metadatas.email_contact_error"
     | "metadatas.creation_date_error"
@@ -43,7 +42,6 @@ export const ValidationMetadatasFrTranslations: Translations<"fr">["ValidationMe
     "metadatas.identifier_error": "L’identificateur est obligatoire",
     "metadatas.identifier_regex": "L’identificateur ne doit contenir que des lettres, chiffres, tirets (-), underscores (_), ou points (.)",
     "metadatas.category_error": "La catégorie thématique est obligatoire",
-    "metadatas.keywords_error": "Les mots clés sont obligatoires",
     "metadatas.email_contact_required_error": "l’email de contact est obligatoire",
     "metadatas.email_contact_error": "l’email de contact n'est pas correct",
     "metadatas.creation_date_error": "La date de création de la ressource est obligatoire",
@@ -69,7 +67,6 @@ export const ValidationMetadatasEnTranslations: Translations<"en">["ValidationMe
     "metadatas.identifier_error": "Identifier is required",
     "metadatas.identifier_regex": "Identifier must contain only letters, numbers, hyphens (-), underscores (_), or dots (.)",
     "metadatas.category_error": "Thematic category is required",
-    "metadatas.keywords_error": "Keywords are required",
     "metadatas.email_contact_required_error": "Contact email is required",
     "metadatas.email_contact_error": "Contact email is not correct",
     "metadatas.creation_date_error": "Creation date is required",
