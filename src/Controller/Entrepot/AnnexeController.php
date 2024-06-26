@@ -11,7 +11,6 @@ use App\Services\EntrepotApi\AnnexeApiService;
 use App\Services\EntrepotApi\CartesMetadataApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\MetadataApiService;
-use App\Services\GeonetworkApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -33,7 +32,6 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
         private MetadataApiService $metadataApiService,
         private CartesMetadataApiService $cartesMetadataApiService,
         private CswMetadataHelper $metadataHelper,
-        private GeonetworkApiService $geonetworkApiService,
         private ParameterBagInterface $parameterBag,
     ) {
     }
@@ -85,7 +83,7 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
                 return new JsonResponse($annexe);
             }
 
-            $xmlFileContent = $this->geonetworkApiService->getMetadataXml($metadata['file_identifier']);
+            $xmlFileContent = $this->metadataApiService->downloadFile($datastoreId, $metadata['_id']);
             $cswMetadata = $this->metadataHelper->fromXml($xmlFileContent);
             $cswMetadata->thumbnailUrl = $annexe['url'];
 
@@ -109,7 +107,7 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
             return $response;
         }
 
-        $xmlFileContent = $this->geonetworkApiService->getMetadataXml($metadata['file_identifier']);
+        $xmlFileContent = $this->metadataApiService->downloadFile($datastoreId, $metadata['_id']);
         $cswMetadata = $this->metadataHelper->fromXml($xmlFileContent);
         $cswMetadata->thumbnailUrl = null;
 

@@ -7,6 +7,9 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
+/**
+ * // NOTE : ne pas utiliser car la variable d'environnement `geonetwork_url` a été supprimée, parce qu'en production la route `geonetwork/srv/api/records/$fileIdentifier/formatters/xml` n'est pas disponible.
+ */
 class GeonetworkApiService
 {
     private HttpClientInterface $geonetworkClient;
@@ -16,7 +19,7 @@ class GeonetworkApiService
         HttpClientInterface $httpClient,
     ) {
         $this->geonetworkClient = $httpClient->withOptions([
-            'base_uri' => $parameterBag->get('geonetwork_url').'/',
+            // 'base_uri' => $parameterBag->get('geonetwork_url').'/',
             'proxy' => $parameterBag->get('http_proxy'),
             'verify_peer' => false,
             'verify_host' => false,

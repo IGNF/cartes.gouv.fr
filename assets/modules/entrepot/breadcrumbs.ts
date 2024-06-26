@@ -42,7 +42,7 @@ const getBreadcrumb = (route: Route<typeof routes>, datastoreName?: string): Bre
             defaultProps.segments.push({ label: t("news"), linkProps: routes.news_list().link });
             return { ...defaultProps, currentPageLabel: getArticleBreadcrumb(route.params.slug) };
 
-        case "accesses_request":
+        // case "accesses_request":
         case "my_account":
         case "my_access_keys":
             defaultProps.segments.push({ label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link });

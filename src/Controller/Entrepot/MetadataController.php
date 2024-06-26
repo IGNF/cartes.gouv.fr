@@ -8,7 +8,6 @@ use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\CswMetadataHelper;
 use App\Services\EntrepotApi\MetadataApiService;
-use App\Services\GeonetworkApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -27,7 +26,6 @@ class MetadataController extends AbstractController implements ApiControllerInte
     public function __construct(
         private MetadataApiService $metadataApiService,
         private CswMetadataHelper $cswMetadataHelper,
-        private GeonetworkApiService $geonetworkApiService,
     ) {
     }
 
@@ -80,9 +78,7 @@ class MetadataController extends AbstractController implements ApiControllerInte
         try {
             $metadata = $this->metadataApiService->get($datastoreId, $metadataId);
 
-            $fileIdentifier = $metadata['file_identifier'];
-            $fileContent = $this->geonetworkApiService->getMetadataXml($fileIdentifier);
-
+            $fileContent = $this->metadataApiService->downloadFile($datastoreId, $metadata['_id']);
             $metadata['csw_metadata'] = $this->cswMetadataHelper->fromXml($fileContent);
 
             return $this->json($metadata);
@@ -108,10 +104,12 @@ class MetadataController extends AbstractController implements ApiControllerInte
             }
 
             $metadata = $metadataList[0];
-            $fileIdentifier = $metadata['file_identifier'];
-            $fileContent = $this->geonetworkApiService->getMetadataXml($fileIdentifier);
+
+            $fileContent = $this->metadataApiService->downloadFile($datastoreId, $metadata['_id']);
 
             $metadata['csw_metadata'] = $this->cswMetadataHelper->fromXml($fileContent);
+
+            // dd($metadata['csw_metadata']);
 
             return $this->json($metadata);
         } catch (ApiException $ex) {
@@ -124,8 +122,7 @@ class MetadataController extends AbstractController implements ApiControllerInte
     {
         try {
             $metadata = $this->metadataApiService->get($datastoreId, $metadataId);
-            $fileIdentifier = $metadata['file_identifier'];
-            $xmlFileContent = $this->geonetworkApiService->getMetadataXml($fileIdentifier);
+            $xmlFileContent = $this->metadataApiService->downloadFile($datastoreId, $metadata['_id']);
 
             $format = $request->query->get('format', 'xml');
 

@@ -2,14 +2,12 @@ import { FC, JSX, Suspense, lazy, useMemo } from "react";
 
 import AppLayout from "../components/Layout/AppLayout";
 import LoadingText from "../components/Utils/LoadingText";
-import EditPermissionForm from "../entrepot/pages/datastore/ManagePermissions/EditPermissionForm";
 import { useIsI18nFetching } from "../i18n/i18n";
 import Home from "../pages/Home";
 import RedirectToLogin from "../pages/RedirectToLogin";
 import PageNotFound from "../pages/error/PageNotFound";
 import { useAuthStore } from "../stores/AuthStore";
 import { knownRoutes, publicRoutes, useRoute } from "./router";
-import AccessesRequest from "../entrepot/pages/AccessesRequest";
 
 const About = lazy(() => import("../pages/About"));
 const Documentation = lazy(() => import("../pages/Documentation"));
@@ -34,6 +32,7 @@ const UserKeyForm = lazy(() => import("../entrepot/pages/users/keys/UserKeyForm"
 const DatastoreManageStorage = lazy(() => import("../entrepot/pages/datastore/ManageStorage/DatastoreManageStorage"));
 const DatastoreManagePermissions = lazy(() => import("../entrepot/pages/datastore/ManagePermissions/DatastoreManagePermissions"));
 const AddPermissionForm = lazy(() => import("../entrepot/pages/datastore/ManagePermissions/AddPermissionForm"));
+const EditPermissionForm = lazy(() => import("../entrepot/pages/datastore/ManagePermissions/EditPermissionForm"));
 
 const DashboardPro = lazy(() => import("../entrepot/pages/dashboard/DashboardPro"));
 const DatasheetList = lazy(() => import("../entrepot/pages/datasheet/DatasheetList/DatasheetList"));
@@ -119,8 +118,8 @@ const RouterRenderer: FC = () => {
                 return <UserKeyForm />;
             case "user_key_edit":
                 return <UserKeyForm keyId={route.params.keyId} />;
-            case "accesses_request":
-                return <AccessesRequest fileIdentifier={route.params.fileIdentifier} />;
+            // case "accesses_request":
+            //     return <AccessesRequest fileIdentifier={route.params.fileIdentifier} />;
             case "datastore_manage_storage":
                 return <DatastoreManageStorage datastoreId={route.params.datastoreId} />;
             case "datastore_manage_permissions":

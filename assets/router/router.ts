@@ -63,12 +63,13 @@ const routeDefs = {
         (p) => `${appRoot}/entrepot/${p.datastoreId}/membres`
     ),
 
-    accesses_request: defineRoute(
-        {
-            fileIdentifier: param.path.string,
-        },
-        (p) => `${appRoot}/demande-acces/${p.fileIdentifier}`
-    ),
+    // NOTE : désactivé car la variable d'environnement `geonetwork_url` a été supprimée, parce qu'en production la route `geonetwork/srv/api/records/$fileIdentifier/formatters/xml` n'est pas disponible
+    // accesses_request: defineRoute(
+    //     {
+    //         fileIdentifier: param.path.string,
+    //     },
+    //     (p) => `${appRoot}/demande-acces/${p.fileIdentifier}`
+    // ),
 
     datastore_create_request_confirm: defineRoute(`${appRoot}/demande-acces/demande-envoyee`),
 
