@@ -1867,9 +1867,9 @@ export interface DatastoreStoragesResponseDto {
     /** @uniqueItems true */
     data?: DatastoreStorageResponseDto[];
     /** Informations sur le stockage */
-    uploads?: DatastoreStorageResponseDto;
+    upload?: DatastoreStorageResponseDto;
     /** Informations sur le stockage */
-    annexes?: DatastoreStorageResponseDto;
+    annexe?: DatastoreStorageResponseDto;
 }
 
 /** Informations sur le stockage */

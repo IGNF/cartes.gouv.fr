@@ -38,7 +38,7 @@ const AnnexeUsage: FC<AnnexeUsageProps> = ({ datastore }) => {
     const { t: tCommon } = useTranslation("Common");
 
     const annexeUsage = useMemo(() => {
-        return datastore?.storages.annexes;
+        return datastore?.storages.annexe;
     }, [datastore]);
 
     const annexeListQuery = useQuery<Annexe[], CartesApiException>({
