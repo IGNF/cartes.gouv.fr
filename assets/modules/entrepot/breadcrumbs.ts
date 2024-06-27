@@ -146,7 +146,7 @@ const getBreadcrumb = (route: Route<typeof routes>, datastoreName?: string): Bre
                     { label: datastoreName, linkProps: routes.datasheet_list({ datastoreId: route.params.datastoreId }).link },
                 ],
             ];
-            return { ...defaultProps, currentPageLabel: route.name };
+            return { ...defaultProps, currentPageLabel: t("datastore_datasheet_upload_integration") };
         case "datastore_datasheet_view":
             defaultProps.segments = [
                 ...defaultProps.segments,
