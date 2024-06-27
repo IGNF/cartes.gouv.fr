@@ -7,6 +7,7 @@ use App\Controller\ApiControllerInterface;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\EntrepotApi\AnnexeApiService;
+use App\Services\EntrepotApi\CartesMetadataApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -27,6 +28,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
         private DatastoreApiService $datastoreApiService,
         private ConfigurationApiService $configurationApiService,
         private AnnexeApiService $annexeApiService,
+        private CartesMetadataApiService $cartesMetadataApiService,
     ) {
     }
 
@@ -79,6 +81,12 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             $annexeId = count($styleAnnexes) ? $styleAnnexes[0]['_id'] : null;
             $this->writeStyleFile($datastoreId, $annexeId, $styles, $path);
 
+            try {
+                $this->cartesMetadataApiService->updateStyleFiles($datastoreId, $datasheetName);
+            } catch (\Throwable $th) {
+                //  ne rien faire si erreur
+            }
+
             return new JsonResponse($styles);
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
@@ -99,6 +107,8 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId);
 
             $configId = $offering['configuration']['_id'];
+            $configuration = $this->configurationApiService->get($datastoreId, $configId);
+            $datasheetName = $configuration['tags'][CommonTags::DATASHEET_NAME];
 
             // Recuperation des styles de la configuration
             $path = "/configuration/$configId/styles.json";
@@ -149,6 +159,12 @@ class StyleController extends AbstractController implements ApiControllerInterfa
 
             // Ecriture des styles mis a jour
             $this->writeStyleFile($datastoreId, $annexeId, $styles, $path);
+
+            try {
+                $this->cartesMetadataApiService->updateStyleFiles($datastoreId, $datasheetName);
+            } catch (\Throwable $th) {
+                //  ne rien faire si erreur
+            }
 
             return new JsonResponse($styles);
         } catch (ApiException $ex) {

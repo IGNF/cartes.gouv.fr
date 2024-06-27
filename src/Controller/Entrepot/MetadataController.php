@@ -109,8 +109,6 @@ class MetadataController extends AbstractController implements ApiControllerInte
 
             $metadata['csw_metadata'] = $this->cswMetadataHelper->fromXml($fileContent);
 
-            // dd($metadata['csw_metadata']);
-
             return $this->json($metadata);
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());

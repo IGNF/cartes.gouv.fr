@@ -280,6 +280,12 @@ export type CswMetadataLayer = {
     offering_id?: string;
 };
 
+export type CswStyleFile = {
+    name?: string;
+    description?: string;
+    url?: string;
+};
+
 export type CswMetadata = {
     file_identifier?: string;
     hierarchy_level?: string;
@@ -297,6 +303,7 @@ export type CswMetadata = {
     organisation_email?: string;
     resolution?: string;
     layers?: CswMetadataLayer[];
+    style_files?: CswStyleFile[];
 };
 
 export type Metadata = MetadataResponseDto & {

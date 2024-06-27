@@ -37,6 +37,9 @@ class CswMetadata
     /** @var array<CswMetadataLayer> */
     public ?array $layers;
 
+    /** @var array<CswStyleFile> */
+    public ?array $styleFiles;
+
     public ?string $thumbnailUrl;
     public ?string $frequencyCode;
 
@@ -48,12 +51,13 @@ class CswMetadata
         $empty->charset = 'utf8';
         $empty->thumbnailUrl = null;
         $empty->resolution = null;
-        $empty->frequencyCode = "unknown";
+        $empty->frequencyCode = 'unknown';
 
         $empty->topicCategories = [];
         $empty->inspireKeywords = [];
         $empty->freeKeywords = [];
         $empty->layers = [];
+        $empty->styleFiles = [];
 
         return $empty;
     }

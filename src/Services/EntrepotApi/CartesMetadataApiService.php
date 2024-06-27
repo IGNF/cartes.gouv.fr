@@ -8,6 +8,7 @@ use App\Entity\CswMetadata\CswHierarchyLevel;
 use App\Entity\CswMetadata\CswLanguage;
 use App\Entity\CswMetadata\CswMetadata;
 use App\Entity\CswMetadata\CswMetadataLayer;
+use App\Entity\CswMetadata\CswStyleFile;
 use App\Exception\AppException;
 use App\Exception\CartesApiException;
 use App\Services\CapabilitiesService;
@@ -31,6 +32,7 @@ class CartesMetadataApiService
         private ConfigurationApiService $configurationApiService,
         private CswMetadataHelper $cswMetadataHelper,
         private CapabilitiesService $capabilitiesService,
+        private CartesServiceApiService $cartesServiceApiService,
     ) {
     }
 
@@ -86,6 +88,23 @@ class CartesMetadataApiService
 
         $cswMetadata = $this->cswMetadataHelper->fromXml($apiMetadataXml);
         $cswMetadata->layers = $this->getMetadataLayers($datastoreId, $datasheetName);
+        $cswMetadata->styleFiles = $this->getStyleFiles($datastoreId, $datasheetName);
+
+        $xmlFilePath = $this->cswMetadataHelper->saveToFile($cswMetadata);
+        $this->metadataApiService->replaceFile($datastoreId, $apiMetadata['_id'], $xmlFilePath);
+    }
+
+    public function updateStyleFiles(string $datastoreId, string $datasheetName): void
+    {
+        $apiMetadata = $this->getMetadataByDatasheetName($datastoreId, $datasheetName);
+        if (!$apiMetadata) {
+            return;
+        }
+
+        $apiMetadataXml = $this->metadataApiService->downloadFile($datastoreId, $apiMetadata['_id']);
+
+        $cswMetadata = $this->cswMetadataHelper->fromXml($apiMetadataXml);
+        $cswMetadata->styleFiles = $this->getStyleFiles($datastoreId, $datasheetName);
 
         $xmlFilePath = $this->cswMetadataHelper->saveToFile($cswMetadata);
         $this->metadataApiService->replaceFile($datastoreId, $apiMetadata['_id'], $xmlFilePath);
@@ -191,6 +210,7 @@ class CartesMetadataApiService
         $newCswMetadata = null === $oldCswMetadata ? CswMetadata::createEmpty() : clone $oldCswMetadata;
 
         $layers = $this->getMetadataLayers($datastoreId, $datasheetName);
+        $styleFiles = $this->getStyleFiles($datastoreId, $datasheetName);
 
         if ($formData) {
             $language = $formData['languages'][0] ?
@@ -214,6 +234,7 @@ class CartesMetadataApiService
             $newCswMetadata->resolution = $formData['resolution'];
             $newCswMetadata->frequencyCode = $formData['frequency_code'];
             $newCswMetadata->layers = $layers;
+            $newCswMetadata->styleFiles = $styleFiles;
         }
 
         return $newCswMetadata;
@@ -294,6 +315,38 @@ class CartesMetadataApiService
         }, $configRelations);
 
         return $relationLayers;
+    }
+
+    /**
+     * @return array<CswStyleFile>
+     */
+    private function getStyleFiles(string $datastoreId, string $datasheetName): array
+    {
+        $styleFiles = [];
+
+        $configurationsList = $this->configurationApiService->getAll($datastoreId, [
+            'tags' => [
+                CommonTags::DATASHEET_NAME => $datasheetName,
+            ],
+        ]);
+
+        $configStyles = array_map(fn ($config) => $this->cartesServiceApiService->getStyles($datastoreId, $config['_id']), $configurationsList);
+        $configStyles = array_filter($configStyles, fn ($stylesList) => count($stylesList) > 0);
+        $configStyles = array_merge([], ...$configStyles);
+
+        foreach ($configStyles as $style) {
+            $layers = $style['layers'];
+
+            foreach ($layers as $layer) {
+                $styleFiles[] = new CswStyleFile(
+                    sprintf('Style %s - %s', $style['name'], $layer['name']),
+                    sprintf('Style pour la couche %s', $layer['name']),
+                    $layer['url']
+                );
+            }
+        }
+
+        return $styleFiles;
     }
 
     private function getMetadataEndpoint(string $datastoreId): array

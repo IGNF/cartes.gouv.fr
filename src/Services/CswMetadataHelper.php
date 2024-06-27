@@ -6,6 +6,7 @@ use App\Entity\CswMetadata\CswHierarchyLevel;
 use App\Entity\CswMetadata\CswLanguage;
 use App\Entity\CswMetadata\CswMetadata;
 use App\Entity\CswMetadata\CswMetadataLayer;
+use App\Entity\CswMetadata\CswStyleFile;
 use App\Exception\AppException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
@@ -116,6 +117,20 @@ class CswMetadataHelper
             );
         }, iterator_to_array($layersNodesList));
         $cswMetadata->layers = $layersList;
+
+        /** @var \DOMNodeList<\DOMElement> $styleFilesNodesList */
+        $styleFilesNodesList = $xpath->query('/gmd:MD_Metadata/gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine[@type="style"]');
+        $styleFilesList = array_map(function (\DOMElement $styleFile) {
+            /** @var \DOMElement $onlineEl */
+            $onlineEl = $styleFile->getElementsByTagName('CI_OnlineResource')[0];
+
+            return new CswStyleFile(
+                $onlineEl->getElementsByTagName('name')[0]?->getElementsByTagName('CharacterString')[0]?->textContent,
+                $onlineEl->getElementsByTagName('description')[0]?->getElementsByTagName('CharacterString')[0]?->textContent,
+                $onlineEl->getElementsByTagName('linkage')[0]?->getElementsByTagName('URL')[0]?->textContent,
+            );
+        }, iterator_to_array($styleFilesNodesList));
+        $cswMetadata->styleFiles = $styleFilesList;
 
         $cswMetadata->fileIdentifier = $xpath->query('/gmd:MD_Metadata/gmd:fileIdentifier/gco:CharacterString')->item(0)->textContent;
         $cswMetadata->hierarchyLevel = CswHierarchyLevel::tryFrom(trim($xpath->query('/gmd:MD_Metadata/gmd:hierarchyLevel/gmd:MD_ScopeCode/@codeListValue')->item(0)?->textContent));

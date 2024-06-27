@@ -162,6 +162,21 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, datasheet, metadataQue
                             )) ?? ""}
                         </Accordion>
 
+                        <Accordion titleAs="h2" defaultExpanded={true} label={"Fichiers de style"}>
+                            {metadata.csw_metadata?.style_files?.map((styleFile) => (
+                                <MetadataField
+                                    key={`${styleFile.url}`}
+                                    title={styleFile.name}
+                                    content={
+                                        <>
+                                            <strong>Description</strong> : {styleFile.description}
+                                            <TextCopyToClipboard text={styleFile.url ?? ""} />
+                                        </>
+                                    }
+                                />
+                            )) ?? ""}
+                        </Accordion>
+
                         <Accordion titleAs="h2" defaultExpanded={true} label={"Informations sur les métadonnées"}>
                             <MetadataField
                                 title={"Langue des métadonnées"}
