@@ -169,7 +169,11 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, datasheet, metadataQue
                                     title={styleFile.name}
                                     content={
                                         <>
-                                            <strong>Description</strong> : {styleFile.description}
+                                            {styleFile?.description !== "" && (
+                                                <>
+                                                    <strong>Description</strong> : {styleFile.description}
+                                                </>
+                                            )}
                                             <TextCopyToClipboard text={styleFile.url ?? ""} />
                                         </>
                                     }

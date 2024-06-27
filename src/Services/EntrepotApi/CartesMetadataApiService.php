@@ -338,9 +338,17 @@ class CartesMetadataApiService
             $layers = $style['layers'];
 
             foreach ($layers as $layer) {
+                $name = "Style {$style['name']}";
+                $description = '';
+
+                if (isset($layer['name'])) {
+                    $name .= " - {$layer['name']}";
+                    $description = sprintf('Style pour la couche %s', $layer['name']);
+                }
+
                 $styleFiles[] = new CswStyleFile(
-                    sprintf('Style %s - %s', $style['name'], $layer['name']),
-                    sprintf('Style pour la couche %s', $layer['name']),
+                    $name,
+                    $description,
                     $layer['url']
                 );
             }
