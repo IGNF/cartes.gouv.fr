@@ -83,7 +83,7 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
         },
         onSuccess() {
             if (offeringId !== undefined) {
-                queryClient.invalidateQueries({
+                queryClient.removeQueries({
                     queryKey: RQKeys.datastore_offering(datastoreId, offeringId),
                 });
             }

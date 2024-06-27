@@ -142,7 +142,7 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
         },
         onSuccess() {
             if (offeringId !== undefined) {
-                queryClient.invalidateQueries({
+                queryClient.removeQueries({
                     queryKey: RQKeys.datastore_offering(datastoreId, offeringId),
                 });
             }
