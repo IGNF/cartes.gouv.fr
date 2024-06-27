@@ -82,6 +82,12 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
             return api.pyramid.publishEdit(datastoreId, pyramidId, offeringId, formValues);
         },
         onSuccess() {
+            if (offeringId !== undefined) {
+                queryClient.invalidateQueries({
+                    queryKey: RQKeys.datastore_offering(datastoreId, offeringId),
+                });
+            }
+
             if (pyramidQuery.data?.tags?.datasheet_name) {
                 queryClient.invalidateQueries({
                     queryKey: RQKeys.datastore_datasheet(datastoreId, pyramidQuery.data?.tags.datasheet_name),

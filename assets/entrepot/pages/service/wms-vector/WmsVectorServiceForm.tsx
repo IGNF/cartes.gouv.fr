@@ -157,6 +157,12 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
             return api.wmsVector.edit(datastoreId, vectorDbId, offeringId, formData);
         },
         onSuccess() {
+            if (offeringId !== undefined) {
+                queryClient.invalidateQueries({
+                    queryKey: RQKeys.datastore_offering(datastoreId, offeringId),
+                });
+            }
+
             if (vectorDbQuery.data?.tags?.datasheet_name) {
                 queryClient.invalidateQueries({
                     queryKey: RQKeys.datastore_datasheet(datastoreId, vectorDbQuery.data?.tags.datasheet_name),
