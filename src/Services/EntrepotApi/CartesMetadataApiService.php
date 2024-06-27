@@ -11,7 +11,6 @@ use App\Entity\CswMetadata\CswMetadataLayer;
 use App\Entity\CswMetadata\CswStyleFile;
 use App\Exception\AppException;
 use App\Exception\CartesApiException;
-use App\Services\CapabilitiesService;
 use App\Services\CswMetadataHelper;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -31,7 +30,6 @@ class CartesMetadataApiService
         private MetadataApiService $metadataApiService,
         private ConfigurationApiService $configurationApiService,
         private CswMetadataHelper $cswMetadataHelper,
-        private CapabilitiesService $capabilitiesService,
         private CartesServiceApiService $cartesServiceApiService,
     ) {
     }
@@ -264,7 +262,8 @@ class CartesMetadataApiService
 
                 switch ($configuration['type']) {
                     case ConfigurationTypes::WFS:
-                        $subLayers = $this->getWfsSubLayers($configuration, $offering, $serviceEndpoint['endpoint']['urls'][0]['url']);
+                        $endpointUrl = $serviceEndpoint['endpoint']['urls'][0]['url'];
+                        $subLayers = $this->getWfsSubLayers($configuration, $offering, $endpointUrl);
                         $layers = array_merge($layers, $subLayers);
 
                         break;
@@ -272,9 +271,9 @@ class CartesMetadataApiService
                     case ConfigurationTypes::WMSVECTOR:
                         $layerName = $offering['layer_name'];
                         $endpointType = 'OGC:WMS';
-                        $getCapUrl = $this->capabilitiesService->getGetCapUrl($serviceEndpoint['endpoint']['urls'][0]['url'], $offering['urls'][0]['url'], 'WMS');
+                        $endpointUrl = $serviceEndpoint['endpoint']['urls'][0]['url'];
 
-                        $layers[] = new CswMetadataLayer($layerName, $endpointType, $getCapUrl, $offering['_id']);
+                        $layers[] = new CswMetadataLayer($layerName, $endpointType, $endpointUrl, $offering['_id']);
                         break;
 
                     case ConfigurationTypes::WMTSTMS:
@@ -309,9 +308,8 @@ class CartesMetadataApiService
         $relationLayers = array_map(function ($relation) use ($offering, $serviceEndpointUrl) {
             $layerName = sprintf('%s:%s', $offering['layer_name'], $relation['native_name']);
             $endpointType = 'OGC:WFS';
-            $getCapUrl = $this->capabilitiesService->getGetCapUrl($serviceEndpointUrl, $offering['urls'][0]['url'], 'WFS');
 
-            return new CswMetadataLayer($layerName, $endpointType, $getCapUrl, $offering['_id']);
+            return new CswMetadataLayer($layerName, $endpointType, $serviceEndpointUrl, $offering['_id']);
         }, $configRelations);
 
         return $relationLayers;
