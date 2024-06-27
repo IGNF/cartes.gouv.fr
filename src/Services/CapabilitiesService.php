@@ -34,63 +34,6 @@ class CapabilitiesService
      * Creation ou mise a jour de l'annexe capabilities lorsque d'un service est ajouté, mis à jour
      * ou supprimé.
      *
-     * @return void
-     */
-    /*public function createOrUpdate(string $datastoreId, string $offeringId)
-    {
-        $capsPath = $this->parameterBag->get('capabilities_path');
-        if (!$this->fs->exists($capsPath)) {
-            $this->fs->mkdir($capsPath);
-        }
-
-        $datastore = $this->datastoreApiService->get($datastoreId);
-        $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId);
-        $configuration = $this->configurationApiService->get($datastoreId, $offering['configuration']['_id']);
-
-        // Recherche du endpoint
-        $endpoint = null;
-        foreach ($datastore['endpoints'] as $ep) {
-            if ($ep['endpoint']['_id'] == $offering['endpoint']['_id']) {
-                $endpoint = $ep['endpoint'];
-                break;
-            }
-        }
-
-        $allOfferings = $this->configurationApiService->getAllOfferings($datastoreId, ['type' => $endpoint['type']]);
-
-        // TODO Les autres (WMS-VECTOR, TMS ...)
-        $xmlStr = null;
-        switch ($endpoint['type']) {
-            case 'WFS':
-                // TODO
-                //$xmlStr = $this->filterWFSCapabilities($endpoint, $offering, $allOfferings);
-                break;
-
-            default: break;
-        }
-
-        $uuid = uniqid();
-        $filePath = join(DIRECTORY_SEPARATOR, [realpath($capsPath), "capabilities-$uuid.xml"]);
-
-        // Creation du fichier
-        file_put_contents($filePath, $xmlStr);
-
-        // On regarde s'il existe deja un fichier avec ce path
-        $path = join('/', [$endpoint['technical_name'], 'capabilities.xml']);
-
-        $annexes = $this->annexeApiService->getAll($datastoreId, null, $path);
-        if (count($annexes)) {  // Il existe, on le met a jour
-            $this->annexeApiService->replaceFile($datastoreId, $annexes[0]['_id'], $filePath);
-        } else {
-            $label = CommonTags::DATASHEET_NAME.'='.$configuration['tags'][CommonTags::DATASHEET_NAME];
-            $this->annexeApiService->add($datastoreId, $filePath, [$path], [$label]);
-        }
-    } */
-
-    /**
-     * Creation ou mise a jour de l'annexe capabilities lorsque d'un service est ajouté, mis à jour
-     * ou supprimé.
-     *
      * @param array<mixed> $endpoint
      */
     public function createOrUpdate(string $datastoreId, array $endpoint, string $url): ?array

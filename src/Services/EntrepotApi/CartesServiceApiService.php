@@ -137,19 +137,19 @@ class CartesServiceApiService
     public function wfsUnpublish(string $datastoreId, array $offering, bool $removeStyleFiles = true): void
     {
         // suppression de l'offering
-        // $this->configurationApiService->removeOffering($datastoreId, $offering['_id']);
+        $this->configurationApiService->removeOffering($datastoreId, $offering['_id']);
         $configurationId = $offering['configuration']['_id'];
 
         // suppression de la configuration
         // la suppression de l'offering nécessite quelques instants, et tant que la suppression de l'offering n'est pas faite, on ne peut pas demander la suppression de la configuration
-        /*while (1) {
+        while (1) {
             sleep(3);
             $configuration = $this->configurationApiService->get($datastoreId, $configurationId);
             if (ConfigurationStatuses::UNPUBLISHED === $configuration['status']) {
                 break;
             }
         }
-        $this->configurationApiService->remove($datastoreId, $configurationId); */
+        $this->configurationApiService->remove($datastoreId, $configurationId);
 
         if (true === $removeStyleFiles) {
             $this->removeStyleFiles($datastoreId, $configurationId);
@@ -223,18 +223,20 @@ class CartesServiceApiService
         $path = "/configuration/$configurationId/styles.json";
         
         $styleAnnexes = $this->annexeApiService->getAll($datastoreId, null, $path);
-        if (count($styleAnnexes)) {
-            $content = $this->annexeApiService->download($datastoreId, $styleAnnexes[0]['_id']);
-            
-            $styles = json_decode($content, true);
-            foreach($styles as $style) {
-                if (array_key_exists('layers', $style)) {
-                    foreach($style['layers'] as $layer) {
-                        $this->annexeApiService->remove($datastoreId, $layer['annexe_id']);    
-                    }
+        if (count($styleAnnexes) === 0) {
+            return;
+        }
+
+        $content = $this->annexeApiService->download($datastoreId, $styleAnnexes[0]['_id']);
+        
+        $styles = json_decode($content, true);
+        foreach($styles as $style) {
+            if (array_key_exists('layers', $style)) {
+                foreach($style['layers'] as $layer) {
+                    $this->annexeApiService->remove($datastoreId, $layer['annexe_id']);    
                 }
             }
-            $this->annexeApiService->remove($datastoreId, $styleAnnexes[0]['_id']);
-        }    
+        }
+        $this->annexeApiService->remove($datastoreId, $styleAnnexes[0]['_id']);
     }
 }
