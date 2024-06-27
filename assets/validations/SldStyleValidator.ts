@@ -31,7 +31,7 @@ export default class SldStyleValidator extends StyleValidator {
             if (invalidXmlSyntax) {
                 return ctx.createError({ message: tSld("file_invalid") });
             } else {
-                return ctx.createError({ message: JSON.stringify(errors) });
+                return ctx.createError({ message: tSld("geostyler_parse_error", { geostylerError: errors.map((e) => e.message).join(" ") }) });
             }
         }
 
