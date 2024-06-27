@@ -84,11 +84,11 @@ class ServiceController extends AbstractController implements ApiControllerInter
             // Mise a jour du capabilities
             try {
                 // Recherche du endpoint
-                $endpoints = array_filter($datastore['endpoints'], function ($ep) use ($offering) {
+                $endpoints = array_values(array_filter($datastore['endpoints'], function ($ep) use ($offering) {
                     return $ep['endpoint']['_id'] === $offering['endpoint']['_id'];
-                });
+                }));
                 if (1 == count($endpoints)) {
-                    $this->capabilitiesService->createOrUpdate($datastoreId, $endpoints[0], $offering['urls'][0]['url']);
+                    $this->capabilitiesService->createOrUpdate($datastoreId, $endpoints[0]['endpoint'], $offering['urls'][0]['url']);
                 }
             } catch (\Exception $e) {
             }
