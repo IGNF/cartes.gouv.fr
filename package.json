@@ -59,6 +59,8 @@
         "eslint-plugin-react-hooks": "^4.6.0",
         "eslint-webpack-plugin": "^4.0.1",
         "file-loader": "^6.2.0",
+        "husky": "^9.0.11",
+        "lint-staged": "^15.2.7",
         "prettier": "^3.0.0",
         "regenerator-runtime": "^0.14.0",
         "sass": "^1.63.6",
@@ -83,9 +85,21 @@
         "predev": "yarn clean && only-include-used-icons",
         "cy:open": "cypress open",
         "cy:run": "cypress run",
-        "cy:run:headed": "cypress run --headed"
+        "cy:run:headed": "cypress run --headed",
+        "prepare": "husky"
     },
     "browserslist": [
         "defaults"
-    ]
+    ],
+    "lint-staged": {
+        "*.{js,ts,json,md,css,scss,xml,yml,yaml,html}": [
+            "prettier --write"
+        ],
+        "*.php": [
+            "vendor/bin/php-cs-fixer fix"
+        ],
+        "*.twig": [
+            "vendor/bin/twig-cs-fixer lint --fix"
+        ]
+    }
 }
