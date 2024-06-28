@@ -8,7 +8,7 @@ import { Translations, declareComponentKeys, getTranslation, useTranslation } fr
 import SymfonyRouting from "../../../modules/Routing";
 import { useAuthStore } from "../../../stores/AuthStore";
 import { useSnackbarStore } from "../../../stores/SnackbarStore";
-import { formatDateFromISO } from "../../../utils";
+// import { formatDateFromISO } from "../../../utils";
 
 const Me = () => {
     const { t: tCommon } = getTranslation("Common");
@@ -28,7 +28,7 @@ const Me = () => {
                     <p>{t("lastname", { lastName: user?.last_name ?? "" })}</p>
                     <p>{t("username", { userName: user?.user_name ?? "" })}</p>
                     <p>{t("email", { email: user.email })}</p>
-                    <p>{t("registration_date", { date: formatDateFromISO(user.account_creation_date) })}</p>
+                    {/* <p>{t("registration_date", { date: formatDateFromISO(user.account_creation_date) })}</p> */}
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-6v")}>
                         {t("id", { id: user.id })}
                         <Button
