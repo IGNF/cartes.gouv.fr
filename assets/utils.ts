@@ -163,6 +163,10 @@ const getFileExtension = (filename: string) => {
 };
 
 const formatDateFromISO = (isoDateString: string): string => {
+    const m = isoDateString.match(/([\d\-T:]+)\+\d{2}:\d{2}?/); // "2023-06-02T06:01:46+00:00"
+    if (m) {
+        isoDateString = m[1];
+    }
     isoDateString = isoDateString.includes("Z") ? isoDateString : isoDateString + "Z";
 
     const d = new Date(isoDateString);
