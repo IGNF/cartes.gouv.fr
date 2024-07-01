@@ -286,6 +286,8 @@ export type CswStyleFile = {
     url?: string;
 };
 
+export type CswCapabilitiesFile = CswStyleFile;
+
 export type CswMetadata = {
     file_identifier?: string;
     hierarchy_level?: string;
@@ -304,6 +306,7 @@ export type CswMetadata = {
     resolution?: string;
     layers?: CswMetadataLayer[];
     style_files?: CswStyleFile[];
+    capabilities_files?: CswCapabilitiesFile[];
 };
 
 export type Metadata = MetadataResponseDto & {

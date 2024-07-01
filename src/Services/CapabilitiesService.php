@@ -98,8 +98,8 @@ class CapabilitiesService
     {
         // Les couches liees aux offerings
         $layerNames = [];
-        foreach ($allOfferings as $off) {
-            $layerNames[] = $off['layer_name'];
+        foreach ($allOfferings as $offering) {
+            $layerNames[] = $offering['layer_name'];
         }
 
         $getCapUrl = $this->getGetCapUrl($endpoint['urls'][0]['url'], $url, 'WFS');
@@ -143,8 +143,8 @@ class CapabilitiesService
     {
         // Les couches liees aux offerings
         $layerNames = [];
-        foreach ($allOfferings as $off) {
-            $layerNames[] = $off['layer_name'];
+        foreach ($allOfferings as $offering) {
+            $layerNames[] = $offering['layer_name'];
         }
 
         $getCapUrl = $this->getGetCapUrl($endpoint['urls'][0]['url'], $url, 'WMS');

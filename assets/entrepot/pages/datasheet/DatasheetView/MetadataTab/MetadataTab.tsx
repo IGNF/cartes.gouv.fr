@@ -181,6 +181,25 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, datasheet, metadataQue
                             )) ?? ""}
                         </Accordion>
 
+                        <Accordion titleAs="h2" defaultExpanded={true} label={"GetCapabilities"}>
+                            {metadata.csw_metadata?.capabilities_files?.map((capFile) => (
+                                <MetadataField
+                                    key={`${capFile.url}`}
+                                    title={capFile.name}
+                                    content={
+                                        <>
+                                            {capFile?.description !== "" && (
+                                                <>
+                                                    <strong>Description</strong> : {capFile.description}
+                                                </>
+                                            )}
+                                            <TextCopyToClipboard text={capFile.url ?? ""} />
+                                        </>
+                                    }
+                                />
+                            )) ?? ""}
+                        </Accordion>
+
                         <Accordion titleAs="h2" defaultExpanded={true} label={"Informations sur les métadonnées"}>
                             <MetadataField
                                 title={"Langue des métadonnées"}

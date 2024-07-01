@@ -74,15 +74,15 @@ class WfsController extends ServiceController implements ApiControllerInterface
                 $this->addPermissionForCurrentCommunity($datastoreId, $offering);
             }
 
-            // création ou mise à jour de metadata
-            $formData = json_decode(json_encode($dto), true);
-            $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $formData);
-
             // Création ou mise à jour du capabilities
             try {
                 $this->capabilitiesService->createOrUpdate($datastoreId, $endpoint, $offering['urls'][0]['url']);
             } catch (\Exception $e) {
             }
+
+            // création ou mise à jour de metadata
+            $formData = json_decode(json_encode($dto), true);
+            $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $formData);
 
             return $this->json($offering);
         } catch (ApiException $ex) {
@@ -130,16 +130,16 @@ class WfsController extends ServiceController implements ApiControllerInterface
 
             $offering['configuration'] = $configuration;
 
-            // création ou mise à jour de metadata
-            $formData = json_decode(json_encode($dto), true);
-            $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $formData);
-
-            // Création ou mise à jour du capabilities
-            try {
+             // Création ou mise à jour du capabilities
+             try {
                 $this->capabilitiesService->createOrUpdate($datastoreId, $endpoint, $offering['urls'][0]['url']);
             } catch (\Exception $e) {
             }
 
+            // création ou mise à jour de metadata
+            $formData = json_decode(json_encode($dto), true);
+            $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $formData);
+           
             return $this->json($offering);
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);

@@ -4,6 +4,7 @@ namespace App\Services\EntrepotApi;
 
 use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationTypes;
+use App\Entity\CswMetadata\CswCapabilitiesFile;
 use App\Entity\CswMetadata\CswHierarchyLevel;
 use App\Entity\CswMetadata\CswLanguage;
 use App\Entity\CswMetadata\CswMetadata;
@@ -87,6 +88,7 @@ class CartesMetadataApiService
         $cswMetadata = $this->cswMetadataHelper->fromXml($apiMetadataXml);
         $cswMetadata->layers = $this->getMetadataLayers($datastoreId, $datasheetName);
         $cswMetadata->styleFiles = $this->getStyleFiles($datastoreId, $datasheetName);
+        $cswMetadata->capabilitiesFiles = $this->getCapabilitiesFiles($datastoreId, $cswMetadata->layers);
 
         $xmlFilePath = $this->cswMetadataHelper->saveToFile($cswMetadata);
         $this->metadataApiService->replaceFile($datastoreId, $apiMetadata['_id'], $xmlFilePath);
@@ -208,7 +210,6 @@ class CartesMetadataApiService
         $newCswMetadata = null === $oldCswMetadata ? CswMetadata::createEmpty() : clone $oldCswMetadata;
 
         $layers = $this->getMetadataLayers($datastoreId, $datasheetName);
-        $styleFiles = $this->getStyleFiles($datastoreId, $datasheetName);
 
         if ($formData) {
             $language = $formData['languages'][0] ?
@@ -232,7 +233,10 @@ class CartesMetadataApiService
             $newCswMetadata->resolution = $formData['resolution'];
             $newCswMetadata->frequencyCode = $formData['frequency_code'];
             $newCswMetadata->layers = $layers;
-            $newCswMetadata->styleFiles = $styleFiles;
+            $newCswMetadata->styleFiles = $this->getStyleFiles($datastoreId, $datasheetName);
+
+            // Doit-être calculé après la récupération des layers
+            $newCswMetadata->capabilitiesFiles = $this->getCapabilitiesFiles($datastoreId, $layers);
         }
 
         return $newCswMetadata;
@@ -353,6 +357,69 @@ class CartesMetadataApiService
         }
 
         return $styleFiles;
+    }
+
+    /**
+     *
+     * @param string $datastoreId
+     * @param array<CswMetadataLayer> $layers
+     * @return array
+     */
+    private function getCapabilitiesFiles(string $datastoreId, array $layers): array
+    {
+        $datastore = $this->datastoreApiService->get($datastoreId);
+        $datastoreName = $datastore['technical_name'];
+
+        // Mapping entre le type d'une layer et le type du endpoint correspondant
+        $mapping = ['OGC:WFS' => 'WFS', 'OGC:WMS' => 'WMS-VECTOR'];
+        $layerTypes = [];
+
+        foreach($layers as $layer) {
+            $type = $layer->endpointType;
+            if (array_key_exists($type, $mapping)) {
+                $layerTypes[] = $mapping[$type];   
+            }
+        }
+        $layerTypes = array_values(array_unique($layerTypes));
+        
+        $annexeUrl = $this->parameterBag->get('annexes_url');
+
+        $capabilitiesFiles = [];
+        foreach($layerTypes as $type) {
+            $endpoint = $this->getEndpoint($datastoreId, $type);
+            if (! $endpoint) {
+                continue;
+            }
+
+            $technicalName = $endpoint['technical_name'];
+            
+            $annexes = $this->annexeApiService->getAll($datastoreId, null, "/$technicalName/capabilities.xml");
+            if (1 === count($annexes)) {
+                $capabilitiesFiles[] = new CswCapabilitiesFile(
+                    "GetCapabilities - $type",
+                    $endpoint['name'],
+                    "$annexeUrl/$datastoreName/$technicalName/capabilities.xml"
+                );
+            }
+        }
+
+        return $capabilitiesFiles;
+    }
+
+    /**
+     *
+     * @param string $datastoreId
+     * @param string $type
+     * @return array<mixed> | null
+     */
+    private function getEndpoint(string $datastoreId, string $type) : array | null
+    {
+        $endpoints = $this->datastoreApiService->getEndpointsList($datastoreId, [
+            'type' => $type,
+            'open' => true,
+        ]);
+
+        return (1 === count($endpoints)) ? $endpoints[0]['endpoint'] : null;
     }
 
     private function getMetadataEndpoint(string $datastoreId): array
