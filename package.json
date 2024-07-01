@@ -96,7 +96,7 @@
             "prettier --write"
         ],
         "*.php": [
-            "vendor/bin/php-cs-fixer fix"
+            "vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.dist.php"
         ],
         "*.twig": [
             "vendor/bin/twig-cs-fixer lint --fix"
