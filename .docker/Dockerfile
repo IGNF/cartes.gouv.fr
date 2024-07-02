@@ -20,7 +20,7 @@ RUN apt-get -qq update && DEBIAN_FRONTEND=noninteractive apt-get -qq install -y 
     && update-locale LANG=fr_FR.UTF-8 \
     && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-ENV LANG fr_FR.UTF-8
+ENV LANG=fr_FR.UTF-8
 
 #----------------------------------------------------------------------
 # PHP : Configuration & Extensions
