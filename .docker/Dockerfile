@@ -1,7 +1,7 @@
 #----------------------------------------------------------------------
 # Instructions communes aux env dev et prod
 #----------------------------------------------------------------------
-FROM php:8.2-apache as base
+FROM php:8.2-apache AS base
 
 RUN rm /etc/apt/preferences.d/no-debian-php
 
@@ -43,8 +43,8 @@ COPY --from=composer /usr/bin/composer /usr/bin/composer
 # https://github.com/nodejs/docker-node/blob/main/18/bullseye/Dockerfile
 # https://stackoverflow.com/a/63108753
 #----------------------------------------------------------------------
-COPY --from=node:18 /usr/local/lib/node_modules /usr/local/lib/node_modules
-COPY --from=node:18 /usr/local/bin/node /usr/local/bin/node
+COPY --from=node:20-slim /usr/local/lib/node_modules /usr/local/lib/node_modules
+COPY --from=node:20-slim /usr/local/bin/node /usr/local/bin/node
 RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm
 RUN npm i -g yarn pnpm npx
 # RUN yarn set version stable
@@ -66,7 +66,7 @@ RUN a2enmod rewrite remoteip
 #----------------------------------------------------------------------
 # cartesgouvfr-site : Installation pour production
 #----------------------------------------------------------------------
-FROM base as prod
+FROM base AS prod
 
 COPY --chown=www-data:www-data . /opt/cartesgouvfr-site
 WORKDIR /opt/cartesgouvfr-site
@@ -88,7 +88,7 @@ EXPOSE 8000
 #----------------------------------------------------------------------
 # cartesgouvfr-site : Installation pour developpement
 #----------------------------------------------------------------------
-FROM base as dev
+FROM base AS dev
 
 RUN if [ "${http_proxy}" != "" ]; then \
     pear config-set http_proxy ${http_proxy} \

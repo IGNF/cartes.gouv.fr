@@ -1,4 +1,7 @@
 {
+    "engines": {
+        "node": ">=20.0.0"
+    },
     "dependencies": {
         "@codegouvfr/react-dsfr": "^1.0.0",
         "@emotion/react": "^11.11.1",
