@@ -31,15 +31,9 @@ const remove = (datastoreId: string, annexeId: string) => {
     return jsonFetch<null>(url, { method: "DELETE" });
 };
 
-const addCapabilities = (datastoreId: string, offeringId: string) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_annexe_capabilities_add", { datastoreId, offeringId });
-    return jsonFetch<undefined>(url, { method: "GET" });
-};
-
 export default {
     getList,
     addThumbnail,
     removeThumbnail,
-    addCapabilities,
     remove,
 };

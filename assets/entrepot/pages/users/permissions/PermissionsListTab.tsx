@@ -23,8 +23,6 @@ const PermissionsListTab: FC<PermissionsListTabProps> = ({ permissions }) => {
             {permissions.map((permission, index) => {
                 const className = index % 2 === 0 ? "frx-permission frx-permission-even" : "frx-permission";
 
-                const grantedBy = permission.datastore_author?.name;
-
                 let expired = false;
                 if (permission.end_date && compareAsc(new Date(permission.end_date), new Date()) < 0) {
                     expired = true;
@@ -34,7 +32,6 @@ const PermissionsListTab: FC<PermissionsListTabProps> = ({ permissions }) => {
                 return (
                     <div key={permission._id} className={className}>
                         <div className={fr.cx("fr-mb-1v")}>
-                            {grantedBy && <div className={fr.cx("fr-grid-row")}>{t("permission_granted_by", { name: grantedBy })}</div>}
                             {expired ? (
                                 <Badge severity="warning">{t("expired", { date: expiresOn })}</Badge>
                             ) : (

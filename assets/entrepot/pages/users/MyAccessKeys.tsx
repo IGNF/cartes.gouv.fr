@@ -3,7 +3,8 @@ import Tabs from "@codegouvfr/react-dsfr/Tabs";
 import { useQuery } from "@tanstack/react-query";
 import { declareComponentKeys } from "i18nifty";
 import { FC } from "react";
-import { PermissionDetailsResponseDto } from "../../../@types/entrepot";
+import { UserKeyDetailedWithAccessesResponseDto } from "../../../@types/app";
+import { PermissionWithOfferingsDetailsResponseDto } from "../../../@types/entrepot";
 import AppLayout from "../../../components/Layout/AppLayout";
 import LoadingText from "../../../components/Utils/LoadingText";
 import { datastoreNavItems } from "../../../config/datastoreNavItems";
@@ -12,7 +13,6 @@ import RQKeys from "../../../modules/entrepot/RQKeys";
 import api from "../../api";
 import UserKeysListTab from "./keys/UserKeysListTab";
 import PermissionsListTab from "./permissions/PermissionsListTab";
-import { UserKeyDetailedWithAccessesResponseDto } from "../../../@types/app";
 
 const { t } = getTranslation("MyAccessKeys");
 
@@ -27,9 +27,9 @@ const MyAccessKeys: FC = () => {
     });
 
     // Les permissions
-    const { data: permissions, isLoading: isLoadingPermissions } = useQuery<PermissionDetailsResponseDto[]>({
+    const { data: permissions, isLoading: isLoadingPermissions } = useQuery<PermissionWithOfferingsDetailsResponseDto[]>({
         queryKey: RQKeys.my_permissions(),
-        queryFn: ({ signal }) => api.user.getMyDetailedPermissions({ signal }),
+        queryFn: ({ signal }) => api.user.getMyPermissions({ signal }),
         staleTime: 3600000,
     });
 

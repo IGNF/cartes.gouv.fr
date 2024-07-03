@@ -2,6 +2,7 @@
 
 namespace App\Controller\Entrepot;
 
+use App\Constants\EntrepotApi\UserKeyTypes;
 use App\Controller\ApiControllerInterface;
 use App\Dto\User\UserKeyDTO;
 use App\Exception\ApiException;
@@ -12,7 +13,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Annotation\Route;
-use App\Constants\EntrepotApi\UserKeyTypes;
 
 #[Route(
     '/api/user',
@@ -68,19 +68,6 @@ class UserController extends AbstractController implements ApiControllerInterfac
         $permissions = $this->userApiService->getMyPermissions();
 
         return $this->json($permissions);
-    }
-
-    #[Route('/me/permissions_detailed', name: 'permissions_detailed')]
-    public function getUserPermissionsDetailed(): JsonResponse
-    {
-        $detailedPermissions = [];
-
-        $permissions = $this->userApiService->getMyPermissions();
-        foreach ($permissions as $permission) {
-            $detailedPermissions[] = $this->userApiService->getPermission($permission['_id']);
-        }
-
-        return $this->json($detailedPermissions);
     }
 
     #[Route('/add_key', name: 'add_key', methods: ['POST'],
