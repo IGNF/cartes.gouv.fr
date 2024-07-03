@@ -6,7 +6,6 @@ use App\Exception\ApiException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpClient\Exception\JsonException;
 use Symfony\Component\HttpClient\HttpClient;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -31,7 +30,10 @@ class ServiceAccount
         private UserApiService $userApiService,
     ) {
         // L'id de la community liee au datastore "Bac à sable"
-        $this->sandBoxCommunityId = $this->parameters->get('sandbox_community_id');
+        $sandbox = $this->parameters->get('sandbox');
+        if ($sandbox && isset($sandbox['community_id'])) {
+            $this->sandBoxCommunityId = $sandbox['community_id'];
+        }
 
         $this->apiClient = HttpClient::createForBaseUri($this->parameters->get('api_entrepot_url').'/', [
             'proxy' => $this->parameters->get('http_proxy'),
@@ -51,16 +53,14 @@ class ServiceAccount
             return null;
         }
 
-        // Id de la community "Bac à sable"
-        $sandboxId = $this->parameters->get('sandbox_community_id');
-        if (!$sandboxId) {
+        if (!$this->sandBoxCommunityId) {
             return null;
         }
 
         $options = $this->prepareOptions();
 
         try {
-            $response = $this->apiClient->request('GET', "communities/$sandboxId", $options);
+            $response = $this->apiClient->request('GET', "communities/{$this->sandBoxCommunityId}", $options);
             $sandboxCommunity = $this->handleResponse($response);
 
             $sandboxDatastoreId = $sandboxCommunity['datastore']['_id'];
@@ -74,21 +74,6 @@ class ServiceAccount
         } catch (ApiException $e) {
             return null;
         }
-    }
-
-    public function getSandboxDatastore(): array
-    {
-        // Id de la community "Bac à sable"
-        $sandboxId = $this->parameters->get('sandbox_community_id');
-        if (!$sandboxId) {
-            throw new ApiException('sandbox community does not exist', JsonResponse::HTTP_NOT_FOUND);
-        }
-
-        $options = $this->prepareOptions();
-
-        $response = $this->apiClient->request('GET', "communities/$sandboxId", $options);
-
-        return $this->handleResponse($response);
     }
 
     /**
@@ -135,8 +120,8 @@ class ServiceAccount
 
         $body = [
             'grant_type' => 'client_credentials',
-            'client_id' => $this->parameters->get('service_account')['client_id'],
-            'client_secret' => $this->parameters->get('service_account')['client_secret'],
+            'client_id' => $this->parameters->get('sandbox_service_account')['client_id'],
+            'client_secret' => $this->parameters->get('sandbox_service_account')['client_secret'],
         ];
 
         $response = $client->request('POST', 'token', [
