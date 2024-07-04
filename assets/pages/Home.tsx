@@ -92,47 +92,66 @@ const Home = () => {
                 </div>
             </div>
 
-            {/* Section proposition de valeur : Ce que vous pourrez faire avec cartes.gouv.fr */}
+            {/* Section proposition de valeur : Ce que vous pouvez faire avec cartes.gouv.fr */}
             <div className={fr.cx("fr-container", "fr-mt-8v", "fr-pb-3v", "fr-mt-md-10v", "fr-mb-2v", "fr-mb-md-8v")}>
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
                     <div className={fr.cx("fr-col-12")}>
-                        <h2 className={fr.cx("fr-my-5w") + " frx-text--center"}>Ce que vous pourrez faire avec cartes.gouv.fr</h2>
+                        <h2 className={fr.cx("fr-my-5w") + " frx-text--center"}>Ce que vous pouvez faire avec cartes.gouv.fr</h2>
+                        <p>
+                            La première bêta publique de <strong>cartes.gouv.fr</strong> est désormais disponible. En tant que premiers utilisateurs, vous
+                            pouvez participer à l’amélioration des fonctionnalités (catalogue, alimentation/diffusion) en testant les pré-versions et en nous
+                            transmettant vos commentaires.
+                        </p>
                     </div>
                 </div>
 
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-grid-row--center")}>
                     <div className={fr.cx("fr-col-lg-3", "fr-col-md-6", "fr-col-12") + " frx-text--center"}>
+                        <img src={`${appRoot}/dsfr/artwork/pictograms/system/system.svg`} alt="" role="presentation" />
+                        <h3 className={fr.cx("fr-text--lead", "fr-mb-3v")}>Stockez, traitez et partagez vos données</h3>
+                        <p className={fr.cx("fr-badge", "fr-badge--success", "fr-badge--no-icon")}>Disponible en bêta</p>
+                        <p>En toute autonomie, selon la diffusion de votre choix depuis cartes.gouv.fr et sur vos sites et applis.</p>
+                    </div>
+
+                    <div className={fr.cx("fr-col-lg-3", "fr-col-md-6", "fr-col-12") + " frx-text--center"}>
                         <img src={`${appRoot}/dsfr/artwork/pictograms/map/map.svg`} alt="" role="presentation" />
-                        <h3 className={fr.cx("fr-text--lead")}>Consultez et utilisez des géodonnées</h3>
+                        <h3 className={fr.cx("fr-text--lead", "fr-mb-3v")}>Consultez et utilisez des géodonnées</h3>
+                        <p className={fr.cx("fr-badge", "fr-badge--success", "fr-badge--no-icon")}>Disponible en bêta</p>
                         <p>Grâce au catalogue et aux cartes en ligne, grâce aux services et données de la communauté Géoplateforme.</p>
                     </div>
 
                     <div className={fr.cx("fr-col-lg-3", "fr-col-md-6", "fr-col-12") + " frx-text--center"}>
-                        <img src={`${appRoot}/dsfr/artwork/pictograms/map/location-france.svg`} alt="" role="presentation" />
-                        <h3 className={fr.cx("fr-text--lead")}>Créez des cartes</h3>
-                        <p>
-                            Grâce aux outils de traitement, de datavisualisation, de création et habillage de cartes et, à terme de création et habillage de
-                            portails cartographiques personnalisés.
+                        <img src={`${appRoot}/dsfr/artwork/pictograms/environment/human-cooperation.svg`} alt="" role="presentation" />
+                        <h3 className={fr.cx("fr-text--lead", "fr-mb-3v")}>Gérez et animez vos communautés</h3>
+                        <p>Via des guichets collaboratifs pour entretenir et enrichir les données.</p>
+                        <p className={fr.cx("fr-text--sm")}>
+                            Aujourd’hui disponible sur <a href="https://espacecollaboratif.ign.fr">espacecollaboratif.ign.fr</a>,<br />
+                            intégré en 2025 dans cartes.gouv.fr
                         </p>
-                    </div>
-
-                    <div className={fr.cx("fr-col-lg-3", "fr-col-md-6", "fr-col-12") + " frx-text--center"}>
-                        <img src={`${appRoot}/dsfr/artwork/pictograms/system/system.svg`} alt="" role="presentation" />
-                        <h3 className={fr.cx("fr-text--lead")}>Stockez, traitez et partagez vos données</h3>
-                        <p>En toute autonomie, selon la diffusion de votre choix depuis cartes.gouv.fr et sur vos sites et applis.</p>
                     </div>
                 </div>
 
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-grid-row--center")}>
                     <div className={fr.cx("fr-col-lg-3", "fr-col-md-6", "fr-col-12") + " frx-text--center"}>
-                        <img src={`${appRoot}/dsfr/artwork/pictograms/environment/human-cooperation.svg`} alt="" role="presentation" />
-                        <h3 className={fr.cx("fr-text--lead")}>Gérez et animez vos communautés</h3>
-                        <p>Via des guichets collaboratifs pour entretenir et enrichir les données.</p>
+                        <img src={`${appRoot}/dsfr/artwork/pictograms/map/location-france.svg`} alt="" role="presentation" />
+                        <h3 className={fr.cx("fr-text--lead", "fr-mb-3v")}>Créez des cartes</h3>
+                        <p>
+                            Grâce aux outils de traitement, de datavisualisation, de création et habillage de cartes et, à terme de création et habillage de
+                            portails cartographiques personnalisés.
+                        </p>
+                        <p className={fr.cx("fr-text--sm")}>
+                            Aujourd’hui disponible sur <a href="https://macarte.ign.fr">macarte.ign.fr</a>,<br />
+                            intégré en 2025 dans cartes.gouv.fr
+                        </p>
                     </div>
                     <div className={fr.cx("fr-col-lg-3", "fr-col-12") + " frx-text--center"}>
                         <img src={`${appRoot}/dsfr/artwork/pictograms/digital/data-visualization.svg`} alt="" role="presentation" />
-                        <h3 className={fr.cx("fr-text--lead")}>Contribuez aux données et services</h3>
-                        <p>Grâce aux outils collaboratifs pour échanger, entretenir et enrichir les géodonnées et géoservices.</p>
+                        <h3 className={fr.cx("fr-text--lead", "fr-mb-3v")}>Ajoutez de nouvelles fonctionnalités</h3>
+                        <p>
+                            Grâce aux outils mis à disposition et en appui sur l’usine logicielle de la Géoplateforme, enrichissez l’offre de service de la
+                            Géoplateforme.
+                        </p>
+                        <p className={fr.cx("fr-text--sm")}>À venir en 2025</p>
                     </div>
                 </div>
             </div>
@@ -142,59 +161,10 @@ const Home = () => {
                     <div className={fr.cx("fr-container")}>
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
                             <div className={fr.cx("fr-col-12", "fr-px-0", "fr-px-md-14v")}>
-                                <p className={fr.cx("fr-mt-4w", "fr-mt-md-7w", "fr-text--lg")}>
-                                    <strong>Cartes.gouv.fr</strong> rassemblera ainsi et ouvrira à tous des fonctionnalités dont certaines sont utilisables dès
-                                    aujourd’hui sur différents sites opérés par l’IGN tels que&nbsp;:
-                                </p>
-                                <ul>
-                                    <li className={fr.cx("fr-text--lg")}>
-                                        <a
-                                            href="https://www.geoportail.gouv.fr"
-                                            target="_blank"
-                                            rel="noreferrer"
-                                            title="geoportail.gouv.fr - ouvre une nouvelle fenêtre"
-                                        >
-                                            geoportail.gouv.fr
-                                        </a>{" "}
-                                        : rechercher et visualiser un lieu, une photographie aérienne, une carte, des données sur un territoire et les
-                                        superposer,
-                                    </li>
-                                    <li className={fr.cx("fr-text--lg")}>
-                                        <a
-                                            href="https://geoservices.ign.fr"
-                                            target="_blank"
-                                            rel="noreferrer"
-                                            title="geoservices.ign.fr - ouvre une nouvelle fenêtre"
-                                        >
-                                            geoservices.ign.fr
-                                        </a>{" "}
-                                        : télécharger et utiliser les flux de toutes les données et tous les services en accès libre et gratuit, ainsi que les
-                                        scans,
-                                    </li>
-                                    <li className={fr.cx("fr-text--lg")}>
-                                        <a
-                                            href="https://espacecollaboratif.ign.fr"
-                                            target="_blank"
-                                            rel="noreferrer"
-                                            title="espacecollaboratif.ign.fr - ouvre une nouvelle fenêtre"
-                                        >
-                                            espacecollaboratif.ign.fr
-                                        </a>{" "}
-                                        : ouvrir l’enrichissement de vos bases de données à des communautés et participer à l’amélioration et l’enrichissement
-                                        des données publiques ou de partenaires,
-                                    </li>
-                                    <li className={fr.cx("fr-text--lg")}>
-                                        <a href="https://macarte.ign.fr" target="_blank" rel="noreferrer" title="macarte.ign.fr - ouvre une nouvelle fenêtre">
-                                            macarte.ign.fr
-                                        </a>{" "}
-                                        : créer ses cartes en quelques clics, à partir des données Géoportail ou de ses propres données, et les publier sur une
-                                        adresse dédiée ou sur son propre site internet.
-                                    </li>
-                                </ul>
                                 <p className={fr.cx("fr-text--lg")}>
-                                    <strong>Cartes.gouv.fr</strong> reprendra dans un premier temps les fonctions des sites Géoservices puis Géoportail ainsi
-                                    que de premiers outils pour la gestion des données par les acteurs publics. Il s’enrichira progressivement de
-                                    fonctionnalités nouvelles au bénéfice de tous.
+                                    Avec cette version bêta, <strong>cartes.gouv.fr</strong> reprend de premières fonctionnalités des sites Géoservices et
+                                    Géoportail ainsi que de premiers outils pour la gestion des données par les acteurs publics. Il s’enrichira progressivement
+                                    de fonctionnalités nouvelles au bénéfice de tous.
                                 </p>
                                 <p className={fr.cx("fr-text--lg")}>
                                     <strong>Cartes.gouv.fr</strong> s’appuie sur une nouvelle infrastructure ouverte et collaborative, la Géoplateforme,
@@ -202,7 +172,15 @@ const Home = () => {
                                     transformation de l’action publique.
                                 </p>
                                 <p className={fr.cx("fr-text--lg")}>
-                                    En attendant, retrouvez les données et services dont vous avez besoin sur{" "}
+                                    <a
+                                        href="https://geoservices.ign.fr"
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        title="geoservices.ign.fr - ouvre une nouvelle fenêtre"
+                                    >
+                                        Géoservices
+                                    </a>{" "}
+                                    et{" "}
                                     <a
                                         href="https://www.geoportail.gouv.fr"
                                         target="_blank"
@@ -211,19 +189,10 @@ const Home = () => {
                                     >
                                         Géoportail
                                     </a>{" "}
-                                    et{" "}
-                                    <a
-                                        href="https://geoservices.ign.fr"
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        title="geoservices.ign.fr - ouvre une nouvelle fenêtre"
-                                    >
-                                        Géoservices
-                                    </a>
-                                    .
+                                    restent en activité le temps que leurs fonctionnalités soient reprises dans cartes.gouv.fr.
                                 </p>
                                 <p className={fr.cx("fr-mb-5w", "fr-text--lg")}>
-                                    Et pour en savoir + sur <strong>cartes.gouv.fr</strong>,{" "}
+                                    Pour en savoir + sur <strong>cartes.gouv.fr</strong>,{" "}
                                     <a
                                         href="https://ign.fr/geoplateforme/rejoindre-la-communaute"
                                         target="_blank"
