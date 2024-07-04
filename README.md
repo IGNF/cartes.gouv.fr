@@ -44,6 +44,8 @@ cartes.gouv.fr n'utilise pas de stockage propre. Toutes les informations visible
 
 Si vous avez utilisé l'API Entrepôt directement, vous ne verrez pas vos données sur cartes.gouv.fr si vous n'avez pas utilisé le tag `datasheet_name` pour associer livraisons (`upload`), données stockées (`stored_data`) et services de diffusion (`configuration`) derrière le concept virtuel de fiche de données.
 
+Pour en savoir plus, consultez la [documentation développeur sur l'utilisation de l'API Entrepôt par cartes.gouv.fr](docs/developer/entrepot/README.md).
+
 ## Développement
 
 Voir la [documentation développeur](docs/developer/README.md).
