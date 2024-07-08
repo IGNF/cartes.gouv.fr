@@ -67,6 +67,7 @@ contact:
         first_name: "Prénom de l’utilisateur"
         date: "Date d’envoi"
         message: "Corps du message"
+        no_message: "Aucun message"
         not_specified: "Non renseigné"
     email_acknowledgement:
         heading: "Votre demande a été envoyée à l’IGN et une réponse vous sera apportée dans les meilleurs délais."
