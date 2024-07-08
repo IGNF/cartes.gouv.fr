@@ -4,9 +4,12 @@ import { Pagination } from "@codegouvfr/react-dsfr/Pagination";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { useQuery } from "@tanstack/react-query";
 import { FC, useMemo, useState } from "react";
+
 import { CommunityListFilter, GetResponse, arrCommunityListFilters } from "../../../@types/app_espaceco";
 import { CommunityResponseDTO } from "../../../@types/espaceco";
+import AppLayout from "../../../components/Layout/AppLayout";
 import Skeleton from "../../../components/Utils/Skeleton";
+import { datastoreNavItems } from "../../../config/datastoreNavItems";
 import { useTranslation } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/espaceco/RQKeys";
 import { CartesApiException } from "../../../modules/jsonFetch";
@@ -16,6 +19,8 @@ import CommunityList from "./CommunityList";
 import SearchCommunity from "./SearchCommunity";
 
 const defaultLimit = 10;
+
+const navItems = datastoreNavItems();
 
 type QueryParamsType = {
     page: number;
@@ -66,7 +71,7 @@ const Communities: FC = () => {
     };
 
     return (
-        <div className={fr.cx("fr-container")}>
+        <AppLayout navItems={navItems} documentTitle={t("title")}>
             <h1>{t("title")}</h1>
             <div>
                 {communityQuery.isError && <Alert severity="error" closable={false} title={communityQuery.error?.message} />}
@@ -151,7 +156,7 @@ const Communities: FC = () => {
                     )}
                 </div>
             </div>
-        </div>
+        </AppLayout>
     );
 };
 
