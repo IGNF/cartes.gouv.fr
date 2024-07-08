@@ -23,7 +23,7 @@
         "geoportal-extensions-openlayers": "^3.3.3",
         "geostyler-mapbox-parser": "^5.0.1",
         "geostyler-openlayers-parser": "^4.3.0",
-        "geostyler-qgis-parser": "^2.0.0",
+        "geostyler-qgis-parser": "^2.1.0",
         "geostyler-sld-parser": "^5.4.0",
         "geostyler-style": "^8.0.0",
         "i18nifty": "^3.0.0",
