@@ -55,6 +55,11 @@ export const datastoreNavItems = (currentDatastore?: Datastore): MainNavigationP
         });
     }
 
+    navItems.push({
+        text: t("espaceco"),
+        linkProps: routes.espaceco_community_list().link,
+    });
+
     navItems.push(assistanceNavItems(tNavItems));
 
     return navItems;
@@ -62,7 +67,7 @@ export const datastoreNavItems = (currentDatastore?: Datastore): MainNavigationP
 
 // traductions
 export const { i18n } = declareComponentKeys<
-    "dashboard" | "data" | "members" | "manage_storage" | "consumption_monitoring" | "permissions_granted" | "my_account" | "my_access_keys"
+    "dashboard" | "data" | "members" | "manage_storage" | "consumption_monitoring" | "permissions_granted" | "my_account" | "my_access_keys" | "espaceco"
 >()("datastoreNavItems");
 
 export const datastoreNavItemsFrTranslations: Translations<"fr">["datastoreNavItems"] = {
@@ -74,6 +79,7 @@ export const datastoreNavItemsFrTranslations: Translations<"fr">["datastoreNavIt
     permissions_granted: "Permissions accordées",
     my_account: "Mon compte",
     my_access_keys: "Mes clés d’accès",
+    espaceco: "Espace Collaboratif",
 };
 
 export const datastoreNavItemsEnTranslations: Translations<"en">["datastoreNavItems"] = {
@@ -85,4 +91,5 @@ export const datastoreNavItemsEnTranslations: Translations<"en">["datastoreNavIt
     permissions_granted: undefined,
     my_account: undefined,
     my_access_keys: undefined,
+    espaceco: undefined,
 };
