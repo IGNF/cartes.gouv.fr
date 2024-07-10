@@ -1,3 +1,4 @@
+import Badge from "@codegouvfr/react-dsfr/Badge";
 import Header, { HeaderProps } from "@codegouvfr/react-dsfr/Header";
 import { MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation/MainNavigation";
 import { FC, ReactNode, memo } from "react";
@@ -99,7 +100,14 @@ const AppHeader: FC<AppHeaderProps> = ({ navItems = [] }) => {
                 ...routes.home().link,
                 title: "Accueil - cartes.gouv.fr",
             }}
-            serviceTitle="cartes.gouv.fr"
+            serviceTitle={
+                <>
+                    cartes.gouv.fr{" "}
+                    <Badge severity="success" noIcon={true} as="span">
+                        Bêta
+                    </Badge>
+                </>
+            }
             serviceTagline="Le service public des cartes et données du territoire"
             quickAccessItems={quickAccessItems}
             // renderSearchInput={({ className, id, name, placeholder, type }) => (
