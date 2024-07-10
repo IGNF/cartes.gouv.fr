@@ -66,6 +66,7 @@ const ServiceView = lazy(() => import("../entrepot/pages/service/view/ServiceVie
 const AccessesRequest = lazy(() => import("../entrepot/pages/accesses-request/AccessesRequest"));
 
 const EspaceCoCommunityList = lazy(() => import("../espaceco/pages/communities/Communities"));
+const EspaceCoManageCommunity = lazy(() => import("../espaceco/pages/communities/ManageCommunity"));
 
 const RouterRenderer: FC = () => {
     const route = useRoute();
@@ -241,6 +242,8 @@ const RouterRenderer: FC = () => {
                 return <ServiceView datastoreId={route.params.datastoreId} offeringId={route.params.offeringId} datasheetName={route.params.datasheetName} />;
             case "espaceco_community_list":
                 return <EspaceCoCommunityList />;
+            case "espaceco_manage_community":
+                return <EspaceCoManageCommunity communityId={route.params.communityId} />;
             default:
                 return <PageNotFound />;
         }
