@@ -1,14 +1,52 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import { useEffect } from "react";
+import Badge from "@codegouvfr/react-dsfr/Badge";
+import { FC, ReactNode, useEffect } from "react";
 
 import AppLayout from "../components/Layout/AppLayout";
 import SymfonyRouting from "../modules/Routing";
 import { appRoot, routes, useRoute } from "../router/router";
 import { useAuthStore } from "../stores/AuthStore";
 
-import hp from "../img/home/home.png";
 import "../sass/pages/home.scss";
+
+// TODO composant Tile temporaire, à remplacer par Tile de react-dsfr quand il sera mis à jour avec les nouveautés du composant
+type CustomTileProps = {
+    title: string;
+    desc?: ReactNode;
+    detail?: ReactNode;
+    start?: ReactNode;
+    pictogramUrl?: string;
+};
+const CustomTile: FC<CustomTileProps> = ({ title, desc, detail, start, pictogramUrl }) => {
+    return (
+        <div className="fr-tile">
+            <div className="fr-tile__body">
+                <div className="fr-tile__content">
+                    <h3 className="fr-tile__title">{title}</h3>
+
+                    {desc && <p className="fr-tile__desc">{desc}</p>}
+
+                    {detail && <p className="fr-tile__detail">{detail}</p>}
+
+                    {start && <div className="fr-tile__start">{start}</div>}
+                </div>
+            </div>
+
+            {pictogramUrl && (
+                <div className="fr-tile__header">
+                    <div className="fr-tile__pictogram">
+                        <svg aria-hidden="true" className="fr-artwork" viewBox="0 0 80 80" width="80px" height="80px">
+                            <use className="fr-artwork-decorative" href={`${pictogramUrl}#artwork-decorative`} />
+                            <use className="fr-artwork-minor" href={`${pictogramUrl}#artwork-minor`} />
+                            <use className="fr-artwork-major" href={`${pictogramUrl}#artwork-major`} />
+                        </svg>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
 
 const Home = () => {
     const { params } = useRoute();
@@ -67,7 +105,7 @@ const Home = () => {
                                     <div className={fr.cx("fr-content-media__img")}>
                                         <img
                                             className={fr.cx("fr-responsive-img", "fr-ratio-1x1")}
-                                            src={hp}
+                                            src={`${appRoot}/build/img/home/home.png`}
                                             alt=""
                                             role="presentation"
                                             data-fr-js-ratio="true"
@@ -94,10 +132,10 @@ const Home = () => {
 
             {/* Section proposition de valeur : Ce que vous pouvez faire avec cartes.gouv.fr */}
             <div className={fr.cx("fr-container", "fr-mt-8v", "fr-pb-3v", "fr-mt-md-10v", "fr-mb-2v", "fr-mb-md-8v")}>
-                <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
+                <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-grid-row--center", "fr-px-md-8w")}>
                     <div className={fr.cx("fr-col-12")}>
                         <h2 className={fr.cx("fr-my-5w") + " frx-text--center"}>Ce que vous pouvez faire avec cartes.gouv.fr</h2>
-                        <p>
+                        <p className={fr.cx("fr-my-5w") + " frx-text--center"}>
                             La première bêta publique de <strong>cartes.gouv.fr</strong> est désormais disponible. En tant que premiers utilisateurs, vous
                             pouvez participer à l’amélioration des fonctionnalités (catalogue, alimentation/diffusion) en testant les pré-versions et en nous
                             transmettant vos commentaires.
@@ -105,58 +143,95 @@ const Home = () => {
                     </div>
                 </div>
 
-                <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-grid-row--center")}>
-                    <div className={fr.cx("fr-col-lg-3", "fr-col-md-6", "fr-col-12") + " frx-text--center"}>
-                        <img src={`${appRoot}/dsfr/artwork/pictograms/system/system.svg`} alt="" role="presentation" />
-                        <h3 className={fr.cx("fr-text--lead", "fr-mb-3v")}>Stockez, traitez et partagez vos données</h3>
-                        <p className={fr.cx("fr-badge", "fr-badge--success", "fr-badge--no-icon")}>Disponible en bêta</p>
-                        <p>En toute autonomie, selon la diffusion de votre choix depuis cartes.gouv.fr et sur vos sites et applis.</p>
+                <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-grid-row--center", "fr-px-md-8w")}>
+                    <div className={fr.cx("fr-col-12", "fr-col-md-6", "fr-col-lg-4") + " frx-text--center"}>
+                        <CustomTile
+                            title="Stockez, traitez et partagez vos données"
+                            desc={"En toute autonomie, selon la diffusion de votre choix depuis cartes.gouv.fr et sur vos sites et applis."}
+                            start={
+                                <Badge severity="success" noIcon={true}>
+                                    Disponible en bêta
+                                </Badge>
+                            }
+                            pictogramUrl={`${appRoot}/dsfr/artwork/pictograms/system/system.svg`}
+                        />
                     </div>
 
-                    <div className={fr.cx("fr-col-lg-3", "fr-col-md-6", "fr-col-12") + " frx-text--center"}>
-                        <img src={`${appRoot}/dsfr/artwork/pictograms/map/map.svg`} alt="" role="presentation" />
-                        <h3 className={fr.cx("fr-text--lead", "fr-mb-3v")}>Consultez et utilisez des géodonnées</h3>
-                        <p className={fr.cx("fr-badge", "fr-badge--success", "fr-badge--no-icon")}>Disponible en bêta</p>
-                        <p>Grâce au catalogue et aux cartes en ligne, grâce aux services et données de la communauté Géoplateforme.</p>
+                    <div className={fr.cx("fr-col-12", "fr-col-md-6", "fr-col-lg-4") + " frx-text--center"}>
+                        <CustomTile
+                            title="Consultez et utilisez des géodonnées"
+                            desc={"Grâce au catalogue et aux cartes en ligne, grâce aux services et données de la communauté Géoplateforme."}
+                            start={
+                                <Badge severity="success" noIcon={true}>
+                                    Disponible en bêta
+                                </Badge>
+                            }
+                            pictogramUrl={`${appRoot}/dsfr/artwork/pictograms/map/map.svg`}
+                        />
                     </div>
 
-                    <div className={fr.cx("fr-col-lg-3", "fr-col-md-6", "fr-col-12") + " frx-text--center"}>
-                        <img src={`${appRoot}/dsfr/artwork/pictograms/environment/human-cooperation.svg`} alt="" role="presentation" />
-                        <h3 className={fr.cx("fr-text--lead", "fr-mb-3v")}>Gérez et animez vos communautés</h3>
-                        <p>Via des guichets collaboratifs pour entretenir et enrichir les données.</p>
-                        <p className={fr.cx("fr-text--sm")}>
-                            Aujourd’hui disponible sur <a href="https://espacecollaboratif.ign.fr">espacecollaboratif.ign.fr</a>,<br />
-                            intégré en 2025 dans cartes.gouv.fr
-                        </p>
+                    <div className={fr.cx("fr-col-12", "fr-col-md-6", "fr-col-lg-4") + " frx-text--center"}>
+                        <CustomTile
+                            title="Gérez et animez vos communautés"
+                            desc={"Via des guichets collaboratifs pour entretenir et enrichir les données."}
+                            start={
+                                <Badge severity="info" noIcon={true}>
+                                    Intégré en 2025
+                                </Badge>
+                            }
+                            detail={
+                                <span className="frx-text--center">
+                                    {"Aujourd'hui disponible sur "}
+                                    <a href="https://espacecollaboratif.ign.fr" rel="noreferrer">
+                                        espacecollaboratif.ign.fr
+                                    </a>
+                                </span>
+                            }
+                            pictogramUrl={`${appRoot}/dsfr/artwork/pictograms/environment/human-cooperation.svg`}
+                        />
                     </div>
-                </div>
 
-                <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-grid-row--center")}>
-                    <div className={fr.cx("fr-col-lg-3", "fr-col-md-6", "fr-col-12") + " frx-text--center"}>
-                        <img src={`${appRoot}/dsfr/artwork/pictograms/map/location-france.svg`} alt="" role="presentation" />
-                        <h3 className={fr.cx("fr-text--lead", "fr-mb-3v")}>Créez des cartes</h3>
-                        <p>
-                            Grâce aux outils de traitement, de datavisualisation, de création et habillage de cartes et, à terme de création et habillage de
-                            portails cartographiques personnalisés.
-                        </p>
-                        <p className={fr.cx("fr-text--sm")}>
-                            Aujourd’hui disponible sur <a href="https://macarte.ign.fr">macarte.ign.fr</a>,<br />
-                            intégré en 2025 dans cartes.gouv.fr
-                        </p>
+                    <div className={fr.cx("fr-col-12", "fr-col-md-6", "fr-col-lg-4") + " frx-text--center"}>
+                        <CustomTile
+                            title="Créez des cartes"
+                            desc={
+                                "Grâce aux outils de traitement, de datavisualisation, de création et habillage de cartes et, à terme de création et habillage de portails cartographiques personnalisés."
+                            }
+                            start={
+                                <Badge severity="info" noIcon={true}>
+                                    Intégré en 2025
+                                </Badge>
+                            }
+                            detail={
+                                <span className="frx-text--center">
+                                    {"Aujourd'hui disponible sur "}
+                                    <a href="https://macarte.ign.fr" rel="noreferrer">
+                                        macarte.ign.fr
+                                    </a>
+                                </span>
+                            }
+                            pictogramUrl={`${appRoot}/dsfr/artwork/pictograms/map/location-france.svg`}
+                        />
                     </div>
-                    <div className={fr.cx("fr-col-lg-3", "fr-col-12") + " frx-text--center"}>
-                        <img src={`${appRoot}/dsfr/artwork/pictograms/digital/data-visualization.svg`} alt="" role="presentation" />
-                        <h3 className={fr.cx("fr-text--lead", "fr-mb-3v")}>Ajoutez de nouvelles fonctionnalités</h3>
-                        <p>
-                            Grâce aux outils mis à disposition et en appui sur l’usine logicielle de la Géoplateforme, enrichissez l’offre de service de la
-                            Géoplateforme.
-                        </p>
-                        <p className={fr.cx("fr-text--sm")}>À venir en 2025</p>
+
+                    <div className={fr.cx("fr-col-12", "fr-col-md-6", "fr-col-lg-4") + " frx-text--center"}>
+                        <CustomTile
+                            title="Ajoutez de nouvelles fonctionnalités"
+                            desc={
+                                "Grâce aux outils mis à disposition et en appui sur l’usine logicielle de la Géoplateforme, enrichissez l’offre de service de la Géoplateforme."
+                            }
+                            start={
+                                <Badge severity="info" noIcon={true}>
+                                    Intégré en 2025
+                                </Badge>
+                            }
+                            pictogramUrl={`${appRoot}/dsfr/artwork/pictograms/map/location-france.svg`}
+                        />
                     </div>
                 </div>
             </div>
 
-            <div className="c-section c-section--gray">
+            <div className="c-section c-section--gray fr-py-5w">
                 <div className={fr.cx("fr-container--fluid")}>
                     <div className={fr.cx("fr-container")}>
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
@@ -191,10 +266,10 @@ const Home = () => {
                                     </a>{" "}
                                     restent en activité le temps que leurs fonctionnalités soient reprises dans cartes.gouv.fr.
                                 </p>
-                                <p className={fr.cx("fr-mb-5w", "fr-text--lg")}>
+                                <p className={fr.cx("fr-text--lg")}>
                                     Pour en savoir + sur <strong>cartes.gouv.fr</strong>,{" "}
                                     <a
-                                        href="https://ign.fr/geoplateforme/rejoindre-la-communaute"
+                                        href="https://www.ign.fr/geoplateforme/rejoindre-la-communaute"
                                         target="_blank"
                                         rel="noreferrer"
                                         title="Rejoindre la communauté Géoplateforme - ouvre une nouvelle fenêtre"
