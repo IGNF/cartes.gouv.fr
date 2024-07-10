@@ -1,7 +1,8 @@
 import { CommunityListFilter } from "../../@types/app_espaceco";
 
 const RQKeys = {
-    community_list: (page: number, limit: number): string[] => ["community", page.toString(), limit.toString()],
+    community: (communityId: number): string[] => ["community", communityId.toString()],
+    community_list: (page: number, limit: number): string[] => ["communities", page.toString(), limit.toString()],
     search: (search: string, filter: CommunityListFilter): string[] => {
         return ["search", "community", filter, search];
     },

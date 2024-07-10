@@ -34,7 +34,9 @@ import { UserKeyFrTranslations } from "../../entrepot/pages/users/keys/UserKey.l
 import { UserKeysListTabFrTranslations } from "../../entrepot/pages/users/keys/UserKeysListTab/UserKeysListTab.locale";
 import { MeFrTranslations } from "../../entrepot/pages/users/me/Me.locale";
 import { PermissionsFrTranslations } from "../../entrepot/pages/users/permissions/Permissions.locale";
-import { EspaceCoCommunitiesFrTranslations } from "../../espaceco/pages/communities/EspaceCoCommunities.locale";
+import { CommunityListFrTranslations } from "../../espaceco/pages/communities/CommunityListTr";
+import { ManageCommunityFrTranslations } from "../../espaceco/pages/communities/ManageCommunityTr";
+import { ManageCommunityValidationsFrTranslations } from "../../espaceco/pages/communities/management/validationTr";
 import { TMSStyleFilesManagerFrTranslations } from "../../modules/Style/TMSStyleFilesManager/TMSStyleFilesManager.locale";
 import { BreadcrumbFrTranslations } from "../../modules/entrepot/breadcrumbs/Breadcrumb.locale";
 import { LoginDisabledFrTranslations } from "../../pages/LoginDisabled/LoginDisabled.locale";
@@ -81,12 +83,10 @@ export const translations: Translations<"fr"> = {
     UploadStyleFile: UploadStyleFileFrTranslations,
     PyramidVectorGenerateForm: PyramidVectorGenerateFormFrTranslations,
     PyramidVectorTmsServiceForm: PyramidVectorTmsServiceFormFrTranslations,
-    PyramidRasterGenerateForm: PyramidRasterGenerateFormFrTranslations,
-    PyramidRasterWmsRasterServiceForm: PyramidRasterWmsRasterServiceFormFrTranslations,
-    PyramidRasterWmtsServiceForm: PyramidRasterWmtsServiceFormFrTranslations,
-    EspaceCoCommunities: EspaceCoCommunitiesFrTranslations,
     DatasheetUploadForm: DatasheetUploadFormFrTranslations,
     DatasheetList: DatasheetListFrTranslations,
     AccessRestrictions: AccessRestrictionsFrTranslations,
-    LoginDisabled: LoginDisabledFrTranslations,
+    CommunityList: CommunityListFrTranslations,
+    ManageCommunity: ManageCommunityFrTranslations,
+    ManageCommunityValidations: ManageCommunityValidationsFrTranslations,
 };

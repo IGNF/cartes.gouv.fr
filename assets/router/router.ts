@@ -263,6 +263,13 @@ const espacecoRoutes = {
         },
         () => `${appRoot}/espaceco/community`
     ),
+
+    espaceco_manage_community: defineRoute(
+        {
+            communityId: param.path.number,
+        },
+        (p) => `${appRoot}/espaceco/community/${p.communityId}/gestion`
+    ),
 };
 
 const routeDefs = {
