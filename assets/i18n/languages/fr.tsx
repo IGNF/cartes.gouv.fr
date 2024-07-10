@@ -24,13 +24,15 @@ import { MyAccessKeysFrTranslations } from "../../entrepot/pages/users/MyAccessK
 import { UserKeyFrTranslations } from "../../entrepot/pages/users/keys/UserKeyTr";
 import { UserKeysListTabFrTranslations } from "../../entrepot/pages/users/keys/UserKeysListTab";
 import { PermissionsFrTranslations } from "../../entrepot/pages/users/permissions/PermissionsTr";
-import { EspaceCoCommunitiesFrTranslations } from "../../espaceco/pages/communities/EspaceCoCommunitiesTr";
+import { CommunityListFrTranslations } from "../../espaceco/pages/communities/CommunityListTr";
+import { ManageCommunityFrTranslations } from "../../espaceco/pages/communities/ManageCommunityTr";
+import { ManageCommunityValidationsFrTranslations } from "../../espaceco/pages/communities/management/validationTr";
 import { TMSStyleFilesManagerFrTranslations } from "../../modules/Style/TMSStyleFilesManager";
 import { contactFrTranslations } from "../../pages/assistance/contact/Contact";
 import { mapboxStyleValidationFrTranslations } from "../../validations/MapboxStyleValidator";
 import { SldStyleValidationErrorsFrTranslations } from "../../validations/SldStyleValidationErrorsTr";
-import { commonFrTranslations } from "../Common";
 import { BreadcrumbFrTranslations } from "../Breadcrumb";
+import { commonFrTranslations } from "../Common";
 import { RightsFrTranslations } from "../Rights";
 import { StyleFrTranslations } from "../Style";
 import type { Translations } from "../i18n";
@@ -67,8 +69,10 @@ export const translations: Translations<"fr"> = {
     TableSelection: TableSelectionFrTranslations,
     UploadStyleFile: UploadStyleFileFrTranslations,
     PyramidVectorTmsServiceForm: PyramidVectorTmsServiceFormFrTranslations,
-    EspaceCoCommunities: EspaceCoCommunitiesFrTranslations,
     DatasheetUploadForm: DatasheetUploadFormFrTranslations,
     DatasheetList: DatasheetListFrTranslations,
     AccessRestrictions: AccessRestrictionsFrTranslations,
+    CommunityList: CommunityListFrTranslations,
+    ManageCommunity: ManageCommunityFrTranslations,
+    ManageCommunityValidations: ManageCommunityValidationsFrTranslations,
 };

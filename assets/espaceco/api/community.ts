@@ -28,6 +28,26 @@ const getAsMember = (queryParams: Record<string, unknown>, signal: AbortSignal) 
     });
 };
 
-const community = { get, searchByName, getAsMember };
+const getCommunity = (communityId: number) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_espaceco_community_get_community", { communityId: communityId });
+    return jsonFetch<CommunityResponseDTO>(url);
+};
+
+const updateLogo = (communityId: number, formData: FormData) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_espaceco_community_update_logo", { communityId: communityId });
+    return jsonFetch<CommunityResponseDTO>(
+        url,
+        {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+            },
+        },
+        formData
+    );
+};
+
+const community = { get, getCommunity, searchByName, getAsMember, updateLogo };
 
 export default community;

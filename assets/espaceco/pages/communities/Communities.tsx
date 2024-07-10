@@ -30,7 +30,7 @@ type QueryParamsType = {
 
 const Communities: FC = () => {
     const route = useRoute();
-    const { t } = useTranslation("EspaceCoCommunities");
+    const { t } = useTranslation("CommunityList");
 
     const filter = useMemo<CommunityListFilter>(() => {
         const f = route.params["filter"];
