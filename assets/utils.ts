@@ -162,6 +162,31 @@ const getFileExtension = (filename: string) => {
     return filename.split(".").pop()?.toLowerCase();
 };
 
+export type ImageSize = {
+    width: number;
+    height: number;
+};
+const getImageSize = async (image: File): Promise<ImageSize> => {
+    return new Promise((resolve, reject) => {
+        try {
+            const fileReader = new FileReader();
+            fileReader.onload = () => {
+                const img = new Image();
+                img.onload = () => {
+                    resolve({ width: img.width, height: img.height });
+                };
+                if (typeof fileReader.result === "string") {
+                    img.src = fileReader.result;
+                }
+            };
+
+            fileReader.readAsDataURL(image);
+        } catch (e) {
+            reject(e);
+        }
+    });
+};
+
 const formatDateFromISO = (isoDateString: string): string => {
     const m = isoDateString.match(/([\d\-T:]+)\+\d{2}:\d{2}?/); // "2023-06-02T06:01:46+00:00"
     if (m) {
@@ -233,6 +258,7 @@ export {
     niceBytes,
     getProjectionCode,
     getFileExtension,
+    getImageSize,
     formatDateFromISO,
     formatDateWithoutTimeFromISO,
     getArrayRange,

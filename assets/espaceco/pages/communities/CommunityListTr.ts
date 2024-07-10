@@ -14,9 +14,9 @@ export const { i18n } = declareComponentKeys<
     | "no_options"
     | "loading"
     | "show_details"
->()("EspaceCoCommunities");
+>()("CommunityList");
 
-export const EspaceCoCommunitiesFrTranslations: Translations<"fr">["EspaceCoCommunities"] = {
+export const CommunityListFrTranslations: Translations<"fr">["CommunityList"] = {
     title: "Liste des guichets",
     filters: "Filtres",
     all_public_communities: "Tous les guichets publics",
@@ -36,7 +36,7 @@ export const EspaceCoCommunitiesFrTranslations: Translations<"fr">["EspaceCoComm
     show_details: "Afficher les détails",
 };
 
-export const EspaceCoCommunitiesEnTranslations: Translations<"en">["EspaceCoCommunities"] = {
+export const CommunityListEnTranslations: Translations<"en">["CommunityList"] = {
     title: "List of communities",
     filters: "Filters",
     all_public_communities: undefined,
