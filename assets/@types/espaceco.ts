@@ -18,7 +18,8 @@ export interface CommunityResponseDTO {
     /** @format date-time */
     creation: string;
     grids: Grids[];
-    logo_url: string;
+    logo_url: string | null;
+    keywords?: string[];
 }
 
 export interface Grids {
@@ -26,4 +27,8 @@ export interface Grids {
     title: string;
     type: string;
     deleted: boolean;
+}
+
+export interface CommunityPatchDTO extends Partial<Omit<CommunityResponseDTO, "logo_url">> {
+    logo: File | null;
 }
