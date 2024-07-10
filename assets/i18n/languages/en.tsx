@@ -3,9 +3,9 @@ import { navItemsEnTranslations } from "../../config/navItems";
 import { AccessesRequestEnTranslations } from "../../entrepot/pages/AccessesRequest";
 import { AddMemberEnTranslations } from "../../entrepot/pages/communities/AddMember";
 import { CommunityMembersEnTranslations } from "../../entrepot/pages/communities/CommunityMembers";
-import { contactEnTranslations } from "../../pages/assistance/contact/Contact";
 import { DashboardProEnTranslations } from "../../entrepot/pages/dashboard/DashboardPro";
 import { DatasheetListEnTranslations } from "../../entrepot/pages/datasheet/DatasheetList/DatasheetList";
+import { DatasheetUploadFormEnTranslations } from "../../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadForm";
 import { PyramidListItemFrTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidList/PyramidListItem";
 import { VectorDbListItemEnTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasetListTab/VectorDbList/VectorDbListItem";
 import { DatasheetViewEnTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasheetView";
@@ -24,16 +24,18 @@ import { MyAccessKeysEnTranslations } from "../../entrepot/pages/users/MyAccessK
 import { UserKeyEnTranslations } from "../../entrepot/pages/users/keys/UserKeyTr";
 import { UserKeysListTabEnTranslations } from "../../entrepot/pages/users/keys/UserKeysListTab";
 import { PermissionsEnTranslations } from "../../entrepot/pages/users/permissions/PermissionsTr";
-import { EspaceCoCommunitiesEnTranslations } from "../../espaceco/pages/communities/EspaceCoCommunitiesTr";
+import { CommunityListEnTranslations } from "../../espaceco/pages/communities/CommunityListTr";
+import { ManageCommunityEnTranslations } from "../../espaceco/pages/communities/ManageCommunityTr";
+import { ManageCommunityValidationsEnTranslations } from "../../espaceco/pages/communities/management/validationTr";
 import { TMSStyleFilesManagerEnTranslations } from "../../modules/Style/TMSStyleFilesManager";
+import { contactEnTranslations } from "../../pages/assistance/contact/Contact";
 import { mapboxStyleValidationEnTranslations } from "../../validations/MapboxStyleValidator";
 import { SldStyleValidationErrorsEnTranslations } from "../../validations/SldStyleValidationErrorsTr";
-import { commonEnTranslations } from "../Common";
 import { BreadcrumbEnTranslations } from "../Breadcrumb";
+import { commonEnTranslations } from "../Common";
 import { RightsEnTranslations } from "../Rights";
 import { StyleEnTranslations } from "../Style";
 import type { Translations } from "../i18n";
-import { DatasheetUploadFormEnTranslations } from "../../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadForm";
 
 export const translations: Translations<"en"> = {
     Common: commonEnTranslations,
@@ -67,8 +69,10 @@ export const translations: Translations<"en"> = {
     TableSelection: TableSelectionEnTranslations,
     UploadStyleFile: UploadStyleFileEnTranslations,
     PyramidVectorTmsServiceForm: PyramidVectorTmsServiceFormEnTranslations,
-    EspaceCoCommunities: EspaceCoCommunitiesEnTranslations,
     DatasheetUploadForm: DatasheetUploadFormEnTranslations,
     DatasheetList: DatasheetListEnTranslations,
     AccessRestrictions: AccessRestrictionsEnTranslations,
+    CommunityList: CommunityListEnTranslations,
+    ManageCommunity: ManageCommunityEnTranslations,
+    ManageCommunityValidations: ManageCommunityValidationsEnTranslations,
 };
