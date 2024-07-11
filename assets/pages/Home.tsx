@@ -1,11 +1,12 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Badge from "@codegouvfr/react-dsfr/Badge";
+import { RegisteredLinkProps } from "@codegouvfr/react-dsfr/link";
 import { FC, ReactNode, useEffect } from "react";
 
 import AppLayout from "../components/Layout/AppLayout";
 import SymfonyRouting from "../modules/Routing";
-import { appRoot, routes, useRoute } from "../router/router";
+import { appRoot, catalogueUrl, routes, useRoute } from "../router/router";
 import { useAuthStore } from "../stores/AuthStore";
 
 import "../sass/pages/home.scss";
@@ -16,14 +17,16 @@ type CustomTileProps = {
     desc?: ReactNode;
     detail?: ReactNode;
     start?: ReactNode;
+    linkProps?: RegisteredLinkProps;
+    enlargeLink?: boolean;
     pictogramUrl?: string;
 };
-const CustomTile: FC<CustomTileProps> = ({ title, desc, detail, start, pictogramUrl }) => {
+const CustomTile: FC<CustomTileProps> = ({ title, desc, detail, start, linkProps, enlargeLink = false, pictogramUrl }) => {
     return (
-        <div className="fr-tile">
+        <div className={fr.cx("fr-tile", enlargeLink && "fr-enlarge-link")}>
             <div className="fr-tile__body">
                 <div className="fr-tile__content">
-                    <h3 className="fr-tile__title">{title}</h3>
+                    <h3 className="fr-tile__title">{linkProps && <a {...linkProps}>{title}</a>}</h3>
 
                     {desc && <p className="fr-tile__desc">{desc}</p>}
 
@@ -153,6 +156,8 @@ const Home = () => {
                                     Disponible en bêta
                                 </Badge>
                             }
+                            linkProps={routes.dashboard_pro().link}
+                            enlargeLink={true}
                             pictogramUrl={`${appRoot}/dsfr/artwork/pictograms/system/system.svg`}
                         />
                     </div>
@@ -166,6 +171,10 @@ const Home = () => {
                                     Disponible en bêta
                                 </Badge>
                             }
+                            linkProps={{
+                                href: catalogueUrl,
+                            }}
+                            enlargeLink={true}
                             pictogramUrl={`${appRoot}/dsfr/artwork/pictograms/map/map.svg`}
                         />
                     </div>
