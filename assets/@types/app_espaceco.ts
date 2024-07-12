@@ -7,3 +7,36 @@ export type GetResponse<T> = {
 
 export const arrCommunityListFilters = ["public", "iam_member", "affiliation"];
 export type CommunityListFilter = (typeof arrCommunityListFilters)[number];
+
+export type Address = {
+    country: string;
+    city: string;
+    x: number;
+    y: number;
+    zipcode: string;
+    street: string;
+    classification: number;
+    kind: string;
+    fulltext: string;
+    metropole: boolean;
+};
+
+export type Poi = {
+    country: string;
+    city: string;
+    x: number;
+    y: number;
+    zipcode: string;
+    zipcodes: string[];
+    poiType: string[];
+    street: string;
+    classification: number;
+    kind: string;
+    fulltext: string;
+    metropole: boolean;
+};
+
+export type SearchResult = {
+    status: string;
+    results: (Address | Poi)[];
+};
