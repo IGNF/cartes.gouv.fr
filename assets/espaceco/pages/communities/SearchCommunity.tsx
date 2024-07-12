@@ -22,7 +22,7 @@ const SearchCommunity: FC<SearchCommunityProps> = ({ filter, onChange }) => {
     const [search, setSearch] = useDebounceValue("", 500);
 
     const searchQuery = useQuery<CommunityResponseDTO[]>({
-        queryKey: RQKeys.search(search, filter),
+        queryKey: RQKeys.searchCommunities(search, filter),
         queryFn: ({ signal }) => api.community.searchByName(search, filter, signal),
         enabled: search.length > 3,
     });
