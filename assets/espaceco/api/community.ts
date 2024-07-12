@@ -29,12 +29,12 @@ const getAsMember = (queryParams: Record<string, unknown>, signal: AbortSignal) 
 };
 
 const getCommunity = (communityId: number) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_espaceco_community_get_community", { communityId: communityId });
+    const url = SymfonyRouting.generate("cartesgouvfr_api_espaceco_community_get_community", { communityId });
     return jsonFetch<CommunityResponseDTO>(url);
 };
 
 const updateLogo = (communityId: number, formData: FormData) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_espaceco_community_update_logo", { communityId: communityId });
+    const url = SymfonyRouting.generate("cartesgouvfr_api_espaceco_community_update_logo", { communityId });
     return jsonFetch<CommunityResponseDTO>(
         url,
         {
