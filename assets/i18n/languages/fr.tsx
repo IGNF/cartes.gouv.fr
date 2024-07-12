@@ -27,6 +27,7 @@ import { PermissionsFrTranslations } from "../../entrepot/pages/users/permission
 import { CommunityListFrTranslations } from "../../espaceco/pages/communities/CommunityListTr";
 import { ManageCommunityFrTranslations } from "../../espaceco/pages/communities/ManageCommunityTr";
 import { ManageCommunityValidationsFrTranslations } from "../../espaceco/pages/communities/management/validationTr";
+import { SearchEnTranslations, SearchFrTranslations } from "../../espaceco/pages/communities/management/Search";
 import { TMSStyleFilesManagerFrTranslations } from "../../modules/Style/TMSStyleFilesManager";
 import { contactFrTranslations } from "../../pages/assistance/contact/Contact";
 import { mapboxStyleValidationFrTranslations } from "../../validations/MapboxStyleValidator";
@@ -35,6 +36,7 @@ import { BreadcrumbFrTranslations } from "../Breadcrumb";
 import { commonFrTranslations } from "../Common";
 import { RightsFrTranslations } from "../Rights";
 import { StyleFrTranslations } from "../Style";
+
 import type { Translations } from "../i18n";
 
 export const translations: Translations<"fr"> = {
@@ -75,4 +77,5 @@ export const translations: Translations<"fr"> = {
     CommunityList: CommunityListFrTranslations,
     ManageCommunity: ManageCommunityFrTranslations,
     ManageCommunityValidations: ManageCommunityValidationsFrTranslations,
+    Search: SearchFrTranslations,
 };

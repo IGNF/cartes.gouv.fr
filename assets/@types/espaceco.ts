@@ -8,7 +8,7 @@ export interface CommunityResponseDTO {
     email: string | null;
     attributes: object[];
     default_comment: string | null;
-    position: string;
+    position: string | null;
     zoom: number;
     all_members_can_valid: boolean;
     open_without_affiliation: boolean;

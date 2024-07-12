@@ -1,4 +1,4 @@
-import { declareComponentKeys } from "i18nifty/declareComponentKeys";
+import { declareComponentKeys } from "i18nifty";
 import { Translations } from "../i18n/i18n";
 
 export const { i18n } = declareComponentKeys<
