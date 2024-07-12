@@ -40,6 +40,7 @@ import { ManageCommunityValidationsFrTranslations } from "../../espaceco/pages/c
 import { TMSStyleFilesManagerFrTranslations } from "../../modules/Style/TMSStyleFilesManager/TMSStyleFilesManager.locale";
 import { BreadcrumbFrTranslations } from "../../modules/entrepot/breadcrumbs/Breadcrumb.locale";
 import { LoginDisabledFrTranslations } from "../../pages/LoginDisabled/LoginDisabled.locale";
+import { SearchEnTranslations, SearchFrTranslations } from "../../espaceco/pages/communities/management/Search";
 import { ContactFrTranslations } from "../../pages/assistance/contact/Contact.locale";
 import { mapboxStyleValidationFrTranslations } from "../../validations/mapbox/MapboxStyleValidator.locale";
 import { SldStyleValidationErrorsFrTranslations } from "../../validations/sld/SldStyleValidation.locale";
@@ -89,4 +90,5 @@ export const translations: Translations<"fr"> = {
     CommunityList: CommunityListFrTranslations,
     ManageCommunity: ManageCommunityFrTranslations,
     ManageCommunityValidations: ManageCommunityValidationsFrTranslations,
+    Search: SearchFrTranslations,
 };

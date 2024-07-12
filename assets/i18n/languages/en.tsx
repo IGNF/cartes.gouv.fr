@@ -37,6 +37,7 @@ import { PermissionsEnTranslations } from "../../entrepot/pages/users/permission
 import { CommunityListEnTranslations } from "../../espaceco/pages/communities/CommunityListTr";
 import { ManageCommunityEnTranslations } from "../../espaceco/pages/communities/ManageCommunityTr";
 import { ManageCommunityValidationsEnTranslations } from "../../espaceco/pages/communities/management/validationTr";
+import { SearchEnTranslations } from "../../espaceco/pages/communities/management/Search";
 import { TMSStyleFilesManagerEnTranslations } from "../../modules/Style/TMSStyleFilesManager/TMSStyleFilesManager.locale";
 import { BreadcrumbEnTranslations } from "../../modules/entrepot/breadcrumbs/Breadcrumb.locale";
 import { LoginDisabledEnTranslations } from "../../pages/LoginDisabled/LoginDisabled.locale";
@@ -93,4 +94,5 @@ export const translations: Translations<"en"> = {
     DatasheetList: DatasheetListEnTranslations,
     AccessRestrictions: AccessRestrictionsEnTranslations,
     LoginDisabled: LoginDisabledEnTranslations,
+    Search: SearchEnTranslations,
 };

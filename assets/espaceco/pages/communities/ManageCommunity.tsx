@@ -14,6 +14,7 @@ import Tabs from "@codegouvfr/react-dsfr/Tabs";
 import Description from "./management/Description";
 import { CommunityResponseDTO } from "../../../@types/espaceco";
 import { CartesApiException } from "../../../modules/jsonFetch";
+import ZoomAndCentering from "./management/ZoomAndCentering";
 
 type ManageCommunityProps = {
     communityId: number;
@@ -69,6 +70,8 @@ const ManageCommunity: FC<ManageCommunityProps> = ({ communityId }) => {
                                     switch (selectedTabId) {
                                         case "tab1":
                                             return <Description community={communityQuery.data} />;
+                                        case "tab3":
+                                            return <ZoomAndCentering community={communityQuery.data} />;
                                         default:
                                             return <p>`Content of ${selectedTabId}`</p>;
                                     }
