@@ -1,20 +1,20 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import Button from "@codegouvfr/react-dsfr/Button";
 import { Tile } from "@codegouvfr/react-dsfr/Tile";
+import { useMutation } from "@tanstack/react-query";
+import { declareComponentKeys } from "i18nifty";
 
 import AppLayout from "../../../components/Layout/AppLayout";
 import LoadingText from "../../../components/Utils/LoadingText";
 import { datastoreNavItems } from "../../../config/datastoreNavItems";
 import useDatastoreList from "../../../hooks/useDatastoreList";
-import Translator from "../../../modules/Translator";
-import { appRoot, routes } from "../../../router/router";
-import { useAuthStore } from "../../../stores/AuthStore";
-import { useMutation } from "@tanstack/react-query";
-import { CartesApiException } from "../../../modules/jsonFetch";
-import api from "../../api";
-import Button from "@codegouvfr/react-dsfr/Button";
-import { useApiEspaceCoStore } from "../../../stores/ApiEspaceCoStore";
-import { declareComponentKeys } from "i18nifty";
 import { Translations, useTranslation } from "../../../i18n/i18n";
+import Translator from "../../../modules/Translator";
+import { CartesApiException } from "../../../modules/jsonFetch";
+import { appRoot, routes } from "../../../router/router";
+import { useApiEspaceCoStore } from "../../../stores/ApiEspaceCoStore";
+import { useAuthStore } from "../../../stores/AuthStore";
+import api from "../../api";
 
 const DashboardPro = () => {
     const datastoreListQuery = useDatastoreList();
@@ -49,7 +49,7 @@ const DashboardPro = () => {
                                 linkProps={routes.my_account().link}
                                 imageUrl={`${appRoot}/dsfr/artwork/pictograms/digital/avatar.svg`}
                                 desc="Consulter et modifier mes informations personnelles"
-                                horizontal={true}
+                                orientation="horizontal"
                                 title="Mon compte"
                             />
                         </div>
@@ -58,7 +58,7 @@ const DashboardPro = () => {
                                 linkProps={routes.my_access_keys().link}
                                 imageUrl={`${appRoot}/dsfr/artwork/pictograms/system/padlock.svg`}
                                 desc="Consulter et modifier mes clés d'accès aux services privés"
-                                horizontal={true}
+                                orientation="horizontal"
                                 title="Mes clés d’accès"
                             />
                         </div>
@@ -83,7 +83,7 @@ const DashboardPro = () => {
                                 linkProps={routes.datastore_create_request().link}
                                 imageUrl={`${appRoot}/dsfr/artwork/pictograms/digital/mail-send.svg`}
                                 desc="Contacter le support pour créer un nouvel espace de travail"
-                                horizontal={true}
+                                orientation="horizontal"
                                 title={Translator.trans("datastore_creation_request.title")}
                             />
                         </div>
@@ -92,7 +92,7 @@ const DashboardPro = () => {
                                 linkProps={routes.join_community().link}
                                 imageUrl={`${appRoot}/dsfr/artwork/pictograms/environment/human-cooperation.svg`}
                                 desc="Demander à rejoindre une communauté publique"
-                                horizontal={true}
+                                orientation="horizontal"
                                 title={Translator.trans("communities_list.title")}
                             />
                         </div>

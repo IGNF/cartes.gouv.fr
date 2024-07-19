@@ -14,11 +14,11 @@ use App\Controller\ApiControllerInterface;
 use App\Exception\ApiException;
 use App\Exception\AppException;
 use App\Exception\CartesApiException;
+use App\Services\DatastoreService;
 use App\Services\EntrepotApi\ProcessingApiService;
 use App\Services\EntrepotApi\StoredDataApiService;
 use App\Services\EntrepotApi\UploadApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
@@ -34,9 +34,9 @@ class UploadController extends AbstractController implements ApiControllerInterf
 {
     public function __construct(
         private UploadApiService $uploadApiService,
+        private DatastoreService $datastoreService,
         private ProcessingApiService $processingApiService,
         private StoredDataApiService $storedDataApiService,
-        private ParameterBagInterface $parameterBag,
     ) {
     }
 
@@ -230,10 +230,10 @@ class UploadController extends AbstractController implements ApiControllerInterf
                     switch ($currentStepStatus) {
                         case JobStatuses::WAITING:
                             /** @var array<string> */
-                            $apiEntrepotProcessings = $this->parameterBag->get('api_entrepot')['processings'];
+                            $processing = $this->datastoreService->getProcIntegrateVectorFilesInBase($datastoreId);
 
                             $procExecBody = [
-                                'processing' => $apiEntrepotProcessings['int_vect_files_db'],
+                                'processing' => $processing,
                                 'inputs' => [
                                     'upload' => [$upload['_id']],
                                 ],

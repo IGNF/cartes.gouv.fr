@@ -10,10 +10,11 @@ const Documentation = () => {
 
                     <p>
                         Les premiers services de la <strong>Géoplateforme</strong> (API entrepôt, API géocodage , API calcul d’itinéraire, flux WFS, WMS, WMTS…)
-                        sont disponibles.
+                        sont disponibles et d’ores et déjà accessibles en direct.
                         <br />
-                        Dans l’attente de leur catalogage sur <strong>cartes.gouv.fr</strong> ils sont accessibles en direct. Vous pouvez accéder à la
-                        documentation de ces services en cliquant sur «&nbsp;en savoir plus&nbsp;».
+                        Ils sont progressivement référencés dans le catalogue <strong>cartes.gouv.fr</strong>.
+                        <br />
+                        Vous pouvez accéder à la documentation de ces services en cliquant sur «&nbsp;en savoir plus&nbsp;».
                     </p>
 
                     <p className={fr.cx("fr-btns-group--center")}>

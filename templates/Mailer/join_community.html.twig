@@ -12,7 +12,11 @@
             <strong>{{ 'mailer.user_id'|trans }} : </strong>{{ app.user.id }}<br>
             <strong>{{ 'mailer.date'|trans }} : </strong>{{ sendDate|date('d-m-Y H:i', 'Europe/Paris') }}
         </p>
-        <strong>{{ 'join_community.email_support.message'|trans }}</strong><br>
-        {{ message|e }}
+        {% if message is not empty %}
+            <strong>{{ 'join_community.email_support.message'|trans }}</strong><br>
+            {{ message|e }}
+        {% else %}
+            {{ 'join_community.email_support.no_message'|trans }}
+        {% endif %}
      </div>
 {% endblock %}

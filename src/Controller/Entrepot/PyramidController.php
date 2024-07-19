@@ -2,26 +2,26 @@
 
 namespace App\Controller\Entrepot;
 
-use App\Exception\ApiException;
-use App\Dto\Pyramid\AddPyramidDTO;
-use App\Dto\Pyramid\CompositionDTO;
-use App\Exception\CartesApiException;
-use App\Services\CapabilitiesService;
-use App\Dto\Pyramid\PublishPyramidDTO;
 use App\Constants\EntrepotApi\CommonTags;
+use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Constants\EntrepotApi\ZoomLevels;
 use App\Controller\ApiControllerInterface;
-use Symfony\Component\Routing\Annotation\Route;
-use App\Constants\EntrepotApi\ConfigurationTypes;
+use App\Dto\Pyramid\AddPyramidDTO;
+use App\Dto\Pyramid\CompositionDTO;
+use App\Dto\Pyramid\PublishPyramidDTO;
+use App\Exception\ApiException;
+use App\Exception\CartesApiException;
+use App\Services\CapabilitiesService;
+use App\Services\DatastoreService;
+use App\Services\EntrepotApi\CartesMetadataApiService;
+use App\Services\EntrepotApi\CartesServiceApiService;
+use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\ProcessingApiService;
 use App\Services\EntrepotApi\StoredDataApiService;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use App\Services\EntrepotApi\CartesServiceApiService;
-use App\Services\EntrepotApi\ConfigurationApiService;
-use App\Services\EntrepotApi\CartesMetadataApiService;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Routing\Annotation\Route;
 
 #[Route(
     '/api/datastores/{datastoreId}/pyramid',
@@ -36,8 +36,8 @@ class PyramidController extends ServiceController implements ApiControllerInterf
         private ConfigurationApiService $configurationApiService,
         private StoredDataApiService $storedDataApiService,
         private ProcessingApiService $processingApiService,
+        private DatastoreService $datastoreService,
         CartesServiceApiService $cartesServiceApiService,
-        private ParameterBagInterface $parameterBag,
         CapabilitiesService $capabilitiesService,
         private CartesMetadataApiService $cartesMetadataApiService,
     ) {
@@ -79,10 +79,10 @@ class PyramidController extends ServiceController implements ApiControllerInterf
                 $parameters['area'] = $dto->area;
             }
 
-            $apiEntrepotProcessings = $this->parameterBag->get('api_entrepot')['processings'];
+            $processing = $this->datastoreService->getProcGeneratePyramid($datastoreId);
 
             $requestBody = [
-                'processing' => $apiEntrepotProcessings['create_vect_pyr'],
+                'processing' => $processing,
                 'inputs' => ['stored_data' => [$dto->vectordb_id]],
                 'output' => ['stored_data' => [
                     'name' => $dto->technical_name,

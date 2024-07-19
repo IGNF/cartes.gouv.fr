@@ -75,12 +75,6 @@ class ServiceController extends AbstractController implements ApiControllerInter
 
             $this->cartesServiceApiService->unpublish($datastoreId, $offeringId);
 
-            if (isset($configuration['tags'][CommonTags::DATASHEET_NAME])) {
-                $datasheetName = $configuration['tags'][CommonTags::DATASHEET_NAME];
-
-                $this->cartesMetadataApiService->updateLayers($datastoreId, $datasheetName);
-            }
-
             // Mise a jour du capabilities
             try {
                 // Recherche du endpoint
@@ -91,6 +85,12 @@ class ServiceController extends AbstractController implements ApiControllerInter
                     $this->capabilitiesService->createOrUpdate($datastoreId, $endpoints[0]['endpoint'], $offering['urls'][0]['url']);
                 }
             } catch (\Exception $e) {
+            }
+
+            if (isset($configuration['tags'][CommonTags::DATASHEET_NAME])) {
+                $datasheetName = $configuration['tags'][CommonTags::DATASHEET_NAME];
+
+                $this->cartesMetadataApiService->updateLayers($datastoreId, $datasheetName);
             }
 
             return new JsonResponse(null, Response::HTTP_NO_CONTENT);

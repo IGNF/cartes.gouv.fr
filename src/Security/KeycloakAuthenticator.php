@@ -84,8 +84,14 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
         $referer = $request->getSession()->get('referer', null);
         $targetPath = $this->getTargetPath($request->getSession(), $firewallName);
 
-        $redirectUrl = $referer ?? $targetPath ?? $this->router->generate(self::SUCCESS_ROUTE);
+        $redirectUrl = $referer ?? $targetPath ?? $this->router->generate(self::SUCCESS_ROUTE, [], RouterInterface::ABSOLUTE_URL);
         $redirectUrl = str_replace('authentication_failed=1', '', $redirectUrl);
+
+        // redirection vers le tableau de bord
+        if ('/' === parse_url($redirectUrl, PHP_URL_PATH)) {
+            $redirectUrl = $this->router->generate(self::SUCCESS_ROUTE, [], RouterInterface::ABSOLUTE_URL);
+            $redirectUrl .= 'tableau-de-bord';
+        }
 
         return new RedirectResponse($redirectUrl);
     }

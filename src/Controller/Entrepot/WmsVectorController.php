@@ -95,18 +95,19 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
                 $this->addPermissionForCurrentCommunity($datastoreId, $offering);
             }
 
+            
+            // Création ou mise à jour du capabilities
+            try {
+                $this->capabilitiesService->createOrUpdate($datastoreId, $endpoint, $offering['urls'][0]['url']);
+            } catch (\Exception $e) {
+            }
+
             // création ou mise à jour de metadata
             $data['languages'] = json_decode($data['languages'], true);
             $data['category'] = json_decode($data['category'], true);
             $data['keywords'] = json_decode($data['keywords'], true);
             $data['free_keywords'] = json_decode($data['free_keywords'], true);
             $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $data);
-
-            // Création ou mise à jour du capabilities
-            try {
-                $this->capabilitiesService->createOrUpdate($datastoreId, $endpoint, $offering['urls'][0]['url']);
-            } catch (\Exception $e) {
-            }
 
             return $this->json($offering);
         } catch (ApiException $ex) {
@@ -162,6 +163,12 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
 
             $offering['configuration'] = $configuration;
 
+            // Création ou mise à jour du capabilities
+            try {
+                $this->capabilitiesService->createOrUpdate($datastoreId, $endpoint, $offering['urls'][0]['url']);
+            } catch (\Exception $e) {
+            }
+
             $this->cleanUnusedStyleFiles($datastoreId, $oldConfiguration, $styleFilesByTable);
 
             // création ou mise à jour de metadata
@@ -170,12 +177,6 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
             $data['keywords'] = json_decode($data['keywords'], true);
             $data['free_keywords'] = json_decode($data['free_keywords'], true);
             $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $data);
-
-            // Création ou mise à jour du capabilities
-            try {
-                $this->capabilitiesService->createOrUpdate($datastoreId, $endpoint, $offering['urls'][0]['url']);
-            } catch (\Exception $e) {
-            }
 
             return $this->json($offering);
         } catch (ApiException $ex) {

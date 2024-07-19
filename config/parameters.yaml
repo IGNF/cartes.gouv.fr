@@ -10,11 +10,15 @@ parameters:
     iam_client_id: "%env(resolve:IAM_CLIENT_ID)%"
     iam_client_secret: "%env(resolve:IAM_CLIENT_SECRET)%"
 
-    service_account:
-        client_id: "%env(resolve:SERVICE_ACCOUNT_CLIENT_ID)%"
-        client_secret: "%env(resolve:SERVICE_ACCOUNT_CLIENT_SECRET)%"
+    sandbox_service_account:
+        client_id: "%env(resolve:SANDBOX_SERVICE_ACCOUNT_CLIENT_ID)%"
+        client_secret: "%env(resolve:SANDBOX_SERVICE_ACCOUNT_CLIENT_SECRET)%"
 
-    sandbox_community_id: "%env(resolve:SANDBOX_COMMUNITY_ID)%"
+    sandbox:
+        community_id: "%env(resolve:SANDBOX_COMMUNITY_ID)%"
+        processings:
+            int_vect_files_db: "%env(resolve:SANDBOX_PROC_INT_VECT_FILES_DB)%"
+            create_vect_pyr: "%env(resolve:SANDBOX_PROC_CREATE_VECT_PYR)%"
 
     api_entrepot_url: "%env(resolve:API_ENTREPOT_URL)%"
     annexes_url: "%env(resolve:ANNEXES_URL)%"

@@ -1,0 +1,31 @@
+.frx-text--center {
+    text-align: center;
+}
+
+.frx-callout--offer-root {
+    height: 100%;
+}
+
+.frx-callout--offer-text {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 32px;
+}
+
+.frx-callout--offer-text-tagline {
+    order: 1;
+}
+
+.frx-callout--offer-text-list {
+    flex: 1 1 auto;
+    order: 2;
+}
+
+.frx-callout--offer-text-price {
+    flex: 1 1 auto;
+    order: 3;
+    align-items: center;
+    align-content: center;
+    flex-direction: column;
+}
