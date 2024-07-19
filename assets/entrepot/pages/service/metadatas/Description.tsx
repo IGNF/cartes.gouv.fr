@@ -132,7 +132,6 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
                         stateRelatedMessage={errors?.category?.message?.toString()}
                         value={field.value}
                         onChange={(_, value) => field.onChange(value)}
-                        // @ts-expect-error fausse alerte
                         controllerField={field}
                     />
                 )}
@@ -149,7 +148,6 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
                         stateRelatedMessage={errors?.keywords?.message?.toString()}
                         value={field.value}
                         onChange={(_, value) => field.onChange(value)}
-                        // @ts-expect-error fausse alerte
                         controllerField={field}
                     />
                 )}
@@ -167,7 +165,6 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
                         stateRelatedMessage={errors?.free_keywords?.message?.toString()}
                         value={field.value}
                         onChange={(_, value) => field.onChange(value)}
-                        // @ts-expect-error fausse alerte
                         controllerField={field}
                     />
                 )}

@@ -103,7 +103,6 @@ const AdditionalInfo: FC<AdditionalInfoProps> = ({ /*storedData, datastoreId,*/ 
                             options={languagesOptions}
                             searchFilter={{ limit: 5 }}
                             onChange={(_, value) => field.onChange(value)}
-                            // @ts-expect-error fausse alerte
                             controllerField={field}
                         />
                     );
