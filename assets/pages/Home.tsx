@@ -1,8 +1,8 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Badge from "@codegouvfr/react-dsfr/Badge";
-import { RegisteredLinkProps } from "@codegouvfr/react-dsfr/link";
-import { FC, ReactNode, useEffect } from "react";
+import Tile from "@codegouvfr/react-dsfr/Tile";
+import { useEffect } from "react";
 
 import AppLayout from "../components/Layout/AppLayout";
 import SymfonyRouting from "../modules/Routing";
@@ -10,46 +10,6 @@ import { appRoot, catalogueUrl, routes, useRoute } from "../router/router";
 import { useAuthStore } from "../stores/AuthStore";
 
 import "../sass/pages/home.scss";
-
-// TODO composant Tile temporaire, à remplacer par Tile de react-dsfr quand il sera mis à jour avec les nouveautés du composant
-type CustomTileProps = {
-    title: string;
-    desc?: ReactNode;
-    detail?: ReactNode;
-    start?: ReactNode;
-    linkProps?: RegisteredLinkProps;
-    enlargeLink?: boolean;
-    pictogramUrl?: string;
-};
-const CustomTile: FC<CustomTileProps> = ({ title, desc, detail, start, linkProps, enlargeLink = false, pictogramUrl }) => {
-    return (
-        <div className={fr.cx("fr-tile", enlargeLink && "fr-enlarge-link")}>
-            <div className="fr-tile__body">
-                <div className="fr-tile__content">
-                    <h3 className="fr-tile__title">{linkProps && <a {...linkProps}>{title}</a>}</h3>
-
-                    {desc && <p className="fr-tile__desc">{desc}</p>}
-
-                    {detail && <p className="fr-tile__detail">{detail}</p>}
-
-                    {start && <div className="fr-tile__start">{start}</div>}
-                </div>
-            </div>
-
-            {pictogramUrl && (
-                <div className="fr-tile__header">
-                    <div className="fr-tile__pictogram">
-                        <svg aria-hidden="true" className="fr-artwork" viewBox="0 0 80 80" width="80px" height="80px">
-                            <use className="fr-artwork-decorative" href={`${pictogramUrl}#artwork-decorative`} />
-                            <use className="fr-artwork-minor" href={`${pictogramUrl}#artwork-minor`} />
-                            <use className="fr-artwork-major" href={`${pictogramUrl}#artwork-major`} />
-                        </svg>
-                    </div>
-                </div>
-            )}
-        </div>
-    );
-};
 
 const Home = () => {
     const { params } = useRoute();
@@ -148,7 +108,7 @@ const Home = () => {
 
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-grid-row--center", "fr-px-md-8w")}>
                     <div className={fr.cx("fr-col-12", "fr-col-md-6", "fr-col-lg-4") + " frx-text--center"}>
-                        <CustomTile
+                        <Tile
                             title="Stockez, traitez et partagez vos données"
                             desc={"En toute autonomie, selon la diffusion de votre choix depuis cartes.gouv.fr et sur vos sites et applis."}
                             start={
@@ -157,13 +117,14 @@ const Home = () => {
                                 </Badge>
                             }
                             linkProps={routes.dashboard_pro().link}
-                            enlargeLink={true}
-                            pictogramUrl={`${appRoot}/dsfr/artwork/pictograms/system/system.svg`}
+                            enlargeLinkOrButton={true}
+                            imageUrl={`${appRoot}/dsfr/artwork/pictograms/system/system.svg`}
+                            imageSvg={true}
                         />
                     </div>
 
                     <div className={fr.cx("fr-col-12", "fr-col-md-6", "fr-col-lg-4") + " frx-text--center"}>
-                        <CustomTile
+                        <Tile
                             title="Consultez et utilisez des géodonnées"
                             desc={"Grâce au catalogue et aux cartes en ligne, grâce aux services et données de la communauté Géoplateforme."}
                             start={
@@ -174,13 +135,14 @@ const Home = () => {
                             linkProps={{
                                 href: catalogueUrl,
                             }}
-                            enlargeLink={true}
-                            pictogramUrl={`${appRoot}/dsfr/artwork/pictograms/map/map.svg`}
+                            enlargeLinkOrButton={true}
+                            imageUrl={`${appRoot}/dsfr/artwork/pictograms/map/map.svg`}
+                            imageSvg={true}
                         />
                     </div>
 
                     <div className={fr.cx("fr-col-12", "fr-col-md-6", "fr-col-lg-4") + " frx-text--center"}>
-                        <CustomTile
+                        <Tile
                             title="Gérez et animez vos communautés"
                             desc={"Via des guichets collaboratifs pour entretenir et enrichir les données."}
                             start={
@@ -196,12 +158,13 @@ const Home = () => {
                                     </a>
                                 </span>
                             }
-                            pictogramUrl={`${appRoot}/dsfr/artwork/pictograms/environment/human-cooperation.svg`}
+                            imageUrl={`${appRoot}/dsfr/artwork/pictograms/environment/human-cooperation.svg`}
+                            imageSvg={true}
                         />
                     </div>
 
                     <div className={fr.cx("fr-col-12", "fr-col-md-6", "fr-col-lg-4") + " frx-text--center"}>
-                        <CustomTile
+                        <Tile
                             title="Créez des cartes"
                             desc={
                                 "Grâce aux outils de traitement, de datavisualisation, de création et habillage de cartes et, à terme de création et habillage de portails cartographiques personnalisés."
@@ -219,12 +182,13 @@ const Home = () => {
                                     </a>
                                 </span>
                             }
-                            pictogramUrl={`${appRoot}/dsfr/artwork/pictograms/map/location-france.svg`}
+                            imageUrl={`${appRoot}/dsfr/artwork/pictograms/map/location-france.svg`}
+                            imageSvg={true}
                         />
                     </div>
 
                     <div className={fr.cx("fr-col-12", "fr-col-md-6", "fr-col-lg-4") + " frx-text--center"}>
-                        <CustomTile
+                        <Tile
                             title="Ajoutez de nouvelles fonctionnalités"
                             desc={
                                 "Grâce aux outils mis à disposition et en appui sur l’usine logicielle de la Géoplateforme, enrichissez l’offre de service de la Géoplateforme."
@@ -234,7 +198,8 @@ const Home = () => {
                                     Intégré en 2025
                                 </Badge>
                             }
-                            pictogramUrl={`${appRoot}/dsfr/artwork/pictograms/map/location-france.svg`}
+                            imageUrl={`${appRoot}/dsfr/artwork/pictograms/map/location-france.svg`}
+                            imageSvg={true}
                         />
                     </div>
                 </div>
