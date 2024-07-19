@@ -1,5 +1,4 @@
 {
-    "$schema": "https://getcomposer.org/schema.json",
     "type": "project",
     "license": "proprietary",
     "minimum-stability": "stable",
