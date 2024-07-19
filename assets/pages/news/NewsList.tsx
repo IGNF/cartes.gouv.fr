@@ -30,7 +30,7 @@ const NewsListItem: FC<NewsListItemProps> = ({ slug, newsArticle }) => {
                             __html:
                                 newsArticle?.short_description && newsArticle?.short_description.length > SHORT_DESC_MAX_CHAR
                                     ? newsArticle?.short_description.substring(0, 100) + "..."
-                                    : newsArticle?.short_description ?? "",
+                                    : (newsArticle?.short_description ?? ""),
                         }}
                     />
                 }
