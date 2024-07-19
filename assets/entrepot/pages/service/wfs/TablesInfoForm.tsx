@@ -123,7 +123,6 @@ const TableInfosForm: FC<TablesInfoFormProps> = ({ visible, tables, state, state
                                                 state={errors.table_infos?.[table.name]?.["keywords"] ? "error" : "default"}
                                                 stateRelatedMessage={errors.table_infos?.[table.name]?.["keywords"]?.message?.toString()}
                                                 onChange={(_, value) => field.onChange(value)}
-                                                // @ts-expect-error fausse alerte
                                                 controllerField={field}
                                                 defaultValue={getFormValues(`table_infos.${table.name}.keywords`) ?? []}
                                             />
