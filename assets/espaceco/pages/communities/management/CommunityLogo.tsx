@@ -200,7 +200,7 @@ const CommunityLogo: FC<CommunityLogoProps> = ({ communityId, logoUrl }) => {
                             priority="tertiary no outline"
                             onClick={AddLogoModal.open}
                         />
-                        {logoUrl !== null && (
+                        {isValid && (
                             <Button
                                 title={t("logo_action", { action: "delete" })}
                                 iconId="fr-icon-delete-line"
