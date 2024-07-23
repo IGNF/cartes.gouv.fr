@@ -1,17 +1,17 @@
-.zoom-range-map {
-    height: 300px;
-}
-
-.ui-map-zoom-levels {
+.frx-zoom-range {
     display: flex;
-    .ui-top-zoom-level,
-    .ui-bottom-zoom-level {
+    .frx-top-zoom,
+    .frx-bottom-zoom {
         height: 300px;
         border: 1px solid lightgray;
         flex: 0 1 50%;
         margin: 0 1em;
     }
-    .ui-bottom-zoom-level {
+    .frx-bottom-zoom {
         margin-left: 0;
+    }
+
+    .frx-zoom-range-sm {
+        height: 150px;
     }
 }

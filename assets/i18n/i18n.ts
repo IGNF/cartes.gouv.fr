@@ -53,7 +53,7 @@ export type ComponentKey =
     | typeof import("../espaceco/pages/communities/CommunityListTr").i18n
     | typeof import("../espaceco/pages/communities/ManageCommunityTr").i18n
     | typeof import("../espaceco/pages/communities/management/validationTr").i18n
-    | typeof import("../espaceco/pages/communities/management/Search").i18n;
+    | typeof import("../espaceco/pages/communities/management/SearchTr").i18n;
 
 export type Translations<L extends Language> = GenericTranslations<ComponentKey, Language, typeof fallbackLanguage, L>;
 export type LocalizedString = Parameters<typeof resolveLocalizedString>[0];

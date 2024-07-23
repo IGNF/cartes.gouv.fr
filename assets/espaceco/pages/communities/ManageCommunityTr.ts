@@ -26,6 +26,21 @@ export const { i18n } = declareComponentKeys<
     | "modal.logo.title"
     | "modal.logo.file_hint"
     | "desc.keywords"
+    | "zoom.consistant_error"
+    | "zoom.position"
+    | "zoom.position_hint"
+    | "zoom.zoom_range"
+    | "zoom.zoom_range_hint"
+    | "zoom.manage_extent"
+    | "zoom.extent"
+    | "zoom.extent_hint"
+    | "zoom.choice.autocomplete"
+    | "zoom.choice.manual"
+    | "zoom.extent_enter_manually"
+    | "zoom.xmin"
+    | "zoom.xmax"
+    | "zoom.ymin"
+    | "zoom.ymax"
 >()("ManageCommunity");
 
 export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"] = {
@@ -59,6 +74,23 @@ export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"
     "modal.logo.title": "Logo du guichet",
     "modal.logo.file_hint": "Taille maximale : 5 Mo. Formats acceptés : jpg, png",
     "desc.keywords": "Mots-clés (optionnel)",
+    "zoom.consistant_error": "Emprise et position ne sont pas cohérents",
+    "zoom.position": "Position",
+    "zoom.position_hint": "Fixer la position et définissez le niveau de zoom (utilisez votre souris ou la barre de recherche ci-dessous",
+    "zoom.zoom_range": "Gérer les niveaux de zoom minimum et maximum permis (optionnel)",
+    "zoom.zoom_range_hint":
+        "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Libero quisquam hic veritatis, ex ipsum illo labore sint perspiciatis quidem architecto!",
+    "zoom.manage_extent": "Gérer les bornes de navigation (optionnel)",
+    "zoom.extent": "Bornes de navigation",
+    "zoom.extent_hint":
+        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime vitae maiores suscipit tempore sequi reiciendis nulla optio doloremque! Unde, illo nemo ab accusantium fugiat minus? Natus inventore dolore velit, nostrum dolores molestiae sint laborum, obcaecati, ullam provident repellat consectetur accusamus sunt rerum nobis sequi? Sed maxime fugit dolore! Ipsam, veritatis.",
+    "zoom.choice.autocomplete": "Recherche d'une emprise administrative",
+    "zoom.choice.manual": "Saisie manuelle",
+    "zoom.extent_enter_manually": "Entrer les coordonnées (lon,lat)",
+    "zoom.xmin": "X min",
+    "zoom.xmax": "X max",
+    "zoom.ymin": "Y min",
+    "zoom.ymax": "Y max",
 };
 
 export const ManageCommunityEnTranslations: Translations<"en">["ManageCommunity"] = {
@@ -92,4 +124,19 @@ export const ManageCommunityEnTranslations: Translations<"en">["ManageCommunity"
     "modal.logo.title": undefined,
     "modal.logo.file_hint": undefined,
     "desc.keywords": undefined,
+    "zoom.consistant_error": undefined,
+    "zoom.position": "Position",
+    "zoom.position_hint": undefined,
+    "zoom.zoom_range": undefined,
+    "zoom.zoom_range_hint": undefined,
+    "zoom.manage_extent": undefined,
+    "zoom.extent": undefined,
+    "zoom.extent_hint": undefined,
+    "zoom.choice.autocomplete": undefined,
+    "zoom.choice.manual": undefined,
+    "zoom.extent_enter_manually": undefined,
+    "zoom.xmin": "X min",
+    "zoom.xmax": "X max",
+    "zoom.ymin": "Y min",
+    "zoom.ymax": "Y max",
 };

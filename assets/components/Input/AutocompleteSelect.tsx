@@ -76,7 +76,6 @@ const AutocompleteSelect = <T,>(props: AutocompleteSelectProps<T>) => {
                     {label}
                     {hintText && <span className="fr-hint-text">{hintText}</span>}
                 </label>
-
                 <Autocomplete
                     {...controllerField}
                     id={inputId}

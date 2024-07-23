@@ -27,7 +27,7 @@ import { PermissionsEnTranslations } from "../../entrepot/pages/users/permission
 import { CommunityListEnTranslations } from "../../espaceco/pages/communities/CommunityListTr";
 import { ManageCommunityEnTranslations } from "../../espaceco/pages/communities/ManageCommunityTr";
 import { ManageCommunityValidationsEnTranslations } from "../../espaceco/pages/communities/management/validationTr";
-import { SearchEnTranslations } from "../../espaceco/pages/communities/management/Search";
+import { SearchEnTranslations } from "../../espaceco/pages/communities/management/SearchTr";
 import { TMSStyleFilesManagerEnTranslations } from "../../modules/Style/TMSStyleFilesManager";
 import { contactEnTranslations } from "../../pages/assistance/contact/Contact";
 import { mapboxStyleValidationEnTranslations } from "../../validations/MapboxStyleValidator";

@@ -10,6 +10,9 @@ export interface CommunityResponseDTO {
     default_comment: string | null;
     position: string | null;
     zoom: number;
+    zoom_min: number | null;
+    zoom_max: number | null;
+    extent: number[] | null;
     all_members_can_valid: boolean;
     open_without_affiliation: boolean;
     open_with_email?: string[];
@@ -27,6 +30,7 @@ export interface Grids {
     title: string;
     type: string;
     deleted: boolean;
+    extent: number[];
 }
 
 export interface CommunityPatchDTO extends Partial<Omit<CommunityResponseDTO, "logo_url">> {
