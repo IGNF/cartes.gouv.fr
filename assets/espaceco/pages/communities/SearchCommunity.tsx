@@ -39,6 +39,7 @@ const SearchCommunity: FC<SearchCommunityProps> = ({ filter, onChange }) => {
                     noOptionsText={t("no_options")}
                     getOptionLabel={(option) => option.name}
                     options={searchQuery.data || []}
+                    filterOptions={(x) => x}
                     renderInput={(params) => (
                         <TextField
                             {...params}

@@ -13,6 +13,7 @@ const RQKeys = {
         limit.toString(),
     ],
     searchAddress: (search: string): string[] => ["searchAddress", search],
+    searchGrids: (text: string): string[] => ["searchGrids", text],
 };
 
 export default RQKeys;
