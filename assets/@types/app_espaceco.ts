@@ -40,3 +40,9 @@ export type SearchResult = {
     status: string;
     results: (Address | Poi)[];
 };
+
+export type SearchGridFilters = {
+    searchBy?: ("name" | "title")[];
+    fields?: ("name" | "title" | "type" | "extent" | "deleted")[];
+    adm?: boolean;
+};

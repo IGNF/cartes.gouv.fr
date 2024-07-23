@@ -1,0 +1,26 @@
+.ol-target {
+    inset: 0;
+    pointer-events: none !important;
+    background-color: transparent !important ;
+}
+
+.ol-target:before,
+.ol-target:after {
+    content: "";
+    position: absolute;
+    background: var(--drawcenter-background);
+}
+
+.ol-target:before {
+    width: 100%;
+    left: 0;
+    top: 50%;
+    height: var(--drawcenter-width, 1px);
+}
+
+.ol-target:after {
+    height: 100%;
+    left: 50%;
+    top: 0;
+    width: var(--drawcenter-width, 1px);
+}

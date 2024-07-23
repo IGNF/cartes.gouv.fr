@@ -12,6 +12,11 @@ export const { i18n } = declareComponentKeys<
     | "description.logo.size_error"
     | "description.logo.dimensions_error"
     | "description.logo.format_error"
+    | { K: "zoom.extent.nan"; P: { field: string }; R: string }
+    | { K: "zoom.extent.mandatory"; P: { field: string }; R: string }
+    | { K: "zoom.f1_less_than_f2"; P: { field1: string; field2: string }; R: string }
+    | { K: "zoom.less_than"; P: { field: string; v: number }; R: string }
+    | { K: "zoom.greater_than"; P: { field: string; v: number }; R: string }
 >()("ManageCommunityValidations");
 
 export const ManageCommunityValidationsFrTranslations: Translations<"fr">["ManageCommunityValidations"] = {
@@ -24,6 +29,11 @@ export const ManageCommunityValidationsFrTranslations: Translations<"fr">["Manag
     "description.logo.size_error": "La taille du fichier ne peut excéder 5 Mo",
     "description.logo.dimensions_error": "Les dimensions maximales de l'image sont de 400px x 400px",
     "description.logo.format_error": "Le fichier doit être au format jpeg ou png",
+    "zoom.extent.nan": ({ field }) => `${field} n'est pas un nombre`,
+    "zoom.extent.mandatory": ({ field }) => `La valeur ${field} est obligatoire`,
+    "zoom.f1_less_than_f2": ({ field1, field2 }) => `La valeur de ${field1} doit être inférieure à la valeur de ${field2}`,
+    "zoom.less_than": ({ field, v }) => `La valeur de ${field} doit être inférieure ou égale à ${v}`,
+    "zoom.greater_than": ({ field, v }) => `La valeur de ${field} doit être supérieure ou égale à ${v}`,
 };
 
 export const ManageCommunityValidationsEnTranslations: Translations<"en">["ManageCommunityValidations"] = {
@@ -36,4 +46,9 @@ export const ManageCommunityValidationsEnTranslations: Translations<"en">["Manag
     "description.logo.size_error": undefined,
     "description.logo.dimensions_error": undefined,
     "description.logo.format_error": undefined,
+    "zoom.extent.nan": ({ field }) => `${field} is not a number`,
+    "zoom.extent.mandatory": ({ field }) => `${field} value is mandatory`,
+    "zoom.f1_less_than_f2": ({ field1, field2 }) => `${field1} value must be less then ${field2} value`,
+    "zoom.less_than": ({ field, v }) => `${field} value must be less or equal to ${v}`,
+    "zoom.greater_than": ({ field, v }) => `${field} value must be greater or equal to ${v}`,
 };
