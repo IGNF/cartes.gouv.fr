@@ -7,6 +7,7 @@ const { i18n } = declareComponentKeys<
     | "add"
     | "adding"
     | "modify"
+    | "apply"
     | "modifying"
     | "removing"
     | "loading"
@@ -41,6 +42,7 @@ export const commonFrTranslations: Translations<"fr">["Common"] = {
     add: "Ajouter",
     adding: "Ajout en cours ...",
     modify: "Modifier",
+    apply: "Appliquer",
     modifying: "Modification en cours ...",
     removing: "Suppression en cours ...",
     loading: "Chargement ...",
@@ -74,6 +76,7 @@ export const commonEnTranslations: Translations<"en">["Common"] = {
     add: "Add",
     adding: "Adding ...",
     modify: "Modify",
+    apply: "Apply",
     modifying: "modifying ...",
     removing: "Removing ...",
     loading: "Loading ...",
