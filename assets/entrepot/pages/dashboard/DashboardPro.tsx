@@ -47,7 +47,7 @@ const DashboardPro = () => {
                         <div className={fr.cx("fr-col-12", "fr-col-sm-6")}>
                             <Tile
                                 linkProps={routes.my_account().link}
-                                imageUrl={`${appRoot}/dsfr/artwork/pictograms/digital/avatar.svg`}
+                                imageUrl={`${appRoot}/build/react-dsfr/dsfr/artwork/pictograms/digital/avatar.svg`}
                                 desc="Consulter et modifier mes informations personnelles"
                                 orientation="horizontal"
                                 title="Mon compte"
@@ -56,7 +56,7 @@ const DashboardPro = () => {
                         <div className={fr.cx("fr-col-12", "fr-col-sm-6")}>
                             <Tile
                                 linkProps={routes.my_access_keys().link}
-                                imageUrl={`${appRoot}/dsfr/artwork/pictograms/system/padlock.svg`}
+                                imageUrl={`${appRoot}/build/react-dsfr/dsfr/artwork/pictograms/system/padlock.svg`}
                                 desc="Consulter et modifier mes clés d'accès aux services privés"
                                 orientation="horizontal"
                                 title="Mes clés d’accès"
@@ -81,7 +81,7 @@ const DashboardPro = () => {
                         <div className={fr.cx("fr-col-12", "fr-col-sm-6")}>
                             <Tile
                                 linkProps={routes.datastore_create_request().link}
-                                imageUrl={`${appRoot}/dsfr/artwork/pictograms/digital/mail-send.svg`}
+                                imageUrl={`${appRoot}/build/react-dsfr/dsfr/artwork/pictograms/digital/mail-send.svg`}
                                 desc="Contacter le support pour créer un nouvel espace de travail"
                                 orientation="horizontal"
                                 title={Translator.trans("datastore_creation_request.title")}
@@ -90,7 +90,7 @@ const DashboardPro = () => {
                         <div className={fr.cx("fr-col-12", "fr-col-sm-6")}>
                             <Tile
                                 linkProps={routes.join_community().link}
-                                imageUrl={`${appRoot}/dsfr/artwork/pictograms/environment/human-cooperation.svg`}
+                                imageUrl={`${appRoot}/build/react-dsfr/dsfr/artwork/pictograms/environment/human-cooperation.svg`}
                                 desc="Demander à rejoindre une communauté publique"
                                 orientation="horizontal"
                                 title={Translator.trans("communities_list.title")}

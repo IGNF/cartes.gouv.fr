@@ -10,6 +10,7 @@ import { appRoot, catalogueUrl, routes, useRoute } from "../router/router";
 import { useAuthStore } from "../stores/AuthStore";
 
 import "../sass/pages/home.scss";
+import Button from "@codegouvfr/react-dsfr/Button";
 
 const Home = () => {
     const { params } = useRoute();
@@ -35,6 +36,10 @@ const Home = () => {
                     }
                 />
             )}
+
+            <Button iconId="ri-add-box-fill">Hello</Button>
+            <Button iconId="ri-expand-height-fill">Hello</Button>
+            <Button iconId="ri-mail-star-fill">Hello</Button>
 
             {/* Section : Présentation */}
             <div className="c-section c-section--gray">
@@ -118,7 +123,7 @@ const Home = () => {
                             }
                             linkProps={routes.dashboard_pro().link}
                             enlargeLinkOrButton={true}
-                            imageUrl={`${appRoot}/dsfr/artwork/pictograms/system/system.svg`}
+                            imageUrl={`${appRoot}/build/react-dsfr/dsfr/artwork/pictograms/system/system.svg`}
                             imageSvg={true}
                         />
                     </div>
@@ -136,7 +141,7 @@ const Home = () => {
                                 href: catalogueUrl,
                             }}
                             enlargeLinkOrButton={true}
-                            imageUrl={`${appRoot}/dsfr/artwork/pictograms/map/map.svg`}
+                            imageUrl={`${appRoot}/build/react-dsfr/dsfr/artwork/pictograms/map/map.svg`}
                             imageSvg={true}
                         />
                     </div>
@@ -158,7 +163,7 @@ const Home = () => {
                                     </a>
                                 </span>
                             }
-                            imageUrl={`${appRoot}/dsfr/artwork/pictograms/environment/human-cooperation.svg`}
+                            imageUrl={`${appRoot}/build/react-dsfr/dsfr/artwork/pictograms/environment/human-cooperation.svg`}
                             imageSvg={true}
                         />
                     </div>
@@ -182,7 +187,7 @@ const Home = () => {
                                     </a>
                                 </span>
                             }
-                            imageUrl={`${appRoot}/dsfr/artwork/pictograms/map/location-france.svg`}
+                            imageUrl={`${appRoot}/build/react-dsfr/dsfr/artwork/pictograms/map/location-france.svg`}
                             imageSvg={true}
                         />
                     </div>
@@ -198,7 +203,7 @@ const Home = () => {
                                     Intégré en 2025
                                 </Badge>
                             }
-                            imageUrl={`${appRoot}/dsfr/artwork/pictograms/map/location-france.svg`}
+                            imageUrl={`${appRoot}/build/react-dsfr/dsfr/artwork/pictograms/map/location-france.svg`}
                             imageSvg={true}
                         />
                     </div>

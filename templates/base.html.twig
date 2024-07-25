@@ -10,18 +10,18 @@
             {% endblock %}
         </title>
 
-        <link rel="apple-touch-icon" href="{{ asset('dsfr/favicon/apple-touch-icon.png') }}" />
-        <link rel="icon" href="{{ asset('dsfr/favicon/favicon.svg') }}" type="image/svg+xml" />
-        <link rel="shortcut icon" href="{{ asset('dsfr/favicon/favicon.ico') }}" type="image/x-icon" />
-        <link rel="manifest" href="{{ asset('dsfr/favicon/manifest.webmanifest') }}" crossorigin="use-credentials" />
+        <link rel="apple-touch-icon" href="{{ asset('build/react-dsfr/favicon/apple-touch-icon.png') }}" />
+        <link rel="icon" href="{{ asset('build/react-dsfr/favicon/favicon.svg') }}" type="image/svg+xml" />
+        <link rel="shortcut icon" href="{{ asset('build/react-dsfr/favicon/favicon.ico') }}" type="image/x-icon" />
+        <link rel="manifest" href="{{ asset('build/react-dsfr/favicon/manifest.webmanifest') }}" crossorigin="use-credentials" />
 
-        <link rel="stylesheet" href="{{ asset('dsfr/utility/icons/icons.min.css') }}" />
-        <link rel="stylesheet" href="{{ asset('dsfr/dsfr.min.css') }}" />
+        <link rel="stylesheet" href="{{ asset('build/react-dsfr/dsfr/utility/icons/icons.min.css') }}" />
+        <link rel="stylesheet" href="{{ asset('build/react-dsfr/dsfr/dsfr.min.css') }}" />
 
         {% set fonts_list = ['Marianne-Regular', 'Marianne-Medium', 'Marianne-Bold'] %}
 
         {% for font_name in fonts_list %}
-            <link rel="preload" href="{{ asset('dsfr/fonts/' ~ font_name ~ '.woff2') }}" as="font" crossorigin="anonymous" />
+            <link rel="preload" href="{{ asset('build/react-dsfr/dsfr/fonts/' ~ font_name ~ '.woff2') }}" as="font" crossorigin="anonymous" />
         {% endfor %}
 
         {% block stylesheets %}
@@ -34,6 +34,7 @@
     </head>
     <body>
         {% block body %}
+
         {% endblock %}
 
         {# bazinga traducteur #}
