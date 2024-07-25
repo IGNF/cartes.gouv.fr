@@ -1,4 +1,6 @@
 const Encore = require("@symfony/webpack-encore");
+const CopyPlugin = require("copy-webpack-plugin");
+
 const FosRouting = require("./vendor/friendsofsymfony/jsrouting-bundle/Resources/webpack/FosRouting");
 
 // Manually configure the runtime environment if not already configured yet by the "encore" command.
@@ -33,16 +35,46 @@ Encore
      */
     .addEntry("main", "./assets/main.tsx")
 
-    .copyFiles([
-        {
-            from: "./assets/img",
-            to: "img/[path][name].[ext]",
-        },
-        {
-            from: "./assets/data/pdf",
-            to: "pdf/[path][name].[ext]",
-        },
-    ])
+    // .addPlugin(new DsfrPluginUpdateIcons())
+
+    .addPlugin(
+        new CopyPlugin({
+            patterns: [
+                {
+                    from: "./assets/img",
+                    to: "img/[path][name][ext]",
+                },
+                {
+                    from: "./assets/data/pdf",
+                    to: "pdf/[path][name][ext]",
+                },
+                {
+                    from: "./node_modules/@codegouvfr/react-dsfr/favicon",
+                    to: "react-dsfr/favicon/[name].[contenthash][ext]",
+                },
+                {
+                    from: "./node_modules/@codegouvfr/react-dsfr/dsfr/dsfr.min.css",
+                    to: "react-dsfr/dsfr/[name].[contenthash][ext]",
+                },
+                {
+                    from: "./node_modules/@codegouvfr/react-dsfr/dsfr/utility/icons/icons.min.css",
+                    to: "react-dsfr/dsfr/utility/icons/[name].[contenthash][ext]",
+                },
+                {
+                    from: "./node_modules/@codegouvfr/react-dsfr/dsfr/fonts",
+                    to: "react-dsfr/dsfr/fonts/[path][name][ext]",
+                },
+                {
+                    from: "./node_modules/@codegouvfr/react-dsfr/dsfr/icons",
+                    to: "react-dsfr/dsfr/icons/[path][name][ext]",
+                },
+                {
+                    from: "./node_modules/@codegouvfr/react-dsfr/dsfr/artwork",
+                    to: "react-dsfr/dsfr/artwork/[path][name][ext]",
+                },
+            ],
+        })
+    )
 
     // enables the Symfony UX Stimulus bridge (used in assets/bootstrap.js)
     // .enableStimulusBridge("./assets/controllers.json")
