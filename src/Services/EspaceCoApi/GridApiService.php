@@ -4,16 +4,16 @@ namespace App\Services\EspaceCoApi;
 
 class GridApiService extends BaseEspaceCoApiService
 {
-    public function getGrids(string $text, string $searchBy, string $fields, string $adm, int $page, int $limit): array
+    public function getGrids(string $text, ?string $searchBy, ?string $fields, ?string $adm, int $page, int $limit): array
     {
         $query = ['text' => $text, 'page' => $page, 'limit' => $limit];
-        if ($searchBy) {
+        if (!is_null($searchBy)) {
             $query['searchBy'] = $searchBy;
         }
-        if ($fields) {
+        if (!is_null($fields)) {
             $query['fields'] = $fields;
         }
-        if ($adm) {
+        if (!is_null($adm)) {
             $query['adm'] = $adm;
         }
 
