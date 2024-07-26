@@ -1,11 +1,11 @@
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import Header, { HeaderProps } from "@codegouvfr/react-dsfr/Header";
 import { MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation/MainNavigation";
-import { FC, ReactNode, memo } from "react";
+import { FC, memo } from "react";
 
 // import { useLang } from "../../i18n/i18n";
 import SymfonyRouting from "../../modules/Routing";
-import { routes, publicRoutes, useRoute, catalogueUrl } from "../../router/router";
+import { catalogueUrl, publicRoutes, routes, useRoute } from "../../router/router";
 import { useAuthStore } from "../../stores/AuthStore";
 // import LanguageSelector from "../Utils/LanguageSelector";
 
@@ -19,7 +19,7 @@ const AppHeader: FC<AppHeaderProps> = ({ navItems = [] }) => {
     // const { lang, setLang } = useLang();
     const route = useRoute();
 
-    const quickAccessItems: (HeaderProps.QuickAccessItem | ReactNode)[] = [];
+    const quickAccessItems: (HeaderProps.QuickAccessItem | JSX.Element | null)[] = [];
 
     const geoportailQuickAccessItem: HeaderProps.QuickAccessItem = {
         iconId: "fr-icon-arrow-right-line",
