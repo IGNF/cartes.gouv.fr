@@ -51,51 +51,54 @@ const Description: FC<DescriptionProps> = ({ community }) => {
     });
 
     return (
-        <div>
-            <p>{tCommon("mandatory_fields")}</p>
-            <Input
-                label={t("desc.name")}
-                hintText={t("desc.hint_name")}
-                state={errors.name ? "error" : "default"}
-                stateRelatedMessage={errors?.name?.message?.toString()}
-                nativeInputProps={{
-                    ...register("name"),
-                }}
-            />
-            <Controller
-                control={control}
-                name="description"
-                render={({ field }) => (
-                    <MarkdownEditor
-                        label={t("desc.description")}
-                        hintText={t("desc.hint_description")}
-                        state={errors.description ? "error" : "default"}
-                        stateRelatedMessage={errors?.description?.message?.toString()}
-                        value={field.value}
-                        onChange={(values) => {
-                            field.onChange(values);
-                        }}
-                    />
-                )}
-            />
-            <CommunityLogo communityId={community.id} logoUrl={community.logo_url} />
-            <Controller
-                control={control}
-                name="keywords"
-                render={({ field }) => (
-                    <AutocompleteSelect
-                        label={t("desc.keywords")}
-                        // hintText={t("")}
-                        options={Object.values(categories).sort()}
-                        searchFilter={{ limit: 40 }}
-                        state={errors.keywords ? "error" : "default"}
-                        stateRelatedMessage={errors?.keywords?.message?.toString()}
-                        value={field.value}
-                        onChange={(_, value) => field.onChange(value)}
-                    />
-                )}
-            />
-        </div>
+        <>
+            <h2>{t("tab1")}</h2>
+            <div>
+                <p>{tCommon("mandatory_fields")}</p>
+                <Input
+                    label={t("desc.name")}
+                    hintText={t("desc.hint_name")}
+                    state={errors.name ? "error" : "default"}
+                    stateRelatedMessage={errors?.name?.message?.toString()}
+                    nativeInputProps={{
+                        ...register("name"),
+                    }}
+                />
+                <Controller
+                    control={control}
+                    name="description"
+                    render={({ field }) => (
+                        <MarkdownEditor
+                            label={t("desc.description")}
+                            hintText={t("desc.hint_description")}
+                            state={errors.description ? "error" : "default"}
+                            stateRelatedMessage={errors?.description?.message?.toString()}
+                            value={field.value}
+                            onChange={(values) => {
+                                field.onChange(values);
+                            }}
+                        />
+                    )}
+                />
+                <CommunityLogo communityId={community.id} logoUrl={community.logo_url} />
+                <Controller
+                    control={control}
+                    name="keywords"
+                    render={({ field }) => (
+                        <AutocompleteSelect
+                            label={t("desc.keywords")}
+                            // hintText={t("")}
+                            options={Object.values(categories).sort()}
+                            searchFilter={{ limit: 40 }}
+                            state={errors.keywords ? "error" : "default"}
+                            stateRelatedMessage={errors?.keywords?.message?.toString()}
+                            value={field.value}
+                            onChange={(_, value) => field.onChange(value)}
+                        />
+                    )}
+                />
+            </div>
+        </>
     );
 };
 
