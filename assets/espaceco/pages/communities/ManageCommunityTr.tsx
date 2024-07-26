@@ -15,6 +15,7 @@ export const { i18n } = declareComponentKeys<
     | "tab4"
     | "tab5"
     | "tab6"
+    | "tab7"
     | "desc.name"
     | "desc.hint_name"
     | "desc.description"
@@ -41,6 +42,8 @@ export const { i18n } = declareComponentKeys<
     | "zoom.xmax"
     | "zoom.ymin"
     | "zoom.ymax"
+    | "grid.grids"
+    | { K: "grid.explain"; R: JSX.Element }
 >()("ManageCommunity");
 
 export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"] = {
@@ -54,6 +57,7 @@ export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"
     tab4: "Couches de la carte",
     tab5: "Outils",
     tab6: "Signalements",
+    tab7: "Emprises",
     "desc.name": "Nom du guichet",
     "desc.hint_name": "Donnez un nom clair et compréhensible",
     "desc.description": "Description",
@@ -91,6 +95,14 @@ export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"
     "zoom.xmax": "X max",
     "zoom.ymin": "Y min",
     "zoom.ymax": "Y max",
+    "grid.grids": "Emprises du guichet (optionnel)",
+    "grid.explain": (
+        <p>
+            Ajouter une ou plusieurs emprises.
+            <br />
+            Tous les membres du guichet y auront accès et pourront donc réaliser des contributions directes sur la base de données.
+        </p>
+    ),
 };
 
 export const ManageCommunityEnTranslations: Translations<"en">["ManageCommunity"] = {
@@ -104,6 +116,7 @@ export const ManageCommunityEnTranslations: Translations<"en">["ManageCommunity"
     tab4: undefined,
     tab5: undefined,
     tab6: undefined,
+    tab7: undefined,
     "desc.name": undefined,
     "desc.hint_name": undefined,
     "desc.description": undefined,
@@ -139,4 +152,6 @@ export const ManageCommunityEnTranslations: Translations<"en">["ManageCommunity"
     "zoom.xmax": "X max",
     "zoom.ymin": "Y min",
     "zoom.ymax": "Y max",
+    "grid.grids": undefined,
+    "grid.explain": undefined,
 };

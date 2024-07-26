@@ -53,7 +53,7 @@ const Search: FC<SearchProps> = ({ label, hintText, filter, onChange }) => {
                     isOptionEqualToValue={(option, v) => option.fulltext === v.fulltext}
                     onInputChange={(_, v) => setText(v)}
                     onChange={(_, v) => {
-                        if (v) onChange(fromLonLat([v.x, v.y]));
+                        if (v) onChange([v.x, v.y]);
                     }}
                 />
             </MuiDsfrThemeProvider>

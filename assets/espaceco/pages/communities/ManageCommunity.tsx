@@ -1,19 +1,20 @@
-import { useQuery } from "@tanstack/react-query";
-import { FC, useState } from "react";
-import RQKeys from "../../../modules/espaceco/RQKeys";
-import api from "../../api";
-import { datastoreNavItems } from "../../../config/datastoreNavItems";
-import AppLayout from "../../../components/Layout/AppLayout";
-import { useTranslation } from "../../../i18n/i18n";
-import LoadingText from "../../../components/Utils/LoadingText";
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
-import { routes } from "../../../router/router";
 import Tabs from "@codegouvfr/react-dsfr/Tabs";
-import Description from "./management/Description";
+import { useQuery } from "@tanstack/react-query";
+import { FC, useState } from "react";
 import { CommunityResponseDTO } from "../../../@types/espaceco";
+import AppLayout from "../../../components/Layout/AppLayout";
+import LoadingText from "../../../components/Utils/LoadingText";
+import { datastoreNavItems } from "../../../config/datastoreNavItems";
+import { useTranslation } from "../../../i18n/i18n";
+import RQKeys from "../../../modules/espaceco/RQKeys";
 import { CartesApiException } from "../../../modules/jsonFetch";
+import { routes } from "../../../router/router";
+import api from "../../api";
+import Description from "./management/Description";
+import Grid from "./management/Grid";
 import ZoomAndCentering from "./management/ZoomAndCentering";
 
 type ManageCommunityProps = {
@@ -62,6 +63,7 @@ const ManageCommunity: FC<ManageCommunityProps> = ({ communityId }) => {
                                 { tabId: "tab4", label: t("tab4") },
                                 { tabId: "tab5", label: t("tab5") },
                                 { tabId: "tab6", label: t("tab6") },
+                                { tabId: "tab7", label: t("tab7") },
                             ]}
                             onTabChange={setSelectedTabId}
                         >
@@ -72,6 +74,8 @@ const ManageCommunity: FC<ManageCommunityProps> = ({ communityId }) => {
                                             return <Description community={communityQuery.data} />;
                                         case "tab3":
                                             return <ZoomAndCentering community={communityQuery.data} />;
+                                        case "tab7":
+                                            return <Grid grids={communityQuery.data?.grids ?? []} />; // TODO
                                         default:
                                             return <p>`Content of ${selectedTabId}`</p>;
                                     }
