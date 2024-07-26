@@ -122,6 +122,7 @@ class User implements UserInterface
             'email' => 'test@test.com',
             'given_name' => 'Test',
             'family_name' => 'User',
+            'preferred_username' => 'test_user',
         ], [
             '_id' => 'fc5a7948-142a-4dae-b24e-5550fe7183f9',
             'creation' => '2023-06-26T11:52:25.924679Z',

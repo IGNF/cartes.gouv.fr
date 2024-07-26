@@ -65,8 +65,15 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
         /** @var OAuth2ClientInterface|KeycloakClient */
         $keycloakClient = $this->clientRegistry->getClient('keycloak');
 
-        /** @var AccessToken */
-        $accessToken = $this->fetchAccessToken($keycloakClient);
+        try {
+            /** @var AccessToken */
+            $accessToken = $this->fetchAccessToken($keycloakClient);
+        } catch (\UnexpectedValueException $ex) {
+            $message = "Authentication failed, unable to get token from keycloak : {$ex->getMessage()}";
+            $this->logger->critical('{class}: {message}', ['class' => self::class, 'message' => $message]);
+
+            throw new AuthenticationException($message, Response::HTTP_UNAUTHORIZED, $ex);
+        }
 
         $this->requestStack->getSession()->set(KeycloakToken::SESSION_KEY, $accessToken);
 
@@ -104,7 +111,7 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
     {
         $message = strtr($exception->getMessageKey(), $exception->getMessageData());
 
-        $this->logger->debug(self::class, [$message]);
+        $this->logger->info(self::class, [$message]);
 
         return new RedirectResponse($this->router->generate(self::HOME_ROUTE, [
             'authentication_failed' => true,
