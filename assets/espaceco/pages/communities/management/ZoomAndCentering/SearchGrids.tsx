@@ -10,13 +10,12 @@ import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/espaceco/RQKeys";
 import api from "../../../../api";
 import TextField from "@mui/material/TextField";
-import { Extent } from "ol/extent";
 
 export type SearchGridsProps = {
     label: ReactNode;
     hintText?: ReactNode;
     filters: SearchGridFilters;
-    onChange: (value: Extent | null) => void;
+    onChange: (grid: Grids | null) => void;
 };
 
 const SearchGrids: FC<SearchGridsProps> = ({ label, hintText, filters, onChange }) => {
@@ -51,7 +50,7 @@ const SearchGrids: FC<SearchGridsProps> = ({ label, hintText, filters, onChange 
                     isOptionEqualToValue={(option, v) => option.name === v.name}
                     onInputChange={(_, v) => setText(v)}
                     onChange={(_, v) => {
-                        if (v) onChange(v.extent);
+                        if (v) onChange(v);
                     }}
                 />
             </MuiDsfrThemeProvider>
