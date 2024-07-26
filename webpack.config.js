@@ -68,10 +68,6 @@ Encore
                     from: "./node_modules/@codegouvfr/react-dsfr/dsfr/icons",
                     to: "react-dsfr/dsfr/icons/[path][name][ext]",
                 },
-                {
-                    from: "./node_modules/@codegouvfr/react-dsfr/dsfr/artwork",
-                    to: "react-dsfr/dsfr/artwork/[path][name][ext]",
-                },
             ],
         })
     )
