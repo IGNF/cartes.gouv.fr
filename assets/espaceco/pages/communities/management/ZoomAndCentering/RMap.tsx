@@ -17,6 +17,7 @@ import olDefaults from "../../../../../data/ol-defaults.json";
 import useCapabilities from "../../../../../hooks/useCapabilities";
 import punaise from "../../../../../img/punaise.png";
 import DisplayCenterControl from "../../../../../ol/controls/DisplayCenterControl";
+import BaseLayer from "ol/layer/Base";
 
 const mapStyle: CSSProperties = {
     height: "400px",
@@ -39,29 +40,13 @@ const RMap: FC<RMapProps> = ({ position, zoom, zoomMin, zoomMax, onMove }) => {
     // Création de la couche openlayers de fond (bg layer)
     const { data: capabilities } = useCapabilities();
 
-    const bgLayer = useMemo(() => {
-        if (!capabilities) return;
-
-        const wmtsOptions = optionsFromCapabilities(capabilities, {
-            layer: olDefaults.default_background_layer,
-        });
-
-        if (!wmtsOptions) return;
-
-        const bgLayer = new TileLayer({
-            source: new WMTS(wmtsOptions),
-        });
-
-        return bgLayer;
-    }, [capabilities]);
-
     const center = useMemo(() => {
         return position ? fromLonLat(position) : fromLonLat(olDefaults.center);
     }, [position]);
 
     // Création de la carte une fois bg layer créée
     useEffect(() => {
-        if (!bgLayer) return;
+        if (!capabilities) return;
 
         const feature = new Feature(new Point(center));
 
@@ -80,9 +65,22 @@ const RMap: FC<RMapProps> = ({ position, zoom, zoomMin, zoomMax, onMove }) => {
             }),
         });
 
+        const layers: BaseLayer[] = [];
+
+        const wmtsOptions = optionsFromCapabilities(capabilities, {
+            layer: olDefaults.default_background_layer,
+        });
+        if (wmtsOptions) {
+            const bkgLayer = new TileLayer({
+                source: new WMTS(wmtsOptions),
+            });
+            layers.push(bkgLayer);
+        }
+        layers.push(layer);
+
         mapRef.current = new Map({
             target: mapTargetRef.current as HTMLElement,
-            layers: [bgLayer, layer],
+            layers: layers,
             controls: defaultControls().extend([new ScaleLine(), new DisplayCenterControl({})]),
             interactions: [
                 new DragPan(),
@@ -104,14 +102,14 @@ const RMap: FC<RMapProps> = ({ position, zoom, zoomMin, zoomMax, onMove }) => {
             const z = map.getView().getZoom() as number;
 
             // Rien n'a bougé
-            if (Math.round(z) === zoom && Math.abs(centerView[0] - center[0]) < 1 && Math.abs(centerView[1] - center[1]) < 1) {
+            if (Math.abs(centerView[0] - center[0]) < 1 && Math.abs(centerView[1] - center[1]) < 1) {
                 return;
             }
             onMove(centerView, Math.round(z) !== zoom ? z : undefined);
         });
 
         return () => mapRef.current?.setTarget(undefined);
-    }, [bgLayer, center, zoom, zoomMin, zoomMax, onMove]);
+    }, [capabilities, center, zoom, zoomMin, zoomMax, onMove]);
 
     return <div ref={mapTargetRef} style={mapStyle} />;
 };
