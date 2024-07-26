@@ -11,10 +11,15 @@ import useDatastoreList from "../../../hooks/useDatastoreList";
 import { Translations, useTranslation } from "../../../i18n/i18n";
 import Translator from "../../../modules/Translator";
 import { CartesApiException } from "../../../modules/jsonFetch";
-import { appRoot, routes } from "../../../router/router";
+import { routes } from "../../../router/router";
 import { useApiEspaceCoStore } from "../../../stores/ApiEspaceCoStore";
 import { useAuthStore } from "../../../stores/AuthStore";
 import api from "../../api";
+
+import avatarSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/digital/avatar.svg";
+import mailSendSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/digital/mail-send.svg";
+import humanCoopSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/environment/human-cooperation.svg";
+import padlockSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/system/padlock.svg";
 
 const DashboardPro = () => {
     const datastoreListQuery = useDatastoreList();
@@ -47,7 +52,7 @@ const DashboardPro = () => {
                         <div className={fr.cx("fr-col-12", "fr-col-sm-6")}>
                             <Tile
                                 linkProps={routes.my_account().link}
-                                imageUrl={`${appRoot}/build/react-dsfr/dsfr/artwork/pictograms/digital/avatar.svg`}
+                                imageUrl={avatarSvgUrl}
                                 desc="Consulter et modifier mes informations personnelles"
                                 orientation="horizontal"
                                 title="Mon compte"
@@ -56,7 +61,7 @@ const DashboardPro = () => {
                         <div className={fr.cx("fr-col-12", "fr-col-sm-6")}>
                             <Tile
                                 linkProps={routes.my_access_keys().link}
-                                imageUrl={`${appRoot}/build/react-dsfr/dsfr/artwork/pictograms/system/padlock.svg`}
+                                imageUrl={padlockSvgUrl}
                                 desc="Consulter et modifier mes clés d'accès aux services privés"
                                 orientation="horizontal"
                                 title="Mes clés d’accès"
@@ -81,7 +86,7 @@ const DashboardPro = () => {
                         <div className={fr.cx("fr-col-12", "fr-col-sm-6")}>
                             <Tile
                                 linkProps={routes.datastore_create_request().link}
-                                imageUrl={`${appRoot}/build/react-dsfr/dsfr/artwork/pictograms/digital/mail-send.svg`}
+                                imageUrl={mailSendSvgUrl}
                                 desc="Contacter le support pour créer un nouvel espace de travail"
                                 orientation="horizontal"
                                 title={Translator.trans("datastore_creation_request.title")}
@@ -90,7 +95,7 @@ const DashboardPro = () => {
                         <div className={fr.cx("fr-col-12", "fr-col-sm-6")}>
                             <Tile
                                 linkProps={routes.join_community().link}
-                                imageUrl={`${appRoot}/build/react-dsfr/dsfr/artwork/pictograms/environment/human-cooperation.svg`}
+                                imageUrl={humanCoopSvgUrl}
                                 desc="Demander à rejoindre une communauté publique"
                                 orientation="horizontal"
                                 title={Translator.trans("communities_list.title")}

@@ -6,11 +6,17 @@ import { useEffect } from "react";
 
 import AppLayout from "../components/Layout/AppLayout";
 import SymfonyRouting from "../modules/Routing";
-import { appRoot, catalogueUrl, routes, useRoute } from "../router/router";
+import { catalogueUrl, routes, useRoute } from "../router/router";
 import { useAuthStore } from "../stores/AuthStore";
 
 import "../sass/pages/home.scss";
-import Button from "@codegouvfr/react-dsfr/Button";
+
+import dataVisuSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/digital/data-visualization.svg";
+import humanCoopSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/environment/human-cooperation.svg";
+import locationFranceSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/map/location-france.svg";
+import mapSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/map/map.svg";
+import systemSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/system/system.svg";
+import homeImgUrl from "../img/home/home.png";
 
 const Home = () => {
     const { params } = useRoute();
@@ -36,10 +42,6 @@ const Home = () => {
                     }
                 />
             )}
-
-            <Button iconId="ri-add-box-fill">Hello</Button>
-            <Button iconId="ri-expand-height-fill">Hello</Button>
-            <Button iconId="ri-mail-star-fill">Hello</Button>
 
             {/* Section : Présentation */}
             <div className="c-section c-section--gray">
@@ -73,7 +75,7 @@ const Home = () => {
                                     <div className={fr.cx("fr-content-media__img")}>
                                         <img
                                             className={fr.cx("fr-responsive-img", "fr-ratio-1x1")}
-                                            src={`${appRoot}/build/img/home/home.png`}
+                                            src={homeImgUrl}
                                             alt=""
                                             role="presentation"
                                             data-fr-js-ratio="true"
@@ -123,7 +125,7 @@ const Home = () => {
                             }
                             linkProps={routes.dashboard_pro().link}
                             enlargeLinkOrButton={true}
-                            imageUrl={`${appRoot}/build/react-dsfr/dsfr/artwork/pictograms/system/system.svg`}
+                            imageUrl={systemSvgUrl}
                             imageSvg={true}
                         />
                     </div>
@@ -141,7 +143,7 @@ const Home = () => {
                                 href: catalogueUrl,
                             }}
                             enlargeLinkOrButton={true}
-                            imageUrl={`${appRoot}/build/react-dsfr/dsfr/artwork/pictograms/map/map.svg`}
+                            imageUrl={mapSvgUrl}
                             imageSvg={true}
                         />
                     </div>
@@ -163,7 +165,7 @@ const Home = () => {
                                     </a>
                                 </span>
                             }
-                            imageUrl={`${appRoot}/build/react-dsfr/dsfr/artwork/pictograms/environment/human-cooperation.svg`}
+                            imageUrl={humanCoopSvgUrl}
                             imageSvg={true}
                         />
                     </div>
@@ -187,7 +189,7 @@ const Home = () => {
                                     </a>
                                 </span>
                             }
-                            imageUrl={`${appRoot}/build/react-dsfr/dsfr/artwork/pictograms/map/location-france.svg`}
+                            imageUrl={locationFranceSvgUrl}
                             imageSvg={true}
                         />
                     </div>
@@ -203,7 +205,7 @@ const Home = () => {
                                     Intégré en 2025
                                 </Badge>
                             }
-                            imageUrl={`${appRoot}/build/react-dsfr/dsfr/artwork/pictograms/map/location-france.svg`}
+                            imageUrl={dataVisuSvgUrl}
                             imageSvg={true}
                         />
                     </div>

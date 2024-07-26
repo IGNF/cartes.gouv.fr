@@ -3,7 +3,10 @@ import { Button } from "@codegouvfr/react-dsfr/Button";
 import { FC } from "react";
 
 import AppLayout from "../../components/Layout/AppLayout";
-import { appRoot, routes } from "../../router/router";
+import { routes } from "../../router/router";
+
+import ovoidSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/background/ovoid.svg";
+import technicalErrorSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/system/technical-error.svg";
 
 const PageNotFound: FC = () => {
     return (
@@ -52,24 +55,12 @@ const PageNotFound: FC = () => {
                         height="200"
                         viewBox="0 0 160 200"
                     >
-                        <use className={fr.cx("fr-artwork-motif")} href={`${appRoot}/build/react-dsfr/dsfr/artwork/background/ovoid.svg#artwork-motif`} />
-                        <use
-                            className={fr.cx("fr-artwork-background")}
-                            href={`${appRoot}/build/react-dsfr/dsfr/artwork/background/ovoid.svg#artwork-background`}
-                        />
+                        <use className={fr.cx("fr-artwork-motif")} href={`${ovoidSvgUrl}#artwork-motif`} />
+                        <use className={fr.cx("fr-artwork-background")} href={`${ovoidSvgUrl}#artwork-background`} />
                         <g transform="translate(40, 60)">
-                            <use
-                                className={fr.cx("fr-artwork-decorative")}
-                                href={`${appRoot}/build/react-dsfr/dsfr/artwork/pictograms/system/technical-error.svg#artwork-decorative`}
-                            />
-                            <use
-                                className={fr.cx("fr-artwork-minor")}
-                                href={`${appRoot}/build/react-dsfr/dsfr/artwork/pictograms/system/technical-error.svg#artwork-minor`}
-                            />
-                            <use
-                                className={fr.cx("fr-artwork-major")}
-                                href={`${appRoot}/build/react-dsfr/dsfr/artwork/pictograms/system/technical-error.svg#artwork-major`}
-                            />
+                            <use className={fr.cx("fr-artwork-decorative")} href={`${technicalErrorSvgUrl}#artwork-decorative`} />
+                            <use className={fr.cx("fr-artwork-minor")} href={`${technicalErrorSvgUrl}#artwork-minor`} />
+                            <use className={fr.cx("fr-artwork-major")} href={`${technicalErrorSvgUrl}#artwork-major`} />
                         </g>
                     </svg>
                 </div>
