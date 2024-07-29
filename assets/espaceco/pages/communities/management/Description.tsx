@@ -16,6 +16,7 @@ import { ComponentKey, useTranslation } from "../../../../i18n/i18n";
 import { getFileExtension } from "../../../../utils";
 import { AddDocumentDialog, AddDocumentDialogModal } from "./AddDocumentDialog";
 import CommunityLogo from "./CommunityLogo";
+import { appRoot } from "../../../../router/router";
 
 import "../../../../sass/pages/espaceco/community.scss";
 
@@ -53,7 +54,8 @@ const Description: FC<DescriptionProps> = ({ community }) => {
                     result.src = d.uri;
                 } else {
                     const extension = getFileExtension(result.short_fileName)?.toLowerCase() ?? "defaut";
-                    result.src = extension in thumbnails ? thumbnails[extension].src : thumbnails["defaut"].src;
+                    const uri = extension in thumbnails ? thumbnails[extension].src : thumbnails["defaut"].src;
+                    result.src = `${appRoot}/${uri}`;
                 }
 
                 return result;
