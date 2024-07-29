@@ -26,6 +26,10 @@ const Home = () => {
         if (user !== null && params?.["authentication_failed"] !== undefined) {
             routes.home().replace();
         }
+
+        if (user !== null && params?.["session_expired_login_success"] === 1) {
+            window.close();
+        }
     }, [params, user]);
 
     return (
@@ -40,6 +44,18 @@ const Home = () => {
                             La tentative de connexion a échoué, veuillez <a href={SymfonyRouting.generate("cartesgouvfr_security_login")}>réessayer</a>.
                         </p>
                     }
+                />
+            )}
+
+            {params?.["session_expired_login_success"] === 1 && (
+                <Alert
+                    severity="success"
+                    closable={true}
+                    title={"Reconnexion réussie"}
+                    description={
+                        "Reconnexion réussie, cette page devrait se fermer automatiquement. Si ce n'est pas le cas, vous pouvez fermer la page en cliquant sur le bouton fermer."
+                    }
+                    onClose={window.close}
                 />
             )}
 
