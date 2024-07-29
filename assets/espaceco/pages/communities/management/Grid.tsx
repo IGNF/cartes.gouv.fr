@@ -1,10 +1,10 @@
 import { FC } from "react";
 import { useTranslation } from "../../../../i18n/i18n";
-import { Grids } from "../../../../@types/espaceco";
+import { Grid } from "../../../../@types/espaceco";
 import GridList from "./GridList";
 
 type GridProps = {
-    grids: Grids[];
+    grids: Grid[];
 };
 
 const Grid: FC<GridProps> = ({ grids }) => {

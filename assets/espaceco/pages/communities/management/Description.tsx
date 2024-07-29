@@ -1,24 +1,65 @@
-import { FC } from "react";
-import { CommunityResponseDTO } from "../../../../@types/espaceco";
-import { ComponentKey, useTranslation } from "../../../../i18n/i18n";
-import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
-import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { Controller, useForm } from "react-hook-form";
+import { fr } from "@codegouvfr/react-dsfr";
+import Button from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
-import MarkdownEditor from "../../../../components/Input/MarkdownEditor";
-import CommunityLogo from "./CommunityLogo";
+import { cx } from "@codegouvfr/react-dsfr/tools/cx";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
+import { FC, useMemo } from "react";
+import { Controller, useForm } from "react-hook-form";
+import * as yup from "yup";
+import { CommunityResponseDTO, DocumentDTO } from "../../../../@types/espaceco";
 import AutocompleteSelect from "../../../../components/Input/AutocompleteSelect";
+import MarkdownEditor from "../../../../components/Input/MarkdownEditor";
+import thumbnails from "../../../../data/doc_thumbnail.json";
 import categories from "../../../../data/topic_categories.json";
+import { ComponentKey, useTranslation } from "../../../../i18n/i18n";
+import { getFileExtension } from "../../../../utils";
+import { AddDocumentDialog, AddDocumentDialogModal } from "./AddDocumentDialog";
+import CommunityLogo from "./CommunityLogo";
+
+import "../../../../sass/pages/espaceco/community.scss";
+
+type DocumentExt = DocumentDTO & {
+    src: string;
+    isImage: boolean;
+};
 
 type DescriptionProps = {
     community: CommunityResponseDTO;
 };
 
+/* const isNewDocument = (d: DocumentDTO | NewDocument): d is NewDocument => "new_id" in d;
+
+const readFileAsDataURL = async (file: File) => {
+    const result = await new Promise((resolve) => {
+        const fileReader = new FileReader();
+        fileReader.onload = (e) => resolve(fileReader.result);
+        fileReader.readAsDataURL(file);
+    });
+    return result;
+}; */
+
 const Description: FC<DescriptionProps> = ({ community }) => {
     const { t: tCommon } = useTranslation("Common");
     const { t: tValid } = useTranslation("ManageCommunityValidations");
     const { t } = useTranslation("ManageCommunity");
+
+    const formattedDocuments = useMemo(() => {
+        const documents = community.documents ?? [];
+        return Array.from(
+            documents.map((d) => {
+                const result: DocumentExt = { ...d } as DocumentExt;
+                if (/^image/.test(result.mime_type)) {
+                    result.src = d.uri;
+                } else {
+                    const extension = getFileExtension(result.short_fileName)?.toLowerCase() ?? "defaut";
+                    result.src = extension in thumbnails ? thumbnails[extension].src : thumbnails["defaut"].src;
+                }
+
+                return result;
+            })
+        );
+    }, [community.documents]);
 
     const schema = (t: TranslationFunction<"ManageCommunityValidations", ComponentKey>) => {
         return yup.object({
@@ -37,8 +78,8 @@ const Description: FC<DescriptionProps> = ({ community }) => {
     const {
         control,
         register,
-        getValues: getFormValues,
         formState: { errors },
+        // setValue: setFormValue,
     } = useForm({
         resolver: yupResolver(schema(tValid)),
         mode: "onChange",
@@ -96,6 +137,52 @@ const Description: FC<DescriptionProps> = ({ community }) => {
                             onChange={(_, value) => field.onChange(value)}
                         />
                     )}
+                />
+                <label className={fr.cx("fr-label")}>
+                    {t("desc.documents")}
+                    <span className={fr.cx("fr-hint-text")}>{t("desc.documents_hint")}</span>
+                </label>
+                <div className={cx(fr.cx("fr-grid-row"), "frx-community-desc-documents")}>
+                    {formattedDocuments.length ? (
+                        formattedDocuments.map((d) => (
+                            <div
+                                style={{
+                                    border: "solid 1.5px",
+                                    borderColor: fr.colors.decisions.border.default.grey.default,
+                                    backgroundColor: fr.colors.decisions.background.contrast.grey.default,
+                                }}
+                                className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-px-2v", "fr-py-2v", "fr-mr-2v")}
+                                key={`${d.id}`}
+                            >
+                                <div>{d.title}</div>
+                                <div>
+                                    <img src={`${d.src}`} />
+                                </div>
+                                <Button
+                                    title={t("desc.document.remove")}
+                                    priority={"tertiary no outline"}
+                                    iconId={"fr-icon-delete-line"}
+                                    onClick={() => {
+                                        console.log("REMOVE"); // TODO SUPPRIMER
+                                        // TODO Mutation : Supprimer le fichier (la route n'existe pas encore)
+                                    }}
+                                />
+                            </div>
+                        ))
+                    ) : (
+                        <p className={fr.cx("fr-my-2v")}>{t("desc.no_documents")}</p>
+                    )}
+                </div>
+                <Button className={fr.cx("fr-my-1v")} iconId={"fr-icon-add-circle-line"} priority="tertiary" onClick={() => AddDocumentDialogModal.open()}>
+                    {tCommon("add")}
+                </Button>
+                <AddDocumentDialog
+                    onCancel={() => AddDocumentDialogModal.close()}
+                    onAdd={(title, file) => {
+                        console.log(title, file.name); // TODO SUPPRIMER
+                        // TODO Mutation : Envoyer le fichier en POST (la route n'existe pas encore)
+                        AddDocumentDialogModal.close();
+                    }}
                 />
             </div>
         </>

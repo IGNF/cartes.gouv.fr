@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { FC, ReactNode } from "react";
 import { useDebounceValue } from "usehooks-ts";
 import { GetResponse, SearchGridFilters } from "../../../../../@types/app_espaceco";
-import { Grids } from "../../../../../@types/espaceco";
+import { Grid } from "../../../../../@types/espaceco";
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/espaceco/RQKeys";
 import api from "../../../../api";
@@ -15,7 +15,7 @@ export type SearchGridsProps = {
     label: ReactNode;
     hintText?: ReactNode;
     filters: SearchGridFilters;
-    onChange: (grid: Grids | null) => void;
+    onChange: (grid: Grid | null) => void;
 };
 
 const SearchGrids: FC<SearchGridsProps> = ({ label, hintText, filters, onChange }) => {
@@ -23,7 +23,7 @@ const SearchGrids: FC<SearchGridsProps> = ({ label, hintText, filters, onChange 
 
     const [text, setText] = useDebounceValue("", 500);
 
-    const searchQuery = useQuery<GetResponse<Grids>>({
+    const searchQuery = useQuery<GetResponse<Grid>>({
         queryKey: RQKeys.searchGrids(text),
         queryFn: async ({ signal }) => {
             return api.grid.search(text, filters, { signal });
