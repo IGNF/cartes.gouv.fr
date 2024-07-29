@@ -27,6 +27,13 @@ export const { i18n } = declareComponentKeys<
     | "modal.logo.title"
     | "modal.logo.file_hint"
     | "desc.keywords"
+    | "desc.documents"
+    | "desc.documents_hint"
+    | "desc.no_documents"
+    | "desc.document.remove"
+    | "modal.document.title"
+    | "modal.document.name"
+    | "modal.document.file_hint"
     | "zoom.consistant_error"
     | "zoom.position"
     | "zoom.position_hint"
@@ -78,6 +85,14 @@ export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"
     "modal.logo.title": "Logo du guichet",
     "modal.logo.file_hint": "Taille maximale : 5 Mo. Formats acceptés : jpg, png",
     "desc.keywords": "Mots-clés (optionnel)",
+    "desc.documents": "Documents additionnels (optionnel)",
+    "desc.documents_hint":
+        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Dicta suscipit tempora culpa, ea quis illo veniam vero consequuntur soluta nesciunt.",
+    "desc.no_documents": "Aucun document",
+    "desc.document.remove": "Supprimer le document",
+    "modal.document.title": "Ajouter un document",
+    "modal.document.name": "Titre",
+    "modal.document.file_hint": "Taille maximale : 5 Mo.",
     "zoom.consistant_error": "Emprise et position ne sont pas cohérents",
     "zoom.position": "Position",
     "zoom.position_hint": "Fixer la position et définissez le niveau de zoom (utilisez votre souris ou la barre de recherche ci-dessous",
@@ -137,6 +152,13 @@ export const ManageCommunityEnTranslations: Translations<"en">["ManageCommunity"
     "modal.logo.title": undefined,
     "modal.logo.file_hint": undefined,
     "desc.keywords": undefined,
+    "desc.documents": undefined,
+    "desc.documents_hint": undefined,
+    "desc.no_documents": "No document",
+    "desc.document.remove": "Remove document",
+    "modal.document.title": "Add document",
+    "modal.document.name": "Title",
+    "modal.document.file_hint": "Maximum file size : 5 Mo.",
     "zoom.consistant_error": undefined,
     "zoom.position": "Position",
     "zoom.position_hint": undefined,
