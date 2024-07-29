@@ -2,18 +2,18 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Table from "@codegouvfr/react-dsfr/Table";
 import { FC, useCallback, useMemo, useState } from "react";
-import { Grids } from "../../../../@types/espaceco";
+import { Grid } from "../../../../@types/espaceco";
 import SearchGrids from "./ZoomAndCentering/SearchGrids";
 
 type GridListProps = {
-    grids?: Grids[];
-    onChange: (grids: Grids[]) => void;
+    grids?: Grid[];
+    onChange: (grids: Grid[]) => void;
 };
 
 const GridList: FC<GridListProps> = ({ grids = [], onChange }) => {
-    const [grid, setGrid] = useState<Grids | null>(null);
+    const [grid, setGrid] = useState<Grid | null>(null);
 
-    const [internal, setInternal] = useState<Grids[]>([...grids]);
+    const [internal, setInternal] = useState<Grid[]>([...grids]);
 
     const handleRemove = useCallback(
         (gridName: string) => {
@@ -34,7 +34,7 @@ const GridList: FC<GridListProps> = ({ grids = [], onChange }) => {
         return Array.from(internal, (grid) => [
             grid.name,
             grid.title,
-            grid.type,
+            grid.type.title,
             <Button key={grid.name} title={""} priority={"tertiary no outline"} iconId={"fr-icon-delete-line"} onClick={() => handleRemove(grid.name)} />,
         ]);
     }, [internal, handleRemove]);
@@ -42,7 +42,7 @@ const GridList: FC<GridListProps> = ({ grids = [], onChange }) => {
     return (
         <>
             <div className={fr.cx("fr-grid-row")}>
-                <div className={fr.cx("fr-col-11")}>
+                <div className={fr.cx("fr-col-6")}>
                     <SearchGrids
                         label={""}
                         filters={{

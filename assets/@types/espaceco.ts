@@ -20,19 +20,38 @@ export interface CommunityResponseDTO {
     shared_extractions: boolean;
     /** @format date-time */
     creation: string;
-    grids: Grids[];
+    grids: Grid[];
     logo_url: string | null;
     keywords?: string[];
+    documents?: DocumentDTO[];
 }
 
-export interface Grids {
-    name: string;
+export interface DocumentDTO {
+    id: number;
+    short_fileName: string;
+    mime_type: string;
+    description?: string;
     title: string;
     type: string;
+    size?: number;
+    width?: number;
+    height?: number;
+    date: string;
+    geometry?: string;
+    uri: string;
+}
+export interface Grid {
+    name: string;
+    title: string;
+    type: GridType;
     deleted: boolean;
     extent: number[];
 }
 
+export interface GridType {
+    name: string;
+    title: string;
+}
 export interface CommunityPatchDTO extends Partial<Omit<CommunityResponseDTO, "logo_url">> {
     logo: File | null;
 }
