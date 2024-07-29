@@ -4,7 +4,6 @@ import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import { useQuery } from "@tanstack/react-query";
 import { Coordinate } from "ol/coordinate";
-import { fromLonLat } from "ol/proj";
 import { FC, ReactNode } from "react";
 import { useDebounceValue } from "usehooks-ts";
 import { SearchResult } from "../../../../../@types/app_espaceco";
