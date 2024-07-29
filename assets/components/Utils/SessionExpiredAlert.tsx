@@ -15,7 +15,13 @@ const SessionExpiredAlert: FC = () => {
                 description={
                     <>
                         Veuillez{" "}
-                        <a href={SymfonyRouting.generate("cartesgouvfr_security_login")} rel="noreferrer" target="_blank">
+                        <a
+                            href={SymfonyRouting.generate("cartesgouvfr_security_login", {
+                                session_expired: 1,
+                            })}
+                            rel="noreferrer"
+                            target="_blank"
+                        >
                             vous-reconnecter
                         </a>{" "}
                         dans un nouvel onglet

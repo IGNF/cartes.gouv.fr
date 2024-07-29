@@ -35,6 +35,9 @@ class SecurityController extends AbstractController
         $referer = $request->headers->get('referer');
         $request->getSession()->set('referer', $referer);
 
+        $sessionExpired = $request->query->get('session_expired');
+        $request->getSession()->set('session_expired', $sessionExpired);
+
         //  création d'un utilisateur bidon si en mode test
         if ('test' === $params->get('app_env')) {
             return $this->testLogin($tokenStorage, $request, $router);

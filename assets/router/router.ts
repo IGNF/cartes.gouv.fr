@@ -10,6 +10,7 @@ const routeDefs = {
     home: defineRoute(
         {
             authentication_failed: param.query.optional.number,
+            session_expired_login_success: param.query.optional.number,
         },
         () => (appRoot === "" ? "/" : appRoot)
     ),
