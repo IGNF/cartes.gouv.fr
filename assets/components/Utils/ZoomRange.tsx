@@ -95,13 +95,11 @@ const ZoomRange: FC<ZoomRangeProps> = (props) => {
 
     useEffect(() => {
         if (leftMapTargetRef.current) {
-            const minValue = olDefaults.zoom_levels.TOP < min ? min : olDefaults.zoom_levels.TOP;
-            leftMapRef.current = createMap(leftMapTargetRef.current, minValue);
+            leftMapRef.current = createMap(leftMapTargetRef.current, Math.max(min, olDefaults.zoom_levels.TOP));
         }
 
         if (rightMapTargetRef.current) {
-            const maxValue = olDefaults.zoom_levels.BOTTOM > max ? max : olDefaults.zoom_levels.BOTTOM;
-            rightMapRef.current = createMap(rightMapTargetRef.current, maxValue);
+            rightMapRef.current = createMap(rightMapTargetRef.current, Math.min(max, olDefaults.zoom_levels.BOTTOM));
         }
 
         return () => {
@@ -142,7 +140,7 @@ const ZoomRange: FC<ZoomRangeProps> = (props) => {
                     {
                         value: values[0],
                         onChange: (e) => {
-                            const v = values;
+                            const v = [...values];
                             v[0] = Number(e.currentTarget.value);
                             onChange(v);
                         },
@@ -150,7 +148,7 @@ const ZoomRange: FC<ZoomRangeProps> = (props) => {
                     {
                         value: values[1],
                         onChange: (e) => {
-                            const v = values;
+                            const v = [...values];
                             v[1] = Number(e.currentTarget.value);
                             onChange(v);
                         },
