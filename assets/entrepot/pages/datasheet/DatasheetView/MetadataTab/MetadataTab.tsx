@@ -19,7 +19,7 @@ import frequencyCodes from "../../../../../data/maintenance_frequency.json";
 
 type MetadataTabProps = {
     datastoreId: string;
-    datasheet?: DatasheetDetailed;
+    datasheet: DatasheetDetailed;
     metadataQuery: UseQueryResult<Metadata, CartesApiException>;
 };
 const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, datasheet, metadataQuery }) => {
