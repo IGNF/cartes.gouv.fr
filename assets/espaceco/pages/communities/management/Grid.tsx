@@ -11,7 +11,6 @@ const Grid: FC<GridProps> = ({ grids }) => {
     const { t } = useTranslation("ManageCommunity");
     return (
         <>
-            <h2>{t("tab7")}</h2>
             <h3>{t("grid.grids")}</h3>
             {t("grid.explain")}
             <GridList
