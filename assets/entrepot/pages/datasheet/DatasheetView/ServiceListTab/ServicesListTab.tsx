@@ -7,7 +7,7 @@ import { DatasheetDetailed } from "../../../../../@types/app";
 import ServicesListItem from "./ServicesListItem";
 
 type ServicesListTabProps = {
-    datasheet?: DatasheetDetailed;
+    datasheet: DatasheetDetailed;
     datastoreId: string;
 };
 const ServicesListTab: FC<ServicesListTabProps> = ({ datastoreId, datasheet }) => {

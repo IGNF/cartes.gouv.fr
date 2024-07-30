@@ -13,7 +13,6 @@ import { symToStr } from "tsafe/symToStr";
 import type { Datasheet, DatasheetDetailed, Metadata } from "../../../../@types/app";
 import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
-import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
 import { Translations, declareComponentKeys, useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
@@ -30,6 +29,13 @@ const deleteDataConfirmModal = createModal({
     isOpenedByDefault: false,
 });
 
+export enum DatasheetViewActiveTabEnum {
+    Metadata = "metadata",
+    Dataset = "dataset",
+    Services = "services",
+    Documents = "documents",
+}
+
 type DatasheetViewProps = {
     datastoreId: string;
     datasheetName: string;
@@ -40,6 +46,8 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
     const { t } = useTranslation({ DatasheetView });
 
     const route = useRoute();
+    const activeTab: DatasheetViewActiveTabEnum = route.params?.["activeTab"];
+
     const queryClient = useQueryClient();
 
     const datasheetDeleteMutation = useMutation<null, CartesApiException>({
@@ -72,41 +80,46 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
 
     return (
         <DatastoreLayout datastoreId={datastoreId} documentTitle={`Données ${datasheetName}`}>
-            {datasheetQuery.isLoading ? (
-                <LoadingText />
-            ) : datasheetQuery.error ? (
-                <Alert
-                    severity="error"
-                    closable={false}
-                    title={datasheetQuery.error.message}
-                    description={<Button linkProps={routes.datasheet_list({ datastoreId }).link}>{t("datasheet.back_to_list")}</Button>}
+            <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-4w")}>
+                <Button
+                    iconId="fr-icon-arrow-left-s-line"
+                    priority="tertiary no outline"
+                    linkProps={routes.datasheet_list({ datastoreId }).link}
+                    title={t("datasheet.back_to_list")}
+                    size="large"
                 />
-            ) : (
-                <>
-                    <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-4w")}>
-                        <Button
-                            iconId="fr-icon-arrow-left-s-line"
-                            priority="tertiary no outline"
-                            linkProps={routes.datasheet_list({ datastoreId }).link}
-                            title={t("datasheet.back_to_list")}
-                            size="large"
+                <h1 className={fr.cx("fr-m-0")}>{datasheetName}</h1>
+                <Badge noIcon={true} severity="info" className={fr.cx("fr-mx-2w")}>
+                    {(datasheetQuery?.data?.nb_publications && datasheetQuery?.data?.nb_publications > 0) || datasheetQuery.data?.metadata_published === true
+                        ? tCommon("published")
+                        : tCommon("not_published")}
+                </Badge>
+                {(datasheetQuery.isFetching || metadataQuery.isFetching) && <LoadingIcon largeIcon={true} />}
+            </div>
+
+            {datasheetQuery.error && (
+                <div className={fr.cx("fr-grid-row", "fr-mb-4w")}>
+                    <div className={fr.cx("fr-col")}>
+                        <Alert
+                            severity="error"
+                            closable={false}
+                            title={datasheetQuery.error.message}
+                            description={<Button linkProps={routes.datasheet_list({ datastoreId }).link}>{t("datasheet.back_to_list")}</Button>}
                         />
-                        <h1 className={fr.cx("fr-m-0")}>{datasheetName}</h1>
-                        <Badge noIcon={true} severity="info" className={fr.cx("fr-mx-2w")}>
-                            {(datasheetQuery?.data?.nb_publications && datasheetQuery?.data?.nb_publications > 0) ||
-                            datasheetQuery.data?.metadata_published === true
-                                ? tCommon("published")
-                                : tCommon("not_published")}
-                        </Badge>
-                        {(datasheetQuery.isFetching || metadataQuery.isFetching) && <LoadingIcon largeIcon={true} />}
                     </div>
+                </div>
+            )}
 
-                    {datasheetDeleteMutation.error && (
-                        <div className={fr.cx("fr-grid-row", "fr-mb-4w")}>
-                            <Alert severity="error" closable={true} title={datasheetDeleteMutation.error.message} />
-                        </div>
-                    )}
+            {datasheetDeleteMutation.error && (
+                <div className={fr.cx("fr-grid-row", "fr-mb-4w")}>
+                    <div className={fr.cx("fr-col")}>
+                        <Alert severity="error" closable={true} title={datasheetDeleteMutation.error.message} />
+                    </div>
+                </div>
+            )}
 
+            {datasheetQuery.data !== undefined && (
+                <>
                     <div className={fr.cx("fr-grid-row", "fr-mb-4w")}>
                         <div className={fr.cx("fr-col-2")}>
                             <DatasheetThumbnail datastoreId={datastoreId} datasheetName={datasheetName} datasheet={datasheetQuery.data} />
@@ -130,48 +143,45 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                         </div>
                     </div>
 
-                    {datasheetQuery.data !== undefined && (
-                        <div className={fr.cx("fr-grid-row")}>
-                            <div className={fr.cx("fr-col")}>
-                                <Tabs
-                                    tabs={[
-                                        {
-                                            label: t("tab_label.metadata"),
-                                            isDefault: route.params["activeTab"] === "metadata",
-                                            content: <MetadataTab datastoreId={datastoreId} datasheet={datasheetQuery.data} metadataQuery={metadataQuery} />,
-                                        },
-                                        {
-                                            label: t("tab_label.datasets", {
-                                                num: (datasheetQuery.data?.vector_db_list?.length || 0) + (datasheetQuery.data?.pyramid_list?.length || 0),
-                                            }),
-                                            isDefault: route.params["activeTab"] === "dataset",
-                                            content: <DatasetListTab datastoreId={datastoreId} datasheet={datasheetQuery.data} />,
-                                        },
-                                        {
-                                            label: t("tab_label.services", { num: datasheetQuery.data?.service_list?.length || 0 }),
-                                            isDefault: route.params["activeTab"] === "services",
-                                            content: <ServicesListTab datastoreId={datastoreId} datasheet={datasheetQuery.data} />,
-                                        },
-                                    ]}
-                                    onTabChange={({ tabIndex }) => {
-                                        let activeTab = "dataset";
-                                        switch (tabIndex) {
-                                            case 0:
-                                                activeTab = "metadata";
-                                                break;
-                                            case 1:
-                                                activeTab = "dataset";
-                                                break;
-                                            case 2:
-                                                activeTab = "services";
-                                                break;
-                                        }
-                                        routes.datastore_datasheet_view({ datastoreId, datasheetName, activeTab }).replace();
-                                    }}
-                                />
-                            </div>
+                    <div className={fr.cx("fr-grid-row")}>
+                        <div className={fr.cx("fr-col")}>
+                            <Tabs
+                                tabs={[
+                                    {
+                                        label: t("tab_label.metadata"),
+                                        tabId: DatasheetViewActiveTabEnum.Metadata,
+                                    },
+                                    {
+                                        label: t("tab_label.datasets", {
+                                            num: (datasheetQuery.data?.vector_db_list?.length || 0) + (datasheetQuery.data?.pyramid_list?.length || 0),
+                                        }),
+                                        tabId: DatasheetViewActiveTabEnum.Dataset,
+                                    },
+                                    {
+                                        label: t("tab_label.services", { num: datasheetQuery.data?.service_list?.length || 0 }),
+                                        tabId: DatasheetViewActiveTabEnum.Services,
+                                    },
+                                ]}
+                                selectedTabId={activeTab}
+                                onTabChange={(activeTab) => {
+                                    routes.datastore_datasheet_view({ datastoreId, datasheetName, activeTab }).replace();
+                                }}
+                            >
+                                {(() => {
+                                    switch (activeTab) {
+                                        case DatasheetViewActiveTabEnum.Metadata:
+                                            return <MetadataTab datastoreId={datastoreId} datasheet={datasheetQuery.data} metadataQuery={metadataQuery} />;
+
+                                        case DatasheetViewActiveTabEnum.Dataset:
+                                            return <DatasetListTab datastoreId={datastoreId} datasheet={datasheetQuery.data} />;
+
+                                        case DatasheetViewActiveTabEnum.Services:
+                                            return <ServicesListTab datastoreId={datastoreId} datasheet={datasheetQuery.data} />;
+                                    }
+                                })()}
+                            </Tabs>
                         </div>
-                    )}
+                    </div>
                 </>
             )}
 
@@ -185,7 +195,6 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                     </div>
                 </Wait>
             )}
-
             <>
                 {createPortal(
                     <deleteDataConfirmModal.Component
