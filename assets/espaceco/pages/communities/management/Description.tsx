@@ -95,7 +95,7 @@ const Description: FC<DescriptionProps> = ({ community }) => {
 
     return (
         <>
-            <h2>{t("tab1")}</h2>
+            <h2>{t("desc.tab.title")}</h2>
             <div>
                 <p>{tCommon("mandatory_fields")}</p>
                 <Input

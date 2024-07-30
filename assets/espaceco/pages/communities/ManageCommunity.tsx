@@ -16,6 +16,7 @@ import api from "../../api";
 import Description from "./management/Description";
 import Grid from "./management/Grid";
 import ZoomAndCentering from "./management/ZoomAndCentering";
+import Layer from "./management/Layer";
 
 type ManageCommunityProps = {
     communityId: number;
@@ -57,13 +58,13 @@ const ManageCommunity: FC<ManageCommunityProps> = ({ communityId }) => {
                         <Tabs
                             selectedTabId={selectedTabId}
                             tabs={[
-                                { tabId: "tab1", label: t("tab1") },
-                                { tabId: "tab2", label: t("tab2") },
-                                { tabId: "tab3", label: t("tab3") },
-                                { tabId: "tab4", label: t("tab4") },
-                                { tabId: "tab5", label: t("tab5") },
-                                { tabId: "tab6", label: t("tab6") },
-                                { tabId: "tab7", label: t("tab7") },
+                                { tabId: "tab1", label: t("tab1") }, // Description
+                                { tabId: "tab2", label: t("tab2") }, // Bases de données
+                                { tabId: "tab3", label: t("tab3") }, // Zoom, centrage
+                                { tabId: "tab4", label: t("tab4") }, // Couches de la carte
+                                { tabId: "tab5", label: t("tab5") }, // Outils
+                                { tabId: "tab6", label: t("tab6") }, // Signalements
+                                { tabId: "tab7", label: t("tab7") }, // Emprises
                             ]}
                             onTabChange={setSelectedTabId}
                         >
@@ -74,6 +75,8 @@ const ManageCommunity: FC<ManageCommunityProps> = ({ communityId }) => {
                                             return <Description community={communityQuery.data} />;
                                         case "tab3":
                                             return <ZoomAndCentering community={communityQuery.data} />;
+                                        case "tab4":
+                                            return <Layer />;
                                         case "tab7":
                                             return <Grid grids={communityQuery.data?.grids ?? []} />; // TODO
                                         default:

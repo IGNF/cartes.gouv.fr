@@ -66,6 +66,7 @@ const ZoomAndCentering: FC<ZoomAndCenteringProps> = ({ community }) => {
             {consistent === false && (
                 <Alert severity="warning" title={tCommon("warning")} description={t("zoom.consistant_error")} className={fr.cx("fr-my-2w")} />
             )}
+            <h2>{t("zoom.tab.title")}</h2>
             <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
                 <div className={fr.cx("fr-col-5")}>
                     <Search
