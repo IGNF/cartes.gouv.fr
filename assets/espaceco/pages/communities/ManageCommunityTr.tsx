@@ -16,6 +16,7 @@ export const { i18n } = declareComponentKeys<
     | "tab5"
     | "tab6"
     | "tab7"
+    | "desc.tab.title"
     | "desc.name"
     | "desc.hint_name"
     | "desc.description"
@@ -35,6 +36,7 @@ export const { i18n } = declareComponentKeys<
     | "modal.document.name"
     | "modal.document.file_hint"
     | "zoom.consistant_error"
+    | "zoom.tab.title"
     | "zoom.position"
     | "zoom.position_hint"
     | "zoom.zoom_range"
@@ -49,6 +51,10 @@ export const { i18n } = declareComponentKeys<
     | "zoom.xmax"
     | "zoom.ymin"
     | "zoom.ymax"
+    | "layer.tab.title"
+    | "layer.tabl"
+    | "layer.tab2"
+    | "layer.tab3"
     | "grid.grids"
     | { K: "grid.explain"; R: JSX.Element }
 >()("ManageCommunity");
@@ -65,6 +71,7 @@ export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"
     tab5: "Outils",
     tab6: "Signalements",
     tab7: "Emprises",
+    "desc.tab.title": "Décrire le guichet",
     "desc.name": "Nom du guichet",
     "desc.hint_name": "Donnez un nom clair et compréhensible",
     "desc.description": "Description",
@@ -94,6 +101,7 @@ export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"
     "modal.document.name": "Titre",
     "modal.document.file_hint": "Taille maximale : 5 Mo.",
     "zoom.consistant_error": "Emprise et position ne sont pas cohérents",
+    "zoom.tab.title": "Définir l’état initial de la carte à l’ouverture du guichet",
     "zoom.position": "Position",
     "zoom.position_hint": "Fixer la position et définissez le niveau de zoom (utilisez votre souris ou la barre de recherche ci-dessous",
     "zoom.zoom_range": "Gérer les niveaux de zoom minimum et maximum permis (optionnel)",
@@ -110,6 +118,10 @@ export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"
     "zoom.xmax": "X max",
     "zoom.ymin": "Y min",
     "zoom.ymax": "Y max",
+    "layer.tab.title": "Gérer les couches de la carte",
+    "layer.tabl": "Mes données",
+    "layer.tab2": "Données de la géoplateforme",
+    "layer.tab3": "Fonds de carte",
     "grid.grids": "Emprises du guichet (optionnel)",
     "grid.explain": (
         <p>
@@ -132,6 +144,7 @@ export const ManageCommunityEnTranslations: Translations<"en">["ManageCommunity"
     tab5: undefined,
     tab6: undefined,
     tab7: undefined,
+    "desc.tab.title": undefined,
     "desc.name": undefined,
     "desc.hint_name": undefined,
     "desc.description": undefined,
@@ -160,6 +173,7 @@ export const ManageCommunityEnTranslations: Translations<"en">["ManageCommunity"
     "modal.document.name": "Title",
     "modal.document.file_hint": "Maximum file size : 5 Mo.",
     "zoom.consistant_error": undefined,
+    "zoom.tab.title": undefined,
     "zoom.position": "Position",
     "zoom.position_hint": undefined,
     "zoom.zoom_range": undefined,
@@ -174,6 +188,10 @@ export const ManageCommunityEnTranslations: Translations<"en">["ManageCommunity"
     "zoom.xmax": "X max",
     "zoom.ymin": "Y min",
     "zoom.ymax": "Y max",
+    "layer.tab.title": undefined,
+    "layer.tabl": "My datas",
+    "layer.tab2": "Geoplateforme datas",
+    "layer.tab3": "Base maps",
     "grid.grids": undefined,
     "grid.explain": undefined,
 };
