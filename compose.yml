@@ -28,6 +28,7 @@ services:
             - host.docker.internal:host-gateway
         ports:
             - "9092:8000"
+            - "5173:5173"
         networks:
             - web_dev
         restart: unless-stopped
