@@ -3,7 +3,7 @@
         "target": "ESNext",
         "esModuleInterop": true,
         "module": "ESNext",
-        "moduleResolution": "Bundler",
+        "moduleResolution": "Node",
         "strict": true,
         //"allowJs": true,
         "jsx": "react-jsx",
