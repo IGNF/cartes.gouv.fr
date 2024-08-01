@@ -30,6 +30,9 @@ framework:
     serializer:
         name_converter: "serializer.name_converter.camel_case_to_snake_case"
 
+    assets:
+        version_strategy: 'Pentatrion\ViteBundle\Asset\ViteAssetVersionStrategy'
+
 when@test:
     framework:
         test: true
