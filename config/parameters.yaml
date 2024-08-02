@@ -30,6 +30,7 @@ parameters:
     style_files_path: "%var_data_path%/style_files"
     capabilities_path: "%var_data_path%/capabilities"
     metadata_path: "%var_data_path%/metadata"
+    datasheet_documents_path: "%var_data_path%/datasheet_documents"
 
     support_contact_mail: "%env(resolve:SUPPORT_CONTACT_EMAIL)%"
     mailer_sender_address: "%env(resolve:MAILER_SENDER_ADDRESS)%"

@@ -10,7 +10,7 @@ import { FC } from "react";
 import { createPortal } from "react-dom";
 import { symToStr } from "tsafe/symToStr";
 
-import type { Datasheet, DatasheetDetailed, Metadata } from "../../../../@types/app";
+import { DatasheetDocumentTypeEnum, type Datasheet, type DatasheetDetailed, type Metadata } from "../../../../@types/app";
 import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import Wait from "../../../../components/Utils/Wait";
@@ -21,6 +21,7 @@ import { routes, useRoute } from "../../../../router/router";
 import api from "../../../api";
 import DatasetListTab from "./DatasetListTab/DatasetListTab";
 import DatasheetThumbnail, { type ThumbnailAction } from "./DatasheetThumbnail";
+import DocumentsTab from "./DocumentsTab/DocumentsTab";
 import MetadataTab from "./MetadataTab/MetadataTab";
 import ServicesListTab from "./ServiceListTab/ServicesListTab";
 
@@ -78,6 +79,13 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
         retry: false,
     });
 
+    const documentsListQuery = useQuery({
+        queryKey: RQKeys.datastore_datasheet_documents_list(datastoreId, datasheetName),
+        queryFn: ({ signal }) => api.datasheetDocument.getList(datastoreId, datasheetName, { signal }),
+        staleTime: 20000,
+        enabled: activeTab === DatasheetViewActiveTabEnum.Documents,
+    });
+
     return (
         <DatastoreLayout datastoreId={datastoreId} documentTitle={`Données ${datasheetName}`}>
             <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-4w")}>
@@ -102,9 +110,10 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                     <div className={fr.cx("fr-col")}>
                         <Alert
                             severity="error"
-                            closable={false}
+                            closable={true}
                             title={datasheetQuery.error.message}
                             description={<Button linkProps={routes.datasheet_list({ datastoreId }).link}>{t("datasheet.back_to_list")}</Button>}
+                            onClose={datasheetQuery.refetch}
                         />
                     </div>
                 </div>
@@ -161,6 +170,10 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                                         label: t("tab_label.services", { num: datasheetQuery.data?.service_list?.length || 0 }),
                                         tabId: DatasheetViewActiveTabEnum.Services,
                                     },
+                                    {
+                                        label: t("tab_label.documents", { num: documentsListQuery.data?.length ?? 0 }),
+                                        tabId: DatasheetViewActiveTabEnum.Documents,
+                                    },
                                 ]}
                                 selectedTabId={activeTab}
                                 onTabChange={(activeTab) => {
@@ -177,6 +190,9 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
 
                                         case DatasheetViewActiveTabEnum.Services:
                                             return <ServicesListTab datastoreId={datastoreId} datasheet={datasheetQuery.data} />;
+
+                                        case DatasheetViewActiveTabEnum.Documents:
+                                            return <DocumentsTab datastoreId={datastoreId} datasheetName={datasheetName} />;
                                     }
                                 })()}
                             </Tabs>
@@ -248,6 +264,7 @@ export const { i18n } = declareComponentKeys<
     | "tab_label.metadata"
     | { K: "tab_label.datasets"; P: { num: number }; R: string }
     | { K: "tab_label.services"; P: { num: number }; R: string }
+    | { K: "tab_label.documents"; P: { num: number }; R: string }
     | "datasheet.back_to_list"
     | "datasheet.remove"
     | { K: "datasheet.being_removed"; P: { datasheetName: string }; R: string }
@@ -264,6 +281,26 @@ export const { i18n } = declareComponentKeys<
     | "datasheet_confirm_delete_modal.text"
     | "metadata_tab.metadata.absent"
     | "metadata_tab.metadata.is_loading"
+    | "documents_tab.add_document"
+    | "documents_tab.document_type.label"
+    | { K: "documents_tab.document_type.options.label"; P: { docType: DatasheetDocumentTypeEnum }; R: string }
+    | "documents_tab.add_document.in_progress"
+    | "documents_tab.add_document.error.name_required"
+    | { K: "documents_tab.add_document.error.extention_incorrect"; P: { fileExtension: string; expectedExtension: string }; R: string }
+    | "documents_tab.add_document.error.extension_missing"
+    | "documents_tab.add_document.error.file_required"
+    | { K: "documents_tab.add_document.error.file_too_large"; P: { maxFileSize: number }; R: string }
+    | "documents_tab.add_document.error.url_required"
+    | "documents_tab.add_document.error.url_invalid"
+    | "documents_tab.add_document.name.label"
+    | "documents_tab.add_document.pdf.label"
+    | "documents_tab.add_document.pdf.hint"
+    | "documents_tab.add_document.video_link.label"
+    | "documents_tab.add_document.qgis_project.label"
+    | "documents_tab.add_document.qgis_project.hint"
+    | { K: "documents_tab.delete_document.confirmation"; P: { display?: string }; R: string }
+    | "documents_tab.delete_document.in_progress"
+    | "documents_tab.no_documents"
 >()({
     DatasheetView,
 });
@@ -272,6 +309,7 @@ export const DatasheetViewFrTranslations: Translations<"fr">["DatasheetView"] = 
     "tab_label.metadata": "Métadonnées",
     "tab_label.datasets": ({ num }) => `Jeux de données (${num})`,
     "tab_label.services": ({ num }) => `Services (${num})`,
+    "tab_label.documents": ({ num }) => `Documents (${num})`,
     "datasheet.back_to_list": "Retour à ma liste de données",
     "datasheet.remove": "Supprimer la fiche de données",
     "datasheet.being_removed": ({ datasheetName }) => `Suppression de la fiche de données ${datasheetName} en cours ...`,
@@ -307,12 +345,43 @@ export const DatasheetViewFrTranslations: Translations<"fr">["DatasheetView"] = 
     "metadata_tab.metadata.absent":
         "Les métadonnées de cette fiche ne sont pas encore disponibles. Créez un premier service à partir d’un de vos jeux de données pour les compléter.",
     "metadata_tab.metadata.is_loading": "Les métadonnées sont en cours de chargement",
+    "documents_tab.add_document": "Ajouter un document",
+    "documents_tab.document_type.label": "Type de document",
+    "documents_tab.document_type.options.label": ({ docType }) => {
+        switch (docType) {
+            case DatasheetDocumentTypeEnum.Pdf:
+                return "PDF";
+            case DatasheetDocumentTypeEnum.VideoLink:
+                return "Lien vidéo";
+            case DatasheetDocumentTypeEnum.QgisProject:
+                return "Projet QGIS";
+        }
+    },
+    "documents_tab.add_document.in_progress": "Ajout de document en cours",
+    "documents_tab.add_document.error.name_required": "Le nom est obligatoire",
+    "documents_tab.add_document.error.extention_incorrect": ({ expectedExtension, fileExtension }) =>
+        `L'extension ${fileExtension} n'est pas acceptée, seule l'extension ${expectedExtension} est acceptée`,
+    "documents_tab.add_document.error.extension_missing": "Extension du fichier manquante",
+    "documents_tab.add_document.error.file_required": "Le fichier est obligatoire",
+    "documents_tab.add_document.error.file_too_large": ({ maxFileSize }) => `La taille du fichier téléversé ne peux excéder ${maxFileSize} Mo`,
+    "documents_tab.add_document.error.url_required": "L'URL est obligatoire",
+    "documents_tab.add_document.error.url_invalid": "L'URL est invalide",
+    "documents_tab.add_document.name.label": "Nom du document",
+    "documents_tab.add_document.pdf.label": "Téléverser un pdf",
+    "documents_tab.add_document.pdf.hint": "Fichier .pdf de moins de 5 Mo uniquement",
+    "documents_tab.add_document.video_link.label": "Lien vers la vidéo",
+    "documents_tab.add_document.qgis_project.label": "Téléverser un fichier de sauvegarde d'un projet QGIS",
+    "documents_tab.add_document.qgis_project.hint": "Fichier .qgz de moins de 5 Mo uniquement",
+    "documents_tab.delete_document.confirmation": ({ display }) => `Êtes-vous sûr de vouloir supprimer le document ${display} ?`,
+    "documents_tab.delete_document.in_progress": "Suppression du document en cours",
+    "documents_tab.no_documents": "Il n'y a pas encore de documents liés à cette fiche de données.",
 };
 
 export const DatasheetViewEnTranslations: Translations<"en">["DatasheetView"] = {
     "tab_label.metadata": "Metadata",
     "tab_label.datasets": ({ num }) => `Datasets (${num})`,
     "tab_label.services": ({ num }) => `Services (${num})`,
+    "tab_label.documents": ({ num }) => `Documents (${num})`,
     "datasheet.back_to_list": "Back to my data list",
     "datasheet.remove": "Delete datasheet",
     "datasheet.being_removed": ({ datasheetName }) => `Datasheet ${datasheetName} being removed ...`,
@@ -347,4 +416,24 @@ export const DatasheetViewEnTranslations: Translations<"en">["DatasheetView"] = 
     "datasheet_confirm_delete_modal.text": "The following items will be deleted :",
     "metadata_tab.metadata.absent": undefined,
     "metadata_tab.metadata.is_loading": undefined,
+    "documents_tab.add_document": undefined,
+    "documents_tab.document_type.label": undefined,
+    "documents_tab.document_type.options.label": undefined,
+    "documents_tab.add_document.in_progress": undefined,
+    "documents_tab.add_document.error.name_required": undefined,
+    "documents_tab.add_document.error.extention_incorrect": undefined,
+    "documents_tab.add_document.error.extension_missing": undefined,
+    "documents_tab.add_document.error.file_required": undefined,
+    "documents_tab.add_document.error.file_too_large": undefined,
+    "documents_tab.add_document.error.url_required": undefined,
+    "documents_tab.add_document.error.url_invalid": undefined,
+    "documents_tab.add_document.name.label": undefined,
+    "documents_tab.add_document.pdf.label": undefined,
+    "documents_tab.add_document.pdf.hint": undefined,
+    "documents_tab.add_document.video_link.label": undefined,
+    "documents_tab.add_document.qgis_project.label": undefined,
+    "documents_tab.add_document.qgis_project.hint": undefined,
+    "documents_tab.delete_document.confirmation": undefined,
+    "documents_tab.delete_document.in_progress": undefined,
+    "documents_tab.no_documents": undefined,
 };
