@@ -59,6 +59,19 @@ export type Datasheet = {
 
 export type DatasheetThumbnailAnnexe = Annexe & { url: string };
 
+export type DatasheetDocument = {
+    type: DatasheetDocumentTypeEnum;
+    url: string;
+    name: string;
+    id: string;
+};
+
+export enum DatasheetDocumentTypeEnum {
+    Pdf = "pdf",
+    VideoLink = "video-link",
+    QgisProject = "qgis-project",
+}
+
 export type DatasheetDetailed = Datasheet & {
     vector_db_list: VectorDb[] | undefined;
     pyramid_list: Pyramid[] | undefined;

@@ -40,7 +40,7 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
     public function getAnnexeList(string $datastoreId): JsonResponse
     {
         try {
-            $annexeList = $this->annexeApiService->getAllDetailed($datastoreId);
+            $annexeList = $this->annexeApiService->getAll($datastoreId);
 
             return $this->json($annexeList);
         } catch (ApiException $ex) {

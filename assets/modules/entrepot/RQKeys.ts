@@ -32,6 +32,9 @@ const RQKeys = {
         "layernames",
         configurationType,
     ],
+
+    datastore_datasheet_documents_list: (datastoreId: string, datasheetName: string) => ["datastore", datastoreId, "datasheet", datasheetName, "documents"],
+
     datastore_offering: (datastoreId: string, offeringId: string): string[] => ["datastore", datastoreId, "offering", offeringId],
 
     datastore_annexe_list: (datastoreId: string): string[] => ["datastore", datastoreId, "annexe"],
