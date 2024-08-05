@@ -75,7 +75,12 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
 export default DatasheetList;
 
 export const { i18n } = declareComponentKeys<
-    { K: "title"; P: { datastoreName?: string }; R: string } | "create_datasheet" | "datasheet_creation_impossible" | "metadata_endpoint_quota_reached"
+    | { K: "title"; P: { datastoreName?: string }; R: string }
+    | "create_datasheet"
+    | "datasheet_creation_impossible"
+    | "metadata_endpoint_quota_reached"
+    | { K: "services_published"; P: { nbServices?: number }; R: string }
+    | "no_services_published"
 >()({
     DatasheetList,
 });
@@ -85,6 +90,8 @@ export const DatasheetListFrTranslations: Translations<"fr">["DatasheetList"] = 
     create_datasheet: "Créer une fiche de données",
     datasheet_creation_impossible: "Création d’une nouvelle fiche de données impossible",
     metadata_endpoint_quota_reached: "Quota du point d’accès de métadonnées atteint",
+    services_published: ({ nbServices }) => `Publié (${nbServices})`,
+    no_services_published: "Non publié",
 };
 
 export const DatasheetListEnTranslations: Translations<"en">["DatasheetList"] = {
@@ -92,4 +99,6 @@ export const DatasheetListEnTranslations: Translations<"en">["DatasheetList"] = 
     create_datasheet: undefined,
     datasheet_creation_impossible: undefined,
     metadata_endpoint_quota_reached: undefined,
+    services_published: undefined,
+    no_services_published: undefined,
 };

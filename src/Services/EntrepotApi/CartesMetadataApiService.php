@@ -92,6 +92,11 @@ class CartesMetadataApiService
 
         $xmlFilePath = $this->cswMetadataHelper->saveToFile($cswMetadata);
         $this->metadataApiService->replaceFile($datastoreId, $apiMetadata['_id'], $xmlFilePath);
+
+        // dépublie la metadata (sans la supprimer) s'il n'y a plus de services publiés
+        if (0 === count($cswMetadata->layers) && isset($apiMetadata['endpoints'][0]['_id'])) {
+            $this->metadataApiService->unpublish($datastoreId, $cswMetadata->fileIdentifier, $apiMetadata['endpoints'][0]['_id']);
+        }
     }
 
     public function updateStyleFiles(string $datastoreId, string $datasheetName): void
@@ -360,10 +365,7 @@ class CartesMetadataApiService
     }
 
     /**
-     *
-     * @param string $datastoreId
      * @param array<CswMetadataLayer> $layers
-     * @return array
      */
     private function getCapabilitiesFiles(string $datastoreId, array $layers): array
     {
@@ -374,25 +376,25 @@ class CartesMetadataApiService
         $mapping = ['OGC:WFS' => 'WFS', 'OGC:WMS' => 'WMS-VECTOR'];
         $layerTypes = [];
 
-        foreach($layers as $layer) {
+        foreach ($layers as $layer) {
             $type = $layer->endpointType;
             if (array_key_exists($type, $mapping)) {
-                $layerTypes[] = $mapping[$type];   
+                $layerTypes[] = $mapping[$type];
             }
         }
         $layerTypes = array_values(array_unique($layerTypes));
-        
+
         $annexeUrl = $this->parameterBag->get('annexes_url');
 
         $capabilitiesFiles = [];
-        foreach($layerTypes as $type) {
+        foreach ($layerTypes as $type) {
             $endpoint = $this->getEndpoint($datastoreId, $type);
-            if (! $endpoint) {
+            if (!$endpoint) {
                 continue;
             }
 
             $technicalName = $endpoint['technical_name'];
-            
+
             $annexes = $this->annexeApiService->getAll($datastoreId, null, "/$technicalName/capabilities.xml");
             if (1 === count($annexes)) {
                 $capabilitiesFiles[] = new CswCapabilitiesFile(
@@ -407,12 +409,9 @@ class CartesMetadataApiService
     }
 
     /**
-     *
-     * @param string $datastoreId
-     * @param string $type
-     * @return array<mixed> | null
+     * @return array<mixed>|null
      */
-    private function getEndpoint(string $datastoreId, string $type) : array | null
+    private function getEndpoint(string $datastoreId, string $type): ?array
     {
         $endpoints = $this->datastoreApiService->getEndpointsList($datastoreId, [
             'type' => $type,

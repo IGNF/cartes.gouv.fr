@@ -4,8 +4,9 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { FC } from "react";
 import { symToStr } from "tsafe/symToStr";
 
-import { routes } from "../../../../router/router";
 import { type Datasheet } from "../../../../@types/app";
+import { useTranslation } from "../../../../i18n/i18n";
+import { routes } from "../../../../router/router";
 
 import "../../../../sass/pages/datasheetlist.scss";
 
@@ -17,6 +18,8 @@ type DatasheetListItemProps = {
 };
 
 const DatasheetListItem: FC<DatasheetListItemProps> = ({ datastoreId, datasheet }) => {
+    const { t } = useTranslation("DatasheetList");
+
     return (
         <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-grid-row--center", "fr-my-1w", "fr-p-2v", "fr-card--grey")}>
             <div className={fr.cx("fr-col")}>
@@ -41,16 +44,12 @@ const DatasheetListItem: FC<DatasheetListItemProps> = ({ datastoreId, datasheet 
             {/* <div className={fr.cx("fr-col-2")}>{datasheet?.date ? formatDateFromISO(datasheet.date) : ""}</div> */}
             <div className={fr.cx("fr-col-2")}>
                 <Badge noIcon={true} severity="info">
-                    {datasheet?.nb_publications > 0
-                        ? `Publié (${datasheet?.nb_publications})`
-                        : datasheet.metadata_published === true
-                          ? "Publié"
-                          : "Non Publié"}
+                    {datasheet?.nb_publications > 0 ? t("services_published", { nbServices: datasheet?.nb_publications }) : t("no_services_published")}
                 </Badge>
             </div>
         </div>
     );
 };
 
-DatasheetListItem.displayName = symToStr({ DataListItem: DatasheetListItem });
+DatasheetListItem.displayName = symToStr({ DatasheetListItem });
 export default DatasheetListItem;

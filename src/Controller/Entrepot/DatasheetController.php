@@ -164,14 +164,6 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         ]);
         $nbPublications = count($configurations);
 
-        // recherche de metadata associée
-        $metadataList = $this->metadataApiService->getAll($datastore['_id'], [
-            'tags' => [
-                CommonTags::DATASHEET_NAME => $datasheetName,
-            ],
-        ]);
-        $metadataPublished = count($metadataList) > 0;
-
         // recherche de vignette
         $annexeUrl = $this->getParameter('annexes_url');
         $annexes = $this->annexeApiService->getAll($datastore['_id'], null, null, ["datasheet_name=$datasheetName", 'type=thumbnail']);
@@ -186,7 +178,6 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             'name' => $datasheetName,
             'nb_publications' => $nbPublications,
             'thumbnail' => $thumbnail,
-            'metadata_published' => $metadataPublished,
         ];
     }
 
