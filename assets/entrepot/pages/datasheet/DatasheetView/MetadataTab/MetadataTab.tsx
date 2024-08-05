@@ -39,6 +39,11 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, datasheet, metadataQue
 
     const catalogueDatasheetUrl = useMemo(() => `${catalogueUrl}/dataset/${metadata?.file_identifier}`, [metadata?.file_identifier]);
 
+    const isPublished = useMemo(
+        () => metadataQuery.data?.endpoints?.length !== undefined && metadataQuery.data?.endpoints?.length > 0,
+        [metadataQuery.data?.endpoints?.length]
+    );
+
     return (
         <>
             {metadataQuery.isLoading && <LoadingText message={tDatasheet("metadata_tab.metadata.is_loading")} withSpinnerIcon={true} as="p" />}
@@ -53,18 +58,29 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, datasheet, metadataQue
             {metadata && (
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--center", "fr-grid-row--middle")}>
                     <div className={fr.cx("fr-col")}>
-                        <CallOut
-                            buttonProps={{
-                                children: "Consulter le catalogue",
-                                linkProps: {
-                                    href: catalogueDatasheetUrl,
-                                    rel: "noreferrer",
-                                    target: "_blank",
-                                },
-                            }}
-                        >
-                            {"Les métadonnées sont désormais publiées sur le catalogue de la géoplateforme."}
-                        </CallOut>
+                        {isPublished ? (
+                            <CallOut
+                                buttonProps={{
+                                    children: "Consulter le catalogue",
+                                    linkProps: {
+                                        href: catalogueDatasheetUrl,
+                                        rel: "noreferrer",
+                                        target: "_blank",
+                                    },
+                                }}
+                            >
+                                {"Les métadonnées sont désormais publiées sur le catalogue de la géoplateforme."}
+                            </CallOut>
+                        ) : (
+                            <CallOut
+                                buttonProps={{
+                                    children: "Consulter le catalogue",
+                                    disabled: true,
+                                }}
+                            >
+                                {"Le lien vers le catalogue est désactivé car la métadonnée a été dépubliée faute de services publiés."}
+                            </CallOut>
+                        )}
 
                         <Accordion titleAs="h2" defaultExpanded={true} label={"Description de la ressource"}>
                             <MetadataField

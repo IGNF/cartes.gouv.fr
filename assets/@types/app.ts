@@ -54,7 +54,6 @@ export type Datasheet = {
     name: string;
     nb_publications: number;
     thumbnail?: DatasheetThumbnailAnnexe;
-    metadata_published: boolean;
 };
 
 export type DatasheetThumbnailAnnexe = Annexe & { url: string };
