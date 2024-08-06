@@ -16,6 +16,7 @@ export const { i18n } = declareComponentKeys<
     | "send"
     | "cancel"
     | "delete"
+    | "see"
     | "yes"
     | "no"
     | "publish"
@@ -46,6 +47,7 @@ export const commonFrTranslations: Translations<"fr">["Common"] = {
     send: "Envoyer",
     cancel: "Annuler",
     delete: "Supprimer",
+    see: "Consulter",
     yes: "Oui",
     no: "Non",
     publish: "Publier",
@@ -76,6 +78,7 @@ export const commonEnTranslations: Translations<"en">["Common"] = {
     send: "Send",
     cancel: "Cancel",
     delete: "Delete",
+    see: "Check",
     yes: "Yes",
     no: "No",
     publish: "Publish",

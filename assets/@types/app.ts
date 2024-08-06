@@ -62,13 +62,13 @@ export type DatasheetDocument = {
     type: DatasheetDocumentTypeEnum;
     url: string;
     name: string;
+    description?: string;
     id: string;
 };
 
 export enum DatasheetDocumentTypeEnum {
-    Pdf = "pdf",
-    VideoLink = "video-link",
-    QgisProject = "qgis-project",
+    File = "file",
+    Link = "link",
 }
 
 export type DatasheetDetailed = Datasheet & {

@@ -59,6 +59,7 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
         try {
             $documentType = $request->request->get('type');
             $documentName = $request->request->get('name');
+            $documentdescription = $request->request->get('description');
 
             $files = $request->files;
 
@@ -75,9 +76,17 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
                 'name' => $documentName,
             ];
 
+            if (null !== $documentdescription) {
+                $newDocument['description'] = $documentdescription;
+            }
+
             switch ($documentType) {
-                case 'pdf':
-                case 'qgis-project':
+                case 'link':
+                    $newDocument['id'] = Uuid::v4();
+                    $newDocument['url'] = $request->request->get('document');
+                    break;
+
+                case 'file':
                     /** @var UploadedFile */
                     $file = $files->get('document');
                     $uuid = Uuid::v4();
@@ -95,12 +104,6 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
 
                     $newDocument['id'] = $fileAnnexe['_id'];
                     $newDocument['url'] = $this->annexesBaseUrl.'/'.$datastore['technical_name'].$fileAnnexe['paths'][0];
-
-                    break;
-
-                case 'video-link':
-                    $newDocument['id'] = Uuid::v4();
-                    $newDocument['url'] = $request->request->get('document');
 
                     break;
             }
@@ -135,8 +138,7 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
 
             if (null !== $document) {
                 switch ($document['type']) {
-                    case 'pdf':
-                    case 'qgis-project':
+                    case 'file':
                         $this->annexeApiService->remove($datastoreId, $document['id']);
                         break;
                 }

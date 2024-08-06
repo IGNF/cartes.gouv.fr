@@ -10,7 +10,7 @@ import { FC } from "react";
 import { createPortal } from "react-dom";
 import { symToStr } from "tsafe/symToStr";
 
-import { DatasheetDocumentTypeEnum, type Datasheet, type DatasheetDetailed, type Metadata } from "../../../../@types/app";
+import { DatasheetDocumentTypeEnum, type Datasheet, type DatasheetDetailed, type DatasheetDocument, type Metadata } from "../../../../@types/app";
 import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import Wait from "../../../../components/Utils/Wait";
@@ -18,6 +18,7 @@ import { Translations, declareComponentKeys, useTranslation } from "../../../../
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { type CartesApiException } from "../../../../modules/jsonFetch";
 import { routes, useRoute } from "../../../../router/router";
+import { getFileExtension } from "../../../../utils";
 import api from "../../../api";
 import DatasetListTab from "./DatasetListTab/DatasetListTab";
 import DatasheetThumbnail, { type ThumbnailAction } from "./DatasheetThumbnail";
@@ -280,25 +281,25 @@ export const { i18n } = declareComponentKeys<
     | "metadata_tab.metadata.absent"
     | "metadata_tab.metadata.is_loading"
     | "documents_tab.add_document"
-    | "documents_tab.document_type.label"
-    | { K: "documents_tab.document_type.options.label"; P: { docType: DatasheetDocumentTypeEnum }; R: string }
+    | "documents_tab.add_document.type.label"
+    | { K: "documents_tab.add_document.type.options.label"; P: { docType: DatasheetDocumentTypeEnum }; R: string }
     | "documents_tab.add_document.in_progress"
     | "documents_tab.add_document.error.name_required"
-    | { K: "documents_tab.add_document.error.extention_incorrect"; P: { fileExtension: string; expectedExtension: string }; R: string }
+    | { K: "documents_tab.add_document.error.extention_incorrect"; P: { fileExtension: string; acceptedExtensions: string[] }; R: string }
     | "documents_tab.add_document.error.extension_missing"
     | "documents_tab.add_document.error.file_required"
     | { K: "documents_tab.add_document.error.file_too_large"; P: { maxFileSize: number }; R: string }
     | "documents_tab.add_document.error.url_required"
     | "documents_tab.add_document.error.url_invalid"
     | "documents_tab.add_document.name.label"
-    | "documents_tab.add_document.pdf.label"
-    | "documents_tab.add_document.pdf.hint"
-    | "documents_tab.add_document.video_link.label"
-    | "documents_tab.add_document.qgis_project.label"
-    | "documents_tab.add_document.qgis_project.hint"
+    | "documents_tab.add_document.description.label"
+    | "documents_tab.add_document.file.label"
+    | { K: "documents_tab.add_document.file.hint"; P: { acceptedExtensions: string[] }; R: string }
+    | "documents_tab.add_document.link.label"
     | { K: "documents_tab.delete_document.confirmation"; P: { display?: string }; R: string }
     | "documents_tab.delete_document.in_progress"
-    | "documents_tab.no_documents"
+    | "documents_tab.list.no_documents"
+    | { K: "documents_tab.list.document_type"; P: { doc: DatasheetDocument }; R: string }
 >()({
     DatasheetView,
 });
@@ -344,35 +345,70 @@ export const DatasheetViewFrTranslations: Translations<"fr">["DatasheetView"] = 
         "Les métadonnées de cette fiche ne sont pas encore disponibles. Créez un premier service à partir d’un de vos jeux de données pour les compléter.",
     "metadata_tab.metadata.is_loading": "Les métadonnées sont en cours de chargement",
     "documents_tab.add_document": "Ajouter un document",
-    "documents_tab.document_type.label": "Type de document",
-    "documents_tab.document_type.options.label": ({ docType }) => {
+    "documents_tab.add_document.type.label": "Type de document",
+    "documents_tab.add_document.type.options.label": ({ docType }) => {
         switch (docType) {
-            case DatasheetDocumentTypeEnum.Pdf:
-                return "PDF";
-            case DatasheetDocumentTypeEnum.VideoLink:
-                return "Lien vidéo";
-            case DatasheetDocumentTypeEnum.QgisProject:
-                return "Projet QGIS";
+            case DatasheetDocumentTypeEnum.File:
+                return "Fichier";
+            case DatasheetDocumentTypeEnum.Link:
+                return "Lien externe";
         }
     },
     "documents_tab.add_document.in_progress": "Ajout de document en cours",
     "documents_tab.add_document.error.name_required": "Le nom est obligatoire",
-    "documents_tab.add_document.error.extention_incorrect": ({ expectedExtension, fileExtension }) =>
-        `L'extension ${fileExtension} n'est pas acceptée, seule l'extension ${expectedExtension} est acceptée`,
+    "documents_tab.add_document.error.extention_incorrect": ({ fileExtension, acceptedExtensions }) => {
+        let str = `L'extension ${fileExtension} n'est pas acceptée, `;
+
+        if (acceptedExtensions.length === 1) {
+            str += ` l'extension acceptée est ${acceptedExtensions[0]}`;
+        } else {
+            const lastExtension = acceptedExtensions.pop();
+
+            str += `les extensions acceptées sont ${acceptedExtensions.join(", ")} et ${lastExtension}`;
+        }
+
+        return str;
+    },
     "documents_tab.add_document.error.extension_missing": "Extension du fichier manquante",
     "documents_tab.add_document.error.file_required": "Le fichier est obligatoire",
     "documents_tab.add_document.error.file_too_large": ({ maxFileSize }) => `La taille du fichier téléversé ne peux excéder ${maxFileSize} Mo`,
     "documents_tab.add_document.error.url_required": "L'URL est obligatoire",
     "documents_tab.add_document.error.url_invalid": "L'URL est invalide",
     "documents_tab.add_document.name.label": "Nom du document",
-    "documents_tab.add_document.pdf.label": "Téléverser un pdf",
-    "documents_tab.add_document.pdf.hint": "Fichier .pdf de moins de 5 Mo uniquement",
-    "documents_tab.add_document.video_link.label": "Lien vers la vidéo",
-    "documents_tab.add_document.qgis_project.label": "Téléverser un fichier de sauvegarde d'un projet QGIS",
-    "documents_tab.add_document.qgis_project.hint": "Fichier .qgz de moins de 5 Mo uniquement",
+    "documents_tab.add_document.description.label": "Description du document (optionnelle)",
+    "documents_tab.add_document.file.label": "Téléverser un fichier",
+    "documents_tab.add_document.file.hint": ({ acceptedExtensions }) => {
+        let acceptedExtensionsStr: string;
+
+        if (acceptedExtensions.length === 1) {
+            acceptedExtensionsStr = acceptedExtensions[0];
+        } else {
+            const lastExtension = acceptedExtensions.pop();
+            acceptedExtensionsStr = `${acceptedExtensions.join(", ")} ou ${lastExtension}`;
+        }
+
+        return `Fichier ${acceptedExtensionsStr} de moins de 5 Mo uniquement`;
+    },
+    "documents_tab.add_document.link.label": "Lien vers la vidéo",
     "documents_tab.delete_document.confirmation": ({ display }) => `Êtes-vous sûr de vouloir supprimer le document ${display} ?`,
     "documents_tab.delete_document.in_progress": "Suppression du document en cours",
-    "documents_tab.no_documents": "Il n'y a pas encore de documents liés à cette fiche de données.",
+    "documents_tab.list.no_documents": "Il n'y a pas encore de documents liés à cette fiche de données.",
+    "documents_tab.list.document_type": ({ doc }) => {
+        if (doc.type === DatasheetDocumentTypeEnum.Link.valueOf()) {
+            return "Lien externe";
+        }
+
+        const fileExtension = getFileExtension(doc.url)?.toLowerCase();
+
+        switch (fileExtension) {
+            case "pdf":
+                return "PDF";
+            case "qgz":
+                return "Projet QGIS";
+            default:
+                return doc.type.toUpperCase();
+        }
+    },
 };
 
 export const DatasheetViewEnTranslations: Translations<"en">["DatasheetView"] = {
@@ -415,8 +451,8 @@ export const DatasheetViewEnTranslations: Translations<"en">["DatasheetView"] = 
     "metadata_tab.metadata.absent": undefined,
     "metadata_tab.metadata.is_loading": undefined,
     "documents_tab.add_document": undefined,
-    "documents_tab.document_type.label": undefined,
-    "documents_tab.document_type.options.label": undefined,
+    "documents_tab.add_document.type.label": undefined,
+    "documents_tab.add_document.type.options.label": undefined,
     "documents_tab.add_document.in_progress": undefined,
     "documents_tab.add_document.error.name_required": undefined,
     "documents_tab.add_document.error.extention_incorrect": undefined,
@@ -426,12 +462,12 @@ export const DatasheetViewEnTranslations: Translations<"en">["DatasheetView"] = 
     "documents_tab.add_document.error.url_required": undefined,
     "documents_tab.add_document.error.url_invalid": undefined,
     "documents_tab.add_document.name.label": undefined,
-    "documents_tab.add_document.pdf.label": undefined,
-    "documents_tab.add_document.pdf.hint": undefined,
-    "documents_tab.add_document.video_link.label": undefined,
-    "documents_tab.add_document.qgis_project.label": undefined,
-    "documents_tab.add_document.qgis_project.hint": undefined,
+    "documents_tab.add_document.description.label": undefined,
+    "documents_tab.add_document.file.label": undefined,
+    "documents_tab.add_document.file.hint": undefined,
+    "documents_tab.add_document.link.label": undefined,
     "documents_tab.delete_document.confirmation": undefined,
     "documents_tab.delete_document.in_progress": undefined,
-    "documents_tab.no_documents": undefined,
+    "documents_tab.list.no_documents": undefined,
+    "documents_tab.list.document_type": undefined,
 };
