@@ -43,6 +43,9 @@ class CswMetadata
     /** @var array<CswCapabilitiesFile> */
     public ?array $capabilitiesFiles;
 
+    /** @var array<CswDocument> */
+    public ?array $documents;
+
     public ?string $thumbnailUrl;
     public ?string $frequencyCode;
 
@@ -62,7 +65,8 @@ class CswMetadata
         $empty->layers = [];
         $empty->styleFiles = [];
         $empty->capabilitiesFiles = [];
-        
+        $empty->documents = [];
+
         return $empty;
     }
 

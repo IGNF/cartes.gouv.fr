@@ -6,6 +6,7 @@ use App\Controller\ApiControllerInterface;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\EntrepotApi\AnnexeApiService;
+use App\Services\EntrepotApi\CartesMetadataApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -31,6 +32,7 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
     public function __construct(
         private AnnexeApiService $annexeApiService,
         private DatastoreApiService $datastoreApiService,
+        private CartesMetadataApiService $cartesMetadataApiService,
         private Filesystem $fs,
         ParameterBagInterface $parameters,
     ) {
@@ -112,6 +114,11 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
 
             $this->updateListAnnexe($datastoreId, $listAnnexe, $documentsList);
 
+            try {
+                $this->cartesMetadataApiService->updateDocuments($datastoreId, $datasheetName);
+            } catch (\Exception $ex) {
+            }
+
             return $this->json($documentsList);
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
@@ -147,6 +154,11 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
                 $newDocumentsList = array_values($newDocumentsList);
 
                 $this->updateListAnnexe($datastoreId, $listAnnexe, $newDocumentsList);
+            }
+
+            try {
+                $this->cartesMetadataApiService->updateDocuments($datastoreId, $datasheetName);
+            } catch (\Exception $ex) {
             }
 
             return new JsonResponse(null, Response::HTTP_NO_CONTENT);

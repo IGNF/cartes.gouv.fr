@@ -97,10 +97,12 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                     title={t("datasheet.back_to_list")}
                     size="large"
                 />
-                <h1 className={fr.cx("fr-m-0")}>{datasheetName}</h1>
-                <Badge noIcon={true} severity="info" className={fr.cx("fr-mx-2w")}>
-                    {datasheetQuery?.data?.nb_publications && datasheetQuery?.data?.nb_publications > 0 ? tCommon("published") : tCommon("not_published")}
-                </Badge>
+                <h1 className={fr.cx("fr-m-0", "fr-mr-2w")}>{datasheetName}</h1>
+                {datasheetQuery?.data?.nb_publications !== undefined && (
+                    <Badge noIcon={true} severity="info" className={fr.cx("fr-mr-2w")}>
+                        {datasheetQuery?.data?.nb_publications > 0 ? tCommon("published") : tCommon("not_published")}
+                    </Badge>
+                )}
                 {(datasheetQuery.isFetching || metadataQuery.isFetching) && <LoadingIcon largeIcon={true} />}
             </div>
 
@@ -152,7 +154,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                     </div>
 
                     <div className={fr.cx("fr-grid-row")}>
-                        <div className={fr.cx("fr-col")}>
+                        <div className={fr.cx("fr-col-12")}>
                             <Tabs
                                 tabs={[
                                     {
