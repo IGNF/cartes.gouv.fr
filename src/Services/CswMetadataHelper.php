@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Entity\CswMetadata\CswCapabilitiesFile;
+use App\Entity\CswMetadata\CswDocument;
 use App\Entity\CswMetadata\CswHierarchyLevel;
 use App\Entity\CswMetadata\CswLanguage;
 use App\Entity\CswMetadata\CswMetadata;
@@ -146,6 +147,20 @@ class CswMetadataHelper
             );
         }, iterator_to_array($capabilitiesFilesNodesList));
         $cswMetadata->capabilitiesFiles = $capabilitiesFilesList;
+
+        /** @var \DOMNodeList<\DOMElement> $documentsNodesList */
+        $documentsNodesList = $xpath->query('/gmd:MD_Metadata/gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine[@type="document"]');
+        $documentsList = array_map(function (\DOMElement $document) {
+            /** @var \DOMElement $onlineEl */
+            $onlineEl = $document->getElementsByTagName('CI_OnlineResource')[0];
+
+            return new CswDocument(
+                $onlineEl->getElementsByTagName('name')[0]?->getElementsByTagName('CharacterString')[0]?->textContent,
+                $onlineEl->getElementsByTagName('description')[0]?->getElementsByTagName('CharacterString')[0]?->textContent,
+                $onlineEl->getElementsByTagName('linkage')[0]?->getElementsByTagName('URL')[0]?->textContent,
+            );
+        }, iterator_to_array($documentsNodesList));
+        $cswMetadata->documents = $documentsList;
 
         $cswMetadata->fileIdentifier = $xpath->query('/gmd:MD_Metadata/gmd:fileIdentifier/gco:CharacterString')->item(0)->textContent;
         $cswMetadata->hierarchyLevel = CswHierarchyLevel::tryFrom(trim($xpath->query('/gmd:MD_Metadata/gmd:hierarchyLevel/gmd:MD_ScopeCode/@codeListValue')->item(0)?->textContent));

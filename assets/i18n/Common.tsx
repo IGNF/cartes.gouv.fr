@@ -29,6 +29,8 @@ export const { i18n } = declareComponentKeys<
     | "new_window"
     | "previous_step"
     | "next_step"
+    | "url_copied"
+    | "copy_to_clipboard"
 >()("Common");
 
 export const commonFrTranslations: Translations<"fr">["Common"] = {
@@ -60,6 +62,8 @@ export const commonFrTranslations: Translations<"fr">["Common"] = {
     new_window: "ouvre une nouvelle fenêtre",
     previous_step: "Étape précédente",
     next_step: "Étape suivante",
+    url_copied: "URL copiée",
+    copy_to_clipboard: "Copier dans le presse-papier",
 };
 
 export const commonEnTranslations: Translations<"en">["Common"] = {
@@ -91,4 +95,6 @@ export const commonEnTranslations: Translations<"en">["Common"] = {
     new_window: "new window",
     previous_step: "Previous step",
     next_step: "Next step",
+    url_copied: "URL copied",
+    copy_to_clipboard: "Copier dans le presse-papier",
 };

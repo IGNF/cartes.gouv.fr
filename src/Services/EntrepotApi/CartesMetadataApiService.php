@@ -5,6 +5,7 @@ namespace App\Services\EntrepotApi;
 use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Entity\CswMetadata\CswCapabilitiesFile;
+use App\Entity\CswMetadata\CswDocument;
 use App\Entity\CswMetadata\CswHierarchyLevel;
 use App\Entity\CswMetadata\CswLanguage;
 use App\Entity\CswMetadata\CswMetadata;
@@ -110,6 +111,22 @@ class CartesMetadataApiService
 
         $cswMetadata = $this->cswMetadataHelper->fromXml($apiMetadataXml);
         $cswMetadata->styleFiles = $this->getStyleFiles($datastoreId, $datasheetName);
+
+        $xmlFilePath = $this->cswMetadataHelper->saveToFile($cswMetadata);
+        $this->metadataApiService->replaceFile($datastoreId, $apiMetadata['_id'], $xmlFilePath);
+    }
+
+    public function updateDocuments(string $datastoreId, string $datasheetName): void
+    {
+        $apiMetadata = $this->getMetadataByDatasheetName($datastoreId, $datasheetName);
+        if (!$apiMetadata) {
+            return;
+        }
+
+        $apiMetadataXml = $this->metadataApiService->downloadFile($datastoreId, $apiMetadata['_id']);
+
+        $cswMetadata = $this->cswMetadataHelper->fromXml($apiMetadataXml);
+        $cswMetadata->documents = $this->getDatasheetDocuments($datastoreId, $datasheetName);
 
         $xmlFilePath = $this->cswMetadataHelper->saveToFile($cswMetadata);
         $this->metadataApiService->replaceFile($datastoreId, $apiMetadata['_id'], $xmlFilePath);
@@ -406,6 +423,30 @@ class CartesMetadataApiService
         }
 
         return $capabilitiesFiles;
+    }
+
+    /**
+     * @return array<CswDocument>
+     */
+    private function getDatasheetDocuments(string $datastoreId, string $datasheetName): array
+    {
+        $labels = ["datasheet_name=$datasheetName", 'type=document-list'];
+
+        $annexeList = $this->annexeApiService->getAll($datastoreId, null, null, $labels);
+
+        // retourne l'annexe s'il existe
+        if (0 === count($annexeList)) {
+            return [];
+        }
+
+        $docsListJson = $this->annexeApiService->download($datastoreId, $annexeList[0]['_id']);
+        $documentsList = json_decode($docsListJson, true);
+
+        return array_map(fn ($doc) => new CswDocument(
+            $doc['name'],
+            isset($doc['description']) ? $doc['description'] : null,
+            $doc['url'],
+        ), $documentsList);
     }
 
     /**

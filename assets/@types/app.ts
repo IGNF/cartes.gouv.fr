@@ -300,6 +300,12 @@ export type CswStyleFile = {
 
 export type CswCapabilitiesFile = CswStyleFile;
 
+export type CswDocument = {
+    name?: string;
+    description?: string | null;
+    url?: string;
+};
+
 export type CswMetadata = {
     file_identifier?: string;
     hierarchy_level?: string;
@@ -319,6 +325,7 @@ export type CswMetadata = {
     layers?: CswMetadataLayer[];
     style_files?: CswStyleFile[];
     capabilities_files?: CswCapabilitiesFile[];
+    documents?: CswDocument[];
 };
 
 export type Metadata = MetadataResponseDto & {

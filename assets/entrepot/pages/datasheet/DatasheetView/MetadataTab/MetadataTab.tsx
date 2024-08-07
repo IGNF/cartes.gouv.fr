@@ -57,7 +57,7 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, datasheet, metadataQue
 
             {metadata && (
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--center", "fr-grid-row--middle")}>
-                    <div className={fr.cx("fr-col")}>
+                    <div className={fr.cx("fr-col-12")}>
                         {isPublished ? (
                             <CallOut
                                 buttonProps={{
@@ -210,6 +210,26 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, datasheet, metadataQue
                                                 </>
                                             )}
                                             <TextCopyToClipboard text={capFile.url ?? ""} />
+                                        </>
+                                    }
+                                />
+                            )) ?? ""}
+                        </Accordion>
+
+                        <Accordion titleAs="h2" defaultExpanded={true} label={"Documents"}>
+                            {metadata.csw_metadata?.documents?.map((document) => (
+                                <MetadataField
+                                    key={`${document.url}`}
+                                    title={document.name}
+                                    content={
+                                        <>
+                                            {document?.description !== null && document?.description !== "" && (
+                                                <>
+                                                    <strong>Description</strong> : {document.description}
+                                                </>
+                                            )}
+
+                                            <TextCopyToClipboard text={document.url ?? ""} />
                                         </>
                                     }
                                 />
