@@ -228,6 +228,13 @@ const routeDefs = {
         },
         () => `${appRoot}/espaceco/community`
     ),
+
+    espaceco_manage_community: defineRoute(
+        {
+            communityId: param.path.number,
+        },
+        (p) => `${appRoot}/espaceco/community/${p.communityId}/gestion`
+    ),
 };
 
 export const { RouteProvider, useRoute, routes, session } = createRouter(routeDefs);
