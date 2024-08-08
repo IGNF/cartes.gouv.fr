@@ -48,7 +48,10 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
     const { t } = useTranslation({ DatasheetView });
 
     const route = useRoute();
-    const activeTab: DatasheetViewActiveTabEnum = route.params?.["activeTab"];
+
+    const activeTab: DatasheetViewActiveTabEnum = Object.values(DatasheetViewActiveTabEnum).includes(route.params?.["activeTab"])
+        ? route.params?.["activeTab"]
+        : DatasheetViewActiveTabEnum.Metadata;
 
     const queryClient = useQueryClient();
 
@@ -66,8 +69,8 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
     const datasheetQuery = useQuery<DatasheetDetailed, CartesApiException>({
         queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName),
         queryFn: ({ signal }) => api.datasheet.get(datastoreId, datasheetName, { signal }),
-        staleTime: 20000,
-        refetchInterval: 20000,
+        staleTime: 60000,
+        refetchInterval: 60000,
         retry: false,
         enabled: !datasheetDeleteMutation.isPending,
     });
@@ -76,14 +79,14 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
         queryKey: RQKeys.datastore_metadata_by_datasheet_name(datastoreId, datasheetName),
         queryFn: ({ signal }) => api.metadata.getByDatasheetName(datastoreId, datasheetName, { signal }),
         enabled: !datasheetQuery.isFetching && !datasheetDeleteMutation.isPending,
-        staleTime: 20000,
+        staleTime: 60000,
         retry: false,
     });
 
     const documentsListQuery = useQuery({
         queryKey: RQKeys.datastore_datasheet_documents_list(datastoreId, datasheetName),
         queryFn: ({ signal }) => api.datasheetDocument.getList(datastoreId, datasheetName, { signal }),
-        staleTime: 20000,
+        staleTime: 60000,
         enabled: activeTab === DatasheetViewActiveTabEnum.Documents,
     });
 
@@ -103,7 +106,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                         {datasheetQuery?.data?.nb_publications > 0 ? tCommon("published") : tCommon("not_published")}
                     </Badge>
                 )}
-                {(datasheetQuery.isFetching || metadataQuery.isFetching) && <LoadingIcon largeIcon={true} />}
+                {(datasheetQuery.isFetching || metadataQuery.isFetching || documentsListQuery.isFetching) && <LoadingIcon largeIcon={true} />}
             </div>
 
             {datasheetQuery.error && (
@@ -302,6 +305,8 @@ export const { i18n } = declareComponentKeys<
     | "documents_tab.delete_document.in_progress"
     | "documents_tab.list.no_documents"
     | { K: "documents_tab.list.document_type"; P: { doc: DatasheetDocument }; R: string }
+    | { K: "documents_tab.edit_document"; P: { name?: string }; R: string }
+    | "documents_tab.edit_document.in_progress"
 >()({
     DatasheetView,
 });
@@ -391,7 +396,7 @@ export const DatasheetViewFrTranslations: Translations<"fr">["DatasheetView"] = 
 
         return `Fichier ${acceptedExtensionsStr} de moins de 5 Mo uniquement`;
     },
-    "documents_tab.add_document.link.label": "Lien vers la vidéo",
+    "documents_tab.add_document.link.label": "Lien vers le document",
     "documents_tab.delete_document.confirmation": ({ display }) => `Êtes-vous sûr de vouloir supprimer le document ${display} ?`,
     "documents_tab.delete_document.in_progress": "Suppression du document en cours",
     "documents_tab.list.no_documents": "Il n'y a pas encore de documents liés à cette fiche de données.",
@@ -411,6 +416,8 @@ export const DatasheetViewFrTranslations: Translations<"fr">["DatasheetView"] = 
                 return doc.type.toUpperCase();
         }
     },
+    "documents_tab.edit_document": ({ name }) => `Modifier le document ${name}`,
+    "documents_tab.edit_document.in_progress": "Modification du document en cours",
 };
 
 export const DatasheetViewEnTranslations: Translations<"en">["DatasheetView"] = {
@@ -472,4 +479,6 @@ export const DatasheetViewEnTranslations: Translations<"en">["DatasheetView"] = 
     "documents_tab.delete_document.in_progress": undefined,
     "documents_tab.list.no_documents": undefined,
     "documents_tab.list.document_type": undefined,
+    "documents_tab.edit_document": undefined,
+    "documents_tab.edit_document.in_progress": undefined,
 };

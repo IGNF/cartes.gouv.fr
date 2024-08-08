@@ -21,8 +21,8 @@ import { getFileExtension } from "../../../../../utils";
 import api from "../../../../api";
 import DocumentsListItem from "./DocumentsListItem";
 
-const uploadDocumentModal = createModal({
-    id: "upload-document-modal",
+const documentAddModal = createModal({
+    id: "datasheet-document-add-modal",
     isOpenedByDefault: false,
 });
 
@@ -141,13 +141,13 @@ const DocumentsTab: FC<DocumentsTabProps> = ({ datastoreId, datasheetName }) => 
     const documentsListQuery = useQuery({
         queryKey: RQKeys.datastore_datasheet_documents_list(datastoreId, datasheetName),
         queryFn: ({ signal }) => api.datasheetDocument.getList(datastoreId, datasheetName, { signal }),
-        staleTime: 20000,
+        staleTime: 60000,
     });
 
     const addDocumentMutation = useMutation({
         mutationFn: (formData: FormData) => api.datasheetDocument.add(datastoreId, datasheetName, formData),
         onMutate: () => {
-            uploadDocumentModal.close();
+            documentAddModal.close();
         },
         onSettled: () => {
             resetForm();
@@ -164,7 +164,7 @@ const DocumentsTab: FC<DocumentsTabProps> = ({ datastoreId, datasheetName }) => 
                     iconId="fr-icon-add-line"
                     onClick={() => {
                         resetForm();
-                        uploadDocumentModal.open();
+                        documentAddModal.open();
                     }}
                 >
                     {t("documents_tab.add_document")}
@@ -182,7 +182,7 @@ const DocumentsTab: FC<DocumentsTabProps> = ({ datastoreId, datasheetName }) => 
                 : t("documents_tab.list.no_documents")}
 
             {createPortal(
-                <uploadDocumentModal.Component
+                <documentAddModal.Component
                     title={t("documents_tab.add_document")}
                     buttons={[
                         {
@@ -278,7 +278,7 @@ const DocumentsTab: FC<DocumentsTabProps> = ({ datastoreId, datasheetName }) => 
                             </div>
                         </div>
                     </div>
-                </uploadDocumentModal.Component>,
+                </documentAddModal.Component>,
                 document.body
             )}
 

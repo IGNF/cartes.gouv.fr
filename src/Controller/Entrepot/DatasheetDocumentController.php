@@ -61,7 +61,7 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
         try {
             $documentType = $request->request->get('type');
             $documentName = $request->request->get('name');
-            $documentdescription = $request->request->get('description');
+            $documentDescription = $request->request->get('description');
 
             $files = $request->files;
 
@@ -78,8 +78,8 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
                 'name' => $documentName,
             ];
 
-            if (null !== $documentdescription) {
-                $newDocument['description'] = $documentdescription;
+            if (null !== $documentDescription) {
+                $newDocument['description'] = $documentDescription;
             }
 
             switch ($documentType) {
@@ -125,7 +125,46 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
         }
     }
 
-    #[Route('/{documentId}', name: 'delete')]
+    #[Route('/{documentId}', name: 'edit', methods: ['PATCH'])]
+    public function edit(string $datastoreId, string $datasheetName, string $documentId, Request $request): JsonResponse
+    {
+        try {
+            $data = json_decode($request->getContent(), true);
+
+            $listAnnexe = $this->getListAnnexe($datastoreId, $datasheetName);
+
+            $docsListJson = $this->annexeApiService->download($datastoreId, $listAnnexe['_id']);
+            $documentsList = json_decode($docsListJson, true);
+
+            $documentsList = array_map(function ($document) use ($documentId, $data) {
+                if ($document['id'] === $documentId) {
+                    $document['name'] = $data['name'];
+
+                    if (null !== $data['description'] && !empty($data['description'])) {
+                        $document['description'] = $data['description'];
+                    } elseif (!empty($document['description'])) {
+                        unset($document['description']);
+                    }
+                }
+
+                return $document;
+            }, $documentsList);
+            $documentsList = array_values($documentsList);
+
+            $this->updateListAnnexe($datastoreId, $listAnnexe, $documentsList);
+
+            try {
+                $this->cartesMetadataApiService->updateDocuments($datastoreId, $datasheetName);
+            } catch (\Exception $ex) {
+            }
+
+            return $this->json($documentsList);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
+    #[Route('/{documentId}', name: 'delete', methods: ['DELETE'])]
     public function delete(string $datastoreId, string $datasheetName, string $documentId): JsonResponse
     {
         try {
