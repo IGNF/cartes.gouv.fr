@@ -22,6 +22,17 @@ const add = (datastoreId: string, datasheetName: string, formData: FormData | ob
     );
 };
 
+const edit = (datastoreId: string, datasheetName: string, documentId: string, formData: FormData | object) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_datasheet_document_edit", { datastoreId, datasheetName, documentId });
+    return jsonFetch<DatasheetDocument[]>(
+        url,
+        {
+            method: "PATCH",
+        },
+        formData
+    );
+};
+
 const remove = (datastoreId: string, datasheetName: string, documentId: string) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_datasheet_document_delete", { datastoreId, datasheetName, documentId });
     return jsonFetch(url, {
@@ -32,6 +43,7 @@ const remove = (datastoreId: string, datasheetName: string, documentId: string) 
 const datasheet = {
     getList,
     add,
+    edit,
     remove,
 };
 
