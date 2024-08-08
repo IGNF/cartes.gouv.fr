@@ -6,7 +6,7 @@ Il s'agit d'une [entité](./entities.md) de l'API qui représente des fichiers l
 
 Syntaxe du path :
 
-```
+```sh
 /configuration/[configuration_id]/styles.json
 ```
 

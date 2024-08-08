@@ -2,5 +2,5 @@
 
 Lien vers la documentation officielle de l'API sur le sujet :
 
--   https://geoplateforme.github.io/entrepot/concepts (production)
--   https://geoplateforme.github.io/entrepot/qualification/concepts (qualification)
+-   [geoplateforme.github.io/entrepot/production/concepts](https://geoplateforme.github.io/entrepot/production/concepts/) (production)
+-   [geoplateforme.github.io/entrepot/qualification/concepts](https://geoplateforme.github.io/entrepot/qualification/concepts/) (qualification)
