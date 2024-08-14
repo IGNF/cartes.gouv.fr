@@ -31,6 +31,16 @@ const PersonalData = () => {
                         sur le site du partenaire organisateur de cet événement.
                     </p>
 
+                    <h2>Accès à certaines API par un fournisseur d’identité</h2>
+
+                    <p>Certaines API sont accessibles et utilisables après authentification auprès de l’un des fournisseurs d’identité suivants&nbsp;:</p>
+                    <ul>
+                        <li>FranceConnect</li>
+                        <li>AgentConnect & MonComptePro</li>
+                    </ul>
+
+                    <p>Nous vous invitons à lire les politiques de protection des données personnelles de ces fournisseurs d’identité.</p>
+
                     <h2>Création d’un compte personnel</h2>
 
                     <p>
@@ -65,7 +75,7 @@ const PersonalData = () => {
                             <strong>Nom d’utilisateur</strong>
                         </li>
                         <li>
-                            <strong>Adresse mail</strong>
+                            <strong>Adresse mail</strong> (étant précisé qu’il n’est pas possible de renseigner une adresse mail temporaire)
                         </li>
                     </ul>
                     <p>
@@ -93,7 +103,7 @@ const PersonalData = () => {
 
                     <h3>Quelle est la durée de conservation des données&nbsp;?</h3>
 
-                    <p>2 ans à compter de la date de dernière connexion ou de la suppression deu compte personnel ou du service</p>
+                    <p>2 ans à compter de la date de dernière connexion ou de la suppression du compte personnel ou du service</p>
 
                     <h2>Prise de contact via le formulaire de contact</h2>
 
