@@ -30,7 +30,7 @@ const Join = () => {
                 <div className={fr.cx("fr-col-12")}>
                     <iframe
                         src="https://analytics-eu.clickdimensions.com/ignfr-agj1s/pages/gcw4gjajee2dsqaisj8xtw.html?PageId=82b8c5810930ed119db10022489f174f"
-                        height="872px"
+                        height="880px"
                         width="100%"
                     />
                 </div>
