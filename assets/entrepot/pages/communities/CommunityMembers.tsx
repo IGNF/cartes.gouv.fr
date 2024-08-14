@@ -237,7 +237,7 @@ const CommunityMembers: FC<CommunityMembersProps> = ({ datastoreId, userId }) =>
                                                             defaultChecked={member.rights[r] === true}
                                                             disabled={member.isMe === true || member.isSupervisor === true}
                                                             inputTitle={t("add_remove_right_title", { right: r })}
-                                                            label={null}
+                                                            label={" "}
                                                             showCheckedHint={false}
                                                             onChange={(checked) => handleToggleChanged(member.id, r, checked)}
                                                         />
