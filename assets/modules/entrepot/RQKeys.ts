@@ -51,6 +51,9 @@ const RQKeys = {
 
     datastore_statics_list: (datastoreId: string): string[] => ["datastore", datastoreId, "statics"],
 
+    community: (communityId: string): string[] => ["community", communityId],
+    community_members: (communityId: string): string[] => ["community", communityId, "members"],
+
     catalogs_communities: (): string[] => ["catalogs", "communities"],
 
     my_keys: (): string[] => ["my_keys"],

@@ -1,17 +1,13 @@
 import { BreadcrumbProps } from "@codegouvfr/react-dsfr/Breadcrumb";
 import { Route } from "type-route";
 
-import articles from "../../data/actualites.json";
 import { getTranslation } from "../../i18n/i18n";
 import { routes } from "../../router/router";
-
-const getArticleBreadcrumb = (slug: string) => {
-    return articles?.[slug]?.breadcrumb ?? articles[slug].title;
-};
+import { Datastore } from "../../@types/app";
 
 const { t } = getTranslation("Breadcrumb");
 
-const getBreadcrumb = (route: Route<typeof routes>, datastoreName?: string): BreadcrumbProps | undefined => {
+const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): BreadcrumbProps | undefined => {
     const defaultProps: BreadcrumbProps = {
         homeLinkProps: routes.home().link,
         segments: [],
@@ -39,8 +35,8 @@ const getBreadcrumb = (route: Route<typeof routes>, datastoreName?: string): Bre
         case "news_list":
             return { ...defaultProps, currentPageLabel: t("news") };
         case "news_article":
-            defaultProps.segments.push({ label: t("news"), linkProps: routes.news_list().link });
-            return { ...defaultProps, currentPageLabel: getArticleBreadcrumb(route.params.slug) };
+            // géré dans le composant NewsArticle
+            return { ...defaultProps, currentPageLabel: t("news") };
 
         // case "accesses_request":
         case "my_account":
@@ -84,13 +80,7 @@ const getBreadcrumb = (route: Route<typeof routes>, datastoreName?: string): Bre
             defaultProps.segments.push({ label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link });
             return { ...defaultProps, currentPageLabel: t(route.name) };
         case "members_list":
-            defaultProps.segments = [
-                ...defaultProps.segments,
-                ...[
-                    { label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link },
-                    { label: datastoreName, linkProps: routes.datasheet_list({ datastoreId: route.params.datastoreId }).link },
-                ],
-            ];
+            // géré dans le composant CommunityMembers
             return { ...defaultProps, currentPageLabel: t(route.name) };
 
         case "datastore_manage_storage":
@@ -99,7 +89,7 @@ const getBreadcrumb = (route: Route<typeof routes>, datastoreName?: string): Bre
                 ...defaultProps.segments,
                 ...[
                     { label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link },
-                    { label: datastoreName, linkProps: routes.datasheet_list({ datastoreId: route.params.datastoreId }).link },
+                    { label: datastore?.name, linkProps: routes.datasheet_list({ datastoreId: route.params.datastoreId }).link },
                 ],
             ];
             return { ...defaultProps, currentPageLabel: t(route.name) };
@@ -109,7 +99,7 @@ const getBreadcrumb = (route: Route<typeof routes>, datastoreName?: string): Bre
                 ...defaultProps.segments,
                 ...[
                     { label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link },
-                    { label: datastoreName, linkProps: routes.datasheet_list({ datastoreId: route.params.datastoreId }).link },
+                    { label: datastore?.name, linkProps: routes.datasheet_list({ datastoreId: route.params.datastoreId }).link },
                     {
                         label: t("datastore_manage_permissions"),
                         linkProps: routes.datastore_manage_permissions({ datastoreId: route.params.datastoreId }).link,
@@ -119,13 +109,13 @@ const getBreadcrumb = (route: Route<typeof routes>, datastoreName?: string): Bre
             return { ...defaultProps, currentPageLabel: t(route.name) };
         case "datasheet_list":
             defaultProps.segments = [...defaultProps.segments, ...[{ label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link }]];
-            return { ...defaultProps, currentPageLabel: datastoreName };
+            return { ...defaultProps, currentPageLabel: datastore?.name };
         case "datastore_datasheet_upload":
             defaultProps.segments = [
                 ...defaultProps.segments,
                 ...[
                     { label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link },
-                    { label: datastoreName, linkProps: routes.datasheet_list({ datastoreId: route.params.datastoreId }).link },
+                    { label: datastore?.name, linkProps: routes.datasheet_list({ datastoreId: route.params.datastoreId }).link },
                 ],
             ];
             if ("datasheetName" in route.params && route.params.datasheetName) {
@@ -143,7 +133,7 @@ const getBreadcrumb = (route: Route<typeof routes>, datastoreName?: string): Bre
                 ...defaultProps.segments,
                 ...[
                     { label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link },
-                    { label: datastoreName, linkProps: routes.datasheet_list({ datastoreId: route.params.datastoreId }).link },
+                    { label: datastore?.name, linkProps: routes.datasheet_list({ datastoreId: route.params.datastoreId }).link },
                 ],
             ];
             return { ...defaultProps, currentPageLabel: t("datastore_datasheet_upload_integration") };
@@ -152,7 +142,7 @@ const getBreadcrumb = (route: Route<typeof routes>, datastoreName?: string): Bre
                 ...defaultProps.segments,
                 ...[
                     { label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link },
-                    { label: datastoreName, linkProps: routes.datasheet_list({ datastoreId: route.params.datastoreId }).link },
+                    { label: datastore?.name, linkProps: routes.datasheet_list({ datastoreId: route.params.datastoreId }).link },
                 ],
             ];
             return { ...defaultProps, currentPageLabel: route.params.datasheetName };
@@ -161,7 +151,7 @@ const getBreadcrumb = (route: Route<typeof routes>, datastoreName?: string): Bre
                 ...defaultProps.segments,
                 ...[
                     { label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link },
-                    { label: datastoreName, linkProps: routes.datasheet_list({ datastoreId: route.params.datastoreId }).link },
+                    { label: datastore?.name, linkProps: routes.datasheet_list({ datastoreId: route.params.datastoreId }).link },
                 ],
             ];
             return { ...defaultProps, currentPageLabel: t("datastore_stored_data_details") };
@@ -178,7 +168,7 @@ const getBreadcrumb = (route: Route<typeof routes>, datastoreName?: string): Bre
                 ...defaultProps.segments,
                 ...[
                     { label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link },
-                    { label: datastoreName, linkProps: routes.datasheet_list({ datastoreId: route.params.datastoreId }).link },
+                    { label: datastore?.name, linkProps: routes.datasheet_list({ datastoreId: route.params.datastoreId }).link },
                     {
                         label: route.params.datasheetName,
                         linkProps: routes.datastore_datasheet_view({

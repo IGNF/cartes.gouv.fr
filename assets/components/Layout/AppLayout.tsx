@@ -1,5 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import { Breadcrumb } from "@codegouvfr/react-dsfr/Breadcrumb";
+import { Breadcrumb, BreadcrumbProps } from "@codegouvfr/react-dsfr/Breadcrumb";
 import { MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation";
 import { Notice, addNoticeTranslations } from "@codegouvfr/react-dsfr/Notice";
 import { SkipLinks } from "@codegouvfr/react-dsfr/SkipLinks";
@@ -45,8 +45,9 @@ const infoBannerMsg = document.getElementById("info_banner")?.dataset?.msg ?? un
 type AppLayoutProps = {
     navItems?: MainNavigationProps.Item[];
     documentTitle?: string;
+    customBreadcrumbProps?: BreadcrumbProps;
 };
-const AppLayout: FC<PropsWithChildren<AppLayoutProps>> = ({ children, navItems, documentTitle }) => {
+const AppLayout: FC<PropsWithChildren<AppLayoutProps>> = ({ children, navItems, documentTitle, customBreadcrumbProps }) => {
     useDocumentTitle(documentTitle);
     const { t } = useTranslation("navItems");
 
@@ -62,9 +63,12 @@ const AppLayout: FC<PropsWithChildren<AppLayoutProps>> = ({ children, navItems, 
     });
 
     const breadcrumbProps = useMemo(() => {
-        const datastoreName = datastoreQuery.data?.name;
-        return getBreadcrumb(route, datastoreName);
-    }, [route, datastoreQuery.data]);
+        if (customBreadcrumbProps !== undefined) {
+            return customBreadcrumbProps;
+        }
+
+        return getBreadcrumb(route, datastoreQuery.data);
+    }, [route, datastoreQuery.data, customBreadcrumbProps]);
 
     navItems = useMemo(() => navItems ?? defaultNavItems(t), [navItems, t]);
 

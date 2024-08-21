@@ -27,7 +27,7 @@ export const datastoreNavItems = (currentDatastore?: Datastore): MainNavigationP
         });
         navItems.push({
             text: t("members"),
-            linkProps: routes.members_list({ datastoreId: currentDatastore._id }).link,
+            linkProps: routes.members_list({ communityId: currentDatastore.community._id }).link,
         });
         navItems.push({
             text: t("manage_storage"),

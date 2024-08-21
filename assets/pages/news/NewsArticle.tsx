@@ -3,10 +3,11 @@ import Tag from "@codegouvfr/react-dsfr/Tag";
 import { FC } from "react";
 import { symToStr } from "tsafe/symToStr";
 
+import { type NewsArticle } from "../../@types/newsArticle";
 import AppLayout from "../../components/Layout/AppLayout";
 import articles from "../../data/actualites.json";
-import { appRoot } from "../../router/router";
-import { type NewsArticle } from "../../@types/newsArticle";
+import { useTranslation } from "../../i18n/i18n";
+import { appRoot, routes } from "../../router/router";
 import { formatDateFromISO } from "../../utils";
 import PageNotFound from "../error/PageNotFound";
 
@@ -15,6 +16,8 @@ type NewsArticleProps = {
 };
 
 const NewsArticle: FC<NewsArticleProps> = ({ slug }) => {
+    const { t: tBreadcrumb } = useTranslation("Breadcrumb");
+
     const newsArticle: NewsArticle | undefined = articles[slug];
 
     if (newsArticle === undefined) {
@@ -28,7 +31,14 @@ const NewsArticle: FC<NewsArticleProps> = ({ slug }) => {
     ));
 
     return (
-        <AppLayout documentTitle={newsArticle?.title}>
+        <AppLayout
+            documentTitle={newsArticle?.title}
+            customBreadcrumbProps={{
+                homeLinkProps: routes.home().link,
+                segments: [{ label: tBreadcrumb("news"), linkProps: routes.news_list().link }],
+                currentPageLabel: newsArticle?.breadcrumb ?? newsArticle.title,
+            }}
+        >
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
