@@ -1,27 +1,28 @@
-import { FC, useEffect, useMemo, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useAuthStore } from "../../../stores/AuthStore";
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { ToggleSwitch } from "@codegouvfr/react-dsfr/ToggleSwitch";
-import RQKeys from "../../../modules/entrepot/RQKeys";
-import api from "../../api";
-import { CommunityMemberDtoRightsEnum, CommunityUserResponseDto, UserDto } from "../../../@types/entrepot";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { FC, useEffect, useMemo, useState } from "react";
+
 import { UserRightsResponseDto } from "../../../@types/app";
-import { getTranslatedRightTypes, complete, UserRights } from "./UserRights";
+import { CommunityMemberDtoRightsEnum, CommunityUserResponseDto, UserDto } from "../../../@types/entrepot";
 import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
-import LoadingText from "../../../components/Utils/LoadingText";
-import { Translations, declareComponentKeys, useTranslation } from "../../../i18n/i18n";
-import { CartesApiException } from "../../../modules/jsonFetch";
-import { AddMember, addMemberModal } from "./AddMember";
-import Wait from "../../../components/Utils/Wait";
-import "../../../sass/pages/community_members.scss";
-import { routes } from "../../../router/router";
 import ConfirmDialog, { ConfirmDialogModal } from "../../../components/Utils/ConfirmDialog";
+import LoadingText from "../../../components/Utils/LoadingText";
+import Wait from "../../../components/Utils/Wait";
+import { declareComponentKeys, Translations, useTranslation } from "../../../i18n/i18n";
+import RQKeys from "../../../modules/entrepot/RQKeys";
+import { CartesApiException } from "../../../modules/jsonFetch";
+import { routes } from "../../../router/router";
+import "../../../sass/pages/community_members.scss";
+import { useAuthStore } from "../../../stores/AuthStore";
+import api from "../../api";
+import { AddMember, addMemberModal } from "./AddMember";
+import { complete, getTranslatedRightTypes, UserRights } from "./UserRights";
 
 type CommunityMembersProps = {
-    datastoreId: string;
+    communityId: string;
     userId?: string;
 };
 
@@ -48,34 +49,33 @@ const getName = (member: UserDto) => {
     return name.replace(/\s+/g, "") === "" ? member.email : name;
 };
 
-const CommunityMembers: FC<CommunityMembersProps> = ({ datastoreId, userId }) => {
+const CommunityMembers: FC<CommunityMembersProps> = ({ communityId, userId }) => {
     // Traductions
     const { t: tCommon } = useTranslation("Common");
     const { t } = useTranslation({ CommunityMembers });
+    const { t: tBreadcrumb } = useTranslation("Breadcrumb");
 
     const { user } = useAuthStore();
-    const [members, setMembers] = useState<Member[]>([]);
+    // const [members, setMembers] = useState<Member[]>([]);
     const [currentMember, setCurrentMember] = useState<string | undefined>(undefined);
-
-    // Le datastore
-    const { data: datastore, isLoading: isLoadingDatastore } = useQuery({
-        queryKey: RQKeys.datastore(datastoreId),
-        queryFn: ({ signal }) => api.datastore.get(datastoreId, { signal }),
-        staleTime: 3600000,
-    });
-
-    const communityId = useMemo(() => {
-        return datastore?.community._id;
-    }, [datastore]);
 
     // La communauté
     const { data: community, isLoading: isLoadingCommunity } = useQuery({
-        queryKey: ["community", communityId],
-        queryFn: () => {
-            if (communityId) return api.community.get(communityId);
-        },
-        staleTime: communityId ? Infinity : 20000,
+        queryKey: RQKeys.community(communityId),
+        queryFn: ({ signal }) => api.community.get(communityId, { signal }),
+        staleTime: 20000,
         enabled: !!communityId,
+    });
+
+    const { data: datastore, isLoading: isLoadingDatastore } = useQuery({
+        queryKey: RQKeys.datastore(community?.datastore?._id ?? "XXXX"),
+        queryFn: ({ signal }) => {
+            if (community?.datastore?._id !== undefined) {
+                return api.datastore.get(community?.datastore?._id, { signal });
+            }
+        },
+        staleTime: 3600000,
+        enabled: community?.datastore?._id !== undefined,
     });
 
     // Les droits sur cette communauté
@@ -95,10 +95,8 @@ const CommunityMembers: FC<CommunityMembersProps> = ({ datastoreId, userId }) =>
 
     // Les membres de cette communauté
     const { data: communityMembers, isLoading: isLoadingMembers } = useQuery({
-        queryKey: ["community", "members", communityId],
-        queryFn: () => {
-            if (communityId) return api.community.getMembers(communityId);
-        },
+        queryKey: RQKeys.community_members(communityId),
+        queryFn: ({ signal }) => api.community.getMembers(communityId, { signal }),
         staleTime: communityId ? Infinity : 20000,
         enabled: !!communityId,
     });
@@ -107,9 +105,9 @@ const CommunityMembers: FC<CommunityMembersProps> = ({ datastoreId, userId }) =>
         return communityMembers?.map((member) => member.user._id) ?? [];
     }, [communityMembers]);
 
-    useEffect(() => {
+    const members: Member[] = useMemo(() => {
         if (!communityMembers) {
-            return;
+            return [];
         }
         const members: Member[] = [];
         communityMembers.forEach((member) => {
@@ -126,12 +124,15 @@ const CommunityMembers: FC<CommunityMembersProps> = ({ datastoreId, userId }) =>
             if (m1.name.toLowerCase() > m2.name.toLowerCase()) return 1;
             return 0;
         });
-        setMembers(members);
+
+        return members;
     }, [communityMembers, communitySupervisor, user?.id]);
 
-    if (isAuthorized && userId && !isLoadingMembers && !communityMemberIds.includes(userId)) {
-        addMemberModal.open();
-    }
+    useEffect(() => {
+        if (isAuthorized && userId && !isLoadingMembers && !communityMemberIds.includes(userId)) {
+            addMemberModal.open();
+        }
+    }, [communityMemberIds, isAuthorized, isLoadingMembers, userId]);
 
     const queryClient = useQueryClient();
 
@@ -143,7 +144,7 @@ const CommunityMembers: FC<CommunityMembersProps> = ({ datastoreId, userId }) =>
         },
         onSuccess: (response) => {
             if (response) {
-                queryClient.setQueryData(["community", "members", communityId], () => {
+                queryClient.setQueryData(RQKeys.community_members(communityId), () => {
                     return communityMembers?.filter((member) => member.user._id !== response.user);
                 });
             }
@@ -158,7 +159,7 @@ const CommunityMembers: FC<CommunityMembersProps> = ({ datastoreId, userId }) =>
         },
         onSuccess: (response) => {
             if (response) {
-                queryClient.setQueryData<CommunityUserResponseDto[]>(["community", "members", communityId], (communityMembers) => {
+                queryClient.setQueryData<CommunityUserResponseDto[]>(RQKeys.community_members(communityId), (communityMembers) => {
                     communityMembers?.forEach((member) => {
                         if (member.user._id === response.user) {
                             member.rights = response.rights; // Mise a jour des droits
@@ -185,7 +186,18 @@ const CommunityMembers: FC<CommunityMembersProps> = ({ datastoreId, userId }) =>
     };
 
     return (
-        <DatastoreLayout datastoreId={datastoreId} documentTitle="Membres">
+        <DatastoreLayout
+            datastoreId={datastore?._id ?? "XXXX"}
+            documentTitle="Membres"
+            customBreadcrumbProps={{
+                homeLinkProps: routes.home().link,
+                segments: [
+                    { label: tBreadcrumb("dashboard_pro"), linkProps: routes.dashboard_pro().link },
+                    { label: datastore?.name, linkProps: routes.datasheet_list({ datastoreId: datastore?._id ?? "XXXX" }).link },
+                ],
+                currentPageLabel: tBreadcrumb("members_list"),
+            }}
+        >
             {(isLoadingDatastore || isLoadingCommunity || isLoadingMembers) && <LoadingText />}
             {!isLoadingMembers && userId && communityMemberIds.includes(userId) && (
                 <Alert
@@ -194,7 +206,7 @@ const CommunityMembers: FC<CommunityMembersProps> = ({ datastoreId, userId }) =>
                     title={t("already_member", { userId: userId })}
                     closable
                     onClose={() => {
-                        routes.members_list({ datastoreId }).push();
+                        routes.members_list({ communityId }).push();
                     }}
                 />
             )}
@@ -237,7 +249,7 @@ const CommunityMembers: FC<CommunityMembersProps> = ({ datastoreId, userId }) =>
                                                             defaultChecked={member.rights[r] === true}
                                                             disabled={member.isMe === true || member.isSupervisor === true}
                                                             inputTitle={t("add_remove_right_title", { right: r })}
-                                                            label={null}
+                                                            label={" "}
                                                             showCheckedHint={false}
                                                             onChange={(checked) => handleToggleChanged(member.id, r, checked)}
                                                         />
@@ -281,7 +293,7 @@ const CommunityMembers: FC<CommunityMembersProps> = ({ datastoreId, userId }) =>
             {isAuthorized === false && (
                 <Alert className={fr.cx("fr-mb-2w")} title={tCommon("information")} closable description={t("no_necessary_rights")} severity={"info"} />
             )}
-            <AddMember datastoreId={datastoreId} communityId={communityId} communityMemberIds={communityMemberIds} userId={userId} />
+            <AddMember communityId={communityId} communityMemberIds={communityMemberIds} userId={userId} />
             <ConfirmDialog
                 title={t("confirm_remove")}
                 onConfirm={() => {

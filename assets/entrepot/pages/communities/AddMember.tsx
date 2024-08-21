@@ -1,22 +1,25 @@
-import { FC, useCallback, useState } from "react";
-import { createPortal } from "react-dom";
 import { fr } from "@codegouvfr/react-dsfr";
-import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
-import { ComponentKey, Translations, declareComponentKeys, getTranslation, useTranslation } from "../../../i18n/i18n";
-import Input from "@codegouvfr/react-dsfr/Input";
+import Alert from "@codegouvfr/react-dsfr/Alert";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
+import Input from "@codegouvfr/react-dsfr/Input";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
+import { FC, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { regex } from "../../../utils";
-import { getRights, rightTypes } from "./UserRights";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { UserRightsResponseDto } from "../../../@types/app";
+
+import type { UserRightsResponseDto } from "../../../@types/app";
+import LoadingIcon from "../../../components/Utils/LoadingIcon";
+import { ComponentKey, Translations, declareComponentKeys, getTranslation, useTranslation } from "../../../i18n/i18n";
+import RQKeys from "../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../modules/jsonFetch";
-import api from "../../api";
-import Alert from "@codegouvfr/react-dsfr/Alert";
 import { routes } from "../../../router/router";
+import { regex } from "../../../utils";
+import api from "../../api";
+import { getRights, rightTypes } from "./UserRights";
 
 const addMemberModal = createModal({
     id: "add-member-modal",
@@ -24,8 +27,7 @@ const addMemberModal = createModal({
 });
 
 type AddMemberProps = {
-    datastoreId: string;
-    communityId?: string;
+    communityId: string;
     communityMemberIds: string[];
     userId?: string;
 };
@@ -33,7 +35,7 @@ type AddMemberProps = {
 const { t: tCommon } = getTranslation("Common");
 const { t: translateRights } = getTranslation("Rights");
 
-const AddMember: FC<AddMemberProps> = ({ datastoreId, communityId, communityMemberIds, userId }) => {
+const AddMember: FC<AddMemberProps> = ({ communityId, communityMemberIds, userId }) => {
     const { t } = useTranslation({ AddMember });
 
     const schema = (t: TranslationFunction<"AddMember", ComponentKey>) => {
@@ -60,52 +62,50 @@ const AddMember: FC<AddMemberProps> = ({ datastoreId, communityId, communityMemb
         handleSubmit,
     } = useForm({ mode: "onSubmit", defaultValues: { user_rights: getRights() }, resolver: yupResolver(schema(t)) });
 
-    const [error, setError] = useState<CartesApiException | undefined>(undefined);
-
-    const resetAll = useCallback(() => {
-        setError(undefined);
-        reset({ user_id: "", user_rights: getRights() });
-        addMemberModal.close();
-    }, [reset]);
-
     const queryClient = useQueryClient();
 
-    const { isPending, mutate } = useMutation<UserRightsResponseDto | undefined, CartesApiException, object>({
+    const addMemberMutation = useMutation<UserRightsResponseDto | undefined, CartesApiException, object>({
         mutationFn: (datas) => {
             if (communityId) return api.community.updateMember(communityId, datas);
             return Promise.resolve(undefined);
         },
         onSuccess: () => {
             resetAll();
-            routes.members_list({ datastoreId }).push(); // Suppression du parametre userId de la requete
-            queryClient.refetchQueries({ queryKey: ["community", "members", communityId] });
-        },
-        onError: (error) => {
-            setError(error);
+            routes.members_list({ communityId }).push(); // Suppression du parametre userId de la requete
+            queryClient.refetchQueries({ queryKey: RQKeys.community_members(communityId) });
         },
     });
+
+    const resetAll = useCallback(() => {
+        addMemberMutation.reset();
+        reset({ user_id: "", user_rights: getRights() });
+        addMemberModal.close();
+    }, [reset, addMemberMutation]);
 
     // Annulation
     const handleOnCancel = () => {
         resetAll();
-        routes.members_list({ datastoreId }).push();
+        routes.members_list({ communityId }).push();
     };
 
     // Ajout de l'utilisateur
     const onSubmit = () => {
         const values = getFormValues();
         values["user_creation"] = true;
-        mutate(values);
+        addMemberMutation.mutate(values);
     };
-
-    let title = t("add_user_title");
-    if (isPending) {
-        title += `&nbsp;${t("running")}&nbsp;<i class="fr-icon-refresh-line frx-icon-spin" />`;
-    }
 
     return createPortal(
         <addMemberModal.Component
-            title={<span dangerouslySetInnerHTML={{ __html: title }} />}
+            title={
+                addMemberMutation.isPending === true ? (
+                    <>
+                        {t("running")} <LoadingIcon />
+                    </>
+                ) : (
+                    t("add_user_title")
+                )
+            }
             buttons={[
                 {
                     children: tCommon("cancel"),
@@ -120,8 +120,11 @@ const AddMember: FC<AddMemberProps> = ({ datastoreId, communityId, communityMemb
                     priority: "primary",
                 },
             ]}
+            concealingBackdrop={true}
         >
-            {error && <Alert severity={"error"} title={tCommon("error")} description={error?.message} className={fr.cx("fr-my-3w")} />}
+            {addMemberMutation.error && (
+                <Alert severity={"error"} title={tCommon("error")} description={addMemberMutation.error?.message} className={fr.cx("fr-my-3w")} />
+            )}
             <Input
                 label={t("user_id")}
                 state={errors.user_id ? "error" : "default"}
@@ -148,7 +151,7 @@ const AddMember: FC<AddMemberProps> = ({ datastoreId, communityId, communityMemb
     );
 };
 
-export { addMemberModal, AddMember };
+export { AddMember, addMemberModal };
 
 // traductions
 export const { i18n } = declareComponentKeys<
@@ -164,7 +167,7 @@ export const AddMemberFrTranslations: Translations<"fr">["AddMember"] = {
     id_mandatory: "L’identifiant est obligatoire",
     id_must_be_uuid: "L’Identifiant doit être un UUID",
     already_member: ({ userId }) => `l’utilisateur ${userId} est déjà membre de cet espace de travail`,
-    running: "en cours ...",
+    running: "Ajout d’utilisateur en cours ...",
 };
 
 export const AddMemberEnTranslations: Translations<"en">["AddMember"] = {
@@ -174,5 +177,5 @@ export const AddMemberEnTranslations: Translations<"en">["AddMember"] = {
     id_mandatory: "Identifier is mandatory",
     id_must_be_uuid: "Identifier must be an UUID",
     already_member: ({ userId }) => `User ${userId} is already a member of this community`,
-    running: "running ...",
+    running: "Ajout d’utilisateur running ...",
 };

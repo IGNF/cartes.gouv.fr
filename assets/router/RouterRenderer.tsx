@@ -137,7 +137,7 @@ const RouterRenderer: FC = () => {
             case "datastore_create_request_confirm":
                 return <Confirm />;
             case "members_list":
-                return <CommunityMembers datastoreId={route.params.datastoreId} userId={route.params.userId} />;
+                return <CommunityMembers communityId={route.params.communityId} userId={route.params.userId} />;
             case "join_community":
                 return <CommunityList />;
             case "datastore_datasheet_upload":

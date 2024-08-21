@@ -58,10 +58,10 @@ const routeDefs = {
     // Liste des membres d'une communaute
     members_list: defineRoute(
         {
-            datastoreId: param.path.string,
+            communityId: param.path.string,
             userId: param.query.optional.string,
         },
-        (p) => `${appRoot}/entrepot/${p.datastoreId}/membres`
+        (p) => `${appRoot}/communaute/${p.communityId}/membres`
     ),
 
     // NOTE : désactivé car la variable d'environnement `geonetwork_url` a été supprimée, parce qu'en production la route `geonetwork/srv/api/records/$fileIdentifier/formatters/xml` n'est pas disponible

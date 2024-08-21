@@ -1,17 +1,20 @@
-import SymfonyRouting from "../../modules/Routing";
-
-import { jsonFetch } from "../../modules/jsonFetch";
-import { CommunityDetailResponseDto, CommunityUserResponseDto } from "../../@types/entrepot";
 import { UserRightsResponseDto } from "../../@types/app";
+import type { CommunityDetailResponseDto, CommunityUserResponseDto } from "../../@types/entrepot";
+import SymfonyRouting from "../../modules/Routing";
+import { jsonFetch } from "../../modules/jsonFetch";
 
-const get = (communityId: string) => {
+const get = (communityId: string, otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_community_get", { communityId });
-    return jsonFetch<CommunityDetailResponseDto>(url);
+    return jsonFetch<CommunityDetailResponseDto>(url, {
+        ...otherOptions,
+    });
 };
 
-const getMembers = (communityId: string) => {
+const getMembers = (communityId: string, otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_community_members", { communityId });
-    return jsonFetch<CommunityUserResponseDto[]>(url);
+    return jsonFetch<CommunityUserResponseDto[]>(url, {
+        ...otherOptions,
+    });
 };
 
 /**
