@@ -230,7 +230,7 @@ class PyramidController extends ServiceController implements ApiControllerInterf
             'name' => $dto->public_name,
             'type_infos' => [
                 'title' => $dto->public_name,
-                'abstract' => '.', // json_encode($dto->description), // TODO temporairement description vide, parce que les caractères spéciaux font planter le endpoint tms
+                'abstract' => json_encode($dto->description),
                 'keywords' => $dto->category,
                 'used_data' => [[
                     'bottom_level' => $levels['bottom_level'],

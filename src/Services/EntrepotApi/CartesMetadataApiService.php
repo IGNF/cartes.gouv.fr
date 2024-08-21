@@ -246,14 +246,14 @@ class CartesMetadataApiService
             $newCswMetadata->title = $formData['public_name'];
             $newCswMetadata->abstract = $formData['description'];
             $newCswMetadata->creationDate = $formData['creation_date'];
-            $newCswMetadata->topicCategories = $formData['category'];
-            $newCswMetadata->inspireKeywords = $formData['keywords'];
-            $newCswMetadata->freeKeywords = $formData['free_keywords'];
+            $newCswMetadata->topicCategories = $formData['category'] ?? [];
+            $newCswMetadata->inspireKeywords = $formData['keywords'] ?? [];
+            $newCswMetadata->freeKeywords = $formData['free_keywords'] ?? [];
             $newCswMetadata->contactEmail = $formData['email_contact'];
             $newCswMetadata->organisationName = $formData['organization'];
             $newCswMetadata->organisationEmail = $formData['organization_email'];
-            $newCswMetadata->resolution = $formData['resolution'];
-            $newCswMetadata->frequencyCode = $formData['frequency_code'];
+            $newCswMetadata->resolution = $formData['resolution'] ?? null;
+            $newCswMetadata->frequencyCode = $formData['frequency_code'] ?? null;
             $newCswMetadata->layers = $layers;
             $newCswMetadata->styleFiles = $this->getStyleFiles($datastoreId, $datasheetName);
 
