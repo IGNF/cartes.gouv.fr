@@ -15,8 +15,9 @@
         {% if message is not empty %}
             <strong>{{ 'join_community.email_support.message'|trans }}</strong><br>
             {{ message|e }}
-        {% else %}
-            {{ 'join_community.email_support.no_message'|trans }}
         {% endif %}
-     </div>
+
+        {% set action_url = url('cartesgouvfr_app') ~ 'communaute/' ~ community._id ~ '/membres?userId=' ~ app.user.id %}
+        <p>{{ 'join_community.email_support.call_to_action'|trans({'%name%': community.name, '%href%': action_url})|raw }}</p>
+    </div>
 {% endblock %}
