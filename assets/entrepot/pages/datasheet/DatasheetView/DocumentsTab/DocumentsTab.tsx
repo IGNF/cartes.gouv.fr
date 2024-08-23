@@ -171,15 +171,18 @@ const DocumentsTab: FC<DocumentsTabProps> = ({ datastoreId, datasheetName }) => 
                 </Button>
             </div>
 
+            {documentsListQuery.isLoading && <LoadingText message={t("documents_tab.documents_list.is_loading")} withSpinnerIcon={true} as="p" />}
+
             {addDocumentMutation.isError && (
                 <Alert severity="error" closable title={tCommon("error")} description={addDocumentMutation.error.message} className={fr.cx("fr-my-3w")} />
             )}
 
-            {documentsListQuery.data?.length !== undefined && documentsListQuery.data?.length > 0
-                ? documentsListQuery.data.map((document) => (
-                      <DocumentsListItem key={document.id} document={document} datastoreId={datastoreId} datasheetName={datasheetName} />
-                  ))
-                : t("documents_tab.list.no_documents")}
+            {documentsListQuery.data?.length !== undefined &&
+                (documentsListQuery.data?.length > 0
+                    ? documentsListQuery.data.map((document) => (
+                          <DocumentsListItem key={document.id} document={document} datastoreId={datastoreId} datasheetName={datasheetName} />
+                      ))
+                    : t("documents_tab.list.no_documents"))}
 
             {createPortal(
                 <documentAddModal.Component
