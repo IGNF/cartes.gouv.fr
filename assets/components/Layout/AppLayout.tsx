@@ -4,7 +4,7 @@ import { MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation";
 import { Notice, addNoticeTranslations } from "@codegouvfr/react-dsfr/Notice";
 import { SkipLinks } from "@codegouvfr/react-dsfr/SkipLinks";
 import { useQuery } from "@tanstack/react-query";
-import { FC, PropsWithChildren, memo, useMemo } from "react";
+import { FC, PropsWithChildren, ReactNode, memo, useMemo } from "react";
 
 import { ConsentBannerAndConsentManagement } from "../../config/consentManagement";
 import { defaultNavItems } from "../../config/navItems";
@@ -40,13 +40,12 @@ const HiddenElements: FC = () => {
 
 const HiddenElementsMemoized = memo(HiddenElements);
 
-const infoBannerMsg = document.getElementById("info_banner")?.dataset?.msg ?? undefined;
-
 type AppLayoutProps = {
     navItems?: MainNavigationProps.Item[];
     documentTitle?: string;
+    infoBannerMsg?: ReactNode;
 };
-const AppLayout: FC<PropsWithChildren<AppLayoutProps>> = ({ children, navItems, documentTitle }) => {
+const AppLayout: FC<PropsWithChildren<AppLayoutProps>> = ({ children, navItems, documentTitle, infoBannerMsg }) => {
     useDocumentTitle(documentTitle);
     const { t } = useTranslation("navItems");
 

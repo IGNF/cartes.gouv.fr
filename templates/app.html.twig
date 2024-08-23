@@ -14,10 +14,6 @@
         <div id="user" data-user="{{ app.user|serialize('json') }}"></div>
     {% endif %}
 
-    {% if info_banner_msg is defined %}
-        <div id="info_banner" data-msg="{{ info_banner_msg }}"></div>
-    {% endif %}
-
     <noscript>
         <p>JavaScript semble être désactivé sur votre navigateur, ce qui est nécessaire pour le bon fonctionnement de ce site. Veuillez activer JavaScript sur votre navigateur.</p>
     </noscript>
