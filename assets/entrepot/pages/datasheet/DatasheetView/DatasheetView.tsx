@@ -285,6 +285,7 @@ export const { i18n } = declareComponentKeys<
     | "datasheet_confirm_delete_modal.text"
     | "metadata_tab.metadata.absent"
     | "metadata_tab.metadata.is_loading"
+    | "documents_tab.documents_list.is_loading"
     | "documents_tab.add_document"
     | "documents_tab.add_document.type.label"
     | { K: "documents_tab.add_document.type.options.label"; P: { docType: DatasheetDocumentTypeEnum }; R: string }
@@ -351,6 +352,7 @@ export const DatasheetViewFrTranslations: Translations<"fr">["DatasheetView"] = 
     "metadata_tab.metadata.absent":
         "Les métadonnées de cette fiche ne sont pas encore disponibles. Créez un premier service à partir d’un de vos jeux de données pour les compléter.",
     "metadata_tab.metadata.is_loading": "Les métadonnées sont en cours de chargement",
+    "documents_tab.documents_list.is_loading": "Les documents sont en cours de chargement",
     "documents_tab.add_document": "Ajouter un document",
     "documents_tab.add_document.type.label": "Type de document",
     "documents_tab.add_document.type.options.label": ({ docType }) => {
@@ -459,6 +461,7 @@ export const DatasheetViewEnTranslations: Translations<"en">["DatasheetView"] = 
     "datasheet_confirm_delete_modal.text": "The following items will be deleted :",
     "metadata_tab.metadata.absent": undefined,
     "metadata_tab.metadata.is_loading": undefined,
+    "documents_tab.documents_list.is_loading": undefined,
     "documents_tab.add_document": undefined,
     "documents_tab.add_document.type.label": undefined,
     "documents_tab.add_document.type.options.label": undefined,
