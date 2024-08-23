@@ -4,6 +4,7 @@ namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationTypes;
+use App\Constants\EntrepotApi\Sandbox;
 use App\Controller\ApiControllerInterface;
 use App\Dto\WfsAddDTO;
 use App\Dto\WfsTableDTO;
@@ -15,6 +16,7 @@ use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\StoredDataApiService;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Annotation\Route;
@@ -28,14 +30,15 @@ use Symfony\Component\Routing\Annotation\Route;
 class WfsController extends ServiceController implements ApiControllerInterface
 {
     public function __construct(
-        DatastoreApiService $datastoreApiService,
+        private DatastoreApiService $datastoreApiService,
         private ConfigurationApiService $configurationApiService,
         private StoredDataApiService $storedDataApiService,
         CartesServiceApiService $cartesServiceApiService,
         private CapabilitiesService $capabilitiesService,
         private CartesMetadataApiService $cartesMetadataApiService,
+        ParameterBagInterface $params
     ) {
-        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $capabilitiesService, $cartesMetadataApiService);
+        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $capabilitiesService, $cartesMetadataApiService, $params);
     }
 
     #[Route('/', name: 'add', methods: ['POST'])]
@@ -45,8 +48,10 @@ class WfsController extends ServiceController implements ApiControllerInterface
         #[MapRequestPayload] WfsAddDTO $dto,
     ): JsonResponse {
         try {
+            $datastore = $this->datastoreApiService->get($datastoreId);
+
             // création de requête pour la config
-            $configRequestBody = $this->getConfigRequestBody($dto, $storedDataId);
+            $configRequestBody = $this->getConfigRequestBody($dto, $storedDataId, false, $datastore['community']['_id']);
 
             $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId);
             $datasheetName = $storedData['tags'][CommonTags::DATASHEET_NAME];
@@ -130,8 +135,8 @@ class WfsController extends ServiceController implements ApiControllerInterface
 
             $offering['configuration'] = $configuration;
 
-             // Création ou mise à jour du capabilities
-             try {
+            // Création ou mise à jour du capabilities
+            try {
                 $this->capabilitiesService->createOrUpdate($datastoreId, $endpoint, $offering['urls'][0]['url']);
             } catch (\Exception $e) {
             }
@@ -139,14 +144,14 @@ class WfsController extends ServiceController implements ApiControllerInterface
             // création ou mise à jour de metadata
             $formData = json_decode(json_encode($dto), true);
             $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $formData);
-           
+
             return $this->json($offering);
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
     }
 
-    private function getConfigRequestBody(WfsAddDTO $dto, string $storedDataId, bool $editMode = false): array
+    private function getConfigRequestBody(WfsAddDTO $dto, string $storedDataId, bool $editMode = false, ?string $communityId = null): array
     {
         $relations = [];
 
@@ -180,6 +185,11 @@ class WfsController extends ServiceController implements ApiControllerInterface
 
         if (false === $editMode) {
             $body['layer_name'] = $dto->technical_name;
+
+            // rajoute le préfixe "sandbox." si c'est la communauté bac à sable
+            if (null !== $this->sandboxCommunityId && null !== $communityId && $this->sandboxCommunityId === $communityId) {
+                $body['layer_name'] = Sandbox::LAYERNAME_PREFIX.$body['layer_name'];
+            }
         }
 
         if ('' !== $dto->attribution_text && '' !== $dto->attribution_url) {

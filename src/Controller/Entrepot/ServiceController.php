@@ -4,6 +4,7 @@ namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\PermissionTypes;
+use App\Constants\EntrepotApi\Sandbox;
 use App\Controller\ApiControllerInterface;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
@@ -13,6 +14,7 @@ use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
@@ -27,13 +29,17 @@ use Symfony\Component\Routing\Requirement\Requirement;
 )]
 class ServiceController extends AbstractController implements ApiControllerInterface
 {
+    protected ?string $sandboxCommunityId;
+
     public function __construct(
         private DatastoreApiService $datastoreApiService,
         private ConfigurationApiService $configurationApiService,
         private CartesServiceApiService $cartesServiceApiService,
         private CapabilitiesService $capabilitiesService,
         private CartesMetadataApiService $cartesMetadataApiService,
+        private ParameterBagInterface $params
     ) {
+        $this->sandboxCommunityId = $this->params->get('sandbox')['community_id'] ?? null;
     }
 
     #[Route('', name: 'get_offerings_list', methods: ['GET'])]
@@ -114,6 +120,8 @@ class ServiceController extends AbstractController implements ApiControllerInter
             $offeringLayerNames = array_map(fn ($offering) => $offering['layer_name'], $offerings);
 
             $existingLayerNames = array_values(array_unique(array_merge([], $configLayerNames, $offeringLayerNames)));
+
+            $existingLayerNames = array_map(fn ($layerName) => str_ireplace(Sandbox::LAYERNAME_PREFIX, '', $layerName), $existingLayerNames);
 
             return $this->json($existingLayerNames);
         } catch (ApiException $ex) {
