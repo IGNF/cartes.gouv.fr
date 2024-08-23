@@ -13,8 +13,8 @@ use App\Services\EntrepotApi\CartesMetadataApiService;
 use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
+use App\Services\SandboxService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
@@ -29,17 +29,14 @@ use Symfony\Component\Routing\Requirement\Requirement;
 )]
 class ServiceController extends AbstractController implements ApiControllerInterface
 {
-    protected ?string $sandboxCommunityId;
-
     public function __construct(
         private DatastoreApiService $datastoreApiService,
         private ConfigurationApiService $configurationApiService,
         private CartesServiceApiService $cartesServiceApiService,
         private CapabilitiesService $capabilitiesService,
         private CartesMetadataApiService $cartesMetadataApiService,
-        private ParameterBagInterface $params
+        protected SandboxService $sandboxService,
     ) {
-        $this->sandboxCommunityId = $this->params->get('sandbox')['community_id'] ?? null;
     }
 
     #[Route('', name: 'get_offerings_list', methods: ['GET'])]
