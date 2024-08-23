@@ -16,7 +16,7 @@ use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\StoredDataApiService;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use App\Services\SandboxService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Annotation\Route;
@@ -30,15 +30,15 @@ use Symfony\Component\Routing\Annotation\Route;
 class WfsController extends ServiceController implements ApiControllerInterface
 {
     public function __construct(
-        private DatastoreApiService $datastoreApiService,
+        DatastoreApiService $datastoreApiService,
         private ConfigurationApiService $configurationApiService,
         private StoredDataApiService $storedDataApiService,
         CartesServiceApiService $cartesServiceApiService,
         private CapabilitiesService $capabilitiesService,
         private CartesMetadataApiService $cartesMetadataApiService,
-        ParameterBagInterface $params
+        SandboxService $sandboxService
     ) {
-        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $capabilitiesService, $cartesMetadataApiService, $params);
+        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $capabilitiesService, $cartesMetadataApiService, $sandboxService);
     }
 
     #[Route('/', name: 'add', methods: ['POST'])]
@@ -48,10 +48,8 @@ class WfsController extends ServiceController implements ApiControllerInterface
         #[MapRequestPayload] WfsAddDTO $dto,
     ): JsonResponse {
         try {
-            $datastore = $this->datastoreApiService->get($datastoreId);
-
             // création de requête pour la config
-            $configRequestBody = $this->getConfigRequestBody($dto, $storedDataId, false, $datastore['community']['_id']);
+            $configRequestBody = $this->getConfigRequestBody($dto, $storedDataId, false, $datastoreId);
 
             $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId);
             $datasheetName = $storedData['tags'][CommonTags::DATASHEET_NAME];
@@ -151,7 +149,7 @@ class WfsController extends ServiceController implements ApiControllerInterface
         }
     }
 
-    private function getConfigRequestBody(WfsAddDTO $dto, string $storedDataId, bool $editMode = false, ?string $communityId = null): array
+    private function getConfigRequestBody(WfsAddDTO $dto, string $storedDataId, bool $editMode = false, ?string $datastoreId = null): array
     {
         $relations = [];
 
@@ -187,7 +185,7 @@ class WfsController extends ServiceController implements ApiControllerInterface
             $body['layer_name'] = $dto->technical_name;
 
             // rajoute le préfixe "sandbox." si c'est la communauté bac à sable
-            if (null !== $this->sandboxCommunityId && null !== $communityId && $this->sandboxCommunityId === $communityId) {
+            if ($this->sandboxService->isSandboxDatastore($datastoreId)) {
                 $body['layer_name'] = Sandbox::LAYERNAME_PREFIX.$body['layer_name'];
             }
         }

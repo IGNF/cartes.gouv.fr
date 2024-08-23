@@ -14,10 +14,10 @@ use App\Controller\ApiControllerInterface;
 use App\Exception\ApiException;
 use App\Exception\AppException;
 use App\Exception\CartesApiException;
-use App\Services\DatastoreService;
 use App\Services\EntrepotApi\ProcessingApiService;
 use App\Services\EntrepotApi\StoredDataApiService;
 use App\Services\EntrepotApi\UploadApiService;
+use App\Services\SandboxService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -34,7 +34,7 @@ class UploadController extends AbstractController implements ApiControllerInterf
 {
     public function __construct(
         private UploadApiService $uploadApiService,
-        private DatastoreService $datastoreService,
+        private SandboxService $datastoreService,
         private ProcessingApiService $processingApiService,
         private StoredDataApiService $storedDataApiService,
     ) {

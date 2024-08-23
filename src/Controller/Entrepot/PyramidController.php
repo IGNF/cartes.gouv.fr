@@ -13,14 +13,13 @@ use App\Dto\Pyramid\PublishPyramidDTO;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\CapabilitiesService;
-use App\Services\DatastoreService;
 use App\Services\EntrepotApi\CartesMetadataApiService;
 use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\ProcessingApiService;
 use App\Services\EntrepotApi\StoredDataApiService;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use App\Services\SandboxService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Annotation\Route;
@@ -34,17 +33,16 @@ use Symfony\Component\Routing\Annotation\Route;
 class PyramidController extends ServiceController implements ApiControllerInterface
 {
     public function __construct(
-        private DatastoreApiService $datastoreApiService,
+        DatastoreApiService $datastoreApiService,
         private ConfigurationApiService $configurationApiService,
         private StoredDataApiService $storedDataApiService,
         private ProcessingApiService $processingApiService,
-        private DatastoreService $datastoreService,
+        SandboxService $sandboxService,
         CartesServiceApiService $cartesServiceApiService,
         CapabilitiesService $capabilitiesService,
         private CartesMetadataApiService $cartesMetadataApiService,
-        ParameterBagInterface $params
     ) {
-        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $capabilitiesService, $cartesMetadataApiService, $params);
+        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $capabilitiesService, $cartesMetadataApiService, $sandboxService);
     }
 
     #[Route('/add', name: 'add', methods: ['POST'])]
@@ -82,7 +80,7 @@ class PyramidController extends ServiceController implements ApiControllerInterf
                 $parameters['area'] = $dto->area;
             }
 
-            $processing = $this->datastoreService->getProcGeneratePyramid($datastoreId);
+            $processing = $this->sandboxService->getProcGeneratePyramid($datastoreId);
 
             $requestBody = [
                 'processing' => $processing,
@@ -127,8 +125,6 @@ class PyramidController extends ServiceController implements ApiControllerInterf
         #[MapRequestPayload] PublishPyramidDTO $dto
     ): JsonResponse {
         try {
-            $datastore = $this->datastoreApiService->get($datastoreId);
-
             $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId);
             $datasheetName = $pyramid['tags'][CommonTags::DATASHEET_NAME];
 
@@ -137,7 +133,7 @@ class PyramidController extends ServiceController implements ApiControllerInterf
             // NOTE on peut difficilement supprimer la base de données parce qu'il y a peut-être d'autres entités qui en dépendent
 
             // création de requête pour la config
-            $configRequestBody = $this->getConfigRequestBody($dto, $pyramid, false, $datastore['community']['_id']);
+            $configRequestBody = $this->getConfigRequestBody($dto, $pyramid, false, $datastoreId);
 
             // Restriction d'acces
             $endpoint = $this->getEndpointByShareType($datastoreId, ConfigurationTypes::WMTSTMS, $dto->share_with);
@@ -225,7 +221,7 @@ class PyramidController extends ServiceController implements ApiControllerInterf
     /**
      * @param array<mixed> $pyramid
      */
-    private function getConfigRequestBody(PublishPyramidDTO $dto, array $pyramid, bool $editMode = false, ?string $communityId = null): array
+    private function getConfigRequestBody(PublishPyramidDTO $dto, array $pyramid, bool $editMode = false, ?string $datastoreId = null): array
     {
         // Recherche de bottom_level et top_level
         $levels = $this->getBottomAndToLevel($pyramid);
@@ -249,7 +245,7 @@ class PyramidController extends ServiceController implements ApiControllerInterf
             $requestBody['layer_name'] = $dto->technical_name;
 
             // rajoute le préfixe "sandbox." si c'est la communauté bac à sable
-            if (null !== $this->sandboxCommunityId && null !== $communityId && $this->sandboxCommunityId === $communityId) {
+            if ($this->sandboxService->isSandboxDatastore($datastoreId)) {
                 $requestBody['layer_name'] = Sandbox::LAYERNAME_PREFIX.$requestBody['layer_name'];
             }
         }

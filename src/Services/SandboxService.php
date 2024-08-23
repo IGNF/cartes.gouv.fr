@@ -5,10 +5,9 @@ namespace App\Services;
 use App\Services\EntrepotApi\CommunityApiService;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
-class DatastoreService
+class SandboxService
 {
-    /** @var string|null */
-    private $sandboxDatastoreId;
+    private ?string $sandboxDatastoreId;
 
     public function __construct(
         private ParameterBagInterface $parameterBag,
@@ -42,5 +41,19 @@ class DatastoreService
         $processings = $this->parameterBag->get($apiEntrepot)['processings'];
 
         return $processings['create_vect_pyr'];
+    }
+
+    public function getSandboxDatastoreId(): ?string
+    {
+        return $this->sandboxDatastoreId;
+    }
+
+    public function isSandboxDatastore(string $datastoreId): bool
+    {
+        if (null !== $this->sandboxDatastoreId && $this->sandboxDatastoreId === $datastoreId) {
+            return true;
+        }
+
+        return false;
     }
 }
