@@ -4,6 +4,7 @@ namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationTypes;
+use App\Constants\EntrepotApi\Sandbox;
 use App\Constants\EntrepotApi\StaticFileTypes;
 use App\Controller\ApiControllerInterface;
 use App\Exception\ApiException;
@@ -15,6 +16,7 @@ use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\StaticApiService;
 use App\Services\EntrepotApi\StoredDataApiService;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -31,7 +33,7 @@ use Symfony\Component\Uid\Uuid;
 class WmsVectorController extends ServiceController implements ApiControllerInterface
 {
     public function __construct(
-        DatastoreApiService $datastoreApiService,
+        private DatastoreApiService $datastoreApiService,
         private ConfigurationApiService $configurationApiService,
         private StoredDataApiService $storedDataApiService,
         CartesServiceApiService $cartesServiceApiService,
@@ -39,8 +41,9 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
         private CapabilitiesService $capabilitiesService,
         protected Filesystem $filesystem,
         private CartesMetadataApiService $cartesMetadataApiService,
+        ParameterBagInterface $params
     ) {
-        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $capabilitiesService, $cartesMetadataApiService);
+        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $capabilitiesService, $cartesMetadataApiService, $params);
     }
 
     #[Route('', name: 'add', methods: ['POST'])]
@@ -56,11 +59,13 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
         $tablesNamesList = isset($data['selected_tables']) ? json_decode($data['selected_tables'], true) : [];
 
         try {
+            $datastore = $this->datastoreApiService->get($datastoreId);
+
             // ajout ou mise à jour des fichiers de styles SLD
             $styleFilesByTable = $this->sendStyleFiles($datastoreId, $tablesNamesList, $files);
 
             // création de requête pour la config
-            $configRequestBody = $this->getConfigRequestBody($data, $tablesNamesList, $styleFilesByTable, $storedDataId);
+            $configRequestBody = $this->getConfigRequestBody($data, $tablesNamesList, $styleFilesByTable, $storedDataId, false, $datastore['community']['_id']);
 
             $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId);
             $datasheetName = $storedData['tags'][CommonTags::DATASHEET_NAME];
@@ -95,7 +100,6 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
                 $this->addPermissionForCurrentCommunity($datastoreId, $offering);
             }
 
-            
             // Création ou mise à jour du capabilities
             try {
                 $this->capabilitiesService->createOrUpdate($datastoreId, $endpoint, $offering['urls'][0]['url']);
@@ -191,7 +195,7 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
      *
      * @return array<mixed>
      */
-    private function getConfigRequestBody(array $data, array $tablesNamesList, array $tables, string $storedDataId, bool $editMode = false): array
+    private function getConfigRequestBody(array $data, array $tablesNamesList, array $tables, string $storedDataId, bool $editMode = false, ?string $communityId = null): array
     {
         $relations = [];
         foreach ($tablesNamesList as $tableName) {
@@ -219,6 +223,11 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
 
         if (false === $editMode) {
             $body['layer_name'] = $data['technical_name'];
+
+            // rajoute le préfixe "sandbox." si c'est la communauté bac à sable
+            if (null !== $this->sandboxCommunityId && null !== $communityId && $this->sandboxCommunityId === $communityId) {
+                $body['layer_name'] = Sandbox::LAYERNAME_PREFIX.$body['layer_name'];
+            }
         }
 
         if ('' !== $data['attribution_text'] && '' !== $data['attribution_url']) {

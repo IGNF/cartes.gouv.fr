@@ -4,6 +4,7 @@ namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationTypes;
+use App\Constants\EntrepotApi\Sandbox;
 use App\Constants\EntrepotApi\ZoomLevels;
 use App\Controller\ApiControllerInterface;
 use App\Dto\Pyramid\AddPyramidDTO;
@@ -19,6 +20,7 @@ use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\ProcessingApiService;
 use App\Services\EntrepotApi\StoredDataApiService;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Annotation\Route;
@@ -32,7 +34,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class PyramidController extends ServiceController implements ApiControllerInterface
 {
     public function __construct(
-        DatastoreApiService $datastoreApiService,
+        private DatastoreApiService $datastoreApiService,
         private ConfigurationApiService $configurationApiService,
         private StoredDataApiService $storedDataApiService,
         private ProcessingApiService $processingApiService,
@@ -40,8 +42,9 @@ class PyramidController extends ServiceController implements ApiControllerInterf
         CartesServiceApiService $cartesServiceApiService,
         CapabilitiesService $capabilitiesService,
         private CartesMetadataApiService $cartesMetadataApiService,
+        ParameterBagInterface $params
     ) {
-        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $capabilitiesService, $cartesMetadataApiService);
+        parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $capabilitiesService, $cartesMetadataApiService, $params);
     }
 
     #[Route('/add', name: 'add', methods: ['POST'])]
@@ -124,6 +127,8 @@ class PyramidController extends ServiceController implements ApiControllerInterf
         #[MapRequestPayload] PublishPyramidDTO $dto
     ): JsonResponse {
         try {
+            $datastore = $this->datastoreApiService->get($datastoreId);
+
             $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId);
             $datasheetName = $pyramid['tags'][CommonTags::DATASHEET_NAME];
 
@@ -132,7 +137,7 @@ class PyramidController extends ServiceController implements ApiControllerInterf
             // NOTE on peut difficilement supprimer la base de données parce qu'il y a peut-être d'autres entités qui en dépendent
 
             // création de requête pour la config
-            $configRequestBody = $this->getConfigRequestBody($dto, $pyramid);
+            $configRequestBody = $this->getConfigRequestBody($dto, $pyramid, false, $datastore['community']['_id']);
 
             // Restriction d'acces
             $endpoint = $this->getEndpointByShareType($datastoreId, ConfigurationTypes::WMTSTMS, $dto->share_with);
@@ -220,7 +225,7 @@ class PyramidController extends ServiceController implements ApiControllerInterf
     /**
      * @param array<mixed> $pyramid
      */
-    private function getConfigRequestBody(PublishPyramidDTO $dto, array $pyramid, bool $editMode = false): array
+    private function getConfigRequestBody(PublishPyramidDTO $dto, array $pyramid, bool $editMode = false, ?string $communityId = null): array
     {
         // Recherche de bottom_level et top_level
         $levels = $this->getBottomAndToLevel($pyramid);
@@ -242,6 +247,11 @@ class PyramidController extends ServiceController implements ApiControllerInterf
 
         if (false === $editMode) {
             $requestBody['layer_name'] = $dto->technical_name;
+
+            // rajoute le préfixe "sandbox." si c'est la communauté bac à sable
+            if (null !== $this->sandboxCommunityId && null !== $communityId && $this->sandboxCommunityId === $communityId) {
+                $requestBody['layer_name'] = Sandbox::LAYERNAME_PREFIX.$requestBody['layer_name'];
+            }
         }
 
         if ('' !== $dto->attribution_text && '' !== $dto->attribution_url) {
