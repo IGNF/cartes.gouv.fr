@@ -11,38 +11,39 @@ Il prend la suite de la préfiguration que constituait le [Géotuileur](https://
 
 Les autres briques de cartes.gouv.fr sont :
 
--   le catalogue [IGNF/geonetwork-ui](https://github.com/IGNF/geonetwork-ui) (déployé publiquement depuis le 28 juin 2024)
+-   le catalogue [IGNF/geonetwork-ui](https://github.com/IGNF/geonetwork-ui) (déployé depuis le 28 juin 2024)
 -   l'entrée cartographique [IGNF/cartes.gouv.fr-entree-carto](https://github.com/IGNF/cartes.gouv.fr-entree-carto) (déployée depuis le 28 juin 2024)
--   la documentation [IGNF/cartes.gouv.fr-documentation](https://github.com/IGNF/cartes.gouv.fr-documentation) (non déployée)
+-   la documentation [IGNF/cartes.gouv.fr-documentation](https://github.com/IGNF/cartes.gouv.fr-documentation) (à venir)
 
 ## Fonctionnalités
 
--   Gestion des clés d'accès aux services restreints
+-   Gestion des **clés d'accès** aux services restreints
 -   Formulaire de demande pour rejoindre une communauté publique
 -   Formulaire de contact, en particulier pour demander la création d'un nouvel espace de travail
 -   Processus d'alimentation et diffusion de données vecteur :
     -   Livraison de données avec intégration en base de données
-    -   Publication de services WFS puis ajout (optionnel) de styles associés
-    -   Publication de services WMS-vecteur (WMS "à la volée", sans images prégénérées)
-    -   Génération de pyramides de tuiles vectorielles et publication de services TMS
-    -   Publication de métadonnées sur le catalogue, obligatoire dès le premier service publié
+    -   Publication de services **WFS** puis ajout (optionnel) de **styles** associés
+    -   Publication de services **WMS-vecteur** (WMS "à la volée", il s'agit bien d'un flux image mais les images ne sont pas précalculées)
+    -   Génération de **pyramides de tuiles vectorielles** et publication de services **TMS** puis ajout (optionnel) de styles associés
+    -   Publication de **métadonnées** sur le catalogue, obligatoire dès le premier service publié
 -   Gestion des entrepôts et communautés :
-    -   Gestion des membres
-    -   Visualisation de l'utilisation des quotas alloués
-    -   Gestion des permissions associées aux services publiés sur des points d'accès restreints
+    -   Gestion des membres et de leurs droits
+    -   Visualisation de l'utilisation des quotas alloués pour chaque service et type de stockage
+    -   Gestion des **permissions** associées aux services publiés sur des points d'accès restreints
 
-A venir :
+À venir :
 
 -   Bac à sable pour tester les fonctionnalités
+-   Ajout de documents associés à une fiche de données
 -   Mise à jour des données diffusées
 -   Génération de pyramides d'images pour publications WMS-raster et WMTS
 -   Interface de configuration de style
 
 ## :warning: Point d'attention
 
-cartes.gouv.fr n'utilise pas de stockage propre. Toutes les informations visibles proviennent de l'API Entrepôt. Mais pour obtenir un affichage cohérent, cartes.gouv.fr utilise les `tags` sur les entités de l'entrepôt.
+cartes.gouv.fr n'utilise pas de stockage propre. Toutes les informations visibles proviennent de l'[API Entrepôt](https://data.geopf.fr/api/swagger-ui/index.html). Mais pour obtenir un affichage cohérent, cartes.gouv.fr utilise des étiquettes (`tags`) sur les entités de l'entrepôt.
 
-Si vous avez utilisé l'API Entrepôt directement, vous ne verrez pas vos données sur cartes.gouv.fr si vous n'avez pas utilisé le tag `datasheet_name` pour associer livraisons (`upload`), données stockées (`stored_data`) et services de diffusion (`configuration`) derrière le concept virtuel de fiche de données.
+Si vous avez utilisé l'API Entrepôt directement ou avec une autre application cliente, vous ne verrez pas vos données sur cartes.gouv.fr si vous n'avez pas utilisé le tag `datasheet_name` pour associer livraisons (`upload`), données stockées (`stored_data`) et services de diffusion (`configuration`) derrière le concept virtuel de **fiche de données**. Une fiche de données correspond à plusieurs livraisons, données stockées et services de diffusion mais à une seule métadonnée.
 
 Pour en savoir plus, consultez la [documentation développeur sur l'utilisation de l'API Entrepôt par cartes.gouv.fr](docs/developer/entrepot/README.md).
 
