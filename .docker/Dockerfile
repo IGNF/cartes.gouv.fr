@@ -39,6 +39,13 @@ RUN apt-get -qq update && DEBIAN_FRONTEND=noninteractive apt-get -qq install -y 
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 
 #----------------------------------------------------------------------
+# Installation de divers outils
+#----------------------------------------------------------------------
+RUN apt-get -qq update && DEBIAN_FRONTEND=noninteractive apt-get -qq install -y rclone git \
+    && rclone self-update --package deb \
+    && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+#----------------------------------------------------------------------
 # Nodejs : Installation
 # https://github.com/nodejs/docker-node/blob/main/18/bullseye/Dockerfile
 # https://stackoverflow.com/a/63108753
@@ -48,11 +55,6 @@ COPY --from=node:20-slim /usr/local/bin/node /usr/local/bin/node
 RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm
 RUN npm i -g yarn pnpm npx
 # RUN yarn set version stable
-
-#----------------------------------------------------------------------
-# Nettoyage Cache APT
-#----------------------------------------------------------------------
-RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 #----------------------------------------------------------------------
 # Configurer apache
@@ -80,8 +82,7 @@ RUN export APP_ENV=prod \
 
 RUN yarn install --production --frozen-lockfile \
     && yarn build \
-    && yarn cache clean \
-    && rm -rf node_modules
+    && yarn cache clean
 
 EXPOSE 8000
 
