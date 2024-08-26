@@ -1,62 +1,54 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import { Card } from "@codegouvfr/react-dsfr/Card";
-import { Tag } from "@codegouvfr/react-dsfr/Tag";
-import { FC } from "react";
+import Alert from "@codegouvfr/react-dsfr/Alert";
+import { useQuery } from "@tanstack/react-query";
 import { symToStr } from "tsafe/symToStr";
 
-import articles from "../../data/actualites.json";
-import { appRoot, routes } from "../../router/router";
-import { type NewsArticle } from "../../@types/newsArticle";
-import { formatDateFromISO } from "../../utils";
 import Main from "../../components/Layout/Main";
+import LoadingText from "../../components/Utils/LoadingText";
+import { useTranslation } from "../../i18n/i18n";
+import SymfonyRouting from "../../modules/Routing";
 
-type NewsListItemProps = {
-    slug: string;
-    newsArticle: NewsArticle;
-};
-
-const NewsListItem: FC<NewsListItemProps> = ({ slug, newsArticle }) => {
-    const SHORT_DESC_MAX_CHAR = 120;
-
-    const tags = newsArticle?.tags?.map((tag, i) => <Tag key={`${slug}_tag_${i}`}>{tag}</Tag>);
-
-    return (
-        <div className={fr.cx("fr-col-sm-12", "fr-col-md-4", "fr-col-lg-4")}>
-            <Card
-                start={<div className={fr.cx("fr-tags-group")}>{tags}</div>}
-                desc={
-                    <span
-                        dangerouslySetInnerHTML={{
-                            __html:
-                                newsArticle?.short_description && newsArticle?.short_description.length > SHORT_DESC_MAX_CHAR
-                                    ? newsArticle?.short_description.substring(0, 100) + "..."
-                                    : (newsArticle?.short_description ?? ""),
-                        }}
-                    />
-                }
-                detail={newsArticle?.date && formatDateFromISO(newsArticle?.date)}
-                enlargeLink
-                imageAlt={newsArticle?.thumbnail_alt ?? "Vignette de l’article"}
-                imageUrl={`${appRoot}/${newsArticle.thumbnail_url}`}
-                linkProps={routes.news_article({ slug }).link}
-                title={<span dangerouslySetInnerHTML={{ __html: newsArticle?.title ?? "" }} />}
-                titleAs="h2"
-            />
-        </div>
-    );
-};
-NewsListItem.displayName = symToStr({ NewsListItem });
+// pour que la commande "react-dsfr update-icons" inclue l'icone article dans les assets
+// fr-icon-article-line
 
 const NewsList = () => {
+    const { t: tCommon } = useTranslation("Common");
+
+    const articlesListQuery = useQuery({
+        queryKey: ["articles"],
+        queryFn: async () => {
+            const url = SymfonyRouting.generate("cartesgouvfr_s3_gateway_get_content", {
+                path: "articles/articles.html",
+            });
+            const response = await fetch(url);
+
+            if (!response.ok) {
+                return Promise.reject({
+                    message: "Fetching articles failed",
+                    code: response.status,
+                });
+            }
+
+            const text = await response.text();
+            return text;
+        },
+    });
+
     return (
         <Main title="Actualités">
-            <div className={fr.cx("fr-container")}>
-                <h1>Actualités</h1>
+            {articlesListQuery.isLoading && <LoadingText message="Actualités" as="h1" withSpinnerIcon={true} />}
 
-                <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
-                    {Object.entries(articles)?.map(([slug, article]) => <NewsListItem key={slug} slug={slug} newsArticle={article} />)}
-                </div>
-            </div>
+            {articlesListQuery.error && (
+                <Alert severity={"error"} title={tCommon("error")} description={articlesListQuery.error?.message} className={fr.cx("fr-my-3w")} />
+            )}
+
+            {articlesListQuery.data && (
+                <div
+                    dangerouslySetInnerHTML={{
+                        __html: articlesListQuery.data,
+                    }}
+                />
+            )}
         </Main>
     );
 };
