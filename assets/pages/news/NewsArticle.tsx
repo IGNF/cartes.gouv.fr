@@ -21,12 +21,12 @@ const NewsArticle: FC<NewsArticleProps> = ({ slug }) => {
     const { t: tBreadcrumb } = useTranslation("Breadcrumb");
 
     const articleQuery = useQuery({
-        queryKey: ["articles", slug],
-        queryFn: async () => {
+        queryKey: ["articles", "slug", slug],
+        queryFn: async ({ signal }) => {
             const url = SymfonyRouting.generate("cartesgouvfr_s3_gateway_get_content", {
                 path: `articles/${slug}.html`,
             });
-            const response = await fetch(url);
+            const response = await fetch(url, { signal });
 
             if (!response.ok) {
                 return Promise.reject({

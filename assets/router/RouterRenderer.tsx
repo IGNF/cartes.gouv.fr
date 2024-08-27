@@ -93,7 +93,7 @@ const RouterRenderer: FC = () => {
             case "contact_thanks":
                 return <Thanks />;
             case "news_list":
-                return <NewsList />;
+                return <NewsList page={route.params.page} />;
             case "news_article":
                 return <NewsArticle slug={route.params.slug} />;
             case "faq":
