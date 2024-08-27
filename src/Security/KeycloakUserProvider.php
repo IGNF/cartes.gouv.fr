@@ -5,16 +5,14 @@ namespace App\Security;
 use App\Services\EntrepotApi\UserApiService;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use KnpU\OAuth2ClientBundle\Client\Provider\KeycloakClient;
-use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Token\AccessToken;
 use Psr\Log\LoggerInterface;
 use Stevenmaguire\OAuth2\Client\Provider\KeycloakResourceOwner;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\HttpClient\Exception\TimeoutException;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use Symfony\Component\Security\Core\Exception\AuthenticationExpiredException;
+use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Exception\TokenNotFoundException;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\Exception\UserNotFoundException;
@@ -64,9 +62,9 @@ class KeycloakUserProvider implements UserProviderInterface
                 $session->set(KeycloakToken::SESSION_KEY, $accessToken);
 
                 $this->logger->debug('{class}: Token refreshed successfully [{id_token}]', ['id_token' => $accessToken->getValues()['id_token'], 'class' => self::class]);
-            } catch (IdentityProviderException $ex) {
-                $this->logger->debug('{class}: Failed to refresh keycloak access token', ['class' => self::class]);
-                throw new AuthenticationExpiredException('Failed to refresh keycloak access token', Response::HTTP_UNAUTHORIZED, $ex);
+            } catch (\Throwable $th) {
+                $this->logger->debug('{class}: Failed to refresh keycloak access token', ['class' => self::class, 'error' => $th]);
+                throw new AuthenticationException('Failed to refresh keycloak access token', Response::HTTP_UNAUTHORIZED, $th);
             }
         }
 
@@ -74,15 +72,15 @@ class KeycloakUserProvider implements UserProviderInterface
             /** @var KeycloakResourceOwner */
             $keycloakUser = $keycloakClient->fetchUserFromToken($accessToken);
         } catch (\Throwable $th) {
-            $this->logger->debug('{class}: Failed to fetch user from token', ['class' => self::class]);
-            throw new AuthenticationExpiredException('Failed to fetch user from token', Response::HTTP_UNAUTHORIZED, $th);
+            $this->logger->info('{class}: Failed to fetch user from token', ['class' => self::class, 'error' => $th]);
+            throw new AuthenticationException('Failed to fetch user from token', Response::HTTP_UNAUTHORIZED, $th);
         }
 
         try {
             $apiUser = $this->userApiService->getMe();
-        } catch (TimeoutException $ex) {
-            $this->logger->debug('{class}: Failed to fetch logged-in user', ['class' => self::class]);
-            throw new UserNotFoundException('Failed to fetch logged-in user', Response::HTTP_UNAUTHORIZED, $ex);
+        } catch (\Throwable $th) {
+            $this->logger->info('{class}: Failed to fetch logged-in user', ['class' => self::class, 'error' => $th]);
+            throw new AuthenticationException('Failed to fetch logged-in user', Response::HTTP_UNAUTHORIZED, $th);
         }
 
         $user = new User($keycloakUser->toArray(), $apiUser);
