@@ -14,9 +14,9 @@ import { promisify } from "util";
 
 const execAsync = promisify(exec);
 
-const ARTICLES_CMS_BASE_URL = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
-const ARTICLES_CMS_USERNAME = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
-const ARTICLES_CMS_PASSWORD = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+const ARTICLES_CMS_BASE_URL = process.env.ARTICLES_CMS_BASE_URL;
+const ARTICLES_CMS_USERNAME = process.env.ARTICLES_CMS_USERNAME;
+const ARTICLES_CMS_PASSWORD = process.env.ARTICLES_CMS_PASSWORD;
 
 const ARTICLES_S3_GATEWAY_BASE_PATH = "/_cartes_s3_gateway/articles";
 const ARTICLES_SITE_BASE_PATH = "/actualites";
@@ -31,6 +31,8 @@ const OUTPUT_DIR = resolve(join(__dirname, "..", "var", "data", "articles"));
 
 const HTTP_PROXY = process.env.HTTP_PROXY;
 
+const { log, warn, error } = console;
+
 /**
  * Binary to ASCII
  * @param {string} username
@@ -43,19 +45,22 @@ async function ensureDirectoryExists(filePath) {
     try {
         await mkdir(dir, { recursive: true });
     } catch (err) {
-        console.error("An error occurred while creating the directory: ", err);
+        error("An error occurred while creating the directory: ", err);
         throw err;
     }
 }
 
+const getArrayRange = (start, stop, step = 1) => Array.from({ length: (stop - start) / step + 1 }, (_, index) => start + index * step);
+
 /**
- * Supprimer les éléments avec la classe "visually-hidden"
+ * Supprimer les éléments avec les classes spécifiées
  *
  * @param {HTMLElement} document
+ * @param {string[]} classes
  */
-const removeVisuallyHiddenElements = (document) => {
-    const visuallyHiddenList = document.querySelectorAll(".visually-hidden");
-    visuallyHiddenList.forEach((el) => el.remove());
+const removeElementsWithClasses = (document, classes = []) => {
+    const elements = classes.map((cls) => [...document.querySelectorAll(`.${cls}`)]).flat();
+    elements.forEach((el) => el.remove());
 };
 
 /**
@@ -77,8 +82,15 @@ const downloadAllImages = async (document) => {
 
                 const newSrcSet = await Promise.all(
                     srcSet.map(async (src) => {
-                        const newSrc = await downloadImage(src);
-                        return ARTICLES_S3_GATEWAY_BASE_PATH + newSrc.replace(OUTPUT_DIR, "");
+                        // split pour séparer l'URL et le descriptor, voir : https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#srcset
+                        const srcSplit = src.split(" ");
+                        const originalImgPath = srcSplit?.[0] ?? src;
+                        const descriptor = srcSplit?.[1] ?? null;
+
+                        const newSrc = await downloadImage(originalImgPath);
+
+                        // reconstitution de l'URL
+                        return ARTICLES_S3_GATEWAY_BASE_PATH + newSrc.replace(OUTPUT_DIR, "") + (descriptor !== null ? " " + descriptor : "");
                     })
                 );
 
@@ -91,28 +103,31 @@ const downloadAllImages = async (document) => {
 
 /**
  *
- * @param {string} originalImgPath
+ * @param {?string} originalImgPath
  */
 const downloadImage = async (originalImgPath) => {
     const url = new URL(ARTICLES_CMS_BASE_URL + originalImgPath);
     let mediaPath = normalize(join(OUTPUT_DIR, "media", url.pathname.replace("/sites/default/files", "")));
     mediaPath = decodeURI(mediaPath);
 
-    console.log(`Downloading file from ${url.href}`);
-    const response = await fetch(url.href, {
-        ...getFetchOptions(),
-    });
+    log(`Downloading file from ${url.href}`);
+    const response = await fetch(url.href, getFetchOptions());
+
+    if (response.status !== 200) {
+        warn(`File download failed : ${url.href}`);
+        warn("XXXXXXXXXXXXXX content-type - ", response.headers.get("content-type"), url.href);
+    }
 
     await ensureDirectoryExists(mediaPath);
 
     await pipeline(response.body, createWriteStream(mediaPath));
 
-    console.log(`File saved to ${mediaPath}`);
+    log(`File saved to ${mediaPath}`);
     return mediaPath;
 };
 
 const getFetchOptions = () => {
-    const proxyUrl = process.env.HTTP_PROXY;
+    const proxyUrl = HTTP_PROXY;
     const proxyAgent = new HttpsProxyAgent(proxyUrl);
 
     return {
@@ -133,18 +148,19 @@ const prettify = async (string) => {
 
 const syncS3 = async () => {
     await execAsync(`rclone sync ${OUTPUT_DIR} ${RCLONE_S3_REMOTE}:${S3_BUCKET_NAME}/articles`);
-    console.log(`Synchronised ${OUTPUT_DIR} with S3`);
+    log(`Synchronised ${OUTPUT_DIR} with S3`);
 };
 
 const cleanOutputDir = async () => {
     await rm(OUTPUT_DIR, { force: true, recursive: true });
-    console.log(`Output dir ${OUTPUT_DIR} cleared`);
+    log(`Output dir ${OUTPUT_DIR} cleared`);
 };
 
-const processArticlesIndex = async () => {
-    const response = await fetch(ARTICLES_CMS_BASE_URL, {
-        ...getFetchOptions(),
-    });
+/**
+ * Renvoie les numéros de page de début et de fin. La pagination commence à 0.
+ */
+const getPageNumbers = async () => {
+    const response = await fetch(ARTICLES_CMS_BASE_URL, getFetchOptions());
 
     const content = await response.text();
     const { document } = new JSDOM(content).window;
@@ -152,7 +168,32 @@ const processArticlesIndex = async () => {
     // Lecture du contenu du main
     const $main = document.querySelector("main");
 
-    removeVisuallyHiddenElements($main);
+    const $navPaginationUl = $main.querySelector("nav.fr-pagination>.fr-pagination__list");
+    const navPagLastChild = $navPaginationUl.lastElementChild.querySelector("a");
+
+    const firstPage = 0;
+    const lastPage = new URL(ARTICLES_CMS_BASE_URL + navPagLastChild.href).searchParams.get("page");
+
+    log(`First page : ${firstPage}, last page : ${lastPage}`);
+
+    return {
+        firstPage: parseInt(firstPage),
+        lastPage: parseInt(lastPage),
+    };
+};
+
+const processArticlesIndex = async (page = 0) => {
+    const url = `${ARTICLES_CMS_BASE_URL}/?page=${page}`;
+    log(`Fetching articles index from url ${url}`);
+    const response = await fetch(url, getFetchOptions());
+
+    const content = await response.text();
+    const { document } = new JSDOM(content).window;
+
+    // Lecture du contenu du main
+    const $main = document.querySelector("main");
+
+    removeElementsWithClasses($main, ["visually-hidden", "hidden"]);
 
     await downloadAllImages($main);
 
@@ -167,11 +208,11 @@ const processArticlesIndex = async () => {
     // Sauvegarde du HTML final dans un fichier
     let mainContent = $main.innerHTML;
     mainContent = await prettify(mainContent);
-    const outputFilePath = join(OUTPUT_DIR, "articles.html");
+    const outputFilePath = join(OUTPUT_DIR, "list", `${page}.html`);
 
     await ensureDirectoryExists(outputFilePath);
     await writeFile(outputFilePath, mainContent, { flag: "w" });
-    console.log(`Saved main HTML file to ${outputFilePath}`);
+    log(`Saved main HTML file to ${outputFilePath}`);
 
     // Retoune la liste des slugs des articles
     return articleSlugsList;
@@ -182,9 +223,7 @@ const processArticlesIndex = async () => {
  * @param {string} slug
  */
 const processSingleArticle = async (slug) => {
-    const response = await fetch(`${ARTICLES_CMS_BASE_URL}/${slug}`, {
-        ...getFetchOptions(),
-    });
+    const response = await fetch(`${ARTICLES_CMS_BASE_URL}/${slug}`, getFetchOptions());
 
     const content = await response.text();
     const { document } = new JSDOM(content).window;
@@ -192,7 +231,7 @@ const processSingleArticle = async (slug) => {
     // Lecture du contenu du main
     const $article = document.querySelector("article");
 
-    removeVisuallyHiddenElements($article);
+    removeElementsWithClasses($article, ["visually-hidden", "hidden"]);
 
     await downloadAllImages($article);
 
@@ -208,17 +247,20 @@ const processSingleArticle = async (slug) => {
 
     await ensureDirectoryExists(outputFilePath);
     await writeFile(outputFilePath, articleContent, { flag: "w" });
-    console.log(`Saved article ${slug} HTML file to ${outputFilePath}`);
+    log(`Saved article ${slug} HTML file to ${outputFilePath}`);
 };
 
 (async () => {
     await cleanOutputDir();
 
-    console.log(`Fetching URL ${ARTICLES_CMS_BASE_URL}`);
-    console.log(`With proxy ${HTTP_PROXY}`);
+    log(`Fetching URL ${ARTICLES_CMS_BASE_URL}`);
+    log(`With proxy ${HTTP_PROXY}`);
 
-    const articleSlugsList = await processArticlesIndex();
+    // la liste paginée des articles
+    const { firstPage, lastPage } = await getPageNumbers();
+    const articleSlugsList = (await Promise.all(getArrayRange(firstPage, lastPage).map((page) => processArticlesIndex(page)))).flat();
 
+    // les articles individuels
     await Promise.all(articleSlugsList.map((slug) => processSingleArticle(slug)));
 
     await syncS3();
