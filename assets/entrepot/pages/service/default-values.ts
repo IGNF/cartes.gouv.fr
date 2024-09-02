@@ -24,7 +24,7 @@ const getMetadataFormDefaultValues = (metadata?: Metadata): MetadataFormValuesTy
         free_keywords: metadata?.csw_metadata?.free_keywords ?? [],
         public_name: metadata?.csw_metadata?.title,
         description: metadata?.csw_metadata?.abstract,
-        identifier: metadata?.csw_metadata?.file_identifier,
+        identifier: metadata?.csw_metadata?.file_identifier?.replaceAll("sandbox.", ""),
         charset: metadata?.csw_metadata?.charset ?? DEFAULT_CHARSET,
         resolution: metadata?.csw_metadata?.resolution ?? "",
         frequency_code: metadata?.csw_metadata?.frequency_code ?? "unknown",
