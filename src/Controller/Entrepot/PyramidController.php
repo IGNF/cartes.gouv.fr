@@ -161,6 +161,9 @@ class PyramidController extends ServiceController implements ApiControllerInterf
 
             // création ou mise à jour de metadata
             $formData = json_decode(json_encode($dto), true);
+            if ($this->sandboxService->isSandboxDatastore($datastoreId)) {
+                $formData['identifier'] = Sandbox::LAYERNAME_PREFIX.$formData['identifier'];
+            }
             $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $formData);
 
             return $this->json($offering);
@@ -210,6 +213,9 @@ class PyramidController extends ServiceController implements ApiControllerInterf
 
             // création ou mise à jour de metadata
             $formData = json_decode(json_encode($dto), true);
+            if ($this->sandboxService->isSandboxDatastore($datastoreId)) {
+                $formData['identifier'] = Sandbox::LAYERNAME_PREFIX.$formData['identifier'];
+            }
             $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $formData);
 
             return $this->json($offering);

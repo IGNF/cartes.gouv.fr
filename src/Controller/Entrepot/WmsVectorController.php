@@ -109,6 +109,9 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
             $data['category'] = json_decode($data['category'], true);
             $data['keywords'] = json_decode($data['keywords'], true);
             $data['free_keywords'] = json_decode($data['free_keywords'], true);
+            if ($this->sandboxService->isSandboxDatastore($datastoreId)) {
+                $data['identifier'] = Sandbox::LAYERNAME_PREFIX.$data['identifier'];
+            }
             $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $data);
 
             return $this->json($offering);
@@ -178,6 +181,9 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
             $data['category'] = json_decode($data['category'], true);
             $data['keywords'] = json_decode($data['keywords'], true);
             $data['free_keywords'] = json_decode($data['free_keywords'], true);
+            if ($this->sandboxService->isSandboxDatastore($datastoreId)) {
+                $data['identifier'] = Sandbox::LAYERNAME_PREFIX.$data['identifier'];
+            }
             $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $data);
 
             return $this->json($offering);
