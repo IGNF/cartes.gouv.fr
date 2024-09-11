@@ -76,11 +76,11 @@ const AppLayout: FC<PropsWithChildren<AppLayoutProps>> = ({ children, navItems, 
         <>
             <HiddenElementsMemoized />
             <AppHeader navItems={navItems} />
-            <main id="main" role="main" className={fr.cx("fr-my-2w")}>
+            <main id="main" role="main">
                 {/* doit être le premier élément atteignable après le lien d'évitement (Accessibilité) : https://www.systeme-de-design.gouv.fr/elements-d-interface/composants/bandeau-d-information-importante */}
                 {infoBannerMsg && <Notice title={infoBannerMsg} isClosable={true} />}
 
-                <div className={fr.cx("fr-container")}>
+                <div className={fr.cx("fr-container", "fr-my-2w")}>
                     {breadcrumbProps && <Breadcrumb {...breadcrumbProps} />}
 
                     <div className={fr.cx("fr-mb-4v")}>
