@@ -1,9 +1,10 @@
-import GetFeatureInfo from "geoportal-extensions-openlayers/src/OpenLayers/Controls/GetFeatureInfo";
-import LayerSwitcher from "geoportal-extensions-openlayers/src/OpenLayers/Controls/LayerSwitcher";
-import SearchEngine from "geoportal-extensions-openlayers/src/OpenLayers/Controls/SearchEngine";
+import GetFeatureInfo from "geopf-extensions-openlayers/src/packages/Controls/GetFeatureInfo/GetFeatureInfo";
+import LayerSwitcher from "geopf-extensions-openlayers/src/packages/Controls/LayerSwitcher/LayerSwitcher";
+import SearchEngine from "geopf-extensions-openlayers/src/packages/Controls/SearchEngine/SearchEngine";
+import GeoportalZoom from "geopf-extensions-openlayers/src/packages/Controls/Zoom/GeoportalZoom";
 import Map from "ol/Map";
 import View from "ol/View";
-import { defaults as defaultControls } from "ol/control";
+import { ScaleLine } from "ol/control";
 import Attribution from "ol/control/Attribution";
 import { createOrUpdate } from "ol/extent";
 import { defaults as defaultInteractions } from "ol/interaction";
@@ -21,9 +22,7 @@ import StyleHelper from "../../modules/Style/StyleHelper";
 
 import "ol/ol.css";
 
-import "geoportal-extensions-openlayers/dist/GpPluginOpenLayers.css";
-
-import "../../sass/components/ol.scss";
+import "geopf-extensions-openlayers/css/Dsfr.css";
 
 import "../../sass/components/map-view.scss";
 
@@ -111,17 +110,18 @@ const RMap: FC<RMapProps> = ({ initial, currentStyle }) => {
     useEffect(() => {
         // Creation de la carte
         if (!mapRef.current) {
-            const controls = defaultControls();
-            controls.push(new Attribution({ collapsible: true, collapsed: true }));
-            controls.push(new LayerSwitcher());
-            controls.push(
+            const controls = [
+                new GeoportalZoom(),
+                new Attribution({ collapsible: true, collapsed: true }),
+                new LayerSwitcher(),
+                new ScaleLine(),
                 new SearchEngine({
                     collapsed: false,
                     displayAdvancedSearch: false,
                     apiKey: "essentiels",
                     zoomTo: "auto",
-                })
-            );
+                }),
+            ];
 
             if (gfinfo) {
                 controls.push(

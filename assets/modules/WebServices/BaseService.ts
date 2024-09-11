@@ -1,5 +1,6 @@
 import { Service } from "../../@types/app";
-import { LayerTypes } from "../../@types/ol";
+// import BaseLayer from "ol/layer/Base";
+import Layer from "ol/layer/Layer";
 abstract class BaseService {
     readonly service: Service;
 
@@ -16,7 +17,7 @@ abstract class BaseService {
     }
 
     abstract getLayerNames(): string[];
-    abstract getLayers(): Promise<LayerTypes[]>;
+    abstract getLayers(): Promise<Layer[]>;
 }
 
 export default BaseService;

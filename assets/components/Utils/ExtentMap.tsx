@@ -1,8 +1,9 @@
-import LayerSwitcher from "geoportal-extensions-openlayers/src/OpenLayers/Controls/LayerSwitcher";
-import SearchEngine from "geoportal-extensions-openlayers/src/OpenLayers/Controls/SearchEngine";
-import { View } from "ol";
+import LayerSwitcher from "geopf-extensions-openlayers/src/packages/Controls/LayerSwitcher/LayerSwitcher";
+import SearchEngine from "geopf-extensions-openlayers/src/packages/Controls/SearchEngine/SearchEngine";
+import GeoportalZoom from "geopf-extensions-openlayers/src/packages/Controls/Zoom/GeoportalZoom";
+import { Feature, View } from "ol";
 import Map from "ol/Map";
-import { Attribution, ScaleLine, defaults as defaultControls } from "ol/control";
+import { ScaleLine } from "ol/control";
 import GeoJSON from "ol/format/GeoJSON";
 import { defaults as defaultInteractions } from "ol/interaction";
 import TileLayer from "ol/layer/Tile";
@@ -18,9 +19,9 @@ import useCapabilities from "../../hooks/useCapabilities";
 
 import "ol/ol.css";
 
-import "geoportal-extensions-openlayers/dist/GpPluginOpenLayers.css";
+import "geopf-extensions-openlayers/css/Dsfr.css";
+
 import "../../sass/components/map-view.scss";
-import "../../sass/components/ol.scss";
 
 type ExtentMapProps = {
     extents?: EntrepotGeometry | EntrepotGeometry[];
@@ -47,7 +48,7 @@ const ExtentMap: FC<ExtentMapProps> = ({ extents }) => {
             .flat();
 
         const extentSource = new VectorSource({
-            features: extentFeatures,
+            features: extentFeatures as Feature[], // NOTE : un peu dégeu mais j'ai pas trouvé mieux comme solution qui marche
         });
 
         return new VectorLayer({
@@ -90,18 +91,17 @@ const ExtentMap: FC<ExtentMapProps> = ({ extents }) => {
             ],
         });
 
-        const controls = defaultControls();
-        controls.push(new Attribution({ collapsible: true, collapsed: true }));
-        controls.push(layerSwitcher);
-        controls.push(
+        const controls = [
+            layerSwitcher,
             new SearchEngine({
                 collapsed: false,
                 displayAdvancedSearch: false,
                 apiKey: "essentiels",
                 zoomTo: "auto",
-            })
-        );
-        controls.push(new ScaleLine());
+            }),
+            new ScaleLine(),
+            new GeoportalZoom(),
+        ];
 
         mapRef.current = new Map({
             target: mapTargetRef.current as HTMLElement,
@@ -114,7 +114,10 @@ const ExtentMap: FC<ExtentMapProps> = ({ extents }) => {
                 zoom: olDefaults.zoom,
             }),
         });
-        mapRef.current.getView().fit(extentLayer.getSource().getExtent());
+        const extentLayerSource = extentLayer.getSource();
+        if (extentLayerSource) {
+            mapRef.current.getView().fit(extentLayerSource.getExtent());
+        }
 
         return () => mapRef.current?.setTarget(undefined);
     }, [bgLayer, extentLayer]);
