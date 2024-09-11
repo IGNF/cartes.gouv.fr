@@ -73,7 +73,7 @@ const downloadAllImages = async (document) => {
     await Promise.all(
         imgList.map(async (img) => {
             // src
-            const newSrc = await downloadImage(img.src);
+            const newSrc = await downloadFile(img.src);
             img.src = ARTICLES_S3_GATEWAY_BASE_PATH + newSrc.replace(OUTPUT_DIR, "");
 
             // srcset
@@ -87,7 +87,7 @@ const downloadAllImages = async (document) => {
                         const originalImgPath = srcSplit?.[0] ?? src;
                         const descriptor = srcSplit?.[1] ?? null;
 
-                        const newSrc = await downloadImage(originalImgPath);
+                        const newSrc = await downloadFile(originalImgPath);
 
                         // reconstitution de l'URL
                         return ARTICLES_S3_GATEWAY_BASE_PATH + newSrc.replace(OUTPUT_DIR, "") + (descriptor !== null ? " " + descriptor : "");
@@ -102,10 +102,25 @@ const downloadAllImages = async (document) => {
 };
 
 /**
+ * Télécharger tous les fichiers téléchargeables (pdf etc.) et réécrire les URLs
+ *
+ * @param {HTMLElement} document
+ */
+const downloadAllDownloadableFiles = async (document) => {
+    const downloadLinks = [...document.querySelectorAll("a.fr-link--download")];
+    await Promise.all(
+        downloadLinks.map(async (downLink) => {
+            const newUrl = await downloadFile(downLink.href);
+            downLink.href = ARTICLES_S3_GATEWAY_BASE_PATH + newUrl.replace(OUTPUT_DIR, "");
+        })
+    );
+};
+
+/**
  *
  * @param {?string} originalImgPath
  */
-const downloadImage = async (originalImgPath) => {
+const downloadFile = async (originalImgPath) => {
     const url = new URL(ARTICLES_CMS_BASE_URL + originalImgPath);
     let mediaPath = normalize(join(OUTPUT_DIR, "media", url.pathname.replace("/sites/default/files", "")));
     mediaPath = decodeURI(mediaPath);
@@ -114,8 +129,10 @@ const downloadImage = async (originalImgPath) => {
     const response = await fetch(url.href, getFetchOptions());
 
     if (response.status !== 200) {
-        warn(`File download failed : ${url.href}`);
+        const msg = `File download failed (code: ${response.status}) : ${url.href}`;
+        warn(msg);
         warn("XXXXXXXXXXXXXX content-type - ", response.headers.get("content-type"), url.href);
+        return Promise.reject(msg);
     }
 
     await ensureDirectoryExists(mediaPath);
@@ -235,8 +252,13 @@ const processSingleArticle = async (slug) => {
 
     await downloadAllImages($article);
 
-    // Réécrire l'URL des liens internes (qui commencent par '/')
-    const internalLinks = [...$article.querySelectorAll("a[href^='/']")];
+    await downloadAllDownloadableFiles($article);
+
+    /**
+     * Réécrire l'URL des liens internes qui commencent par '/', sauf ceux qui commencent par '/_cartes_s3_gateway'
+     * parce que ce sont des documents qu'on a téléchargés et mis sur le S3
+     */
+    const internalLinks = [...$article.querySelectorAll("a[href^='/']:not([href^='/_cartes_s3_gateway'])")];
     internalLinks.forEach((el) => {
         el.href = ARTICLES_SITE_BASE_PATH + el.href;
     });
@@ -258,7 +280,8 @@ const processSingleArticle = async (slug) => {
 
     // la liste paginée des articles
     const { firstPage, lastPage } = await getPageNumbers();
-    const articleSlugsList = (await Promise.all(getArrayRange(firstPage, lastPage).map((page) => processArticlesIndex(page)))).flat();
+    const pagesRange = getArrayRange(firstPage, lastPage); // [0,1,2,3,...,n]
+    const articleSlugsList = (await Promise.all(pagesRange.map((page) => processArticlesIndex(page)))).flat();
 
     // les articles individuels
     await Promise.all(articleSlugsList.map((slug) => processSingleArticle(slug)));
