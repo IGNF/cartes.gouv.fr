@@ -7,7 +7,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import SldStyleParser from "geostyler-sld-parser";
 import { declareComponentKeys } from "i18nifty";
-import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import { FC, useCallback, useMemo, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { symToStr } from "tsafe/symToStr";
 import * as yup from "yup";
@@ -24,6 +24,7 @@ import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
+import useScrollToTopEffect from "../../../../hooks/useScrollToTopEffect";
 import { Translations, useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
@@ -271,10 +272,7 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
         return [];
     }, [selectedTableNamesList, vectorDbQuery.data]);
 
-    useEffect(() => {
-        window.focus();
-        window?.scrollTo({ top: 0, left: 0, behavior: "smooth" });
-    }, [currentStep]);
+    useScrollToTopEffect([currentStep]);
 
     const previousStep = useCallback(() => setCurrentStep((currentStep) => currentStep - 1), []);
 

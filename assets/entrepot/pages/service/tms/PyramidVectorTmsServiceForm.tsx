@@ -6,7 +6,7 @@ import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { declareComponentKeys } from "i18nifty";
-import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import { FC, useCallback, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { ConfigurationTypeEnum, EndpointTypeEnum, Pyramid, Service, ServiceFormValuesBaseType } from "../../../../@types/app";
@@ -14,6 +14,7 @@ import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
+import useScrollToTopEffect from "../../../../hooks/useScrollToTopEffect";
 import { Translations, useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
@@ -156,10 +157,7 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
 
     const { getValues: getFormValues, trigger } = form;
 
-    useEffect(() => {
-        window.focus();
-        window?.scrollTo({ top: 0, left: 0, behavior: "smooth" });
-    }, [currentStep]);
+    useScrollToTopEffect([currentStep]);
 
     // Etape precedente
     const previousStep = useCallback(() => setCurrentStep((currentStep) => currentStep - 1), []);

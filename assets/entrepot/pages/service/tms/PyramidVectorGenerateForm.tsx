@@ -14,6 +14,7 @@ import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
 import olDefaults from "../../../../data/ol-defaults.json";
+import useScrollToTopEffect from "../../../../hooks/useScrollToTopEffect";
 import Translator from "../../../../modules/Translator";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
@@ -118,10 +119,7 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, vec
         }
     }, [selectedTableNamesList, vectorDbQuery.data]);
 
-    useEffect(() => {
-        window.focus();
-        window?.scrollTo({ top: 0, left: 0, behavior: "smooth" });
-    }, [currentStep]);
+    useScrollToTopEffect([currentStep]);
 
     const previousStep = () => setCurrentStep((currentStep) => currentStep - 1);
 

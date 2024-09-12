@@ -6,7 +6,7 @@ import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { declareComponentKeys } from "i18nifty";
-import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import { FC, useCallback, useMemo, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { symToStr } from "tsafe/symToStr";
 import * as yup from "yup";
@@ -17,10 +17,12 @@ import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
 import { filterGeometricRelations } from "../../../../helpers";
+import useScrollToTopEffect from "../../../../hooks/useScrollToTopEffect";
 import { Translations, useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import { routes } from "../../../../router/router";
+import { trimObject } from "../../../../utils";
 import api from "../../../api";
 import AccessRestrictions from "../AccessRestrictions";
 import { CommonSchemasValidation } from "../common-schemas-validation";
@@ -29,7 +31,6 @@ import AdditionalInfo from "../metadatas/AdditionalInfo";
 import Description from "../metadatas/Description";
 import UploadMDFile from "../metadatas/UploadMDFile";
 import TableInfosForm from "./TablesInfoForm";
-import { trimObject } from "../../../../utils";
 
 type TableInfoType = Record<string, WfsTableInfos>;
 
@@ -250,10 +251,7 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
         defaultValue: [],
     });
 
-    useEffect(() => {
-        window.focus();
-        window?.scrollTo({ top: 0, left: 0, behavior: "smooth" });
-    }, [currentStep]);
+    useScrollToTopEffect([currentStep]);
 
     const previousStep = useCallback(() => setCurrentStep((currentStep) => currentStep - 1), []);
 
