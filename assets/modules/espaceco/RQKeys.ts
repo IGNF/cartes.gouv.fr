@@ -14,6 +14,7 @@ const RQKeys = {
     ],
     searchAddress: (search: string): string[] => ["searchAddress", search],
     searchGrids: (text: string): string[] => ["searchGrids", text],
+    tables: (communityId: number): string[] => ["feature_types", communityId.toString()],
 };
 
 export default RQKeys;
