@@ -44,6 +44,7 @@ import { LoginDisabledEnTranslations } from "../../pages/LoginDisabled/LoginDisa
 import { ContactEnTranslations } from "../../pages/assistance/contact/Contact.locale";
 import { mapboxStyleValidationEnTranslations } from "../../validations/mapbox/MapboxStyleValidator.locale";
 import { SldStyleValidationErrorsEnTranslations } from "../../validations/sld/SldStyleValidation.locale";
+import { ThemeEnTranslations } from "../../espaceco/pages/communities/management/reports/ThemeTr";
 import { commonEnTranslations } from "../Common.locale";
 import type { Translations } from "../types";
 
@@ -94,5 +95,6 @@ export const translations: Translations<"en"> = {
     DatasheetList: DatasheetListEnTranslations,
     AccessRestrictions: AccessRestrictionsEnTranslations,
     LoginDisabled: LoginDisabledEnTranslations,
+    Theme: ThemeEnTranslations,
     Search: SearchEnTranslations,
 };

@@ -53,7 +53,7 @@ const Communities: FC = () => {
         queryKey: RQKeys.community_list(queryParams.page, queryParams.limit),
         queryFn: ({ signal }) => api.community.get(queryParams, signal),
         staleTime: 3600000,
-        retry: false,
+        //retry: false,
         enabled: filter === "public",
     });
 
@@ -61,7 +61,7 @@ const Communities: FC = () => {
         queryKey: RQKeys.communities_as_member(queryParams.pending ?? false, queryParams.page, queryParams.limit),
         queryFn: ({ signal }) => api.community.getAsMember(queryParams, signal),
         staleTime: 3600000,
-        retry: false,
+        //retry: false,
         enabled: filter === "iam_member" || filter === "affiliation",
     });
 

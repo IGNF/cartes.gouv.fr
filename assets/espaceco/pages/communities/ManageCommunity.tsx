@@ -17,6 +17,7 @@ import Description from "./management/Description";
 import Grid from "./management/Grid";
 import ZoomAndCentering from "./management/ZoomAndCentering";
 import Layer from "./management/Layer";
+import Reports from "./management/Reports";
 
 type ManageCommunityProps = {
     communityId: number;
@@ -77,6 +78,8 @@ const ManageCommunity: FC<ManageCommunityProps> = ({ communityId }) => {
                                             return <ZoomAndCentering community={communityQuery.data} />;
                                         case "tab4":
                                             return <Layer />;
+                                        case "tab6":
+                                            return <Reports community={communityQuery.data} />;
                                         case "tab7":
                                             return <Grid grids={communityQuery.data?.grids ?? []} />; // TODO
                                         default:
