@@ -36,6 +36,7 @@ import { BreadcrumbFrTranslations } from "../Breadcrumb";
 import { commonFrTranslations } from "../Common";
 import { RightsFrTranslations } from "../Rights";
 import { StyleFrTranslations } from "../Style";
+import { ThemeFrTranslations } from "../../espaceco/pages/communities/management/reports/ThemeTr";
 
 import type { Translations } from "../i18n";
 
@@ -77,5 +78,6 @@ export const translations: Translations<"fr"> = {
     CommunityList: CommunityListFrTranslations,
     ManageCommunity: ManageCommunityFrTranslations,
     ManageCommunityValidations: ManageCommunityValidationsFrTranslations,
+    Theme: ThemeFrTranslations,
     Search: SearchFrTranslations,
 };
