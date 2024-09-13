@@ -106,7 +106,7 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
     const { t: tCommon } = useTranslation("Common");
 
     /* l'etape courante */
-    const [currentStep, setCurrentStep] = useState(STEPS.TABLES_INFOS);
+    const [currentStep, setCurrentStep] = useState(STEPS.METADATAS_DESCRIPTION); // TODO, A ENLEVER
     const editMode = useMemo(() => !!offeringId, [offeringId]);
 
     const queryClient = useQueryClient();

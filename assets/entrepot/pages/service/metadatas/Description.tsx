@@ -5,13 +5,13 @@ import { XMLParser } from "fast-xml-parser";
 import { FC, useEffect } from "react";
 import { Controller, UseFormReturn } from "react-hook-form";
 
+import { EndpointTypeEnum, ServiceFormValuesBaseType } from "../../../../@types/app";
 import AutocompleteSelect from "../../../../components/Input/AutocompleteSelect";
 import MarkdownEditor from "../../../../components/Input/MarkdownEditor";
-import { getTranslation } from "../../../../i18n/i18n";
-import { EndpointTypeEnum, ServiceFormValuesBaseType } from "../../../../@types/app";
-import { getInspireKeywords, regex } from "../../../../utils";
-import categories from "../../../../data/topic_categories.json";
 import frequencyCodes from "../../../../data/maintenance_frequency.json";
+import categories from "../../../../data/topic_categories.json";
+import { useTranslation } from "../../../../i18n/i18n";
+import { getInspireKeywords, regex } from "../../../../utils";
 
 const keywords = getInspireKeywords();
 
@@ -35,8 +35,8 @@ type DescriptionProps = {
 };
 
 const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
-    const { t: tCommon } = getTranslation("Common");
-    const { t } = getTranslation("MetadatasForm");
+    const { t: tCommon } = useTranslation("Common");
+    const { t } = useTranslation("MetadatasForm");
 
     const {
         register,
@@ -235,6 +235,20 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
                     ...register("organization_email"),
                 }}
             />
+
+            <h3>{t("metadata.description_form.public_access_limits_title")}</h3>
+            <AutocompleteSelect
+                label={t("metadata.description_form.access_and_use_conditions")}
+                options={[
+                    "Aucune condition ne s'applique",
+                    "Licence Ouverte / Open Licence version 2.0 https://www.etalab.gouv.fr/licence-ouverte-open-licence",
+                    "Conditions inconnues",
+                ]}
+                multiple={false}
+                freeSolo={true}
+                getOptionLabel={(option) => String(option)}
+            />
+            <Input label={t("metadata.description_form.public_access_restrictions")} />
         </div>
     );
 };

@@ -8,7 +8,7 @@ import { symToStr } from "tsafe/symToStr";
 interface AutocompleteSelectProps<T> {
     id?: string;
     label: string;
-    hintText: string;
+    hintText?: string;
     state?: "default" | "error" | "success";
     stateRelatedMessage?: string;
     defaultValue?: T[];
