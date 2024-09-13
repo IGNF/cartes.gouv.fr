@@ -272,7 +272,7 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
         return [];
     }, [selectedTableNamesList, vectorDbQuery.data]);
 
-    useScrollToTopEffect([currentStep]);
+    useScrollToTopEffect(currentStep);
 
     const previousStep = useCallback(() => setCurrentStep((currentStep) => currentStep - 1), []);
 

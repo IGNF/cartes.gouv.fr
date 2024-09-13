@@ -251,7 +251,7 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
         defaultValue: [],
     });
 
-    useScrollToTopEffect([currentStep]);
+    useScrollToTopEffect(currentStep);
 
     const previousStep = useCallback(() => setCurrentStep((currentStep) => currentStep - 1), []);
 

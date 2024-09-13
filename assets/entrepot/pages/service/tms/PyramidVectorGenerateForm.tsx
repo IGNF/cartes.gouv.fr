@@ -119,7 +119,7 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, vec
         }
     }, [selectedTableNamesList, vectorDbQuery.data]);
 
-    useScrollToTopEffect([currentStep]);
+    useScrollToTopEffect(currentStep);
 
     const previousStep = () => setCurrentStep((currentStep) => currentStep - 1);
 

@@ -157,7 +157,7 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
 
     const { getValues: getFormValues, trigger } = form;
 
-    useScrollToTopEffect([currentStep]);
+    useScrollToTopEffect(currentStep);
 
     // Etape precedente
     const previousStep = useCallback(() => setCurrentStep((currentStep) => currentStep - 1), []);
