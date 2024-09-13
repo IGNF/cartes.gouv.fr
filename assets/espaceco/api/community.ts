@@ -6,6 +6,7 @@ import { jsonFetch } from "../../modules/jsonFetch";
 
 const get = (queryParams: { page: number; limit: number }, signal: AbortSignal) => {
     const params = { ...queryParams, sort: "name:ASC" };
+
     const url = SymfonyRouting.generate("cartesgouvfr_api_espaceco_community_get", params);
     return jsonFetch<GetResponse<CommunityResponseDTO>>(url, {
         signal: signal,

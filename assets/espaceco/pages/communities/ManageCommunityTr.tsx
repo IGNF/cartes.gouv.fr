@@ -55,6 +55,8 @@ export const { i18n } = declareComponentKeys<
     | "layer.tabl"
     | "layer.tab2"
     | "layer.tab3"
+    | "report.configure_themes"
+    | "report.configure_themes.explain"
     | "grid.grids"
     | { K: "grid.explain"; R: JSX.Element }
 >()("ManageCommunity");
@@ -122,6 +124,9 @@ export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"
     "layer.tabl": "Mes données",
     "layer.tab2": "Données de la géoplateforme",
     "layer.tab3": "Fonds de carte",
+    "report.configure_themes": "Configurer les thèmes et attributs des signalements (optionnel)",
+    "report.configure_themes.explain":
+        "Afin de permettre aux membres de votre groupe de soumettre des signalements sur d'autres thématiques que celles IGN (Adresse, Bâti, Points d'intérêts...), vous pouvez ajouter vos propres thèmes et personnaliser le formulaire de saisie d'un nouveau signalement pour l'adapter à vos besoins métier. Les membres de votre groupe verront ces thèmes, en plus ou à la place des thèmes IGN, sur l'interface de saisie d'un nouveau signalement sur l'espace collaboratif, les plugins SIG et l'application mobile.",
     "grid.grids": "Emprises du guichet (optionnel)",
     "grid.explain": (
         <p>
@@ -192,6 +197,8 @@ export const ManageCommunityEnTranslations: Translations<"en">["ManageCommunity"
     "layer.tabl": "My datas",
     "layer.tab2": "Geoplateforme datas",
     "layer.tab3": "Base maps",
+    "report.configure_themes": undefined,
+    "report.configure_themes.explain": undefined,
     "grid.grids": undefined,
     "grid.explain": undefined,
 };
