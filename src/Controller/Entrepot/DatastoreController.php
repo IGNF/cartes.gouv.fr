@@ -9,6 +9,7 @@ use App\Dto\Datastore\UpdatePermissionDTO;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\EntrepotApi\DatastoreApiService;
+use App\Services\SandboxService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
@@ -24,14 +25,21 @@ use Symfony\Component\Routing\Annotation\Route;
 class DatastoreController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        private DatastoreApiService $datastoreApiService
+        private DatastoreApiService $datastoreApiService,
+        private SandboxService $sandboxService
     ) {
     }
 
     #[Route('/{datastoreId}', name: 'get', methods: ['GET'])]
     public function getDatastore(string $datastoreId): JsonResponse
     {
-        return $this->json($this->datastoreApiService->get($datastoreId));
+        $datastore = $this->datastoreApiService->get($datastoreId);
+        $datastore['is_sandbox'] = $this->sandboxService->isSandboxDatastore($datastore['_id']);
+        if (true === $datastore['is_sandbox']) {
+            $datastore['name'] = 'Découverte';
+        }
+
+        return $this->json($datastore);
     }
 
     #[Route('/{datastoreId}/endpoints', name: 'get_endpoints', methods: ['GET'])]

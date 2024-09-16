@@ -91,7 +91,12 @@ const DashboardPro = () => {
                             const link = { ...routes.datasheet_list({ datastoreId: datastore._id }).link, onClick: () => handleClick(datastore._id) };
                             return (
                                 <div key={datastore._id} className={fr.cx("fr-col-12", "fr-col-sm-6", "fr-col-md-4", "fr-col-lg-3")}>
-                                    <Tile linkProps={link} grey={true} title={datastore.name} />
+                                    <Tile
+                                        linkProps={link}
+                                        grey={true}
+                                        title={datastore.name}
+                                        desc={datastore.is_sandbox === true ? t("datastore_for_tests") : undefined}
+                                    />
                                 </div>
                             );
                         })}
@@ -131,14 +136,16 @@ const DashboardPro = () => {
 
 export default DashboardPro;
 
-export const { i18n } = declareComponentKeys<"document_title" | "espaceco_frontoffice_list">()("DashboardPro");
+export const { i18n } = declareComponentKeys<"document_title" | "espaceco_frontoffice_list" | "datastore_for_tests">()("DashboardPro");
 
 export const DashboardProFrTranslations: Translations<"fr">["DashboardPro"] = {
     document_title: "Tableau de bord professionnel",
     espaceco_frontoffice_list: "Liste des guichets de l’espace collaboratif",
+    datastore_for_tests: "A des fins de tests",
 };
 
-export const DashboardProEnTranslations: Translations<"fr">["DashboardPro"] = {
+export const DashboardProEnTranslations: Translations<"en">["DashboardPro"] = {
     document_title: "Professional dashboard",
     espaceco_frontoffice_list: "List of collaborative space front offices",
+    datastore_for_tests: undefined,
 };

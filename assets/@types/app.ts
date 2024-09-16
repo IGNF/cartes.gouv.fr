@@ -47,7 +47,9 @@ export type CartesUser = {
 };
 
 /** datastore */
-export type Datastore = DatastoreDetailResponseDto;
+export type Datastore = DatastoreDetailResponseDto & {
+    is_sandbox?: boolean;
+};
 
 /** fiche de donnée */
 export type Datasheet = {

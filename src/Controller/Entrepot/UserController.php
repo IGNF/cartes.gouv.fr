@@ -187,6 +187,9 @@ class UserController extends AbstractController implements ApiControllerInterfac
                 $myDatastores = array_values(array_filter($myDatastores, function ($myDatastore) use ($sandboxCommunity) {
                     return $myDatastore['_id'] != $sandboxCommunity['datastore']['_id'];
                 }));
+
+                $sandboxCommunity['datastore']['is_sandbox'] = true;
+                $sandboxCommunity['datastore']['name'] = 'Découverte';
                 array_unshift($myDatastores, $sandboxCommunity['datastore']);
             }
 
