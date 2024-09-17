@@ -39,7 +39,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
     });
 
     const metadataEndpoint = useMemo(
-        () => datastoreQuery.data?.endpoints.find((endpoint) => endpoint.endpoint.type === EndpointTypeEnum.METADATA),
+        () => datastoreQuery.data?.endpoints?.find((endpoint) => endpoint.endpoint.type === EndpointTypeEnum.METADATA),
         [datastoreQuery.data?.endpoints]
     );
 

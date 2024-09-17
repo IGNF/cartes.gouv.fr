@@ -6,8 +6,14 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { declareComponentKeys } from "i18nifty";
 import { FC, useMemo, useState } from "react";
-import { UserKeyDetailedWithAccessesResponseDto } from "../../../../@types/app";
-import { HashInfoDto, PermissionDetailsResponseDto, UserKeyDetailsResponseDtoUserKeyInfoDtoTypeEnum, UserKeyResponseDto } from "../../../../@types/entrepot";
+
+import type { UserKeyDetailedWithAccessesResponseDto } from "../../../../@types/app";
+import {
+    type HashInfoDto,
+    type PermissionWithOfferingsResponseDto,
+    UserKeyDetailsResponseDtoUserKeyInfoDtoTypeEnum,
+    type UserKeyResponseDto,
+} from "../../../../@types/entrepot";
 import { ConfirmDialog, ConfirmDialogModal } from "../../../../components/Utils/ConfirmDialog";
 import Wait from "../../../../components/Utils/Wait";
 import { Translations, useTranslation } from "../../../../i18n/i18n";
@@ -19,7 +25,7 @@ import api from "../../../api";
 
 type UserKeysListTabProps = {
     keys: UserKeyDetailedWithAccessesResponseDto[] | undefined;
-    permissions: PermissionDetailsResponseDto[] | undefined;
+    permissions: PermissionWithOfferingsResponseDto[] | undefined;
 };
 
 const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
@@ -104,16 +110,22 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
                                             {accessKey.type && accessKey.type === UserKeyDetailsResponseDtoUserKeyInfoDtoTypeEnum.HASH && (
                                                 <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-2v")}>
                                                     {t("hash_value", { value: (accessKey.type_infos as HashInfoDto).hash })}
-                                                    <Button
-                                                        className={fr.cx("fr-ml-2v")}
-                                                        title={tCommon("copy")}
-                                                        priority={"tertiary no outline"}
-                                                        iconId={"ri-file-copy-2-line"}
-                                                        onClick={async () => {
-                                                            await navigator.clipboard.writeText((accessKey.type_infos as HashInfoDto).hash);
-                                                            setMessage(t("hash_value_copied"));
-                                                        }}
-                                                    />
+
+                                                    {(accessKey.type_infos as HashInfoDto).hash !== undefined && (
+                                                        <Button
+                                                            className={fr.cx("fr-ml-2v")}
+                                                            title={tCommon("copy")}
+                                                            priority={"tertiary no outline"}
+                                                            iconId={"ri-file-copy-2-line"}
+                                                            onClick={async () => {
+                                                                const hash = (accessKey.type_infos as HashInfoDto).hash;
+                                                                if (hash !== undefined) {
+                                                                    await navigator.clipboard.writeText(hash);
+                                                                    setMessage(t("hash_value_copied"));
+                                                                }
+                                                            }}
+                                                        />
+                                                    )}
                                                 </div>
                                             )}
                                             <div className={fr.cx("fr-mb-1v")}>{t("services")}</div>
@@ -193,7 +205,7 @@ export default UserKeysListTab;
 export const { i18n } = declareComponentKeys<
     | "no_keys"
     | "no_permission_warning"
-    | { K: "hash_value"; P: { value: string }; R: string }
+    | { K: "hash_value"; P: { value?: string }; R: string }
     | "hash_value_copied"
     | "services"
     | "no_services"
@@ -206,7 +218,7 @@ export const { i18n } = declareComponentKeys<
 export const UserKeysListTabFrTranslations: Translations<"fr">["UserKeysListTab"] = {
     no_keys: "Vous n'avez aucune clé d’accès",
     no_permission_warning: "Vous n'avez aucune permission, il n'est pas possible d’ajouter une clé",
-    hash_value: ({ value }) => `Valeur du hash : ${value}`,
+    hash_value: ({ value }) => `Valeur du hash : ${value ?? "indisponible"}`,
     hash_value_copied: "Valeur du hash copiée",
     services: "Services accessibles",
     no_services: "Cette clé n'a accès à aucun service",

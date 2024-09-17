@@ -33,7 +33,7 @@ const UploadUsage: FC<UploadUsageProps> = ({ datastore }) => {
     const { t: tCommon } = useTranslation("Common");
 
     const uploadUsage = useMemo(() => {
-        return datastore?.storages.upload;
+        return datastore?.storages.uploads;
     }, [datastore]);
 
     const uploadListQuery = useQuery<Upload[], CartesApiException>({

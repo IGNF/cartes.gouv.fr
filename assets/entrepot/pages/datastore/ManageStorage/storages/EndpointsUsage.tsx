@@ -37,11 +37,13 @@ const EndpointsUsage: FC<EndpointsUsageProps> = ({ datastore }) => {
     const { t: tCommon } = useTranslation("Common");
 
     const endpointsUsage = useMemo(() => {
-        return datastore?.endpoints.sort((a, b) => {
-            if (a.endpoint.technical_name.toLowerCase() < b.endpoint.technical_name.toLowerCase()) return -1;
-            if (a.endpoint.technical_name.toLowerCase() > b.endpoint.technical_name.toLowerCase()) return 1;
-            return 0;
-        });
+        return (
+            datastore?.endpoints?.sort((a, b) => {
+                if (a.endpoint.technical_name.toLowerCase() < b.endpoint.technical_name.toLowerCase()) return -1;
+                if (a.endpoint.technical_name.toLowerCase() > b.endpoint.technical_name.toLowerCase()) return 1;
+                return 0;
+            }) ?? []
+        );
     }, [datastore]);
 
     const metadataEndpoints = useMemo(() => endpointsUsage.filter((endpoint) => endpoint.endpoint.type === EndpointTypeEnum.METADATA), [endpointsUsage]);

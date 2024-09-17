@@ -3,14 +3,14 @@ import Badge from "@codegouvfr/react-dsfr/Badge";
 import { compareAsc } from "date-fns";
 import { FC } from "react";
 
-import { PermissionDetailsResponseDto } from "../../../../@types/entrepot";
+import { PermissionWithOfferingsDetailsResponseDto } from "../../../../@types/entrepot";
 import { useTranslation } from "../../../../i18n/i18n";
 import { formatDateWithoutTimeFromISO } from "../../../../utils";
 
 import "../../../../sass/pages/my_keys.scss";
 
 type PermissionsListTabProps = {
-    permissions: PermissionDetailsResponseDto[] | undefined;
+    permissions: PermissionWithOfferingsDetailsResponseDto[] | undefined;
 };
 
 const PermissionsListTab: FC<PermissionsListTabProps> = ({ permissions }) => {

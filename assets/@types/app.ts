@@ -175,13 +175,7 @@ export type TmsMetadata = {
 export type Configuration = ConfigurationDetailResponseDto & { styles?: CartesStyle[] };
 
 export type Offering = OfferingDetailResponseDto;
-export enum OfferingStatusEnum {
-    PUBLISHING = "PUBLISHING",
-    MODIFYING = "MODIFYING",
-    PUBLISHED = "PUBLISHED",
-    UNPUBLISHING = "UNPUBLISHING",
-    UNSTABLE = "UNSTABLE",
-}
+export { OfferingStatusEnum } from "./entrepot";
 
 export type Service = Offering & {
     configuration: Configuration;
