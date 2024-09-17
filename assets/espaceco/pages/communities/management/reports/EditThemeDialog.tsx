@@ -10,7 +10,7 @@ import * as yup from "yup";
 import { ThemeDTO } from "../../../../../@types/espaceco";
 import { useTranslation } from "../../../../../i18n/i18n";
 
-export type EditTheme = {
+export type EditThemeFormType = {
     theme: string;
     table?: string;
     global?: boolean;
@@ -26,7 +26,7 @@ type EditThemeDialogProps = {
     themes: ThemeDTO[];
     currentTheme?: ThemeDTO;
     // tables: Partial<TableResponseDTO>[];
-    onModify: (oldName: string, newTheme: EditTheme) => void;
+    onModify: (oldName: string, newTheme: EditThemeFormType) => void;
 };
 
 const EditThemeDialog: FC<EditThemeDialogProps> = ({ themes, currentTheme, onModify }) => {
@@ -43,8 +43,8 @@ const EditThemeDialog: FC<EditThemeDialogProps> = ({ themes, currentTheme, onMod
     const schema = yup.object({
         theme: yup
             .string()
-            .required(t("name_mandatory_error"))
-            .test("is-unique", t("name_unique_error"), (value) => !themeNames.includes(value)),
+            .required(t("dialog.edit_theme.name_mandatory_error"))
+            .test("is-unique", t("dialog.edit_theme.name_unique_error"), (value) => !themeNames.includes(value)),
         table: yup.string(),
         help: yup.string(),
         global: yup.boolean(),
@@ -56,7 +56,7 @@ const EditThemeDialog: FC<EditThemeDialogProps> = ({ themes, currentTheme, onMod
         setValue: setFormValue,
         getValues: getFormValues,
         handleSubmit,
-    } = useForm<EditTheme>({
+    } = useForm<EditThemeFormType>({
         mode: "onSubmit",
         values: {
             theme: currentTheme?.theme ?? "",
@@ -96,12 +96,20 @@ const EditThemeDialog: FC<EditThemeDialogProps> = ({ themes, currentTheme, onMod
                     <div>
                         <p>{tCommon("mandatory_fields")}</p>
                         <Input
-                            label={t("name")}
-                            hintText={t("name_hint")}
+                            label={t("dialog.edit_theme.name")}
+                            hintText={t("dialog.edit_theme.name_hint")}
                             state={errors.theme ? "error" : "default"}
                             stateRelatedMessage={errors?.theme?.message}
                             nativeInputProps={{
                                 ...register("theme"),
+                            }}
+                        />
+                        <Input
+                            label={t("dialog.edit_theme.help")}
+                            state={errors.help ? "error" : "default"}
+                            stateRelatedMessage={errors?.help?.message}
+                            nativeInputProps={{
+                                ...register("help"),
                             }}
                         />
                         {currentTheme?.table ? (
@@ -109,9 +117,9 @@ const EditThemeDialog: FC<EditThemeDialogProps> = ({ themes, currentTheme, onMod
                         ) : (
                             <ToggleSwitch
                                 className={fr.cx("fr-mb-3w")}
-                                helperText={t("global_hint")}
+                                helperText={t("dialog.edit_theme.global_hint")}
                                 inputTitle={""}
-                                label={t("global")}
+                                label={t("dialog.edit_theme.global")}
                                 showCheckedHint
                                 defaultChecked={getFormValues("global")}
                                 onChange={(checked) => {
@@ -119,14 +127,6 @@ const EditThemeDialog: FC<EditThemeDialogProps> = ({ themes, currentTheme, onMod
                                 }}
                             />
                         )}
-                        <Input
-                            label={t("description")}
-                            state={errors.help ? "error" : "default"}
-                            stateRelatedMessage={errors?.help?.message}
-                            nativeInputProps={{
-                                ...register("help"),
-                            }}
-                        />
                     </div>
                 </EditThemeDialogModal.Component>,
                 document.body
