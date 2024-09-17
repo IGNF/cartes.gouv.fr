@@ -39,9 +39,7 @@ const ManageCommunity: FC<ManageCommunityProps> = ({ communityId }) => {
     return (
         <AppLayout navItems={navItems} documentTitle={t("title", { name: communityQuery.data?.name })}>
             <h1>{t("title", { name: communityQuery.data?.name })}</h1>
-            {communityQuery.isLoading ? (
-                <LoadingText message={t("loading")} />
-            ) : communityQuery.isError ? (
+            {communityQuery.isError ? (
                 <Alert
                     severity="error"
                     closable={false}
@@ -53,6 +51,8 @@ const ManageCommunity: FC<ManageCommunityProps> = ({ communityId }) => {
                         </>
                     }
                 />
+            ) : communityQuery.isLoading ? (
+                <LoadingText message={t("loading")} />
             ) : (
                 communityQuery.data !== undefined && (
                     <div className={fr.cx("fr-container", "fr-py-2w")}>

@@ -1,3 +1,5 @@
+import statuses from "../data/report_statuses.json";
+
 export interface ConstraintsDTO {
     minLength?: number;
     maxLength?: number;
@@ -31,6 +33,21 @@ export interface ThemeDTO {
     global?: boolean;
 }
 
+export type ReportStatuses = keyof typeof statuses;
+export type ReportStatusesDTO = Record<
+    ReportStatuses,
+    {
+        wording: string;
+        help?: string;
+    }
+>;
+
+export type ReportStatusesDTO2 = {
+    status: ReportStatuses;
+    wording: string;
+    help?: string;
+}[];
+
 export interface CommunityResponseDTO {
     id: number;
     description: string | null;
@@ -57,6 +74,7 @@ export interface CommunityResponseDTO {
     logo_url: string | null;
     keywords?: string[];
     documents?: DocumentDTO[];
+    report_statuses?: ReportStatusesDTO2;
 }
 
 export interface DocumentDTO {
@@ -155,3 +173,8 @@ export interface TableResponseDTO {
     wfs_transactions: string;
     columns: ColumnDTO[];
 }
+
+export type ReportFormType = {
+    attributes: ThemeDTO[];
+    report_statuses?: ReportStatusesDTO2;
+};
