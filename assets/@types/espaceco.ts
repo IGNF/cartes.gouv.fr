@@ -6,9 +6,11 @@ export interface ConstraintsDTO {
     pattern?: string;
 }
 
+export const AttributeTypes = ["text", "integer", "double", "checkbox", "list", "date"];
+export type AttributeType = (typeof AttributeTypes)[number];
 export interface AttributeDTO {
     name: string;
-    type: "text" | "integer" | "double" | "checkbox" | "list" | "date";
+    type: AttributeType;
     default?: string;
     mandatory?: boolean;
     values?: string[];
