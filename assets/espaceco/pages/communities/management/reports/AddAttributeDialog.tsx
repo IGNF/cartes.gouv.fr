@@ -1,6 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Input from "@codegouvfr/react-dsfr/Input";
-import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import ToggleSwitch from "@codegouvfr/react-dsfr/ToggleSwitch";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -11,13 +10,10 @@ import * as yup from "yup";
 import { AttributeDTO, AttributeTypes } from "../../../../../@types/espaceco";
 import { useTranslation } from "../../../../../i18n/i18n";
 import { AttributeValidations, validateList } from "./AttributeValidations";
-
-const AddAttributeDialogModal = createModal({
-    id: "add-attribute",
-    isOpenedByDefault: false,
-});
+import { createModal } from "@codegouvfr/react-dsfr/Modal";
 
 type AddAttributeDialogProps = {
+    modal: ReturnType<typeof createModal>;
     attributes: AttributeDTO[];
     onAdd: (attribute: AttributeDTO) => void;
 };
@@ -42,7 +38,7 @@ const defaultValues: AddAttributeFormType = {
     values: "",
 };
 
-const AddAttributeDialog: FC<AddAttributeDialogProps> = ({ attributes, onAdd }) => {
+const AddAttributeDialog: FC<AddAttributeDialogProps> = ({ modal, attributes, onAdd }) => {
     const { t: tCommon } = useTranslation("Common");
     const { t } = useTranslation("Theme");
 
@@ -71,15 +67,11 @@ const AddAttributeDialog: FC<AddAttributeDialogProps> = ({ attributes, onAdd }) 
         }),
         help: yup.string(),
         multiple: yup.boolean(),
-        /*values: yup.string().test({
+        values: yup.string().test({
             name: "check-values",
             test: (value, context) => {
                 return validateList(value, context);
             },
-        }),*/
-        values: yup.string().transform((value, origin) => {
-            const v = origin ? origin.split("|") : [];
-            return [...new Set(v)];
         }),
     });
 
@@ -99,21 +91,9 @@ const AddAttributeDialog: FC<AddAttributeDialogProps> = ({ attributes, onAdd }) 
     });
 
     const type = watch("type");
+
     const mandatory = watch("mandatory");
     const multiple = watch("multiple");
-
-    const typeOptions = useMemo(() => {
-        return Array.from(AttributeTypes, (at) => {
-            return {
-                label: t("dialog.add_attribute.get_type", { type: at }),
-                nativeInputProps: {
-                    ...register("type"),
-                    value: at,
-                    checked: at === type,
-                },
-            };
-        });
-    }, [t, register, type]);
 
     useEffect(() => {
         setFormValue("default", "");
@@ -152,7 +132,7 @@ const AddAttributeDialog: FC<AddAttributeDialogProps> = ({ attributes, onAdd }) 
     }, [getFormValues]);
 
     const onSubmit = () => {
-        AddAttributeDialogModal.close();
+        modal.close();
         onAdd(normalize());
         reset(defaultValues);
     };
@@ -160,7 +140,7 @@ const AddAttributeDialog: FC<AddAttributeDialogProps> = ({ attributes, onAdd }) 
     return (
         <>
             {createPortal(
-                <AddAttributeDialogModal.Component
+                <modal.Component
                     title={t("add_attribute")}
                     buttons={[
                         {
@@ -169,7 +149,7 @@ const AddAttributeDialog: FC<AddAttributeDialogProps> = ({ attributes, onAdd }) 
                             doClosesModal: false,
                             onClick: () => {
                                 reset(defaultValues);
-                                AddAttributeDialogModal.close();
+                                modal.close();
                             },
                         },
                         {
@@ -192,7 +172,13 @@ const AddAttributeDialog: FC<AddAttributeDialogProps> = ({ attributes, onAdd }) 
                         />
                         <RadioButtons
                             legend={t("dialog.add_attribute.type")}
-                            options={typeOptions}
+                            options={AttributeTypes.map((attrType) => ({
+                                label: t("dialog.add_attribute.get_type", { type: attrType }),
+                                nativeInputProps: {
+                                    ...register("type"),
+                                    value: attrType,
+                                },
+                            }))}
                             orientation={"horizontal"}
                             state={errors.type ? "error" : "default"}
                             stateRelatedMessage={errors?.type?.message}
@@ -247,11 +233,11 @@ const AddAttributeDialog: FC<AddAttributeDialogProps> = ({ attributes, onAdd }) 
                             }}
                         />
                     </div>
-                </AddAttributeDialogModal.Component>,
+                </modal.Component>,
                 document.body
             )}
         </>
     );
 };
 
-export { AddAttributeDialog, AddAttributeDialogModal };
+export { AddAttributeDialog /*, AddAttributeDialogModal*/ };

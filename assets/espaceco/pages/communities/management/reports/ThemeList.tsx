@@ -3,7 +3,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { CSSProperties, FC, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
-import { TableResponseDTO, ThemeDTO } from "../../../../../@types/espaceco";
+import { ReportFormType, TableResponseDTO, ThemeDTO } from "../../../../../@types/espaceco";
 import { useTranslation } from "../../../../../i18n/i18n";
 import { AddThemeDialog, AddThemeDialogModal } from "./AddThemeDialog";
 import AttributeList from "./AttributeList";
@@ -20,7 +20,7 @@ const themeStyle: CSSProperties = {
 };
 
 type ThemeListProps = {
-    form: UseFormReturn;
+    form: UseFormReturn<ReportFormType>;
     tables: Partial<TableResponseDTO>[];
 };
 
