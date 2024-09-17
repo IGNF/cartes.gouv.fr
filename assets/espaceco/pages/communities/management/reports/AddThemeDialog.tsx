@@ -23,14 +23,14 @@ type AddThemeDialogProps = {
     onAdd: (theme: ThemeDTO) => void;
 };
 
-type AddTheme = {
+type AddThemeFormType = {
     theme: string;
     fullname?: string;
     help?: string;
     global?: boolean;
 };
 
-const normalize = (theme: AddTheme): ThemeDTO => {
+const normalize = (theme: AddThemeFormType): ThemeDTO => {
     const result = { ...theme };
 
     result["attributes"] = [];
@@ -43,7 +43,7 @@ const normalize = (theme: AddTheme): ThemeDTO => {
     return normalizeTheme(result as ThemeDTO);
 };
 
-const defaultValues: AddTheme = {
+const defaultValues: AddThemeFormType = {
     theme: "",
     fullname: "",
     help: "",
@@ -55,7 +55,7 @@ const AddThemeDialog: FC<AddThemeDialogProps> = ({ themes, tables, onAdd }) => {
     const { t } = useTranslation("Theme");
 
     const themeNames: string[] = useMemo(() => {
-        return Array.from(themes as ThemeDTO[], (a) => a.theme);
+        return Array.from(themes, (a) => a.theme);
     }, [themes]);
 
     const tableOptions = useMemo(() => {
@@ -66,7 +66,7 @@ const AddThemeDialog: FC<AddThemeDialogProps> = ({ themes, tables, onAdd }) => {
         ));
         a.unshift(
             <option key={0} value={""}>
-                {t("dialog.add.not_link")}
+                {t("dialog.add_theme.not_link")}
             </option>
         );
         return a;
@@ -77,8 +77,8 @@ const AddThemeDialog: FC<AddThemeDialogProps> = ({ themes, tables, onAdd }) => {
             .string()
             .trim(t("trimmed_error"))
             .strict(true)
-            .required(t("name_mandatory_error"))
-            .test("is-unique", t("name_unique_error"), (value) => {
+            .required(t("dialog.edit_theme.name_mandatory_error"))
+            .test("is-unique", t("dialog.add_theme.name_unique_error"), (value) => {
                 const v = value.trim();
                 return !themeNames.includes(v);
             }),
@@ -95,7 +95,7 @@ const AddThemeDialog: FC<AddThemeDialogProps> = ({ themes, tables, onAdd }) => {
         getValues: getFormValues,
         reset,
         handleSubmit,
-    } = useForm<AddTheme>({
+    } = useForm<AddThemeFormType>({
         mode: "onSubmit",
         defaultValues: defaultValues,
         resolver: yupResolver(schema),
@@ -141,17 +141,16 @@ const AddThemeDialog: FC<AddThemeDialogProps> = ({ themes, tables, onAdd }) => {
                     <div>
                         <p>{tCommon("mandatory_fields")}</p>
                         <Input
-                            label={t("dialog.add.name")}
+                            label={t("dialog.add_theme.name")}
                             state={errors.theme ? "error" : "default"}
                             stateRelatedMessage={errors?.theme?.message}
                             nativeInputProps={{
                                 ...register("theme"),
                             }}
                         />
-
                         <Select
-                            label={t("dialog.add.link_to_table")}
-                            hint={t("dialog.add.link_to_table_hint")}
+                            label={t("dialog.add_theme.link_to_table")}
+                            hint={t("dialog.add_theme.link_to_table_hint")}
                             nativeSelectProps={{
                                 ...register("fullname"),
                             }}
@@ -159,8 +158,8 @@ const AddThemeDialog: FC<AddThemeDialogProps> = ({ themes, tables, onAdd }) => {
                             options={tableOptions}
                         </Select>
                         <Input
-                            label={t("dialog.add.help")}
-                            hintText={t("dialog.add.help_hint")}
+                            label={t("dialog.add_theme.help")}
+                            hintText={t("dialog.add_theme.help_hint")}
                             state={errors.help ? "error" : "default"}
                             stateRelatedMessage={errors?.help?.message}
                             nativeInputProps={{
@@ -170,9 +169,9 @@ const AddThemeDialog: FC<AddThemeDialogProps> = ({ themes, tables, onAdd }) => {
                         <ToggleSwitch
                             className={fr.cx("fr-mb-3w")}
                             disabled={tableFullName !== ""}
-                            helperText={t("global_hint")}
+                            helperText={t("dialog.edit_theme.global_hint")}
                             inputTitle={""}
-                            label={t("global")}
+                            label={t("dialog.edit_theme.global")}
                             showCheckedHint
                             defaultChecked={getFormValues("global")}
                             onChange={(checked) => {
