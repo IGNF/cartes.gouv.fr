@@ -1,14 +1,16 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
-import { FC } from "react";
+import { FC, useMemo } from "react";
 import { UseFormReturn } from "react-hook-form";
-import { ThemeDTO } from "../../../../../@types/espaceco";
+import { ReportFormType, ThemeDTO } from "../../../../../@types/espaceco";
 import { useTranslation } from "../../../../../i18n/i18n";
-import { AddAttributeDialog, AddAttributeDialogModal } from "./AddAttributeDialog";
+import { AddAttributeDialog /*, AddAttributeDialogModal*/ } from "./AddAttributeDialog";
+import { createModal } from "@codegouvfr/react-dsfr/Modal";
+import { v4 as uuidv4 } from "uuid";
 
 type AttributeListProps = {
-    form: UseFormReturn;
-    theme?: ThemeDTO;
+    form: UseFormReturn<ReportFormType>;
+    theme: ThemeDTO;
 };
 
 const AttributeList: FC<AttributeListProps> = ({ form, theme }) => {
@@ -30,9 +32,14 @@ const AttributeList: FC<AttributeListProps> = ({ form, theme }) => {
         setFormValue("attributes", a);
     };
 
-    if (!theme?.attributes.length) {
-        return null;
-    }
+    const AddAttributeDialogModal: ReturnType<typeof createModal> = useMemo(
+        () =>
+            createModal({
+                id: `add-attribute-${uuidv4()}`,
+                isOpenedByDefault: false,
+            }),
+        []
+    );
 
     return (
         <div className={fr.cx("fr-grid-row")}>
@@ -74,7 +81,7 @@ const AttributeList: FC<AttributeListProps> = ({ form, theme }) => {
                     </Button>
                 )}
             </div>
-            <AddAttributeDialog attributes={theme?.attributes} onAdd={(attribute) => console.log(attribute)} />
+            {!theme.table && <AddAttributeDialog modal={AddAttributeDialogModal} attributes={theme.attributes} onAdd={(attribute) => console.log(attribute)} />}
         </div>
     );
 };
