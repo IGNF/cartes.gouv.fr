@@ -1,13 +1,14 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
+import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { CSSProperties, FC, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { TableResponseDTO, ThemeDTO } from "../../../../../@types/espaceco";
 import { useTranslation } from "../../../../../i18n/i18n";
 import { AddThemeDialog, AddThemeDialogModal } from "./AddThemeDialog";
+import AttributeList from "./AttributeList";
 import { EditThemeDialog, EditThemeDialogModal } from "./EditThemeDialog";
 import normalizeTheme from "./ThemeUtils";
-import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 
 const customStyle: CSSProperties = {
     border: "solid 1.5px",
@@ -28,25 +29,13 @@ const ThemeList: FC<ThemeListProps> = ({ form, tables }) => {
     const { t: tTheme } = useTranslation("Theme");
 
     const { watch, setValue: setFormValue, getValues: getFormValues } = form;
-    const attributes: ThemeDTO[] = watch("attributes");
+    const themes: ThemeDTO[] = watch("attributes");
 
     const [currentTheme, setCurrentTheme] = useState<ThemeDTO>();
 
     // Supression d'un theme
     const handleRemoveTheme = (theme: string) => {
-        const a = attributes.filter((a) => a.theme !== theme);
-        setFormValue("attributes", a);
-    };
-
-    // Suppression d'un attribut de theme
-    const handleRemoveAttribute = (theme: string, attribute: string) => {
-        const a = Array.from(attributes, (t) => {
-            if (t.theme === theme) {
-                const attr = t.attributes.filter((a) => a.name !== attribute);
-                return { ...t, attributes: attr };
-            }
-            return t;
-        });
+        const a = themes.filter((a) => a.theme !== theme);
         setFormValue("attributes", a);
     };
 
@@ -58,7 +47,7 @@ const ThemeList: FC<ThemeListProps> = ({ form, tables }) => {
                 <Button className={fr.cx("fr-mt-2v")} size="small" onClick={() => AddThemeDialogModal.open()}>
                     {tTheme("add_theme")}
                 </Button>
-                {attributes.map((t) => (
+                {themes.map((t) => (
                     <div key={t.theme} style={customStyle} className={fr.cx("fr-my-2v", "fr-p-1v")}>
                         <div className={fr.cx("fr-grid-row", "fr-p-2v")} style={themeStyle}>
                             <div className={fr.cx("fr-col-10")}>
@@ -97,51 +86,12 @@ const ThemeList: FC<ThemeListProps> = ({ form, tables }) => {
                                 </div>
                             </div>
                         </div>
-                        {t.table === undefined && (
-                            <div className={fr.cx("fr-grid-row")}>
-                                <div className={fr.cx("fr-col-offset-1", "fr-col-11")}>
-                                    <ul className={fr.cx("fr-raw-list")}>
-                                        {t.attributes.map((a) => (
-                                            <li key={a.name}>
-                                                <div className={fr.cx("fr-grid-row", "fr-my-2v", "fr-px-2v")}>
-                                                    <div className={fr.cx("fr-col-10")}>{a.name}</div>
-                                                    <div className={fr.cx("fr-col-2")}>
-                                                        <div className={fr.cx("fr-grid-row", "fr-grid-row--right")}>
-                                                            <Button
-                                                                title={tTheme("modify_attribute", { text: a.name })}
-                                                                priority="secondary"
-                                                                iconId="fr-icon-edit-line"
-                                                                size="small"
-                                                                onClick={() => {
-                                                                    setCurrentTheme(t);
-                                                                    EditThemeDialogModal.open();
-                                                                }}
-                                                            />
-                                                            <Button
-                                                                title={tTheme("delete_attribute", { text: a.name })}
-                                                                className={fr.cx("fr-ml-2v")}
-                                                                priority="secondary"
-                                                                iconId="fr-icon-delete-line"
-                                                                size="small"
-                                                                onClick={() => handleRemoveAttribute(t.theme, a.name)}
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                    <Button size="small" onClick={() => console.log("CLICKED")}>
-                                        {tTheme("add_attribute")}
-                                    </Button>
-                                </div>
-                            </div>
-                        )}
+                        {t.table === undefined && <AttributeList form={form} theme={t} />}
                     </div>
                 ))}
             </div>
             <AddThemeDialog
-                themes={attributes}
+                themes={themes}
                 tables={tables}
                 onAdd={(theme) => {
                     const attributes = getFormValues("attributes");
@@ -152,7 +102,7 @@ const ThemeList: FC<ThemeListProps> = ({ form, tables }) => {
                 }}
             />
             <EditThemeDialog
-                themes={attributes}
+                themes={themes}
                 currentTheme={currentTheme}
                 // tables={tables}
                 onModify={(oldName, newTheme) => {
