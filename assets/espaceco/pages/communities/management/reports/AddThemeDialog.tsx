@@ -102,6 +102,7 @@ const AddThemeDialog: FC<AddThemeDialogProps> = ({ themes, tables, onAdd }) => {
     });
 
     const tableFullName = watch("fullname");
+    const global = watch("global");
 
     useEffect(() => {
         if (tableFullName) {
@@ -173,7 +174,7 @@ const AddThemeDialog: FC<AddThemeDialogProps> = ({ themes, tables, onAdd }) => {
                             inputTitle={""}
                             label={t("dialog.edit_theme.global")}
                             showCheckedHint
-                            defaultChecked={getFormValues("global")}
+                            defaultChecked={global}
                             onChange={(checked) => {
                                 setFormValue("global", checked);
                             }}
