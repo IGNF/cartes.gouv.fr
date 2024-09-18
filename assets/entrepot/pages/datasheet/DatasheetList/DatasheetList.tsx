@@ -1,7 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
-import { getLink } from "@codegouvfr/react-dsfr/link";
 import { useQuery } from "@tanstack/react-query";
 import { declareComponentKeys } from "i18nifty";
 import { FC, ReactNode, useMemo } from "react";
@@ -15,8 +14,6 @@ import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { routes } from "../../../../router/router";
 import api from "../../../api";
 import DatasheetListItem from "./DatasheetListItem";
-
-const { Link } = getLink();
 
 type DatasheetListProps = {
     datastoreId: string;
@@ -102,7 +99,9 @@ export const DatasheetListFrTranslations: Translations<"fr">["DatasheetList"] = 
     no_services_published: "Non publié",
     sandbox_datastore_explanation: (
         <p>
-            {"Cet espace permet de tester les fonctions d’alimentation et de diffusion de la Géoplateforme. Les services publiés dans cet espace ne sont pas visibles sur le catalogue."}
+            {
+                "Cet espace permet de tester les fonctions d’alimentation et de diffusion de la Géoplateforme. Les services publiés dans cet espace ne sont pas visibles sur le catalogue."
+            }
         </p>
     ),
 };
