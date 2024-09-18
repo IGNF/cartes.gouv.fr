@@ -32,8 +32,22 @@ const Home = () => {
         }
     }, [params, user]);
 
+    const infoBannerMsg = (
+        <>
+            Votre avis compte ! Participez à notre questionnaire pour nous aider à améliorer le site cartes.gouv.fr. Merci pour votre contribution précieuse.{" "}
+            <a
+                href="https://analytics-eu.clickdimensions.com/ignfr-agj1s/pages/dbg2dmemee4wanorp13w.html?PageId=0eb6b1752661ef11bfe3000d3aba75df"
+                target="_blank"
+                rel="noreferrer"
+                title="Questionnaire sur cartes.gouv.fr - Ouvre une nouvelle fenêtre"
+            >
+                Participer
+            </a>
+        </>
+    );
+
     return (
-        <AppLayout documentTitle="Le service public des cartes et données du territoire">
+        <AppLayout documentTitle="Le service public des cartes et données du territoire" infoBannerMsg={infoBannerMsg}>
             {params?.["authentication_failed"] === 1 && (
                 <Alert
                     severity="error"
