@@ -102,8 +102,7 @@ export const DatasheetListFrTranslations: Translations<"fr">["DatasheetList"] = 
     no_services_published: "Non publié",
     sandbox_datastore_explanation: (
         <p>
-            {"Cet espace permet de tester les fonctions d’alimentation et de diffusion de la Géoplateforme. Les conditions d'utilisation sont "}{" "}
-            <Link {...routes.terms_of_service().link}>décrites à cette page.</Link>
+            {"Cet espace permet de tester les fonctions d’alimentation et de diffusion de la Géoplateforme. Les services publiés dans cet espace ne sont pas visibles sur le catalogue."}
         </p>
     ),
 };
