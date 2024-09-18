@@ -33,13 +33,17 @@ class DatastoreController extends AbstractController implements ApiControllerInt
     #[Route('/{datastoreId}', name: 'get', methods: ['GET'])]
     public function getDatastore(string $datastoreId): JsonResponse
     {
-        $datastore = $this->datastoreApiService->get($datastoreId);
-        $datastore['is_sandbox'] = $this->sandboxService->isSandboxDatastore($datastore['_id']);
-        if (true === $datastore['is_sandbox']) {
-            $datastore['name'] = 'Découverte';
-        }
+        try {
+            $datastore = $this->datastoreApiService->get($datastoreId);
+            $datastore['is_sandbox'] = $this->sandboxService->isSandboxDatastore($datastore['_id']);
+            if (true === $datastore['is_sandbox']) {
+                $datastore['name'] = 'Découverte';
+            }
 
-        return $this->json($datastore);
+            return $this->json($datastore);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
     }
 
     #[Route('/{datastoreId}/endpoints', name: 'get_endpoints', methods: ['GET'])]
