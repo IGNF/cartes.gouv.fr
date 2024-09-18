@@ -27,6 +27,10 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): Brea
         case "join":
         case "terms_of_service":
         case "service_status":
+        case "newsletter_subscribe":
+        case "newsletter_confirm_email":
+        case "newsletter_success":
+        case "newsletter_error":
             return { ...defaultProps, currentPageLabel: t(route.name) };
 
         case "contact_thanks":

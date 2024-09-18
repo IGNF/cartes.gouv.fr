@@ -16,6 +16,10 @@ const { i18n } = declareComponentKeys<
     | "join"
     | "terms_of_service"
     | "service_status"
+    | "newsletter_subscribe"
+    | "newsletter_confirm_email"
+    | "newsletter_success"
+    | "newsletter_error"
     | "accesses_request"
     | "my_account"
     | "my_access_keys"
@@ -64,6 +68,10 @@ export const BreadcrumbFrTranslations: Translations<"fr">["Breadcrumb"] = {
     join: "Nous rejoindre",
     terms_of_service: "Conditions générales d'utilisation",
     service_status: "Niveau de service",
+    newsletter_subscribe: "S’inscrire à la lettre d’information",
+    newsletter_confirm_email: "S’inscrire à la lettre d’information",
+    newsletter_success: "S’inscrire à la lettre d’information",
+    newsletter_error: "S’inscrire à la lettre d’information",
     accesses_request: "Demande d'accès à un service privé",
     my_account: "Mon compte",
     my_access_keys: "Mes clés d'accès",
@@ -110,7 +118,11 @@ export const BreadcrumbEnTranslations: Translations<"en">["Breadcrumb"] = {
     offer: "Offer",
     join: "Join us",
     terms_of_service: "Terms of Service",
-    service_status: "TODO",
+    service_status: "Service Status",
+    newsletter_subscribe: "Newsletter subscription",
+    newsletter_confirm_email: "Newsletter subscription",
+    newsletter_success: "Newsletter subscription",
+    newsletter_error: "Newsletter subscription",
     accesses_request: "Request to private resources",
     my_account: "My account",
     my_access_keys: "My access keys",

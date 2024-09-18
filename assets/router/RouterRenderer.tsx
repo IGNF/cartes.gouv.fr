@@ -25,6 +25,10 @@ const LegalNotice = lazy(() => import("../pages/footer/LegalNotice"));
 const PersonalData = lazy(() => import("../pages/footer/PersonalData"));
 const TermsOfService = lazy(() => import("../pages/footer/TermsOfService"));
 const LoginDisabled = lazy(() => import("../pages/LoginDisabled/LoginDisabled"));
+const NewsletterSubscribe = lazy(() => import("../pages/newsletter/NewsletterSubscribe"));
+const NewsletterConfirmEmail = lazy(() => import("../pages/newsletter/NewsletterConfirmEmail"));
+const NewsletterSuccess = lazy(() => import("../pages/newsletter/NewsletterSuccess"));
+const NewsletterError = lazy(() => import("../pages/newsletter/NewsletterError"));
 
 const Me = lazy(() => import("../entrepot/pages/users/me/Me"));
 const MyAccessKeys = lazy(() => import("../entrepot/pages/users/access-keys/MyAccessKeys"));
@@ -120,6 +124,14 @@ const RouterRenderer: FC = () => {
                 return <ServiceStatus />;
             case "login_disabled":
                 return <LoginDisabled />;
+            case "newsletter_subscribe":
+                return <NewsletterSubscribe />;
+            case "newsletter_confirm_email":
+                return <NewsletterConfirmEmail />;
+            case "newsletter_success":
+                return <NewsletterSuccess />;
+            case "newsletter_error":
+                return <NewsletterError />;
             case "my_account":
                 return <Me />;
             case "my_access_keys":
