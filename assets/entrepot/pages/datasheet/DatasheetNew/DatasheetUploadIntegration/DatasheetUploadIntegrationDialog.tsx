@@ -152,14 +152,21 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
                     </div>
                 </div>
             ) : (
-                <div className={fr.cx("fr-grid-row")}>
-                    <div className={fr.cx("fr-col-1")}>
-                        <LoadingIcon largeIcon={true} />
+                <>
+                    <div className={fr.cx("fr-grid-row")}>
+                        <div className={fr.cx("fr-col-1")}>
+                            <LoadingIcon largeIcon={true} />
+                        </div>
+                        <div className={fr.cx("fr-col-11")}>
+                            <h6 className={fr.cx("fr-h6")}>Vos données vecteur sont en cours de dépôt</h6>
+                        </div>
                     </div>
-                    <div className={fr.cx("fr-col-11")}>
-                        <h6 className={fr.cx("fr-h6")}>Vos données vecteur sont en cours de dépôt</h6>
+                    <div className={fr.cx("fr-grid-row")}>
+                        <div className={fr.cx("fr-col")}>
+                            <p>Les opérations suivantes peuvent prendre quelques minutes. Merci pour votre patience.</p>
+                        </div>
                     </div>
-                </div>
+                </>
             )}
 
             <div className={fr.cx("fr-grid-row", "fr-px-4w")}>
