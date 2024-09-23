@@ -46,10 +46,11 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, datasheet, metadataQue
     );
 
     const catalogueDatasheetUrl = useMemo(() => {
-        const metadataEndpoint = datastoreQuery.data?.endpoints?.find((ep) => ep.endpoint._id === metadata?.endpoints?.[0]._id);
-        const cswBaseUrl = metadataEndpoint?.endpoint.urls?.[0].url.trim();
-
+        // si datastore sandbox
         if (datastoreQuery.data?.is_sandbox === true) {
+            const metadataEndpoint = datastoreQuery.data?.endpoints?.find((ep) => ep.endpoint._id === metadata?.endpoints?.[0]?._id);
+            const cswBaseUrl = metadataEndpoint?.endpoint.urls?.[0].url.trim();
+
             if (cswBaseUrl !== undefined) {
                 return `${cswBaseUrl}?REQUEST=GetRecordById&SERVICE=CSW&VERSION=2.0.2&OUTPUTSCHEMA=http://www.isotc211.org/2005/gmd&elementSetName=full&ID=${metadata?.file_identifier}`;
             }
