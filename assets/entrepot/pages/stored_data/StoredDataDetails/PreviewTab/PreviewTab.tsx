@@ -4,7 +4,7 @@ import Table from "@codegouvfr/react-dsfr/Table";
 import { UseQueryResult, useQuery } from "@tanstack/react-query";
 import { FC, Fragment, useMemo } from "react";
 
-import { Pyramid, StoredDataTypeEnum, VectorDb } from "../../../../../@types/app";
+import { PyramidVector, StoredDataTypeEnum, VectorDb } from "../../../../../@types/app";
 import ExtentMap from "../../../../../components/Utils/ExtentMap";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../../modules/jsonFetch";
@@ -21,9 +21,9 @@ const PreviewTab: FC<PreviewTabProps> = ({ datastoreId, reportQuery }) => {
     const storedData = useMemo(() => reportQuery.data?.stored_data, [reportQuery.data?.stored_data]);
 
     const vectorDbQuery = useQuery<VectorDb, CartesApiException>({
-        queryKey: RQKeys.datastore_stored_data(datastoreId, (storedData as Pyramid).tags.vectordb_id!),
-        queryFn: ({ signal }) => api.storedData.get(datastoreId, (storedData as Pyramid).tags.vectordb_id!, { signal }),
-        enabled: !!(storedData as Pyramid).tags.vectordb_id,
+        queryKey: RQKeys.datastore_stored_data(datastoreId, (storedData as PyramidVector).tags.vectordb_id!),
+        queryFn: ({ signal }) => api.storedData.get(datastoreId, (storedData as PyramidVector).tags.vectordb_id!, { signal }),
+        enabled: !!(storedData as PyramidVector).tags.vectordb_id,
         staleTime: 3600000,
     });
 

@@ -143,7 +143,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         return $this->json([
             ...$datasheet,
             'vector_db_list' => $vectorDbList,
-            'pyramid_list' => $pyramidList,
+            'pyramid_vector_list' => $pyramidList,
             'upload_list' => $uploadList,
             'service_list' => $services,
         ]);

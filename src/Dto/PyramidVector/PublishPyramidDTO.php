@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Dto\Pyramid;
+namespace App\Dto\PyramidVector;
 
 use Symfony\Component\Validator\Constraints as Assert;
 

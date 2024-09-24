@@ -83,7 +83,7 @@ export enum DatasheetDocumentTypeEnum {
 
 export type DatasheetDetailed = Datasheet & {
     vector_db_list: VectorDb[] | undefined;
-    pyramid_list: Pyramid[] | undefined;
+    pyramid_vector_list: PyramidVector[] | undefined;
     upload_list: Upload[] | undefined;
     service_list: Service[] | undefined;
 };
@@ -108,7 +108,7 @@ export type VectorDb = StoredData & {
 };
 
 /** stored_data (donnée stockée) du type ROK4-PYRAMID-VECTOR */
-export type Pyramid = StoredData & {
+export type PyramidVector = StoredData & {
     type: StoredDataPrivateDetailResponseDtoTypeEnum.ROK4PYRAMIDVECTOR;
     tags: {
         datasheet_name?: string;

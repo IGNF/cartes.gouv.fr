@@ -166,7 +166,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                                     },
                                     {
                                         label: t("tab_label.datasets", {
-                                            num: (datasheetQuery.data?.vector_db_list?.length || 0) + (datasheetQuery.data?.pyramid_list?.length || 0),
+                                            num: (datasheetQuery.data?.vector_db_list?.length || 0) + (datasheetQuery.data?.pyramid_vector_list?.length || 0),
                                         }),
                                         tabId: DatasheetViewActiveTabEnum.Dataset,
                                     },
@@ -243,8 +243,8 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                             {datasheetQuery?.data?.vector_db_list?.length && datasheetQuery?.data?.vector_db_list.length > 0 ? (
                                 <li>{datasheetQuery?.data?.vector_db_list.length} base(s) de données</li>
                             ) : null}
-                            {datasheetQuery?.data?.pyramid_list?.length && datasheetQuery?.data?.pyramid_list.length > 0 ? (
-                                <li>{datasheetQuery?.data?.pyramid_list.length} pyramide(s) de tuiles vectorielles</li>
+                            {datasheetQuery?.data?.pyramid_vector_list?.length && datasheetQuery?.data?.pyramid_vector_list.length > 0 ? (
+                                <li>{datasheetQuery?.data?.pyramid_vector_list.length} pyramide(s) de tuiles vectorielles</li>
                             ) : null}
                             {datasheetQuery.data?.service_list?.length && datasheetQuery.data.service_list.length > 0 ? (
                                 <li>{datasheetQuery.data?.service_list.length} service(s) publié(s)</li>
@@ -255,7 +255,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
 
                             {metadataQuery.data && <li>La métadonnée associée ({metadataQuery.data.file_identifier})</li>}
 
-                            {/* TODO : pyramides tuiles vectorielles, raster, métadonnées etc... */}
+                            {/* TODO : pyramides tuiles raster, documents etc... */}
                         </ul>
                     </deleteDataConfirmModal.Component>,
                     document.body

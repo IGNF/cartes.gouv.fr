@@ -6,7 +6,7 @@ import { CommunityMembersEnTranslations } from "../../entrepot/pages/communities
 import { contactEnTranslations } from "../../pages/assistance/contact/Contact";
 import { DashboardProEnTranslations } from "../../entrepot/pages/dashboard/DashboardPro";
 import { DatasheetListEnTranslations } from "../../entrepot/pages/datasheet/DatasheetList/DatasheetList";
-import { PyramidListItemFrTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidList/PyramidListItem";
+import { PyramidVectorListItemFrTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidVectorList/PyramidVectorListItem";
 import { VectorDbListItemEnTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasetListTab/VectorDbList/VectorDbListItem";
 import { DatasheetViewEnTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasheetView";
 import { DatastorePermissionsEnTranslations } from "../../entrepot/pages/datastore/ManagePermissions/DatastorePermissionsTr";
@@ -56,7 +56,7 @@ export const translations: Translations<"en"> = {
     navItems: navItemsEnTranslations,
     datastoreNavItems: datastoreNavItemsEnTranslations,
     VectorDbListItem: VectorDbListItemEnTranslations,
-    PyramidListItem: PyramidListItemFrTranslations,
+    PyramidVectorListItem: PyramidVectorListItemFrTranslations,
     DatasheetView: DatasheetViewEnTranslations,
     SldStyleValidationErrors: SldStyleValidationErrorsEnTranslations,
     mapboxStyleValidation: mapboxStyleValidationEnTranslations,
