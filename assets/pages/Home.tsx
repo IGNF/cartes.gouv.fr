@@ -34,14 +34,14 @@ const Home = () => {
 
     const infoBannerMsg = (
         <>
-            Votre avis compte ! Participez à notre questionnaire pour nous aider à améliorer le site cartes.gouv.fr. Merci pour votre contribution précieuse.{" "}
+            Devenez acteur de cartes.gouv.fr et co-construisez les fonctionnalités en participant à des ateliers thématiques.{" "}
             <a
                 href="https://analytics-eu.clickdimensions.com/ignfr-agj1s/pages/dbg2dmemee4wanorp13w.html?PageId=0eb6b1752661ef11bfe3000d3aba75df"
                 target="_blank"
                 rel="noreferrer"
-                title="Questionnaire sur cartes.gouv.fr - Ouvre une nouvelle fenêtre"
+                title="Formulaire d’inscription à des ateliers cartes.gouv.fr - Ouvre une nouvelle fenêtre"
             >
-                Participer
+                Inscrivez-vous
             </a>
         </>
     );
