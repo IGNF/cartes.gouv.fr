@@ -26,15 +26,14 @@ Les autres briques de cartes.gouv.fr sont :
     -   Publication de services **WMS-vecteur** (WMS "à la volée", il s'agit bien d'un flux image mais les images ne sont pas précalculées)
     -   Génération de **pyramides de tuiles vectorielles** et publication de services **TMS** puis ajout (optionnel) de styles associés
     -   Publication de **métadonnées** sur le catalogue, obligatoire dès le premier service publié
+    -   Ajout de documents associés à une fiche de données
 -   Gestion des entrepôts et communautés :
     -   Gestion des membres et de leurs droits
     -   Visualisation de l'utilisation des quotas alloués pour chaque service et type de stockage
     -   Gestion des **permissions** associées aux services publiés sur des points d'accès restreints
+-   Espace **Découverte** pour tester les fonctionnalités
 
 À venir :
-
--   Bac à sable pour tester les fonctionnalités
--   Ajout de documents associés à une fiche de données
 -   Mise à jour des données diffusées
 -   Génération de pyramides d'images pour publications WMS-raster et WMTS
 -   Interface de configuration de style
