@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Dto\Pyramid;
+namespace App\Dto\PyramidVector;
 
 use App\Constants\EntrepotApi\ZoomLevels;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -31,7 +31,7 @@ class CompositionDTO
         )]
         #[Assert\Expression(
             'value <= this.bottom_level',
-            message: 'pyramid_add.composition.level_error' 
+            message: 'pyramid_add.composition.level_error'
         )]
         public readonly int $top_level
     ) {

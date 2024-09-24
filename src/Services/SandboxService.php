@@ -46,7 +46,7 @@ class SandboxService
         return $processings['int_vect_files_db'];
     }
 
-    public function getProcGeneratePyramid(string $datastoreId): string
+    public function getProcGeneratePyramidVector(string $datastoreId): string
     {
         $apiEntrepot = $this->isSandboxDatastore($datastoreId) ? 'sandbox' : 'api_entrepot';
         $processings = $this->parameterBag->get($apiEntrepot)['processings'];
