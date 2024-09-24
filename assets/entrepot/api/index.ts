@@ -9,7 +9,7 @@ import community from "./community";
 import user from "./user";
 import wfs from "./wfs";
 import wmsVector from "./wms-vector";
-import pyramid from "./pyramid";
+import pyramidVector from "./pyramidVector";
 import service from "./service";
 import epsg from "./epsg";
 import annexe from "./annexe";
@@ -31,7 +31,7 @@ const api = {
     user,
     wfs,
     wmsVector,
-    pyramid,
+    pyramidVector,
     service,
     annexe,
     style,

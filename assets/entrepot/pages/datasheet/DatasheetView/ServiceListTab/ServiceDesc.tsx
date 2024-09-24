@@ -5,7 +5,7 @@ import { FC, useMemo } from "react";
 import api from "../../../../api";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
-import { ConfigurationTypeEnum, Pyramid, Service, VectorDb } from "../../../../../@types/app";
+import { ConfigurationTypeEnum, PyramidVector, Service, VectorDb } from "../../../../../@types/app";
 
 type ServiceDescProps = {
     service: Service;
@@ -30,7 +30,7 @@ const ServiceDesc: FC<ServiceDescProps> = ({ service, datastoreId }) => {
             if (pyramidUsedId === undefined) {
                 return Promise.reject();
             }
-            return api.storedData.get<Pyramid>(datastoreId, pyramidUsedId, { signal });
+            return api.storedData.get<PyramidVector>(datastoreId, pyramidUsedId, { signal });
         },
         staleTime: 600000,
         enabled: !!pyramidUsedId,
