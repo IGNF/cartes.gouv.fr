@@ -213,6 +213,16 @@ const routeDefs = {
         (p) => `${appRoot}/entrepot/${p.datastoreId}/service/tms/${p.offeringId}/modification`
     ),
 
+    // Création/génération d'une pyramide raster
+    datastore_pyramid_raster_generate: defineRoute(
+        {
+            datastoreId: param.path.string,
+            offeringId: param.query.string,
+            datasheetName: param.query.string,
+        },
+        (p) => `${appRoot}/entrepot/${p.datastoreId}/pyramide-raster/ajout`
+    ),
+
     datastore_service_view: defineRoute(
         {
             datastoreId: param.path.string,

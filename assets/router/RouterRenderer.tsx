@@ -53,6 +53,7 @@ const WfsServiceForm = lazy(() => import("../entrepot/pages/service/wfs/WfsServi
 const WmsVectorServiceForm = lazy(() => import("../entrepot/pages/service/wms-vector/WmsVectorServiceForm"));
 const PyramidVectorGenerateForm = lazy(() => import("../entrepot/pages/service/tms/PyramidVectorGenerateForm"));
 const PyramidVectorTmsServiceForm = lazy(() => import("../entrepot/pages/service/tms/PyramidVectorTmsServiceForm"));
+const PyramidRasterGenerateForm = lazy(() => import("../entrepot/pages/service/wms-raster-wmts/PyramidRasterGenerateForm"));
 
 const ServiceView = lazy(() => import("../entrepot/pages/service/view/ServiceView"));
 
@@ -178,6 +179,14 @@ const RouterRenderer: FC = () => {
                         datastoreId={route.params.datastoreId}
                         pyramidId={route.params.pyramidId}
                         offeringId={route.params.offeringId}
+                    />
+                );
+            case "datastore_pyramid_raster_generate":
+                return (
+                    <PyramidRasterGenerateForm
+                        datastoreId={route.params.datastoreId}
+                        offeringId={route.params.offeringId}
+                        datasheetName={route.params.datasheetName}
                     />
                 );
             case "datastore_service_view":
