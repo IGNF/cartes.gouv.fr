@@ -20,6 +20,7 @@ parameters:
         processings:
             int_vect_files_db: "%env(resolve:SANDBOX_PROC_INT_VECT_FILES_DB)%"
             create_vect_pyr: "%env(resolve:SANDBOX_PROC_CREATE_VECT_PYR)%"
+            create_rast_pyr: "%env(resolve:SANDBOX_PROC_CREATE_RAST_PYR)%"
 
     api_entrepot_url: "%env(resolve:API_ENTREPOT_URL)%"
     annexes_url: "%env(resolve:ANNEXES_URL)%"
@@ -40,6 +41,7 @@ parameters:
         processings:
             int_vect_files_db: "%env(resolve:API_ENTREPOT_PROC_INT_VECT_FILES_DB)%"
             create_vect_pyr: "%env(resolve:API_ENTREPOT_PROC_CREATE_VECT_PYR)%"
+            create_rast_pyr: "%env(resolve:API_ENTREPOT_PROC_CREATE_RAST_PYR)%"
 
     api_espaceco_url: "%env(resolve:API_ESPACE_COLLABORATIF_URL)%"
     catalogue_url: "%env(resolve:CATALOGUE_URL)%"
