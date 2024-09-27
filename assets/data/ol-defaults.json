@@ -4,7 +4,7 @@
     "projection": "EPSG:3857",
     "zoom": 10,
     "zoom_levels": {
-        "TOP": 0,
+        "TOP": 1,
         "BOTTOM": 18
     }
 }
