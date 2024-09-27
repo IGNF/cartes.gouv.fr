@@ -9,6 +9,8 @@ import { useApiEspaceCoStore } from "./stores/ApiEspaceCoStore";
 import { useAuthStore } from "./stores/AuthStore";
 import { useSnackbarStore } from "./stores/SnackbarStore";
 
+import "ol/ol.css";
+
 // en prod
 if ((document.getElementById("root") as HTMLDivElement)?.dataset?.appEnv?.toLowerCase() === "prod") {
     disableReactDevTools();
