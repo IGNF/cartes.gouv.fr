@@ -1,4 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import Accordion from "@codegouvfr/react-dsfr/Accordion";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
@@ -8,9 +9,12 @@ import { useQuery } from "@tanstack/react-query";
 import { declareComponentKeys } from "i18nifty";
 import { FC, useCallback, useState } from "react";
 
-import { Service } from "../../../../@types/app";
+import type { Service } from "../../../../@types/app";
+import type { ConfigurationWmsVectorDetailsContent } from "../../../../@types/entrepot";
 import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
 import LoadingText from "../../../../components/Utils/LoadingText";
+import ZoomRange from "../../../../components/Utils/ZoomRange";
+import olDefaults from "../../../../data/ol-defaults.json";
 import useScrollToTopEffect from "../../../../hooks/useScrollToTopEffect";
 import { Translations, useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
@@ -33,7 +37,7 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
     const { t } = useTranslation("PyramidRasterGenerateForm");
     const { t: tCommon } = useTranslation("Common");
 
-    const [currentStep, setCurrentStep] = useState(STEPS.TECHNICAL_NAME);
+    const [currentStep, setCurrentStep] = useState(STEPS.TOP_ZOOM_LEVEL);
 
     const serviceQuery = useQuery<Service, CartesApiException>({
         queryKey: RQKeys.datastore_offering(datastoreId, offeringId),
@@ -64,6 +68,8 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
         currentStep,
         /*createServiceMutation, editServiceMutation,  trigger, editMode*/
     ]);
+
+    const [levels, setLevels] = useState([5, 15]);
 
     return (
         <DatastoreLayout datastoreId={datastoreId} documentTitle={t("title")}>
@@ -115,6 +121,44 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
                         de la carte de gauche. Le zoom maximum sur l’image de droite est fixe et ne peut être modifié. Tous les niveaux intermédiaires seront
                         générés.`}
                         </p>
+
+                        {currentStep === STEPS.TOP_ZOOM_LEVEL &&
+                            (serviceQuery.data?.configuration.type_infos as ConfigurationWmsVectorDetailsContent).used_data?.[0]?.relations.map((rel) => (
+                                <Accordion key={rel.name} label={rel.name} titleAs="h4" defaultExpanded={true}>
+                                    <ZoomRange
+                                        min={olDefaults.zoom_levels.TOP}
+                                        max={olDefaults.zoom_levels.BOTTOM}
+                                        values={levels}
+                                        onChange={(values) => {
+                                            console.log(values);
+                                            setLevels((prevLevels) => [values[0], prevLevels[1]]);
+                                        }}
+                                        step={1}
+                                        mode="top"
+                                    />
+                                    <ZoomRange
+                                        min={olDefaults.zoom_levels.TOP}
+                                        max={olDefaults.zoom_levels.BOTTOM}
+                                        values={levels}
+                                        onChange={(values) => {
+                                            console.log(values);
+                                            setLevels((prevLevels) => [prevLevels[0], values[0]]);
+                                        }}
+                                        step={1}
+                                        mode="bottom"
+                                    />
+                                    <ZoomRange
+                                        min={olDefaults.zoom_levels.TOP}
+                                        max={olDefaults.zoom_levels.BOTTOM}
+                                        values={levels}
+                                        onChange={(values) => {
+                                            console.log(values);
+                                            setLevels(values);
+                                        }}
+                                        step={1}
+                                    />
+                                </Accordion>
+                            ))}
                     </div>
 
                     <ButtonsGroup

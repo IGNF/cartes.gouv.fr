@@ -16,8 +16,6 @@ import { Geometry as EntrepotGeometry } from "../../@types/entrepot";
 import olDefaults from "../../data/ol-defaults.json";
 import useCapabilities from "../../hooks/useCapabilities";
 
-import "ol/ol.css";
-
 import "geoportal-extensions-openlayers/dist/GpPluginOpenLayers.css";
 import "../../sass/components/map-view.scss";
 import "../../sass/components/ol.scss";
