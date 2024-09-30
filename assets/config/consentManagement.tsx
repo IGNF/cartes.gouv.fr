@@ -22,7 +22,9 @@ export const { ConsentBannerAndConsentManagement, FooterConsentManagementItem, F
             ].join(" "),
         },
     }),
-    personalDataPolicyLinkProps: routes.personal_data().link,
+    personalDataPolicyLinkProps: {
+        href: routes.personal_data().href,
+    },
 
     consentCallback: async ({ finalityConsent }) => {
         const eulerian = await prEulerianApi;
