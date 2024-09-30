@@ -121,7 +121,7 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): Brea
             if ("datasheetName" in route.params && route.params.datasheetName) {
                 defaultProps.segments.push({
                     label: route.params.datasheetName,
-                    linkProps: routes.datastore_datasheet_view({ datastoreId: route.params.datastoreId, datasheetName: route.params.datasheetName }),
+                    linkProps: routes.datastore_datasheet_view({ datastoreId: route.params.datastoreId, datasheetName: route.params.datasheetName }).link,
                 });
                 defaultProps["currentPageLabel"] = t("upload");
             } else {

@@ -349,7 +349,7 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
     );
 };
 
-DatasheetUploadForm.displayName = symToStr({ DatasheetNewForm: DatasheetUploadForm });
+DatasheetUploadForm.displayName = symToStr({ DatasheetUploadForm });
 
 export default DatasheetUploadForm;
 

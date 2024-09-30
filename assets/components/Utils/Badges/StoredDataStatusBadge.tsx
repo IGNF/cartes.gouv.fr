@@ -1,7 +1,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { AlertProps } from "@codegouvfr/react-dsfr/Alert";
 import Badge from "@codegouvfr/react-dsfr/Badge";
-import { FC, memo, useMemo } from "react";
+import { FC, memo, ReactNode, useMemo } from "react";
 
 import { StoredData, StoredDataStatusEnum } from "../../../@types/app";
 
@@ -12,7 +12,7 @@ type StoredDataStatusBadgeProps = {
 const StoredDataStatusBadge: FC<StoredDataStatusBadgeProps> = ({ status }) => {
     const { severity, text } = useMemo(() => {
         let severity: AlertProps.Severity = "info";
-        let text = "";
+        let text: NonNullable<ReactNode> = "";
 
         switch (status) {
             case StoredDataStatusEnum.GENERATED:
@@ -23,7 +23,13 @@ const StoredDataStatusBadge: FC<StoredDataStatusBadgeProps> = ({ status }) => {
             case StoredDataStatusEnum.CREATED:
             case StoredDataStatusEnum.GENERATING:
                 severity = "warning";
-                text = "En cours de génération";
+                text = (
+                    <>
+                        En cours de
+                        <br />
+                        génération
+                    </>
+                );
                 break;
 
             case StoredDataStatusEnum.MODIFYING:

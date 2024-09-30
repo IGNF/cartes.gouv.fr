@@ -25,7 +25,7 @@ const DatasetListTab: FC<DataListTabProps> = ({ datastoreId, datasheet }) => {
             }
 
             const integrationProgress = JSON.parse(upload.tags.integration_progress);
-            return ["waiting", "in_progress"].includes(Object.values(integrationProgress)?.[2] as string);
+            return ["waiting"].includes(Object.values(integrationProgress)?.[2] as string);
         });
     }, [datasheet.upload_list]);
 
