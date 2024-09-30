@@ -19,6 +19,7 @@ import SessionExpiredAlert from "../Utils/SessionExpiredAlert";
 import SnackbarMessage from "../Utils/SnackbarMessage";
 import AppFooter from "./AppFooter";
 import AppHeader from "./AppHeader";
+import AppFollow from "./AppFollow";
 
 const HiddenElements: FC = () => {
     return (
@@ -70,6 +71,8 @@ const AppLayout: FC<PropsWithChildren<AppLayoutProps>> = ({ children, navItems, 
         return getBreadcrumb(route, datastoreQuery.data);
     }, [route, datastoreQuery.data, customBreadcrumbProps]);
 
+    const newsletterSubscribeAction = (document.getElementById("app_env") as HTMLDivElement)?.dataset?.["newsletterSubscribeAction"] ?? null;
+
     navItems = useMemo(() => navItems ?? defaultNavItems(t), [navItems, t]);
 
     return (
@@ -90,6 +93,7 @@ const AppLayout: FC<PropsWithChildren<AppLayoutProps>> = ({ children, navItems, 
                     {children}
                 </div>
             </main>
+            {newsletterSubscribeAction !== null && <AppFollow />}
             <AppFooter />
             <SnackbarMessage />
         </>
