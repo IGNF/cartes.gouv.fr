@@ -3,7 +3,8 @@ import { createRouter, defineRoute, param } from "type-route";
 import SymfonyRouting from "../modules/Routing";
 
 export const appRoot = SymfonyRouting.getBaseUrl(); // (document.getElementById("root") as HTMLDivElement).dataset?.appRoot ?? "";
-export const catalogueUrl = (document.getElementById("app_env") as HTMLDivElement)?.dataset?.["catalogueUrl"] ?? "/catalogue";
+export const catalogueUrl = (document.getElementById("app_env") as HTMLDivElement)?.dataset?.["catalogueUrl"] ?? appRoot + "/catalogue";
+export const cartesUrl = appRoot + "/cartes";
 
 const routeDefs = {
     // routes non protégées (doivent être listées plus bas dans publicRoutes)
@@ -18,7 +19,12 @@ const routeDefs = {
     documentation: defineRoute(`${appRoot}/documentation`),
     contact: defineRoute(`${appRoot}/nous-ecrire`),
     contact_thanks: defineRoute(`${appRoot}/nous-ecrire/demande-envoyee`),
-    news_list: defineRoute(`${appRoot}/actualites`),
+    news_list: defineRoute(
+        {
+            page: param.query.optional.number.default(0),
+        },
+        () => `${appRoot}/actualites`
+    ),
     news_article: defineRoute(
         {
             slug: param.path.string,
