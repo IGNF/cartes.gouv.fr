@@ -16,7 +16,7 @@ class User implements UserInterface
     private ?string $firstName;
     private ?string $lastName;
 
-    /** @var array<string,mixed> */
+    /** @var array<mixed> */
     private array $communitiesMember = [];
 
     private \DateTimeInterface $accountCreationDate;
@@ -104,6 +104,16 @@ class User implements UserInterface
     public function getCommunitiesMember(): array
     {
         return $this->communitiesMember;
+    }
+
+    /**
+     * @param array<mixed> $communitiesMember
+     */
+    public function setCommunitiesMember(array $communitiesMember): self
+    {
+        $this->communitiesMember = $communitiesMember;
+
+        return $this;
     }
 
     public function getAccountCreationDate(): ?\DateTimeInterface

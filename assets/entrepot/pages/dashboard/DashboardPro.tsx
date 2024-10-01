@@ -1,15 +1,17 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { Tile } from "@codegouvfr/react-dsfr/Tile";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { declareComponentKeys } from "i18nifty";
+import { useEffect } from "react";
 
+import { CartesUser, Datastore } from "../../../@types/app";
 import AppLayout from "../../../components/Layout/AppLayout";
-import LoadingText from "../../../components/Utils/LoadingText";
+import LoadingIcon from "../../../components/Utils/LoadingIcon";
 import { datastoreNavItems } from "../../../config/datastoreNavItems";
-import useDatastoreList from "../../../hooks/useDatastoreList";
 import { Translations, useTranslation } from "../../../i18n/i18n";
 import Translator from "../../../modules/Translator";
+import RQKeys from "../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
 import { useApiEspaceCoStore } from "../../../stores/ApiEspaceCoStore";
@@ -22,13 +24,33 @@ import humanCoopSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/envi
 import padlockSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/system/padlock.svg";
 
 const DashboardPro = () => {
-    const datastoreListQuery = useDatastoreList();
+    const { t } = useTranslation("DashboardPro");
+
     const navItems = datastoreNavItems();
 
-    const { user } = useAuthStore();
+    const user = useAuthStore((state) => state.user);
+    const setUser = useAuthStore((state) => state.setUser);
     const isApiEspaceCoDefined = useApiEspaceCoStore((state) => state.isUrlDefined);
 
-    const { t } = useTranslation("DashboardPro");
+    const userQuery = useQuery<CartesUser, CartesApiException>({
+        queryKey: RQKeys.user_me(),
+        queryFn: ({ signal }) => api.user.getMe({ signal }),
+        initialData: user ?? undefined,
+        staleTime: 15000,
+    });
+
+    // requête exprès pour récupérer le datastore bac à sable
+    const sandboxDatastoreQuery = useQuery<Datastore, CartesApiException>({
+        queryKey: RQKeys.datastore("sandbox"),
+        queryFn: ({ signal }) => api.datastore.getSandbox({ signal }),
+        staleTime: 3600000,
+    });
+
+    useEffect(() => {
+        if (userQuery.data !== undefined) {
+            setUser(userQuery.data);
+        }
+    }, [setUser, userQuery.data]);
 
     const { mutate } = useMutation<undefined, CartesApiException>({
         mutationFn: () => {
@@ -57,78 +79,91 @@ const DashboardPro = () => {
 
     return (
         <AppLayout navItems={navItems} documentTitle={t("document_title")} infoBannerMsg={infoBannerMsg}>
-            {datastoreListQuery.isLoading ? (
-                <LoadingText />
-            ) : (
-                <>
-                    <h1>Bienvenue {user?.first_name ?? user?.user_name}</h1>
+            <h1>Bienvenue {user?.first_name ?? user?.user_name}</h1>
 
-                    <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mb-3w")}>
-                        <div className={fr.cx("fr-col-12", "fr-col-sm-6")}>
+            <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mb-3w")}>
+                <div className={fr.cx("fr-col-12", "fr-col-sm-6")}>
+                    <Tile
+                        linkProps={routes.my_account().link}
+                        imageUrl={avatarSvgUrl}
+                        desc="Consulter et modifier mes informations personnelles"
+                        orientation="horizontal"
+                        title="Mon compte"
+                    />
+                </div>
+                <div className={fr.cx("fr-col-12", "fr-col-sm-6")}>
+                    <Tile
+                        linkProps={routes.my_access_keys().link}
+                        imageUrl={padlockSvgUrl}
+                        desc="Consulter et modifier mes clés d'accès aux services privés"
+                        orientation="horizontal"
+                        title="Mes clés d’accès"
+                    />
+                </div>
+            </div>
+
+            <h2>Espaces de travail {(sandboxDatastoreQuery.isLoading || userQuery.isFetching) && <LoadingIcon largeIcon={true} />}</h2>
+
+            <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
+                {/* si l'utilisateur ne fait pas déjà partie du bac à sable, on affiche une Tile "spéciale" dont le click va ajouter l'utilisateur dans le bac à sable */}
+                {/* si l'utilisateur en fait déjà partie, on n'affiche pas cette Tile, on boucle tout simplement sur ses datastores (user.communities_member), voir plus bas */}
+                {sandboxDatastoreQuery.data !== undefined &&
+                    user?.communities_member.find((community) => community.community?.datastore === sandboxDatastoreQuery.data._id) === undefined && (
+                        <div className={fr.cx("fr-col-12", "fr-col-sm-6", "fr-col-md-4", "fr-col-lg-3")}>
                             <Tile
-                                linkProps={routes.my_account().link}
-                                imageUrl={avatarSvgUrl}
-                                desc="Consulter et modifier mes informations personnelles"
-                                orientation="horizontal"
-                                title="Mon compte"
+                                linkProps={{
+                                    ...routes.datasheet_list({ datastoreId: sandboxDatastoreQuery.data._id }).link,
+                                    onClick: () => handleClick(sandboxDatastoreQuery.data._id),
+                                }}
+                                grey={true}
+                                title={sandboxDatastoreQuery.data.name}
+                                desc={t("datastore_for_tests")}
                             />
-                        </div>
-                        <div className={fr.cx("fr-col-12", "fr-col-sm-6")}>
-                            <Tile
-                                linkProps={routes.my_access_keys().link}
-                                imageUrl={padlockSvgUrl}
-                                desc="Consulter et modifier mes clés d'accès aux services privés"
-                                orientation="horizontal"
-                                title="Mes clés d’accès"
-                            />
-                        </div>
-                    </div>
-
-                    <h2>Espaces de travail</h2>
-
-                    <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
-                        {datastoreListQuery.data?.map((datastore) => {
-                            const link = { ...routes.datasheet_list({ datastoreId: datastore._id }).link, onClick: () => handleClick(datastore._id) };
-                            return (
-                                <div key={datastore._id} className={fr.cx("fr-col-12", "fr-col-sm-6", "fr-col-md-4", "fr-col-lg-3")}>
-                                    <Tile
-                                        linkProps={link}
-                                        grey={true}
-                                        title={datastore.name}
-                                        desc={datastore.is_sandbox === true ? t("datastore_for_tests") : undefined}
-                                    />
-                                </div>
-                            );
-                        })}
-                    </div>
-
-                    <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
-                        <div className={fr.cx("fr-col-12", "fr-col-sm-6")}>
-                            <Tile
-                                linkProps={routes.datastore_create_request().link}
-                                imageUrl={mailSendSvgUrl}
-                                desc="Contacter le support pour créer un nouvel espace de travail"
-                                orientation="horizontal"
-                                title={Translator.trans("datastore_creation_request.title")}
-                            />
-                        </div>
-                        <div className={fr.cx("fr-col-12", "fr-col-sm-6")}>
-                            <Tile
-                                linkProps={routes.join_community().link}
-                                imageUrl={humanCoopSvgUrl}
-                                desc="Demander à rejoindre une communauté publique"
-                                orientation="horizontal"
-                                title={Translator.trans("communities_list.title")}
-                            />
-                        </div>
-                    </div>
-
-                    {isApiEspaceCoDefined() && (
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--left", "fr-mt-4w")}>
-                            <Button linkProps={routes.espaceco_community_list().link}>{t("espaceco_frontoffice_list")}</Button>
                         </div>
                     )}
-                </>
+
+                {user?.communities_member.map((community) => {
+                    const datastoreId = community.community?.datastore;
+                    if (datastoreId === undefined) return null;
+
+                    return (
+                        <div key={datastoreId} className={fr.cx("fr-col-12", "fr-col-sm-6", "fr-col-md-4", "fr-col-lg-3")}>
+                            <Tile
+                                linkProps={routes.datasheet_list({ datastoreId }).link}
+                                grey={true}
+                                title={community.community?.name}
+                                desc={community.community?.is_sandbox === true ? t("datastore_for_tests") : undefined}
+                            />
+                        </div>
+                    );
+                })}
+            </div>
+
+            <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
+                <div className={fr.cx("fr-col-12", "fr-col-sm-6")}>
+                    <Tile
+                        linkProps={routes.datastore_create_request().link}
+                        imageUrl={mailSendSvgUrl}
+                        desc="Contacter le support pour créer un nouvel espace de travail"
+                        orientation="horizontal"
+                        title={Translator.trans("datastore_creation_request.title")}
+                    />
+                </div>
+                <div className={fr.cx("fr-col-12", "fr-col-sm-6")}>
+                    <Tile
+                        linkProps={routes.join_community().link}
+                        imageUrl={humanCoopSvgUrl}
+                        desc="Demander à rejoindre une communauté publique"
+                        orientation="horizontal"
+                        title={Translator.trans("communities_list.title")}
+                    />
+                </div>
+            </div>
+
+            {isApiEspaceCoDefined() && (
+                <div className={fr.cx("fr-grid-row", "fr-grid-row--left", "fr-mt-4w")}>
+                    <Button linkProps={routes.espaceco_community_list().link}>{t("espaceco_frontoffice_list")}</Button>
+                </div>
             )}
         </AppLayout>
     );

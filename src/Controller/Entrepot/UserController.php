@@ -7,6 +7,7 @@ use App\Controller\ApiControllerInterface;
 use App\Dto\User\UserKeyDTO;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
+use App\Security\User;
 use App\Services\EntrepotApi\ServiceAccount;
 use App\Services\EntrepotApi\UserApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -30,7 +31,16 @@ class UserController extends AbstractController implements ApiControllerInterfac
     #[Route('/me', name: 'me')]
     public function getCurrentUser(): JsonResponse
     {
-        return $this->json($this->getUser());
+        /** @var User */
+        $user = $this->getUser();
+
+        $apiUserInfo = $this->userApiService->getMe();
+
+        if (array_key_exists('communities_member', $apiUserInfo)) {
+            $user->setCommunitiesMember($apiUserInfo['communities_member']);
+        }
+
+        return $this->json($user);
     }
 
     #[Route('/me/keys', name: 'keys')]

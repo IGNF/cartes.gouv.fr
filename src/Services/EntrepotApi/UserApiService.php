@@ -3,10 +3,13 @@
 namespace App\Services\EntrepotApi;
 
 use App\Exception\ApiException;
+use App\Services\SandboxService;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class UserApiService extends BaseEntrepotApiService
@@ -18,13 +21,31 @@ class UserApiService extends BaseEntrepotApiService
         RequestStack $requestStack,
         LoggerInterface $logger,
         private DatastoreApiService $datastoreApiService,
+        private SandboxService $sandboxService,
+        private CacheInterface $cache,
     ) {
         parent::__construct($httpClient, $parameters, $filesystem, $requestStack, $logger);
     }
 
     public function getMe(): array
     {
-        return $this->request('GET', 'users/me');
+        return $this->cache->get('users-me', function (ItemInterface $item) {
+            $item->expiresAfter(15);
+
+            $user = $this->request('GET', 'users/me');
+
+            foreach ($user['communities_member'] as &$communitiesMember) {
+                if ($this->sandboxService->isSandboxCommunity($communitiesMember['community']['_id'])) {
+                    $communitiesMember['community']['is_sandbox'] = true;
+                    $communitiesMember['community']['name'] = 'Découverte';
+                }
+            }
+
+            // tri pour positionner le bac à sable en premier
+            $user['communities_member'] = $this->sortCommunitiesMemberBySandbox($user['communities_member']);
+
+            return $user;
+        });
     }
 
     /**
@@ -130,5 +151,25 @@ class UserApiService extends BaseEntrepotApiService
     public function removeAccess(string $keyId, string $accessId): array
     {
         return $this->request('DELETE', "users/me/keys/$keyId/accesses/$accessId");
+    }
+
+    /**
+     * @param array<mixed> $communitiesMember
+     */
+    private function sortCommunitiesMemberBySandbox(array $communitiesMember): array
+    {
+        usort($communitiesMember, function ($a, $b) {
+            if (isset($a['community']['is_sandbox']) && true === $a['community']['is_sandbox']) {
+                return -1;
+            }
+
+            if (isset($b['community']['is_sandbox']) && true === $b['community']['is_sandbox']) {
+                return 1;
+            }
+
+            return 0;
+        });
+
+        return $communitiesMember;
     }
 }

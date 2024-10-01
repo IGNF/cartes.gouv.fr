@@ -31,7 +31,14 @@ import {
     UserKeyDetailsResponseDtoUserKeyInfoDto,
     UserKeyResponseDto,
     MetadataResponseDto,
+    CommunityUserDto,
 } from "./entrepot";
+
+export interface CartesCommunityMember extends CommunityMemberDto {
+    community?: CommunityUserDto & {
+        is_sandbox?: boolean;
+    };
+}
 
 /** user */
 export type CartesUser = {
@@ -41,7 +48,7 @@ export type CartesUser = {
     first_name?: string | null;
     last_name?: string | null;
     roles: string[];
-    communities_member: CommunityMemberDto[];
+    communities_member: CartesCommunityMember[];
     account_creation_date: string;
     last_api_call_date: string;
 };
