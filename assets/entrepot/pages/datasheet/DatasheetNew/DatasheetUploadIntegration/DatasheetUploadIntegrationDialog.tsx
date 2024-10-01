@@ -1,5 +1,4 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import { ButtonProps } from "@codegouvfr/react-dsfr/Button";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useEffect, useMemo, useState } from "react";
@@ -142,34 +141,6 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
         }
     }, [integrationStatus, datastoreId, uploadQuery?.data?.tags.datasheet_name, queryClient]);
 
-    const bottomButtons: [ButtonProps, ...ButtonProps[]] = useMemo(() => {
-        const _bottomButtons: [ButtonProps, ...ButtonProps[]] = [
-            {
-                children: "Revenir à mes données",
-                linkProps: routes.datasheet_list({ datastoreId }).link,
-                priority: "secondary",
-            },
-        ];
-
-        if (integrationStatus === "at_lease_one_failure" && uploadQuery.data?.tags?.vectordb_id !== undefined) {
-            _bottomButtons.unshift({
-                children: "Voir le rapport d’erreur",
-                linkProps: routes.datastore_stored_data_details({ datastoreId, storedDataId: uploadQuery.data?.tags?.vectordb_id }).link,
-            });
-        } else if (integrationStatus === "proc_int_launched" && uploadQuery.data?.tags.datasheet_name !== undefined) {
-            _bottomButtons.unshift({
-                children: "Consulter la fiche de données",
-                linkProps: routes.datastore_datasheet_view({
-                    datastoreId,
-                    datasheetName: uploadQuery.data?.tags.datasheet_name,
-                    activeTab: DatasheetViewActiveTabEnum.Dataset,
-                }).link,
-            });
-        }
-
-        return _bottomButtons;
-    }, [datastoreId, integrationStatus, uploadQuery.data?.tags?.vectordb_id, uploadQuery.data?.tags.datasheet_name]);
-
     return (
         <div className={fr.cx("fr-container")}>
             {integrationStatus === "at_lease_one_failure" ? (
@@ -215,9 +186,40 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
                 <p>Vous pouvez maintenant poursuivre votre navigation même si vos données ne sont pas encore prêtes.</p>
             )}
 
-            {(integrationStatus === "at_lease_one_failure" || integrationStatus === "proc_int_launched") && (
+            {(integrationStatus === "all_successful" || integrationStatus === "proc_int_launched") && uploadQuery.data?.tags.datasheet_name !== undefined && (
                 <div className={fr.cx("fr-grid-row")}>
-                    <ButtonsGroup buttons={bottomButtons} inlineLayoutWhen="always" />
+                    <ButtonsGroup
+                        buttons={[
+                            {
+                                children: "Consulter la fiche de données",
+                                linkProps: routes.datastore_datasheet_view({
+                                    datastoreId,
+                                    datasheetName: uploadQuery.data?.tags.datasheet_name,
+                                    activeTab: DatasheetViewActiveTabEnum.Dataset,
+                                }).link,
+                            },
+                        ]}
+                        inlineLayoutWhen="always"
+                    />
+                </div>
+            )}
+
+            {integrationStatus === "at_lease_one_failure" && uploadQuery.data?.tags?.vectordb_id !== undefined && (
+                <div className={fr.cx("fr-grid-row")}>
+                    <ButtonsGroup
+                        buttons={[
+                            {
+                                children: "Voir le rapport d’erreur",
+                                linkProps: routes.datastore_stored_data_details({ datastoreId, storedDataId: uploadQuery.data?.tags?.vectordb_id }).link,
+                            },
+                            {
+                                children: "Revenir à mes données",
+                                linkProps: routes.datasheet_list({ datastoreId }).link,
+                                priority: "secondary",
+                            },
+                        ]}
+                        inlineLayoutWhen="always"
+                    />
                 </div>
             )}
         </div>
