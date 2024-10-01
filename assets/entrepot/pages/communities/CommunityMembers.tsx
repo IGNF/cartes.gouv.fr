@@ -97,8 +97,7 @@ const CommunityMembers: FC<CommunityMembersProps> = ({ communityId, userId }) =>
     const { data: communityMembers, isLoading: isLoadingMembers } = useQuery({
         queryKey: RQKeys.community_members(communityId),
         queryFn: ({ signal }) => api.community.getMembers(communityId, { signal }),
-        staleTime: communityId ? Infinity : 20000,
-        enabled: !!communityId,
+        staleTime: 20000,
     });
 
     const communityMemberIds = useMemo(() => {
