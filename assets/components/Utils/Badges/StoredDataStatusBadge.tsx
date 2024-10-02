@@ -34,7 +34,13 @@ const StoredDataStatusBadge: FC<StoredDataStatusBadgeProps> = ({ status }) => {
 
             case StoredDataStatusEnum.MODIFYING:
                 severity = "warning";
-                text = "En cours de modification";
+                text = (
+                    <>
+                        En cours de
+                        <br />
+                        modification
+                    </>
+                );
                 break;
 
             case StoredDataStatusEnum.UNSTABLE:
