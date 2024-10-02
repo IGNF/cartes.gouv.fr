@@ -1,6 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import Map from "ol/Map";
-import { MapOptions } from "ol/PluggableMap";
+import Map, { type MapOptions } from "ol/Map";
 import View, { ViewOptions } from "ol/View";
 import { ScaleLine } from "ol/control";
 import BaseLayer from "ol/layer/Base";

@@ -2,6 +2,7 @@ import MapboxStyleParser from "geostyler-mapbox-parser";
 import OpenLayersParser from "geostyler-openlayers-parser";
 import QGISStyleParser from "geostyler-qgis-parser";
 import SldStyleParser from "geostyler-sld-parser";
+import { Feature } from "ol";
 import { Geometry } from "ol/geom";
 import BaseLayer from "ol/layer/Base";
 import VectorLayer from "ol/layer/Vector";
@@ -59,7 +60,7 @@ class StyleHelper {
         }
     }
 
-    static async #getOlStyle(layer: VectorLayer<VectorSource<Geometry>> | VectorTileLayer, currentStyle: CartesStyle, nameMandatory = true) {
+    static async #getOlStyle(layer: VectorLayer<VectorSource<Feature<Geometry>>> | VectorTileLayer, currentStyle: CartesStyle, nameMandatory = true) {
         let styleUrl;
         if (nameMandatory) {
             // Le nom est obligatoire pour les flux WFS
