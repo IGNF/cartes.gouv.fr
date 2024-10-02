@@ -11,7 +11,8 @@ export class CommonSchemasValidation {
             metadata_file_content: yup.mixed().test({
                 name: "is-valid-metadata",
                 async test(value, ctx) {
-                    if (value instanceof FileList && value.length === 0) return true;
+                    // upload de fichier est optionnel, donc value peut être undefined ou un array de taille 0
+                    if (value === undefined || (value instanceof FileList && value.length === 0)) return true;
                     return validations.metadata.test(value as FileList, ctx);
                 },
             }),

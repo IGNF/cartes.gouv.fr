@@ -33,7 +33,7 @@ const test = (value: FileList, ctx: TestContext) => {
             Uniquement une fois toutes les validations effectuées, le fichier est enregistré sur le S3. sur celui-ci, il est nommé selon son id, avec en préfixe de path "/metadata/"
          */
     } else {
-        return ctx.createError({ message: "Le fichier de style de métadonnées est invalide" });
+        return ctx.createError({ message: "Le fichier de métadonnées est invalide" });
     }
     return true;
 };

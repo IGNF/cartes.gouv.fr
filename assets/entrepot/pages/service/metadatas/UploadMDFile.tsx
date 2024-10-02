@@ -13,7 +13,7 @@ type UploadMDFileProps = {
 
 const UploadMDFile: FC<UploadMDFileProps> = ({ visible, form }) => {
     const { t } = useTranslation("MetadatasForm");
-    const { t: tCommon } = useTranslation("Common");
+    // const { t: tCommon } = useTranslation("Common");
 
     const {
         formState: { errors },
@@ -23,7 +23,10 @@ const UploadMDFile: FC<UploadMDFileProps> = ({ visible, form }) => {
     return (
         <div className={fr.cx("fr-my-2v", !visible && "fr-hidden")}>
             <h3>{t("metadata.upload_form.title")}</h3>
-            <p>{tCommon("mandatory_fields")}</p>
+            {/* // cf. https://github.com/IGNF/cartes.gouv.fr/issues/519 */}
+            {/* <p>{tCommon("mandatory_fields")}</p> */}
+            <p>{"Fonctionnalité en cours de construction"}</p>
+
             <Upload
                 label={t("metadata.upload_form.drag_and_drop_file")}
                 className={fr.cx("fr-input-group", "fr-mb-2w")}
@@ -34,6 +37,7 @@ const UploadMDFile: FC<UploadMDFileProps> = ({ visible, form }) => {
                 }}
                 state={errors?.metadata_file_content?.message ? "error" : "default"}
                 stateRelatedMessage={errors?.metadata_file_content?.message?.toString()}
+                disabled={true} // cf. https://github.com/IGNF/cartes.gouv.fr/issues/519
             />
         </div>
     );
