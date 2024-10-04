@@ -1,4 +1,14 @@
 {
+    "webinaire-15-octobre": {
+        "date": "2024-10-07T07:00:00.000Z",
+        "title": "Découvrez comment diffuser vos données à l’aide de cartes.gouv et de la Géoplateforme (version beta)",
+        "breadcrumb": "Découvrez comment diffuser vos données à l’aide de cartes.gouv et de la Géoplateforme (version beta)",
+        "tags": ["Webinaire", "Cartes.gouv.fr", "Géoplateforme", "API"],
+        "thumbnail_url": "build/img/actualites/15_webinaire_diffusion.png",
+        "thumbnail_alt": "Prochain webinaire : Diffusez vos données à l’aide de cartes.gouv et de la Géoplateforme. Mardi 15 octobre 2024 à 11h",
+        "short_description": "L’IGN vous convie à un temps d'information.",
+        "content": "<p>Durant ce temps d’info nous vous présenterons comment diffuser vos propres données géographiques en toute autonomie à l’aide de cartes.gouv et de la Géoplateforme : configuration de géoservices TMS, WMS, WFS à partir des données vectorielles, publication dans le catalogue et visualisation cartographique.</p><p><strong>RDV le mardi 15 octobre à 11h&nbsp;!</strong></p><p>Inscrivez vous ici <a href=\"https://www.ign.fr/geoplateforme/inscrivez-vous-au-prochain-temps-dinformation-geoplateforme-mardi-15-octobre-11h-12h30\" target=\"_blank\"  rel=\"noreferrer\" title=\"www.ign.fr - ouvre une nouvelle fenêtre\">Inscrivez-vous au prochain temps d'information Géoplateforme mardi 15 octobre, 11h-12h30 - Programme Géoplateforme - IGN</a></p>"
+    },
     "temoignage-mnhn": {
         "date": "2024-05-27T08:00:00.000Z",
         "title": "Témoignage : Contribution des données de l’inventaire national du patrimoine naturel à la Géoplateforme",
