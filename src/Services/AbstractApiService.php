@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Mime\Part\DataPart;
 use Symfony\Component\Mime\Part\Multipart\FormDataPart;
+use Symfony\Component\Security\Core\Exception\AuthenticationExpiredException;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
@@ -172,8 +173,12 @@ abstract class AbstractApiService
         /** @var SessionInterface */
         $session = $this->requestStack->getSession();
 
-        /** @var AccessToken */
+        /** @var ?AccessToken */
         $accessToken = $session->get(KeycloakToken::SESSION_KEY);
+
+        if (null === $accessToken) {
+            throw new AuthenticationExpiredException();
+        }
 
         return $accessToken;
     }
