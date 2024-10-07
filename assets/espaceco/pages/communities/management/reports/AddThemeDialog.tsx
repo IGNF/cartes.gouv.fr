@@ -10,7 +10,7 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { TableResponseDTO, ThemeDTO } from "../../../../../@types/espaceco";
 import { useTranslation } from "../../../../../i18n/i18n";
-import normalizeTheme from "./ThemeUtils";
+import { normalizeTheme } from "./ThemeUtils";
 
 const AddThemeDialogModal = createModal({
     id: "add-theme",

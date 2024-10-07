@@ -226,14 +226,14 @@ const routeDefs = {
             page: param.query.optional.number.default(1),
             filter: param.query.optional.string.default("public"),
         },
-        () => `${appRoot}/espaceco/community`
+        () => `${appRoot}/espace-collaboratif`
     ),
 
     espaceco_manage_community: defineRoute(
         {
             communityId: param.path.number,
         },
-        (p) => `${appRoot}/espaceco/community/${p.communityId}/gestion`
+        (p) => `${appRoot}/espace-collaboratif/${p.communityId}/gerer-le-guichet`
     ),
 };
 

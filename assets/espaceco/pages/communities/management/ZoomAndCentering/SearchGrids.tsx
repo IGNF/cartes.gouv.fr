@@ -1,6 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import MuiDsfrThemeProvider from "@codegouvfr/react-dsfr/mui";
-import Autocomplete from "@mui/material/Autocomplete";
+import Autocomplete, { autocompleteClasses } from "@mui/material/Autocomplete";
 import { useQuery } from "@tanstack/react-query";
 import { FC, ReactNode } from "react";
 import { useDebounceValue } from "usehooks-ts";
@@ -10,6 +10,7 @@ import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/espaceco/RQKeys";
 import api from "../../../../api";
 import TextField from "@mui/material/TextField";
+import Box from "@mui/material/Box";
 
 export type SearchGridsProps = {
     label: ReactNode;
@@ -34,12 +35,33 @@ const SearchGrids: FC<SearchGridsProps> = ({ label, hintText, filters, onChange 
 
     return (
         <div>
-            <label className={fr.cx("fr-label")}>
+            <label className={fr.cx("fr-mb-2v", "fr-label")}>
                 {label}
                 {hintText && <span className={"fr-hint-text"}>{hintText}</span>}
             </label>
             <MuiDsfrThemeProvider>
                 <Autocomplete
+                    disablePortal={true} // If true, the Popper content will be under the DOM hierarchy of the parent component.
+                    renderOption={(props, option, state, ownerState) => {
+                        const { ...optionProps } = props;
+                        return (
+                            <Box
+                                sx={{
+                                    // borderRadius: "8px",
+                                    margin: 0,
+                                    [`&.${autocompleteClasses.option}`]: {
+                                        padding: 0,
+                                        height: "20px",
+                                    },
+                                }}
+                                component="li"
+                                {...optionProps}
+                            >
+                                {ownerState.getOptionLabel(option)}
+                            </Box>
+                        );
+                    }}
+                    size={"small"}
                     loading={searchQuery.isLoading}
                     loadingText={t("loading")}
                     noOptionsText={t("no_results")}
@@ -50,7 +72,7 @@ const SearchGrids: FC<SearchGridsProps> = ({ label, hintText, filters, onChange 
                     isOptionEqualToValue={(option, v) => option.name === v.name}
                     onInputChange={(_, v) => setText(v)}
                     onChange={(_, v) => {
-                        if (v) onChange(v);
+                        onChange(v);
                     }}
                 />
             </MuiDsfrThemeProvider>
