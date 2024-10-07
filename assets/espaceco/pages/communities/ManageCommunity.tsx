@@ -15,9 +15,9 @@ import { routes } from "../../../router/router";
 import api from "../../api";
 import Description from "./management/Description";
 import Grid from "./management/Grid";
-import ZoomAndCentering from "./management/ZoomAndCentering";
 import Layer from "./management/Layer";
 import Reports from "./management/Reports";
+import ZoomAndCentering from "./management/ZoomAndCentering";
 
 type ManageCommunityProps = {
     communityId: number;
@@ -27,6 +27,7 @@ const navItems = datastoreNavItems();
 
 const ManageCommunity: FC<ManageCommunityProps> = ({ communityId }) => {
     const { t } = useTranslation("ManageCommunity");
+    const { t: tBreadcrumb } = useTranslation("Breadcrumb");
 
     const communityQuery = useQuery<CommunityResponseDTO, CartesApiException>({
         queryKey: RQKeys.community(communityId),
@@ -37,7 +38,18 @@ const ManageCommunity: FC<ManageCommunityProps> = ({ communityId }) => {
     const [selectedTabId, setSelectedTabId] = useState("tab1");
 
     return (
-        <AppLayout navItems={navItems} documentTitle={t("title", { name: communityQuery.data?.name })}>
+        <AppLayout
+            navItems={navItems}
+            customBreadcrumbProps={{
+                homeLinkProps: routes.home().link,
+                segments: [
+                    { label: tBreadcrumb("dashboard_pro"), linkProps: routes.dashboard_pro().link },
+                    { label: tBreadcrumb("espaceco_community_list"), linkProps: routes.espaceco_community_list().link },
+                ],
+                currentPageLabel: tBreadcrumb("espaceco_manage_community", { communityName: communityQuery.data?.name }),
+            }}
+            documentTitle={t("title", { name: communityQuery.data?.name })}
+        >
             <h1>{t("title", { name: communityQuery.data?.name })}</h1>
             {communityQuery.isError ? (
                 <Alert
@@ -54,7 +66,7 @@ const ManageCommunity: FC<ManageCommunityProps> = ({ communityId }) => {
             ) : communityQuery.isLoading ? (
                 <LoadingText message={t("loading")} />
             ) : (
-                communityQuery.data !== undefined && (
+                communityQuery.data && (
                     <div className={fr.cx("fr-container", "fr-py-2w")}>
                         <Tabs
                             selectedTabId={selectedTabId}

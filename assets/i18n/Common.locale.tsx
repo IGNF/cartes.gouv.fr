@@ -8,12 +8,14 @@ const { i18n } = declareComponentKeys<
     | "adding"
     | "modify"
     | "apply"
+    | "record"
     | "modifying"
     | "removing"
     | "loading"
     | "continue"
     | "validate"
     | "submit"
+    | "save"
     | "copy"
     | "send"
     | "cancel"
@@ -35,6 +37,7 @@ const { i18n } = declareComponentKeys<
     | "url_copied"
     | "copy_to_clipboard"
     | "go_to_content"
+    | "trimmed_error"
 >()("Common");
 export type I18n = typeof i18n;
 
@@ -45,12 +48,14 @@ export const commonFrTranslations: Translations<"fr">["Common"] = {
     adding: "Ajout en cours ...",
     modify: "Modifier",
     apply: "Appliquer",
+    record: "Enregistrer",
     modifying: "Modification en cours ...",
     removing: "Suppression en cours ...",
     loading: "Chargement ...",
     continue: "Continuer",
     validate: "Valider",
     submit: "Soumettre",
+    save: "Sauvegarder",
     copy: "Copier",
     send: "Envoyer",
     cancel: "Annuler",
@@ -72,6 +77,7 @@ export const commonFrTranslations: Translations<"fr">["Common"] = {
     url_copied: "URL copiée",
     copy_to_clipboard: "Copier dans le presse-papier",
     go_to_content: "Aller au contenu",
+    trimmed_error: "La chaîne de caractères ne doit contenir aucun espace en début et fin",
 };
 
 export const commonEnTranslations: Translations<"en">["Common"] = {
@@ -81,12 +87,14 @@ export const commonEnTranslations: Translations<"en">["Common"] = {
     adding: "Adding ...",
     modify: "Modify",
     apply: "Apply",
+    record: "Record",
     modifying: "modifying ...",
     removing: "Removing ...",
     loading: "Loading ...",
     continue: "Continue",
     validate: "Validate",
     submit: "Submit",
+    save: "Save",
     copy: "Copy",
     send: "Send",
     cancel: "Cancel",
@@ -108,4 +116,5 @@ export const commonEnTranslations: Translations<"en">["Common"] = {
     url_copied: "URL copied",
     copy_to_clipboard: "Copy to clipboard",
     go_to_content: "Go to content",
+    trimmed_error: "The character string must not contain any spaces at the beginning and end",
 };

@@ -216,7 +216,6 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): Brea
             ];
             return { ...defaultProps, currentPageLabel: t(route.name) };
 
-        case "espaceco_community_list":
         case "home":
         default:
             return undefined;

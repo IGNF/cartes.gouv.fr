@@ -7,6 +7,5 @@
     "valid": "Pris en compte",
     "valid0": "Déjà pris en compte",
     "reject": "Rejeté (hors spéc.)",
-    "reject0": "Rejeté (hors de propos)",
-    "test": "En mode test"
+    "reject0": "Rejeté (hors de propos)"
 }

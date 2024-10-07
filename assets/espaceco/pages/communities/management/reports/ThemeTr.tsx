@@ -5,6 +5,7 @@ export const { i18n } = declareComponentKeys<
     | "add_theme"
     | "add_attribute"
     | "trimmed_error"
+    | "attributes_not_conform"
     | { K: "modify_theme"; P: { text: string }; R: string }
     | { K: "delete_theme"; P: { text: string }; R: string }
     | { K: "modify_attribute"; P: { text: string }; R: string }
@@ -45,12 +46,21 @@ export const { i18n } = declareComponentKeys<
     | "dialog.add_attribute.list_duplicates_error"
     | "dialog.add_attribute.value_not_in_list_error"
     | "dialog.add_attribute.description"
+    | "dialog.edit_attribute.name"
+    | "dialog.edit_attribute.name_mandatory_error"
+    | "dialog.edit_attribute.name_unique_error"
+    | "dialog.edit_attribute.mandatory"
+    | "dialog.edit_attribute.list.multiple"
+    | "dialog.edit_attribute.list.values"
+    | "dialog.edit_attribute.value"
+    | "dialog.edit_attribute.description"
 >()("Theme");
 
 export const ThemeFrTranslations: Translations<"fr">["Theme"] = {
     add_theme: "Ajouter un thème",
     add_attribute: "Ajouter un attribut",
     trimmed_error: "La chaîne de caractères ne doit contenir aucun espace en début et fin",
+    attributes_not_conform: "Les attributs ne sont pas conformes",
     modify_theme: ({ text }) => `Modifier le thème [${text}]`,
     delete_theme: ({ text }) => `Supprimer le thème [${text}]`,
     modify_attribute: ({ text }) => `Modifier l'attribut [${text}]`,
@@ -97,7 +107,7 @@ export const ThemeFrTranslations: Translations<"fr">["Theme"] = {
         }
     },
     "dialog.add_attribute.list.multiple": "Choix multiple",
-    "dialog.add_attribute.list.values": "Valeurs",
+    "dialog.add_attribute.list.values": "Valeurs (à séparer par des '|')",
     "dialog.add_attribute.value": "Valeur par défaut (optionnel sauf pour le type Liste)",
     "dialog.add_attribute.value.not_a_valid_integer": "La valeur n'est pas un entier valide",
     "dialog.add_attribute.value.not_a_valid_double": "La valeur n'est pas un double valide",
@@ -107,12 +117,21 @@ export const ThemeFrTranslations: Translations<"fr">["Theme"] = {
     "dialog.add_attribute.list_duplicates_error": "Il y a des valeurs en double dans la liste",
     "dialog.add_attribute.value_not_in_list_error": "La valeur doit être dans la liste",
     "dialog.add_attribute.description": "Description (optionnel)",
+    "dialog.edit_attribute.name": "Nouveau nom",
+    "dialog.edit_attribute.name_mandatory_error": "Le nom de l'attribut est obligatoire",
+    "dialog.edit_attribute.name_unique_error": "Le nom doit être unique",
+    "dialog.edit_attribute.mandatory": "Attribut obligatoire",
+    "dialog.edit_attribute.list.multiple": "Choix multiple",
+    "dialog.edit_attribute.list.values": "Valeurs (à séparer par des '|')",
+    "dialog.edit_attribute.value": "Valeur par défaut (optionnel sauf pour le type Liste)",
+    "dialog.edit_attribute.description": "Nouvelle description",
 };
 
 export const ThemeEnTranslations: Translations<"en">["Theme"] = {
     add_theme: "Add Theme",
     add_attribute: undefined,
     trimmed_error: undefined,
+    attributes_not_conform: undefined,
     modify_theme: ({ text }) => `Modify theme [${text}]`,
     delete_theme: ({ text }) => `Delete theme [${text}]`,
     modify_attribute: ({ text }) => `Modify attribute [${text}]`,
@@ -168,4 +187,12 @@ export const ThemeEnTranslations: Translations<"en">["Theme"] = {
     "dialog.add_attribute.list_duplicates_error": undefined,
     "dialog.add_attribute.value_not_in_list_error": undefined,
     "dialog.add_attribute.description": undefined,
+    "dialog.edit_attribute.name": undefined,
+    "dialog.edit_attribute.name_mandatory_error": undefined,
+    "dialog.edit_attribute.name_unique_error": undefined,
+    "dialog.edit_attribute.mandatory": undefined,
+    "dialog.edit_attribute.list.multiple": undefined,
+    "dialog.edit_attribute.list.values": undefined,
+    "dialog.edit_attribute.value": undefined,
+    "dialog.edit_attribute.description": undefined,
 };

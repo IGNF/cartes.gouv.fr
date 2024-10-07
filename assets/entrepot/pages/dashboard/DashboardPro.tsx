@@ -1,14 +1,15 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import Button from "@codegouvfr/react-dsfr/Button";
-import { Tile } from "@codegouvfr/react-dsfr/Tile";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
 import avatarSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/digital/avatar.svg?no-inline";
+import internetSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/digital/internet.svg?no-inline";
 import mailSendSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/digital/mail-send.svg?no-inline";
 import humanCoopSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/environment/human-cooperation.svg?no-inline";
 import padlockSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/system/padlock.svg?no-inline";
+import { Tile } from "@codegouvfr/react-dsfr/Tile";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 
 import { CartesUser, Datastore } from "../../../@types/app";
+import Main from "../../../components/Layout/Main";
 import LoadingIcon from "../../../components/Utils/LoadingIcon";
 import Skeleton from "../../../components/Utils/Skeleton";
 import { useTranslation } from "../../../i18n/i18n";
@@ -19,7 +20,6 @@ import { useApiEspaceCoStore } from "../../../stores/ApiEspaceCoStore";
 import { useAuthStore } from "../../../stores/AuthStore";
 import { getArrayRange } from "../../../utils";
 import api from "../../api";
-import Main from "../../../components/Layout/Main";
 
 const DashboardPro = () => {
     const { t } = useTranslation("DashboardPro");
@@ -183,8 +183,16 @@ const DashboardPro = () => {
             </div>
 
             {isApiEspaceCoDefined() && (
-                <div className={fr.cx("fr-grid-row", "fr-grid-row--left", "fr-mt-4w")}>
-                    <Button linkProps={routes.espaceco_community_list().link}>{t("espaceco_frontoffice_list")}</Button>
+                <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
+                    <div className={fr.cx("fr-col-12", "fr-col-sm-6")}>
+                        <Tile
+                            linkProps={routes.espaceco_community_list().link}
+                            imageUrl={internetSvgUrl}
+                            desc="Voir la liste des guichets"
+                            orientation="horizontal"
+                            title={t("espaceco_frontoffice_list")}
+                        />
+                    </div>
                 </div>
             )}
         </Main>

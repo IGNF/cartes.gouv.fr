@@ -31,6 +31,7 @@ type QueryParamsType = {
 const Communities: FC = () => {
     const route = useRoute();
     const { t } = useTranslation("CommunityList");
+    const { t: tBreadcrumb } = useTranslation("Breadcrumb");
 
     const filter = useMemo<CommunityListFilter>(() => {
         const f = route.params["filter"];
@@ -71,7 +72,15 @@ const Communities: FC = () => {
     };
 
     return (
-        <AppLayout navItems={navItems} documentTitle={t("title")}>
+        <AppLayout
+            navItems={navItems}
+            customBreadcrumbProps={{
+                homeLinkProps: routes.home().link,
+                segments: [{ label: tBreadcrumb("dashboard_pro"), linkProps: routes.dashboard_pro().link }],
+                currentPageLabel: tBreadcrumb("espaceco_community_list"),
+            }}
+            documentTitle={t("title")}
+        >
             <h1>{t("title")}</h1>
             <div>
                 {communityQuery.isError && <Alert severity="error" closable={false} title={communityQuery.error?.message} />}

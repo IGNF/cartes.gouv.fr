@@ -48,6 +48,8 @@ const { i18n } = declareComponentKeys<
     | "datastore_pyramid_raster_wmts_service_new"
     | "datastore_pyramid_raster_wmts_service_edit"
     | "datastore_service_view"
+    | "espaceco_community_list"
+    | { K: "espaceco_manage_community"; P: { communityName?: string }; R: string }
 >()("Breadcrumb");
 export type I18n = typeof i18n;
 
@@ -98,6 +100,8 @@ export const BreadcrumbFrTranslations: Translations<"fr">["Breadcrumb"] = {
     datastore_pyramid_raster_wmts_service_new: "Création d'un service WMTS",
     datastore_pyramid_raster_wmts_service_edit: "Modification d'un service WMTS",
     datastore_service_view: "Prévisualisation d'un service",
+    espaceco_community_list: "Espace collaboratif",
+    espaceco_manage_community: ({ communityName }) => `Gérer le guichet ${communityName ?? ""}`,
 };
 
 export const BreadcrumbEnTranslations: Translations<"en">["Breadcrumb"] = {
@@ -147,4 +151,6 @@ export const BreadcrumbEnTranslations: Translations<"en">["Breadcrumb"] = {
     datastore_pyramid_raster_wmts_service_new: "Create a WMTS service",
     datastore_pyramid_raster_wmts_service_edit: "Modify a WMTS service",
     datastore_service_view: "Preview a service",
+    espaceco_community_list: "Collaborative space",
+    espaceco_manage_community: ({ communityName }) => `Manage community ${communityName ?? ""}`,
 };

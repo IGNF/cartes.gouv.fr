@@ -23,7 +23,7 @@ type formType = {
     zoom: number;
     zoomMin: number;
     zoomMax: number;
-    extent?: Extent | null;
+    extent: Extent | null;
 };
 
 const ZoomAndCentering: FC<ZoomAndCenteringProps> = ({ community }) => {

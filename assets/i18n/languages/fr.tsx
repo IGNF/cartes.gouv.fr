@@ -46,6 +46,8 @@ import { mapboxStyleValidationFrTranslations } from "../../validations/mapbox/Ma
 import { SldStyleValidationErrorsFrTranslations } from "../../validations/sld/SldStyleValidation.locale";
 import { commonFrTranslations } from "../Common.locale";
 import { ThemeFrTranslations } from "../../espaceco/pages/communities/management/reports/ThemeTr";
+import { ReportStatusesFrTranslations } from "../../espaceco/pages/communities/management/reports/ReportStatusesTr";
+import { SharedThemesFrTranslations } from "../../espaceco/pages/communities/management/reports/SharedThemes";
 import type { Translations } from "../types";
 
 export const translations: Translations<"fr"> = {
@@ -92,5 +94,7 @@ export const translations: Translations<"fr"> = {
     ManageCommunity: ManageCommunityFrTranslations,
     ManageCommunityValidations: ManageCommunityValidationsFrTranslations,
     Theme: ThemeFrTranslations,
+    ReportStatuses: ReportStatusesFrTranslations,
+    SharedThemes: SharedThemesFrTranslations,
     Search: SearchFrTranslations,
 };
