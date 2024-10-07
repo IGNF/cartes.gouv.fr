@@ -11,8 +11,8 @@ class AttributeValidations {
         this.#context = context;
     }
 
-    validateValue = (value: string | undefined) => {
-        if (value === undefined) return true;
+    validateValue = (value?: string | null) => {
+        if (value === undefined || value === null) return true;
 
         const {
             parent: { type },
@@ -77,7 +77,7 @@ class AttributeValidations {
     };
 }
 
-const validateList = (value: string | undefined, context: yup.TestContext<yup.AnyObject>): yup.ValidationError | boolean => {
+const validateList = (value: string | null | undefined, context: yup.TestContext<yup.AnyObject>): yup.ValidationError | boolean => {
     const {
         parent: { type },
     } = context;

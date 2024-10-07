@@ -9,20 +9,22 @@ export interface ConstraintsDTO {
 }
 
 export const AttributeTypes = ["text", "integer", "double", "checkbox", "list", "date"];
+
 export type AttributeType = (typeof AttributeTypes)[number];
-export interface AttributeDTO {
+export type AttributeDTO = {
     name: string;
     type: AttributeType;
-    default?: string;
+    default?: string | null;
     mandatory?: boolean;
-    values?: string[];
-    help?: string;
+    multiple?: boolean;
+    values?: string[] | null;
+    help?: string | null;
     title?: string;
-    input_constraints?: ConstraintsDTO;
-    json_schema?: object;
+    input_constraints?: ConstraintsDTO | null;
+    json_schema?: object | null;
     required?: boolean;
     condition_field?: string;
-}
+};
 
 export interface ThemeDTO {
     theme: string;
@@ -33,28 +35,38 @@ export interface ThemeDTO {
     global?: boolean;
 }
 
-export type ReportStatuses = keyof typeof statuses;
-export type ReportStatusesDTO = Record<
-    ReportStatuses,
-    {
-        wording: string;
-        help?: string;
-    }
->;
+export type UserSharedThemesDTO = {
+    community_id: number;
+    community_name: string;
+    themes: ThemeDTO[];
+};
 
-export type ReportStatusesDTO2 = {
-    status: ReportStatuses;
-    wording: string;
-    help?: string;
-}[];
+export type SharedThemesDTO = {
+    community_id: number;
+    community_name: string;
+    themes: string[];
+};
 
+export type ReportStatusesType = keyof typeof statuses;
+
+export type ReportStatusParams = {
+    title: string;
+    description?: string;
+    active: boolean;
+};
+export type ReportStatusesDTO = Record<string, ReportStatusParams>;
+
+const SharedGeoremOptions = ["all", "restrained", "personal"];
+export type SharedGeorem = (typeof SharedGeoremOptions)[number];
 export interface CommunityResponseDTO {
     id: number;
     description: string | null;
     detailed_description?: string | null;
     name: string;
     active: boolean;
+    listed: boolean;
     shared_georem: "all" | "restrained" | "personal";
+    shared_extractions: boolean;
     email: string | null;
     attributes: ThemeDTO[];
     default_comment: string | null;
@@ -67,14 +79,14 @@ export interface CommunityResponseDTO {
     open_without_affiliation: boolean;
     open_with_email?: string[];
     offline_allowed: boolean;
-    shared_extractions: boolean;
     /** @format date-time */
     creation: string;
     grids: Grid[];
     logo_url: string | null;
     keywords?: string[];
     documents?: DocumentDTO[];
-    report_statuses?: ReportStatusesDTO2;
+    report_statuses?: ReportStatusesDTO;
+    shared_themes?: SharedThemesDTO[];
 }
 
 export interface DocumentDTO {
@@ -176,5 +188,10 @@ export interface TableResponseDTO {
 
 export type ReportFormType = {
     attributes: ThemeDTO[];
-    report_statuses?: ReportStatusesDTO2;
+    report_statuses: ReportStatusesDTO;
+    shared_themes?: SharedThemesDTO[];
+    shared_georem: SharedGeorem;
+    all_members_can_valid: boolean;
 };
+
+export { SharedGeoremOptions };

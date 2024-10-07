@@ -12,6 +12,7 @@ type GridListProps = {
 
 const GridList: FC<GridListProps> = ({ grids = [], onChange }) => {
     const [grid, setGrid] = useState<Grid | null>(null);
+    console.log(grid);
 
     const [internal, setInternal] = useState<Grid[]>([...grids]);
 
@@ -40,13 +41,13 @@ const GridList: FC<GridListProps> = ({ grids = [], onChange }) => {
     }, [internal, handleRemove]);
 
     return (
-        <>
+        <div>
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-6")}>
                     <SearchGrids
                         label={""}
                         filters={{
-                            searchBy: ["name", "title"],
+                            fields: ["name", "title", "type", "extent"],
                         }}
                         onChange={(grid) => setGrid(grid)}
                     />
@@ -57,8 +58,8 @@ const GridList: FC<GridListProps> = ({ grids = [], onChange }) => {
                     </div>
                 </div>
             </div>
-            <Table className={fr.cx("fr-table--sm")} caption={null} data={data} />
-        </>
+            <Table className={fr.cx("fr-table--sm")} bordered fixed noCaption data={data} />
+        </div>
     );
 };
 

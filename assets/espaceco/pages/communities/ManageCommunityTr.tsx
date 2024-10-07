@@ -7,6 +7,7 @@ export type logoAction = "add" | "modify" | "delete";
 export const { i18n } = declareComponentKeys<
     | { K: "title"; P: { name: string | undefined }; R: string }
     | "loading"
+    | "loading_tables"
     | "fetch_failed"
     | "back_to_list"
     | "tab1"
@@ -57,8 +58,17 @@ export const { i18n } = declareComponentKeys<
     | "layer.tab3"
     | "report.configure_themes"
     | "report.configure_themes.explain"
+    | "report.configure_shared_themes"
+    | "report.configure_shared_themes.explain"
     | "report.configure_statuses"
     | "report.configure_statuses.explain"
+    | "report.manage_permissions"
+    | "report.manage_permissions.shared_report"
+    | "report.manage_permissions.shared_report_hint"
+    | { K: "report.manage_permissions.shared_report.option"; P: { option: string }; R: string }
+    | "report.manage_permissions.report_answers"
+    | "report.manage_permissions.authorize"
+    | "report.manage_permissions.authorize_hint"
     | "grid.grids"
     | { K: "grid.explain"; R: JSX.Element }
 >()("ManageCommunity");
@@ -66,6 +76,7 @@ export const { i18n } = declareComponentKeys<
 export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"] = {
     title: ({ name }) => (name === undefined ? "Gérer le guichet" : `Gérer le guichet - ${name}`),
     loading: "Recherche du guichet en cours ...",
+    loading_tables: "Recherche des tables pour la configuration des thèmes en cours ...",
     fetch_failed: "La récupération des informations sur le guichet a échoué",
     back_to_list: "Retour à la liste des guichets",
     tab1: "Description",
@@ -129,9 +140,31 @@ export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"
     "report.configure_themes": "Configurer les thèmes et attributs des signalements (optionnel)",
     "report.configure_themes.explain":
         "Afin de permettre aux membres de votre groupe de soumettre des signalements sur d'autres thématiques que celles IGN (Adresse, Bâti, Points d'intérêts...), vous pouvez ajouter vos propres thèmes et personnaliser le formulaire de saisie d'un nouveau signalement pour l'adapter à vos besoins métier. Les membres de votre groupe verront ces thèmes, en plus ou à la place des thèmes IGN, sur l'interface de saisie d'un nouveau signalement sur l'espace collaboratif, les plugins SIG et l'application mobile.",
+    "report.configure_shared_themes": "Afficher des thèmes partagés (optionnel)",
+    "report.configure_shared_themes.explain": "Vous pouvez également choisir des thèmes partagés qui apparaitront sur ce guichet.",
     "report.configure_statuses": "Paramétrer les status des signalements (optionnel)",
     "report.configure_statuses.explain":
-        "Vous pouvez supprimer un maximum de 2 status en les décochant, changer le nom des status et ajouter une explication des status pour améliorer la compréhension de vos utilisateurs.",
+        "Vous pouvez supprimer un maximum de 2 status en les décochant, changer leur nom et ajouter une explication pour améliorer la compréhension de vos utilisateurs.",
+    "report.manage_permissions": "Gérer les permissions (optionnel)",
+    "report.manage_permissions.shared_report": "Partage des signalements",
+    "report.manage_permissions.shared_report_hint":
+        "Vous pouvez déterminer quels utilisateurs ont accès aux signalements du groupe. Choisissez si les signalements du groupe sont :",
+    "report.manage_permissions.shared_report.option": ({ option }) => {
+        switch (option) {
+            case "all":
+                return "Visibles de tout le monde";
+            case "restrained":
+                return "Visibles uniquement des membres du guichet";
+            case "personal":
+                return "Visibles uniquement de leur auteur et des gestionnaires du guichet";
+            default:
+                return "";
+        }
+    },
+    "report.manage_permissions.report_answers": "Réponses aux signalements",
+    "report.manage_permissions.authorize": "Autoriser",
+    "report.manage_permissions.authorize_hint":
+        "Tous les membres d'un groupe peuvent répondre aux signalements le concernant mais seuls les gestionnaires peuvent valider ces réponses et donc clore les signalements. En cochant la case suivante vous autorisez tous les membres de ce groupe à apporter des réponses sans validation.",
     "grid.grids": "Emprises du guichet (optionnel)",
     "grid.explain": (
         <p>
@@ -145,6 +178,7 @@ export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"
 export const ManageCommunityEnTranslations: Translations<"en">["ManageCommunity"] = {
     title: ({ name }) => (name === undefined ? "Manage front office" : `Manage front office - ${name}`),
     loading: undefined,
+    loading_tables: undefined,
     fetch_failed: undefined,
     back_to_list: undefined,
     tab1: undefined,
@@ -204,8 +238,19 @@ export const ManageCommunityEnTranslations: Translations<"en">["ManageCommunity"
     "layer.tab3": "Base maps",
     "report.configure_themes": undefined,
     "report.configure_themes.explain": undefined,
+    "report.configure_shared_themes": undefined,
+    "report.configure_shared_themes.explain": undefined,
     "report.configure_statuses": undefined,
     "report.configure_statuses.explain": undefined,
+    "report.manage_permissions": undefined,
+    "report.manage_permissions.shared_report": undefined,
+    "report.manage_permissions.shared_report_hint": undefined,
+    "report.manage_permissions.shared_report.option": ({ option }) => {
+        return `${option}`;
+    },
+    "report.manage_permissions.report_answers": undefined,
+    "report.manage_permissions.authorize": undefined,
+    "report.manage_permissions.authorize_hint": undefined,
     "grid.grids": undefined,
     "grid.explain": undefined,
 };

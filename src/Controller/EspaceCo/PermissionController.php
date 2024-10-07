@@ -81,7 +81,9 @@ class PermissionController extends AbstractController implements ApiControllerIn
                 return ($fna < $fnb) ? -1 : 1;
             });
 
-            return new JsonResponse(array_unique($response, SORT_REGULAR));
+            $t = array_values(array_unique($response, SORT_REGULAR));
+
+            return new JsonResponse($t);
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
