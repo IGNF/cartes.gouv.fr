@@ -1,9 +1,9 @@
 import { BreadcrumbProps } from "@codegouvfr/react-dsfr/Breadcrumb";
 import { Route } from "type-route";
 
+import { Datastore } from "../../@types/app";
 import { getTranslation } from "../../i18n/i18n";
 import { routes } from "../../router/router";
-import { Datastore } from "../../@types/app";
 
 const { t } = getTranslation("Breadcrumb");
 
@@ -181,7 +181,6 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): Brea
             ];
             return { ...defaultProps, currentPageLabel: t(route.name) };
 
-        case "espaceco_community_list":
         case "home":
         default:
             return undefined;

@@ -17,19 +17,15 @@ export type EditThemeFormType = {
     help?: string;
 };
 
-const EditThemeDialogModal = createModal({
-    id: "edit-theme",
-    isOpenedByDefault: false,
-});
-
 type EditThemeDialogProps = {
+    modal: ReturnType<typeof createModal>;
     themes: ThemeDTO[];
     currentTheme?: ThemeDTO;
     // tables: Partial<TableResponseDTO>[];
     onModify: (oldName: string, newTheme: EditThemeFormType) => void;
 };
 
-const EditThemeDialog: FC<EditThemeDialogProps> = ({ themes, currentTheme, onModify }) => {
+const EditThemeDialog: FC<EditThemeDialogProps> = ({ modal, themes, currentTheme, onModify }) => {
     const { t: tCommon } = useTranslation("Common");
     const { t } = useTranslation("Theme");
 
@@ -68,7 +64,7 @@ const EditThemeDialog: FC<EditThemeDialogProps> = ({ themes, currentTheme, onMod
     });
 
     const onSubmit = () => {
-        EditThemeDialogModal.close();
+        modal.close();
         if (currentTheme) {
             const values = getFormValues();
             onModify(currentTheme?.theme, values);
@@ -78,7 +74,7 @@ const EditThemeDialog: FC<EditThemeDialogProps> = ({ themes, currentTheme, onMod
     return (
         <>
             {createPortal(
-                <EditThemeDialogModal.Component
+                <modal.Component
                     title={t("modify_theme", { text: currentTheme?.theme ?? "" })}
                     buttons={[
                         {
@@ -128,11 +124,11 @@ const EditThemeDialog: FC<EditThemeDialogProps> = ({ themes, currentTheme, onMod
                             />
                         )}
                     </div>
-                </EditThemeDialogModal.Component>,
+                </modal.Component>,
                 document.body
             )}
         </>
     );
 };
 
-export { EditThemeDialog, EditThemeDialogModal };
+export default EditThemeDialog;
