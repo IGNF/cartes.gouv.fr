@@ -3,54 +3,102 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import { FC, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
-import { ReportFormType, ReportStatusesDTO2 } from "../../../../../@types/espaceco";
+import { ReportFormType, ReportStatusesType } from "../../../../../@types/espaceco";
 import { useTranslation } from "../../../../../i18n/i18n";
-import getDefaultStatuses from "./Utils";
+import { EditReportParameterModal, EditReportStatusDialog } from "./EditReportStatusDialog";
+import { statusesAlwaysActive } from "./Utils";
 
 type ReportStatusesProps = {
     form: UseFormReturn<ReportFormType>;
-    statuses?: ReportStatusesDTO2;
+    state?: "default" | "error" | "success";
 };
-const ReportStatuses: FC<ReportStatusesProps> = ({ form, statuses }) => {
+
+// const minStatuses = getMinAuthorizedStatus();
+
+const ReportStatuses: FC<ReportStatusesProps> = ({ form, state }) => {
+    const { t: tStatus } = useTranslation("ReportStatuses");
     const { t } = useTranslation("ManageCommunity");
 
-    const [newStatus, setNewStatus] = useState<ReportStatusesDTO2>(() => {
-        return statuses ? { ...statuses } : getDefaultStatuses();
-    });
+    const {
+        watch,
+        register,
+        setValue: setFormValue,
+        formState: { errors },
+    } = form;
+    const statuses = watch("report_statuses");
+
+    const [currentStatus, setCurrentStatus] = useState<ReportStatusesType | undefined>();
+
+    // Changement d'etat d'un checkbox
+    /*const handleOnChange = (status: string, checked: boolean) => {
+        const v = { ...statuses };
+        const num = countActiveStatus(v);
+        if ((!checked && num > minStatuses) || checked) {
+            v[status].active = checked;
+        }
+        setFormValue("report_statuses", v);
+    }; */
 
     return (
-        <div>
+        <div className={fr.cx("fr-input-group", "fr-mt-2w", state === "error" && "fr-input-group--error")}>
             <h3>{t("report.configure_statuses")}</h3>
             <span className={fr.cx("fr-hint-text")}>{t("report.configure_statuses.explain")}</span>
-            <div className={fr.cx("fr-grid-row")}>
-                <div className={fr.cx("fr-col-6")}>
-                    <ul className={fr.cx("fr-raw-list")}>
-                        {newStatus.map((s) => (
-                            <li key={s.status}>
-                                <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                                    <div className={fr.cx("fr-col-10")}>
-                                        <Checkbox
-                                            options={[
-                                                {
-                                                    label: s.wording,
-                                                    nativeInputProps: {
-                                                        value: s.status,
-                                                    },
-                                                },
-                                            ]}
-                                        />
-                                    </div>
-                                    <div className={fr.cx("fr-col-2")}>
-                                        <div className={fr.cx("fr-grid-row", "fr-grid-row--right")}>
-                                            <Button title={""} priority="secondary" iconId="fr-icon-settings-5-line" size="small" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
+            <div className={fr.cx("fr-mt-2v")}>
+                <Checkbox
+                    className={fr.cx("fr-m-0")}
+                    options={Object.keys(statuses).map((s) => {
+                        const label = (
+                            <div className={fr.cx("fr-grid-row", "fr-grid-row--top")}>
+                                {statuses[s].title}
+                                <Button
+                                    title={tStatus("parameter")}
+                                    priority="tertiary no outline"
+                                    iconId="fr-icon-edit-line"
+                                    size="small"
+                                    onClick={() => {
+                                        setCurrentStatus(s as ReportStatusesType);
+                                        EditReportParameterModal.open();
+                                    }}
+                                />
+                            </div>
+                        );
+                        return {
+                            label: label,
+                            nativeInputProps: {
+                                ...register(`report_statuses.${s}.active`),
+                                disabled: statusesAlwaysActive.includes(s),
+                            },
+                        };
+                    })}
+                />
             </div>
+            {state !== "default" && (
+                <p
+                    className={fr.cx(
+                        (() => {
+                            switch (state) {
+                                case "error":
+                                    return "fr-error-text";
+                                case "success":
+                                    return "fr-valid-text";
+                            }
+                        })()
+                    )}
+                >
+                    {errors.report_statuses?.root?.message}
+                </p>
+            )}
+            <EditReportStatusDialog
+                status={currentStatus}
+                statusParams={currentStatus ? statuses?.[currentStatus] : undefined}
+                onModify={(values) => {
+                    if (currentStatus) {
+                        const v = { ...statuses };
+                        v[currentStatus] = { ...v[currentStatus], ...values };
+                        setFormValue("report_statuses", v);
+                    }
+                }}
+            />
         </div>
     );
 };
