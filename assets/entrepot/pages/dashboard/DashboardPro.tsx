@@ -107,36 +107,50 @@ const DashboardPro = () => {
             <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
                 {/* si l'utilisateur ne fait pas déjà partie du bac à sable, on affiche une Tile "spéciale" dont le click va ajouter l'utilisateur dans le bac à sable */}
                 {/* si l'utilisateur en fait déjà partie, on n'affiche pas cette Tile, on boucle tout simplement sur ses datastores (user.communities_member), voir plus bas */}
-                {sandboxDatastoreQuery.data !== undefined &&
-                    user?.communities_member.find((community) => community.community?.datastore === sandboxDatastoreQuery.data._id) === undefined && (
-                        <div className={fr.cx("fr-col-12", "fr-col-sm-6", "fr-col-md-4", "fr-col-lg-3")}>
-                            <Tile
-                                linkProps={{
-                                    ...routes.datasheet_list({ datastoreId: sandboxDatastoreQuery.data._id }).link,
-                                    onClick: () => handleClick(sandboxDatastoreQuery.data._id),
-                                }}
-                                grey={true}
-                                title={sandboxDatastoreQuery.data.name}
-                                desc={t("datastore_for_tests")}
-                            />
-                        </div>
-                    )}
+                {sandboxDatastoreQuery.data !== undefined && (
+                    <>
+                        {user?.communities_member.find((community) => community.community?.datastore === sandboxDatastoreQuery.data._id) === undefined && (
+                            <div className={fr.cx("fr-col-12", "fr-col-sm-6", "fr-col-md-4", "fr-col-lg-3")}>
+                                <Tile
+                                    linkProps={{
+                                        ...routes.datasheet_list({ datastoreId: sandboxDatastoreQuery.data._id }).link,
+                                        onClick: () => handleClick(sandboxDatastoreQuery.data._id),
+                                    }}
+                                    grey={true}
+                                    title={"Découverte"}
+                                    desc={t("datastore_for_tests")}
+                                />
+                            </div>
+                        )}
 
-                {user?.communities_member.map((community) => {
-                    const datastoreId = community.community?.datastore;
-                    if (datastoreId === undefined) return null;
+                        {user?.communities_member
+                            // tri pour positionner le datastore bac à sable en premier
+                            .sort((a, b) => {
+                                if (a.community?._id === sandboxDatastoreQuery.data?.community._id) return -1;
+                                if (b.community?._id === sandboxDatastoreQuery.data?.community._id) return 1;
+                                return 0;
+                            })
+                            .map((community) => {
+                                const datastoreId = community.community?.datastore;
+                                if (datastoreId === undefined) return null;
 
-                    return (
-                        <div key={datastoreId} className={fr.cx("fr-col-12", "fr-col-sm-6", "fr-col-md-4", "fr-col-lg-3")}>
-                            <Tile
-                                linkProps={routes.datasheet_list({ datastoreId }).link}
-                                grey={true}
-                                title={community.community?.name}
-                                desc={community.community?.is_sandbox === true ? t("datastore_for_tests") : undefined}
-                            />
-                        </div>
-                    );
-                })}
+                                return (
+                                    <div key={datastoreId} className={fr.cx("fr-col-12", "fr-col-sm-6", "fr-col-md-4", "fr-col-lg-3")}>
+                                        <Tile
+                                            linkProps={routes.datasheet_list({ datastoreId }).link}
+                                            grey={true}
+                                            title={
+                                                community.community?._id === sandboxDatastoreQuery.data?.community._id
+                                                    ? "Découverte"
+                                                    : community.community?.name
+                                            }
+                                            desc={community.community?._id === sandboxDatastoreQuery.data?.community._id ? t("datastore_for_tests") : undefined}
+                                        />
+                                    </div>
+                                );
+                            })}
+                    </>
+                )}
             </div>
 
             <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>

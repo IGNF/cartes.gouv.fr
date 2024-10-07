@@ -23,9 +23,16 @@ class SandboxService
         $this->sandboxCommunityId = isset($sandbox['community_id']) ? $sandbox['community_id'] : null;
 
         if ($this->sandboxCommunityId) {
+            // NOTE : on met en cache (24h) le datastore id seulement
+            $key = "community-{$this->sandboxCommunityId}-datastore-id";
             try {
-                $sandboxCommunity = $this->getSandboxCommunity($this->sandboxCommunityId);
-                $this->sandboxDatastoreId = $sandboxCommunity['datastore']['_id'];
+                $this->sandboxDatastoreId = $this->cache->get($key, function (ItemInterface $item): string {
+                    $item->expiresAfter(86400);
+
+                    $sandboxCommunity = $this->getSandboxCommunity($this->sandboxCommunityId);
+
+                    return $sandboxCommunity['datastore']['_id'];
+                });
             } catch (\Throwable $e) {
             }
         }
@@ -72,12 +79,13 @@ class SandboxService
      */
     private function getSandboxCommunity(string $sandboxCommunityId): array
     {
-        $key = "community-{$sandboxCommunityId}";
+        return $this->communityApiService->get($sandboxCommunityId);
+        // $key = "community-{$sandboxCommunityId}";
 
-        return $this->cache->get($key, function (ItemInterface $item) use ($sandboxCommunityId) {
-            $item->expiresAfter(300);
+        // return $this->cache->get($key, function (ItemInterface $item) use ($sandboxCommunityId) {
+        //     $item->expiresAfter(300);
 
-            return $this->communityApiService->get($sandboxCommunityId);
-        });
+        //     return $this->communityApiService->get($sandboxCommunityId);
+        // });
     }
 }
