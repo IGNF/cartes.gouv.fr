@@ -140,24 +140,24 @@ const ZoomRange: FC<ZoomRangeProps> = (props) => {
         <div className={fr.cx("fr-my-2v")}>
             <div className={fr.cx("fr-grid-row")}>
                 {(mode === "both" || mode === "top") && (
-                    <div className={fr.cx("fr-col-6", "fr-px-2v")}>
+                    <div className={fr.cx("fr-col", "fr-px-2v")}>
                         <div ref={leftMapTargetRef} className={cx(classes.map)} />
                     </div>
                 )}
 
                 {mode !== "both" && (
-                    <div className={cx(fr.cx("fr-col-6", "fr-px-2v"))}>
+                    <div className={cx(fr.cx("fr-col", "fr-px-2v"))}>
                         <div className={cx(classes.falseMapRoot)}>
                             <img src={mode === "top" ? imgMapZoomBottom : imgMapZoomTop} className={cx(classes.map, classes.falseMapImg)} />
                             <div className={cx(classes.falseMapOverlay)}>
-                                {overlayContent && <div className={cx(classes.falseMapOverlayContent)}>{overlayContent}</div>}
+                                {overlayContent && <div className={cx(fr.cx("fr-m-4v", "fr-p-2v"), classes.falseMapOverlayContent)}>{overlayContent}</div>}
                             </div>
                         </div>
                     </div>
                 )}
 
                 {(mode === "both" || mode === "bottom") && (
-                    <div className={fr.cx("fr-col-6", "fr-px-2v")}>
+                    <div className={fr.cx("fr-col", "fr-px-2v")}>
                         <div ref={rightMapTargetRef} className={cx(classes.map)} />
                     </div>
                 )}
@@ -248,6 +248,5 @@ const useStyles = tss.withName(ZoomRange.displayName).create(() => ({
     falseMapOverlayContent: {
         backgroundColor: fr.colors.decisions.background.default.grey.default,
         color: fr.colors.decisions.text.default.grey.default,
-        padding: fr.spacing("2v"),
     },
 }));

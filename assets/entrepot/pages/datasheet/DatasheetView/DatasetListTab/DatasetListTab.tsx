@@ -8,6 +8,7 @@ import { routes } from "../../../../../router/router";
 import PyramidVectorList from "./PyramidVectorList/PyramidVectorList";
 import UnfinishedUploadList from "./UnfinishedUploadList";
 import VectorDbList from "./VectorDbList/VectorDbList";
+import PyramidRasterList from "./PyramidRasterList/PyramidRasterList";
 
 type DataListTabProps = {
     datastoreId: string;
@@ -53,6 +54,11 @@ const DatasetListTab: FC<DataListTabProps> = ({ datastoreId, datasheet }) => {
             <div className={fr.cx("fr-grid-row", "fr-grid-row--center", "fr-grid-row--middle", "fr-mt-4w")}>
                 <div className={fr.cx("fr-col")}>
                     <PyramidVectorList datastoreId={datastoreId} datasheetName={datasheet.name} pyramidList={datasheet.pyramid_vector_list} />
+                </div>
+            </div>
+            <div className={fr.cx("fr-grid-row", "fr-grid-row--center", "fr-grid-row--middle", "fr-mt-4w")}>
+                <div className={fr.cx("fr-col")}>
+                    <PyramidRasterList datastoreId={datastoreId} datasheetName={datasheet.name} pyramidList={datasheet.pyramid_raster_list} />
                 </div>
             </div>
         </>

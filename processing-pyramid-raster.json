@@ -1,0 +1,182 @@
+{
+    "name": "Calcul ou mise à jour de pyramide raster par moissonnage WMS",
+    "description": "Il n'y a pas besoin de donnée en entrée. Sont fournis en paramètres toutes les informations sur le service WMS et le jeu de données à moissonner, ainsi que la zone sur laquelle faire le moissonnage",
+    "input_types": {
+        "upload": [],
+        "stored_data": ["ROK4-PYRAMID-RASTER"]
+    },
+    "output_type": {
+        "stored_data": "ROK4-PYRAMID-RASTER",
+        "storage": ["S3"]
+    },
+    "parameters": [
+        {
+            "name": "harvest_layers",
+            "description": "Couches à moisonner (séparées par des virgules)",
+            "mandatory": true,
+            "constraints": {
+                "type": "string"
+            }
+        },
+        {
+            "name": "top",
+            "description": "Le niveau du haut de la pyramide en sortie ",
+            "mandatory": false,
+            "constraints": {
+                "type": "string"
+            }
+        },
+        {
+            "name": "harvest_dimensions",
+            "description": "Deux entiers positifs, dimensions pixel maximales de moisonnage, devra être un diviseur de la taille pixel des dalles",
+            "mandatory": false,
+            "constraints": {
+                "type": "array",
+                "items": {
+                    "type": "integer"
+                },
+                "maxItems": 2,
+                "minItems": 2
+            }
+        },
+        {
+            "name": "compression",
+            "description": "La compression des données en sortie (valeurs possibles: raw, jpg, png, zip, jpg90)",
+            "mandatory": false,
+            "constraints": {
+                "enum": ["raw", "jpg", "png", "zip", "jpg90"],
+                "type": "string"
+            }
+        },
+        {
+            "name": "samplesperpixel",
+            "description": "Nombre de canaux dans les dalles en sortie (entier de 1 à 4)",
+            "mandatory": false,
+            "constraints": {
+                "type": "integer",
+                "maximum": 4,
+                "minimum": 1
+            }
+        },
+        {
+            "name": "parallelization",
+            "description": "Le niveau de parallélisation du calcul (défaut à 1, entier >= 1)",
+            "mandatory": false,
+            "default_value": 1
+        },
+        {
+            "name": "tms",
+            "description": "L identifiant du quadrillage à utiliser (Tile Matrix Set)",
+            "mandatory": false,
+            "constraints": {
+                "enum": ["PM"],
+                "type": "string"
+            }
+        },
+        {
+            "name": "height",
+            "description": "Le nombre de tuile par dalle en hauteur (entier >= 1)",
+            "mandatory": false,
+            "default_value": 16
+        },
+        {
+            "name": "harvest_levels",
+            "description": "Identifiants des niveaux pour lesquels on moissonne les dalles (celui le plus bas sera le niveau du bas de la pyramide). On considère que les niveaux sont précisés de bas en haut.",
+            "mandatory": true,
+            "constraints": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            }
+        },
+        {
+            "name": "sampleformat",
+            "description": "Format des canaux dans les dalles en sortie (UINT8 ou FLOAT32)",
+            "mandatory": false,
+            "constraints": {
+                "enum": ["UINT8", "FLOAT32"],
+                "type": "string"
+            }
+        },
+        {
+            "name": "harvest_threshold",
+            "description": "Taille minimale en octet des dalles moissonnées",
+            "mandatory": false,
+            "constraints": {
+                "type": "integer",
+                "minimum": 0
+            }
+        },
+        {
+            "name": "harvest_extras",
+            "description": "Paramètres de requêtes GetMap additionnels, hors layers, bbox, format et srs",
+            "mandatory": false,
+            "constraints": {
+                "type": "string"
+            }
+        },
+        {
+            "name": "width",
+            "description": "Le nombre de tuile par dalle en largeur (entier >= 1)",
+            "mandatory": false,
+            "default_value": 16
+        },
+        {
+            "name": "harvest_area",
+            "description": "WKT de la zone sur laquelle le moissonnage doit se faire, en EPSG:4326",
+            "mandatory": true,
+            "constraints": {
+                "type": "string"
+            }
+        },
+        {
+            "name": "harvest_format",
+            "description": "Format des images téléchargées",
+            "mandatory": true,
+            "constraints": {
+                "enum": [
+                    "image/png",
+                    "image/tiff",
+                    "image/jpeg",
+                    "image/x-bil;bits=32",
+                    "image/tiff&format_options=compression:deflate",
+                    "image/tiff&format_options=compression:lzw",
+                    "image/tiff&format_options=compression:packbits",
+                    "image/tiff&format_options=compression:raw"
+                ],
+                "type": "string"
+            }
+        },
+        {
+            "name": "harvest_url",
+            "description": "URL du service WMS, avec le protocole et le chemin",
+            "mandatory": true,
+            "constraints": {
+                "type": "string"
+            }
+        },
+        {
+            "name": "bottom",
+            "description": "Le niveau du bas de la pyramide en sortie ",
+            "mandatory": true,
+            "constraints": {
+                "type": "string"
+            }
+        },
+        {
+            "name": "nodata",
+            "description": "Valeur de nodata pour compléter les images",
+            "mandatory": false,
+            "constraints": {
+                "type": "array",
+                "items": {
+                    "type": "integer"
+                },
+                "minItems": 1
+            }
+        }
+    ],
+    "_id": "748e4ebe-3ef6-447d-8221-ecd3bc2157e6",
+    "required_checks": []
+}
