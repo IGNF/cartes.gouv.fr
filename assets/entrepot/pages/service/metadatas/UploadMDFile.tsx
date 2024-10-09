@@ -1,4 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Upload } from "@codegouvfr/react-dsfr/Upload";
 import { FC } from "react";
 import { UseFormReturn } from "react-hook-form";
@@ -25,8 +26,7 @@ const UploadMDFile: FC<UploadMDFileProps> = ({ visible, form }) => {
             <h3>{t("metadata.upload_form.title")}</h3>
             {/* // cf. https://github.com/IGNF/cartes.gouv.fr/issues/519 */}
             {/* <p>{tCommon("mandatory_fields")}</p> */}
-            <p>{"Fonctionnalité en cours de construction"}</p>
-
+            <Alert description="Fonctionnalité en cours de construction" className={fr.cx("fr-mb-2v")} closable={false} severity="info" small />
             <Upload
                 label={t("metadata.upload_form.drag_and_drop_file")}
                 className={fr.cx("fr-input-group", "fr-mb-2w")}
