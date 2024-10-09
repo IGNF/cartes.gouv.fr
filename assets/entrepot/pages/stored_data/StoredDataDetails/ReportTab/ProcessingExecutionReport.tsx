@@ -21,6 +21,24 @@ const ProcessingExecutionReport: FC<ProcessingExecutionReportProps> = ({ process
                 <strong>{"Identifiant technique de la donnée en sortie :"}</strong> {processingExecution?.output?.stored_data._id}{" "}
             </li>
             <li>
+                <strong>Entrée :</strong>
+                <pre>
+                    <code>{JSON.stringify(processingExecution.inputs, null, 4)}</code>
+                </pre>
+            </li>
+            <li>
+                <strong>Sortie :</strong>
+                <pre>
+                    <code>{JSON.stringify(processingExecution.output, null, 4)}</code>
+                </pre>
+            </li>
+            <li>
+                <strong>Paramètres :</strong>
+                <pre>
+                    <code>{JSON.stringify(processingExecution.parameters, null, 4)}</code>
+                </pre>
+            </li>
+            <li>
                 <Logs logs={processingExecution?.logs} />
             </li>
         </ul>
