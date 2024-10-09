@@ -13,10 +13,10 @@ import MarkdownEditor from "../../../../components/Input/MarkdownEditor";
 import thumbnails from "../../../../data/doc_thumbnail.json";
 import categories from "../../../../data/topic_categories.json";
 import { ComponentKey, useTranslation } from "../../../../i18n/i18n";
+import { appRoot } from "../../../../router/router";
 import { getFileExtension } from "../../../../utils";
 import { AddDocumentDialog, AddDocumentDialogModal } from "./AddDocumentDialog";
 import CommunityLogo from "./CommunityLogo";
-import { appRoot } from "../../../../router/router";
 
 import "../../../../sass/pages/espaceco/community.scss";
 
@@ -41,6 +41,8 @@ const readFileAsDataURL = async (file: File) => {
 }; */
 
 const Description: FC<DescriptionProps> = ({ community }) => {
+    // const { tab1 } = useCommunityFormStore(community)();
+
     const { t: tCommon } = useTranslation("Common");
     const { t: tValid } = useTranslation("ManageCommunityValidations");
     const { t } = useTranslation("ManageCommunity");

@@ -3,52 +3,50 @@ import { defaults as defaultControls, ScaleLine } from "ol/control";
 import { Coordinate } from "ol/coordinate";
 import Point from "ol/geom/Point";
 import { DragPan, MouseWheelZoom } from "ol/interaction";
+import BaseLayer from "ol/layer/Base";
 import TileLayer from "ol/layer/Tile";
 import VectorLayer from "ol/layer/Vector";
 import Map from "ol/Map";
-import { fromLonLat } from "ol/proj";
+import { fromLonLat, toLonLat } from "ol/proj";
 import VectorSource from "ol/source/Vector";
 import WMTS, { optionsFromCapabilities } from "ol/source/WMTS";
 import Icon from "ol/style/Icon";
 import Style from "ol/style/Style";
 import View from "ol/View";
 import { CSSProperties, FC, useEffect, useMemo, useRef } from "react";
+import { UseFormReturn } from "react-hook-form";
 import olDefaults from "../../../../../data/ol-defaults.json";
 import useCapabilities from "../../../../../hooks/useCapabilities";
 import punaise from "../../../../../img/punaise.png";
-import DisplayCenterControl from "../../../../../ol/controls/DisplayCenterControl";
-import BaseLayer from "ol/layer/Base";
+import { ZoomAndCenteringFormType } from "../ZoomAndCentering";
 
 const mapStyle: CSSProperties = {
     height: "400px",
 };
 
 type RMapProps = {
-    position: Coordinate | null;
-    // NOTE Supprimé car si la position n'est pas dans l'extent, le centre de la carte (position) est déplacé
-    // extent?: Extent;
-    zoom: number;
-    zoomMin: number;
-    zoomMax: number;
-    onMove: (center: Coordinate, zoom?: number) => void;
+    form: UseFormReturn<ZoomAndCenteringFormType>;
+    onPositionChanged: (position: Coordinate) => void;
+    onZoomChanged: (zoom: number) => void;
 };
 
-const RMap: FC<RMapProps> = ({ position, zoom, zoomMin, zoomMax, onMove }) => {
+const RMap: FC<RMapProps> = ({ form, onPositionChanged, onZoomChanged }) => {
     const mapTargetRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<Map>();
 
     // Création de la couche openlayers de fond (bg layer)
     const { data: capabilities } = useCapabilities();
 
-    const center = useMemo(() => {
-        return position ? fromLonLat(position) : fromLonLat(olDefaults.center);
-    }, [position]);
+    const { watch, getValues: getFormValues } = form;
+    const position = watch("position");
+
+    const position3857 = useMemo(() => fromLonLat(position), [position]);
 
     // Création de la carte une fois bg layer créée
     useEffect(() => {
         if (!capabilities) return;
 
-        const feature = new Feature(new Point(center));
+        const feature = new Feature(new Point(position3857));
 
         // layer punaise
         const source = new VectorSource();
@@ -81,7 +79,7 @@ const RMap: FC<RMapProps> = ({ position, zoom, zoomMin, zoomMax, onMove }) => {
         mapRef.current = new Map({
             target: mapTargetRef.current as HTMLElement,
             layers: layers,
-            controls: defaultControls().extend([new ScaleLine(), new DisplayCenterControl({})]),
+            controls: defaultControls().extend([new ScaleLine()]),
             interactions: [
                 new DragPan(),
                 new MouseWheelZoom({
@@ -89,10 +87,10 @@ const RMap: FC<RMapProps> = ({ position, zoom, zoomMin, zoomMax, onMove }) => {
                 }),
             ],
             view: new View({
-                center: center,
-                zoom: zoom,
-                minZoom: zoomMin,
-                maxZoom: zoomMax,
+                center: position3857,
+                zoom: getFormValues("zoom"),
+                minZoom: getFormValues("zoomMin"),
+                maxZoom: getFormValues("zoomMax"),
             }),
         });
 
@@ -101,15 +99,17 @@ const RMap: FC<RMapProps> = ({ position, zoom, zoomMin, zoomMax, onMove }) => {
             const centerView = map.getView().getCenter() as Coordinate;
             const z = map.getView().getZoom() as number;
 
-            // Rien n'a bougé
-            if (Math.abs(centerView[0] - center[0]) < 1 && Math.abs(centerView[1] - center[1]) < 1) {
-                return;
+            if (z !== getFormValues("zoom")) {
+                onZoomChanged(Math.round(z));
             }
-            onMove(centerView, Math.round(z) !== zoom ? z : undefined);
+
+            if (Math.abs(centerView[0] - position3857[0]) > 1 && Math.abs(centerView[1] - position3857[1]) > 1) {
+                onPositionChanged(toLonLat(centerView));
+            }
         });
 
         return () => mapRef.current?.setTarget(undefined);
-    }, [capabilities, center, zoom, zoomMin, zoomMax, onMove]);
+    }, [capabilities, position3857, getFormValues, onPositionChanged, onZoomChanged]);
 
     return <div ref={mapTargetRef} style={mapStyle} />;
 };

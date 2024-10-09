@@ -46,3 +46,21 @@ export type SearchGridFilters = {
     fields?: ("name" | "title" | "type" | "extent" | "deleted")[];
     adm?: boolean;
 };
+
+export type CommunityMember = {
+    user_id: number;
+    username: string;
+    firstname: string | null;
+    surname: string | null;
+    emprises: string[]; // TODO renommer en grids
+    role: "pending" | "member" | "admin";
+    active: boolean;
+    date: string;
+};
+
+/* FORMULAIRES */
+export type DescriptionFormType = {
+    name: string;
+    description?: string;
+    keywords?: string[];
+};
