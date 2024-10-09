@@ -103,8 +103,16 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         ]);
 
         // Pyramid vector
-        $pyramidList = $this->storedDataApiService->getAllDetailed($datastoreId, [
+        $pyramidVectorList = $this->storedDataApiService->getAllDetailed($datastoreId, [
             'type' => StoredDataTypes::ROK4_PYRAMID_VECTOR,
+            'tags' => [
+                CommonTags::DATASHEET_NAME => $datasheetName,
+            ],
+        ]);
+
+        // Pyramid raster
+        $pyramidRasterList = $this->storedDataApiService->getAllDetailed($datastoreId, [
+            'type' => StoredDataTypes::ROK4_PYRAMID_RASTER,
             'tags' => [
                 CommonTags::DATASHEET_NAME => $datasheetName,
             ],
@@ -116,7 +124,13 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             ],
         ]);
 
-        if (0 === count($uploadList) && 0 === count($vectorDbList) && 0 === count($pyramidList) && 0 === count($metadataList)) {
+        if (
+            0 === count($uploadList)
+            && 0 === count($vectorDbList)
+            && 0 === count($pyramidVectorList)
+            && 0 === count($pyramidRasterList)
+            && 0 === count($metadataList)
+        ) {
             throw new CartesApiException("La fiche de donnée [$datasheetName] n'existe pas", Response::HTTP_NOT_FOUND);
         }
 
@@ -124,13 +138,14 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         $datasheet = $this->getBasicInfo($datastore, $datasheetName);
 
         // Recherche de services (configuration et offering)
-        $storedDataList = array_merge($vectorDbList, $pyramidList);
+        $storedDataList = array_merge([], $vectorDbList, $pyramidVectorList, $pyramidRasterList);
         $services = $this->_getServices($datastoreId, $storedDataList);
 
         return $this->json([
             ...$datasheet,
             'vector_db_list' => $vectorDbList,
-            'pyramid_vector_list' => $pyramidList,
+            'pyramid_vector_list' => $pyramidVectorList,
+            'pyramid_raster_list' => $pyramidRasterList,
             'upload_list' => $uploadList,
             'service_list' => $services,
         ]);

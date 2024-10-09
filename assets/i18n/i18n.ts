@@ -38,6 +38,7 @@ export type ComponentKey =
     | typeof import("../entrepot/pages/datasheet/DatasheetList/DatasheetList").i18n
     | typeof import("../entrepot/pages/datasheet/DatasheetView/DatasetListTab/VectorDbList/VectorDbListItem").i18n
     | typeof import("../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidVectorList/PyramidVectorListItem").i18n
+    | typeof import("../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidRasterList/PyramidRasterListItem").i18n
     | typeof import("../entrepot/pages/datasheet/DatasheetView/DatasheetView").i18n
     | typeof import("../config/navItems").i18n
     | typeof import("../config/datastoreNavItems").i18n

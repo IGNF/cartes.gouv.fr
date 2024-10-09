@@ -7,6 +7,7 @@ import { DashboardProFrTranslations } from "../../entrepot/pages/dashboard/Dashb
 import { DatasheetListFrTranslations } from "../../entrepot/pages/datasheet/DatasheetList/DatasheetList";
 import { DatasheetUploadFormFrTranslations } from "../../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadForm";
 import { PyramidVectorListItemFrTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidVectorList/PyramidVectorListItem";
+import { PyramidRasterListItemFrTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidRasterList/PyramidRasterListItem";
 import { VectorDbListItemFrTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasetListTab/VectorDbList/VectorDbListItem";
 import { DatasheetViewFrTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasheetView";
 import { DatastorePermissionsFrTranslations } from "../../entrepot/pages/datastore/ManagePermissions/DatastorePermissionsTr";
@@ -57,6 +58,7 @@ export const translations: Translations<"fr"> = {
     datastoreNavItems: datastoreNavItemsFrTranslations,
     VectorDbListItem: VectorDbListItemFrTranslations,
     PyramidVectorListItem: PyramidVectorListItemFrTranslations,
+    PyramidRasterListItem: PyramidRasterListItemFrTranslations,
     DatasheetView: DatasheetViewFrTranslations,
     SldStyleValidationErrors: SldStyleValidationErrorsFrTranslations,
     mapboxStyleValidation: mapboxStyleValidationFrTranslations,

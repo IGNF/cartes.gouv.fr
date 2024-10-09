@@ -76,6 +76,7 @@ export enum DatasheetDocumentTypeEnum {
 export type DatasheetDetailed = Datasheet & {
     vector_db_list: VectorDb[] | undefined;
     pyramid_vector_list: PyramidVector[] | undefined;
+    pyramid_raster_list: PyramidRaster[] | undefined;
     upload_list: Upload[] | undefined;
     service_list: Service[] | undefined;
 };
@@ -109,6 +110,14 @@ export type PyramidVector = StoredData & {
         proc_int_id?: string;
         proc_pyr_creat_id?: string;
         is_sample?: "true" | "false";
+    };
+};
+
+/** stored_data (donnée stockée) du type ROK4-PYRAMID-VECTOR */
+export type PyramidRaster = StoredData & {
+    type: StoredDataPrivateDetailResponseDtoTypeEnum.ROK4PYRAMIDRASTER;
+    tags: {
+        datasheet_name?: string;
     };
 };
 

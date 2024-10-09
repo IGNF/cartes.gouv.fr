@@ -166,7 +166,10 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                                     },
                                     {
                                         label: t("tab_label.datasets", {
-                                            num: (datasheetQuery.data?.vector_db_list?.length || 0) + (datasheetQuery.data?.pyramid_vector_list?.length || 0),
+                                            num:
+                                                (datasheetQuery.data?.vector_db_list?.length || 0) +
+                                                (datasheetQuery.data?.pyramid_vector_list?.length || 0) +
+                                                (datasheetQuery.data?.pyramid_raster_list?.length || 0),
                                         }),
                                         tabId: DatasheetViewActiveTabEnum.Dataset,
                                     },
