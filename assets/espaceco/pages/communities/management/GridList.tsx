@@ -12,8 +12,6 @@ type GridListProps = {
 
 const GridList: FC<GridListProps> = ({ grids = [], onChange }) => {
     const [grid, setGrid] = useState<Grid | null>(null);
-    console.log(grid);
-
     const [internal, setInternal] = useState<Grid[]>([...grids]);
 
     const handleRemove = useCallback(
@@ -27,8 +25,9 @@ const GridList: FC<GridListProps> = ({ grids = [], onChange }) => {
 
     const handleAdd = () => {
         if (grid) {
-            const grids = [...internal, grid];
+            const grids = Array.from(new Set([...internal, grid]));
             setInternal(grids);
+            onChange(grids);
         }
     };
     const data = useMemo(() => {
@@ -42,18 +41,22 @@ const GridList: FC<GridListProps> = ({ grids = [], onChange }) => {
 
     return (
         <div>
-            <div className={fr.cx("fr-grid-row")}>
+            <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
                 <div className={fr.cx("fr-col-6")}>
                     <SearchGrids
                         label={""}
                         filters={{
                             fields: ["name", "title", "type", "extent"],
                         }}
-                        onChange={(grid) => setGrid(grid)}
+                        onChange={(grid) => {
+                            if (grid) {
+                                setGrid(grid);
+                            }
+                        }}
                     />
                 </div>
                 <div className={fr.cx("fr-col-1")}>
-                    <div className={fr.cx("fr-grid-row", "fr-grid-row--left", "fr-grid-row--middle")}>
+                    <div className={fr.cx("fr-grid-row", "fr-grid-row--left")}>
                         <Button title={""} priority={"tertiary no outline"} iconId={"fr-icon-add-circle-line"} onClick={handleAdd} />
                     </div>
                 </div>

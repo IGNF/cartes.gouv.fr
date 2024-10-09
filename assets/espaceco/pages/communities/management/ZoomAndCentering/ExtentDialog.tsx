@@ -39,7 +39,8 @@ const ExtentDialog: FC<ExtentDialogProps> = ({ onCancel, onApply }) => {
 
     const [choice, setChoice] = useState<SearchOption>("manual");
 
-    const schema = yup.object({
+    const schema = {};
+    schema["manual"] = yup.object({
         xmin: yup
             .number()
             .typeError(tValid("zoom.extent.nan", { field: "${path}" }))
@@ -104,10 +105,13 @@ const ExtentDialog: FC<ExtentDialogProps> = ({ onCancel, onApply }) => {
                 },
             }),
     });
+    schema["autocomplete"] = yup.object({
+        extent: yup.array().of(yup.number()).required(tValid("zoom.extent.required")),
+    });
 
     const form = useForm({
         mode: "onChange",
-        resolver: yupResolver(schema),
+        resolver: yupResolver(schema[choice]),
     });
     const {
         register,
@@ -181,56 +185,53 @@ const ExtentDialog: FC<ExtentDialogProps> = ({ onCancel, onApply }) => {
                             ]}
                         />
                         {choice === "autocomplete" ? (
-                            <SearchGrids
-                                label={t("zoom.choice.autocomplete")}
-                                filters={filters}
-                                onChange={(grid) => {
-                                    if (grid) {
-                                        setFormValue("xmin", grid.extent?.[0]);
-                                        setFormValue("ymin", grid.extent?.[1]);
-                                        setFormValue("xmax", grid.extent?.[2]);
-                                        setFormValue("ymax", grid.extent?.[3]);
-                                    } else clear();
-                                    clearErrors();
-                                }}
-                            />
+                            <div>
+                                <SearchGrids
+                                    label={t("zoom.choice.autocomplete")}
+                                    filters={filters}
+                                    state={errors.extent ? "error" : "default"}
+                                    stateRelatedMessage={errors.extent?.message?.toString()}
+                                    onChange={(grid) => {
+                                        setFormValue("extent", grid ? grid : undefined);
+                                        clearErrors();
+                                    }}
+                                />
+                            </div>
                         ) : (
-                            <label className={fr.cx("fr-label")}>{t("zoom.extent_enter_manually")}</label>
+                            <div>
+                                <label className={fr.cx("fr-label")}>{t("zoom.extent_enter_manually")}</label>
+                                <div className={fr.cx("fr-grid-row", "fr-mt-1w")}>
+                                    <div className={fr.cx("fr-col-6", "fr-px-2w")}>
+                                        <Input
+                                            label={t("zoom.xmin")}
+                                            state={errors.xmin ? "error" : "default"}
+                                            stateRelatedMessage={errors.xmin?.message?.toString()}
+                                            nativeInputProps={register("xmin")}
+                                        />
+                                        <Input
+                                            label={t("zoom.xmax")}
+                                            state={errors.xmax ? "error" : "default"}
+                                            stateRelatedMessage={errors.xmax?.message?.toString()}
+                                            nativeInputProps={register("xmax")}
+                                        />
+                                    </div>
+                                    <div className={fr.cx("fr-col-6", "fr-px-2w")}>
+                                        <Input
+                                            label={t("zoom.ymin")}
+                                            state={errors.ymin ? "error" : "default"}
+                                            stateRelatedMessage={errors.ymin?.message?.toString()}
+                                            nativeInputProps={register("ymin")}
+                                        />
+                                        <Input
+                                            label={t("zoom.ymax")}
+                                            state={errors.ymax ? "error" : "default"}
+                                            stateRelatedMessage={errors.ymax?.message?.toString()}
+                                            nativeInputProps={register("ymax")}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
                         )}
-                        <div className={fr.cx("fr-grid-row", "fr-mt-1w")}>
-                            <div className={fr.cx("fr-col-6", "fr-px-2w")}>
-                                <Input
-                                    label={t("zoom.xmin")}
-                                    disabled={choice === "autocomplete"}
-                                    state={errors.xmin ? "error" : "default"}
-                                    stateRelatedMessage={errors.xmin?.message?.toString()}
-                                    nativeInputProps={register("xmin")}
-                                />
-                                <Input
-                                    label={t("zoom.xmax")}
-                                    disabled={choice === "autocomplete"}
-                                    state={errors.xmax ? "error" : "default"}
-                                    stateRelatedMessage={errors.xmax?.message?.toString()}
-                                    nativeInputProps={register("xmax")}
-                                />
-                            </div>
-                            <div className={fr.cx("fr-col-6", "fr-px-2w")}>
-                                <Input
-                                    label={t("zoom.ymin")}
-                                    disabled={choice === "autocomplete"}
-                                    state={errors.ymin ? "error" : "default"}
-                                    stateRelatedMessage={errors.ymin?.message?.toString()}
-                                    nativeInputProps={register("ymin")}
-                                />
-                                <Input
-                                    label={t("zoom.ymax")}
-                                    disabled={choice === "autocomplete"}
-                                    state={errors.ymax ? "error" : "default"}
-                                    stateRelatedMessage={errors.ymax?.message?.toString()}
-                                    nativeInputProps={register("ymax")}
-                                />
-                            </div>
-                        </div>
                     </>
                 </ExtentDialogModal.Component>,
                 document.body
