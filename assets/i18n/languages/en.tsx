@@ -39,6 +39,7 @@ import { StyleEnTranslations } from "../Style";
 import { ThemeEnTranslations } from "../../espaceco/pages/communities/management/reports/ThemeTr";
 import { ReportStatusesEnTranslations } from "../../espaceco/pages/communities/management/reports/ReportStatusesTr";
 import { SharedThemesEnTranslations } from "../../espaceco/pages/communities/management/reports/SharedThemes";
+import { EscoCommunityMembersEnTranslations } from "../../espaceco/pages/communities/management/Members";
 
 import type { Translations } from "../i18n";
 
@@ -84,4 +85,5 @@ export const translations: Translations<"en"> = {
     ReportStatuses: ReportStatusesEnTranslations,
     SharedThemes: SharedThemesEnTranslations,
     Search: SearchEnTranslations,
+    EscoCommunityMembers: EscoCommunityMembersEnTranslations,
 };

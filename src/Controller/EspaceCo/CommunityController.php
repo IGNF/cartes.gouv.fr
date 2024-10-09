@@ -45,6 +45,14 @@ class CommunityController extends AbstractController implements ApiControllerInt
         }
     }
 
+    #[Route('/get_names', name: 'get_names', methods: ['GET'])]
+    public function getCommunitiesName(): JsonResponse
+    {
+        $names = $this->communityApiService->getCommunitiesName();
+
+        return new JsonResponse($names);
+    }
+
     #[Route('/get_as_member', name: 'get_as_member', methods: ['GET'])]
     public function getMeMember(
         #[MapQueryParameter] bool $pending,
@@ -114,6 +122,25 @@ class CommunityController extends AbstractController implements ApiControllerInt
     {
         try {
             $response = $this->communityApiService->getCommunity($communityId);
+
+            return new JsonResponse($response);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
+    /**
+     * @param array<string> $roles
+     */
+    #[Route('/{communityId}/members', name: 'get_members', methods: ['GET'])]
+    public function getMembers(
+        int $communityId,
+        #[MapQueryParameter(filter: \FILTER_VALIDATE_REGEXP, options: ['regexp' => '/^admin|member|pending$/'])] array $roles = [],
+        #[MapQueryParameter] ?int $page = 1,
+        #[MapQueryParameter(options: ['min_range' => 1, 'max_range' => 50])] ?int $limit = 10
+    ): JsonResponse {
+        try {
+            $response = $this->communityApiService->getCommunityMembers($communityId, $roles, $page, $limit);
 
             return new JsonResponse($response);
         } catch (ApiException $ex) {

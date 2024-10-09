@@ -127,7 +127,7 @@ const Reports: FC<ReportsProps> = ({ community }) => {
     });
 
     const sharedThemesQuery = useQuery<UserSharedThemesDTO[], CartesApiException>({
-        queryKey: RQKeys.user_shared_themes(),
+        queryKey: RQKeys.userSharedThemes(),
         queryFn: () => api.user.getSharedThemes(),
         staleTime: 3600000,
     });

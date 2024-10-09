@@ -18,6 +18,7 @@ import Grid from "./management/Grid";
 import Layer from "./management/Layer";
 import Reports from "./management/Reports";
 import ZoomAndCentering from "./management/ZoomAndCentering";
+import Members from "./management/Members";
 
 type ManageCommunityProps = {
     communityId: number;
@@ -78,6 +79,7 @@ const ManageCommunity: FC<ManageCommunityProps> = ({ communityId }) => {
                                 { tabId: "tab5", label: t("tab5") }, // Outils
                                 { tabId: "tab6", label: t("tab6") }, // Signalements
                                 { tabId: "tab7", label: t("tab7") }, // Emprises
+                                { tabId: "tab8", label: t("tab8") }, // Membres
                             ]}
                             onTabChange={setSelectedTabId}
                         >
@@ -93,7 +95,9 @@ const ManageCommunity: FC<ManageCommunityProps> = ({ communityId }) => {
                                         case "tab6":
                                             return <Reports community={communityQuery.data} />;
                                         case "tab7":
-                                            return <Grid grids={communityQuery.data?.grids ?? []} />; // TODO
+                                            return <Grid grids={communityQuery.data.grids ?? []} />; // TODO
+                                        case "tab8":
+                                            return <Members communityId={communityQuery.data.id} />;
                                         default:
                                             return <p>`Content of ${selectedTabId}`</p>;
                                     }

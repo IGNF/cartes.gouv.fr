@@ -1,11 +1,10 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
-import { Coordinate } from "ol/coordinate";
 import { containsCoordinate, Extent } from "ol/extent";
 import WKT from "ol/format/WKT";
-import { toLonLat } from "ol/proj";
-import { FC, useEffect, useState } from "react";
+import { FC, useCallback, useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { CommunityResponseDTO } from "../../../../@types/espaceco";
 import ZoomRange from "../../../../components/Utils/ZoomRange";
 import olDefaults from "../../../../data/ol-defaults.json";
@@ -18,12 +17,12 @@ type ZoomAndCenteringProps = {
     community: CommunityResponseDTO;
 };
 
-type formType = {
-    position: Coordinate | null;
+export type ZoomAndCenteringFormType = {
+    position: number[];
     zoom: number;
     zoomMin: number;
     zoomMax: number;
-    extent: Extent | null;
+    extent?: Extent | null;
 };
 
 const ZoomAndCentering: FC<ZoomAndCenteringProps> = ({ community }) => {
@@ -33,33 +32,40 @@ const ZoomAndCentering: FC<ZoomAndCenteringProps> = ({ community }) => {
     // Cohérence entre l'extent et la position
     const [consistent, setConsistent] = useState<boolean>(true);
 
-    const [values, setValues] = useState<formType>(() => {
-        let p = null;
+    const getValues = useCallback(() => {
+        let p;
         if (community.position) {
             const feature = new WKT().readFeature(community.position, {
                 dataProjection: "EPSG:4326",
             });
             p = feature.getGeometry().getCoordinates();
-        }
-
-        const zoomMin = community.zoom_min ?? olDefaults.zoom_levels.TOP;
-        const zoomMax = community.zoom_max ?? olDefaults.zoom_levels.BOTTOM;
+        } else p = olDefaults.center;
 
         return {
             position: p,
+            zoom: community.zoom ?? olDefaults.zoom,
+            zoomMin: community.zoom_min ?? olDefaults.zoom_levels.TOP,
+            zoomMax: community.zoom_max ?? olDefaults.zoom_levels.BOTTOM,
             extent: community.extent,
-            zoomMin: zoomMin,
-            zoomMax: zoomMax,
-            zoom: zoomMax,
         };
+    }, [community]);
+
+    const form = useForm<ZoomAndCenteringFormType>({
+        mode: "onSubmit",
+        values: getValues(),
     });
+    const { watch, getValues: getFormValues, setValue: setFormValue } = form;
+    console.log(watch());
+
+    const position = watch("position");
+    const extent = watch("extent");
 
     useEffect(() => {
-        if (values.extent && values.position) {
-            setConsistent(containsCoordinate(values.extent, values.position));
+        if (position && extent) {
+            setConsistent(containsCoordinate(extent, position));
         }
         return;
-    }, [values]);
+    }, [position, extent]);
 
     return (
         <div>
@@ -78,7 +84,7 @@ const ZoomAndCentering: FC<ZoomAndCenteringProps> = ({ community }) => {
                         }}
                         onChange={(newPosition) => {
                             if (newPosition) {
-                                setValues({ ...values, position: newPosition });
+                                setFormValue("position", newPosition);
                             }
                         }}
                     />
@@ -88,10 +94,12 @@ const ZoomAndCentering: FC<ZoomAndCenteringProps> = ({ community }) => {
                         small={true}
                         min={olDefaults.zoom_levels.TOP}
                         max={olDefaults.zoom_levels.BOTTOM}
-                        values={[values.zoomMin, values.zoomMax]}
+                        values={[getFormValues("zoomMin"), getFormValues("zoomMax")]}
                         onChange={(v) => {
-                            const { zoom } = values;
-                            setValues({ ...values, zoomMin: v[0], zoomMax: v[1], zoom: zoom < v[1] ? zoom : v[1] });
+                            const oldZoom = getFormValues("zoom");
+                            setFormValue("zoomMin", v[0]);
+                            setFormValue("zoomMax", v[1]);
+                            setFormValue("zoom", oldZoom < v[1] ? oldZoom : v[1]);
                         }}
                     />
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
@@ -108,25 +116,15 @@ const ZoomAndCentering: FC<ZoomAndCenteringProps> = ({ community }) => {
                 </div>
                 <div className={fr.cx("fr-col-7")}>
                     <RMap
-                        position={values.position}
-                        zoom={values.zoom}
-                        zoomMin={values.zoomMin}
-                        zoomMax={values.zoomMax}
-                        onMove={(center, zoom) => {
-                            const v = {
-                                position: toLonLat(center),
-                            };
-                            if (zoom) {
-                                v["zoom"] = zoom;
-                            }
-                            setValues({ ...values, ...v });
-                        }}
+                        form={form}
+                        onPositionChanged={(position) => setFormValue("position", position)}
+                        onZoomChanged={(zoom) => setFormValue("zoom", zoom)}
                     />
                 </div>
                 <ExtentDialog
                     onCancel={() => ExtentDialogModal.close()}
                     onApply={(e) => {
-                        setValues({ ...values, extent: e });
+                        setFormValue("extent", e);
                         ExtentDialogModal.close();
                     }}
                 />
