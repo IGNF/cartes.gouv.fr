@@ -3,16 +3,16 @@ import Badge from "@codegouvfr/react-dsfr/Badge";
 import { UseQueryResult, useQuery } from "@tanstack/react-query";
 import { FC, memo, useMemo } from "react";
 
-import api from "../../../../../api";
+import { PyramidVector, VectorDb } from "../../../../../../@types/app";
+import { OfferingListResponseDto, ProcessingExecutionStoredDataDto } from "../../../../../../@types/entrepot";
 import LoadingText from "../../../../../../components/Utils/LoadingText";
 import RQKeys from "../../../../../../modules/entrepot/RQKeys";
-import { Pyramid, VectorDb } from "../../../../../../@types/app";
-import { OfferingListResponseDto, ProcessingExecutionStoredDataDto } from "../../../../../../@types/entrepot";
 import { offeringTypeDisplayName } from "../../../../../../utils";
+import api from "../../../../../api";
 
-type PyramidDescProps = {
+type PyramidVectorDescProps = {
     datastoreId: string;
-    pyramid: Pyramid;
+    pyramid: PyramidVector;
     dataUsesQuery: UseQueryResult<
         {
             stored_data_list: ProcessingExecutionStoredDataDto[];
@@ -22,7 +22,7 @@ type PyramidDescProps = {
     >;
 };
 
-const PyramidDesc: FC<PyramidDescProps> = ({ datastoreId, pyramid, dataUsesQuery }) => {
+const PyramidVectorDesc: FC<PyramidVectorDescProps> = ({ datastoreId, pyramid, dataUsesQuery }) => {
     const vectorDbUsedId = useMemo(() => pyramid.tags.vectordb_id, [pyramid.tags.vectordb_id]);
 
     const vectorDbUsedQuery = useQuery({
@@ -82,4 +82,4 @@ const PyramidDesc: FC<PyramidDescProps> = ({ datastoreId, pyramid, dataUsesQuery
     );
 };
 
-export default memo(PyramidDesc);
+export default memo(PyramidVectorDesc);
