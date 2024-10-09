@@ -18,4 +18,9 @@ class UserApiService extends BaseEspaceCoApiService
 
         return [];
     }
+
+    public function getUser(int $userId): array
+    {
+        return $this->request('GET', "users/$userId");
+    }
 }

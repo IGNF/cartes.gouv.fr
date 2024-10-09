@@ -17,6 +17,7 @@ export const { i18n } = declareComponentKeys<
     | "tab5"
     | "tab6"
     | "tab7"
+    | "tab8"
     | "desc.tab.title"
     | "desc.name"
     | "desc.hint_name"
@@ -86,6 +87,7 @@ export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"
     tab5: "Outils",
     tab6: "Signalements",
     tab7: "Emprises",
+    tab8: "Membres",
     "desc.tab.title": "Décrire le guichet",
     "desc.name": "Nom du guichet",
     "desc.hint_name": "Donnez un nom clair et compréhensible",
@@ -188,6 +190,7 @@ export const ManageCommunityEnTranslations: Translations<"en">["ManageCommunity"
     tab5: undefined,
     tab6: undefined,
     tab7: undefined,
+    tab8: undefined,
     "desc.tab.title": undefined,
     "desc.name": undefined,
     "desc.hint_name": undefined,

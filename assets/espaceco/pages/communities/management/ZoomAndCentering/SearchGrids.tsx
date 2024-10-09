@@ -1,6 +1,8 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import MuiDsfrThemeProvider from "@codegouvfr/react-dsfr/mui";
 import Autocomplete, { autocompleteClasses } from "@mui/material/Autocomplete";
+import Box from "@mui/material/Box";
+import TextField from "@mui/material/TextField";
 import { useQuery } from "@tanstack/react-query";
 import { FC, ReactNode } from "react";
 import { useDebounceValue } from "usehooks-ts";
@@ -9,17 +11,17 @@ import { Grid } from "../../../../../@types/espaceco";
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/espaceco/RQKeys";
 import api from "../../../../api";
-import TextField from "@mui/material/TextField";
-import Box from "@mui/material/Box";
 
 export type SearchGridsProps = {
     label: ReactNode;
     hintText?: ReactNode;
     filters: SearchGridFilters;
+    state?: "default" | "error" | "success";
+    stateRelatedMessage?: string;
     onChange: (grid: Grid | null) => void;
 };
 
-const SearchGrids: FC<SearchGridsProps> = ({ label, hintText, filters, onChange }) => {
+const SearchGrids: FC<SearchGridsProps> = ({ label, hintText, filters, state, stateRelatedMessage, onChange }) => {
     const { t } = useTranslation("Search");
 
     const [text, setText] = useDebounceValue("", 500);
@@ -34,7 +36,7 @@ const SearchGrids: FC<SearchGridsProps> = ({ label, hintText, filters, onChange 
     });
 
     return (
-        <div>
+        <div className={fr.cx("fr-input-group", state === "error" && "fr-input-group--error")}>
             <label className={fr.cx("fr-mb-2v", "fr-label")}>
                 {label}
                 {hintText && <span className={"fr-hint-text"}>{hintText}</span>}
@@ -43,11 +45,9 @@ const SearchGrids: FC<SearchGridsProps> = ({ label, hintText, filters, onChange 
                 <Autocomplete
                     disablePortal={true} // If true, the Popper content will be under the DOM hierarchy of the parent component.
                     renderOption={(props, option, state, ownerState) => {
-                        const { ...optionProps } = props;
                         return (
                             <Box
                                 sx={{
-                                    // borderRadius: "8px",
                                     margin: 0,
                                     [`&.${autocompleteClasses.option}`]: {
                                         padding: 0,
@@ -55,7 +55,8 @@ const SearchGrids: FC<SearchGridsProps> = ({ label, hintText, filters, onChange 
                                     },
                                 }}
                                 component="li"
-                                {...optionProps}
+                                {...props}
+                                key={option.name}
                             >
                                 {ownerState.getOptionLabel(option)}
                             </Box>
@@ -76,6 +77,23 @@ const SearchGrids: FC<SearchGridsProps> = ({ label, hintText, filters, onChange 
                     }}
                 />
             </MuiDsfrThemeProvider>
+            {state !== "default" && (
+                <p
+                    className={fr.cx(
+                        (() => {
+                            switch (state) {
+                                case "error":
+                                    return "fr-error-text";
+                                case "success":
+                                    return "fr-valid-text";
+                            }
+                        })(),
+                        "fr-mb-1v"
+                    )}
+                >
+                    {stateRelatedMessage}
+                </p>
+            )}
         </div>
     );
 };
