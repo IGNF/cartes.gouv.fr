@@ -134,7 +134,7 @@ const Home = () => {
                         </div>
                     </div>
 
-                    <div className={fr.cx("fr-grid-row", "fr-grid-row--center", "fr-mt-4w")}>
+                    <div className={fr.cx("fr-grid-row", "fr-grid-row--center", "fr-mt-2w")}>
                         <div className={fr.cx("fr-col-10")}>
                             <CallOut colorVariant="blue-cumulus">
                                 Le site ne cesse de s’enrichir de nouveaux services en s’appuyant sur les besoins et attentes des utilisateurs, n’hésitez pas à
