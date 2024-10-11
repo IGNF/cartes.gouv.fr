@@ -1,6 +1,8 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Badge from "@codegouvfr/react-dsfr/Badge";
+import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
+import CallOut from "@codegouvfr/react-dsfr/CallOut";
 import Tile from "@codegouvfr/react-dsfr/Tile";
 import { useEffect } from "react";
 
@@ -74,64 +76,85 @@ const Home = () => {
             )}
 
             {/* Section : Présentation */}
-            <div className="c-section c-section--gray">
+            <div className="c-section">
                 <div className={fr.cx("fr-container--fluid")}>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
-                            <div className={fr.cx("fr-col-12", "fr-col-lg-6", "fr-px-0", "fr-pl-md-14v")}>
-                                <p className={fr.cx("fr-mt-4w", "fr-mt-md-7w") + " frx-display--xxs"}>
-                                    Bienvenue sur le service public des cartes et données du territoire
-                                </p>
-
-                                <p className={fr.cx("fr-text--lg", "fr-pr-10v")}>
-                                    La carte et le territoire enfin réunis&nbsp;? Le besoin en données explose pour connaître la réalité terrain, analyser des
-                                    phénomènes, piloter des activités multiples.
-                                </p>
-                                <p className={fr.cx("fr-text--lg", "fr-pr-10v")}>
-                                    Collectivités territoriales, acteurs publics, entreprises, associations, citoyens…
-                                </p>
-                                <p className={fr.cx("fr-text--lg", "fr-pr-10v")}>
-                                    <strong>Cartes.gouv.fr</strong> offre à tous les bases de données et les outils utiles pour se saisir de ces opportunités,
-                                    avec en premier lieu des cartes et données publiques librement accessibles sur de nombreux thèmes (topographie, écologie,
-                                    sécurité, foncier, réglementations…) ainsi que la diffusion en toute autonomie de vos propres données géographiques.
-                                </p>
-                            </div>
-                            <div className={fr.cx("fr-col-12", "fr-col-lg-6", "fr-pb-4w", "fr-pl-md-8w", "fr-pr-md-2w", "fr-mt-4w")}>
-                                <figure
-                                    className={fr.cx("fr-content-media")}
-                                    role="group"
-                                    aria-label="Carte des grandes régions écologiques (GRECO), IGN - 2023"
-                                >
-                                    <div className={fr.cx("fr-content-media__img")}>
-                                        <img
-                                            className={fr.cx("fr-responsive-img", "fr-ratio-1x1")}
-                                            src={homeImgUrl}
-                                            alt=""
-                                            role="presentation"
-                                            data-fr-js-ratio="true"
-                                        />
-                                    </div>
-                                    <figcaption className={fr.cx("fr-content-media__caption")}>
-                                        Source : Carte des grandes régions écologiques (GRECO), IGN - 2023
-                                    </figcaption>
-                                </figure>
-                            </div>
+                    <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
+                        <div className={fr.cx("fr-col-12", "fr-col-lg-7")}>
+                            <p className={fr.cx("fr-mt-4w", "fr-mt-md-7w") + " frx-display--xxs"}>Le service public des cartes et données du territoire</p>
+                            <p className={fr.cx("fr-text--lg", "fr-pr-10v")}>
+                                Déposez et diffusez vos données géographiques en toute autonomie, c’est simple grâce aux outils de cartes.gouv.fr
+                            </p>
+                            <ul>
+                                <li>Je dépose ma donnée et configure mon service</li>
+                                <li>Je publie dans le catalogue</li>
+                                <li>Je visualise sur une carte</li>
+                            </ul>
+                            <ButtonsGroup
+                                buttons={[
+                                    {
+                                        iconId: "fr-icon-cursor-line",
+                                        linkProps: routes.dashboard_pro().link,
+                                        children: "Je dépose ma donnée",
+                                        priority: "primary",
+                                    },
+                                    {
+                                        iconId: "fr-icon-file-download-line",
+                                        linkProps: {
+                                            href: "./catalogue",
+                                        },
+                                        children: "J’accède au catalogue",
+                                        priority: "secondary",
+                                    },
+                                ]}
+                                inlineLayoutWhen="always"
+                                buttonsEquisized={true}
+                                className={fr.cx("fr-mt-2w")}
+                            />
                         </div>
 
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
-                            <div className={fr.cx("fr-col-12", "fr-px-0", "fr-px-md-14v")}>
-                                <p className={fr.cx("fr-text--lg")}>
-                                    Le site s’enrichira de nouveaux services pour la contribution, le partage et la visualisation des données et cartes, en
-                                    s’appuyant sur les besoins et attentes des utilisateurs.
-                                </p>
-                            </div>
+                        <div className={fr.cx("fr-col-12", "fr-col-lg-5", "fr-pb-4w", "fr-pl-md-8w", "fr-pr-md-2w", "fr-mt-4w")}>
+                            <figure
+                                className={fr.cx("fr-content-media", "fr-mt-0", "fr-mb-0")}
+                                role="group"
+                                aria-label="Carte des grandes régions écologiques (GRECO), IGN - 2023"
+                            >
+                                <div className={fr.cx("fr-content-media__img")}>
+                                    <img
+                                        className={fr.cx("fr-responsive-img", "fr-ratio-1x1")}
+                                        src={homeImgUrl}
+                                        alt=""
+                                        role="presentation"
+                                        data-fr-js-ratio="true"
+                                    />
+                                </div>
+                                <figcaption className={fr.cx("fr-content-media__caption")}>
+                                    Source : Carte des grandes régions écologiques (GRECO), IGN - 2023
+                                </figcaption>
+                            </figure>
+                        </div>
+                    </div>
+
+                    <div className={fr.cx("fr-grid-row", "fr-grid-row--center", "fr-mt-4w")}>
+                        <div className={fr.cx("fr-col-10")}>
+                            <CallOut colorVariant="blue-cumulus">
+                                Le site ne cesse de s’enrichir de nouveaux services en s’appuyant sur les besoins et attentes des utilisateurs, n’hésitez pas à
+                                nous faire part de vos retours d’expérience en rejoignant{" "}
+                                <a
+                                    href="https://www.ign.fr/geoplateforme/rejoindre-la-communaute"
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    title="Rejoindre la communauté Géoplateforme - ouvre une nouvelle fenêtre"
+                                >
+                                    la communauté Géoplateforme
+                                </a>
+                            </CallOut>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Section proposition de valeur : Ce que vous pouvez faire avec cartes.gouv.fr */}
-            <div className={fr.cx("fr-container", "fr-mt-8v", "fr-pb-3v", "fr-mt-md-10v", "fr-mb-2v", "fr-mb-md-8v")}>
+            <div className={fr.cx("fr-container--fluid", "fr-mt-8v", "fr-pb-3v", "fr-mt-md-10v", "fr-mb-2v", "fr-mb-md-8v")}>
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-grid-row--center", "fr-px-md-8w")}>
                     <div className={fr.cx("fr-col-12")}>
                         <h2 className={fr.cx("fr-my-5w") + " frx-text--center"}>Ce que vous pouvez faire avec cartes.gouv.fr</h2>
@@ -143,7 +166,7 @@ const Home = () => {
                     </div>
                 </div>
 
-                <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-grid-row--center", "fr-px-md-8w")}>
+                <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-grid-row--center")}>
                     <div className={fr.cx("fr-col-12", "fr-col-md-6", "fr-col-lg-4") + " frx-text--center"}>
                         <Tile
                             title="Stockez, traitez et partagez vos données"
