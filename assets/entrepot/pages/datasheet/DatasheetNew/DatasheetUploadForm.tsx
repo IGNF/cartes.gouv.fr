@@ -394,7 +394,8 @@ export const DatasheetUploadFormFrTranslations: Translations<"fr">["DatasheetUpl
     "datasheet.name_already_exists_error": ({ datasheetName }) => `Une fiche de donnée existe déjà avec le nom "${datasheetName}"`,
     "datasheet.creation_running": "Création de la fiche en cours ...",
     upload: "Déposez votre fichier de données",
-    upload_hint: "Formats de fichiers autorisés : Geopackage ou archive zip contenant un Geopackage (recommandé)",
+    // NB: la taille maximale doit correspondre à celle effectivement implémentée dans DatasheetUploadForm
+    upload_hint: "Taille maximale : 1 Go. Formats de fichiers autorisés : Geopackage ou archive zip contenant un Geopackage (recommandé)",
     upload_nofile_error: "Aucun fichier téléversé",
     upload_extension_error: ({ filename }) => `L’extension du fichier ${filename} n'est pas correcte`,
     upload_max_size_error: ({ maxSize }) => `La taille maximale pour un fichier est de ${maxSize}`,

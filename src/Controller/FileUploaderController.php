@@ -232,7 +232,7 @@ class FileUploaderController extends AbstractController
      * Effectue des contrôles sur l'archive zip.
      *
      * Critères de validation :
-     * - doit contenir au moins un fichier gpkg ou CSV
+     * - doit contenir au moins un fichier gpkg
      * - ne peut contenir qu'un seul type de fichiers
      * - ne peut contenir plus de 10000 fichiers
      * - taille max du zip : 1 Go
@@ -245,7 +245,7 @@ class FileUploaderController extends AbstractController
     private function validateArchive(\SplFileInfo $file)
     {
         $maxFiles = 10000;
-        $maxSize = 1000000000; // 1 GB
+        $maxSize = 1000000000; // 1 GB // en cas de changement de cette limite, modifier upload_hint dans DatasheetUploadForm
         $oneGiga = 1000000000;
         $maxRatio = 20; // initialement on avait testé 10% mais c'était trop restrictif (https://github.com/IGNF/geotuileur-site/issues/47)
 
