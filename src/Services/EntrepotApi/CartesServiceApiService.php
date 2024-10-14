@@ -97,6 +97,7 @@ class CartesServiceApiService
         switch ($offering['type']) {
             case OfferingTypes::WFS:
             case OfferingTypes::WMSVECTOR:
+            case OfferingTypes::WMSRASTER:
                 $annexeUrl = $this->params->get('annexes_url');
                 $shareUrl = join('/', [$annexeUrl, $datastore['technical_name'],  $endpoint['endpoint']['technical_name'], 'capabilities.xml']);
                 break;
@@ -215,25 +216,24 @@ class CartesServiceApiService
     }
 
     /**
-     * Suppression des styles lies à une configuration
-     *
+     * Suppression des styles lies à une configuration.
      */
-    private function removeStyleFiles(string $datastoreId, string $configurationId) : void
+    private function removeStyleFiles(string $datastoreId, string $configurationId): void
     {
         $path = "/configuration/$configurationId/styles.json";
-        
+
         $styleAnnexes = $this->annexeApiService->getAll($datastoreId, null, $path);
-        if (count($styleAnnexes) === 0) {
+        if (0 === count($styleAnnexes)) {
             return;
         }
 
         $content = $this->annexeApiService->download($datastoreId, $styleAnnexes[0]['_id']);
-        
+
         $styles = json_decode($content, true);
-        foreach($styles as $style) {
+        foreach ($styles as $style) {
             if (array_key_exists('layers', $style)) {
-                foreach($style['layers'] as $layer) {
-                    $this->annexeApiService->remove($datastoreId, $layer['annexe_id']);    
+                foreach ($style['layers'] as $layer) {
+                    $this->annexeApiService->remove($datastoreId, $layer['annexe_id']);
                 }
             }
         }

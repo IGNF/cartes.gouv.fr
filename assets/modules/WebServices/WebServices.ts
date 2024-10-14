@@ -12,11 +12,12 @@ const getWebService = (service: Service) => {
         case OfferingDetailResponseDtoTypeEnum.WMTSTMS: {
             return new TMSService(service);
         }
-        case OfferingDetailResponseDtoTypeEnum.WMSVECTOR: {
+        case OfferingDetailResponseDtoTypeEnum.WMSVECTOR:
+        case OfferingDetailResponseDtoTypeEnum.WMSRASTER: {
             return new WMSVectorService(service);
         }
         default:
-            throw Error(`Service ${service.type} is not implemented`);
+            throw Error(`L'affichage du flux du type ${service.type} n'est pas encore implémenté`);
     }
 };
 

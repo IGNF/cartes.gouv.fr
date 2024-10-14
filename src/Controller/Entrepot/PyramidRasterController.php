@@ -85,7 +85,7 @@ class PyramidRasterController extends ServiceController implements ApiController
                 'processing' => $processingId,
                 'output' => [
                     'stored_data' => [
-                        'name' => 'aaaaaaaaaaaa', // $data['technical_name'],
+                        'name' => $data['technical_name'],
                     ],
                 ],
                 'parameters' => [
@@ -98,7 +98,7 @@ class PyramidRasterController extends ServiceController implements ApiController
                     'harvest_format' => 'image/jpeg',
                     'harvest_url' => $harvestUrl,
                     'harvest_layers' => $wmsvOffering['layer_name'],
-                    'harvest_area' => $this->bboxToWkt($wmsvConfiguration['type_infos']['bbox']),
+                    'harvest_area' => $data['wmsv_config_bbox'] ?? $this->bboxToWkt($wmsvConfiguration['type_infos']['bbox']),
                     // 'POLYGON((1.999375 50.25875,5.8734375 50.25875,5.8734375 47.940898437,1.999375 47.940898437,1.999375 50.25875))',
                 ],
             ];

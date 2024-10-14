@@ -97,7 +97,8 @@ const PyramidRasterListItem: FC<PyramidRasterListItemProps> = ({ datasheetName, 
                                 priority="secondary"
                                 disabled={pyramid.status !== StoredDataStatusEnum.GENERATED}
                             >
-                                {t("publish_tms_service")}
+                                {/* {t("publish_tms_service")} */}
+                                TODO
                             </Button>
                             <MenuList
                                 menuOpenButtonProps={{
