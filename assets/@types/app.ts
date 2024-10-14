@@ -118,6 +118,10 @@ export type PyramidRaster = StoredData & {
     type: StoredDataPrivateDetailResponseDtoTypeEnum.ROK4PYRAMIDRASTER;
     tags: {
         datasheet_name?: string;
+        upload_id?: string;
+        proc_int_id?: string;
+        vectordb_id?: string;
+        proc_pyr_creat_id?: string;
     };
 };
 
@@ -181,7 +185,12 @@ export type TmsMetadata = {
 };
 
 /** configuration & offerings */
-export type Configuration = ConfigurationDetailResponseDto & { styles?: CartesStyle[] };
+export type Configuration = ConfigurationDetailResponseDto & {
+    styles?: CartesStyle[];
+    tags: {
+        datasheet_name?: string;
+    };
+};
 
 export type Offering = OfferingDetailResponseDto;
 export { OfferingStatusEnum } from "./entrepot";

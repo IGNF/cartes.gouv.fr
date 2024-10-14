@@ -42,20 +42,6 @@ class PyramidRasterController extends ServiceController implements ApiController
         parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $capabilitiesService, $cartesMetadataApiService, $sandboxService);
     }
 
-    /**
-     * @param array<mixed> $bbox
-     */
-    private function bboxToWkt(array $bbox): string
-    {
-        $str = 'POLYGON((west north,east north,east south,west south,west north))';
-
-        return preg_replace_callback('/[a-z]+/', function ($matches) use ($bbox) {
-            $key = $matches[0];
-
-            return $bbox[$key];
-        }, $str);
-    }
-
     #[Route('/add', name: 'add', methods: ['POST'])]
     public function add(string $datastoreId, Request $request): JsonResponse
     {
@@ -81,6 +67,9 @@ class PyramidRasterController extends ServiceController implements ApiController
                 throw new AppException('URL du service WMS-Vecteur non trouvée', Response::HTTP_BAD_REQUEST);
             }
 
+            $zoomRange = $data['zoom_range'];
+            $harvestLevels = array_map(fn ($v) => strval($v), array_reverse(range($zoomRange[0], $zoomRange[1], 1), false));
+
             $requestBody = [
                 'processing' => $processingId,
                 'output' => [
@@ -93,13 +82,13 @@ class PyramidRasterController extends ServiceController implements ApiController
                     'sampleformat' => 'UINT8',
                     'tms' => 'PM',
                     'compression' => 'jpg',
-                    'bottom' => '14',
-                    'harvest_levels' => ['14', '10'],
+                    'bottom' => strval($zoomRange[1]),
+                    'harvest_levels' => $harvestLevels,
+
                     'harvest_format' => 'image/jpeg',
                     'harvest_url' => $harvestUrl,
                     'harvest_layers' => $wmsvOffering['layer_name'],
-                    'harvest_area' => $data['wmsv_config_bbox'] ?? $this->bboxToWkt($wmsvConfiguration['type_infos']['bbox']),
-                    // 'POLYGON((1.999375 50.25875,5.8734375 50.25875,5.8734375 47.940898437,1.999375 47.940898437,1.999375 50.25875))',
+                    'harvest_area' => $data['wmsv_config_bbox'],
                 ],
             ];
 
