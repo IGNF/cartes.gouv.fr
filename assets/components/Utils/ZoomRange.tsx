@@ -147,7 +147,11 @@ const ZoomRange: FC<ZoomRangeProps> = (props) => {
                 {mode !== "both" && (
                     <div className={cx(fr.cx("fr-col", "fr-px-2v"))}>
                         <div className={cx(classes.falseMapRoot)}>
-                            <img src={mode === "top" ? imgMapZoomBottom : imgMapZoomTop} className={cx(classes.map, classes.falseMapImg)} />
+                            <img
+                                src={mode === "top" ? imgMapZoomBottom : imgMapZoomTop}
+                                className={cx(classes.map, classes.falseMapImg)}
+                                alt="Illustration d'une carte fixe"
+                            />
                             <div className={cx(classes.falseMapOverlay)}>
                                 {overlayContent && <div className={cx(fr.cx("fr-m-4v", "fr-p-2v"), classes.falseMapOverlayContent)}>{overlayContent}</div>}
                             </div>

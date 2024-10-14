@@ -1,5 +1,4 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import Accordion from "@codegouvfr/react-dsfr/Accordion";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
@@ -38,11 +37,13 @@ function bboxToWkt(bbox: BoundingBox) {
 
 const STEPS = {
     TECHNICAL_NAME: 1,
-    TOP_ZOOM_LEVEL: 2,
+    // TOP_ZOOM_LEVEL: 2,
+    BOTTOM_ZOOM_LEVEL: 2,
 };
 
 type PyramidRasterGenerateFormType = {
     technical_name: string;
+    bottom_zoom_level: number;
 };
 
 type PyramidRasterGenerateFormProps = {
@@ -67,26 +68,29 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
         technical_name: yup.string().typeError(t("technical_name.error.mandatory")).required(t("technical_name.error.mandatory")),
     });
 
-    schemas[STEPS.TOP_ZOOM_LEVEL] = yup.lazy(() => {
-        // if (serviceQuery.data === undefined) {
-        // }
-        return yup.mixed().nullable().notRequired();
+    schemas[STEPS.BOTTOM_ZOOM_LEVEL] = yup.object({
+        bottom_zoom_level: yup.number().required(),
     });
 
     const form = useForm<PyramidRasterGenerateFormType>({
         resolver: yupResolver(schemas[currentStep]),
         mode: "onChange",
-        // values: defaultValues,
+        defaultValues: {
+            technical_name: "test wms raster",
+            bottom_zoom_level: 10,
+        },
     });
 
     const {
         register,
         trigger,
         getValues: getFormValues,
+        setValue: setFormValue,
         formState: { errors },
+        watch,
     } = form;
 
-    // console.log(bboxToWkt((serviceQuery.data?.configuration.type_infos as ConfigurationWmsVectorDetailsContent).bbox));
+    const bottomLevel = watch("bottom_zoom_level");
 
     const generatePyramidRasterMutation = useMutation<PyramidRaster, CartesApiException>({
         mutationFn: () => {
@@ -129,8 +133,6 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
         }
     }, [currentStep, generatePyramidRasterMutation, trigger]);
 
-    const [levels, setLevels] = useState([5, 15]);
-
     console.log("errors", errors);
 
     return (
@@ -160,7 +162,7 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
                     <Stepper
                         currentStep={currentStep}
                         stepCount={Object.values(STEPS).length}
-                        nextTitle={currentStep < STEPS.TOP_ZOOM_LEVEL && t("step.title", { stepNumber: currentStep + 1 })}
+                        nextTitle={currentStep < STEPS.BOTTOM_ZOOM_LEVEL && t("step.title", { stepNumber: currentStep + 1 })}
                         title={t("step.title", { stepNumber: currentStep })}
                     />
 
@@ -183,48 +185,19 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
                         />
                     </div>
 
-                    <div className={fr.cx(currentStep !== STEPS.TOP_ZOOM_LEVEL && "fr-hidden")}>
-                        <h3>{t("top_zoom_level.lead_text")}</h3>
-                        <p>{t("top_zoom_level.explanation")}</p>
+                    <div className={fr.cx(currentStep !== STEPS.BOTTOM_ZOOM_LEVEL && "fr-hidden")}>
+                        <h3>{t("bottom_zoom_level.lead_text")}</h3>
+                        <p>{t("bottom_zoom_level.explanation")}</p>
 
-                        {currentStep === STEPS.TOP_ZOOM_LEVEL &&
-                            (serviceQuery.data?.configuration.type_infos as ConfigurationWmsVectorDetailsContent).used_data?.[0]?.relations.map((rel) => (
-                                <Accordion key={rel.name} label={rel.name} titleAs="h4" defaultExpanded={true}>
-                                    <ZoomRange
-                                        min={olDefaults.zoom_levels.TOP}
-                                        max={olDefaults.zoom_levels.BOTTOM}
-                                        values={levels}
-                                        onChange={(values) => {
-                                            console.log(values);
-                                            setLevels((prevLevels) => [values[0], prevLevels[1]]);
-                                        }}
-                                        step={1}
-                                        mode="top"
-                                        overlayContent={t("top_zoom_level.overlay_text")}
-                                    />
-                                    {/* <ZoomRange
-                                        min={olDefaults.zoom_levels.TOP}
-                                        max={olDefaults.zoom_levels.BOTTOM}
-                                        values={levels}
-                                        onChange={(values) => {
-                                            console.log(values);
-                                            setLevels((prevLevels) => [prevLevels[0], values[0]]);
-                                        }}
-                                        step={1}
-                                        mode="bottom"
-                                    />
-                                    <ZoomRange
-                                        min={olDefaults.zoom_levels.TOP}
-                                        max={olDefaults.zoom_levels.BOTTOM}
-                                        values={levels}
-                                        onChange={(values) => {
-                                            console.log(values);
-                                            setLevels(values);
-                                        }}
-                                        step={1}
-                                    /> */}
-                                </Accordion>
-                            ))}
+                        <ZoomRange
+                            min={olDefaults.zoom_levels.TOP}
+                            max={olDefaults.zoom_levels.BOTTOM}
+                            values={[bottomLevel]}
+                            onChange={(values) => setFormValue("bottom_zoom_level", values[0])}
+                            step={1}
+                            mode="top"
+                            overlayContent={t("bottom_zoom_level.overlay_text")}
+                        />
                     </div>
 
                     <ButtonsGroup
@@ -278,9 +251,9 @@ export const { i18n } = declareComponentKeys<
     | "technical_name.label"
     | "technical_name.explanation"
     | "technical_name.error.mandatory"
-    | "top_zoom_level.lead_text"
-    | "top_zoom_level.explanation"
-    | "top_zoom_level.overlay_text"
+    | "bottom_zoom_level.lead_text"
+    | "bottom_zoom_level.explanation"
+    | "bottom_zoom_level.overlay_text"
     | "generate.in_progress"
 >()({
     PyramidRasterGenerateForm,
@@ -294,7 +267,7 @@ export const PyramidRasterGenerateFormFrTranslations: Translations<"fr">["Pyrami
             case 1:
                 return "Nom de la pyramide de tuiles raster";
             case 2:
-                return "Niveau de zoom top";
+                return "Niveau de zoom bottom";
             default:
                 return "";
         }
@@ -307,11 +280,10 @@ export const PyramidRasterGenerateFormFrTranslations: Translations<"fr">["Pyrami
     "technical_name.explanation":
         "II s'agit du nom technique du service qui apparaitra dans votre espace de travail, il ne sera pas publié en ligne. Si vous le renommez, choisissez un nom explicite.",
     "technical_name.error.mandatory": "Le nom technique de la pyramide de tuiles raster est obligatoire",
-    "top_zoom_level.lead_text": "Choisissez le niveau de zoom top de vos tables",
-    "top_zoom_level.explanation": `Les niveaux de zoom de la pyramide de tuiles raster sont prédéfinis. Choisissez la borne minimum de votre pyramide de tuiles en vous aidant
-                        de la carte de gauche. Le zoom maximum sur l’image de droite est fixe et ne peut être modifié. Tous les niveaux intermédiaires seront
-                        générés.`,
-    "top_zoom_level.overlay_text": "Le zoom maximum est déterminé par la résolution des images fournies en entrée",
+    "bottom_zoom_level.lead_text": "Choisissez le niveau de zoom bottom de votre flux WMS-Vecteur",
+    "bottom_zoom_level.explanation":
+        "Les niveaux de zoom de la pyramide de tuiles raster sont prédéfinis. Choisissez la borne minimum de votre pyramide de tuiles en vous aidant de la carte de gauche. Le zoom maximum sur l’image de droite est fixe et ne peut être modifié. Tous les niveaux intermédiaires seront générés.",
+    "bottom_zoom_level.overlay_text": "Le zoom maximum est déterminé par la résolution des images fournies en entrée",
     "generate.in_progress": "Génération de pyramide de tuiles raster en cours",
 };
 
@@ -325,8 +297,8 @@ export const PyramidRasterGenerateFormEnTranslations: Translations<"en">["Pyrami
     "technical_name.lead_text": undefined,
     "technical_name.label": undefined,
     "technical_name.explanation": undefined,
-    "top_zoom_level.lead_text": undefined,
-    "top_zoom_level.explanation": undefined,
-    "top_zoom_level.overlay_text": undefined,
+    "bottom_zoom_level.lead_text": undefined,
+    "bottom_zoom_level.explanation": undefined,
+    "bottom_zoom_level.overlay_text": undefined,
     "generate.in_progress": undefined,
 };
