@@ -31,7 +31,7 @@ const StoredDataDetails: FC<StoredDataDetailsProps> = ({ datastoreId, storedData
     const reportQuery = useQuery<ReportTab, CartesApiException>({
         queryKey: RQKeys.datastore_stored_data_report(datastoreId, storedDataId),
         queryFn: ({ signal }) => api.storedData.getReportData(datastoreId, storedDataId, { signal }),
-        refetchInterval: 60000,
+        refetchInterval: 30000,
         enabled: reportQueryEnabled,
     });
 

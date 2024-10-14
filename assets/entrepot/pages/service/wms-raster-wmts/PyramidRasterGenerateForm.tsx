@@ -5,14 +5,14 @@ import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Input from "@codegouvfr/react-dsfr/Input";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { declareComponentKeys } from "i18nifty";
 import { FC, useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
 import type { PyramidRaster, Service } from "../../../../@types/app";
-import type { BoundingBox, ConfigurationWmsVectorDetailsContent } from "../../../../@types/entrepot";
+import type { ConfigurationWmsVectorDetailsContent } from "../../../../@types/entrepot";
 import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../components/Utils/LoadingText";
@@ -24,26 +24,18 @@ import { Translations, useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import { routes } from "../../../../router/router";
+import { bboxToWkt } from "../../../../utils";
 import api from "../../../api";
 import { DatasheetViewActiveTabEnum } from "../../datasheet/DatasheetView/DatasheetView";
 
-function bboxToWkt(bbox: BoundingBox) {
-    const str = "POLYGON((west north,east north,east south,west south,west north))";
-
-    return str.replace(/[a-z]+/g, function (s) {
-        return bbox[s];
-    });
-}
-
 const STEPS = {
     TECHNICAL_NAME: 1,
-    // TOP_ZOOM_LEVEL: 2,
-    BOTTOM_ZOOM_LEVEL: 2,
+    ZOOM_RANGE: 2,
 };
 
 type PyramidRasterGenerateFormType = {
     technical_name: string;
-    bottom_zoom_level: number;
+    zoom_range: number[];
 };
 
 type PyramidRasterGenerateFormProps = {
@@ -63,21 +55,23 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
         staleTime: 60000,
     });
 
+    const queryClient = useQueryClient();
+
     const schemas = {};
     schemas[STEPS.TECHNICAL_NAME] = yup.object({
         technical_name: yup.string().typeError(t("technical_name.error.mandatory")).required(t("technical_name.error.mandatory")),
     });
 
-    schemas[STEPS.BOTTOM_ZOOM_LEVEL] = yup.object({
-        bottom_zoom_level: yup.number().required(),
+    schemas[STEPS.ZOOM_RANGE] = yup.object({
+        zoom_range: yup.array().of(yup.number()).length(2, t("zoom_range.error")).required(t("zoom_range.error")),
     });
 
     const form = useForm<PyramidRasterGenerateFormType>({
         resolver: yupResolver(schemas[currentStep]),
         mode: "onChange",
         defaultValues: {
-            technical_name: "test wms raster",
-            bottom_zoom_level: 10,
+            technical_name: "",
+            zoom_range: [4, 16],
         },
     });
 
@@ -90,7 +84,7 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
         watch,
     } = form;
 
-    const bottomLevel = watch("bottom_zoom_level");
+    const zoomRange = watch("zoom_range");
 
     const generatePyramidRasterMutation = useMutation<PyramidRaster, CartesApiException>({
         mutationFn: () => {
@@ -100,19 +94,13 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
                 wmsv_config_bbox: bboxToWkt((serviceQuery.data?.configuration.type_infos as ConfigurationWmsVectorDetailsContent).bbox!),
             };
 
-            console.log("formData", formData);
-
             return api.pyramidRaster.add(datastoreId, formData);
         },
         onSuccess() {
-            // if (pyramidQuery.data?.tags?.datasheet_name) {
-            //     queryClient.invalidateQueries({
-            //         queryKey: RQKeys.datastore_datasheet(datastoreId, pyramidQuery.data?.tags.datasheet_name),
-            //     });
-            //     routes.datastore_datasheet_view({ datastoreId, datasheetName: pyramidQuery.data?.tags.datasheet_name, activeTab: "services" }).push();
-            // } else {
-            //     routes.datasheet_list({ datastoreId }).push();
-            // }
+            queryClient.invalidateQueries({
+                queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName),
+            });
+            routes.datastore_datasheet_view({ datastoreId, datasheetName: datasheetName, activeTab: "dataset" }).push();
         },
     });
 
@@ -132,8 +120,6 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
             generatePyramidRasterMutation.mutate();
         }
     }, [currentStep, generatePyramidRasterMutation, trigger]);
-
-    console.log("errors", errors);
 
     return (
         <DatastoreLayout datastoreId={datastoreId} documentTitle={t("title")}>
@@ -157,12 +143,25 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
                         </>
                     }
                 />
+            ) : (serviceQuery.data?.configuration.type_infos as ConfigurationWmsVectorDetailsContent).bbox === undefined ? (
+                <Alert
+                    severity="error"
+                    closable={false}
+                    title={t("wmsv-service.bbox_not_found")}
+                    description={
+                        <Button
+                            linkProps={routes.datastore_datasheet_view({ datastoreId, datasheetName, activeTab: DatasheetViewActiveTabEnum.Services }).link}
+                        >
+                            {t("back_to_datasheet")}
+                        </Button>
+                    }
+                />
             ) : (
                 <>
                     <Stepper
                         currentStep={currentStep}
                         stepCount={Object.values(STEPS).length}
-                        nextTitle={currentStep < STEPS.BOTTOM_ZOOM_LEVEL && t("step.title", { stepNumber: currentStep + 1 })}
+                        nextTitle={currentStep < STEPS.ZOOM_RANGE && t("step.title", { stepNumber: currentStep + 1 })}
                         title={t("step.title", { stepNumber: currentStep })}
                     />
 
@@ -185,19 +184,22 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
                         />
                     </div>
 
-                    <div className={fr.cx(currentStep !== STEPS.BOTTOM_ZOOM_LEVEL && "fr-hidden")}>
-                        <h3>{t("bottom_zoom_level.lead_text")}</h3>
-                        <p>{t("bottom_zoom_level.explanation")}</p>
-
-                        <ZoomRange
-                            min={olDefaults.zoom_levels.TOP}
-                            max={olDefaults.zoom_levels.BOTTOM}
-                            values={[bottomLevel]}
-                            onChange={(values) => setFormValue("bottom_zoom_level", values[0])}
-                            step={1}
-                            mode="top"
-                            overlayContent={t("bottom_zoom_level.overlay_text")}
-                        />
+                    <div className={fr.cx(currentStep !== STEPS.ZOOM_RANGE && "fr-hidden")}>
+                        <h3>{t("zoom_range.lead_text")}</h3>
+                        <p>{t("zoom_range.explanation")}</p>
+                        {currentStep === STEPS.ZOOM_RANGE && (
+                            <>
+                                <ZoomRange
+                                    min={olDefaults.zoom_levels.TOP}
+                                    max={olDefaults.zoom_levels.BOTTOM}
+                                    values={zoomRange}
+                                    onChange={(values) => setFormValue("zoom_range", values)}
+                                    step={1}
+                                    mode="both"
+                                />
+                                {errors.zoom_range?.message !== undefined && <p className={fr.cx("fr-error-text")}>{errors.zoom_range?.message}</p>}
+                            </>
+                        )}
                     </div>
 
                     <ButtonsGroup
@@ -246,14 +248,15 @@ export const { i18n } = declareComponentKeys<
     | { K: "step.title"; P: { stepNumber: number }; R: string }
     | "wmsv-service.loading"
     | "wmsv-service.fetch_failed"
+    | "wmsv-service.bbox_not_found"
     | "back_to_datasheet"
     | "technical_name.lead_text"
     | "technical_name.label"
     | "technical_name.explanation"
     | "technical_name.error.mandatory"
-    | "bottom_zoom_level.lead_text"
-    | "bottom_zoom_level.explanation"
-    | "bottom_zoom_level.overlay_text"
+    | "zoom_range.lead_text"
+    | "zoom_range.explanation"
+    | "zoom_range.error"
     | "generate.in_progress"
 >()({
     PyramidRasterGenerateForm,
@@ -267,23 +270,24 @@ export const PyramidRasterGenerateFormFrTranslations: Translations<"fr">["Pyrami
             case 1:
                 return "Nom de la pyramide de tuiles raster";
             case 2:
-                return "Niveau de zoom bottom";
+                return "Niveaux de pyramide";
             default:
                 return "";
         }
     },
     "wmsv-service.loading": "Chargement du service WMS-Vecteur...",
     "wmsv-service.fetch_failed": "Récupération des informations sur le service WMS-Vecteur a échoué",
+    "wmsv-service.bbox_not_found": "La bbox du service WMS-Vecteur n'a pas été trouvée, veuillez vérifier le service et la donnée stockée utilisée",
     back_to_datasheet: "Retour à la fiche de données",
     "technical_name.lead_text": "Choisissez le nom technique de la pyramide de tuiles raster",
     "technical_name.label": "Nom technique de la pyramide de tuiles raster",
     "technical_name.explanation":
         "II s'agit du nom technique du service qui apparaitra dans votre espace de travail, il ne sera pas publié en ligne. Si vous le renommez, choisissez un nom explicite.",
     "technical_name.error.mandatory": "Le nom technique de la pyramide de tuiles raster est obligatoire",
-    "bottom_zoom_level.lead_text": "Choisissez le niveau de zoom bottom de votre flux WMS-Vecteur",
-    "bottom_zoom_level.explanation":
-        "Les niveaux de zoom de la pyramide de tuiles raster sont prédéfinis. Choisissez la borne minimum de votre pyramide de tuiles en vous aidant de la carte de gauche. Le zoom maximum sur l’image de droite est fixe et ne peut être modifié. Tous les niveaux intermédiaires seront générés.",
-    "bottom_zoom_level.overlay_text": "Le zoom maximum est déterminé par la résolution des images fournies en entrée",
+    "zoom_range.lead_text": "Choisissez les niveaux de pyramide à générer",
+    "zoom_range.explanation":
+        "Les niveaux de zoom de la pyramide de tuiles raster sont prédéfinis. Choisissez la borne minimum de votre pyramide de tuiles en vous aidant de la carte de gauche et le zoom maximum en vous aidant de la carte de droite. Tous les niveaux intermédiaires seront générés.",
+    "zoom_range.error": "Les bornes de la pyramide sont obligatoires.",
     "generate.in_progress": "Génération de pyramide de tuiles raster en cours",
 };
 
@@ -292,13 +296,14 @@ export const PyramidRasterGenerateFormEnTranslations: Translations<"en">["Pyrami
     "step.title": undefined,
     "wmsv-service.loading": undefined,
     "wmsv-service.fetch_failed": undefined,
+    "wmsv-service.bbox_not_found": undefined,
     back_to_datasheet: undefined,
     "technical_name.error.mandatory": undefined,
     "technical_name.lead_text": undefined,
     "technical_name.label": undefined,
     "technical_name.explanation": undefined,
-    "bottom_zoom_level.lead_text": undefined,
-    "bottom_zoom_level.explanation": undefined,
-    "bottom_zoom_level.overlay_text": undefined,
+    "zoom_range.lead_text": undefined,
+    "zoom_range.explanation": undefined,
+    "zoom_range.error": undefined,
     "generate.in_progress": undefined,
 };
