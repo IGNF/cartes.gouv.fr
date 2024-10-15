@@ -10,6 +10,7 @@ import placeholder1x1 from "../../../img/placeholder.1x1.png";
 
 import "../../../sass/pages/espaceco/community.scss";
 import { routes } from "../../../router/router";
+import { useApiEspaceCoStore } from "../../../stores/ApiEspaceCoStore";
 
 type CommunityListItemProps = {
     className?: string;
@@ -18,6 +19,18 @@ type CommunityListItemProps = {
 const CommunityListItem: FC<CommunityListItemProps> = ({ className, community }) => {
     const { t } = useTranslation("CommunityList");
     const { t: tCommon } = useTranslation("Common");
+
+    /* TODO PROVISOIRE A SUPPRIMER ------------- */
+    const url = useApiEspaceCoStore((state) => state.api_espaceco_url);
+    const espacecoUrl = url?.replace("/gcms/api", "");
+    const appEnv = document.getElementById("root")?.dataset?.appEnv?.toLowerCase();
+    const link =
+        appEnv === "dev"
+            ? routes.espaceco_manage_community({ communityId: community.id }).link
+            : espacecoUrl
+              ? { href: `${espacecoUrl}/group/${community.id}`, target: "_blank" }
+              : { href: "#" };
+    /* ----------------------------------------- */
 
     const [showDescription, toggleShowDescription] = useToggle(false);
 
@@ -50,15 +63,7 @@ const CommunityListItem: FC<CommunityListItemProps> = ({ className, community })
                     <div dangerouslySetInnerHTML={{ __html: community.description ?? "" }} />
                 </div>
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-col-1", "fr-px-2v")}>
-                    <Button
-                        title={tCommon("modify")}
-                        priority="secondary"
-                        iconId="fr-icon-edit-line"
-                        size="small"
-                        onClick={() => {
-                            routes.espaceco_manage_community({ communityId: community.id }).push();
-                        }}
-                    />
+                    <Button title={tCommon("modify")} priority="secondary" iconId="fr-icon-edit-line" size="small" linkProps={link} />
                 </div>
             </div>
             {community.detailed_description && <div className={fr.cx("fr-grid-row")} dangerouslySetInnerHTML={{ __html: community.detailed_description }} />}
