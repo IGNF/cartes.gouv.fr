@@ -9,7 +9,7 @@ import { declareComponentKeys } from "i18nifty";
 import { FC, useCallback, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 
-import { ConfigurationTypeEnum, EndpointTypeEnum, Pyramid, Service, ServiceFormValuesBaseType } from "../../../../@types/app";
+import { ConfigurationTypeEnum, EndpointTypeEnum, PyramidVector, Service, ServiceFormValuesBaseType } from "../../../../@types/app";
 import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../components/Utils/LoadingText";
@@ -58,7 +58,7 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
     const createServiceMutation = useMutation<Service, CartesApiException>({
         mutationFn: () => {
             const formValues = getFormValues();
-            return api.pyramid.publish(datastoreId, pyramidId, formValues);
+            return api.pyramidVector.publish(datastoreId, pyramidId, formValues);
         },
         onSuccess() {
             if (pyramidQuery.data?.tags?.datasheet_name) {
@@ -79,8 +79,7 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
             }
 
             const formValues = getFormValues();
-
-            return api.pyramid.publishEdit(datastoreId, pyramidId, offeringId, formValues);
+            return api.pyramidVector.publishEdit(datastoreId, pyramidId, offeringId, formValues);
         },
         onSuccess() {
             if (offeringId !== undefined) {
@@ -103,7 +102,7 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
 
     const pyramidQuery = useQuery({
         queryKey: RQKeys.datastore_stored_data(datastoreId, pyramidId),
-        queryFn: () => api.storedData.get<Pyramid>(datastoreId, pyramidId),
+        queryFn: () => api.storedData.get<PyramidVector>(datastoreId, pyramidId),
         staleTime: Infinity,
         enabled: !(createServiceMutation.isPending || editServiceMutation.isPending),
     });

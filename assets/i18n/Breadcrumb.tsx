@@ -39,6 +39,7 @@ export const { i18n } = declareComponentKeys<
     | "datastore_pyramid_vector_generate"
     | "datastore_pyramid_vector_tms_service_new"
     | "datastore_pyramid_vector_tms_service_edit"
+    | "datastore_pyramid_raster_generate"
     | "datastore_service_view"
 >()("Breadcrumb");
 
@@ -81,6 +82,7 @@ export const BreadcrumbFrTranslations: Translations<"fr">["Breadcrumb"] = {
     datastore_pyramid_vector_generate: "Génération d'une pyramide vecteur",
     datastore_pyramid_vector_tms_service_new: "Création d'un service TMS",
     datastore_pyramid_vector_tms_service_edit: "Modification d'un service TMS",
+    datastore_pyramid_raster_generate: "Génération d'une pyramide raster",
     datastore_service_view: "Prévisualisation d'un service",
 };
 
@@ -123,5 +125,6 @@ export const BreadcrumbEnTranslations: Translations<"en">["Breadcrumb"] = {
     datastore_pyramid_vector_generate: "Generate a vector pyramid",
     datastore_pyramid_vector_tms_service_new: "Create a TMS service",
     datastore_pyramid_vector_tms_service_edit: "Modify a TMS service",
+    datastore_pyramid_raster_generate: "Generate raster pyramid",
     datastore_service_view: "Preview a service",
 };

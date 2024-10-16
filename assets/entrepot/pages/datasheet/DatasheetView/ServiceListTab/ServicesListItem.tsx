@@ -105,12 +105,11 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                                             }
                                         },
                                     },
-                                    {
+                                    [OfferingTypeEnum.WFS, OfferingTypeEnum.WMTSTMS].includes(service.type) && {
                                         text: "Gérer les styles",
                                         iconId: "ri-flashlight-line",
                                         linkProps: routes.datastore_service_view({ datastoreId, datasheetName, offeringId: service._id, activeTab: "styles" })
                                             .link,
-                                        disabled: ![OfferingTypeEnum.WFS, OfferingTypeEnum.WMTSTMS].includes(service.type),
                                     },
                                     // {
                                     //     text: "Mettre à jour la légende",
@@ -123,7 +122,7 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                                         linkProps: routes.datastore_manage_permissions({ datastoreId }).link,
                                         disabled: service.open === true,
                                     },
-                                    {
+                                    [OfferingTypeEnum.WMSVECTOR, OfferingTypeEnum.WFS, OfferingTypeEnum.WMTSTMS].includes(service.type) && {
                                         text: "Modifier les informations de publication",
                                         iconId: "ri-edit-box-line",
                                         linkProps: (() => {
@@ -158,7 +157,11 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                                                     };
                                             }
                                         })(),
-                                        disabled: ![OfferingTypeEnum.WMSVECTOR, OfferingTypeEnum.WFS, OfferingTypeEnum.WMTSTMS].includes(service.type),
+                                    },
+                                    service.type === OfferingTypeEnum.WMSVECTOR && {
+                                        text: "Créer un service raster WMS/WMTS",
+                                        iconId: "ri-add-box-line",
+                                        linkProps: routes.datastore_pyramid_raster_generate({ datastoreId, offeringId: service._id, datasheetName }).link,
                                     },
                                     // NOTE : reporté cf. issue #249
                                     // {

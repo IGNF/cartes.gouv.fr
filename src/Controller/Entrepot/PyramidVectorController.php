@@ -7,9 +7,9 @@ use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Constants\EntrepotApi\Sandbox;
 use App\Constants\EntrepotApi\ZoomLevels;
 use App\Controller\ApiControllerInterface;
-use App\Dto\Pyramid\AddPyramidDTO;
-use App\Dto\Pyramid\CompositionDTO;
-use App\Dto\Pyramid\PublishPyramidDTO;
+use App\Dto\PyramidVector\AddPyramidDTO;
+use App\Dto\PyramidVector\CompositionDTO;
+use App\Dto\PyramidVector\PublishPyramidDTO;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\CapabilitiesService;
@@ -25,12 +25,12 @@ use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route(
-    '/api/datastores/{datastoreId}/pyramid',
-    name: 'cartesgouvfr_api_pyramid_',
+    '/api/datastores/{datastoreId}/pyramid-vector',
+    name: 'cartesgouvfr_api_pyramid_vector_',
     options: ['expose' => true],
     condition: 'request.isXmlHttpRequest()'
 )]
-class PyramidController extends ServiceController implements ApiControllerInterface
+class PyramidVectorController extends ServiceController implements ApiControllerInterface
 {
     public function __construct(
         DatastoreApiService $datastoreApiService,
@@ -80,7 +80,7 @@ class PyramidController extends ServiceController implements ApiControllerInterf
                 $parameters['area'] = $dto->area;
             }
 
-            $processing = $this->sandboxService->getProcGeneratePyramid($datastoreId);
+            $processing = $this->sandboxService->getProcGeneratePyramidVector($datastoreId);
 
             $requestBody = [
                 'processing' => $processing,
@@ -95,10 +95,6 @@ class PyramidController extends ServiceController implements ApiControllerInterf
             // Ajout d'une execution de traitement
             $processingExecution = $this->processingApiService->addExecution($datastoreId, $requestBody);
             $pyramidId = $processingExecution['output']['stored_data']['_id'];
-
-            $this->storedDataApiService->addTags($datastoreId, $dto->vectordb_id, [
-                'pyramid_id' => $pyramidId,
-            ]);
 
             $pyramidTags = [
                 CommonTags::DATASHEET_NAME => $vectordb['tags'][CommonTags::DATASHEET_NAME],

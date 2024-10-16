@@ -7,6 +7,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, memo, useMemo } from "react";
 import { createPortal } from "react-dom";
 
+import { PyramidVector, StoredDataStatusEnum } from "../../../../../../@types/app";
 import StoredDataStatusBadge from "../../../../../../components/Utils/Badges/StoredDataStatusBadge";
 import LoadingIcon from "../../../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../../../components/Utils/LoadingText";
@@ -16,21 +17,20 @@ import useToggle from "../../../../../../hooks/useToggle";
 import { Translations, declareComponentKeys, getTranslation, useTranslation } from "../../../../../../i18n/i18n";
 import RQKeys from "../../../../../../modules/entrepot/RQKeys";
 import { routes } from "../../../../../../router/router";
-import { Pyramid, StoredDataStatusEnum } from "../../../../../../@types/app";
 import { formatDateFromISO, offeringTypeDisplayName } from "../../../../../../utils";
 import api from "../../../../../api";
-import PyramidDesc from "./PyramidDesc";
+import PyramidVectorDesc from "./PyramidVectorDesc";
 
-type PyramidListItemProps = {
+type PyramidVectorListItemProps = {
     datasheetName: string;
-    pyramid: Pyramid;
+    pyramid: PyramidVector;
     datastoreId: string;
 };
 
 const { t: tCommon } = getTranslation("Common");
 
-const PyramidListItem: FC<PyramidListItemProps> = ({ datasheetName, datastoreId, pyramid }) => {
-    const { t } = useTranslation({ PyramidListItem });
+const PyramidVectorListItem: FC<PyramidVectorListItemProps> = ({ datasheetName, datastoreId, pyramid }) => {
+    const { t } = useTranslation({ PyramidVectorListItem });
 
     const [showDescription, toggleShowDescription] = useToggle(false);
 
@@ -77,6 +77,11 @@ const PyramidListItem: FC<PyramidListItemProps> = ({ datasheetName, datastoreId,
                                 onClick={toggleShowDescription}
                             />
                             {pyramid.name}
+                            {pyramid.tags?.is_sample === "true" && (
+                                <Badge noIcon={true} severity={"info"} className={fr.cx("fr-ml-2v")}>
+                                    Echantillon
+                                </Badge>
+                            )}
                         </div>
                     </div>
 
@@ -117,7 +122,7 @@ const PyramidListItem: FC<PyramidListItemProps> = ({ datasheetName, datastoreId,
                         </div>
                     </div>
                 </div>
-                {showDescription && <PyramidDesc datastoreId={datastoreId} pyramid={pyramid} dataUsesQuery={dataUsesQuery} />}
+                {showDescription && <PyramidVectorDesc datastoreId={datastoreId} pyramid={pyramid} dataUsesQuery={dataUsesQuery} />}
             </div>
             {deletePyramidMutation.error && (
                 <Alert
@@ -180,7 +185,7 @@ const PyramidListItem: FC<PyramidListItemProps> = ({ datasheetName, datastoreId,
     );
 };
 
-export default memo(PyramidListItem);
+export default memo(PyramidVectorListItem);
 
 // traductions
 export const { i18n } = declareComponentKeys<
@@ -192,10 +197,10 @@ export const { i18n } = declareComponentKeys<
     | "following_services_deleted"
     | { K: "error_deleting"; P: { pyramidName: string }; R: string }
 >()({
-    PyramidListItem,
+    PyramidVectorListItem,
 });
 
-export const PyramidListItemFrTranslations: Translations<"fr">["PyramidListItem"] = {
+export const PyramidVectorListItemFrTranslations: Translations<"fr">["PyramidVectorListItem"] = {
     show_linked_datas: "Voir les données liées",
     other_actions: "Autres actions",
     show_details: "Voir les détails",
@@ -205,7 +210,7 @@ export const PyramidListItemFrTranslations: Translations<"fr">["PyramidListItem"
     error_deleting: ({ pyramidName }) => `La suppression de la pyramide ${pyramidName} a échoué`,
 };
 
-export const PyramidListItemEnTranslations: Translations<"en">["PyramidListItem"] = {
+export const PyramidVectorListItemEnTranslations: Translations<"en">["PyramidVectorListItem"] = {
     show_linked_datas: "Show linked datas",
     other_actions: "Other actions",
     show_details: "Show details",
