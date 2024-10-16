@@ -98,7 +98,7 @@ const Offer = () => {
                         (disponible à l’automne 2024).
                     </p>
                     <p>
-                        <a {...routes.terms_of_service().link}>Conditions générales d’utilisation : à venir</a>
+                        <a {...routes.terms_of_service().link}>Conditions générales d’utilisation</a>
                     </p>
                     <p>
                         <a {...routes.contact().link}>Nous contacter.</a>
