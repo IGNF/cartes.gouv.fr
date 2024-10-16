@@ -105,7 +105,7 @@ const PyramidListItem: FC<PyramidListItemProps> = ({ datasheetName, datastoreId,
                                     {
                                         text: t("show_details"),
                                         iconId: "fr-icon-file-text-fill",
-                                        linkProps: routes.datastore_stored_data_details({ datastoreId, storedDataId: pyramid._id }).link,
+                                        linkProps: routes.datastore_stored_data_details({ datastoreId, datasheetName, storedDataId: pyramid._id }).link,
                                     },
                                     {
                                         text: tCommon("delete"),

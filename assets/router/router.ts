@@ -121,6 +121,7 @@ const routeDefs = {
         {
             datastoreId: param.path.string,
             uploadId: param.query.string,
+            datasheetName: param.query.optional.string,
         },
         (p) => `${appRoot}/entrepot/${p.datastoreId}/donnees/integration`
     ),
@@ -136,6 +137,7 @@ const routeDefs = {
         {
             datastoreId: param.path.string,
             storedDataId: param.path.string,
+            datasheetName: param.query.optional.string,
         },
         (p) => `${appRoot}/entrepot/${p.datastoreId}/donnees/${p.storedDataId}/details`
     ),

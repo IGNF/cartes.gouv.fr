@@ -52,10 +52,11 @@ type IntegrationStatus = "at_lease_one_failure" | "proc_int_launched" | "all_suc
 
 type DatasheetUploadIntegrationDialogProps = {
     datastoreId: string;
+    datasheetName: string | undefined;
     uploadId: string;
 };
 
-const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps> = ({ datastoreId, uploadId }) => {
+const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps> = ({ datastoreId, datasheetName, uploadId }) => {
     const [shouldPingIntProg, setShouldPingIntProg] = useState<boolean>(true);
 
     const queryClient = useQueryClient();
@@ -210,7 +211,11 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
                         buttons={[
                             {
                                 children: "Voir le rapport d’erreur",
-                                linkProps: routes.datastore_stored_data_details({ datastoreId, storedDataId: uploadQuery.data?.tags?.vectordb_id }).link,
+                                linkProps: routes.datastore_stored_data_details({
+                                    datastoreId,
+                                    storedDataId: uploadQuery.data?.tags?.vectordb_id,
+                                    datasheetName,
+                                }).link,
                             },
                             {
                                 children: "Revenir à mes données",

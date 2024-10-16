@@ -262,7 +262,7 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
                                     {
                                         text: t("show_details"),
                                         iconId: "fr-icon-file-text-fill",
-                                        linkProps: routes.datastore_stored_data_details({ datastoreId, storedDataId: vectorDb._id }).link,
+                                        linkProps: routes.datastore_stored_data_details({ datastoreId, datasheetName, storedDataId: vectorDb._id }).link,
                                     },
                                     {
                                         text: tCommon("delete"),

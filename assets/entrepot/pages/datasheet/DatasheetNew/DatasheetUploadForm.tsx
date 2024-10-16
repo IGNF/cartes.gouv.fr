@@ -342,7 +342,7 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
 
             {addUploadMutation.isSuccess && addUploadMutation.data?._id !== undefined && (
                 <Wait>
-                    <DatasheetUploadIntegrationDialog datastoreId={datastoreId} uploadId={addUploadMutation.data?._id} />
+                    <DatasheetUploadIntegrationDialog datastoreId={datastoreId} uploadId={addUploadMutation.data?._id} datasheetName={datasheetName} />
                 </Wait>
             )}
         </DatastoreLayout>

@@ -143,7 +143,13 @@ const RouterRenderer: FC = () => {
             case "datastore_datasheet_upload":
                 return <DatasheetUploadForm datastoreId={route.params.datastoreId} />;
             case "datastore_datasheet_upload_integration":
-                return <DatasheetUploadIntegrationPage datastoreId={route.params.datastoreId} uploadId={route.params.uploadId} />;
+                return (
+                    <DatasheetUploadIntegrationPage
+                        datastoreId={route.params.datastoreId}
+                        uploadId={route.params.uploadId}
+                        datasheetName={route.params.datasheetName}
+                    />
+                );
             case "datastore_datasheet_view":
                 return <DatasheetView datastoreId={route.params.datastoreId} datasheetName={route.params.datasheetName} />;
             case "datastore_stored_data_details":
