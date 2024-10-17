@@ -4,9 +4,9 @@ namespace App\Controller\EspaceCo;
 
 use App\Controller\ApiControllerInterface;
 use App\Services\EspaceCoApi\UserApiService;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Routing\Annotation\Route;
 
 #[Route(
     '/api/espaceco/user',
@@ -25,6 +25,15 @@ class UserController extends AbstractController implements ApiControllerInterfac
     public function getCurrentUser(): JsonResponse
     {
         $me = $this->userApiService->getMe();
+
+        return $this->json($me);
+    }
+
+    #[Route('/me/shared_themes', name: 'shared_themes')]
+    public function getSharedThemes(): JsonResponse
+    {
+        $me = $this->userApiService->getSharedThemes();
+
         return $this->json($me);
     }
 }

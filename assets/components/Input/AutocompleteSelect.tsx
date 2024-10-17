@@ -8,7 +8,7 @@ import { symToStr } from "tsafe/symToStr";
 interface AutocompleteSelectProps<T> {
     id?: string;
     label: string;
-    hintText: string;
+    hintText?: string;
     state?: "default" | "error" | "success";
     stateRelatedMessage?: string;
     defaultValue?: T[];
@@ -76,7 +76,6 @@ const AutocompleteSelect = <T,>(props: AutocompleteSelectProps<T>) => {
                     {label}
                     {hintText && <span className="fr-hint-text">{hintText}</span>}
                 </label>
-
                 <Autocomplete
                     {...controllerField}
                     id={inputId}
