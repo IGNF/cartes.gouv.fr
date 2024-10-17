@@ -48,7 +48,7 @@ const getStepStatusText = (status: string) => {
     return statusText;
 };
 
-type IntegrationStatus = "at_lease_one_failure" | "proc_int_launched" | "all_successful";
+type IntegrationStatus = "at_least_one_failure" | "proc_int_launched" | "all_successful";
 
 type DatasheetUploadIntegrationDialogProps = {
     datastoreId: string;
@@ -101,7 +101,7 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
     const integrationStatus: IntegrationStatus | undefined = useMemo(() => {
         if (integrationProgress && Object.values(integrationProgress).includes("failed")) {
             // au moins une étape a échoué
-            return "at_lease_one_failure";
+            return "at_least_one_failure";
         }
 
         if (integrationProgress && integrationProgress?.["integration_processing"] === "in_progress") {
@@ -117,7 +117,7 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
 
     useEffect(() => {
         switch (integrationStatus) {
-            case "at_lease_one_failure":
+            case "at_least_one_failure":
                 setShouldPingIntProg(false);
                 break;
             case "proc_int_launched":
@@ -144,7 +144,7 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
 
     return (
         <div className={fr.cx("fr-container")}>
-            {integrationStatus === "at_lease_one_failure" ? (
+            {integrationStatus === "at_least_one_failure" ? (
                 <div className={fr.cx("fr-grid-row")}>
                     <div className={fr.cx("fr-col")}>
                         <h6 className={fr.cx("fr-h6")}>
@@ -205,7 +205,7 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
                 </div>
             )}
 
-            {integrationStatus === "at_lease_one_failure" && uploadQuery.data?.tags?.vectordb_id !== undefined && (
+            {integrationStatus === "at_least_one_failure" && uploadQuery.data?.tags?.vectordb_id !== undefined && (
                 <div className={fr.cx("fr-grid-row")}>
                     <ButtonsGroup
                         buttons={[
