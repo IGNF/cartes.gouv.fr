@@ -222,6 +222,23 @@ const routeDefs = {
         },
         (p) => `${appRoot}/entrepot/${p.datastoreId}/pyramide-raster/ajout`
     ),
+    datastore_pyramid_raster_wms_raster_service_new: defineRoute(
+        {
+            datastoreId: param.path.string,
+            pyramidId: param.query.string,
+            datasheetName: param.query.string,
+        },
+        (p) => `${appRoot}/entrepot/${p.datastoreId}/service/wms-raster/ajout`
+    ),
+    datastore_pyramid_raster_wms_raster_service_edit: defineRoute(
+        {
+            datastoreId: param.path.string,
+            pyramidId: param.query.string,
+            offeringId: param.path.string,
+            datasheetName: param.query.string,
+        },
+        (p) => `${appRoot}/entrepot/${p.datastoreId}/service/wms-raster/${p.offeringId}/modification`
+    ),
 
     datastore_service_view: defineRoute(
         {

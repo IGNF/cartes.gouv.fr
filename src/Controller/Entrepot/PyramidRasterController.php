@@ -3,6 +3,8 @@
 namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\CommonTags;
+use App\Constants\EntrepotApi\ConfigurationTypes;
+use App\Constants\EntrepotApi\Sandbox;
 use App\Constants\EntrepotApi\StoredDataTypes;
 use App\Controller\ApiControllerInterface;
 use App\Exception\ApiException;
@@ -36,8 +38,8 @@ class PyramidRasterController extends ServiceController implements ApiController
         private ProcessingApiService $processingApiService,
         SandboxService $sandboxService,
         CartesServiceApiService $cartesServiceApiService,
-        CapabilitiesService $capabilitiesService,
-        CartesMetadataApiService $cartesMetadataApiService,
+        private CapabilitiesService $capabilitiesService,
+        private CartesMetadataApiService $cartesMetadataApiService,
     ) {
         parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $capabilitiesService, $cartesMetadataApiService, $sandboxService);
     }
@@ -110,5 +112,162 @@ class PyramidRasterController extends ServiceController implements ApiController
         } catch (ApiException|AppException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
+    }
+
+    #[Route('/{pyramidId}/wms-raster', name: 'wms_raster_add', methods: ['POST'])]
+    public function addWmsRaster(
+        string $datastoreId,
+        string $pyramidId,
+        Request $request
+    ): JsonResponse {
+        try {
+            $data = json_decode($request->getContent(), true);
+            $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId);
+            $datasheetName = $pyramid['tags'][CommonTags::DATASHEET_NAME];
+
+            // création de requête pour la config
+            $configRequestBody = $this->getConfigRequestBody($data, $pyramid, false, $datastoreId);
+
+            // Restriction d'acces
+            $endpoint = $this->getEndpointByShareType($datastoreId, ConfigurationTypes::WMSRASTER, $data['share_with']);
+
+            // Ajout de la configuration
+            $configuration = $this->configurationApiService->add($datastoreId, $configRequestBody);
+            $configuration = $this->configurationApiService->addTags($datastoreId, $configuration['_id'], [
+                CommonTags::DATASHEET_NAME => $pyramid['tags'][CommonTags::DATASHEET_NAME],
+            ]);
+
+            // Creation d'une offering
+            try {
+                $offering = $this->configurationApiService->addOffering($datastoreId, $configuration['_id'], $endpoint['_id'], $endpoint['open']);
+                $offering['configuration'] = $configuration;
+            } catch (\Throwable $th) {
+                // si la création de l'offering plante, on défait la création de la config
+                $this->configurationApiService->remove($datastoreId, $configuration['_id']);
+                throw $th;
+            }
+
+            // création d'une permission pour la communauté actuelle
+            if ('your_community' === $data['share_with']) {
+                $this->addPermissionForCurrentCommunity($datastoreId, $offering);
+            }
+
+            // Création ou mise à jour du capabilities
+            try {
+                $this->capabilitiesService->createOrUpdate($datastoreId, $endpoint, $offering['urls'][0]['url']);
+            } catch (\Exception $e) {
+            }
+
+            // création ou mise à jour de metadata
+            if ($this->sandboxService->isSandboxDatastore($datastoreId)) {
+                $data['identifier'] = Sandbox::LAYERNAME_PREFIX.$data['identifier'];
+            }
+            $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $data);
+
+            return $this->json($offering);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
+    #[Route('/{pyramidId}/wms-raster/{offeringId}/edit', name: 'wms_raster_edit', methods: ['POST'])]
+    public function editWmsRaster(
+        string $datastoreId,
+        string $pyramidId,
+        string $offeringId,
+        Request $request
+    ): JsonResponse {
+        try {
+            $data = json_decode($request->getContent(), true);
+
+            // récup config et offering existants
+            $oldOffering = $this->configurationApiService->getOffering($datastoreId, $offeringId);
+            $oldConfiguration = $this->configurationApiService->get($datastoreId, $oldOffering['configuration']['_id']);
+
+            $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId);
+            $datasheetName = $pyramid['tags'][CommonTags::DATASHEET_NAME];
+
+            // création de requête pour la config
+            $configRequestBody = $this->getConfigRequestBody($data, $pyramid, true);
+
+            $endpoint = $this->getEndpointByShareType($datastoreId, ConfigurationTypes::WMSRASTER, $data['share_with']);
+
+            // Mise à jour de la configuration
+            $configuration = $this->configurationApiService->replace($datastoreId, $oldConfiguration['_id'], $configRequestBody);
+
+            // on recrée l'offering si changement d'endpoint, sinon demande la synchronisation
+            if ($oldOffering['open'] !== $endpoint['open']) {
+                $this->configurationApiService->removeOffering($datastoreId, $oldOffering['_id']);
+
+                $offering = $this->configurationApiService->addOffering($datastoreId, $oldConfiguration['_id'], $endpoint['_id'], $endpoint['open']);
+
+                if (false === $offering['open']) {
+                    // création d'une permission pour la communauté actuelle
+                    $this->addPermissionForCurrentCommunity($datastoreId, $offering);
+                }
+            } else {
+                $offering = $this->configurationApiService->syncOffering($datastoreId, $offeringId);
+            }
+
+            $offering['configuration'] = $configuration;
+
+            // Création ou mise à jour du capabilities
+            try {
+                $this->capabilitiesService->createOrUpdate($datastoreId, $endpoint, $offering['urls'][0]['url']);
+            } catch (\Exception $e) {
+            }
+
+            // création ou mise à jour de metadata
+            if ($this->sandboxService->isSandboxDatastore($datastoreId)) {
+                $data['identifier'] = Sandbox::LAYERNAME_PREFIX.$data['identifier'];
+            }
+            $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $data);
+
+            return $this->json($offering);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
+    /**
+     * @param array<mixed> $data
+     * @param array<mixed> $pyramid
+     */
+    private function getConfigRequestBody(array $data, array $pyramid, bool $editMode = false, ?string $datastoreId = null): array
+    {
+        $levels = $this->getPyramidZoomLevels($pyramid);
+
+        $requestBody = [
+            'type' => ConfigurationTypes::WMSRASTER,
+            'name' => $data['public_name'],
+            'type_infos' => [
+                'title' => $data['public_name'],
+                'abstract' => json_encode($data['description']),
+                'keywords' => $data['category'],
+                'used_data' => [[
+                    'bottom_level' => $levels['bottom_level'],
+                    'top_level' => $levels['top_level'],
+                    'stored_data' => $pyramid['_id'],
+                ]],
+            ],
+        ];
+
+        if (false === $editMode) {
+            $requestBody['layer_name'] = $data['technical_name'];
+
+            // rajoute le préfixe "sandbox." si c'est la communauté bac à sable
+            if ($this->sandboxService->isSandboxDatastore($datastoreId)) {
+                $requestBody['layer_name'] = Sandbox::LAYERNAME_PREFIX.$requestBody['layer_name'];
+            }
+        }
+
+        if ('' !== $data['attribution_text'] && '' !== $data['attribution_url']) {
+            $requestBody['attribution'] = [
+                'title' => $data['attribution_text'],
+                'url' => $data['attribution_url'],
+            ];
+        }
+
+        return $requestBody;
     }
 }

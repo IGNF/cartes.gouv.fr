@@ -5,28 +5,15 @@ import { XMLParser } from "fast-xml-parser";
 import { FC, useEffect } from "react";
 import { Controller, UseFormReturn } from "react-hook-form";
 
+import { ServiceFormValuesBaseType } from "../../../../@types/app";
 import AutocompleteSelect from "../../../../components/Input/AutocompleteSelect";
 import MarkdownEditor from "../../../../components/Input/MarkdownEditor";
-import { getTranslation } from "../../../../i18n/i18n";
-import { EndpointTypeEnum, ServiceFormValuesBaseType } from "../../../../@types/app";
-import { getInspireKeywords, regex } from "../../../../utils";
-import categories from "../../../../data/topic_categories.json";
 import frequencyCodes from "../../../../data/maintenance_frequency.json";
+import categories from "../../../../data/topic_categories.json";
+import { getTranslation } from "../../../../i18n/i18n";
+import { getInspireKeywords, regex } from "../../../../utils";
 
 const keywords = getInspireKeywords();
-
-export const getEndpointSuffix = (endpointType: EndpointTypeEnum) => {
-    switch (endpointType) {
-        case EndpointTypeEnum.WFS:
-            return "wfs";
-        case EndpointTypeEnum.WMSVECTOR:
-            return "wmsv";
-        case EndpointTypeEnum.WMTSTMS:
-            return "tms";
-        default:
-            return "other"; // TODO
-    }
-};
 
 type DescriptionProps = {
     visible: boolean;
