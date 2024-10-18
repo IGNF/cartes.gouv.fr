@@ -3,7 +3,8 @@ import { fr } from "@codegouvfr/react-dsfr";
 import AppLayout from "../../components/Layout/AppLayout";
 
 import { routes } from "../../router/router";
-import SymfonyRouting from "../../modules/Routing";
+
+import "../../sass/components/summary.scss";
 
 const TermsOfService = () => {
     return (
@@ -147,22 +148,18 @@ const TermsOfService = () => {
                                     </li>
                                 </ol>
                             </li>
-                            <li
-                                style={{
-                                    listStyleType: "none",
-                                }}
-                            >
-                                <a className={fr.cx("fr-summary__link")} id="summary-link-annexe-1" href="#anchor-annexe-1">
+                            <li>
+                                <a className={fr.cx("fr-summary__link") + " frx-nonumber"} id="summary-link-annexe-1" href="#anchor-annexe-1">
                                     Annexe 1&nbsp;: Liste des API de la Géoplateforme
                                 </a>
                             </li>
                             <li>
-                                <a className={fr.cx("fr-summary__link")} id="summary-link-annexe-2" href="#anchor-annexe-2">
+                                <a className={fr.cx("fr-summary__link") + " frx-nonumber"} id="summary-link-annexe-2" href="#anchor-annexe-2">
                                     Annexe 2&nbsp;: Offre Géoplateforme
                                 </a>
                             </li>
                             <li>
-                                <a className={fr.cx("fr-summary__link")} id="summary-link-annexe-3" href="#anchor-annexe-3">
+                                <a className={fr.cx("fr-summary__link") + " frx-nonumber"} id="summary-link-annexe-3" href="#anchor-annexe-3">
                                     Annexe 3&nbsp;: Accord de niveau de service
                                 </a>
                             </li>
@@ -191,7 +188,7 @@ const TermsOfService = () => {
                     <p>
                         Pour les API permettant l’hébergement, la gestion collaborative et la diffusion de données, les CGU s’appliquent dans le respect des
                         fonctionnalités de l’offre souscrite par vous-même ou par l’entité que vous représentez/pour laquelle vous travaillez (Offre Essentielle
-                        ou Premium, définie en Annexe 2) et sous réserve de conventions dérogatoires.
+                        ou Premium, définie en <a href="#anchor-annexe-2">Annexe 2</a>) et sous réserve de conventions dérogatoires.
                     </p>
 
                     <p>
@@ -343,16 +340,16 @@ const TermsOfService = () => {
                     </h3>
 
                     <p>
-                        Vous vous engagez à utiliser l’API dans le respect de sa documentation, des conditions du niveau d’offre souscrit (Annexe 2) et à vous
-                        adapter aux évolutions et mises à jour de l’API. Vous êtes seul responsable de l’usage que vous faites de l’API, lequel doit être
-                        strictement conforme aux CGU, aux lois et réglementations en vigueur.
+                        Vous vous engagez à utiliser l’API dans le respect de sa documentation, des conditions du niveau d’offre souscrit (
+                        <a href="#anchor-annexe-2">Annexe 2</a>) et à vous adapter aux évolutions et mises à jour de l’API. Vous êtes seul responsable de
+                        l’usage que vous faites de l’API, lequel doit être strictement conforme aux CGU, aux lois et réglementations en vigueur.
                     </p>
 
                     <p>
                         En cas de manquement de votre part aux CGU ou aux lois et réglementations en vigueur, le Fournisseur d’API, le Fournisseur de données et
-                        l’IGN ne peuvent pas être tenus responsables de tout préjudice causé par vous-même ou vos ayants droit (notamment, pour le Développeur :
-                        vos Utilisateurs Finaux) lié à l’utilisation de l’API et à l’utilisation/réutilisation des données mises à disposition à partir de
-                        l’API.
+                        l’IGN ne peuvent pas être tenus responsables de tout préjudice causé par vous-même ou vos ayants droit (notamment, pour le
+                        Développeur&nbsp;: vos Utilisateurs Finaux) lié à l’utilisation de l’API et à l’utilisation/réutilisation des données mises à
+                        disposition à partir de l’API.
                     </p>
 
                     <p>
@@ -525,7 +522,7 @@ const TermsOfService = () => {
 
                         <li>
                             met en œuvre tous les moyens aux fins d’assurer le bon fonctionnement des API selon l’accord de niveau de service (ou service level
-                            agreement, ci-après «&nbsp;SLA&nbsp;» en Annexe 3),
+                            agreement, ci-après «&nbsp;SLA&nbsp;» en <a href="#anchor-annexe-3">Annexe 3</a>),
                         </li>
 
                         <li>ne peut être tenu responsable d’une modification des conditions d’utilisation d’une API par son Fournisseur d’API,</li>
@@ -590,7 +587,7 @@ const TermsOfService = () => {
 
                     <p>
                         L’IGN met en œuvre tous les moyens afin de maintenir la disponibilité de la Géoplateforme et des API selon l’accord de niveau de service
-                        (Annexe 3).
+                        (<a href="#anchor-annexe-3">Annexe 3</a>).
                     </p>
 
                     <p>L’indisponibilité de la Géoplateforme ne saurait ouvrir droit à aucune compensation quelle qu’en soit sa nature.</p>
@@ -700,7 +697,8 @@ const TermsOfService = () => {
                         <li>API Géoplateforme - Diffusion de tuiles vectorielles pg_tileserv - Bac à sable </li>
                     </ul>
                     <p>
-                        La dénomination des API est susceptible d’évoluer : il convient de se référer au <a href="./catalogue">Catalogue | cartes.gouv.fr</a>.
+                        La dénomination des API est susceptible d’évoluer&nbsp;: il convient de se référer au{" "}
+                        <a href="./catalogue">Catalogue | cartes.gouv.fr</a>.
                     </p>
 
                     <hr />
@@ -720,26 +718,19 @@ const TermsOfService = () => {
 
                     <p>
                         L’offre Découverte permet au Fournisseur de données d’éprouver le fonctionnement du système. Cette offre est gratuite et accessible
-                        depuis{" "}
-                        <a
-                            {...routes.dashboard_pro().link}
-                        >{`${SymfonyRouting.getScheme()}://${SymfonyRouting.getHost()}${SymfonyRouting.getBaseUrl()}${routes.dashboard_pro().href}`}</a>{" "}
-                        (authentification nécessaire). Elle donne accès à un espace de type bac à sable, non personnel, partagé avec l’ensemble des Fournisseurs
-                        de données de la Géoplateforme et sur lequel les données ne sont pas pérennes (suppression trimestrielle des données). Il ne s’agit donc
-                        pas d’un espace pour accueillir des données de production et l’IGN ne peut être tenu pour responsable des effets provoqués par ladite
-                        suppression trimestrielle des données.
+                        depuis <a {...routes.dashboard_pro().link}>Tableau de bord | cartes.gouv.fr</a> (authentification nécessaire). Elle donne accès à un
+                        espace de type bac à sable, non personnel, partagé avec l’ensemble des Fournisseurs de données de la Géoplateforme et sur lequel les
+                        données ne sont pas pérennes (suppression trimestrielle des données). Il ne s’agit donc pas d’un espace pour accueillir des données de
+                        production et l’IGN ne peut être tenu pour responsable des effets provoqués par ladite suppression trimestrielle des données.
                     </p>
 
                     <p>
                         L’offre Essentiel permet au Fournisseur de données un usage standard en production. Cette offre est gratuite et accessible via un
-                        formulaire disponible sur{" "}
-                        <a
-                            {...routes.dashboard_pro().link}
-                        >{`${SymfonyRouting.getScheme()}://${SymfonyRouting.getHost()}${SymfonyRouting.getBaseUrl()}${routes.dashboard_pro().href}`}</a>{" "}
-                        (authentification nécessaire). Cette offre est limitée à une instance par organisme, attribuée au premier Fournisseur de données qui en
-                        fait la demande en se réclamant de cet organisme et qui se voit attribué l’espace de données offre Essentiel pour l’organisme. Les
-                        éventuels autres Fournisseurs de données du même organisme effectuant la même demande sont rattachés à l’unique espace déjà créé pour
-                        l’organisme. L’IGN se réserve un droit de modération a posteriori des comptes et espaces de données.
+                        formulaire disponible sur <a {...routes.dashboard_pro().link}>Tableau de bord | cartes.gouv.fr</a> (authentification nécessaire). Cette
+                        offre est limitée à une instance par organisme, attribuée au premier Fournisseur de données qui en fait la demande en se réclamant de
+                        cet organisme et qui se voit attribué l’espace de données offre Essentiel pour l’organisme. Les éventuels autres Fournisseurs de données
+                        du même organisme effectuant la même demande sont rattachés à l’unique espace déjà créé pour l’organisme. L’IGN se réserve un droit de
+                        modération a posteriori des comptes et espaces de données.
                     </p>
 
                     <p>
@@ -977,7 +968,7 @@ const TermsOfService = () => {
 
                     <p>
                         L’objectif du présent accord de niveau de service (ou service level agreement, ci-après « SLA ») est de définir les paramètres de
-                        référence applicables aux API (Annexe 1) et le contrôle du niveau de qualité effectivement fourni.
+                        référence applicables aux API (<a href="#anchor-annexe-1">Annexe 1</a>) et le contrôle du niveau de qualité effectivement fourni.
                     </p>
 
                     <h3>Article 2&nbsp;: Définitions et périmètre du SLA</h3>
@@ -1034,11 +1025,7 @@ const TermsOfService = () => {
 
                     <p>Les mesures de temps de fonctionnement de référence sont réalisées au moyen de l’outil Uptrends.</p>
                     <p>
-                        La disponibilité des API est consultable sur{" "}
-                        <a
-                            {...routes.service_status().link}
-                        >{`${SymfonyRouting.getScheme()}://${SymfonyRouting.getHost()}${SymfonyRouting.getBaseUrl()}${routes.service_status().href}`}</a>
-                        .
+                        La disponibilité des API est consultable sur <a {...routes.service_status().link}>Niveau de service | cartes.gouv.fr</a>.
                     </p>
 
                     <h3>Article 3&nbsp;: Engagement de service relatif au fonctionnement</h3>
@@ -1051,7 +1038,7 @@ const TermsOfService = () => {
 
                     <p>Une indisponibilité ne saurait ouvrir droit à aucune compensation quelle qu’en soit sa nature.</p>
 
-                    <p>Les indisponibilités liées à une maintenance programmée font l’objet d’un délai de prévenance minimum : </p>
+                    <p>Les indisponibilités liées à une maintenance programmée font l’objet d’un délai de prévenance minimum&nbsp;: </p>
                     <ul>
                         <li>de 20 jours ouvrés pour une maintenance avec interruption&nbsp;;</li>
                         <li>de 10 jours ouvrés pour une maintenance évolutive de grande envergure sans interruption, sauf en cas de force majeure.</li>
