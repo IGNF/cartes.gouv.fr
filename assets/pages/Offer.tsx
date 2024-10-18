@@ -93,9 +93,7 @@ const Offer = () => {
 
             <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
                 <div className={fr.cx("fr-col-12", "fr-col-lg-8")}>
-                    <p>
-                        Un « bac à sable » permet de tester gratuitement les fonctions d’alimentation et de diffusion de la Géoplateforme en quelques clics.
-                    </p>
+                    <p>Un « bac à sable » permet de tester gratuitement les fonctions d’alimentation et de diffusion de la Géoplateforme en quelques clics.</p>
                     <p>
                         <a {...routes.terms_of_service().link}>Conditions générales d’utilisation</a>
                     </p>
