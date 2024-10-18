@@ -122,7 +122,9 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                                         linkProps: routes.datastore_manage_permissions({ datastoreId }).link,
                                         disabled: service.open === true,
                                     },
-                                    [OfferingTypeEnum.WMSVECTOR, OfferingTypeEnum.WFS, OfferingTypeEnum.WMTSTMS].includes(service.type) && {
+                                    [OfferingTypeEnum.WMSVECTOR, OfferingTypeEnum.WMSRASTER, OfferingTypeEnum.WFS, OfferingTypeEnum.WMTSTMS].includes(
+                                        service.type
+                                    ) && {
                                         text: "Modifier les informations de publication",
                                         iconId: "ri-edit-box-line",
                                         linkProps: (() => {
@@ -131,6 +133,14 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                                                     return routes.datastore_wms_vector_service_edit({
                                                         datastoreId,
                                                         vectorDbId: service.configuration.type_infos.used_data[0].stored_data,
+                                                        offeringId: service._id,
+                                                        datasheetName,
+                                                    }).link;
+
+                                                case OfferingTypeEnum.WMSRASTER:
+                                                    return routes.datastore_pyramid_raster_wms_raster_service_edit({
+                                                        datastoreId,
+                                                        pyramidId: service.configuration.type_infos.used_data[0].stored_data,
                                                         offeringId: service._id,
                                                         datasheetName,
                                                     }).link;

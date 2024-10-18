@@ -40,6 +40,8 @@ export const { i18n } = declareComponentKeys<
     | "datastore_pyramid_vector_tms_service_new"
     | "datastore_pyramid_vector_tms_service_edit"
     | "datastore_pyramid_raster_generate"
+    | "datastore_pyramid_raster_wms_raster_service_new"
+    | "datastore_pyramid_raster_wms_raster_service_edit"
     | "datastore_service_view"
 >()("Breadcrumb");
 
@@ -77,12 +79,14 @@ export const BreadcrumbFrTranslations: Translations<"fr">["Breadcrumb"] = {
     datastore_stored_data_details: "Détails d'une donnée stockée",
     datastore_wfs_service_new: "Création d'un service WFS",
     datastore_wfs_service_edit: "Modification d'un service WFS",
-    datastore_wms_vector_service_new: "Création d'un service WMS",
-    datastore_wms_vector_service_edit: "Modification d'un service WMS",
+    datastore_wms_vector_service_new: "Création d'un service WMS-Vecteur",
+    datastore_wms_vector_service_edit: "Modification d'un service WMS-Vecteur",
     datastore_pyramid_vector_generate: "Génération d'une pyramide vecteur",
     datastore_pyramid_vector_tms_service_new: "Création d'un service TMS",
     datastore_pyramid_vector_tms_service_edit: "Modification d'un service TMS",
     datastore_pyramid_raster_generate: "Génération d'une pyramide raster",
+    datastore_pyramid_raster_wms_raster_service_new: "Création d'un service WMS-Raster",
+    datastore_pyramid_raster_wms_raster_service_edit: "Modification d'un service WMS-Raster",
     datastore_service_view: "Prévisualisation d'un service",
 };
 
@@ -120,11 +124,13 @@ export const BreadcrumbEnTranslations: Translations<"en">["Breadcrumb"] = {
     datastore_stored_data_details: "Details of stored data",
     datastore_wfs_service_new: "Create a WFS service",
     datastore_wfs_service_edit: "Modify WFS service",
-    datastore_wms_vector_service_new: "Create a WMS service",
-    datastore_wms_vector_service_edit: "Modify a WMS service",
+    datastore_wms_vector_service_new: "Create a WMS-Vector service",
+    datastore_wms_vector_service_edit: "Modify a WMS-Vector service",
     datastore_pyramid_vector_generate: "Generate a vector pyramid",
     datastore_pyramid_vector_tms_service_new: "Create a TMS service",
     datastore_pyramid_vector_tms_service_edit: "Modify a TMS service",
     datastore_pyramid_raster_generate: "Generate raster pyramid",
+    datastore_pyramid_raster_wms_raster_service_new: "Create a WMS-Raster service",
+    datastore_pyramid_raster_wms_raster_service_edit: "Modify a WMS-Raster service",
     datastore_service_view: "Preview a service",
 };

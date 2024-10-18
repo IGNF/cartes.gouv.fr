@@ -6,7 +6,7 @@ import { Select as SelectNext } from "@codegouvfr/react-dsfr/SelectNext";
 import { FC, useMemo } from "react";
 import { Controller, UseFormReturn } from "react-hook-form";
 
-import type { PyramidVector } from "../../../../@types/app";
+import type { PyramidRaster, PyramidVector } from "../../../../@types/app";
 import { MetadataHierarchyLevel, type ServiceFormValuesBaseType, type VectorDb } from "../../../../@types/app";
 import AutocompleteSelect from "../../../../components/Input/AutocompleteSelect";
 import resolutions from "../../../../data/md_resolutions.json";
@@ -31,7 +31,7 @@ import { LanguageType, charsets, getLanguages } from "../../../../utils";
 // };
 
 type AdditionalInfoProps = {
-    storedData: VectorDb | PyramidVector;
+    storedData: VectorDb | PyramidVector | PyramidRaster;
     visible: boolean;
     form: UseFormReturn<ServiceFormValuesBaseType>;
     datastoreId: string;

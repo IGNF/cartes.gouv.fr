@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Services\EntrepotApi\AnnexeApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
@@ -60,6 +59,7 @@ class CapabilitiesService
                 $xmlStr = $this->filterWFSCapabilities($endpoint, $url, $allOfferings);
                 break;
             case ConfigurationTypes::WMSVECTOR:
+            case ConfigurationTypes::WMSRASTER:
                 $xmlStr = $this->filterWMSCapabilities($endpoint, $url, $allOfferings);
                 break;
             default: break;
