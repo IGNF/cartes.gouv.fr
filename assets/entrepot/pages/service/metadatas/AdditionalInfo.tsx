@@ -4,7 +4,7 @@ import Select from "@codegouvfr/react-dsfr/Select";
 import { FC, useMemo } from "react";
 import { Controller, UseFormReturn } from "react-hook-form";
 
-import type { PyramidVector, ServiceFormValuesBaseType, VectorDb } from "../../../../@types/app";
+import type { PyramidRaster, PyramidVector, ServiceFormValuesBaseType, VectorDb } from "../../../../@types/app";
 import AutocompleteSelect from "../../../../components/Input/AutocompleteSelect";
 import ignProducts from "../../../../data/md_resolutions.json";
 import { getTranslation } from "../../../../i18n/i18n";
@@ -28,7 +28,7 @@ import { LanguageType, charsets, getLanguages } from "../../../../utils";
 // };
 
 type AdditionalInfoProps = {
-    storedData: VectorDb | PyramidVector;
+    storedData: VectorDb | PyramidVector | PyramidRaster;
     visible: boolean;
     form: UseFormReturn<ServiceFormValuesBaseType>;
     datastoreId: string;

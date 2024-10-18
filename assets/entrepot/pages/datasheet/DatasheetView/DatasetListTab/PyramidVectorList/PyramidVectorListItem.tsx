@@ -19,7 +19,7 @@ import RQKeys from "../../../../../../modules/entrepot/RQKeys";
 import { routes } from "../../../../../../router/router";
 import { formatDateFromISO, offeringTypeDisplayName } from "../../../../../../utils";
 import api from "../../../../../api";
-import PyramidVectorDesc from "./PyramidVectorDesc";
+import PyramidStoredDataDesc from "../PyramidStoredDataDesc";
 
 type PyramidVectorListItemProps = {
     datasheetName: string;
@@ -122,7 +122,7 @@ const PyramidVectorListItem: FC<PyramidVectorListItemProps> = ({ datasheetName, 
                         </div>
                     </div>
                 </div>
-                {showDescription && <PyramidVectorDesc datastoreId={datastoreId} pyramid={pyramid} dataUsesQuery={dataUsesQuery} />}
+                {showDescription && <PyramidStoredDataDesc datastoreId={datastoreId} pyramid={pyramid} dataUsesQuery={dataUsesQuery} />}
             </div>
             {deletePyramidMutation.error && (
                 <Alert

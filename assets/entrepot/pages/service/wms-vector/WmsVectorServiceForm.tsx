@@ -300,7 +300,7 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
         <DatastoreLayout datastoreId={datastoreId} documentTitle={t("title", { editMode })}>
             <h1>{t("title", { editMode })}</h1>
 
-            {vectorDbQuery.isLoading || offeringQuery.isLoading ? (
+            {vectorDbQuery.isLoading || offeringQuery.isLoading || metadataQuery.isLoading ? (
                 <LoadingText as="h2" message={editMode ? t("stored_data_and_offering.loading") : t("stored_data.loading")} />
             ) : vectorDbQuery.data === undefined ? (
                 <Alert
