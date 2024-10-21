@@ -1,14 +1,14 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import MuiDsfrThemeProvider from "@codegouvfr/react-dsfr/mui";
 import { Autocomplete, AutocompleteFreeSoloValueMapping, AutocompleteValue, CreateFilterOptionsConfig, TextField, createFilterOptions } from "@mui/material";
-import { CSSProperties, useId } from "react";
+import { CSSProperties, ReactNode, useId } from "react";
 import { ControllerRenderProps } from "react-hook-form";
 import { symToStr } from "tsafe/symToStr";
 
 interface AutocompleteSelectProps<T> {
     id?: string;
     label: string;
-    hintText?: string;
+    hintText?: ReactNode;
     state?: "default" | "error" | "success";
     stateRelatedMessage?: string;
     defaultValue?: T[];

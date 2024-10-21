@@ -8,7 +8,6 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import {
     CommunityResponseDTO,
-    ReportFormType,
     ReportStatusesType,
     SharedGeoremOptions,
     SharedThemesDTO,
@@ -28,6 +27,7 @@ import SharedThemes from "./reports/SharedThemes";
 import ThemeList from "./reports/ThemeList";
 import { countActiveStatus, getDefaultStatuses, getMinAuthorizedStatus } from "./reports/Utils";
 import Answers from "./reports/Answers";
+import { ReportFormType } from "../../../../@types/app_espaceco";
 
 type ReportsProps = {
     community: CommunityResponseDTO;

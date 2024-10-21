@@ -2,7 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import ToggleSwitch from "@codegouvfr/react-dsfr/ToggleSwitch";
 import { FC } from "react";
 import { Controller, UseFormReturn } from "react-hook-form";
-import { ReportFormType } from "../../../../../@types/espaceco";
+import { ReportFormType } from "../../../../../@types/app_espaceco";
 import { useTranslation } from "../../../../../i18n/i18n";
 
 type AnswersProps = {

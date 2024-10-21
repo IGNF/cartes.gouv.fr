@@ -48,9 +48,13 @@ class CommunityController extends AbstractController implements ApiControllerInt
     #[Route('/get_names', name: 'get_names', methods: ['GET'])]
     public function getCommunitiesName(): JsonResponse
     {
-        $names = $this->communityApiService->getCommunitiesName();
+        try {
+            $names = $this->communityApiService->getCommunitiesName();
 
-        return new JsonResponse($names);
+            return new JsonResponse($names);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
     }
 
     #[Route('/get_as_member', name: 'get_as_member', methods: ['GET'])]
@@ -148,6 +152,26 @@ class CommunityController extends AbstractController implements ApiControllerInt
         }
     }
 
+    #[Route('/{communityId}/member/{userId}/update_role', name: 'update_member_role', methods: ['PATCH'])]
+    public function updateMemberRole(int $communityId, int $userId, Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        $member = $this->communityApiService->updateMember($communityId, $userId, 'role', $data['role']);
+
+        return new JsonResponse($member);
+    }
+
+    #[Route('/{communityId}/member/{userId}/update_grids', name: 'update_member_grids', methods: ['PATCH'])]
+    public function updateMemberGrids(int $communityId, int $userId, Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        $member = $this->communityApiService->updateMember($communityId, $userId, 'grids', $data['grids']);
+
+        return new JsonResponse($member);
+    }
+
     #[Route('/{communityId}/update_logo', name: 'update_logo', methods: ['PATCH'])]
     public function updateLogo(int $communityId, Request $request): JsonResponse
     {
@@ -158,6 +182,18 @@ class CommunityController extends AbstractController implements ApiControllerInt
             $this->communityApiService->updateLogo($communityId, $logo);
 
             return new JsonResponse($community);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
+    #[Route('/{communityId}/member/{userId}/remove', name: 'remove_member', methods: ['DELETE'])]
+    public function removeMember(int $communityId, int $userId): JsonResponse
+    {
+        try {
+            $this->communityApiService->removeMember($communityId, $userId);
+
+            return new JsonResponse(['user_id' => $userId]);
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }

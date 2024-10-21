@@ -81,12 +81,19 @@ export interface CommunityResponseDTO {
     offline_allowed: boolean;
     /** @format date-time */
     creation: string;
-    grids: Grid[];
+    grids: GridDTO[];
     logo_url: string | null;
     keywords?: string[];
     documents?: DocumentDTO[];
     report_statuses?: ReportStatusesDTO;
     shared_themes?: SharedThemesDTO[];
+}
+
+export interface UserDTO {
+    id: number;
+    username: string;
+    firstname?: string;
+    surname?: string;
 }
 
 export interface DocumentDTO {
@@ -103,7 +110,7 @@ export interface DocumentDTO {
     geometry?: string;
     uri: string;
 }
-export interface Grid {
+export interface GridDTO {
     name: string;
     title: string;
     type: GridType;
@@ -185,13 +192,5 @@ export interface TableResponseDTO {
     wfs_transactions: string;
     columns: ColumnDTO[];
 }
-
-export type ReportFormType = {
-    attributes: ThemeDTO[];
-    report_statuses: ReportStatusesDTO;
-    shared_themes?: SharedThemesDTO[];
-    shared_georem: SharedGeorem;
-    all_members_can_valid: boolean;
-};
 
 export { SharedGeoremOptions };

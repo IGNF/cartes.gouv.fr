@@ -26,6 +26,26 @@ class GridController extends AbstractController implements ApiControllerInterfac
     ) {
     }
 
+    /**
+     * @param array<string> $names
+     */
+    #[Route('/get_by_names', name: 'get_by_names', methods: ['GET'])]
+    public function getFromArray(
+        #[MapQueryParameter] array $names
+    ): JsonResponse {
+        try {
+            if (!is_array($names) || 0 == count($names)) {
+                throw new ApiException('names is not an array or is empty');
+            }
+
+            $response = $this->gridApiService->getGridsFromNames($names);
+
+            return new JsonResponse($response);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
     #[Route('/search', name: 'search', methods: ['GET'])]
     public function get(
         #[MapQueryParameter] string $text,
