@@ -32,4 +32,25 @@ class GridApiService extends BaseEspaceCoApiService
             'nextPage' => $nextPage,
         ];
     }
+
+    public function getGrid(string $gridName): array
+    {
+        return $this->request('GET', "grids/$gridName", [], ['fields' => ['name', 'title', 'deleted', 'type']]);
+    }
+
+    /**
+     * @param array<string> $names
+     */
+    public function getGridsFromNames(array $names): array
+    {
+        $grids = [];
+        foreach ($names as $gridName) {
+            $grid = $this->getGrid($gridName);
+            if (!$grid['deleted']) {
+                $grids[] = $grid;
+            }
+        }
+
+        return $grids;
+    }
 }

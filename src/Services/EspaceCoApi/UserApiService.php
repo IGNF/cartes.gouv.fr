@@ -19,8 +19,16 @@ class UserApiService extends BaseEspaceCoApiService
         return [];
     }
 
-    public function getUser(int $userId): array
+    /**
+     * @param array<mixed> $query
+     */
+    public function getUser(int $userId, array $query = []): array
     {
-        return $this->request('GET', "users/$userId");
+        return $this->request('GET', "users/$userId", [], $query);
+    }
+
+    public function search(string $search): array
+    {
+        return $this->request('GET', 'users', [], ['search' => $search, 'fields' => ['id', 'username', 'firstname', 'surname']]);
     }
 }

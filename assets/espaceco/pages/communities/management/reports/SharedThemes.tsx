@@ -2,9 +2,10 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { CSSProperties, FC } from "react";
 import { UseFormReturn } from "react-hook-form";
-import { ReportFormType, SharedThemesDTO } from "../../../../../@types/espaceco";
+import { ReportFormType } from "../../../../../@types/app_espaceco";
 import { declareComponentKeys, Translations, useTranslation } from "../../../../../i18n/i18n";
 import { SetSharedThemesDialogModal, SetSharedThemesDialog, UserSharedThemesType, SharedThemesType } from "./SetSharedThemesDialog";
+import { SharedThemesDTO } from "../../../../../@types/espaceco";
 
 type SharedThemesProps = {
     form: UseFormReturn<ReportFormType>;
