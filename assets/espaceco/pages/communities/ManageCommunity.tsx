@@ -97,7 +97,7 @@ const ManageCommunity: FC<ManageCommunityProps> = ({ communityId }) => {
                                         case "tab7":
                                             return <Grid grids={communityQuery.data.grids ?? []} />; // TODO
                                         case "tab8":
-                                            return <Members communityId={communityQuery.data.id} />;
+                                            return <Members community={communityQuery.data} />;
                                         default:
                                             return <p>`Content of ${selectedTabId}`</p>;
                                     }

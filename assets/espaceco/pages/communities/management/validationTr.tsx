@@ -5,6 +5,7 @@ import { Translations } from "../../../../i18n/i18n";
 export const { i18n } = declareComponentKeys<
     | "trimmed_error"
     | "description.name.mandatory"
+    | "description.name.unique"
     | "description.name.minlength"
     | "description.name.maxlength"
     | "description.desc.mandatory"
@@ -27,6 +28,7 @@ export const { i18n } = declareComponentKeys<
 export const ManageCommunityValidationsFrTranslations: Translations<"fr">["ManageCommunityValidations"] = {
     trimmed_error: "La chaîne de caractères ne doit contenir aucun espace en début et fin",
     "description.name.mandatory": "Le nom est obligatoire",
+    "description.name.unique": "Ce nom existe déjà",
     "description.name.minlength": "Le nom doit faire au moins 2 caractères",
     "description.name.maxlength": "Le nom ne doit pas dépasser 80 caractères",
     "description.desc.mandatory": "La description est obligatoire",
@@ -49,6 +51,7 @@ export const ManageCommunityValidationsFrTranslations: Translations<"fr">["Manag
 export const ManageCommunityValidationsEnTranslations: Translations<"en">["ManageCommunityValidations"] = {
     trimmed_error: undefined,
     "description.name.mandatory": undefined,
+    "description.name.unique": "Name already exists",
     "description.name.minlength": undefined,
     "description.name.maxlength": undefined,
     "description.desc.mandatory": undefined,

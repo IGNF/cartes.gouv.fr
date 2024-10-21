@@ -4,11 +4,11 @@ import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import ToggleSwitch from "@codegouvfr/react-dsfr/ToggleSwitch";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FC, useEffect, useMemo } from "react";
+import { FC, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
-import { AttributeDTO, AttributeTypes } from "../../../../../@types/espaceco";
+import { AttributeDTO, AttributeType, AttributeTypes } from "../../../../../@types/espaceco";
 import { useTranslation } from "../../../../../i18n/i18n";
 import { AttributeValidations, validateList } from "./AttributeValidations";
 import { AddOrEditAttributeFormType, getInputType, normalizeAttribute } from "./ThemeUtils";
@@ -32,6 +32,9 @@ const defaultValues: AddOrEditAttributeFormType = {
 const AddAttributeDialog: FC<AddAttributeDialogProps> = ({ modal, attributes, onAdd }) => {
     const { t: tCommon } = useTranslation("Common");
     const { t } = useTranslation("Theme");
+
+    // Etrange, le register devrait suffire
+    const [type, setType] = useState<AttributeType>("text");
 
     const attributeNames: string[] = useMemo(() => {
         return Array.from(attributes, (a) => a.name);
@@ -87,8 +90,6 @@ const AddAttributeDialog: FC<AddAttributeDialogProps> = ({ modal, attributes, on
         resolver: yupResolver(schema),
     });
 
-    const type = watch("type");
-
     const mandatory = watch("mandatory");
     const multiple = watch("multiple");
 
@@ -100,6 +101,10 @@ const AddAttributeDialog: FC<AddAttributeDialogProps> = ({ modal, attributes, on
             setFormValue("multiple", false);
         }
     }, [type, setFormValue, clearErrors]);
+
+    useEffect(() => {
+        setFormValue("type", type);
+    }, [setFormValue, type]);
 
     const onSubmit = () => {
         modal.close();
@@ -140,13 +145,13 @@ const AddAttributeDialog: FC<AddAttributeDialogProps> = ({ modal, attributes, on
                                 ...register("name"),
                             }}
                         />
-                        <RadioButtons
+                        <RadioButtons // Ne fonctionne pas avec register ??????
                             legend={t("dialog.add_attribute.type")}
                             options={AttributeTypes.map((attrType) => ({
                                 label: t("dialog.add_attribute.get_type", { type: attrType }),
                                 nativeInputProps: {
-                                    ...register("type"),
-                                    value: attrType,
+                                    checked: attrType === type,
+                                    onChange: () => setType(attrType),
                                 },
                             }))}
                             orientation={"horizontal"}

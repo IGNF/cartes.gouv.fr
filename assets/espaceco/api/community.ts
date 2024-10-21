@@ -1,6 +1,6 @@
 import SymfonyRouting from "../../modules/Routing";
 
-import { CommunityListFilter, CommunityMember, GetResponse } from "../../@types/app_espaceco";
+import { CommunityListFilter, CommunityMember, GetResponse, Role } from "../../@types/app_espaceco";
 import { type CommunityResponseDTO } from "../../@types/espaceco";
 import { jsonFetch } from "../../modules/jsonFetch";
 
@@ -40,15 +40,52 @@ const getCommunity = (communityId: number) => {
 };
 
 const getCommunityMembers = (communityId: number, page: number, limit: number = 10, signal: AbortSignal) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_espaceco_community_get_members", { communityId, page: page, limit: limit });
+    const url = SymfonyRouting.generate("cartesgouvfr_api_espaceco_community_get_members", {
+        communityId,
+        page: page,
+        limit: limit,
+        roles: ["member", "admin"],
+    });
     return jsonFetch<GetResponse<CommunityMember>>(url, {
         signal: signal,
     });
 };
 
-const getCommunityMembershipRequests = (communityId: number) => {
+const getCommunityMembershipRequests = (communityId: number, signal: AbortSignal) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_espaceco_community_get_members", { communityId, page: 1, limit: 50, roles: ["pending"] });
-    return jsonFetch<CommunityMember[]>(url);
+    return jsonFetch<GetResponse<CommunityMember>>(url, {
+        signal: signal,
+    });
+};
+
+const updateMemberRole = (communityId: number, userId: number, role: Role) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_espaceco_community_update_member_role", { communityId, userId });
+    return jsonFetch<CommunityMember>(
+        url,
+        {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+            },
+        },
+        { role: role }
+    );
+};
+
+const updateMemberGrids = (communityId: number, userId: number, grids: string[]) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_espaceco_community_update_member_grids", { communityId, userId });
+    return jsonFetch<CommunityMember>(
+        url,
+        {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+            },
+        },
+        { grids: grids }
+    );
 };
 
 const updateLogo = (communityId: number, formData: FormData) => {
@@ -66,6 +103,25 @@ const updateLogo = (communityId: number, formData: FormData) => {
     );
 };
 
-const community = { get, getCommunitiesName, getCommunity, getCommunityMembers, getCommunityMembershipRequests, searchByName, getAsMember, updateLogo };
+const removeMember = (communityId: number, userId: number) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_espaceco_community_remove_member", { communityId, userId });
+    return jsonFetch<{ user_id: number }>(url, {
+        method: "DELETE",
+    });
+};
+
+const community = {
+    get,
+    getCommunitiesName,
+    getCommunity,
+    getCommunityMembers,
+    getCommunityMembershipRequests,
+    searchByName,
+    getAsMember,
+    updateMemberRole,
+    updateMemberGrids,
+    removeMember,
+    updateLogo,
+};
 
 export default community;

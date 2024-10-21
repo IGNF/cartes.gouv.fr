@@ -4,36 +4,40 @@ import Autocomplete, { autocompleteClasses } from "@mui/material/Autocomplete";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import { useQuery } from "@tanstack/react-query";
-import { FC, ReactNode } from "react";
+import { FC, ReactNode, useMemo } from "react";
 import { useDebounceValue } from "usehooks-ts";
-import { GetResponse, SearchGridFilters } from "../../../../../@types/app_espaceco";
-import { GridDTO } from "../../../../../@types/espaceco";
+import { isUser } from "../../../../../@types/app_espaceco";
+import { UserDTO } from "../../../../../@types/espaceco";
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/espaceco/RQKeys";
 import api from "../../../../api";
 
-export type SearchGridsProps = {
+export type SearchUsersProps = {
     label: ReactNode;
     hintText?: ReactNode;
-    filters: SearchGridFilters;
+    value?: (UserDTO | string)[];
     state?: "default" | "error" | "success";
     stateRelatedMessage?: string;
-    onChange: (grid: GridDTO | null) => void;
+    onChange: (users: (UserDTO | string)[]) => void;
 };
 
-const SearchGrids: FC<SearchGridsProps> = ({ label, hintText, filters, state, stateRelatedMessage, onChange }) => {
+const SearchUsers: FC<SearchUsersProps> = ({ label, hintText, value, state, stateRelatedMessage, onChange }) => {
     const { t } = useTranslation("Search");
 
-    const [text, setText] = useDebounceValue("", 500);
+    const [search, setSearch] = useDebounceValue("", 500);
 
-    const searchQuery = useQuery<GetResponse<GridDTO>>({
-        queryKey: RQKeys.searchGrids(text),
+    const searchQuery = useQuery<UserDTO[]>({
+        queryKey: RQKeys.searchUsers(search),
         queryFn: ({ signal }) => {
-            return api.grid.search(text, filters, { signal });
+            return api.user.search(search, signal);
         },
         staleTime: 1000 * 60,
-        enabled: text.length >= 2,
+        enabled: search.length >= 3,
     });
+
+    const usernames = useMemo(() => {
+        return value?.map((v) => (isUser(v) ? v.username : v));
+    }, [value]);
 
     return (
         <div className={fr.cx("fr-input-group", state === "error" && "fr-input-group--error")}>
@@ -44,6 +48,9 @@ const SearchGrids: FC<SearchGridsProps> = ({ label, hintText, filters, state, st
             <MuiDsfrThemeProvider>
                 <Autocomplete
                     disablePortal={true} // If true, the Popper content will be under the DOM hierarchy of the parent component.
+                    freeSolo={true}
+                    multiple={true}
+                    value={value}
                     renderOption={(props, option, state, ownerState) => {
                         return (
                             <Box
@@ -56,7 +63,7 @@ const SearchGrids: FC<SearchGridsProps> = ({ label, hintText, filters, state, st
                                 }}
                                 component="li"
                                 {...props}
-                                key={option.name}
+                                key={typeof option === "string" ? option : option.username}
                             >
                                 {ownerState.getOptionLabel(option)}
                             </Box>
@@ -66,12 +73,15 @@ const SearchGrids: FC<SearchGridsProps> = ({ label, hintText, filters, state, st
                     loading={searchQuery.isLoading}
                     loadingText={t("loading")}
                     noOptionsText={t("no_results")}
-                    getOptionLabel={(option) => `${option.name} : ${option.title}`}
-                    options={searchQuery.data?.content ?? []}
-                    filterOptions={(x) => x}
+                    getOptionLabel={(option) => (typeof option === "string" ? option : option.username)}
+                    options={searchQuery.data?.filter((u) => !usernames?.includes(u.username)) ?? []}
                     renderInput={(params) => <TextField {...params} />}
-                    isOptionEqualToValue={(option, v) => option.name === v.name}
-                    onInputChange={(_, v) => setText(v)}
+                    isOptionEqualToValue={(option, v) => {
+                        if (isUser(option) && isUser(v)) return option.username === v.username;
+                        if (typeof option !== typeof v) return false;
+                        return option === v;
+                    }}
+                    onInputChange={(_, v) => setSearch(v)}
                     onChange={(_, v) => {
                         onChange(v);
                     }}
@@ -98,4 +108,4 @@ const SearchGrids: FC<SearchGridsProps> = ({ label, hintText, filters, state, st
     );
 };
 
-export default SearchGrids;
+export default SearchUsers;

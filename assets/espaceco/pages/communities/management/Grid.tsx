@@ -1,11 +1,11 @@
 import { FC } from "react";
 import { useForm } from "react-hook-form";
-import { Grid } from "../../../../@types/espaceco";
+import { GridDTO } from "../../../../@types/espaceco";
 import { useTranslation } from "../../../../i18n/i18n";
 import GridList from "./GridList";
 
 type GridProps = {
-    grids: Grid[];
+    grids: GridDTO[];
 };
 
 type GridForm = {

@@ -1,3 +1,5 @@
+import { GridDTO, ReportStatusesDTO, SharedGeorem, SharedThemesDTO, ThemeDTO, UserDTO } from "./espaceco";
+
 export type GetResponse<T> = {
     content: T[];
     totalPages: number;
@@ -47,20 +49,38 @@ export type SearchGridFilters = {
     adm?: boolean;
 };
 
-export type CommunityMember = {
+export type UserType = {
     user_id: number;
     username: string;
     firstname: string | null;
     surname: string | null;
-    emprises: string[]; // TODO renommer en grids
-    role: "pending" | "member" | "admin";
+};
+
+export type Role = "pending" | "member" | "admin";
+export type CommunityMember = UserType & {
+    grids: GridDTO[];
+    role: Role;
     active: boolean;
     date: string;
 };
 
 /* FORMULAIRES */
+export type ReportFormType = {
+    attributes: ThemeDTO[];
+    report_statuses: ReportStatusesDTO;
+    shared_themes?: SharedThemesDTO[];
+    shared_georem: SharedGeorem;
+    all_members_can_valid: boolean;
+};
+
 export type DescriptionFormType = {
     name: string;
     description?: string;
     keywords?: string[];
 };
+
+const isUser = (v: UserDTO | string): v is UserDTO => {
+    return (v as UserDTO).username !== undefined;
+};
+
+export { isUser };

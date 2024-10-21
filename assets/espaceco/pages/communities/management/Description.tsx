@@ -17,8 +17,11 @@ import { appRoot } from "../../../../router/router";
 import { getFileExtension } from "../../../../utils";
 import { AddDocumentDialog, AddDocumentDialogModal } from "./AddDocumentDialog";
 import CommunityLogo from "./CommunityLogo";
-
+import { type CartesApiException } from "../../../../modules/jsonFetch";
 import "../../../../sass/pages/espaceco/community.scss";
+import { useQuery } from "@tanstack/react-query";
+import RQKeys from "../../../../modules/espaceco/RQKeys";
+import api from "../../../api";
 
 type DocumentExt = DocumentDTO & {
     src: string;
@@ -47,6 +50,16 @@ const Description: FC<DescriptionProps> = ({ community }) => {
     const { t: tValid } = useTranslation("ManageCommunityValidations");
     const { t } = useTranslation("ManageCommunity");
 
+    const communityNamesQuery = useQuery<string[], CartesApiException>({
+        queryKey: RQKeys.communitiesName(),
+        queryFn: () => api.community.getCommunitiesName(),
+        staleTime: 3600000,
+    });
+
+    const communityNames = useMemo(() => {
+        return communityNamesQuery.data?.filter((n) => n !== community.name) ?? [];
+    }, [community.name, communityNamesQuery]);
+
     const formattedDocuments = useMemo(() => {
         const documents = community.documents ?? [];
         return Array.from(
@@ -73,6 +86,10 @@ const Description: FC<DescriptionProps> = ({ community }) => {
                 .strict(true)
                 .min(2, t("description.name.minlength"))
                 .max(80, t("description.name.maxlength"))
+                .test("is-unique", tValid("description.name.unique"), (name) => {
+                    if (name === undefined) return true;
+                    return !communityNames.includes(name.trim());
+                })
                 .required(t("description.name.mandatory")),
             description: yup.string().max(1024, t("description.desc.maxlength")).required(t("description.desc.mandatory")),
             keywords: yup.array().of(yup.string()),

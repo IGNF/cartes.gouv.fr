@@ -24,6 +24,7 @@ const RQKeys = {
     userSharedThemes: (): string[] => ["user", "shared_themes"],
     searchAddress: (search: string): string[] => ["searchAddress", search],
     searchGrids: (text: string): string[] => ["searchGrids", text],
+    searchUsers: (text: string): string[] => ["searchUsers", text],
     tables: (communityId: number): string[] => ["feature_types", communityId.toString()],
 };
 

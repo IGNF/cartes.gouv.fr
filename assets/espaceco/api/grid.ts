@@ -1,5 +1,5 @@
 import { GetResponse, SearchGridFilters } from "../../@types/app_espaceco";
-import { Grid } from "../../@types/espaceco";
+import { GridDTO } from "../../@types/espaceco";
 import { jsonFetch } from "../../modules/jsonFetch";
 import SymfonyRouting from "../../modules/Routing";
 
@@ -15,11 +15,18 @@ const search = (text: string, filters: SearchGridFilters, otherOptions: RequestI
     }
 
     const url = SymfonyRouting.generate("cartesgouvfr_api_espaceco_grid_search", queryParams);
-    return jsonFetch<GetResponse<Grid>>(url, {
+    return jsonFetch<GetResponse<GridDTO>>(url, {
         ...otherOptions,
     });
 };
 
-const grid = { search };
+const fromNames = (names: string[], otherOptions: RequestInit = {}) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_espaceco_grid_get_by_names", { names: names });
+    return jsonFetch<GetResponse<GridDTO>>(url, {
+        ...otherOptions,
+    });
+};
+
+const grid = { search, fromNames };
 
 export default grid;

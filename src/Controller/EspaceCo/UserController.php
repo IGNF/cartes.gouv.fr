@@ -6,6 +6,7 @@ use App\Controller\ApiControllerInterface;
 use App\Services\EspaceCoApi\UserApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route(
@@ -27,6 +28,15 @@ class UserController extends AbstractController implements ApiControllerInterfac
         $me = $this->userApiService->getMe();
 
         return $this->json($me);
+    }
+
+    #[Route('/search', name: 'search')]
+    public function search(
+        #[MapQueryParameter] string $search
+    ): JsonResponse {
+        $users = $this->userApiService->search($search);
+
+        return new JsonResponse($users);
     }
 
     #[Route('/me/shared_themes', name: 'shared_themes')]

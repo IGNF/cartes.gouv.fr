@@ -56,7 +56,9 @@ export type ComponentKey =
     | typeof import("../espaceco/pages/communities/management/reports/ThemeTr").i18n
     | typeof import("../espaceco/pages/communities/management/reports/ReportStatusesTr").i18n
     | typeof import("../espaceco/pages/communities/management/reports/SharedThemes").i18n
-    | typeof import("../espaceco/pages/communities/management/Members").i18n;
+    | typeof import("../espaceco/pages/communities/management/Members").i18n
+    | typeof import("../espaceco/pages/communities/management/member/AddMembersDialog").i18n
+    | typeof import("../espaceco/pages/communities/management/member/ManageGridsDialog").i18n;
 
 export type Translations<L extends Language> = GenericTranslations<ComponentKey, Language, typeof fallbackLanguage, L>;
 >>>>>>> c0922c9 (feat: Ajout de la gestion des membres pour un guichet (début))

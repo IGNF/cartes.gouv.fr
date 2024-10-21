@@ -49,7 +49,16 @@ import { commonEnTranslations } from "../Common.locale";
 import { ReportStatusesEnTranslations } from "../../espaceco/pages/communities/management/reports/ReportStatusesTr";
 import { SharedThemesEnTranslations } from "../../espaceco/pages/communities/management/reports/SharedThemes";
 import { EscoCommunityMembersEnTranslations } from "../../espaceco/pages/communities/management/Members";
+import { AddMembersDialogEnTranslations } from "../../espaceco/pages/communities/management/member/AddMembersDialog";
+import { ManageGridsDialogEnTranslations } from "../../espaceco/pages/communities/management/member/ManageGridsDialog";
+<<<<<<< HEAD
 import type { Translations } from "../types";
+=======
+import { AddMembersDialogEnTranslations } from "../../espaceco/pages/communities/management/member/AddMembersDialog";
+import { ManageGridsDialogEnTranslations } from "../../espaceco/pages/communities/management/member/ManageGridsDialog";
+
+import type { Translations } from "../i18n";
+>>>>>>> 4749caa (Edition d'un guichet suite ...)
 
 export const translations: Translations<"en"> = {
     Common: commonEnTranslations,
@@ -103,4 +112,6 @@ export const translations: Translations<"en"> = {
     SharedThemes: SharedThemesEnTranslations,
     Search: SearchEnTranslations,
     EscoCommunityMembers: EscoCommunityMembersEnTranslations,
+    AddMembersDialog: AddMembersDialogEnTranslations,
+    ManageGridsDialog: ManageGridsDialogEnTranslations,
 };
