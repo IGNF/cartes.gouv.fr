@@ -1,8 +1,8 @@
-import { FC } from "react";
-import { useTranslation } from "../../../../../i18n/i18n";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
+import { FC } from "react";
 import { UseFormReturn } from "react-hook-form";
-import { ReportFormType } from "../../../../../@types/espaceco";
+import { ReportFormType } from "../../../../../@types/app_espaceco";
+import { useTranslation } from "../../../../../i18n/i18n";
 
 type PermissionsProps = {
     form: UseFormReturn<ReportFormType>;

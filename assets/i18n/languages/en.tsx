@@ -40,6 +40,8 @@ import { ThemeEnTranslations } from "../../espaceco/pages/communities/management
 import { ReportStatusesEnTranslations } from "../../espaceco/pages/communities/management/reports/ReportStatusesTr";
 import { SharedThemesEnTranslations } from "../../espaceco/pages/communities/management/reports/SharedThemes";
 import { EscoCommunityMembersEnTranslations } from "../../espaceco/pages/communities/management/Members";
+import { AddMembersDialogEnTranslations } from "../../espaceco/pages/communities/management/member/AddMembersDialog";
+import { ManageGridsDialogEnTranslations } from "../../espaceco/pages/communities/management/member/ManageGridsDialog";
 
 import type { Translations } from "../i18n";
 
@@ -86,4 +88,6 @@ export const translations: Translations<"en"> = {
     SharedThemes: SharedThemesEnTranslations,
     Search: SearchEnTranslations,
     EscoCommunityMembers: EscoCommunityMembersEnTranslations,
+    AddMembersDialog: AddMembersDialogEnTranslations,
+    ManageGridsDialog: ManageGridsDialogEnTranslations,
 };
