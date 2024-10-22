@@ -6,7 +6,7 @@ import { Tabs, TabsProps } from "@codegouvfr/react-dsfr/Tabs";
 import { useQuery } from "@tanstack/react-query";
 import { FC, useEffect, useMemo, useState } from "react";
 
-import { CartesStyle, OfferingStatusEnum, OfferingTypeEnum, Service, TypeInfosWithBbox } from "../../../../@types/app";
+import { type CartesStyle, OfferingStatusEnum, OfferingTypeEnum, type Service, StoredDataTypeEnum, type TypeInfosWithBbox } from "../../../../@types/app";
 import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import type { MapInitial } from "../../../../components/Utils/RMap";
@@ -63,7 +63,9 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
 
     // ONGLETS
     const tabs: TabsProps["tabs"] = useMemo(() => {
-        const canManageStyles = serviceQuery.data?.type === OfferingTypeEnum.WFS || serviceQuery.data?.type === OfferingTypeEnum.WMTSTMS;
+        const canManageStyles =
+            serviceQuery.data?.type === OfferingTypeEnum.WFS ||
+            (serviceQuery.data?.type === OfferingTypeEnum.WMTSTMS && serviceQuery.data.configuration.pyramid?.type === StoredDataTypeEnum.ROK4PYRAMIDVECTOR);
 
         const _tabs: TabsProps["tabs"] = [
             {

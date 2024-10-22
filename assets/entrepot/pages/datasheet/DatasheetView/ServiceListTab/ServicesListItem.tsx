@@ -7,6 +7,7 @@ import { FC } from "react";
 import { createPortal } from "react-dom";
 import { symToStr } from "tsafe/symToStr";
 
+import { OfferingStatusEnum, OfferingTypeEnum, StoredDataTypeEnum, type Service } from "../../../../../@types/app";
 import OfferingStatusBadge from "../../../../../components/Utils/Badges/OfferingStatusBadge";
 import MenuList from "../../../../../components/Utils/MenuList";
 import Wait from "../../../../../components/Utils/Wait";
@@ -14,7 +15,6 @@ import useToggle from "../../../../../hooks/useToggle";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import { routes } from "../../../../../router/router";
 import { useSnackbarStore } from "../../../../../stores/SnackbarStore";
-import { OfferingStatusEnum, OfferingTypeEnum, type Service } from "../../../../../@types/app";
 import { formatDateFromISO, offeringTypeDisplayName } from "../../../../../utils";
 import api from "../../../../api";
 import ServiceDesc from "./ServiceDesc";
@@ -154,17 +154,28 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                                                     }).link;
 
                                                 case OfferingTypeEnum.WMTSTMS:
-                                                    return routes.datastore_pyramid_vector_tms_service_edit({
-                                                        datastoreId,
-                                                        pyramidId: service.configuration.type_infos.used_data[0].stored_data,
-                                                        offeringId: service._id,
-                                                        datasheetName,
-                                                    }).link;
+                                                    switch (service.configuration.pyramid?.type) {
+                                                        case StoredDataTypeEnum.ROK4PYRAMIDVECTOR:
+                                                            return routes.datastore_pyramid_vector_tms_service_edit({
+                                                                datastoreId,
+                                                                pyramidId: service.configuration.type_infos.used_data[0].stored_data,
+                                                                offeringId: service._id,
+                                                                datasheetName,
+                                                            }).link;
+                                                        case StoredDataTypeEnum.ROK4PYRAMIDRASTER:
+                                                            return routes.datastore_pyramid_raster_wmts_service_edit({
+                                                                datastoreId,
+                                                                pyramidId: service.configuration.type_infos.used_data[0].stored_data,
+                                                                offeringId: service._id,
+                                                                datasheetName,
+                                                            }).link;
+
+                                                        default:
+                                                            return routes.page_not_found().link;
+                                                    }
 
                                                 default:
-                                                    return {
-                                                        onClick: () => console.warn("Action non implémentée"),
-                                                    };
+                                                    return routes.page_not_found().link;
                                             }
                                         })(),
                                     },

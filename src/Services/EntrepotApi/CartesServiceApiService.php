@@ -4,6 +4,7 @@ namespace App\Services\EntrepotApi;
 
 use App\Constants\EntrepotApi\ConfigurationStatuses;
 use App\Constants\EntrepotApi\OfferingTypes;
+use App\Constants\EntrepotApi\StoredDataTypes;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -21,6 +22,7 @@ class CartesServiceApiService
         private AnnexeApiService $annexeApiService,
         private DatastoreApiService $datastoreApiService,
         private StaticApiService $staticApiService,
+        private StoredDataApiService $storedDataApiService,
         HttpClientInterface $httpClient,
     ) {
         $this->httpClient = $httpClient->withOptions([
@@ -35,19 +37,26 @@ class CartesServiceApiService
         $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId);
         $offering['configuration'] = $this->configurationApiService->get($datastoreId, $offering['configuration']['_id']);
 
-        // Metadatas (TMS)
+        // traitement spécial pour WMTS-TMS
         if (OfferingTypes::WMTSTMS === $offering['type']) {
-            $urls = array_values(array_filter($offering['urls'], static function ($url) {
-                return 'TMS' == $url['type'];
-            }));
-            $url = $urls[0]['url'].'/metadata.json';
+            $storedData = $this->storedDataApiService->get($datastoreId, $offering['configuration']['type_infos']['used_data'][0]['stored_data']);
+            $offering['configuration']['pyramid'] = $storedData;
 
-            try {
-                $response = $this->httpClient->request('GET', $url);
-                if (Response::HTTP_OK === $response->getStatusCode()) {
-                    $offering['tms_metadata'] = $response->toArray();
+            // TMS
+            if (StoredDataTypes::ROK4_PYRAMID_VECTOR === $storedData['type']) {
+                // Metadatas (TMS)
+                $urls = array_values(array_filter($offering['urls'], static function ($url) {
+                    return 'TMS' == $url['type'];
+                }));
+                $url = $urls[0]['url'].'/metadata.json';
+
+                try {
+                    $response = $this->httpClient->request('GET', $url);
+                    if (Response::HTTP_OK === $response->getStatusCode()) {
+                        $offering['tms_metadata'] = $response->toArray();
+                    }
+                } catch (\Throwable $th) {
                 }
-            } catch (\Throwable $th) {
             }
         }
 
@@ -106,6 +115,12 @@ class CartesServiceApiService
                 if (isset($offering['tms_metadata']['tiles'][0])) {
                     $shareUrl = $offering['tms_metadata']['tiles'][0];
                 }
+
+                if (isset($offering['configuration']['pyramid']['type']) && StoredDataTypes::ROK4_PYRAMID_RASTER === $offering['configuration']['pyramid']['type']) {
+                    $annexeUrl = $this->params->get('annexes_url');
+                    $shareUrl = join('/', [$annexeUrl, $datastore['technical_name'],  $endpoint['endpoint']['technical_name'], 'capabilities.xml']);
+                }
+
                 break;
 
             default:

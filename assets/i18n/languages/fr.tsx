@@ -38,6 +38,7 @@ import type { Translations } from "../i18n";
 import { LoginDisabledFrTranslations } from "../../pages/LoginDisabled";
 import { PyramidRasterGenerateFormFrTranslations } from "../../entrepot/pages/service/wms-raster-wmts/PyramidRasterGenerateForm";
 import { PyramidRasterWmsRasterServiceFormFrTranslations } from "../../entrepot/pages/service/wms-raster-wmts/PyramidRasterWmsRasterServiceForm";
+import { PyramidRasterWmtsServiceFormFrTranslations } from "../../entrepot/pages/service/wms-raster-wmts/PyramidRasterWmtsServiceForm";
 
 export const translations: Translations<"fr"> = {
     Common: commonFrTranslations,
@@ -74,6 +75,7 @@ export const translations: Translations<"fr"> = {
     PyramidVectorTmsServiceForm: PyramidVectorTmsServiceFormFrTranslations,
     PyramidRasterGenerateForm: PyramidRasterGenerateFormFrTranslations,
     PyramidRasterWmsRasterServiceForm: PyramidRasterWmsRasterServiceFormFrTranslations,
+    PyramidRasterWmtsServiceForm: PyramidRasterWmtsServiceFormFrTranslations,
     EspaceCoCommunities: EspaceCoCommunitiesFrTranslations,
     DatasheetUploadForm: DatasheetUploadFormFrTranslations,
     DatasheetList: DatasheetListFrTranslations,

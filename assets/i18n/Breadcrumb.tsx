@@ -42,6 +42,8 @@ export const { i18n } = declareComponentKeys<
     | "datastore_pyramid_raster_generate"
     | "datastore_pyramid_raster_wms_raster_service_new"
     | "datastore_pyramid_raster_wms_raster_service_edit"
+    | "datastore_pyramid_raster_wmts_service_new"
+    | "datastore_pyramid_raster_wmts_service_edit"
     | "datastore_service_view"
 >()("Breadcrumb");
 
@@ -87,6 +89,8 @@ export const BreadcrumbFrTranslations: Translations<"fr">["Breadcrumb"] = {
     datastore_pyramid_raster_generate: "Génération d'une pyramide raster",
     datastore_pyramid_raster_wms_raster_service_new: "Création d'un service WMS-Raster",
     datastore_pyramid_raster_wms_raster_service_edit: "Modification d'un service WMS-Raster",
+    datastore_pyramid_raster_wmts_service_new: "Création d'un service WMTS",
+    datastore_pyramid_raster_wmts_service_edit: "Modification d'un service WMTS",
     datastore_service_view: "Prévisualisation d'un service",
 };
 
@@ -132,5 +136,7 @@ export const BreadcrumbEnTranslations: Translations<"en">["Breadcrumb"] = {
     datastore_pyramid_raster_generate: "Generate raster pyramid",
     datastore_pyramid_raster_wms_raster_service_new: "Create a WMS-Raster service",
     datastore_pyramid_raster_wms_raster_service_edit: "Modify a WMS-Raster service",
+    datastore_pyramid_raster_wmts_service_new: "Create a WMTS service",
+    datastore_pyramid_raster_wmts_service_edit: "Modify a WMTS service",
     datastore_service_view: "Preview a service",
 };
