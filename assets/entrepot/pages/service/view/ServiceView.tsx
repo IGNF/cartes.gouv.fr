@@ -32,7 +32,7 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
 
     const serviceQuery = useQuery<Service, CartesApiException>({
         queryKey: RQKeys.datastore_offering(datastoreId, offeringId),
-        queryFn: () => api.service.getService(datastoreId, offeringId),
+        queryFn: ({ signal }) => api.service.getService(datastoreId, offeringId, { signal }),
         staleTime: 60000,
     });
 
@@ -132,6 +132,22 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
                                 title={"Flux instable"}
                                 description={"Ce flux est considéré instable par l’API Entrepôt. Il est possible qu'il ne s'affiche pas correctement."}
                             />
+                        </div>
+                    )}
+
+                    {serviceQuery.data?.type === OfferingTypeEnum.WMSVECTOR && serviceQuery.data?.status === OfferingStatusEnum.PUBLISHED && (
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-4w")}>
+                            <Button
+                                linkProps={
+                                    routes.datastore_pyramid_raster_generate({
+                                        datastoreId,
+                                        offeringId,
+                                        datasheetName,
+                                    }).link
+                                }
+                            >
+                                Créer un service raster WMS/WMTS
+                            </Button>
                         </div>
                     )}
 
