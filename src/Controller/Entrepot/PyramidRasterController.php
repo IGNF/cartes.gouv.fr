@@ -21,6 +21,7 @@ use App\Services\SandboxService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route(
@@ -114,22 +115,28 @@ class PyramidRasterController extends ServiceController implements ApiController
         }
     }
 
-    #[Route('/{pyramidId}/wms-raster', name: 'wms_raster_add', methods: ['POST'])]
-    public function addWmsRaster(
+    #[Route('/{pyramidId}/wms-raster-wmts', name: 'wms_raster_wmts_add', methods: ['POST'])]
+    public function addWmsRasterWmts(
         string $datastoreId,
         string $pyramidId,
+        #[MapQueryParameter] string $type,
         Request $request
     ): JsonResponse {
         try {
+            $acceptedTypes = [ConfigurationTypes::WMSRASTER, ConfigurationTypes::WMTSTMS];
+            if (!in_array($type, $acceptedTypes)) {
+                throw new AppException(sprintf("Le type %s n'est pas accepté. Les types acceptés sont %s.", $type, join(', ', $acceptedTypes)), Response::HTTP_BAD_REQUEST);
+            }
+
             $data = json_decode($request->getContent(), true);
             $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId);
             $datasheetName = $pyramid['tags'][CommonTags::DATASHEET_NAME];
 
             // création de requête pour la config
-            $configRequestBody = $this->getConfigRequestBody($data, $pyramid, false, $datastoreId);
+            $configRequestBody = $this->getConfigRequestBody($data, $pyramid, $type, false, $datastoreId);
 
             // Restriction d'acces
-            $endpoint = $this->getEndpointByShareType($datastoreId, ConfigurationTypes::WMSRASTER, $data['share_with']);
+            $endpoint = $this->getEndpointByShareType($datastoreId, $type, $data['share_with']);
 
             // Ajout de la configuration
             $configuration = $this->configurationApiService->add($datastoreId, $configRequestBody);
@@ -154,7 +161,9 @@ class PyramidRasterController extends ServiceController implements ApiController
 
             // Création ou mise à jour du capabilities
             try {
-                $this->capabilitiesService->createOrUpdate($datastoreId, $endpoint, $offering['urls'][0]['url']);
+                if (ConfigurationTypes::WMSRASTER === $configuration['type'] || StoredDataTypes::ROK4_PYRAMID_RASTER === $pyramid['type']) {
+                    $this->capabilitiesService->createOrUpdate($datastoreId, $endpoint, $offering['urls'][0]['url']);
+                }
             } catch (\Exception $e) {
             }
 
@@ -165,19 +174,24 @@ class PyramidRasterController extends ServiceController implements ApiController
             $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $data);
 
             return $this->json($offering);
-        } catch (ApiException $ex) {
+        } catch (ApiException|AppException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
     }
 
-    #[Route('/{pyramidId}/wms-raster/{offeringId}/edit', name: 'wms_raster_edit', methods: ['POST'])]
-    public function editWmsRaster(
+    #[Route('/{pyramidId}/wms-raster-wmts/{offeringId}/edit', name: 'wms_raster_wmts_edit', methods: ['POST'])]
+    public function editWmsRasterWmts(
         string $datastoreId,
         string $pyramidId,
         string $offeringId,
+        #[MapQueryParameter] string $type,
         Request $request
     ): JsonResponse {
         try {
+            $acceptedTypes = [ConfigurationTypes::WMSRASTER, ConfigurationTypes::WMTSTMS];
+            if (!in_array($type, $acceptedTypes)) {
+                throw new AppException(sprintf("Le type %s n'est pas accepté. Les types acceptés sont %s.", $type, join(', ', $acceptedTypes)), Response::HTTP_BAD_REQUEST);
+            }
             $data = json_decode($request->getContent(), true);
 
             // récup config et offering existants
@@ -188,9 +202,9 @@ class PyramidRasterController extends ServiceController implements ApiController
             $datasheetName = $pyramid['tags'][CommonTags::DATASHEET_NAME];
 
             // création de requête pour la config
-            $configRequestBody = $this->getConfigRequestBody($data, $pyramid, true);
+            $configRequestBody = $this->getConfigRequestBody($data, $pyramid, $type, true);
 
-            $endpoint = $this->getEndpointByShareType($datastoreId, ConfigurationTypes::WMSRASTER, $data['share_with']);
+            $endpoint = $this->getEndpointByShareType($datastoreId, $type, $data['share_with']);
 
             // Mise à jour de la configuration
             $configuration = $this->configurationApiService->replace($datastoreId, $oldConfiguration['_id'], $configRequestBody);
@@ -233,12 +247,12 @@ class PyramidRasterController extends ServiceController implements ApiController
      * @param array<mixed> $data
      * @param array<mixed> $pyramid
      */
-    private function getConfigRequestBody(array $data, array $pyramid, bool $editMode = false, ?string $datastoreId = null): array
+    private function getConfigRequestBody(array $data, array $pyramid, string $type, bool $editMode = false, ?string $datastoreId = null): array
     {
         $levels = $this->getPyramidZoomLevels($pyramid);
 
         $requestBody = [
-            'type' => ConfigurationTypes::WMSRASTER,
+            'type' => $type,
             'name' => $data['public_name'],
             'type_infos' => [
                 'title' => $data['public_name'],

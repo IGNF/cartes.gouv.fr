@@ -37,6 +37,7 @@ import type { Translations } from "../i18n";
 import { DatasheetUploadFormEnTranslations } from "../../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadForm";
 import { PyramidRasterGenerateFormEnTranslations } from "../../entrepot/pages/service/wms-raster-wmts/PyramidRasterGenerateForm";
 import { PyramidRasterWmsRasterServiceFormEnTranslations } from "../../entrepot/pages/service/wms-raster-wmts/PyramidRasterWmsRasterServiceForm";
+import { PyramidRasterWmtsServiceFormEnTranslations } from "../../entrepot/pages/service/wms-raster-wmts/PyramidRasterWmtsServiceForm";
 
 export const translations: Translations<"en"> = {
     Common: commonEnTranslations,
@@ -73,6 +74,7 @@ export const translations: Translations<"en"> = {
     PyramidVectorTmsServiceForm: PyramidVectorTmsServiceFormEnTranslations,
     PyramidRasterGenerateForm: PyramidRasterGenerateFormEnTranslations,
     PyramidRasterWmsRasterServiceForm: PyramidRasterWmsRasterServiceFormEnTranslations,
+    PyramidRasterWmtsServiceForm: PyramidRasterWmtsServiceFormEnTranslations,
     EspaceCoCommunities: EspaceCoCommunitiesEnTranslations,
     DatasheetUploadForm: DatasheetUploadFormEnTranslations,
     DatasheetList: DatasheetListEnTranslations,

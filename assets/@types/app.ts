@@ -190,6 +190,7 @@ export type Configuration = ConfigurationDetailResponseDto & {
     tags: {
         datasheet_name?: string;
     };
+    pyramid?: PyramidVector | PyramidRaster;
 };
 
 export type Offering = OfferingDetailResponseDto;

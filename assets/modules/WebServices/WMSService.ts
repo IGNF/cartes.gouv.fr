@@ -6,7 +6,8 @@ import TileLayer from "ol/layer/Tile";
 import TileWMSSource from "ol/source/TileWMS.js";
 import BaseService from "./BaseService";
 import { getRequestInfo } from "../../utils";
-class WMSVectorService extends BaseService {
+
+class WMSService extends BaseService {
     #requestInfo: Record<string, string>;
     #parser: WMSCapabilities;
 
@@ -64,4 +65,4 @@ class WMSVectorService extends BaseService {
     }
 }
 
-export default WMSVectorService;
+export default WMSService;

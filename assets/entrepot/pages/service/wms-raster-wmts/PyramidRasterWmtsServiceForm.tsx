@@ -23,7 +23,7 @@ import { routes } from "../../../../router/router";
 import api from "../../../api";
 import AccessRestrictions from "../AccessRestrictions";
 import { CommonSchemasValidation } from "../common-schemas-validation";
-import { getPyramidRasterWmsRasterServiceFormDefaultValues } from "../default-values";
+import { getPyramidRasterWmtsServiceFormDefaultValues } from "../default-values";
 import AdditionalInfo from "../metadatas/AdditionalInfo";
 import Description from "../metadatas/Description";
 import UploadMDFile from "../metadatas/UploadMDFile";
@@ -37,14 +37,14 @@ const STEPS = {
 
 const commonValidation = new CommonSchemasValidation();
 
-type PyramidRasterWmsRasterServiceFormProps = {
+type PyramidRasterWmtsServiceFormProps = {
     datastoreId: string;
     pyramidId: string;
     datasheetName: string;
     offeringId?: string;
 };
-const PyramidRasterWmsRasterServiceForm: FC<PyramidRasterWmsRasterServiceFormProps> = ({ datastoreId, pyramidId, datasheetName, offeringId }) => {
-    const { t } = useTranslation("PyramidRasterWmsRasterServiceForm");
+const PyramidRasterWmtsServiceForm: FC<PyramidRasterWmtsServiceFormProps> = ({ datastoreId, pyramidId, datasheetName, offeringId }) => {
+    const { t } = useTranslation("PyramidRasterWmtsServiceForm");
     const { t: tCommon } = useTranslation("Common");
 
     const editMode = useMemo(() => Boolean(offeringId), [offeringId]);
@@ -56,7 +56,7 @@ const PyramidRasterWmsRasterServiceForm: FC<PyramidRasterWmsRasterServiceFormPro
     const createServiceMutation = useMutation<Service, CartesApiException>({
         mutationFn: () => {
             const formValues = getFormValues();
-            return api.pyramidRaster.publishWmsRasterWmts(datastoreId, pyramidId, ConfigurationTypeEnum.WMSRASTER, formValues);
+            return api.pyramidRaster.publishWmsRasterWmts(datastoreId, pyramidId, ConfigurationTypeEnum.WMTSTMS, formValues);
         },
         onSuccess() {
             queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
@@ -71,7 +71,7 @@ const PyramidRasterWmsRasterServiceForm: FC<PyramidRasterWmsRasterServiceFormPro
             }
 
             const formValues = getFormValues();
-            return api.pyramidRaster.editWmsRasterWmts(datastoreId, pyramidId, offeringId, ConfigurationTypeEnum.WMSRASTER, formValues);
+            return api.pyramidRaster.editWmsRasterWmts(datastoreId, pyramidId, offeringId, ConfigurationTypeEnum.WMTSTMS, formValues);
         },
         onSuccess() {
             if (offeringId !== undefined) {
@@ -92,8 +92,8 @@ const PyramidRasterWmsRasterServiceForm: FC<PyramidRasterWmsRasterServiceFormPro
     });
 
     const existingLayerNamesQuery = useQuery<string[], CartesApiException>({
-        queryKey: RQKeys.datastore_layernames_list(datastoreId, ConfigurationTypeEnum.WMSRASTER),
-        queryFn: ({ signal }) => api.service.getExistingLayerNames(datastoreId, ConfigurationTypeEnum.WMSRASTER, { signal }),
+        queryKey: RQKeys.datastore_layernames_list(datastoreId, ConfigurationTypeEnum.WMTSTMS),
+        queryFn: ({ signal }) => api.service.getExistingLayerNames(datastoreId, ConfigurationTypeEnum.WMTSTMS, { signal }),
         refetchInterval: 30000,
         enabled: !(createServiceMutation.isPending || editServiceMutation.isPending),
     });
@@ -127,7 +127,7 @@ const PyramidRasterWmsRasterServiceForm: FC<PyramidRasterWmsRasterServiceFormPro
     schemas[STEPS.ACCESSRESTRICTIONS] = commonValidation.getAccessRestrictionSchema();
 
     const defaultValues: ServiceFormValuesBaseType = useMemo(
-        () => getPyramidRasterWmsRasterServiceFormDefaultValues(offeringQuery.data, editMode, pyramidQuery.data, metadataQuery.data),
+        () => getPyramidRasterWmtsServiceFormDefaultValues(offeringQuery.data, editMode, pyramidQuery.data, metadataQuery.data),
         [editMode, offeringQuery.data, pyramidQuery.data, metadataQuery.data]
     );
 
@@ -215,7 +215,7 @@ const PyramidRasterWmsRasterServiceForm: FC<PyramidRasterWmsRasterServiceFormPro
                     />
                     <AccessRestrictions
                         datastoreId={datastoreId}
-                        endpointType={EndpointTypeEnum.WMSRASTER}
+                        endpointType={EndpointTypeEnum.WMTSTMS}
                         visible={currentStep === STEPS.ACCESSRESTRICTIONS}
                         form={form}
                         service={offeringQuery.data}
@@ -260,9 +260,9 @@ const PyramidRasterWmsRasterServiceForm: FC<PyramidRasterWmsRasterServiceFormPro
     );
 };
 
-PyramidRasterWmsRasterServiceForm.displayName = symToStr({ PyramidRasterWmsRasterServiceForm });
+PyramidRasterWmtsServiceForm.displayName = symToStr({ PyramidRasterWmtsServiceForm });
 
-export default PyramidRasterWmsRasterServiceForm;
+export default PyramidRasterWmtsServiceForm;
 
 export const { i18n } = declareComponentKeys<
     | { K: "title"; P: { editMode: boolean }; R: string }
@@ -276,11 +276,11 @@ export const { i18n } = declareComponentKeys<
     | "modify.in_progress"
     | "back_to_data_list"
 >()({
-    PyramidRasterWmsRasterServiceForm,
+    PyramidRasterWmtsServiceForm,
 });
 
-export const PyramidRasterWmsRasterServiceFormFrTranslations: Translations<"fr">["PyramidRasterWmsRasterServiceForm"] = {
-    title: ({ editMode }) => (editMode ? "Modifier le service WMS-Raster" : "Publier un service WMS-Raster"),
+export const PyramidRasterWmtsServiceFormFrTranslations: Translations<"fr">["PyramidRasterWmtsServiceForm"] = {
+    title: ({ editMode }) => (editMode ? "Modifier le service WMTS" : "Publier un service WMTS"),
     "stored_data.loading": "Chargement de la donnée stockée",
     "stored_data_and_offering.loading": "Chargement de la donnée stockée et du service à modifier",
     "stored_data.fetch_failed": "Récupération des informations sur la donnée stockée a échoué",
@@ -301,12 +301,12 @@ export const PyramidRasterWmsRasterServiceFormFrTranslations: Translations<"fr">
         }
     },
     publish: "Publier le service maintenant",
-    "publish.in_progress": "Création du service WMS-Raster en cours",
-    "modify.in_progress": "Modification des informations du service WMS-Raster en cours",
+    "publish.in_progress": "Création du service WMTS en cours",
+    "modify.in_progress": "Modification des informations du service WMTS en cours",
     back_to_data_list: "Retour à mes données",
 };
 
-export const PyramidRasterWmsRasterServiceFormEnTranslations: Translations<"en">["PyramidRasterWmsRasterServiceForm"] = {
+export const PyramidRasterWmtsServiceFormEnTranslations: Translations<"en">["PyramidRasterWmtsServiceForm"] = {
     title: undefined,
     "stored_data.loading": undefined,
     "stored_data_and_offering.loading": undefined,

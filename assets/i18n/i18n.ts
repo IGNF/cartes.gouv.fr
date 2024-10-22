@@ -50,6 +50,7 @@ export type ComponentKey =
     | typeof import("../entrepot/pages/service/tms/PyramidVectorTmsServiceForm").i18n
     | typeof import("../entrepot/pages/service/wms-raster-wmts/PyramidRasterGenerateForm").i18n
     | typeof import("../entrepot/pages/service/wms-raster-wmts/PyramidRasterWmsRasterServiceForm").i18n
+    | typeof import("../entrepot/pages/service/wms-raster-wmts/PyramidRasterWmtsServiceForm").i18n
     | typeof import("../entrepot/pages/service/TableSelection").i18n
     | typeof import("../entrepot/pages/service/AccessRestrictions").i18n
     | typeof import("../entrepot/pages/service/wms-vector/UploadStyleFile").i18n

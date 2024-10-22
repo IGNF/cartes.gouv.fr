@@ -5,6 +5,7 @@ namespace App\Services\EntrepotApi;
 use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationStatuses;
 use App\Constants\EntrepotApi\ConfigurationTypes;
+use App\Constants\EntrepotApi\StoredDataTypes;
 use App\Entity\CswMetadata\CswCapabilitiesFile;
 use App\Entity\CswMetadata\CswDocument;
 use App\Entity\CswMetadata\CswHierarchyLevel;
@@ -34,6 +35,7 @@ class CartesMetadataApiService
         private ConfigurationApiService $configurationApiService,
         private CswMetadataHelper $cswMetadataHelper,
         private CartesServiceApiService $cartesServiceApiService,
+        private StoredDataApiService $storedDataApiService
     ) {
     }
 
@@ -298,21 +300,36 @@ class CartesMetadataApiService
                     case ConfigurationTypes::WMSRASTER:
                     case ConfigurationTypes::WMSVECTOR:
                         $layerName = $offering['layer_name'];
-                        $endpointType = 'OGC:WMS';
+                        $endpointTypeOgc = 'OGC:WMS';
                         $endpointUrl = $serviceEndpoint['endpoint']['urls'][0]['url'];
 
-                        $layers[] = new CswMetadataLayer($layerName, $endpointType, $endpointUrl, $offering['_id']);
+                        $layers[] = new CswMetadataLayer($layerName, $endpointTypeOgc, $endpointUrl, $offering['_id']);
                         break;
 
                     case ConfigurationTypes::WMTSTMS:
                         $layerName = $offering['layer_name'];
-                        $endpointType = 'OGC:TMS';
 
-                        $tmsEndpoints = array_filter($serviceEndpoint['endpoint']['urls'], fn (array $url) => 'TMS' === $url['type']);
-                        $tmsEndpoints = array_values($tmsEndpoints);
+                        if (!isset($configuration['type_infos']['used_data'][0]['stored_data'])) {
+                            break;
+                        }
+                        $pyramid = $this->storedDataApiService->get($datastoreId, $configuration['type_infos']['used_data'][0]['stored_data']);
 
-                        if (count($tmsEndpoints) > 0) {
-                            $layers[] = new CswMetadataLayer($layerName, $endpointType, $tmsEndpoints[0]['url'], $offering['_id']);
+                        $endpointTypeOgc = null;
+                        $actualType = null;
+
+                        if (StoredDataTypes::ROK4_PYRAMID_VECTOR === $pyramid['type']) {
+                            $endpointTypeOgc = 'OGC:TMS';
+                            $actualType = 'TMS';
+                        } elseif (StoredDataTypes::ROK4_PYRAMID_RASTER === $pyramid['type']) {
+                            $endpointTypeOgc = 'OGC:WMTS';
+                            $actualType = 'WMTS';
+                        }
+
+                        $endpoints = array_filter($serviceEndpoint['endpoint']['urls'], fn (array $url) => $actualType === $url['type']);
+                        $endpoints = array_values($endpoints);
+
+                        if (count($endpoints) > 0) {
+                            $layers[] = new CswMetadataLayer($layerName, $endpointTypeOgc, $endpoints[0]['url'], $offering['_id']);
                         }
 
                         break;

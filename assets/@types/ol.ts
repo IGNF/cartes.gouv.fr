@@ -4,6 +4,7 @@ import VectorLayer from "ol/layer/Vector";
 import VectorTileLayer from "ol/layer/VectorTile";
 import TileWMS from "ol/source/TileWMS";
 import VectorSource from "ol/source/Vector";
+import WMTS from "ol/source/WMTS";
 
 export interface Capabilities {
     ServiceIdentification: ServiceIdentification;
@@ -120,4 +121,4 @@ export interface TileMatrixEntity {
     MatrixHeight: number;
 }
 
-export type LayerTypes = VectorLayer<VectorSource<Geometry>> | VectorTileLayer | TileLayer<TileWMS>;
+export type LayerTypes = VectorLayer<VectorSource<Geometry>> | VectorTileLayer | TileLayer<TileWMS> | TileLayer<WMTS>;

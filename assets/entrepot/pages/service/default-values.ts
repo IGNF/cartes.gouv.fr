@@ -10,7 +10,7 @@ import { WmsVectorServiceFormValuesType } from "./wms-vector/WmsVectorServiceFor
 const DEFAULT_CHARSET = "utf8";
 const DEFAULT_LANGUAGE = { language: "français", code: "fre" };
 
-export const getEndpointSuffix = (endpointType: EndpointTypeEnum) => {
+export const getEndpointSuffix = (endpointType: EndpointTypeEnum | string) => {
     switch (endpointType) {
         case EndpointTypeEnum.WFS:
             return "wfs";
@@ -18,8 +18,10 @@ export const getEndpointSuffix = (endpointType: EndpointTypeEnum) => {
             return "wmsv";
         case EndpointTypeEnum.WMSRASTER:
             return "wmsr";
-        case EndpointTypeEnum.WMTSTMS:
+        case "tms":
             return "tms";
+        case "wmts":
+            return "wmts";
         default:
             return "other"; // TODO
     }
@@ -181,7 +183,7 @@ export const getPyramidVectorTmsServiceFormDefaultValues = (
             attribution_url: offering?.configuration.attribution?.url,
         };
     } else {
-        const suffix = getEndpointSuffix(EndpointTypeEnum.WMTSTMS);
+        const suffix = getEndpointSuffix("tms");
         const storedDataName = pyramid?.name ?? "";
         const nice = removeDiacritics(storedDataName.toLowerCase()).replace(/ /g, "_");
 
@@ -206,6 +208,18 @@ export const getPyramidVectorTmsServiceFormDefaultValues = (
 export const getPyramidRasterWmsRasterServiceFormDefaultValues = (offering?: Service | null, editMode?: boolean, pyramid?: StoredData, metadata?: Metadata) => {
     // NOTE : a priori à peu près la même chose que la publication d'une pyramide vecteur en tms
     const suffix = getEndpointSuffix(EndpointTypeEnum.WMSRASTER);
+    const storedDataName = pyramid?.name ?? "";
+    const nice = removeDiacritics(storedDataName.toLowerCase()).replace(/ /g, "_");
+
+    return {
+        ...getPyramidVectorTmsServiceFormDefaultValues(offering, editMode, pyramid, metadata),
+        technical_name: `${nice}_${suffix}`,
+    };
+};
+
+export const getPyramidRasterWmtsServiceFormDefaultValues = (offering?: Service | null, editMode?: boolean, pyramid?: StoredData, metadata?: Metadata) => {
+    // NOTE : a priori à peu près la même chose que la publication d'une pyramide vecteur en tms
+    const suffix = getEndpointSuffix("wmts");
     const storedDataName = pyramid?.name ?? "";
     const nice = removeDiacritics(storedDataName.toLowerCase()).replace(/ /g, "_");
 

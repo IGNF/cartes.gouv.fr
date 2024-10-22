@@ -116,11 +116,6 @@ const PyramidRasterListItem: FC<PyramidRasterListItemProps> = ({ datasheetName, 
                                 onClick={toggleShowDescription}
                             />
                             {pyramid.name}
-                            {pyramid.tags?.is_sample === "true" && (
-                                <Badge noIcon={true} severity={"info"} className={fr.cx("fr-ml-2v")}>
-                                    Echantillon
-                                </Badge>
-                            )}
                         </div>
                     </div>
 
@@ -169,6 +164,8 @@ const PyramidRasterListItem: FC<PyramidRasterListItemProps> = ({ datasheetName, 
                                                 .push();
                                             break;
                                         case OfferingTypeEnum.WMTSTMS:
+                                            routes.datastore_pyramid_raster_wmts_service_new({ datastoreId, pyramidId: pyramid._id, datasheetName }).push();
+                                            break;
                                         default:
                                             throw new Error(`Publication ${serviceType} n'est pas encore implémentée`);
                                     }
