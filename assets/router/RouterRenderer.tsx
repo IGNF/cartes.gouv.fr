@@ -2,12 +2,12 @@ import { FC, JSX, Suspense, lazy, useMemo } from "react";
 
 import AppLayout from "../components/Layout/AppLayout";
 import LoadingText from "../components/Utils/LoadingText";
-import { useIsI18nFetching } from "../i18n/i18n";
+import { I18nFetchingSuspense } from "../i18n/i18n";
 import Home from "../pages/Home";
 import RedirectToLogin from "../pages/RedirectToLogin";
 import PageNotFound from "../pages/error/PageNotFound";
 import { useAuthStore } from "../stores/AuthStore";
-import { knownRoutes, publicRoutes, useRoute } from "./router";
+import { knownRoutes, publicRoutes, routes, useRoute } from "./router";
 
 const About = lazy(() => import("../pages/About"));
 const Documentation = lazy(() => import("../pages/Documentation"));
@@ -61,8 +61,6 @@ const EspaceCoCommunityList = lazy(() => import("../espaceco/pages/communities/C
 const RouterRenderer: FC = () => {
     const route = useRoute();
     const user = useAuthStore((state) => state.user);
-
-    const isI18nFetching = useIsI18nFetching();
 
     const content: JSX.Element = useMemo(() => {
         // vérification si la route demandée est bien connue/enregistrée
@@ -193,6 +191,7 @@ const RouterRenderer: FC = () => {
 
     return (
         <Suspense
+            // affiche LoadingText pendant que les composants react "lazy" se chargent
             fallback={
                 <AppLayout>
                     <LoadingText />
@@ -200,13 +199,21 @@ const RouterRenderer: FC = () => {
             }
         >
             {/* on s'assure que les textes de traductions sont chargés */}
-            {isI18nFetching ? (
-                <AppLayout>
-                    <LoadingText />
-                </AppLayout>
-            ) : (
-                content
-            )}
+            <I18nFetchingSuspense
+                fallback={
+                    // fallback permet d'afficher LoadingText pendant que les textes de traductions se chargent
+                    // par contre, traitement particulier pour la page d'accueil, on affiche tout de suite le contenu de la page d'accueil. Le contenu sera mis à jour une fois les textes de traductions seront chargés
+                    route.name === routes.home().name ? (
+                        <Home />
+                    ) : (
+                        <AppLayout>
+                            <LoadingText />
+                        </AppLayout>
+                    )
+                }
+            >
+                {content}
+            </I18nFetchingSuspense>
         </Suspense>
     );
 };

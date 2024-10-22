@@ -56,7 +56,7 @@ export type Translations<L extends Language> = GenericTranslations<ComponentKey,
 export type LocalizedString = Parameters<typeof resolveLocalizedString>[0];
 
 /** initialisation de l'instance de i18n */
-export const { useTranslation, getTranslation, resolveLocalizedString, useLang, $lang, useResolveLocalizedString, useIsI18nFetching } =
+export const { useTranslation, getTranslation, resolveLocalizedString, useLang, $lang, useResolveLocalizedString, useIsI18nFetching, I18nFetchingSuspense } =
     createI18nApi<ComponentKey>()(
         { languages, fallbackLanguage },
         {
