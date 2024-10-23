@@ -139,11 +139,13 @@ class CartesServiceApiService
                 $this->wfsUnpublish($datastoreId, $offering);
                 break;
             case OfferingTypes::WMTSTMS:
-                $this->tmsUnpublish($datastoreId, $offering);
+                $this->wmtsTmsUnpublish($datastoreId, $offering);
                 break;
             case OfferingTypes::WMSVECTOR:
                 $this->wmsVectorUnpublish($datastoreId, $offering);
                 break;
+            case OfferingTypes::WMSRASTER:
+                $this->wmsRasterUnpublish($datastoreId, $offering);
         }
     }
 
@@ -208,7 +210,28 @@ class CartesServiceApiService
     /**
      * @param array<mixed> $offering
      */
-    public function tmsUnpublish(string $datastoreId, array $offering, bool $removeStyleFiles = true): void
+    public function wmsRasterUnpublish(string $datastoreId, array $offering): void
+    {
+        // suppression de l'offering
+        $this->configurationApiService->removeOffering($datastoreId, $offering['_id']);
+        $configurationId = $offering['configuration']['_id'];
+
+        // suppression de la configuration
+        // la suppression de l'offering nécessite quelques instants, et tant que la suppression de l'offering n'est pas faite, on ne peut pas demander la suppression de la configuration
+        while (1) {
+            sleep(3);
+            $configuration = $this->configurationApiService->get($datastoreId, $configurationId);
+            if (ConfigurationStatuses::UNPUBLISHED === $configuration['status']) {
+                break;
+            }
+        }
+        $this->configurationApiService->remove($datastoreId, $configurationId);
+    }
+
+    /**
+     * @param array<mixed> $offering
+     */
+    public function wmtsTmsUnpublish(string $datastoreId, array $offering, bool $removeStyleFiles = true): void
     {
         // suppression de l'offering
         $this->configurationApiService->removeOffering($datastoreId, $offering['_id']);

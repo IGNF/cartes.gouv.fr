@@ -36,7 +36,7 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
 
     const unpublishServiceMutation = useMutation({
         mutationFn: (service: Service) => {
-            if (![OfferingTypeEnum.WFS, OfferingTypeEnum.WMSVECTOR, OfferingTypeEnum.WMTSTMS].includes(service.type)) {
+            if (![OfferingTypeEnum.WFS, OfferingTypeEnum.WMSVECTOR, OfferingTypeEnum.WMSRASTER, OfferingTypeEnum.WMTSTMS].includes(service.type)) {
                 console.warn(`Dépublication de service ${service.type} n'a pas encore été implémentée`);
                 return Promise.reject(`Dépublication de service ${service.type} n'a pas encore été implémentée`);
             }
