@@ -161,8 +161,13 @@ class PyramidRasterController extends ServiceController implements ApiController
 
             // Création ou mise à jour du capabilities
             try {
-                if (ConfigurationTypes::WMSRASTER === $configuration['type'] || StoredDataTypes::ROK4_PYRAMID_RASTER === $pyramid['type']) {
+                if (ConfigurationTypes::WMSRASTER === $configuration['type']) {
                     $this->capabilitiesService->createOrUpdate($datastoreId, $endpoint, $offering['urls'][0]['url']);
+                } elseif (ConfigurationTypes::WMTSTMS === $configuration['type'] && StoredDataTypes::ROK4_PYRAMID_RASTER === $pyramid['type']) {
+                    $offeringUrl = array_values(array_filter($offering['urls'], fn ($url) => 'WMTS' === $url['type']))[0] ?? null;
+                    if (null !== $offeringUrl) {
+                        $this->capabilitiesService->createOrUpdate($datastoreId, $endpoint, $offeringUrl['url']);
+                    }
                 }
             } catch (\Exception $e) {
             }
@@ -227,7 +232,14 @@ class PyramidRasterController extends ServiceController implements ApiController
 
             // Création ou mise à jour du capabilities
             try {
-                $this->capabilitiesService->createOrUpdate($datastoreId, $endpoint, $offering['urls'][0]['url']);
+                if (ConfigurationTypes::WMSRASTER === $configuration['type']) {
+                    $this->capabilitiesService->createOrUpdate($datastoreId, $endpoint, $offering['urls'][0]['url']);
+                } elseif (ConfigurationTypes::WMTSTMS === $configuration['type'] && StoredDataTypes::ROK4_PYRAMID_RASTER === $pyramid['type']) {
+                    $offeringUrl = array_values(array_filter($offering['urls'], fn ($url) => 'WMTS' === $url['type']))[0] ?? null;
+                    if (null !== $offeringUrl) {
+                        $this->capabilitiesService->createOrUpdate($datastoreId, $endpoint, $offeringUrl['url']);
+                    }
+                }
             } catch (\Exception $e) {
             }
 
