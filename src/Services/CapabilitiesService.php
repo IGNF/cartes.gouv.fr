@@ -81,8 +81,6 @@ class CapabilitiesService
             $annexe = $this->annexeApiService->add($datastoreId, $filePath, [$path], ['type=capabilities']);
         }
 
-        $this->fs->remove($filePath);
-
         return $annexe;
     }
 
