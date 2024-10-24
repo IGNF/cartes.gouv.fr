@@ -153,4 +153,23 @@ class MetadataController extends AbstractController implements ApiControllerInte
             throw new CartesApiException($ex->getMessage(), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
+    #[Route('/{metadataId}/unpublish', name: 'unpublish', methods: ['DELETE'])]
+    public function unpublish(string $datastoreId, string $metadataId): JsonResponse
+    {
+        try {
+            $metadata = $this->metadataApiService->get($datastoreId, $metadataId);
+
+            $endpointId = $metadata['endpoints'][0]['_id'] ?? null;
+            if (null !== $endpointId) {
+                $this->metadataApiService->unpublish($datastoreId, $metadata['file_identifier'], $endpointId);
+            }
+
+            return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        } catch (\Exception $ex) {
+            throw new CartesApiException($ex->getMessage(), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 }
