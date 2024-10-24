@@ -12,7 +12,6 @@ import { UseFormReturn } from "react-hook-form";
 import { fr } from "@codegouvfr/react-dsfr";
 import Translator from "../../../../../modules/Translator";
 
-import "ol/ol.css";
 import "geoportal-extensions-openlayers/dist/GpPluginOpenLayers.css";
 import "../../../../../sass/components/map-view.scss";
 import "../../../../../sass/components/ol.scss";

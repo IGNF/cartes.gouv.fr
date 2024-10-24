@@ -3,13 +3,29 @@ import { format as datefnsFormat } from "date-fns";
 import { EndpointTypeEnum, Metadata, MetadataFormValuesType, Service, StoredData } from "../../../@types/app";
 import { ConfigurationWfsDetailsContent, ConfigurationWmsVectorDetailsContent, ConfigurationWmtsTmsDetailsContent } from "../../../@types/entrepot";
 import { getProjectionCode, removeDiacritics } from "../../../utils";
-import { getEndpointSuffix } from "./metadatas/Description";
+import { PyramidVectorTmsServiceFormValuesType } from "./tms/PyramidVectorTmsServiceForm";
 import { WfsServiceFormValuesType, WfsTableInfos } from "./wfs/WfsServiceForm";
 import { WmsVectorServiceFormValuesType } from "./wms-vector/WmsVectorServiceForm";
-import { PyramidVectorTmsServiceFormValuesType } from "./tms/PyramidVectorTmsServiceForm";
 
 const DEFAULT_CHARSET = "utf8";
 const DEFAULT_LANGUAGE = { language: "français", code: "fre" };
+
+export const getEndpointSuffix = (endpointType: EndpointTypeEnum | string) => {
+    switch (endpointType) {
+        case EndpointTypeEnum.WFS:
+            return "wfs";
+        case EndpointTypeEnum.WMSVECTOR:
+            return "wmsv";
+        case EndpointTypeEnum.WMSRASTER:
+            return "wmsr";
+        case "tms":
+            return "tms";
+        case "wmts":
+            return "wmts";
+        default:
+            return "other"; // TODO
+    }
+};
 
 const getMetadataFormDefaultValues = (metadata?: Metadata): MetadataFormValuesType => {
     return {
@@ -167,7 +183,7 @@ export const getPyramidVectorTmsServiceFormDefaultValues = (
             attribution_url: offering?.configuration.attribution?.url,
         };
     } else {
-        const suffix = getEndpointSuffix(EndpointTypeEnum.WMTSTMS);
+        const suffix = getEndpointSuffix("tms");
         const storedDataName = pyramid?.name ?? "";
         const nice = removeDiacritics(storedDataName.toLowerCase()).replace(/ /g, "_");
 
@@ -187,4 +203,44 @@ export const getPyramidVectorTmsServiceFormDefaultValues = (
     };
 
     return defValues;
+};
+
+export const getPyramidRasterWmsRasterServiceFormDefaultValues = (offering?: Service | null, editMode?: boolean, pyramid?: StoredData, metadata?: Metadata) => {
+    // NOTE : a priori à peu près la même chose que la publication d'une pyramide vecteur en tms
+
+    let technicalName: string | undefined;
+
+    if (editMode) {
+        technicalName = offering?.configuration.layer_name;
+    } else {
+        const suffix = getEndpointSuffix(EndpointTypeEnum.WMSRASTER);
+        const storedDataName = pyramid?.name ?? "";
+        const nice = removeDiacritics(storedDataName.toLowerCase()).replace(/ /g, "_");
+        technicalName = `${nice}_${suffix}`;
+    }
+
+    return {
+        ...getPyramidVectorTmsServiceFormDefaultValues(offering, editMode, pyramid, metadata),
+        technical_name: technicalName,
+    };
+};
+
+export const getPyramidRasterWmtsServiceFormDefaultValues = (offering?: Service | null, editMode?: boolean, pyramid?: StoredData, metadata?: Metadata) => {
+    // NOTE : a priori à peu près la même chose que la publication d'une pyramide vecteur en tms
+
+    let technicalName: string | undefined;
+
+    if (editMode) {
+        technicalName = offering?.configuration.layer_name;
+    } else {
+        const suffix = getEndpointSuffix("wmts");
+        const storedDataName = pyramid?.name ?? "";
+        const nice = removeDiacritics(storedDataName.toLowerCase()).replace(/ /g, "_");
+        technicalName = `${nice}_${suffix}`;
+    }
+
+    return {
+        ...getPyramidVectorTmsServiceFormDefaultValues(offering, editMode, pyramid, metadata),
+        technical_name: technicalName,
+    };
 };

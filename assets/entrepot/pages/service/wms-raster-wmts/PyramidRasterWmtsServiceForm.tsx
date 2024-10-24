@@ -8,8 +8,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { declareComponentKeys } from "i18nifty";
 import { FC, useCallback, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
+import { symToStr } from "tsafe/symToStr";
 
-import { ConfigurationTypeEnum, EndpointTypeEnum, PyramidVector, Service, ServiceFormValuesBaseType } from "../../../../@types/app";
+import { ConfigurationTypeEnum, EndpointTypeEnum, PyramidRaster, Service, ServiceFormValuesBaseType } from "../../../../@types/app";
 import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../components/Utils/LoadingText";
@@ -22,14 +23,10 @@ import { routes } from "../../../../router/router";
 import api from "../../../api";
 import AccessRestrictions from "../AccessRestrictions";
 import { CommonSchemasValidation } from "../common-schemas-validation";
-import { getPyramidVectorTmsServiceFormDefaultValues } from "../default-values";
+import { getPyramidRasterWmtsServiceFormDefaultValues } from "../default-values";
 import AdditionalInfo from "../metadatas/AdditionalInfo";
 import Description from "../metadatas/Description";
 import UploadMDFile from "../metadatas/UploadMDFile";
-
-export type PyramidVectorTmsServiceFormValuesType = ServiceFormValuesBaseType;
-
-const commonValidation = new CommonSchemasValidation();
 
 const STEPS = {
     METADATA_UPLOAD: 1,
@@ -38,19 +35,20 @@ const STEPS = {
     ACCESSRESTRICTIONS: 4,
 };
 
-type PyramidVectorTmsServiceFormProps = {
+const commonValidation = new CommonSchemasValidation();
+
+type PyramidRasterWmtsServiceFormProps = {
     datastoreId: string;
     pyramidId: string;
+    datasheetName: string;
     offeringId?: string;
 };
-
-const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ datastoreId, pyramidId, offeringId }) => {
-    const { t } = useTranslation("PyramidVectorTmsServiceForm");
+const PyramidRasterWmtsServiceForm: FC<PyramidRasterWmtsServiceFormProps> = ({ datastoreId, pyramidId, datasheetName, offeringId }) => {
+    const { t } = useTranslation("PyramidRasterWmtsServiceForm");
     const { t: tCommon } = useTranslation("Common");
 
-    const editMode = useMemo(() => !!offeringId, [offeringId]);
+    const editMode = useMemo(() => Boolean(offeringId), [offeringId]);
 
-    /* l'etape courante */
     const [currentStep, setCurrentStep] = useState(STEPS.METADATA_UPLOAD);
 
     const queryClient = useQueryClient();
@@ -58,17 +56,11 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
     const createServiceMutation = useMutation<Service, CartesApiException>({
         mutationFn: () => {
             const formValues = getFormValues();
-            return api.pyramidVector.publish(datastoreId, pyramidId, formValues);
+            return api.pyramidRaster.publishWmsRasterWmts(datastoreId, pyramidId, ConfigurationTypeEnum.WMTSTMS, formValues);
         },
         onSuccess() {
-            if (pyramidQuery.data?.tags?.datasheet_name) {
-                queryClient.invalidateQueries({
-                    queryKey: RQKeys.datastore_datasheet(datastoreId, pyramidQuery.data?.tags.datasheet_name),
-                });
-                routes.datastore_datasheet_view({ datastoreId, datasheetName: pyramidQuery.data?.tags.datasheet_name, activeTab: "services" }).push();
-            } else {
-                routes.datasheet_list({ datastoreId }).push();
-            }
+            queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
+            routes.datastore_datasheet_view({ datastoreId, datasheetName: datasheetName, activeTab: "services" }).push();
         },
     });
 
@@ -79,30 +71,22 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
             }
 
             const formValues = getFormValues();
-            return api.pyramidVector.publishEdit(datastoreId, pyramidId, offeringId, formValues);
+            return api.pyramidRaster.editWmsRasterWmts(datastoreId, pyramidId, offeringId, ConfigurationTypeEnum.WMTSTMS, formValues);
         },
         onSuccess() {
             if (offeringId !== undefined) {
-                queryClient.removeQueries({
-                    queryKey: RQKeys.datastore_offering(datastoreId, offeringId),
-                });
+                queryClient.removeQueries({ queryKey: RQKeys.datastore_offering(datastoreId, offeringId) });
             }
 
-            if (pyramidQuery.data?.tags?.datasheet_name) {
-                queryClient.invalidateQueries({
-                    queryKey: RQKeys.datastore_datasheet(datastoreId, pyramidQuery.data?.tags.datasheet_name),
-                });
-                routes.datastore_datasheet_view({ datastoreId, datasheetName: pyramidQuery.data?.tags.datasheet_name, activeTab: "services" }).push();
-                queryClient.refetchQueries({ queryKey: RQKeys.datastore_metadata_by_datasheet_name(datastoreId, pyramidQuery.data?.tags?.datasheet_name) });
-            } else {
-                routes.datasheet_list({ datastoreId }).push();
-            }
+            queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
+            routes.datastore_datasheet_view({ datastoreId, datasheetName: datasheetName, activeTab: "services" }).push();
+            queryClient.refetchQueries({ queryKey: RQKeys.datastore_metadata_by_datasheet_name(datastoreId, datasheetName) });
         },
     });
 
-    const pyramidQuery = useQuery({
+    const pyramidQuery = useQuery<PyramidRaster, CartesApiException>({
         queryKey: RQKeys.datastore_stored_data(datastoreId, pyramidId),
-        queryFn: ({ signal }) => api.storedData.get<PyramidVector>(datastoreId, pyramidId, { signal }),
+        queryFn: () => api.storedData.get<PyramidRaster>(datastoreId, pyramidId),
         staleTime: Infinity,
         enabled: !(createServiceMutation.isPending || editServiceMutation.isPending),
     });
@@ -127,12 +111,11 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
     });
 
     const metadataQuery = useQuery({
-        queryKey: RQKeys.datastore_metadata_by_datasheet_name(datastoreId, pyramidQuery.data?.tags?.datasheet_name ?? "XX"),
-        queryFn: ({ signal }) => api.metadata.getByDatasheetName(datastoreId, pyramidQuery.data?.tags?.datasheet_name ?? "XX", { signal }),
-        enabled: !!pyramidQuery.data?.tags?.datasheet_name,
+        queryKey: RQKeys.datastore_metadata_by_datasheet_name(datastoreId, datasheetName),
+        queryFn: ({ signal }) => api.metadata.getByDatasheetName(datastoreId, datasheetName, { signal }),
+        enabled: !(createServiceMutation.isPending || editServiceMutation.isPending),
     });
 
-    // Definition du schema
     const schemas = {};
     schemas[STEPS.METADATA_UPLOAD] = commonValidation.getMDUploadFileSchema();
     schemas[STEPS.METADATA_DESCRIPTION] = commonValidation.getMDDescriptionSchema(
@@ -143,12 +126,12 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
     schemas[STEPS.METADATA_ADDITIONALINFORMATIONS] = commonValidation.getMDAdditionalInfoSchema();
     schemas[STEPS.ACCESSRESTRICTIONS] = commonValidation.getAccessRestrictionSchema();
 
-    const defaultValues: PyramidVectorTmsServiceFormValuesType = useMemo(
-        () => getPyramidVectorTmsServiceFormDefaultValues(offeringQuery.data, editMode, pyramidQuery.data, metadataQuery.data),
+    const defaultValues: ServiceFormValuesBaseType = useMemo(
+        () => getPyramidRasterWmtsServiceFormDefaultValues(offeringQuery.data, editMode, pyramidQuery.data, metadataQuery.data),
         [editMode, offeringQuery.data, pyramidQuery.data, metadataQuery.data]
     );
 
-    const form = useForm<PyramidVectorTmsServiceFormValuesType>({
+    const form = useForm<ServiceFormValuesBaseType>({
         resolver: yupResolver(schemas[currentStep]),
         mode: "onChange",
         values: defaultValues,
@@ -158,10 +141,8 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
 
     useScrollToTopEffect(currentStep);
 
-    // Etape precedente
     const previousStep = useCallback(() => setCurrentStep((currentStep) => currentStep - 1), []);
 
-    // Etape suivante
     const nextStep = useCallback(async () => {
         const isStepValid = await trigger(undefined, { shouldFocus: true }); // demande de valider le formulaire
 
@@ -173,7 +154,6 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
             setCurrentStep((currentStep) => currentStep + 1);
         } else {
             // on est à la dernière étape du formulaire donc on envoie la sauce
-
             if (editMode) {
                 editServiceMutation.mutate();
             } else {
@@ -186,7 +166,7 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
         <DatastoreLayout datastoreId={datastoreId} documentTitle={t("title", { editMode })}>
             <h1>{t("title", { editMode })}</h1>
 
-            {pyramidQuery.isLoading || offeringQuery.isLoading ? (
+            {pyramidQuery.isLoading || offeringQuery.isLoading || metadataQuery.isLoading ? (
                 <LoadingText as="h2" message={editMode ? t("stored_data_and_offering.loading") : t("stored_data.loading")} withSpinnerIcon={true} />
             ) : pyramidQuery.data === undefined ? (
                 <Alert
@@ -261,6 +241,7 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
                     />
                 </>
             )}
+
             {(createServiceMutation.isPending || editServiceMutation.isPending) && (
                 <Wait>
                     <div className={fr.cx("fr-container")}>
@@ -279,7 +260,9 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
     );
 };
 
-export default PyramidVectorTmsServiceForm;
+PyramidRasterWmtsServiceForm.displayName = symToStr({ PyramidRasterWmtsServiceForm });
+
+export default PyramidRasterWmtsServiceForm;
 
 export const { i18n } = declareComponentKeys<
     | { K: "title"; P: { editMode: boolean }; R: string }
@@ -293,11 +276,11 @@ export const { i18n } = declareComponentKeys<
     | "modify.in_progress"
     | "back_to_data_list"
 >()({
-    PyramidVectorTmsServiceForm,
+    PyramidRasterWmtsServiceForm,
 });
 
-export const PyramidVectorTmsServiceFormFrTranslations: Translations<"fr">["PyramidVectorTmsServiceForm"] = {
-    title: ({ editMode }) => (editMode ? "Modifier le service TMS" : "Publier un service TMS"),
+export const PyramidRasterWmtsServiceFormFrTranslations: Translations<"fr">["PyramidRasterWmtsServiceForm"] = {
+    title: ({ editMode }) => (editMode ? "Modifier le service WMTS" : "Publier un service WMTS"),
     "stored_data.loading": "Chargement de la donnée stockée",
     "stored_data_and_offering.loading": "Chargement de la donnée stockée et du service à modifier",
     "stored_data.fetch_failed": "Récupération des informations sur la donnée stockée a échoué",
@@ -318,12 +301,12 @@ export const PyramidVectorTmsServiceFormFrTranslations: Translations<"fr">["Pyra
         }
     },
     publish: "Publier le service maintenant",
-    "publish.in_progress": "Création du service TMS en cours",
-    "modify.in_progress": "Modification des informations du service TMS en cours",
+    "publish.in_progress": "Création du service WMTS en cours",
+    "modify.in_progress": "Modification des informations du service WMTS en cours",
     back_to_data_list: "Retour à mes données",
 };
 
-export const PyramidVectorTmsServiceFormEnTranslations: Translations<"en">["PyramidVectorTmsServiceForm"] = {
+export const PyramidRasterWmtsServiceFormEnTranslations: Translations<"en">["PyramidRasterWmtsServiceForm"] = {
     title: undefined,
     "stored_data.loading": undefined,
     "stored_data_and_offering.loading": undefined,

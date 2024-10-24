@@ -169,6 +169,11 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): Brea
         case "datastore_pyramid_vector_generate":
         case "datastore_pyramid_vector_tms_service_new":
         case "datastore_pyramid_vector_tms_service_edit":
+        case "datastore_pyramid_raster_generate":
+        case "datastore_pyramid_raster_wms_raster_service_new":
+        case "datastore_pyramid_raster_wms_raster_service_edit":
+        case "datastore_pyramid_raster_wmts_service_new":
+        case "datastore_pyramid_raster_wmts_service_edit":
         case "datastore_service_view":
             defaultProps.segments = [
                 ...defaultProps.segments,
