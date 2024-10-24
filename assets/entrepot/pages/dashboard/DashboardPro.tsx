@@ -1,5 +1,4 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import Button from "@codegouvfr/react-dsfr/Button";
 import { Tile } from "@codegouvfr/react-dsfr/Tile";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { declareComponentKeys } from "i18nifty";
@@ -19,6 +18,7 @@ import { useAuthStore } from "../../../stores/AuthStore";
 import api from "../../api";
 
 import avatarSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/digital/avatar.svg";
+import internetSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/digital/internet.svg";
 import mailSendSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/digital/mail-send.svg";
 import humanCoopSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/environment/human-cooperation.svg";
 import padlockSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/system/padlock.svg";
@@ -175,8 +175,16 @@ const DashboardPro = () => {
             </div>
 
             {isApiEspaceCoDefined() && (
-                <div className={fr.cx("fr-grid-row", "fr-grid-row--left", "fr-mt-4w")}>
-                    <Button linkProps={routes.espaceco_community_list().link}>{t("espaceco_frontoffice_list")}</Button>
+                <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
+                    <div className={fr.cx("fr-col-12", "fr-col-sm-6")}>
+                        <Tile
+                            linkProps={routes.espaceco_community_list().link}
+                            imageUrl={internetSvgUrl}
+                            desc="Voir la liste des guichets"
+                            orientation="horizontal"
+                            title={t("espaceco_frontoffice_list")}
+                        />
+                    </div>
                 </div>
             )}
         </AppLayout>
