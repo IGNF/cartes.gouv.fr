@@ -31,6 +31,9 @@ export const { i18n } = declareComponentKeys<
     | "metadata.description_form.hint_organization"
     | "metadata.description_form.organization_email"
     | "metadata.description_form.hint_organization_email"
+    | "metadata.description_form.public_access_limits_title"
+    | "metadata.description_form.access_and_use_conditions"
+    | "metadata.description_form.public_access_restrictions"
     | "attribution.title"
     | "attribution.explain"
     | "attribution_form.text"
@@ -94,6 +97,9 @@ export const MetadatasFormFrTranslations: Translations<"fr">["MetadatasForm"] = 
     "attribution_form.url": "URL de l’attribution (optionnel)",
     "attribution_form.hint_url":
         "Adresse de la page web vers laquelle doit pointer l’attribution. Il peut s'agir du site web de l’organisme producteur, d’une page de conditions d’utilisation des données ou de toute autre URL valide en lien avec les données représentées.",
+    "metadata.description_form.public_access_limits_title": "Limitations d'accès public",
+    "metadata.description_form.access_and_use_conditions": "Condition d'accès et d'utilisation",
+    "metadata.description_form.public_access_restrictions": "Restriction d'accès public",
     "metadata.additionnal_infos_form.language": "Langue des métadonnées",
     "metadata.additionnal_infos_form.hint_language": "La ou les langues utilisées pour décrire les métadonnées",
     "metadata.additionnal_infos_form.charset": "Jeu de caractères de la ressource",
@@ -149,6 +155,9 @@ export const MetadatasFormEnTranslations: Translations<"en">["MetadatasForm"] = 
     "attribution_form.url": "Attribution URL",
     "attribution_form.hint_url":
         "Address of the web page to which the attribution should point. This may be the producing organization's website, a data use conditions page, or any other valid URL related to the data represented.",
+    "metadata.description_form.public_access_limits_title": undefined,
+    "metadata.description_form.access_and_use_conditions": undefined,
+    "metadata.description_form.public_access_restrictions": undefined,
     "metadata.additionnal_infos_form.language": "Metadata language",
     "metadata.additionnal_infos_form.hint_language": "The language(s) used to describe the metadata",
     "metadata.additionnal_infos_form.charset": "Resource charset",
