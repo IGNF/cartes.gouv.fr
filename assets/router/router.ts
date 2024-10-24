@@ -35,6 +35,11 @@ const routeDefs = {
     terms_of_service: defineRoute(`${appRoot}/cgu`),
     service_status: defineRoute(`${appRoot}/niveau-de-service`),
 
+    newsletter_subscribe: defineRoute(`${appRoot}/inscription-a-la-lettre`),
+    newsletter_confirm_email: defineRoute(`${appRoot}/inscription-a-la-lettre/confirmez-votre-inscription`),
+    newsletter_success: defineRoute(`${appRoot}/inscription-a-la-lettre/confirmation`),
+    newsletter_error: defineRoute(`${appRoot}/inscription-a-la-lettre/erreur`),
+
     // routes protégées
     // utilisateur
     my_account: defineRoute(`${appRoot}/mon-compte`),
@@ -252,4 +257,8 @@ export const publicRoutes: typeof knownRoutes = [
     "join",
     "terms_of_service",
     "service_status",
+    "newsletter_subscribe",
+    "newsletter_confirm_email",
+    "newsletter_success",
+    "newsletter_error",
 ];

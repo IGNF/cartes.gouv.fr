@@ -19,6 +19,7 @@ import SessionExpiredAlert from "../Utils/SessionExpiredAlert";
 import SnackbarMessage from "../Utils/SnackbarMessage";
 import AppFooter from "./AppFooter";
 import AppHeader from "./AppHeader";
+import AppFollow from "./AppFollow";
 
 const HiddenElements: FC = () => {
     return (
@@ -90,6 +91,7 @@ const AppLayout: FC<PropsWithChildren<AppLayoutProps>> = ({ children, navItems, 
                     {children}
                 </div>
             </main>
+            <AppFollow />
             <AppFooter />
             <SnackbarMessage />
         </>
