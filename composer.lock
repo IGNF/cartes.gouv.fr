@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d8847a563236197409391fc44feb39b1",
+    "content-hash": "f4594dcf4e46bf348c50937784df4a16",
     "packages": [
         {
             "name": "cweagans/composer-patches",
@@ -1710,6 +1710,58 @@
                 "source": "https://github.com/ralouphie/getallheaders/tree/develop"
             },
             "time": "2019-03-08T08:55:37+00:00"
+        },
+        {
+            "name": "runtime/frankenphp-symfony",
+            "version": "0.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-runtime/frankenphp-symfony.git",
+                "reference": "56822c3631d9522a3136a4c33082d006bdfe4bad"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-runtime/frankenphp-symfony/zipball/56822c3631d9522a3136a4c33082d006bdfe4bad",
+                "reference": "56822c3631d9522a3136a4c33082d006bdfe4bad",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.1",
+                "symfony/dependency-injection": "^5.4 || ^6.0 || ^7.0",
+                "symfony/http-kernel": "^5.4 || ^6.0 || ^7.0",
+                "symfony/runtime": "^5.4 || ^6.0 || ^7.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^9.5"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Runtime\\FrankenPhpSymfony\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Kévin Dunglas",
+                    "email": "kevin@dunglas.dev"
+                }
+            ],
+            "description": "FrankenPHP runtime for Symfony",
+            "support": {
+                "issues": "https://github.com/php-runtime/frankenphp-symfony/issues",
+                "source": "https://github.com/php-runtime/frankenphp-symfony/tree/0.2.0"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/nyholm",
+                    "type": "github"
+                }
+            ],
+            "time": "2023-12-12T12:06:11+00:00"
         },
         {
             "name": "stevenmaguire/oauth2-keycloak",
@@ -9192,7 +9244,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": [],
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
@@ -9200,6 +9252,6 @@
         "ext-ctype": "*",
         "ext-iconv": "*"
     },
-    "platform-dev": {},
+    "platform-dev": [],
     "plugin-api-version": "2.6.0"
 }
