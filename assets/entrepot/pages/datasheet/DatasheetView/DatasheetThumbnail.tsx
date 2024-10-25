@@ -2,6 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { createModal, ModalProps } from "@codegouvfr/react-dsfr/Modal";
+import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { Upload } from "@codegouvfr/react-dsfr/Upload";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -23,7 +24,6 @@ import api from "../../../api";
 
 import "../../../../sass/components/buttons.scss";
 
-import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import placeholder1x1 from "../../../../img/placeholder.1x1.png";
 
 const addThumbnailModal = createModal({
@@ -209,7 +209,7 @@ const DatasheetThumbnail: FC<DatasheetThumbnailProps> = ({ datastoreId, datashee
                     loading="lazy"
                     src={datasheet?.thumbnail?.url === undefined ? placeholder1x1 : datasheet?.thumbnail?.url}
                 />
-                {thumbnailIsHovered && (
+                {(datasheet?.thumbnail?._id === undefined || thumbnailIsHovered) && (
                     <div className="frx-btn--hover-icon">
                         <Button
                             title={t("thumbnail_action", { action: action })}
