@@ -1,0 +1,13 @@
+# Production environment override
+services:
+    php:
+        build:
+            context: .
+            target: frankenphp_prod
+            args:
+                - HTTP_PROXY
+                - HTTPS_PROXY
+        environment:
+            APP_SECRET: ${APP_SECRET}
+            # MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
+            # MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
