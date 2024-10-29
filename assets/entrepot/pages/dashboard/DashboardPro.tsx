@@ -8,6 +8,7 @@ import { useEffect } from "react";
 import { CartesUser, Datastore } from "../../../@types/app";
 import AppLayout from "../../../components/Layout/AppLayout";
 import LoadingIcon from "../../../components/Utils/LoadingIcon";
+import Skeleton from "../../../components/Utils/Skeleton";
 import { datastoreNavItems } from "../../../config/datastoreNavItems";
 import { Translations, useTranslation } from "../../../i18n/i18n";
 import Translator from "../../../modules/Translator";
@@ -16,6 +17,7 @@ import { CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
 import { useApiEspaceCoStore } from "../../../stores/ApiEspaceCoStore";
 import { useAuthStore } from "../../../stores/AuthStore";
+import { getArrayRange } from "../../../utils";
 import api from "../../api";
 
 import avatarSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/digital/avatar.svg";
@@ -105,9 +107,16 @@ const DashboardPro = () => {
             <h2>Espaces de travail {(sandboxDatastoreQuery.isLoading || userQuery.isFetching) && <LoadingIcon largeIcon={true} />}</h2>
 
             <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
-                {/* si l'utilisateur ne fait pas déjà partie du bac à sable, on affiche une Tile "spéciale" dont le click va ajouter l'utilisateur dans le bac à sable */}
-                {/* si l'utilisateur en fait déjà partie, on n'affiche pas cette Tile, on boucle tout simplement sur ses datastores (user.communities_member), voir plus bas */}
-                {sandboxDatastoreQuery.data !== undefined && (
+                {/* affiche indication de chargement pendant que sandboxDatastoreQuery est en cours */}
+                {sandboxDatastoreQuery.data === undefined ? (
+                    getArrayRange(1, user?.communities_member.length ?? 3).map((i) => (
+                        <div key={i} className={fr.cx("fr-col-12", "fr-col-sm-6", "fr-col-md-4", "fr-col-lg-3")}>
+                            <Skeleton count={1} rectangleHeight={150} />
+                        </div>
+                    ))
+                ) : (
+                    // si l'utilisateur ne fait pas déjà partie du bac à sable, on affiche une Tile "spéciale" dont le click va ajouter l'utilisateur dans le bac à sable
+                    // si l'utilisateur en fait déjà partie, on n'affiche pas cette Tile, on boucle tout simplement sur ses datastores (user.communities_member), voir plus bas
                     <>
                         {user?.communities_member.find((community) => community.community?.datastore === sandboxDatastoreQuery.data._id) === undefined && (
                             <div className={fr.cx("fr-col-12", "fr-col-sm-6", "fr-col-md-4", "fr-col-lg-3")}>
