@@ -42,8 +42,9 @@ class DatasheetController extends AbstractController implements ApiControllerInt
     #[Route('', name: 'get_list', methods: ['GET'])]
     public function getDatasheetList(string $datastoreId): JsonResponse
     {
-        $uploads = $this->uploadApiService->getAllDetailed($datastoreId, [
+        $uploads = $this->uploadApiService->getAll($datastoreId, [
             'sort' => 'lastEvent,desc',
+            'fields' => ['tags'],
         ]);
 
         $uploadDatasheetNames = array_map(function ($upload) {
@@ -52,8 +53,9 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             }
         }, $uploads);
 
-        $storedDataList = $this->storedDataApiService->getAllDetailed($datastoreId, [
+        $storedDataList = $this->storedDataApiService->getAll($datastoreId, [
             'sort' => 'lastEvent,desc',
+            'fields' => ['tags'],
         ]);
 
         $storedDataDatasheetNames = array_map(function ($storedData) {

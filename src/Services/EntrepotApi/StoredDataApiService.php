@@ -19,7 +19,7 @@ class StoredDataApiService extends BaseEntrepotApiService
         LoggerInterface $logger,
         private ProcessingApiService $processingApiService,
         private ConfigurationApiService $configurationApiService,
-        private AnnexeApiService $annexeApiService
+        private AnnexeApiService $annexeApiService,
     ) {
         parent::__construct($httpClient, $parameters, $filesystem, $requestStack, $logger);
     }
@@ -33,7 +33,14 @@ class StoredDataApiService extends BaseEntrepotApiService
             $query['sort'] = 'lastEvent,desc';
         }
 
-        return $this->requestAll("datastores/$datastoreId/stored_data", $query);
+        /*
+         * pour transformer "sort=lastEvent,desc&fields[0]=field1&fields[1]=field2" en "sort=lastEvent,desc&fields=field1&fields=field2"
+         * l'API entrepôt ignore le premier format
+         */
+        $queryString = urldecode(http_build_query($query));
+        $queryString = preg_replace('/\[\d+\]/', '', $queryString);
+
+        return $this->requestAll("datastores/$datastoreId/stored_data?{$queryString}");
     }
 
     /**
