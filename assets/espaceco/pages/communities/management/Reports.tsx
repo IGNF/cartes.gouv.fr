@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import {
     CommunityResponseDTO,
+    EmailPlannerDTO,
     ReportStatusesType,
     SharedGeoremOptions,
     SharedThemesDTO,
@@ -16,7 +17,7 @@ import {
 } from "../../../../@types/espaceco";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import statuses from "../../../../data/report_statuses.json";
-import { useTranslation } from "../../../../i18n/i18n";
+import { declareComponentKeys, Translations, useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/espaceco/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import api from "../../../api";
@@ -28,6 +29,8 @@ import ThemeList from "./reports/ThemeList";
 import { countActiveStatus, getDefaultStatuses, getMinAuthorizedStatus } from "./reports/Utils";
 import Answers from "./reports/Answers";
 import { ReportFormType } from "../../../../@types/app_espaceco";
+import { setToNull } from "../../../../utils";
+import EmailPlanners from "./reports/EmailPlanners";
 
 type ReportsProps = {
     community: CommunityResponseDTO;
@@ -38,7 +41,7 @@ const minStatuses = getMinAuthorizedStatus();
 const Reports: FC<ReportsProps> = ({ community }) => {
     const { t: tCommon } = useTranslation("Common");
     const { t: tStatus } = useTranslation("ReportStatuses");
-    const { t } = useTranslation("ManageCommunity");
+    const { t } = useTranslation("Reports");
 
     const schema: yup.ObjectSchema<ReportFormType> = yup.object({
         attributes: yup
@@ -109,6 +112,20 @@ const Reports: FC<ReportsProps> = ({ community }) => {
                 })
                 .required();
         }),
+        email_planners: yup.array().of(
+            yup.object({
+                id: yup.number().required(),
+                subject: yup.string().required(),
+                body: yup.string().required(),
+                delay: yup.number().required(),
+                repeat: yup.boolean().required(),
+                recipients: yup.array().of(yup.string().required()).required(),
+                event: yup.string().oneOf(["georem_created", "georem_status_changed"]).required(),
+                cancel_event: yup.string().oneOf(["none", "georem_status_changed"]).required(),
+                condition: yup.string().transform(setToNull).required(),
+                themes: yup.string().transform(setToNull).required(),
+            })
+        ),
         shared_themes: yup.array().of(
             yup.object({
                 community_id: yup.number().required(),
@@ -120,15 +137,24 @@ const Reports: FC<ReportsProps> = ({ community }) => {
         all_members_can_valid: yup.boolean().required(),
     });
 
+    // Tables
     const tablesQuery = useQuery<Partial<TableResponseDTO>[], CartesApiException>({
         queryKey: RQKeys.tables(community.id),
         queryFn: ({ signal }) => api.permission.getThemableTables(community.id, signal),
         staleTime: 60000,
     });
 
+    // Themes partagés
     const sharedThemesQuery = useQuery<UserSharedThemesDTO[], CartesApiException>({
         queryKey: RQKeys.userSharedThemes(),
         queryFn: () => api.user.getSharedThemes(),
+        staleTime: 3600000,
+    });
+
+    // Email planners
+    const emailPlannersQuery = useQuery<EmailPlannerDTO[], CartesApiException>({
+        queryKey: RQKeys.emailPlanners(community.id),
+        queryFn: () => api.emailplanner.getAll(community.id),
         staleTime: 3600000,
     });
 
@@ -175,6 +201,7 @@ const Reports: FC<ReportsProps> = ({ community }) => {
         values: {
             attributes: community.attributes ?? [],
             report_statuses: community.report_statuses ?? getDefaultStatuses(),
+            email_planners: emailPlannersQuery.data ?? [],
             shared_themes: sharedThemes,
             shared_georem: community.shared_georem,
             all_members_can_valid: community.all_members_can_valid,
@@ -195,13 +222,16 @@ const Reports: FC<ReportsProps> = ({ community }) => {
         <div>
             {tablesQuery.isError && <Alert severity="error" closable title={tablesQuery.error.message} />}
             {sharedThemesQuery.isError && <Alert severity="error" closable title={sharedThemesQuery.error.message} />}
+            {emailPlannersQuery.isError && <Alert severity="error" closable title={emailPlannersQuery.error.message} />}
             {tablesQuery.isLoading && <LoadingText as="h6" message={t("loading_tables")} />}
-            {sharedThemesQuery.isLoading && <LoadingText as="h6" />}
-            {tablesQuery.data && sharedThemesQuery.data && (
+            {sharedThemesQuery.isLoading && <LoadingText as="h6" message={t("loading_shared_themes")} />}
+            {emailPlannersQuery.isLoading && <LoadingText as="h6" message={t("loading_email_planners")} />}
+            {tablesQuery.data && sharedThemesQuery.data && emailPlannersQuery.data && (
                 <div>
                     <ThemeList form={form} tables={tablesQuery.data ?? []} state={errors.attributes ? "error" : "default"} />
                     <SharedThemes form={form} userSharedThemes={userSharedThemes} />
                     <ReportStatuses form={form} state={errors.report_statuses ? "error" : "default"} />
+                    <EmailPlanners communityId={community.id} form={form} emailPlanners={emailPlannersQuery.data} />
                     <Permissions form={form} />
                     <Answers form={form} />
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-mt-2v")}>
@@ -220,3 +250,18 @@ const Reports: FC<ReportsProps> = ({ community }) => {
 };
 
 export default Reports;
+
+// traductions
+export const { i18n } = declareComponentKeys<"loading_tables" | "loading_shared_themes" | "loading_email_planners">()("Reports");
+
+export const ReportsFrTranslations: Translations<"fr">["Reports"] = {
+    loading_tables: "Recherche des tables pour la configuration des thèmes ...",
+    loading_shared_themes: "Recherche des thèmes partagés ...",
+    loading_email_planners: "Recherche des emails de suivi ...",
+};
+
+export const ReportsEnTranslations: Translations<"en">["Reports"] = {
+    loading_tables: undefined,
+    loading_shared_themes: undefined,
+    loading_email_planners: undefined,
+};

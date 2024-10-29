@@ -56,6 +56,29 @@ export type ReportStatusParams = {
 };
 export type ReportStatusesDTO = Record<string, ReportStatusParams>;
 
+/* Email planners */
+export const TriggerEvents = ["georem_created", "georem_status_changed"] as const;
+export type TriggerEventType = (typeof TriggerEvents)[number];
+
+export const CancelEvents = ["georem_status_changed", "none"] as const;
+export type CancelEventType = (typeof CancelEvents)[number];
+
+export const Recipients = ["Auteur", "Gestionnaire", "Majec"] as const;
+export type RecipientType = (typeof Recipients)[number];
+
+export type EmailPlannerDTO = {
+    id: number;
+    subject: string;
+    body: string;
+    delay: number;
+    repeat: boolean;
+    recipients: string[];
+    event: TriggerEventType;
+    cancel_event: CancelEventType;
+    condition: string | null;
+    themes: string | null;
+};
+
 const SharedGeoremOptions = ["all", "restrained", "personal"];
 export type SharedGeorem = (typeof SharedGeoremOptions)[number];
 export interface CommunityResponseDTO {

@@ -7,7 +7,6 @@ export type logoAction = "add" | "modify" | "delete";
 export const { i18n } = declareComponentKeys<
     | { K: "title"; P: { name: string | undefined }; R: string }
     | "loading"
-    | "loading_tables"
     | "fetch_failed"
     | "back_to_list"
     | "tab1"
@@ -63,6 +62,8 @@ export const { i18n } = declareComponentKeys<
     | "report.configure_shared_themes.explain"
     | "report.configure_statuses"
     | "report.configure_statuses.explain"
+    | "report.manage.emailplanners"
+    | "report.manage.emailplanners_explain"
     | "report.manage_permissions"
     | "report.manage_permissions.shared_report"
     | "report.manage_permissions.shared_report_hint"
@@ -77,7 +78,6 @@ export const { i18n } = declareComponentKeys<
 export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"] = {
     title: ({ name }) => (name === undefined ? "Gérer le guichet" : `Gérer le guichet - ${name}`),
     loading: "Recherche du guichet en cours ...",
-    loading_tables: "Recherche des tables pour la configuration des thèmes en cours ...",
     fetch_failed: "La récupération des informations sur le guichet a échoué",
     back_to_list: "Retour à la liste des guichets",
     tab1: "Description",
@@ -147,6 +147,10 @@ export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"
     "report.configure_statuses": "Paramétrer les status des signalements (optionnel)",
     "report.configure_statuses.explain":
         "Vous pouvez supprimer un maximum de 2 status en les décochant, changer leur nom et ajouter une explication pour améliorer la compréhension de vos utilisateurs.",
+    "report.manage.emailplanners": "Gérer les emails de suivi des nouveaux signalements (optionnel)",
+    "report.manage.emailplanners_explain":
+        "Générer des emails de suivi des signalements automatiques. Vous pouvez ajouter des adresses email dont les destinataires recevront des emails simples et pré-configurés pour tout nouveau signalement, ou configurer vous même les emails pour un meilleur suivi des signalements.",
+
     "report.manage_permissions": "Gérer les permissions (optionnel)",
     "report.manage_permissions.shared_report": "Partage des signalements",
     "report.manage_permissions.shared_report_hint":
@@ -180,7 +184,6 @@ export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"
 export const ManageCommunityEnTranslations: Translations<"en">["ManageCommunity"] = {
     title: ({ name }) => (name === undefined ? "Manage front office" : `Manage front office - ${name}`),
     loading: undefined,
-    loading_tables: undefined,
     fetch_failed: undefined,
     back_to_list: undefined,
     tab1: undefined,
@@ -245,6 +248,8 @@ export const ManageCommunityEnTranslations: Translations<"en">["ManageCommunity"
     "report.configure_shared_themes.explain": undefined,
     "report.configure_statuses": undefined,
     "report.configure_statuses.explain": undefined,
+    "report.manage.emailplanners": undefined,
+    "report.manage.emailplanners_explain": undefined,
     "report.manage_permissions": undefined,
     "report.manage_permissions.shared_report": undefined,
     "report.manage_permissions.shared_report_hint": undefined,

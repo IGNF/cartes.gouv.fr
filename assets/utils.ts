@@ -255,6 +255,8 @@ const bboxToWkt = (bbox: BoundingBox) => {
         return bbox[s];
     });
 };
+// Utilisée dans yup.transform sur une chaine . Si la valeur est undefined ou égale à ""
+const setToNull = (value) => (value === undefined || value === "" ? null : value);
 
 export {
     getInspireKeywords,
@@ -274,4 +276,5 @@ export {
     getArrayRange,
     trimObject,
     bboxToWkt,
+    setToNull,
 };
