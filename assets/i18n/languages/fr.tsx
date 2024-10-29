@@ -41,9 +41,13 @@ import { TMSStyleFilesManagerFrTranslations } from "../../modules/Style/TMSStyle
 import { BreadcrumbFrTranslations } from "../../modules/entrepot/breadcrumbs/Breadcrumb.locale";
 import { LoginDisabledFrTranslations } from "../../pages/LoginDisabled/LoginDisabled.locale";
 import { SearchEnTranslations, SearchFrTranslations } from "../../espaceco/pages/communities/management/Search";
+import { EmailPlannersFrTranslations } from "../../espaceco/pages/communities/management/reports/EmailPlanners";
 import { ContactFrTranslations } from "../../pages/assistance/contact/Contact.locale";
 import { mapboxStyleValidationFrTranslations } from "../../validations/mapbox/MapboxStyleValidator.locale";
 import { SldStyleValidationErrorsFrTranslations } from "../../validations/sld/SldStyleValidation.locale";
+import { ReportsFrTranslations } from "../../espaceco/pages/communities/management/Reports";
+import { AddOrEditEmailPlannerFrTranslations } from "../../espaceco/pages/communities/management/reports/emailplanners/AddOrEditEmailPlannerTr";
+import { EmailPlannerKeywordsFrTranslations } from "../../espaceco/pages/communities/management/reports/emailplanners/EmailPlannerKeywords";
 import { commonFrTranslations } from "../Common.locale";
 import { ThemeFrTranslations } from "../../espaceco/pages/communities/management/reports/ThemeTr";
 import { ReportStatusesFrTranslations } from "../../espaceco/pages/communities/management/reports/ReportStatusesTr";
@@ -96,6 +100,10 @@ export const translations: Translations<"fr"> = {
     CommunityList: CommunityListFrTranslations,
     ManageCommunity: ManageCommunityFrTranslations,
     ManageCommunityValidations: ManageCommunityValidationsFrTranslations,
+    Reports: ReportsFrTranslations,
+    EmailPlanners: EmailPlannersFrTranslations,
+    AddOrEditEmailPlanner: AddOrEditEmailPlannerFrTranslations,
+    EmailPlannerKeywords: EmailPlannerKeywordsFrTranslations,
     Theme: ThemeFrTranslations,
     ReportStatuses: ReportStatusesFrTranslations,
     SharedThemes: SharedThemesFrTranslations,

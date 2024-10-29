@@ -5,6 +5,8 @@ import { CSSProperties, ReactNode, useId } from "react";
 import { ControllerRenderProps } from "react-hook-form";
 import { symToStr } from "tsafe/symToStr";
 
+import "../../../assets/sass/components/autocomplete.scss";
+
 interface AutocompleteSelectProps<T> {
     id?: string;
     label: string;

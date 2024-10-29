@@ -52,10 +52,17 @@ import { EscoCommunityMembersEnTranslations } from "../../espaceco/pages/communi
 import { AddMembersDialogEnTranslations } from "../../espaceco/pages/communities/management/member/AddMembersDialog";
 import { ManageGridsDialogEnTranslations } from "../../espaceco/pages/communities/management/member/ManageGridsDialog";
 <<<<<<< HEAD
+<<<<<<< HEAD
 import type { Translations } from "../types";
 =======
 import { AddMembersDialogEnTranslations } from "../../espaceco/pages/communities/management/member/AddMembersDialog";
 import { ManageGridsDialogEnTranslations } from "../../espaceco/pages/communities/management/member/ManageGridsDialog";
+=======
+import { ReportsEnTranslations } from "../../espaceco/pages/communities/management/Reports";
+import { EmailPlannersEnTranslations } from "../../espaceco/pages/communities/management/reports/EmailPlanners";
+import { AddOrEditEmailPlannerEnTranslations } from "../../espaceco/pages/communities/management/reports/emailplanners/AddOrEditEmailPlannerTr";
+import { EmailPlannerKeywordsEnTranslations } from "../../espaceco/pages/communities/management/reports/emailplanners/EmailPlannerKeywords";
+>>>>>>> 594310c (feat: ajout de email planner et continuation edition community)
 
 import type { Translations } from "../i18n";
 >>>>>>> 4749caa (Edition d'un guichet suite ...)
@@ -108,6 +115,10 @@ export const translations: Translations<"en"> = {
     AccessRestrictions: AccessRestrictionsEnTranslations,
     LoginDisabled: LoginDisabledEnTranslations,
     Theme: ThemeEnTranslations,
+    Reports: ReportsEnTranslations,
+    EmailPlanners: EmailPlannersEnTranslations,
+    AddOrEditEmailPlanner: AddOrEditEmailPlannerEnTranslations,
+    EmailPlannerKeywords: EmailPlannerKeywordsEnTranslations,
     ReportStatuses: ReportStatusesEnTranslations,
     SharedThemes: SharedThemesEnTranslations,
     Search: SearchEnTranslations,

@@ -3,6 +3,7 @@ import { FC } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { ReportFormType } from "../../../../../@types/app_espaceco";
 import { useTranslation } from "../../../../../i18n/i18n";
+import { fr } from "@codegouvfr/react-dsfr";
 
 type PermissionsProps = {
     form: UseFormReturn<ReportFormType>;
@@ -17,7 +18,7 @@ const Permissions: FC<PermissionsProps> = ({ form }) => {
     } = form;
 
     return (
-        <div>
+        <div className={fr.cx("fr-mt-6v")}>
             <h3>{t("report.manage_permissions")}</h3>
             <Checkbox
                 legend={t("report.manage_permissions.shared_report")}

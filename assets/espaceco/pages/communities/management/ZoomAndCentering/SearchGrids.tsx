@@ -1,7 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import MuiDsfrThemeProvider from "@codegouvfr/react-dsfr/mui";
-import Autocomplete, { autocompleteClasses } from "@mui/material/Autocomplete";
-import Box from "@mui/material/Box";
+import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import { useQuery } from "@tanstack/react-query";
 import { FC, ReactNode } from "react";
@@ -11,6 +10,8 @@ import { GridDTO } from "../../../../../@types/espaceco";
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/espaceco/RQKeys";
 import api from "../../../../api";
+
+import "../../../../../sass/components/autocomplete.scss";
 
 export type SearchGridsProps = {
     label: ReactNode;
@@ -44,7 +45,7 @@ const SearchGrids: FC<SearchGridsProps> = ({ label, hintText, filters, state, st
             <MuiDsfrThemeProvider>
                 <Autocomplete
                     disablePortal={true} // If true, the Popper content will be under the DOM hierarchy of the parent component.
-                    renderOption={(props, option, state, ownerState) => {
+                    /* renderOption={(props, option, state, ownerState) => {
                         return (
                             <Box
                                 sx={{
@@ -61,7 +62,7 @@ const SearchGrids: FC<SearchGridsProps> = ({ label, hintText, filters, state, st
                                 {ownerState.getOptionLabel(option)}
                             </Box>
                         );
-                    }}
+                    }} */
                     size={"small"}
                     loading={searchQuery.isLoading}
                     loadingText={t("loading")}

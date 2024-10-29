@@ -41,7 +41,7 @@ const ReportStatuses: FC<ReportStatusesProps> = ({ form, state }) => {
     }; */
 
     return (
-        <div className={fr.cx("fr-input-group", "fr-mt-2w", state === "error" && "fr-input-group--error")}>
+        <div className={fr.cx("fr-input-group", "fr-my-1w", state === "error" && "fr-input-group--error")}>
             <h3>{t("report.configure_statuses")}</h3>
             <span className={fr.cx("fr-hint-text")}>{t("report.configure_statuses.explain")}</span>
             <div className={fr.cx("fr-mt-2v")}>
