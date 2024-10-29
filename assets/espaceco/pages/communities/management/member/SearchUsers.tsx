@@ -1,7 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import MuiDsfrThemeProvider from "@codegouvfr/react-dsfr/mui";
-import Autocomplete, { autocompleteClasses } from "@mui/material/Autocomplete";
-import Box from "@mui/material/Box";
+import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import { useQuery } from "@tanstack/react-query";
 import { FC, ReactNode, useMemo } from "react";
@@ -11,6 +10,8 @@ import { UserDTO } from "../../../../../@types/espaceco";
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/espaceco/RQKeys";
 import api from "../../../../api";
+
+import "../../../../../sass/components/autocomplete.scss";
 
 export type SearchUsersProps = {
     label: ReactNode;
@@ -51,24 +52,6 @@ const SearchUsers: FC<SearchUsersProps> = ({ label, hintText, value, state, stat
                     freeSolo={true}
                     multiple={true}
                     value={value}
-                    renderOption={(props, option, state, ownerState) => {
-                        return (
-                            <Box
-                                sx={{
-                                    margin: 0,
-                                    [`&.${autocompleteClasses.option}`]: {
-                                        padding: 0,
-                                        height: "20px",
-                                    },
-                                }}
-                                component="li"
-                                {...props}
-                                key={typeof option === "string" ? option : option.username}
-                            >
-                                {ownerState.getOptionLabel(option)}
-                            </Box>
-                        );
-                    }}
                     size={"small"}
                     loading={searchQuery.isLoading}
                     loadingText={t("loading")}

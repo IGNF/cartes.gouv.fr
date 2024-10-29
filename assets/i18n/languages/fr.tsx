@@ -36,6 +36,10 @@ import { BreadcrumbFrTranslations } from "../Breadcrumb";
 import { commonFrTranslations } from "../Common";
 import { RightsFrTranslations } from "../Rights";
 import { StyleFrTranslations } from "../Style";
+import { ReportsFrTranslations } from "../../espaceco/pages/communities/management/Reports";
+import { EmailPlannersFrTranslations } from "../../espaceco/pages/communities/management/reports/EmailPlanners";
+import { AddOrEditEmailPlannerFrTranslations } from "../../espaceco/pages/communities/management/reports/emailplanners/AddOrEditEmailPlannerTr";
+import { EmailPlannerKeywordsFrTranslations } from "../../espaceco/pages/communities/management/reports/emailplanners/EmailPlannerKeywords";
 import { ThemeFrTranslations } from "../../espaceco/pages/communities/management/reports/ThemeTr";
 import { ReportStatusesFrTranslations } from "../../espaceco/pages/communities/management/reports/ReportStatusesTr";
 import { SharedThemesFrTranslations } from "../../espaceco/pages/communities/management/reports/SharedThemes";
@@ -83,6 +87,10 @@ export const translations: Translations<"fr"> = {
     CommunityList: CommunityListFrTranslations,
     ManageCommunity: ManageCommunityFrTranslations,
     ManageCommunityValidations: ManageCommunityValidationsFrTranslations,
+    Reports: ReportsFrTranslations,
+    EmailPlanners: EmailPlannersFrTranslations,
+    AddOrEditEmailPlanner: AddOrEditEmailPlannerFrTranslations,
+    EmailPlannerKeywords: EmailPlannerKeywordsFrTranslations,
     Theme: ThemeFrTranslations,
     ReportStatuses: ReportStatusesFrTranslations,
     SharedThemes: SharedThemesFrTranslations,

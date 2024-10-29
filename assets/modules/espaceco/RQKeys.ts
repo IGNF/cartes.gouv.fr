@@ -4,6 +4,7 @@ const RQKeys = {
     communityList: (page: number, limit: number): string[] => ["communities", page.toString(), limit.toString()],
     communitiesName: (): string[] => ["communities_names"],
     community: (communityId: number): string[] => ["community", communityId.toString()],
+    emailPlanners: (communityId: number): string[] => ["emailplanners", communityId.toString()],
     communityMembershipRequests: (communityId: number): string[] => ["community", "members", "pending", communityId.toString()],
     communityMembers: (communityId: number, page: number, limit: number): string[] => [
         "community",

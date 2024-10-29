@@ -246,6 +246,9 @@ const trimObject = (obj: object): object => {
     return newObject;
 };
 
+// Utilisée dans yup.transform sur une chaine . Si la valeur est undefined ou égale à ""
+const setToNull = (value) => (value === undefined || value === "" ? null : value);
+
 export {
     getInspireKeywords,
     getLanguages,
@@ -263,4 +266,5 @@ export {
     formatDateWithoutTimeFromISO,
     getArrayRange,
     trimObject,
+    setToNull,
 };

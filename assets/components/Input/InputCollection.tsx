@@ -83,7 +83,7 @@ const InputCollection: FC<InputCollectionProps> = (props: InputCollectionProps) 
                 </Button>
             </div>
             {Object.keys(internals).map((key) => (
-                <div key={key} className="fr-grid-row fr-grid-row--middle">
+                <div key={key} className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
                     <div className={fr.cx("fr-col")}>
                         <Input
                             className={fr.cx("fr-mb-1v")}
