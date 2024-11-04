@@ -242,6 +242,17 @@ const TermsOfService = () => {
                             <strong>Utilisateur Géoplateforme</strong>&nbsp;: toute personne physique accédant à la Géoplateforme comme l’Utilisateur API, le
                             Développeur, le Fournisseur de données ou le Fournisseur d’API.
                         </li>
+                        <li>
+                            <strong>Endpoint public</strong>&nbsp;: point de diffusion de données (par exemple de type WFS) dépourvu de contrôle d’accès
+                            c’est-à-dire permettant à tout Utilisateur Géoplateforme d’accéder librement à toutes les données qui y sont exposées ; ce type de
+                            Endpoint est donc destiné aux données libres.
+                        </li>
+                        <li>
+                            <strong>Endpoint privé</strong>&nbsp;: point de diffusion de données (par exemple de type WFS) doté d’un contrôle d’accès
+                            c’est-à-dire imposant à tout Utilisateur Géoplateforme de bénéficier d’une permission d’accès associée à une clé alphanumérique à
+                            joindre aux requêtes pour accéder aux données autorisées ; ce type de Endpoint est donc destiné aux données non libres pour
+                            lesquelles le Fournisseur de données souhaite mettre en œuvre une restriction d’accès.
+                        </li>
                     </ul>
 
                     <h2 id="anchor-1" tabIndex={-1}>
