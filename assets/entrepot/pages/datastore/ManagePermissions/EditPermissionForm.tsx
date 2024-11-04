@@ -136,7 +136,15 @@ const EditPermissionForm: FC<EditPermissionFormProps> = ({ datastoreId, permissi
                         control={control}
                         name="end_date"
                         render={({ field: { onChange, value } }) => (
-                            <DatePicker label={t("edit_form.expiration_date")} value={value} minDate={new Date()} onChange={onChange} />
+                            <DatePicker
+                                label={t("edit_form.expiration_date")}
+                                value={value}
+                                minDate={new Date()}
+                                onChange={onChange}
+                                state={errors.end_date?.message ? "error" : "default"}
+                                stateRelatedMessage={errors.end_date?.message}
+                                className={fr.cx("fr-col-12", "fr-col-sm-4")}
+                            />
                         )}
                     />
                     <Controller

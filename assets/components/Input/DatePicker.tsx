@@ -1,11 +1,13 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import MuiDsfrThemeProvider from "@codegouvfr/react-dsfr/mui";
+import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 import { DatePicker as MuiDatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider/LocalizationProvider";
 import { enGB as enGBLocale, fr as frLocale } from "date-fns/locale";
 import { useId } from "react";
 import { symToStr } from "tsafe/symToStr";
+
 import { useLang } from "../../i18n/i18n";
 
 const locales = { en: enGBLocale, fr: frLocale };
@@ -19,10 +21,11 @@ type DatePickerProps = {
     value?: Date;
     minDate?: Date;
     onChange?: (value: Date | undefined) => void;
+    className?: string;
 };
 
 const DatePicker = (props: DatePickerProps) => {
-    const { id, label, hintText, state, stateRelatedMessage, value, minDate, onChange } = props;
+    const { id, label, hintText, state, stateRelatedMessage, value, minDate, onChange, className } = props;
 
     const { lang } = useLang();
 
@@ -35,10 +38,10 @@ const DatePicker = (props: DatePickerProps) => {
 
     return (
         <MuiDsfrThemeProvider>
-            <div className={fr.cx("fr-input-group", state === "error" && "fr-input-group--error")}>
+            <div className={cx(fr.cx("fr-input-group", state === "error" && "fr-input-group--error"), className)}>
                 <label className={fr.cx("fr-label")} htmlFor={inputId}>
                     {label}
-                    {hintText && <span className="fr-hint-text">{hintText}</span>}
+                    {hintText && <span className={fr.cx("fr-hint-text")}>{hintText}</span>}
                 </label>
                 <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={locales[lang]}>
                     <MuiDatePicker
@@ -54,7 +57,7 @@ const DatePicker = (props: DatePickerProps) => {
                         }}
                     />
                 </LocalizationProvider>
-                {state !== "default" && (
+                {state !== "default" && stateRelatedMessage !== undefined && (
                     <p
                         id={messageId}
                         className={fr.cx(

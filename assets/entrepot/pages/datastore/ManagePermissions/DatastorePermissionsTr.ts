@@ -39,6 +39,7 @@ export const { i18n } = declareComponentKeys<
     | "edit_form.expiration_date"
     | "edit_form.record"
     | "validation.licence_required"
+    | "validation.end_date.invalid_date"
     | "validation.type_required"
     | "validation.min_beneficiaries"
     | "validation.min_offerings"
@@ -120,6 +121,7 @@ export const DatastorePermissionsFrTranslations: Translations<"fr">["DatastorePe
     "edit_form.expiration_date": "Date d’expiration (optionnel)",
     "edit_form.record": "Enregister les modifications",
     "validation.licence_required": "La licence est obligatoire",
+    "validation.end_date.invalid_date": "La date d'expiration saisie n'est pas une date valide",
     "validation.type_required": "Le type est obligatoire",
     "validation.min_beneficiaries": "Il doit y avoir au moins un bénéficiaire",
     "validation.min_offerings": "Au moins un service doit être sélectionné",
@@ -165,6 +167,7 @@ export const DatastorePermissionsEnTranslations: Translations<"en">["DatastorePe
     "edit_form.expiration_date": "Expiration date (optional)",
     "edit_form.record": "Save changes",
     "validation.licence_required": "Licence is required",
+    "validation.end_date.invalid_date": "The selected expirated date is invalid",
     "validation.type_required": "Type is required",
     "validation.min_beneficiaries": "There must be at least one beneficiary",
     "validation.min_offerings": "At least one service must be selected",

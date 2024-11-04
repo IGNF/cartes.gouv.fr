@@ -29,7 +29,7 @@ const uuidTest = (t: TranslationFunction<"DatastorePermissions", ComponentKey>) 
 const getSchema = (t: TranslationFunction<"DatastorePermissions", ComponentKey>) =>
     yup.object({
         licence: yup.string().required(t("validation.licence_required")),
-        end_date: yup.date(),
+        end_date: yup.date().typeError(t("validation.end_date.invalid_date")),
         offerings: yup.array(yup.string().required()).min(1, t("validation.min_offerings")).test(uuidTest(t)).required(),
     });
 

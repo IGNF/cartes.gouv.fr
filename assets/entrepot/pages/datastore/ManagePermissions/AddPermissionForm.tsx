@@ -132,11 +132,6 @@ const AddPermissionForm: FC<AddPermissionFormProps> = ({ datastoreId }) => {
         mutateAdd(values);
     };
 
-    // TODO SUPPRIMER
-    /*useEffect(() => {
-        watch((value, { name, type }) => console.log(value, name, type));
-    }, [watch]); */
-
     useEffect(() => {
         setFormValue("beneficiaries", []);
     }, [type, setFormValue]);
@@ -222,7 +217,15 @@ const AddPermissionForm: FC<AddPermissionFormProps> = ({ datastoreId }) => {
                         control={control}
                         name="end_date"
                         render={({ field: { onChange } }) => (
-                            <DatePicker label={t("add_form.expiration_date")} value={defaultDate} minDate={new Date()} onChange={onChange} />
+                            <DatePicker
+                                label={t("add_form.expiration_date")}
+                                value={defaultDate}
+                                minDate={new Date()}
+                                onChange={onChange}
+                                state={errors.end_date?.message ? "error" : "default"}
+                                stateRelatedMessage={errors.end_date?.message}
+                                className={fr.cx("fr-col-12", "fr-col-sm-4")}
+                            />
                         )}
                     />
                     <Controller
