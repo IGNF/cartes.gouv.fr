@@ -24,6 +24,7 @@ import "ol/ol.css";
 
 import "geopf-extensions-openlayers/css/Dsfr.css";
 
+import "../../sass/components/geopf-ext-ol-custom.scss";
 import "../../sass/components/map-view.scss";
 
 export interface MapInitial {
@@ -111,9 +112,16 @@ const RMap: FC<RMapProps> = ({ initial, currentStyle }) => {
         // Creation de la carte
         if (!mapRef.current) {
             const controls = [
-                new GeoportalZoom(),
+                new GeoportalZoom({ position: "top-left" }),
                 new Attribution({ collapsible: true, collapsed: true }),
-                new LayerSwitcher(),
+                new LayerSwitcher({
+                    options: {
+                        position: "top-right",
+                        collapsed: true,
+                        panel: true,
+                        counter: true,
+                    },
+                }),
                 new ScaleLine(),
                 new SearchEngine({
                     collapsed: false,
@@ -130,6 +138,7 @@ const RMap: FC<RMapProps> = ({ initial, currentStyle }) => {
                             active: true,
                             hidden: true,
                         },
+                        position: "bottom-right",
                     })
                 );
             }
@@ -172,7 +181,8 @@ const RMap: FC<RMapProps> = ({ initial, currentStyle }) => {
                     gfiLayers.push({ obj: layer });
                 }
             });
-            getControl("GetFeatureInfo")?.setLayers(gfiLayers);
+            // NOTE : il me semble que ce n'est plus nécessaire et plus possible sur geopf-ext-ol, à vérifier
+            // getControl("GetFeatureInfo")?.setLayers(gfiLayers);
 
             // On zoom sur l'extent de la couche au premier rendu
             if (extent) {

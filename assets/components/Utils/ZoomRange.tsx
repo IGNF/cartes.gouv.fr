@@ -12,8 +12,6 @@ import olDefaults from "../../data/ol-defaults.json";
 import useCapabilities from "../../hooks/useCapabilities";
 import RangeSlider from "./RangeSlider";
 
-import "ol/ol.css";
-
 import "../../sass/components/zoom-range.scss";
 
 type ZoomRangeProps = {

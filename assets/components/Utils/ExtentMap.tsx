@@ -21,6 +21,7 @@ import "ol/ol.css";
 
 import "geopf-extensions-openlayers/css/Dsfr.css";
 
+import "../../sass/components/geopf-ext-ol-custom.scss";
 import "../../sass/components/map-view.scss";
 
 type ExtentMapProps = {
@@ -89,6 +90,12 @@ const ExtentMap: FC<ExtentMapProps> = ({ extents }) => {
                     },
                 },
             ],
+            options: {
+                position: "top-right",
+                collapsed: true,
+                panel: true,
+                counter: true,
+            },
         });
 
         const controls = [
@@ -100,7 +107,7 @@ const ExtentMap: FC<ExtentMapProps> = ({ extents }) => {
                 zoomTo: "auto",
             }),
             new ScaleLine(),
-            new GeoportalZoom(),
+            new GeoportalZoom({ position: "top-left" }),
         ];
 
         mapRef.current = new Map({

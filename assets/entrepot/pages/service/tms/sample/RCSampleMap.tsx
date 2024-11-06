@@ -15,6 +15,9 @@ import SampleMap from "./SampleMap";
 
 import "ol/ol.css";
 
+import "geopf-extensions-openlayers/css/Dsfr.css";
+
+import "../../../../../sass/components/geopf-ext-ol-custom.scss";
 import "../../../../../sass/components/map-view.scss";
 
 type RCSampleMapProps = {
@@ -36,7 +39,7 @@ const RCSampleMap: FC<RCSampleMapProps> = ({ form, center, bottomZoomLevel, onCh
         if (!mapRef.current) {
             // Controles par defaut
             const controls = [
-                new GeoportalZoom(),
+                new GeoportalZoom({ position: "top-left" }),
                 new ScaleLine(),
                 new SearchEngine({
                     collapsed: false,
