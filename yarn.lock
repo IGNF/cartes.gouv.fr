@@ -1792,7 +1792,7 @@
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.15.tgz#596a1747233694d50f6ad8a7869fcb6f56cf5841"
   integrity sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==
 
-"@types/lodash@^4.14.168", "@types/lodash@^4.14.190", "@types/lodash@^4.14.201":
+"@types/lodash@^4.14.168", "@types/lodash@^4.14.201":
   version "4.17.0"
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.17.0.tgz#d774355e41f372d5350a4d0714abb48194a489c3"
   integrity sha512-t7dhREVv6dbNj0q17X12j7yDG4bD/DHYX7o5/DbDxobP0HnGPgpRz2Ej77aL7TZT3DSw13fqUTj8J4mMnqa7WA==
@@ -1884,13 +1884,6 @@
   version "10.0.0"
   resolved "https://registry.yarnpkg.com/@types/uuid/-/uuid-10.0.0.tgz#e9c07fe50da0f53dc24970cca94d619ff03f6f6d"
   integrity sha512-7gqG38EyHgyP1S+7+xomFtL+ZNHcKv6DwNaCZmJmo1vgMugyF3TCnXVg4t1uk89mLNwnLtnY3TpOpCOyp1/xHQ==
-
-"@types/xml2js@^0.4.11":
-  version "0.4.14"
-  resolved "https://registry.yarnpkg.com/@types/xml2js/-/xml2js-0.4.14.tgz#5d462a2a7330345e2309c6b549a183a376de8f9a"
-  integrity sha512-4YnrRemBShWRO2QjvUin8ESA41rH+9nQGLUGZV/1IDhi3SL9OhdpNC/MrulTWuptXKwhx/aDxE7toV0f/ypIXQ==
-  dependencies:
-    "@types/node" "*"
 
 "@types/yargs-parser@*":
   version "21.0.3"
@@ -2978,9 +2971,9 @@ core-js-compat@^3.36.1, core-js-compat@^3.37.1:
     browserslist "^4.23.0"
 
 core-js@^3.26.1:
-  version "3.37.0"
-  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.37.0.tgz#d8dde58e91d156b2547c19d8a4efd5c7f6c426bb"
-  integrity sha512-fu5vHevQ8ZG4og+LXug8ulUtVxjOcEYvifJr7L5Bfq9GOztVqsKd9/59hUk2ZSbCrS3BqUr3EpaYGIYzq7g3Ug==
+  version "3.39.0"
+  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.39.0.tgz#57f7647f4d2d030c32a72ea23a0555b2eaa30f83"
+  integrity sha512-raM0ew0/jJUqkJ0E6e8UDtl+y/7ktFivgWvqw8dNSQeNWoSDLvQ1H/RN3aPXB9tBd4/FhyR4RDPGhsNIMsAn7g==
 
 core-js@^3.31.1:
   version "3.38.1"
@@ -3475,11 +3468,6 @@ electron-to-chromium@^1.4.820, electron-to-chromium@^1.5.28:
   version "1.5.31"
   resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.5.31.tgz#b1478418769dec72ea70d9fdf147a81491857f10"
   integrity sha512-QcDoBbQeYt0+3CWcK/rEbuHvwpbT/8SV9T3OSgs6cX1FlcUAkgrkqbg9zLnDrMM/rLamzQwal4LYFCiWk861Tg==
-
-emitter-component@^1.1.1:
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/emitter-component/-/emitter-component-1.1.2.tgz#d65af5833dc7c682fd0ade35f902d16bc4bad772"
-  integrity sha512-QdXO3nXOzZB4pAjM0n6ZE+R9/+kPpECA/XSELIcc54NeYVnBqIk+4DFiBgK+8QbV3mdvTG6nedl7dTYgO+5wDw==
 
 emoji-regex@^10.3.0:
   version "10.3.0"
@@ -4258,13 +4246,12 @@ geoportal-access-lib@3.4.3:
     es6-promise "^4.2.4"
     node-fetch "^2.6.1"
 
-geostyler-cql-parser@^3.0.1:
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/geostyler-cql-parser/-/geostyler-cql-parser-3.0.2.tgz#d27742d7ede3c8e8bf542e3dc2c86d6e79fe6b45"
-  integrity sha512-nfQOnWwFSrWtgl7DRmhwoa3r0BnpsMvEv7rb5D8ihpCUQS/YP09C2C1j6zKQVSnYRMl0545VnhtYtqejMgPaBg==
+geostyler-cql-parser@4.0.0-beta.4:
+  version "4.0.0-beta.4"
+  resolved "https://registry.yarnpkg.com/geostyler-cql-parser/-/geostyler-cql-parser-4.0.0-beta.4.tgz#2d96c630cfc64b281a6e89093df7b892b8e2354e"
+  integrity sha512-aBR1oAx6gkmz6PZVbd8zmCQ0gwdeh/g7bkDL9v/YURZCInLAqH5o4oGP72ljt3Qjc6/zYwm5TYuJ3p+wwe2nkA==
   dependencies:
-    geostyler-style "^7.2.0"
-    lodash "^4.17.21"
+    geostyler-style "9.0.0-next.5"
 
 geostyler-mapbox-parser@^5.0.1:
   version "5.0.1"
@@ -4283,23 +4270,18 @@ geostyler-openlayers-parser@^4.3.0:
     geostyler-style "^8.1.0"
 
 geostyler-qgis-parser@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/geostyler-qgis-parser/-/geostyler-qgis-parser-2.0.0.tgz#042fb8c85193e847a3e4d10c3db72471b36156cc"
-  integrity sha512-9lPl2kebQ3BGbmGA3Lk3as97RcTn65IODD1CAwJkyGcLs8hVOOc8YCciaXgsWHREENA275GIOtX+2aRHWG4D9Q==
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/geostyler-qgis-parser/-/geostyler-qgis-parser-2.1.0.tgz#f95112ac31cfafbf1992be194850f57d8b4cfdfd"
+  integrity sha512-0Xu3Dd1hBKSS7Qv8//ciHavVJI3Ez03JxrYfzF0HNZq32tNL/DITxxbD8nYb/uWawIsBWnJMFbmykxsqC1EEXA==
   dependencies:
-    "@types/lodash" "^4.14.190"
-    "@types/xml2js" "^0.4.11"
     buffer "^6.0.3"
     color "^4.2.3"
     core-js "^3.26.1"
-    geostyler-cql-parser "^3.0.1"
-    geostyler-style "^7.2.0"
-    lodash "^4.17.21"
-    stream "^0.0.2"
+    geostyler-cql-parser "4.0.0-beta.4"
+    geostyler-style "9.0.0-next.5"
     string_decoder "^1.3.0"
     timers "^0.1.1"
-    xml2js "^0.4.23"
-    xmldom "^0.6.0"
+    xml2js "^0.6.0"
 
 geostyler-sld-parser@^5.4.0:
   version "5.4.0"
@@ -4311,13 +4293,10 @@ geostyler-sld-parser@^5.4.0:
     i18next "^23.11.5"
     lodash "^4.17.21"
 
-geostyler-style@^7.2.0:
-  version "7.5.0"
-  resolved "https://registry.yarnpkg.com/geostyler-style/-/geostyler-style-7.5.0.tgz#25a40c7b24453ee42b01c6fc4293807b687ad0ec"
-  integrity sha512-0qlFOwDl9cdiiNUk6ijRSpBq+W3Kpry1aZS++BE8EPBxvbFgoTsKU6JIriKLmCqPqBmJIVnMFMUEk6Sf3n0ZIA==
-  dependencies:
-    "@types/lodash" "^4.14.201"
-    lodash "^4.17.21"
+geostyler-style@9.0.0-next.5:
+  version "9.0.0-next.5"
+  resolved "https://registry.yarnpkg.com/geostyler-style/-/geostyler-style-9.0.0-next.5.tgz#b7d319e42c70783ebd93f24b613963ba24cd4b46"
+  integrity sha512-nbTyL5i4zAB303RUXpVRKhrXceSKu2sOMWqjXjitjII31eOIKybS0iKV5C4f1qktE3TweJY/xPtC6aP6rTsQAw==
 
 geostyler-style@^8.0.0, geostyler-style@^8.1.0:
   version "8.1.0"
@@ -7468,9 +7447,9 @@ sass@^1.63.6:
     source-map-js ">=0.6.2 <2.0.0"
 
 sax@>=0.6.0:
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/sax/-/sax-1.3.0.tgz#a5dbe77db3be05c9d1ee7785dbd3ea9de51593d0"
-  integrity sha512-0s+oAmw9zLl1V1cS9BtZN7JAd0cW5e0QH4W3LWEK6a4LaLEA2OTpGYWDY+6XasBLtz6wkm3u1xRw95mRuJ59WA==
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/sax/-/sax-1.4.1.tgz#44cc8988377f126304d3b3fc1010c733b929ef0f"
+  integrity sha512-+aWOz7yVScEGoKNd4PA10LZ8sk0A/z5+nXQG5giUO5rprX9jgYsTdov9qCchZiPIZezbZH+jRut8nPodFAX4Jg==
 
 scheduler@^0.23.2:
   version "0.23.2"
@@ -7724,13 +7703,6 @@ stackframe@^1.3.4:
   version "1.3.4"
   resolved "https://registry.yarnpkg.com/stackframe/-/stackframe-1.3.4.tgz#b881a004c8c149a5e8efef37d51b16e412943310"
   integrity sha512-oeVtt7eWQS+Na6F//S4kJ2K2VbRlS9D43mAlMyVpVWovy9o+jfgH8O9agzANzaiLjclA0oYzUXEM4PurhSUChw==
-
-stream@^0.0.2:
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/stream/-/stream-0.0.2.tgz#7f5363f057f6592c5595f00bc80a27f5cec1f0ef"
-  integrity sha512-gCq3NDI2P35B2n6t76YJuOp7d6cN/C7Rt0577l91wllh0sY9ZBuw9KaSGqH/b0hzn3CWWJbpbW0W0WvQ1H/Q7g==
-  dependencies:
-    emitter-component "^1.1.1"
 
 string-argv@~0.3.2:
   version "0.3.2"
@@ -8601,10 +8573,10 @@ xml-utils@^1.0.2:
   resolved "https://registry.yarnpkg.com/xml-utils/-/xml-utils-1.8.0.tgz#dd9baa161012849b97703d8423d09d9d815a5910"
   integrity sha512-1TY5yLw8DApowZAUsWCniNr8HH6Ebt6O7UQvmIwziGKwUNsQx6e+4NkfOvCfnqmYIcPjCeoI6dh1JenPJ9a1hQ==
 
-xml2js@^0.4.23:
-  version "0.4.23"
-  resolved "https://registry.yarnpkg.com/xml2js/-/xml2js-0.4.23.tgz#a0c69516752421eb2ac758ee4d4ccf58843eac66"
-  integrity sha512-ySPiMjM0+pLDftHgXY4By0uswI3SPKLDw/i3UXbnO8M/p28zqexCUoPmQFrYD+/1BzhGJSs2i1ERWKJAtiLrug==
+xml2js@^0.6.0:
+  version "0.6.2"
+  resolved "https://registry.yarnpkg.com/xml2js/-/xml2js-0.6.2.tgz#dd0b630083aa09c161e25a4d0901e2b2a929b499"
+  integrity sha512-T4rieHaC1EXcES0Kxxj4JWgaUQHDk+qwHcYOCFHfiwKz7tOVPLq7Hjq9dM1WCMhylqMEfP7hMcOIChvotiZegA==
   dependencies:
     sax ">=0.6.0"
     xmlbuilder "~11.0.0"
@@ -8613,11 +8585,6 @@ xmlbuilder@~11.0.0:
   version "11.0.1"
   resolved "https://registry.yarnpkg.com/xmlbuilder/-/xmlbuilder-11.0.1.tgz#be9bae1c8a046e76b31127726347d0ad7002beb3"
   integrity sha512-fDlsI/kFEx7gLvbecc0/ohLG50fugQp8ryHzMTuW9vSa1GJ0XYWKnhsUx7oie3G98+r56aTQIUB4kht42R3JvA==
-
-xmldom@^0.6.0:
-  version "0.6.0"
-  resolved "https://registry.yarnpkg.com/xmldom/-/xmldom-0.6.0.tgz#43a96ecb8beece991cef382c08397d82d4d0c46f"
-  integrity sha512-iAcin401y58LckRZ0TkI4k0VSM1Qg0KGSc3i8rU+xrxe19A/BN1zHyVSJY7uoutVlaTSzYyk/v5AmkewAP7jtg==
 
 yallist@^3.0.2:
   version "3.1.1"
