@@ -1,14 +1,16 @@
 import { XMLParser } from "fast-xml-parser";
-import { Geometry } from "ol/geom";
-import { transformExtent } from "ol/proj";
-import { bbox as bboxStrategy } from "ol/loadingstrategy";
+import { Feature } from "ol";
 import GeoJSON from "ol/format/GeoJSON";
-import VectorSource from "ol/source/Vector";
+import { Geometry } from "ol/geom";
 import VectorLayer from "ol/layer/Vector";
+import { bbox as bboxStrategy } from "ol/loadingstrategy";
+import { transformExtent } from "ol/proj";
+import VectorSource from "ol/source/Vector";
+
 import { Service } from "../../@types/app";
-import BaseService from "./BaseService";
-import { getRequestInfo } from "../../utils";
 import olDefaults from "../../data/ol-defaults.json";
+import { getRequestInfo } from "../../utils";
+import BaseService from "./BaseService";
 
 type LayerInfo = {
     Abstract: string;
@@ -58,7 +60,7 @@ class WFSService extends BaseService {
     }
 
     async getLayers() {
-        const layers: VectorLayer<VectorSource<Geometry>>[] = [];
+        const layers: VectorLayer<VectorSource<Feature<Geometry>>>[] = [];
 
         for (const descUrl of this.service.urls) {
             const requestInfo = getRequestInfo(descUrl.url);
@@ -74,7 +76,7 @@ class WFSService extends BaseService {
         return layers;
     }
 
-    #getLayer(info: LayerInfo): VectorLayer<VectorSource<Geometry>> {
+    #getLayer(info: LayerInfo): VectorLayer<VectorSource<Feature<Geometry>>> {
         const format = this.#format;
 
         const vectorSource = new VectorSource({
@@ -93,7 +95,7 @@ class WFSService extends BaseService {
                         return response.json();
                     })
                     .then((response) => {
-                        const features = format.readFeatures(response);
+                        const features = format.readFeatures(response) as Feature[]; // NOTE : un peu dégeu mais j'ai pas trouvé mieux comme solution qui marche
                         vectorSource.addFeatures(features);
                         success?.(features);
                     })

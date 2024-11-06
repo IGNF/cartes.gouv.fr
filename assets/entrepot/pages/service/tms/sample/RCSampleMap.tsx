@@ -1,21 +1,24 @@
-import { FC, useEffect, useRef } from "react";
-import View from "ol/View";
-import { fromLonLat } from "ol/proj";
-import MouseWheelZoom from "ol/interaction/MouseWheelZoom";
-import { defaults as defaultControls } from "ol/control";
-import ScaleLine from "ol/control/ScaleLine";
-import SearchEngine from "geoportal-extensions-openlayers/src/OpenLayers/Controls/SearchEngine";
-import DragPan from "ol/interaction/DragPan";
-import useCapabilities from "../../../../../hooks/useCapabilities";
-import SampleMap from "./SampleMap";
-import { UseFormReturn } from "react-hook-form";
 import { fr } from "@codegouvfr/react-dsfr";
+import SearchEngine from "geopf-extensions-openlayers/src/packages/Controls/SearchEngine/SearchEngine";
+import GeoportalZoom from "geopf-extensions-openlayers/src/packages/Controls/Zoom/GeoportalZoom";
+import View from "ol/View";
+import ScaleLine from "ol/control/ScaleLine";
+import DragPan from "ol/interaction/DragPan";
+import MouseWheelZoom from "ol/interaction/MouseWheelZoom";
+import { fromLonLat } from "ol/proj";
+import { FC, useEffect, useRef } from "react";
+import { UseFormReturn } from "react-hook-form";
+
+import useCapabilities from "../../../../../hooks/useCapabilities";
 import Translator from "../../../../../modules/Translator";
+import SampleMap from "./SampleMap";
 
 import "ol/ol.css";
-import "geoportal-extensions-openlayers/dist/GpPluginOpenLayers.css";
+
+import "geopf-extensions-openlayers/css/Dsfr.css";
+
+import "../../../../../sass/components/geopf-ext-ol-custom.scss";
 import "../../../../../sass/components/map-view.scss";
-import "../../../../../sass/components/ol.scss";
 
 type RCSampleMapProps = {
     form: UseFormReturn;
@@ -35,21 +38,17 @@ const RCSampleMap: FC<RCSampleMapProps> = ({ form, center, bottomZoomLevel, onCh
         // Creation de la carte
         if (!mapRef.current) {
             // Controles par defaut
-            const controls = defaultControls({
-                attribution: false,
-                rotate: false,
-                zoom: true,
-            });
-            controls.push(new ScaleLine());
-            controls.push(
+            const controls = [
+                new GeoportalZoom({ position: "top-left" }),
+                new ScaleLine(),
                 new SearchEngine({
                     collapsed: false,
                     displayAdvancedSearch: false,
                     displayMarker: false,
                     apiKey: "essentiels",
                     zoomTo: "auto",
-                })
-            );
+                }),
+            ];
 
             mapRef.current = new SampleMap({
                 view: new View({

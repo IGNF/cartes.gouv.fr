@@ -1,9 +1,10 @@
-import GetFeatureInfo from "geoportal-extensions-openlayers/src/OpenLayers/Controls/GetFeatureInfo";
-import LayerSwitcher from "geoportal-extensions-openlayers/src/OpenLayers/Controls/LayerSwitcher";
-import SearchEngine from "geoportal-extensions-openlayers/src/OpenLayers/Controls/SearchEngine";
+import GetFeatureInfo from "geopf-extensions-openlayers/src/packages/Controls/GetFeatureInfo/GetFeatureInfo";
+import LayerSwitcher from "geopf-extensions-openlayers/src/packages/Controls/LayerSwitcher/LayerSwitcher";
+import SearchEngine from "geopf-extensions-openlayers/src/packages/Controls/SearchEngine/SearchEngine";
+import GeoportalZoom from "geopf-extensions-openlayers/src/packages/Controls/Zoom/GeoportalZoom";
 import Map from "ol/Map";
 import View from "ol/View";
-import { defaults as defaultControls } from "ol/control";
+import { ScaleLine } from "ol/control";
 import Attribution from "ol/control/Attribution";
 import { createOrUpdate } from "ol/extent";
 import { defaults as defaultInteractions } from "ol/interaction";
@@ -21,10 +22,9 @@ import StyleHelper from "../../modules/Style/StyleHelper";
 
 import "ol/ol.css";
 
-import "geoportal-extensions-openlayers/dist/GpPluginOpenLayers.css";
+import "geopf-extensions-openlayers/css/Dsfr.css";
 
-import "../../sass/components/ol.scss";
-
+import "../../sass/components/geopf-ext-ol-custom.scss";
 import "../../sass/components/map-view.scss";
 
 export interface MapInitial {
@@ -111,17 +111,25 @@ const RMap: FC<RMapProps> = ({ initial, currentStyle }) => {
     useEffect(() => {
         // Creation de la carte
         if (!mapRef.current) {
-            const controls = defaultControls();
-            controls.push(new Attribution({ collapsible: true, collapsed: true }));
-            controls.push(new LayerSwitcher());
-            controls.push(
+            const controls = [
+                new GeoportalZoom({ position: "top-left" }),
+                new Attribution({ collapsible: true, collapsed: true }),
+                new LayerSwitcher({
+                    options: {
+                        position: "top-right",
+                        collapsed: true,
+                        panel: true,
+                        counter: true,
+                    },
+                }),
+                new ScaleLine(),
                 new SearchEngine({
                     collapsed: false,
                     displayAdvancedSearch: false,
                     apiKey: "essentiels",
                     zoomTo: "auto",
-                })
-            );
+                }),
+            ];
 
             if (gfinfo) {
                 controls.push(
@@ -130,6 +138,7 @@ const RMap: FC<RMapProps> = ({ initial, currentStyle }) => {
                             active: true,
                             hidden: true,
                         },
+                        position: "bottom-right",
                     })
                 );
             }
@@ -172,7 +181,8 @@ const RMap: FC<RMapProps> = ({ initial, currentStyle }) => {
                     gfiLayers.push({ obj: layer });
                 }
             });
-            getControl("GetFeatureInfo")?.setLayers(gfiLayers);
+            // NOTE : il me semble que ce n'est plus nécessaire et plus possible sur geopf-ext-ol, à vérifier
+            // getControl("GetFeatureInfo")?.setLayers(gfiLayers);
 
             // On zoom sur l'extent de la couche au premier rendu
             if (extent) {

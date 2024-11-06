@@ -1,0 +1,27 @@
+/* Centrage de la barre de recherche avec marge horizontales auto et largeur fixe */
+div[id^="GPsearchEngine-"] {
+    position: relative;
+    width: 480px;
+    margin: 0 auto;
+    // left: unset;
+    z-index: -1; // pour que le composant de recherche ne cache pas autre chose comme les tooltips d'autres controls
+}
+
+/* pas de scrollbar sur les panneaux de recherche avancée */
+form[id^="GPadvancedSearchForm"],
+form[id^="GPcoordinateSearchForm"] {
+    max-height: unset;
+}
+
+/* MODE MOBILE : les boutons sont en dessous de la barre de recherche qui prend toute la largeur */
+@media (max-width: 576px) {
+    div[id^="GPsearchEngine-"] {
+        top: unset;
+        left: unset;
+        width: 100%;
+    }
+
+    [id^="GPautocompleteResults-"] {
+        height: 70vh;
+    }
+}
