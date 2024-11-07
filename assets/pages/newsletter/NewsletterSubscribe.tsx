@@ -2,6 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import AppLayout from "../../components/Layout/AppLayout";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
+import { routes } from "../../router/router";
 
 const NewsletterSubscribe = () => {
     const newsletterSubscribeAction = (document.getElementById("app_env") as HTMLDivElement)?.dataset?.["newsletterSubscribeAction"] ?? null;
@@ -15,23 +16,28 @@ const NewsletterSubscribe = () => {
                     {newsletterSubscribeAction === null ? (
                         <p>Le formulaire d’inscription n’est pas disponible</p>
                     ) : (
-                        <form action={newsletterSubscribeAction} name="form" method="post">
-                            <Input
-                                state="default"
-                                label="Votre adresse électronique"
-                                hintText="ex. : nom@domaine.fr"
-                                nativeInputProps={{
-                                    placeholder: "Votre adresse électronique (ex. : nom@domaine.fr)",
-                                    type: "email",
-                                    autoComplete: "email",
-                                    id: "contact_email",
-                                    name: "contact_email",
-                                }}
-                            />
-                            <Button id="newsletter-button" type="submit" title="S’abonner à notre lettre d’information">
-                                S’abonner
-                            </Button>
-                        </form>
+                        <>
+                            <form action={newsletterSubscribeAction} name="form" method="post">
+                                <Input
+                                    state="default"
+                                    label="Votre adresse électronique"
+                                    hintText="ex. : nom@domaine.fr"
+                                    nativeInputProps={{
+                                        placeholder: "Votre adresse électronique (ex. : nom@domaine.fr)",
+                                        type: "email",
+                                        autoComplete: "email",
+                                        id: "contact_email",
+                                        name: "contact_email",
+                                    }}
+                                />
+                                <Button id="newsletter-button" type="submit" title="S’abonner à notre lettre d’information">
+                                    S’abonner
+                                </Button>
+                            </form>
+                            <p>
+                                <a {...routes.personal_data().link}>En savoir plus sur la gestion des données à caractère personnel</a>
+                            </p>
+                        </>
                     )}
                 </div>
             </div>

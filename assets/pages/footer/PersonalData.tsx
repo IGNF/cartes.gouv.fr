@@ -2,6 +2,8 @@ import { fr } from "@codegouvfr/react-dsfr";
 
 import AppLayout from "../../components/Layout/AppLayout";
 
+import Summary from "@codegouvfr/react-dsfr/Summary";
+
 const PersonalData = () => {
     return (
         <AppLayout documentTitle="Données à caractère personnel">
@@ -9,7 +11,113 @@ const PersonalData = () => {
                 <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
                     <h1>Données à caractère personnel</h1>
 
-                    <h2>Inscriptions aux événements</h2>
+                    <Summary
+                        links={[
+                            {
+                                text: "Inscription à la lettre d’information",
+                                linkProps: {
+                                    href: "#lettre-information",
+                                },
+                            },
+                            {
+                                text: "Inscriptions aux événements",
+                                linkProps: {
+                                    href: "#evenements",
+                                },
+                            },
+                            {
+                                text: "Accès à certaines API par un fournisseur d’identité",
+                                linkProps: {
+                                    href: "#fournisseurs-identite",
+                                },
+                            },
+                            {
+                                text: "Création d’un compte personnel",
+                                linkProps: {
+                                    href: "#creation-compte",
+                                },
+                            },
+                            {
+                                text: "Prise de contact via le formulaire de contact",
+                                linkProps: {
+                                    href: "#contact",
+                                },
+                            },
+                            {
+                                text: "Participation à une enquête utilisateur",
+                                linkProps: {
+                                    href: "#enquete",
+                                },
+                            },
+                            {
+                                text: "Inscription aux communautés d’utilisateurs",
+                                linkProps: {
+                                    href: "#communautes",
+                                },
+                            },
+                        ]}
+                    />
+
+                    <h2 id="lettre-information" tabIndex={-1}>Inscription à la lettre d’information</h2>
+
+                    <p>
+                        L’inscription à la lettre d’information cartes.gouv.fr donne lieu à la collecte, au stockage et au traitement de données à caractère
+                        personnel par l’IGN, responsable de traitement. Les traitements sont référencés ci-dessous&nbsp;:
+                    </p>
+
+                    <h3>Quels sont les objectifs du recueil de ces données (finalités)&nbsp;?</h3>
+                    <ul>
+                        <li>
+                            Gestion de l’envoi de la lettre d’information
+                            <ul>
+                                <li>Gestion des abonnements à la lettre d’information</li>
+                                <li>Gestion des envois électroniques</li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <h3>
+                        Quelles sont les données personnelles collectées <a href="#footnote1">(i)</a>&nbsp;?{" "}
+                    </h3>
+                    <p>Catégories de données traitées&nbsp;:</p>
+                    <ul>
+                        <li>
+                            <strong>Adresse email</strong>
+                        </li>
+                    </ul>
+                    <p>Source des données&nbsp;:</p>
+                    <ul>
+                        <li>Personnes concernées</li>
+                        <li>Prestataire en charge de la gestion des abonnements et des envois de la lettre d’information</li>
+                    </ul>
+                    <p>Caractère obligatoire du recueil des données&nbsp;:</p>
+                    <ul>
+                        <li>Le recueil de l’adresse email est obligatoire pour l’envoi de la lettre d’information</li>
+                    </ul>
+                    <h3>Quelle est la base juridique du traitement&nbsp;?</h3>
+                    <ul>
+                        <li>
+                            Article 6 (1) e du RGPD : ce traitement de données relève d’une mission d’intérêt public dont est investi l’IGN en application du
+                            RGPD et de la loi Informatique et Libertés modifiée.
+                        </li>
+                    </ul>
+                    <h3>Quelles sont les personnes concernées&nbsp;?</h3>
+                    <ul>
+                        <li>Le traitement de données concerne les personnes qui souhaitent s’abonner ou se désabonner de la lettre d’information.</li>
+                    </ul>
+                    <h3>Qui pourra prendre en connaissance (destinataires)&nbsp;?</h3>
+                    <ul>
+                        <li>Service de l’IGN en charge de gérer la lettre d’information,</li>
+                        <li>Le prestataire en charge de l’abonnement e des envois de la lettre d’information</li>
+                    </ul>
+                    <h3>Quelle est la durée de conservation des données&nbsp;?</h3>
+                    <ul>
+                        <li>
+                            L’IGN conserve l’adresse email tant que la personne concernée ne se désinscrit pas (via le lien de désinscription intégré aux
+                            newsletters).
+                        </li>
+                    </ul>
+
+                    <h2 id="evenements" tabIndex={-1}>Inscriptions aux événements</h2>
 
                     <p>
                         L’inscription aux événements (physique ou en ligne) sur le site cartes.gouv.fr donne lieu à la collecte, au stockage et au traitement de
@@ -31,7 +139,7 @@ const PersonalData = () => {
                         sur le site du partenaire organisateur de cet événement.
                     </p>
 
-                    <h2>Accès à certaines API par un fournisseur d’identité</h2>
+                    <h2 id="fournisseurs-identite" tabIndex={-1}>Accès à certaines API par un fournisseur d’identité</h2>
 
                     <p>Certaines API sont accessibles et utilisables après authentification auprès de l’un des fournisseurs d’identité suivants&nbsp;:</p>
                     <ul>
@@ -41,7 +149,7 @@ const PersonalData = () => {
 
                     <p>Nous vous invitons à lire les politiques de protection des données personnelles de ces fournisseurs d’identité.</p>
 
-                    <h2>Création d’un compte personnel</h2>
+                    <h2 id="creation-compte" tabIndex={-1}>Création d’un compte personnel</h2>
 
                     <p>
                         Le site cartes.gouv.fr offre aux utilisateurs la possibilité de créer un compte personnel pour accéder à des fonctions particulières et
@@ -105,7 +213,7 @@ const PersonalData = () => {
 
                     <p>2 ans à compter de la date de dernière connexion ou de la suppression du compte personnel ou du service</p>
 
-                    <h2>Prise de contact via le formulaire de contact</h2>
+                    <h2 id="contact" tabIndex={-1}>Prise de contact via le formulaire de contact</h2>
 
                     <p>
                         La prise de contact via le formulaire de contact donne lieu à la collecte, au stockage et au traitement de données à caractère personnel
@@ -147,7 +255,7 @@ const PersonalData = () => {
 
                     <p>La durée de conservation des données à caractère personnel est fixée par l’IGN à trois ans à compter de la dernière sollicitation</p>
 
-                    <h2>Participation à une enquête utilisateur</h2>
+                    <h2 id="enquete" tabIndex={-1}>Participation à une enquête utilisateur</h2>
 
                     <p>
                         La participation à une enquête utilisateur donne lieu à la collecte, au stockage et au traitement de données à caractère personnel par
@@ -194,7 +302,7 @@ const PersonalData = () => {
 
                     <p>La durée de conservation des données est fixée à 5 ans à compter de la date de participation à une enquête utilisateur.</p>
 
-                    <h2>Inscription aux communautés d’utilisateurs</h2>
+                    <h2 id="communautes" tabIndex={-1}>Inscription aux communautés d’utilisateurs</h2>
 
                     <p>
                         L’inscription aux communautés d’utilisateurs IGN donne lieu à la collecte, au stockage et au traitement de données à caractère personnel
