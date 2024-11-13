@@ -1,12 +1,13 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Input from "@codegouvfr/react-dsfr/Input";
 import Select from "@codegouvfr/react-dsfr/Select";
+import { Select as SelectNext } from "@codegouvfr/react-dsfr/SelectNext";
 import { FC, useMemo } from "react";
 import { Controller, UseFormReturn } from "react-hook-form";
 
 import type { Pyramid, ServiceFormValuesBaseType, VectorDb } from "../../../../@types/app";
 import AutocompleteSelect from "../../../../components/Input/AutocompleteSelect";
-import ignProducts from "../../../../data/md_resolutions.json";
+import resolutions from "../../../../data/md_resolutions.json";
 import { getTranslation } from "../../../../i18n/i18n";
 import { LanguageType, charsets, getLanguages } from "../../../../utils";
 
@@ -148,25 +149,19 @@ const AdditionalInfo: FC<AdditionalInfoProps> = ({ /*storedData, datastoreId,*/ 
                     defaultValue: fileType,
                 }}
             /> */}
-            <Select
+            <SelectNext
                 label={t("metadata.additionnal_infos_form.hint_spatial_resolution")}
                 hint={t("metadata.additionnal_infos_form.hint_spatial_resolution")}
                 state={errors.resolution ? "error" : "default"}
                 stateRelatedMessage={errors?.resolution?.message?.toString()}
+                options={["", ...resolutions].map((res) => ({
+                    value: res.toString(),
+                    label: res === "" ? "Aucune" : res.toLocaleString(),
+                }))}
                 nativeSelectProps={{
                     ...register("resolution"),
                 }}
-            >
-                <option value="">Aucune</option>
-                {Object.keys(ignProducts).map((product) => {
-                    const text = `${product} (1/${ignProducts[product]})`;
-                    return (
-                        <option key={product} value={ignProducts[product]}>
-                            {text}
-                        </option>
-                    );
-                })}
-            </Select>
+            />
         </div>
     );
 };
