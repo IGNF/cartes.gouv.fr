@@ -8,7 +8,7 @@ class CommonDTO
 {
     public function __construct(
         #[Assert\NotBlank(['message' => 'metadatas.technical_name_error'])]
-        #[Assert\Regex(['pattern' => '/^[\w\-\.]+$/', 'message' => 'metadatas.technical_name_regex'])]
+        #[Assert\Regex(['pattern' => '/^[A-Za-z_][A-Za-z0-9_.-]*$/', 'message' => 'metadatas.technical_name_regex'])]
         public readonly string $technical_name,
 
         #[Assert\NotBlank(['message' => 'metadatas.public_name_error'])]
@@ -68,7 +68,7 @@ class CommonDTO
             'choices' => ['all_public', 'your_community'], 	// TODO NON EXHAUSTIF
             'message' => 'metadatas.share_with_error',
         ])]
-        public readonly string $share_with
+        public readonly string $share_with,
     ) {
     }
 }

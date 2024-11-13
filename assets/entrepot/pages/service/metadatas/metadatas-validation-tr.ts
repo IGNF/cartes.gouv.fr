@@ -35,7 +35,8 @@ export const { i18n } = declareComponentKeys<
 
 export const ValidationMetadatasFrTranslations: Translations<"fr">["ValidationMetadatas"] = {
     "metadatas.technical_name_error": "Le nom technique est obligatoire",
-    "metadatas.technical_name_regex": "Le nom technique ne doit contenir que des lettres, chiffres, tirets (-), underscores (_), ou points (.)",
+    "metadatas.technical_name_regex":
+        "Le nom technique doit commencer par une lettre ou un underscore et ne doit contenir que des lettres, chiffres, tirets (-), underscores (_), ou points (.)",
     "metadatas.technical_name_unicity_error": "Ce nom technique existe déjà",
     "metadatas.public_name_error": "L’intitulé (nom public) est obligatoire",
     "metadatas.description_error": "Un résumé est obligatoire",
@@ -60,7 +61,8 @@ export const ValidationMetadatasFrTranslations: Translations<"fr">["ValidationMe
 
 export const ValidationMetadatasEnTranslations: Translations<"en">["ValidationMetadatas"] = {
     "metadatas.technical_name_error": "Technical name is required",
-    "metadatas.technical_name_regex": "Technical name must contain only letters, numbers, hyphens (-), underscores (_), or dots (.)",
+    "metadatas.technical_name_regex":
+        "Technical name must start with a letter or an underscore and must contain only letters, numbers, hyphens (-), underscores (_), or dots (.)",
     "metadatas.technical_name_unicity_error": "This technical name already exists",
     "metadatas.public_name_error": "Title (public name) is required",
     "metadatas.description_error": "A summary is required",
