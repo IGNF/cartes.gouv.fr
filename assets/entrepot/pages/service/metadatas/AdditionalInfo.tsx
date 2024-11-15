@@ -150,13 +150,13 @@ const AdditionalInfo: FC<AdditionalInfoProps> = ({ /*storedData, datastoreId,*/ 
                 }}
             /> */}
             <SelectNext
-                label={t("metadata.additionnal_infos_form.hint_spatial_resolution")}
+                label={t("metadata.additionnal_infos_form.spatial_resolution")}
                 hint={t("metadata.additionnal_infos_form.hint_spatial_resolution")}
                 state={errors.resolution ? "error" : "default"}
                 stateRelatedMessage={errors?.resolution?.message?.toString()}
                 options={["", ...resolutions].map((res) => ({
                     value: res.toString(),
-                    label: res === "" ? "Aucune" : res.toLocaleString(),
+                    label: res === "" ? "Aucune" : `1:${res.toLocaleString()}`,
                 }))}
                 nativeSelectProps={{
                     ...register("resolution"),
