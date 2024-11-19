@@ -48,7 +48,7 @@ export const { i18n } = declareComponentKeys<
     | "metadata.additionnal_infos_form.encoding"
     | "metadata.additionnal_infos_form.hint_encoding"
     | "metadata.additionnal_infos_form.spatial_resolution"
-    | "metadata.additionnal_infos_form.hint_spatial_resolution"
+    | { K: "metadata.additionnal_infos_form.hint_spatial_resolution"; R: JSX.Element }
 >()("MetadatasForm");
 
 export const MetadatasFormFrTranslations: Translations<"fr">["MetadatasForm"] = {
@@ -105,8 +105,14 @@ export const MetadatasFormFrTranslations: Translations<"fr">["MetadatasForm"] = 
         "Permet de décrire le système de coordonnées, pour une donnée géographique, il s’agit de son système de projection",
     "metadata.additionnal_infos_form.encoding": "Encodage de la ressource",
     "metadata.additionnal_infos_form.hint_encoding": "[TODO]",
-    "metadata.additionnal_infos_form.spatial_resolution": "Résolution indiquée en échelle (1/x)",
-    "metadata.additionnal_infos_form.hint_spatial_resolution": "Sélectionnez un produit (série) (optionnel)",
+    "metadata.additionnal_infos_form.spatial_resolution": "Résolution spatiale (optionnelle)",
+    "metadata.additionnal_infos_form.hint_spatial_resolution": (
+        <>
+            {"Échelle approximative à laquelle les données sont les plus pertinentes."}
+            <br />
+            {"Exemple : 25 000 si les données sont faites pour un affichage à l’échelle d'une carte topographique."}
+        </>
+    ),
 };
 
 export const MetadatasFormEnTranslations: Translations<"en">["MetadatasForm"] = {
@@ -159,6 +165,6 @@ export const MetadatasFormEnTranslations: Translations<"en">["MetadatasForm"] = 
     "metadata.additionnal_infos_form.hint_projection": "Describe the coordinate system, for geographic data, this is its projection system",
     "metadata.additionnal_infos_form.encoding": "Resource encoding",
     "metadata.additionnal_infos_form.hint_encoding": "[TODO] Codification utilisée dans la ressource pour restituer les caractères",
-    "metadata.additionnal_infos_form.spatial_resolution": "Resolution indicated in scale (1/x)",
-    "metadata.additionnal_infos_form.hint_spatial_resolution": "Select a product (series)",
+    "metadata.additionnal_infos_form.spatial_resolution": "Spatial resolution (optional)",
+    "metadata.additionnal_infos_form.hint_spatial_resolution": undefined,
 };

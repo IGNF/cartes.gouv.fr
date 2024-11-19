@@ -65,7 +65,7 @@ class PublishPyramidDTO
         // public readonly string $encoding,
 
         #[Assert\Choice([
-            'choices' => ['', '25000', '75000', '100000', '150000', '200000', '250000', '1000000'], // TODO NON EXHAUSTIF
+            'choices' => ['', '200', '500', '1000', '2000', '5000', '10000', '25000', '50000', '100000', '250000', '500000', '1000000', '5000000',  '10000000'], // NOTE : doit correspondre à assets/data/md_resolutions.json
             'message' => 'common.resolution_error',
         ])]
         public readonly ?string $resolution,

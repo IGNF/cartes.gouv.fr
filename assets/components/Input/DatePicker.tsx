@@ -54,6 +54,7 @@ const DatePicker = (props: DatePickerProps) => {
                         minDate={minDate}
                         onChange={(v) => {
                             if (v) onChange?.(v);
+                            else onChange?.(undefined);
                         }}
                     />
                 </LocalizationProvider>
