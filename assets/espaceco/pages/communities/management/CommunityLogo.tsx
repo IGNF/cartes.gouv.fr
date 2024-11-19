@@ -15,11 +15,13 @@ import { ComponentKey, useTranslation } from "../../../../i18n/i18n";
 import { getFileExtension, getImageSize, ImageSize } from "../../../../utils";
 import { logoAction } from "../ManageCommunityTr";
 
-import placeholder1x1 from "../../../../img/placeholder.1x1.png";
-import "../../../../sass/components/buttons.scss";
+import Alert from "@codegouvfr/react-dsfr/Alert";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { CartesApiException } from "../../../../modules/jsonFetch";
 import { CommunityResponseDTO } from "../../../../@types/espaceco";
+import placeholder1x1 from "../../../../img/placeholder.1x1.png";
+import RQKeys from "../../../../modules/espaceco/RQKeys";
+import { CartesApiException } from "../../../../modules/jsonFetch";
+import "../../../../sass/components/buttons.scss";
 import api from "../../../api";
 
 type CommunityLogoProps = {
@@ -73,14 +75,19 @@ const CommunityLogo: FC<CommunityLogoProps> = ({ communityId, logoUrl }) => {
     const { t: tValidation } = useTranslation("ManageCommunityValidations");
     const { t } = useTranslation("ManageCommunity");
 
-    const [isValid, setIsValid] = useState(false);
+    const [isValid, setIsValid] = useState<boolean>(false);
     useEffect(() => {
+        setIsValid(false);
+
         if (logoUrl) {
             fetch(logoUrl).then((res) => {
                 setIsValid(() => res.status === 200);
             });
         }
     }, [logoUrl]);
+
+    console.log("LOGO_URL : ", logoUrl);
+    console.log("ISVALID : ", isValid);
 
     const action: logoAction = useMemo(() => (isValid ? "modify" : "add"), [isValid]);
 
@@ -89,10 +96,10 @@ const CommunityLogo: FC<CommunityLogoProps> = ({ communityId, logoUrl }) => {
     const logoDivRef = useRef(null);
     const logoIsHovered = useHover(logoDivRef);
 
-    // const queryClient = useQueryClient();
+    const queryClient = useQueryClient();
 
     // Ajout/modification du logo
-    const updateLogoMutation = useMutation<CommunityResponseDTO, CartesApiException>({
+    const updateLogoMutation = useMutation<{ logo_url: string }, CartesApiException>({
         mutationFn: () => {
             const form = new FormData();
             form.append("logo", upload);
@@ -101,23 +108,27 @@ const CommunityLogo: FC<CommunityLogoProps> = ({ communityId, logoUrl }) => {
         onSuccess: (response) => {
             AddLogoModal.close();
 
-            // Mise à jour du contenu de la réponse de datasheetQuery
-            /*queryClient.setQueryData<DatasheetDetailed>(RQKeys.datastore_datasheet(datastoreId, datasheetName), (datasheet) => {
-                if (datasheet) {
-                    datasheet.thumbnail = response;
-                }
-                return datasheet;
-            });
+            queryClient.setQueryData<CommunityResponseDTO>(RQKeys.community(communityId), (community) =>
+                community ? { ...community, logo_url: response.logo_url } : community
+            );
+        },
+        onSettled: () => {
+            reset();
+        },
+    });
 
-            // Mise à jour du contenu de la réponse de datasheetListQuery
-            queryClient.setQueryData<Datasheet[]>(RQKeys.datastore_datasheet_list(datastoreId), (datasheetList = []) => {
-                return datasheetList.map((datasheet) => {
-                    if (datasheet.name === datasheetName) {
-                        datasheet.thumbnail = response;
-                    }
-                    return datasheet;
-                });
-            });*/
+    // Suppression de la vignette
+    const removeLogoMutation = useMutation<null, CartesApiException>({
+        mutationFn: () => {
+            if (communityId) {
+                return api.community.removeLogo(communityId);
+            }
+            return Promise.resolve(null);
+        },
+        onSuccess: () => {
+            queryClient.setQueryData<CommunityResponseDTO>(RQKeys.community(communityId), (community) =>
+                community ? { ...community, logo_url: null } : community
+            );
         },
         onSettled: () => {
             reset();
@@ -163,7 +174,7 @@ const CommunityLogo: FC<CommunityLogoProps> = ({ communityId, logoUrl }) => {
                 children: tCommon("cancel"),
                 onClick: () => {
                     reset();
-                    // addThumbnailMutation.reset();
+                    updateLogoMutation.reset();
                 },
                 doClosesModal: true,
                 priority: "secondary",
@@ -177,7 +188,7 @@ const CommunityLogo: FC<CommunityLogoProps> = ({ communityId, logoUrl }) => {
         ];
 
         return btns;
-    }, [action, /*addThumbnailMutation,*/ handleSubmit, onSubmit, reset, t, tCommon]);
+    }, [action, updateLogoMutation, handleSubmit, onSubmit, reset, t, tCommon]);
 
     return (
         <div className={fr.cx("fr-input-group")}>
@@ -187,10 +198,10 @@ const CommunityLogo: FC<CommunityLogoProps> = ({ communityId, logoUrl }) => {
                     className={logoIsHovered ? "frx-btn--transparent fr-img--transparent-transition" : ""}
                     loading="lazy"
                     src={isValid ? logoUrl : placeholder1x1}
-                    /* onError={({ currentTarget }) => {
+                    onError={({ currentTarget }) => {
                         currentTarget.onerror = null; // prevents looping
                         currentTarget.src = placeholder1x1;
-                    }} */
+                    }}
                 />
                 {logoIsHovered && (
                     <div className="frx-btn--hover-icon">
@@ -211,17 +222,20 @@ const CommunityLogo: FC<CommunityLogoProps> = ({ communityId, logoUrl }) => {
                     </div>
                 )}
             </div>
+            {updateLogoMutation.isError && (
+                <Alert severity="error" closable title={tCommon("error")} description={updateLogoMutation.error.message} className={fr.cx("fr-my-3w")} />
+            )}
+            {removeLogoMutation.isError && (
+                <Alert severity="error" closable title={tCommon("error")} description={removeLogoMutation.error.message} className={fr.cx("fr-my-3w")} />
+            )}
+            {removeLogoMutation.isPending && (
+                <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
+                    <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " frx-icon-spin"} />
+                    <h6 className={fr.cx("fr-m-0")}>{t("running_action", { action: "delete" })}</h6>
+                </div>
+            )}
             {createPortal(
                 <AddLogoModal.Component title={t("modal.logo.title")} buttons={AddModalButtons}>
-                    {/* {addThumbnailMutation.isError && (
-                        <Alert
-                            severity="error"
-                            closable
-                            title={tCommon("error")}
-                            description={addThumbnailMutation.error.message}
-                            className={fr.cx("fr-my-3w")}
-                        />
-                    )} */}
                     <div className={fr.cx("fr-grid-row")}>
                         <div className={fr.cx("fr-col-9")}>
                             <Upload
@@ -239,19 +253,19 @@ const CommunityLogo: FC<CommunityLogoProps> = ({ communityId, logoUrl }) => {
                             <img src={modalImageUrl === "" ? placeholder1x1 : modalImageUrl} width="128px" />
                         </div>
                     </div>
-                    {/* {addThumbnailMutation.isPending && (
+                    {updateLogoMutation.isPending && (
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
                             <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " frx-icon-spin"} />
-                            <h6 className={fr.cx("fr-m-0")}>{t("thumbnail_modal.action_being", { action: action })}</h6>
+                            <h6 className={fr.cx("fr-m-0")}>{t("running_action", { action: action })}</h6>
                         </div>
-                    )} */}
+                    )}
                 </AddLogoModal.Component>,
                 document.body
             )}
             <ConfirmDialog
                 title={t("logo_confirm_delete_modal.title")}
                 onConfirm={() => {
-                    // deleteThumbnailMutation.mutate();
+                    removeLogoMutation.mutate();
                 }}
             />
         </div>

@@ -2,22 +2,27 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Input from "@codegouvfr/react-dsfr/Input";
 import Select from "@codegouvfr/react-dsfr/Select";
 import ToggleSwitch from "@codegouvfr/react-dsfr/ToggleSwitch";
-import { FC, useEffect } from "react";
+import { FC, useCallback, useEffect, useMemo } from "react";
 import { Controller, UseFormReturn, useWatch } from "react-hook-form";
-import { EmailPlannerFormType } from "../../../../../../@types/app_espaceco";
-import { CancelEvents, TriggerEvents } from "../../../../../../@types/espaceco";
+import isEmail from "validator/lib/isEmail";
+import { BasicRecipientsArray, EmailPlannerFormType } from "../../../../../../@types/app_espaceco";
+import { CancelEvents, ReportStatusesDTO, ReportStatusesType, TriggerEvents } from "../../../../../../@types/espaceco";
 import AutocompleteSelect from "../../../../../../components/Input/AutocompleteSelect";
 import MarkdownEditor from "../../../../../../components/Input/MarkdownEditor";
 import { useTranslation } from "../../../../../../i18n/i18n";
 import getKeywordsExtraCommands from "./EmailPlannerKeywords";
-import RecipientsManager from "./RecipientsManager";
 
 import "../../../../../../sass/components/react-md-editor.scss";
 
 type PersonalEmailPlannerProps = {
     form: UseFormReturn<EmailPlannerFormType>;
     themes: string[];
-    statuses: string[];
+    statuses: ReportStatusesDTO;
+};
+
+type StatusAutocompleteOption = {
+    status: ReportStatusesType;
+    title: string;
 };
 
 const PersonalEmailPlanner: FC<PersonalEmailPlannerProps> = ({ form, themes, statuses }) => {
@@ -40,9 +45,32 @@ const PersonalEmailPlanner: FC<PersonalEmailPlannerProps> = ({ form, themes, sta
 
     useEffect(() => {
         if (event === "georem_created") {
-            resetField("condition", undefined);
+            resetField("statuses", { defaultValue: [] });
         }
     }, [resetField, event]);
+
+    const options = useMemo<StatusAutocompleteOption[]>(() => {
+        const options = Object.keys(statuses).reduce((accumulator, status) => {
+            accumulator[status] = { title: statuses[status].title, status: status };
+            return accumulator;
+        }, {});
+        return Object.values(options);
+    }, [statuses]);
+
+    const getValue = useCallback(
+        (value?: string[]) => {
+            if (!value) return [];
+
+            const options = Object.keys(statuses).reduce((accumulator, status) => {
+                if (value.includes(status)) {
+                    accumulator[status] = { title: statuses[status].title, status: status };
+                }
+                return accumulator;
+            }, {});
+            return Object.values(options);
+        },
+        [statuses]
+    );
 
     return (
         <div>
@@ -77,6 +105,8 @@ const PersonalEmailPlanner: FC<PersonalEmailPlannerProps> = ({ form, themes, sta
                     return (
                         <AutocompleteSelect
                             label={t("dialog.themes")}
+                            state={errors.themes ? "error" : "default"}
+                            stateRelatedMessage={errors.themes?.message?.toString()}
                             options={themes}
                             searchFilter={{ limit: 10 }}
                             onChange={(_, value) => field.onChange(value)}
@@ -88,17 +118,26 @@ const PersonalEmailPlanner: FC<PersonalEmailPlannerProps> = ({ form, themes, sta
             {event === "georem_status_changed" && (
                 <Controller
                     control={control}
-                    name="condition.status"
+                    name="statuses"
                     render={({ field }) => {
                         return (
                             <AutocompleteSelect
                                 label={t("dialog.status")}
-                                state={errors.condition?.status ? "error" : "default"}
-                                stateRelatedMessage={errors.condition?.status?.message?.toString()}
-                                options={statuses}
+                                state={errors.statuses ? "error" : "default"}
+                                stateRelatedMessage={errors.statuses?.message?.toString()}
+                                options={options}
+                                getOptionLabel={(option) => (option as StatusAutocompleteOption).title}
+                                isOptionEqualToValue={(option, value) => {
+                                    const optionStatus = (option as StatusAutocompleteOption).status;
+                                    const valueStatus = (value as StatusAutocompleteOption).status;
+                                    return optionStatus === valueStatus;
+                                }}
                                 searchFilter={{ limit: 10 }}
-                                onChange={(_, value) => field.onChange(value)}
-                                value={field.value ?? []}
+                                onChange={(_, value) => {
+                                    const selected = value as StatusAutocompleteOption[];
+                                    field.onChange(selected.map((s) => s.status));
+                                }}
+                                value={getValue(field.value)}
                             />
                         );
                     }}
@@ -139,15 +178,31 @@ const PersonalEmailPlanner: FC<PersonalEmailPlannerProps> = ({ form, themes, sta
                 showCheckedHint={false}
                 onChange={(checked) => setFormValue("repeat", checked)}
             />
+            <h5>{t("dialog.recipients")}</h5>
             <Controller
                 control={control}
                 name="recipients"
                 render={({ field: { value, onChange } }) => (
-                    <RecipientsManager
-                        value={value ?? []}
+                    <AutocompleteSelect
+                        label={""}
                         state={errors.recipients ? "error" : "default"}
                         stateRelatedMessage={errors.recipients?.message?.toString()}
-                        onChange={onChange}
+                        freeSolo={true}
+                        options={BasicRecipientsArray}
+                        isOptionEqualToValue={(option, value) => {
+                            return option === value;
+                        }}
+                        searchFilter={{ limit: 10 }}
+                        onChange={(_, value) => {
+                            if (value && Array.isArray(value)) {
+                                value = value.filter((v) => {
+                                    if (BasicRecipientsArray.includes(v)) return true;
+                                    return isEmail(v);
+                                });
+                                onChange(value);
+                            }
+                        }}
+                        value={value}
                     />
                 )}
             />

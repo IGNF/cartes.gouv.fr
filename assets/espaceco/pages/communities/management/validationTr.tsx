@@ -43,7 +43,7 @@ export const ManageCommunityValidationsFrTranslations: Translations<"fr">["Manag
     "zoom.greater_than": ({ field, v }) => `La valeur de ${field} doit être supérieure ou égale à ${v}`,
     "zoom.extent.required": "La boîte englobante est obligatoire",
     "description.modal.document.name.mandatory": "Le nom est obligatoire",
-    "description.modal.document.name.minlength": "Le nom doit faire au moins 7 caractères",
+    "description.modal.document.name.minlength": "Le nom doit faire au moins 10 caractères",
     "description.modal.document.file.mandatory": "Le fichier est obligatoire",
     "description.modal.document.file.size_error": "La taille du fichier ne peut excéder 5 Mo",
 };

@@ -7,15 +7,26 @@ const getAddDefaultValues = (type: EmailPlannerType): EmailPlannerFormType => {
         delay: 1,
         cancel_event: "georem_status_changed",
         repeat: false,
-        // recipients: [],
         subject: type === "personal" ? "" : "Nouveau signalement",
         body: type === "personal" ? "" : "Le signalement n° _id_ a été envoyé le _openingDate_ par _author_",
-        condition: { status: [] },
+        recipients: [],
         themes: [],
     };
 };
 
 const getEditDefaultValues = (emailPlaner: EmailPlannerDTO): EmailPlannerFormType => {
+    let statuses: string[] = [];
+    if (emailPlaner.condition) {
+        try {
+            const condition = emailPlaner.condition ?? { status: [] };
+            if ("status" in condition) {
+                statuses = condition["status"];
+            }
+        } catch (e) {
+            /* empty */
+        }
+    }
+
     return {
         id: emailPlaner.id,
         event: emailPlaner.event,
@@ -25,8 +36,8 @@ const getEditDefaultValues = (emailPlaner: EmailPlannerDTO): EmailPlannerFormTyp
         recipients: emailPlaner.recipients,
         subject: emailPlaner.subject,
         body: emailPlaner.body,
-        condition: emailPlaner.condition ? JSON.parse(emailPlaner.condition) : undefined,
-        themes: emailPlaner.themes ? JSON.parse(emailPlaner.themes) : [],
+        statuses: statuses,
+        themes: emailPlaner.themes,
     };
 };
 

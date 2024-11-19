@@ -8,6 +8,7 @@ use App\Exception\CartesApiException;
 use App\Services\EspaceCoApi\EmailPlannerApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route(
@@ -30,6 +31,19 @@ class EmailPlannerController extends AbstractController implements ApiController
     {
         try {
             $response = $this->emailPlannerApiService->getAll($communityId);
+
+            return new JsonResponse($response);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
+    #[Route('/{communityId}', name: 'add', methods: ['POST'])]
+    public function add(int $communityId, Request $request): JsonResponse
+    {
+        try {
+            $data = json_decode($request->getContent(), true);
+            $response = $this->emailPlannerApiService->add($communityId, $data);
 
             return new JsonResponse($response);
         } catch (ApiException $ex) {

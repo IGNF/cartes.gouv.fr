@@ -37,6 +37,7 @@ const { i18n } = declareComponentKeys<
     | "url_copied"
     | "copy_to_clipboard"
     | "go_to_content"
+    | "download"
     | "trimmed_error"
 >()("Common");
 export type I18n = typeof i18n;
@@ -77,6 +78,7 @@ export const commonFrTranslations: Translations<"fr">["Common"] = {
     url_copied: "URL copiée",
     copy_to_clipboard: "Copier dans le presse-papier",
     go_to_content: "Aller au contenu",
+    download: "Télécharger",
     trimmed_error: "La chaîne de caractères ne doit contenir aucun espace en début et fin",
 };
 
@@ -116,5 +118,6 @@ export const commonEnTranslations: Translations<"en">["Common"] = {
     url_copied: "URL copied",
     copy_to_clipboard: "Copy to clipboard",
     go_to_content: "Go to content",
+    download: "Download",
     trimmed_error: "The character string must not contain any spaces at the beginning and end",
 };

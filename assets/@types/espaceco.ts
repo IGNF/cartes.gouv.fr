@@ -63,8 +63,8 @@ export type TriggerEventType = (typeof TriggerEvents)[number];
 export const CancelEvents = ["georem_status_changed", "none"] as const;
 export type CancelEventType = (typeof CancelEvents)[number];
 
-export const Recipients = ["Auteur", "Gestionnaire", "Majec"] as const;
-export type RecipientType = (typeof Recipients)[number];
+export const BasicRecipients = ["Auteur", "Gestionnaire", "Majec"] as const;
+export type RecipientType = (typeof BasicRecipients)[number];
 
 export type EmailPlannerDTO = {
     id: number;
@@ -75,8 +75,8 @@ export type EmailPlannerDTO = {
     recipients: string[];
     event: TriggerEventType;
     cancel_event: CancelEventType;
-    condition: string | null;
-    themes: string | null;
+    condition: { status: string[] } | null;
+    themes: string[];
 };
 
 const SharedGeoremOptions = ["all", "restrained", "personal"];
@@ -121,18 +121,19 @@ export interface UserDTO {
 
 export interface DocumentDTO {
     id: number;
+    title: string;
+    description: string | null;
     short_fileName: string;
     mime_type: string;
-    description?: string;
-    title: string;
-    type: string;
-    size?: number;
-    width?: number;
-    height?: number;
+    size: number | null;
+    width: number | null;
+    height: number | null;
     date: string;
-    geometry?: string;
-    uri: string;
+    geometry: string | null;
+    uri: string | null;
+    download_uri: string;
 }
+
 export interface GridDTO {
     name: string;
     title: string;

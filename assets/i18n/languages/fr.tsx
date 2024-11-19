@@ -41,11 +41,15 @@ import { TMSStyleFilesManagerFrTranslations } from "../../modules/Style/TMSStyle
 import { BreadcrumbFrTranslations } from "../../modules/entrepot/breadcrumbs/Breadcrumb.locale";
 import { LoginDisabledFrTranslations } from "../../pages/LoginDisabled/LoginDisabled.locale";
 import { SearchEnTranslations, SearchFrTranslations } from "../../espaceco/pages/communities/management/Search";
+import { SearchFrTranslations } from "../../espaceco/pages/communities/management/SearchTr";
+import { TMSStyleFilesManagerFrTranslations } from "../../modules/Style/TMSStyleFilesManager";
+import { contactFrTranslations } from "../../pages/assistance/contact/Contact";
+import { mapboxStyleValidationFrTranslations } from "../../validations/MapboxStyleValidator";
+import { SldStyleValidationErrorsFrTranslations } from "../../validations/SldStyleValidationErrorsTr";
+import { DescriptionFrTranslations } from "../../espaceco/pages/communities/management/Description";
+import { ReportsFrTranslations } from "../../espaceco/pages/communities/management/Reports";
 import { EmailPlannersFrTranslations } from "../../espaceco/pages/communities/management/reports/EmailPlanners";
 import { ContactFrTranslations } from "../../pages/assistance/contact/Contact.locale";
-import { mapboxStyleValidationFrTranslations } from "../../validations/mapbox/MapboxStyleValidator.locale";
-import { SldStyleValidationErrorsFrTranslations } from "../../validations/sld/SldStyleValidation.locale";
-import { ReportsFrTranslations } from "../../espaceco/pages/communities/management/Reports";
 import { AddOrEditEmailPlannerFrTranslations } from "../../espaceco/pages/communities/management/reports/emailplanners/AddOrEditEmailPlannerTr";
 import { EmailPlannerKeywordsFrTranslations } from "../../espaceco/pages/communities/management/reports/emailplanners/EmailPlannerKeywords";
 import { commonFrTranslations } from "../Common.locale";
@@ -62,6 +66,7 @@ export const translations: Translations<"fr"> = {
     Breadcrumb: BreadcrumbFrTranslations,
     Rights: RightsFrTranslations,
     Style: StyleFrTranslations,
+    InputCollection: InputCollectionFrTranslations,
     Me: MeFrTranslations,
     AddMember: AddMemberFrTranslations,
     CommunityMembers: CommunityMembersFrTranslations,
@@ -101,6 +106,7 @@ export const translations: Translations<"fr"> = {
     ManageCommunity: ManageCommunityFrTranslations,
     ManageCommunityValidations: ManageCommunityValidationsFrTranslations,
     Reports: ReportsFrTranslations,
+    Description: DescriptionFrTranslations,
     EmailPlanners: EmailPlannersFrTranslations,
     AddOrEditEmailPlanner: AddOrEditEmailPlannerFrTranslations,
     EmailPlannerKeywords: EmailPlannerKeywordsFrTranslations,

@@ -33,6 +33,7 @@ export const { i18n } = declareComponentKeys<
     | "validation.body.mandatory"
     | "validation.delay.mandatory"
     | "validation.delay.positive"
+    | "validation.themes.mandatory"
     | "validation.condition.mandatory"
     | { K: "validation.error.email_not_valid"; P: { value: string }; R: string }
     | "validation.error.email.min"
@@ -100,6 +101,7 @@ export const AddOrEditEmailPlannerFrTranslations: Translations<"fr">["AddOrEditE
     "validation.body.mandatory": "Le corps de l'email est obligatoire",
     "validation.delay.mandatory": "Le délai est obligatoire",
     "validation.delay.positive": "Le délai doit être supérieur à 0",
+    "validation.themes.mandatory": "Les thèmes sont obligatoires",
     "validation.condition.mandatory": "Vous devez sélectionner au moins un statut si l'évènement déclencheur est [Modification du statut]",
     "validation.error.email_not_valid": ({ value }) => `La chaîne ${value} n'est pas un email valide`,
     "validation.error.email.min": "Il doit y avoir au moins un email destinataire",
@@ -135,6 +137,7 @@ export const AddOrEditEmailPlannerEnTranslations: Translations<"en">["AddOrEditE
     "validation.body.mandatory": "Email body is mandatory",
     "validation.delay.mandatory": undefined,
     "validation.delay.positive": undefined,
+    "validation.themes.mandatory": undefined,
     "validation.condition.mandatory": undefined,
     "validation.error.email_not_valid": ({ value }) => `String ${value} is not a valid email`,
     "validation.error.email.min": undefined,

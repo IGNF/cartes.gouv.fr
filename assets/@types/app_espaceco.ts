@@ -1,4 +1,4 @@
-import { EmailPlannerDTO, GridDTO, ReportStatusesDTO, SharedGeorem, SharedThemesDTO, ThemeDTO, UserDTO } from "./espaceco";
+import { BasicRecipients, EmailPlannerDTO, GridDTO, ReportStatusesDTO, SharedGeorem, SharedThemesDTO, ThemeDTO, UserDTO } from "./espaceco";
 
 export type GetResponse<T> = {
     content: T[];
@@ -81,18 +81,22 @@ export type DescriptionFormType = {
 };
 
 /* email planners */
+export const BasicRecipientsArray: string[] = [...BasicRecipients] as string[];
+
 export const EmailPlannerTypes = ["basic", "personal"] as const;
 export type EmailPlannerType = (typeof EmailPlannerTypes)[number];
 
-export type EmailPlannerFormType = Omit<EmailPlannerDTO, "id" | "recipients" | "themes" | "condition"> & {
+export type EmailPlannerAddType = Omit<EmailPlannerDTO, "id">;
+
+export type EmailPlannerFormType = Omit<EmailPlannerDTO, "id" | "recipients" | "event" | "cancel_event" | "themes" | "condition"> & {
     id?: number;
-    recipients?: string[];
-    condition?: { status: string[] };
-    themes: string[];
+    event: string;
+    cancel_event: string;
+    recipients: string[];
+    statuses?: string[];
+    themes?: string[];
 };
 
-const isUser = (v: UserDTO | string): v is UserDTO => {
+export const isUser = (v: UserDTO | string): v is UserDTO => {
     return (v as UserDTO).username !== undefined;
 };
-
-export { isUser };

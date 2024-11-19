@@ -1,19 +1,21 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Table from "@codegouvfr/react-dsfr/Table";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FC, ReactNode, useMemo, useState } from "react";
 import { UseFormReturn, useWatch } from "react-hook-form";
-import { ReportFormType } from "../../../../../@types/app_espaceco";
+import { EmailPlannerAddType, ReportFormType } from "../../../../../@types/app_espaceco";
 import { EmailPlannerDTO, ReportStatusesDTO, ThemeDTO } from "../../../../../@types/espaceco";
 import { ConfirmDialog, ConfirmDialogModal } from "../../../../../components/Utils/ConfirmDialog";
+import LoadingText from "../../../../../components/Utils/LoadingText";
 import Wait from "../../../../../components/Utils/Wait";
 import { declareComponentKeys, Translations, useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/espaceco/RQKeys";
 import { CartesApiException } from "../../../../../modules/jsonFetch";
 import api from "../../../../api";
-import { AddOrEditEmailPlannerDialogModal, AddOrEditEmailPlannerDialog } from "./AddOrEditEmailPlannerDialog";
 import { AddEmailPlannerDialog, AddEmailPlannerDialogModal } from "./emailplanners/AddEmailPlannerDialog";
+import { EditEmailPlannerDialog, EditEmailPlannerDialogModal } from "./emailplanners/EditEmailPlannerDialog";
 
 type EmailPlannersProps = {
     communityId: number;
@@ -21,22 +23,23 @@ type EmailPlannersProps = {
     emailPlanners: EmailPlannerDTO[];
 };
 
-const checkStatus = (ep: EmailPlannerDTO, statuses: string[]) => {
-    const condition = ep.condition ? JSON.parse(ep.condition) : {};
-
+const checkStatus = (ep: EmailPlannerDTO, statuses: ReportStatusesDTO) => {
+    const condition = ep.condition ?? { status: [] };
+    if (!("status" in condition)) {
+        return true;
+    }
     // Verification du status
-    if ("status" in condition) {
-        for (const s of condition["status"]) {
-            if (!statuses.includes(s)) {
-                return false;
-            }
+    for (const s of condition["status"]) {
+        if (!(s in statuses)) {
+            return false;
         }
     }
+
     return true;
 };
 
 const checkThemes = (ep: EmailPlannerDTO, themeNames: string[]) => {
-    const epThemes = ep.themes ? JSON.parse(ep.themes) : [];
+    const epThemes = ep.themes ?? [];
     for (const theme of epThemes) {
         if (!themeNames.includes(theme)) {
             return false;
@@ -46,7 +49,6 @@ const checkThemes = (ep: EmailPlannerDTO, themeNames: string[]) => {
 };
 
 const EmailPlanners: FC<EmailPlannersProps> = ({ communityId, form, emailPlanners }) => {
-    const { t: tCommon } = useTranslation("Common");
     const { t: tmc } = useTranslation("ManageCommunity");
     const { t } = useTranslation("EmailPlanners");
 
@@ -55,8 +57,11 @@ const EmailPlanners: FC<EmailPlannersProps> = ({ communityId, form, emailPlanner
     const reportStatuses: ReportStatusesDTO = useWatch({ control, name: "report_statuses" });
 
     // Les status actifs
-    const activeStatuses = useMemo(() => {
-        return Object.keys(reportStatuses).filter((s) => reportStatuses[s].active);
+    const activeStatuses = useMemo<ReportStatusesDTO>(() => {
+        return Object.keys(reportStatuses).reduce((accumulator, status) => {
+            if (reportStatuses[status].active) accumulator[status] = reportStatuses[status];
+            return accumulator;
+        }, {});
     }, [reportStatuses]);
 
     // Les thèmes du groupe
@@ -66,8 +71,23 @@ const EmailPlanners: FC<EmailPlannersProps> = ({ communityId, form, emailPlanner
 
     const queryClient = useQueryClient();
 
+    // Ajout d'un email de suivi
+    const addPlannerMutation = useMutation<EmailPlannerDTO, CartesApiException, EmailPlannerAddType>({
+        mutationFn: (data) => {
+            return api.emailplanner.add(communityId, data);
+        },
+        onSuccess: (planner) => {
+            setCurrentEmailPlanner(undefined);
+            queryClient.setQueryData(RQKeys.emailPlanners(communityId), (oldPlanners: EmailPlannerDTO[]) => {
+                const emailPlanners = [...oldPlanners];
+                emailPlanners.push(planner);
+                return emailPlanners;
+            });
+        },
+    });
+
     // Suppression d'un email de suivi
-    const { isPending: isRemovePending, mutate: mutateRemove } = useMutation<{ emailplanner_id: number }, CartesApiException, number>({
+    const removePlannerMutation = useMutation<{ emailplanner_id: number }, CartesApiException, number>({
         mutationFn: (emailplannerId) => {
             return api.emailplanner.remove(communityId, emailplannerId!);
         },
@@ -77,6 +97,7 @@ const EmailPlanners: FC<EmailPlannersProps> = ({ communityId, form, emailPlanner
                 return emailPlanners?.filter((ep) => ep.id !== data.emailplanner_id);
             });
         },
+        onSettled: () => setCurrentEmailPlanner(undefined),
     });
 
     const datas = useMemo(() => {
@@ -94,7 +115,7 @@ const EmailPlanners: FC<EmailPlannersProps> = ({ communityId, form, emailPlanner
                         size="small"
                         onClick={() => {
                             setCurrentEmailPlanner(ep);
-                            AddOrEditEmailPlannerDialogModal.open();
+                            EditEmailPlannerDialogModal.open();
                         }}
                     />
                     <Button
@@ -125,17 +146,26 @@ const EmailPlanners: FC<EmailPlannersProps> = ({ communityId, form, emailPlanner
 
     return (
         <div className={fr.cx("fr-my-1w")}>
-            <h3>{tmc("report.manage.emailplanners")}</h3>
-            <span className={fr.cx("fr-hint-text")}>{tmc("report.manage.emailplanners_explain")}</span>
-            {isRemovePending && (
+            {addPlannerMutation.isError && <Alert severity="error" closable title={addPlannerMutation.error.message} />}
+            {removePlannerMutation.isError && <Alert severity="error" closable title={removePlannerMutation.error.message} />}
+            {addPlannerMutation.isPending && (
                 <Wait>
-                    <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                        <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " frx-icon-spin"} />
-                        <h6 className={fr.cx("fr-m-0")}>{isRemovePending ? tCommon("removing") : tCommon("modifying")}</h6>
+                    <div className={fr.cx("fr-grid-row")}>
+                        <LoadingText as="h6" message={t("adding")} withSpinnerIcon={true} />
                     </div>
                 </Wait>
             )}
+            {removePlannerMutation.isPending && (
+                <Wait>
+                    <div className={fr.cx("fr-grid-row")}>
+                        <LoadingText as="h6" message={t("removing")} withSpinnerIcon={true} />
+                    </div>
+                </Wait>
+            )}
+            <h3>{tmc("report.manage.emailplanners")}</h3>
+            <span className={fr.cx("fr-hint-text")}>{tmc("report.manage.emailplanners_explain")}</span>
             <Table
+                className={fr.cx("fr-mb-0")}
                 bordered
                 headers={[
                     "",
@@ -150,15 +180,21 @@ const EmailPlanners: FC<EmailPlannersProps> = ({ communityId, form, emailPlanner
                 ]}
                 data={datas}
             />
-            <Button size="small" onClick={() => AddEmailPlannerDialogModal.open()}>
+            <Button className={fr.cx("fr-my-1v")} iconId={"fr-icon-add-circle-line"} priority="secondary" onClick={() => AddEmailPlannerDialogModal.open()}>
                 {t("add")}
             </Button>
-            <AddEmailPlannerDialog themes={themeNames} statuses={activeStatuses} />
+            <AddEmailPlannerDialog themes={themeNames} statuses={activeStatuses} onAdd={(values) => addPlannerMutation.mutate(values)} />
+            <EditEmailPlannerDialog
+                emailPlanner={currentEmailPlanner}
+                themes={themeNames}
+                statuses={activeStatuses}
+                onModify={(values) => console.log(values)}
+            />
             <ConfirmDialog
                 title={t("confirm_remove_title")}
                 onConfirm={() => {
                     if (currentEmailPlanner) {
-                        mutateRemove(currentEmailPlanner.id);
+                        removePlannerMutation.mutate(currentEmailPlanner.id);
                     }
                 }}
             />
@@ -178,8 +214,10 @@ export const { i18n } = declareComponentKeys<
     | "cancel_event_header"
     | "repeat_header"
     | "add"
+    | "adding"
     | "modify"
     | "remove"
+    | "removing"
     | "confirm_remove_title"
 >()("EmailPlanners");
 
@@ -192,8 +230,10 @@ export const EmailPlannersFrTranslations: Translations<"fr">["EmailPlanners"] = 
     cancel_event_header: "Evénement annulateur",
     repeat_header: "Répétition",
     add: "Ajouter un email de suivi",
+    adding: "Ajout de l'email de suivi en cours ...",
     modify: "Modifier l'email de suivi",
     remove: "Supprimer l'email de suivi",
+    removing: "Suppression de l'email de suivi en cours ...",
     confirm_remove_title: "Êtes-vous sûr de vouloir supprimer cet email de suivi ?",
 };
 
@@ -206,7 +246,9 @@ export const EmailPlannersEnTranslations: Translations<"en">["EmailPlanners"] = 
     cancel_event_header: undefined,
     repeat_header: undefined,
     add: undefined,
+    adding: undefined,
     modify: undefined,
     remove: undefined,
+    removing: undefined,
     confirm_remove_title: undefined,
 };

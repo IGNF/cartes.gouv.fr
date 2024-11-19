@@ -51,27 +51,21 @@ import { SharedThemesEnTranslations } from "../../espaceco/pages/communities/man
 import { EscoCommunityMembersEnTranslations } from "../../espaceco/pages/communities/management/Members";
 import { AddMembersDialogEnTranslations } from "../../espaceco/pages/communities/management/member/AddMembersDialog";
 import { ManageGridsDialogEnTranslations } from "../../espaceco/pages/communities/management/member/ManageGridsDialog";
-<<<<<<< HEAD
-<<<<<<< HEAD
 import type { Translations } from "../types";
-=======
-import { AddMembersDialogEnTranslations } from "../../espaceco/pages/communities/management/member/AddMembersDialog";
-import { ManageGridsDialogEnTranslations } from "../../espaceco/pages/communities/management/member/ManageGridsDialog";
-=======
+import { DescriptionEnTranslations } from "../../espaceco/pages/communities/management/Description";
 import { ReportsEnTranslations } from "../../espaceco/pages/communities/management/Reports";
 import { EmailPlannersEnTranslations } from "../../espaceco/pages/communities/management/reports/EmailPlanners";
 import { AddOrEditEmailPlannerEnTranslations } from "../../espaceco/pages/communities/management/reports/emailplanners/AddOrEditEmailPlannerTr";
 import { EmailPlannerKeywordsEnTranslations } from "../../espaceco/pages/communities/management/reports/emailplanners/EmailPlannerKeywords";
->>>>>>> 594310c (feat: ajout de email planner et continuation edition community)
 
-import type { Translations } from "../i18n";
->>>>>>> 4749caa (Edition d'un guichet suite ...)
+import { InputCollectionEnTranslations } from "../../components/Input/InputCollection";
 
 export const translations: Translations<"en"> = {
     Common: commonEnTranslations,
     Breadcrumb: BreadcrumbEnTranslations,
     Rights: RightsEnTranslations,
     Style: StyleEnTranslations,
+    InputCollection: InputCollectionEnTranslations,
     Me: MeEnTranslations,
     AddMember: AddMemberEnTranslations,
     CommunityMembers: CommunityMembersEnTranslations,
@@ -115,6 +109,7 @@ export const translations: Translations<"en"> = {
     AccessRestrictions: AccessRestrictionsEnTranslations,
     LoginDisabled: LoginDisabledEnTranslations,
     Theme: ThemeEnTranslations,
+    Description: DescriptionEnTranslations,
     Reports: ReportsEnTranslations,
     EmailPlanners: EmailPlannersEnTranslations,
     AddOrEditEmailPlanner: AddOrEditEmailPlannerEnTranslations,

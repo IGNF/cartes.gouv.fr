@@ -90,17 +90,19 @@ const updateMemberGrids = (communityId: number, userId: number, grids: string[])
 
 const updateLogo = (communityId: number, formData: FormData) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_espaceco_community_update_logo", { communityId });
-    return jsonFetch<CommunityResponseDTO>(
+    return jsonFetch<{ logo_url: string }>(
         url,
         {
-            method: "PATCH",
-            headers: {
-                "Content-Type": "application/json",
-                Accept: "application/json",
-            },
+            method: "POST",
         },
-        formData
+        formData,
+        true
     );
+};
+
+const removeLogo = (communityId: number) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_espaceco_community_remove_logo", { communityId });
+    return jsonFetch<null>(url, { method: "DELETE" });
 };
 
 const removeMember = (communityId: number, userId: number) => {
@@ -122,6 +124,7 @@ const community = {
     updateMemberGrids,
     removeMember,
     updateLogo,
+    removeLogo,
 };
 
 export default community;

@@ -46,7 +46,7 @@ const normalizeAttribute = (attribute: AddOrEditAttributeFormType): AttributeDTO
 };
 
 /* Recuperation de input type à partir de type */
-const getInputType = (type: AttributeType) => {
+const getInputType = (type?: AttributeType) => {
     return type === "date" ? "date" : "text";
 };
 
