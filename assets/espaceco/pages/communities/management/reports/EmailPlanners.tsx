@@ -86,6 +86,24 @@ const EmailPlanners: FC<EmailPlannersProps> = ({ communityId, form, emailPlanner
         },
     });
 
+    // Mise à jour d'un email de suivi
+    const updatePlannerMutation = useMutation<EmailPlannerDTO, CartesApiException, EmailPlannerAddType>({
+        mutationFn: (data) => {
+            if (currentEmailPlanner) {
+                return api.emailplanner.update(communityId, currentEmailPlanner.id, data);
+            }
+            return Promise.reject();
+        },
+        onSuccess: (planner) => {
+            setCurrentEmailPlanner(undefined);
+            queryClient.setQueryData(RQKeys.emailPlanners(communityId), (oldPlanners: EmailPlannerDTO[]) => {
+                const emailPlanners = [...oldPlanners].filter((ep) => ep.id !== currentEmailPlanner?.id);
+                emailPlanners.push(planner);
+                return emailPlanners;
+            });
+        },
+    });
+
     // Suppression d'un email de suivi
     const removePlannerMutation = useMutation<{ emailplanner_id: number }, CartesApiException, number>({
         mutationFn: (emailplannerId) => {
@@ -132,7 +150,16 @@ const EmailPlanners: FC<EmailPlannersProps> = ({ communityId, form, emailPlanner
                 </div>
             );
 
-            const data: ReactNode[] = [ep.event, ep.subject, ep.body, ep.delay, ep.recipients, ep.cancel_event, new Boolean(ep.repeat).toString(), tools];
+            const data: ReactNode[] = [
+                ep.event,
+                ep.subject,
+                ep.body,
+                ep.delay,
+                ep.recipients.join(", "),
+                ep.cancel_event,
+                new Boolean(ep.repeat).toString(),
+                tools,
+            ];
             data.unshift(
                 !statusOk || !themesOK ? (
                     <span className={fr.cx("fr-icon-warning-line")} aria-hidden="true" style={{ color: fr.colors.decisions.text.default.warning.default }} />
@@ -147,11 +174,19 @@ const EmailPlanners: FC<EmailPlannersProps> = ({ communityId, form, emailPlanner
     return (
         <div className={fr.cx("fr-my-1w")}>
             {addPlannerMutation.isError && <Alert severity="error" closable title={addPlannerMutation.error.message} />}
+            {updatePlannerMutation.isError && <Alert severity="error" closable title={updatePlannerMutation.error.message} />}
             {removePlannerMutation.isError && <Alert severity="error" closable title={removePlannerMutation.error.message} />}
             {addPlannerMutation.isPending && (
                 <Wait>
                     <div className={fr.cx("fr-grid-row")}>
                         <LoadingText as="h6" message={t("adding")} withSpinnerIcon={true} />
+                    </div>
+                </Wait>
+            )}
+            {updatePlannerMutation.isPending && (
+                <Wait>
+                    <div className={fr.cx("fr-grid-row")}>
+                        <LoadingText as="h6" message={t("modifying")} withSpinnerIcon={true} />
                     </div>
                 </Wait>
             )}
@@ -188,7 +223,11 @@ const EmailPlanners: FC<EmailPlannersProps> = ({ communityId, form, emailPlanner
                 emailPlanner={currentEmailPlanner}
                 themes={themeNames}
                 statuses={activeStatuses}
-                onModify={(values) => console.log(values)}
+                onModify={(data: EmailPlannerAddType) => {
+                    if (currentEmailPlanner) {
+                        updatePlannerMutation.mutate(data);
+                    }
+                }}
             />
             <ConfirmDialog
                 title={t("confirm_remove_title")}
@@ -216,6 +255,7 @@ export const { i18n } = declareComponentKeys<
     | "add"
     | "adding"
     | "modify"
+    | "modifying"
     | "remove"
     | "removing"
     | "confirm_remove_title"
@@ -232,6 +272,7 @@ export const EmailPlannersFrTranslations: Translations<"fr">["EmailPlanners"] = 
     add: "Ajouter un email de suivi",
     adding: "Ajout de l'email de suivi en cours ...",
     modify: "Modifier l'email de suivi",
+    modifying: "Modification de l'email de suivi en cours ...",
     remove: "Supprimer l'email de suivi",
     removing: "Suppression de l'email de suivi en cours ...",
     confirm_remove_title: "Êtes-vous sûr de vouloir supprimer cet email de suivi ?",
@@ -248,6 +289,7 @@ export const EmailPlannersEnTranslations: Translations<"en">["EmailPlanners"] = 
     add: undefined,
     adding: undefined,
     modify: undefined,
+    modifying: undefined,
     remove: undefined,
     removing: undefined,
     confirm_remove_title: undefined,

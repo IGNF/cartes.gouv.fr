@@ -86,9 +86,6 @@ const CommunityLogo: FC<CommunityLogoProps> = ({ communityId, logoUrl }) => {
         }
     }, [logoUrl]);
 
-    console.log("LOGO_URL : ", logoUrl);
-    console.log("ISVALID : ", isValid);
-
     const action: logoAction = useMemo(() => (isValid ? "modify" : "add"), [isValid]);
 
     // Boite modale, gestion de l'image

@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { FC, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
+import { ReportFormType } from "../../../../@types/app_espaceco";
 import {
     CommunityResponseDTO,
     EmailPlannerDTO,
@@ -21,16 +22,14 @@ import { declareComponentKeys, Translations, useTranslation } from "../../../../
 import RQKeys from "../../../../modules/espaceco/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import api from "../../../api";
+import Answers from "./reports/Answers";
+import EmailPlanners from "./reports/EmailPlanners";
 import Permissions from "./reports/Permissions";
 import ReportStatuses from "./reports/ReportStatuses";
 import type { UserSharedThemesType } from "./reports/SetSharedThemesDialog";
 import SharedThemes from "./reports/SharedThemes";
 import ThemeList from "./reports/ThemeList";
 import { countActiveStatus, getDefaultStatuses, getMinAuthorizedStatus } from "./reports/Utils";
-import Answers from "./reports/Answers";
-import { ReportFormType } from "../../../../@types/app_espaceco";
-import { setToNull } from "../../../../utils";
-import EmailPlanners from "./reports/EmailPlanners";
 
 type ReportsProps = {
     community: CommunityResponseDTO;

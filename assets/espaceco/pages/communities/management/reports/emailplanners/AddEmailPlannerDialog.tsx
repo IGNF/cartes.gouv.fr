@@ -5,9 +5,8 @@ import { FC, useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Controller, useForm } from "react-hook-form";
 import isEmail from "validator/lib/isEmail";
-import * as yup from "yup";
-import { BasicRecipientsArray, EmailPlannerAddType, EmailPlannerFormType, EmailPlannerType, EmailPlannerTypes } from "../../../../../../@types/app_espaceco";
-import { CancelEventType, EmailPlannerDTO, ReportStatusesDTO, TriggerEventType } from "../../../../../../@types/espaceco";
+import { BasicRecipientsArray, EmailPlannerAddType, EmailPlannerFormType, EmailPlannerTypes } from "../../../../../../@types/app_espaceco";
+import { CancelEventType, ReportStatusesDTO, TriggerEventType } from "../../../../../../@types/espaceco";
 import AutocompleteSelect from "../../../../../../components/Input/AutocompleteSelect";
 import { useTranslation } from "../../../../../../i18n/i18n";
 import { getAddDefaultValues } from "./Defaults";
@@ -75,7 +74,9 @@ const AddEmailPlannerDialog: FC<AddEmailPlannerDialogProps> = ({ themes, statuse
 
         if (values.event === "georem_status_changed") {
             const statuses = values.statuses ?? [];
-            form = { ...form, condition: { status: statuses } };
+            if (statuses.length) {
+                form = { ...form, condition: { status: statuses } };
+            }
         }
 
         onAdd(form);

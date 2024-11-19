@@ -14,30 +14,23 @@ const getAddDefaultValues = (type: EmailPlannerType): EmailPlannerFormType => {
     };
 };
 
-const getEditDefaultValues = (emailPlaner: EmailPlannerDTO): EmailPlannerFormType => {
+const getEditDefaultValues = (emailPlanner: EmailPlannerDTO): EmailPlannerFormType => {
     let statuses: string[] = [];
-    if (emailPlaner.condition) {
-        try {
-            const condition = emailPlaner.condition ?? { status: [] };
-            if ("status" in condition) {
-                statuses = condition["status"];
-            }
-        } catch (e) {
-            /* empty */
-        }
+    if (emailPlanner.condition && "status" in emailPlanner.condition) {
+        statuses = emailPlanner.condition["status"];
     }
 
     return {
-        id: emailPlaner.id,
-        event: emailPlaner.event,
-        delay: emailPlaner.delay,
-        cancel_event: emailPlaner.cancel_event,
-        repeat: emailPlaner.repeat,
-        recipients: emailPlaner.recipients,
-        subject: emailPlaner.subject,
-        body: emailPlaner.body,
+        id: emailPlanner.id,
+        event: emailPlanner.event,
+        delay: emailPlanner.delay,
+        cancel_event: emailPlanner.cancel_event,
+        repeat: emailPlanner.repeat,
+        recipients: emailPlanner.recipients,
+        subject: emailPlanner.subject,
+        body: emailPlanner.body,
         statuses: statuses,
-        themes: emailPlaner.themes,
+        themes: emailPlanner.themes ?? [],
     };
 };
 

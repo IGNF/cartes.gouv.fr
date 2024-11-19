@@ -22,6 +22,21 @@ const add = (communityId: number, data: object) => {
     );
 };
 
+const update = (communityId: number, emailPlannerId: number, data: object) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_espaceco_emailplanner_update", { communityId, emailPlannerId });
+    return jsonFetch<EmailPlannerDTO>(
+        url,
+        {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+            },
+        },
+        data
+    );
+};
+
 const remove = (communityId: number, emailplannerId: number) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_espaceco_emailplanner_remove", { communityId, emailplannerId });
     return jsonFetch<{ emailplanner_id: number }>(url, {
@@ -32,6 +47,7 @@ const remove = (communityId: number, emailplannerId: number) => {
 const emailplanner = {
     getAll,
     add,
+    update,
     remove,
 };
 

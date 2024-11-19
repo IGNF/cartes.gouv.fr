@@ -22,7 +22,7 @@ class EmailPlannerController extends AbstractController implements ApiController
     public const SEARCH_LIMIT = 20;
 
     public function __construct(
-        private EmailPlannerApiService $emailPlannerApiService
+        private EmailPlannerApiService $emailPlannerApiService,
     ) {
     }
 
@@ -44,6 +44,19 @@ class EmailPlannerController extends AbstractController implements ApiController
         try {
             $data = json_decode($request->getContent(), true);
             $response = $this->emailPlannerApiService->add($communityId, $data);
+
+            return new JsonResponse($response);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
+    #[Route('/{communityId}/update/{emailPlannerId}', name: 'update', methods: ['PUT'])]
+    public function update(int $communityId, int $emailPlannerId, Request $request): JsonResponse
+    {
+        try {
+            $data = json_decode($request->getContent(), true);
+            $response = $this->emailPlannerApiService->update($communityId, $emailPlannerId, $data);
 
             return new JsonResponse($response);
         } catch (ApiException $ex) {
