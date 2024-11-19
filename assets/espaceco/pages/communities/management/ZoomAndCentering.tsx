@@ -12,6 +12,7 @@ import { useTranslation } from "../../../../i18n/i18n";
 import { ExtentDialog, ExtentDialogModal } from "./ZoomAndCentering/ExtentDialog";
 import RMap from "./ZoomAndCentering/RMap";
 import Search from "./ZoomAndCentering/Search";
+import { Point } from "ol/geom";
 
 type ZoomAndCenteringProps = {
     community: CommunityResponseDTO;
@@ -38,7 +39,7 @@ const ZoomAndCentering: FC<ZoomAndCenteringProps> = ({ community }) => {
             const feature = new WKT().readFeature(community.position, {
                 dataProjection: "EPSG:4326",
             });
-            p = feature.getGeometry().getCoordinates();
+            p = feature.getGeometry() ? (feature.getGeometry() as Point).getCoordinates() : olDefaults.center;
         } else p = olDefaults.center;
 
         return {
