@@ -2,8 +2,43 @@
     background-color: var(--background-alt-grey);
 }
 
-.frx-community-desc-documents {
+/*.frx-community-desc-documents {
     padding: 0.4rem;
     border: 1px solid;
     border-color: var(--border-default-grey);
+}*/
+
+.frx-document-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 1px solid;
+    border-color: var(--border-default-grey);
+    background-color: var(--background-contrast-grey);
+    padding: 1rem;
+    margin: 0.5rem;
+    gap: 0.4rem;
+    justify-content: space-between;
+    img {
+        width: 48px;
+        height: 48px;
+        max-width: 48px;
+        max-height: 48px;
+    }
+}
+
+.frx-document-image {
+    width: 48px;
+    height: 48px;
+    max-width: 48px;
+    max-height: 48px;
+}
+
+.frx-image-modal {
+    height: 64px;
+    width: 64px;
+    img {
+        max-height: 64px;
+        max-width: 64px;
+    }
 }

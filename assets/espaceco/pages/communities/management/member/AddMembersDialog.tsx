@@ -55,7 +55,6 @@ const AddMembersDialog: FC = () => {
     });
 
     const users = watch("users");
-    console.log("USERS : ", users);
 
     const handleRemove = useCallback(
         (user: UserDTO | string) => {

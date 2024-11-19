@@ -19,6 +19,7 @@ export type ComponentKey =
     | typeof import("./Breadcrumb").i18n
     | typeof import("./Rights").i18n
     | typeof import("./Style").i18n
+    | typeof import("../components/Input/InputCollection").i18n
     | typeof import("../entrepot/pages/users/Me").i18n
     | typeof import("../entrepot/pages/communities/AddMember").i18n
     | typeof import("../entrepot/pages/communities/CommunityMembers").i18n
@@ -53,6 +54,7 @@ export type ComponentKey =
     | typeof import("../espaceco/pages/communities/ManageCommunityTr").i18n
     | typeof import("../espaceco/pages/communities/management/validationTr").i18n
     | typeof import("../espaceco/pages/communities/management/SearchTr").i18n
+    | typeof import("../espaceco/pages/communities/management/Description").i18n
     | typeof import("../espaceco/pages/communities/management/Reports").i18n
     | typeof import("../espaceco/pages/communities/management/reports/ThemeTr").i18n
     | typeof import("../espaceco/pages/communities/management/reports/ReportStatusesTr").i18n

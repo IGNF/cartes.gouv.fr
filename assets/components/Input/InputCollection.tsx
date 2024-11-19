@@ -1,108 +1,110 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import Button from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
-import { FC, useCallback, useState } from "react";
-import { v4 as uuidv4 } from "uuid";
-import { useTranslation } from "../../i18n/i18n";
+import { FC } from "react";
+import { useForm } from "react-hook-form";
+import * as yup from "yup";
+import isEmail from "validator/lib/isEmail";
+import { yupResolver } from "@hookform/resolvers/yup";
+import Button from "@codegouvfr/react-dsfr/Button";
+import { declareComponentKeys, Translations, useTranslation } from "../../i18n/i18n";
+
+export type ValidatorType = "none" | "email";
 
 interface InputCollectionProps {
     label?: string;
     hintText?: string;
     state?: "default" | "error" | "success";
     stateRelatedMessage?: string;
+    minLength?: number;
+    validator?: ValidatorType; // On pourrait en mettre plusieurs
     value?: string[];
     onChange: (value: string[]) => void;
 }
 
 const InputCollection: FC<InputCollectionProps> = (props: InputCollectionProps) => {
-    const { t } = useTranslation("Common");
+    const { label, hintText, state, stateRelatedMessage, minLength = 0, validator = "none", value = [], onChange } = props;
 
-    const { label, hintText, state, stateRelatedMessage, value = [], onChange } = props;
+    const { t: tCommon } = useTranslation("Common");
+    const { t } = useTranslation("InputCollection");
 
-    /* Calcul de la valeur finale */
-    const compute = useCallback((values: Record<string, string>) => {
-        const result: string[] = Object.values(values).filter((v) => v.trim().length);
-        return [...new Set(result)];
-    }, []);
+    const _validator: (value) => boolean = validator === "email" ? isEmail : undefined;
 
-    const [internals, setInternals] = useState<Record<string, string>>(() => {
-        // On met une ligne par defaut
-        const def = [...value];
-        if (def.length === 0) {
-            def.push("");
-        }
-
-        const values: Record<string, string> = {};
-        def.forEach((value) => {
-            const uuid = uuidv4();
-            values[uuid] = value;
-        });
-        return values;
+    const schema = yup.object({
+        text: yup
+            .string()
+            .min(minLength, t("min_length_error", { min: minLength }))
+            .test({
+                name: "check",
+                test(value, ctx) {
+                    if (!value) return true;
+                    if (_validator) {
+                        if (!_validator(value)) {
+                            return ctx.createError({ message: `${value} n'est pas un email valide` });
+                        }
+                    }
+                    return true;
+                },
+            }),
     });
 
-    const num = Object.keys(internals).length;
+    const {
+        register,
+        formState: { errors },
+        getValues: getFormValues,
+        resetField,
+        handleSubmit,
+    } = useForm<{ text?: string }>({
+        mode: "onChange",
+        resolver: yupResolver(schema),
+    });
 
-    /* Ajout d'une ligne */
-    const handleAdd = () => {
-        const d = { ...internals };
-        d[uuidv4()] = "";
-        setInternals(d);
+    const onSubmit = () => {
+        const v = getFormValues("text");
+        const values = value ? [...value] : [];
+        if (v) {
+            values.push(v);
+            onChange(Array.from(new Set(values)));
+            resetField("text");
+        }
     };
 
     /* Suppression d'une ligne */
-    const handleRemove = (key: string) => {
-        const datas = { ...internals };
-        const value = datas[key];
-        delete datas[key];
-
-        setInternals(datas);
-        if (value) {
-            onChange(compute(datas));
-        }
+    const handleRemove = (text: string) => {
+        const values = value.filter((v) => text !== v);
+        onChange(values);
     };
-
-    /* Modification d'une valeur */
-    const handleChangeValue = useCallback(
-        (key: string, value: string) => {
-            const datas = { ...internals };
-            datas[key] = value;
-            setInternals(datas);
-
-            onChange(compute(datas));
-        },
-        [internals, compute, onChange]
-    );
 
     return (
         <div className={fr.cx("fr-input-group", state === "error" && "fr-input-group--error")}>
             {label && <label className={fr.cx("fr-label")}>{label}</label>}
             {hintText && <span className={fr.cx("fr-hint-text", "fr-mt-2v")}>{hintText}</span>}
-            <div className={fr.cx("fr-grid-row", "fr-mt-2v")}>
-                <Button className={fr.cx("fr-mb-1v")} iconId={"fr-icon-add-circle-line"} priority="tertiary" onClick={handleAdd}>
-                    {t("add")}
-                </Button>
-            </div>
-            {Object.keys(internals).map((key) => (
-                <div key={key} className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                    <div className={fr.cx("fr-col")}>
-                        <Input
-                            className={fr.cx("fr-mb-1v")}
-                            label={null}
-                            nativeInputProps={{
-                                defaultValue: internals[key],
-                                onChange: (e) => handleChangeValue(key, e.currentTarget.value),
-                            }}
-                        />
-                    </div>
-                    <Button
-                        title={t("delete")}
-                        priority={"tertiary no outline"}
-                        iconId={"fr-icon-delete-line"}
-                        disabled={num === 1}
-                        onClick={() => handleRemove(key)}
+            <div className={fr.cx("fr-grid-row", "fr-grid-row--top")}>
+                <div className={fr.cx("fr-col")}>
+                    <Input
+                        className={fr.cx("fr-mb-1v")}
+                        label={null}
+                        state={errors.text ? "error" : "default"}
+                        stateRelatedMessage={errors?.text?.message?.toString()}
+                        nativeInputProps={{
+                            ...register("text"),
+                        }}
                     />
                 </div>
-            ))}
+                <Button className={fr.cx("fr-mb-1v")} iconId={"fr-icon-add-circle-line"} priority="tertiary" onClick={handleSubmit(onSubmit)}>
+                    {tCommon("add")}
+                </Button>
+            </div>
+            {value && (
+                <div>
+                    {value.map((v) => (
+                        <div key={v} className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
+                            <div className={fr.cx("fr-col")}>{v}</div>
+                            <Button title={tCommon("delete")} priority={"tertiary no outline"} iconId={"fr-icon-delete-line"} onClick={() => handleRemove(v)} />
+                        </div>
+                    ))}
+                </div>
+            )}
+
             {state !== "default" && (
                 <p
                     className={fr.cx(
@@ -125,3 +127,32 @@ const InputCollection: FC<InputCollectionProps> = (props: InputCollectionProps) 
 };
 
 export default InputCollection;
+
+// traductions
+export const { i18n } = declareComponentKeys<
+    { K: "min_length_error"; P: { min: number | null }; R: string } | { K: "validator_error"; P: { type: ValidatorType; value: string | null }; R: string }
+>()("InputCollection");
+
+export const InputCollectionFrTranslations: Translations<"fr">["InputCollection"] = {
+    min_length_error: ({ min }) => `La chaîne doit faire au mois ${min} caractères `,
+    validator_error: ({ type, value }) => {
+        switch (type) {
+            case "none":
+                return "";
+            case "email":
+                return `${value} n'est pas un email valide`;
+        }
+    },
+};
+
+export const InputCollectionEnTranslations: Translations<"en">["InputCollection"] = {
+    min_length_error: ({ min }) => `Minimum string length is ${min}`,
+    validator_error: ({ type, value }) => {
+        switch (type) {
+            case "none":
+                return "";
+            case "email":
+                return `${value} is not a valid email`;
+        }
+    },
+};

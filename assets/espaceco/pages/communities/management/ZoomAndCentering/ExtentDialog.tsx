@@ -4,7 +4,7 @@ import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Extent } from "ol/extent";
-import { FC, useState } from "react";
+import { FC, useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
@@ -123,22 +123,28 @@ const ExtentDialog: FC<ExtentDialogProps> = ({ onCancel, onApply }) => {
         resetField,
     } = form;
 
-    const clear = () => {
-        ["xmin", "ymin", "xmax", "ymax"].forEach((f) => resetField(f as FieldName, undefined));
-    };
-
     const onChoiceChanged = (v) => {
-        clear();
         setChoice(v);
     };
+
+    const clear = useCallback(() => {
+        ["xmin", "ymin", "xmax", "ymax"].forEach((f) => resetField(f as FieldName, undefined));
+    }, [resetField]);
+
+    useEffect(() => {
+        choice === "autocomplete" ? clear() : resetField("extent", undefined);
+    }, [choice, clear, resetField]);
 
     const onSubmit = () => {
         ExtentDialogModal.close();
 
         const values = getFormValues();
-        onApply([values.xmin, values.ymin, values.xmax, values.ymax]);
-        setChoice("manual");
-        clear();
+        const extent = choice === "autocomplete" ? values.extent : [values.xmin, values.ymin, values.xmax, values.ymax];
+        onApply(extent);
+
+        if (choice !== "manual") {
+            setChoice("manual");
+        } else clear();
     };
 
     return (
@@ -192,7 +198,7 @@ const ExtentDialog: FC<ExtentDialogProps> = ({ onCancel, onApply }) => {
                                     state={errors.extent ? "error" : "default"}
                                     stateRelatedMessage={errors.extent?.message?.toString()}
                                     onChange={(grid) => {
-                                        setFormValue("extent", grid ? grid : undefined);
+                                        setFormValue("extent", grid ? grid.extent : undefined);
                                         clearErrors();
                                     }}
                                 />

@@ -8,10 +8,13 @@ use App\Exception\CartesApiException;
 use App\Services\EspaceCoApi\CommunityApiService;
 use App\Services\EspaceCoApi\UserApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Uid\Uuid;
 
 #[Route(
     '/api/espaceco/community',
@@ -23,10 +26,15 @@ class CommunityController extends AbstractController implements ApiControllerInt
 {
     public const SEARCH_LIMIT = 20;
 
+    private string $varDataPath;
+
     public function __construct(
+        ParameterBagInterface $parameters,
+        private Filesystem $fs,
         private CommunityApiService $communityApiService,
         private UserApiService $userApiService
     ) {
+        $this->varDataPath = $parameters->get('upload_path');
     }
 
     #[Route('/get', name: 'get', methods: ['GET'])]
@@ -121,11 +129,14 @@ class CommunityController extends AbstractController implements ApiControllerInt
         }
     }
 
+    /**
+     * @param array<string> $fields
+     */
     #[Route('/{communityId}', name: 'get_community', methods: ['GET'])]
-    public function getCommunity(int $communityId): JsonResponse
+    public function getCommunity(int $communityId, #[MapQueryParameter] ?array $fields = []): JsonResponse
     {
         try {
-            $response = $this->communityApiService->getCommunity($communityId);
+            $response = $this->communityApiService->getCommunity($communityId, $fields);
 
             return new JsonResponse($response);
         } catch (ApiException $ex) {
@@ -172,16 +183,36 @@ class CommunityController extends AbstractController implements ApiControllerInt
         return new JsonResponse($member);
     }
 
-    #[Route('/{communityId}/update_logo', name: 'update_logo', methods: ['PATCH'])]
+    #[Route('/{communityId}/update_logo', name: 'update_logo', methods: ['POST'])]
     public function updateLogo(int $communityId, Request $request): JsonResponse
     {
         try {
-            $community = $this->communityApiService->getCommunity($communityId);
-
             $logo = $request->files->get('logo');
-            $this->communityApiService->updateLogo($communityId, $logo);
 
-            return new JsonResponse($community);
+            $uuid = Uuid::v4();
+            $tempFileDir = join(DIRECTORY_SEPARATOR, [$this->varDataPath, $uuid]);
+            $tempFilePath = join(DIRECTORY_SEPARATOR, [$tempFileDir, $logo->getClientOriginalName()]);
+
+            $logo->move($tempFileDir, $logo->getClientOriginalName());
+
+            $this->communityApiService->updateLogo($communityId, $tempFilePath);
+            $this->fs->remove($tempFileDir);
+
+            $community = $this->communityApiService->getCommunity($communityId, ['fields' => ['logo_url']]);
+
+            return new JsonResponse(['logo_url' => $community['logo_url']]);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
+    #[Route('/{communityId}/remove_logo', name: 'remove_logo', methods: ['DELETE'])]
+    public function removeLogo(int $communityId): JsonResponse
+    {
+        try {
+            $this->communityApiService->removeLogo($communityId);
+
+            return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }

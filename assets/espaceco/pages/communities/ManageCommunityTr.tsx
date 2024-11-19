@@ -25,6 +25,7 @@ export const { i18n } = declareComponentKeys<
     | "desc.logo"
     | "desc.logo.title"
     | { K: "logo_action"; P: { action: logoAction }; R: string }
+    | { K: "running_action"; P: { action: logoAction }; R: string }
     | "logo_confirm_delete_modal.title"
     | "modal.logo.title"
     | "modal.logo.file_hint"
@@ -32,9 +33,13 @@ export const { i18n } = declareComponentKeys<
     | "desc.documents"
     | "desc.documents_hint"
     | "desc.no_documents"
-    | "desc.document.remove"
+    | "desc.adding_document"
+    | "desc.updating_document"
+    | "desc.confirm_remove_document"
+    | "desc.removing_document"
     | "modal.document.title"
-    | "modal.document.name"
+    | "modal.document.title_field"
+    | "modal.document.description"
     | "modal.document.file_hint"
     | "zoom.consistant_error"
     | "zoom.tab.title"
@@ -75,6 +80,19 @@ export const { i18n } = declareComponentKeys<
     | { K: "grid.explain"; R: JSX.Element }
 >()("ManageCommunity");
 
+/**
+ * "thumbnail_modal.action_being": ({ action }) => {
+        switch (action) {
+            case "add":
+                return "Ajout de la vignette en cours ...";
+            case "modify":
+                return "Remplacement de la vignette en cours ...";
+            case "delete":
+                return "Suppression de la vignette en cours ...";
+        }
+    },
+ */
+
 export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"] = {
     title: ({ name }) => (name === undefined ? "Gérer le guichet" : `Gérer le guichet - ${name}`),
     loading: "Recherche du guichet en cours ...",
@@ -105,6 +123,16 @@ export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"
                 return "Supprimer le logo";
         }
     },
+    running_action: ({ action }) => {
+        switch (action) {
+            case "add":
+                return "Ajout du logo en cours ...";
+            case "modify":
+                return "Mise à jour du logo en cours ...";
+            case "delete":
+                return "Suppression du logo en cours ...";
+        }
+    },
     "logo_confirm_delete_modal.title": "Êtes-vous sûr de vouloir supprimer le logo de ce guichet ?",
     "modal.logo.title": "Logo du guichet",
     "modal.logo.file_hint": "Taille maximale : 5 Mo. Formats acceptés : jpg, png",
@@ -113,9 +141,13 @@ export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"
     "desc.documents_hint":
         "Lorem ipsum dolor sit amet consectetur adipisicing elit. Dicta suscipit tempora culpa, ea quis illo veniam vero consequuntur soluta nesciunt.",
     "desc.no_documents": "Aucun document",
-    "desc.document.remove": "Supprimer le document",
+    "desc.adding_document": "Ajout d'un document en cours ...",
+    "desc.updating_document": "Modification d'un document en cours ...",
+    "desc.confirm_remove_document": "Êtes-vous sûr de vouloir supprimer ce document ?",
+    "desc.removing_document": "Suppression du document en cours ...",
     "modal.document.title": "Ajouter un document",
-    "modal.document.name": "Titre",
+    "modal.document.title_field": "Titre",
+    "modal.document.description": "Description (optionnel)",
     "modal.document.file_hint": "Taille maximale : 5 Mo.",
     "zoom.consistant_error": "Emprise et position ne sont pas cohérents",
     "zoom.tab.title": "Définir l’état initial de la carte à l’ouverture du guichet",
@@ -211,6 +243,7 @@ export const ManageCommunityEnTranslations: Translations<"en">["ManageCommunity"
                 return "Delete logo";
         }
     },
+    running_action: ({ action }) => `${action} running`,
     "logo_confirm_delete_modal.title": undefined,
     "modal.logo.title": undefined,
     "modal.logo.file_hint": undefined,
@@ -218,9 +251,13 @@ export const ManageCommunityEnTranslations: Translations<"en">["ManageCommunity"
     "desc.documents": undefined,
     "desc.documents_hint": undefined,
     "desc.no_documents": "No document",
-    "desc.document.remove": "Remove document",
+    "desc.adding_document": undefined,
+    "desc.updating_document": undefined,
+    "desc.confirm_remove_document": undefined,
+    "desc.removing_document": undefined,
     "modal.document.title": "Add document",
-    "modal.document.name": "Title",
+    "modal.document.title_field": "Title",
+    "modal.document.description": "Description (optional)",
     "modal.document.file_hint": "Maximum file size : 5 Mo.",
     "zoom.consistant_error": undefined,
     "zoom.tab.title": undefined,
