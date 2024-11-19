@@ -1,10 +1,10 @@
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FC, useEffect } from "react";
+import { FC } from "react";
 import { createPortal } from "react-dom";
 import { useForm } from "react-hook-form";
-import { EmailPlannerFormType } from "../../../../../../@types/app_espaceco";
-import { EmailPlannerDTO, ReportStatusesDTO } from "../../../../../../@types/espaceco";
+import { EmailPlannerAddType, EmailPlannerFormType } from "../../../../../../@types/app_espaceco";
+import { CancelEventType, EmailPlannerDTO, ReportStatusesDTO, TriggerEventType } from "../../../../../../@types/espaceco";
 import { useTranslation } from "../../../../../../i18n/i18n";
 import { getAddDefaultValues, getEditDefaultValues } from "./Defaults";
 import PersonalEmailPlanner from "./PersonalEmailPlanner";
@@ -19,7 +19,7 @@ type EditEmailPlannerDialogProps = {
     emailPlanner?: EmailPlannerDTO;
     themes: string[];
     statuses: ReportStatusesDTO;
-    onModify: (values: EmailPlannerDTO) => void;
+    onModify: (values: EmailPlannerAddType) => void;
 };
 
 const EditEmailPlannerDialog: FC<EditEmailPlannerDialogProps> = ({ emailPlanner, themes, statuses, onModify }) => {
@@ -34,13 +34,33 @@ const EditEmailPlannerDialog: FC<EditEmailPlannerDialogProps> = ({ emailPlanner,
         resolver: yupResolver(schema),
     });
 
-    const { watch } = form;
+    const { handleSubmit, getValues: getFormValues } = form;
 
-    /* TODO SUPPRIMER */
-    const values = watch();
-    useEffect(() => {
-        console.log("VALUES : ", values);
-    }, [values]);
+    const onSubmit = () => {
+        const values = getFormValues();
+
+        let form: EmailPlannerAddType = {
+            subject: values.subject,
+            event: values.event as TriggerEventType,
+            cancel_event: values.cancel_event as CancelEventType,
+            body: values.body,
+            recipients: values.recipients,
+            themes: values.themes ?? [],
+            condition: null,
+            delay: values.delay,
+            repeat: values.repeat,
+        };
+
+        if (values.event === "georem_status_changed") {
+            const statuses = values.statuses ?? [];
+            if (statuses.length) {
+                form = { ...form, condition: { status: statuses } };
+            }
+        }
+
+        onModify(form);
+        EditEmailPlannerDialogModal.close();
+    };
 
     return (
         <>
@@ -55,10 +75,10 @@ const EditEmailPlannerDialog: FC<EditEmailPlannerDialogProps> = ({ emailPlanner,
                             doClosesModal: true,
                         },
                         {
-                            children: tCommon("add"),
+                            children: emailPlanner ? tCommon("modify") : tCommon("add"),
                             priority: "primary",
                             doClosesModal: false,
-                            //onClick: handleSubmit(onSubmit),
+                            onClick: handleSubmit(onSubmit),
                         },
                     ]}
                 >

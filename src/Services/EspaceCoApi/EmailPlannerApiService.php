@@ -14,7 +14,7 @@ class EmailPlannerApiService extends BaseEspaceCoApiService
         ParameterBagInterface $parameters,
         Filesystem $filesystem,
         RequestStack $requestStack,
-        LoggerInterface $logger
+        LoggerInterface $logger,
     ) {
         parent::__construct($httpClient, $parameters, $filesystem, $requestStack, $logger);
     }
@@ -33,6 +33,14 @@ class EmailPlannerApiService extends BaseEspaceCoApiService
     public function add(int $communityId, array $data): array
     {
         return $this->request('POST', "communities/$communityId/emailplanners", $data);
+    }
+
+    /**
+     * @param array<mixed> $data
+     */
+    public function update(int $communityId, int $emailPlannerId, array $data): array
+    {
+        return $this->request('PUT', "communities/$communityId/emailplanners/$emailPlannerId", $data);
     }
 
     public function remove(int $communityId, int $emailPlannerId): array
