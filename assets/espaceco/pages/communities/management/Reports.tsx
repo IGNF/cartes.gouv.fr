@@ -122,8 +122,10 @@ const Reports: FC<ReportsProps> = ({ community }) => {
                 recipients: yup.array().of(yup.string().required()).required(),
                 event: yup.string().oneOf(["georem_created", "georem_status_changed"]).required(),
                 cancel_event: yup.string().oneOf(["none", "georem_status_changed"]).required(),
-                condition: yup.string().transform(setToNull).required(),
-                themes: yup.string().transform(setToNull).required(),
+                condition: yup.object({
+                    status: yup.array().of(yup.string().required()).required(),
+                }),
+                themes: yup.array().of(yup.string().required()).required(),
             })
         ),
         shared_themes: yup.array().of(

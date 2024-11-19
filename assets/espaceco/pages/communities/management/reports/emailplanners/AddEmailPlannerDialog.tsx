@@ -4,17 +4,15 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { FC, useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Controller, useForm } from "react-hook-form";
+import isEmail from "validator/lib/isEmail";
 import * as yup from "yup";
-import { EmailPlannerFormType, EmailPlannerType, EmailPlannerTypes } from "../../../../../../@types/app_espaceco";
-import { CancelEvents, TriggerEvents } from "../../../../../../@types/espaceco";
+import { BasicRecipientsArray, EmailPlannerAddType, EmailPlannerFormType, EmailPlannerType, EmailPlannerTypes } from "../../../../../../@types/app_espaceco";
+import { CancelEventType, EmailPlannerDTO, ReportStatusesDTO, TriggerEventType } from "../../../../../../@types/espaceco";
+import AutocompleteSelect from "../../../../../../components/Input/AutocompleteSelect";
 import { useTranslation } from "../../../../../../i18n/i18n";
-import { setToNull } from "../../../../../../utils";
 import { getAddDefaultValues } from "./Defaults";
 import PersonalEmailPlanner from "./PersonalEmailPlanner";
-import RecipientsManager from "./RecipientsManager";
-
-const cloneEvents = [...TriggerEvents] as string[];
-const cloneCancelEvents = [...CancelEvents] as string[];
+import { getBasicSchema, getPersonalSchema } from "./schemas";
 
 const AddEmailPlannerDialogModal = createModal({
     id: "add-emailplanner",
@@ -23,104 +21,66 @@ const AddEmailPlannerDialogModal = createModal({
 
 type AddEmailPlannerDialogProps = {
     themes: string[];
-    statuses: string[];
+    statuses: ReportStatusesDTO;
+    onAdd: (values: EmailPlannerAddType) => void;
 };
 
-const AddEmailPlannerDialog: FC<AddEmailPlannerDialogProps> = ({ themes, statuses }) => {
+const AddEmailPlannerDialog: FC<AddEmailPlannerDialogProps> = ({ themes, statuses, onAdd }) => {
     const { t: tCommon } = useTranslation("Common");
     const { t } = useTranslation("AddOrEditEmailPlanner");
 
-    const [type, setType] = useState<EmailPlannerType>("basic");
+    const [type, setType] = useState<"basic" | "personal">("basic");
 
-    const baseSchema = yup.object({
-        type: yup.string().oneOf([...EmailPlannerTypes]),
-        recipients: yup.array().of(yup.string().required()).min(1, t("validation.error.email.min")).required(),
-    });
-
-    const schema = {};
-
-    schema["basic"] = baseSchema;
-    schema["personal"] = baseSchema.shape({
-        subject: yup.string().required(t("validation.subject.mandatory")),
-        body: yup.string().required(t("validation.body.mandatory")),
-        delay: yup.number().min(1, t("validation.delay.positive")).required(t("validation.delay.mandatory")),
-        repeat: yup.boolean().required(),
-        event: yup.string().required().oneOf(cloneEvents),
-        cancel_event: yup
-            .string()
-            .required()
-            .oneOf([...cloneCancelEvents]),
-        condition: yup.object({
-            status: yup
-                .array()
-                .of(yup.string().oneOf(statuses).required())
-                .test({
-                    name: "validate-condition",
-                    test: (value, context) => {
-                        if (!value || !context.from) return true;
-
-                        const [, parent] = context.from;
-                        const { event } = parent.value;
-                        if (event === "georem_status_changed") {
-                            if (value && value.length === 0) {
-                                return context.createError({ message: t("validation.condition.mandatory") });
-                            }
-                        }
-
-                        return true;
-                    },
-                }),
-        }),
-        /*.test({
-                name: "validate-condition",
-                test: (value, context) => {
-                    const {
-                        parent: { event },
-                    } = context;
-                    if (event === "georem_status_changed") {
-                        if (!("status" in value) || value["status"]?.length === 0) {
-                            return context.createError({ message: t("validation.condition.mandatory") });
-                        }
-                    }
-                    return true;
-                },
-            })*/ themes: yup.string().nullable().transform(setToNull),
-    });
+    const schemas = {};
+    schemas["basic"] = getBasicSchema();
+    schemas["personal"] = getPersonalSchema(themes, statuses);
 
     const form = useForm<EmailPlannerFormType>({
         mode: "onChange",
-        resolver: yupResolver(schema[type]),
+        resolver: yupResolver(schemas[type]),
         defaultValues: getAddDefaultValues(type),
     });
     const {
         control,
-        watch,
         formState: { errors },
         getValues: getFormValues,
         reset,
         handleSubmit,
     } = form;
 
-    /* TODO SUPPRIMER */
-    const values = watch();
-    useEffect(() => {
-        console.log("VALUES : ", values);
-    }, [values]);
-
     useEffect(() => {
         reset(getAddDefaultValues(type));
     }, [reset, type]);
 
     const resetForm = useCallback(() => {
+        /* si type est déjà basic, setType ne déclenchera pas le useEffect précédent 
+        et ne fera donc pas un reset du formulaire avec les valeurs par défaut */
         type === "basic" ? reset(getAddDefaultValues(type)) : setType("basic");
     }, [type, reset]);
 
-    // TODO
     const onSubmit = () => {
         const values = getFormValues();
-        console.log(values);
-        resetForm();
 
+        let form: EmailPlannerAddType = {
+            subject: values.subject,
+            event: values.event as TriggerEventType,
+            cancel_event: values.cancel_event as CancelEventType,
+            body: values.body,
+            recipients: values.recipients,
+            themes: values.themes ?? [],
+            condition: null,
+            delay: values.delay,
+            repeat: values.repeat,
+        };
+
+        if (values.event === "georem_status_changed") {
+            const statuses = values.statuses ?? [];
+            form = { ...form, condition: { status: statuses } };
+        }
+
+        onAdd(form);
+
+        resetForm();
         AddEmailPlannerDialogModal.close();
     };
 
@@ -162,18 +122,36 @@ const AddEmailPlannerDialog: FC<AddEmailPlannerDialogProps> = ({ themes, statuse
                         <hr />
                         <p>{tCommon("mandatory_fields")}</p>
                         {type === "basic" ? (
-                            <Controller
-                                control={control}
-                                name="recipients"
-                                render={({ field: { value, onChange } }) => (
-                                    <RecipientsManager
-                                        state={errors.recipients ? "error" : "default"}
-                                        stateRelatedMessage={errors.recipients?.message?.toString()}
-                                        value={value ?? []}
-                                        onChange={onChange}
-                                    />
-                                )}
-                            />
+                            <>
+                                <h5>{t("dialog.recipients")}</h5>
+                                <Controller
+                                    control={control}
+                                    name="recipients"
+                                    render={({ field: { value, onChange } }) => (
+                                        <AutocompleteSelect
+                                            label={""}
+                                            state={errors.recipients ? "error" : "default"}
+                                            stateRelatedMessage={errors.recipients?.message?.toString()}
+                                            freeSolo={true}
+                                            options={BasicRecipientsArray}
+                                            isOptionEqualToValue={(option, value) => {
+                                                return option === value;
+                                            }}
+                                            searchFilter={{ limit: 10 }}
+                                            onChange={(_, value) => {
+                                                if (value && Array.isArray(value)) {
+                                                    value = value.filter((v) => {
+                                                        if (BasicRecipientsArray.includes(v)) return true;
+                                                        return isEmail(v);
+                                                    });
+                                                    onChange(value);
+                                                }
+                                            }}
+                                            value={value}
+                                        />
+                                    )}
+                                />
+                            </>
                         ) : (
                             <PersonalEmailPlanner form={form} themes={themes} statuses={statuses} />
                         )}

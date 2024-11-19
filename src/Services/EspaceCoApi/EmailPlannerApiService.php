@@ -27,6 +27,14 @@ class EmailPlannerApiService extends BaseEspaceCoApiService
         return $this->requestAll("communities/$communityId/emailplanners");
     }
 
+    /**
+     * @param array<mixed> $data
+     */
+    public function add(int $communityId, array $data): array
+    {
+        return $this->request('POST', "communities/$communityId/emailplanners", $data);
+    }
+
     public function remove(int $communityId, int $emailPlannerId): array
     {
         return $this->request('DELETE', "communities/$communityId/emailplanners/$emailPlannerId");

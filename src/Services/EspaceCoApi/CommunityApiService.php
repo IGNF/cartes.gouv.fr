@@ -5,7 +5,6 @@ namespace App\Services\EspaceCoApi;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -48,11 +47,13 @@ class CommunityApiService extends BaseEspaceCoApiService
     }
 
     /**
+     * @param array<mixed> $fields
+     *
      * @return array<mixed>
      */
-    public function getCommunity(int $communityId): array
+    public function getCommunity(int $communityId, array $fields = []): array
     {
-        return $this->request('GET', "communities/$communityId");
+        return $this->request('GET', "communities/$communityId", [], ['fields' => $fields]);
     }
 
     /**
@@ -114,8 +115,13 @@ class CommunityApiService extends BaseEspaceCoApiService
         return $this->request('DELETE', "communities/$communityId/members/$userId");
     }
 
-    public function updateLogo(int $communityId, UploadedFile $file): array
+    public function updateLogo(int $communityId, string $filePath): array
     {
-        return $this->request('PATCH', "communities/$communityId", ['logo' => $file], [], [], true);
+        return $this->sendFile('POST', "communities/$communityId/logo", $filePath, [], [], 'logo');
+    }
+
+    public function removeLogo(int $communityId): array
+    {
+        return $this->request('DELETE', "communities/$communityId/logo");
     }
 }

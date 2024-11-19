@@ -36,6 +36,7 @@ import { BreadcrumbFrTranslations } from "../Breadcrumb";
 import { commonFrTranslations } from "../Common";
 import { RightsFrTranslations } from "../Rights";
 import { StyleFrTranslations } from "../Style";
+import { DescriptionFrTranslations } from "../../espaceco/pages/communities/management/Description";
 import { ReportsFrTranslations } from "../../espaceco/pages/communities/management/Reports";
 import { EmailPlannersFrTranslations } from "../../espaceco/pages/communities/management/reports/EmailPlanners";
 import { AddOrEditEmailPlannerFrTranslations } from "../../espaceco/pages/communities/management/reports/emailplanners/AddOrEditEmailPlannerTr";
@@ -46,6 +47,7 @@ import { SharedThemesFrTranslations } from "../../espaceco/pages/communities/man
 import { EscoCommunityMembersFrTranslations } from "../../espaceco/pages/communities/management/Members";
 import { AddMembersDialogFrTranslations } from "../../espaceco/pages/communities/management/member/AddMembersDialog";
 import { ManageGridsDialogFrTranslations } from "../../espaceco/pages/communities/management/member/ManageGridsDialog";
+import { InputCollectionFrTranslations } from "../../components/Input/InputCollection";
 
 import type { Translations } from "../i18n";
 
@@ -54,6 +56,7 @@ export const translations: Translations<"fr"> = {
     Breadcrumb: BreadcrumbFrTranslations,
     Rights: RightsFrTranslations,
     Style: StyleFrTranslations,
+    InputCollection: InputCollectionFrTranslations,
     Me: MeFrTranslations,
     AddMember: AddMemberFrTranslations,
     CommunityMembers: CommunityMembersFrTranslations,
@@ -88,6 +91,7 @@ export const translations: Translations<"fr"> = {
     ManageCommunity: ManageCommunityFrTranslations,
     ManageCommunityValidations: ManageCommunityValidationsFrTranslations,
     Reports: ReportsFrTranslations,
+    Description: DescriptionFrTranslations,
     EmailPlanners: EmailPlannersFrTranslations,
     AddOrEditEmailPlanner: AddOrEditEmailPlannerFrTranslations,
     EmailPlannerKeywords: EmailPlannerKeywordsFrTranslations,
