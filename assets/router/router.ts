@@ -6,7 +6,7 @@ export const appRoot = SymfonyRouting.getBaseUrl(); // (document.getElementById(
 export const catalogueUrl = (document.getElementById("app_env") as HTMLDivElement)?.dataset?.["catalogueUrl"] ?? "/catalogue";
 
 const routeDefs = {
-    // routes non protégées (doivent être listées plus bas dans publicRoutes)
+    // NOTE : routes non protégées (doivent être listées plus bas dans publicRoutes)
     home: defineRoute(
         {
             authentication_failed: param.query.optional.number,
@@ -34,8 +34,9 @@ const routeDefs = {
     join: defineRoute(`${appRoot}/nous-rejoindre`),
     terms_of_service: defineRoute(`${appRoot}/cgu`),
     service_status: defineRoute(`${appRoot}/niveau-de-service`),
+    login_disabled: defineRoute(`${appRoot}/connexion-desactivee`),
 
-    // routes protégées
+    // NOTE : routes protégées
     // utilisateur
     my_account: defineRoute(`${appRoot}/mon-compte`),
     my_access_keys: defineRoute(`${appRoot}/mes-cles`),
@@ -252,4 +253,5 @@ export const publicRoutes: typeof knownRoutes = [
     "join",
     "terms_of_service",
     "service_status",
+    "login_disabled",
 ];

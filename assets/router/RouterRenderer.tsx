@@ -24,6 +24,7 @@ const Accessibility = lazy(() => import("../pages/footer/Accessibility"));
 const LegalNotice = lazy(() => import("../pages/footer/LegalNotice"));
 const PersonalData = lazy(() => import("../pages/footer/PersonalData"));
 const TermsOfService = lazy(() => import("../pages/footer/TermsOfService"));
+const LoginDisabled = lazy(() => import("../pages/LoginDisabled"));
 
 const Me = lazy(() => import("../entrepot/pages/users/Me"));
 const MyAccessKeys = lazy(() => import("../entrepot/pages/users/MyAccessKeys"));
@@ -108,6 +109,8 @@ const RouterRenderer: FC = () => {
                 return <TermsOfService />;
             case "service_status":
                 return <ServiceStatus />;
+            case "login_disabled":
+                return <LoginDisabled />;
             case "my_account":
                 return <Me />;
             case "my_access_keys":
