@@ -9,6 +9,7 @@ parameters:
     iam_realm: "%env(resolve:IAM_REALM)%"
     iam_client_id: "%env(resolve:IAM_CLIENT_ID)%"
     iam_client_secret: "%env(resolve:IAM_CLIENT_SECRET)%"
+    iam_login_disabled: "%env(resolve:IAM_LOGIN_DISABLED)%"
 
     sandbox_service_account:
         client_id: "%env(resolve:SANDBOX_SERVICE_ACCOUNT_CLIENT_ID)%"

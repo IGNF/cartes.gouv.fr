@@ -34,6 +34,7 @@ import { BreadcrumbFrTranslations } from "../Breadcrumb";
 import { RightsFrTranslations } from "../Rights";
 import { StyleFrTranslations } from "../Style";
 import type { Translations } from "../i18n";
+import { LoginDisabledFrTranslations } from "../../pages/LoginDisabled";
 
 export const translations: Translations<"fr"> = {
     Common: commonFrTranslations,
@@ -71,4 +72,5 @@ export const translations: Translations<"fr"> = {
     DatasheetUploadForm: DatasheetUploadFormFrTranslations,
     DatasheetList: DatasheetListFrTranslations,
     AccessRestrictions: AccessRestrictionsFrTranslations,
+    LoginDisabled: LoginDisabledFrTranslations,
 };

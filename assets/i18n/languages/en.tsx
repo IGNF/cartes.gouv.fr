@@ -34,6 +34,7 @@ import { RightsEnTranslations } from "../Rights";
 import { StyleEnTranslations } from "../Style";
 import type { Translations } from "../i18n";
 import { DatasheetUploadFormEnTranslations } from "../../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadForm";
+import { LoginDisabledEnTranslations } from "../../pages/LoginDisabled";
 
 export const translations: Translations<"en"> = {
     Common: commonEnTranslations,
@@ -71,4 +72,5 @@ export const translations: Translations<"en"> = {
     DatasheetUploadForm: DatasheetUploadFormEnTranslations,
     DatasheetList: DatasheetListEnTranslations,
     AccessRestrictions: AccessRestrictionsEnTranslations,
+    LoginDisabled: LoginDisabledEnTranslations,
 };
