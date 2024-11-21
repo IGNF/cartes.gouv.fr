@@ -1,14 +1,18 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { useIsDark } from "@codegouvfr/react-dsfr/useIsDark";
-import MDEditor from "@uiw/react-md-editor";
-import { CSSProperties, FC } from "react";
+import MDEditor, { ICommand } from "@uiw/react-md-editor";
+import { CSSProperties, FC, ReactNode } from "react";
 
-import getLocaleCommands from "../../modules/react-md/react-md-commands";
+import { getLocaleCommands } from "../../modules/react-md/commands";
 import Translator from "../../modules/Translator";
+import { useLang } from "../../i18n/i18n";
 
 type MarkdownEditorProps = {
     label?: string;
-    hintText?: string;
+    hintText?: ReactNode;
+    /* Les commandes supplémentaires standard peuvent être récupérées via 
+    getExtraCommands dans @uiw/react-md-editor */
+    extraCommands?: ICommand[];
     value: string;
     onChange: (values: string) => void;
     state?: "default" | "error" | "success";
@@ -17,8 +21,9 @@ type MarkdownEditorProps = {
 };
 
 const MarkdownEditor: FC<MarkdownEditorProps> = (props) => {
-    const { label, hintText, value, state, stateRelatedMessage, placeholder, onChange } = props;
+    const { label, hintText, extraCommands, value, state, stateRelatedMessage, placeholder, onChange } = props;
     const { isDark } = useIsDark();
+    const { lang } = useLang();
 
     const customStyle: CSSProperties = {
         backgroundColor: fr.colors.decisions.background.contrast.grey.default,
@@ -39,8 +44,8 @@ const MarkdownEditor: FC<MarkdownEditorProps> = (props) => {
             <MDEditor
                 value={value}
                 height={200}
-                commands={getLocaleCommands("fr")}
-                extraCommands={[]}
+                commands={getLocaleCommands(lang)}
+                extraCommands={extraCommands ?? []}
                 textareaProps={{
                     placeholder: placeholder ?? Translator.trans("service.wfs.new.description_form.markdown_placeholder"),
                 }}

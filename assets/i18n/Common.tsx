@@ -6,12 +6,15 @@ export const { i18n } = declareComponentKeys<
     | "add"
     | "adding"
     | "modify"
+    | "apply"
+    | "record"
     | "modifying"
     | "removing"
     | "loading"
     | "continue"
     | "validate"
     | "submit"
+    | "save"
     | "copy"
     | "send"
     | "cancel"
@@ -31,6 +34,8 @@ export const { i18n } = declareComponentKeys<
     | "next_step"
     | "url_copied"
     | "copy_to_clipboard"
+    | "download"
+    | "trimmed_error"
 >()("Common");
 
 export const commonFrTranslations: Translations<"fr">["Common"] = {
@@ -39,12 +44,15 @@ export const commonFrTranslations: Translations<"fr">["Common"] = {
     add: "Ajouter",
     adding: "Ajout en cours ...",
     modify: "Modifier",
+    apply: "Appliquer",
+    record: "Enregistrer",
     modifying: "Modification en cours ...",
     removing: "Suppression en cours ...",
     loading: "Chargement ...",
     continue: "Continuer",
     validate: "Valider",
     submit: "Soumettre",
+    save: "Sauvegarder",
     copy: "Copier",
     send: "Envoyer",
     cancel: "Annuler",
@@ -64,6 +72,8 @@ export const commonFrTranslations: Translations<"fr">["Common"] = {
     next_step: "Étape suivante",
     url_copied: "URL copiée",
     copy_to_clipboard: "Copier dans le presse-papier",
+    download: "Télécharger",
+    trimmed_error: "La chaîne de caractères ne doit contenir aucun espace en début et fin",
 };
 
 export const commonEnTranslations: Translations<"en">["Common"] = {
@@ -72,12 +82,15 @@ export const commonEnTranslations: Translations<"en">["Common"] = {
     add: "Add",
     adding: "Adding ...",
     modify: "Modify",
+    apply: "Apply",
+    record: "Record",
     modifying: "modifying ...",
     removing: "Removing ...",
     loading: "Loading ...",
     continue: "Continue",
     validate: "Validate",
     submit: "Submit",
+    save: "Save",
     copy: "Copy",
     send: "Send",
     cancel: "Cancel",
@@ -97,4 +110,6 @@ export const commonEnTranslations: Translations<"en">["Common"] = {
     next_step: "Next step",
     url_copied: "URL copied",
     copy_to_clipboard: "Copier dans le presse-papier",
+    download: "Download",
+    trimmed_error: "The character string must not contain any spaces at the beginning and end",
 };

@@ -20,6 +20,7 @@ export type ComponentKey =
     | typeof import("./Breadcrumb").i18n
     | typeof import("./Rights").i18n
     | typeof import("./Style").i18n
+    | typeof import("../components/Input/InputCollection").i18n
     | typeof import("../entrepot/pages/users/Me").i18n
     | typeof import("../entrepot/pages/communities/AddMember").i18n
     | typeof import("../entrepot/pages/communities/CommunityMembers").i18n
@@ -50,7 +51,21 @@ export type ComponentKey =
     | typeof import("../entrepot/pages/service/TableSelection").i18n
     | typeof import("../entrepot/pages/service/AccessRestrictions").i18n
     | typeof import("../entrepot/pages/service/wms-vector/UploadStyleFile").i18n
-    | typeof import("../espaceco/pages/communities/EspaceCoCommunitiesTr").i18n;
+    | typeof import("../espaceco/pages/communities/CommunityListTr").i18n
+    | typeof import("../espaceco/pages/communities/ManageCommunityTr").i18n
+    | typeof import("../espaceco/pages/communities/management/validationTr").i18n
+    | typeof import("../espaceco/pages/communities/management/SearchTr").i18n
+    | typeof import("../espaceco/pages/communities/management/Description").i18n
+    | typeof import("../espaceco/pages/communities/management/Reports").i18n
+    | typeof import("../espaceco/pages/communities/management/reports/ThemeTr").i18n
+    | typeof import("../espaceco/pages/communities/management/reports/ReportStatusesTr").i18n
+    | typeof import("../espaceco/pages/communities/management/reports/SharedThemes").i18n
+    | typeof import("../espaceco/pages/communities/management/reports/EmailPlanners").i18n
+    | typeof import("../espaceco/pages/communities/management/reports/emailplanners/AddOrEditEmailPlannerTr").i18n
+    | typeof import("../espaceco/pages/communities/management/reports/emailplanners/EmailPlannerKeywords").i18n
+    | typeof import("../espaceco/pages/communities/management/Members").i18n
+    | typeof import("../espaceco/pages/communities/management/member/AddMembersDialog").i18n
+    | typeof import("../espaceco/pages/communities/management/member/ManageGridsDialog").i18n;
 
 export type Translations<L extends Language> = GenericTranslations<ComponentKey, Language, typeof fallbackLanguage, L>;
 export type LocalizedString = Parameters<typeof resolveLocalizedString>[0];

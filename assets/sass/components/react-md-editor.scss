@@ -1,0 +1,16 @@
+.w-md-editor-toolbar li > button.frx-keywords-btn {
+    all: unset;
+
+    color: var(--text-inverted-blue-france);
+    background-color: var(--background-action-high-blue-france);
+    --hover: var(--background-action-high-blue-france-hover);
+    --active: var(--background-action-high-blue-france-active);
+
+    border: 1px solid grey;
+    font-weight: 500;
+    font-size: 0.8rem;
+    line-height: 1rem;
+    min-height: 1.5rem;
+    padding: 0 0.4rem;
+    margin: 0.25rem;
+}
