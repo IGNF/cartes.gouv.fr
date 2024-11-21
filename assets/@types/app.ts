@@ -231,7 +231,7 @@ export { EndpointDetailResponseDtoTypeEnum as EndpointTypeEnum };
 
 export type CheckOrProcessingExecutionLogs = [string];
 export type CheckDetailed = CheckingExecutionDetailResponseDto & {
-    logs: CheckOrProcessingExecutionLogs;
+    logs?: CheckOrProcessingExecutionLogs;
 };
 
 export type ProcessingExecution = ProcessingExecutionDetailResponseDto;
@@ -245,9 +245,9 @@ export type StoredDataReport = {
     processing_executions: StoredDataReportProcessingExecution[];
 };
 
-type StoredDataReportProcessingExecution = ProcessingExecution & {
+export type StoredDataReportProcessingExecution = ProcessingExecution & {
     output: ProcessingExecutionOutputStoredDataDto;
-    logs: CheckOrProcessingExecutionLogs;
+    logs?: CheckOrProcessingExecutionLogs;
 };
 
 export type UserRightsResponseDto = {
