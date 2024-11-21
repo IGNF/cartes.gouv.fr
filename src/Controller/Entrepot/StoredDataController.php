@@ -119,7 +119,10 @@ class StoredDataController extends AbstractController implements ApiControllerIn
             foreach ($uploadChecks as &$checkType) {
                 foreach ($checkType as &$checkExecution) {
                     $checkExecution = array_merge($checkExecution, $this->uploadApiService->getCheckExecution($datastoreId, $checkExecution['_id']));
-                    $checkExecution['logs'] = $this->uploadApiService->getCheckExecutionLogs($datastoreId, $checkExecution['_id']);
+                    try {
+                        $checkExecution['logs'] = $this->uploadApiService->getCheckExecutionLogs($datastoreId, $checkExecution['_id']);
+                    } catch (ApiException $ex) {
+                    }
                     $inputUpload['checks'][] = $checkExecution;
                 }
             }
@@ -131,14 +134,21 @@ class StoredDataController extends AbstractController implements ApiControllerIn
             // récupération de l'exécution de traitement d'intégration en base de données
             if ($procIntegrationId) {
                 $procIntegrationExec = $this->processingApiService->getExecution($datastoreId, $procIntegrationId);
-                $procIntegrationExec['logs'] = $this->processingApiService->getExecutionLogs($datastoreId, $procIntegrationId);
+                try {
+                    $procIntegrationExec['logs'] = $this->processingApiService->getExecutionLogs($datastoreId, $procIntegrationId);
+                } catch (ApiException $ex) {
+                }
+
                 $procExections[] = $procIntegrationExec;
             }
 
             // récupération de l'exécution de traitement de création de pyramide vecteur
             if ($procPyramidCreationId) {
                 $procPyramidCreationExec = $this->processingApiService->getExecution($datastoreId, $procPyramidCreationId);
-                $procPyramidCreationExec['logs'] = $this->processingApiService->getExecutionLogs($datastoreId, $procPyramidCreationId);
+                try {
+                    $procPyramidCreationExec['logs'] = $this->processingApiService->getExecutionLogs($datastoreId, $procPyramidCreationId);
+                } catch (ApiException $ex) {
+                }
                 $procExections[] = $procPyramidCreationExec;
             }
 
