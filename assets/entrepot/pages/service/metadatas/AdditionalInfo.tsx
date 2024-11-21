@@ -1,11 +1,12 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Input from "@codegouvfr/react-dsfr/Input";
+import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import Select from "@codegouvfr/react-dsfr/Select";
 import { Select as SelectNext } from "@codegouvfr/react-dsfr/SelectNext";
 import { FC, useMemo } from "react";
 import { Controller, UseFormReturn } from "react-hook-form";
 
-import type { Pyramid, ServiceFormValuesBaseType, VectorDb } from "../../../../@types/app";
+import { MetadataHierarchyLevel, type Pyramid, type ServiceFormValuesBaseType, type VectorDb } from "../../../../@types/app";
 import AutocompleteSelect from "../../../../components/Input/AutocompleteSelect";
 import resolutions from "../../../../data/md_resolutions.json";
 import { getTranslation } from "../../../../i18n/i18n";
@@ -87,6 +88,30 @@ const AdditionalInfo: FC<AdditionalInfoProps> = ({ /*storedData, datastoreId,*/ 
                 }}
             />
             <h3>{t("metadata.additionnal_infos_form.metadata_information_title")}</h3>
+            <RadioButtons
+                legend={t("metadata.additionnal_infos_form.hierarchy_level")}
+                state={errors.hierarchy_level ? "error" : "default"}
+                stateRelatedMessage={errors.hierarchy_level?.message}
+                orientation="vertical"
+                options={[
+                    {
+                        label: t(`metadata.additionnal_infos_form.hierarchy_level_${MetadataHierarchyLevel.Dataset}`),
+                        hintText: t(`metadata.additionnal_infos_form.hierarchy_level_${MetadataHierarchyLevel.Dataset}_hint`),
+                        nativeInputProps: {
+                            ...register("hierarchy_level"),
+                            value: MetadataHierarchyLevel.Dataset,
+                        },
+                    },
+                    {
+                        label: t("metadata.additionnal_infos_form.hierarchy_level_series"),
+                        hintText: t("metadata.additionnal_infos_form.hierarchy_level_series_hint"),
+                        nativeInputProps: {
+                            ...register("hierarchy_level"),
+                            value: MetadataHierarchyLevel.Series,
+                        },
+                    },
+                ]}
+            />
             <Controller
                 control={control}
                 name="languages"

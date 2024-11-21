@@ -18,6 +18,7 @@ class CswMetadata
     public ?string $abstract;
     public ?string $creationDate;
     public ?string $updateDate;
+    public ?string $resourceGenealogy;
 
     /** @var array<string> */
     public ?array $inspireKeywords;
@@ -58,6 +59,7 @@ class CswMetadata
         $empty->thumbnailUrl = null;
         $empty->resolution = null;
         $empty->frequencyCode = 'unknown';
+        $empty->resourceGenealogy = '';
 
         $empty->topicCategories = [];
         $empty->inspireKeywords = [];

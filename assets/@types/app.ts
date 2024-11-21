@@ -191,6 +191,11 @@ export type TypeInfosWithBbox =
     | ConfigurationWmsVectorDetailsContent
     | ConfigurationWmtsTmsDetailsContent;
 
+export enum MetadataHierarchyLevel {
+    Dataset = "dataset",
+    Series = "series",
+}
+
 export type MetadataFormValuesType = {
     metadata_file_content?: FileList;
     identifier?: string;
@@ -199,6 +204,7 @@ export type MetadataFormValuesType = {
     email_contact?: string;
     creation_date?: string;
     resource_genealogy?: string;
+    hierarchy_level?: MetadataHierarchyLevel;
     organization?: string;
     organization_email?: string;
     category?: string[];
@@ -304,7 +310,8 @@ export type CswDocument = {
 
 export type CswMetadata = {
     file_identifier?: string;
-    hierarchy_level?: string;
+    hierarchy_level?: MetadataHierarchyLevel;
+    resource_genealogy?: string;
     language?: LanguageType;
     charset?: string;
     title?: string;

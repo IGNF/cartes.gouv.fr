@@ -1,12 +1,12 @@
 import { format as datefnsFormat } from "date-fns";
 
-import { EndpointTypeEnum, Metadata, MetadataFormValuesType, Service, StoredData } from "../../../@types/app";
+import { EndpointTypeEnum, Metadata, MetadataFormValuesType, MetadataHierarchyLevel, Service, StoredData } from "../../../@types/app";
 import { ConfigurationWfsDetailsContent, ConfigurationWmsVectorDetailsContent, ConfigurationWmtsTmsDetailsContent } from "../../../@types/entrepot";
 import { getProjectionCode, removeDiacritics } from "../../../utils";
 import { getEndpointSuffix } from "./metadatas/Description";
+import { PyramidVectorTmsServiceFormValuesType } from "./tms/PyramidVectorTmsServiceForm";
 import { WfsServiceFormValuesType, WfsTableInfos } from "./wfs/WfsServiceForm";
 import { WmsVectorServiceFormValuesType } from "./wms-vector/WmsVectorServiceForm";
-import { PyramidVectorTmsServiceFormValuesType } from "./tms/PyramidVectorTmsServiceForm";
 
 const DEFAULT_CHARSET = "utf8";
 const DEFAULT_LANGUAGE = { language: "français", code: "fre" };
@@ -15,7 +15,8 @@ const getMetadataFormDefaultValues = (metadata?: Metadata): MetadataFormValuesTy
     return {
         languages: metadata?.csw_metadata?.language ? [metadata?.csw_metadata?.language] : [DEFAULT_LANGUAGE],
         creation_date: metadata?.csw_metadata?.creation_date,
-        resource_genealogy: metadata?.csw_metadata?.hierarchy_level,
+        resource_genealogy: metadata?.csw_metadata?.resource_genealogy,
+        hierarchy_level: metadata?.csw_metadata?.hierarchy_level ?? MetadataHierarchyLevel.Dataset,
         email_contact: metadata?.csw_metadata?.contact_email,
         organization: metadata?.csw_metadata?.organisation_name,
         organization_email: metadata?.csw_metadata?.organisation_email,

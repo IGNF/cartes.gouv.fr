@@ -6,7 +6,7 @@ import Tag from "@codegouvfr/react-dsfr/Tag";
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import { FC, useMemo } from "react";
 
-import type { DatasheetDetailed, Metadata, StoredData } from "../../../../../@types/app";
+import { MetadataHierarchyLevel, type DatasheetDetailed, type Metadata, type StoredData } from "../../../../../@types/app";
 import ExtentMap from "../../../../../components/Utils/ExtentMap";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import TextCopyToClipboard from "../../../../../components/Utils/TextCopyToClipboard";
@@ -138,7 +138,6 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, datasheet, metadataQue
                                 hintText={"Valeur identifiant la ressource de manière unique sur le catalogue"}
                                 content={metadata.csw_metadata?.file_identifier}
                             />
-                            <MetadataField title={"Fréquence de mise à jour"} content={frequencyCode} />
                             <MetadataField
                                 title={"Catégories thématiques"}
                                 content={
@@ -177,19 +176,13 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, datasheet, metadataQue
                             />
                         </Accordion>
 
+                        <Accordion titleAs="h2" defaultExpanded={true} label={"Qualité"}>
+                            <MetadataField title={"Généalogie de la ressource"} content={metadata.csw_metadata?.resource_genealogy} />
+                        </Accordion>
+
                         <Accordion titleAs="h2" defaultExpanded={true} label={"Référence temporelle"}>
                             <MetadataField title={"Date de la création de la ressource"} content={metadata.csw_metadata?.creation_date} />
-                            <MetadataField
-                                title={"Généalogie de la ressource"}
-                                content={(() => {
-                                    switch (metadata.csw_metadata?.hierarchy_level) {
-                                        case "series":
-                                            return "Produit";
-                                        case "dataset":
-                                            return "Lot";
-                                    }
-                                })()}
-                            />
+                            <MetadataField title={"Fréquence de mise à jour"} content={frequencyCode} />
                         </Accordion>
 
                         <Accordion titleAs="h2" defaultExpanded={true} label={"Contact sur les métadonnées"}>
@@ -275,6 +268,17 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, datasheet, metadataQue
                         </Accordion>
 
                         <Accordion titleAs="h2" defaultExpanded={true} label={"Informations sur les métadonnées"}>
+                            <MetadataField
+                                title={"Type de ressource"}
+                                content={(() => {
+                                    switch (metadata.csw_metadata?.hierarchy_level) {
+                                        case MetadataHierarchyLevel.Series:
+                                            return "Produit";
+                                        case MetadataHierarchyLevel.Dataset:
+                                            return "Lot";
+                                    }
+                                })()}
+                            />
                             <MetadataField
                                 title={"Langue des métadonnées"}
                                 hintText={"Langue utilisée pour décrire les métadonnées"}
