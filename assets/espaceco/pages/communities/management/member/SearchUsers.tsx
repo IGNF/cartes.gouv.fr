@@ -10,6 +10,7 @@ import { UserDTO } from "../../../../../@types/espaceco";
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/espaceco/RQKeys";
 import api from "../../../../api";
+import isEmail from "validator/lib/isEmail";
 
 import "../../../../../sass/components/autocomplete.scss";
 
@@ -65,8 +66,13 @@ const SearchUsers: FC<SearchUsersProps> = ({ label, hintText, value, state, stat
                         return option === v;
                     }}
                     onInputChange={(_, v) => setSearch(v)}
-                    onChange={(_, v) => {
-                        onChange(v);
+                    onChange={(_, value) => {
+                        if (value && Array.isArray(value)) {
+                            value = value.filter((v) => {
+                                return isUser(v) || isEmail(v);
+                            });
+                            onChange(value);
+                        }
                     }}
                 />
             </MuiDsfrThemeProvider>

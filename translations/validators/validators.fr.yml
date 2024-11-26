@@ -103,3 +103,7 @@ common:
     attribution_url_error: "L'URL de l'attribution n'est pas valide"
     resolution_error: "La résolution n'est pas valide"
     share_with_error: "La restriction n'est pas valide"
+
+espaceco:
+    add_members:
+        email_error: "l'email n'est pas valide"

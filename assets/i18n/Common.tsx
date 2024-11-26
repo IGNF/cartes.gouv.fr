@@ -22,6 +22,8 @@ export const { i18n } = declareComponentKeys<
     | "see"
     | "yes"
     | "no"
+    | "accept"
+    | "reject"
     | "publish"
     | "unpublish"
     | "published"
@@ -60,6 +62,8 @@ export const commonFrTranslations: Translations<"fr">["Common"] = {
     see: "Consulter",
     yes: "Oui",
     no: "Non",
+    accept: "Accepter",
+    reject: "Refuser",
     publish: "Publier",
     unpublish: "Dépublier",
     published: "Publié",
@@ -98,6 +102,8 @@ export const commonEnTranslations: Translations<"en">["Common"] = {
     see: "Check",
     yes: "Yes",
     no: "No",
+    accept: "Accept",
+    reject: "Reject",
     publish: "Publish",
     unpublish: "Unpublish",
     published: "Published",

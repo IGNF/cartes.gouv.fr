@@ -8,6 +8,7 @@ import RedirectToLogin from "../pages/RedirectToLogin";
 import PageNotFound from "../pages/error/PageNotFound";
 import { useAuthStore } from "../stores/AuthStore";
 import { knownRoutes, publicRoutes, routes, useRoute } from "./router";
+import MemberInvitation from "../espaceco/pages/communities/MemberInvitation";
 
 const About = lazy(() => import("../pages/About"));
 const Documentation = lazy(() => import("../pages/Documentation"));
@@ -187,6 +188,8 @@ const RouterRenderer: FC = () => {
                 return <EspaceCoCommunityList />;
             case "espaceco_manage_community":
                 return <EspaceCoManageCommunity communityId={route.params.communityId} />;
+            case "espaceco_member_invitation":
+                return <MemberInvitation communityId={route.params.communityId} />;
             default:
                 return <PageNotFound />;
         }

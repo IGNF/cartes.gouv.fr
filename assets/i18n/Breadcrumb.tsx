@@ -41,6 +41,7 @@ export const { i18n } = declareComponentKeys<
     | "datastore_pyramid_vector_tms_service_edit"
     | "datastore_service_view"
     | "espaceco_community_list"
+    | "espaceco_member_invitation"
     | { K: "espaceco_manage_community"; P: { communityName?: string }; R: string }
 >()("Breadcrumb");
 
@@ -86,6 +87,7 @@ export const BreadcrumbFrTranslations: Translations<"fr">["Breadcrumb"] = {
     datastore_service_view: "Prévisualisation d'un service",
     espaceco_community_list: "Espace collaboratif",
     espaceco_manage_community: ({ communityName }) => `Gérer le guichet ${communityName ?? ""}`,
+    espaceco_member_invitation: "Invitation",
 };
 
 export const BreadcrumbEnTranslations: Translations<"en">["Breadcrumb"] = {
@@ -130,4 +132,5 @@ export const BreadcrumbEnTranslations: Translations<"en">["Breadcrumb"] = {
     datastore_service_view: "Preview a service",
     espaceco_community_list: "Collaborative space",
     espaceco_manage_community: ({ communityName }) => `Manage community ${communityName ?? ""}`,
+    espaceco_member_invitation: "Invitation",
 };

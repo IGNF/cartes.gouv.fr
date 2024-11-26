@@ -27,6 +27,7 @@ import { PermissionsEnTranslations } from "../../entrepot/pages/users/permission
 import { CommunityListEnTranslations } from "../../espaceco/pages/communities/CommunityListTr";
 import { ManageCommunityEnTranslations } from "../../espaceco/pages/communities/ManageCommunityTr";
 import { ManageCommunityValidationsEnTranslations } from "../../espaceco/pages/communities/management/validationTr";
+import { MemberInvitationEnTranslations } from "../../espaceco/pages/communities/MemberInvitation";
 import { SearchEnTranslations } from "../../espaceco/pages/communities/management/SearchTr";
 import { TMSStyleFilesManagerEnTranslations } from "../../modules/Style/TMSStyleFilesManager";
 import { contactEnTranslations } from "../../pages/assistance/contact/Contact";
@@ -90,6 +91,7 @@ export const translations: Translations<"en"> = {
     CommunityList: CommunityListEnTranslations,
     ManageCommunity: ManageCommunityEnTranslations,
     ManageCommunityValidations: ManageCommunityValidationsEnTranslations,
+    MemberInvitation: MemberInvitationEnTranslations,
     Theme: ThemeEnTranslations,
     Description: DescriptionEnTranslations,
     Reports: ReportsEnTranslations,

@@ -25,6 +25,7 @@ const RQKeys = {
     userSharedThemes: (): string[] => ["user", "shared_themes"],
     searchAddress: (search: string): string[] => ["searchAddress", search],
     searchGrids: (text: string): string[] => ["searchGrids", text],
+    getMe: (): string[] => ["espaceco", "users", "me"],
     searchUsers: (text: string): string[] => ["searchUsers", text],
     tables: (communityId: number): string[] => ["feature_types", communityId.toString()],
     emailPlanners: (communityId: number): string[] => ["emailplanners", communityId.toString()],
