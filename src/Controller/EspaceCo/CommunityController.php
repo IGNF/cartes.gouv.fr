@@ -3,17 +3,21 @@
 namespace App\Controller\EspaceCo;
 
 use App\Controller\ApiControllerInterface;
+use App\Dto\Espaceco\Members\AddMembersDTO;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\EspaceCoApi\CommunityApiService;
 use App\Services\EspaceCoApi\UserApiService;
+use App\Services\MailerService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Uid\Uuid;
 
 #[Route(
@@ -31,8 +35,9 @@ class CommunityController extends AbstractController implements ApiControllerInt
     public function __construct(
         ParameterBagInterface $parameters,
         private Filesystem $fs,
+        private MailerService $mailerService,
         private CommunityApiService $communityApiService,
-        private UserApiService $userApiService
+        private UserApiService $userApiService,
     ) {
         $this->varDataPath = $parameters->get('upload_path');
     }
@@ -69,7 +74,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
     public function getMeMember(
         #[MapQueryParameter] bool $pending,
         #[MapQueryParameter] ?int $page = 1,
-        #[MapQueryParameter] ?int $limit = 10
+        #[MapQueryParameter] ?int $limit = 10,
     ): JsonResponse {
         try {
             $me = $this->userApiService->getMe();
@@ -152,7 +157,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
         int $communityId,
         #[MapQueryParameter(filter: \FILTER_VALIDATE_REGEXP, options: ['regexp' => '/^admin|member|pending$/'])] array $roles = [],
         #[MapQueryParameter] ?int $page = 1,
-        #[MapQueryParameter(options: ['min_range' => 1, 'max_range' => 50])] ?int $limit = 10
+        #[MapQueryParameter(options: ['min_range' => 1, 'max_range' => 50])] ?int $limit = 10,
     ): JsonResponse {
         try {
             $response = $this->communityApiService->getCommunityMembers($communityId, $roles, $page, $limit);
@@ -163,11 +168,35 @@ class CommunityController extends AbstractController implements ApiControllerInt
         }
     }
 
+    #[Route('/{communityId}/members', name: 'add_members', methods: ['POST'])]
+    public function addMembers(
+        int $communityId,
+        #[MapRequestPayload] AddMembersDTO $dto): JsonResponse
+    {
+        try {
+            $community = $this->communityApiService->getCommunity($communityId);
+
+            $members = [];
+            foreach ($dto->members as $userId) {
+                $email = filter_var($userId, FILTER_VALIDATE_EMAIL);
+                $member = $this->communityApiService->addMember($communityId, $userId);
+                if ($email && 'invited' === $member['role']) {
+                    $this->_sendEmail($email, $community);
+                } else {
+                    $members[] = $member;
+                }
+            }
+
+            return new JsonResponse($members);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
     #[Route('/{communityId}/member/{userId}/update_role', name: 'update_member_role', methods: ['PATCH'])]
     public function updateMemberRole(int $communityId, int $userId, Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-
         $member = $this->communityApiService->updateMember($communityId, $userId, 'role', $data['role']);
 
         return new JsonResponse($member);
@@ -177,7 +206,6 @@ class CommunityController extends AbstractController implements ApiControllerInt
     public function updateMemberGrids(int $communityId, int $userId, Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-
         $member = $this->communityApiService->updateMember($communityId, $userId, 'grids', $data['grids']);
 
         return new JsonResponse($member);
@@ -275,5 +303,18 @@ class CommunityController extends AbstractController implements ApiControllerInt
 
             return ($upM1 < $upM2) ? -1 : 1;
         });
+    }
+
+    /**
+     * @param array<mixed> $community
+     */
+    private function _sendEmail(string $email, array $community): void
+    {
+        $communityId = $community['id'];
+        $communityName = $community['name'];
+        $subject = "[cartes.gouv.fr] Invitation au guichet $communityName";
+
+        $url = $this->generateUrl('cartesgouvfr_app', [], UrlGeneratorInterface::ABSOLUTE_URL)."espace-collaboratif/$communityId/invitation";
+        $this->mailerService->sendMail($email, $subject, 'Mailer/espaceco/member_invitation.html.twig', ['community' => $community, 'link' => $url]);
     }
 }

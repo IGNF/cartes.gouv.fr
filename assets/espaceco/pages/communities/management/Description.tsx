@@ -48,7 +48,6 @@ const Description: FC<DescriptionProps> = ({ community }) => {
         staleTime: 3600000,
     });
 
-    // TODO DECOMMENTER
     const communityDocumentsQuery = useQuery<DocumentDTO[], CartesApiException>({
         queryKey: RQKeys.communityDocuments(community.id),
         queryFn: ({ signal }) => api.communityDocuments.getAll(community.id, [], signal),
@@ -81,7 +80,6 @@ const Description: FC<DescriptionProps> = ({ community }) => {
         control,
         register,
         formState: { errors },
-        // setValue: setFormValue,
     } = useForm({
         resolver: yupResolver(schema(tValid)),
         mode: "onChange",
@@ -154,7 +152,7 @@ export default Description;
 export const { i18n } = declareComponentKeys<"loading_documents">()("Description");
 
 export const DescriptionFrTranslations: Translations<"fr">["Description"] = {
-    loading_documents: "Recherche des tables pour la configuration des thèmes ...",
+    loading_documents: "Chargement des documents",
 };
 
 export const DescriptionEnTranslations: Translations<"en">["Description"] = {
