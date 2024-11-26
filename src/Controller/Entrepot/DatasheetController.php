@@ -44,7 +44,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
     {
         $uploads = $this->uploadApiService->getAll($datastoreId, [
             'sort' => 'lastEvent,desc',
-            'fields' => ['tags'],
+            'fields' => 'tags',
         ]);
 
         $uploadDatasheetNames = array_map(function ($upload) {
@@ -55,7 +55,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
 
         $storedDataList = $this->storedDataApiService->getAll($datastoreId, [
             'sort' => 'lastEvent,desc',
-            'fields' => ['tags'],
+            'fields' => 'tags',
         ]);
 
         $storedDataDatasheetNames = array_map(function ($storedData) {

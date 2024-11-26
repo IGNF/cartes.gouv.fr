@@ -18,14 +18,11 @@ class UploadApiService extends BaseEntrepotApiService
             $query['sort'] = 'lastEvent,desc';
         }
 
-        /*
-         * pour transformer "sort=lastEvent,desc&fields[0]=field1&fields[1]=field2" en "sort=lastEvent,desc&fields=field1&fields=field2"
-         * l'API entrepôt ignore le premier format
-         */
-        $queryString = urldecode(http_build_query($query));
-        $queryString = preg_replace('/\[\d+\]/', '', $queryString);
+        if (array_key_exists('fields', $query) && is_array($query['fields']) && !empty($query['fields'])) {
+            $query['fields'] = implode(',', $query['fields']);
+        }
 
-        return $this->requestAll("datastores/$datastoreId/uploads?{$queryString}");
+        return $this->requestAll("datastores/$datastoreId/uploads", $query);
     }
 
     /**
