@@ -15,6 +15,7 @@ import Main from "../components/Layout/Main";
 
 const EspaceCoCommunityList = lazy(() => import("../espaceco/pages/communities/Communities"));
 const EspaceCoManageCommunity = lazy(() => import("../espaceco/pages/communities/ManageCommunity"));
+const MemberInvitation = lazy(() => import("../espaceco/pages/communities/MemberInvitation"));
 
 const RouterRenderer: FC = () => {
     const route = useRoute();
@@ -45,6 +46,8 @@ const RouterRenderer: FC = () => {
                     return <EspaceCoCommunityList />;
                 case "espaceco_manage_community":
                     return <EspaceCoManageCommunity communityId={route.params.communityId} />;
+                case "espaceco_member_invitation":
+                    return <MemberInvitation communityId={route.params.communityId} />;
             }
         }
 

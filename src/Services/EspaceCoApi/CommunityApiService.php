@@ -16,7 +16,7 @@ class CommunityApiService extends BaseEspaceCoApiService
         RequestStack $requestStack,
         LoggerInterface $logger,
         private UserApiService $userApiService,
-        private GridApiService $gridApiService
+        private GridApiService $gridApiService,
     ) {
         parent::__construct($httpClient, $parameters, $filesystem, $requestStack, $logger);
     }
@@ -79,14 +79,7 @@ class CommunityApiService extends BaseEspaceCoApiService
             $member = array_merge($member, $user);
 
             // Ajout des grids
-            $grids = [];
-            foreach ($member['grids'] as $name) {
-                $grid = $this->gridApiService->getGrid($name);
-                if (!$grid['deleted']) {
-                    $grids[] = $grid;
-                }
-            }
-            $member['grids'] = $grids;
+            $member['grids'] = $this->_transformGrids($member['grids']);
         }
 
         usort($members, function ($mb1, $mb2) {
@@ -105,9 +98,19 @@ class CommunityApiService extends BaseEspaceCoApiService
         ];
     }
 
+    public function addMember(int $communityId, int $userId): array
+    {
+        return $this->request('POST', "communities/$communityId/members/$userId", ['user_id' => $userId]);
+    }
+
     public function updateMember(int $communityId, int $userId, string $field, mixed $value): array
     {
-        return $this->request('PATCH', "communities/$communityId/members/$userId", [$field => $value]);
+        $member = $this->request('PATCH', "communities/$communityId/members/$userId", [$field => $value]);
+        if ('grids' === $field) {   // On recupere les grids, pas seulement leur nom
+            $member['grids'] = $this->_transformGrids($member['grids']);
+        }
+
+        return $member;
     }
 
     public function removeMember(int $communityId, int $userId): array
@@ -123,5 +126,21 @@ class CommunityApiService extends BaseEspaceCoApiService
     public function removeLogo(int $communityId): array
     {
         return $this->request('DELETE', "communities/$communityId/logo");
+    }
+
+    /**
+     * @param array<string> $grids
+     */
+    private function _transformGrids(array $grids): array
+    {
+        $result = [];
+        foreach ($grids as $name) {
+            $grid = $this->gridApiService->getGrid($name);
+            if (!$grid['deleted']) {
+                $result[] = $grid;
+            }
+        }
+
+        return $result;
     }
 }

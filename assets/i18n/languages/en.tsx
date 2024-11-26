@@ -37,7 +37,7 @@ import { PermissionsEnTranslations } from "../../entrepot/pages/users/permission
 import { CommunityListEnTranslations } from "../../espaceco/pages/communities/CommunityListTr";
 import { ManageCommunityEnTranslations } from "../../espaceco/pages/communities/ManageCommunityTr";
 import { ManageCommunityValidationsEnTranslations } from "../../espaceco/pages/communities/management/validationTr";
-import { SearchEnTranslations } from "../../espaceco/pages/communities/management/Search";
+import { SearchEnTranslations } from "../../espaceco/pages/communities/management/SearchTr";
 import { TMSStyleFilesManagerEnTranslations } from "../../modules/Style/TMSStyleFilesManager/TMSStyleFilesManager.locale";
 import { BreadcrumbEnTranslations } from "../../modules/entrepot/breadcrumbs/Breadcrumb.locale";
 import { LoginDisabledEnTranslations } from "../../pages/LoginDisabled/LoginDisabled.locale";
@@ -59,6 +59,7 @@ import { AddOrEditEmailPlannerEnTranslations } from "../../espaceco/pages/commun
 import { EmailPlannerKeywordsEnTranslations } from "../../espaceco/pages/communities/management/reports/emailplanners/EmailPlannerKeywords";
 
 import { InputCollectionEnTranslations } from "../../components/Input/InputCollection";
+import { MemberInvitationEnTranslations } from "../../espaceco/pages/communities/MemberInvitation";
 
 export const translations: Translations<"en"> = {
     Common: commonEnTranslations,
@@ -108,6 +109,7 @@ export const translations: Translations<"en"> = {
     DatasheetList: DatasheetListEnTranslations,
     AccessRestrictions: AccessRestrictionsEnTranslations,
     LoginDisabled: LoginDisabledEnTranslations,
+    MemberInvitation: MemberInvitationEnTranslations,
     Theme: ThemeEnTranslations,
     Description: DescriptionEnTranslations,
     Reports: ReportsEnTranslations,

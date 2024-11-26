@@ -191,7 +191,14 @@ const DocumentList: FC<DocumentListProps> = ({ communityId, documents }) => {
                     </div>
                 </Wait>
             )}
-            <Table className={fr.cx("fr-table--sm", "fr-mb-0")} bordered fixed caption={t("desc.documents")} data={datas} />
+            {datas.length ? (
+                <Table className={fr.cx("fr-table--sm", "fr-mb-0")} bordered fixed caption={t("desc.documents")} data={datas} />
+            ) : (
+                <div>
+                    <h3>{t("desc.documents")}</h3>
+                    <div>{t("desc.no_documents")}</div>
+                </div>
+            )}
             <Button
                 className={fr.cx("fr-my-1v")}
                 iconId={"fr-icon-add-circle-line"}

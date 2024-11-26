@@ -40,12 +40,7 @@ import { ManageCommunityValidationsFrTranslations } from "../../espaceco/pages/c
 import { TMSStyleFilesManagerFrTranslations } from "../../modules/Style/TMSStyleFilesManager/TMSStyleFilesManager.locale";
 import { BreadcrumbFrTranslations } from "../../modules/entrepot/breadcrumbs/Breadcrumb.locale";
 import { LoginDisabledFrTranslations } from "../../pages/LoginDisabled/LoginDisabled.locale";
-import { SearchEnTranslations, SearchFrTranslations } from "../../espaceco/pages/communities/management/Search";
 import { SearchFrTranslations } from "../../espaceco/pages/communities/management/SearchTr";
-import { TMSStyleFilesManagerFrTranslations } from "../../modules/Style/TMSStyleFilesManager";
-import { contactFrTranslations } from "../../pages/assistance/contact/Contact";
-import { mapboxStyleValidationFrTranslations } from "../../validations/MapboxStyleValidator";
-import { SldStyleValidationErrorsFrTranslations } from "../../validations/SldStyleValidationErrorsTr";
 import { DescriptionFrTranslations } from "../../espaceco/pages/communities/management/Description";
 import { ReportsFrTranslations } from "../../espaceco/pages/communities/management/Reports";
 import { EmailPlannersFrTranslations } from "../../espaceco/pages/communities/management/reports/EmailPlanners";
@@ -60,6 +55,7 @@ import { EscoCommunityMembersFrTranslations } from "../../espaceco/pages/communi
 import { AddMembersDialogFrTranslations } from "../../espaceco/pages/communities/management/member/AddMembersDialog";
 import { ManageGridsDialogFrTranslations } from "../../espaceco/pages/communities/management/member/ManageGridsDialog";
 import type { Translations } from "../types";
+import { InputCollectionFrTranslations } from "../../components/Input/InputCollection";
 
 export const translations: Translations<"fr"> = {
     Common: commonFrTranslations,
@@ -105,6 +101,7 @@ export const translations: Translations<"fr"> = {
     CommunityList: CommunityListFrTranslations,
     ManageCommunity: ManageCommunityFrTranslations,
     ManageCommunityValidations: ManageCommunityValidationsFrTranslations,
+    MemberInvitation: MemberInvitationFrTranslations,
     Reports: ReportsFrTranslations,
     Description: DescriptionFrTranslations,
     EmailPlanners: EmailPlannersFrTranslations,

@@ -270,6 +270,13 @@ const espacecoRoutes = {
         },
         (p) => `${appRoot}/espace-collaboratif/${p.communityId}/gerer-le-guichet`
     ),
+
+    espaceco_member_invitation: defineRoute(
+        {
+            communityId: param.path.number,
+        },
+        (p) => `${appRoot}/espace-collaboratif/${p.communityId}/invitation`
+    ),
 };
 
 const routeDefs = {

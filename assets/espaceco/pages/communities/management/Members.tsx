@@ -41,8 +41,6 @@ const Members: FC<MembersProps> = ({ community }) => {
     const queryClient = useQueryClient();
 
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const [errorUpdateRole, setErrorUpdateRole] = useState<string | undefined>(undefined);
-    const [errorRemoveMember, setErrorRemoveMember] = useState<string | undefined>(undefined);
 
     const [action, setAction] = useState<"remove" | "reject" | undefined>(undefined);
     const [currentMember, setCurrentMember] = useState<CommunityMember | undefined>(undefined);
@@ -66,31 +64,46 @@ const Members: FC<MembersProps> = ({ community }) => {
         mutationFn: (params) => {
             return api.community.updateMemberRole(params.communityId, params.userId, params.role);
         },
-        onSuccess() {
-            setErrorUpdateRole(undefined);
-
-            queryClient.refetchQueries({ queryKey: RQKeys.communityMembers(community.id, currentPage, maxFetchedMembers) });
-            queryClient.refetchQueries({ queryKey: RQKeys.communityMembershipRequests(community.id) });
-
+        onSuccess(response) {
             /* Mise à jour des données de la requête membersQuery */
-            /*queryClient.setQueryData<GetResponse<CommunityMember>>(RQKeys.communityMembers(community.id, currentPage, maxFetchedMembers), (datas) => {
-                datas?.content.forEach((member) => {
-                    if (member.user_id === response.user_id) {
-                        member.role = response.role; // Mise a jour du role
-                    }
-                });
+            queryClient.setQueryData<GetResponse<CommunityMember>>(RQKeys.communityMembers(community.id, currentPage, maxFetchedMembers), (datas) => {
+                if (datas) {
+                    datas.content.forEach((member) => {
+                        if (member.user_id === response.user_id) {
+                            member.role = response.role; // Mise a jour du role
+                        }
+                    });
+                }
                 return datas;
-            }); */
+            });
 
             /* Mise à jour des données de la requête membershipRequestsQuery */
-            /* queryClient.setQueryData<CommunityMember[]>(RQKeys.communityMembershipRequests(community.id), (datas) => {
+            queryClient.setQueryData<CommunityMember[]>(RQKeys.communityMembershipRequests(community.id), (datas) => {
                 if (datas) {
-                    return datas.filter((member) => member.user_id !== response.user_id);
+                    datas = datas.filter((member) => member.user_id !== response.user_id);
                 }
-            }); */
+                return datas;
+            });
         },
-        onError(e) {
-            setErrorUpdateRole(e.message);
+    });
+
+    /* Mise a jour des grids  de l'utilisateur */
+    const updateGridsMutation = useMutation<CommunityMember, CartesApiException, { communityId: number; userId: number; grids: string[] }>({
+        mutationFn: (params) => {
+            return api.community.updateMemberGrids(params.communityId, params.userId, params.grids);
+        },
+        onSuccess(response) {
+            /* Mise à jour des données de la requête membersQuery */
+            queryClient.setQueryData<GetResponse<CommunityMember>>(RQKeys.communityMembers(community.id, currentPage, maxFetchedMembers), (datas) => {
+                if (datas) {
+                    datas.content.forEach((member) => {
+                        if (member.user_id === response.user_id) {
+                            member.grids = response.grids; // Mise a jour des grids
+                        }
+                    });
+                }
+                return datas;
+            });
         },
     });
 
@@ -99,50 +112,57 @@ const Members: FC<MembersProps> = ({ community }) => {
         mutationFn: ({ communityId, userId }) => {
             return api.community.removeMember(communityId, userId);
         },
-        onSuccess() {
-            setAction(undefined);
-            setErrorRemoveMember(undefined);
-
-            queryClient.refetchQueries({ queryKey: RQKeys.communityMembers(community.id, currentPage, maxFetchedMembers) });
-            queryClient.refetchQueries({ queryKey: RQKeys.communityMembershipRequests(community.id) });
-
+        onSuccess(response) {
             /* Mise à jour des données de la requête membersQuery */
-            /*queryClient.setQueryData<GetResponse<CommunityMember>>(RQKeys.communityMembers(community.id, currentPage, maxFetchedMembers), (datas) => {
+            queryClient.setQueryData<GetResponse<CommunityMember>>(RQKeys.communityMembers(community.id, currentPage, maxFetchedMembers), (datas) => {
                 if (datas) {
                     datas.content = datas.content.filter((member) => member.user_id !== response.user_id);
-                    return datas;
                 }
-            });*/
+                return datas;
+            });
 
             /* Mise à jour des données de la requête membershipRequestsQuery */
-            /*queryClient.setQueryData<CommunityMember[]>(RQKeys.communityMembershipRequests(community.id), (datas) => {
+            queryClient.setQueryData<CommunityMember[]>(RQKeys.communityMembershipRequests(community.id), (datas) => {
                 if (datas) {
-                    return datas.filter((member) => member.user_id !== response.user_id);
+                    datas = datas.filter((member) => member.user_id !== response.user_id);
                 }
-            });*/
+                return datas;
+            });
         },
-        onError(e) {
-            setErrorRemoveMember(e.message);
+        onSettled: () => {
+            setAction(undefined);
         },
     });
 
-    const alert = useCallback(
-        (error: string) => {
-            return (
-                <Alert
-                    severity="error"
-                    closable={false}
-                    title={t("fetch_failed")}
-                    description={
-                        <>
-                            <p>{error}</p>
-                            <Button linkProps={routes.espaceco_community_list().link}>{t("back_to_list")}</Button>
-                        </>
-                    }
-                />
-            );
+    const addMembersMutation = useMutation<CommunityMember[], CartesApiException, { communityId: number; members: (number | string)[] }>({
+        mutationFn: ({ communityId, members }) => {
+            return api.community.addMembers(communityId, members);
         },
-        [t]
+        onSuccess() {
+            queryClient.refetchQueries({ queryKey: RQKeys.communityMembers(community.id, currentPage, maxFetchedMembers) });
+        },
+    });
+
+    const alert = useCallback((title: string, error: string) => {
+        return <Alert className={"fr-my-2w"} severity={"error"} closable={false} title={title} description={error} />;
+    }, []);
+
+    const displayWait = useCallback(
+        (text) => (
+            <Wait>
+                <div className={fr.cx("fr-container")}>
+                    <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
+                        <div className={fr.cx("fr-col-2")}>
+                            <LoadingIcon className={fr.cx("fr-mr-2v")} />
+                        </div>
+                        <div className={fr.cx("fr-col-10")}>
+                            <h6 className={fr.cx("fr-h6", "fr-m-0")}>{text}</h6>
+                        </div>
+                    </div>
+                </div>
+            </Wait>
+        ),
+        []
     );
 
     const headers = useMemo(() => [t("username_header"), t("name_header"), t("status_header"), t("grids_header"), ""], [t]);
@@ -232,12 +252,34 @@ const Members: FC<MembersProps> = ({ community }) => {
     return (
         <div>
             {/* les requêtes ont échoué */}
-            {membershipRequestsQuery.isError && alert(membershipRequestsQuery.error.message)}
-            {membersQuery.isError && alert(membersQuery.error.message)}
-            {errorUpdateRole && alert(errorUpdateRole)}
-            {errorRemoveMember && alert(errorRemoveMember)}
+            {membersQuery.isError && (
+                <Alert
+                    severity="error"
+                    closable={false}
+                    title={t("fetch_members_failed")}
+                    description={
+                        <>
+                            <p>{membersQuery.error.message}</p>
+                            <Button linkProps={routes.espaceco_community_list().link}>{t("back_to_list")}</Button>
+                        </>
+                    }
+                />
+            )}
 
-            {(membershipRequestsQuery.isLoading || membersQuery.isLoading) && <LoadingText />}
+            {/* LES ERREURS */}
+            {membershipRequestsQuery.isError && alert(t("fetch_affiliate_members_failed"), membershipRequestsQuery.error.message)}
+            {updateRoleMutation.isError && alert(t("update_role_failed"), updateRoleMutation.error.message)}
+            {updateGridsMutation.isError && alert(t("update_grids_failed"), updateGridsMutation.error.message)}
+            {addMembersMutation.isError && alert(t("add_members_failed"), addMembersMutation.error.message)}
+            {removeMemberMutation.isError && alert(t("remove_member_failed"), removeMemberMutation.error.message)}
+
+            {/* LES ACTIONS EN COURS */}
+            {(membershipRequestsQuery.isLoading || membersQuery.isLoading) && <LoadingText as={"h6"} />}
+            {updateRoleMutation.isPending && displayWait(t("updating_role"))}
+            {updateGridsMutation.isPending && displayWait(t("updating_grids"))}
+            {addMembersMutation.isPending && displayWait(t("adding_members"))}
+            {removeMemberMutation.isPending && displayWait(t("removing_action", { action: action }))}
+
             {membershipRequestsQuery.data?.content && membershipRequestsQuery.data.content.length > 0 && (
                 <Accordion label={t("membership_requests", { count: membershipRequestsQuery.data.content.length })} defaultExpanded={true}>
                     <Table headers={pendingHeaders} data={pendingData} fixed />
@@ -264,34 +306,6 @@ const Members: FC<MembersProps> = ({ community }) => {
                     </div>
                 </div>
             )}
-            {updateRoleMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <div className={fr.cx("fr-col-2")}>
-                                <LoadingIcon className={fr.cx("fr-mr-2v")} />
-                            </div>
-                            <div className={fr.cx("fr-col-10")}>
-                                <h6 className={fr.cx("fr-h6", "fr-m-0")}>{t("update_role")}</h6>
-                            </div>
-                        </div>
-                    </div>
-                </Wait>
-            )}
-            {removeMemberMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <div className={fr.cx("fr-col-2")}>
-                                <LoadingIcon className={fr.cx("fr-mr-2v")} />
-                            </div>
-                            <div className={fr.cx("fr-col-10")}>
-                                <h6 className={fr.cx("fr-h6", "fr-m-0")}>{t("remove_action", { action: action })}</h6>
-                            </div>
-                        </div>
-                    </div>
-                </Wait>
-            )}
             <ConfirmDialog
                 title={t("confirm_remove")}
                 onConfirm={() => {
@@ -300,8 +314,16 @@ const Members: FC<MembersProps> = ({ community }) => {
                     }
                 }}
             />
-            <AddMembersDialog />
-            <ManageGridsDialog communityGrids={community.grids} userGrids={currentMember?.grids ?? []} onApply={(grids) => console.log("TODOS")} />
+            <AddMembersDialog onAdd={(ids) => addMembersMutation.mutate({ communityId: community.id, members: ids })} />
+            <ManageGridsDialog
+                communityGrids={community.grids}
+                userGrids={currentMember?.grids ?? []}
+                onApply={(grids) => {
+                    if (currentMember !== undefined) {
+                        updateGridsMutation.mutate({ communityId: community.id, userId: currentMember.user_id, grids });
+                    }
+                }}
+            />
         </div>
     );
 };
@@ -310,19 +332,26 @@ export default Members;
 
 // traductions
 export const { i18n } = declareComponentKeys<
-    | "fetch_failed"
+    | "fetch_members_failed"
+    | "fetch_affiliate_members_failed"
+    | "update_role_failed"
+    | "update_grids_failed"
+    | "add_members_failed"
+    | "remove_member_failed"
     | "back_to_list"
     | "loading_members"
     | "loading_membership_requests"
     | { K: "membership_requests"; P: { count: number }; R: string }
+    | "adding_members"
     | "username_header"
     | "name_header"
     | "status_header"
     | "grids_header"
     | { K: "role"; P: { role: Role }; R: string }
     | "date_header"
-    | "update_role"
-    | { K: "remove_action"; P: { action: "remove" | "reject" | undefined }; R: string }
+    | "updating_role"
+    | "updating_grids"
+    | { K: "removing_action"; P: { action: "remove" | "reject" | undefined }; R: string }
     | "confirm_remove"
     | "accept"
     | "accept_title"
@@ -334,11 +363,17 @@ export const { i18n } = declareComponentKeys<
 >()("EscoCommunityMembers");
 
 export const EscoCommunityMembersFrTranslations: Translations<"fr">["EscoCommunityMembers"] = {
-    fetch_failed: "La récupération des membres du guichet a échoué",
+    fetch_members_failed: "La récupération des membres du guichet a échoué",
+    fetch_affiliate_members_failed: "La récupération des demandes d'affiliation pour ce guichet a échoué",
+    update_role_failed: "La mise à jour du rôle de ce membre a échoué",
+    update_grids_failed: "La mise à jour des emprises de ce membre a échoué",
+    add_members_failed: "L'ajout de nouveaux membres a échoué",
+    remove_member_failed: "La suppression d'un membre a échoué",
     back_to_list: "Retour à la liste des guichets",
-    loading_members: "Chargement des membres du guichet",
-    loading_membership_requests: "Chargement des demandes d’affiliation",
+    loading_members: "Chargement des membres du guichet ...",
+    loading_membership_requests: "Chargement des demandes d’affiliation ...",
     membership_requests: ({ count }) => `Demandes d’affiliation (${count})`,
+    adding_members: "Ajout de nouveaux membres en cours ...",
     username_header: "Nom de l'utilisateur",
     name_header: "Nom, prénom",
     status_header: "Statut",
@@ -351,11 +386,14 @@ export const EscoCommunityMembersFrTranslations: Translations<"fr">["EscoCommuni
                 return "Membre";
             case "pending":
                 return "En attente de demande d'affiliation";
+            case "invited":
+                return "Invité";
         }
     },
     date_header: "Date de la demande",
-    update_role: "Mise à jour du rôle de l'utilisateur en cours ...",
-    remove_action: ({ action }) => {
+    updating_role: "Mise à jour du rôle de l'utilisateur en cours ...",
+    updating_grids: "Mise à jour des emprises de l'utilisateur en cours ...",
+    removing_action: ({ action }) => {
         switch (action) {
             case "remove":
                 return "Suppression de l'utilisateur en cours ...";
@@ -376,19 +414,26 @@ export const EscoCommunityMembersFrTranslations: Translations<"fr">["EscoCommuni
 };
 
 export const EscoCommunityMembersEnTranslations: Translations<"en">["EscoCommunityMembers"] = {
-    fetch_failed: undefined,
+    fetch_members_failed: undefined,
+    fetch_affiliate_members_failed: undefined,
+    update_role_failed: undefined,
+    update_grids_failed: undefined,
+    add_members_failed: undefined,
+    remove_member_failed: undefined,
     back_to_list: undefined,
     loading_members: undefined,
     loading_membership_requests: undefined,
     membership_requests: ({ count }) => `Membership requests (${count})`,
+    adding_members: "Adding new members ...",
     username_header: "username",
     name_header: undefined,
     status_header: "Status",
     grids_header: undefined,
     role: ({ role }) => `${role}`,
     date_header: undefined,
-    update_role: undefined,
-    remove_action: ({ action }) => `${action}`,
+    updating_role: undefined,
+    updating_grids: undefined,
+    removing_action: ({ action }) => `${action}`,
     confirm_remove: undefined,
     accept: undefined,
     accept_title: undefined,

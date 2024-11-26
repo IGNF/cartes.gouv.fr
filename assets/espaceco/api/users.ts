@@ -1,6 +1,15 @@
+import { UserMe } from "../../@types/app_espaceco";
 import { UserDTO, UserSharedThemesDTO } from "../../@types/espaceco";
 import { jsonFetch } from "../../modules/jsonFetch";
 import SymfonyRouting from "../../modules/Routing";
+
+const getMe = (signal: AbortSignal) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_espaceco_user_me");
+    return jsonFetch<UserMe>(url, {
+        method: "GET",
+        signal: signal,
+    });
+};
 
 const getSharedThemes = () => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_espaceco_user_shared_themes");
@@ -15,6 +24,6 @@ const search = (search: string, signal: AbortSignal) => {
     });
 };
 
-const user = { search, getSharedThemes };
+const user = { getMe, search, getSharedThemes };
 
 export default user;

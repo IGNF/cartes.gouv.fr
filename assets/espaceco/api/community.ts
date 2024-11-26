@@ -58,6 +58,21 @@ const getCommunityMembershipRequests = (communityId: number, signal: AbortSignal
     });
 };
 
+const addMembers = (communityId: number, members: (number | string)[]) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_espaceco_community_add_members", { communityId });
+    return jsonFetch<CommunityMember[]>(
+        url,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+            },
+        },
+        { members: members }
+    );
+};
+
 const updateMemberRole = (communityId: number, userId: number, role: Role) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_espaceco_community_update_member_role", { communityId, userId });
     return jsonFetch<CommunityMember>(
@@ -118,6 +133,7 @@ const community = {
     getCommunity,
     getCommunityMembers,
     getCommunityMembershipRequests,
+    addMembers,
     searchByName,
     getAsMember,
     updateMemberRole,

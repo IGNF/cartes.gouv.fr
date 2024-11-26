@@ -56,12 +56,39 @@ export type UserType = {
     surname: string | null;
 };
 
-export type Role = "pending" | "member" | "admin";
+export type Role = "pending" | "member" | "admin" | "invited";
 export type CommunityMember = UserType & {
     grids: GridDTO[];
     role: Role;
     active: boolean;
     date: string;
+};
+
+export type CommunityMemberDetailed = {
+    user_id: number;
+    community_name: string;
+    community_id: number;
+    grids: GridDTO[];
+    role: Role;
+    active: boolean;
+    date: string;
+};
+
+export type Profile = {
+    community_id: number;
+    themes: ThemeDTO[];
+};
+
+export type UserMe = {
+    id: number;
+    email: string;
+    username: string;
+    surname: string | null;
+    description: string | null;
+    administrator: boolean;
+    profile: Profile;
+    shared_themes: SharedThemesDTO[];
+    communities_member: CommunityMemberDetailed[];
 };
 
 /* FORMULAIRES */

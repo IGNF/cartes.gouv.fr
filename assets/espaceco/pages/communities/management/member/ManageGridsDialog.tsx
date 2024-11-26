@@ -40,6 +40,7 @@ const ManageGridsDialog: FC<ManageGridsDialogProps> = ({ communityGrids, userGri
     });
 
     const {
+        reset,
         setValue: setFormValue,
         getValues: getFormValues,
         handleSubmit,
@@ -67,6 +68,7 @@ const ManageGridsDialog: FC<ManageGridsDialogProps> = ({ communityGrids, userGri
 
         const userGrids = getFormValues("user_grids") ?? [];
         onApply(userGrids);
+        reset({ user_grids: [] });
     };
 
     return (
