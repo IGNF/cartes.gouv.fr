@@ -15,7 +15,7 @@ const getMetadataFormDefaultValues = (metadata?: Metadata): MetadataFormValuesTy
     return {
         languages: metadata?.csw_metadata?.language ? [metadata?.csw_metadata?.language] : [DEFAULT_LANGUAGE],
         creation_date: metadata?.csw_metadata?.creation_date,
-        resource_genealogy: metadata?.csw_metadata?.resource_genealogy,
+        resource_genealogy: metadata?.csw_metadata?.resource_genealogy ?? "",
         hierarchy_level: metadata?.csw_metadata?.hierarchy_level ?? MetadataHierarchyLevel.Dataset,
         email_contact: metadata?.csw_metadata?.contact_email,
         organization: metadata?.csw_metadata?.organisation_name,

@@ -60,8 +60,10 @@ class CommonDTO
 
         #[Assert\Choice([
             'choices' => ['', 'dataset', 'series'],
-            'message' => 'metadatas.resource_genealogy_error',
+            'message' => 'metadatas.hierarchy_level_error',
         ])]
+        public readonly ?string $hierarchy_level,
+
         public readonly string $resource_genealogy,
 
         #[Assert\Choice([

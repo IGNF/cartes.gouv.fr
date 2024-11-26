@@ -86,6 +86,7 @@ export class CommonSchemasValidation {
                 projection: yup.string().required(tValidMD("metadatas.projection_error")),
                 // encoding: yup.string().required(tValidMD("metadatas.encoding_error")),
                 resolution: yup.string(),
+                hierarchy_level: yup.string().required(tValidMD("metadatas.hierarchy_level_error")),
             })
             .required();
     }

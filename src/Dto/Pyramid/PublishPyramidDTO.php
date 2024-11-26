@@ -72,8 +72,10 @@ class PublishPyramidDTO
 
         #[Assert\Choice([
             'choices' => ['', 'dataset', 'series'],
-            'message' => 'common.resource_genealogy_error',
+            'message' => 'common.hierarchy_level_error',
         ])]
+        public readonly ?string $hierarchy_level,
+
         public readonly ?string $resource_genealogy,
 
         #[Assert\Choice([
