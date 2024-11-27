@@ -53,7 +53,9 @@ class CommunityApiService extends BaseEspaceCoApiService
      */
     public function getCommunity(int $communityId, array $fields = []): array
     {
-        return $this->request('GET', "communities/$communityId", [], ['fields' => $fields]);
+        $query = empty($fields) ? [] : ['fields' => implode(',', $fields)];
+
+        return $this->request('GET', "communities/$communityId", [], $query);
     }
 
     /**
@@ -137,7 +139,7 @@ class CommunityApiService extends BaseEspaceCoApiService
         foreach ($grids as $name) {
             $grid = $this->gridApiService->getGrid($name);
             if (!$grid['deleted']) {
-                $result[] = $grid;
+                $grids[] = $grid;
             }
         }
 

@@ -24,6 +24,13 @@ const search = (search: string, signal: AbortSignal) => {
     });
 };
 
-const user = { getMe, search, getSharedThemes };
+const checkMeCGU = (signal: AbortSignal) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_espaceco_user_check_cgu");
+    return jsonFetch<boolean>(url, {
+        method: "GET",
+        signal: signal,
+    });
+};
+const user = { getMe, search, getSharedThemes, checkMeCGU };
 
 export default user;

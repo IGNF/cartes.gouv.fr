@@ -24,7 +24,7 @@ const getMembers = (communityId: string, otherOptions: RequestInit = {}) => {
  * @returns
  */
 const updateMember = (communityId: string, formData: object) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_community_add_member", { communityId });
+    const url = SymfonyRouting.generate("cartesgouvfr_api_community_update_member", { communityId });
     return jsonFetch<UserRightsResponseDto>(
         url,
         {
