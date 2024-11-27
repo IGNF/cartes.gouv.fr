@@ -226,7 +226,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
             $this->communityApiService->updateLogo($communityId, $tempFilePath);
             $this->fs->remove($tempFileDir);
 
-            $community = $this->communityApiService->getCommunity($communityId, ['fields' => ['logo_url']]);
+            $community = $this->communityApiService->getCommunity($communityId, ['logo_url']);
 
             return new JsonResponse(['logo_url' => $community['logo_url']]);
         } catch (ApiException $ex) {

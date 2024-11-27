@@ -23,7 +23,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
     }
 
     #[Route('/me', name: 'me')]
-    public function getCurrentUser(): JsonResponse
+    public function getMe(): JsonResponse
     {
         $me = $this->userApiService->getMe();
 
@@ -32,7 +32,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
 
     #[Route('/search', name: 'search')]
     public function search(
-        #[MapQueryParameter] string $search
+        #[MapQueryParameter] string $search,
     ): JsonResponse {
         $users = $this->userApiService->search($search);
 
@@ -45,5 +45,19 @@ class UserController extends AbstractController implements ApiControllerInterfac
         $me = $this->userApiService->getSharedThemes();
 
         return $this->json($me);
+    }
+
+    #[Route('/me/check_cgu', name: 'check_cgu')]
+    public function checkMeCGUser(): JsonResponse
+    {
+        $cguAccepted = false;
+
+        $response = $this->userApiService->checkMeCGU();
+        $contentType = $response['headers']['content-type'][0];
+        if (preg_match("/^application\/json/", $contentType)) {
+            $cguAccepted = (null !== json_decode($response['content']));
+        }
+
+        return new JsonResponse($cguAccepted);
     }
 }

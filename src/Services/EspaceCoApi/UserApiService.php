@@ -31,4 +31,13 @@ class UserApiService extends BaseEspaceCoApiService
     {
         return $this->request('GET', 'users', [], ['search' => $search, 'fields' => ['id', 'username', 'firstname', 'surname']]);
     }
+
+    /**
+     * On essaye de récupérer les détails de l'utilisateur courant. Si celui-ci n'a pas encore
+     * accepter les conditions générales de l'espace collaboratif, la route retourne un XML.
+     */
+    public function checkMeCGU(): array|string
+    {
+        return $this->request('GET', 'users/me', [], [], [], false, false, true);
+    }
 }
