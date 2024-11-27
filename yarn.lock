@@ -4232,27 +4232,28 @@ gensync@^1.0.0-beta.2:
   resolved "https://registry.yarnpkg.com/gensync/-/gensync-1.0.0-beta.2.tgz#32a6ee76c3d7f52d46b2b1ae5d93fea8580a25e0"
   integrity sha512-3hN7NaskYvMDLQY55gnW3NQ+mesEAepTqlg+VEbj7zzqEMBVNhzcGYYeqFo/TlYz6eQiFcp1HcsCZO+nGgS8zg==
 
-geopf-extensions-openlayers@./assets/lib/geopf-extensions-openlayers-1.0.0-beta.0-241.tgz:
-  version "1.0.0-beta.0-241"
-  resolved "./assets/lib/geopf-extensions-openlayers-1.0.0-beta.0-241.tgz#d3cf64b1a42aa4ea5a871117ee511015c777bf73"
+geopf-extensions-openlayers@^1.0.0-beta.0:
+  version "1.0.0-beta.0"
+  resolved "https://registry.yarnpkg.com/geopf-extensions-openlayers/-/geopf-extensions-openlayers-1.0.0-beta.0.tgz#64d4aeb3c2d46feb586ad8a6089702f32a78b3c7"
+  integrity sha512-Yasr65mQGKVNIKcwG1kl8zslhmlyw67dcekqGIi170pqT1Mp8DHRtovqeoqtDS2p7OgbsuZ+9vDJQX4EutXYGg==
   dependencies:
     "@gouvfr/dsfr" "^1.11.0"
     "@mapbox/mapbox-gl-style-spec" "14.7.1"
     "@xmldom/xmldom" "^0.9.0"
     eventbusjs "0.2.0"
-    geoportal-access-lib "3.4.3"
+    geoportal-access-lib "3.4.4"
     loglevel "^1.9.1"
     ol "8.2.0"
     ol-mapbox-style "12.3.5"
-    proj4 "2.12.1"
+    proj4 "2.14.0"
     sortablejs "1.15.3"
     typescript "^5.3.3"
     whatwg-fetch "3.6.20"
 
-geoportal-access-lib@3.4.3:
-  version "3.4.3"
-  resolved "https://registry.yarnpkg.com/geoportal-access-lib/-/geoportal-access-lib-3.4.3.tgz#b1f1874cfc0c58e62d7234378db3e33affc2354c"
-  integrity sha512-n2KdCYqq0sf/DiCDcnwWCilZchhy/ksdnInnp6Z4inQ7rxH5dbeDHefM7jtXjQmJ/nse/0nZIUEjY1+TGtgSQw==
+geoportal-access-lib@3.4.4:
+  version "3.4.4"
+  resolved "https://registry.yarnpkg.com/geoportal-access-lib/-/geoportal-access-lib-3.4.4.tgz#229374d4e8ff7bf93ab544fa4932840d9aeee1c0"
+  integrity sha512-2h23wRT9X/y0yIdkpCIR4mX0nVqYa8i2ALsNQK3+veSPerMa5z40X7aAglBxr/4TDzsK0uWgqi58YXRSL/DjHw==
   dependencies:
     "@xmldom/xmldom" "^0.8.10"
     es6-promise "^4.2.4"
@@ -5587,9 +5588,9 @@ lru-queue@^0.1.0:
     es5-ext "~0.10.2"
 
 mapbox-to-css-font@^2.4.1:
-  version "2.4.4"
-  resolved "https://registry.yarnpkg.com/mapbox-to-css-font/-/mapbox-to-css-font-2.4.4.tgz#f4d9b8ad95a8c540fccfef23bb9e341a5e4f4883"
-  integrity sha512-X1dtuTuH2D1MRMuductMZCLV/fy9EoIgqW/lmu8vQSAhEatx/tdFebkYT3TVhdTwqFDHbLEgQBD3IKA4KI7aoQ==
+  version "2.4.5"
+  resolved "https://registry.yarnpkg.com/mapbox-to-css-font/-/mapbox-to-css-font-2.4.5.tgz#b10a7a33af3e1a9a1369e4d5e8285492a7943c46"
+  integrity sha512-VJ6nB8emkO9VODI0Fk+TQ/0zKBTqmf/Pkt8Xv0kHstoc0iXRajA00DAid4Kc3K5xeFIOoiZrVxijEzj0GLVO2w==
 
 markdown-table@^3.0.0:
   version "3.0.3"
@@ -6871,10 +6872,10 @@ process@^0.11.10:
   resolved "https://registry.yarnpkg.com/process/-/process-0.11.10.tgz#7332300e840161bda3e69a1d1d91a7d4bc16f182"
   integrity sha512-cdGef/drWFoydD1JsMzuFf8100nZl+GT+yacc2bEced5f9Rjk4z+WtFUTBu9PhOi9j/jfmBPu0mMEY4wIdAF8A==
 
-proj4@2.12.1:
-  version "2.12.1"
-  resolved "https://registry.yarnpkg.com/proj4/-/proj4-2.12.1.tgz#1a5422a9273cbf17df8e2e9af91aced63bebded7"
-  integrity sha512-vmhP3hmstjXjzFwg8QXJwpoj4n7GVrXk3ZW3DzNK/Ur4cuwXq7ZiMXaWYvLYLQbX8n4MXgbwTr4lthOUZltBpA==
+proj4@2.14.0:
+  version "2.14.0"
+  resolved "https://registry.yarnpkg.com/proj4/-/proj4-2.14.0.tgz#41ea598d17f4507d1155eabee9421f5e4aba6d1d"
+  integrity sha512-fumDL50ThQ3issOLxaLYwv1j4LePEzYleY6vqsX+2uWOcvKzqpzHhtTTH18CvIDg+nf8MYl0/XF6yYyESKDi4w==
   dependencies:
     mgrs "1.0.0"
     wkt-parser "^1.3.3"
@@ -8158,10 +8159,15 @@ typed-array-length@^1.0.6:
     is-typed-array "^1.1.13"
     possible-typed-array-names "^1.0.0"
 
-typescript@^5.0.0, typescript@^5.3.3:
+typescript@^5.0.0:
   version "5.6.3"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.6.3.tgz#5f3449e31c9d94febb17de03cc081dd56d81db5b"
   integrity sha512-hjcS1mhfuyi4WW8IWtjP7brDrG2cuDZukyrYrSauoXGNgx0S7zceP07adYkJycEr56BOUTNPzbInooiN3fn1qw==
+
+typescript@^5.3.3:
+  version "5.7.2"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.7.2.tgz#3169cf8c4c8a828cde53ba9ecb3d2b1d5dd67be6"
+  integrity sha512-i5t66RHxDvVN40HfDd1PsEThGNnlMCMT3jMUuoh9/0TaqWevNontacunWyN02LA9/fIbEWlcHZcgTKb9QoaLfg==
 
 unbox-primitive@^1.0.2:
   version "1.0.2"
@@ -8555,9 +8561,9 @@ wildcard@^2.0.0:
   integrity sha512-CC1bOL87PIWSBhDcTrdeLo6eGT7mCFtrg0uIJtqJUFyK+eJnzl8A1niH56uu7KMa5XFrtiV+AQuHO3n7DsHnLQ==
 
 wkt-parser@^1.3.3:
-  version "1.3.3"
-  resolved "https://registry.yarnpkg.com/wkt-parser/-/wkt-parser-1.3.3.tgz#46b4e3032dd9c86907f7e630b57e3c6ea2bb772b"
-  integrity sha512-ZnV3yH8/k58ZPACOXeiHaMuXIiaTk1t0hSUVisbO0t4RjA5wPpUytcxeyiN2h+LZRrmuHIh/1UlrR9e7DHDvTw==
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/wkt-parser/-/wkt-parser-1.4.0.tgz#7cca07a6ee5b4baf059b723e62d7fe95bc923bf5"
+  integrity sha512-qpwO7Ihds/YYDTi1aADFTI1Sm9YC/tTe3SHD24EeIlZxy7Ik6a1b4HOz7jAi0xdUAw487duqpo8OGu+Tf4nwlQ==
 
 word-wrap@^1.2.5:
   version "1.2.5"
