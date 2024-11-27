@@ -18,6 +18,7 @@ import { routes } from "../../../router/router";
 import api from "../../api";
 
 import "../../../../assets/sass/pages/espaceco/member_invitation.scss";
+import { useApiEspaceCoStore } from "../../../stores/ApiEspaceCoStore";
 
 type MemberInvitationProps = {
     communityId: number;
@@ -27,18 +28,32 @@ const MemberInvitation: FC<MemberInvitationProps> = ({ communityId }) => {
     const { t } = useTranslation("MemberInvitation");
     const { t: tBreadcrumb } = useTranslation("Breadcrumb");
 
+    const apiEspaceCoUrl = useApiEspaceCoStore((state) => state.api_espaceco_url);
+    const espaceCoUrl = useMemo(() => (apiEspaceCoUrl ? apiEspaceCoUrl.replace("/gcms/api", "/login") : ""), [apiEspaceCoUrl]);
+
     const navItems = useMemo(() => datastoreNavItems(), []);
+
+    const checkCGUQuery = useQuery<boolean>({
+        queryKey: RQKeys.checkMeCGU(),
+        queryFn: ({ signal }) => api.user.checkMeCGU(signal),
+        staleTime: 60000,
+    });
+    const cguAccepted = useMemo(() => {
+        return checkCGUQuery.data;
+    }, [checkCGUQuery.data]);
 
     const query = useQuery<CommunityResponseDTO, CartesApiException>({
         queryKey: RQKeys.community(communityId),
         queryFn: () => api.community.getCommunity(communityId),
         staleTime: 3600000,
+        enabled: cguAccepted,
     });
 
     const meQuery = useQuery<UserMe>({
         queryKey: RQKeys.getMe(),
         queryFn: ({ signal }) => api.user.getMe(signal),
         staleTime: 3600000,
+        enabled: cguAccepted,
     });
 
     const myRole = useMemo<Role | undefined>(() => {
@@ -111,7 +126,9 @@ const MemberInvitation: FC<MemberInvitationProps> = ({ communityId }) => {
                 </Wait>
             )}
 
-            {community && myRole === "invited" ? (
+            {cguAccepted === false && espaceCoUrl ? (
+                t("espaceco_accept_cgu", { url: espaceCoUrl })
+            ) : community && myRole === "invited" ? (
                 <div>
                     <CallOut
                         title={
@@ -150,7 +167,7 @@ const MemberInvitation: FC<MemberInvitationProps> = ({ communityId }) => {
             ) : myRole !== undefined ? (
                 <p>{t("already_member")}</p>
             ) : (
-                <p>{t("no_invitation")}</p>
+                <Alert severity={"warning"} closable title={t("no_invitation")} />
             )}
         </AppLayout>
     );
@@ -168,6 +185,7 @@ export const { i18n } = declareComponentKeys<
     | { K: "community_name"; P: { name: string }; R: JSX.Element }
     | { K: "community_description"; P: { description: string | null }; R: JSX.Element }
     | { K: "invitation"; R: JSX.Element }
+    | { K: "espaceco_accept_cgu"; P: { url: string }; R: JSX.Element }
     | "already_member"
     | "no_invitation"
     | "accept"
@@ -192,6 +210,20 @@ export const MemberInvitationFrTranslations: Translations<"fr">["MemberInvitatio
         return description ? <p dangerouslySetInnerHTML={{ __html: description }} /> : <p>Aucune description</p>;
     },
     invitation: <p>Vous avez reçu une invitation à rejoindre le guichet :</p>,
+    espaceco_accept_cgu: ({ url }) => (
+        <div>
+            <p>{"Bonjour, vous n'avez pas encore accepté les conditions générales d'utilisation de l'espace collaboratif."}</p>
+            <p>
+                {"Veuillez vous connecter avec votre nom d'utilisateur sur "}
+                <a href={url} target="_blank" rel="noreferrer">
+                    {"l'espace collaboratif"}
+                </a>
+                {" et accepter les CGU."}
+                <br />
+                {"Vous pourrez ensuite continuer la navigation sur cartes.gouv.fr."}
+            </p>
+        </div>
+    ),
     already_member: "Vous êtes déjà membre de ce guichet",
     no_invitation: "Vous n'avez pas reçu d'invitation de ce guichet",
     accept: "Accepter et rejoindre le guichet",
@@ -214,6 +246,7 @@ export const MemberInvitationEnTranslations: Translations<"en">["MemberInvitatio
     ),
     community_description: undefined,
     invitation: undefined,
+    espaceco_accept_cgu: ({ url }) => <p>{url}</p>,
     already_member: undefined,
     no_invitation: undefined,
     accept: undefined,

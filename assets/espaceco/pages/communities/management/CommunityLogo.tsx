@@ -219,9 +219,6 @@ const CommunityLogo: FC<CommunityLogoProps> = ({ communityId, logoUrl }) => {
                     </div>
                 )}
             </div>
-            {updateLogoMutation.isError && (
-                <Alert severity="error" closable title={tCommon("error")} description={updateLogoMutation.error.message} className={fr.cx("fr-my-3w")} />
-            )}
             {removeLogoMutation.isError && (
                 <Alert severity="error" closable title={tCommon("error")} description={removeLogoMutation.error.message} className={fr.cx("fr-my-3w")} />
             )}
@@ -234,6 +231,15 @@ const CommunityLogo: FC<CommunityLogoProps> = ({ communityId, logoUrl }) => {
             {createPortal(
                 <AddLogoModal.Component title={t("modal.logo.title")} buttons={AddModalButtons}>
                     <div className={fr.cx("fr-grid-row")}>
+                        {updateLogoMutation.isError && (
+                            <Alert
+                                severity="error"
+                                closable
+                                title={tCommon("error")}
+                                description={updateLogoMutation.error.message}
+                                className={fr.cx("fr-my-3w")}
+                            />
+                        )}
                         <div className={fr.cx("fr-col-9")}>
                             <Upload
                                 hint={t("modal.logo.file_hint")}
