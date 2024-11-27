@@ -25,7 +25,7 @@ class CswMetadataHelper
         private Twig $twig,
         private ParameterBagInterface $params,
         private SerializerInterface $serializer,
-        private Filesystem $fs
+        private Filesystem $fs,
     ) {
         $content = file_get_contents($params->get('assets_directory').'/data/topic_categories.json');
         if (false !== $content) {
@@ -164,6 +164,8 @@ class CswMetadataHelper
 
         $cswMetadata->fileIdentifier = $xpath->query('/gmd:MD_Metadata/gmd:fileIdentifier/gco:CharacterString')->item(0)->textContent;
         $cswMetadata->hierarchyLevel = CswHierarchyLevel::tryFrom(trim($xpath->query('/gmd:MD_Metadata/gmd:hierarchyLevel/gmd:MD_ScopeCode/@codeListValue')->item(0)?->textContent));
+
+        $cswMetadata->resourceGenealogy = $xpath->query('/gmd:MD_Metadata/gmd:dataQualityInfo/gmd:DQ_DataQuality/gmd:lineage/gmd:LI_Lineage/gmd:statement/gco:CharacterString')->item(0)?->textContent;
 
         $cswMetadata->language = new CswLanguage(
             $xpath->query('/gmd:MD_Metadata/gmd:language/gmd:LanguageCode/@codeListValue')->item(0)->textContent,

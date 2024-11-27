@@ -2,13 +2,15 @@ import { FC } from "react";
 import { CheckOrProcessingExecutionLogs } from "../../../../../@types/app";
 
 type LogsProps = {
-    logs: CheckOrProcessingExecutionLogs;
+    logs?: CheckOrProcessingExecutionLogs;
 };
 const Logs: FC<LogsProps> = ({ logs }) => {
     return (
         <>
             <strong>Journal :</strong>
-            {logs.length > 0 ? (
+            {logs === undefined ? (
+                "Impossible de récupérer les journaux"
+            ) : logs.length > 0 ? (
                 <pre>
                     <code
                         style={{

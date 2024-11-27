@@ -239,7 +239,7 @@ class CartesMetadataApiService
                  : CswLanguage::default();
 
             $newCswMetadata->fileIdentifier = $formData['identifier'];
-            $newCswMetadata->hierarchyLevel = CswHierarchyLevel::tryFrom('' === $formData['resource_genealogy'] ? 'series' : $formData['resource_genealogy']);
+            $newCswMetadata->hierarchyLevel = CswHierarchyLevel::tryFrom('' === $formData['hierarchy_level'] ? 'dataset' : $formData['hierarchy_level']);
 
             $newCswMetadata->language = $language;
             $newCswMetadata->charset = $formData['charset'];
@@ -252,6 +252,7 @@ class CartesMetadataApiService
             $newCswMetadata->contactEmail = $formData['email_contact'];
             $newCswMetadata->organisationName = $formData['organization'];
             $newCswMetadata->organisationEmail = $formData['organization_email'];
+            $newCswMetadata->resourceGenealogy = $formData['resource_genealogy'];
             $newCswMetadata->resolution = $formData['resolution'] ?? null;
             $newCswMetadata->frequencyCode = $formData['frequency_code'] ?? null;
             $newCswMetadata->layers = $layers;

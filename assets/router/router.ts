@@ -6,7 +6,7 @@ export const appRoot = SymfonyRouting.getBaseUrl(); // (document.getElementById(
 export const catalogueUrl = (document.getElementById("app_env") as HTMLDivElement)?.dataset?.["catalogueUrl"] ?? "/catalogue";
 
 const routeDefs = {
-    // routes non protégées (doivent être listées plus bas dans publicRoutes)
+    // NOTE : routes non protégées (doivent être listées plus bas dans publicRoutes)
     home: defineRoute(
         {
             authentication_failed: param.query.optional.number,
@@ -34,13 +34,13 @@ const routeDefs = {
     join: defineRoute(`${appRoot}/nous-rejoindre`),
     terms_of_service: defineRoute(`${appRoot}/cgu`),
     service_status: defineRoute(`${appRoot}/niveau-de-service`),
-
+    login_disabled: defineRoute(`${appRoot}/connexion-desactivee`),
     newsletter_subscribe: defineRoute(`${appRoot}/inscription-a-la-lettre`),
     newsletter_confirm_email: defineRoute(`${appRoot}/inscription-a-la-lettre/confirmez-votre-inscription`),
     newsletter_success: defineRoute(`${appRoot}/inscription-a-la-lettre/confirmation`),
     newsletter_error: defineRoute(`${appRoot}/inscription-a-la-lettre/erreur`),
 
-    // routes protégées
+    // NOTE : routes protégées
     // utilisateur
     my_account: defineRoute(`${appRoot}/mon-compte`),
     my_access_keys: defineRoute(`${appRoot}/mes-cles`),
@@ -261,4 +261,5 @@ export const publicRoutes: typeof knownRoutes = [
     "newsletter_confirm_email",
     "newsletter_success",
     "newsletter_error",
+    "login_disabled",
 ];

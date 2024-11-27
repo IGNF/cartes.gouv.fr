@@ -212,6 +212,20 @@
         </gmd:dateStamp>
     {% endif %}
 
+    {% if resource_genealogy is defined %}
+        <gmd:dataQualityInfo>
+            <gmd:DQ_DataQuality>
+                <gmd:lineage>
+                    <gmd:LI_Lineage>
+                        <gmd:statement>
+                            <gco:CharacterString>{{ resource_genealogy }}</gco:CharacterString>
+                        </gmd:statement>
+                    </gmd:LI_Lineage>
+                </gmd:lineage>
+            </gmd:DQ_DataQuality>
+        </gmd:dataQualityInfo>
+    {% endif %}
+
     {% if layers is defined or style_files is defined or capabilities_files is defined or documents is defined %}
         <gmd:distributionInfo>
             <gmd:MD_Distribution>

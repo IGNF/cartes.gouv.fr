@@ -21,10 +21,11 @@ export const { i18n } = declareComponentKeys<
     | "metadata.description_form.hint_free_keywords"
     | "metadata.description_form.contact_email"
     | "metadata.description_form.hint_contact_email"
-    | "metadata.description_form.time_reference_title"
-    | "metadata.description_form.creation_date"
+    | "metadata.description_form.quality_title"
     | "metadata.description_form.resource_genealogy"
     | "metadata.description_form.hint_resource_genealogy"
+    | "metadata.description_form.time_reference_title"
+    | "metadata.description_form.creation_date"
     | "metadata.description_form.frequency_code"
     | "metadata.description_form.resource_manager_title"
     | "metadata.description_form.organization"
@@ -38,6 +39,11 @@ export const { i18n } = declareComponentKeys<
     | "attribution_form.url"
     | "attribution_form.hint_url"
     | "metadata.additionnal_infos_form.metadata_information_title"
+    | "metadata.additionnal_infos_form.hierarchy_level"
+    | "metadata.additionnal_infos_form.hierarchy_level_dataset"
+    | "metadata.additionnal_infos_form.hierarchy_level_dataset_hint"
+    | "metadata.additionnal_infos_form.hierarchy_level_series"
+    | "metadata.additionnal_infos_form.hierarchy_level_series_hint"
     | "metadata.additionnal_infos_form.language"
     | "metadata.additionnal_infos_form.hint_language"
     | "metadata.additionnal_infos_form.charset"
@@ -74,11 +80,13 @@ export const MetadatasFormFrTranslations: Translations<"fr">["MetadatasForm"] = 
     "metadata.description_form.hint_free_keywords": "Saisissez librement des mots clés en appuyant sur Entrée après chaque mot",
     "metadata.description_form.contact_email": "Email de contact sur les métadonnées",
     "metadata.description_form.hint_contact_email": "E-mail auprès duquel des compléments d’information peuvent être obtenus",
+    "metadata.description_form.quality_title": "Qualité",
+    "metadata.description_form.resource_genealogy": "Généalogie de la ressource (optionnelle)",
+    "metadata.description_form.hint_resource_genealogy":
+        "La généalogie de la ressource décrit l’historique d’un jeu de données et, s’il est connu, le cycle de vie de celui-ci, depuis l’acquisition et la saisie de l’information jusqu’à sa compilation, avec d’autres jeux et les variantes de sa forme actuelle.",
+    "metadata.description_form.frequency_code": "Fréquence de mise à jour",
     "metadata.description_form.time_reference_title": "Référence temporelle",
     "metadata.description_form.creation_date": "Date de la création de la ressource",
-    "metadata.description_form.resource_genealogy": "Généalogie de la ressource (optionnel)",
-    "metadata.description_form.hint_resource_genealogy": "Description du mode de production de la ressource",
-    "metadata.description_form.frequency_code": "Fréquence de mise à jour",
     "metadata.description_form.resource_manager_title": "Responsable de la ressource",
     "metadata.description_form.organization": "Organisme",
     "metadata.description_form.hint_organization":
@@ -86,6 +94,12 @@ export const MetadatasFormFrTranslations: Translations<"fr">["MetadatasForm"] = 
     "metadata.description_form.organization_email": "Email",
     "metadata.description_form.hint_organization_email": "Email de contact de l’organisme",
     "metadata.additionnal_infos_form.metadata_information_title": "Informations sur les métadonnées",
+    "metadata.additionnal_infos_form.hierarchy_level": "Type de ressource",
+    "metadata.additionnal_infos_form.hierarchy_level_dataset": "Lot ou série",
+    "metadata.additionnal_infos_form.hierarchy_level_dataset_hint":
+        "Toute donnée faisant directement ou indirectement référence à un lieu ou une zone géographique spécifique",
+    "metadata.additionnal_infos_form.hierarchy_level_series": "Produit ou ensemble de séries",
+    "metadata.additionnal_infos_form.hierarchy_level_series_hint": "Compilation identifiable de données géographiques",
     "attribution.title": "Attribution",
     "attribution.explain":
         "L’attribution est une mention que les consommateurs de ce service doivent afficher de manière visible sur les cartes qui l’utilise. Elle est généralement brève et désigne la source des données tout en pointant vers une page web qui décrit ses conditions d’utilisation ou la page d’accueil de l’organisme producteur. ll est généralement choisi de faire figurer cette attribution en petits caractères au bas des cartes.",
@@ -136,10 +150,11 @@ export const MetadatasFormEnTranslations: Translations<"en">["MetadatasForm"] = 
     "metadata.description_form.hint_free_keywords": undefined,
     "metadata.description_form.contact_email": "Metadata contact email",
     "metadata.description_form.hint_contact_email": "Email from which additional information can be obtained",
+    "metadata.description_form.quality_title": "Quality",
+    "metadata.description_form.resource_genealogy": undefined,
+    "metadata.description_form.hint_resource_genealogy": undefined,
     "metadata.description_form.time_reference_title": "Time reference",
     "metadata.description_form.creation_date": "Resource creation date",
-    "metadata.description_form.resource_genealogy": "Genealogy of the resource (optional)",
-    "metadata.description_form.hint_resource_genealogy": "Description of the resource production mode",
     "metadata.description_form.frequency_code": "Update frequency",
     "metadata.description_form.resource_manager_title": "Resource manager",
     "metadata.description_form.organization": "Organization",
@@ -148,6 +163,11 @@ export const MetadatasFormEnTranslations: Translations<"en">["MetadatasForm"] = 
     "metadata.description_form.organization_email": "Email",
     "metadata.description_form.hint_organization_email": "Contact email of the organization",
     "metadata.additionnal_infos_form.metadata_information_title": "Metadata informations",
+    "metadata.additionnal_infos_form.hierarchy_level": undefined,
+    "metadata.additionnal_infos_form.hierarchy_level_dataset": undefined,
+    "metadata.additionnal_infos_form.hierarchy_level_dataset_hint": undefined,
+    "metadata.additionnal_infos_form.hierarchy_level_series": undefined,
+    "metadata.additionnal_infos_form.hierarchy_level_series_hint": undefined,
     "attribution.title": "Attribution",
     "attribution.explain": "[TODO]",
     "attribution_form.text": "Text to display",

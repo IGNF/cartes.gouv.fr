@@ -12,6 +12,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
@@ -30,8 +31,13 @@ class SecurityController extends AbstractController
         ClientRegistry $clientRegistry,
         ParameterBagInterface $params,
         TokenStorageInterface $tokenStorage,
-        RouterInterface $router
+        RouterInterface $router,
     ): RedirectResponse {
+        $iamLoginDisabled = boolval($params->get('iam_login_disabled'));
+        if ($iamLoginDisabled) {
+            return $this->redirect($this->generateUrl('cartesgouvfr_app', [], UrlGeneratorInterface::ABSOLUTE_URL).'connexion-desactivee');
+        }
+
         $referer = $request->headers->get('referer');
         $request->getSession()->set('referer', $referer);
 
@@ -84,7 +90,7 @@ class SecurityController extends AbstractController
     private function testLogin(
         TokenStorageInterface $tokenStorage,
         Request $request,
-        RouterInterface $router
+        RouterInterface $router,
     ): RedirectResponse {
         $user = User::getTestUser();
 

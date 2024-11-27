@@ -5,13 +5,13 @@ import { XMLParser } from "fast-xml-parser";
 import { FC, useEffect } from "react";
 import { Controller, UseFormReturn } from "react-hook-form";
 
+import { EndpointTypeEnum, type ServiceFormValuesBaseType } from "../../../../@types/app";
 import AutocompleteSelect from "../../../../components/Input/AutocompleteSelect";
 import MarkdownEditor from "../../../../components/Input/MarkdownEditor";
-import { getTranslation } from "../../../../i18n/i18n";
-import { EndpointTypeEnum, ServiceFormValuesBaseType } from "../../../../@types/app";
-import { getInspireKeywords, regex } from "../../../../utils";
-import categories from "../../../../data/topic_categories.json";
 import frequencyCodes from "../../../../data/maintenance_frequency.json";
+import categories from "../../../../data/topic_categories.json";
+import { getTranslation } from "../../../../i18n/i18n";
+import { getInspireKeywords, regex } from "../../../../utils";
 
 const keywords = getInspireKeywords();
 
@@ -179,6 +179,18 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
                 }}
             />
 
+            <h3>{t("metadata.description_form.quality_title")}</h3>
+            <Input
+                label={t("metadata.description_form.resource_genealogy")}
+                hintText={t("metadata.description_form.hint_resource_genealogy")}
+                state={errors.resource_genealogy ? "error" : "default"}
+                stateRelatedMessage={errors?.resource_genealogy?.message?.toString()}
+                nativeTextAreaProps={{
+                    ...register("resource_genealogy"),
+                }}
+                textArea={true}
+            />
+
             <h3>{t("metadata.description_form.time_reference_title")}</h3>
             <Input
                 label={t("metadata.description_form.creation_date")}
@@ -189,19 +201,6 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
                     type: "date",
                 }}
             />
-            <Select
-                label={t("metadata.description_form.resource_genealogy")}
-                hint={t("metadata.description_form.hint_resource_genealogy")}
-                state={errors.resource_genealogy ? "error" : "default"}
-                stateRelatedMessage={errors?.resource_genealogy?.message?.toString()}
-                nativeSelectProps={{
-                    ...register("resource_genealogy"),
-                }}
-            >
-                <option value="">{tCommon("none")}</option>
-                <option value="dataset">Lot</option>
-                <option value="series">Produit</option>
-            </Select>
             <Select
                 label={t("metadata.description_form.frequency_code")}
                 state={errors.frequency_code ? "error" : "default"}

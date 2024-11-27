@@ -1,15 +1,11 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { FC } from "react";
 
-import { CheckOrProcessingExecutionLogs, ProcessingExecution } from "../../../../../@types/app";
-import { ProcessingExecutionOutputStoredDataDto } from "../../../../../@types/entrepot";
+import type { StoredDataReportProcessingExecution } from "../../../../../@types/app";
 import Logs from "./Logs";
 
 type ProcessingExecutionReportProps = {
-    processingExecution: ProcessingExecution & {
-        output: ProcessingExecutionOutputStoredDataDto;
-        logs: CheckOrProcessingExecutionLogs;
-    };
+    processingExecution: StoredDataReportProcessingExecution;
     datastoreName?: string;
 };
 const ProcessingExecutionReport: FC<ProcessingExecutionReportProps> = ({ processingExecution, datastoreName }) => {
