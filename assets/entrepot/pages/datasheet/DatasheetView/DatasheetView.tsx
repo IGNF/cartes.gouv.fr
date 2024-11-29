@@ -10,7 +10,7 @@ import { FC } from "react";
 import { createPortal } from "react-dom";
 import { symToStr } from "tsafe/symToStr";
 
-import { DatasheetDocumentTypeEnum, type Datasheet, type DatasheetDetailed, type DatasheetDocument, type Metadata } from "../../../../@types/app";
+import { DatasheetDocumentTypeEnum, Service, type Datasheet, type DatasheetDetailed, type DatasheetDocument, type Metadata } from "../../../../@types/app";
 import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import Wait from "../../../../components/Utils/Wait";
@@ -73,6 +73,14 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
         refetchInterval: 60000,
         retry: false,
         enabled: !datasheetDeleteMutation.isPending,
+    });
+
+    const datasheetServicesQuery = useQuery<Service[], CartesApiException>({
+        queryKey: RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName),
+        queryFn: ({ signal }) => api.datasheet.getServices(datastoreId, datasheetName, { signal }),
+        enabled: !datasheetQuery.isFetching && !datasheetDeleteMutation.isPending,
+        staleTime: 60000,
+        retry: false,
     });
 
     const metadataQuery = useQuery<Metadata, CartesApiException>({
@@ -171,7 +179,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                                         tabId: DatasheetViewActiveTabEnum.Dataset,
                                     },
                                     {
-                                        label: t("tab_label.services", { num: datasheetQuery.data?.service_list?.length || 0 }),
+                                        label: t("tab_label.services", { num: datasheetServicesQuery.data?.length || 0 }),
                                         tabId: DatasheetViewActiveTabEnum.Services,
                                     },
                                     {
@@ -193,7 +201,13 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                                             return <DatasetListTab datastoreId={datastoreId} datasheet={datasheetQuery.data} />;
 
                                         case DatasheetViewActiveTabEnum.Services:
-                                            return <ServicesListTab datastoreId={datastoreId} datasheet={datasheetQuery.data} />;
+                                            return (
+                                                <ServicesListTab
+                                                    datastoreId={datastoreId}
+                                                    datasheet={datasheetQuery.data}
+                                                    datasheet_services_list={datasheetServicesQuery.data ?? []}
+                                                />
+                                            );
 
                                         case DatasheetViewActiveTabEnum.Documents:
                                             return <DocumentsTab datastoreId={datastoreId} datasheetName={datasheetName} />;
@@ -240,8 +254,8 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                             {datasheetQuery?.data?.pyramid_list?.length && datasheetQuery?.data?.pyramid_list.length > 0 ? (
                                 <li>{datasheetQuery?.data?.pyramid_list.length} pyramide(s) de tuiles vectorielles</li>
                             ) : null}
-                            {datasheetQuery?.data?.service_list?.length && datasheetQuery?.data?.service_list.length > 0 ? (
-                                <li>{datasheetQuery?.data?.service_list.length} service(s) publié(s)</li>
+                            {datasheetServicesQuery.data?.length && datasheetServicesQuery.data.length > 0 ? (
+                                <li>{datasheetServicesQuery.data.length} service(s) publié(s)</li>
                             ) : null}
                             {datasheetQuery?.data?.upload_list?.length && datasheetQuery?.data?.upload_list.length > 0 ? (
                                 <li>{datasheetQuery?.data?.upload_list.length} livraison(s)</li>

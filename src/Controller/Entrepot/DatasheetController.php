@@ -24,7 +24,7 @@ use Symfony\Component\Routing\Annotation\Route;
     '/api/datastores/{datastoreId}/datasheet',
     name: 'cartesgouvfr_api_datasheet_',
     options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()'
+    // condition: 'request.isXmlHttpRequest()'
 )]
 class DatasheetController extends AbstractController implements ApiControllerInterface
 {
@@ -90,27 +90,31 @@ class DatasheetController extends AbstractController implements ApiControllerInt
     #[Route('/{datasheetName}', name: 'get', methods: ['GET'])]
     public function getDetailed(string $datastoreId, string $datasheetName): JsonResponse
     {
-        // recherche d'entités API qui représente une fiche de données : upload, stored_data
-        $uploadList = $this->uploadApiService->getAllDetailed($datastoreId, [
+        // recherche d'entités API qui représente une fiche de données : upload, stored_data, metadata
+        $uploadList = $this->uploadApiService->getAll($datastoreId, [
             'tags' => [
                 CommonTags::DATASHEET_NAME => $datasheetName,
             ],
+            'fields' => ['name', 'description', 'type', 'visibility', 'status', 'srs', 'contact', 'size', 'last_event', 'tags', 'bbox'],
         ]);
 
-        $vectorDbList = $this->storedDataApiService->getAllDetailed($datastoreId, [
-            'type' => StoredDataTypes::VECTOR_DB,
+        $storedDataList = $this->storedDataApiService->getAll($datastoreId, [
             'tags' => [
                 CommonTags::DATASHEET_NAME => $datasheetName,
             ],
+            'fields' => ['name', 'description', 'type', 'visibility', 'status', 'srs', 'contact', 'size', 'last_event', 'tags', 'bbox'],
         ]);
+
+        $vectorDbList = array_filter($storedDataList, function ($storedData) {
+            return StoredDataTypes::VECTOR_DB === $storedData['type'];
+        });
+        $vectorDbList = array_values($vectorDbList);
 
         // Pyramid vector
-        $pyramidList = $this->storedDataApiService->getAllDetailed($datastoreId, [
-            'type' => StoredDataTypes::ROK4_PYRAMID_VECTOR,
-            'tags' => [
-                CommonTags::DATASHEET_NAME => $datasheetName,
-            ],
-        ]);
+        $pyramidList = array_filter($storedDataList, function ($storedData) {
+            return StoredDataTypes::ROK4_PYRAMID_VECTOR === $storedData['type'];
+        });
+        $pyramidList = array_values($pyramidList);
 
         $metadataList = $this->metadataApiService->getAll($datastoreId, [
             'tags' => [
@@ -127,7 +131,8 @@ class DatasheetController extends AbstractController implements ApiControllerInt
 
         // Recherche de services (configuration et offering)
         $storedDataList = array_merge($vectorDbList, $pyramidList);
-        $services = $this->_getServices($datastoreId, $storedDataList);
+        // $services = $this->_getServices($datastoreId, $storedDataList);
+        $services = [];
 
         return $this->json([
             ...$datasheet,
