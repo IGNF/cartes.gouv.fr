@@ -10,7 +10,7 @@ import { FC } from "react";
 import { createPortal } from "react-dom";
 import { symToStr } from "tsafe/symToStr";
 
-import { DatasheetDocumentTypeEnum, Service, type Datasheet, type DatasheetDetailed, type DatasheetDocument, type Metadata } from "../../../../@types/app";
+import { DatasheetDocumentTypeEnum, type Datasheet, type DatasheetDetailed, type DatasheetDocument, type Metadata } from "../../../../@types/app";
 import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import Wait from "../../../../components/Utils/Wait";
@@ -75,18 +75,10 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
         enabled: !datasheetDeleteMutation.isPending,
     });
 
-    const datasheetServicesQuery = useQuery<Service[], CartesApiException>({
-        queryKey: RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName),
-        queryFn: ({ signal }) => api.datasheet.getServices(datastoreId, datasheetName, { signal }),
-        enabled: !datasheetQuery.isFetching && !datasheetDeleteMutation.isPending,
-        staleTime: 60000,
-        retry: false,
-    });
-
     const metadataQuery = useQuery<Metadata, CartesApiException>({
         queryKey: RQKeys.datastore_metadata_by_datasheet_name(datastoreId, datasheetName),
         queryFn: ({ signal }) => api.metadata.getByDatasheetName(datastoreId, datasheetName, { signal }),
-        enabled: !datasheetQuery.isFetching && !datasheetDeleteMutation.isPending,
+        enabled: !datasheetDeleteMutation.isPending,
         staleTime: 60000,
         retry: false,
     });
@@ -94,8 +86,8 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
     const documentsListQuery = useQuery({
         queryKey: RQKeys.datastore_datasheet_documents_list(datastoreId, datasheetName),
         queryFn: ({ signal }) => api.datasheetDocument.getList(datastoreId, datasheetName, { signal }),
-        staleTime: 60000,
-        enabled: activeTab === DatasheetViewActiveTabEnum.Documents,
+        staleTime: 120000,
+        enabled: !datasheetDeleteMutation.isPending,
     });
 
     return (
@@ -179,7 +171,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                                         tabId: DatasheetViewActiveTabEnum.Dataset,
                                     },
                                     {
-                                        label: t("tab_label.services", { num: datasheetServicesQuery.data?.length || 0 }),
+                                        label: t("tab_label.services", { num: datasheetQuery.data.service_list?.length || 0 }),
                                         tabId: DatasheetViewActiveTabEnum.Services,
                                     },
                                     {
@@ -205,7 +197,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                                                 <ServicesListTab
                                                     datastoreId={datastoreId}
                                                     datasheet={datasheetQuery.data}
-                                                    datasheet_services_list={datasheetServicesQuery.data ?? []}
+                                                    datasheet_services_list={datasheetQuery.data.service_list ?? []}
                                                 />
                                             );
 
@@ -254,8 +246,8 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                             {datasheetQuery?.data?.pyramid_list?.length && datasheetQuery?.data?.pyramid_list.length > 0 ? (
                                 <li>{datasheetQuery?.data?.pyramid_list.length} pyramide(s) de tuiles vectorielles</li>
                             ) : null}
-                            {datasheetServicesQuery.data?.length && datasheetServicesQuery.data.length > 0 ? (
-                                <li>{datasheetServicesQuery.data.length} service(s) publié(s)</li>
+                            {datasheetQuery.data?.service_list?.length && datasheetQuery.data.service_list.length > 0 ? (
+                                <li>{datasheetQuery.data?.service_list.length} service(s) publié(s)</li>
                             ) : null}
                             {datasheetQuery?.data?.upload_list?.length && datasheetQuery?.data?.upload_list.length > 0 ? (
                                 <li>{datasheetQuery?.data?.upload_list.length} livraison(s)</li>

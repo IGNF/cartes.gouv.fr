@@ -24,7 +24,7 @@ use Symfony\Component\Routing\Annotation\Route;
     '/api/datastores/{datastoreId}/datasheet',
     name: 'cartesgouvfr_api_datasheet_',
     options: ['expose' => true],
-    // condition: 'request.isXmlHttpRequest()'
+    condition: 'request.isXmlHttpRequest()'
 )]
 class DatasheetController extends AbstractController implements ApiControllerInterface
 {
@@ -91,18 +91,18 @@ class DatasheetController extends AbstractController implements ApiControllerInt
     public function getDetailed(string $datastoreId, string $datasheetName): JsonResponse
     {
         // recherche d'entités API qui représente une fiche de données : upload, stored_data, metadata
-        $uploadList = $this->uploadApiService->getAll($datastoreId, [
+        $uploadList = $this->uploadApiService->getAllDetailed($datastoreId, [
             'tags' => [
                 CommonTags::DATASHEET_NAME => $datasheetName,
             ],
-            'fields' => ['name', 'description', 'type', 'visibility', 'status', 'srs', 'contact', 'size', 'last_event', 'tags', 'bbox'],
+            // 'fields' => ['name', 'description', 'type', 'visibility', 'status', 'srs', 'contact', 'size', 'last_event', 'tags', 'bbox'],
         ]);
 
-        $storedDataList = $this->storedDataApiService->getAll($datastoreId, [
+        $storedDataList = $this->storedDataApiService->getAllDetailed($datastoreId, [
             'tags' => [
                 CommonTags::DATASHEET_NAME => $datasheetName,
             ],
-            'fields' => ['name', 'description', 'type', 'visibility', 'status', 'srs', 'contact', 'size', 'last_event', 'tags', 'bbox'],
+            // 'fields' => ['name', 'description', 'type', 'visibility', 'status', 'srs', 'contact', 'size', 'last_event', 'tags', 'bbox'],
         ]);
 
         $vectorDbList = array_filter($storedDataList, function ($storedData) {
@@ -130,9 +130,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         $datasheet = $this->getBasicInfo($datastore, $datasheetName);
 
         // Recherche de services (configuration et offering)
-        $storedDataList = array_merge($vectorDbList, $pyramidList);
-        // $services = $this->_getServices($datastoreId, $storedDataList);
-        $services = [];
+        $services = $this->_getServices($datastoreId, $storedDataList);
 
         return $this->json([
             ...$datasheet,
@@ -146,7 +144,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
     #[Route('/{datasheetName}/services', name: 'get_services', methods: ['GET'])]
     public function getServices(string $datastoreId, string $datasheetName): JsonResponse
     {
-        $storedDataList = $this->storedDataApiService->getAllDetailed($datastoreId, [
+        $storedDataList = $this->storedDataApiService->getAll($datastoreId, [
             'tags' => [
                 CommonTags::DATASHEET_NAME => $datasheetName,
             ],
