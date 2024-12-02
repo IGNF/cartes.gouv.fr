@@ -18,10 +18,9 @@ const TableAttributeSelection: FC<TableAttributeSelectionProps> = ({ visible, fo
         setValue: setFormValue,
         getValues: getFormValues,
         formState: { errors },
-        watch,
     } = form;
 
-    const tableAttributes: Record<string, string[]> = watch("table_attributes") ?? {};
+    const tableAttributes: Record<string, string[]> = getFormValues("table_attributes") ?? {};
 
     useEffect(() => {
         const prevTableAttributes = getFormValues("table_attributes") ?? {};
@@ -33,9 +32,8 @@ const TableAttributeSelection: FC<TableAttributeSelectionProps> = ({ visible, fo
         setFormValue("table_attributes", tableAttributes);
     }, [getFormValues, setFormValue, selectedTables]);
 
-    const toggleAttributes = (tableName: string, attrName: string) => {
-        const prevTableAttributes = { ...tableAttributes };
-        let tableAttr: string[] = prevTableAttributes[tableName];
+    const toggleAttributes = (tableName: string, attrName: string, tableAttributes: string[]) => {
+        let tableAttr = [...tableAttributes];
 
         if (tableAttr.includes(attrName)) {
             tableAttr = tableAttr.filter((el) => el !== attrName);
@@ -44,9 +42,7 @@ const TableAttributeSelection: FC<TableAttributeSelectionProps> = ({ visible, fo
             tableAttr = Array.from(new Set(tableAttr));
         }
 
-        prevTableAttributes[tableName] = tableAttr;
-
-        setFormValue("table_attributes", { ...prevTableAttributes }, { shouldValidate: true });
+        setFormValue(`table_attributes.${tableName}`, tableAttr, { shouldValidate: true });
     };
 
     return (
@@ -67,7 +63,7 @@ const TableAttributeSelection: FC<TableAttributeSelectionProps> = ({ visible, fo
                                 nativeInputProps: {
                                     value: attrName,
                                     checked: tableAttributes?.[table.name]?.includes(attrName) ?? false,
-                                    onChange: () => toggleAttributes(table.name, attrName),
+                                    onChange: () => toggleAttributes(table.name, attrName, tableAttributes[table.name]),
                                 },
                             }))}
                         state={errors?.table_attributes?.[table.name]?.message ? "error" : "default"}
