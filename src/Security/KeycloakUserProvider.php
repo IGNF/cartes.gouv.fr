@@ -20,6 +20,8 @@ use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 
 /**
  * @implements UserProviderInterface<User>
@@ -32,6 +34,7 @@ class KeycloakUserProvider implements UserProviderInterface
         private ParameterBagInterface $params,
         private UserApiService $userApiService,
         private LoggerInterface $logger,
+        private CacheInterface $cache,
     ) {
     }
 
@@ -78,12 +81,16 @@ class KeycloakUserProvider implements UserProviderInterface
             throw new AuthenticationExpiredException('Failed to fetch user from token', Response::HTTP_UNAUTHORIZED, $th);
         }
 
-        try {
-            $apiUser = $this->userApiService->getMe();
-        } catch (TimeoutException $ex) {
-            $this->logger->debug('{class}: Failed to fetch logged-in user', ['class' => self::class]);
-            throw new UserNotFoundException('Failed to fetch logged-in user', Response::HTTP_UNAUTHORIZED, $ex);
-        }
+        $apiUser = $this->cache->get('users-me', function (ItemInterface $item) {
+            $item->expiresAfter(60);
+
+            try {
+                return $this->userApiService->getMe();
+            } catch (TimeoutException $ex) {
+                $this->logger->debug('{class}: Failed to fetch logged-in user', ['class' => self::class]);
+                throw new UserNotFoundException('Failed to fetch logged-in user', Response::HTTP_UNAUTHORIZED, $ex);
+            }
+        });
 
         $user = new User($keycloakUser->toArray(), $apiUser);
 

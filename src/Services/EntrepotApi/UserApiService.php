@@ -7,6 +7,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class UserApiService extends BaseEntrepotApiService
@@ -18,8 +19,9 @@ class UserApiService extends BaseEntrepotApiService
         RequestStack $requestStack,
         LoggerInterface $logger,
         private DatastoreApiService $datastoreApiService,
+        protected CacheInterface $cache,
     ) {
-        parent::__construct($httpClient, $parameters, $filesystem, $requestStack, $logger);
+        parent::__construct($httpClient, $parameters, $filesystem, $requestStack, $cache, $logger);
     }
 
     public function getMe(): array
