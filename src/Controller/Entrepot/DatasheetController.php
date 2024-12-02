@@ -42,8 +42,9 @@ class DatasheetController extends AbstractController implements ApiControllerInt
     #[Route('', name: 'get_list', methods: ['GET'])]
     public function getDatasheetList(string $datastoreId): JsonResponse
     {
-        $uploads = $this->uploadApiService->getAllDetailed($datastoreId, [
+        $uploads = $this->uploadApiService->getAll($datastoreId, [
             'sort' => 'lastEvent,desc',
+            'fields' => 'tags',
         ]);
 
         $uploadDatasheetNames = array_map(function ($upload) {
@@ -52,8 +53,9 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             }
         }, $uploads);
 
-        $storedDataList = $this->storedDataApiService->getAllDetailed($datastoreId, [
+        $storedDataList = $this->storedDataApiService->getAll($datastoreId, [
             'sort' => 'lastEvent,desc',
+            'fields' => 'tags',
         ]);
 
         $storedDataDatasheetNames = array_map(function ($storedData) {
@@ -88,27 +90,31 @@ class DatasheetController extends AbstractController implements ApiControllerInt
     #[Route('/{datasheetName}', name: 'get', methods: ['GET'])]
     public function getDetailed(string $datastoreId, string $datasheetName): JsonResponse
     {
-        // recherche d'entités API qui représente une fiche de données : upload, stored_data
+        // recherche d'entités API qui représente une fiche de données : upload, stored_data, metadata
         $uploadList = $this->uploadApiService->getAllDetailed($datastoreId, [
             'tags' => [
                 CommonTags::DATASHEET_NAME => $datasheetName,
             ],
+            // 'fields' => ['name', 'description', 'type', 'visibility', 'status', 'srs', 'contact', 'size', 'last_event', 'tags', 'bbox'],
         ]);
 
-        $vectorDbList = $this->storedDataApiService->getAllDetailed($datastoreId, [
-            'type' => StoredDataTypes::VECTOR_DB,
+        $storedDataList = $this->storedDataApiService->getAllDetailed($datastoreId, [
             'tags' => [
                 CommonTags::DATASHEET_NAME => $datasheetName,
             ],
+            // 'fields' => ['name', 'description', 'type', 'visibility', 'status', 'srs', 'contact', 'size', 'last_event', 'tags', 'bbox'],
         ]);
+
+        $vectorDbList = array_filter($storedDataList, function ($storedData) {
+            return StoredDataTypes::VECTOR_DB === $storedData['type'];
+        });
+        $vectorDbList = array_values($vectorDbList);
 
         // Pyramid vector
-        $pyramidList = $this->storedDataApiService->getAllDetailed($datastoreId, [
-            'type' => StoredDataTypes::ROK4_PYRAMID_VECTOR,
-            'tags' => [
-                CommonTags::DATASHEET_NAME => $datasheetName,
-            ],
-        ]);
+        $pyramidList = array_filter($storedDataList, function ($storedData) {
+            return StoredDataTypes::ROK4_PYRAMID_VECTOR === $storedData['type'];
+        });
+        $pyramidList = array_values($pyramidList);
 
         $metadataList = $this->metadataApiService->getAll($datastoreId, [
             'tags' => [
@@ -124,7 +130,6 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         $datasheet = $this->getBasicInfo($datastore, $datasheetName);
 
         // Recherche de services (configuration et offering)
-        $storedDataList = array_merge($vectorDbList, $pyramidList);
         $services = $this->_getServices($datastoreId, $storedDataList);
 
         return $this->json([
@@ -139,7 +144,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
     #[Route('/{datasheetName}/services', name: 'get_services', methods: ['GET'])]
     public function getServices(string $datastoreId, string $datasheetName): JsonResponse
     {
-        $storedDataList = $this->storedDataApiService->getAllDetailed($datastoreId, [
+        $storedDataList = $this->storedDataApiService->getAll($datastoreId, [
             'tags' => [
                 CommonTags::DATASHEET_NAME => $datasheetName,
             ],

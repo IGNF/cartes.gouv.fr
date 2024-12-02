@@ -19,7 +19,7 @@ class StoredDataApiService extends BaseEntrepotApiService
         LoggerInterface $logger,
         private ProcessingApiService $processingApiService,
         private ConfigurationApiService $configurationApiService,
-        private AnnexeApiService $annexeApiService
+        private AnnexeApiService $annexeApiService,
     ) {
         parent::__construct($httpClient, $parameters, $filesystem, $requestStack, $logger);
     }
@@ -31,6 +31,10 @@ class StoredDataApiService extends BaseEntrepotApiService
     {
         if (!array_key_exists('sort', $query)) { // par défaut, trier par la date de création décroissante
             $query['sort'] = 'lastEvent,desc';
+        }
+
+        if (array_key_exists('fields', $query) && is_array($query['fields']) && !empty($query['fields'])) {
+            $query['fields'] = implode(',', $query['fields']);
         }
 
         return $this->requestAll("datastores/$datastoreId/stored_data", $query);

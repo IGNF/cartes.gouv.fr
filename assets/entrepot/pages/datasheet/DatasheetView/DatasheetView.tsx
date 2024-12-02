@@ -78,7 +78,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
     const metadataQuery = useQuery<Metadata, CartesApiException>({
         queryKey: RQKeys.datastore_metadata_by_datasheet_name(datastoreId, datasheetName),
         queryFn: ({ signal }) => api.metadata.getByDatasheetName(datastoreId, datasheetName, { signal }),
-        enabled: !datasheetQuery.isFetching && !datasheetDeleteMutation.isPending,
+        enabled: !datasheetDeleteMutation.isPending,
         staleTime: 60000,
         retry: false,
     });
@@ -86,8 +86,8 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
     const documentsListQuery = useQuery({
         queryKey: RQKeys.datastore_datasheet_documents_list(datastoreId, datasheetName),
         queryFn: ({ signal }) => api.datasheetDocument.getList(datastoreId, datasheetName, { signal }),
-        staleTime: 60000,
-        enabled: activeTab === DatasheetViewActiveTabEnum.Documents,
+        staleTime: 120000,
+        enabled: !datasheetDeleteMutation.isPending,
     });
 
     return (
@@ -171,7 +171,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                                         tabId: DatasheetViewActiveTabEnum.Dataset,
                                     },
                                     {
-                                        label: t("tab_label.services", { num: datasheetQuery.data?.service_list?.length || 0 }),
+                                        label: t("tab_label.services", { num: datasheetQuery.data.service_list?.length || 0 }),
                                         tabId: DatasheetViewActiveTabEnum.Services,
                                     },
                                     {
@@ -193,7 +193,13 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                                             return <DatasetListTab datastoreId={datastoreId} datasheet={datasheetQuery.data} />;
 
                                         case DatasheetViewActiveTabEnum.Services:
-                                            return <ServicesListTab datastoreId={datastoreId} datasheet={datasheetQuery.data} />;
+                                            return (
+                                                <ServicesListTab
+                                                    datastoreId={datastoreId}
+                                                    datasheet={datasheetQuery.data}
+                                                    datasheet_services_list={datasheetQuery.data.service_list ?? []}
+                                                />
+                                            );
 
                                         case DatasheetViewActiveTabEnum.Documents:
                                             return <DocumentsTab datastoreId={datastoreId} datasheetName={datasheetName} />;
@@ -240,8 +246,8 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                             {datasheetQuery?.data?.pyramid_list?.length && datasheetQuery?.data?.pyramid_list.length > 0 ? (
                                 <li>{datasheetQuery?.data?.pyramid_list.length} pyramide(s) de tuiles vectorielles</li>
                             ) : null}
-                            {datasheetQuery?.data?.service_list?.length && datasheetQuery?.data?.service_list.length > 0 ? (
-                                <li>{datasheetQuery?.data?.service_list.length} service(s) publié(s)</li>
+                            {datasheetQuery.data?.service_list?.length && datasheetQuery.data.service_list.length > 0 ? (
+                                <li>{datasheetQuery.data?.service_list.length} service(s) publié(s)</li>
                             ) : null}
                             {datasheetQuery?.data?.upload_list?.length && datasheetQuery?.data?.upload_list.length > 0 ? (
                                 <li>{datasheetQuery?.data?.upload_list.length} livraison(s)</li>
