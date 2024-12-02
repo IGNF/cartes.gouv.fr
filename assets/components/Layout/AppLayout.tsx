@@ -31,6 +31,7 @@ const HiddenElements: FC = () => {
                     {
                         anchor: "#main",
                         label: Translator.trans("site.go_to_content"),
+                        id: "skip-to-content-link",
                     },
                 ]}
             />

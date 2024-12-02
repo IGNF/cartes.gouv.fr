@@ -16,6 +16,7 @@ const AppFooter = () => {
             accessibility="partially compliant"
             accessibilityLinkProps={{
                 ...routes.accessibility().link,
+                id: "footer-accessibility-link",
             }}
             brandTop={
                 <>
@@ -29,7 +30,10 @@ const AppFooter = () => {
             "
             bottomItems={[
                 {
-                    linkProps: routes.terms_of_service().link,
+                    linkProps: {
+                        ...routes.terms_of_service().link,
+                        id: "footer-terms-of-service-link",
+                    },
                     text: "Conditions générales d’utilisation",
                 },
                 <FooterPersonalDataPolicyItem key="footer-personal-data-policy-item" />,
@@ -40,34 +44,53 @@ const AppFooter = () => {
             homeLinkProps={{
                 ...routes.home().link,
                 title: "Accueil - cartes.gouv.fr",
+                id: "footer-home-link",
             }}
             termsLinkProps={{
                 ...routes.legal_notice().link,
+                id: "footer-legal-notice-link",
             }}
             websiteMapLinkProps={{
                 ...routes.sitemap().link,
+                id: "footer-sitemap-link",
             }}
             partnersLogos={{
                 sub: [
                     {
                         alt: "IGN",
-                        href: "https://www.ign.fr",
                         imgUrl: logoIgn,
+                        linkProps: {
+                            id: "footer-ign-link",
+                            title: "IGN",
+                            href: "https://www.ign.fr",
+                        },
                     },
                     {
                         alt: "MINISTÈRE DE LA TRANSFORMATION ET DE LA FONCTION PUBLIQUES",
-                        href: "https://www.transformation.gouv.fr/",
                         imgUrl: logoMinistereTransformation,
+                        linkProps: {
+                            id: "footer-ministere-transformation-link",
+                            title: "MINISTÈRE DE LA TRANSFORMATION ET DE LA FONCTION PUBLIQUES",
+                            href: "https://www.transformation.gouv.fr/",
+                        },
                     },
                     {
                         alt: "MINISTÈRE DE LA TRANSITION ÉCOLOGIQUE ET DE LA COHÉSION DES TERRITOIRES",
-                        href: "https://www.ecologie.gouv.fr/",
                         imgUrl: logoMinistereEcologie,
+                        linkProps: {
+                            id: "footer-ministere-ecologie-link",
+                            title: "MINISTÈRE DE LA TRANSITION ÉCOLOGIQUE ET DE LA COHÉSION DES TERRITOIRES",
+                            href: "https://www.ecologie.gouv.fr/",
+                        },
                     },
                     {
                         alt: "Conseil National de l’Information Géolocalisée",
-                        href: "https://cnig.gouv.fr/",
                         imgUrl: logoCnig,
+                        linkProps: {
+                            id: "footer-cnig-link",
+                            title: "Conseil National de l’Information Géolocalisée",
+                            href: "https://cnig.gouv.fr/",
+                        },
                     },
                 ],
             }}
