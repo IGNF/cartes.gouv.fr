@@ -29,6 +29,7 @@ const AppHeader: FC<AppHeaderProps> = ({ navItems = [] }) => {
             target: "_blank",
             rel: "noreferrer",
             title: "Accéder au Géoportail - ouvre une nouvelle fenêtre",
+            id: "header-geoportail-link",
         },
         text: "Accéder au Géoportail",
     };
@@ -41,6 +42,7 @@ const AppHeader: FC<AppHeaderProps> = ({ navItems = [] }) => {
             target: "_blank",
             rel: "noreferrer",
             title: "Catalogue - ouvre une nouvelle fenêtre",
+            id: "header-catalogue-link",
         },
         text: "Catalogue",
     };
@@ -53,6 +55,7 @@ const AppHeader: FC<AppHeaderProps> = ({ navItems = [] }) => {
             iconId: "fr-icon-account-fill",
             linkProps: {
                 href: SymfonyRouting.generate("cartesgouvfr_security_login"),
+                id: "header-login-link",
             },
             text: "Se connecter",
         });
@@ -73,13 +76,17 @@ const AppHeader: FC<AppHeaderProps> = ({ navItems = [] }) => {
 
         quickAccessItems.push({
             iconId: "fr-icon-account-fill",
-            linkProps: routes.dashboard_pro().link,
+            linkProps: {
+                ...routes.dashboard_pro().link,
+                id: "header-dashboard-link",
+            },
             text: btnMyAccountText.trim(),
         });
         quickAccessItems.push({
             iconId: "fr-icon-logout-box-r-line",
             linkProps: {
                 href: SymfonyRouting.generate("cartesgouvfr_security_logout"),
+                id: "header-logout-link",
             },
             text: "Se déconnecter",
         });
@@ -99,6 +106,7 @@ const AppHeader: FC<AppHeaderProps> = ({ navItems = [] }) => {
             homeLinkProps={{
                 ...routes.home().link,
                 title: "Accueil - cartes.gouv.fr",
+                id: "header-home-link",
             }}
             serviceTitle={
                 <>

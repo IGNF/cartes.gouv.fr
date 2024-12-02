@@ -42,6 +42,7 @@ const Home = () => {
                 target="_blank"
                 rel="noreferrer"
                 title="Formulaire d’inscription à des ateliers cartes.gouv.fr - Ouvre une nouvelle fenêtre"
+                id="home-info-banner-link"
             >
                 Inscrivez-vous
             </a>

@@ -910,9 +910,9 @@
     "@babel/helper-validator-identifier" "^7.25.9"
 
 "@codegouvfr/react-dsfr@^1.10.11":
-  version "1.16.4"
-  resolved "https://registry.npmjs.org/@codegouvfr/react-dsfr/-/react-dsfr-1.16.4.tgz"
-  integrity sha512-nowg/cHFUCRxnt55YqlVp8na3Unv7dEjsohm9ak92gIP3YIVYr+AOPXgDSSB3mkOxoUyR2yTZLUGEA48jy5FSQ==
+  version "1.17.0"
+  resolved "https://registry.yarnpkg.com/@codegouvfr/react-dsfr/-/react-dsfr-1.17.0.tgz#f781abd40493de02d89d1b11240a4500d24b097a"
+  integrity sha512-zYluHhGRD39ckZvQFgK8hSeo76TbxPtuot+I6N66vC6XXkILvv0llbIvezkxv3xlz4J8fvq4Ou5Hngt5EWtpeg==
   dependencies:
     tsafe "^1.8.5"
     yargs-parser "^21.1.1"
@@ -7644,7 +7644,7 @@ ts-loader@^9.4.4:
 
 tsafe@^1.6.5, tsafe@^1.8.5:
   version "1.8.5"
-  resolved "https://registry.npmjs.org/tsafe/-/tsafe-1.8.5.tgz"
+  resolved "https://registry.yarnpkg.com/tsafe/-/tsafe-1.8.5.tgz#cdf9fa3111974ac480d7ee519f8241815e5d22ea"
   integrity sha512-LFWTWQrW6rwSY+IBNFl2ridGfUzVsPwrZ26T4KUJww/py8rzaQ/SY+MIz6YROozpUCaRcuISqagmlwub9YT9kw==
 
 tslib@^2.1.0:
