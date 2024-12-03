@@ -24,7 +24,7 @@ const UploadLayerStyles: FC<UploadLayerStylesProps> = ({ form, format, layers })
             {format === "qml" && (
                 <>
                     <div className="fr-alert fr-alert--warning">
-                        <p>{t("qml_message")}</p>
+                        {t("qml_message")}
                     </div>
                     <br />
                 </>
