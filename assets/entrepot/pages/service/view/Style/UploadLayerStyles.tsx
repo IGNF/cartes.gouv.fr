@@ -22,11 +22,13 @@ const UploadLayerStyles: FC<UploadLayerStylesProps> = ({ form, format, layers })
         <>
             <p>{t("add_file", { format: format })}</p>
             {format === "qml" && (
-                <div className="fr-alert fr-alert--warning">
-                    <p>{t("qml_message")}</p>
-                </div>
+                <>
+                    <div className="fr-alert fr-alert--warning">
+                        <p>{t("qml_message")}</p>
+                    </div>
+                    <br />
+                </>
             )}
-            <br />
             {Object.keys(layers).map((uid) => {
                 return (
                     <div key={uid} className={fr.cx("fr-grid-row", "fr-mb-3w")}>
