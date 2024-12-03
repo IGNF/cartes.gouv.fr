@@ -24,13 +24,8 @@ const UploadLayerStyles: FC<UploadLayerStylesProps> = ({ form, format, layers })
             <p>{t("add_file", { format: format })}</p>
             {format === "qml" && (
                 <>
-                    <Alert
-                        closable={false}
-                        description={t("qml_message")}
-                        severity="warning"
-                        small
-                    />
-                    <br/>
+                    <Alert closable={false} description={t("qml_message")} severity="warning" small />
+                    <br />
                 </>
             )}
             {Object.keys(layers).map((uid) => {
