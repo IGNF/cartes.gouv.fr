@@ -80,8 +80,16 @@ class DatasheetController extends AbstractController implements ApiControllerInt
 
         $datastore = $this->datastoreApiService->get($datastoreId);
 
+        // récupération des configurations publiées et des annexes de type vignette en amont pour le nombre de services publiés et la vignette de chaque fiche de données
+        $configurations = $this->configurationApiService->getAll($datastore['_id'], [
+            'status' => ConfigurationStatuses::PUBLISHED,
+            'fields' => 'tags',
+        ]);
+
+        $annexes = $this->annexeApiService->getAll($datastoreId, null, null, ['type=thumbnail']);
+
         foreach ($uniqueDatasheetNames as $datasheetName) {
-            $datasheetList[] = $this->getBasicInfo($datastore, $datasheetName);
+            $datasheetList[] = $this->getBasicInfo($datastore, $datasheetName, $configurations, $annexes);
         }
 
         return $this->json($datasheetList);
@@ -156,26 +164,45 @@ class DatasheetController extends AbstractController implements ApiControllerInt
     }
 
     /**
-     * @param array<mixed> $datastore
+     * @param array<mixed>         $datastore
+     * @param ?array<array<mixed>> $configurations
+     * @param ?array<array<mixed>> $annexes
      */
-    private function getBasicInfo(array $datastore, string $datasheetName): array
+    private function getBasicInfo(array $datastore, string $datasheetName, ?array $configurations = null, ?array $annexes = null): array
     {
-        // recherche du nombre de services publiés
-        $configurations = $this->configurationApiService->getAll($datastore['_id'], [
-            'tags' => [
-                CommonTags::DATASHEET_NAME => $datasheetName,
-            ],
-            'status' => ConfigurationStatuses::PUBLISHED,
-        ]);
-        $nbPublications = count($configurations);
+        // recherche du nombre de services publiés à partir de $configurations si fourni, sinon requête API
+        if (null !== $configurations) {
+            $datasheetConfigurations = array_filter($configurations, function ($configuration) use ($datasheetName) {
+                if (isset($configuration['tags'][CommonTags::DATASHEET_NAME])) {
+                    return $configuration['tags'][CommonTags::DATASHEET_NAME] === $datasheetName;
+                }
 
-        // recherche de vignette
+                return false;
+            });
+        } else {
+            $datasheetConfigurations = $this->configurationApiService->getAll($datastore['_id'], [
+                'tags' => [
+                    CommonTags::DATASHEET_NAME => $datasheetName,
+                ],
+                'status' => ConfigurationStatuses::PUBLISHED,
+            ]);
+        }
+        $nbPublications = count($datasheetConfigurations);
+
+        // recherche de vignette à partir de $annexes si fourni, sinon requête API
         $annexeUrl = $this->getParameter('annexes_url');
-        $annexes = $this->annexeApiService->getAll($datastore['_id'], null, null, ["datasheet_name=$datasheetName", 'type=thumbnail']);
+        if (null !== $annexes) {
+            $datasheetAnnexes = array_filter($annexes, function ($annexe) use ($datasheetName) {
+                return in_array(CommonTags::DATASHEET_NAME."=$datasheetName", $annexe['labels']);
+            });
+            $datasheetAnnexes = array_values($datasheetAnnexes);
+        } else {
+            $datasheetAnnexes = $this->annexeApiService->getAll($datastore['_id'], null, null, ["datasheet_name=$datasheetName", 'type=thumbnail']);
+        }
 
         $thumbnail = null;
-        if (count($annexes) > 0) {
-            $thumbnail = $annexes[0];
+        if (count($datasheetAnnexes) > 0) {
+            $thumbnail = $datasheetAnnexes[0];
             $thumbnail['url'] = $annexeUrl.'/'.$datastore['technical_name'].$thumbnail['paths'][0];
         }
 
