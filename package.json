@@ -98,7 +98,7 @@
         "defaults"
     ],
     "lint-staged": {
-        "*.{js,ts,json,md,css,scss,xml,yml,yaml,html}": [
+        "*.{js,jsx,ts,tsx,json,md,css,scss,xml,yml,yaml,html}": [
             "prettier --write"
         ],
         "*.php": [
