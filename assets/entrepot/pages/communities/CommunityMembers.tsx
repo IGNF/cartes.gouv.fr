@@ -289,7 +289,7 @@ const CommunityMembers: FC<CommunityMembersProps> = ({ communityId, userId }) =>
                     )}
                 </>
             )}
-            {isAuthorized === false && (
+            {isLoadingCommunity === false && isAuthorized === false && (
                 <Alert className={fr.cx("fr-mb-2w")} title={tCommon("information")} closable description={t("no_necessary_rights")} severity={"info"} />
             )}
             <AddMember communityId={communityId} communityMemberIds={communityMemberIds} userId={userId} />

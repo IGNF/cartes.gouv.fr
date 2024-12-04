@@ -4,12 +4,17 @@ namespace App\Services\EntrepotApi;
 
 use App\Exception\ApiException;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Contracts\Cache\ItemInterface;
 
 class DatastoreApiService extends BaseEntrepotApiService
 {
     public function get(string $datastoreId): array
     {
-        return $this->request('GET', "datastores/$datastoreId");
+        return $this->cache->get("datastore-$datastoreId", function (ItemInterface $item) use ($datastoreId) {
+            $item->expiresAfter(60);
+
+            return $this->request('GET', "datastores/$datastoreId");
+        });
     }
 
     /**

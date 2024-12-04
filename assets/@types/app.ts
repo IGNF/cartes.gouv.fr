@@ -73,6 +73,14 @@ export enum DatasheetDocumentTypeEnum {
     Link = "link",
 }
 
+// type PartialVectorDb = Pick<VectorDb, "name" | "description" | "type" | "visibility" | "status" | "srs" | "contact" | "size" | "last_event" | "tags"> & {
+//     bbox?: BoundingBox;
+// };
+
+// type PartialPyramid = Pick<Pyramid, "name" | "description" | "type" | "visibility" | "status" | "srs" | "contact" | "size" | "last_event" | "tags"> & {
+//     bbox?: BoundingBox;
+// };
+
 export type DatasheetDetailed = Datasheet & {
     vector_db_list: VectorDb[] | undefined;
     pyramid_list: Pyramid[] | undefined;

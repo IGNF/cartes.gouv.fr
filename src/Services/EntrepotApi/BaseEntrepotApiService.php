@@ -10,6 +10,7 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpClient\Exception\JsonException;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
@@ -20,7 +21,8 @@ class BaseEntrepotApiService extends AbstractApiService
         ParameterBagInterface $parameters,
         Filesystem $filesystem,
         RequestStack $requestStack,
-        LoggerInterface $logger
+        protected CacheInterface $cache,
+        LoggerInterface $logger,
     ) {
         parent::__construct($httpClient, $parameters, $filesystem, $requestStack, $logger, 'api_entrepot_url');
     }

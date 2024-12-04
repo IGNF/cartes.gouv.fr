@@ -30,8 +30,8 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
     const datasheetListQuery = useQuery({
         queryKey: RQKeys.datastore_datasheet_list(datastoreId),
         queryFn: ({ signal }) => api.datasheet.getList(datastoreId, { signal }),
-        staleTime: 30000,
-        refetchInterval: 30000,
+        staleTime: 60000,
+        refetchInterval: 60000,
         enabled: datastoreQuery.data !== undefined,
     });
 
