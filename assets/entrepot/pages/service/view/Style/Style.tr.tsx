@@ -1,5 +1,5 @@
-import { declareComponentKeys } from "./i18n";
-import { type Translations } from "./types";
+import { declareComponentKeys } from "../../../../../i18n";
+import { type Translations } from "../../../../../i18n/types";
 
 const { i18n } = declareComponentKeys<
     | "my_styles"

@@ -13,7 +13,7 @@ import * as yup from "yup";
 
 import type { UserRightsResponseDto } from "../../../../@types/app";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
-import { getTranslation, useTranslation } from "../../../../i18n/i18n";
+import { useTranslation } from "../../../../i18n/i18n";
 import { ComponentKey } from "../../../../i18n/types";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
@@ -33,11 +33,10 @@ type AddMemberProps = {
     userId?: string;
 };
 
-const { t: tCommon } = getTranslation("Common");
-const { t: translateRights } = getTranslation("Rights");
-
 const AddMember: FC<AddMemberProps> = ({ communityId, communityMemberIds, userId }) => {
     const { t } = useTranslation({ AddMember });
+    const { t: tCommon } = useTranslation("Common");
+    const { t: translateRights } = useTranslation("Rights");
 
     const schema = (t: TranslationFunction<"AddMember", ComponentKey>) => {
         return yup.object({

@@ -17,9 +17,9 @@ export const languagesDisplayNames: Record<Language, string> = {
 export type Language = (typeof languages)[number];
 export type ComponentKey =
     | import("./Common.tr").I18n
-    | import("./Breadcrumb.tr").I18n
-    | import("./Rights.tr").I18n
-    | import("./Style.tr").I18n
+    | import("../modules/entrepot/breadcrumbs/Breadcrumb.tr").I18n
+    | import("../entrepot/pages/communities/Rights.tr").I18n
+    | import("../entrepot/pages/service/view/Style/Style.tr").I18n
     | import("../entrepot/pages/users/me/Me.tr").I18n
     | import("../entrepot/pages/communities/AddMember/AddMember.tr").I18n
     | import("../entrepot/pages/communities/CommunityMembers/CommunityMembers.tr").I18n

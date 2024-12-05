@@ -1,9 +1,9 @@
 import { BreadcrumbProps } from "@codegouvfr/react-dsfr/Breadcrumb";
 import { Route } from "type-route";
 
-import { getTranslation } from "../../i18n/i18n";
-import { routes } from "../../router/router";
-import { Datastore } from "../../@types/app";
+import { Datastore } from "../../../@types/app";
+import { getTranslation } from "../../../i18n/i18n";
+import { routes } from "../../../router/router";
 
 const { t } = getTranslation("Breadcrumb");
 
