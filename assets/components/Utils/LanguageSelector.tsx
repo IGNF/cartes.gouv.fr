@@ -2,7 +2,8 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { memo, useId } from "react";
 import { symToStr } from "tsafe/symToStr";
 
-import { languagesDisplayNames, languages, type Language } from "../../i18n/i18n";
+import { Language } from "../../i18n";
+import { languages, languagesDisplayNames } from "../../i18n/types";
 
 type Props = {
     lang: Language;

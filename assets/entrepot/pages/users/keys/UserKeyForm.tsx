@@ -14,7 +14,7 @@ import { PermissionWithOfferingsDetailsResponseDto, UserKeyResponseDto, UserKeyR
 import AppLayout from "../../../../components/Layout/AppLayout";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
-import { datastoreNavItems } from "../../../../config/datastoreNavItems";
+import { datastoreNavItems } from "../../../../config/navItems/datastoreNavItems";
 import { getTranslation, useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
