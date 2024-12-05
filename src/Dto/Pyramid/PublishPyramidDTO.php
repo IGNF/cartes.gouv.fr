@@ -46,10 +46,8 @@ class PublishPyramidDTO
         #[Assert\NotBlank(['message' => 'common.projection_error'])]
         public readonly string $projection,
 
-        // #[Assert\NotBlank(['message' => 'common.attribution_text_mandatory_error'])]
         public readonly string $attribution_text,
 
-        // #[Assert\NotBlank(['message' => 'common.attribution_url_mandatory_error'])]
         #[Assert\Url(['message' => 'common.attribution_url_error'])]
         public readonly string $attribution_url,
 
@@ -59,9 +57,6 @@ class PublishPyramidDTO
 
         #[Assert\NotBlank(['message' => 'common.charset_error'])]
         public readonly string $charset,
-
-        // #[Assert\NotBlank(['message' => 'common.encoding_error'])]
-        // public readonly string $encoding,
 
         #[Assert\Choice([
             'choices' => ['', '200', '500', '1000', '2000', '5000', '10000', '25000', '50000', '100000', '250000', '500000', '1000000', '5000000',  '10000000'], // NOTE : doit correspondre à assets/data/md_resolutions.json
