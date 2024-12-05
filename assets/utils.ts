@@ -221,6 +221,20 @@ const trimObject = (obj: object): object => {
     return newObject;
 };
 
+async function hashStringSHA256(str: string): Promise<string> {
+    // encodage chaîne en Uint8Array pour la fonction crypto.subtle.digest
+    const encoder = new TextEncoder();
+    const data = encoder.encode(str);
+
+    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+
+    // convertir le hash du binaire en chaîne hexadécimal
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+
+    return hashHex;
+}
+
 export {
     getInspireKeywords,
     getLanguages,
@@ -237,4 +251,5 @@ export {
     formatDateWithoutTimeFromISO,
     getArrayRange,
     trimObject,
+    hashStringSHA256,
 };
