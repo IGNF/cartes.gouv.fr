@@ -5,7 +5,6 @@ import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { declareComponentKeys } from "i18nifty";
 import { FC, useCallback, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -15,7 +14,7 @@ import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
 import useScrollToTopEffect from "../../../../hooks/useScrollToTopEffect";
-import { Translations, useTranslation } from "../../../../i18n/i18n";
+import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import { routes } from "../../../../router/router";
@@ -280,58 +279,3 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
 };
 
 export default PyramidVectorTmsServiceForm;
-
-export const { i18n } = declareComponentKeys<
-    | { K: "title"; P: { editMode: boolean }; R: string }
-    | "stored_data.loading"
-    | "stored_data_and_offering.loading"
-    | "stored_data.fetch_failed"
-    | "offering.fetch_failed"
-    | { K: "step.title"; P: { stepNumber: number }; R: string }
-    | "publish"
-    | "publish.in_progress"
-    | "modify.in_progress"
-    | "back_to_data_list"
->()({
-    PyramidVectorTmsServiceForm,
-});
-
-export const PyramidVectorTmsServiceFormFrTranslations: Translations<"fr">["PyramidVectorTmsServiceForm"] = {
-    title: ({ editMode }) => (editMode ? "Modifier le service TMS" : "Publier un service TMS"),
-    "stored_data.loading": "Chargement de la donnée stockée",
-    "stored_data_and_offering.loading": "Chargement de la donnée stockée et du service à modifier",
-    "stored_data.fetch_failed": "Récupération des informations sur la donnée stockée a échoué",
-    "offering.fetch_failed": "Récupération des informations sur le service à modifier a échoué",
-    "step.title": ({ stepNumber }) => {
-        switch (stepNumber) {
-            case 1:
-                return "Source des métadonnées";
-            case 2:
-                return "Description de la ressource";
-            case 3:
-                return "Informations supplémentaires";
-            case 4:
-                return "Restrictions d’accès";
-
-            default:
-                return "";
-        }
-    },
-    publish: "Publier le service maintenant",
-    "publish.in_progress": "Création du service TMS en cours",
-    "modify.in_progress": "Modification des informations du service TMS en cours",
-    back_to_data_list: "Retour à mes données",
-};
-
-export const PyramidVectorTmsServiceFormEnTranslations: Translations<"en">["PyramidVectorTmsServiceForm"] = {
-    title: undefined,
-    "stored_data.loading": undefined,
-    "stored_data_and_offering.loading": undefined,
-    "stored_data.fetch_failed": undefined,
-    "offering.fetch_failed": undefined,
-    "step.title": undefined,
-    publish: undefined,
-    "publish.in_progress": undefined,
-    "modify.in_progress": undefined,
-    back_to_data_list: undefined,
-};

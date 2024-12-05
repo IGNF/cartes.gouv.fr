@@ -8,7 +8,7 @@ import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import Translator from "../../../../../modules/Translator";
 import { routes } from "../../../../../router/router";
 import api from "../../../../api";
-import { DatasheetViewActiveTabEnum } from "../../DatasheetView/DatasheetView";
+import { DatasheetViewActiveTabEnum } from "../../DatasheetView/DatasheetView/DatasheetView";
 
 const getStepIcon = (status: string) => {
     let icon = <span className={fr.cx("fr-icon-time-line")} />;

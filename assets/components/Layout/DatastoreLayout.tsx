@@ -2,8 +2,8 @@ import { BreadcrumbProps } from "@codegouvfr/react-dsfr/Breadcrumb";
 import { useQuery } from "@tanstack/react-query";
 import { FC, PropsWithChildren, memo, useMemo } from "react";
 
-import type { Datastore } from "../../@types/app";
-import { datastoreNavItems } from "../../config/datastoreNavItems";
+import { Datastore } from "../../@types/app";
+import { datastoreNavItems } from "../../config/navItems/datastoreNavItems";
 import api from "../../entrepot/api";
 import RQKeys from "../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../modules/jsonFetch";

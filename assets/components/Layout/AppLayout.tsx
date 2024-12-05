@@ -7,7 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { FC, PropsWithChildren, ReactNode, memo, useMemo } from "react";
 
 import { ConsentBannerAndConsentManagement } from "../../config/consentManagement";
-import { defaultNavItems } from "../../config/navItems";
+import { defaultNavItems } from "../../config/navItems/navItems";
 import api from "../../entrepot/api";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { useTranslation } from "../../i18n/i18n";

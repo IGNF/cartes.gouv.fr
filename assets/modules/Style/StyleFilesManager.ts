@@ -1,7 +1,7 @@
 import { Service, StyleFormat } from "../../@types/app";
 import { OfferingDetailResponseDtoTypeEnum } from "../../@types/entrepot";
 import WFSStyleFilesManager from "./WFSStyleFilesManager";
-import TMSStyleFilesManager from "./TMSStyleFilesManager";
+import TMSStyleFilesManager from "./TMSStyleFilesManager/TMSStyleFilesManager";
 
 const getStyleFilesManager = (service: Service, inputFormat: StyleFormat) => {
     switch (service.type) {
