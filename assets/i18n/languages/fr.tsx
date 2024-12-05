@@ -6,6 +6,7 @@ import { navItemsFrTranslations } from "../../config/navItems/navItems.tr";
 import { AccessesRequestFrTranslations } from "../../entrepot/pages/accesses-request/AccessesRequest.tr";
 import { AddMemberFrTranslations } from "../../entrepot/pages/communities/AddMember/AddMember.tr";
 import { CommunityMembersFrTranslations } from "../../entrepot/pages/communities/CommunityMembers/CommunityMembers.tr";
+import { RightsFrTranslations } from "../../entrepot/pages/communities/Rights.tr";
 import { DashboardProFrTranslations } from "../../entrepot/pages/dashboard/DashboardPro.tr";
 import { DatasheetListFrTranslations } from "../../entrepot/pages/datasheet/DatasheetList/DatasheetList.tr";
 import { DatasheetUploadFormFrTranslations } from "../../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadForm.tr";
@@ -19,6 +20,7 @@ import { TableSelectionFrTranslations } from "../../entrepot/pages/service/Table
 import { MetadatasFormFrTranslations } from "../../entrepot/pages/service/metadatas/MetadataForm.tr";
 import { ValidationMetadatasFrTranslations } from "../../entrepot/pages/service/metadatas/MetadataValidation.tr";
 import { PyramidVectorTmsServiceFormFrTranslations } from "../../entrepot/pages/service/tms/PyramidVectorTmsServiceForm.tr";
+import { StyleFrTranslations } from "../../entrepot/pages/service/view/Style/Style.tr";
 import { WfsServiceFormFrTranslations } from "../../entrepot/pages/service/wfs/WfsServiceForm.tr";
 import { UploadStyleFileFrTranslations } from "../../entrepot/pages/service/wms-vector/UploadStyleFile.tr";
 import { WmsVectorServiceFormFrTranslations } from "../../entrepot/pages/service/wms-vector/WmsVectorServiceForm.tr";
@@ -33,10 +35,8 @@ import { LoginDisabledFrTranslations } from "../../pages/LoginDisabled/LoginDisa
 import { contactFrTranslations } from "../../pages/assistance/contact/Contact.tr";
 import { mapboxStyleValidationFrTranslations } from "../../validations/mapbox/MapboxStyleValidator.tr";
 import { SldStyleValidationErrorsFrTranslations } from "../../validations/sld/SldStyleValidation.tr";
-import { BreadcrumbFrTranslations } from "../Breadcrumb.tr";
+import { BreadcrumbFrTranslations } from "../../modules/entrepot/breadcrumbs/Breadcrumb.tr";
 import { commonFrTranslations } from "../Common.tr";
-import { RightsFrTranslations } from "../Rights.tr";
-import { StyleFrTranslations } from "../Style.tr";
 import type { Translations } from "../types";
 
 export const translations: Translations<"fr"> = {
