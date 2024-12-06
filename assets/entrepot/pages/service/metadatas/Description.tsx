@@ -5,7 +5,7 @@ import { XMLParser } from "fast-xml-parser";
 import { FC, useEffect } from "react";
 import { Controller, UseFormReturn } from "react-hook-form";
 
-import { EndpointTypeEnum, type ServiceFormValuesBaseType } from "../../../../@types/app";
+import { type ServiceFormValuesBaseType } from "../../../../@types/app";
 import AutocompleteSelect from "../../../../components/Input/AutocompleteSelect";
 import MarkdownEditor from "../../../../components/Input/MarkdownEditor";
 import frequencyCodes from "../../../../data/maintenance_frequency.json";
@@ -14,19 +14,6 @@ import { getTranslation } from "../../../../i18n/i18n";
 import { getInspireKeywords, regex } from "../../../../utils";
 
 const keywords = getInspireKeywords();
-
-export const getEndpointSuffix = (endpointType: EndpointTypeEnum) => {
-    switch (endpointType) {
-        case EndpointTypeEnum.WFS:
-            return "wfs";
-        case EndpointTypeEnum.WMSVECTOR:
-            return "wmsv";
-        case EndpointTypeEnum.WMTSTMS:
-            return "tms";
-        default:
-            return "other"; // TODO
-    }
-};
 
 type DescriptionProps = {
     visible: boolean;
