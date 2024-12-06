@@ -34,9 +34,9 @@ import AccessRestrictions from "../AccessRestrictions";
 import TableSelection from "../TableSelection";
 import { CommonSchemasValidation } from "../common-schemas-validation";
 import { getWmsVectorServiceFormDefaultValues } from "../default-values";
-import AdditionalInfo from "../metadatas/AdditionalInfo";
-import Description from "../metadatas/Description";
-import UploadMDFile from "../metadatas/UploadMDFile";
+import AdditionalInfo from "../metadata/AdditionalInfo";
+import Description from "../metadata/Description";
+import UploadMDFile from "../metadata/UploadMDFile";
 import UploadStyleFile from "./UploadStyleFile";
 
 /**
