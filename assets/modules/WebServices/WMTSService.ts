@@ -1,5 +1,4 @@
 import TileLayer from "ol/layer/Tile";
-import { LayerTypes } from "../../@types/ol";
 import BaseService from "./BaseService";
 import WMTS, { optionsFromCapabilities } from "ol/source/WMTS";
 import { getRequestInfo } from "../../utils";
@@ -10,7 +9,7 @@ class WMTSService extends BaseService {
         return [this.service.layer_name];
     }
 
-    async getLayers(): Promise<LayerTypes[]> {
+    async getLayers() {
         // On ne conserve que l'URL du WMTS
         const wmtsUrl = this.service.urls.find((descUrl) => {
             return descUrl.type === "WMTS";
