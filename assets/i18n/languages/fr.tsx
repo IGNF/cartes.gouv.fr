@@ -25,6 +25,7 @@ import { UserKeyFrTranslations } from "../../entrepot/pages/users/keys/UserKeyTr
 import { UserKeysListTabFrTranslations } from "../../entrepot/pages/users/keys/UserKeysListTab";
 import { PermissionsFrTranslations } from "../../entrepot/pages/users/permissions/PermissionsTr";
 import { CommunityListFrTranslations } from "../../espaceco/pages/communities/CommunityListTr";
+import { CreateCommunityFrTranslations } from "../../espaceco/pages/communities/CreateCommunity.tr";
 import { ManageCommunityFrTranslations } from "../../espaceco/pages/communities/ManageCommunityTr";
 import { ManageCommunityValidationsFrTranslations } from "../../espaceco/pages/communities/management/validationTr";
 import { MemberInvitationFrTranslations } from "../../espaceco/pages/communities/MemberInvitation";
@@ -90,6 +91,7 @@ export const translations: Translations<"fr"> = {
     AccessRestrictions: AccessRestrictionsFrTranslations,
     CommunityList: CommunityListFrTranslations,
     ManageCommunity: ManageCommunityFrTranslations,
+    CreateCommunity: CreateCommunityFrTranslations,
     ManageCommunityValidations: ManageCommunityValidationsFrTranslations,
     MemberInvitation: MemberInvitationFrTranslations,
     Reports: ReportsFrTranslations,

@@ -7,6 +7,7 @@ use App\Dto\Espaceco\Members\AddMembersDTO;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\EspaceCoApi\CommunityApiService;
+use App\Services\EspaceCoApi\CommunityDocumentApiService;
 use App\Services\EspaceCoApi\UserApiService;
 use App\Services\MailerService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -37,6 +38,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
         private Filesystem $fs,
         private MailerService $mailerService,
         private CommunityApiService $communityApiService,
+        private CommunityDocumentApiService $documentApiService,
         private UserApiService $userApiService,
     ) {
         $this->varDataPath = $parameters->get('upload_path');
@@ -141,9 +143,10 @@ class CommunityController extends AbstractController implements ApiControllerInt
     public function getCommunity(int $communityId, #[MapQueryParameter] ?array $fields = []): JsonResponse
     {
         try {
-            $response = $this->communityApiService->getCommunity($communityId, $fields);
+            $community = $this->communityApiService->getCommunity($communityId, $fields);
+            $community['documents'] = $this->documentApiService->getDocuments($communityId);
 
-            return new JsonResponse($response);
+            return new JsonResponse($community);
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
@@ -196,19 +199,27 @@ class CommunityController extends AbstractController implements ApiControllerInt
     #[Route('/{communityId}/member/{userId}/update_role', name: 'update_member_role', methods: ['PATCH'])]
     public function updateMemberRole(int $communityId, int $userId, Request $request): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
-        $member = $this->communityApiService->updateMember($communityId, $userId, 'role', $data['role']);
+        try {
+            $data = json_decode($request->getContent(), true);
+            $member = $this->communityApiService->updateMember($communityId, $userId, 'role', $data['role']);
 
-        return new JsonResponse($member);
+            return new JsonResponse($member);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
     }
 
     #[Route('/{communityId}/member/{userId}/update_grids', name: 'update_member_grids', methods: ['PATCH'])]
     public function updateMemberGrids(int $communityId, int $userId, Request $request): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
-        $member = $this->communityApiService->updateMember($communityId, $userId, 'grids', $data['grids']);
+        try {
+            $data = json_decode($request->getContent(), true);
+            $member = $this->communityApiService->updateMember($communityId, $userId, 'grids', $data['grids']);
 
-        return new JsonResponse($member);
+            return new JsonResponse($member);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
     }
 
     #[Route('/{communityId}/update_logo', name: 'update_logo', methods: ['POST'])]

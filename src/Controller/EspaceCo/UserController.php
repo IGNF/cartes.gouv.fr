@@ -3,6 +3,8 @@
 namespace App\Controller\EspaceCo;
 
 use App\Controller\ApiControllerInterface;
+use App\Exception\ApiException;
+use App\Exception\CartesApiException;
 use App\Services\EspaceCoApi\UserApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -25,39 +27,37 @@ class UserController extends AbstractController implements ApiControllerInterfac
     #[Route('/me', name: 'me')]
     public function getMe(): JsonResponse
     {
-        $me = $this->userApiService->getMe();
+        try {
+            $me = $this->userApiService->getMe();
 
-        return $this->json($me);
+            return $this->json($me);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
     }
 
     #[Route('/search', name: 'search')]
     public function search(
         #[MapQueryParameter] string $search,
     ): JsonResponse {
-        $users = $this->userApiService->search($search);
+        try {
+            $users = $this->userApiService->search($search);
 
-        return new JsonResponse($users);
+            return new JsonResponse($users);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
     }
 
     #[Route('/me/shared_themes', name: 'shared_themes')]
     public function getSharedThemes(): JsonResponse
     {
-        $me = $this->userApiService->getSharedThemes();
+        try {
+            $me = $this->userApiService->getSharedThemes();
 
-        return $this->json($me);
-    }
-
-    #[Route('/me/check_cgu', name: 'check_cgu')]
-    public function checkMeCGUser(): JsonResponse
-    {
-        $cguAccepted = false;
-
-        $response = $this->userApiService->checkMeCGU();
-        $contentType = $response['headers']['content-type'][0];
-        if (preg_match("/^application\/json/", $contentType)) {
-            $cguAccepted = (null !== json_decode($response['content']));
+            return $this->json($me);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
-
-        return new JsonResponse($cguAccepted);
     }
 }
