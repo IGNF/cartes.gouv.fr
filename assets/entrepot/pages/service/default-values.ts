@@ -3,7 +3,7 @@ import { format as datefnsFormat } from "date-fns";
 import { EndpointTypeEnum, Metadata, MetadataFormValuesType, MetadataHierarchyLevel, Service, StoredData } from "../../../@types/app";
 import { ConfigurationWfsDetailsContent, ConfigurationWmsVectorDetailsContent, ConfigurationWmtsTmsDetailsContent } from "../../../@types/entrepot";
 import { getProjectionCode, removeDiacritics } from "../../../utils";
-import { getEndpointSuffix } from "./metadatas/Description";
+import { getEndpointSuffix } from "./metadata/Description";
 import { PyramidVectorTmsServiceFormValuesType } from "./tms/PyramidVectorTmsServiceForm";
 import { WfsServiceFormValuesType, WfsTableInfos } from "./wfs/WfsServiceForm";
 import { WmsVectorServiceFormValuesType } from "./wms-vector/WmsVectorServiceForm";

@@ -22,9 +22,9 @@ import api from "../../../api";
 import AccessRestrictions from "../AccessRestrictions";
 import { CommonSchemasValidation } from "../common-schemas-validation";
 import { getPyramidVectorTmsServiceFormDefaultValues } from "../default-values";
-import AdditionalInfo from "../metadatas/AdditionalInfo";
-import Description from "../metadatas/Description";
-import UploadMDFile from "../metadatas/UploadMDFile";
+import AdditionalInfo from "../metadata/AdditionalInfo";
+import Description from "../metadata/Description";
+import UploadMDFile from "../metadata/UploadMDFile";
 
 export type PyramidVectorTmsServiceFormValuesType = ServiceFormValuesBaseType;
 

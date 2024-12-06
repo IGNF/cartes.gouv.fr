@@ -13,7 +13,7 @@ import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { useTranslation } from "../../i18n/i18n";
 import Translator from "../../modules/Translator";
 import RQKeys from "../../modules/entrepot/RQKeys";
-import getBreadcrumb from "../../modules/entrepot/breadcrumbs/breadcrumbs";
+import getBreadcrumb from "../../modules/entrepot/breadcrumbs/Breadcrumb";
 import { useRoute } from "../../router/router";
 import SessionExpiredAlert from "../Utils/SessionExpiredAlert";
 import SnackbarMessage from "../Utils/SnackbarMessage";
