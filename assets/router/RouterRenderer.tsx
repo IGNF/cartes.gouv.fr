@@ -24,10 +24,10 @@ const Accessibility = lazy(() => import("../pages/footer/Accessibility"));
 const LegalNotice = lazy(() => import("../pages/footer/LegalNotice"));
 const PersonalData = lazy(() => import("../pages/footer/PersonalData"));
 const TermsOfService = lazy(() => import("../pages/footer/TermsOfService"));
-const LoginDisabled = lazy(() => import("../pages/LoginDisabled"));
+const LoginDisabled = lazy(() => import("../pages/LoginDisabled/LoginDisabled"));
 
-const Me = lazy(() => import("../entrepot/pages/users/Me"));
-const MyAccessKeys = lazy(() => import("../entrepot/pages/users/MyAccessKeys"));
+const Me = lazy(() => import("../entrepot/pages/users/me/Me"));
+const MyAccessKeys = lazy(() => import("../entrepot/pages/users/access-keys/MyAccessKeys"));
 const UserKeyForm = lazy(() => import("../entrepot/pages/users/keys/UserKeyForm"));
 
 const DatastoreManageStorage = lazy(() => import("../entrepot/pages/datastore/ManageStorage/DatastoreManageStorage"));
@@ -40,14 +40,14 @@ const DatasheetList = lazy(() => import("../entrepot/pages/datasheet/DatasheetLi
 
 const DatasheetUploadForm = lazy(() => import("../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadForm"));
 const DatasheetUploadIntegrationPage = lazy(() => import("../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadIntegration/DatasheetUploadIntegrationPage"));
-const DatasheetView = lazy(() => import("../entrepot/pages/datasheet/DatasheetView/DatasheetView"));
+const DatasheetView = lazy(() => import("../entrepot/pages/datasheet/DatasheetView/DatasheetView/DatasheetView"));
 
 const StoredDataDetails = lazy(() => import("../entrepot/pages/stored_data/StoredDataDetails/StoredDataDetails"));
 
 const DatastoreCreationForm = lazy(() => import("../entrepot/pages/datastore/DatastoreCreationForm"));
 const Confirm = lazy(() => import("../entrepot/pages/datastore/Confirmation"));
 
-const CommunityMembers = lazy(() => import("../entrepot/pages/communities/CommunityMembers"));
+const CommunityMembers = lazy(() => import("../entrepot/pages/communities/CommunityMembers/CommunityMembers"));
 const CommunityList = lazy(() => import("../entrepot/pages/communities/CommunityList"));
 
 const WfsServiceForm = lazy(() => import("../entrepot/pages/service/wfs/WfsServiceForm"));

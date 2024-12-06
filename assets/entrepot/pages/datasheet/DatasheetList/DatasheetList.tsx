@@ -2,14 +2,13 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { useQuery } from "@tanstack/react-query";
-import { declareComponentKeys } from "i18nifty";
-import { FC, ReactNode, useMemo } from "react";
+import { FC, useMemo } from "react";
 
 import { Datasheet, EndpointTypeEnum } from "../../../../@types/app";
 import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import Skeleton from "../../../../components/Utils/Skeleton";
-import { Translations, useTranslation } from "../../../../i18n/i18n";
+import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { routes } from "../../../../router/router";
 import api from "../../../api";
@@ -77,41 +76,3 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
 };
 
 export default DatasheetList;
-
-export const { i18n } = declareComponentKeys<
-    | { K: "title"; P: { datastoreName?: string }; R: string }
-    | "create_datasheet"
-    | "datasheet_creation_impossible"
-    | "metadata_endpoint_quota_reached"
-    | { K: "services_published"; P: { nbServices?: number }; R: string }
-    | "no_services_published"
-    | { K: "sandbox_datastore_explanation"; R: ReactNode }
->()({
-    DatasheetList,
-});
-
-export const DatasheetListFrTranslations: Translations<"fr">["DatasheetList"] = {
-    title: ({ datastoreName }) => `Données ${datastoreName ?? ""}`,
-    create_datasheet: "Créer une fiche de données",
-    datasheet_creation_impossible: "Création d’une nouvelle fiche de données impossible",
-    metadata_endpoint_quota_reached: "Quota du point d’accès de métadonnées atteint",
-    services_published: ({ nbServices }) => `Publié (${nbServices})`,
-    no_services_published: "Non publié",
-    sandbox_datastore_explanation: (
-        <p>
-            {
-                "Cet espace permet de tester les fonctions d’alimentation et de diffusion de la Géoplateforme. Les services publiés dans cet espace ne sont pas visibles sur le catalogue."
-            }
-        </p>
-    ),
-};
-
-export const DatasheetListEnTranslations: Translations<"en">["DatasheetList"] = {
-    title: undefined,
-    create_datasheet: undefined,
-    datasheet_creation_impossible: undefined,
-    metadata_endpoint_quota_reached: undefined,
-    services_published: undefined,
-    no_services_published: undefined,
-    sandbox_datastore_explanation: undefined,
-};

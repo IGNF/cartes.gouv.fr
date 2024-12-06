@@ -2,7 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import AppLayout from "../../../components/Layout/AppLayout";
-import { datastoreNavItems } from "../../../config/datastoreNavItems";
+import { datastoreNavItems } from "../../../config/navItems/datastoreNavItems";
 import Translator from "../../../modules/Translator";
 import { routes } from "../../../router/router";
 

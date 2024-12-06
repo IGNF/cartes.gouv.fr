@@ -3,9 +3,9 @@ import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import { FC, useCallback, useMemo } from "react";
 import { useWatch, type UseFormReturn } from "react-hook-form";
 
-import { filterGeometricRelations } from "../../../helpers";
-import { type Translations, declareComponentKeys, useTranslation } from "../../../i18n/i18n";
 import { type VectorDb } from "../../../@types/app";
+import { filterGeometricRelations } from "../../../helpers";
+import { useTranslation } from "../../../i18n/i18n";
 import { type PyramidVectorGenerateFormValuesType } from "./tms/PyramidVectorGenerateForm";
 import { type WmsVectorServiceFormValuesType } from "./wms-vector/WmsVectorServiceForm";
 
@@ -78,17 +78,3 @@ const TableSelection: FC<TablesSelectionProps> = ({ filterGeometric = false, vec
 };
 
 export default TableSelection;
-
-export const { i18n } = declareComponentKeys<"title" | { K: "tables_detected_hint"; P: { nbTables: number }; R: string }>()({
-    TableSelection,
-});
-
-export const TableSelectionFrTranslations: Translations<"fr">["TableSelection"] = {
-    title: "Sélectionnez les tables nécessaires au service",
-    tables_detected_hint: ({ nbTables }) => (nbTables > 1 ? `${nbTables} tables détectées` : "1 table détectée"),
-};
-
-export const TableSelectionEnTranslations: Translations<"en">["TableSelection"] = {
-    title: undefined,
-    tables_detected_hint: undefined,
-};
