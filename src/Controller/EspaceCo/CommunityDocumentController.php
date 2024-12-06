@@ -91,8 +91,12 @@ class CommunityDocumentController extends AbstractController implements ApiContr
     #[Route('/delete/{documentId}', name: 'delete', methods: ['DELETE'])]
     public function deleteDocument(int $communityId, int $documentId): JsonResponse
     {
-        $this->communityDocumentApiService->deleteDocument($communityId, $documentId);
+        try {
+            $this->communityDocumentApiService->deleteDocument($communityId, $documentId);
 
-        return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
+            return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
     }
 }

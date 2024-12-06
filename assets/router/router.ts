@@ -264,6 +264,8 @@ const espacecoRoutes = {
         () => `${appRoot}/espace-collaboratif`
     ),
 
+    espaceco_create_community: defineRoute(`${appRoot}/espace-collaboratif/creer-un-guichet`),
+
     espaceco_manage_community: defineRoute(
         {
             communityId: param.path.number,

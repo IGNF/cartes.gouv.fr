@@ -3,7 +3,7 @@ import Input from "@codegouvfr/react-dsfr/Input";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useQuery } from "@tanstack/react-query";
 import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
-import { FC, useMemo } from "react";
+import { FC, useCallback, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { CommunityResponseDTO, DocumentDTO } from "../../../../@types/espaceco";
@@ -17,26 +17,29 @@ import { type CartesApiException } from "../../../../modules/jsonFetch";
 import "../../../../sass/pages/espaceco/community.scss";
 import api from "../../../api";
 import CommunityLogo from "./CommunityLogo";
-import DocumentList from "./description/DocumentList";
+import DocumentList from "./description/DocumentList2";
+import { fr } from "@codegouvfr/react-dsfr";
+import { Button } from "@mui/material";
 
-type DescriptionProps = {
-    community: CommunityResponseDTO;
+type DocumentForm = {
+    title: string;
+    description?: string;
+    file: File;
 };
 
-/* const isNewDocument = (d: DocumentDTO | NewDocument): d is NewDocument => "new_id" in d;
+type DescriptionForm = {
+    name: string;
+    description?: string;
+    keywords?: string[];
+    documents?: DocumentForm[];
+};
 
-const readFileAsDataURL = async (file: File) => {
-    const result = await new Promise((resolve) => {
-        const fileReader = new FileReader();
-        fileReader.onload = (e) => resolve(fileReader.result);
-        fileReader.readAsDataURL(file);
-    });
-    return result;
-}; */
+type DescriptionProps = {
+    community?: CommunityResponseDTO;
+    onSubmit: (datas: DescriptionForm) => void;
+};
 
 const Description: FC<DescriptionProps> = ({ community }) => {
-    // const { tab1 } = useCommunityFormStore(community)();
-
     const { t: tCommon } = useTranslation("Common");
     const { t: tValid } = useTranslation("ManageCommunityValidations");
     const { t: tmc } = useTranslation("ManageCommunity");
@@ -48,16 +51,24 @@ const Description: FC<DescriptionProps> = ({ community }) => {
         staleTime: 3600000,
     });
 
-    const communityDocumentsQuery = useQuery<DocumentDTO[], CartesApiException>({
-        queryKey: RQKeys.communityDocuments(community.id),
-        queryFn: ({ signal }) => api.communityDocuments.getAll(community.id, [], signal),
+    /* const communityDocumentsQuery = useQuery<DocumentDTO[] | null, CartesApiException>({
+        queryKey: RQKeys.communityDocuments(community?.id),
+        queryFn: ({ signal }) => {
+            if (community) {
+                return api.communityDocuments.getAll(community.id, [], signal);
+            }
+            return Promise.resolve(null);
+        },
         staleTime: 3600000,
-    });
+        enabled: community !== undefined,
+    }); */
 
     const communityNames = useMemo(() => {
-        return communityNamesQuery.data?.filter((n) => n !== community.name) ?? [];
-    }, [community.name, communityNamesQuery]);
+        const name = community?.name;
+        return communityNamesQuery.data?.filter((n) => n !== name) ?? [];
+    }, [community, communityNamesQuery]);
 
+    // TODO AJOUTER LES TRADUCTIONS POUR LES VALIDATIONS DES DOCUMENTS
     const schema = (t: TranslationFunction<"ManageCommunityValidations", ComponentKey>) => {
         return yup.object({
             name: yup
@@ -73,6 +84,13 @@ const Description: FC<DescriptionProps> = ({ community }) => {
                 .required(t("description.name.mandatory")),
             description: yup.string().max(1024, t("description.desc.maxlength")).required(t("description.desc.mandatory")),
             keywords: yup.array().of(yup.string()),
+            documents: yup.array().of(
+                yup.object({
+                    title: yup.string(),
+                    description: yup.string(),
+                    file: yup.mixed(),
+                })
+            ),
         });
     };
 
@@ -80,23 +98,33 @@ const Description: FC<DescriptionProps> = ({ community }) => {
         control,
         register,
         formState: { errors },
+        getValues: getFormValues,
+        handleSubmit,
     } = useForm({
         resolver: yupResolver(schema(tValid)),
         mode: "onChange",
         values: {
-            name: community.name,
-            description: community.description ?? "",
-            // TODO keywords: community.keywords ?? []
-            keywords: [],
+            name: community?.name || "",
+            description: community?.description ?? "",
+            keywords: community?.keywords ?? [],
+            documents: [],
         },
     });
 
+    const onSubmitForm = () => {
+        const values = getFormValues();
+
+        /* Suppression des tableaux vides et des valeurs nulles ou undefined */
+        Object.keys(values).forEach((key) => {
+            if ((Array.isArray(values[key]) && values[key].length === 0) || values[key] === null || values[key] === undefined) {
+                delete values[key];
+            }
+        });
+    };
     return (
         <>
-            {communityDocumentsQuery.isError && <Alert severity="error" closable title={communityDocumentsQuery.error.message} />}
-            {communityDocumentsQuery.isLoading && <LoadingText as="h6" message={t("loading_documents")} />}
             <h2>{tmc("desc.tab.title")}</h2>
-            <div>
+            <form onSubmit={handleSubmit(onSubmitForm)}>
                 <p>{tCommon("mandatory_fields")}</p>
                 <Input
                     label={tmc("desc.name")}
@@ -123,7 +151,8 @@ const Description: FC<DescriptionProps> = ({ community }) => {
                         />
                     )}
                 />
-                <CommunityLogo communityId={community.id} logoUrl={community.logo_url} />
+                {/* TODO A VOIR */}
+                {/* <CommunityLogo communityId={community.id} logoUrl={community.logo_url} /> */}
                 <Controller
                     control={control}
                     name="keywords"
@@ -140,8 +169,11 @@ const Description: FC<DescriptionProps> = ({ community }) => {
                         />
                     )}
                 />
-                {communityDocumentsQuery.data && <DocumentList communityId={community.id} documents={communityDocumentsQuery.data} />}
-            </div>
+                {/* TODO A VOIR */}
+                <DocumentList community={community} />
+                {/* {communityDocumentsQuery.data && <DocumentList communityId={community.id} documents={communityDocumentsQuery.data} />} */}
+                <div className={fr.cx("fr-grid-row", "fr-grid-row--right")} />
+            </form>
         </>
     );
 };

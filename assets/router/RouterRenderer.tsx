@@ -14,6 +14,7 @@ import PageNotFoundWithLayout from "../pages/error/PageNotFoundWithLayout";
 import Main from "../components/Layout/Main";
 
 const EspaceCoCommunityList = lazy(() => import("../espaceco/pages/communities/Communities"));
+const EspaceCoCreateCommunity = lazy(() => import("../espaceco/pages/communities/CreateCommunity"));
 const EspaceCoManageCommunity = lazy(() => import("../espaceco/pages/communities/ManageCommunity"));
 const MemberInvitation = lazy(() => import("../espaceco/pages/communities/MemberInvitation"));
 
@@ -44,6 +45,8 @@ const RouterRenderer: FC = () => {
             switch (route.name) {
                 case "espaceco_community_list":
                     return <EspaceCoCommunityList />;
+                case "espaceco_create_community":
+                    return <EspaceCoCreateCommunity />;
                 case "espaceco_manage_community":
                     return <EspaceCoManageCommunity communityId={route.params.communityId} />;
                 case "espaceco_member_invitation":

@@ -1,10 +1,10 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import Alert from "@codegouvfr/react-dsfr/Alert";
+import Alert, { AlertProps } from "@codegouvfr/react-dsfr/Alert";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import CallOut from "@codegouvfr/react-dsfr/CallOut";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { FC, useMemo } from "react";
+import { FC, useEffect, useMemo, useState } from "react";
 import { CommunityMember, Role, UserMe } from "../../../@types/app_espaceco";
 import { CommunityResponseDTO } from "../../../@types/espaceco";
 import AppLayout from "../../../components/Layout/AppLayout";
@@ -15,13 +15,18 @@ import { declareComponentKeys, Translations, useTranslation } from "../../../i18
 import RQKeys from "../../../modules/espaceco/RQKeys";
 import { CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
+import { useApiEspaceCoStore } from "../../../stores/ApiEspaceCoStore";
 import api from "../../api";
 
 import "../../../../assets/sass/pages/espaceco/member_invitation.scss";
-import { useApiEspaceCoStore } from "../../../stores/ApiEspaceCoStore";
 
 type MemberInvitationProps = {
     communityId: number;
+};
+
+type ErrorMessage = {
+    message: string | JSX.Element;
+    type: AlertProps.Severity;
 };
 
 const MemberInvitation: FC<MemberInvitationProps> = ({ communityId }) => {
@@ -29,40 +34,48 @@ const MemberInvitation: FC<MemberInvitationProps> = ({ communityId }) => {
     const { t: tBreadcrumb } = useTranslation("Breadcrumb");
 
     const apiEspaceCoUrl = useApiEspaceCoStore((state) => state.api_espaceco_url);
-    const espaceCoUrl = useMemo(() => (apiEspaceCoUrl ? apiEspaceCoUrl.replace("/gcms/api", "/login") : ""), [apiEspaceCoUrl]);
+    const espaceCoUrl = useMemo(() => (apiEspaceCoUrl ? apiEspaceCoUrl.replace("/gcms/api", "/login") : undefined), [apiEspaceCoUrl]);
 
     const navItems = useMemo(() => datastoreNavItems(), []);
 
-    const checkCGUQuery = useQuery<boolean>({
-        queryKey: RQKeys.checkMeCGU(),
-        queryFn: ({ signal }) => api.user.checkMeCGU(signal),
-        staleTime: 60000,
+    const [errorMessage, setErrorMessage] = useState<ErrorMessage | undefined>();
+
+    const meQuery = useQuery<UserMe, CartesApiException>({
+        queryKey: RQKeys.getMe(),
+        queryFn: ({ signal }) => api.user.getMe(signal),
+        staleTime: 3600000,
+        retry: false,
     });
-    const cguAccepted = useMemo(() => {
-        return checkCGUQuery.data;
-    }, [checkCGUQuery.data]);
+
+    useEffect(() => {
+        if (meQuery.error) {
+            if (meQuery.error.code === 403 && meQuery.error?.message.includes("CGU")) {
+                setErrorMessage({
+                    message: t("espaceco_accept_cgu", { url: espaceCoUrl }),
+                    type: "warning",
+                });
+            } else
+                setErrorMessage({
+                    message: meQuery.error.message,
+                    type: "warning",
+                });
+        }
+    }, [espaceCoUrl, meQuery, t]);
 
     const query = useQuery<CommunityResponseDTO, CartesApiException>({
         queryKey: RQKeys.community(communityId),
         queryFn: () => api.community.getCommunity(communityId),
         staleTime: 3600000,
-        enabled: cguAccepted,
-    });
-
-    const meQuery = useQuery<UserMe>({
-        queryKey: RQKeys.getMe(),
-        queryFn: ({ signal }) => api.user.getMe(signal),
-        staleTime: 3600000,
-        enabled: cguAccepted,
+        enabled: meQuery.data !== undefined,
     });
 
     const myRole = useMemo<Role | undefined>(() => {
         let role: Role | undefined;
         if (meQuery.data) {
             const user_id = meQuery.data.id;
-            const invitations = meQuery.data.communities_member.filter((m) => m.community_id === communityId && m.user_id === user_id);
-            if (invitations.length === 1) {
-                role = invitations[0].role;
+            const members = meQuery.data.communities_member.filter((m) => m.community_id === communityId && m.user_id === user_id);
+            if (members.length === 1) {
+                role = members[0].role;
             }
         }
         return role;
@@ -102,11 +115,10 @@ const MemberInvitation: FC<MemberInvitationProps> = ({ communityId }) => {
             documentTitle={t("document_title")}
         >
             <h1>{t("document_title")}</h1>
-            {query.isLoading && <LoadingText as="h6" message={t("community_loading")} />}
             {meQuery.isLoading && <LoadingText as="h6" message={t("userme_loading")} />}
 
+            {query.isLoading && <LoadingText as="h6" message={t("community_loading")} />}
             {query.isError && <Alert severity="error" closable title={t("community_loading_failed")} />}
-            {meQuery.isError && <Alert severity="error" closable title={t("userme_loading_failed")} />}
 
             {updateRoleMutation.isError && <Alert severity="error" closable title={updateRoleMutation.error.message} />}
             {updateRoleMutation.isPending && (
@@ -126,48 +138,51 @@ const MemberInvitation: FC<MemberInvitationProps> = ({ communityId }) => {
                 </Wait>
             )}
 
-            {cguAccepted === false && espaceCoUrl ? (
-                t("espaceco_accept_cgu", { url: espaceCoUrl })
-            ) : community && myRole === "invited" ? (
-                <div>
-                    <CallOut
-                        title={
-                            <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                                <img
-                                    className={cx(fr.cx("fr-mr-2v"), "frx-invitation-img")}
-                                    alt={t("logo")}
-                                    src={community.logo_url ? community.logo_url : "https://www.systeme-de-design.gouv.fr/img/placeholder.1x1.png"}
-                                />
-                                {t("community_name", { name: community.name })}
-                            </div>
-                        }
-                    >
-                        <div>
-                            {t("community_description", { description: community.description })}
-                            <ButtonsGroup
-                                buttons={[
-                                    {
-                                        children: t("reject"),
-                                        priority: "secondary",
-                                        onClick: () => removeMemberMutation.mutate(),
-                                    },
-                                    {
-                                        children: t("accept"),
-                                        priority: "primary",
-                                        onClick: () => updateRoleMutation.mutate(),
-                                    },
-                                ]}
-                                inlineLayoutWhen="always"
-                                alignment="left"
-                                className={fr.cx("fr-mt-2w")}
-                            />
-                        </div>
-                    </CallOut>
-                </div>
-            ) : myRole !== undefined ? (
-                <p>{t("already_member")}</p>
+            {errorMessage ? (
+                <Alert severity={errorMessage.type} closable title={errorMessage.message} />
             ) : (
-                <Alert severity={"warning"} closable title={t("no_invitation")} />
+                community &&
+                (myRole === "invited" ? (
+                    <div>
+                        <CallOut
+                            title={
+                                <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
+                                    <img
+                                        className={cx(fr.cx("fr-mr-2v"), "frx-invitation-img")}
+                                        alt={t("logo")}
+                                        src={community.logo_url ? community.logo_url : "https://www.systeme-de-des ign.gouv.fr/img/placeholder.1x1.png"}
+                                    />
+                                    {t("community_name", { name: community.name })}
+                                </div>
+                            }
+                        >
+                            <div>
+                                {t("community_description", { description: community.description })}
+                                <ButtonsGroup
+                                    buttons={[
+                                        {
+                                            children: t("reject"),
+                                            priority: "secondary",
+                                            onClick: () => removeMemberMutation.mutate(),
+                                        },
+                                        {
+                                            children: t("accept"),
+                                            priority: "primary",
+                                            onClick: () => updateRoleMutation.mutate(),
+                                        },
+                                    ]}
+                                    inlineLayoutWhen="always"
+                                    alignment="left"
+                                    className={fr.cx("fr-mt-2w")}
+                                />
+                            </div>
+                        </CallOut>
+                    </div>
+                ) : myRole !== undefined ? (
+                    <p>{t("already_member")}</p>
+                ) : (
+                    <Alert severity={"warning"} closable title={t("not_member")} />
+                ))
             )}
         </AppLayout>
     );
@@ -185,9 +200,9 @@ export const { i18n } = declareComponentKeys<
     | { K: "community_name"; P: { name: string }; R: JSX.Element }
     | { K: "community_description"; P: { description: string | null }; R: JSX.Element }
     | { K: "invitation"; R: JSX.Element }
-    | { K: "espaceco_accept_cgu"; P: { url: string }; R: JSX.Element }
+    | { K: "espaceco_accept_cgu"; P: { url: string | undefined }; R: JSX.Element }
     | "already_member"
-    | "no_invitation"
+    | "not_member"
     | "accept"
     | "reject"
     | "inviting"
@@ -215,9 +230,13 @@ export const MemberInvitationFrTranslations: Translations<"fr">["MemberInvitatio
             <p>{"Bonjour, vous n'avez pas encore accepté les conditions générales d'utilisation de l'espace collaboratif."}</p>
             <p>
                 {"Veuillez vous connecter avec votre nom d'utilisateur sur "}
-                <a href={url} target="_blank" rel="noreferrer">
-                    {"l'espace collaboratif"}
-                </a>
+                {url ? (
+                    <a href={url} target="_blank" rel="noreferrer">
+                        {"l'espace collaboratif"}
+                    </a>
+                ) : (
+                    "l'espace collaboratif"
+                )}
                 {" et accepter les CGU."}
                 <br />
                 {"Vous pourrez ensuite continuer la navigation sur cartes.gouv.fr."}
@@ -225,7 +244,7 @@ export const MemberInvitationFrTranslations: Translations<"fr">["MemberInvitatio
         </div>
     ),
     already_member: "Vous êtes déjà membre de ce guichet",
-    no_invitation: "Vous n'avez pas reçu d'invitation de ce guichet",
+    not_member: "Vous n'êtes pas membre de ce guichet",
     accept: "Accepter et rejoindre le guichet",
     reject: "Refuser l'invitation",
     inviting: "Invitation en cours ...",
@@ -248,7 +267,7 @@ export const MemberInvitationEnTranslations: Translations<"en">["MemberInvitatio
     invitation: undefined,
     espaceco_accept_cgu: ({ url }) => <p>{url}</p>,
     already_member: undefined,
-    no_invitation: undefined,
+    not_member: undefined,
     accept: undefined,
     reject: undefined,
     inviting: undefined,
