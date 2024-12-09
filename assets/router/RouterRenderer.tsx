@@ -54,6 +54,9 @@ const WfsServiceForm = lazy(() => import("../entrepot/pages/service/wfs/WfsServi
 const WmsVectorServiceForm = lazy(() => import("../entrepot/pages/service/wms-vector/WmsVectorServiceForm"));
 const PyramidVectorGenerateForm = lazy(() => import("../entrepot/pages/service/tms/PyramidVectorGenerateForm"));
 const PyramidVectorTmsServiceForm = lazy(() => import("../entrepot/pages/service/tms/PyramidVectorTmsServiceForm"));
+const PyramidRasterGenerateForm = lazy(() => import("../entrepot/pages/service/wms-raster-wmts/PyramidRasterGenerateForm"));
+const PyramidRasterWmsRasterServiceForm = lazy(() => import("../entrepot/pages/service/wms-raster-wmts/PyramidRasterWmsRasterServiceForm"));
+const PyramidRasterWmtsServiceForm = lazy(() => import("../entrepot/pages/service/wms-raster-wmts/PyramidRasterWmtsServiceForm"));
 
 const ServiceView = lazy(() => import("../entrepot/pages/service/view/ServiceView"));
 
@@ -81,6 +84,8 @@ const RouterRenderer: FC = () => {
         switch (route.name) {
             case "home":
                 return <Home />;
+            case "page_not_found":
+                return <PageNotFound />;
             case "about":
                 return <About />;
             case "documentation":
@@ -182,6 +187,48 @@ const RouterRenderer: FC = () => {
                     <PyramidVectorTmsServiceForm
                         datastoreId={route.params.datastoreId}
                         pyramidId={route.params.pyramidId}
+                        offeringId={route.params.offeringId}
+                    />
+                );
+            case "datastore_pyramid_raster_generate":
+                return (
+                    <PyramidRasterGenerateForm
+                        datastoreId={route.params.datastoreId}
+                        offeringId={route.params.offeringId}
+                        datasheetName={route.params.datasheetName}
+                    />
+                );
+            case "datastore_pyramid_raster_wms_raster_service_new":
+                return (
+                    <PyramidRasterWmsRasterServiceForm
+                        datastoreId={route.params.datastoreId}
+                        pyramidId={route.params.pyramidId}
+                        datasheetName={route.params.datasheetName}
+                    />
+                );
+            case "datastore_pyramid_raster_wms_raster_service_edit":
+                return (
+                    <PyramidRasterWmsRasterServiceForm
+                        datastoreId={route.params.datastoreId}
+                        pyramidId={route.params.pyramidId}
+                        datasheetName={route.params.datasheetName}
+                        offeringId={route.params.offeringId}
+                    />
+                );
+            case "datastore_pyramid_raster_wmts_service_new":
+                return (
+                    <PyramidRasterWmtsServiceForm
+                        datastoreId={route.params.datastoreId}
+                        pyramidId={route.params.pyramidId}
+                        datasheetName={route.params.datasheetName}
+                    />
+                );
+            case "datastore_pyramid_raster_wmts_service_edit":
+                return (
+                    <PyramidRasterWmtsServiceForm
+                        datastoreId={route.params.datastoreId}
+                        pyramidId={route.params.pyramidId}
+                        datasheetName={route.params.datasheetName}
                         offeringId={route.params.offeringId}
                     />
                 );
