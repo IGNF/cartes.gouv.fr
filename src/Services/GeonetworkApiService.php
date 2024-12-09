@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Exception\CartesApiException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpClient\HttpOptions;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
@@ -18,18 +19,37 @@ class GeonetworkApiService
         ParameterBagInterface $parameterBag,
         HttpClientInterface $httpClient,
     ) {
-        $this->geonetworkClient = $httpClient->withOptions([
-            // 'base_uri' => $parameterBag->get('geonetwork_url').'/',
-            'proxy' => $parameterBag->get('http_proxy'),
-            'verify_peer' => false,
-            'verify_host' => false,
-        ]);
+        $parsedUrl = parse_url($parameterBag->get('api_entrepot_url'));
+        $baseUrl = sprintf('%s://%s', $parsedUrl['scheme'], $parsedUrl['host']);
+
+        $this->geonetworkClient = $httpClient->withOptions(
+            (new HttpOptions())
+                ->setBaseUri($baseUrl)
+                ->setProxy($parameterBag->get('http_proxy'))
+                ->verifyHost(false)
+                ->verifyPeer(false)
+                ->toArray()
+        );
     }
 
     public function getMetadataXml(string $fileIdentifier): string
     {
-        $url = "geonetwork/srv/api/records/$fileIdentifier/formatters/xml";
-        $response = $this->geonetworkClient->request('GET', $url);
+        $query = [
+            'REQUEST' => 'GetRecordById',
+            'SERVICE' => 'CSW',
+            'VERSION' => '2.0.2',
+            'OUTPUTSCHEMA' => 'http://www.isotc211.org/2005/gmd',
+            'elementSetName' => 'full',
+            'ID' => $fileIdentifier,
+        ];
+
+        // $url = "geonetwork/srv/api/records/$fileIdentifier/formatters/xml";
+        $url = '/csw';
+        if (str_starts_with($fileIdentifier, 'sandbox')) {
+            $url = '/sandbox/csw';
+        }
+
+        $response = $this->geonetworkClient->request('GET', $url, ['query' => $query]);
 
         return $this->handleResponse($response);
     }
@@ -37,7 +57,7 @@ class GeonetworkApiService
     protected function handleResponse(ResponseInterface $response): mixed
     {
         $statusCode = $response->getStatusCode();
-        if (200 == $statusCode) { // requête réussie
+        if (200 === $statusCode) { // requête réussie
             return $response->getContent();
         }
 

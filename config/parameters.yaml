@@ -43,4 +43,3 @@ parameters:
 
     api_espaceco_url: "%env(resolve:API_ESPACE_COLLABORATIF_URL)%"
     catalogue_url: "%env(resolve:CATALOGUE_URL)%"
-    # geonetwork_url: "%env(resolve:GEONETWORK_URL)%"

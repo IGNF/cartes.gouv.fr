@@ -9,7 +9,8 @@ import { useQuery } from "@tanstack/react-query";
 import { ComponentProps, FC, ReactNode, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
-import { GeonetworkMetadataResponse } from "../../@types/app";
+
+import type { GeonetworkMetadataResponse } from "../../@types/app";
 import AppLayout from "../../components/Layout/AppLayout";
 import LoadingText from "../../components/Utils/LoadingText";
 import Wait from "../../components/Utils/Wait";
@@ -29,7 +30,7 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
     const { t } = useTranslation({ AccessesRequest });
     const { t: tCommon } = useTranslation("Common");
 
-    const { user } = useAuthStore();
+    const user = useAuthStore((state) => state.user);
 
     const [isSending, setIsSending] = useState(false);
     const [sendError, setSendError] = useState<string | undefined>(undefined);

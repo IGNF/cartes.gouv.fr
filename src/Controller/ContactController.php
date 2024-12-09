@@ -16,13 +16,15 @@ use Symfony\Component\Routing\Annotation\Route;
 
 #[Route(
     name: 'cartesgouvfr_contact_',
+    options: ['expose' => true],
+    condition: 'request.isXmlHttpRequest()',
 )]
 class ContactController extends AbstractController
 {
     public function __construct(
         private UserApiService $userApiService,
         private MailerService $mailerService,
-        private LoggerInterface $mailerLogger
+        private LoggerInterface $mailerLogger,
     ) {
     }
 
@@ -215,9 +217,7 @@ class ContactController extends AbstractController
     #[Route(
         '/accesses_request',
         name: 'accesses_request',
-        options: ['expose' => true],
         methods: ['POST'],
-        condition: 'request.isXmlHttpRequest()'
     )]
     public function accessesRequest(Request $request): JsonResponse
     {
@@ -237,12 +237,12 @@ class ContactController extends AbstractController
                 'layers' => $data['layers'],
             ];
             if (isset($data['myself'])) {
-                $mailParams['myself'] = true;   
+                $mailParams['myself'] = true;
             }
             if (isset($data['beneficiaries'])) {
                 $mailParams['beneficiaries'] = $data['beneficiaries'];
             }
-            
+
             $context = array_merge(['userEmail' => $userEmail], $mailParams);
             $this->mailerLogger->info('User ({userEmail}) : Demande d\'accès à des services de diffusion de données dont l\'accès est restreint', $context);
 

@@ -57,6 +57,8 @@ const PyramidVectorTmsServiceForm = lazy(() => import("../entrepot/pages/service
 
 const ServiceView = lazy(() => import("../entrepot/pages/service/view/ServiceView"));
 
+const AccessesRequest = lazy(() => import("../entrepot/pages/AccessesRequest"));
+
 const EspaceCoCommunityList = lazy(() => import("../espaceco/pages/communities/Communities"));
 
 const RouterRenderer: FC = () => {
@@ -119,8 +121,8 @@ const RouterRenderer: FC = () => {
                 return <UserKeyForm />;
             case "user_key_edit":
                 return <UserKeyForm keyId={route.params.keyId} />;
-            // case "accesses_request":
-            //     return <AccessesRequest fileIdentifier={route.params.fileIdentifier} />;
+            case "accesses_request":
+                return <AccessesRequest fileIdentifier={route.params.fileIdentifier} />;
             case "datastore_manage_storage":
                 return <DatastoreManageStorage datastoreId={route.params.datastoreId} />;
             case "datastore_manage_permissions":
