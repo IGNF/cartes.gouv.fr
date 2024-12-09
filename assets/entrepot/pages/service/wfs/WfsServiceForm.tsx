@@ -31,6 +31,7 @@ import AdditionalInfo from "../metadatas/AdditionalInfo";
 import Description from "../metadatas/Description";
 import UploadMDFile from "../metadatas/UploadMDFile";
 import TableInfosForm from "./TablesInfoForm";
+import { regex } from "../../../../utils";
 
 type TableInfoType = Record<string, WfsTableInfos>;
 
@@ -200,11 +201,18 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
             if (!selectedTableNamesList || selectedTableNamesList.length === 0) {
                 return yup.mixed().nullable().notRequired();
             }
-
             const table_schemas = {};
             selectedTableNamesList.forEach((table) => {
                 table_schemas[table] = yup.object({
-                    public_name: yup.string().default(table),
+                    public_name: yup
+                        .string()
+                        .default(table)
+                        .test("matches", t("public_name_regex"), (value) => {
+                            if (!value || value.trim() === "") {
+                                return true;
+                            }
+                            return regex.public_name.test(value);
+                        }),
                     title: yup.string().trim(t("trimmed_error")).strict(true).required(`Le titre de la table ${table} est obligatoire`),
                     description: yup.string().trim(t("trimmed_error")).strict(true).required(`Le résumé du contenu de la table ${table} est obligatoire`),
                     keywords: yup.array().of(yup.string()),
@@ -398,6 +406,7 @@ export const { i18n } = declareComponentKeys<
     | "modify.in_progress"
     | "back_to_data_list"
     | "trimmed_error"
+    | "public_name_regex"
 >()({
     WfsServiceForm,
 });
@@ -431,6 +440,7 @@ export const WfsServiceFormFrTranslations: Translations<"fr">["WfsServiceForm"] 
     "modify.in_progress": "Modification des informations du service WFS en cours",
     back_to_data_list: "Retour à mes données",
     trimmed_error: "La chaîne de caractères ne doit contenir aucun espace en début et fin",
+    public_name_regex: "L'intitulé (nom public) ne doit contenir que des lettres, chiffres, tirets (-), underscores (_), ou points (.)",
 };
 
 export const WfsServiceFormEnTranslations: Translations<"en">["WfsServiceForm"] = {
@@ -447,4 +457,5 @@ export const WfsServiceFormEnTranslations: Translations<"en">["WfsServiceForm"] 
     "modify.in_progress": undefined,
     back_to_data_list: undefined,
     trimmed_error: undefined,
+    public_name_regex: undefined,
 };
