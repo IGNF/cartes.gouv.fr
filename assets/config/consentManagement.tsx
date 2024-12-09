@@ -24,6 +24,7 @@ export const { ConsentBannerAndConsentManagement, FooterConsentManagementItem, F
     }),
     personalDataPolicyLinkProps: {
         href: routes.personal_data().href,
+        id: "footer-personal-data-policy-link",
     },
 
     consentCallback: async ({ finalityConsent }) => {
