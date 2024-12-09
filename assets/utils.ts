@@ -91,6 +91,7 @@ const regex = {
     technical_name: /^[A-Za-z_][A-Za-z0-9_.-]*$/, // chaîne alphanumérique qui commence par une lettre ou un underscore et ne doit contenir que des lettres, chiffres, tirets (-), underscores (_), ou points (.)
     email: /^[\w-.]+@([\w-]+\.)+[\w-]{2,}$/,
     uuid: /^[A-F\d]{8}-[A-F\d]{4}-[A-F\d]{4}-[A-F\d]{4}-[A-F\d]{12}$/i,
+    public_name: /^[A-Za-z_][A-Za-z0-9_.-]*$/,
 };
 
 export type ContentRangeType = {
