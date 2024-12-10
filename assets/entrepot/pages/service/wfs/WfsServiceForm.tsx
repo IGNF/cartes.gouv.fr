@@ -440,7 +440,8 @@ export const WfsServiceFormFrTranslations: Translations<"fr">["WfsServiceForm"] 
     "modify.in_progress": "Modification des informations du service WFS en cours",
     back_to_data_list: "Retour à mes données",
     trimmed_error: "La chaîne de caractères ne doit contenir aucun espace en début et fin",
-    public_name_regex: "L'intitulé (nom public) ne doit contenir que des lettres, chiffres, tirets (-), underscores (_), ou points (.)",
+    public_name_regex:
+        "Le nom public de la table ne doit contenir que des lettres, chiffres, tirets (-), underscores (_), ou points (.) et ne peut commencer que par une lettre ou un underscore",
 };
 
 export const WfsServiceFormEnTranslations: Translations<"en">["WfsServiceForm"] = {
