@@ -27,6 +27,7 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
 
     public const LOGIN_ROUTE = 'cartesgouvfr_security_login';
     public const LOGIN_CHECK_ROUTE = 'cartesgouvfr_security_login_check';
+    public const LOGIN_ENTREE_CARTO = 'cartesgouvfr_security_login_entree_carto';
     public const SUCCESS_ROUTE = 'cartesgouvfr_app';
     public const HOME_ROUTE = 'cartesgouvfr_app';
 
@@ -92,11 +93,16 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
         $targetPath = $this->getTargetPath($request->getSession(), $firewallName);
 
         $sessionExpired = $request->getSession()->get('session_expired');
+        $loginEntreeCarto = $request->getSession()->get('login_entree_carto');
 
         if (!is_null($sessionExpired) && 1 === intval($sessionExpired)) {
             $redirectUrl = $this->router->generate(self::HOME_ROUTE, ['session_expired_login_success' => 1], RouterInterface::ABSOLUTE_URL);
 
             $request->getSession()->remove('session_expired');
+        } if (!is_null($loginEntreeCarto) && 1 === intval($loginEntreeCarto)) {
+            $redirectUrl = $this->router->generate(self::LOGIN_ENTREE_CARTO, [], RouterInterface::ABSOLUTE_URL);
+
+            $request->getSession()->remove('login_entree_carto');
         } else {
             $redirectUrl = $referer ?? $targetPath ?? $this->router->generate(self::SUCCESS_ROUTE, [], RouterInterface::ABSOLUTE_URL);
             $redirectUrl = str_replace('authentication_failed=1', '', $redirectUrl);

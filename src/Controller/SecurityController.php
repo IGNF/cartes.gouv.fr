@@ -3,9 +3,11 @@
 namespace App\Controller;
 
 use App\Exception\AppException;
+use App\Security\KeycloakToken;
 use App\Security\User;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use KnpU\OAuth2ClientBundle\Client\Provider\KeycloakClient;
+use League\OAuth2\Client\Token\AccessToken;
 use Stevenmaguire\OAuth2\Client\Provider\Keycloak;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -85,6 +87,28 @@ class SecurityController extends AbstractController
         $accountUrl = "{$keycloak->authServerUrl}/realms/{$iamRealm}/account";
 
         return $this->redirect($accountUrl);
+    }
+
+    #[Route('/login/entree-carto/', name: 'login_entree_carto', methods: ['GET'])]
+    public function loginEntreeCarto(Request $request): RedirectResponse
+    {
+        /** @var ?AccessToken */
+        $token = $request->getSession()->get(KeycloakToken::SESSION_KEY);
+
+        // un token null signifie qu'on n'est pas connecté, donc on fait la connexion sur cartes d'abord. Après la connexion on revient ici et envoie le token à entree-carto par une redirection
+        if (null === $token) {
+            $request->getSession()->set('login_entree_carto', 1);
+
+            return new RedirectResponse($this->generateUrl('cartesgouvfr_security_login'));
+        }
+        $tokenArray = $token->jsonSerialize();
+
+        // $entreeCartoLoginCallbackUrl = $this->generateUrl('cartesgouvfr_app', [], UrlGeneratorInterface::ABSOLUTE_URL).'cartes';
+        $entreeCartoLoginCallbackUrl = 'http://localhost:5173/cartes.gouv.fr-entree-carto/login';
+
+        return new RedirectResponse($entreeCartoLoginCallbackUrl.'?'.http_build_query([
+            'token' => json_encode($tokenArray),
+        ]));
     }
 
     private function testLogin(
