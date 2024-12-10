@@ -14,6 +14,7 @@ const routeDefs = {
         },
         () => (appRoot === "" ? "/" : appRoot)
     ),
+    page_not_found: defineRoute(`${appRoot}/404`),
     about: defineRoute(`${appRoot}/a-propos`),
     documentation: defineRoute(`${appRoot}/documentation`),
     contact: defineRoute(`${appRoot}/nous-ecrire`),
@@ -211,6 +212,50 @@ const routeDefs = {
             datasheetName: param.query.string,
         },
         (p) => `${appRoot}/entrepot/${p.datastoreId}/service/tms/${p.offeringId}/modification`
+    ),
+
+    // Création/génération d'une pyramide raster
+    datastore_pyramid_raster_generate: defineRoute(
+        {
+            datastoreId: param.path.string,
+            offeringId: param.query.string,
+            datasheetName: param.query.string,
+        },
+        (p) => `${appRoot}/entrepot/${p.datastoreId}/pyramide-raster/ajout`
+    ),
+    datastore_pyramid_raster_wms_raster_service_new: defineRoute(
+        {
+            datastoreId: param.path.string,
+            pyramidId: param.query.string,
+            datasheetName: param.query.string,
+        },
+        (p) => `${appRoot}/entrepot/${p.datastoreId}/service/wms-raster/ajout`
+    ),
+    datastore_pyramid_raster_wms_raster_service_edit: defineRoute(
+        {
+            datastoreId: param.path.string,
+            pyramidId: param.query.string,
+            offeringId: param.path.string,
+            datasheetName: param.query.string,
+        },
+        (p) => `${appRoot}/entrepot/${p.datastoreId}/service/wms-raster/${p.offeringId}/modification`
+    ),
+    datastore_pyramid_raster_wmts_service_new: defineRoute(
+        {
+            datastoreId: param.path.string,
+            pyramidId: param.query.string,
+            datasheetName: param.query.string,
+        },
+        (p) => `${appRoot}/entrepot/${p.datastoreId}/service/wmts/ajout`
+    ),
+    datastore_pyramid_raster_wmts_service_edit: defineRoute(
+        {
+            datastoreId: param.path.string,
+            pyramidId: param.query.string,
+            offeringId: param.path.string,
+            datasheetName: param.query.string,
+        },
+        (p) => `${appRoot}/entrepot/${p.datastoreId}/service/wmts/${p.offeringId}/modification`
     ),
 
     datastore_service_view: defineRoute(

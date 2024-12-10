@@ -3,7 +3,9 @@
 namespace App\Services\EntrepotApi;
 
 use App\Constants\EntrepotApi\CommonTags;
+use App\Constants\EntrepotApi\ConfigurationStatuses;
 use App\Constants\EntrepotApi\ConfigurationTypes;
+use App\Constants\EntrepotApi\StoredDataTypes;
 use App\Entity\CswMetadata\CswCapabilitiesFile;
 use App\Entity\CswMetadata\CswDocument;
 use App\Entity\CswMetadata\CswHierarchyLevel;
@@ -33,6 +35,7 @@ class CartesMetadataApiService
         private ConfigurationApiService $configurationApiService,
         private CswMetadataHelper $cswMetadataHelper,
         private CartesServiceApiService $cartesServiceApiService,
+        private StoredDataApiService $storedDataApiService
     ) {
     }
 
@@ -89,7 +92,7 @@ class CartesMetadataApiService
         $cswMetadata = $this->cswMetadataHelper->fromXml($apiMetadataXml);
         $cswMetadata->layers = $this->getMetadataLayers($datastoreId, $datasheetName);
         $cswMetadata->styleFiles = $this->getStyleFiles($datastoreId, $datasheetName);
-        $cswMetadata->capabilitiesFiles = $this->getCapabilitiesFiles($datastoreId, $cswMetadata->layers);
+        $cswMetadata->capabilitiesFiles = $this->getCapabilitiesFiles($datastoreId, $datasheetName);
 
         $xmlFilePath = $this->cswMetadataHelper->saveToFile($cswMetadata);
         $this->metadataApiService->replaceFile($datastoreId, $apiMetadata['_id'], $xmlFilePath);
@@ -259,7 +262,7 @@ class CartesMetadataApiService
             $newCswMetadata->styleFiles = $this->getStyleFiles($datastoreId, $datasheetName);
 
             // Doit-être calculé après la récupération des layers
-            $newCswMetadata->capabilitiesFiles = $this->getCapabilitiesFiles($datastoreId, $layers);
+            $newCswMetadata->capabilitiesFiles = $this->getCapabilitiesFiles($datastoreId, $datasheetName);
         }
 
         return $newCswMetadata;
@@ -295,23 +298,39 @@ class CartesMetadataApiService
 
                         break;
 
+                    case ConfigurationTypes::WMSRASTER:
                     case ConfigurationTypes::WMSVECTOR:
                         $layerName = $offering['layer_name'];
-                        $endpointType = 'OGC:WMS';
+                        $endpointTypeOgc = 'OGC:WMS';
                         $endpointUrl = $serviceEndpoint['endpoint']['urls'][0]['url'];
 
-                        $layers[] = new CswMetadataLayer($layerName, $endpointType, $endpointUrl, $offering['_id']);
+                        $layers[] = new CswMetadataLayer($layerName, $endpointTypeOgc, $endpointUrl, $offering['_id']);
                         break;
 
                     case ConfigurationTypes::WMTSTMS:
                         $layerName = $offering['layer_name'];
-                        $endpointType = 'OGC:TMS';
 
-                        $tmsEndpoints = array_filter($serviceEndpoint['endpoint']['urls'], fn (array $url) => 'TMS' === $url['type']);
-                        $tmsEndpoints = array_values($tmsEndpoints);
+                        if (!isset($configuration['type_infos']['used_data'][0]['stored_data'])) {
+                            break;
+                        }
+                        $pyramid = $this->storedDataApiService->get($datastoreId, $configuration['type_infos']['used_data'][0]['stored_data']);
 
-                        if (count($tmsEndpoints) > 0) {
-                            $layers[] = new CswMetadataLayer($layerName, $endpointType, $tmsEndpoints[0]['url'], $offering['_id']);
+                        $endpointTypeOgc = null;
+                        $actualType = null;
+
+                        if (StoredDataTypes::ROK4_PYRAMID_VECTOR === $pyramid['type']) {
+                            $endpointTypeOgc = 'OGC:TMS';
+                            $actualType = 'TMS';
+                        } elseif (StoredDataTypes::ROK4_PYRAMID_RASTER === $pyramid['type']) {
+                            $endpointTypeOgc = 'OGC:WMTS';
+                            $actualType = 'WMTS';
+                        }
+
+                        $endpoints = array_filter($serviceEndpoint['endpoint']['urls'], fn (array $url) => $actualType === $url['type']);
+                        $endpoints = array_values($endpoints);
+
+                        if (count($endpoints) > 0) {
+                            $layers[] = new CswMetadataLayer($layerName, $endpointTypeOgc, $endpoints[0]['url'], $offering['_id']);
                         }
 
                         break;
@@ -382,24 +401,18 @@ class CartesMetadataApiService
         return $styleFiles;
     }
 
-    /**
-     * @param array<CswMetadataLayer> $layers
-     */
-    private function getCapabilitiesFiles(string $datastoreId, array $layers): array
+    private function getCapabilitiesFiles(string $datastoreId, string $datasheetName): array
     {
         $datastore = $this->datastoreApiService->get($datastoreId);
         $datastoreName = $datastore['technical_name'];
 
-        // Mapping entre le type d'une layer et le type du endpoint correspondant
-        $mapping = ['OGC:WFS' => 'WFS', 'OGC:WMS' => 'WMS-VECTOR'];
-        $layerTypes = [];
-
-        foreach ($layers as $layer) {
-            $type = $layer->endpointType;
-            if (array_key_exists($type, $mapping)) {
-                $layerTypes[] = $mapping[$type];
-            }
-        }
+        $configurationsList = $this->configurationApiService->getAll($datastoreId, [
+            'tags' => [
+                CommonTags::DATASHEET_NAME => $datasheetName,
+            ],
+            'status' => ConfigurationStatuses::PUBLISHED,
+        ]);
+        $layerTypes = array_map(fn ($config) => $config['type'], $configurationsList);
         $layerTypes = array_values(array_unique($layerTypes));
 
         $annexeUrl = $this->parameterBag->get('annexes_url');

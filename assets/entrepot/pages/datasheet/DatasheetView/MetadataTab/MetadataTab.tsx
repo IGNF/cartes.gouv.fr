@@ -41,8 +41,8 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, datasheet, metadataQue
     }, [metadata]);
 
     const storedDataList: StoredData[] = useMemo(
-        () => [...(datasheet?.vector_db_list ?? []), ...(datasheet?.pyramid_list ?? [])],
-        [datasheet?.vector_db_list, datasheet?.pyramid_list]
+        () => [...(datasheet?.vector_db_list ?? []), ...(datasheet?.pyramid_vector_list ?? [])],
+        [datasheet?.vector_db_list, datasheet?.pyramid_vector_list]
     );
 
     const catalogueDatasheetUrl = useMemo(() => {

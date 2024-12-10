@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Services\EntrepotApi\AnnexeApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
@@ -48,21 +47,21 @@ class CapabilitiesService
             return null;
         }
 
-        if (!in_array($endpoint['type'], [ConfigurationTypes::WFS, ConfigurationTypes::WMSVECTOR])) {
-            return null;
-        }
-
-        $allOfferings = $this->configurationApiService->getAllOfferings($datastoreId, ['endpoint' => $endpoint['_id']]);
-
         $xmlStr = null;
         switch ($endpoint['type']) {
             case ConfigurationTypes::WFS:
-                $xmlStr = $this->filterWFSCapabilities($endpoint, $url, $allOfferings);
+                $xmlStr = $this->filterWFSCapabilities($datastoreId, $endpoint, $url);
                 break;
             case ConfigurationTypes::WMSVECTOR:
-                $xmlStr = $this->filterWMSCapabilities($endpoint, $url, $allOfferings);
+            case ConfigurationTypes::WMSRASTER:
+                $xmlStr = $this->filterWMSCapabilities($datastoreId, $endpoint, $url);
                 break;
-            default: break;
+            case ConfigurationTypes::WMTSTMS:
+                // uniquement pour le WMTS
+                $xmlStr = $this->filterWMTSCapabilities($datastoreId, $endpoint, $url);
+                break;
+            default:
+                return null;
         }
 
         $uuid = uniqid();
@@ -82,8 +81,6 @@ class CapabilitiesService
             $annexe = $this->annexeApiService->add($datastoreId, $filePath, [$path], ['type=capabilities']);
         }
 
-        $this->fs->remove($filePath);
-
         return $annexe;
     }
 
@@ -94,8 +91,10 @@ class CapabilitiesService
         return sprintf('%s?SERVICE=%s&VERSION=%s&request=GetCapabilities', $endpointUrl, $serviceType, $version);
     }
 
-    private function filterWFSCapabilities(mixed $endpoint, string $url, mixed $allOfferings): string
+    private function filterWFSCapabilities(string $datastoreId, mixed $endpoint, string $url): string
     {
+        $allOfferings = $this->configurationApiService->getAllOfferings($datastoreId, ['endpoint' => $endpoint['_id']]);
+
         // Les couches liees aux offerings
         $layerNames = [];
         foreach ($allOfferings as $offering) {
@@ -139,8 +138,10 @@ class CapabilitiesService
         return $doc->saveXML();
     }
 
-    private function filterWMSCapabilities(mixed $endpoint, string $url, mixed $allOfferings): string
+    private function filterWMSCapabilities(string $datastoreId, mixed $endpoint, string $url): string
     {
+        $allOfferings = $this->configurationApiService->getAllOfferings($datastoreId, ['endpoint' => $endpoint['_id']]);
+
         // Les couches liees aux offerings
         $layerNames = [];
         foreach ($allOfferings as $offering) {
@@ -167,6 +168,50 @@ class CapabilitiesService
         while ($index >= 0) {
             $child = $layers->item($index);
             $name = $child->getElementsByTagName('Name')[0]->textContent;
+
+            if (!in_array($name, $layerNames)) {
+                $child->remove();
+            }
+            --$index;
+        }
+
+        return $doc->saveXML();
+    }
+
+    private function filterWMTSCapabilities(string $datastoreId, mixed $endpoint, string $url): string
+    {
+        $allOfferings = $this->configurationApiService->getAllOfferings($datastoreId, ['endpoint' => $endpoint['_id']]);
+
+        $layerNames = [];
+        foreach ($allOfferings as $offering) {
+            $layerNames[] = $offering['layer_name'];
+        }
+
+        $endpointUrl = array_values(array_filter($endpoint['urls'], fn ($url) => 'WMTS' === $url['type']))[0] ?? null;
+        if (null === $endpointUrl) {
+            throw new \Exception('Endpoint URL not found');
+        }
+
+        $getCapUrl = $this->getGetCapUrl($endpointUrl['url'], $url, 'WMTS');
+
+        $response = $this->httpClient->request('GET', $getCapUrl);
+        if (JsonResponse::HTTP_OK != $response->getStatusCode()) {
+            throw new \Exception('Request GetCapabilities failed');
+        }
+
+        $doc = new \DOMDocument();
+        $loaded = $doc->loadXML($response->getContent());
+        if (!$loaded) {
+            throw new \Exception('Parsing GetCapabilities failed');
+        }
+
+        $contents = $doc->getElementsByTagName('Contents');
+        $layers = $contents[0]?->getElementsByTagName('Layer');
+
+        $index = $layers->count() - 1;
+        while ($index >= 0) {
+            $child = $layers->item($index);
+            $name = $child->getElementsByTagName('Identifier')[0]->textContent;
 
             if (!in_array($name, $layerNames)) {
                 $child->remove();

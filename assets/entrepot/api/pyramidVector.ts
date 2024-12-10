@@ -3,7 +3,7 @@ import { jsonFetch } from "../../modules/jsonFetch";
 import { Service } from "../../@types/app";
 
 const add = (datastoreId: string, formData: FormData | object) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_pyramid_add", { datastoreId });
+    const url = SymfonyRouting.generate("cartesgouvfr_api_pyramid_vector_add", { datastoreId });
     return jsonFetch<null>(
         url,
         {
@@ -18,7 +18,7 @@ const add = (datastoreId: string, formData: FormData | object) => {
 };
 
 const publish = (datastoreId: string, pyramidId: string, formData: FormData | object) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_pyramid_tms_add", { datastoreId, pyramidId });
+    const url = SymfonyRouting.generate("cartesgouvfr_api_pyramid_vector_tms_add", { datastoreId, pyramidId });
     return jsonFetch<Service>(
         url,
         {
@@ -33,7 +33,7 @@ const publish = (datastoreId: string, pyramidId: string, formData: FormData | ob
 };
 
 const publishEdit = (datastoreId: string, pyramidId: string, offeringId: string, formData: FormData | object) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_pyramid_tms_edit", { datastoreId, pyramidId, offeringId });
+    const url = SymfonyRouting.generate("cartesgouvfr_api_pyramid_vector_tms_edit", { datastoreId, pyramidId, offeringId });
     return jsonFetch<Service>(
         url,
         {

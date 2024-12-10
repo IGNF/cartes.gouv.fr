@@ -11,6 +11,7 @@ import charsets from "./data/charset_list.json";
 // https://github.com/haliaeetus/iso-639/blob/master/data/iso_639-2.json
 import langs from "./data/iso_639-2.json";
 import { OfferingTypeEnum } from "./@types/app";
+import { BoundingBox } from "./@types/entrepot";
 
 export type LanguageType = {
     language: string;
@@ -222,6 +223,14 @@ const trimObject = (obj: object): object => {
     return newObject;
 };
 
+const bboxToWkt = (bbox: BoundingBox) => {
+    const str = "POLYGON((west north,east north,east south,west south,west north))";
+
+    return str.replace(/[a-z]+/g, function (s) {
+        return bbox[s];
+    });
+};
+
 export {
     getInspireKeywords,
     getLanguages,
@@ -238,4 +247,5 @@ export {
     formatDateWithoutTimeFromISO,
     getArrayRange,
     trimObject,
+    bboxToWkt,
 };
