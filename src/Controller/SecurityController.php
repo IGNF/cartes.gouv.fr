@@ -101,6 +101,7 @@ class SecurityController extends AbstractController
 
             return new RedirectResponse($this->generateUrl('cartesgouvfr_security_login'));
         }
+        // dd($request->getSession()->get('keycloak_code'));
         $tokenArray = $token->jsonSerialize();
 
         // $entreeCartoLoginCallbackUrl = $this->generateUrl('cartesgouvfr_app', [], UrlGeneratorInterface::ABSOLUTE_URL).'cartes';
@@ -108,6 +109,7 @@ class SecurityController extends AbstractController
 
         return new RedirectResponse($entreeCartoLoginCallbackUrl.'?'.http_build_query([
             'token' => json_encode($tokenArray),
+            'code' => json_encode($request->getSession()->get('keycloak_code')),
         ]));
     }
 
