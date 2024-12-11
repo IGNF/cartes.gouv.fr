@@ -89,6 +89,9 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
      */
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
+        $this->requestStack->getSession()->set('keycloak_code', $request->query->all());
+        $request->getSession()->set('keycloak_code', $request->query->all());
+
         $referer = $request->getSession()->get('referer', null);
         $targetPath = $this->getTargetPath($request->getSession(), $firewallName);
 
