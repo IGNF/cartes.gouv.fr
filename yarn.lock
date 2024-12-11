@@ -1492,9 +1492,7 @@
   integrity sha512-3J96098GrC95XsLw/TpGNMxhUOnoG9NZ/17Pfk1CrJj+4rcuolsF2RdF3XAFTu/3a/A+5ouxlSIykzYz6Ee87g==
 
 "@mui/material@^6.0.0":
-  version "6.1.5"
-  resolved "https://registry.yarnpkg.com/@mui/material/-/material-6.1.5.tgz#1ba8deda18564b277f37d957d523a9d2624b4b9a"
-  integrity sha512-rhaxC7LnlOG8zIVYv7BycNbWkC5dlm9A/tcDUp0CuwA7Zf9B9JP6M3rr50cNKxI7Z0GIUesAT86ceVm44quwnQ==
+  version "6.2.0"
   dependencies:
     "@babel/runtime" "^7.25.7"
     "@mui/core-downloads-tracker" "^6.1.5"
@@ -1562,9 +1560,7 @@
     react-is "^18.3.1"
 
 "@mui/x-date-pickers@^7.21.0":
-  version "7.21.0"
-  resolved "https://registry.yarnpkg.com/@mui/x-date-pickers/-/x-date-pickers-7.21.0.tgz#78de7e81bdf863d443d7963777dfc3052ae3c320"
-  integrity sha512-WLpuTu3PvhYwd7IAJSuDWr1Zd8c5C8Cc7rpAYCaV5+tGBoEP0C2UKqClMR4F1wTiU2a7x3dzgQzkcgK72yyqDw==
+  version "7.23.1"
   dependencies:
     "@babel/runtime" "^7.25.7"
     "@mui/utils" "^5.16.6 || ^6.0.0"
