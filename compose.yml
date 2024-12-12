@@ -12,6 +12,7 @@ services:
             args:
                 - HTTP_PROXY
                 - HTTPS_PROXY
+        scale: 2
         env_file:
             - .env.local
         environment:
@@ -27,7 +28,7 @@ services:
         extra_hosts:
             - host.docker.internal:host-gateway
         ports:
-            - "9092:8000"
+            - "9091-9092:8000"
         networks:
             - web_dev
         restart: unless-stopped
@@ -36,3 +37,11 @@ services:
             - "traefik.http.routers.cartesgouvfr.rule=Host(`cartesgouvfr-dev.docker.localhost`)"
             - "traefik.http.routers.cartesgouvfr.entrypoints=websecure"
             - "traefik.http.services.cartesgouvfr.loadbalancer.server.port=8000"
+
+    valkey:
+        image: "bitnami/valkey:latest"
+        container_name: cartesgouvfr_valkey
+        environment:
+            - ALLOW_EMPTY_PASSWORD=yes
+        networks:
+            - web_dev

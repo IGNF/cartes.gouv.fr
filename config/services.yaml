@@ -23,5 +23,25 @@ services:
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
 
+    app.cache_factory:
+        class: App\DependencyInjection\Factory\CacheFactory
+        autowire: true
+        arguments:
+            $projectDir: "%kernel.project_dir%"
+            $env: "%kernel.environment%"
+            $redisUrl: "%env(resolve:REDIS_URL)%"
+
+    app.custom_redis_adapter:
+        class: Symfony\Component\Cache\Adapter\AdapterInterface
+        factory: ["@app.cache_factory", "createCacheAdapter"]
+        arguments:
+            - "%env(resolve:REDIS_URL)%"
+
+    app.custom_session_handler:
+        class: Symfony\Component\Cache\Adapter\AdapterInterface
+        factory: ["@app.cache_factory", "createSessionHandler"]
+        arguments:
+            - "%env(resolve:REDIS_URL)%"
+
 imports:
     - { resource: parameters.yaml }

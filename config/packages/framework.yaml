@@ -9,7 +9,7 @@ framework:
     # Remove or comment this section to explicitly disable session support.
     session:
         enabled: true
-        handler_id: null
+        handler_id: "app.custom_session_handler"
         cookie_secure: true
         cookie_samesite: lax
         cookie_lifetime: 86400

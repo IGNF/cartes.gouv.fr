@@ -81,7 +81,7 @@ class KeycloakUserProvider implements UserProviderInterface
             throw new AuthenticationExpiredException('Failed to fetch user from token', Response::HTTP_UNAUTHORIZED, $th);
         }
 
-        $apiUser = $this->cache->get('users-me', function (ItemInterface $item) {
+        $apiUser = $this->cache->get("users-{$keycloakUser->getId()}", function (ItemInterface $item) {
             $item->expiresAfter(60);
 
             try {
