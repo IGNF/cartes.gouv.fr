@@ -1,8 +1,8 @@
 import * as yup from "yup";
 
-import { getTranslation } from "../../../i18n/i18n";
-import { regex } from "../../../utils";
-import validations from "../../../validations";
+import { getTranslation } from "../../../../i18n/i18n";
+import { regex } from "../../../../utils";
+import validations from "../../../../validations";
 
 const { t: tValidMD } = getTranslation("ValidationMetadatas");
 export class CommonSchemasValidation {

@@ -5,10 +5,10 @@ import { useQuery } from "@tanstack/react-query";
 import { FC, useMemo } from "react";
 import { UseFormReturn } from "react-hook-form";
 
-import { DatastoreEndpoint, EndpointTypeEnum, Service, ServiceFormValuesBaseType } from "../../../@types/app";
-import { useTranslation } from "../../../i18n/i18n";
-import RQKeys from "../../../modules/entrepot/RQKeys";
-import api from "../../api";
+import { DatastoreEndpoint, EndpointTypeEnum, Service, ServiceFormValuesBaseType } from "../../../../../@types/app";
+import { useTranslation } from "../../../../../i18n/i18n";
+import RQKeys from "../../../../../modules/entrepot/RQKeys";
+import api from "../../../../api";
 
 type AccessRestrictionProps = {
     datastoreId: string;

@@ -53,7 +53,7 @@ const CommunityList = lazy(() => import("../entrepot/pages/communities/Community
 const WfsServiceForm = lazy(() => import("../entrepot/pages/service/wfs/WfsServiceForm"));
 const WmsVectorServiceForm = lazy(() => import("../entrepot/pages/service/wms-vector/WmsVectorServiceForm"));
 const PyramidVectorGenerateForm = lazy(() => import("../entrepot/pages/service/tms/PyramidVectorGenerateForm"));
-const PyramidVectorTmsServiceForm = lazy(() => import("../entrepot/pages/service/tms/PyramidVectorTmsServiceForm"));
+const PyramidVectorTmsServiceForm = lazy(() => import("../entrepot/pages/service/tms/PyramidVectorTmsServiceForm/PyramidVectorTmsServiceForm"));
 const PyramidRasterGenerateForm = lazy(() => import("../entrepot/pages/service/wms-raster-wmts/PyramidRasterGenerateForm/PyramidRasterGenerateForm"));
 const PyramidRasterWmsRasterServiceForm = lazy(
     () => import("../entrepot/pages/service/wms-raster-wmts/PyramidRasterWmsRasterServiceForm/PyramidRasterWmsRasterServiceForm")

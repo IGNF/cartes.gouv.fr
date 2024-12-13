@@ -13,11 +13,11 @@ import { VectorDbListFrTranslations } from "../../entrepot/pages/datasheet/Datas
 import { DatasheetViewFrTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasheetView/DatasheetView.locale";
 import { DatastorePermissionsFrTranslations } from "../../entrepot/pages/datastore/ManagePermissions/DatastorePermissions.locale";
 import { DatastoreManageStorageFrTranslations } from "../../entrepot/pages/datastore/ManageStorage/DatastoreManageStorage.locale";
-import { AccessRestrictionsFrTranslations } from "../../entrepot/pages/service/AccessRestrictions.locale";
-import { TableSelectionFrTranslations } from "../../entrepot/pages/service/TableSelection.locale";
+import { AccessRestrictionsFrTranslations } from "../../entrepot/pages/service/common/AccessRestrictions/AccessRestrictions.locale";
+import { TableSelectionFrTranslations } from "../../entrepot/pages/service/common/TableSelection/TableSelection.locale";
 import { MetadatasFormFrTranslations } from "../../entrepot/pages/service/metadata/MetadataForm.locale";
 import { ValidationMetadatasFrTranslations } from "../../entrepot/pages/service/metadata/MetadataValidation.locale";
-import { PyramidVectorTmsServiceFormFrTranslations } from "../../entrepot/pages/service/tms/PyramidVectorTmsServiceForm.locale";
+import { PyramidVectorTmsServiceFormFrTranslations } from "../../entrepot/pages/service/tms/PyramidVectorTmsServiceForm/PyramidVectorTmsServiceForm.locale";
 import { StyleFrTranslations } from "../../entrepot/pages/service/view/Style/Style.locale";
 import { WfsServiceFormFrTranslations } from "../../entrepot/pages/service/wfs/WfsServiceForm.locale";
 import { PyramidRasterGenerateFormFrTranslations } from "../../entrepot/pages/service/wms-raster-wmts/PyramidRasterGenerateForm/PyramidRasterGenerateForm.locale";

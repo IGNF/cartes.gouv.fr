@@ -1,5 +1,5 @@
 import { declareComponentKeys } from "i18nifty";
-import { Translations } from "../../../i18n/types";
+import { Translations } from "../../../../../i18n/types";
 
 const { i18n } = declareComponentKeys<"title" | { K: "tables_detected_hint"; P: { nbTables: number }; R: string }>()("TableSelection");
 export type I18n = typeof i18n;

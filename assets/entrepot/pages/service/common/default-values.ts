@@ -1,11 +1,11 @@
 import { format as datefnsFormat } from "date-fns";
 
-import { EndpointTypeEnum, Metadata, MetadataFormValuesType, MetadataHierarchyLevel, Service, StoredData } from "../../../@types/app";
-import { ConfigurationWfsDetailsContent, ConfigurationWmsVectorDetailsContent, ConfigurationWmtsTmsDetailsContent } from "../../../@types/entrepot";
-import { getProjectionCode, removeDiacritics } from "../../../utils";
-import { PyramidVectorTmsServiceFormValuesType } from "./tms/PyramidVectorTmsServiceForm";
-import { WfsServiceFormValuesType, WfsTableInfos } from "./wfs/WfsServiceForm";
-import { WmsVectorServiceFormValuesType } from "./wms-vector/WmsVectorServiceForm";
+import { EndpointTypeEnum, Metadata, MetadataFormValuesType, MetadataHierarchyLevel, Service, StoredData } from "../../../../@types/app";
+import { ConfigurationWfsDetailsContent, ConfigurationWmsVectorDetailsContent, ConfigurationWmtsTmsDetailsContent } from "../../../../@types/entrepot";
+import { getProjectionCode, removeDiacritics } from "../../../../utils";
+import { PyramidVectorTmsServiceFormValuesType } from "../tms/PyramidVectorTmsServiceForm/PyramidVectorTmsServiceForm";
+import { WfsServiceFormValuesType, WfsTableInfos } from "../wfs/WfsServiceForm";
+import { WmsVectorServiceFormValuesType } from "../wms-vector/WmsVectorServiceForm";
 
 const DEFAULT_CHARSET = "utf8";
 const DEFAULT_LANGUAGE = { language: "français", code: "fre" };

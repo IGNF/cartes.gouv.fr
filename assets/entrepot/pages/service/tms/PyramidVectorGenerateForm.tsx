@@ -20,7 +20,7 @@ import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import { routes } from "../../../../router/router";
 import api from "../../../api";
-import TableSelection from "../TableSelection";
+import TableSelection from "../common/TableSelection/TableSelection";
 import formatForm from "./format-form";
 import Sample, { type SampleType } from "./sample/Sample";
 import TableAttributeSelection from "./tables/TableAttributeSelection";

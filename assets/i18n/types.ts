@@ -47,12 +47,12 @@ export type ComponentKey =
     | import("../modules/Style/TMSStyleFilesManager/TMSStyleFilesManager.locale").I18n
     | import("../entrepot/pages/service/wms-vector/WmsVectorServiceForm.locale").I18n
     | import("../entrepot/pages/service/wfs/WfsServiceForm.locale").I18n
-    | import("../entrepot/pages/service/tms/PyramidVectorTmsServiceForm.locale").I18n
+    | import("../entrepot/pages/service/tms/PyramidVectorTmsServiceForm/PyramidVectorTmsServiceForm.locale").I18n
     | import("../entrepot/pages/service/wms-raster-wmts/PyramidRasterGenerateForm/PyramidRasterGenerateForm.locale").I18n
     | import("../entrepot/pages/service/wms-raster-wmts/PyramidRasterWmsRasterServiceForm/PyramidRasterWmsRasterServiceForm.locale").I18n
     | import("../entrepot/pages/service/wms-raster-wmts/PyramidRasterWmtsServiceForm/PyramidRasterWmtsServiceForm.locale").I18n
-    | import("../entrepot/pages/service/TableSelection.locale").I18n
-    | import("../entrepot/pages/service/AccessRestrictions.locale").I18n
+    | import("../entrepot/pages/service/common/TableSelection/TableSelection.locale").I18n
+    | import("../entrepot/pages/service/common/AccessRestrictions/AccessRestrictions.locale").I18n
     | import("../entrepot/pages/service/wms-vector/UploadStyleFile.locale").I18n
     | import("../espaceco/pages/communities/EspaceCoCommunities.locale").I18n
     | import("../pages/LoginDisabled/LoginDisabled.locale").I18n;
