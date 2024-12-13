@@ -14,7 +14,7 @@ import LoadingText from "../../../../../../components/Utils/LoadingText";
 import MenuList from "../../../../../../components/Utils/MenuList";
 import Wait from "../../../../../../components/Utils/Wait";
 import useToggle from "../../../../../../hooks/useToggle";
-import { Translations, declareComponentKeys, getTranslation, useTranslation } from "../../../../../../i18n/i18n";
+import { getTranslation, useTranslation } from "../../../../../../i18n/i18n";
 import RQKeys from "../../../../../../modules/entrepot/RQKeys";
 import { routes } from "../../../../../../router/router";
 import { formatDateFromISO, offeringTypeDisplayName } from "../../../../../../utils";
@@ -30,7 +30,7 @@ type PyramidVectorListItemProps = {
 const { t: tCommon } = getTranslation("Common");
 
 const PyramidVectorListItem: FC<PyramidVectorListItemProps> = ({ datasheetName, datastoreId, pyramid }) => {
-    const { t } = useTranslation({ PyramidVectorListItem });
+    const { t } = useTranslation("PyramidVectorList");
 
     const [showDescription, toggleShowDescription] = useToggle(false);
 
@@ -186,36 +186,3 @@ const PyramidVectorListItem: FC<PyramidVectorListItemProps> = ({ datasheetName, 
 };
 
 export default memo(PyramidVectorListItem);
-
-// traductions
-export const { i18n } = declareComponentKeys<
-    | "show_linked_datas"
-    | "other_actions"
-    | "show_details"
-    | "publish_tms_service"
-    | { K: "confirm_delete_modal.title"; P: { pyramidName: string }; R: string }
-    | "following_services_deleted"
-    | { K: "error_deleting"; P: { pyramidName: string }; R: string }
->()({
-    PyramidVectorListItem,
-});
-
-export const PyramidVectorListItemFrTranslations: Translations<"fr">["PyramidVectorListItem"] = {
-    show_linked_datas: "Voir les données liées",
-    other_actions: "Autres actions",
-    show_details: "Voir les détails",
-    publish_tms_service: "Publier le service TMS",
-    "confirm_delete_modal.title": ({ pyramidName }) => `Êtes-vous sûr de vouloir supprimer la pyramide ${pyramidName} ?`,
-    following_services_deleted: "Les services suivants seront aussi supprimés :",
-    error_deleting: ({ pyramidName }) => `La suppression de la pyramide ${pyramidName} a échoué`,
-};
-
-export const PyramidVectorListItemEnTranslations: Translations<"en">["PyramidVectorListItem"] = {
-    show_linked_datas: "Show linked datas",
-    other_actions: "Other actions",
-    show_details: "Show details",
-    publish_tms_service: "Publish TMS service",
-    "confirm_delete_modal.title": ({ pyramidName }) => `Are you sure you want to delete pyramid ${pyramidName} ?`,
-    following_services_deleted: "The following services will be deleted :",
-    error_deleting: ({ pyramidName }) => `Deleting ${pyramidName} pyramid failed`,
-};

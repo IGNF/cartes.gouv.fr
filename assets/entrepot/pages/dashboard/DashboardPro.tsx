@@ -2,15 +2,14 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { Tile } from "@codegouvfr/react-dsfr/Tile";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { declareComponentKeys } from "i18nifty";
 import { useEffect } from "react";
 
 import { CartesUser, Datastore } from "../../../@types/app";
 import AppLayout from "../../../components/Layout/AppLayout";
 import LoadingIcon from "../../../components/Utils/LoadingIcon";
 import Skeleton from "../../../components/Utils/Skeleton";
-import { datastoreNavItems } from "../../../config/datastoreNavItems";
-import { Translations, useTranslation } from "../../../i18n/i18n";
+import { datastoreNavItems } from "../../../config/navItems/datastoreNavItems";
+import { useTranslation } from "../../../i18n/i18n";
 import Translator from "../../../modules/Translator";
 import RQKeys from "../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../modules/jsonFetch";
@@ -193,17 +192,3 @@ const DashboardPro = () => {
 };
 
 export default DashboardPro;
-
-export const { i18n } = declareComponentKeys<"document_title" | "espaceco_frontoffice_list" | "datastore_for_tests">()("DashboardPro");
-
-export const DashboardProFrTranslations: Translations<"fr">["DashboardPro"] = {
-    document_title: "Tableau de bord professionnel",
-    espaceco_frontoffice_list: "Liste des guichets de l’espace collaboratif",
-    datastore_for_tests: "À des fins de test",
-};
-
-export const DashboardProEnTranslations: Translations<"en">["DashboardPro"] = {
-    document_title: "Professional dashboard",
-    espaceco_frontoffice_list: "List of collaborative space front offices",
-    datastore_for_tests: "For testing purposes",
-};

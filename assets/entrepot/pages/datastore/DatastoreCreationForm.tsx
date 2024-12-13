@@ -13,7 +13,7 @@ import { jsonFetch } from "../../../modules/jsonFetch";
 import { removeDiacritics } from "../../../utils";
 import Wait from "../../../components/Utils/Wait";
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import { datastoreNavItems } from "../../../config/datastoreNavItems";
+import { datastoreNavItems } from "../../../config/navItems/datastoreNavItems";
 
 const DatastoreCreationForm: FC = () => {
     const schema = yup
