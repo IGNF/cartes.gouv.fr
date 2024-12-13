@@ -37,7 +37,8 @@ export type ComponentKey =
     | import("../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadForm.locale").I18n
     | import("../entrepot/pages/datasheet/DatasheetList/DatasheetList.locale").I18n
     | import("../entrepot/pages/datasheet/DatasheetView/DatasetListTab/VectorDbList/VectorDbList.locale").I18n
-    | import("../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidList/PyramidList.locale").I18n
+    | import("../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidVectorList/PyramidVectorList.locale").I18n
+    | import("../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidRasterList/PyramidRasterList.locale").I18n
     | import("../entrepot/pages/datasheet/DatasheetView/DatasheetView/DatasheetView.locale").I18n
     | import("../config/navItems/navItems.locale").I18n
     | import("../config/navItems/datastoreNavItems.locale").I18n
@@ -47,6 +48,9 @@ export type ComponentKey =
     | import("../entrepot/pages/service/wms-vector/WmsVectorServiceForm.locale").I18n
     | import("../entrepot/pages/service/wfs/WfsServiceForm.locale").I18n
     | import("../entrepot/pages/service/tms/PyramidVectorTmsServiceForm.locale").I18n
+    | import("../entrepot/pages/service/wms-raster-wmts/PyramidRasterGenerateForm/PyramidRasterGenerateForm.locale").I18n
+    | import("../entrepot/pages/service/wms-raster-wmts/PyramidRasterWmsRasterServiceForm/PyramidRasterWmsRasterServiceForm.locale").I18n
+    | import("../entrepot/pages/service/wms-raster-wmts/PyramidRasterWmtsServiceForm/PyramidRasterWmtsServiceForm.locale").I18n
     | import("../entrepot/pages/service/TableSelection.locale").I18n
     | import("../entrepot/pages/service/AccessRestrictions.locale").I18n
     | import("../entrepot/pages/service/wms-vector/UploadStyleFile.locale").I18n

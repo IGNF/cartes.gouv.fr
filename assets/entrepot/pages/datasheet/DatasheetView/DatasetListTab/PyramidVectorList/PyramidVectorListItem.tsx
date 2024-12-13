@@ -30,7 +30,7 @@ type PyramidVectorListItemProps = {
 const { t: tCommon } = getTranslation("Common");
 
 const PyramidVectorListItem: FC<PyramidVectorListItemProps> = ({ datasheetName, datastoreId, pyramid }) => {
-    const { t } = useTranslation({ PyramidVectorListItem });
+    const { t } = useTranslation("PyramidVectorList");
 
     const [showDescription, toggleShowDescription] = useToggle(false);
 

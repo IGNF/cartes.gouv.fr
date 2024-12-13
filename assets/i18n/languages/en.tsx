@@ -7,7 +7,8 @@ import { RightsEnTranslations } from "../../entrepot/pages/communities/Rights.lo
 import { DashboardProEnTranslations } from "../../entrepot/pages/dashboard/DashboardPro.locale";
 import { DatasheetListEnTranslations } from "../../entrepot/pages/datasheet/DatasheetList/DatasheetList.locale";
 import { DatasheetUploadFormEnTranslations } from "../../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadForm.locale";
-import { PyramidListFrTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidList/PyramidList.locale";
+import { PyramidRasterListEnTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidRasterList/PyramidRasterList.locale";
+import { PyramidVectorListEnTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidVectorList/PyramidVectorList.locale";
 import { VectorDbListEnTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasetListTab/VectorDbList/VectorDbList.locale";
 import { DatasheetViewEnTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasheetView/DatasheetView.locale";
 import { DatastorePermissionsEnTranslations } from "../../entrepot/pages/datastore/ManagePermissions/DatastorePermissions.locale";
@@ -19,6 +20,9 @@ import { ValidationMetadatasEnTranslations } from "../../entrepot/pages/service/
 import { PyramidVectorTmsServiceFormEnTranslations } from "../../entrepot/pages/service/tms/PyramidVectorTmsServiceForm.locale";
 import { StyleEnTranslations } from "../../entrepot/pages/service/view/Style/Style.locale";
 import { WfsServiceFormEnTranslations } from "../../entrepot/pages/service/wfs/WfsServiceForm.locale";
+import { PyramidRasterGenerateFormEnTranslations } from "../../entrepot/pages/service/wms-raster-wmts/PyramidRasterGenerateForm/PyramidRasterGenerateForm.locale";
+import { PyramidRasterWmsRasterServiceFormEnTranslations } from "../../entrepot/pages/service/wms-raster-wmts/PyramidRasterWmsRasterServiceForm/PyramidRasterWmsRasterServiceForm.locale";
+import { PyramidRasterWmtsServiceFormEnTranslations } from "../../entrepot/pages/service/wms-raster-wmts/PyramidRasterWmtsServiceForm/PyramidRasterWmtsServiceForm.locale";
 import { UploadStyleFileEnTranslations } from "../../entrepot/pages/service/wms-vector/UploadStyleFile.locale";
 import { WmsVectorServiceFormEnTranslations } from "../../entrepot/pages/service/wms-vector/WmsVectorServiceForm.locale";
 import { MyAccessKeysEnTranslations } from "../../entrepot/pages/users/access-keys/MyAccessKeys.locale";
@@ -34,9 +38,6 @@ import { contactEnTranslations } from "../../pages/assistance/contact/Contact.lo
 import { mapboxStyleValidationEnTranslations } from "../../validations/mapbox/MapboxStyleValidator.locale";
 import { SldStyleValidationErrorsEnTranslations } from "../../validations/sld/SldStyleValidation.locale";
 import { commonEnTranslations } from "../Common.locale";
-import { PyramidRasterGenerateFormEnTranslations } from "../../entrepot/pages/service/wms-raster-wmts/PyramidRasterGenerateForm";
-import { PyramidRasterWmsRasterServiceFormEnTranslations } from "../../entrepot/pages/service/wms-raster-wmts/PyramidRasterWmsRasterServiceForm";
-import { PyramidRasterWmtsServiceFormEnTranslations } from "../../entrepot/pages/service/wms-raster-wmts/PyramidRasterWmtsServiceForm";
 import type { Translations } from "../types";
 
 export const translations: Translations<"en"> = {
@@ -58,11 +59,9 @@ export const translations: Translations<"en"> = {
     AccessesRequest: AccessesRequestEnTranslations,
     navItems: navItemsEnTranslations,
     datastoreNavItems: datastoreNavItemsEnTranslations,
-    VectorDbListItem: VectorDbListItemEnTranslations,
-    PyramidVectorListItem: PyramidVectorListItemEnTranslations,
-    PyramidRasterListItem: PyramidRasterListItemEnTranslations,
     VectorDbList: VectorDbListEnTranslations,
-    PyramidList: PyramidListFrTranslations,
+    PyramidVectorList: PyramidVectorListEnTranslations,
+    PyramidRasterList: PyramidRasterListEnTranslations,
     DatasheetView: DatasheetViewEnTranslations,
     SldStyleValidationErrors: SldStyleValidationErrorsEnTranslations,
     mapboxStyleValidation: mapboxStyleValidationEnTranslations,

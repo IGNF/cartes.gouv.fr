@@ -10,10 +10,10 @@ const { i18n } = declareComponentKeys<
     | { K: "confirm_delete_modal.title"; P: { pyramidName: string }; R: string }
     | "following_services_deleted"
     | { K: "error_deleting"; P: { pyramidName: string }; R: string }
->()("PyramidList");
+>()("PyramidVectorList");
 export type I18n = typeof i18n;
 
-export const PyramidListFrTranslations: Translations<"fr">["PyramidList"] = {
+export const PyramidVectorListFrTranslations: Translations<"fr">["PyramidVectorList"] = {
     show_linked_datas: "Voir les données liées",
     other_actions: "Autres actions",
     show_details: "Voir les détails",
@@ -23,7 +23,7 @@ export const PyramidListFrTranslations: Translations<"fr">["PyramidList"] = {
     error_deleting: ({ pyramidName }) => `La suppression de la pyramide ${pyramidName} a échoué`,
 };
 
-export const PyramidListEnTranslations: Translations<"en">["PyramidList"] = {
+export const PyramidVectorListEnTranslations: Translations<"en">["PyramidVectorList"] = {
     show_linked_datas: "Show linked datas",
     other_actions: "Other actions",
     show_details: "Show details",

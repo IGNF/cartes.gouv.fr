@@ -54,13 +54,15 @@ const WfsServiceForm = lazy(() => import("../entrepot/pages/service/wfs/WfsServi
 const WmsVectorServiceForm = lazy(() => import("../entrepot/pages/service/wms-vector/WmsVectorServiceForm"));
 const PyramidVectorGenerateForm = lazy(() => import("../entrepot/pages/service/tms/PyramidVectorGenerateForm"));
 const PyramidVectorTmsServiceForm = lazy(() => import("../entrepot/pages/service/tms/PyramidVectorTmsServiceForm"));
-const PyramidRasterGenerateForm = lazy(() => import("../entrepot/pages/service/wms-raster-wmts/PyramidRasterGenerateForm"));
-const PyramidRasterWmsRasterServiceForm = lazy(() => import("../entrepot/pages/service/wms-raster-wmts/PyramidRasterWmsRasterServiceForm"));
-const PyramidRasterWmtsServiceForm = lazy(() => import("../entrepot/pages/service/wms-raster-wmts/PyramidRasterWmtsServiceForm"));
+const PyramidRasterGenerateForm = lazy(() => import("../entrepot/pages/service/wms-raster-wmts/PyramidRasterGenerateForm/PyramidRasterGenerateForm"));
+const PyramidRasterWmsRasterServiceForm = lazy(
+    () => import("../entrepot/pages/service/wms-raster-wmts/PyramidRasterWmsRasterServiceForm/PyramidRasterWmsRasterServiceForm")
+);
+const PyramidRasterWmtsServiceForm = lazy(() => import("../entrepot/pages/service/wms-raster-wmts/PyramidRasterWmtsServiceForm/PyramidRasterWmtsServiceForm"));
 
 const ServiceView = lazy(() => import("../entrepot/pages/service/view/ServiceView"));
 
-const AccessesRequest = lazy(() => import("../entrepot/pages/AccessesRequest"));
+const AccessesRequest = lazy(() => import("../entrepot/pages/accesses-request/AccessesRequest"));
 
 const EspaceCoCommunityList = lazy(() => import("../espaceco/pages/communities/Communities"));
 
