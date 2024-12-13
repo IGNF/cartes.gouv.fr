@@ -5,11 +5,10 @@ namespace App\Controller\Entrepot;
 use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Constants\EntrepotApi\Sandbox;
-use App\Constants\EntrepotApi\ZoomLevels;
 use App\Controller\ApiControllerInterface;
-use App\Dto\Pyramid\AddPyramidDTO;
-use App\Dto\Pyramid\CompositionDTO;
-use App\Dto\Pyramid\PublishPyramidDTO;
+use App\Dto\PyramidVector\AddPyramidDTO;
+use App\Dto\PyramidVector\CompositionDTO;
+use App\Dto\PyramidVector\PublishPyramidDTO;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\CapabilitiesService;
@@ -25,12 +24,12 @@ use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route(
-    '/api/datastores/{datastoreId}/pyramid',
-    name: 'cartesgouvfr_api_pyramid_',
+    '/api/datastores/{datastoreId}/pyramid-vector',
+    name: 'cartesgouvfr_api_pyramid_vector_',
     options: ['expose' => true],
     condition: 'request.isXmlHttpRequest()'
 )]
-class PyramidController extends ServiceController implements ApiControllerInterface
+class PyramidVectorController extends ServiceController implements ApiControllerInterface
 {
     public function __construct(
         DatastoreApiService $datastoreApiService,
@@ -80,7 +79,7 @@ class PyramidController extends ServiceController implements ApiControllerInterf
                 $parameters['area'] = $dto->area;
             }
 
-            $processing = $this->sandboxService->getProcGeneratePyramid($datastoreId);
+            $processing = $this->sandboxService->getProcGeneratePyramidVector($datastoreId);
 
             $requestBody = [
                 'processing' => $processing,
@@ -95,10 +94,6 @@ class PyramidController extends ServiceController implements ApiControllerInterf
             // Ajout d'une execution de traitement
             $processingExecution = $this->processingApiService->addExecution($datastoreId, $requestBody);
             $pyramidId = $processingExecution['output']['stored_data']['_id'];
-
-            $this->storedDataApiService->addTags($datastoreId, $dto->vectordb_id, [
-                'pyramid_id' => $pyramidId,
-            ]);
 
             $pyramidTags = [
                 CommonTags::DATASHEET_NAME => $vectordb['tags'][CommonTags::DATASHEET_NAME],
@@ -230,7 +225,7 @@ class PyramidController extends ServiceController implements ApiControllerInterf
     private function getConfigRequestBody(PublishPyramidDTO $dto, array $pyramid, bool $editMode = false, ?string $datastoreId = null): array
     {
         // Recherche de bottom_level et top_level
-        $levels = $this->getBottomAndToLevel($pyramid);
+        $levels = $this->getPyramidZoomLevels($pyramid);
 
         $requestBody = [
             'type' => ConfigurationTypes::WMTSTMS,
@@ -280,24 +275,5 @@ class PyramidController extends ServiceController implements ApiControllerInterf
         sort($levels, SORT_NUMERIC);
 
         return $levels;
-    }
-
-    /**
-     * @param array<mixed> $pyramid
-     *
-     * @return array
-     */
-    private function getBottomAndToLevel(array $pyramid)
-    {
-        if (!isset($pyramid['type_infos']) || !isset($pyramid['type_infos']['levels'])) {
-            return ['bottom_level' => strval(ZoomLevels::BOTTOM_LEVEL_DEFAULT), 'top_level' => strval(ZoomLevels::TOP_LEVEL_DEFAULT)];
-        }
-
-        $levels = $pyramid['type_infos']['levels'];
-        usort($levels, function (string $a, string $b) {
-            return intval($a) - intval($b);
-        });
-
-        return ['bottom_level' => end($levels), 'top_level' => reset($levels)];
     }
 }

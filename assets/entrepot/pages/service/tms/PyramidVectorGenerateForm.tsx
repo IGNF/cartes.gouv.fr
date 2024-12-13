@@ -4,7 +4,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
@@ -84,6 +84,8 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, vec
     /* l'etape courante */
     const [currentStep, setCurrentStep] = useState(STEPS.TABLES_SELECTION);
 
+    const queryClient = useQueryClient();
+
     const vectorDbQuery = useQuery({
         queryKey: RQKeys.datastore_stored_data(datastoreId, vectorDbId),
         queryFn: () => api.storedData.get<VectorDb>(datastoreId, vectorDbId),
@@ -137,10 +139,13 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, vec
 
         setIsSubmitting(true);
 
-        api.pyramid
+        api.pyramidVector
             .add(datastoreId, formatted)
             .then(() => {
                 if (vectorDbQuery.data?.tags?.datasheet_name) {
+                    queryClient.invalidateQueries({
+                        queryKey: RQKeys.datastore_datasheet(datastoreId, vectorDbQuery.data?.tags.datasheet_name),
+                    });
                     routes.datastore_datasheet_view({ datastoreId, datasheetName: vectorDbQuery.data?.tags.datasheet_name, activeTab: "dataset" }).push();
                 } else {
                     routes.datasheet_list({ datastoreId }).push();

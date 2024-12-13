@@ -78,6 +78,7 @@ const ReportTab: FC<ReportTabProps> = ({ datastoreName, reportQuery }) => {
                         defaultExpanded={[
                             ProcessingExecutionDetailResponseDtoStatusEnum.FAILURE,
                             ProcessingExecutionDetailResponseDtoStatusEnum.ABORTED,
+                            ProcessingExecutionDetailResponseDtoStatusEnum.PROGRESS,
                         ].includes(procExec.status)}
                     >
                         <ProcessingExecutionReport datastoreName={datastoreName} processingExecution={procExec} />

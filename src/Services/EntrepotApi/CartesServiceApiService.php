@@ -4,6 +4,7 @@ namespace App\Services\EntrepotApi;
 
 use App\Constants\EntrepotApi\ConfigurationStatuses;
 use App\Constants\EntrepotApi\OfferingTypes;
+use App\Constants\EntrepotApi\StoredDataTypes;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -21,6 +22,7 @@ class CartesServiceApiService
         private AnnexeApiService $annexeApiService,
         private DatastoreApiService $datastoreApiService,
         private StaticApiService $staticApiService,
+        private StoredDataApiService $storedDataApiService,
         HttpClientInterface $httpClient,
     ) {
         $this->httpClient = $httpClient->withOptions([
@@ -35,19 +37,26 @@ class CartesServiceApiService
         $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId);
         $offering['configuration'] = $this->configurationApiService->get($datastoreId, $offering['configuration']['_id']);
 
-        // Metadatas (TMS)
+        // traitement spécial pour WMTS-TMS
         if (OfferingTypes::WMTSTMS === $offering['type']) {
-            $urls = array_values(array_filter($offering['urls'], static function ($url) {
-                return 'TMS' == $url['type'];
-            }));
-            $url = $urls[0]['url'].'/metadata.json';
+            $storedData = $this->storedDataApiService->get($datastoreId, $offering['configuration']['type_infos']['used_data'][0]['stored_data']);
+            $offering['configuration']['pyramid'] = $storedData;
 
-            try {
-                $response = $this->httpClient->request('GET', $url);
-                if (Response::HTTP_OK === $response->getStatusCode()) {
-                    $offering['tms_metadata'] = $response->toArray();
+            // TMS
+            if (StoredDataTypes::ROK4_PYRAMID_VECTOR === $storedData['type']) {
+                // Metadatas (TMS)
+                $urls = array_values(array_filter($offering['urls'], static function ($url) {
+                    return 'TMS' == $url['type'];
+                }));
+                $url = $urls[0]['url'].'/metadata.json';
+
+                try {
+                    $response = $this->httpClient->request('GET', $url);
+                    if (Response::HTTP_OK === $response->getStatusCode()) {
+                        $offering['tms_metadata'] = $response->toArray();
+                    }
+                } catch (\Throwable $th) {
                 }
-            } catch (\Throwable $th) {
             }
         }
 
@@ -97,6 +106,7 @@ class CartesServiceApiService
         switch ($offering['type']) {
             case OfferingTypes::WFS:
             case OfferingTypes::WMSVECTOR:
+            case OfferingTypes::WMSRASTER:
                 $annexeUrl = $this->params->get('annexes_url');
                 $shareUrl = join('/', [$annexeUrl, $datastore['technical_name'],  $endpoint['endpoint']['technical_name'], 'capabilities.xml']);
                 break;
@@ -105,6 +115,12 @@ class CartesServiceApiService
                 if (isset($offering['tms_metadata']['tiles'][0])) {
                     $shareUrl = $offering['tms_metadata']['tiles'][0];
                 }
+
+                if (isset($offering['configuration']['pyramid']['type']) && StoredDataTypes::ROK4_PYRAMID_RASTER === $offering['configuration']['pyramid']['type']) {
+                    $annexeUrl = $this->params->get('annexes_url');
+                    $shareUrl = join('/', [$annexeUrl, $datastore['technical_name'],  $endpoint['endpoint']['technical_name'], 'capabilities.xml']);
+                }
+
                 break;
 
             default:
@@ -123,11 +139,13 @@ class CartesServiceApiService
                 $this->wfsUnpublish($datastoreId, $offering);
                 break;
             case OfferingTypes::WMTSTMS:
-                $this->tmsUnpublish($datastoreId, $offering);
+                $this->wmtsTmsUnpublish($datastoreId, $offering);
                 break;
             case OfferingTypes::WMSVECTOR:
                 $this->wmsVectorUnpublish($datastoreId, $offering);
                 break;
+            case OfferingTypes::WMSRASTER:
+                $this->wmsRasterUnpublish($datastoreId, $offering);
         }
     }
 
@@ -192,7 +210,28 @@ class CartesServiceApiService
     /**
      * @param array<mixed> $offering
      */
-    public function tmsUnpublish(string $datastoreId, array $offering, bool $removeStyleFiles = true): void
+    public function wmsRasterUnpublish(string $datastoreId, array $offering): void
+    {
+        // suppression de l'offering
+        $this->configurationApiService->removeOffering($datastoreId, $offering['_id']);
+        $configurationId = $offering['configuration']['_id'];
+
+        // suppression de la configuration
+        // la suppression de l'offering nécessite quelques instants, et tant que la suppression de l'offering n'est pas faite, on ne peut pas demander la suppression de la configuration
+        while (1) {
+            sleep(3);
+            $configuration = $this->configurationApiService->get($datastoreId, $configurationId);
+            if (ConfigurationStatuses::UNPUBLISHED === $configuration['status']) {
+                break;
+            }
+        }
+        $this->configurationApiService->remove($datastoreId, $configurationId);
+    }
+
+    /**
+     * @param array<mixed> $offering
+     */
+    public function wmtsTmsUnpublish(string $datastoreId, array $offering, bool $removeStyleFiles = true): void
     {
         // suppression de l'offering
         $this->configurationApiService->removeOffering($datastoreId, $offering['_id']);
@@ -215,25 +254,24 @@ class CartesServiceApiService
     }
 
     /**
-     * Suppression des styles lies à une configuration
-     *
+     * Suppression des styles lies à une configuration.
      */
-    private function removeStyleFiles(string $datastoreId, string $configurationId) : void
+    private function removeStyleFiles(string $datastoreId, string $configurationId): void
     {
         $path = "/configuration/$configurationId/styles.json";
-        
+
         $styleAnnexes = $this->annexeApiService->getAll($datastoreId, null, $path);
-        if (count($styleAnnexes) === 0) {
+        if (0 === count($styleAnnexes)) {
             return;
         }
 
         $content = $this->annexeApiService->download($datastoreId, $styleAnnexes[0]['_id']);
-        
+
         $styles = json_decode($content, true);
-        foreach($styles as $style) {
+        foreach ($styles as $style) {
             if (array_key_exists('layers', $style)) {
-                foreach($style['layers'] as $layer) {
-                    $this->annexeApiService->remove($datastoreId, $layer['annexe_id']);    
+                foreach ($style['layers'] as $layer) {
+                    $this->annexeApiService->remove($datastoreId, $layer['annexe_id']);
                 }
             }
         }

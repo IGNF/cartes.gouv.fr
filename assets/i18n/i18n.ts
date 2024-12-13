@@ -37,7 +37,8 @@ export type ComponentKey =
     | typeof import("../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadForm").i18n
     | typeof import("../entrepot/pages/datasheet/DatasheetList/DatasheetList").i18n
     | typeof import("../entrepot/pages/datasheet/DatasheetView/DatasetListTab/VectorDbList/VectorDbListItem").i18n
-    | typeof import("../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidList/PyramidListItem").i18n
+    | typeof import("../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidVectorList/PyramidVectorListItem").i18n
+    | typeof import("../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidRasterList/PyramidRasterListItem").i18n
     | typeof import("../entrepot/pages/datasheet/DatasheetView/DatasheetView").i18n
     | typeof import("../config/navItems").i18n
     | typeof import("../config/datastoreNavItems").i18n
@@ -47,6 +48,9 @@ export type ComponentKey =
     | typeof import("../entrepot/pages/service/wms-vector/WmsVectorServiceForm").i18n
     | typeof import("../entrepot/pages/service/wfs/WfsServiceForm").i18n
     | typeof import("../entrepot/pages/service/tms/PyramidVectorTmsServiceForm").i18n
+    | typeof import("../entrepot/pages/service/wms-raster-wmts/PyramidRasterGenerateForm").i18n
+    | typeof import("../entrepot/pages/service/wms-raster-wmts/PyramidRasterWmsRasterServiceForm").i18n
+    | typeof import("../entrepot/pages/service/wms-raster-wmts/PyramidRasterWmtsServiceForm").i18n
     | typeof import("../entrepot/pages/service/TableSelection").i18n
     | typeof import("../entrepot/pages/service/AccessRestrictions").i18n
     | typeof import("../entrepot/pages/service/wms-vector/UploadStyleFile").i18n

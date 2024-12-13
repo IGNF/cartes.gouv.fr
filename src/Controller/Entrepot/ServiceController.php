@@ -5,6 +5,7 @@ namespace App\Controller\Entrepot;
 use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\PermissionTypes;
 use App\Constants\EntrepotApi\Sandbox;
+use App\Constants\EntrepotApi\ZoomLevels;
 use App\Controller\ApiControllerInterface;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
@@ -169,5 +170,24 @@ class ServiceController extends AbstractController implements ApiControllerInter
         ];
 
         $this->datastoreApiService->addPermission($datastoreId, $permissionRequestBody);
+    }
+
+    /**
+     * @param array<mixed> $pyramid
+     *
+     * @return array
+     */
+    protected function getPyramidZoomLevels(array $pyramid)
+    {
+        if (!isset($pyramid['type_infos']) || !isset($pyramid['type_infos']['levels'])) {
+            return ['bottom_level' => strval(ZoomLevels::BOTTOM_LEVEL_DEFAULT), 'top_level' => strval(ZoomLevels::TOP_LEVEL_DEFAULT)];
+        }
+
+        $levels = $pyramid['type_infos']['levels'];
+        usort($levels, function (string $a, string $b) {
+            return intval($a) - intval($b);
+        });
+
+        return ['bottom_level' => end($levels), 'top_level' => reset($levels)];
     }
 }

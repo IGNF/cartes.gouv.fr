@@ -2,12 +2,14 @@ import { startReactDsfr } from "@codegouvfr/react-dsfr/spa";
 import { disableReactDevTools } from "@fvilers/disable-react-devtools";
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { mountStoreDevtool } from "simple-zustand-devtools";
+// import { mountStoreDevtool } from "simple-zustand-devtools";
 
 import App from "./App";
-import { useApiEspaceCoStore } from "./stores/ApiEspaceCoStore";
-import { useAuthStore } from "./stores/AuthStore";
-import { useSnackbarStore } from "./stores/SnackbarStore";
+// import { useApiEspaceCoStore } from "./stores/ApiEspaceCoStore";
+// import { useAuthStore } from "./stores/AuthStore";
+// import { useSnackbarStore } from "./stores/SnackbarStore";
+
+import "ol/ol.css";
 
 // en prod
 if ((document.getElementById("root") as HTMLDivElement)?.dataset?.appEnv?.toLowerCase() === "prod") {
@@ -15,9 +17,9 @@ if ((document.getElementById("root") as HTMLDivElement)?.dataset?.appEnv?.toLowe
 }
 // en dev/qualif
 else {
-    mountStoreDevtool("AuthStore", useAuthStore);
-    mountStoreDevtool("ApiEspaceCoStore", useApiEspaceCoStore);
-    mountStoreDevtool("SnackbarStore", useSnackbarStore);
+    // mountStoreDevtool("AuthStore", useAuthStore);
+    // mountStoreDevtool("ApiEspaceCoStore", useApiEspaceCoStore);
+    // mountStoreDevtool("SnackbarStore", useSnackbarStore);
 }
 
 startReactDsfr({ defaultColorScheme: "light" });

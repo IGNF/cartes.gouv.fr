@@ -6,7 +6,8 @@ import { CommunityMembersFrTranslations } from "../../entrepot/pages/communities
 import { DashboardProFrTranslations } from "../../entrepot/pages/dashboard/DashboardPro";
 import { DatasheetListFrTranslations } from "../../entrepot/pages/datasheet/DatasheetList/DatasheetList";
 import { DatasheetUploadFormFrTranslations } from "../../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadForm";
-import { PyramidListItemFrTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidList/PyramidListItem";
+import { PyramidVectorListItemFrTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidVectorList/PyramidVectorListItem";
+import { PyramidRasterListItemFrTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidRasterList/PyramidRasterListItem";
 import { VectorDbListItemFrTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasetListTab/VectorDbList/VectorDbListItem";
 import { DatasheetViewFrTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasheetView";
 import { DatastorePermissionsFrTranslations } from "../../entrepot/pages/datastore/ManagePermissions/DatastorePermissionsTr";
@@ -35,6 +36,9 @@ import { RightsFrTranslations } from "../Rights";
 import { StyleFrTranslations } from "../Style";
 import type { Translations } from "../i18n";
 import { LoginDisabledFrTranslations } from "../../pages/LoginDisabled";
+import { PyramidRasterGenerateFormFrTranslations } from "../../entrepot/pages/service/wms-raster-wmts/PyramidRasterGenerateForm";
+import { PyramidRasterWmsRasterServiceFormFrTranslations } from "../../entrepot/pages/service/wms-raster-wmts/PyramidRasterWmsRasterServiceForm";
+import { PyramidRasterWmtsServiceFormFrTranslations } from "../../entrepot/pages/service/wms-raster-wmts/PyramidRasterWmtsServiceForm";
 
 export const translations: Translations<"fr"> = {
     Common: commonFrTranslations,
@@ -56,7 +60,8 @@ export const translations: Translations<"fr"> = {
     navItems: navItemsFrTranslations,
     datastoreNavItems: datastoreNavItemsFrTranslations,
     VectorDbListItem: VectorDbListItemFrTranslations,
-    PyramidListItem: PyramidListItemFrTranslations,
+    PyramidVectorListItem: PyramidVectorListItemFrTranslations,
+    PyramidRasterListItem: PyramidRasterListItemFrTranslations,
     DatasheetView: DatasheetViewFrTranslations,
     SldStyleValidationErrors: SldStyleValidationErrorsFrTranslations,
     mapboxStyleValidation: mapboxStyleValidationFrTranslations,
@@ -68,6 +73,9 @@ export const translations: Translations<"fr"> = {
     TableSelection: TableSelectionFrTranslations,
     UploadStyleFile: UploadStyleFileFrTranslations,
     PyramidVectorTmsServiceForm: PyramidVectorTmsServiceFormFrTranslations,
+    PyramidRasterGenerateForm: PyramidRasterGenerateFormFrTranslations,
+    PyramidRasterWmsRasterServiceForm: PyramidRasterWmsRasterServiceFormFrTranslations,
+    PyramidRasterWmtsServiceForm: PyramidRasterWmtsServiceFormFrTranslations,
     EspaceCoCommunities: EspaceCoCommunitiesFrTranslations,
     DatasheetUploadForm: DatasheetUploadFormFrTranslations,
     DatasheetList: DatasheetListFrTranslations,
