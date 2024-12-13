@@ -1,3 +1,7 @@
+networks:
+    web_dev:
+        external: true
+
 services:
     php:
         image: ${IMAGES_PREFIX:-}app-php
@@ -5,7 +9,8 @@ services:
         env_file:
             - .env.local
         environment:
-            SERVER_NAME: ${SERVER_NAME:-localhost}, php:80
+            # SERVER_NAME: ${SERVER_NAME:-localhost}, php:80
+            SERVER_NAME: "cartesgouvfr-dev.docker.localhost"
             # MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
             # MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
             # Run "composer require symfony/orm-pack" to install and configure Doctrine ORM
@@ -37,6 +42,13 @@ services:
             - target: 443
               published: ${HTTP3_PORT:-443}
               protocol: udp
+        # networks:
+        #     - web_dev
+        # labels:
+        #     - "traefik.enable=true"
+        #     - "traefik.http.routers.cartesgouvfr.rule=Host(`cartesgouvfr-dev.docker.localhost`)"
+        #     - "traefik.http.routers.cartesgouvfr.entrypoints=websecure"
+        #     - "traefik.http.services.cartesgouvfr.loadbalancer.server.port=80"
 
 # Mercure is installed as a Caddy module, prevent the Flex recipe from installing another service
 ###> symfony/mercure-bundle ###
