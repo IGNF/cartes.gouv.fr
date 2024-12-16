@@ -18,8 +18,8 @@ npx swagger-typescript-api@latest -p <chemin/vers/fichier/openapi> -o assets/@ty
 
 ## Corrections manuelles à faire
 
--   Supprimer les références circulaires
--   `StoredDataDetailsDto` :
+- Supprimer les références circulaires
+- `StoredDataDetailsDto` :
 
 remplacer
 
@@ -48,4 +48,4 @@ export type StoredDataDetailsDto = StoredDataRok4PyramidRasterDetailsDto &
     StoredDataIndexDetailsDto;
 ```
 
--   `ConfigurationDetailResponseDtoStatusEnum` : supprimer `ConfigurationResponseDtoStatusEnum` et ne garder que `ConfigurationDetailResponseDtoStatusEnum`
+- `ConfigurationDetailResponseDtoStatusEnum` : supprimer `ConfigurationResponseDtoStatusEnum` et ne garder que `ConfigurationDetailResponseDtoStatusEnum`
