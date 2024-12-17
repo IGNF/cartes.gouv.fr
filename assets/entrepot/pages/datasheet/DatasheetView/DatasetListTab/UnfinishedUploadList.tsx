@@ -5,6 +5,7 @@ import { symToStr } from "tsafe/symToStr";
 
 import { routes } from "../../../../../router/router";
 import { Upload } from "../../../../../@types/app";
+import ReportStatusBadge from "../../../stored_data/StoredDataDetails/ReportTab/ReportStatusBadge";
 
 type UnfinishedUploadListProps = {
     datastoreId: string;
@@ -23,7 +24,10 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
             {uploadList?.map((upload) => (
                 <div key={upload._id} className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mt-2v")}>
                     <div className={fr.cx("fr-col")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>{upload.name}</div>
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
+                            {upload.name}
+                            <ReportStatusBadge status="FAILURE" className={fr.cx("fr-ml-2w")} />
+                        </div>
                     </div>
 
                     <div className={fr.cx("fr-col")}>
