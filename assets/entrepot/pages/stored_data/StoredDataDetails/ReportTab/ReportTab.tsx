@@ -3,7 +3,7 @@ import Accordion from "@codegouvfr/react-dsfr/Accordion";
 import { UseQueryResult } from "@tanstack/react-query";
 import { FC } from "react";
 
-import { StoredDataReport as ReportTab } from "../../../../../@types/app";
+import { DeliveryReport, StoredDataReport as ReportTab } from "../../../../../@types/app";
 import { CheckingExecutionDetailResponseDtoStatusEnum, ProcessingExecutionDetailResponseDtoStatusEnum } from "../../../../../@types/entrepot";
 import { CartesApiException } from "../../../../../modules/jsonFetch";
 import { niceBytes } from "../../../../../utils";
@@ -14,7 +14,7 @@ import UploadFileTree from "./UploadFileTree";
 
 type ReportTabProps = {
     datastoreName?: string;
-    reportQuery: UseQueryResult<ReportTab, CartesApiException>;
+    reportQuery: UseQueryResult<ReportTab | DeliveryReport, CartesApiException>;
 };
 
 const ReportTab: FC<ReportTabProps> = ({ datastoreName, reportQuery }) => {
@@ -65,24 +65,25 @@ const ReportTab: FC<ReportTabProps> = ({ datastoreName, reportQuery }) => {
                     ))}
                 </Accordion>
 
-                {reportQuery?.data.processing_executions.map((procExec) => (
-                    <Accordion
-                        key={procExec._id}
-                        titleAs="h3"
-                        label={
-                            <>
-                                <p>{`${step++}. Traitement : ${procExec.processing.name}`}</p>
-                                <ReportStatusBadge status={procExec.status} className={fr.cx("fr-ml-2w")} />
-                            </>
-                        }
-                        defaultExpanded={[
-                            ProcessingExecutionDetailResponseDtoStatusEnum.FAILURE,
-                            ProcessingExecutionDetailResponseDtoStatusEnum.ABORTED,
-                        ].includes(procExec.status)}
-                    >
-                        <ProcessingExecutionReport datastoreName={datastoreName} processingExecution={procExec} />
-                    </Accordion>
-                ))}
+                {"processing_executions" in reportQuery.data &&
+                    reportQuery?.data.processing_executions.map((procExec) => (
+                        <Accordion
+                            key={procExec._id}
+                            titleAs="h3"
+                            label={
+                                <>
+                                    <p>{`${step++}. Traitement : ${procExec.processing.name}`}</p>
+                                    <ReportStatusBadge status={procExec.status} className={fr.cx("fr-ml-2w")} />
+                                </>
+                            }
+                            defaultExpanded={[
+                                ProcessingExecutionDetailResponseDtoStatusEnum.FAILURE,
+                                ProcessingExecutionDetailResponseDtoStatusEnum.ABORTED,
+                            ].includes(procExec.status)}
+                        >
+                            <ProcessingExecutionReport datastoreName={datastoreName} processingExecution={procExec} />
+                        </Accordion>
+                    ))}
             </>
         )
     );

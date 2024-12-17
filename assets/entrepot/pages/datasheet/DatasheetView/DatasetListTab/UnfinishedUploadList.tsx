@@ -28,8 +28,11 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
 
                     <div className={fr.cx("fr-col")}>
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-grid-row--middle")}>
-                            <Button linkProps={routes.datastore_datasheet_upload_integration({ datastoreId, uploadId: upload._id }).link}>
-                                {"Reprendre l’intégration"}
+                            <Button className={fr.cx("fr-mr-2w")} linkProps={routes.datastore_delivery_details({ datastoreId, uploadDataId: upload._id }).link}>
+                                {"Voir le rapport"}
+                            </Button>
+                            <Button iconId="fr-icon-delete-fill" priority="secondary">
+                                {"Supprimer"}
                             </Button>
                         </div>
                     </div>

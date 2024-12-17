@@ -259,6 +259,13 @@ export type StoredDataReport = {
     processing_executions: StoredDataReportProcessingExecution[];
 };
 
+export type DeliveryReport = {
+    input_upload: Upload & {
+        file_tree: UploadTree;
+        checks: CheckDetailed[];
+    };
+};
+
 export type StoredDataReportProcessingExecution = ProcessingExecution & {
     output: ProcessingExecutionOutputStoredDataDto;
     logs?: CheckOrProcessingExecutionLogs;
