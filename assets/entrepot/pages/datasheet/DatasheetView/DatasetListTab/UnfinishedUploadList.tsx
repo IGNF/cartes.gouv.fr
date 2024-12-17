@@ -28,7 +28,12 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
 
                     <div className={fr.cx("fr-col")}>
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-grid-row--middle")}>
-                            <Button className={fr.cx("fr-mr-2w")} linkProps={routes.datastore_delivery_details({ datastoreId, uploadDataId: upload._id }).link}>
+                            <Button
+                                className={fr.cx("fr-mr-2w")}
+                                linkProps={
+                                    routes.datastore_delivery_details({ datastoreId, uploadDataId: upload._id, datasheetName: upload.tags.datasheet_name }).link
+                                }
+                            >
                                 {"Voir le rapport"}
                             </Button>
                             <Button iconId="fr-icon-delete-fill" priority="secondary">

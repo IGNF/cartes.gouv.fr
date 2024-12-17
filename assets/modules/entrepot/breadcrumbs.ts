@@ -161,6 +161,21 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): Brea
                 });
             }
             return { ...defaultProps, currentPageLabel: t("datastore_stored_data_details") };
+        case "datastore_delivery_details":
+            defaultProps.segments = [
+                ...defaultProps.segments,
+                ...[
+                    { label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link },
+                    { label: datastore?.name, linkProps: routes.datasheet_list({ datastoreId: route.params.datastoreId }).link },
+                ],
+            ];
+            if ("datasheetName" in route.params && route.params.datasheetName) {
+                defaultProps.segments.push({
+                    label: route.params.datasheetName,
+                    linkProps: routes.datastore_datasheet_view({ datastoreId: route.params.datastoreId, datasheetName: route.params.datasheetName }).link,
+                });
+            }
+            return { ...defaultProps, currentPageLabel: t("datastore_delivery_details") };
 
         case "datastore_wfs_service_new":
         case "datastore_wfs_service_edit":

@@ -60,15 +60,15 @@ const DeliveryDetails: FC<DeliveryDetailsProps> = ({ datastoreId, uploadDataId }
                     {reportQuery.isLoading && <LoadingIcon className={fr.cx("fr-ml-2v")} largeIcon={true} />}
                 </h1>
             </div>
-
-            <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-4w")}>
-                {reportQuery.isError && <Alert severity="error" closable title={reportQuery.error.message} onClose={reportQuery.refetch} />}
-            </div>
             {reportQuery?.data?.input_upload?.name && (
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-4w")}>
                     <h2>{reportQuery?.data?.input_upload?.name}</h2>
                 </div>
             )}
+
+            <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-4w")}>
+                {reportQuery.isError && <Alert severity="error" closable title={reportQuery.error.message} onClose={reportQuery.refetch} />}
+            </div>
 
             {reportQuery.data && (
                 <div className={fr.cx("fr-grid-row")}>

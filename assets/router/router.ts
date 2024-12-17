@@ -145,6 +145,7 @@ const routeDefs = {
         {
             datastoreId: param.path.string,
             uploadDataId: param.path.string,
+            datasheetName: param.query.optional.string,
         },
         (p) => `${appRoot}/entrepot/${p.datastoreId}/donnees/${p.uploadDataId}/rapport`
     ),

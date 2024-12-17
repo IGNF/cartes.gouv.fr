@@ -32,6 +32,7 @@ export const { i18n } = declareComponentKeys<
     | "upload"
     | "datastore_datasheet_upload_integration"
     | "datastore_stored_data_details"
+    | "datastore_delivery_details"
     | "datastore_wfs_service_new"
     | "datastore_wfs_service_edit"
     | "datastore_wms_vector_service_new"
@@ -74,6 +75,7 @@ export const BreadcrumbFrTranslations: Translations<"fr">["Breadcrumb"] = {
     upload: "Téléversement",
     datastore_datasheet_upload_integration: "Intégration de données",
     datastore_stored_data_details: "Détails d'une donnée stockée",
+    datastore_delivery_details: "Détails d'une livraison",
     datastore_wfs_service_new: "Création d'un service WFS",
     datastore_wfs_service_edit: "Modification d'un service WFS",
     datastore_wms_vector_service_new: "Création d'un service WMS",
@@ -116,6 +118,7 @@ export const BreadcrumbEnTranslations: Translations<"en">["Breadcrumb"] = {
     upload: "Upload",
     datastore_datasheet_upload_integration: "Data integration",
     datastore_stored_data_details: "Details of stored data",
+    datastore_delivery_details: "Details of delivery",
     datastore_wfs_service_new: "Create a WFS service",
     datastore_wfs_service_edit: "Modify WFS service",
     datastore_wms_vector_service_new: "Create a WMS service",
