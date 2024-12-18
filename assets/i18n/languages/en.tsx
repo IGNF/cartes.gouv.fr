@@ -34,7 +34,7 @@ import { EspaceCoCommunitiesEnTranslations } from "../../espaceco/pages/communit
 import { TMSStyleFilesManagerEnTranslations } from "../../modules/Style/TMSStyleFilesManager/TMSStyleFilesManager.locale";
 import { BreadcrumbEnTranslations } from "../../modules/entrepot/breadcrumbs/Breadcrumb.locale";
 import { LoginDisabledEnTranslations } from "../../pages/LoginDisabled/LoginDisabled.locale";
-import { contactEnTranslations } from "../../pages/assistance/contact/Contact.locale";
+import { ContactEnTranslations } from "../../pages/assistance/contact/Contact.locale";
 import { mapboxStyleValidationEnTranslations } from "../../validations/mapbox/MapboxStyleValidator.locale";
 import { SldStyleValidationErrorsEnTranslations } from "../../validations/sld/SldStyleValidation.locale";
 import { commonEnTranslations } from "../Common.locale";
@@ -55,7 +55,7 @@ export const translations: Translations<"en"> = {
     Permissions: PermissionsEnTranslations,
     ValidationMetadatas: ValidationMetadatasEnTranslations,
     MetadatasForm: MetadatasFormEnTranslations,
-    Contact: contactEnTranslations,
+    Contact: ContactEnTranslations,
     AccessesRequest: AccessesRequestEnTranslations,
     navItems: navItemsEnTranslations,
     datastoreNavItems: datastoreNavItemsEnTranslations,
