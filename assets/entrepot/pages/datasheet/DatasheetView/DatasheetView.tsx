@@ -31,6 +31,11 @@ const deleteDataConfirmModal = createModal({
     isOpenedByDefault: false,
 });
 
+export const deleteDeliveryConfirmModal = createModal({
+    id: "delete-delivery-confirm-modal",
+    isOpenedByDefault: false,
+});
+
 export enum DatasheetViewActiveTabEnum {
     Metadata = "metadata",
     Dataset = "dataset",
@@ -258,6 +263,26 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                             {/* TODO : pyramides tuiles vectorielles, raster, métadonnées etc... */}
                         </ul>
                     </deleteDataConfirmModal.Component>,
+                    document.body
+                )}
+                {createPortal(
+                    <deleteDeliveryConfirmModal.Component
+                        title={`Voulez-vous supprimer la fiche de données ${datasheetName} ?`}
+                        buttons={[
+                            {
+                                children: tCommon("no"),
+                                doClosesModal: true,
+                                priority: "secondary",
+                            },
+                            {
+                                children: tCommon("yes"),
+                                onClick: () => datasheetDeleteMutation.mutate(),
+                                priority: "primary",
+                            },
+                        ]}
+                    >
+                        <strong>En supprimant cette livraison, la fiche de données {datasheetName} sera supprimée.</strong>
+                    </deleteDeliveryConfirmModal.Component>,
                     document.body
                 )}
             </>
