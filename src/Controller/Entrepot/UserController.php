@@ -34,11 +34,11 @@ class UserController extends AbstractController implements ApiControllerInterfac
         /** @var User */
         $user = $this->getUser();
 
-        // $apiUserInfo = $this->userApiService->getMe();
+        $apiUserInfo = $this->userApiService->getMe();
 
-        // if (array_key_exists('communities_member', $apiUserInfo)) {
-        //     $user->setCommunitiesMember($apiUserInfo['communities_member']);
-        // }
+        if (array_key_exists('communities_member', $apiUserInfo)) {
+            $user->setCommunitiesMember($apiUserInfo['communities_member']);
+        }
 
         return $this->json($user);
     }
