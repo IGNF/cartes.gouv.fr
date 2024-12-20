@@ -37,7 +37,12 @@ const routeDefs = {
     service_status: defineRoute(`${appRoot}/niveau-de-service`),
     login_disabled: defineRoute(`${appRoot}/connexion-desactivee`),
 
-    // NOTE : routes protégées
+    newsletter_subscribe: defineRoute(`${appRoot}/inscription-a-la-lettre`),
+    newsletter_confirm_email: defineRoute(`${appRoot}/inscription-a-la-lettre/confirmez-votre-inscription`),
+    newsletter_success: defineRoute(`${appRoot}/inscription-a-la-lettre/confirmation`),
+    newsletter_error: defineRoute(`${appRoot}/inscription-a-la-lettre/erreur`),
+
+    // routes protégées
     // utilisateur
     my_account: defineRoute(`${appRoot}/mon-compte`),
     my_access_keys: defineRoute(`${appRoot}/mes-cles`),
@@ -298,4 +303,8 @@ export const publicRoutes: typeof knownRoutes = [
     "terms_of_service",
     "service_status",
     "login_disabled",
+    "newsletter_subscribe",
+    "newsletter_confirm_email",
+    "newsletter_success",
+    "newsletter_error",
 ];
