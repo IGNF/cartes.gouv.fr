@@ -1,6 +1,6 @@
 # Utilisation des fichiers statiques
 
-Il s'agit d'une [entité](./entities.md) de l'API qui représente des fichiers de configuration utilisés par l'Entrepôt en arrière plan lors des différents traitements.
+Il s'agit d'une [entité](https://geoplateforme.github.io/entrepot/production/concepts/) de l'API qui représente des fichiers de configuration utilisés par l'Entrepôt en arrière plan lors des différents traitements.
 
 Cette entité `static` a seulement une propriété `name`, pas de `tags` ni de `labels`. Donc, afin de pouvoir lier ces fichiers statiques à d'autres entités pour notre usage, nous allons se contenter d'utiliser une nomination particulière.
 

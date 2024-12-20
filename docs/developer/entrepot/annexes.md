@@ -1,6 +1,6 @@
 # Utilisation des fichiers annexes
 
-Il s'agit d'une [entité](./entities.md) de l'API qui représente des fichiers librement déposés et utilisés par les utilisateurs de l'API Entrepôt.
+Il s'agit d'une [entité](https://geoplateforme.github.io/entrepot/production/concepts/) de l'API qui représente des fichiers librement déposés et utilisés par les utilisateurs de l'API Entrepôt.
 
 ## un ensemble de fichiers de style associés à une configuration
 
@@ -16,7 +16,19 @@ Syntaxe du path :
 
 Structure de cet annexe json :
 
--   `SLD` ou `QML` pour une configuration du type `WFS`
+```ts
+export type Styles = {
+    name: string;
+    current?: boolean;
+    layers: {
+        name?: string;
+        annexe_id: string;
+        url: string;
+    }[];
+}[];
+```
+
+- `SLD` ou `QML` pour une configuration du type `WFS`
 
 ```json
 [
@@ -45,7 +57,7 @@ Structure de cet annexe json :
 
 > Il y a un fichier de style SLD par table. Donc pour chaque table il y a un annexe qui contient le style. Et cette structure json globale répertorie tous les styles associés à une configuration WFS.
 
--   `Mapbox` pour une configuration du type `WMTS-TMS`
+- `Mapbox` pour une configuration du type `WMTS-TMS` (pyramide de tuiles vectorielles)
 
 ```json
 [
@@ -64,5 +76,49 @@ Structure de cet annexe json :
         "name": "nom du style 2",
         "layers": ["..."]
     }
+]
+```
+
+## un ensemble de documents liés à une fiche de donnée
+
+Syntaxe du path :
+
+```
+/documents/[datasheet_name]/styles.json
+```
+
+| variable         | description               |        |
+| ---------------- | ------------------------- | ------ |
+| `datasheet_name` | nom de la fiche de donnée | string |
+
+Structure de cet annexe json :
+
+```ts
+export type DatasheetDocument = {
+    type: "link" | "file";
+    url: string;
+    name: string;
+    description?: string;
+    id: string;
+};
+```
+
+```json
+[
+    {
+        "type": "link",
+        "name": "test lien",
+        "description": "test lien desc",
+        "id": "uuid généré automatiquement par cartes.gouv.fr",
+        "url": "https://ign.fr"
+    },
+    {
+        "type": "file",
+        "name": "projet qgis",
+        "description": "un projet qgis",
+        "id": "identifiant de l'annexe",
+        "url": "url complète de l'annexe"
+    }
+    ...
 ]
 ```
