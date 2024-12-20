@@ -42,8 +42,12 @@ export type CartesUser = {
     last_name?: string | null;
     roles: string[];
     communities_member: CommunityMemberDto[];
-    account_creation_date: string;
-    last_api_call_date: string;
+    account_creation_date?: string;
+    last_login_date?: string;
+    documents_quota?: number;
+    documents_use?: number;
+    keys_quota?: number;
+    keys_use?: number;
 };
 
 /** datastore */

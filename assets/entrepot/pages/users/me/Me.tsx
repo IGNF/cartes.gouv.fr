@@ -28,7 +28,7 @@ const Me = () => {
                     <p>{t("lastname", { lastName: user?.last_name ?? "" })}</p>
                     <p>{t("username", { userName: user?.user_name ?? "" })}</p>
                     <p>{t("email", { email: user.email })}</p>
-                    <p>{t("registration_date", { date: formatDateFromISO(user.account_creation_date) })}</p>
+                    {user.account_creation_date !== undefined && <p>{t("registration_date", { date: formatDateFromISO(user.account_creation_date) })}</p>}
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-6v")}>
                         {t("id", { id: user.id })}
                         <Button
