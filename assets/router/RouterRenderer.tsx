@@ -43,7 +43,7 @@ const DatasheetUploadIntegrationPage = lazy(() => import("../entrepot/pages/data
 const DatasheetView = lazy(() => import("../entrepot/pages/datasheet/DatasheetView/DatasheetView/DatasheetView"));
 
 const StoredDataDetails = lazy(() => import("../entrepot/pages/data_details/StoredDataDetails"));
-const UploadReport = lazy(() => import("../entrepot/pages/data_details/UploadDetails"));
+const UploadDetails = lazy(() => import("../entrepot/pages/data_details/UploadDetails"));
 
 const DatastoreCreationForm = lazy(() => import("../entrepot/pages/datastore/DatastoreCreationForm"));
 const Confirm = lazy(() => import("../entrepot/pages/datastore/Confirmation"));
