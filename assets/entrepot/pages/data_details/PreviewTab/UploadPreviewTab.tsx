@@ -2,15 +2,15 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Accordion from "@codegouvfr/react-dsfr/Accordion";
 import { FC } from "react";
 
-import { DeliveryReport } from "../../../../../@types/app";
-import { niceBytes } from "../../../../../utils";
+import { UploadReport } from "../../../../@types/app";
+import { niceBytes } from "../../../../utils";
 import ReportStatusBadge from "../ReportTab/ReportStatusBadge";
 
-type DeliveryPreviewTabProps = {
-    reportData: DeliveryReport;
+type UploadPreviewTabProps = {
+    reportData: UploadReport;
 };
 
-const DeliveryPreviewTab: FC<DeliveryPreviewTabProps> = ({ reportData }) => {
+const UploadPreviewTab: FC<UploadPreviewTabProps> = ({ reportData }) => {
     const uploadData = reportData.input_upload;
 
     return (
@@ -39,4 +39,4 @@ const DeliveryPreviewTab: FC<DeliveryPreviewTabProps> = ({ reportData }) => {
     );
 };
 
-export default DeliveryPreviewTab;
+export default UploadPreviewTab;

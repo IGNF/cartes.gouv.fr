@@ -3,10 +3,10 @@ import Accordion from "@codegouvfr/react-dsfr/Accordion";
 import { UseQueryResult } from "@tanstack/react-query";
 import { FC } from "react";
 
-import { DeliveryReport, StoredDataReport as ReportTab } from "../../../../../@types/app";
-import { CheckingExecutionDetailResponseDtoStatusEnum, ProcessingExecutionDetailResponseDtoStatusEnum } from "../../../../../@types/entrepot";
-import { CartesApiException } from "../../../../../modules/jsonFetch";
-import { niceBytes } from "../../../../../utils";
+import { UploadReport, StoredDataReport as ReportTab } from "../../../../@types/app";
+import { CheckingExecutionDetailResponseDtoStatusEnum, ProcessingExecutionDetailResponseDtoStatusEnum } from "../../../../@types/entrepot";
+import { CartesApiException } from "../../../../modules/jsonFetch";
+import { niceBytes } from "../../../../utils";
 import ProcessingExecutionReport from "./ProcessingExecutionReport";
 import ReportStatusBadge from "./ReportStatusBadge";
 import UploadCheckExecutionReport from "./UploadCheckExecutionReport";
@@ -14,7 +14,7 @@ import UploadFileTree from "./UploadFileTree";
 
 type ReportTabProps = {
     datastoreName?: string;
-    reportQuery: UseQueryResult<ReportTab | DeliveryReport, CartesApiException>;
+    reportQuery: UseQueryResult<ReportTab | UploadReport, CartesApiException>;
 };
 
 const ReportTab: FC<ReportTabProps> = ({ datastoreName, reportQuery }) => {

@@ -161,7 +161,7 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): Brea
                 });
             }
             return { ...defaultProps, currentPageLabel: t("datastore_stored_data_details") };
-        case "datastore_delivery_details":
+        case "datastore_upload_details":
             defaultProps.segments = [
                 ...defaultProps.segments,
                 ...[
@@ -175,7 +175,7 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): Brea
                     linkProps: routes.datastore_datasheet_view({ datastoreId: route.params.datastoreId, datasheetName: route.params.datasheetName }).link,
                 });
             }
-            return { ...defaultProps, currentPageLabel: t("datastore_delivery_details") };
+            return { ...defaultProps, currentPageLabel: t("datastore_upload_details") };
 
         case "datastore_wfs_service_new":
         case "datastore_wfs_service_edit":

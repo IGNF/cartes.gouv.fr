@@ -39,12 +39,7 @@ const DatasetListTab: FC<DataListTabProps> = ({ datastoreId, datasheet }) => {
             {unfinishedUploads && unfinishedUploads.length > 0 && (
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--center", "fr-grid-row--middle")}>
                     <div className={fr.cx("fr-col")}>
-                        <UnfinishedUploadList
-                            datastoreId={datastoreId}
-                            uploadList={unfinishedUploads}
-                            nbPublications={datasheet.nb_publications}
-                            datasheet={datasheet}
-                        />
+                        <UnfinishedUploadList datastoreId={datastoreId} uploadList={unfinishedUploads} nbPublications={datasheet.nb_publications} />
                     </div>
                 </div>
             )}

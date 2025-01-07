@@ -4,12 +4,12 @@ import Table from "@codegouvfr/react-dsfr/Table";
 import { UseQueryResult, useQuery } from "@tanstack/react-query";
 import { FC, Fragment, useMemo } from "react";
 
-import { Pyramid, StoredDataTypeEnum, VectorDb } from "../../../../../@types/app";
-import ExtentMap from "../../../../../components/Utils/ExtentMap";
-import RQKeys from "../../../../../modules/entrepot/RQKeys";
-import { CartesApiException } from "../../../../../modules/jsonFetch";
-import { niceBytes } from "../../../../../utils";
-import api from "../../../../api";
+import { Pyramid, StoredDataTypeEnum, VectorDb } from "../../../../@types/app";
+import ExtentMap from "../../../../components/Utils/ExtentMap";
+import RQKeys from "../../../../modules/entrepot/RQKeys";
+import { CartesApiException } from "../../../../modules/jsonFetch";
+import { niceBytes } from "../../../../utils";
+import api from "../../../api";
 import ReportStatusBadge from "../ReportTab/ReportStatusBadge";
 import ReportTab from "../ReportTab/ReportTab";
 

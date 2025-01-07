@@ -309,8 +309,8 @@ class UploadController extends AbstractController implements ApiControllerInterf
         }
     }
 
-    #[Route('/{uploadId}/delivery-report', name: 'get_delivery_report', methods: ['GET'])]
-    public function getDeliveryReport(string $datastoreId, string $uploadId): JsonResponse
+    #[Route('/{uploadId}/upload-report', name: 'get_upload_report', methods: ['GET'])]
+    public function getUploadReport(string $datastoreId, string $uploadId): JsonResponse
     {
         try {
             // Récupération des détails de l'upload ayant échoué

@@ -141,7 +141,7 @@ const routeDefs = {
         },
         (p) => `${appRoot}/entrepot/${p.datastoreId}/donnees/${p.storedDataId}/details`
     ),
-    datastore_delivery_details: defineRoute(
+    datastore_upload_details: defineRoute(
         {
             datastoreId: param.path.string,
             uploadDataId: param.path.string,

@@ -42,8 +42,8 @@ const DatasheetUploadForm = lazy(() => import("../entrepot/pages/datasheet/Datas
 const DatasheetUploadIntegrationPage = lazy(() => import("../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadIntegration/DatasheetUploadIntegrationPage"));
 const DatasheetView = lazy(() => import("../entrepot/pages/datasheet/DatasheetView/DatasheetView"));
 
-const StoredDataDetails = lazy(() => import("../entrepot/pages/stored_data/StoredDataDetails/StoredDataDetails"));
-const DeliveryReport = lazy(() => import("../entrepot/pages/stored_data/StoredDataDetails/DeliveryDetails"));
+const StoredDataDetails = lazy(() => import("../entrepot/pages/data_details/StoredDataDetails"));
+const UploadReport = lazy(() => import("../entrepot/pages/data_details/UploadDetails"));
 
 const DatastoreCreationForm = lazy(() => import("../entrepot/pages/datastore/DatastoreCreationForm"));
 const Confirm = lazy(() => import("../entrepot/pages/datastore/Confirmation"));
@@ -158,8 +158,8 @@ const RouterRenderer: FC = () => {
                 return <DatasheetView datastoreId={route.params.datastoreId} datasheetName={route.params.datasheetName} />;
             case "datastore_stored_data_details":
                 return <StoredDataDetails datastoreId={route.params.datastoreId} storedDataId={route.params.storedDataId} />;
-            case "datastore_delivery_details":
-                return <DeliveryReport datastoreId={route.params.datastoreId} uploadDataId={route.params.uploadDataId} />;
+            case "datastore_upload_details":
+                return <UploadReport datastoreId={route.params.datastoreId} uploadDataId={route.params.uploadDataId} />;
             case "datastore_wfs_service_new":
                 return <WfsServiceForm datastoreId={route.params.datastoreId} vectorDbId={route.params.vectorDbId} />;
             case "datastore_wfs_service_edit":

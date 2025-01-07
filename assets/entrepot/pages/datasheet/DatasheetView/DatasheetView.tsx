@@ -31,8 +31,8 @@ const deleteDataConfirmModal = createModal({
     isOpenedByDefault: false,
 });
 
-export const deleteDeliveryConfirmModal = createModal({
-    id: "delete-delivery-confirm-modal",
+export const deleteUploadConfirmModal = createModal({
+    id: "delete-upload-confirm-modal",
     isOpenedByDefault: false,
 });
 
@@ -266,7 +266,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                     document.body
                 )}
                 {createPortal(
-                    <deleteDeliveryConfirmModal.Component
+                    <deleteUploadConfirmModal.Component
                         title={`Voulez-vous supprimer la fiche de données ${datasheetName} ?`}
                         buttons={[
                             {
@@ -282,7 +282,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                         ]}
                     >
                         <strong>En supprimant cette livraison, la fiche de données {datasheetName} sera supprimée.</strong>
-                    </deleteDeliveryConfirmModal.Component>,
+                    </deleteUploadConfirmModal.Component>,
                     document.body
                 )}
             </>

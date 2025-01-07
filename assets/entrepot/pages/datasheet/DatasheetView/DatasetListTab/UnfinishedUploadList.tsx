@@ -6,11 +6,10 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import api from "../../../../api";
-import { type DatasheetDetailed } from "../../../../../@types/app";
 import { routes } from "../../../../../router/router";
 import { Upload } from "../../../../../@types/app";
-import ReportStatusBadge from "../../../stored_data/StoredDataDetails/ReportTab/ReportStatusBadge";
-import { deleteDeliveryConfirmModal } from "../DatasheetView";
+import ReportStatusBadge from "../../../data_details/ReportTab/ReportStatusBadge";
+import { deleteUploadConfirmModal } from "../DatasheetView";
 import Wait from "../../../../../components/Utils/Wait";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import { useTranslation } from "../../../../../i18n/i18n";
@@ -19,10 +18,9 @@ type UnfinishedUploadListProps = {
     datastoreId: string;
     uploadList?: Upload[];
     nbPublications: number;
-    datasheet: DatasheetDetailed;
 };
 
-const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uploadList, nbPublications, datasheet }) => {
+const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uploadList, nbPublications }) => {
     const { t } = useTranslation("DatastoreManageStorage");
 
     const queryClient = useQueryClient();
@@ -34,10 +32,9 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
     const deleteUnfinishedUpload = useMutation({
         mutationFn: (uploadId: string) => api.upload.remove(datastoreId, uploadId),
         onSuccess(uploadId) {
-            queryClient.setQueryData(RQKeys.datastore_datasheet(datastoreId, datasheet.name), (datasheet: { upload_list: Upload[] }) => {
+            queryClient.setQueryData(RQKeys.datastore_upload_list(datastoreId), (uploadList: Upload[]) => {
                 return {
-                    ...datasheet,
-                    upload_list: datasheet.upload_list.filter((upload) => upload._id !== uploadId),
+                    uploadList: uploadList.filter((upload) => upload._id !== uploadId),
                 };
             });
         },
@@ -73,56 +70,39 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
                         <div className={fr.cx("fr-col")}>
                             <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-grid-row--middle")}>
                                 {failureCase ? (
-                                    <>
-                                        <Button
-                                            className={fr.cx("fr-mr-2w")}
-                                            linkProps={
-                                                routes.datastore_delivery_details({
-                                                    datastoreId,
-                                                    uploadDataId: upload._id,
-                                                    datasheetName: upload.tags.datasheet_name,
-                                                }).link
-                                            }
-                                        >
-                                            {"Voir le rapport"}
-                                        </Button>
-                                        <Button
-                                            iconId="fr-icon-delete-fill"
-                                            priority="secondary"
-                                            onClick={() => {
-                                                if (isLastUpload(uploadList)) {
-                                                    deleteDeliveryConfirmModal.open();
-                                                } else {
-                                                    deleteUnfinishedUpload.mutate(upload._id);
-                                                }
-                                            }}
-                                        >
-                                            {"Supprimer"}
-                                        </Button>
-                                    </>
+                                    <Button
+                                        className={fr.cx("fr-mr-2w")}
+                                        linkProps={
+                                            routes.datastore_upload_details({
+                                                datastoreId,
+                                                uploadDataId: upload._id,
+                                                datasheetName: upload.tags.datasheet_name,
+                                            }).link
+                                        }
+                                    >
+                                        {"Voir le rapport"}
+                                    </Button>
                                 ) : (
-                                    <>
-                                        <Button
-                                            className={fr.cx("fr-mr-2w")}
-                                            linkProps={routes.datastore_datasheet_upload_integration({ datastoreId, uploadId: upload._id }).link}
-                                        >
-                                            {"Reprendre l'intégration"}
-                                        </Button>
-                                        <Button
-                                            iconId="fr-icon-delete-fill"
-                                            priority="secondary"
-                                            onClick={() => {
-                                                if (isLastUpload(uploadList)) {
-                                                    deleteDeliveryConfirmModal.open();
-                                                } else {
-                                                    deleteUnfinishedUpload.mutate(upload._id);
-                                                }
-                                            }}
-                                        >
-                                            {"Supprimer"}
-                                        </Button>
-                                    </>
+                                    <Button
+                                        className={fr.cx("fr-mr-2w")}
+                                        linkProps={routes.datastore_datasheet_upload_integration({ datastoreId, uploadId: upload._id }).link}
+                                    >
+                                        {"Reprendre l'intégration"}
+                                    </Button>
                                 )}
+                                <Button
+                                    iconId="fr-icon-delete-fill"
+                                    priority="secondary"
+                                    onClick={() => {
+                                        if (isLastUpload(uploadList)) {
+                                            deleteUploadConfirmModal.open();
+                                        } else {
+                                            deleteUnfinishedUpload.mutate(upload._id);
+                                        }
+                                    }}
+                                >
+                                    {"Supprimer"}
+                                </Button>
                             </div>
                         </div>
                     </div>

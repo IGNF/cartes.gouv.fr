@@ -5,37 +5,38 @@ import Tabs from "@codegouvfr/react-dsfr/Tabs";
 import { useQuery } from "@tanstack/react-query";
 import { FC, useMemo } from "react";
 
-import { Datastore } from "../../../../@types/app";
-import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
-import LoadingIcon from "../../../../components/Utils/LoadingIcon";
-import RQKeys from "../../../../modules/entrepot/RQKeys";
-import { CartesApiException } from "../../../../modules/jsonFetch";
-import { routes } from "../../../../router/router";
-import api from "../../../api";
-import PreviewTab from "./PreviewTab/PreviewTab";
+import { UploadReport } from "../../../@types/app";
+import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
+import LoadingIcon from "../../../components/Utils/LoadingIcon";
+import RQKeys from "../../../modules/entrepot/RQKeys";
+import { CartesApiException } from "../../../modules/jsonFetch";
+import { routes } from "../../../router/router";
+import api from "../../api";
+import UploadPreviewTab from "./PreviewTab/UploadPreviewTab";
 import ReportTab from "./ReportTab/ReportTab";
 
-type StoredDataDetailsProps = {
+type UploadDetailsProps = {
     datastoreId: string;
-    storedDataId: string;
+    uploadDataId: string;
 };
-const StoredDataDetails: FC<StoredDataDetailsProps> = ({ datastoreId, storedDataId }) => {
-    const datastoreQuery = useQuery<Datastore, CartesApiException>({
+
+const UploadDetails: FC<UploadDetailsProps> = ({ datastoreId, uploadDataId }) => {
+    const datastoreQuery = useQuery({
         queryKey: RQKeys.datastore(datastoreId),
         queryFn: ({ signal }) => api.datastore.get(datastoreId, { signal }),
         staleTime: 3600000,
     });
 
-    const reportQuery = useQuery<ReportTab, CartesApiException>({
-        queryKey: RQKeys.datastore_stored_data_report(datastoreId, storedDataId),
-        queryFn: ({ signal }) => api.storedData.getReportData(datastoreId, storedDataId, { signal }),
+    const reportQuery = useQuery<UploadReport, CartesApiException>({
+        queryKey: RQKeys.datastore_upload_report(datastoreId, uploadDataId),
+        queryFn: ({ signal }) => api.upload.getUploadReport(datastoreId, uploadDataId, { signal }),
         staleTime: 3600000,
     });
 
-    const datasheetName = useMemo(() => reportQuery?.data?.stored_data?.tags?.datasheet_name, [reportQuery?.data?.stored_data?.tags?.datasheet_name]);
+    const datasheetName = useMemo(() => reportQuery?.data?.input_upload?.tags?.datasheet_name, [reportQuery?.data?.input_upload?.tags?.datasheet_name]);
 
     return (
-        <DatastoreLayout datastoreId={datastoreId} documentTitle={`Détails de donnée stockée ${reportQuery?.data?.stored_data?.name ?? ""}`}>
+        <DatastoreLayout datastoreId={datastoreId} documentTitle={`Rapport de livraison ${reportQuery?.data?.input_upload?.name ?? ""}`}>
             <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
                 {datasheetName ? (
                     <Button
@@ -55,13 +56,13 @@ const StoredDataDetails: FC<StoredDataDetailsProps> = ({ datastoreId, storedData
                     />
                 )}
                 <h1 className={fr.cx("fr-m-0")}>
-                    {"Détails de donnée stockée"}
+                    {"Rapport de livraison"}
                     {reportQuery.isLoading && <LoadingIcon className={fr.cx("fr-ml-2v")} largeIcon={true} />}
                 </h1>
             </div>
-            {reportQuery?.data?.stored_data?.name && (
+            {reportQuery?.data?.input_upload?.name && (
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-4w")}>
-                    <h2>{reportQuery?.data?.stored_data?.name}</h2>
+                    <h2>{reportQuery?.data?.input_upload?.name}</h2>
                 </div>
             )}
 
@@ -76,7 +77,7 @@ const StoredDataDetails: FC<StoredDataDetailsProps> = ({ datastoreId, storedData
                             tabs={[
                                 {
                                     label: "Aperçu de la donnée",
-                                    content: <PreviewTab datastoreId={datastoreId} reportQuery={reportQuery} />,
+                                    content: <UploadPreviewTab reportData={reportQuery.data} />,
                                 },
                                 {
                                     label: "Rapport de génération",
@@ -91,4 +92,4 @@ const StoredDataDetails: FC<StoredDataDetailsProps> = ({ datastoreId, storedData
     );
 };
 
-export default StoredDataDetails;
+export default UploadDetails;
