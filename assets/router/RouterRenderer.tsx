@@ -24,10 +24,10 @@ const Accessibility = lazy(() => import("../pages/footer/Accessibility"));
 const LegalNotice = lazy(() => import("../pages/footer/LegalNotice"));
 const PersonalData = lazy(() => import("../pages/footer/PersonalData"));
 const TermsOfService = lazy(() => import("../pages/footer/TermsOfService"));
-const LoginDisabled = lazy(() => import("../pages/LoginDisabled"));
+const LoginDisabled = lazy(() => import("../pages/LoginDisabled/LoginDisabled"));
 
-const Me = lazy(() => import("../entrepot/pages/users/Me"));
-const MyAccessKeys = lazy(() => import("../entrepot/pages/users/MyAccessKeys"));
+const Me = lazy(() => import("../entrepot/pages/users/me/Me"));
+const MyAccessKeys = lazy(() => import("../entrepot/pages/users/access-keys/MyAccessKeys"));
 const UserKeyForm = lazy(() => import("../entrepot/pages/users/keys/UserKeyForm"));
 
 const DatastoreManageStorage = lazy(() => import("../entrepot/pages/datastore/ManageStorage/DatastoreManageStorage"));
@@ -40,7 +40,7 @@ const DatasheetList = lazy(() => import("../entrepot/pages/datasheet/DatasheetLi
 
 const DatasheetUploadForm = lazy(() => import("../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadForm"));
 const DatasheetUploadIntegrationPage = lazy(() => import("../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadIntegration/DatasheetUploadIntegrationPage"));
-const DatasheetView = lazy(() => import("../entrepot/pages/datasheet/DatasheetView/DatasheetView"));
+const DatasheetView = lazy(() => import("../entrepot/pages/datasheet/DatasheetView/DatasheetView/DatasheetView"));
 
 const StoredDataDetails = lazy(() => import("../entrepot/pages/data_details/StoredDataDetails"));
 const UploadReport = lazy(() => import("../entrepot/pages/data_details/UploadDetails"));
@@ -48,17 +48,22 @@ const UploadReport = lazy(() => import("../entrepot/pages/data_details/UploadDet
 const DatastoreCreationForm = lazy(() => import("../entrepot/pages/datastore/DatastoreCreationForm"));
 const Confirm = lazy(() => import("../entrepot/pages/datastore/Confirmation"));
 
-const CommunityMembers = lazy(() => import("../entrepot/pages/communities/CommunityMembers"));
+const CommunityMembers = lazy(() => import("../entrepot/pages/communities/CommunityMembers/CommunityMembers"));
 const CommunityList = lazy(() => import("../entrepot/pages/communities/CommunityList"));
 
 const WfsServiceForm = lazy(() => import("../entrepot/pages/service/wfs/WfsServiceForm"));
 const WmsVectorServiceForm = lazy(() => import("../entrepot/pages/service/wms-vector/WmsVectorServiceForm"));
 const PyramidVectorGenerateForm = lazy(() => import("../entrepot/pages/service/tms/PyramidVectorGenerateForm"));
-const PyramidVectorTmsServiceForm = lazy(() => import("../entrepot/pages/service/tms/PyramidVectorTmsServiceForm"));
+const PyramidVectorTmsServiceForm = lazy(() => import("../entrepot/pages/service/tms/PyramidVectorTmsServiceForm/PyramidVectorTmsServiceForm"));
+const PyramidRasterGenerateForm = lazy(() => import("../entrepot/pages/service/wms-raster-wmts/PyramidRasterGenerateForm/PyramidRasterGenerateForm"));
+const PyramidRasterWmsRasterServiceForm = lazy(
+    () => import("../entrepot/pages/service/wms-raster-wmts/PyramidRasterWmsRasterServiceForm/PyramidRasterWmsRasterServiceForm")
+);
+const PyramidRasterWmtsServiceForm = lazy(() => import("../entrepot/pages/service/wms-raster-wmts/PyramidRasterWmtsServiceForm/PyramidRasterWmtsServiceForm"));
 
 const ServiceView = lazy(() => import("../entrepot/pages/service/view/ServiceView"));
 
-const AccessesRequest = lazy(() => import("../entrepot/pages/AccessesRequest"));
+const AccessesRequest = lazy(() => import("../entrepot/pages/accesses-request/AccessesRequest"));
 
 const EspaceCoCommunityList = lazy(() => import("../espaceco/pages/communities/Communities"));
 
@@ -82,6 +87,8 @@ const RouterRenderer: FC = () => {
         switch (route.name) {
             case "home":
                 return <Home />;
+            case "page_not_found":
+                return <PageNotFound />;
             case "about":
                 return <About />;
             case "documentation":
@@ -185,6 +192,48 @@ const RouterRenderer: FC = () => {
                     <PyramidVectorTmsServiceForm
                         datastoreId={route.params.datastoreId}
                         pyramidId={route.params.pyramidId}
+                        offeringId={route.params.offeringId}
+                    />
+                );
+            case "datastore_pyramid_raster_generate":
+                return (
+                    <PyramidRasterGenerateForm
+                        datastoreId={route.params.datastoreId}
+                        offeringId={route.params.offeringId}
+                        datasheetName={route.params.datasheetName}
+                    />
+                );
+            case "datastore_pyramid_raster_wms_raster_service_new":
+                return (
+                    <PyramidRasterWmsRasterServiceForm
+                        datastoreId={route.params.datastoreId}
+                        pyramidId={route.params.pyramidId}
+                        datasheetName={route.params.datasheetName}
+                    />
+                );
+            case "datastore_pyramid_raster_wms_raster_service_edit":
+                return (
+                    <PyramidRasterWmsRasterServiceForm
+                        datastoreId={route.params.datastoreId}
+                        pyramidId={route.params.pyramidId}
+                        datasheetName={route.params.datasheetName}
+                        offeringId={route.params.offeringId}
+                    />
+                );
+            case "datastore_pyramid_raster_wmts_service_new":
+                return (
+                    <PyramidRasterWmtsServiceForm
+                        datastoreId={route.params.datastoreId}
+                        pyramidId={route.params.pyramidId}
+                        datasheetName={route.params.datasheetName}
+                    />
+                );
+            case "datastore_pyramid_raster_wmts_service_edit":
+                return (
+                    <PyramidRasterWmtsServiceForm
+                        datastoreId={route.params.datastoreId}
+                        pyramidId={route.params.pyramidId}
+                        datasheetName={route.params.datasheetName}
                         offeringId={route.params.offeringId}
                     />
                 );

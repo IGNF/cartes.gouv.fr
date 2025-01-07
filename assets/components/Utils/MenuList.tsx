@@ -29,7 +29,7 @@ type MenuListItem = MenuListItemCommon &
 
 type MenuListProps = {
     menuOpenButtonProps?: Omit<ButtonProps, "linkProps" | "onClick" | "type" | "disabled">;
-    items: MenuListItem[];
+    items: (MenuListItem | undefined | false)[];
     disabled?: boolean;
 };
 
@@ -47,6 +47,8 @@ const MenuList: FC<MenuListProps> = ({ menuOpenButtonProps, items = [], disabled
     const handleClose = () => {
         setAnchorEl(null);
     };
+
+    const _items: MenuListItem[] = useMemo(() => items.filter((item) => item !== undefined && item !== false), [items]);
 
     // props du bouton ouvrir menu
     const _menuOpenBtnProps = useMemo<ButtonProps>(() => {
@@ -66,7 +68,7 @@ const MenuList: FC<MenuListProps> = ({ menuOpenButtonProps, items = [], disabled
         return _props;
     }, [menuOpenButtonProps, disabled, isMenuOpen, otherActionsBtnId, otherActionsMenuId]);
 
-    const atLeastOneIcon = useMemo<boolean>(() => items.filter((item) => item.iconId !== undefined).length > 0, [items]);
+    const atLeastOneIcon = useMemo<boolean>(() => _items.filter((item) => item.iconId !== undefined).length > 0, [_items]);
 
     return (
         <>
@@ -91,7 +93,7 @@ const MenuList: FC<MenuListProps> = ({ menuOpenButtonProps, items = [], disabled
                     }}
                 >
                     {disabled === false &&
-                        items.map((item, i) => {
+                        _items.map((item, i) => {
                             const itemContent = (
                                 <MenuItem
                                     key={i}

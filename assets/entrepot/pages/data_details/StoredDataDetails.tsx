@@ -3,9 +3,9 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Tabs from "@codegouvfr/react-dsfr/Tabs";
 import { useQuery } from "@tanstack/react-query";
-import { FC, useMemo } from "react";
+import { FC, useEffect, useMemo, useState } from "react";
 
-import { Datastore } from "../../../@types/app";
+import { Datastore, StoredDataStatusEnum } from "../../../@types/app";
 import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
 import LoadingIcon from "../../../components/Utils/LoadingIcon";
 import RQKeys from "../../../modules/entrepot/RQKeys";
@@ -20,6 +20,8 @@ type StoredDataDetailsProps = {
     storedDataId: string;
 };
 const StoredDataDetails: FC<StoredDataDetailsProps> = ({ datastoreId, storedDataId }) => {
+    const [reportQueryEnabled, setReportQueryEnabled] = useState(true);
+
     const datastoreQuery = useQuery<Datastore, CartesApiException>({
         queryKey: RQKeys.datastore(datastoreId),
         queryFn: ({ signal }) => api.datastore.get(datastoreId, { signal }),
@@ -29,8 +31,18 @@ const StoredDataDetails: FC<StoredDataDetailsProps> = ({ datastoreId, storedData
     const reportQuery = useQuery<ReportTab, CartesApiException>({
         queryKey: RQKeys.datastore_stored_data_report(datastoreId, storedDataId),
         queryFn: ({ signal }) => api.storedData.getReportData(datastoreId, storedDataId, { signal }),
-        staleTime: 3600000,
+        refetchInterval: 30000,
+        enabled: reportQueryEnabled,
     });
+
+    useEffect(() => {
+        if (
+            reportQuery.data?.stored_data.status !== undefined &&
+            [StoredDataStatusEnum.DELETED, StoredDataStatusEnum.GENERATED, StoredDataStatusEnum.UNSTABLE].includes(reportQuery.data?.stored_data.status)
+        ) {
+            setReportQueryEnabled(false);
+        }
+    }, [reportQuery.data?.stored_data.status]);
 
     const datasheetName = useMemo(() => reportQuery?.data?.stored_data?.tags?.datasheet_name, [reportQuery?.data?.stored_data?.tags?.datasheet_name]);
 
@@ -81,6 +93,7 @@ const StoredDataDetails: FC<StoredDataDetailsProps> = ({ datastoreId, storedData
                                 {
                                     label: "Rapport de génération",
                                     content: <ReportTab datastoreName={datastoreQuery.data?.name} reportQuery={reportQuery} />,
+                                    isDefault: true,
                                 },
                             ]}
                         />

@@ -1,40 +1,44 @@
-import { datastoreNavItemsEnTranslations } from "../../config/datastoreNavItems";
-import { navItemsEnTranslations } from "../../config/navItems";
-import { AccessesRequestEnTranslations } from "../../entrepot/pages/AccessesRequest";
-import { AddMemberEnTranslations } from "../../entrepot/pages/communities/AddMember";
-import { CommunityMembersEnTranslations } from "../../entrepot/pages/communities/CommunityMembers";
-import { contactEnTranslations } from "../../pages/assistance/contact/Contact";
-import { DashboardProEnTranslations } from "../../entrepot/pages/dashboard/DashboardPro";
-import { DatasheetListEnTranslations } from "../../entrepot/pages/datasheet/DatasheetList/DatasheetList";
-import { PyramidListItemFrTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidList/PyramidListItem";
-import { VectorDbListItemEnTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasetListTab/VectorDbList/VectorDbListItem";
-import { DatasheetViewEnTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasheetView";
-import { DatastorePermissionsEnTranslations } from "../../entrepot/pages/datastore/ManagePermissions/DatastorePermissionsTr";
-import { DatastoreManageStorageEnTranslations } from "../../entrepot/pages/datastore/ManageStorage/DatastoreManageStorage";
-import { AccessRestrictionsEnTranslations } from "../../entrepot/pages/service/AccessRestrictions";
-import { TableSelectionEnTranslations } from "../../entrepot/pages/service/TableSelection";
-import { MetadatasFormEnTranslations } from "../../entrepot/pages/service/metadatas/metadatas-form-tr";
-import { ValidationMetadatasEnTranslations } from "../../entrepot/pages/service/metadatas/metadatas-validation-tr";
-import { PyramidVectorTmsServiceFormEnTranslations } from "../../entrepot/pages/service/tms/PyramidVectorTmsServiceForm";
-import { WfsServiceFormEnTranslations } from "../../entrepot/pages/service/wfs/WfsServiceForm";
-import { UploadStyleFileEnTranslations } from "../../entrepot/pages/service/wms-vector/UploadStyleFile";
-import { WmsVectorServiceFormEnTranslations } from "../../entrepot/pages/service/wms-vector/WmsVectorServiceForm";
-import { MeEnTranslations } from "../../entrepot/pages/users/Me";
-import { MyAccessKeysEnTranslations } from "../../entrepot/pages/users/MyAccessKeys";
-import { UserKeyEnTranslations } from "../../entrepot/pages/users/keys/UserKeyTr";
-import { UserKeysListTabEnTranslations } from "../../entrepot/pages/users/keys/UserKeysListTab";
-import { PermissionsEnTranslations } from "../../entrepot/pages/users/permissions/PermissionsTr";
-import { EspaceCoCommunitiesEnTranslations } from "../../espaceco/pages/communities/EspaceCoCommunitiesTr";
-import { TMSStyleFilesManagerEnTranslations } from "../../modules/Style/TMSStyleFilesManager";
-import { mapboxStyleValidationEnTranslations } from "../../validations/MapboxStyleValidator";
-import { SldStyleValidationErrorsEnTranslations } from "../../validations/SldStyleValidationErrorsTr";
-import { commonEnTranslations } from "../Common";
-import { BreadcrumbEnTranslations } from "../Breadcrumb";
-import { RightsEnTranslations } from "../Rights";
-import { StyleEnTranslations } from "../Style";
-import type { Translations } from "../i18n";
-import { DatasheetUploadFormEnTranslations } from "../../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadForm";
-import { LoginDisabledEnTranslations } from "../../pages/LoginDisabled";
+import { datastoreNavItemsEnTranslations } from "../../config/navItems/datastoreNavItems.locale";
+import { navItemsEnTranslations } from "../../config/navItems/navItems.locale";
+import { AccessesRequestEnTranslations } from "../../entrepot/pages/accesses-request/AccessesRequest.locale";
+import { AddMemberEnTranslations } from "../../entrepot/pages/communities/AddMember/AddMember.locale";
+import { CommunityMembersEnTranslations } from "../../entrepot/pages/communities/CommunityMembers/CommunityMembers.locale";
+import { RightsEnTranslations } from "../../entrepot/pages/communities/Rights.locale";
+import { DashboardProEnTranslations } from "../../entrepot/pages/dashboard/DashboardPro.locale";
+import { DatasheetListEnTranslations } from "../../entrepot/pages/datasheet/DatasheetList/DatasheetList.locale";
+import { DatasheetUploadFormEnTranslations } from "../../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadForm.locale";
+import { PyramidRasterListEnTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidRasterList/PyramidRasterList.locale";
+import { PyramidVectorListEnTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidVectorList/PyramidVectorList.locale";
+import { VectorDbListEnTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasetListTab/VectorDbList/VectorDbList.locale";
+import { DatasheetViewEnTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasheetView/DatasheetView.locale";
+import { DatastorePermissionsEnTranslations } from "../../entrepot/pages/datastore/ManagePermissions/DatastorePermissions.locale";
+import { DatastoreManageStorageEnTranslations } from "../../entrepot/pages/datastore/ManageStorage/DatastoreManageStorage.locale";
+import { AccessRestrictionsEnTranslations } from "../../entrepot/pages/service/common/AccessRestrictions/AccessRestrictions.locale";
+import { TableSelectionEnTranslations } from "../../entrepot/pages/service/common/TableSelection/TableSelection.locale";
+import { MetadatasFormEnTranslations } from "../../entrepot/pages/service/metadata/MetadataForm.locale";
+import { ValidationMetadatasEnTranslations } from "../../entrepot/pages/service/metadata/MetadataValidation.locale";
+import { PyramidVectorTmsServiceFormEnTranslations } from "../../entrepot/pages/service/tms/PyramidVectorTmsServiceForm/PyramidVectorTmsServiceForm.locale";
+import { StyleEnTranslations } from "../../entrepot/pages/service/view/Style/Style.locale";
+import { WfsServiceFormEnTranslations } from "../../entrepot/pages/service/wfs/WfsServiceForm.locale";
+import { PyramidRasterGenerateFormEnTranslations } from "../../entrepot/pages/service/wms-raster-wmts/PyramidRasterGenerateForm/PyramidRasterGenerateForm.locale";
+import { PyramidRasterWmsRasterServiceFormEnTranslations } from "../../entrepot/pages/service/wms-raster-wmts/PyramidRasterWmsRasterServiceForm/PyramidRasterWmsRasterServiceForm.locale";
+import { PyramidRasterWmtsServiceFormEnTranslations } from "../../entrepot/pages/service/wms-raster-wmts/PyramidRasterWmtsServiceForm/PyramidRasterWmtsServiceForm.locale";
+import { UploadStyleFileEnTranslations } from "../../entrepot/pages/service/wms-vector/UploadStyleFile.locale";
+import { WmsVectorServiceFormEnTranslations } from "../../entrepot/pages/service/wms-vector/WmsVectorServiceForm.locale";
+import { MyAccessKeysEnTranslations } from "../../entrepot/pages/users/access-keys/MyAccessKeys.locale";
+import { UserKeyEnTranslations } from "../../entrepot/pages/users/keys/UserKey.locale";
+import { UserKeysListTabEnTranslations } from "../../entrepot/pages/users/keys/UserKeysListTab/UserKeysListTab.locale";
+import { MeEnTranslations } from "../../entrepot/pages/users/me/Me.locale";
+import { PermissionsEnTranslations } from "../../entrepot/pages/users/permissions/Permissions.locale";
+import { EspaceCoCommunitiesEnTranslations } from "../../espaceco/pages/communities/EspaceCoCommunities.locale";
+import { TMSStyleFilesManagerEnTranslations } from "../../modules/Style/TMSStyleFilesManager/TMSStyleFilesManager.locale";
+import { BreadcrumbEnTranslations } from "../../modules/entrepot/breadcrumbs/Breadcrumb.locale";
+import { LoginDisabledEnTranslations } from "../../pages/LoginDisabled/LoginDisabled.locale";
+import { ContactEnTranslations } from "../../pages/assistance/contact/Contact.locale";
+import { mapboxStyleValidationEnTranslations } from "../../validations/mapbox/MapboxStyleValidator.locale";
+import { SldStyleValidationErrorsEnTranslations } from "../../validations/sld/SldStyleValidation.locale";
+import { commonEnTranslations } from "../Common.locale";
+import type { Translations } from "../types";
 
 export const translations: Translations<"en"> = {
     Common: commonEnTranslations,
@@ -51,12 +55,13 @@ export const translations: Translations<"en"> = {
     Permissions: PermissionsEnTranslations,
     ValidationMetadatas: ValidationMetadatasEnTranslations,
     MetadatasForm: MetadatasFormEnTranslations,
-    Contact: contactEnTranslations,
+    Contact: ContactEnTranslations,
     AccessesRequest: AccessesRequestEnTranslations,
     navItems: navItemsEnTranslations,
     datastoreNavItems: datastoreNavItemsEnTranslations,
-    VectorDbListItem: VectorDbListItemEnTranslations,
-    PyramidListItem: PyramidListItemFrTranslations,
+    VectorDbList: VectorDbListEnTranslations,
+    PyramidVectorList: PyramidVectorListEnTranslations,
+    PyramidRasterList: PyramidRasterListEnTranslations,
     DatasheetView: DatasheetViewEnTranslations,
     SldStyleValidationErrors: SldStyleValidationErrorsEnTranslations,
     mapboxStyleValidation: mapboxStyleValidationEnTranslations,
@@ -68,6 +73,9 @@ export const translations: Translations<"en"> = {
     TableSelection: TableSelectionEnTranslations,
     UploadStyleFile: UploadStyleFileEnTranslations,
     PyramidVectorTmsServiceForm: PyramidVectorTmsServiceFormEnTranslations,
+    PyramidRasterGenerateForm: PyramidRasterGenerateFormEnTranslations,
+    PyramidRasterWmsRasterServiceForm: PyramidRasterWmsRasterServiceFormEnTranslations,
+    PyramidRasterWmtsServiceForm: PyramidRasterWmtsServiceFormEnTranslations,
     EspaceCoCommunities: EspaceCoCommunitiesEnTranslations,
     DatasheetUploadForm: DatasheetUploadFormEnTranslations,
     DatasheetList: DatasheetListEnTranslations,

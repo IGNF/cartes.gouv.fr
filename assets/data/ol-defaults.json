@@ -1,10 +1,13 @@
 {
     "default_background_layer": "GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2",
-    "center": [2.35, 48.85],
+    "center": [
+        2.35,
+        48.85
+    ],
     "projection": "EPSG:3857",
     "zoom": 10,
     "zoom_levels": {
-        "TOP": 0,
+        "TOP": 1,
         "BOTTOM": 18
     }
 }

@@ -103,14 +103,12 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             'tags' => [
                 CommonTags::DATASHEET_NAME => $datasheetName,
             ],
-            // 'fields' => ['name', 'description', 'type', 'visibility', 'status', 'srs', 'contact', 'size', 'last_event', 'tags', 'bbox'],
         ]);
 
         $storedDataList = $this->storedDataApiService->getAllDetailed($datastoreId, [
             'tags' => [
                 CommonTags::DATASHEET_NAME => $datasheetName,
             ],
-            // 'fields' => ['name', 'description', 'type', 'visibility', 'status', 'srs', 'contact', 'size', 'last_event', 'tags', 'bbox'],
         ]);
 
         $vectorDbList = array_filter($storedDataList, function ($storedData) {
@@ -119,10 +117,16 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         $vectorDbList = array_values($vectorDbList);
 
         // Pyramid vector
-        $pyramidList = array_filter($storedDataList, function ($storedData) {
+        $pyramidVectorList = array_filter($storedDataList, function ($storedData) {
             return StoredDataTypes::ROK4_PYRAMID_VECTOR === $storedData['type'];
         });
-        $pyramidList = array_values($pyramidList);
+        $pyramidVectorList = array_values($pyramidVectorList);
+
+        // Pyramid raster
+        $pyramidRasterList = array_filter($storedDataList, function ($storedData) {
+            return StoredDataTypes::ROK4_PYRAMID_RASTER === $storedData['type'];
+        });
+        $pyramidRasterList = array_values($pyramidRasterList);
 
         $metadataList = $this->metadataApiService->getAll($datastoreId, [
             'tags' => [
@@ -130,7 +134,11 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             ],
         ]);
 
-        if (0 === count($uploadList) && 0 === count($vectorDbList) && 0 === count($pyramidList) && 0 === count($metadataList)) {
+        if (
+            0 === count($uploadList)
+            && 0 === count($storedDataList)
+            && 0 === count($metadataList)
+        ) {
             throw new CartesApiException("La fiche de donnée [$datasheetName] n'existe pas", Response::HTTP_NOT_FOUND);
         }
 
@@ -143,7 +151,8 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         return $this->json([
             ...$datasheet,
             'vector_db_list' => $vectorDbList,
-            'pyramid_list' => $pyramidList,
+            'pyramid_vector_list' => $pyramidVectorList,
+            'pyramid_raster_list' => $pyramidRasterList,
             'upload_list' => $uploadList,
             'service_list' => $services,
         ]);

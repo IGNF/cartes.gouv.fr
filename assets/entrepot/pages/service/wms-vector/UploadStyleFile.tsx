@@ -3,8 +3,8 @@ import { Upload } from "@codegouvfr/react-dsfr/Upload";
 import { FC } from "react";
 import { type UseFormReturn } from "react-hook-form";
 
-import { Translations, declareComponentKeys, useTranslation } from "../../../../i18n/i18n";
 import { type StoredDataRelation } from "../../../../@types/app";
+import { useTranslation } from "../../../../i18n/i18n";
 import { WmsVectorServiceFormValuesType } from "./WmsVectorServiceForm";
 
 type UploadStyleFileProps = {
@@ -46,17 +46,3 @@ const UploadStyleFile: FC<UploadStyleFileProps> = ({ visible, selectedTables = [
 };
 
 export default UploadStyleFile;
-
-export const { i18n } = declareComponentKeys<"title" | "file_input_hint">()({
-    UploadStyleFile,
-});
-
-export const UploadStyleFileFrTranslations: Translations<"fr">["UploadStyleFile"] = {
-    title: "Déposez vos fichiers de style SLD",
-    file_input_hint: "Glissez-déposez votre fichier SLD ici. Formats de fichiers autorisés : .sld",
-};
-
-export const UploadStyleFileEnTranslations: Translations<"en">["UploadStyleFile"] = {
-    title: undefined,
-    file_input_hint: undefined,
-};

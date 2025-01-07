@@ -23,7 +23,6 @@ const RangeSlider: FC<RangeSliderProps> = (props) => {
                     value: v,
                     label: v.toString(),
                 }))}
-                getAriaLabel={() => "Minimum distance"}
                 value={values}
                 onChange={(_, newValue) => {
                     if (!Array.isArray(newValue)) {

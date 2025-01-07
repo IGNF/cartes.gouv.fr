@@ -7,6 +7,7 @@ import { FC } from "react";
 import { createPortal } from "react-dom";
 import { symToStr } from "tsafe/symToStr";
 
+import { OfferingStatusEnum, OfferingTypeEnum, StoredDataTypeEnum, type Service } from "../../../../../@types/app";
 import OfferingStatusBadge from "../../../../../components/Utils/Badges/OfferingStatusBadge";
 import MenuList from "../../../../../components/Utils/MenuList";
 import Wait from "../../../../../components/Utils/Wait";
@@ -14,7 +15,6 @@ import useToggle from "../../../../../hooks/useToggle";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import { routes } from "../../../../../router/router";
 import { useSnackbarStore } from "../../../../../stores/SnackbarStore";
-import { OfferingStatusEnum, OfferingTypeEnum, type Service } from "../../../../../@types/app";
 import { formatDateFromISO, offeringTypeDisplayName } from "../../../../../utils";
 import api from "../../../../api";
 import ServiceDesc from "./ServiceDesc";
@@ -36,7 +36,7 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
 
     const unpublishServiceMutation = useMutation({
         mutationFn: (service: Service) => {
-            if (![OfferingTypeEnum.WFS, OfferingTypeEnum.WMSVECTOR, OfferingTypeEnum.WMTSTMS].includes(service.type)) {
+            if (![OfferingTypeEnum.WFS, OfferingTypeEnum.WMSVECTOR, OfferingTypeEnum.WMSRASTER, OfferingTypeEnum.WMTSTMS].includes(service.type)) {
                 console.warn(`Dépublication de service ${service.type} n'a pas encore été implémentée`);
                 return Promise.reject(`Dépublication de service ${service.type} n'a pas encore été implémentée`);
             }
@@ -105,12 +105,11 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                                             }
                                         },
                                     },
-                                    {
+                                    [OfferingTypeEnum.WFS, OfferingTypeEnum.WMTSTMS].includes(service.type) && {
                                         text: "Gérer les styles",
                                         iconId: "ri-flashlight-line",
                                         linkProps: routes.datastore_service_view({ datastoreId, datasheetName, offeringId: service._id, activeTab: "styles" })
                                             .link,
-                                        disabled: ![OfferingTypeEnum.WFS, OfferingTypeEnum.WMTSTMS].includes(service.type),
                                     },
                                     // {
                                     //     text: "Mettre à jour la légende",
@@ -123,7 +122,9 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                                         linkProps: routes.datastore_manage_permissions({ datastoreId }).link,
                                         disabled: service.open === true,
                                     },
-                                    {
+                                    [OfferingTypeEnum.WMSVECTOR, OfferingTypeEnum.WMSRASTER, OfferingTypeEnum.WFS, OfferingTypeEnum.WMTSTMS].includes(
+                                        service.type
+                                    ) && {
                                         text: "Modifier les informations de publication",
                                         iconId: "ri-edit-box-line",
                                         linkProps: (() => {
@@ -132,6 +133,14 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                                                     return routes.datastore_wms_vector_service_edit({
                                                         datastoreId,
                                                         vectorDbId: service.configuration.type_infos.used_data[0].stored_data,
+                                                        offeringId: service._id,
+                                                        datasheetName,
+                                                    }).link;
+
+                                                case OfferingTypeEnum.WMSRASTER:
+                                                    return routes.datastore_pyramid_raster_wms_raster_service_edit({
+                                                        datastoreId,
+                                                        pyramidId: service.configuration.type_infos.used_data[0].stored_data,
                                                         offeringId: service._id,
                                                         datasheetName,
                                                     }).link;
@@ -145,20 +154,35 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                                                     }).link;
 
                                                 case OfferingTypeEnum.WMTSTMS:
-                                                    return routes.datastore_pyramid_vector_tms_service_edit({
-                                                        datastoreId,
-                                                        pyramidId: service.configuration.type_infos.used_data[0].stored_data,
-                                                        offeringId: service._id,
-                                                        datasheetName,
-                                                    }).link;
+                                                    switch (service.configuration.pyramid?.type) {
+                                                        case StoredDataTypeEnum.ROK4PYRAMIDVECTOR:
+                                                            return routes.datastore_pyramid_vector_tms_service_edit({
+                                                                datastoreId,
+                                                                pyramidId: service.configuration.type_infos.used_data[0].stored_data,
+                                                                offeringId: service._id,
+                                                                datasheetName,
+                                                            }).link;
+                                                        case StoredDataTypeEnum.ROK4PYRAMIDRASTER:
+                                                            return routes.datastore_pyramid_raster_wmts_service_edit({
+                                                                datastoreId,
+                                                                pyramidId: service.configuration.type_infos.used_data[0].stored_data,
+                                                                offeringId: service._id,
+                                                                datasheetName,
+                                                            }).link;
+
+                                                        default:
+                                                            return routes.page_not_found().link;
+                                                    }
 
                                                 default:
-                                                    return {
-                                                        onClick: () => console.warn("Action non implémentée"),
-                                                    };
+                                                    return routes.page_not_found().link;
                                             }
                                         })(),
-                                        disabled: ![OfferingTypeEnum.WMSVECTOR, OfferingTypeEnum.WFS, OfferingTypeEnum.WMTSTMS].includes(service.type),
+                                    },
+                                    service.type === OfferingTypeEnum.WMSVECTOR && {
+                                        text: "Créer un service raster WMS/WMTS",
+                                        iconId: "ri-add-box-line",
+                                        linkProps: routes.datastore_pyramid_raster_generate({ datastoreId, offeringId: service._id, datasheetName }).link,
                                     },
                                     // NOTE : reporté cf. issue #249
                                     // {

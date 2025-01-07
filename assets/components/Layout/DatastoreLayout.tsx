@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { FC, PropsWithChildren, memo, useMemo } from "react";
 
 import { Datastore } from "../../@types/app";
-import { datastoreNavItems } from "../../config/datastoreNavItems";
+import { datastoreNavItems } from "../../config/navItems/datastoreNavItems";
 import api from "../../entrepot/api";
 import RQKeys from "../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../modules/jsonFetch";

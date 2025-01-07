@@ -9,7 +9,7 @@ import api from "../../../../api";
 import { routes } from "../../../../../router/router";
 import { Upload } from "../../../../../@types/app";
 import ReportStatusBadge from "../../../data_details/ReportTab/ReportStatusBadge";
-import { deleteUploadConfirmModal } from "../DatasheetView";
+import { deleteUploadConfirmModal } from "../DatasheetView/DatasheetView";
 import Wait from "../../../../../components/Utils/Wait";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import { useTranslation } from "../../../../../i18n/i18n";

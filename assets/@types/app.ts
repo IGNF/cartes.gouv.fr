@@ -42,8 +42,12 @@ export type CartesUser = {
     last_name?: string | null;
     roles: string[];
     communities_member: CommunityMemberDto[];
-    account_creation_date: string;
-    last_api_call_date: string;
+    account_creation_date?: string;
+    last_login_date?: string;
+    documents_quota?: number;
+    documents_use?: number;
+    keys_quota?: number;
+    keys_use?: number;
 };
 
 /** datastore */
@@ -83,7 +87,8 @@ export enum DatasheetDocumentTypeEnum {
 
 export type DatasheetDetailed = Datasheet & {
     vector_db_list: VectorDb[] | undefined;
-    pyramid_list: Pyramid[] | undefined;
+    pyramid_vector_list: PyramidVector[] | undefined;
+    pyramid_raster_list: PyramidRaster[] | undefined;
     upload_list: Upload[] | undefined;
     service_list: Service[] | undefined;
 };
@@ -108,7 +113,7 @@ export type VectorDb = StoredData & {
 };
 
 /** stored_data (donnée stockée) du type ROK4-PYRAMID-VECTOR */
-export type Pyramid = StoredData & {
+export type PyramidVector = StoredData & {
     type: StoredDataPrivateDetailResponseDtoTypeEnum.ROK4PYRAMIDVECTOR;
     tags: {
         datasheet_name?: string;
@@ -117,6 +122,18 @@ export type Pyramid = StoredData & {
         proc_int_id?: string;
         proc_pyr_creat_id?: string;
         is_sample?: "true" | "false";
+    };
+};
+
+/** stored_data (donnée stockée) du type ROK4-PYRAMID-VECTOR */
+export type PyramidRaster = StoredData & {
+    type: StoredDataPrivateDetailResponseDtoTypeEnum.ROK4PYRAMIDRASTER;
+    tags: {
+        datasheet_name?: string;
+        upload_id?: string;
+        proc_int_id?: string;
+        vectordb_id?: string;
+        proc_pyr_creat_id?: string;
     };
 };
 
@@ -180,7 +197,13 @@ export type TmsMetadata = {
 };
 
 /** configuration & offerings */
-export type Configuration = ConfigurationDetailResponseDto & { styles?: CartesStyle[] };
+export type Configuration = ConfigurationDetailResponseDto & {
+    styles?: CartesStyle[];
+    tags: {
+        datasheet_name?: string;
+    };
+    pyramid?: PyramidVector | PyramidRaster;
+};
 
 export type Offering = OfferingDetailResponseDto;
 export { OfferingStatusEnum } from "./entrepot";
