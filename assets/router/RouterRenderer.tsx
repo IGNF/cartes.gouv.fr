@@ -166,7 +166,7 @@ const RouterRenderer: FC = () => {
             case "datastore_stored_data_details":
                 return <StoredDataDetails datastoreId={route.params.datastoreId} storedDataId={route.params.storedDataId} />;
             case "datastore_upload_details":
-                return <UploadReport datastoreId={route.params.datastoreId} uploadDataId={route.params.uploadDataId} />;
+                return <UploadDetails datastoreId={route.params.datastoreId} uploadId={route.params.uploadId} />;
             case "datastore_wfs_service_new":
                 return <WfsServiceForm datastoreId={route.params.datastoreId} vectorDbId={route.params.vectorDbId} />;
             case "datastore_wfs_service_edit":
