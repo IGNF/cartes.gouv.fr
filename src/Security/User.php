@@ -35,7 +35,7 @@ class User implements UserInterface
         $this->userName = $keycloakUserInfo['preferred_username'];
 
         $this->accountCreationDate = new \DateTime($apiUserInfo['creation']);
-        // $this->lastApiCallDate = new \DateTime($apiUserInfo['last_call']);
+        $this->lastApiCallDate = new \DateTime($apiUserInfo['last_call']);
 
         if (array_key_exists('communities_member', $apiUserInfo)) {
             $this->communitiesMember = $apiUserInfo['communities_member'];
