@@ -8,5 +8,6 @@ Voici les liens de sa documentation en [production](https://geoplateforme.github
 - Utilisation des :
     - [tags](./tags.md)
     - [labels](./labels.md)
+    - [extra](./extra.md)
     - [annexes](./annexes.md)
     - [fichiers statiques](./statics.md)

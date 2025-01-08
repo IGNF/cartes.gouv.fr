@@ -17,7 +17,7 @@ Exemple : datasheet_name=Ma donnée
 
 ### fichier de style individuel (par ex. contenu du SLD, QML etc)
 
-Un fichier de style déposé via cartes.gouv.fr est stocké d'abord dans un annexe avant d'être référencé dans l'annexe "chapeau" décrit [ici](./annexes.md)
+Un fichier de style déposé via cartes.gouv.fr est stocké d'abord dans un annexe avant d'être référencé dans la propriété `extra` de la configuration décrite [ici](./extra.md)
 
 | label            | description               |        |
 | ---------------- | ------------------------- | ------ |
