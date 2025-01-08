@@ -205,6 +205,24 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
                 </div>
             )}
 
+            {integrationStatus === "at_least_one_failure" && uploadQuery.data?.tags.datasheet_name !== undefined && (
+                <div className={fr.cx("fr-grid-row")}>
+                    <ButtonsGroup
+                        buttons={[
+                            {
+                                children: "Consulter la fiche de données",
+                                linkProps: routes.datastore_datasheet_view({
+                                    datastoreId,
+                                    datasheetName: uploadQuery.data?.tags.datasheet_name,
+                                    activeTab: DatasheetViewActiveTabEnum.Dataset,
+                                }).link,
+                            },
+                        ]}
+                        inlineLayoutWhen="always"
+                    />
+                </div>
+            )}
+
             {integrationStatus === "at_least_one_failure" && uploadQuery.data?.tags?.vectordb_id !== undefined && (
                 <div className={fr.cx("fr-grid-row")}>
                     <ButtonsGroup

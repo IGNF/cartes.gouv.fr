@@ -1,7 +1,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { FC } from "react";
 
-import { CheckDetailed } from "../../../../../@types/app";
+import { CheckDetailed } from "../../../../@types/app";
 import Logs from "./Logs";
 
 type UploadCheckExecutionReportProps = {

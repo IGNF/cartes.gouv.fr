@@ -37,6 +37,11 @@ export enum DatasheetViewActiveTabEnum {
     Documents = "documents",
 }
 
+export const deleteUploadConfirmModal = createModal({
+    id: "delete-upload-confirm-modal",
+    isOpenedByDefault: false,
+});
+
 type DatasheetViewProps = {
     datastoreId: string;
     datasheetName: string;
@@ -260,6 +265,26 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                             {/* TODO : pyramides tuiles raster, documents etc... */}
                         </ul>
                     </deleteDataConfirmModal.Component>,
+                    document.body
+                )}
+                {createPortal(
+                    <deleteUploadConfirmModal.Component
+                        title={`Voulez-vous supprimer la fiche de données ${datasheetName} ?`}
+                        buttons={[
+                            {
+                                children: tCommon("no"),
+                                doClosesModal: true,
+                                priority: "secondary",
+                            },
+                            {
+                                children: tCommon("yes"),
+                                onClick: () => datasheetDeleteMutation.mutate(),
+                                priority: "primary",
+                            },
+                        ]}
+                    >
+                        <strong>En supprimant cette livraison, la fiche de données {datasheetName} sera supprimée.</strong>
+                    </deleteUploadConfirmModal.Component>,
                     document.body
                 )}
             </>

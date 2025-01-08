@@ -117,7 +117,7 @@ class PyramidVectorController extends ServiceController implements ApiController
     public function addTms(
         string $datastoreId,
         string $pyramidId,
-        #[MapRequestPayload] PublishPyramidDTO $dto
+        #[MapRequestPayload] PublishPyramidDTO $dto,
     ): JsonResponse {
         try {
             $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId);
@@ -172,7 +172,7 @@ class PyramidVectorController extends ServiceController implements ApiController
         string $datastoreId,
         string $pyramidId,
         string $offeringId,
-        #[MapRequestPayload] PublishPyramidDTO $dto
+        #[MapRequestPayload] PublishPyramidDTO $dto,
     ): JsonResponse {
         try {
             // récup config et offering existants

@@ -24,7 +24,7 @@ class AddPyramidDTO
          * @var CompositionDTO[]
          */
         #[Assert\Valid]
-        public readonly array $composition
+        public readonly array $composition,
     ) {
     }
 }

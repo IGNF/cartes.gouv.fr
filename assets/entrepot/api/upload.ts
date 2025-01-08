@@ -1,5 +1,6 @@
 import SymfonyRouting from "../../modules/Routing";
 import { jsonFetch } from "../../modules/jsonFetch";
+import { UploadReport } from "../../@types/app";
 import { Upload, UploadTree, UploadTypeEnum } from "../../@types/app";
 
 const getList = (datastoreId: string, type?: UploadTypeEnum, otherOptions: RequestInit = {}) => {
@@ -61,6 +62,13 @@ const remove = (datastoreId: string, uploadId: string) => {
     return jsonFetch<null>(url, { method: "DELETE" });
 };
 
+const getUploadReport = (datastoreId: string, uploadId: string, otherOptions: RequestInit = {}) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_upload_get_upload_report", { datastoreId, uploadId });
+    return jsonFetch<UploadReport>(url, {
+        ...otherOptions,
+    });
+};
+
 const upload = {
     getList,
     add,
@@ -69,6 +77,7 @@ const upload = {
     pingIntegrationProgress,
     getFileTree,
     remove,
+    getUploadReport,
 };
 
 export default upload;

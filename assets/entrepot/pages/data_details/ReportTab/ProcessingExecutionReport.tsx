@@ -1,7 +1,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { FC } from "react";
 
-import type { StoredDataReportProcessingExecution } from "../../../../../@types/app";
+import type { StoredDataReportProcessingExecution } from "../../../../@types/app";
 import Logs from "./Logs";
 
 type ProcessingExecutionReportProps = {

@@ -308,4 +308,33 @@ class UploadController extends AbstractController implements ApiControllerInterf
             throw new CartesApiException($ex->getMessage(), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
+    #[Route('/{uploadId}/upload-report', name: 'get_upload_report', methods: ['GET'])]
+    public function getUploadReport(string $datastoreId, string $uploadId): JsonResponse
+    {
+        try {
+            // Récupération des détails de l'upload ayant échoué
+            $inputUpload = $this->uploadApiService->get($datastoreId, $uploadId);
+            $inputUpload['file_tree'] = $this->uploadApiService->getFileTree($datastoreId, $inputUpload['_id']);
+            $inputUpload['checks'] = [];
+            $uploadChecks = $this->uploadApiService->getCheckExecutions($datastoreId, $inputUpload['_id']);
+
+            foreach ($uploadChecks as &$checkType) {
+                foreach ($checkType as &$checkExecution) {
+                    $checkExecution = array_merge($checkExecution, $this->uploadApiService->getCheckExecution($datastoreId, $checkExecution['_id']));
+                    try {
+                        $checkExecution['logs'] = $this->uploadApiService->getCheckExecutionLogs($datastoreId, $checkExecution['_id']);
+                    } catch (ApiException $ex) {
+                    }
+                    $inputUpload['checks'][] = $checkExecution;
+                }
+            }
+
+            return $this->json([
+                'input_upload' => $inputUpload,
+            ]);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
+        }
+    }
 }

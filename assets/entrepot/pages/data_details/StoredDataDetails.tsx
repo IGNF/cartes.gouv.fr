@@ -5,14 +5,14 @@ import Tabs from "@codegouvfr/react-dsfr/Tabs";
 import { useQuery } from "@tanstack/react-query";
 import { FC, useEffect, useMemo, useState } from "react";
 
-import { Datastore, StoredDataStatusEnum } from "../../../../@types/app";
-import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
-import LoadingIcon from "../../../../components/Utils/LoadingIcon";
-import RQKeys from "../../../../modules/entrepot/RQKeys";
-import { CartesApiException } from "../../../../modules/jsonFetch";
-import { routes } from "../../../../router/router";
-import api from "../../../api";
-import PreviewTab from "./PreviewTab/PreviewTab";
+import { Datastore, StoredDataStatusEnum } from "../../../@types/app";
+import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
+import LoadingIcon from "../../../components/Utils/LoadingIcon";
+import RQKeys from "../../../modules/entrepot/RQKeys";
+import { CartesApiException } from "../../../modules/jsonFetch";
+import { routes } from "../../../router/router";
+import api from "../../api";
+import PreviewTab from "./PreviewTab/StoredDataPreviewTab";
 import ReportTab from "./ReportTab/ReportTab";
 
 type StoredDataDetailsProps = {

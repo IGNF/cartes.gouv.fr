@@ -35,7 +35,7 @@ class CartesMetadataApiService
         private ConfigurationApiService $configurationApiService,
         private CswMetadataHelper $cswMetadataHelper,
         private CartesServiceApiService $cartesServiceApiService,
-        private StoredDataApiService $storedDataApiService
+        private StoredDataApiService $storedDataApiService,
     ) {
     }
 

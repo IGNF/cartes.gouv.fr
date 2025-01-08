@@ -120,7 +120,7 @@ class PyramidRasterController extends ServiceController implements ApiController
         string $datastoreId,
         string $pyramidId,
         #[MapQueryParameter] string $type,
-        Request $request
+        Request $request,
     ): JsonResponse {
         try {
             $acceptedTypes = [ConfigurationTypes::WMSRASTER, ConfigurationTypes::WMTSTMS];
@@ -190,7 +190,7 @@ class PyramidRasterController extends ServiceController implements ApiController
         string $pyramidId,
         string $offeringId,
         #[MapQueryParameter] string $type,
-        Request $request
+        Request $request,
     ): JsonResponse {
         try {
             $acceptedTypes = [ConfigurationTypes::WMSRASTER, ConfigurationTypes::WMTSTMS];

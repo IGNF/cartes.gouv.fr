@@ -33,7 +33,7 @@ class CompositionDTO
             'value <= this.bottom_level',
             message: 'pyramid_add.composition.level_error'
         )]
-        public readonly int $top_level
+        public readonly int $top_level,
     ) {
     }
 }
