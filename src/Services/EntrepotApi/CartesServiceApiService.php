@@ -62,7 +62,7 @@ class CartesServiceApiService
 
         $styles = [];
         if (OfferingTypes::WFS === $offering['type'] || OfferingTypes::WMTSTMS === $offering['type']) {
-            $styles = $this->getStyles($datastoreId, $offering['configuration']['_id']);
+            $styles = $this->getStyles($datastoreId, $offering['configuration']);
         }
         $offering['configuration']['styles'] = $styles;
 
@@ -73,23 +73,40 @@ class CartesServiceApiService
     }
 
     /**
-     * Recherche des styles et ajout de l'url.
-     * // NOTE Utilisation d'un annexe parce qu'un tag est limité à 99 caractères. Le champ "extra" pourrait être utilisé une fois implémenté dans l'API.
+     * Recherche des styles et ajout de l'url. Les styles sont désormais stockés dans extra. Cette fonction est prévue pour migrer les styles stockés dans les annexes vers extra.
+     *
+     * @param array<mixed> $configuration
      *
      * @return array<mixed>
      */
-    public function getStyles(string $datastoreId, string $configId): array
+    public function getStyles(string $datastoreId, array $configuration): array
     {
-        $path = "/configuration/$configId/styles.json";
-        $styleAnnexes = $this->annexeApiService->getAll($datastoreId, null, $path);
+        $styles = null;
 
-        $styles = [];
-        if (count($styleAnnexes)) {
-            $content = $this->annexeApiService->download($datastoreId, $styleAnnexes[0]['_id']);
-            $styles = json_decode($content, true);
+        // vérifier si styles est présent dans extra
+        if (isset($configuration['extra']['styles'])) {
+            $styles = $configuration['extra']['styles'];
         }
 
-        return $styles;
+        // vérifier si styles est présent dans une annexe
+        $path = "/configuration/{$configuration['_id']}/styles.json";
+        $styleAnnexes = $this->annexeApiService->getAll($datastoreId, null, $path);
+
+        // si styles est présent dans une annexe et non dans extra, on le stocke dans extra et on supprime l'annexe
+        if (count($styleAnnexes)) {
+            // on ne lit l'annexe styles que si elle n'est pas déjà dans extra
+            if (null === $styles) {
+                $content = $this->annexeApiService->download($datastoreId, $styleAnnexes[0]['_id']);
+                $styles = json_decode($content, true);
+
+                $extra = ['styles' => $styles];
+                $this->configurationApiService->modify($datastoreId, $configuration['_id'], ['extra' => $extra]);
+            }
+
+            $this->annexeApiService->remove($datastoreId, $styleAnnexes[0]['_id']);
+        }
+
+        return $styles ?? [];
     }
 
     /**
@@ -170,7 +187,7 @@ class CartesServiceApiService
         $this->configurationApiService->remove($datastoreId, $configurationId);
 
         if (true === $removeStyleFiles) {
-            $this->removeStyleFiles($datastoreId, $configurationId);
+            $this->removeStyleFiles($datastoreId, $configuration);
         }
     }
 
@@ -249,25 +266,19 @@ class CartesServiceApiService
         $this->configurationApiService->remove($datastoreId, $configurationId);
 
         if (true === $removeStyleFiles) {
-            $this->removeStyleFiles($datastoreId, $configurationId);
+            $this->removeStyleFiles($datastoreId, $configuration);
         }
     }
 
     /**
-     * Suppression des styles lies à une configuration.
+     * Suppression des styles (les fichiers annexes) liés à une configuration.
+     *
+     * @param array<mixed> $configuration
      */
-    private function removeStyleFiles(string $datastoreId, string $configurationId): void
+    private function removeStyleFiles(string $datastoreId, array $configuration): void
     {
-        $path = "/configuration/$configurationId/styles.json";
+        $styles = $this->getStyles($datastoreId, $configuration);
 
-        $styleAnnexes = $this->annexeApiService->getAll($datastoreId, null, $path);
-        if (0 === count($styleAnnexes)) {
-            return;
-        }
-
-        $content = $this->annexeApiService->download($datastoreId, $styleAnnexes[0]['_id']);
-
-        $styles = json_decode($content, true);
         foreach ($styles as $style) {
             if (array_key_exists('layers', $style)) {
                 foreach ($style['layers'] as $layer) {
@@ -275,6 +286,5 @@ class CartesServiceApiService
                 }
             }
         }
-        $this->annexeApiService->remove($datastoreId, $styleAnnexes[0]['_id']);
     }
 }

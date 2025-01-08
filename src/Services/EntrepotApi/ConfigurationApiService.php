@@ -47,6 +47,14 @@ class ConfigurationApiService extends BaseEntrepotApiService
         return $this->request('PUT', "datastores/$datastoreId/configurations/$configurationId", $body);
     }
 
+    /**
+     * @param array<mixed> $body
+     */
+    public function modify(string $datastoreId, string $configurationId, $body = []): array
+    {
+        return $this->request('PATCH', "datastores/$datastoreId/configurations/$configurationId", $body);
+    }
+
     public function remove(string $datastoreId, string $configurationId): array
     {
         return $this->request('DELETE', "datastores/$datastoreId/configurations/$configurationId");

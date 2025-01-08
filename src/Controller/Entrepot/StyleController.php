@@ -8,10 +8,10 @@ use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\EntrepotApi\AnnexeApiService;
 use App\Services\EntrepotApi\CartesMetadataApiService;
+use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -29,6 +29,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
         private ConfigurationApiService $configurationApiService,
         private AnnexeApiService $annexeApiService,
         private CartesMetadataApiService $cartesMetadataApiService,
+        private CartesServiceApiService $cartesServiceApiService,
     ) {
     }
 
@@ -49,14 +50,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             $datasheetName = $configuration['tags'][CommonTags::DATASHEET_NAME];
 
             // Recuperation des styles de la configuration
-            $path = "/configuration/$configId/styles.json";
-            $styleAnnexes = $this->annexeApiService->getAll($datastoreId, null, $path);
-
-            $styles = [];
-            if (count($styleAnnexes)) {
-                $content = $this->annexeApiService->download($datastoreId, $styleAnnexes[0]['_id']);
-                $styles = json_decode($content, true);
-            }
+            $styles = $this->cartesServiceApiService->getStyles($datastoreId, $configuration);
 
             // Suppression du style courant
             $this->cleanStyleTags($styles);
@@ -77,9 +71,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             $styles[] = $newStyle;
             $this->_addUrls($datastore, $styles);
 
-            // Re ecriture dans le fichier
-            $annexeId = count($styleAnnexes) ? $styleAnnexes[0]['_id'] : null;
-            $this->writeStyleFile($datastoreId, $annexeId, $styles, $path);
+            $this->updateStyles($datastoreId, $configuration['_id'], $styles);
 
             try {
                 $this->cartesMetadataApiService->updateStyleFiles($datastoreId, $datasheetName);
@@ -111,14 +103,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             $datasheetName = $configuration['tags'][CommonTags::DATASHEET_NAME];
 
             // Recuperation des styles de la configuration
-            $path = "/configuration/$configId/styles.json";
-            $styleAnnexes = $this->annexeApiService->getAll($datastoreId, null, $path);
-
-            $styles = [];
-            if (0 != count($styleAnnexes)) {
-                $content = $this->annexeApiService->download($datastoreId, $styleAnnexes[0]['_id']);
-                $styles = json_decode($content, true);
-            }
+            $styles = $this->cartesServiceApiService->getStyles($datastoreId, $configuration);
 
             // Recuperation du style
             $style = array_values(array_filter($styles, static function ($style) use ($styleName) {
@@ -149,16 +134,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
                 $styles[0]['current'] = true;
             }
 
-            // Plus de style, on supprime le fichier
-            $annexeId = count($styleAnnexes) ? $styleAnnexes[0]['_id'] : null;
-            if ($annexeId && 0 == count($styles)) {
-                $this->annexeApiService->remove($datastoreId, $styleAnnexes[0]['_id']);
-
-                return new JsonResponse([]);
-            }
-
-            // Ecriture des styles mis a jour
-            $this->writeStyleFile($datastoreId, $annexeId, $styles, $path);
+            $this->updateStyles($datastoreId, $configuration['_id'], $styles);
 
             try {
                 $this->cartesMetadataApiService->updateStyleFiles($datastoreId, $datasheetName);
@@ -185,16 +161,10 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId);
 
             $configId = $offering['configuration']['_id'];
+            $configuration = $this->configurationApiService->get($datastoreId, $configId);
 
             // Recuperation des styles de la configuration
-            $path = "/configuration/$configId/styles.json";
-            $styleAnnexes = $this->annexeApiService->getAll($datastoreId, null, $path);
-
-            $styles = [];
-            if (0 != count($styleAnnexes)) {
-                $content = $this->annexeApiService->download($datastoreId, $styleAnnexes[0]['_id']);
-                $styles = json_decode($content, true);
-            }
+            $styles = $this->cartesServiceApiService->getStyles($datastoreId, $configuration);
 
             // Recuperation du style
             $style = array_filter($styles, static function ($style) use ($styleName) {
@@ -208,10 +178,8 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             $this->cleanStyleTags($styles);
             $this->setCurrent($styles, $styleName);
 
-            $annexeId = count($styleAnnexes) ? $styleAnnexes[0]['_id'] : null;
-
             // Ecriture des styles mis a jour
-            $this->writeStyleFile($datastoreId, $annexeId, $styles, $path);
+            $this->updateStyles($datastoreId, $configuration['_id'], $styles);
 
             return new JsonResponse($styles);
         } catch (ApiException $ex) {
@@ -292,32 +260,13 @@ class StyleController extends AbstractController implements ApiControllerInterfa
     }
 
     /**
-     * Ecriture du nouveau fichier de style.
+     * Mise à jour des styles dans extra.
      *
-     * @param string       $datastoreId
-     * @param string       $annexeId
      * @param array<mixed> $styles
-     * @param string       $path
      */
-    private function writeStyleFile($datastoreId, $annexeId, $styles, $path): void
+    private function updateStyles(string $datastoreId, string $configurationId, array $styles): void
     {
-        $fs = new Filesystem();
-
-        $directory = $this->getParameter('style_files_path');
-        if (!$fs->exists($directory)) {
-            $fs->mkdir($directory);
-        }
-
-        $uuid = uniqid();
-        $filePath = join(DIRECTORY_SEPARATOR, [realpath($directory), "style-$uuid.json"]);
-
-        // Creation du fichier
-        file_put_contents($filePath, json_encode($styles));
-
-        if ($annexeId) {    // PUT
-            $this->annexeApiService->replaceFile($datastoreId, $annexeId, $filePath);
-        } else {
-            $this->annexeApiService->add($datastoreId, $filePath, [$path], null);
-        }
+        $extra = ['styles' => $styles];
+        $this->configurationApiService->modify($datastoreId, $configurationId, ['extra' => $extra]);
     }
 }
