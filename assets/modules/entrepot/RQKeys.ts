@@ -14,7 +14,7 @@ const RQKeys = {
     datastore_upload: (datastoreId: string, uploadId: string): string[] => ["datastore", datastoreId, "upload", uploadId],
     datastore_upload_integration: (datastoreId: string, uploadId: string): string[] => ["datastore", datastoreId, "upload", uploadId, "integration"],
     datastore_upload_file_tree: (datastoreId: string, uploadId: string = "undefined"): string[] => ["datastore", datastoreId, "upload", uploadId, "file_tree"],
-    datastore_upload_report: (datastoreId: string, uploadDataId: string): string[] => ["datastore", datastoreId, "upload_data", uploadDataId, "report"],
+    datastore_upload_report: (datastoreId: string, uploadId: string): string[] => ["datastore", datastoreId, "upload", uploadId, "report"],
 
     datastore_stored_data_list: (datastoreId: string): string[] => ["datastore", datastoreId, "stored_data"],
     datastore_stored_data_list_with_type: (datastoreId: string, type: string): string[] => ["datastore", datastoreId, "stored_data", "type", type],
