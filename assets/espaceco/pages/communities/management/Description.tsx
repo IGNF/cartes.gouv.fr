@@ -15,7 +15,7 @@ import { CommunityResponseDTO, DocumentDTO } from "../../../../@types/espaceco";
 import AutocompleteSelect from "../../../../components/Input/AutocompleteSelect";
 import MarkdownEditor from "../../../../components/Input/MarkdownEditor";
 import categories from "../../../../data/topic_categories.json";
-import { ComponentKey, declareComponentKeys, Translations, useTranslation } from "../../../../i18n/i18n";
+import { declareComponentKeys, useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/espaceco/RQKeys";
 import { type CartesApiException } from "../../../../modules/jsonFetch";
 import "../../../../sass/pages/espaceco/community.scss";
@@ -29,6 +29,7 @@ import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import "../../../../sass/pages/espaceco/community.scss";
 import CommunityLogo from "./CommunityLogo";
+import { ComponentKey, Translations } from "../../../../i18n/types";
 
 type DescriptionProps = {
     mode: CommunityFormMode;
@@ -347,7 +348,8 @@ const Description: FC<DescriptionProps> = ({ mode, community, onSubmit }) => {
 export default Description;
 
 // traductions
-export const { i18n } = declareComponentKeys<"loading_documents">()("Description");
+const { i18n } = declareComponentKeys<"loading_documents">()("Description");
+export type I18n = typeof i18n;
 
 export const DescriptionFrTranslations: Translations<"fr">["Description"] = {
     loading_documents: "Chargement des documents",

@@ -1,10 +1,11 @@
 import { declareComponentKeys } from "i18nifty";
-import { Translations } from "../../../i18n/i18n";
+import { Translations } from "../../../i18n/types";
 
 // traductions
-export const { i18n } = declareComponentKeys<
-    "forbidden_access" | "title" | { K: "step_title"; P: { stepNumber: number }; R: string } | "loading" | "fetch_failed"
->()("CreateCommunity");
+const { i18n } = declareComponentKeys<"forbidden_access" | "title" | { K: "step_title"; P: { stepNumber: number }; R: string } | "loading" | "fetch_failed">()(
+    "CreateCommunity"
+);
+export type I18n = typeof i18n;
 
 export const CreateCommunityFrTranslations: Translations<"fr">["CreateCommunity"] = {
     forbidden_access: "Vous n'avez pas le droit d'accéder à cette page",

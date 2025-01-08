@@ -1,8 +1,8 @@
 import { declareComponentKeys } from "i18nifty";
-import { Translations } from "../../../../i18n/i18n";
+import { Translations } from "../../../../i18n/types";
 
 // traductions
-export const { i18n } = declareComponentKeys<
+const { i18n } = declareComponentKeys<
     | "trimmed_error"
     | "description.name.mandatory"
     | "description.name.unique"
@@ -23,6 +23,7 @@ export const { i18n } = declareComponentKeys<
     | "description.modal.document.file.mandatory"
     | "description.modal.document.file.size_error"
 >()("ManageCommunityValidations");
+export type I18n = typeof i18n;
 
 export const ManageCommunityValidationsFrTranslations: Translations<"fr">["ManageCommunityValidations"] = {
     trimmed_error: "La chaîne de caractères ne doit contenir aucun espace en début et fin",

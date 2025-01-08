@@ -1,16 +1,18 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
+import Button from "@codegouvfr/react-dsfr/Button";
 import { Pagination } from "@codegouvfr/react-dsfr/Pagination";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useMemo, useState } from "react";
 
-import Button from "@codegouvfr/react-dsfr/Button";
 import { CommunityListFilter, GetResponse, UserMe, arrCommunityListFilters } from "../../../@types/app_espaceco";
 import { CommunityResponseDTO } from "../../../@types/espaceco";
 import AppLayout from "../../../components/Layout/AppLayout";
+import LoadingText from "../../../components/Utils/LoadingText";
 import Skeleton from "../../../components/Utils/Skeleton";
-import { datastoreNavItems } from "../../../config/datastoreNavItems";
+import Wait from "../../../components/Utils/Wait";
+import { datastoreNavItems } from "../../../config/navItems/datastoreNavItems";
 import { useTranslation } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/espaceco/RQKeys";
 import { CartesApiException } from "../../../modules/jsonFetch";
@@ -19,8 +21,6 @@ import api from "../../api";
 import CommunityList from "./CommunityList";
 import { CreateCommunityDialog, CreateCommunityDialogModal } from "./CreateCommunityDialog";
 import SearchCommunity from "./SearchCommunity";
-import Wait from "../../../components/Utils/Wait";
-import LoadingText from "../../../components/Utils/LoadingText";
 
 const defaultLimit = 10;
 

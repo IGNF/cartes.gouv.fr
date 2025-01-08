@@ -1,0 +1,17 @@
+.frx-zoom-range {
+    display: flex;
+    .frx-top-zoom,
+    .frx-bottom-zoom {
+        height: 300px;
+        border: 1px solid lightgray;
+        flex: 0 1 50%;
+        margin: 0 1em;
+    }
+    .frx-bottom-zoom {
+        margin-left: 0;
+    }
+
+    .frx-zoom-range-sm {
+        height: 150px;
+    }
+}

@@ -1,9 +1,10 @@
 import { ReactNode } from "react";
 import { CancelEventType, RecipientType, TriggerEventType } from "../../../../../../@types/espaceco";
-import { declareComponentKeys, Translations } from "../../../../../../i18n/i18n";
+import { declareComponentKeys } from "../../../../../../i18n/i18n";
+import { Translations } from "../../../../../../i18n/types";
 
 // traductions
-export const { i18n } = declareComponentKeys<
+const { i18n } = declareComponentKeys<
     | { K: "title"; P: { edit: boolean }; R: string }
     | "choose_email_type"
     | { K: "email_planner_type"; P: { type: string }; R: string }
@@ -38,6 +39,7 @@ export const { i18n } = declareComponentKeys<
     | { K: "validation.error.email_not_valid"; P: { value: string }; R: string }
     | "validation.error.email.min"
 >()("AddOrEditEmailPlanner");
+export type I18n = typeof i18n;
 
 export const AddOrEditEmailPlannerFrTranslations: Translations<"fr">["AddOrEditEmailPlanner"] = {
     title: ({ edit }) => `${edit ? "Modification de l'email de suivi" : "Ajout d'un email de suivi"}`,

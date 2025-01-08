@@ -1,5 +1,5 @@
 import { getCommands, getExtraCommands, ICommand } from "@uiw/react-md-editor";
-import { Language } from "../../i18n/i18n";
+import { Language } from "../../i18n/types";
 import { MDCommandTranslations } from "./translations";
 
 export const getLocaleCommands = (lang: Language = "fr") => {

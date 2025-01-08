@@ -2,14 +2,16 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Accordion from "@codegouvfr/react-dsfr/Accordion";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import Table from "@codegouvfr/react-dsfr/Table";
+import { yupResolver } from "@hookform/resolvers/yup";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import { GridDTO } from "../../../../../@types/espaceco";
-import { declareComponentKeys, Translations, useTranslation } from "../../../../../i18n/i18n";
-import GridList from "../GridList";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers/yup";
+
+import { GridDTO } from "../../../../../@types/espaceco";
+import { declareComponentKeys, useTranslation } from "../../../../../i18n/i18n";
+import { Translations } from "../../../../../i18n/types";
+import GridList from "../GridList";
 
 const ManageGridsDialogModal = createModal({
     id: "manage-grids-modal",
@@ -141,7 +143,7 @@ const ManageGridsDialog: FC<ManageGridsDialogProps> = ({ communityGrids, userGri
 export { ManageGridsDialog, ManageGridsDialogModal };
 
 // traductions
-export const { i18n } = declareComponentKeys<
+const { i18n } = declareComponentKeys<
     | "title"
     | { K: "explain"; R: JSX.Element }
     | "main_grids"
@@ -153,6 +155,7 @@ export const { i18n } = declareComponentKeys<
     | "title_header"
     | "type_header"
 >()("ManageGridsDialog");
+export type I18n = typeof i18n;
 
 export const ManageGridsDialogFrTranslations: Translations<"fr">["ManageGridsDialog"] = {
     title: "Gérer les emprises individuelles du membre",

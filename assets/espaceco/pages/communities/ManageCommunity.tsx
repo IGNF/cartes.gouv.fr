@@ -4,10 +4,11 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import Tabs from "@codegouvfr/react-dsfr/Tabs";
 import { useQuery } from "@tanstack/react-query";
 import { FC, useState } from "react";
+
 import { CommunityResponseDTO } from "../../../@types/espaceco";
 import AppLayout from "../../../components/Layout/AppLayout";
 import LoadingText from "../../../components/Utils/LoadingText";
-import { datastoreNavItems } from "../../../config/datastoreNavItems";
+import { datastoreNavItems } from "../../../config/navItems/datastoreNavItems";
 import { useTranslation } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/espaceco/RQKeys";
 import { CartesApiException } from "../../../modules/jsonFetch";
@@ -16,9 +17,9 @@ import api from "../../api";
 import Description from "./management/Description";
 import Grid from "./management/Grid";
 import Layer from "./management/Layer";
+import Members from "./management/Members";
 import Reports from "./management/Reports";
 import ZoomAndCentering from "./management/ZoomAndCentering";
-import Members from "./management/Members";
 
 type ManageCommunityProps = {
     communityId: number;

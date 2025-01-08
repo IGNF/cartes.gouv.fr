@@ -6,9 +6,10 @@ import { createPortal } from "react-dom";
 import { Controller, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { UserDTO } from "../../../../../@types/espaceco";
-import { declareComponentKeys, Translations, useTranslation } from "../../../../../i18n/i18n";
+import { declareComponentKeys, useTranslation } from "../../../../../i18n/i18n";
 import SearchUsers from "./SearchUsers";
 import { isUser } from "../../../../../@types/app_espaceco";
+import { Translations } from "../../../../../i18n/types";
 
 const AddMembersDialogModal = createModal({
     id: "add-esco-member-modal",
@@ -105,7 +106,8 @@ const AddMembersDialog: FC<AddMembersDialogProps> = ({ onAdd }) => {
 export { AddMembersDialog, AddMembersDialogModal };
 
 // traductions
-export const { i18n } = declareComponentKeys<"invite_title" | "invite" | { K: "users_hint"; R: JSX.Element } | "min_users_error">()("AddMembersDialog");
+const { i18n } = declareComponentKeys<"invite_title" | "invite" | { K: "users_hint"; R: JSX.Element } | "min_users_error">()("AddMembersDialog");
+export type I18n = typeof i18n;
 
 export const AddMembersDialogFrTranslations: Translations<"fr">["AddMembersDialog"] = {
     invite_title: "Inviter des membres",

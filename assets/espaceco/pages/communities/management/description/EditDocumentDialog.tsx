@@ -6,9 +6,11 @@ import { FC, useCallback, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
-import { ComponentKey, useTranslation } from "../../../../../i18n/i18n";
 
 import { DocumentFormType } from "../../../../../@types/app_espaceco";
+import { useTranslation } from "../../../../../i18n";
+import { ComponentKey } from "../../../../../i18n/types";
+
 import "../../../../../sass/pages/espaceco/community.scss";
 
 const EditDocumentDialogModal = createModal({

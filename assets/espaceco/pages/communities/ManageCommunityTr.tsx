@@ -1,10 +1,10 @@
 import { declareComponentKeys } from "i18nifty";
-import { Translations } from "../../../i18n/i18n";
+import { Translations } from "../../../i18n/types";
 
 export type logoAction = "add" | "modify" | "delete";
 
 // traductions
-export const { i18n } = declareComponentKeys<
+const { i18n } = declareComponentKeys<
     | { K: "title"; P: { name: string | undefined }; R: string }
     | "loading"
     | "fetch_failed"
@@ -97,6 +97,7 @@ export const { i18n } = declareComponentKeys<
     | "grid.grids"
     | { K: "grid.explain"; R: JSX.Element }
 >()("ManageCommunity");
+export type I18n = typeof i18n;
 
 /**
  * "thumbnail_modal.action_being": ({ action }) => {
