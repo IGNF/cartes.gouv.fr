@@ -1,3 +1,4 @@
+import { InputCollectionFrTranslations } from "../../components/Input/InputCollection";
 import { datastoreNavItemsFrTranslations } from "../../config/navItems/datastoreNavItems.locale";
 import { navItemsFrTranslations } from "../../config/navItems/navItems.locale";
 import { AccessesRequestFrTranslations } from "../../entrepot/pages/accesses-request/AccessesRequest.locale";
@@ -35,29 +36,31 @@ import { UserKeysListTabFrTranslations } from "../../entrepot/pages/users/keys/U
 import { MeFrTranslations } from "../../entrepot/pages/users/me/Me.locale";
 import { PermissionsFrTranslations } from "../../entrepot/pages/users/permissions/Permissions.locale";
 import { CommunityListFrTranslations } from "../../espaceco/pages/communities/CommunityListTr";
-import { CreateCommunityDialogFrTranslations } from "../../espaceco/pages/communities/CreateCommunityDialog.locale";
 import { CreateCommunityFrTranslations } from "../../espaceco/pages/communities/CreateCommunity.locale";
+import { CreateCommunityDialogFrTranslations } from "../../espaceco/pages/communities/CreateCommunityDialog.locale";
 import { ManageCommunityFrTranslations } from "../../espaceco/pages/communities/ManageCommunityTr";
+import { MemberInvitationFrTranslations } from "../../espaceco/pages/communities/MemberInvitation";
+import { DescriptionFrTranslations } from "../../espaceco/pages/communities/management/Description";
+import { EscoCommunityMembersFrTranslations } from "../../espaceco/pages/communities/management/Members";
+import { ReportsFrTranslations } from "../../espaceco/pages/communities/management/Reports";
+import { SearchFrTranslations } from "../../espaceco/pages/communities/management/SearchTr";
+import { AddMembersDialogFrTranslations } from "../../espaceco/pages/communities/management/member/AddMembersDialog";
+import { ManageGridsDialogFrTranslations } from "../../espaceco/pages/communities/management/member/ManageGridsDialog";
+import { EmailPlannersFrTranslations } from "../../espaceco/pages/communities/management/reports/EmailPlanners";
+import { ReportStatusesFrTranslations } from "../../espaceco/pages/communities/management/reports/ReportStatusesTr";
+import { SharedThemesFrTranslations } from "../../espaceco/pages/communities/management/reports/SharedThemes";
+import { ThemeFrTranslations } from "../../espaceco/pages/communities/management/reports/ThemeTr";
+import { AddOrEditEmailPlannerFrTranslations } from "../../espaceco/pages/communities/management/reports/emailplanners/AddOrEditEmailPlannerTr";
+import { EmailPlannerKeywordsFrTranslations } from "../../espaceco/pages/communities/management/reports/emailplanners/EmailPlannerKeywords";
 import { ManageCommunityValidationsFrTranslations } from "../../espaceco/pages/communities/management/validationTr";
 import { TMSStyleFilesManagerFrTranslations } from "../../modules/Style/TMSStyleFilesManager/TMSStyleFilesManager.locale";
 import { BreadcrumbFrTranslations } from "../../modules/entrepot/breadcrumbs/Breadcrumb.locale";
 import { LoginDisabledFrTranslations } from "../../pages/LoginDisabled/LoginDisabled.locale";
-import { SearchFrTranslations } from "../../espaceco/pages/communities/management/SearchTr";
-import { DescriptionFrTranslations } from "../../espaceco/pages/communities/management/Description";
-import { ReportsFrTranslations } from "../../espaceco/pages/communities/management/Reports";
-import { EmailPlannersFrTranslations } from "../../espaceco/pages/communities/management/reports/EmailPlanners";
 import { ContactFrTranslations } from "../../pages/assistance/contact/Contact.locale";
-import { AddOrEditEmailPlannerFrTranslations } from "../../espaceco/pages/communities/management/reports/emailplanners/AddOrEditEmailPlannerTr";
-import { EmailPlannerKeywordsFrTranslations } from "../../espaceco/pages/communities/management/reports/emailplanners/EmailPlannerKeywords";
+import { mapboxStyleValidationFrTranslations } from "../../validations/mapbox/MapboxStyleValidator.locale";
+import { SldStyleValidationErrorsFrTranslations } from "../../validations/sld/SldStyleValidation.locale";
 import { commonFrTranslations } from "../Common.locale";
-import { ThemeFrTranslations } from "../../espaceco/pages/communities/management/reports/ThemeTr";
-import { ReportStatusesFrTranslations } from "../../espaceco/pages/communities/management/reports/ReportStatusesTr";
-import { SharedThemesFrTranslations } from "../../espaceco/pages/communities/management/reports/SharedThemes";
-import { EscoCommunityMembersFrTranslations } from "../../espaceco/pages/communities/management/Members";
-import { AddMembersDialogFrTranslations } from "../../espaceco/pages/communities/management/member/AddMembersDialog";
-import { ManageGridsDialogFrTranslations } from "../../espaceco/pages/communities/management/member/ManageGridsDialog";
 import type { Translations } from "../types";
-import { InputCollectionFrTranslations } from "../../components/Input/InputCollection";
 
 export const translations: Translations<"fr"> = {
     Common: commonFrTranslations,
@@ -97,6 +100,9 @@ export const translations: Translations<"fr"> = {
     UploadStyleFile: UploadStyleFileFrTranslations,
     PyramidVectorGenerateForm: PyramidVectorGenerateFormFrTranslations,
     PyramidVectorTmsServiceForm: PyramidVectorTmsServiceFormFrTranslations,
+    PyramidRasterGenerateForm: PyramidRasterGenerateFormFrTranslations,
+    PyramidRasterWmsRasterServiceForm: PyramidRasterWmsRasterServiceFormFrTranslations,
+    PyramidRasterWmtsServiceForm: PyramidRasterWmtsServiceFormFrTranslations,
     DatasheetUploadForm: DatasheetUploadFormFrTranslations,
     DatasheetList: DatasheetListFrTranslations,
     AccessRestrictions: AccessRestrictionsFrTranslations,
@@ -105,6 +111,7 @@ export const translations: Translations<"fr"> = {
     CreateCommunityDialog: CreateCommunityDialogFrTranslations,
     CreateCommunity: CreateCommunityFrTranslations,
     ManageCommunityValidations: ManageCommunityValidationsFrTranslations,
+    LoginDisabled: LoginDisabledFrTranslations,
     MemberInvitation: MemberInvitationFrTranslations,
     Reports: ReportsFrTranslations,
     Description: DescriptionFrTranslations,

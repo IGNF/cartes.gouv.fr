@@ -1,5 +1,6 @@
 import { ICommand } from "@uiw/react-md-editor";
-import { declareComponentKeys, getTranslation, Translations } from "../../../../../../i18n/i18n";
+import { declareComponentKeys, getTranslation } from "../../../../../../i18n/i18n";
+import { Translations } from "../../../../../../i18n/types";
 
 const { t } = getTranslation("EmailPlannerKeywords");
 
@@ -40,9 +41,10 @@ const getKeywordsExtraCommands = (): ICommand[] => {
 export default getKeywordsExtraCommands;
 
 // traductions
-export const { i18n } = declareComponentKeys<
-    { K: "getTitle"; P: { keyword: KeywordsType }; R: string } | { K: "getText"; P: { keyword: KeywordsType }; R: string }
->()("EmailPlannerKeywords");
+const { i18n } = declareComponentKeys<{ K: "getTitle"; P: { keyword: KeywordsType }; R: string } | { K: "getText"; P: { keyword: KeywordsType }; R: string }>()(
+    "EmailPlannerKeywords"
+);
+export type I18n = typeof i18n;
 
 export const EmailPlannerKeywordsFrTranslations: Translations<"fr">["EmailPlannerKeywords"] = {
     getTitle: ({ keyword }) => {

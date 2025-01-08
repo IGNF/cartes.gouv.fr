@@ -58,7 +58,25 @@ export type ComponentKey =
     | import("../entrepot/pages/service/common/TableSelection/TableSelection.locale").I18n
     | import("../entrepot/pages/service/common/AccessRestrictions/AccessRestrictions.locale").I18n
     | import("../entrepot/pages/service/wms-vector/UploadStyleFile.locale").I18n
-    | import("../espaceco/pages/communities/EspaceCoCommunities.locale").I18n
-    | import("../pages/LoginDisabled/LoginDisabled.locale").I18n;
+    | import("../pages/LoginDisabled/LoginDisabled.locale").I18n
+    | import("../espaceco/pages/communities/CommunityListTr").I18n
+    | import("../espaceco/pages/communities/CreateCommunityDialog.locale").I18n
+    | import("../espaceco/pages/communities/CreateCommunity.locale").I18n
+    | import("../espaceco/pages/communities/ManageCommunityTr").I18n
+    | import("../espaceco/pages/communities/management/validationTr").I18n
+    | import("../espaceco/pages/communities/management/SearchTr").I18n
+    | import("../espaceco/pages/communities/management/Description").I18n
+    | import("../espaceco/pages/communities/management/Reports").I18n
+    | import("../espaceco/pages/communities/management/reports/ThemeTr").I18n
+    | import("../espaceco/pages/communities/management/reports/ReportStatusesTr").I18n
+    | import("../espaceco/pages/communities/management/reports/SharedThemes").I18n
+    | import("../espaceco/pages/communities/management/reports/EmailPlanners").I18n
+    | import("../espaceco/pages/communities/management/reports/emailplanners/AddOrEditEmailPlannerTr").I18n
+    | import("../espaceco/pages/communities/management/reports/emailplanners/EmailPlannerKeywords").I18n
+    | import("../espaceco/pages/communities/management/Members").I18n
+    | import("../espaceco/pages/communities/management/member/AddMembersDialog").I18n
+    | import("../espaceco/pages/communities/management/member/ManageGridsDialog").I18n
+    | import("../espaceco/pages/communities/MemberInvitation").I18n
+    | import("../components/Input/InputCollection").I18n;
 
 export type Translations<L extends Language> = GenericTranslations<ComponentKey, Language, typeof fallbackLanguage, L>;

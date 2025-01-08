@@ -5,13 +5,15 @@ import CallOut from "@codegouvfr/react-dsfr/CallOut";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { FC, useEffect, useMemo, useState } from "react";
+
 import { CommunityMember, Role, UserMe } from "../../../@types/app_espaceco";
 import { CommunityResponseDTO } from "../../../@types/espaceco";
 import AppLayout from "../../../components/Layout/AppLayout";
 import LoadingText from "../../../components/Utils/LoadingText";
 import Wait from "../../../components/Utils/Wait";
-import { datastoreNavItems } from "../../../config/datastoreNavItems";
-import { declareComponentKeys, Translations, useTranslation } from "../../../i18n/i18n";
+import { datastoreNavItems } from "../../../config/navItems/datastoreNavItems";
+import { declareComponentKeys, useTranslation } from "../../../i18n/i18n";
+import { Translations } from "../../../i18n/types";
 import RQKeys from "../../../modules/espaceco/RQKeys";
 import { CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
@@ -19,6 +21,8 @@ import { useApiEspaceCoStore } from "../../../stores/ApiEspaceCoStore";
 import api from "../../api";
 
 import "../../../../assets/sass/pages/espaceco/member_invitation.scss";
+
+const navItems = datastoreNavItems();
 
 type MemberInvitationProps = {
     communityId: number;
@@ -35,8 +39,6 @@ const MemberInvitation: FC<MemberInvitationProps> = ({ communityId }) => {
 
     const apiEspaceCoUrl = useApiEspaceCoStore((state) => state.api_espaceco_url);
     const espaceCoUrl = useMemo(() => (apiEspaceCoUrl ? apiEspaceCoUrl.replace("/gcms/api", "/login") : undefined), [apiEspaceCoUrl]);
-
-    const navItems = useMemo(() => datastoreNavItems(), []);
 
     const [errorMessage, setErrorMessage] = useState<ErrorMessage | undefined>();
 
@@ -190,7 +192,7 @@ const MemberInvitation: FC<MemberInvitationProps> = ({ communityId }) => {
 
 export default MemberInvitation;
 
-export const { i18n } = declareComponentKeys<
+const { i18n } = declareComponentKeys<
     | "document_title"
     | "community_loading"
     | "community_loading_failed"
@@ -208,6 +210,7 @@ export const { i18n } = declareComponentKeys<
     | "inviting"
     | "rejecting"
 >()("MemberInvitation");
+export type I18n = typeof i18n;
 
 export const MemberInvitationFrTranslations: Translations<"fr">["MemberInvitation"] = {
     document_title: "Invitation",

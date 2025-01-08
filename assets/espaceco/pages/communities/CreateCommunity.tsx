@@ -1,11 +1,12 @@
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { useQuery } from "@tanstack/react-query";
 import { FC, useState } from "react";
+
 import { CommunityFormMode } from "../../../@types/app_espaceco";
 import { CommunityResponseDTO } from "../../../@types/espaceco";
 import AppLayout from "../../../components/Layout/AppLayout";
 import LoadingText from "../../../components/Utils/LoadingText";
-import { datastoreNavItems } from "../../../config/datastoreNavItems";
+import { datastoreNavItems } from "../../../config/navItems/datastoreNavItems";
 import { useTranslation } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/espaceco/RQKeys";
 import { routes } from "../../../router/router";

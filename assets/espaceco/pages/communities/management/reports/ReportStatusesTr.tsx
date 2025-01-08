@@ -1,8 +1,10 @@
-import { declareComponentKeys, Translations } from "../../../../../i18n/i18n";
+import { declareComponentKeys } from "../../../../../i18n/i18n";
+import { Translations } from "../../../../../i18n/types";
 
-export const { i18n } = declareComponentKeys<"parameter" | "title" | "description" | "description_placeholder" | "back_to_default" | "min_statuses">()(
+const { i18n } = declareComponentKeys<"parameter" | "title" | "description" | "description_placeholder" | "back_to_default" | "min_statuses">()(
     "ReportStatuses"
 );
+export type I18n = typeof i18n;
 
 export const ReportStatusesFrTranslations: Translations<"fr">["ReportStatuses"] = {
     parameter: "Paramétrer",

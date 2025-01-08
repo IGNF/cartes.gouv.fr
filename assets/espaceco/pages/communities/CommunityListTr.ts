@@ -1,9 +1,10 @@
 import { declareComponentKeys } from "i18nifty";
-import { Translations } from "../../../i18n/i18n";
+
 import { CommunityListFilter } from "../../../@types/app_espaceco";
+import { Translations } from "../../../i18n/types";
 
 // traductions
-export const { i18n } = declareComponentKeys<
+const { i18n } = declareComponentKeys<
     | "title"
     | "filters"
     | "all_public_communities"
@@ -18,6 +19,7 @@ export const { i18n } = declareComponentKeys<
     | "create_community"
     | "append_community"
 >()("CommunityList");
+export type I18n = typeof i18n;
 
 export const CommunityListFrTranslations: Translations<"fr">["CommunityList"] = {
     title: "Liste des guichets",

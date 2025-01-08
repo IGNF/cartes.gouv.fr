@@ -1,7 +1,9 @@
-import { declareComponentKeys, Translations } from "../../../i18n/i18n";
+import { declareComponentKeys } from "../../../i18n/i18n";
+import { Translations } from "../../../i18n/types";
 
 // traductions
-export const { i18n } = declareComponentKeys<"title" | "name" | "name_hint">()("CreateCommunityDialog");
+const { i18n } = declareComponentKeys<"title" | "name" | "name_hint">()("CreateCommunityDialog");
+export type I18n = typeof i18n;
 
 export const CreateCommunityDialogFrTranslations: Translations<"fr">["CreateCommunityDialog"] = {
     title: "Création d'un guichet",

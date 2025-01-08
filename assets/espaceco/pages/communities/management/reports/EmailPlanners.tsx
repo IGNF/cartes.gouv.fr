@@ -10,12 +10,13 @@ import { EmailPlannerDTO, ReportStatusesDTO, ThemeDTO } from "../../../../../@ty
 import { ConfirmDialog, ConfirmDialogModal } from "../../../../../components/Utils/ConfirmDialog";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import Wait from "../../../../../components/Utils/Wait";
-import { declareComponentKeys, Translations, useTranslation } from "../../../../../i18n/i18n";
+import { declareComponentKeys, useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/espaceco/RQKeys";
 import { CartesApiException } from "../../../../../modules/jsonFetch";
 import api from "../../../../api";
 import { AddEmailPlannerDialog, AddEmailPlannerDialogModal } from "./emailplanners/AddEmailPlannerDialog";
 import { EditEmailPlannerDialog, EditEmailPlannerDialogModal } from "./emailplanners/EditEmailPlannerDialog";
+import { Translations } from "../../../../../i18n/types";
 
 type EmailPlannersProps = {
     communityId: number;
@@ -244,7 +245,7 @@ const EmailPlanners: FC<EmailPlannersProps> = ({ communityId, form, emailPlanner
 export default EmailPlanners;
 
 // traductions
-export const { i18n } = declareComponentKeys<
+const { i18n } = declareComponentKeys<
     | "event_header"
     | "subject_header"
     | "body_header"
@@ -260,6 +261,7 @@ export const { i18n } = declareComponentKeys<
     | "removing"
     | "confirm_remove_title"
 >()("EmailPlanners");
+export type I18n = typeof i18n;
 
 export const EmailPlannersFrTranslations: Translations<"fr">["EmailPlanners"] = {
     event_header: "Evénement déclencheur",

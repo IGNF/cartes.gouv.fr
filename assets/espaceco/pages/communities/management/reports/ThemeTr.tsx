@@ -1,7 +1,8 @@
-import { declareComponentKeys, Translations } from "../../../../../i18n/i18n";
+import { declareComponentKeys } from "../../../../../i18n/i18n";
+import { Translations } from "../../../../../i18n/types";
 
 // traductions
-export const { i18n } = declareComponentKeys<
+const { i18n } = declareComponentKeys<
     | "add_theme"
     | "add_attribute"
     | "trimmed_error"
@@ -55,6 +56,7 @@ export const { i18n } = declareComponentKeys<
     | "dialog.edit_attribute.value"
     | "dialog.edit_attribute.description"
 >()("Theme");
+export type I18n = typeof i18n;
 
 export const ThemeFrTranslations: Translations<"fr">["Theme"] = {
     add_theme: "Ajouter un thème",

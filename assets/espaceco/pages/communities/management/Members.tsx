@@ -15,13 +15,14 @@ import ConfirmDialog, { ConfirmDialogModal } from "../../../../components/Utils/
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
-import { declareComponentKeys, Translations, useTranslation } from "../../../../i18n/i18n";
+import { declareComponentKeys, useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/espaceco/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import { routes } from "../../../../router/router";
 import api from "../../../api";
 import { AddMembersDialog, AddMembersDialogModal } from "./member/AddMembersDialog";
 import { ManageGridsDialog, ManageGridsDialogModal } from "./member/ManageGridsDialog";
+import { Translations } from "../../../../i18n/types";
 
 export type membersQueryParams = {
     page: number;
@@ -331,7 +332,7 @@ const Members: FC<MembersProps> = ({ community }) => {
 export default Members;
 
 // traductions
-export const { i18n } = declareComponentKeys<
+const { i18n } = declareComponentKeys<
     | "fetch_members_failed"
     | "fetch_affiliate_members_failed"
     | "update_role_failed"
@@ -361,6 +362,7 @@ export const { i18n } = declareComponentKeys<
     | "manage_grids"
     | "invite"
 >()("EscoCommunityMembers");
+export type I18n = typeof i18n;
 
 export const EscoCommunityMembersFrTranslations: Translations<"fr">["EscoCommunityMembers"] = {
     fetch_members_failed: "La récupération des membres du guichet a échoué",

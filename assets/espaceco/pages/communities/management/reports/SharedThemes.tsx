@@ -2,10 +2,12 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { CSSProperties, FC } from "react";
 import { UseFormReturn } from "react-hook-form";
+
 import { ReportFormType } from "../../../../../@types/app_espaceco";
-import { declareComponentKeys, Translations, useTranslation } from "../../../../../i18n/i18n";
-import { SetSharedThemesDialogModal, SetSharedThemesDialog, UserSharedThemesType, SharedThemesType } from "./SetSharedThemesDialog";
 import { SharedThemesDTO } from "../../../../../@types/espaceco";
+import { declareComponentKeys, useTranslation } from "../../../../../i18n/i18n";
+import { Translations } from "../../../../../i18n/types";
+import { SetSharedThemesDialog, SetSharedThemesDialogModal, SharedThemesType, UserSharedThemesType } from "./SetSharedThemesDialog";
 
 type SharedThemesProps = {
     form: UseFormReturn<ReportFormType>;
@@ -116,9 +118,10 @@ const SharedThemes: FC<SharedThemesProps> = ({ form, userSharedThemes }) => {
 
 export default SharedThemes;
 
-export const { i18n } = declareComponentKeys<
+const { i18n } = declareComponentKeys<
     { K: "delete_community"; P: { text: string }; R: string } | { K: "delete_theme"; P: { text: string }; R: string } | "manage" | "dialog.title"
 >()("SharedThemes");
+export type I18n = typeof i18n;
 
 export const SharedThemesFrTranslations: Translations<"fr">["SharedThemes"] = {
     delete_community: ({ text }) => `Supprimer tous les thèmes de la communauté [${text}]`,

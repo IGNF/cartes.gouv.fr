@@ -9,13 +9,15 @@ import { FC, useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
-import { ComponentKey, useTranslation } from "../../../../../i18n/i18n";
+
+import { useTranslation } from "../../../../../i18n/i18n";
+import { ComponentKey } from "../../../../../i18n/types";
+import { appRoot } from "../../../../../router/router";
+import { getThumbnail } from "../../../../esco_utils";
 
 import placeholder1x1 from "../../../../../img/placeholder.1x1.png";
 
-import { appRoot } from "../../../../../router/router";
 import "../../../../../sass/pages/espaceco/community.scss";
-import { getThumbnail } from "../../../../esco_utils";
 
 const AddDocumentDialogModal = createModal({
     id: "add-document-modal",

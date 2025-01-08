@@ -1,28 +1,30 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { createModal, ModalProps } from "@codegouvfr/react-dsfr/Modal";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { Upload } from "@codegouvfr/react-dsfr/Upload";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
 import { FC, memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useForm } from "react-hook-form";
 import { useHover } from "usehooks-ts";
 import * as yup from "yup";
-import { ConfirmDialog, ConfirmDialogModal } from "../../../../components/Utils/ConfirmDialog";
-import { ComponentKey, useTranslation } from "../../../../i18n/i18n";
-import { getFileExtension, getImageSize, ImageSize } from "../../../../utils";
-import { logoAction } from "../ManageCommunityTr";
 
-import Alert from "@codegouvfr/react-dsfr/Alert";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CommunityResponseDTO } from "../../../../@types/espaceco";
+import { ConfirmDialog, ConfirmDialogModal } from "../../../../components/Utils/ConfirmDialog";
+import { useTranslation } from "../../../../i18n/i18n";
+import { ComponentKey } from "../../../../i18n/types";
 import placeholder1x1 from "../../../../img/placeholder.1x1.png";
 import RQKeys from "../../../../modules/espaceco/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
-import "../../../../sass/components/buttons.scss";
+import { getFileExtension, getImageSize, ImageSize } from "../../../../utils";
 import api from "../../../api";
+import { logoAction } from "../ManageCommunityTr";
+
+import "../../../../sass/components/buttons.scss";
 
 type CommunityLogoProps = {
     community: CommunityResponseDTO;

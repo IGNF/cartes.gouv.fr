@@ -1,8 +1,9 @@
 import { declareComponentKeys } from "i18nifty";
-import { Translations } from "../../../../i18n/i18n";
+import { Translations } from "../../../../i18n/types";
 
 // traductions
-export const { i18n } = declareComponentKeys<"no_results" | "loading">()("Search");
+const { i18n } = declareComponentKeys<"no_results" | "loading">()("Search");
+export type I18n = typeof i18n;
 
 export const SearchFrTranslations: Translations<"fr">["Search"] = {
     no_results: "Aucun résultat",
