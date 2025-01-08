@@ -3,15 +3,15 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import Table from "@codegouvfr/react-dsfr/Table";
 import { FC, ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { GridDTO } from "../../../../@types/espaceco";
-import SearchGrids from "./ZoomAndCentering/SearchGrids";
+import SearchGrids from "./SearchGrids";
 
 type GridListProps = {
     grids?: GridDTO[];
+    displayType?: boolean;
     onChange: (grids: GridDTO[]) => void;
 };
 
-const GridList: FC<GridListProps> = ({ grids = [], onChange }) => {
-    const [grid, setGrid] = useState<GridDTO | null>(null);
+const GridList: FC<GridListProps> = ({ grids = [], displayType = false, onChange }) => {
     const [internal, setInternal] = useState<GridDTO[]>([]);
 
     useEffect(() => {
@@ -27,47 +27,41 @@ const GridList: FC<GridListProps> = ({ grids = [], onChange }) => {
         [internal, onChange]
     );
 
-    const handleAdd = () => {
+    const handleAdd = (grid: GridDTO | null) => {
         if (grid) {
             const grids = Array.from(new Set([...internal, grid]));
             setInternal(grids);
             onChange(grids);
         }
     };
+
     const data: ReactNode[][] = useMemo(() => {
-        return Array.from(internal, (grid) => [
-            grid.name,
-            grid.title,
-            grid.type.title,
-            <div key={grid.name} className={fr.cx("fr-grid-row", "fr-grid-row--right")}>
-                <Button title={""} priority={"tertiary no outline"} iconId={"fr-icon-delete-line"} onClick={() => handleRemove(grid.name)} />
-            </div>,
-        ]);
-    }, [internal, handleRemove]);
+        return Array.from(internal, (grid) => {
+            const node: ReactNode[] = [grid.name, grid.title];
+            if (displayType) {
+                node.push(grid.type.title);
+            }
+            node.push(
+                <div key={grid.name} className={fr.cx("fr-grid-row", "fr-grid-row--right")}>
+                    <Button title={""} priority={"tertiary no outline"} iconId={"fr-icon-delete-line"} onClick={() => handleRemove(grid.name)} />
+                </div>
+            );
+            return node;
+        });
+    }, [internal, displayType, handleRemove]);
 
     return (
         <div>
-            <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                <div className={fr.cx("fr-col-11")}>
-                    <SearchGrids
-                        label={""}
-                        filters={{
-                            fields: ["name", "title", "type", "extent"],
-                        }}
-                        onChange={(grid) => {
-                            if (grid) {
-                                setGrid(grid);
-                            }
-                        }}
-                    />
-                </div>
-                <div className={fr.cx("fr-col-1")}>
-                    <div className={fr.cx("fr-grid-row", "fr-grid-row--left")}>
-                        <Button title={""} priority={"tertiary no outline"} iconId={"fr-icon-add-circle-line"} onClick={handleAdd} />
-                    </div>
-                </div>
-            </div>
-            <Table className={fr.cx("fr-table--sm")} bordered fixed noCaption data={data} />
+            <SearchGrids
+                label={"Chercher une emprise"}
+                filters={{
+                    fields: ["name", "title", "type", "deleted", "extent"],
+                }}
+                onChange={(grid) => {
+                    handleAdd(grid);
+                }}
+            />
+            <Table className={fr.cx("fr-table--sm", "fr-mb-1v")} bordered fixed noCaption data={data} />
         </div>
     );
 };

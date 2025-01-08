@@ -84,7 +84,7 @@ export type SharedGeorem = (typeof SharedGeoremOptions)[number];
 export interface CommunityResponseDTO {
     id: number;
     description: string | null;
-    detailed_description?: string | null;
+    about?: string | null;
     name: string;
     active: boolean;
     listed: boolean;
@@ -100,14 +100,14 @@ export interface CommunityResponseDTO {
     extent: number[] | null;
     all_members_can_valid: boolean;
     open_without_affiliation: boolean;
-    open_with_email?: string[];
+    open_with_email: Record<string, string>;
     offline_allowed: boolean;
     /** @format date-time */
     creation: string;
     grids: GridDTO[];
     logo_url: string | null;
     keywords?: string[];
-    documents?: DocumentDTO[];
+    documents: DocumentDTO[];
     report_statuses?: ReportStatusesDTO;
     shared_themes?: SharedThemesDTO[];
 }
@@ -123,9 +123,10 @@ export interface DocumentDTO {
     id: number;
     title: string;
     description: string | null;
+    filename: string;
     short_fileName: string;
     mime_type: string;
-    size: number | null;
+    size: number;
     width: number | null;
     height: number | null;
     date: string;
@@ -139,7 +140,7 @@ export interface GridDTO {
     title: string;
     type: GridType;
     deleted: boolean;
-    extent: number[];
+    extent?: number[];
 }
 
 export interface GridType {

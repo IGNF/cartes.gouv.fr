@@ -2,9 +2,12 @@ import { declareComponentKeys } from "i18nifty";
 import { Translations } from "../../../i18n/i18n";
 
 // traductions
-export const { i18n } = declareComponentKeys<"title" | { K: "step_title"; P: { stepNumber: number }; R: string }>()("CreateCommunity");
+export const { i18n } = declareComponentKeys<
+    "forbidden_access" | "title" | { K: "step_title"; P: { stepNumber: number }; R: string } | "loading" | "fetch_failed"
+>()("CreateCommunity");
 
 export const CreateCommunityFrTranslations: Translations<"fr">["CreateCommunity"] = {
+    forbidden_access: "Vous n'avez pas le droit d'accéder à cette page",
     title: "Création d'un guichet",
     step_title: ({ stepNumber }) => {
         switch (stepNumber) {
@@ -24,9 +27,14 @@ export const CreateCommunityFrTranslations: Translations<"fr">["CreateCommunity"
                 return "";
         }
     },
+    loading: "Recherche du guichet en cours ...",
+    fetch_failed: "La récupération des informations sur le guichet a échoué",
 };
 
 export const CreateCommunityEnTranslations: Translations<"en">["CreateCommunity"] = {
+    forbidden_access: "Forbidden access to this page",
     title: "Create community",
     step_title: ({ stepNumber }) => `step ${stepNumber}`,
+    loading: "Fetching community ...",
+    fetch_failed: "Fetching community failed",
 };

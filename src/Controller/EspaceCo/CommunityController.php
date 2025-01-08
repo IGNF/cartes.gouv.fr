@@ -8,11 +8,13 @@ use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\EspaceCoApi\CommunityApiService;
 use App\Services\EspaceCoApi\CommunityDocumentApiService;
+use App\Services\EspaceCoApi\GridApiService;
 use App\Services\EspaceCoApi\UserApiService;
 use App\Services\MailerService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
@@ -37,9 +39,10 @@ class CommunityController extends AbstractController implements ApiControllerInt
         ParameterBagInterface $parameters,
         private Filesystem $fs,
         private MailerService $mailerService,
+        private UserApiService $userApiService,
         private CommunityApiService $communityApiService,
         private CommunityDocumentApiService $documentApiService,
-        private UserApiService $userApiService,
+        private GridApiService $gridApiService,
     ) {
         $this->varDataPath = $parameters->get('upload_path');
     }
@@ -55,6 +58,22 @@ class CommunityController extends AbstractController implements ApiControllerInt
             $response = $this->communityApiService->getCommunities($name, $page, $limit, $sort);
 
             return new JsonResponse($response);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
+    /**
+     * @param array<string> $fields
+     */
+    #[Route('/{communityId}', name: 'get_community', requirements: ['communityId' => '\d+'], methods: ['GET'])]
+    public function getCommunity(int $communityId, #[MapQueryParameter] ?array $fields = []): JsonResponse
+    {
+        try {
+            $community = $this->communityApiService->getCommunity($communityId, $fields);
+            $this->_complete($community);
+
+            return new JsonResponse($community);
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
@@ -119,11 +138,11 @@ class CommunityController extends AbstractController implements ApiControllerInt
         #[MapQueryParameter] string $sort,
     ): JsonResponse {
         try {
-            if (!in_array($filter, ['public', 'iam_member', 'affiliation'])) {
-                throw new ApiException('Le filtre doit être public, iam_member ou affiliation');
+            if (!in_array($filter, ['listed', 'iam_member', 'affiliation'])) {
+                throw new ApiException('Le filtre doit être listed, iam_member ou affiliation');
             }
 
-            if ('public' == $filter) {
+            if ('listed' == $filter) {
                 $result = $this->communityApiService->getCommunities($name, 1, self::SEARCH_LIMIT, $sort);
                 $response = $result['content'];
             } else {
@@ -131,22 +150,6 @@ class CommunityController extends AbstractController implements ApiControllerInt
             }
 
             return new JsonResponse($response);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
-    }
-
-    /**
-     * @param array<string> $fields
-     */
-    #[Route('/{communityId}', name: 'get_community', methods: ['GET'])]
-    public function getCommunity(int $communityId, #[MapQueryParameter] ?array $fields = []): JsonResponse
-    {
-        try {
-            $community = $this->communityApiService->getCommunity($communityId, $fields);
-            $community['documents'] = $this->documentApiService->getDocuments($communityId);
-
-            return new JsonResponse($community);
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
@@ -166,6 +169,62 @@ class CommunityController extends AbstractController implements ApiControllerInt
             $response = $this->communityApiService->getCommunityMembers($communityId, $roles, $page, $limit);
 
             return new JsonResponse($response);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
+    #[Route('/add', name: 'add', methods: ['POST'])]
+    public function add(Request $request): JsonResponse
+    {
+        try {
+            $name = $request->request->get('name');
+            $datas = ['name' => $name, 'active' => 'false'];
+
+            $community = $this->communityApiService->addCommunity($datas, null);
+
+            return new JsonResponse($community);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
+    #[Route('/update', name: 'update', methods: ['PUT'])]
+    public function update(Request $request): JsonResponse
+    {
+        try {
+            $name = $request->request->get('name');
+            $datas['name'] = $name;
+
+            $description = $request->request->get('description');
+            if ($description) {
+                $datas['description'] = $description;
+            }
+
+            // TODO DECOMMENTER
+            // $listed = $request->request->get('listed');
+
+            $keywords = $request->request->get('keywords');
+
+            // TODO DECOMMENTER
+            /* if ($keywords) {
+                $datas['keywords'] = $keywords;
+            } */
+
+            // open_with_email
+            $openWithEmail = $request->get('open_with_email');
+            if ($openWithEmail) {
+                $datas['open_with_email'] = $openWithEmail;
+            }
+            $openWithoutAffiliation = $request->get('open_without_affiliation');
+            if ($openWithoutAffiliation) {
+                $datas['open_without_affiliation'] = $openWithoutAffiliation;
+            }
+
+            $community = $this->communityApiService->addCommunity($datas, null);
+            $this->_complete($community);
+
+            return new JsonResponse($community);
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
@@ -227,12 +286,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
     {
         try {
             $logo = $request->files->get('logo');
-
-            $uuid = Uuid::v4();
-            $tempFileDir = join(DIRECTORY_SEPARATOR, [$this->varDataPath, $uuid]);
-            $tempFilePath = join(DIRECTORY_SEPARATOR, [$tempFileDir, $logo->getClientOriginalName()]);
-
-            $logo->move($tempFileDir, $logo->getClientOriginalName());
+            [$tempFileDir, $tempFilePath] = $this->_copyFile($logo);
 
             $this->communityApiService->updateLogo($communityId, $tempFilePath);
             $this->fs->remove($tempFileDir);
@@ -266,6 +320,21 @@ class CommunityController extends AbstractController implements ApiControllerInt
             return new JsonResponse(['user_id' => $userId]);
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
+    /**
+     * Ajout des documents et reformatage de openwithEmail.
+     *
+     * @param array<mixed> $community
+     *
+     * @return void
+     */
+    private function _complete(&$community)
+    {
+        // TODO SUPPRIMER, NORMALEMENT open_with_email existe
+        if (isset($community['open_with_email'])) {
+            $community['open_with_email'] = $this->_formatOpenWithEmail($community['open_with_email']);
         }
     }
 
@@ -327,5 +396,104 @@ class CommunityController extends AbstractController implements ApiControllerInt
 
         $url = $this->generateUrl('cartesgouvfr_app', [], UrlGeneratorInterface::ABSOLUTE_URL)."espace-collaboratif/$communityId/invitation";
         $this->mailerService->sendMail($email, $subject, 'Mailer/espaceco/member_invitation.html.twig', ['community' => $community, 'link' => $url]);
+    }
+
+    private function _copyFile(UploadedFile $file): array
+    {
+        $uuid = Uuid::v4();
+        $tempFileDir = join(DIRECTORY_SEPARATOR, [$this->varDataPath, $uuid]);
+        $tempFilePath = join(DIRECTORY_SEPARATOR, [$tempFileDir, $file->getClientOriginalName()]);
+
+        $file->move($tempFileDir, $file->getClientOriginalName());
+
+        return [$tempFileDir, $tempFilePath];
+    }
+
+    /**
+     * @param array<mixed> $documents
+     */
+    private function _manageDocuments(int $communityId, array $documents, Request $request): void
+    {
+        $oldDocuments = $this->documentApiService->getDocuments($communityId);
+        $oldIds = array_map(fn ($document) => $document->getId(), $oldDocuments);
+
+        foreach ($documents as $document) {
+            $id = $document['id'];
+            if ($id < 0) {  // Nouveau
+                $description = isset($document['description']) && '' !== $document['description'] ? $document['description'] : null;
+
+                $file = $request->files->get("file*$id");
+                [$fileDir, $filePath] = $this->_copyFile($file);
+                $this->documentApiService->addDocument($communityId, $document['title'], $description, $filePath);
+                $this->fs->remove($fileDir);
+                continue;
+            }
+
+            unset($oldIds[$id]);
+            $oldDocument = $this->documentApiService->getDocument($communityId, $id, ['title', 'description']);
+
+            $datas = [];
+            $description = isset($document['description']) && '' !== $document['description'] ? $document['description'] : null;
+            if ($oldDocument['title'] !== $document['title']) {
+                $datas['title'] = $document['title'];
+            }
+            if ($oldDocument['description'] !== $description) {
+                $datas['description'] = $description;
+            }
+            if (count($datas)) {
+                $this->documentApiService->updateDocument($communityId, $id, $datas);
+            }
+        }
+
+        // Suppression des autres ($oldIds restants)
+        foreach ($oldIds as $id) {
+            $this->documentApiService->deleteDocument($communityId, $id);
+        }
+    }
+
+    /**
+     * @param array<mixed> $openwithEmail
+     */
+    private function _formatOpenWithEmail(?array $openwithEmail): ?array
+    {
+        if (is_null($openwithEmail)) {
+            return null;
+        }
+
+        // Recuperation des grids
+        $tmpGrids = [];
+        foreach ($openwithEmail as $emailDomain => $grids) {
+            $g = explode(',', $grids);
+            $tmpGrids = [...$tmpGrids, ...$g];
+        }
+        $tmpGrids = array_unique($tmpGrids);
+
+        $allGrids = [];
+        foreach ($tmpGrids as $gridName) {
+            try {
+                $grid = $this->gridApiService->getGrid($gridName);
+                if (!$grid['deleted']) {
+                    $allGrids[$grid['name']] = $grid;
+                }
+            } catch (ApiException $ex) {
+                continue;
+            }
+        }
+
+        // Reformatage de openWithEmail
+        $newOpenwithEmail = [];
+        foreach ($openwithEmail as $emailDomain => $gNames) {
+            $gridNames = explode(',', $gNames);
+
+            $grids = [];
+            foreach ($gridNames as $gridName) {
+                if (isset($allGrids[$gridName])) {
+                    $grids[] = $allGrids[$gridName];
+                }
+            }
+            $newOpenwithEmail[] = ['email' => $emailDomain, 'grids' => $grids];
+        }
+
+        return $newOpenwithEmail;
     }
 }

@@ -3,15 +3,15 @@ import MuiDsfrThemeProvider from "@codegouvfr/react-dsfr/mui";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import { useQuery } from "@tanstack/react-query";
-import { FC, ReactNode } from "react";
+import { FC, ReactNode, useState } from "react";
 import { useDebounceValue } from "usehooks-ts";
-import { GetResponse, SearchGridFilters } from "../../../../../@types/app_espaceco";
-import { GridDTO } from "../../../../../@types/espaceco";
-import { useTranslation } from "../../../../../i18n/i18n";
-import RQKeys from "../../../../../modules/espaceco/RQKeys";
-import api from "../../../../api";
+import { GetResponse, SearchGridFilters } from "../../../../@types/app_espaceco";
+import { GridDTO } from "../../../../@types/espaceco";
+import { useTranslation } from "../../../../i18n/i18n";
+import RQKeys from "../../../../modules/espaceco/RQKeys";
+import api from "../../../api";
 
-import "../../../../../sass/components/autocomplete.scss";
+import "../../../../sass/components/autocomplete.scss";
 
 export type SearchGridsProps = {
     label: ReactNode;
@@ -25,15 +25,16 @@ export type SearchGridsProps = {
 const SearchGrids: FC<SearchGridsProps> = ({ label, hintText, filters, state, stateRelatedMessage, onChange }) => {
     const { t } = useTranslation("Search");
 
-    const [text, setText] = useDebounceValue("", 500);
+    const [search, setSearch] = useDebounceValue("", 500);
+    const [value, setValue] = useState<GridDTO | null>(null);
 
     const searchQuery = useQuery<GetResponse<GridDTO>>({
-        queryKey: RQKeys.searchGrids(text),
+        queryKey: RQKeys.searchGrids(search),
         queryFn: ({ signal }) => {
-            return api.grid.search(text, filters, { signal });
+            return api.grid.search(search, filters, { signal });
         },
         staleTime: 1000 * 60,
-        enabled: text.length >= 2,
+        enabled: search.length >= 2,
     });
 
     return (
@@ -64,6 +65,7 @@ const SearchGrids: FC<SearchGridsProps> = ({ label, hintText, filters, state, st
                         );
                     }} */
                     size={"small"}
+                    blurOnSelect={true}
                     loading={searchQuery.isLoading}
                     loadingText={t("loading")}
                     noOptionsText={t("no_results")}
@@ -72,10 +74,14 @@ const SearchGrids: FC<SearchGridsProps> = ({ label, hintText, filters, state, st
                     filterOptions={(x) => x}
                     renderInput={(params) => <TextField {...params} />}
                     isOptionEqualToValue={(option, v) => option.name === v.name}
-                    onInputChange={(_, v) => setText(v)}
+                    onInputChange={(_, v) => {
+                        setSearch(v);
+                    }}
                     onChange={(_, v) => {
                         onChange(v);
+                        setValue(null);
                     }}
+                    value={value}
                 />
             </MuiDsfrThemeProvider>
             {state !== "default" && (

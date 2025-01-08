@@ -279,12 +279,17 @@ const routeDefs = {
     espaceco_community_list: defineRoute(
         {
             page: param.query.optional.number.default(1),
-            filter: param.query.optional.string.default("public"),
+            filter: param.query.optional.string.default("listed"),
         },
         () => `${appRoot}/espace-collaboratif`
     ),
 
-    espaceco_create_community: defineRoute(`${appRoot}/espace-collaboratif/creer-un-guichet`),
+    espaceco_create_community: defineRoute(
+        {
+            communityId: param.path.number,
+        },
+        (p) => `${appRoot}/espace-collaboratif/creer-un-guichet/${p.communityId}`
+    ),
 
     espaceco_manage_community: defineRoute(
         {

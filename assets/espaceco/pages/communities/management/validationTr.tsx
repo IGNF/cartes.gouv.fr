@@ -8,7 +8,6 @@ export const { i18n } = declareComponentKeys<
     | "description.name.unique"
     | "description.name.minlength"
     | "description.name.maxlength"
-    | "description.desc.mandatory"
     | "description.desc.maxlength"
     | "description.logo.size_error"
     | "description.logo.dimensions_error"
@@ -31,7 +30,6 @@ export const ManageCommunityValidationsFrTranslations: Translations<"fr">["Manag
     "description.name.unique": "Ce nom existe déjà",
     "description.name.minlength": "Le nom doit faire au moins 2 caractères",
     "description.name.maxlength": "Le nom ne doit pas dépasser 80 caractères",
-    "description.desc.mandatory": "La description est obligatoire",
     "description.desc.maxlength": "La description ne doit pas faire plus de 1024 caractères",
     "description.logo.size_error": "La taille du fichier ne peut excéder 5 Mo",
     "description.logo.dimensions_error": "Les dimensions maximales de l'image sont de 400px x 400px",
@@ -42,10 +40,10 @@ export const ManageCommunityValidationsFrTranslations: Translations<"fr">["Manag
     "zoom.less_than": ({ field, v }) => `La valeur de ${field} doit être inférieure ou égale à ${v}`,
     "zoom.greater_than": ({ field, v }) => `La valeur de ${field} doit être supérieure ou égale à ${v}`,
     "zoom.extent.required": "La boîte englobante est obligatoire",
-    "description.modal.document.name.mandatory": "Le nom est obligatoire",
-    "description.modal.document.name.minlength": "Le nom doit faire au moins 10 caractères",
+    "description.modal.document.name.mandatory": "Le titre est obligatoire",
+    "description.modal.document.name.minlength": "Le titre doit faire au moins 10 caractères",
     "description.modal.document.file.mandatory": "Le fichier est obligatoire",
-    "description.modal.document.file.size_error": "La taille du fichier ne peut excéder 5 Mo",
+    "description.modal.document.file.size_error": "La taille du fichier ne peut excéder 15 Mo",
 };
 
 export const ManageCommunityValidationsEnTranslations: Translations<"en">["ManageCommunityValidations"] = {
@@ -54,7 +52,6 @@ export const ManageCommunityValidationsEnTranslations: Translations<"en">["Manag
     "description.name.unique": "Name already exists",
     "description.name.minlength": undefined,
     "description.name.maxlength": undefined,
-    "description.desc.mandatory": undefined,
     "description.desc.maxlength": undefined,
     "description.logo.size_error": undefined,
     "description.logo.dimensions_error": undefined,

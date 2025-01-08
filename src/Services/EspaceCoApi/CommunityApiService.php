@@ -6,6 +6,8 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Mime\Part\DataPart;
+use Symfony\Component\Mime\Part\Multipart\FormDataPart;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class CommunityApiService extends BaseEspaceCoApiService
@@ -56,6 +58,23 @@ class CommunityApiService extends BaseEspaceCoApiService
         $query = empty($fields) ? [] : ['fields' => implode(',', $fields)];
 
         return $this->request('GET', "communities/$communityId", [], $query);
+    }
+
+    /**
+     * @param array<mixed> $datas
+     */
+    public function addCommunity(array $datas, ?string $logoFilePath): array
+    {
+        $formFields = $datas;
+        if ($logoFilePath) {
+            $formFields['logo'] = DataPart::fromPath($logoFilePath);
+        }
+
+        $formData = new FormDataPart($formFields);
+        $body = $formData->bodyToIterable();
+        $headers = $formData->getPreparedHeaders()->toArray();
+
+        return $this->request('POST', 'communities', $body, [], $headers, true);
     }
 
     /**

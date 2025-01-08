@@ -87,7 +87,7 @@ const ManageCommunity: FC<ManageCommunityProps> = ({ communityId }) => {
                                 {(() => {
                                     switch (selectedTabId) {
                                         case "tab1":
-                                            return <Description community={communityQuery.data} />;
+                                            return <Description mode={"edition"} community={communityQuery.data} onSubmit={(datas) => console.log(datas)} />;
                                         case "tab3":
                                             return <ZoomAndCentering community={communityQuery.data} />;
                                         case "tab4":

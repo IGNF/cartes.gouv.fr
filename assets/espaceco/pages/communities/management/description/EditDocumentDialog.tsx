@@ -8,7 +8,7 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { ComponentKey, useTranslation } from "../../../../../i18n/i18n";
 
-import { DocumentDTO } from "../../../../../@types/espaceco";
+import { DocumentFormType } from "../../../../../@types/app_espaceco";
 import "../../../../../sass/pages/espaceco/community.scss";
 
 const EditDocumentDialogModal = createModal({
@@ -17,7 +17,7 @@ const EditDocumentDialogModal = createModal({
 });
 
 type EditDocumentDialogProps = {
-    editDocument?: DocumentDTO;
+    editDocument?: DocumentFormType;
     onModify: (data: object) => void;
 };
 

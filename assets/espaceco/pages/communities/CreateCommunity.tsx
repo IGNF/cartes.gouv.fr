@@ -1,29 +1,39 @@
-import Stepper from "@codegouvfr/react-dsfr/Stepper";
+import Alert from "@codegouvfr/react-dsfr/Alert";
+import { useQuery } from "@tanstack/react-query";
 import { FC, useState } from "react";
-import { useTranslation } from "../../../i18n/i18n";
-import { datastoreNavItems } from "../../../config/datastoreNavItems";
-import AppLayout from "../../../components/Layout/AppLayout";
-import { routes } from "../../../router/router";
-import Description from "./management/Description";
+import { CommunityFormMode } from "../../../@types/app_espaceco";
 import { CommunityResponseDTO } from "../../../@types/espaceco";
-
-const STEPS = {
-    DESCRIPTION: 1,
-    DATABASE: 2,
-    LAYERS: 3,
-    ZOOM_AND_CENTERING: 4,
-    TOOLS: 5,
-    REPORTS: 6,
-};
+import AppLayout from "../../../components/Layout/AppLayout";
+import LoadingText from "../../../components/Utils/LoadingText";
+import { datastoreNavItems } from "../../../config/datastoreNavItems";
+import { useTranslation } from "../../../i18n/i18n";
+import RQKeys from "../../../modules/espaceco/RQKeys";
+import { routes } from "../../../router/router";
+import api from "../../api";
+import { COMMUNITY_FORM_STEPS, CommunityStepper } from "./FormSteps";
+import Description from "./management/Description";
 
 const navItems = datastoreNavItems();
 
-const CreateCommunity: FC = () => {
+type CreateCommunityProps = {
+    communityId: number;
+};
+
+const CreateCommunity: FC<CreateCommunityProps> = ({ communityId }) => {
+    // const route = useRoute();
+
     const { t: tBreadcrumb } = useTranslation("Breadcrumb");
     const { t } = useTranslation("CreateCommunity");
 
-    const [community, setCommunity] = useState<CommunityResponseDTO | undefined>();
-    const [currentStep, setCurrentStep] = useState<number>(STEPS.DESCRIPTION);
+    const mode: CommunityFormMode = "creation";
+
+    const [currentStep, setCurrentStep] = useState<COMMUNITY_FORM_STEPS>(COMMUNITY_FORM_STEPS.DESCRIPTION);
+
+    const communityQuery = useQuery<CommunityResponseDTO>({
+        queryKey: RQKeys.community(communityId),
+        queryFn: () => api.community.getCommunity(communityId),
+        staleTime: 3600000,
+    });
 
     return (
         <AppLayout
@@ -38,17 +48,27 @@ const CreateCommunity: FC = () => {
             }}
             documentTitle={t("title")}
         >
-            <div>
-                <h1>{t("title")}</h1>
-                <Stepper
-                    currentStep={currentStep}
-                    stepCount={STEPS.REPORTS}
-                    title={t("step_title", { stepNumber: currentStep })}
-                    nextTitle={currentStep < STEPS.REPORTS ? t("step_title", { stepNumber: currentStep + 1 }) : ""}
-                />
-                {/* TODO */}
-                <div>{currentStep === STEPS.DESCRIPTION && <Description community={community} onSubmit={(datas) => console.log(datas)} />}</div>
-            </div>
+            {communityQuery.data?.active ? (
+                <Alert severity="error" closable={false} title={t("forbidden_access")} />
+            ) : (
+                <div>
+                    <h1>{t("title")}</h1>
+                    <CommunityStepper mode={mode} currentStep={currentStep} />
+                    {communityQuery.isError ? (
+                        <Alert severity="error" closable={false} title={t("fetch_failed")} />
+                    ) : communityQuery.isLoading ? (
+                        <LoadingText as={"h2"} message={t("loading")} />
+                    ) : (
+                        communityQuery.data && (
+                            <div>
+                                {currentStep === COMMUNITY_FORM_STEPS.DESCRIPTION && (
+                                    <Description mode={mode} community={communityQuery.data} onSubmit={(datas) => console.log(datas)} />
+                                )}
+                            </div>
+                        )
+                    )}
+                </div>
+            )}
         </AppLayout>
     );
 };
