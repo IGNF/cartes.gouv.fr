@@ -75,7 +75,7 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
                                         linkProps={
                                             routes.datastore_upload_details({
                                                 datastoreId,
-                                                uploadDataId: upload._id,
+                                                uploadId: upload._id,
                                                 datasheetName: upload.tags.datasheet_name,
                                             }).link
                                         }

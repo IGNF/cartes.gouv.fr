@@ -145,10 +145,10 @@ const routeDefs = {
     datastore_upload_details: defineRoute(
         {
             datastoreId: param.path.string,
-            uploadDataId: param.path.string,
+            uploadId: param.path.string,
             datasheetName: param.query.optional.string,
         },
-        (p) => `${appRoot}/entrepot/${p.datastoreId}/livraisons/${p.uploadDataId}/rapport`
+        (p) => `${appRoot}/entrepot/${p.datastoreId}/livraisons/${p.uploadId}/rapport`
     ),
 
     // Creer et publier un service WFS

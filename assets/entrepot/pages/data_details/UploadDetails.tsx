@@ -17,10 +17,10 @@ import ReportTab from "./ReportTab/ReportTab";
 
 type UploadDetailsProps = {
     datastoreId: string;
-    uploadDataId: string;
+    uploadId: string;
 };
 
-const UploadDetails: FC<UploadDetailsProps> = ({ datastoreId, uploadDataId }) => {
+const UploadDetails: FC<UploadDetailsProps> = ({ datastoreId, uploadId }) => {
     const datastoreQuery = useQuery({
         queryKey: RQKeys.datastore(datastoreId),
         queryFn: ({ signal }) => api.datastore.get(datastoreId, { signal }),
@@ -28,8 +28,8 @@ const UploadDetails: FC<UploadDetailsProps> = ({ datastoreId, uploadDataId }) =>
     });
 
     const reportQuery = useQuery<UploadReport, CartesApiException>({
-        queryKey: RQKeys.datastore_upload_report(datastoreId, uploadDataId),
-        queryFn: ({ signal }) => api.upload.getUploadReport(datastoreId, uploadDataId, { signal }),
+        queryKey: RQKeys.datastore_upload_report(datastoreId, uploadId),
+        queryFn: ({ signal }) => api.upload.getUploadReport(datastoreId, uploadId, { signal }),
         staleTime: 3600000,
     });
 
