@@ -16,7 +16,7 @@ class CommunityDocumentApiService extends BaseEspaceCoApiService
         ParameterBagInterface $parameters,
         Filesystem $filesystem,
         RequestStack $requestStack,
-        LoggerInterface $logger
+        LoggerInterface $logger,
     ) {
         parent::__construct($httpClient, $parameters, $filesystem, $requestStack, $logger);
     }
@@ -29,13 +29,23 @@ class CommunityDocumentApiService extends BaseEspaceCoApiService
         return $this->request('GET', "communities/$communityId/documents", ['fields' => $fields]);
     }
 
-    public function addDocument(int $communityId, string $title, string $description, string $tempFilePath): array
+    /**
+     * @param array<string> $fields
+     */
+    public function getDocument(int $communityId, int $documentId, array $fields = []): array
+    {
+        return $this->request('GET', "communities/$communityId/documents/$communityId", ['fields' => $fields]);
+    }
+
+    public function addDocument(int $communityId, string $title, ?string $description, string $tempFilePath): array
     {
         $formFields = [
             'title' => $title,
-            'description' => $description,
+            'document' => DataPart::fromPath($tempFilePath),
         ];
-        $formFields['document'] = DataPart::fromPath($tempFilePath);
+        if (!is_null($description)) {
+            $formFields['description'] = $description;
+        }
 
         $formData = new FormDataPart($formFields);
         $body = $formData->bodyToIterable();

@@ -10,9 +10,12 @@ import { createPortal } from "react-dom";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { ComponentKey, useTranslation } from "../../../../../i18n/i18n";
+
 import placeholder1x1 from "../../../../../img/placeholder.1x1.png";
 
+import { appRoot } from "../../../../../router/router";
 import "../../../../../sass/pages/espaceco/community.scss";
+import { getThumbnail } from "../../../../esco_utils";
 
 const AddDocumentDialogModal = createModal({
     id: "add-document-modal",
@@ -47,8 +50,9 @@ const AddDocumentDialog: FC<AddDocumentDialogProps> = ({ onAdd }) => {
                         if (file === undefined) return true;
 
                         const size = file.size / 1024 / 1024;
-                        return size < 5;
-                    }),
+                        return size < 15;
+                    })
+                    .required(),
             }),
         []
     );
@@ -96,13 +100,9 @@ const AddDocumentDialog: FC<AddDocumentDialogProps> = ({ onAdd }) => {
         if (!documentFile) {
             return;
         }
-        if (/image/.test(documentFile.type)) {
-            const reader = new FileReader();
-            reader.onload = () => {
-                setModalImageUrl(reader.result as string);
-            };
-            reader.readAsDataURL(documentFile);
-        }
+        getThumbnail(appRoot, documentFile).then((uri) => {
+            setModalImageUrl(uri ? uri : "");
+        });
     }, [documentFile]);
 
     return (

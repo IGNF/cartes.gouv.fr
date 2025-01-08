@@ -23,6 +23,8 @@ export const { i18n } = declareComponentKeys<
     | "desc.description"
     | "desc.hint_description"
     | "desc.logo"
+    | "desc.hint_logo"
+    | "desc.logo.remove"
     | "desc.logo.title"
     | { K: "logo_action"; P: { action: logoAction }; R: string }
     | { K: "running_action"; P: { action: logoAction }; R: string }
@@ -37,6 +39,22 @@ export const { i18n } = declareComponentKeys<
     | "desc.updating_document"
     | "desc.confirm_remove_document"
     | "desc.removing_document"
+    | "desc.listed.title"
+    | "desc.listed_hint"
+    | "desc.membership_requests.title"
+    | "desc.membership_requests.open"
+    | "desc.membership_requests.not_open"
+    | "desc.membership_requests.not_open_hint"
+    | "desc.membership_requests.partial_open"
+    | "desc.membership_requests.partial_open_hint"
+    | "desc.membership_request.partial_open.parameter"
+    | "desc.openwithemail_not_empty"
+    | "desc.openwithemail_no_domains"
+    | "desc.openwithemail.domains_header"
+    | "desc.openwithemail.grids_header"
+    | "modal.openwithemail.title"
+    | "modal.openwithemail.add_domain"
+    | { K: "modal.openwithemail.grids_not_empty_error"; P: { domain: string }; R: string }
     | "modal.document.title"
     | "modal.document.title_field"
     | "modal.document.description"
@@ -112,6 +130,8 @@ export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"
     "desc.description": "Description",
     "desc.hint_description": "Bref résumé narratif de l'objectif du guichet",
     "desc.logo": "Logo (optionnel)",
+    "desc.hint_logo": "Taille maximale : 5 Mo. Formats acceptés : jpg, png",
+    "desc.logo.remove": "Supprimer le logo",
     "desc.logo.title": "Ajouter, modifier ou supprimer le logo du guichet",
     logo_action: ({ action }) => {
         switch (action) {
@@ -145,6 +165,22 @@ export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"
     "desc.updating_document": "Modification d'un document en cours ...",
     "desc.confirm_remove_document": "Êtes-vous sûr de vouloir supprimer ce document ?",
     "desc.removing_document": "Suppression du document en cours ...",
+    "desc.listed.title": "Le guichet doit-il apparaître dans la liste des guichets publics ?",
+    "desc.listed_hint": "Un guichet non listé n’apparaitra pas dans la liste des guichets",
+    "desc.membership_requests.title": "Le guichet est-il ouvert aux demandes d’affiliation ?",
+    "desc.membership_requests.open": "Le guichet accepte toutes les demandes d’affiliation automatiquement",
+    "desc.membership_requests.not_open": "Le guichet est ouvert aux demandes d’affiliation",
+    "desc.membership_requests.not_open_hint": "Les demandes devront néanmoins être validées par le gestionnaire ou administrateur du guichet",
+    "desc.membership_requests.partial_open": "Le guichet accepte certaines demandes d’affiliation",
+    "desc.membership_requests.partial_open_hint": "Vous devez paramétrer les types de comptes acceptés",
+    "desc.membership_request.partial_open.parameter": "Paramétrer",
+    "desc.openwithemail_not_empty": "Si Le guichet accepte certaines demandes d’affiliation, il doit y avoir au moins un domaine configuré",
+    "desc.openwithemail_no_domains": "Aucun domaine de configuré",
+    "desc.openwithemail.domains_header": "Domaines acceptés",
+    "desc.openwithemail.grids_header": "Emprises",
+    "modal.openwithemail.title": "Paramétrer les domaines acceptés pour les demandes d’affiliation",
+    "modal.openwithemail.add_domain": "Ajouter un domaine accepté (doit commencer par un @)",
+    "modal.openwithemail.grids_not_empty_error": ({ domain }) => `Le domaine ${domain} doit avoir au moins une emprise`,
     "modal.document.title": "Ajouter un document",
     "modal.document.title_field": "Titre",
     "modal.document.description": "Description (optionnel)",
@@ -232,6 +268,8 @@ export const ManageCommunityEnTranslations: Translations<"en">["ManageCommunity"
     "desc.description": undefined,
     "desc.hint_description": undefined,
     "desc.logo": undefined,
+    "desc.hint_logo": undefined,
+    "desc.logo.remove": undefined,
     "desc.logo.title": undefined,
     logo_action: ({ action }) => {
         switch (action) {
@@ -255,6 +293,22 @@ export const ManageCommunityEnTranslations: Translations<"en">["ManageCommunity"
     "desc.updating_document": undefined,
     "desc.confirm_remove_document": undefined,
     "desc.removing_document": undefined,
+    "desc.listed.title": undefined,
+    "desc.listed_hint": undefined,
+    "desc.membership_requests.title": undefined,
+    "desc.membership_requests.open": undefined,
+    "desc.membership_requests.not_open": undefined,
+    "desc.membership_requests.not_open_hint": undefined,
+    "desc.membership_requests.partial_open": undefined,
+    "desc.membership_requests.partial_open_hint": undefined,
+    "desc.membership_request.partial_open.parameter": "Parameter",
+    "desc.openwithemail_not_empty": undefined,
+    "desc.openwithemail_no_domains": undefined,
+    "desc.openwithemail.domains_header": undefined,
+    "desc.openwithemail.grids_header": undefined,
+    "modal.openwithemail.title": undefined,
+    "modal.openwithemail.add_domain": "Add accepted domain",
+    "modal.openwithemail.grids_not_empty_error": undefined,
     "modal.document.title": "Add document",
     "modal.document.title_field": "Title",
     "modal.document.description": "Description (optional)",

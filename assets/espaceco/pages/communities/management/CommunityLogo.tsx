@@ -25,8 +25,7 @@ import "../../../../sass/components/buttons.scss";
 import api from "../../../api";
 
 type CommunityLogoProps = {
-    communityId: number;
-    logoUrl: string | null;
+    community: CommunityResponseDTO;
 };
 
 const AddLogoModal = createModal({
@@ -70,7 +69,7 @@ const schema = (t: TranslationFunction<"ManageCommunityValidations", ComponentKe
             }),
     });
 
-const CommunityLogo: FC<CommunityLogoProps> = ({ communityId, logoUrl }) => {
+const CommunityLogo: FC<CommunityLogoProps> = ({ community }) => {
     const { t: tCommon } = useTranslation("Common");
     const { t: tValidation } = useTranslation("ManageCommunityValidations");
     const { t } = useTranslation("ManageCommunity");
@@ -79,12 +78,12 @@ const CommunityLogo: FC<CommunityLogoProps> = ({ communityId, logoUrl }) => {
     useEffect(() => {
         setIsValid(false);
 
-        if (logoUrl) {
-            fetch(logoUrl).then((res) => {
+        if (community.logo_url) {
+            fetch(community.logo_url).then((res) => {
                 setIsValid(() => res.status === 200);
             });
         }
-    }, [logoUrl]);
+    }, [community]);
 
     const action: logoAction = useMemo(() => (isValid ? "modify" : "add"), [isValid]);
 
@@ -100,12 +99,12 @@ const CommunityLogo: FC<CommunityLogoProps> = ({ communityId, logoUrl }) => {
         mutationFn: () => {
             const form = new FormData();
             form.append("logo", upload);
-            return api.community.updateLogo(communityId, form);
+            return api.community.updateLogo(community.id, form);
         },
         onSuccess: (response) => {
             AddLogoModal.close();
 
-            queryClient.setQueryData<CommunityResponseDTO>(RQKeys.community(communityId), (community) =>
+            queryClient.setQueryData<CommunityResponseDTO>(RQKeys.community(community.id), (community) =>
                 community ? { ...community, logo_url: response.logo_url } : community
             );
         },
@@ -116,14 +115,9 @@ const CommunityLogo: FC<CommunityLogoProps> = ({ communityId, logoUrl }) => {
 
     // Suppression de la vignette
     const removeLogoMutation = useMutation<null, CartesApiException>({
-        mutationFn: () => {
-            if (communityId) {
-                return api.community.removeLogo(communityId);
-            }
-            return Promise.resolve(null);
-        },
+        mutationFn: () => api.community.removeLogo(community.id),
         onSuccess: () => {
-            queryClient.setQueryData<CommunityResponseDTO>(RQKeys.community(communityId), (community) =>
+            queryClient.setQueryData<CommunityResponseDTO>(RQKeys.community(community.id), (community) =>
                 community ? { ...community, logo_url: null } : community
             );
         },
@@ -190,11 +184,11 @@ const CommunityLogo: FC<CommunityLogoProps> = ({ communityId, logoUrl }) => {
     return (
         <div className={fr.cx("fr-input-group")}>
             <label className={fr.cx("fr-label")}>{t("desc.logo")}</label>
-            <div className={cx(fr.cx("fr-mt-1v"), "frx-thumbnail")} aria-label={t("desc.logo.title")} title={t("desc.logo.title")} ref={logoDivRef}>
+            <div className={cx(fr.cx("fr-mt-1v"), "frx-community-logo")} aria-label={t("desc.logo.title")} title={t("desc.logo.title")} ref={logoDivRef}>
                 <img
                     className={logoIsHovered ? "frx-btn--transparent fr-img--transparent-transition" : ""}
                     loading="lazy"
-                    src={isValid ? logoUrl : placeholder1x1}
+                    src={isValid ? community.logo_url : placeholder1x1}
                     onError={({ currentTarget }) => {
                         currentTarget.onerror = null; // prevents looping
                         currentTarget.src = placeholder1x1;

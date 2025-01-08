@@ -1,43 +1,46 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
-import { FC } from "react";
+import { FC, ReactNode, useMemo } from "react";
 import { CommunityResponseDTO } from "../../../@types/espaceco";
 import useToggle from "../../../hooks/useToggle";
 import { useTranslation } from "../../../i18n/i18n";
-
+import { routes } from "../../../router/router";
 import placeholder1x1 from "../../../img/placeholder.1x1.png";
 
 import "../../../sass/pages/espaceco/community.scss";
-import { routes } from "../../../router/router";
-import { useApiEspaceCoStore } from "../../../stores/ApiEspaceCoStore";
 
 type CommunityListItemProps = {
     className?: string;
     community: CommunityResponseDTO;
 };
+
 const CommunityListItem: FC<CommunityListItemProps> = ({ className, community }) => {
     const { t } = useTranslation("CommunityList");
     const { t: tCommon } = useTranslation("Common");
 
-    /* TODO PROVISOIRE A SUPPRIMER ------------- */
-    const url = useApiEspaceCoStore((state) => state.api_espaceco_url);
-    const espacecoUrl = url?.replace("/gcms/api", "");
-    const appEnv = document.getElementById("root")?.dataset?.appEnv?.toLowerCase();
-    const link =
-        appEnv === "dev"
-            ? routes.espaceco_manage_community({ communityId: community.id }).link
-            : espacecoUrl
-              ? { href: `${espacecoUrl}/group/${community.id}`, target: "_blank" }
-              : { href: "#" };
-    /* ----------------------------------------- */
-
     const [showDescription, toggleShowDescription] = useToggle(false);
+    const buttonProps = useMemo(() => {
+        return community.active
+            ? { link: routes.espaceco_manage_community({ communityId: community.id }).link, title: tCommon("modify") }
+            : { link: routes.espaceco_create_community({ communityId: community.id }).link, title: t("append_community") };
+    }, [community, t, tCommon]);
+
+    const infos = useMemo(() => {
+        if ((community.description === null || community.description === undefined) && (community.about === null || community.about === undefined)) {
+            return null;
+        }
+
+        const children: ReactNode[] = [];
+        if (community.description) children.push(<p dangerouslySetInnerHTML={{ __html: community.description }} />);
+        if (community.about) children.push(<p dangerouslySetInnerHTML={{ __html: community.about }} />);
+        return <div style={{ backgroundColor: fr.colors.decisions.background.default.grey.default }}>{children}</div>;
+    }, [community]);
 
     return (
         <>
             <div className={cx(fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-my-2v", "fr-my-2v", "fr-p-2v"), className ?? "")}>
-                <div className={fr.cx("fr-col-5")}>
+                <div className={fr.cx("fr-col-7")}>
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-grid-row--left")}>
                         <Button
                             iconId={showDescription ? "ri-subtract-fill" : "ri-add-fill"}
@@ -59,14 +62,14 @@ const CommunityListItem: FC<CommunityListItemProps> = ({ className, community })
                         <span className={fr.cx("fr-ml-2v")}>{community.name}</span>
                     </div>
                 </div>
-                <div className={fr.cx("fr-col-5", "fr-px-2v")}>
-                    <div dangerouslySetInnerHTML={{ __html: community.description ?? "" }} />
-                </div>
-                <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-col-1", "fr-px-2v")}>
-                    <Button title={tCommon("modify")} priority="secondary" iconId="fr-icon-edit-line" size="small" linkProps={link} />
+                <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-col-5", "fr-px-2v")}>
+                    <Button priority="secondary" size="small" linkProps={buttonProps.link}>
+                        {buttonProps.title}
+                    </Button>
                 </div>
             </div>
-            {community.detailed_description && <div className={fr.cx("fr-grid-row")} dangerouslySetInnerHTML={{ __html: community.detailed_description }} />}
+            {}
+            {showDescription && infos}
         </>
     );
 };

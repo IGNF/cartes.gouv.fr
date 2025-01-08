@@ -1,4 +1,6 @@
-import { BasicRecipients, EmailPlannerDTO, GridDTO, ReportStatusesDTO, SharedGeorem, SharedThemesDTO, ThemeDTO, UserDTO } from "./espaceco";
+import { BasicRecipients, DocumentDTO, EmailPlannerDTO, GridDTO, ReportStatusesDTO, SharedGeorem, SharedThemesDTO, ThemeDTO, UserDTO } from "./espaceco";
+
+export type AtLeast<T, K extends keyof T> = Partial<T> & Pick<T, K>;
 
 export type GetResponse<T> = {
     content: T[];
@@ -7,7 +9,7 @@ export type GetResponse<T> = {
     nextPage: number;
 };
 
-export const arrCommunityListFilters = ["public", "iam_member", "affiliation"] as const;
+export const arrCommunityListFilters = ["listed", "iam_member", "affiliation"] as const;
 export type CommunityListFilter = (typeof arrCommunityListFilters)[number];
 
 export type Address = {
@@ -92,6 +94,28 @@ export type UserMe = {
 };
 
 /* FORMULAIRES */
+export type CommunityFormMode = "creation" | "edition";
+
+export type DocumentFormType = AtLeast<DocumentDTO, "id" | "title"> & { file?: File };
+
+export const MembershipRequestValues = ["open", "not_open", "partially_open"] as const;
+export type MembershipRequestType = (typeof MembershipRequestValues)[number];
+
+export type OpenWithEmailType = {
+    email: string;
+    grids: GridDTO[];
+};
+
+export type DescriptionFormType = {
+    name: string;
+    description?: string;
+    keywords?: string[];
+    logo?: unknown | null;
+    listed: boolean;
+    membershipRequest: MembershipRequestType;
+    openWithEmail: OpenWithEmailType[];
+};
+
 export type ReportFormType = {
     attributes: ThemeDTO[];
     report_statuses: ReportStatusesDTO;
@@ -99,12 +123,6 @@ export type ReportFormType = {
     shared_themes?: SharedThemesDTO[];
     shared_georem: SharedGeorem;
     all_members_can_valid: boolean;
-};
-
-export type DescriptionFormType = {
-    name: string;
-    description?: string;
-    keywords?: string[];
 };
 
 /* email planners */

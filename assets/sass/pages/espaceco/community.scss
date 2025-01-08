@@ -42,3 +42,16 @@
         max-width: 64px;
     }
 }
+
+.fr-table {
+    margin-top: 0;
+    margin-bottom: 0;
+    table > td {
+        padding: 0;
+    }
+}
+
+.frx-openwithemail {
+    max-height: 300px;
+    overflow: auto;
+}

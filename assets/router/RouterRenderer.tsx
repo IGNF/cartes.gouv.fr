@@ -46,7 +46,7 @@ const RouterRenderer: FC = () => {
                 case "espaceco_community_list":
                     return <EspaceCoCommunityList />;
                 case "espaceco_create_community":
-                    return <EspaceCoCreateCommunity />;
+                    return <EspaceCoCreateCommunity communityId={route.params.communityId} />;
                 case "espaceco_manage_community":
                     return <EspaceCoManageCommunity communityId={route.params.communityId} />;
                 case "espaceco_member_invitation":

@@ -10,7 +10,7 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { SearchGridFilters } from "../../../../../@types/app_espaceco";
 import { useTranslation } from "../../../../../i18n/i18n";
-import SearchGrids from "./SearchGrids";
+import SearchGrids from "../SearchGrids";
 
 type ExtentDialogProps = {
     onCancel: () => void;

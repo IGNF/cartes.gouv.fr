@@ -13,6 +13,23 @@ const get = (queryParams: { page: number; limit: number }, signal: AbortSignal) 
     });
 };
 
+const add = (data: FormData) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_espaceco_community_add");
+    return jsonFetch<CommunityResponseDTO>(
+        url,
+        {
+            method: "POST",
+        },
+        data,
+        true
+    );
+};
+
+const update = (data: FormData | object) => {
+    // TODO
+    console.log(data);
+};
+
 const getCommunitiesName = () => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_espaceco_community_get_names");
     return jsonFetch<string[]>(url);
@@ -129,6 +146,8 @@ const removeMember = (communityId: number, userId: number) => {
 
 const community = {
     get,
+    add,
+    update,
     getCommunitiesName,
     getCommunity,
     getCommunityMembers,
