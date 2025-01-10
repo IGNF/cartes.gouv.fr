@@ -1,12 +1,11 @@
-import { fr } from "@codegouvfr/react-dsfr";
 import { useQuery } from "@tanstack/react-query";
 import { FC, useMemo } from "react";
 
 import type { PyramidRaster, PyramidVector, Service, VectorDb } from "../../../../../@types/app";
-import { ConfigurationTypeEnum, StoredDataTypeEnum } from "../../../../../@types/app";
-import LoadingText from "../../../../../components/Utils/LoadingText";
+import { ConfigurationTypeEnum } from "../../../../../@types/app";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import api from "../../../../api";
+import Desc from "../Desc";
 
 type ServiceDescProps = {
     service: Service;
@@ -58,51 +57,11 @@ const ServiceDesc: FC<ServiceDescProps> = ({ service, datastoreId }) => {
     });
 
     return (
-        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mt-2v", "fr-ml-10v")}>
-            <div className={fr.cx("fr-col")}>
-                {(pyramidUsedQuery.isFetching || vectorDbUsedQuery.isFetching) && <LoadingText as="p" withSpinnerIcon={true} />}
-
-                {vectorDbUsedQuery.data && (
-                    <div
-                        className={fr.cx("fr-grid-row", "fr-mt-2v", "fr-p-2v")}
-                        style={{ backgroundColor: fr.colors.decisions.background.default.grey.default }}
-                    >
-                        <div className={fr.cx("fr-col", "fr-col-md-4")}>
-                            <span className={fr.cx("fr-icon-database-fill")} /> Base de données utilisée
-                        </div>
-                        <div className={fr.cx("fr-col")}>
-                            <ul className={fr.cx("fr-raw-list")}>
-                                <li>{vectorDbUsedQuery.data.name}</li>
-                            </ul>
-                        </div>
-                    </div>
-                )}
-
-                {pyramidUsedQuery.data && (
-                    <div
-                        className={fr.cx("fr-grid-row", "fr-mt-2v", "fr-p-2v")}
-                        style={{ backgroundColor: fr.colors.decisions.background.default.grey.default }}
-                    >
-                        <div className={fr.cx("fr-col", "fr-col-md-4")}>
-                            <span className={fr.cx("ri-stack-line")} />{" "}
-                            {(() => {
-                                switch (pyramidUsedQuery.data.type) {
-                                    case StoredDataTypeEnum.ROK4PYRAMIDVECTOR:
-                                        return "Pyramide de tuiles vectorielles utilisée";
-                                    case StoredDataTypeEnum.ROK4PYRAMIDRASTER:
-                                        return "Pyramide de tuiles raster utilisée";
-                                }
-                            })()}
-                        </div>
-                        <div className={fr.cx("fr-col")}>
-                            <ul className={fr.cx("fr-raw-list")}>
-                                <li>{pyramidUsedQuery.data.name}</li>
-                            </ul>
-                        </div>
-                    </div>
-                )}
-            </div>
-        </div>
+        <Desc
+            isFetching={pyramidUsedQuery.isFetching || vectorDbUsedQuery.isFetching}
+            databaseUsed={vectorDbUsedQuery.data?.name}
+            pyramidUsed={pyramidUsedQuery.data}
+        />
     );
 };
 

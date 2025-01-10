@@ -23,7 +23,7 @@ type MenuListItemWithLinkProps = {
     linkProps: RegisteredLinkProps;
 };
 
-type MenuListItem = MenuListItemCommon &
+export type MenuListItem = MenuListItemCommon &
     // onClick et linkProps sont mutuellement exclusifs
     (MenuListItemWithOnClick | MenuListItemWithLinkProps);
 

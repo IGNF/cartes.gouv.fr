@@ -11,15 +11,15 @@ import { PyramidVector, StoredDataStatusEnum } from "../../../../../../@types/ap
 import StoredDataStatusBadge from "../../../../../../components/Utils/Badges/StoredDataStatusBadge";
 import LoadingIcon from "../../../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../../../components/Utils/LoadingText";
-import MenuList from "../../../../../../components/Utils/MenuList";
 import Wait from "../../../../../../components/Utils/Wait";
 import useToggle from "../../../../../../hooks/useToggle";
 import { getTranslation, useTranslation } from "../../../../../../i18n/i18n";
 import RQKeys from "../../../../../../modules/entrepot/RQKeys";
 import { routes } from "../../../../../../router/router";
-import { formatDateFromISO, offeringTypeDisplayName } from "../../../../../../utils";
+import { offeringTypeDisplayName } from "../../../../../../utils";
 import api from "../../../../../api";
 import PyramidStoredDataDesc from "../PyramidStoredDataDesc";
+import ListItem from "../../ListItem";
 
 type PyramidVectorListItemProps = {
     datasheetName: string;
@@ -64,66 +64,42 @@ const PyramidVectorListItem: FC<PyramidVectorListItemProps> = ({ datasheetName, 
 
     return (
         <>
-            <div className={fr.cx("fr-p-2v", "fr-mt-2v")} style={{ backgroundColor: fr.colors.decisions.background.contrast.grey.default }}>
-                <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                    <div className={fr.cx("fr-col")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-my-2v")}>
-                            <Button
-                                iconId={showDescription ? "ri-subtract-fill" : "ri-add-fill"}
-                                size="small"
-                                title={t("show_linked_datas")}
-                                className={fr.cx("fr-mr-2v")}
-                                priority="secondary"
-                                onClick={toggleShowDescription}
-                            />
-                            {pyramid.name}
-                            {pyramid.tags?.is_sample === "true" && (
-                                <Badge noIcon={true} severity={"info"} className={fr.cx("fr-ml-2v")}>
-                                    Echantillon
-                                </Badge>
-                            )}
-                        </div>
-                    </div>
+            <ListItem
+                actionButton={
+                    <Button
+                        onClick={() => {
+                            routes.datastore_pyramid_vector_tms_service_new({ datastoreId, pyramidId: pyramid._id, datasheetName }).push();
+                        }}
+                        className={fr.cx("fr-mr-2v")}
+                        priority="secondary"
+                        disabled={pyramid.status !== StoredDataStatusEnum.GENERATED}
+                    >
+                        {t("publish_tms_service")}
+                    </Button>
+                }
+                badge={<StoredDataStatusBadge status={pyramid.status} />}
+                buttonTitle={t("show_linked_datas")}
+                date={pyramid?.last_event?.date}
+                isSample
+                menuListItems={[
+                    {
+                        text: t("show_details"),
+                        iconId: "fr-icon-file-text-fill",
+                        linkProps: routes.datastore_stored_data_details({ datastoreId, datasheetName, storedDataId: pyramid._id }).link,
+                    },
+                    {
+                        text: tCommon("delete"),
+                        iconId: "fr-icon-delete-line",
+                        onClick: () => confirmRemovePyramidModal.open(),
+                    },
+                ]}
+                name={pyramid.name}
+                showDescription={showDescription}
+                toggleShowDescription={toggleShowDescription}
+            >
+                <PyramidStoredDataDesc datastoreId={datastoreId} pyramid={pyramid} dataUsesQuery={dataUsesQuery} />
+            </ListItem>
 
-                    <div className={fr.cx("fr-col")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-grid-row--middle")}>
-                            <p className={fr.cx("fr-m-auto", "fr-mr-2v")}>{pyramid?.last_event?.date && formatDateFromISO(pyramid?.last_event?.date)}</p>
-                            <StoredDataStatusBadge status={pyramid.status} />
-                            <Button
-                                onClick={() => {
-                                    routes.datastore_pyramid_vector_tms_service_new({ datastoreId, pyramidId: pyramid._id, datasheetName }).push();
-                                }}
-                                className={fr.cx("fr-mr-2v")}
-                                priority="secondary"
-                                disabled={pyramid.status !== StoredDataStatusEnum.GENERATED}
-                            >
-                                {t("publish_tms_service")}
-                            </Button>
-                            <MenuList
-                                menuOpenButtonProps={{
-                                    iconId: "fr-icon-menu-2-fill",
-                                    title: t("other_actions"),
-                                    priority: "secondary",
-                                }}
-                                // disabled={pyramid.status !== StoredDataStatuses.GENERATED}
-                                items={[
-                                    {
-                                        text: t("show_details"),
-                                        iconId: "fr-icon-file-text-fill",
-                                        linkProps: routes.datastore_stored_data_details({ datastoreId, datasheetName, storedDataId: pyramid._id }).link,
-                                    },
-                                    {
-                                        text: tCommon("delete"),
-                                        iconId: "fr-icon-delete-line",
-                                        onClick: () => confirmRemovePyramidModal.open(),
-                                    },
-                                ]}
-                            />
-                        </div>
-                    </div>
-                </div>
-                {showDescription && <PyramidStoredDataDesc datastoreId={datastoreId} pyramid={pyramid} dataUsesQuery={dataUsesQuery} />}
-            </div>
             {deletePyramidMutation.error && (
                 <Alert
                     title={t("error_deleting", { pyramidName: pyramid.name })}

@@ -11,16 +11,16 @@ import { DatastoreEndpoint, EndpointTypeEnum, OfferingTypeEnum, PyramidRaster, S
 import StoredDataStatusBadge from "../../../../../../components/Utils/Badges/StoredDataStatusBadge";
 import LoadingIcon from "../../../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../../../components/Utils/LoadingText";
-import MenuList from "../../../../../../components/Utils/MenuList";
 import Wait from "../../../../../../components/Utils/Wait";
 import useToggle from "../../../../../../hooks/useToggle";
 import { useTranslation } from "../../../../../../i18n/i18n";
 import RQKeys from "../../../../../../modules/entrepot/RQKeys";
 import { routes } from "../../../../../../router/router";
-import { formatDateFromISO, offeringTypeDisplayName } from "../../../../../../utils";
+import { offeringTypeDisplayName } from "../../../../../../utils";
 import api from "../../../../../api";
 import PyramidStoredDataDesc from "../PyramidStoredDataDesc";
 import { PyramidRasterServiceChoiceDialog, type PyramidRasterServiceChoiceDialogProps } from "./PyramidRasterServiceChoiceDialog";
+import ListItem from "../../ListItem";
 
 const getHintText = (endpoints: DatastoreEndpoint[]): ReactNode => (
     <ul className={fr.cx("fr-raw-list")}>
@@ -103,103 +103,82 @@ const PyramidRasterListItem: FC<PyramidRasterListItemProps> = ({ datasheetName, 
 
     return (
         <>
-            <div className={fr.cx("fr-p-2v", "fr-mt-2v")} style={{ backgroundColor: fr.colors.decisions.background.contrast.grey.default }}>
-                <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                    <div className={fr.cx("fr-col")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-my-2v")}>
-                            <Button
-                                iconId={showDescription ? "ri-subtract-fill" : "ri-add-fill"}
-                                size="small"
-                                title={t("show_linked_datas")}
-                                className={fr.cx("fr-mr-2v")}
-                                priority="secondary"
-                                onClick={toggleShowDescription}
-                            />
-                            {pyramid.name}
-                        </div>
-                    </div>
+            <ListItem
+                actionButton={
+                    <Button
+                        onClick={async () => {
+                            if (serviceChoiceDialogActions.current.open === undefined) return;
 
-                    <div className={fr.cx("fr-col")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-grid-row--middle")}>
-                            <p className={fr.cx("fr-m-auto", "fr-mr-2v")}>{pyramid?.last_event?.date && formatDateFromISO(pyramid?.last_event?.date)}</p>
-                            <StoredDataStatusBadge status={pyramid.status} />
-                            <Button
-                                onClick={async () => {
-                                    if (serviceChoiceDialogActions.current.open === undefined) return;
-
-                                    const { response: serviceType } = await serviceChoiceDialogActions.current.open({
-                                        title: t("choose_service_type"),
-                                        options: [
-                                            {
-                                                id: OfferingTypeEnum.WMSRASTER,
-                                                text: t("wms_raster_label"),
-                                                hintText: (
-                                                    <>
-                                                        {t("wms_raster_hint_text")}
-                                                        {getHintText(wmsRasterEndpoints)}
-                                                    </>
-                                                ),
-                                                disabled: wmsRasterEndpoints.length === 0 || !isAvailable(wmsRasterEndpoints),
-                                            },
-                                            {
-                                                id: OfferingTypeEnum.WMTSTMS,
-                                                text: t("wmts_label"),
-                                                hintText: (
-                                                    <>
-                                                        {t("wmts_hint_text")}
-                                                        {getHintText(wmtsEndpoints)}
-                                                    </>
-                                                ),
-                                                disabled: wmtsEndpoints.length === 0 || !isAvailable(wmtsEndpoints),
-                                            },
-                                        ],
-                                    });
-
-                                    if (serviceType === undefined) return;
-
-                                    switch (serviceType) {
-                                        case OfferingTypeEnum.WMSRASTER:
-                                            routes
-                                                .datastore_pyramid_raster_wms_raster_service_new({ datastoreId, pyramidId: pyramid._id, datasheetName })
-                                                .push();
-                                            break;
-                                        case OfferingTypeEnum.WMTSTMS:
-                                            routes.datastore_pyramid_raster_wmts_service_new({ datastoreId, pyramidId: pyramid._id, datasheetName }).push();
-                                            break;
-                                        default:
-                                            throw new Error(`Publication ${serviceType} n'est pas encore implémentée`);
-                                    }
-                                }}
-                                className={fr.cx("fr-mr-2v")}
-                                priority="secondary"
-                                disabled={pyramid.status !== StoredDataStatusEnum.GENERATED}
-                            >
-                                {t("publish_pyramid_raster")}
-                            </Button>
-                            <MenuList
-                                menuOpenButtonProps={{
-                                    iconId: "fr-icon-menu-2-fill",
-                                    title: t("other_actions"),
-                                    priority: "secondary",
-                                }}
-                                items={[
+                            const { response: serviceType } = await serviceChoiceDialogActions.current.open({
+                                title: t("choose_service_type"),
+                                options: [
                                     {
-                                        text: t("show_details"),
-                                        iconId: "fr-icon-file-text-fill",
-                                        linkProps: routes.datastore_stored_data_details({ datastoreId, storedDataId: pyramid._id }).link,
+                                        id: OfferingTypeEnum.WMSRASTER,
+                                        text: t("wms_raster_label"),
+                                        hintText: (
+                                            <>
+                                                {t("wms_raster_hint_text")}
+                                                {getHintText(wmsRasterEndpoints)}
+                                            </>
+                                        ),
+                                        disabled: wmsRasterEndpoints.length === 0 || !isAvailable(wmsRasterEndpoints),
                                     },
                                     {
-                                        text: tCommon("delete"),
-                                        iconId: "fr-icon-delete-line",
-                                        onClick: () => confirmRemovePyramidModal.open(),
+                                        id: OfferingTypeEnum.WMTSTMS,
+                                        text: t("wmts_label"),
+                                        hintText: (
+                                            <>
+                                                {t("wmts_hint_text")}
+                                                {getHintText(wmtsEndpoints)}
+                                            </>
+                                        ),
+                                        disabled: wmtsEndpoints.length === 0 || !isAvailable(wmtsEndpoints),
                                     },
-                                ]}
-                            />
-                        </div>
-                    </div>
-                </div>
-                {showDescription && <PyramidStoredDataDesc datastoreId={datastoreId} pyramid={pyramid} dataUsesQuery={dataUsesQuery} />}
-            </div>
+                                ],
+                            });
+
+                            if (serviceType === undefined) return;
+
+                            switch (serviceType) {
+                                case OfferingTypeEnum.WMSRASTER:
+                                    routes.datastore_pyramid_raster_wms_raster_service_new({ datastoreId, pyramidId: pyramid._id, datasheetName }).push();
+                                    break;
+                                case OfferingTypeEnum.WMTSTMS:
+                                    routes.datastore_pyramid_raster_wmts_service_new({ datastoreId, pyramidId: pyramid._id, datasheetName }).push();
+                                    break;
+                                default:
+                                    throw new Error(`Publication ${serviceType} n'est pas encore implémentée`);
+                            }
+                        }}
+                        className={fr.cx("fr-mr-2v")}
+                        priority="secondary"
+                        disabled={pyramid.status !== StoredDataStatusEnum.GENERATED}
+                    >
+                        {t("publish_pyramid_raster")}
+                    </Button>
+                }
+                badge={<StoredDataStatusBadge status={pyramid.status} />}
+                buttonTitle={t("show_linked_datas")}
+                date={pyramid?.last_event?.date}
+                menuListItems={[
+                    {
+                        text: t("show_details"),
+                        iconId: "fr-icon-file-text-fill",
+                        linkProps: routes.datastore_stored_data_details({ datastoreId, storedDataId: pyramid._id }).link,
+                    },
+                    {
+                        text: tCommon("delete"),
+                        iconId: "fr-icon-delete-line",
+                        onClick: () => confirmRemovePyramidModal.open(),
+                    },
+                ]}
+                name={pyramid.name}
+                showDescription={showDescription}
+                toggleShowDescription={toggleShowDescription}
+            >
+                <PyramidStoredDataDesc datastoreId={datastoreId} pyramid={pyramid} dataUsesQuery={dataUsesQuery} />
+            </ListItem>
+
             <PyramidRasterServiceChoiceDialog actions={serviceChoiceDialogActions.current} />
             {deletePyramidMutation.error && (
                 <Alert

@@ -16,16 +16,16 @@ import { EndpointDetailResponseDtoTypeEnum } from "../../../../../../@types/entr
 import StoredDataStatusBadge from "../../../../../../components/Utils/Badges/StoredDataStatusBadge";
 import LoadingIcon from "../../../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../../../components/Utils/LoadingText";
-import MenuList from "../../../../../../components/Utils/MenuList";
 import Wait from "../../../../../../components/Utils/Wait";
 import useToggle from "../../../../../../hooks/useToggle";
 import { getTranslation, useTranslation } from "../../../../../../i18n/i18n";
 import { ComponentKey } from "../../../../../../i18n/types";
 import RQKeys from "../../../../../../modules/entrepot/RQKeys";
 import { routes } from "../../../../../../router/router";
-import { formatDateFromISO, offeringTypeDisplayName } from "../../../../../../utils";
+import { offeringTypeDisplayName } from "../../../../../../utils";
 import api from "../../../../../api";
 import VectorDbDesc from "./VectorDbDesc";
+import ListItem from "../../ListItem";
 
 type ServiceTypes = "tms" | "wfs" | "wms-vector" | "pre-paquet";
 
@@ -217,66 +217,48 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
 
     return (
         <>
-            <div className={fr.cx("fr-p-2v", "fr-mt-2v")} style={{ backgroundColor: fr.colors.decisions.background.contrast.grey.default }}>
-                <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                    <div className={fr.cx("fr-col")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <Button
-                                iconId={showDescription ? "ri-subtract-fill" : "ri-add-fill"}
-                                size="small"
-                                title={t("show_linked_datas")}
-                                className={fr.cx("fr-mr-2v")}
-                                priority="secondary"
-                                onClick={toggleShowDescription}
-                            />
-                            {vectorDb.name}
-                        </div>
-                    </div>
+            <ListItem
+                actionButton={
+                    <Button
+                        onClick={() => {
+                            serviceTypeChoiceModal.open();
+                        }}
+                        className={fr.cx("fr-mr-2v")}
+                        priority="secondary"
+                        disabled={vectorDb.status !== StoredDataStatusEnum.GENERATED}
+                    >
+                        {t("create_service")}
+                    </Button>
+                }
+                badge={<StoredDataStatusBadge status={vectorDb.status} />}
+                buttonTitle={t("show_linked_datas")}
+                date={vectorDb?.last_event?.date}
+                menuListItems={[
+                    // NOTE : reporté cf. issue #249
+                    // {
+                    //     text: t("replace_datas"),
+                    //     iconId: "fr-icon-refresh-line",
+                    //     onClick: () => console.warn("Action non implémentée"),
+                    //     disabled: vectorDb.status !== StoredDataStatusEnum.GENERATED,
+                    // },
+                    {
+                        text: t("show_details"),
+                        iconId: "fr-icon-file-text-fill",
+                        linkProps: routes.datastore_stored_data_details({ datastoreId, datasheetName, storedDataId: vectorDb._id }).link,
+                    },
+                    {
+                        text: tCommon("delete"),
+                        iconId: "fr-icon-delete-line",
+                        onClick: () => confirmRemoveVectorDbModal.open(),
+                    },
+                ]}
+                name={vectorDb.name}
+                showDescription={showDescription}
+                toggleShowDescription={toggleShowDescription}
+            >
+                <VectorDbDesc dataUsesQuery={dataUsesQuery} />
+            </ListItem>
 
-                    <div className={fr.cx("fr-col")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-grid-row--middle")}>
-                            <p className={fr.cx("fr-m-auto", "fr-mr-2v")}>{vectorDb?.last_event?.date && formatDateFromISO(vectorDb?.last_event?.date)}</p>
-                            <StoredDataStatusBadge status={vectorDb.status} />
-                            <Button
-                                onClick={() => {
-                                    serviceTypeChoiceModal.open();
-                                }}
-                                className={fr.cx("fr-mr-2v")}
-                                priority="secondary"
-                                disabled={vectorDb.status !== StoredDataStatusEnum.GENERATED}
-                            >
-                                {t("create_service")}
-                            </Button>
-                            <MenuList
-                                menuOpenButtonProps={{
-                                    title: t("other_actions"),
-                                    priority: "secondary",
-                                }}
-                                items={[
-                                    // NOTE : reporté cf. issue #249
-                                    // {
-                                    //     text: t("replace_datas"),
-                                    //     iconId: "fr-icon-refresh-line",
-                                    //     onClick: () => console.warn("Action non implémentée"),
-                                    //     disabled: vectorDb.status !== StoredDataStatusEnum.GENERATED,
-                                    // },
-                                    {
-                                        text: t("show_details"),
-                                        iconId: "fr-icon-file-text-fill",
-                                        linkProps: routes.datastore_stored_data_details({ datastoreId, datasheetName, storedDataId: vectorDb._id }).link,
-                                    },
-                                    {
-                                        text: tCommon("delete"),
-                                        iconId: "fr-icon-delete-line",
-                                        onClick: () => confirmRemoveVectorDbModal.open(),
-                                    },
-                                ]}
-                            />
-                        </div>
-                    </div>
-                </div>
-                {showDescription && <VectorDbDesc dataUsesQuery={dataUsesQuery} />}
-            </div>
             {deleteVectorDbMutation.error && (
                 <Alert
                     title={t("error_deleting", { dbname: vectorDb.name })}
