@@ -1,4 +1,4 @@
-import { declareComponentKeys } from "i18nifty";
+import { declareComponentKeys } from "../../../../i18n/i18n";
 import { Translations } from "../../../../i18n/types";
 
 // traductions
