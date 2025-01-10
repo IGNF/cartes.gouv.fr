@@ -22,7 +22,7 @@ import RQKeys from "../../../../modules/espaceco/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import { getFileExtension, getImageSize, ImageSize } from "../../../../utils";
 import api from "../../../api";
-import { logoAction } from "../ManageCommunityTr";
+import { logoAction } from "../ManageCommunity.locale";
 
 import "../../../../sass/components/buttons.scss";
 

@@ -126,6 +126,9 @@ export type ReportFormType = {
 };
 
 /* email planners */
+export const EmailPlannerKeywords = ["id", "author", "group", "comment", "status", "openingDate", "updatingDate", "closingDate", "validator"] as const;
+export type KeywordsType = (typeof EmailPlannerKeywords)[number];
+
 export const BasicRecipientsArray: string[] = [...BasicRecipients] as string[];
 
 export const EmailPlannerTypes = ["basic", "personal"] as const;

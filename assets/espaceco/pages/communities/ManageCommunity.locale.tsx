@@ -1,4 +1,4 @@
-import { declareComponentKeys } from "i18nifty";
+import { declareComponentKeys } from "../../../i18n/i18n";
 import { Translations } from "../../../i18n/types";
 
 export type logoAction = "add" | "modify" | "delete";
@@ -98,19 +98,6 @@ const { i18n } = declareComponentKeys<
     | { K: "grid.explain"; R: JSX.Element }
 >()("ManageCommunity");
 export type I18n = typeof i18n;
-
-/**
- * "thumbnail_modal.action_being": ({ action }) => {
-        switch (action) {
-            case "add":
-                return "Ajout de la vignette en cours ...";
-            case "modify":
-                return "Remplacement de la vignette en cours ...";
-            case "delete":
-                return "Suppression de la vignette en cours ...";
-        }
-    },
- */
 
 export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"] = {
     title: ({ name }) => (name === undefined ? "Gérer le guichet" : `Gérer le guichet - ${name}`),

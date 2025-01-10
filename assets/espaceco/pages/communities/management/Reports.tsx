@@ -18,7 +18,7 @@ import {
 } from "../../../../@types/espaceco";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import statuses from "../../../../data/report_statuses.json";
-import { declareComponentKeys, useTranslation } from "../../../../i18n/i18n";
+import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/espaceco/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import api from "../../../api";
@@ -30,7 +30,6 @@ import type { UserSharedThemesType } from "./reports/SetSharedThemesDialog";
 import SharedThemes from "./reports/SharedThemes";
 import ThemeList from "./reports/ThemeList";
 import { countActiveStatus, getDefaultStatuses, getMinAuthorizedStatus } from "./reports/Utils";
-import { Translations } from "../../../../i18n/types";
 
 type ReportsProps = {
     community: CommunityResponseDTO;
@@ -252,19 +251,3 @@ const Reports: FC<ReportsProps> = ({ community }) => {
 };
 
 export default Reports;
-
-// traductions
-const { i18n } = declareComponentKeys<"loading_tables" | "loading_shared_themes" | "loading_email_planners">()("Reports");
-export type I18n = typeof i18n;
-
-export const ReportsFrTranslations: Translations<"fr">["Reports"] = {
-    loading_tables: "Recherche des tables pour la configuration des thèmes ...",
-    loading_shared_themes: "Recherche des thèmes partagés ...",
-    loading_email_planners: "Recherche des emails de suivi ...",
-};
-
-export const ReportsEnTranslations: Translations<"en">["Reports"] = {
-    loading_tables: undefined,
-    loading_shared_themes: undefined,
-    loading_email_planners: undefined,
-};
