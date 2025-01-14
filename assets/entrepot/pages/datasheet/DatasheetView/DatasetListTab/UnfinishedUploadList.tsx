@@ -1,6 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
-import { FC, memo } from "react";
+import { FC, memo, useState } from "react";
 import { symToStr } from "tsafe/symToStr";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -29,14 +29,19 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
         return uploadList.length === 1 && nbPublications === 0;
     };
 
+    const [currentUploadId, setCurrentUploadId] = useState<string | undefined>();
+
     const deleteUnfinishedUpload = useMutation({
         mutationFn: (uploadId: string) => api.upload.remove(datastoreId, uploadId),
-        onSuccess(uploadId) {
-            queryClient.setQueryData(RQKeys.datastore_upload_list(datastoreId), (uploadList: Upload[]) => {
-                return {
-                    uploadList: uploadList.filter((upload) => upload._id !== uploadId),
-                };
+        onSuccess() {
+            queryClient.setQueryData(RQKeys.datastore_upload_list(datastoreId), (uploadsList: Upload[]) => {
+                return uploadsList.filter((annexe) => annexe._id !== currentUploadId);
             });
+
+            setCurrentUploadId(undefined);
+        },
+        onError() {
+            setCurrentUploadId(undefined);
         },
     });
 
@@ -100,6 +105,7 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
                                     iconId="fr-icon-delete-fill"
                                     priority="secondary"
                                     onClick={() => {
+                                        setCurrentUploadId(upload._id);
                                         if (isLastUpload(uploadList)) {
                                             deleteUploadConfirmModal.open();
                                         } else {
