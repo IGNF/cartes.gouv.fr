@@ -374,7 +374,7 @@ class CartesMetadataApiService
             ],
         ]);
 
-        $configStyles = array_map(fn ($config) => $this->cartesServiceApiService->getStyles($datastoreId, $config['_id']), $configurationsList);
+        $configStyles = array_map(fn ($config) => $this->cartesServiceApiService->getStyles($datastoreId, $config), $configurationsList);
         $configStyles = array_filter($configStyles, fn ($stylesList) => count($stylesList) > 0);
         $configStyles = array_merge([], ...$configStyles);
 
