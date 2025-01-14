@@ -193,11 +193,19 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
                         buttons={[
                             {
                                 children: "Consulter la fiche de données",
-                                linkProps: routes.datastore_datasheet_view({
-                                    datastoreId,
-                                    datasheetName: uploadQuery.data?.tags.datasheet_name,
-                                    activeTab: DatasheetViewActiveTabEnum.Dataset,
-                                }).link,
+                                onClick: () => {
+                                    uploadQuery.data?.tags.datasheet_name &&
+                                        (queryClient.refetchQueries({
+                                            queryKey: RQKeys.datastore_datasheet(datastoreId, uploadQuery.data?.tags.datasheet_name),
+                                        }),
+                                        routes
+                                            .datastore_datasheet_view({
+                                                datastoreId,
+                                                datasheetName: uploadQuery.data?.tags.datasheet_name,
+                                                activeTab: DatasheetViewActiveTabEnum.Dataset,
+                                            })
+                                            .push());
+                                },
                             },
                         ]}
                         inlineLayoutWhen="always"
@@ -211,11 +219,19 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
                         buttons={[
                             {
                                 children: "Consulter la fiche de données",
-                                linkProps: routes.datastore_datasheet_view({
-                                    datastoreId,
-                                    datasheetName: uploadQuery.data?.tags.datasheet_name,
-                                    activeTab: DatasheetViewActiveTabEnum.Dataset,
-                                }).link,
+                                onClick: () => {
+                                    uploadQuery.data?.tags.datasheet_name &&
+                                        (queryClient.refetchQueries({
+                                            queryKey: RQKeys.datastore_datasheet(datastoreId, uploadQuery.data?.tags.datasheet_name),
+                                        }),
+                                        routes
+                                            .datastore_datasheet_view({
+                                                datastoreId,
+                                                datasheetName: uploadQuery.data?.tags.datasheet_name,
+                                                activeTab: DatasheetViewActiveTabEnum.Dataset,
+                                            })
+                                            .push());
+                                },
                             },
                         ]}
                         inlineLayoutWhen="always"
