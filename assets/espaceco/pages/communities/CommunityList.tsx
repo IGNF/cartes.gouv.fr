@@ -8,12 +8,12 @@ type CommunityListProps = {
 
 const CommunityList: FC<CommunityListProps> = ({ communities }) => {
     return (
-        <div>
+        <>
             {communities.map((community, index) => {
                 const className = index % 2 === 0 ? "frx-community-even" : "";
                 return <CommunityListItem key={community.id} className={className} community={community} />;
             })}
-        </div>
+        </>
     );
 };
 
