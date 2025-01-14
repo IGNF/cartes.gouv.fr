@@ -1,13 +1,13 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
-import { FC, memo, useState } from "react";
+import { FC, memo } from "react";
 import { symToStr } from "tsafe/symToStr";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import api from "../../../../api";
 import { routes } from "../../../../../router/router";
-import { Upload } from "../../../../../@types/app";
+import { type DatasheetDetailed, Upload } from "../../../../../@types/app";
 import ReportStatusBadge from "../../../data_details/ReportTab/ReportStatusBadge";
 import { deleteUploadConfirmModal } from "../DatasheetView/DatasheetView";
 import Wait from "../../../../../components/Utils/Wait";
@@ -18,9 +18,10 @@ type UnfinishedUploadListProps = {
     datastoreId: string;
     uploadList?: Upload[];
     nbPublications: number;
+    datasheetName: string;
 };
 
-const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uploadList, nbPublications }) => {
+const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uploadList, nbPublications, datasheetName }) => {
     const { t } = useTranslation("DatastoreManageStorage");
 
     const queryClient = useQueryClient();
@@ -29,19 +30,16 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
         return uploadList.length === 1 && nbPublications === 0;
     };
 
-    const [currentUploadId, setCurrentUploadId] = useState<string | undefined>();
-
     const deleteUnfinishedUpload = useMutation({
         mutationFn: (uploadId: string) => api.upload.remove(datastoreId, uploadId),
-        onSuccess() {
-            queryClient.setQueryData(RQKeys.datastore_upload_list(datastoreId), (uploadsList: Upload[]) => {
-                return uploadsList.filter((annexe) => annexe._id !== currentUploadId);
+        onSuccess(uploadId) {
+            queryClient.setQueryData(RQKeys.datastore_datasheet(datastoreId, datasheetName), (datasheet: DatasheetDetailed) => {
+                return {
+                    ...datasheet,
+                    upload_list: datasheet.upload_list?.filter((upload) => upload._id !== uploadId) ?? [],
+                };
             });
-
-            setCurrentUploadId(undefined);
-        },
-        onError() {
-            setCurrentUploadId(undefined);
+            queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
         },
     });
 
@@ -105,7 +103,6 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
                                     iconId="fr-icon-delete-fill"
                                     priority="secondary"
                                     onClick={() => {
-                                        setCurrentUploadId(upload._id);
                                         if (isLastUpload(uploadList)) {
                                             deleteUploadConfirmModal.open();
                                         } else {

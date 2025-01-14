@@ -2,12 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { FC, memo, useMemo } from "react";
 import { symToStr } from "tsafe/symToStr";
-import { useQuery } from "@tanstack/react-query";
 
-import api from "../../../../api";
-import RQKeys from "../../../../../modules/entrepot/RQKeys";
-import { Upload } from "../../../../../@types/app";
-import { CartesApiException } from "../../../../../modules/jsonFetch";
 import { type DatasheetDetailed } from "../../../../../@types/app";
 import { routes } from "../../../../../router/router";
 import PyramidVectorList from "./PyramidVectorList/PyramidVectorList";
@@ -22,14 +17,9 @@ type DataListTabProps = {
 
 const DatasetListTab: FC<DataListTabProps> = ({ datastoreId, datasheet }) => {
     // TODO : il y en aura d'autres types de données aussi (pyramid vector, raster, etc)
-    const uploadListQuery = useQuery<Upload[], CartesApiException>({
-        queryKey: RQKeys.datastore_upload_list(datastoreId),
-        queryFn: ({ signal }) => api.upload.getList(datastoreId, undefined, { signal }),
-        staleTime: 60000,
-    });
     // liste des uploads/livraisons dont l'intégration en base de données n'a pas réussi ou n'a pas terminé
     const unfinishedUploads = useMemo(() => {
-        return uploadListQuery.data?.filter((upload) => {
+        return datasheet.upload_list?.filter((upload) => {
             if (upload.tags.datasheet_name !== datasheet.name) {
                 return false;
             }
@@ -39,7 +29,7 @@ const DatasetListTab: FC<DataListTabProps> = ({ datastoreId, datasheet }) => {
             const integrationProgress = JSON.parse(upload.tags.integration_progress);
             return ["waiting"].includes(Object.values(integrationProgress)?.[2] as string);
         });
-    }, [uploadListQuery.data, datasheet.name]);
+    }, [datasheet]);
 
     const nbPublications =
         (datasheet.vector_db_list?.length || 0) + (datasheet.pyramid_vector_list?.length || 0) + (datasheet.pyramid_raster_list?.length || 0);
@@ -54,7 +44,12 @@ const DatasetListTab: FC<DataListTabProps> = ({ datastoreId, datasheet }) => {
             {unfinishedUploads && unfinishedUploads.length > 0 && (
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--center", "fr-grid-row--middle")}>
                     <div className={fr.cx("fr-col")}>
-                        <UnfinishedUploadList datastoreId={datastoreId} uploadList={unfinishedUploads} nbPublications={nbPublications} />
+                        <UnfinishedUploadList
+                            datastoreId={datastoreId}
+                            uploadList={unfinishedUploads}
+                            nbPublications={nbPublications}
+                            datasheetName={datasheet.name}
+                        />
                     </div>
                 </div>
             )}
