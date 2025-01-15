@@ -23,8 +23,9 @@ const RQKeys = {
     datastore_stored_data_report: (datastoreId: string, storedDataId: string): string[] => ["datastore", datastoreId, "stored_data", storedDataId, "report"],
 
     datastore_datasheet_list: (datastoreId: string): string[] => ["datastore", datastoreId, "datasheet"],
-    datastore_datasheet: (datastoreId: string, dataName: string): string[] => ["datastore", datastoreId, "datasheet", dataName],
-    datastore_datasheet_service_list: (datastoreId: string, dataName: string) => ["datastore", datastoreId, "datasheet", dataName, "services"],
+    datastore_datasheet: (datastoreId: string, datasheetName: string): string[] => ["datastore", datastoreId, "datasheet", datasheetName],
+    datastore_datasheet_metadata: (datastoreId: string, datasheetName: string): string[] => ["datastore", datastoreId, "datasheet", datasheetName, "metadata"],
+    datastore_datasheet_service_list: (datastoreId: string, datasheetName: string) => ["datastore", datastoreId, "datasheet", datasheetName, "services"],
 
     datastore_offering_list: (datastoreId: string): string[] => ["datastore", datastoreId, "offering"],
     datastore_layernames_list: (datastoreId: string, configurationType: ConfigurationTypeEnum | OfferingTypeEnum): string[] => [
@@ -41,13 +42,6 @@ const RQKeys = {
     datastore_annexe_list: (datastoreId: string): string[] => ["datastore", datastoreId, "annexe"],
 
     datastore_metadata_list: (datastoreId: string): string[] => ["datastore", datastoreId, "metadata"],
-    datastore_metadata_by_datasheet_name: (datastoreId: string, datasheetName: string): string[] => [
-        "datastore",
-        datastoreId,
-        "metadata",
-        "datasheet",
-        datasheetName,
-    ],
     datastore_metadata_by_id: (datastoreId: string, metadataId: string): string[] => ["datastore", datastoreId, "metadata", metadataId],
 
     datastore_statics_list: (datastoreId: string): string[] => ["datastore", datastoreId, "statics"],

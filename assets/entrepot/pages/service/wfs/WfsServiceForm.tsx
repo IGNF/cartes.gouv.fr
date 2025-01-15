@@ -153,7 +153,7 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
                     queryKey: RQKeys.datastore_datasheet(datastoreId, vectorDbQuery.data?.tags.datasheet_name),
                 });
                 routes.datastore_datasheet_view({ datastoreId, datasheetName: vectorDbQuery.data?.tags.datasheet_name, activeTab: "services" }).push();
-                queryClient.refetchQueries({ queryKey: RQKeys.datastore_metadata_by_datasheet_name(datastoreId, vectorDbQuery.data?.tags?.datasheet_name) });
+                queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet_metadata(datastoreId, vectorDbQuery.data?.tags?.datasheet_name) });
             } else {
                 routes.datasheet_list({ datastoreId }).push();
             }
@@ -187,7 +187,7 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
     });
 
     const metadataQuery = useQuery({
-        queryKey: RQKeys.datastore_metadata_by_datasheet_name(datastoreId, vectorDbQuery.data?.tags?.datasheet_name ?? "XX"),
+        queryKey: RQKeys.datastore_datasheet_metadata(datastoreId, vectorDbQuery.data?.tags?.datasheet_name ?? "XX"),
         queryFn: ({ signal }) => api.metadata.getByDatasheetName(datastoreId, vectorDbQuery.data?.tags?.datasheet_name ?? "XX", { signal }),
         enabled: !!vectorDbQuery.data?.tags?.datasheet_name,
     });

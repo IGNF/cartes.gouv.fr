@@ -79,7 +79,7 @@ const PyramidRasterWmtsServiceForm: FC<PyramidRasterWmtsServiceFormProps> = ({ d
 
             queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
             routes.datastore_datasheet_view({ datastoreId, datasheetName: datasheetName, activeTab: "services" }).push();
-            queryClient.refetchQueries({ queryKey: RQKeys.datastore_metadata_by_datasheet_name(datastoreId, datasheetName) });
+            queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet_metadata(datastoreId, datasheetName) });
         },
     });
 
@@ -110,7 +110,7 @@ const PyramidRasterWmtsServiceForm: FC<PyramidRasterWmtsServiceFormProps> = ({ d
     });
 
     const metadataQuery = useQuery({
-        queryKey: RQKeys.datastore_metadata_by_datasheet_name(datastoreId, datasheetName),
+        queryKey: RQKeys.datastore_datasheet_metadata(datastoreId, datasheetName),
         queryFn: ({ signal }) => api.metadata.getByDatasheetName(datastoreId, datasheetName, { signal }),
         enabled: !(createServiceMutation.isPending || editServiceMutation.isPending),
     });

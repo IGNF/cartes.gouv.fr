@@ -65,6 +65,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
             queryClient.setQueryData<Datasheet[]>(RQKeys.datastore_datasheet_list(datastoreId), (datasheetList = []) => {
                 return datasheetList.filter((datasheet) => datasheet.name !== datasheetName);
             });
+            queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet_list(datastoreId) });
 
             routes.datasheet_list({ datastoreId }).push();
         },
@@ -80,7 +81,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
     });
 
     const metadataQuery = useQuery<Metadata, CartesApiException>({
-        queryKey: RQKeys.datastore_metadata_by_datasheet_name(datastoreId, datasheetName),
+        queryKey: RQKeys.datastore_datasheet_metadata(datastoreId, datasheetName),
         queryFn: ({ signal }) => api.metadata.getByDatasheetName(datastoreId, datasheetName, { signal }),
         enabled: !datasheetDeleteMutation.isPending,
         staleTime: 60000,
