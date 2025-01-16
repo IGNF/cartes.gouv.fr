@@ -276,6 +276,8 @@ const routeDefs = {
         (p) => `${appRoot}/entrepot/${p.datastoreId}/service/${p.offeringId}/visualisation`
     ),
 
+    config_events: defineRoute(`${appRoot}/config/events`),
+
     espaceco_community_list: defineRoute(
         {
             page: param.query.optional.number.default(1),
