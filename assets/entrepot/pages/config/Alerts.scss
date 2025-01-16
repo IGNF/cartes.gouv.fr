@@ -1,0 +1,25 @@
+.alerts__table caption {
+    width: 100%;
+}
+
+.alerts__caption {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.alerts__icon--info {
+    color: var(--text-default-info);
+}
+
+.alerts__icon--warning {
+    color: var(--text-default-warning);
+}
+
+.alerts__icon--error {
+    color: var(--text-default-error);
+}
+
+.alerts__icon--success {
+    color: var(--text-default-success);
+}

@@ -12,6 +12,7 @@ import GroupDatastore from "./GroupDatastore";
 import GroupApp from "./GroupApp";
 import PageNotFoundWithLayout from "../pages/error/PageNotFoundWithLayout";
 import Main from "../components/Layout/Main";
+import GroupConfig from "./GroupConfig";
 
 const EspaceCoCommunityList = lazy(() => import("../espaceco/pages/communities/Communities"));
 
@@ -36,6 +37,10 @@ const RouterRenderer: FC = () => {
 
         if (groups.datastore.has(route)) {
             return <GroupDatastore route={route} />;
+        }
+
+        if (groups.config.has(route)) {
+            return <GroupConfig route={route} />;
         }
 
         if (groups.espaceco.has(route)) {

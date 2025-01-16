@@ -42,6 +42,7 @@ import { ContactFrTranslations } from "../../pages/assistance/contact/Contact.lo
 import { mapboxStyleValidationFrTranslations } from "../../validations/mapbox/MapboxStyleValidator.locale";
 import { SldStyleValidationErrorsFrTranslations } from "../../validations/sld/SldStyleValidation.locale";
 import { commonFrTranslations } from "../Common.locale";
+import { AlertsFrTranslations } from "../../entrepot/pages/config/Alerts.locale";
 import type { Translations } from "../types";
 
 export const translations: Translations<"fr"> = {
@@ -89,4 +90,5 @@ export const translations: Translations<"fr"> = {
     DatasheetList: DatasheetListFrTranslations,
     AccessRestrictions: AccessRestrictionsFrTranslations,
     LoginDisabled: LoginDisabledFrTranslations,
+    ConfigAlerts: AlertsFrTranslations,
 };
