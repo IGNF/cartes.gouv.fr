@@ -2,6 +2,7 @@ import { FC, JSX, Suspense, lazy, useMemo } from "react";
 
 import AppLayout from "../components/Layout/AppLayout";
 import LoadingText from "../components/Utils/LoadingText";
+import MemberInvitation from "../espaceco/pages/communities/MemberInvitation";
 import { I18nFetchingSuspense } from "../i18n/i18n";
 import Home from "../pages/Home";
 import RedirectToLogin from "../pages/RedirectToLogin";
@@ -66,6 +67,8 @@ const ServiceView = lazy(() => import("../entrepot/pages/service/view/ServiceVie
 const AccessesRequest = lazy(() => import("../entrepot/pages/accesses-request/AccessesRequest"));
 
 const EspaceCoCommunityList = lazy(() => import("../espaceco/pages/communities/Communities"));
+const EspaceCoCreateCommunity = lazy(() => import("../espaceco/pages/communities/CreateCommunity"));
+const EspaceCoManageCommunity = lazy(() => import("../espaceco/pages/communities/ManageCommunity"));
 
 const RouterRenderer: FC = () => {
     const route = useRoute();
@@ -241,6 +244,12 @@ const RouterRenderer: FC = () => {
                 return <ServiceView datastoreId={route.params.datastoreId} offeringId={route.params.offeringId} datasheetName={route.params.datasheetName} />;
             case "espaceco_community_list":
                 return <EspaceCoCommunityList />;
+            case "espaceco_create_community":
+                return <EspaceCoCreateCommunity communityId={route.params.communityId} />;
+            case "espaceco_manage_community":
+                return <EspaceCoManageCommunity communityId={route.params.communityId} />;
+            case "espaceco_member_invitation":
+                return <MemberInvitation communityId={route.params.communityId} />;
             default:
                 return <PageNotFound />;
         }

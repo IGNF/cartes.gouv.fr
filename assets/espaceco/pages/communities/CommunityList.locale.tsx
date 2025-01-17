@@ -1,7 +1,7 @@
 import { declareComponentKeys } from "i18nifty";
 
 import { CommunityListFilter } from "../../../@types/app_espaceco";
-import type { Translations } from "../../../i18n/types";
+import { Translations } from "../../../i18n/types";
 
 // traductions
 const { i18n } = declareComponentKeys<
@@ -15,17 +15,20 @@ const { i18n } = declareComponentKeys<
     | "no_options"
     | "loading"
     | "show_details"
->()("EspaceCoCommunities");
+    | "community_creation"
+    | "create_community"
+    | "append_community"
+>()("CommunityList");
 export type I18n = typeof i18n;
 
-export const EspaceCoCommunitiesFrTranslations: Translations<"fr">["EspaceCoCommunities"] = {
+export const CommunityListFrTranslations: Translations<"fr">["CommunityList"] = {
     title: "Liste des guichets",
     filters: "Filtres",
     all_public_communities: "Tous les guichets publics",
     communities_as_member: "Guichets dont je suis membre",
     pending_membership: "Adhésions en cours",
     no_result: ({ filter }) =>
-        filter === "public"
+        filter === "listed"
             ? "Aucun guichet public"
             : filter === "iam_member"
               ? "Vous n'êtes membre d’aucun guichet"
@@ -36,9 +39,12 @@ export const EspaceCoCommunitiesFrTranslations: Translations<"fr">["EspaceCoComm
     no_options: "Aucun guichet",
     loading: "Recherche en cours ...",
     show_details: "Afficher les détails",
+    community_creation: "Création du guichet en cours ...",
+    create_community: "Création d'un guichet",
+    append_community: "Reprendre la configuration de ce guichet",
 };
 
-export const EspaceCoCommunitiesEnTranslations: Translations<"en">["EspaceCoCommunities"] = {
+export const CommunityListEnTranslations: Translations<"en">["CommunityList"] = {
     title: "List of communities",
     filters: "Filters",
     all_public_communities: undefined,
@@ -49,4 +55,7 @@ export const EspaceCoCommunitiesEnTranslations: Translations<"en">["EspaceCoComm
     no_options: undefined,
     loading: undefined,
     show_details: undefined,
+    community_creation: undefined,
+    create_community: undefined,
+    append_community: undefined,
 };
