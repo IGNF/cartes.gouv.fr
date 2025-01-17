@@ -11,32 +11,33 @@ Il prend la suite de la préfiguration que constituait le [Géotuileur](https://
 
 Les autres briques de cartes.gouv.fr sont :
 
--   le catalogue [IGNF/geonetwork-ui](https://github.com/IGNF/geonetwork-ui) (déployé depuis le 28 juin 2024)
--   l'entrée cartographique [IGNF/cartes.gouv.fr-entree-carto](https://github.com/IGNF/cartes.gouv.fr-entree-carto) (déployée depuis le 28 juin 2024)
--   la documentation [IGNF/cartes.gouv.fr-documentation](https://github.com/IGNF/cartes.gouv.fr-documentation) (à venir)
+- le catalogue [IGNF/geonetwork-ui](https://github.com/IGNF/geonetwork-ui) (déployé depuis le 28 juin 2024)
+- l'entrée cartographique [IGNF/cartes.gouv.fr-entree-carto](https://github.com/IGNF/cartes.gouv.fr-entree-carto) (déployée depuis le 28 juin 2024)
+- la documentation [IGNF/cartes.gouv.fr-documentation](https://github.com/IGNF/cartes.gouv.fr-documentation) (à venir)
 
 ## Fonctionnalités
 
--   Gestion des **clés d'accès** aux services restreints
--   Formulaire de demande pour rejoindre une communauté publique
--   Formulaire de contact, en particulier pour demander la création d'un nouvel espace de travail
--   Processus d'alimentation et diffusion de données vecteur :
-    -   Livraison de données avec intégration en base de données
-    -   Publication de services **WFS** puis ajout (optionnel) de **styles** associés
-    -   Publication de services **WMS-vecteur** (WMS "à la volée", il s'agit bien d'un flux image mais les images ne sont pas précalculées)
-    -   Génération de **pyramides de tuiles vectorielles** et publication de services **TMS** puis ajout (optionnel) de styles associés
-    -   Publication de **métadonnées** sur le catalogue, obligatoire dès le premier service publié
-    -   Ajout de documents associés à une fiche de données
--   Gestion des entrepôts et communautés :
-    -   Gestion des membres et de leurs droits
-    -   Visualisation de l'utilisation des quotas alloués pour chaque service et type de stockage
-    -   Gestion des **permissions** associées aux services publiés sur des points d'accès restreints
--   Espace **Découverte** pour tester les fonctionnalités
+- Gestion des **clés d'accès** aux services restreints
+- Formulaire de demande pour rejoindre une communauté publique
+- Formulaire de contact, en particulier pour demander la création d'un nouvel espace de travail
+- Processus d'alimentation et diffusion de données vecteur :
+    - Livraison de données avec intégration en base de données
+    - Publication de services **WFS** puis ajout (optionnel) de **styles** associés
+    - Publication de services **WMS-vecteur** (WMS "à la volée", il s'agit bien d'un flux image mais les images ne sont pas précalculées)
+    - Génération de **pyramides de tuiles vectorielles** et publication de services **TMS** puis ajout (optionnel) de styles associés
+    - Génération de **pyramides de tuiles d'images** et publications de services **WMS-raster** et **WMTS**
+    - Publication de **métadonnées** sur le catalogue, obligatoire dès le premier service publié
+    - Ajout de documents associés à une fiche de données
+- Gestion des entrepôts et communautés :
+    - Gestion des membres et de leurs droits
+    - Visualisation de l'utilisation des quotas alloués pour chaque service et type de stockage
+    - Gestion des **permissions** associées aux services publiés sur des points d'accès restreints
+- Espace **Découverte** pour tester les fonctionnalités
 
 À venir :
--   Mise à jour des données diffusées
--   Génération de pyramides d'images pour publications WMS-raster et WMTS
--   Interface de configuration de style
+
+- Mise à jour des données diffusées
+- Interface de configuration de style
 
 ## :warning: Point d'attention
 
