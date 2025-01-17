@@ -12,7 +12,7 @@ import App from "./App";
 import "ol/ol.css";
 
 // en prod
-if ((document.getElementById("root") as HTMLDivElement)?.dataset?.appEnv?.toLowerCase() === "prod") {
+if (import.meta.env?.APP_ENV?.toLowerCase() === "prod") {
     disableReactDevTools();
 }
 // en dev/qualif

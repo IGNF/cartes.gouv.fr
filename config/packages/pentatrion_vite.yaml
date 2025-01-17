@@ -1,0 +1,15 @@
+pentatrion_vite:
+    public_directory: public
+    build_directory: build
+    throw_on_missing_entry: true
+    throw_on_missing_asset: false
+    # crossorigin: true
+
+# when@dev:
+#     pentatrion_vite:
+#         # proxy_origin: http://host.docker.internal:5173
+#         # proxy_origin: https://cartesgouvfr-dev.docker.localhost
+
+when@prod:
+    pentatrion_vite:
+        cache: true
