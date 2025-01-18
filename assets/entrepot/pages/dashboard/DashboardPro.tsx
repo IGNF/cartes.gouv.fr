@@ -10,7 +10,6 @@ import LoadingIcon from "../../../components/Utils/LoadingIcon";
 import Skeleton from "../../../components/Utils/Skeleton";
 import { datastoreNavItems } from "../../../config/navItems/datastoreNavItems";
 import { useTranslation } from "../../../i18n/i18n";
-import Translator from "../../../modules/Translator";
 import RQKeys from "../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
@@ -166,18 +165,20 @@ const DashboardPro = () => {
                     <Tile
                         linkProps={routes.datastore_create_request().link}
                         imageUrl={mailSendSvgUrl}
+                        imageSvg={true}
                         desc="Contacter le support pour créer un nouvel espace de travail"
                         orientation="horizontal"
-                        title={Translator.trans("datastore_creation_request.title")}
+                        title={t("datastore_creation_form")}
                     />
                 </div>
                 <div className={fr.cx("fr-col-12", "fr-col-sm-6")}>
                     <Tile
                         linkProps={routes.join_community().link}
                         imageUrl={humanCoopSvgUrl}
+                        imageSvg={true}
                         desc="Demander à rejoindre une communauté publique"
                         orientation="horizontal"
-                        title={Translator.trans("communities_list.title")}
+                        title={t("join_existing_community")}
                     />
                 </div>
             </div>

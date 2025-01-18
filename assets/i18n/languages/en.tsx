@@ -2,21 +2,25 @@ import { datastoreNavItemsEnTranslations } from "../../config/navItems/datastore
 import { navItemsEnTranslations } from "../../config/navItems/navItems.locale";
 import { AccessesRequestEnTranslations } from "../../entrepot/pages/accesses-request/AccessesRequest.locale";
 import { AddMemberEnTranslations } from "../../entrepot/pages/communities/AddMember/AddMember.locale";
+import { CommunityListEnTranslations } from "../../entrepot/pages/communities/CommunityList/CommunityList.locale";
 import { CommunityMembersEnTranslations } from "../../entrepot/pages/communities/CommunityMembers/CommunityMembers.locale";
 import { RightsEnTranslations } from "../../entrepot/pages/communities/Rights.locale";
 import { DashboardProEnTranslations } from "../../entrepot/pages/dashboard/DashboardPro.locale";
 import { DatasheetListEnTranslations } from "../../entrepot/pages/datasheet/DatasheetList/DatasheetList.locale";
-import { DatasheetUploadFormEnTranslations } from "../../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadForm.locale";
+import { DatasheetUploadFormEnTranslations } from "../../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadForm/DatasheetUploadForm.locale";
+import { DatasheetUploadIntegrationEnTranslations } from "../../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadIntegration/DatasheetUploadIntegration.locale";
 import { PyramidRasterListEnTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidRasterList/PyramidRasterList.locale";
 import { PyramidVectorListEnTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidVectorList/PyramidVectorList.locale";
 import { VectorDbListEnTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasetListTab/VectorDbList/VectorDbList.locale";
 import { DatasheetViewEnTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasheetView/DatasheetView.locale";
+import { DatastoreCreationFormEnTranslations } from "../../entrepot/pages/datastore/DatastoreCreationForm/DatastoreCreationForm.locale";
 import { DatastorePermissionsEnTranslations } from "../../entrepot/pages/datastore/ManagePermissions/DatastorePermissions.locale";
 import { DatastoreManageStorageEnTranslations } from "../../entrepot/pages/datastore/ManageStorage/DatastoreManageStorage.locale";
 import { AccessRestrictionsEnTranslations } from "../../entrepot/pages/service/common/AccessRestrictions/AccessRestrictions.locale";
 import { TableSelectionEnTranslations } from "../../entrepot/pages/service/common/TableSelection/TableSelection.locale";
 import { MetadatasFormEnTranslations } from "../../entrepot/pages/service/metadata/MetadataForm.locale";
 import { ValidationMetadatasEnTranslations } from "../../entrepot/pages/service/metadata/MetadataValidation.locale";
+import { PyramidVectorGenerateFormEnTranslations } from "../../entrepot/pages/service/tms/PyramidVectorGenerateForm/PyramidVectorGenerateForm.locale";
 import { PyramidVectorTmsServiceFormEnTranslations } from "../../entrepot/pages/service/tms/PyramidVectorTmsServiceForm/PyramidVectorTmsServiceForm.locale";
 import { StyleEnTranslations } from "../../entrepot/pages/service/view/Style/Style.locale";
 import { WfsServiceFormEnTranslations } from "../../entrepot/pages/service/wfs/WfsServiceForm.locale";
@@ -48,6 +52,9 @@ export const translations: Translations<"en"> = {
     Me: MeEnTranslations,
     AddMember: AddMemberEnTranslations,
     CommunityMembers: CommunityMembersEnTranslations,
+    CommunityList: CommunityListEnTranslations,
+    DatastoreCreationForm: DatastoreCreationFormEnTranslations,
+    DatasheetUploadIntegration: DatasheetUploadIntegrationEnTranslations,
     DashboardPro: DashboardProEnTranslations,
     MyAccessKeys: MyAccessKeysEnTranslations,
     UserKeysListTab: UserKeysListTabEnTranslations,
@@ -72,6 +79,7 @@ export const translations: Translations<"en"> = {
     WfsServiceForm: WfsServiceFormEnTranslations,
     TableSelection: TableSelectionEnTranslations,
     UploadStyleFile: UploadStyleFileEnTranslations,
+    PyramidVectorGenerateForm: PyramidVectorGenerateFormEnTranslations,
     PyramidVectorTmsServiceForm: PyramidVectorTmsServiceFormEnTranslations,
     PyramidRasterGenerateForm: PyramidRasterGenerateFormEnTranslations,
     PyramidRasterWmsRasterServiceForm: PyramidRasterWmsRasterServiceFormEnTranslations,

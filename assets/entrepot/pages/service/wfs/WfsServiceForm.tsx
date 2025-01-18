@@ -195,7 +195,7 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
     // Definition du schema
     const schemas = {};
     schemas[STEPS.TABLES_INFOS] = yup.object().shape({
-        selected_tables: yup.array(yup.string()).min(1, "Veuillez choisir au moins une table").required("Veuillez choisir au moins une table"),
+        selected_tables: yup.array(yup.string()).min(1, t("tables_info_form.error.required")).required(t("tables_info_form.error.required")),
         table_infos: yup.lazy(() => {
             if (!selectedTableNamesList || selectedTableNamesList.length === 0) {
                 return yup.mixed().nullable().notRequired();
@@ -212,8 +212,8 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
                             }
                             return regex.public_name.test(value);
                         }),
-                    title: yup.string().trim(t("trimmed_error")).strict(true).required(`Le titre de la table ${table} est obligatoire`),
-                    description: yup.string().trim(t("trimmed_error")).strict(true).required(`Le résumé du contenu de la table ${table} est obligatoire`),
+                    title: yup.string().trim(t("trimmed_error")).strict(true).required(t("tables_info_form.title.error.required", { table })),
+                    description: yup.string().trim(t("trimmed_error")).strict(true).required(t("tables_info_form.description.error.required", { table })),
                     keywords: yup.array().of(yup.string()),
                 });
             });

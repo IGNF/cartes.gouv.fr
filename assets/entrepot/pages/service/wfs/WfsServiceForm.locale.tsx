@@ -16,6 +16,18 @@ const { i18n } = declareComponentKeys<
     | "back_to_data_list"
     | "trimmed_error"
     | "public_name_regex"
+    | "tables_info_form.label"
+    | "tables_info_form.error.required"
+    | "tables_info_form.public_name.label"
+    | "tables_info_form.public_name.hint"
+    | "tables_info_form.title.label"
+    | "tables_info_form.title.hint"
+    | { K: "tables_info_form.title.error.required"; P: { table: string }; R: string }
+    | "tables_info_form.description.label"
+    | "tables_info_form.description.hint"
+    | { K: "tables_info_form.description.error.required"; P: { table: string }; R: string }
+    | "tables_info_form.keywords.label"
+    | "tables_info_form.keywords.hint"
 >()("WfsServiceForm");
 export type I18n = typeof i18n;
 
@@ -50,6 +62,18 @@ export const WfsServiceFormFrTranslations: Translations<"fr">["WfsServiceForm"] 
     trimmed_error: "La chaîne de caractères ne doit contenir aucun espace en début et fin",
     public_name_regex:
         "Le nom public de la table ne doit contenir que des lettres, chiffres, tirets (-), underscores (_), ou points (.) et ne peut commencer que par une lettre ou un underscore",
+    "tables_info_form.label": "Sélectionnez les tables nécessaires au service",
+    "tables_info_form.error.required": "Veuillez choisir au moins une table",
+    "tables_info_form.public_name.label": "Nom public de la table (optionnel)",
+    "tables_info_form.public_name.hint": "Ce nom permettra d’identifier la table dans les services que vous configurerez, veuillez choisir un nom explicite.",
+    "tables_info_form.title.label": "Titre de la table",
+    "tables_info_form.title.hint": "Ce titre permet de faciliter l’identification de la table par les utilisateurs.",
+    "tables_info_form.title.error.required": ({ table }) => `Le titre de la table ${table} est obligatoire`,
+    "tables_info_form.description.label": "Résumé du contenu de la table",
+    "tables_info_form.description.hint": "Bref résumé narratif du contenu de la table",
+    "tables_info_form.description.error.required": ({ table }) => `Le résumé du contenu de la table ${table} est obligatoire`,
+    "tables_info_form.keywords.label": "Mot clés (optionnel)",
+    "tables_info_form.keywords.hint": "Utilisez l’auto-complétion ou saisissez librement des mots clés en appuyant sur Entrée après chaque mot",
 };
 
 export const WfsServiceFormEnTranslations: Translations<"en">["WfsServiceForm"] = {
@@ -67,4 +91,16 @@ export const WfsServiceFormEnTranslations: Translations<"en">["WfsServiceForm"] 
     back_to_data_list: undefined,
     trimmed_error: undefined,
     public_name_regex: undefined,
+    "tables_info_form.label": undefined,
+    "tables_info_form.error.required": undefined,
+    "tables_info_form.public_name.label": undefined,
+    "tables_info_form.public_name.hint": undefined,
+    "tables_info_form.title.label": undefined,
+    "tables_info_form.title.hint": undefined,
+    "tables_info_form.title.error.required": undefined,
+    "tables_info_form.description.label": undefined,
+    "tables_info_form.description.hint": undefined,
+    "tables_info_form.description.error.required": undefined,
+    "tables_info_form.keywords.label": undefined,
+    "tables_info_form.keywords.hint": undefined,
 };

@@ -64,9 +64,8 @@ const Contact = () => {
 
         jsonFetch<{ success: boolean }>(url, { method: "POST" }, getFormValues())
             .then((response) => {
-                console.log(response);
                 if (response?.success === true) {
-                    routes.contact_thanks().push();
+                    routes.contact_confirmation().push();
                 }
             })
             .catch((error) => {

@@ -18,7 +18,7 @@ const routeDefs = {
     about: defineRoute(`${appRoot}/a-propos`),
     documentation: defineRoute(`${appRoot}/documentation`),
     contact: defineRoute(`${appRoot}/nous-ecrire`),
-    contact_thanks: defineRoute(`${appRoot}/nous-ecrire/demande-envoyee`),
+    contact_confirmation: defineRoute(`${appRoot}/nous-ecrire/demande-envoyee`),
     news_list: defineRoute(`${appRoot}/actualites`),
     news_article: defineRoute(
         {
@@ -53,6 +53,7 @@ const routeDefs = {
 
     // Demande de creation d'un datastore
     datastore_create_request: defineRoute(`${appRoot}/entrepot/demande-de-creation`),
+    datastore_create_request_confirm: defineRoute(`${appRoot}/entrepot/demande-de-creation/demande-envoyee`),
 
     // Demande pour rejoindre une communaute
     join_community: defineRoute(`${appRoot}/rejoindre-des-communautes`),
@@ -72,8 +73,6 @@ const routeDefs = {
         },
         (p) => `${appRoot}/demande-acces/${p.fileIdentifier}`
     ),
-
-    datastore_create_request_confirm: defineRoute(`${appRoot}/demande-acces/demande-envoyee`),
 
     datastore_manage_storage: defineRoute(
         {
@@ -293,7 +292,7 @@ export const publicRoutes: typeof knownRoutes = [
     "about",
     "documentation",
     "contact",
-    "contact_thanks",
+    "contact_confirmation",
     "news_list",
     "news_article",
     "faq",

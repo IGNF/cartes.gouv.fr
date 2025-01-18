@@ -87,6 +87,7 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
                     <MarkdownEditor
                         label={t("metadata.description_form.description")}
                         hintText={t("metadata.description_form.hint_description")}
+                        placeholder={t("metadata.description_form.placeholder_description")}
                         state={errors.description ? "error" : "default"}
                         stateRelatedMessage={errors?.description?.message?.toString()}
                         value={field.value ?? ""}

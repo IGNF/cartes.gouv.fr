@@ -6,8 +6,8 @@ import { UseFormReturn } from "react-hook-form";
 import { StoredDataRelation } from "../../../../../@types/app";
 import ZoomRange from "../../../../../components/Utils/ZoomRange";
 import olDefaults from "../../../../../data/ol-defaults.json";
-import Translator from "../../../../../modules/Translator";
-import { PyramidVectorGenerateFormValuesType } from "../PyramidVectorGenerateForm";
+import { useTranslation } from "../../../../../i18n";
+import { PyramidVectorGenerateFormValuesType } from "../PyramidVectorGenerateForm/PyramidVectorGenerateForm";
 
 type TableZoomLevelsProps = {
     visible: boolean;
@@ -16,6 +16,8 @@ type TableZoomLevelsProps = {
 };
 
 const TableZoomLevels: FC<TableZoomLevelsProps> = ({ visible, form, selectedTables }) => {
+    const { t } = useTranslation("PyramidVectorGenerateForm");
+
     const [tableZoomLevels, setTableZoomLevels] = useState<Record<string, number[]>>({});
 
     const { setValue: setFormValue, getValues: getFormValues } = form;
@@ -51,8 +53,8 @@ const TableZoomLevels: FC<TableZoomLevelsProps> = ({ visible, form, selectedTabl
 
     return (
         <div className={fr.cx("fr-my-2v", !visible && "fr-hidden")}>
-            <h3>{Translator.trans("pyramid_vector.new.step_zoom_levels.title")}</h3>
-            <p>{Translator.trans("pyramid_vector.new.step_zoom_levels.explain")}</p>
+            <h3>{t("step_zoom_levels.label")}</h3>
+            <p>{t("step_zoom_levels.explanation")}</p>
 
             {visible &&
                 selectedTables.map((table) => (

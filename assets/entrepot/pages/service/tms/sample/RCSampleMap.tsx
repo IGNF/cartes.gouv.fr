@@ -10,7 +10,7 @@ import { FC, useEffect, useRef } from "react";
 import { UseFormReturn } from "react-hook-form";
 
 import useCapabilities from "../../../../../hooks/useCapabilities";
-import Translator from "../../../../../modules/Translator";
+import { useTranslation } from "../../../../../i18n";
 import SampleMap from "./SampleMap";
 
 import "ol/ol.css";
@@ -28,6 +28,8 @@ type RCSampleMapProps = {
 };
 
 const RCSampleMap: FC<RCSampleMapProps> = ({ form, center, bottomZoomLevel, onChange }) => {
+    const { t } = useTranslation("PyramidVectorGenerateForm");
+
     const mapTargetRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<SampleMap>();
 
@@ -59,8 +61,6 @@ const RCSampleMap: FC<RCSampleMapProps> = ({ form, center, bottomZoomLevel, onCh
                 controls: controls,
             });
 
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
             mapRef.current.on("extentchanged", (e) => {
                 onChange?.(e.center, e.area);
             });
@@ -79,7 +79,7 @@ const RCSampleMap: FC<RCSampleMapProps> = ({ form, center, bottomZoomLevel, onCh
 
     return (
         <div className={fr.cx("fr-grid-row")}>
-            <p className={fr.cx("fr-mb-1w")}>{Translator.trans("pyramid_vector.new.step_sample.sample_explain")}</p>
+            <p className={fr.cx("fr-mb-1w")}>{t("step_sample.hint")}</p>
             <div className={fr.cx("fr-col-12", "fr-col-md-12")}>
                 <div className={"map-view"} ref={mapTargetRef} />
             </div>

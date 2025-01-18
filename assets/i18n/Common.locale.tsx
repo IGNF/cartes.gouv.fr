@@ -32,6 +32,7 @@ const { i18n } = declareComponentKeys<
     | "next_step"
     | "url_copied"
     | "copy_to_clipboard"
+    | "go_to_content"
 >()("Common");
 export type I18n = typeof i18n;
 
@@ -66,6 +67,7 @@ export const commonFrTranslations: Translations<"fr">["Common"] = {
     next_step: "Étape suivante",
     url_copied: "URL copiée",
     copy_to_clipboard: "Copier dans le presse-papier",
+    go_to_content: "Aller au contenu",
 };
 
 export const commonEnTranslations: Translations<"en">["Common"] = {
@@ -98,5 +100,6 @@ export const commonEnTranslations: Translations<"en">["Common"] = {
     previous_step: "Previous step",
     next_step: "Next step",
     url_copied: "URL copied",
-    copy_to_clipboard: "Copier dans le presse-papier",
+    copy_to_clipboard: "Copy to clipboard",
+    go_to_content: "Go to content",
 };

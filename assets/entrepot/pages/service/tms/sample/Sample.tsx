@@ -1,10 +1,11 @@
+import { fr } from "@codegouvfr/react-dsfr";
+import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import { FC, useEffect, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
-import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
-import Translator from "../../../../../modules/Translator";
-import { fr } from "@codegouvfr/react-dsfr";
-import RCSampleMap from "./RCSampleMap";
+
 import olDefaults from "../../../../../data/ol-defaults.json";
+import { useTranslation } from "../../../../../i18n";
+import RCSampleMap from "./RCSampleMap";
 
 type booleanValue = "true" | "false";
 export type SampleType = {
@@ -20,6 +21,8 @@ type SampleProps = {
 };
 
 const Sample: FC<SampleProps> = ({ visible, bottomZoomLevel, form }) => {
+    const { t } = useTranslation("PyramidVectorGenerateForm");
+
     const { setValue: setFormValue, getValues: getFormValues } = form;
 
     const [sample, setSample] = useState<SampleType>({
@@ -49,15 +52,15 @@ const Sample: FC<SampleProps> = ({ visible, bottomZoomLevel, form }) => {
 
     return (
         <div className={fr.cx("fr-my-2v", !visible && "fr-hidden")}>
-            <h3>{Translator.trans("pyramid_vector.new.step_sample.title")}</h3>
+            <h3>{t("step_sample.label")}</h3>
             <p>
-                <strong>{Translator.trans("pyramid_vector.new.step_sample.doubts")}</strong>
+                <strong>{t("step_sample.doubts_prompt")}</strong>
             </p>
-            <p>{Translator.trans("pyramid_vector.new.step_sample.explain")}</p>
+            <p>{t("step_sample.explanation")}</p>
             <Checkbox
                 options={[
                     {
-                        label: Translator.trans("pyramid_vector.new.step_sample.define_sample"),
+                        label: t("step_sample.define_sample"),
                         nativeInputProps: {
                             onChange: () => toggleSample(),
                         },

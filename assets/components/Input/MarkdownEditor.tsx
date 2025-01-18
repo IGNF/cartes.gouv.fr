@@ -4,7 +4,6 @@ import MDEditor from "@uiw/react-md-editor";
 import { CSSProperties, FC } from "react";
 
 import getLocaleCommands from "../../modules/react-md/react-md-commands";
-import Translator from "../../modules/Translator";
 
 type MarkdownEditorProps = {
     label?: string;
@@ -42,7 +41,7 @@ const MarkdownEditor: FC<MarkdownEditorProps> = (props) => {
                 commands={getLocaleCommands("fr")}
                 extraCommands={[]}
                 textareaProps={{
-                    placeholder: placeholder ?? Translator.trans("service.wfs.new.description_form.markdown_placeholder"),
+                    placeholder: placeholder,
                 }}
                 onChange={(newValue = "") => onChange(newValue)}
                 style={customStyle}

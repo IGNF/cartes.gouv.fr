@@ -4,12 +4,12 @@ import Input from "@codegouvfr/react-dsfr/Input";
 import { FC, useEffect } from "react";
 import { Controller, UseFormReturn } from "react-hook-form";
 
-import AutocompleteSelect from "../../../../components/Input/AutocompleteSelect";
-import Translator from "../../../../modules/Translator";
 import { StoredDataDetailsRelationDto } from "../../../../@types/entrepot";
+import AutocompleteSelect from "../../../../components/Input/AutocompleteSelect";
 import { WfsServiceFormValuesType } from "./WfsServiceForm";
 
 // Themes et mot cles INSPIRE
+import { useTranslation } from "../../../../i18n";
 import { getInspireKeywords } from "../../../../utils";
 
 type TablesInfoFormProps = {
@@ -23,6 +23,9 @@ type TablesInfoFormProps = {
 const keywords = getInspireKeywords();
 
 const TableInfosForm: FC<TablesInfoFormProps> = ({ visible, tables, state, stateRelatedMessage, form }) => {
+    const { t } = useTranslation("WfsServiceForm");
+    const { t: tCommon } = useTranslation("Common");
+
     const {
         register,
         setValue: setFormValue,
@@ -55,8 +58,8 @@ const TableInfosForm: FC<TablesInfoFormProps> = ({ visible, tables, state, state
 
     return (
         <div className={fr.cx("fr-my-2v", !visible && "fr-hidden")}>
-            <h3>{Translator.trans("service.wfs.new.tables_form.title")}</h3>
-            <p>{Translator.trans("mandatory_fields")}</p>
+            <h3>{t("tables_info_form.label")}</h3>
+            <p>{tCommon("mandatory_fields")}</p>
             {tables.map((table) => {
                 return (
                     <div className={fr.cx("fr-mb-4v")} key={table.name}>
@@ -76,8 +79,8 @@ const TableInfosForm: FC<TablesInfoFormProps> = ({ visible, tables, state, state
                         {selectedTables.includes(table.name) && (
                             <div className={fr.cx("fr-ml-8v")}>
                                 <Input
-                                    label={Translator.trans("service.wfs.new.tables_form.table.public_name")}
-                                    hintText={Translator.trans("service.wfs.new.tables_form.table.hint_public_name")}
+                                    label={t("tables_info_form.public_name.label")}
+                                    hintText={t("tables_info_form.public_name.hint")}
                                     nativeInputProps={{
                                         defaultValue: getFormValues(`table_infos.${table.name}.public_name`) ?? table.name,
                                         ...register(`table_infos.${table.name}.public_name`),
@@ -86,8 +89,8 @@ const TableInfosForm: FC<TablesInfoFormProps> = ({ visible, tables, state, state
                                     stateRelatedMessage={errors?.table_infos?.[table.name]?.public_name?.message}
                                 />
                                 <Input
-                                    label={Translator.trans("service.wfs.new.tables_form.table.title")}
-                                    hintText={Translator.trans("service.wfs.new.tables_form.table.hint_title")}
+                                    label={t("tables_info_form.title.label")}
+                                    hintText={t("tables_info_form.title.hint")}
                                     nativeInputProps={{
                                         defaultValue: getFormValues(`table_infos.${table.name}.title`),
                                         ...register(`table_infos.${table.name}.title`),
@@ -96,8 +99,8 @@ const TableInfosForm: FC<TablesInfoFormProps> = ({ visible, tables, state, state
                                     stateRelatedMessage={errors?.table_infos?.[table.name]?.title?.message}
                                 />
                                 <Input
-                                    label={Translator.trans("service.wfs.new.tables_form.table.description")}
-                                    hintText={Translator.trans("service.wfs.new.tables_form.table.hint_description")}
+                                    label={t("tables_info_form.description.label")}
+                                    hintText={t("tables_info_form.description.hint")}
                                     textArea={true}
                                     nativeTextAreaProps={{
                                         defaultValue: getFormValues(`table_infos.${table.name}.description`),
@@ -114,8 +117,8 @@ const TableInfosForm: FC<TablesInfoFormProps> = ({ visible, tables, state, state
                                     render={({ field }) => {
                                         return (
                                             <AutocompleteSelect
-                                                label={Translator.trans("service.wfs.new.tables_form.table.keywords")}
-                                                hintText={Translator.trans("service.wfs.new.tables_form.table.hint_keywords")}
+                                                label={t("tables_info_form.keywords.label")}
+                                                hintText={t("tables_info_form.keywords.hint")}
                                                 options={keywords}
                                                 freeSolo={true}
                                                 getOptionLabel={(option) => option}

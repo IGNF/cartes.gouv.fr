@@ -13,20 +13,20 @@ import { symToStr } from "tsafe/symToStr";
 import { v4 as uuidv4 } from "uuid";
 import * as yup from "yup";
 
-import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
-import LoadingIcon from "../../../../components/Utils/LoadingIcon";
-import LoadingText from "../../../../components/Utils/LoadingText";
-import Progress from "../../../../components/Utils/Progress";
-import Wait from "../../../../components/Utils/Wait";
-import defaultProjections from "../../../../data/default_projections.json";
-import ignfProjections from "../../../../data/ignf_projections.json";
-import { useTranslation } from "../../../../i18n/i18n";
-import FileUploader from "../../../../modules/FileUploader";
-import RQKeys from "../../../../modules/entrepot/RQKeys";
-import { routes, useRoute } from "../../../../router/router";
-import { getFileExtension, regex } from "../../../../utils";
-import api from "../../../api";
-import DatasheetUploadIntegrationDialog from "./DatasheetUploadIntegration/DatasheetUploadIntegrationDialog";
+import DatastoreLayout from "../../../../../components/Layout/DatastoreLayout";
+import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
+import LoadingText from "../../../../../components/Utils/LoadingText";
+import Progress from "../../../../../components/Utils/Progress";
+import Wait from "../../../../../components/Utils/Wait";
+import defaultProjections from "../../../../../data/default_projections.json";
+import ignfProjections from "../../../../../data/ignf_projections.json";
+import { useTranslation } from "../../../../../i18n/i18n";
+import FileUploader from "../../../../../modules/FileUploader";
+import RQKeys from "../../../../../modules/entrepot/RQKeys";
+import { routes, useRoute } from "../../../../../router/router";
+import { getFileExtension, regex } from "../../../../../utils";
+import api from "../../../../api";
+import DatasheetUploadIntegrationDialog from "../DatasheetUploadIntegration/DatasheetUploadIntegrationDialog";
 
 const maxFileSize = 2000000000; // 2 GB
 const fileExtensions = ["gpkg", "zip"];

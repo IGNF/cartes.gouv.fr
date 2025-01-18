@@ -12,6 +12,7 @@ const { i18n } = declareComponentKeys<
     | "metadata.description_form.hint_public_name"
     | "metadata.description_form.description"
     | "metadata.description_form.hint_description"
+    | "metadata.description_form.placeholder_description"
     | "metadata.description_form.identifier"
     | "metadata.description_form.hint_identifier"
     | "metadata.description_form.category"
@@ -70,6 +71,7 @@ export const MetadatasFormFrTranslations: Translations<"fr">["MetadatasForm"] = 
     "metadata.description_form.hint_public_name": "Nom caractéristique et souvent unique sous lequel la ressource est connue",
     "metadata.description_form.description": "Résumé",
     "metadata.description_form.hint_description": "Bref résumé narratif du contenu de la ressource",
+    "metadata.description_form.placeholder_description": "Veuillez saisir le texte Markdown",
     "metadata.description_form.identifier": "Identificateur de ressource unique",
     "metadata.description_form.hint_identifier": "Entrez une valeur identifiant la ressource de manière unique",
     "metadata.description_form.category": "Catégorie thématique",
@@ -142,6 +144,7 @@ export const MetadatasFormEnTranslations: Translations<"en">["MetadatasForm"] = 
     "metadata.description_form.hint_public_name": "Characteristic and often unique name by which the resource is known",
     "metadata.description_form.description": "Description",
     "metadata.description_form.hint_description": "Brief narrative summary of resource content",
+    "metadata.description_form.placeholder_description": undefined,
     "metadata.description_form.identifier": "Unique resource identifier",
     "metadata.description_form.hint_identifier": "Enter a value that uniquely identifies the resource",
     "metadata.description_form.category": "Thematic category",

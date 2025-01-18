@@ -1,27 +1,28 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import Alert from "@codegouvfr/react-dsfr/Alert";
+import { Button } from "@codegouvfr/react-dsfr/Button";
+import { Input } from "@codegouvfr/react-dsfr/Input";
+import { yupResolver } from "@hookform/resolvers/yup";
 import { FC, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Input } from "@codegouvfr/react-dsfr/Input";
-import { Button } from "@codegouvfr/react-dsfr/Button";
-import AppLayout from "../../../components/Layout/AppLayout";
-import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import SymfonyRouting from "../../../modules/Routing";
-import { routes } from "../../../router/router";
-import Translator from "../../../modules/Translator";
-import { jsonFetch } from "../../../modules/jsonFetch";
-import { removeDiacritics } from "../../../utils";
-import Wait from "../../../components/Utils/Wait";
-import Alert from "@codegouvfr/react-dsfr/Alert";
-import { datastoreNavItems } from "../../../config/navItems/datastoreNavItems";
+
+import AppLayout from "../../../../components/Layout/AppLayout";
+import Wait from "../../../../components/Utils/Wait";
+import { datastoreNavItems } from "../../../../config/navItems/datastoreNavItems";
+import { useTranslation } from "../../../../i18n";
+import SymfonyRouting from "../../../../modules/Routing";
+import { jsonFetch } from "../../../../modules/jsonFetch";
+import { routes } from "../../../../router/router";
+import { removeDiacritics } from "../../../../utils";
 
 const DatastoreCreationForm: FC = () => {
+    const { t } = useTranslation("DatastoreCreationForm");
+    const { t: tCommon } = useTranslation("Common");
+
     const schema = yup
         .object({
-            name: yup
-                .string()
-                .required(Translator.trans("datastore_creation_request.form.name_error"))
-                .min(10, Translator.trans("datastore_creation_request.form.name_minlength_error")),
+            name: yup.string().required(t("form.name_error")).min(10, t("form.name_minlength_error")),
             technical_name: yup.string().required(),
             information: yup.string(),
         })
@@ -68,10 +69,10 @@ const DatastoreCreationForm: FC = () => {
     const navItems = datastoreNavItems();
 
     return (
-        <AppLayout navItems={navItems} documentTitle={Translator.trans("datastore_creation_request.title")}>
+        <AppLayout navItems={navItems} documentTitle={t("title")}>
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-12")}>
-                    <h1>{Translator.trans("datastore_creation_request.title")}</h1>
+                    <h1>{t("title")}</h1>
                     <p>Un espace de travail permet de disposer&nbsp;:</p>
                     <ul>
                         <li>
@@ -86,12 +87,12 @@ const DatastoreCreationForm: FC = () => {
                             .
                         </li>
                     </ul>
-                    <p>{Translator.trans("mandatory_fields")}</p>
-                    {error && <Alert title={Translator.trans("datastore_creation_request.form.error_title")} closable description={error} severity="error" />}
+                    <p>{tCommon("mandatory_fields")}</p>
+                    {error && <Alert title={t("form.error_title")} closable description={error} severity="error" />}
                     <div className={fr.cx("fr-col-12", "fr-col-md-12")}>
                         <Input
-                            label={Translator.trans("datastore_creation_request.form.name")}
-                            hintText={Translator.trans("datastore_creation_request.form.name_hint")}
+                            label={t("form.name")}
+                            hintText={t("form.name_hint")}
                             state={errors.name ? "error" : "default"}
                             stateRelatedMessage={errors?.name?.message}
                             nativeInputProps={{
@@ -99,8 +100,8 @@ const DatastoreCreationForm: FC = () => {
                             }}
                         />
                         <Input
-                            label={Translator.trans("datastore_creation_request.form.information")}
-                            hintText={Translator.trans("datastore_creation_request.form.information_hint")}
+                            label={t("form.information")}
+                            hintText={t("form.information_hint")}
                             textArea
                             nativeTextAreaProps={{
                                 ...register("information"),
@@ -108,7 +109,7 @@ const DatastoreCreationForm: FC = () => {
                             }}
                         />
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--right")}>
-                            <Button onClick={handleSubmit(onSubmit)}>{Translator.trans("datastore_creation_request.form.send")}</Button>
+                            <Button onClick={handleSubmit(onSubmit)}>{t("form.send")}</Button>
                         </div>
                     </div>
                 </div>
@@ -121,7 +122,7 @@ const DatastoreCreationForm: FC = () => {
                                 <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg") + " frx-icon-spin"} />
                             </div>
                             <div className={fr.cx("fr-col-10")}>
-                                <h6 className={fr.cx("fr-h6", "fr-m-0")}>{Translator.trans("datastore_creation_request.is_sending")}</h6>
+                                <h6 className={fr.cx("fr-h6", "fr-m-0")}>{t("is_sending")}</h6>
                             </div>
                         </div>
                     </div>

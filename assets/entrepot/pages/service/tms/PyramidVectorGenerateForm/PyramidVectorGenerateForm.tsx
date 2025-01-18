@@ -9,23 +9,23 @@ import { FC, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
-import { type StoredDataRelation, type VectorDb } from "../../../../@types/app";
-import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
-import LoadingText from "../../../../components/Utils/LoadingText";
-import Wait from "../../../../components/Utils/Wait";
-import olDefaults from "../../../../data/ol-defaults.json";
-import useScrollToTopEffect from "../../../../hooks/useScrollToTopEffect";
-import Translator from "../../../../modules/Translator";
-import RQKeys from "../../../../modules/entrepot/RQKeys";
-import { CartesApiException } from "../../../../modules/jsonFetch";
-import { routes } from "../../../../router/router";
-import api from "../../../api";
-import TableSelection from "../common/TableSelection/TableSelection";
-import formatForm from "./format-form";
-import Sample, { type SampleType } from "./sample/Sample";
-import TableAttributeSelection from "./tables/TableAttributeSelection";
-import TableZoomLevels from "./tables/TableZoomLevels";
-import TippeCanoe from "./tippecanoes/Tippecanoe";
+import { type StoredDataRelation, type VectorDb } from "../../../../../@types/app";
+import DatastoreLayout from "../../../../../components/Layout/DatastoreLayout";
+import LoadingText from "../../../../../components/Utils/LoadingText";
+import Wait from "../../../../../components/Utils/Wait";
+import olDefaults from "../../../../../data/ol-defaults.json";
+import useScrollToTopEffect from "../../../../../hooks/useScrollToTopEffect";
+import { useTranslation } from "../../../../../i18n";
+import RQKeys from "../../../../../modules/entrepot/RQKeys";
+import { CartesApiException } from "../../../../../modules/jsonFetch";
+import { routes } from "../../../../../router/router";
+import api from "../../../../api";
+import TableSelection from "../../common/TableSelection/TableSelection";
+import formatForm from "../format-form";
+import Sample, { type SampleType } from "../sample/Sample";
+import TableAttributeSelection from "../tables/TableAttributeSelection";
+import TableZoomLevels from "../tables/TableZoomLevels";
+import TippeCanoe from "../tippecanoes/Tippecanoe";
 
 export type PyramidVectorGenerateFormValuesType = {
     selected_tables?: string[];
@@ -50,13 +50,13 @@ type PyramidVectorNewProps = {
 };
 
 const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, vectorDbId, technicalName }) => {
+    const { t } = useTranslation("PyramidVectorGenerateForm");
+    const { t: tCommon } = useTranslation("Common");
+
     // Definition du schema
     const schema = {};
     schema[STEPS.TABLES_SELECTION] = yup.object({
-        selected_tables: yup
-            .array(yup.string())
-            .min(1, Translator.trans("pyramid_vector.new.step_tables.mandatory_error"))
-            .required(Translator.trans("pyramid_vector.new.step_tables.mandatory_error")),
+        selected_tables: yup.array(yup.string()).min(1, t("step_tables.error.required")).required(t("step_tables.error.required")),
     });
     schema[STEPS.ATTRIBUTES_SELECTION] = yup.object({
         table_attributes: yup.lazy(() => {
@@ -69,15 +69,15 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, vec
                 tableAttributes[table.name] = yup
                     .array()
                     .of(yup.string())
-                    .min(1, Translator.trans("pyramid_vector.new.step_attributes.mandatory_error"))
-                    .required(Translator.trans("pyramid_vector.new.step_attributes.mandatory_error"));
+                    .min(1, t("step_attributes.error.required"))
+                    .required(t("step_attributes.error.required"));
             });
             return yup.object().shape(tableAttributes);
         }),
     });
     schema[STEPS.ZOOM_LEVELS] = yup.mixed().nullable().notRequired();
     schema[STEPS.GENERALIZE_OPTIONS] = yup.object({
-        tippecanoe: yup.string().required(Translator.trans("pyramid_vector.new.step_tippecanoe.mandatory_error")),
+        tippecanoe: yup.string().required(t("step_generalisation.tippecanoe_option.error.required")),
     });
     schema[STEPS.SAMPLE] = yup.mixed().nullable().notRequired();
 
@@ -160,34 +160,28 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, vec
     };
 
     return (
-        <DatastoreLayout datastoreId={datastoreId} documentTitle={Translator.trans("pyramid_vector.new.title")}>
-            <h1>{Translator.trans("pyramid_vector.new.title")}</h1>
+        <DatastoreLayout datastoreId={datastoreId} documentTitle={t("title")}>
+            <h1>{t("title")}</h1>
 
             {vectorDbQuery.isLoading ? (
-                <LoadingText message={Translator.trans("pyramid_vector.new.loading_stored_data")} />
+                <LoadingText message={t("stored_data.loading")} />
             ) : vectorDbQuery.data === undefined ? (
                 <Alert
                     severity="error"
                     closable={false}
-                    title="Récupération des informations sur la donnée stockée a échoué"
-                    description={<Button linkProps={routes.datasheet_list({ datastoreId }).link}>Retour à mes données</Button>}
+                    title={t("stored_data.fetch_failed")}
+                    description={<Button linkProps={routes.datasheet_list({ datastoreId }).link}>{t("back_to_data_list")}</Button>}
                 />
             ) : (
                 <>
                     <Stepper
                         currentStep={currentStep}
                         stepCount={Object.values(STEPS).length}
-                        nextTitle={currentStep < STEPS.SAMPLE && Translator.trans(`pyramid_vector.new.step${currentStep + 1}`)}
-                        title={Translator.trans(`pyramid_vector.new.step${currentStep}`)}
+                        nextTitle={currentStep < STEPS.SAMPLE && t("step.title", { stepNumber: currentStep + 1 })}
+                        title={t("step.title", { stepNumber: currentStep })}
                     />
                     {validationError && (
-                        <Alert
-                            className="fr-preline"
-                            closable
-                            description={validationError.message}
-                            severity="error"
-                            title={Translator.trans("commons.error")}
-                        />
+                        <Alert className="fr-preline" closable description={validationError.message} severity="error" title={tCommon("error")} />
                     )}
                     <TableSelection filterGeometric={true} visible={currentStep === STEPS.TABLES_SELECTION} vectorDb={vectorDbQuery.data} form={form} />
                     <TableAttributeSelection visible={currentStep === STEPS.ATTRIBUTES_SELECTION} form={form} selectedTables={selectedTables} />
@@ -204,7 +198,7 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, vec
                         alignment="between"
                         buttons={[
                             {
-                                children: Translator.trans("previous_step"),
+                                children: tCommon("previous_step"),
                                 iconId: "fr-icon-arrow-left-fill",
                                 priority: "tertiary",
                                 onClick: previousStep,
@@ -213,10 +207,10 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, vec
                             {
                                 children:
                                     currentStep < Object.values(STEPS).length
-                                        ? Translator.trans("continue")
+                                        ? tCommon("continue")
                                         : sample?.is_sample === "true"
-                                          ? Translator.trans("pyramid_vector.new.generate_sample")
-                                          : Translator.trans("pyramid_vector.new.generate_pyramid"),
+                                          ? t("generate_sample")
+                                          : t("generate_pyramid"),
                                 onClick: nextStep,
                             },
                         ]}
@@ -232,7 +226,7 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, vec
                                 <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg") + " frx-icon-spin"} />
                             </div>
                             <div className={fr.cx("fr-col-10")}>
-                                <h6 className={fr.cx("fr-h6", "fr-m-0")}>{"Demande de création de la pyramide de tuiles en cours ..."}</h6>
+                                <h6 className={fr.cx("fr-h6", "fr-m-0")}>{t("pyramid_creation_launch_in_progress")}</h6>
                             </div>
                         </div>
                     </div>

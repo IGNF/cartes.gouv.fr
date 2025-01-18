@@ -23,6 +23,8 @@ export type ComponentKey =
     | import("../entrepot/pages/users/me/Me.locale").I18n
     | import("../entrepot/pages/communities/AddMember/AddMember.locale").I18n
     | import("../entrepot/pages/communities/CommunityMembers/CommunityMembers.locale").I18n
+    | import("../entrepot/pages/communities/CommunityList/CommunityList.locale").I18n
+    | import("../entrepot/pages/datastore/DatastoreCreationForm/DatastoreCreationForm.locale").I18n
     | import("../entrepot/pages/dashboard/DashboardPro.locale").I18n
     | import("../entrepot/pages/users/access-keys/MyAccessKeys.locale").I18n
     | import("../entrepot/pages/users/keys/UserKeysListTab/UserKeysListTab.locale").I18n
@@ -34,7 +36,8 @@ export type ComponentKey =
     | import("../pages/assistance/contact/Contact.locale").I18n
     | import("../entrepot/pages/datastore/ManageStorage/DatastoreManageStorage.locale").I18n
     | import("../entrepot/pages/datastore/ManagePermissions/DatastorePermissions.locale").I18n
-    | import("../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadForm.locale").I18n
+    | import("../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadForm/DatasheetUploadForm.locale").I18n
+    | import("../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadIntegration/DatasheetUploadIntegration.locale").I18n
     | import("../entrepot/pages/datasheet/DatasheetList/DatasheetList.locale").I18n
     | import("../entrepot/pages/datasheet/DatasheetView/DatasetListTab/VectorDbList/VectorDbList.locale").I18n
     | import("../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidVectorList/PyramidVectorList.locale").I18n
@@ -48,6 +51,7 @@ export type ComponentKey =
     | import("../entrepot/pages/service/wms-vector/WmsVectorServiceForm.locale").I18n
     | import("../entrepot/pages/service/wfs/WfsServiceForm.locale").I18n
     | import("../entrepot/pages/service/tms/PyramidVectorTmsServiceForm/PyramidVectorTmsServiceForm.locale").I18n
+    | import("../entrepot/pages/service/tms/PyramidVectorGenerateForm/PyramidVectorGenerateForm.locale").I18n
     | import("../entrepot/pages/service/wms-raster-wmts/PyramidRasterGenerateForm/PyramidRasterGenerateForm.locale").I18n
     | import("../entrepot/pages/service/wms-raster-wmts/PyramidRasterWmsRasterServiceForm/PyramidRasterWmsRasterServiceForm.locale").I18n
     | import("../entrepot/pages/service/wms-raster-wmts/PyramidRasterWmtsServiceForm/PyramidRasterWmtsServiceForm.locale").I18n

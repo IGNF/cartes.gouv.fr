@@ -1,5 +1,5 @@
 import { declareComponentKeys } from "i18nifty";
-import { Translations } from "../../../../i18n/types";
+import { Translations } from "../../../../../i18n/types";
 
 const { i18n } = declareComponentKeys<
     | { K: "title"; P: { datasheetName: string | undefined }; R: string }

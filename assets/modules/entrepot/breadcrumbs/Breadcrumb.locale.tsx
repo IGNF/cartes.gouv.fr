@@ -5,7 +5,7 @@ const { i18n } = declareComponentKeys<
     | "dashboard_pro"
     | "about"
     | "contact"
-    | "contact_thanks"
+    | "contact_confirmation"
     | "news"
     | "faq"
     | "sitemap"
@@ -54,7 +54,7 @@ export const BreadcrumbFrTranslations: Translations<"fr">["Breadcrumb"] = {
     dashboard_pro: "Tableau de bord",
     about: "A propos",
     contact: "Nous écrire",
-    contact_thanks: "Demande envoyée",
+    contact_confirmation: "Demande envoyée",
     news: "Actualités",
     faq: "Questions fréquentes",
     sitemap: "Plan du site",
@@ -102,7 +102,7 @@ export const BreadcrumbEnTranslations: Translations<"en">["Breadcrumb"] = {
     dashboard_pro: "Dashboard",
     about: "About",
     contact: "Contact us",
-    contact_thanks: "Request sent",
+    contact_confirmation: "Request sent",
     news: "News",
     faq: "frequently asked questions",
     sitemap: "Sitemap",

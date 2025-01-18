@@ -15,7 +15,7 @@ const Offer = lazy(() => import("../pages/Offer"));
 const Join = lazy(() => import("../pages/Join"));
 const Faq = lazy(() => import("../pages/assistance/Faq"));
 const Contact = lazy(() => import("../pages/assistance/contact/Contact"));
-const Thanks = lazy(() => import("../pages/assistance/contact/Thanks"));
+const ContactConfirmation = lazy(() => import("../pages/assistance/contact/ContactConfirmation"));
 const ServiceStatus = lazy(() => import("../pages/assistance/ServiceStatus"));
 const NewsList = lazy(() => import("../pages/news/NewsList"));
 const NewsArticle = lazy(() => import("../pages/news/NewsArticle"));
@@ -38,22 +38,22 @@ const EditPermissionForm = lazy(() => import("../entrepot/pages/datastore/Manage
 const DashboardPro = lazy(() => import("../entrepot/pages/dashboard/DashboardPro"));
 const DatasheetList = lazy(() => import("../entrepot/pages/datasheet/DatasheetList/DatasheetList"));
 
-const DatasheetUploadForm = lazy(() => import("../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadForm"));
+const DatasheetUploadForm = lazy(() => import("../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadForm/DatasheetUploadForm"));
 const DatasheetUploadIntegrationPage = lazy(() => import("../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadIntegration/DatasheetUploadIntegrationPage"));
 const DatasheetView = lazy(() => import("../entrepot/pages/datasheet/DatasheetView/DatasheetView/DatasheetView"));
 
 const StoredDataDetails = lazy(() => import("../entrepot/pages/data_details/StoredDataDetails"));
 const UploadDetails = lazy(() => import("../entrepot/pages/data_details/UploadDetails"));
 
-const DatastoreCreationForm = lazy(() => import("../entrepot/pages/datastore/DatastoreCreationForm"));
-const Confirm = lazy(() => import("../entrepot/pages/datastore/Confirmation"));
+const DatastoreCreationForm = lazy(() => import("../entrepot/pages/datastore/DatastoreCreationForm/DatastoreCreationForm"));
+const DatastoreCreationRequestConfirmation = lazy(() => import("../entrepot/pages/datastore/DatastoreCreationForm/DatastoreCreationRequestConfirmation"));
 
 const CommunityMembers = lazy(() => import("../entrepot/pages/communities/CommunityMembers/CommunityMembers"));
-const CommunityList = lazy(() => import("../entrepot/pages/communities/CommunityList"));
+const CommunityList = lazy(() => import("../entrepot/pages/communities/CommunityList/CommunityList"));
 
 const WfsServiceForm = lazy(() => import("../entrepot/pages/service/wfs/WfsServiceForm"));
 const WmsVectorServiceForm = lazy(() => import("../entrepot/pages/service/wms-vector/WmsVectorServiceForm"));
-const PyramidVectorGenerateForm = lazy(() => import("../entrepot/pages/service/tms/PyramidVectorGenerateForm"));
+const PyramidVectorGenerateForm = lazy(() => import("../entrepot/pages/service/tms/PyramidVectorGenerateForm/PyramidVectorGenerateForm"));
 const PyramidVectorTmsServiceForm = lazy(() => import("../entrepot/pages/service/tms/PyramidVectorTmsServiceForm/PyramidVectorTmsServiceForm"));
 const PyramidRasterGenerateForm = lazy(() => import("../entrepot/pages/service/wms-raster-wmts/PyramidRasterGenerateForm/PyramidRasterGenerateForm"));
 const PyramidRasterWmsRasterServiceForm = lazy(
@@ -99,8 +99,8 @@ const RouterRenderer: FC = () => {
                 return <Join />;
             case "contact":
                 return <Contact />;
-            case "contact_thanks":
-                return <Thanks />;
+            case "contact_confirmation":
+                return <ContactConfirmation />;
             case "news_list":
                 return <NewsList />;
             case "news_article":
@@ -146,7 +146,7 @@ const RouterRenderer: FC = () => {
             case "datastore_create_request":
                 return <DatastoreCreationForm />;
             case "datastore_create_request_confirm":
-                return <Confirm />;
+                return <DatastoreCreationRequestConfirmation />;
             case "members_list":
                 return <CommunityMembers communityId={route.params.communityId} userId={route.params.userId} />;
             case "join_community":

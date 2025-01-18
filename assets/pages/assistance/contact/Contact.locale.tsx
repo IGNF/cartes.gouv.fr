@@ -23,6 +23,10 @@ const { i18n } = declareComponentKeys<
     | "message_sent"
     | "send"
     | { K: "form.infos"; P: { personalDataLinkProps: RegisteredLinkProps }; R: JSX.Element }
+    | "contact_confirmation.title"
+    | "contact_confirmation.success.title"
+    | { K: "contact_confirmation.success.description"; P: { homeLink: RegisteredLinkProps }; R: JSX.Element }
+    | "contact_confirmation.continue"
 >()("Contact");
 export type I18n = typeof i18n;
 
@@ -57,6 +61,17 @@ export const ContactFrTranslations: Translations<"fr">["Contact"] = {
             <a {...personalDataLinkProps}>{"En savoir plus sur la gestion des données à caractère personnel"}</a>.
         </>
     ),
+
+    "contact_confirmation.title": "Demande envoyée",
+    "contact_confirmation.success.title": "Votre message a bien été envoyé",
+    "contact_confirmation.success.description": ({ homeLink }) => (
+        <>
+            Vous recevrez dans les prochaines minutes un accusé de réception récapitulant votre demande.
+            <br />
+            Cordialement, l’équipe de <a {...homeLink}>cartes.gouv.fr</a>.
+        </>
+    ),
+    "contact_confirmation.continue": "Poursuivre",
 };
 
 export const ContactEnTranslations: Translations<"en">["Contact"] = {
@@ -90,4 +105,8 @@ export const ContactEnTranslations: Translations<"en">["Contact"] = {
             <a {...personalDataLinkProps}>{"Learn more about how personal data is stored and used"}</a>.
         </>
     ),
+    "contact_confirmation.title": undefined,
+    "contact_confirmation.success.title": undefined,
+    "contact_confirmation.success.description": undefined,
+    "contact_confirmation.continue": undefined,
 };

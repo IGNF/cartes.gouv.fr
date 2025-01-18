@@ -4,8 +4,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useEffect, useMemo, useState } from "react";
 
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
+import { useTranslation } from "../../../../../i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
-import Translator from "../../../../../modules/Translator";
 import { routes } from "../../../../../router/router";
 import api from "../../../../api";
 import { DatasheetViewActiveTabEnum } from "../../DatasheetView/DatasheetView/DatasheetView";
@@ -30,24 +30,6 @@ const getStepIcon = (status: string) => {
     return icon;
 };
 
-const getStepStatusText = (status: string) => {
-    let statusText = "";
-    switch (status) {
-        case "in_progress":
-            statusText = "En cours";
-            break;
-        case "successful":
-            statusText = "Succès";
-            break;
-        case "failed":
-            statusText = "Echec";
-            break;
-        case "waiting":
-            statusText = "En attente";
-    }
-    return statusText;
-};
-
 type IntegrationStatus = "at_least_one_failure" | "proc_int_launched" | "all_successful";
 
 type DatasheetUploadIntegrationDialogProps = {
@@ -57,6 +39,8 @@ type DatasheetUploadIntegrationDialogProps = {
 };
 
 const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps> = ({ datastoreId, datasheetName, uploadId }) => {
+    const { t } = useTranslation("DatasheetUploadIntegration");
+
     const [shouldPingIntProg, setShouldPingIntProg] = useState<boolean>(true);
 
     const queryClient = useQueryClient();
@@ -157,13 +141,13 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
                     <div className={fr.cx("fr-grid-row")}>
                         <div className={fr.cx("fr-col")}>
                             <h6 className={fr.cx("fr-h6")}>
-                                <LoadingIcon largeIcon={true} /> Vos données vecteur sont en cours de dépôt
+                                <LoadingIcon largeIcon={true} /> {t("data_integration_in_progress")}
                             </h6>
                         </div>
                     </div>
                     <div className={fr.cx("fr-grid-row")}>
                         <div className={fr.cx("fr-col")}>
-                            <p>Les opérations suivantes peuvent prendre quelques minutes. Merci pour votre patience.</p>
+                            <p>{t("long_operation_information")}</p>
                         </div>
                     </div>
                 </>
@@ -176,16 +160,14 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
                             <div className={fr.cx("fr-grid-row")} key={step}>
                                 <p>
                                     {getStepIcon(status)}
-                                    &nbsp;{Translator.trans(`datasheet.new_integration.steps.${step}`)} : {getStepStatusText(status)}
+                                    &nbsp;{t("step_title", { step_name: step })} : {t("step_status_text", { step_status: status })}
                                 </p>
                             </div>
                         ))}
                 </div>
             </div>
 
-            {integrationStatus === "proc_int_launched" && (
-                <p>Vous pouvez maintenant poursuivre votre navigation même si vos données ne sont pas encore prêtes.</p>
-            )}
+            {integrationStatus === "proc_int_launched" && <p>{t("continue_browsing_data_not_ready")}</p>}
 
             {(integrationStatus === "all_successful" || integrationStatus === "proc_int_launched") && uploadQuery.data?.tags.datasheet_name !== undefined && (
                 <div className={fr.cx("fr-grid-row")}>
@@ -218,7 +200,7 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
                     <ButtonsGroup
                         buttons={[
                             {
-                                children: "Consulter la fiche de données",
+                                children: t("view_datasheet"),
                                 onClick: () => {
                                     uploadQuery.data?.tags.datasheet_name &&
                                         (queryClient.refetchQueries({
@@ -244,7 +226,7 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
                     <ButtonsGroup
                         buttons={[
                             {
-                                children: "Voir le rapport d’erreur",
+                                children: t("check_error_report"),
                                 linkProps: routes.datastore_stored_data_details({
                                     datastoreId,
                                     storedDataId: uploadQuery.data?.tags?.vectordb_id,
@@ -252,7 +234,7 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
                                 }).link,
                             },
                             {
-                                children: "Revenir à mes données",
+                                children: t("back_to_datasheet_list"),
                                 linkProps: routes.datasheet_list({ datastoreId }).link,
                                 priority: "secondary",
                             },

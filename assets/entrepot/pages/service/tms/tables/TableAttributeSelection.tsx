@@ -4,8 +4,8 @@ import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import { FC, useEffect } from "react";
 import { type UseFormReturn } from "react-hook-form";
 
-import Translator from "../../../../../modules/Translator";
 import { type StoredDataRelation } from "../../../../../@types/app";
+import { useTranslation } from "../../../../../i18n";
 
 type TableAttributeSelectionProps = {
     visible: boolean;
@@ -14,6 +14,9 @@ type TableAttributeSelectionProps = {
 };
 
 const TableAttributeSelection: FC<TableAttributeSelectionProps> = ({ visible, form, selectedTables }) => {
+    const { t } = useTranslation("PyramidVectorGenerateForm");
+    const { t: tCommon } = useTranslation("Common");
+
     const {
         setValue: setFormValue,
         getValues: getFormValues,
@@ -47,8 +50,8 @@ const TableAttributeSelection: FC<TableAttributeSelectionProps> = ({ visible, fo
 
     return (
         <div className={fr.cx(!visible && "fr-hidden")}>
-            <h3>{Translator.trans("choose_attributes")}</h3>
-            <p>{Translator.trans("mandatory_fields")}</p>
+            <h3>{t("step_attributes.label")}</h3>
+            <p>{tCommon("mandatory_fields")}</p>
 
             {selectedTables.map((table) => (
                 <Accordion key={table.name} label={table.name} titleAs="h4" defaultExpanded={true}>

@@ -8,19 +8,19 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { FC, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
-import api from "../../api";
-import AppLayout from "../../../components/Layout/AppLayout";
-import LoadingText from "../../../components/Utils/LoadingText";
-import Wait from "../../../components/Utils/Wait";
-import { datastoreNavItems } from "../../../config/navItems/datastoreNavItems";
-import RQKeys from "../../../modules/entrepot/RQKeys";
-import Translator from "../../../modules/Translator";
-import { CartesApiException } from "../../../modules/jsonFetch";
-import { useAuthStore } from "../../../stores/AuthStore";
-import { CommunityListResponseDto } from "../../../@types/entrepot";
-import { regex, removeDiacritics } from "../../../utils";
+import { CommunityListResponseDto } from "../../../../@types/entrepot";
+import AppLayout from "../../../../components/Layout/AppLayout";
+import LoadingText from "../../../../components/Utils/LoadingText";
+import Wait from "../../../../components/Utils/Wait";
+import { datastoreNavItems } from "../../../../config/navItems/datastoreNavItems";
+import { useTranslation } from "../../../../i18n";
+import RQKeys from "../../../../modules/entrepot/RQKeys";
+import { CartesApiException } from "../../../../modules/jsonFetch";
+import { useAuthStore } from "../../../../stores/AuthStore";
+import { regex, removeDiacritics } from "../../../../utils";
+import api from "../../../api";
 
-import "../../../sass/pages/community_list.scss";
+import "../../../../sass/pages/community_list.scss";
 
 const joinCommunityModal = createModal({
     id: "join-community-modal",
@@ -30,6 +30,8 @@ const joinCommunityModal = createModal({
 const navItems = datastoreNavItems();
 
 const CommunityList: FC = () => {
+    const { t } = useTranslation("CommunityList");
+    const { t: tCommon } = useTranslation("Common");
     const { user } = useAuthStore();
 
     const [searchText, setSearchText] = useState<string>();
@@ -86,8 +88,8 @@ const CommunityList: FC = () => {
     };
 
     return (
-        <AppLayout navItems={navItems} documentTitle={Translator.trans("communities_list.title")}>
-            <h1>{Translator.trans("communities_list.title")}</h1>
+        <AppLayout navItems={navItems} documentTitle={t("title")}>
+            <h1>{t("title")}</h1>
 
             <div className={fr.cx("fr-container", "fr-py-2w")}>
                 {communitiesQuery.isLoading ? (
@@ -102,8 +104,8 @@ const CommunityList: FC = () => {
                             <Alert
                                 severity="success"
                                 closable
-                                title={Translator.trans("communities_list.success_message_title", { name: selectedCommunity?.name })}
-                                description={Translator.trans("communities_list.success_message_description")}
+                                title={t("success_message.title", { name: selectedCommunity?.name })}
+                                description={t("success_message.description")}
                             />
                         )}
 
@@ -131,7 +133,7 @@ const CommunityList: FC = () => {
                                         data={filteredCommunities.map((community) => [
                                             community.name,
                                             <Button key={community._id} size="small" onClick={() => handleClick(community)} priority="secondary">
-                                                {Translator.trans("communities_list.join")}
+                                                {t("join")}
                                             </Button>,
                                         ])}
                                         noCaption
@@ -162,22 +164,22 @@ const CommunityList: FC = () => {
             <>
                 {createPortal(
                     <joinCommunityModal.Component
-                        title={Translator.trans("communities_list.modal.title", { name: selectedCommunity?.name })}
+                        title={t("modal.title", { name: selectedCommunity?.name })}
                         buttons={[
                             {
-                                children: Translator.trans("commons.cancel"),
+                                children: tCommon("cancel"),
                                 doClosesModal: true,
                                 priority: "secondary",
                             },
                             {
-                                children: Translator.trans("send"),
+                                children: tCommon("send"),
                                 onClick: handleOk,
                                 doClosesModal: true,
                                 priority: "primary",
                             },
                         ]}
                     >
-                        <Input nativeTextAreaProps={{ ref: refMsg }} label={Translator.trans("communities_list.modal.message")} textArea />
+                        <Input nativeTextAreaProps={{ ref: refMsg }} label={t("modal.message")} textArea />
                     </joinCommunityModal.Component>,
                     document.body
                 )}

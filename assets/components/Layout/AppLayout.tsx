@@ -11,7 +11,6 @@ import { defaultNavItems } from "../../config/navItems/navItems";
 import api from "../../entrepot/api";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { useTranslation } from "../../i18n/i18n";
-import Translator from "../../modules/Translator";
 import RQKeys from "../../modules/entrepot/RQKeys";
 import getBreadcrumb from "../../modules/entrepot/breadcrumbs/Breadcrumb";
 import { useRoute } from "../../router/router";
@@ -21,6 +20,8 @@ import AppFooter from "./AppFooter";
 import AppHeader from "./AppHeader";
 
 const HiddenElements: FC = () => {
+    const { t } = useTranslation("Common");
+
     return (
         <>
             {/* doit être le premier élément du DOM (Accessibilité) : https://www.systeme-de-design.gouv.fr/elements-d-interface/composants/gestionnaire-de-consentement */}
@@ -30,7 +31,7 @@ const HiddenElements: FC = () => {
                 links={[
                     {
                         anchor: "#main",
-                        label: Translator.trans("site.go_to_content"),
+                        label: t("go_to_content"),
                     },
                 ]}
             />
