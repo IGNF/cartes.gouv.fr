@@ -32,7 +32,9 @@ export default defineConfig({
             },
         ]),
     ],
+    base: process.env.ENCORE_PUBLIC_PATH ?? "/build/",
     build: {
+        outDir: resolve(join(__dirname, "public", "build")),
         rollupOptions: {
             input: {
                 main: resolve(join(__dirname, "./assets", "main.tsx")),
