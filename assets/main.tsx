@@ -4,7 +4,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 // import { mountStoreDevtool } from "simple-zustand-devtools";
 
-import App from "./App";
+import App from "@/App";
 // import { useApiEspaceCoStore } from "./stores/ApiEspaceCoStore";
 // import { useAuthStore } from "./stores/AuthStore";
 // import { useSnackbarStore } from "./stores/SnackbarStore";

@@ -42,4 +42,9 @@ export default defineConfig({
             },
         },
     },
+    resolve: {
+        alias: {
+            "@": resolve(join(__dirname, "assets")),
+        },
+    },
 });
