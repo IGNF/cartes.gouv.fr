@@ -1,99 +1,24 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
-import { AlertProps } from "@codegouvfr/react-dsfr/Alert";
 import Table from "@codegouvfr/react-dsfr/Table";
 import ToggleSwitch from "@codegouvfr/react-dsfr/ToggleSwitch";
+import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { FC, useEffect, useState } from "react";
 import { symToStr } from "tsafe/symToStr";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 
+import { IAlert, INewAlert } from "../../../@types/alert";
 import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
+import CreateAlert from "../../../components/Modal/CreateAlert/CreateAlert";
 import { useTranslation } from "../../../i18n";
 import { formatDateFromISO } from "../../../utils";
 
 import "./Alerts.scss";
-
-interface IAlert {
-    id: string;
-    title: string;
-    description: string;
-    link: { url: string; label: string };
-    severity: AlertProps["severity"];
-    details: string;
-    date: string;
-    visibility: {
-        homepage: boolean;
-        contact: boolean;
-        map: boolean;
-        serviceLevel: boolean;
-    };
-}
+import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 
 const datastoreId = "5cb4fdb0-6f6c-4422-893d-e04564bfcc10";
-const mock: IAlert[] = [
-    {
-        id: "1",
-        title: "Titre d'alerte",
-        description: "Description de l'alerte",
-        link: { url: "https://example.com", label: "Lien vers la page" },
-        severity: "info",
-        details: "Détails supplémentaires",
-        date: "2023-06-02T06:01:46+00:00",
-        visibility: {
-            homepage: true,
-            contact: true,
-            map: true,
-            serviceLevel: true,
-        },
-    },
-    {
-        id: "2",
-        title: "Titre d'alerte",
-        description: "Description de l'alerte",
-        link: { url: "https://example.com", label: "Lien vers la page" },
-        severity: "warning",
-        details: "Détails supplémentaires",
-        date: "2023-06-03T06:01:46+00:00",
-        visibility: {
-            homepage: false,
-            contact: false,
-            map: true,
-            serviceLevel: true,
-        },
-    },
-    {
-        id: "3",
-        title: "Titre d'alerte",
-        description: "Description de l'alerte",
-        link: { url: "https://example.com", label: "Lien vers la page" },
-        severity: "error",
-        details: "Détails supplémentaires",
-        date: "2023-06-03T06:01:46+00:00",
-        visibility: {
-            homepage: false,
-            contact: false,
-            map: true,
-            serviceLevel: true,
-        },
-    },
-    {
-        id: "4",
-        title: "Titre d'alerte",
-        description: "Description de l'alerte",
-        link: { url: "https://example.com", label: "Lien vers la page" },
-        severity: "success",
-        details: "Détails supplémentaires",
-        date: "2023-06-03T06:01:46+00:00",
-        visibility: {
-            homepage: false,
-            contact: false,
-            map: true,
-            serviceLevel: true,
-        },
-    },
-];
 
 const schema = yup.object({
     visibility: yup.array().of(
@@ -106,7 +31,7 @@ const schema = yup.object({
     ),
 });
 
-function getIcon(severity: AlertProps["severity"]) {
+function getIcon(severity: IAlert["severity"]) {
     switch (severity) {
         case "success":
             return <span className={[fr.cx("fr-icon-success-fill"), "alerts__icon--success"].join(" ")} title={severity} />;
@@ -119,22 +44,24 @@ function getIcon(severity: AlertProps["severity"]) {
     }
 }
 
+const modal = createModal({
+    id: "alerts",
+    isOpenedByDefault: false,
+});
+
 const Alerts: FC = () => {
-    const [alerts, setAlerts] = useState(mock);
+    const [alerts, setAlerts] = useState<IAlert[]>([]);
     const { t } = useTranslation("ConfigAlerts");
     const title = t("title");
 
-    const {
-        control,
-        setValue,
-        getValues,
-        formState: { errors },
-        watch,
-        handleSubmit,
-    } = useForm({ mode: "onSubmit", defaultValues: { visibility: alerts.map((alert) => alert.visibility) }, resolver: yupResolver(schema) });
+    const { control, getValues, handleSubmit, setValue } = useForm({
+        mode: "onSubmit",
+        defaultValues: { visibility: alerts.map((alert) => alert.visibility) },
+        resolver: yupResolver(schema),
+    });
 
     function handleAdd() {
-        console.log("add");
+        modal.open();
     }
 
     function handleChange(index: number, visibility: "homepage" | "contact" | "map" | "serviceLevel") {
@@ -156,9 +83,18 @@ const Alerts: FC = () => {
         };
     }
 
-    function submit(values) {
+    function submitAlerts(values) {
         console.log("submit", values);
     }
+
+    function addAlert(alert: INewAlert) {
+        setAlerts([...alerts, { ...alert, id: crypto.randomUUID() }]);
+        modal.close();
+    }
+
+    useEffect(() => {
+        // todo: fetch alerts from API
+    }, []);
 
     return (
         <DatastoreLayout datastoreId={datastoreId} documentTitle={title}>
@@ -167,7 +103,7 @@ const Alerts: FC = () => {
                     <h1>{title}</h1>
                 </div>
             </div> */}
-            <form onSubmit={handleSubmit(submit)}>
+            <form onSubmit={handleSubmit(submitAlerts)}>
                 <div className="alerts__caption">
                     <h1>{title}</h1>
                     <Button iconId={"fr-icon-add-line"} onClick={handleAdd} type="button">
@@ -182,13 +118,13 @@ const Alerts: FC = () => {
                     data={alerts.map((alert, i) => [
                         getIcon(alert.severity),
                         alert.title,
-                        formatDateFromISO(alert.date),
+                        formatDateFromISO(alert.date.toISOString()),
                         <Controller
                             key="switch-homepage"
                             control={control}
                             name={`visibility.${i}.homepage`}
                             render={({ field: { value } }) => (
-                                <ToggleSwitch inputTitle={t("th.homepage")} label="" onChange={handleChange(i, "homepage")} checked={value} />
+                                <ToggleSwitch inputTitle={t("alert.homepage")} label="" onChange={handleChange(i, "homepage")} checked={value} />
                             )}
                         />,
                         <Controller
@@ -196,7 +132,7 @@ const Alerts: FC = () => {
                             control={control}
                             name={`visibility.${i}.contact`}
                             render={({ field: { value } }) => (
-                                <ToggleSwitch inputTitle={t("th.contact")} label="" onChange={handleChange(i, "contact")} checked={value} />
+                                <ToggleSwitch inputTitle={t("alert.contact")} label="" onChange={handleChange(i, "contact")} checked={value} />
                             )}
                         />,
                         <Controller
@@ -204,7 +140,7 @@ const Alerts: FC = () => {
                             control={control}
                             name={`visibility.${i}.map`}
                             render={({ field: { value } }) => (
-                                <ToggleSwitch inputTitle={t("th.map")} label="" onChange={handleChange(i, "map")} checked={value} />
+                                <ToggleSwitch inputTitle={t("alert.map")} label="" onChange={handleChange(i, "map")} checked={value} />
                             )}
                         />,
                         <Controller
@@ -212,16 +148,30 @@ const Alerts: FC = () => {
                             control={control}
                             name={`visibility.${i}.serviceLevel`}
                             render={({ field: { value } }) => (
-                                <ToggleSwitch inputTitle={t("th.serviceLevel")} label="" onChange={handleChange(i, "serviceLevel")} checked={value} />
+                                <ToggleSwitch inputTitle={t("alert.serviceLevel")} label="" onChange={handleChange(i, "serviceLevel")} checked={value} />
                             )}
                         />,
+                        <div key="actions">
+                            <Button iconId="fr-icon-pencil-line" priority="tertiary no outline" title={t("update")} className={fr.cx("fr-mr-2v")} />
+                            <Button iconId="fr-icon-delete-line" priority="tertiary no outline" title={t("delete")} />
+                        </div>,
                     ])}
-                    headers={[t("th.severity"), t("th.title"), t("th.date"), t("th.homepage"), t("th.contact"), t("th.map"), t("th.serviceLevel")]}
+                    headers={[
+                        t("alert.severity"),
+                        t("alert.title"),
+                        t("alert.date"),
+                        t("alert.homepage"),
+                        t("alert.contact"),
+                        t("alert.map"),
+                        t("alert.serviceLevel"),
+                        t("actions"),
+                    ]}
                 />
                 <Button iconId={"fr-icon-add-line"} type="submit">
-                    {t("enregistrer")}
+                    {t("save")}
                 </Button>
             </form>
+            <CreateAlert ModalComponent={modal.Component} onSubmit={addAlert} />
         </DatastoreLayout>
     );
 };
