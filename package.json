@@ -51,6 +51,8 @@
         "uuid": "^11.0.0",
         "validator": "^13.11.0",
         "vite-plugin-run": "^0.6",
+        "vite": "^6.0",
+        "vite-plugin-symfony": "^7.0",
         "yup": "^1.2.0",
         "zustand": "^5.0.0"
     },
@@ -71,9 +73,7 @@
         "lint-staged": "^15.2.7",
         "prettier": "^3.0.0",
         "sass": "^1.63.6",
-        "typescript": "^5.1.6",
-        "vite": "^6.0",
-        "vite-plugin-symfony": "^7.0"
+        "typescript": "^5.1.6"
     },
     "scripts": {
         "dev": "vite",
