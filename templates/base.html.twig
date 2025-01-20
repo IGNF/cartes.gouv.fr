@@ -16,14 +16,14 @@
 
         {# <link rel="stylesheet" href="{{ asset('node_modules/@codegouvfr/react-dsfr/main.css') }}" /> #}
 
-        {% set fonts_list = ['Marianne-Regular', 'Marianne-Medium', 'Marianne-Bold', 'Spectral-Regular'] %}
+        {% set fonts_list = ['Marianne-Regular', 'Marianne-Medium', 'Marianne-Bold'] %}
 
         {% for font_name in fonts_list %}
             <link rel="preload" href="{{ asset('node_modules/@codegouvfr/react-dsfr/dsfr/fonts/' ~ font_name ~ '.woff2') }}" as="font" crossorigin="anonymous" />
         {% endfor %}
 
         {% block stylesheets %}
-            {{ vite_entry_link_tags('dsfr', {preloadDynamicImports: true}) }}
+            {{ vite_entry_link_tags('dsfr') }}
             {{ vite_entry_link_tags('main') }}
             {# {{ encore_entry_link_tags('main') }} #}
         {% endblock %}
