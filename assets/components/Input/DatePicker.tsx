@@ -2,7 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import MuiDsfrThemeProvider from "@codegouvfr/react-dsfr/mui";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
-import { DatePicker as MuiDatePicker } from "@mui/x-date-pickers/DatePicker";
+import { DatePicker as MuiDatePicker, DatePickerProps as MuiDatePickerProps } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider/LocalizationProvider";
 import { enGB as enGBLocale, fr as frLocale } from "date-fns/locale";
 import { useId } from "react";
@@ -12,7 +12,7 @@ import { useLang } from "../../i18n/i18n";
 
 const locales = { en: enGBLocale, fr: frLocale };
 
-type DatePickerProps = {
+interface DatePickerProps extends Omit<MuiDatePickerProps<Date, false>, "onChange"> {
     id?: string;
     label: string;
     hintText?: string;
@@ -22,10 +22,10 @@ type DatePickerProps = {
     minDate?: Date;
     onChange?: (value: Date | undefined) => void;
     className?: string;
-};
+}
 
 const DatePicker = (props: DatePickerProps) => {
-    const { id, label, hintText, state, stateRelatedMessage, value, minDate, onChange, className } = props;
+    const { id, label, hintText, state, stateRelatedMessage, value, minDate, onChange, className, ...datePickerProps } = props;
 
     const { lang } = useLang();
 
@@ -45,8 +45,10 @@ const DatePicker = (props: DatePickerProps) => {
                 </label>
                 <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={locales[lang]}>
                     <MuiDatePicker
+                        {...datePickerProps}
                         slotProps={{
-                            field: { clearable: true, onClear: () => onChange?.(undefined) },
+                            ...datePickerProps.slotProps,
+                            field: { ...datePickerProps.slotProps?.field, clearable: true, onClear: () => onChange?.(undefined) },
                         }}
                         sx={{ width: "100%" }}
                         timezone={"UTC"}
