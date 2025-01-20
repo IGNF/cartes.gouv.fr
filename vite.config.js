@@ -5,6 +5,7 @@ import process from "process";
 import { defineConfig } from "vite";
 import run from "vite-plugin-run";
 import symfonyPlugin from "vite-plugin-symfony";
+import autoprefixer from "autoprefixer";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -46,6 +47,11 @@ export default defineConfig({
     resolve: {
         alias: {
             "@": resolve(join(__dirname, "assets")),
+        },
+    },
+    css: {
+        postcss: {
+            plugins: [autoprefixer()],
         },
     },
 });
