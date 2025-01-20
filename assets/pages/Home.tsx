@@ -6,19 +6,19 @@ import CallOut from "@codegouvfr/react-dsfr/CallOut";
 import Tile from "@codegouvfr/react-dsfr/Tile";
 import { useEffect } from "react";
 
-import AppLayout from "../components/Layout/AppLayout";
-import SymfonyRouting from "../modules/Routing";
-import { catalogueUrl, routes, useRoute } from "../router/router";
-import { useAuthStore } from "../stores/AuthStore";
+import AppLayout from "@/components/Layout/AppLayout";
+import SymfonyRouting from "@/modules/Routing";
+import { catalogueUrl, routes, useRoute } from "@/router/router";
+import { useAuthStore } from "@/stores/AuthStore";
 
-import "../sass/pages/home.scss";
+import "@/sass/pages/home.scss";
 
+import homeImgUrl from "@/img/home/home.png";
 import dataVisuSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/digital/data-visualization.svg";
 import humanCoopSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/environment/human-cooperation.svg";
 import locationFranceSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/map/location-france.svg";
 import mapSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/map/map.svg";
 import systemSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/system/system.svg";
-import homeImgUrl from "../img/home/home.png";
 
 const Home = () => {
     const { params } = useRoute();
