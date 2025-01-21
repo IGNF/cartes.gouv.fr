@@ -87,9 +87,9 @@ class AnnexeApiService extends BaseEntrepotApiService
         ]);
     }
 
-    public function remove(string $datastoreId, string $annexeId): void
+    public function remove(string $datastoreId, string $annexeId): array
     {
-        $this->request('DELETE', "datastores/$datastoreId/annexes/$annexeId");
+        return $this->request('DELETE', "datastores/$datastoreId/annexes/$annexeId");
     }
 
     public function download(string $datastoreId, string $annexeId): string

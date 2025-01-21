@@ -16,7 +16,7 @@ use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route(
-    '/api/user',
+    '/api/users',
     name: 'cartesgouvfr_api_user_',
     options: ['expose' => true],
     condition: 'request.isXmlHttpRequest()'

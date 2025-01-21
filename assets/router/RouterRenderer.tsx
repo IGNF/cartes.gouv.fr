@@ -29,6 +29,7 @@ const LoginDisabled = lazy(() => import("../pages/LoginDisabled/LoginDisabled"))
 const Me = lazy(() => import("../entrepot/pages/users/me/Me"));
 const MyAccessKeys = lazy(() => import("../entrepot/pages/users/access-keys/MyAccessKeys"));
 const UserKeyForm = lazy(() => import("../entrepot/pages/users/keys/UserKeyForm"));
+const MyDocuments = lazy(() => import("../entrepot/pages/users/documents/MyDocuments"));
 
 const DatastoreManageStorage = lazy(() => import("../entrepot/pages/datastore/ManageStorage/DatastoreManageStorage"));
 const DatastoreManagePermissions = lazy(() => import("../entrepot/pages/datastore/ManagePermissions/DatastoreManagePermissions"));
@@ -129,6 +130,8 @@ const RouterRenderer: FC = () => {
                 return <UserKeyForm />;
             case "user_key_edit":
                 return <UserKeyForm keyId={route.params.keyId} />;
+            case "my_documents":
+                return <MyDocuments />;
             case "accesses_request":
                 return <AccessesRequest fileIdentifier={route.params.fileIdentifier} />;
             case "datastore_manage_storage":

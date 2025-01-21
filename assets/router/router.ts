@@ -48,6 +48,7 @@ const routeDefs = {
         },
         (p) => `${appRoot}/mes-cles/${p.keyId}/modification`
     ),
+    my_documents: defineRoute(`${appRoot}/mes-documents`),
 
     dashboard_pro: defineRoute(`${appRoot}/tableau-de-bord`),
 

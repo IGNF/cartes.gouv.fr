@@ -51,10 +51,12 @@ const RQKeys = {
 
     catalogs_communities: (): string[] => ["catalogs", "communities"],
 
-    my_keys: (): string[] => ["my_keys"],
-    my_key: (keyId: string): string[] => ["my_key", keyId],
-    my_permissions: (): string[] => ["my_permissions"],
     user_me: (): string[] => ["user", "me"],
+    my_keys: (): string[] => ["user", "me", "keys"],
+    my_key: (keyId: string): string[] => ["user", "me", "keys", keyId],
+    my_permissions: (): string[] => ["user", "me", "permissions"],
+    my_documents: (query?: unknown): string[] => ["user", "me", "documents", JSON.stringify(query)],
+    my_document: (documentId: string): string[] => ["user", "me", "documents", documentId],
 
     accesses_request: (fileIdentifier: string): string[] => ["accesses_request", fileIdentifier],
 };
