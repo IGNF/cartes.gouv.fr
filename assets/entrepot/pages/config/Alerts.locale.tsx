@@ -4,6 +4,7 @@ import { Translations } from "../../../i18n/types";
 
 const { i18n } = declareComponentKeys<
     | "create_alert"
+    | "edit_alert"
     | "save"
     | "table_caption"
     | "title"
@@ -25,11 +26,13 @@ const { i18n } = declareComponentKeys<
     | "alert.serviceLevel"
     | "modal.cancel"
     | "modal.add"
+    | "modal.edit"
 >()("ConfigAlerts");
 export type I18n = typeof i18n;
 
 export const AlertsFrTranslations: Translations<"fr">["ConfigAlerts"] = {
     create_alert: "Créer une alerte",
+    edit_alert: "Modifier une alerte",
     save: "Enregistrer",
     table_caption: "Alertes",
     title: "configuration : Alerte",
@@ -51,10 +54,12 @@ export const AlertsFrTranslations: Translations<"fr">["ConfigAlerts"] = {
     "alert.serviceLevel": "Visible sur la page niveau de service",
     "modal.cancel": "Annuler",
     "modal.add": "Ajouter",
+    "modal.edit": "Modifier",
 };
 
 export const AlertsEnTranslations: Translations<"en">["ConfigAlerts"] = {
     create_alert: undefined,
+    edit_alert: undefined,
     save: undefined,
     table_caption: undefined,
     title: undefined,
@@ -76,4 +81,5 @@ export const AlertsEnTranslations: Translations<"en">["ConfigAlerts"] = {
     "alert.serviceLevel": undefined,
     "modal.cancel": undefined,
     "modal.add": undefined,
+    "modal.edit": undefined,
 };

@@ -1,5 +1,5 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FC, useMemo } from "react";
+import { FC, useEffect } from "react";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import { symToStr } from "tsafe/symToStr";
 import * as yup from "yup";
@@ -10,20 +10,25 @@ import ToggleSwitch from "@codegouvfr/react-dsfr/ToggleSwitch";
 import isURL from "validator/lib/isURL";
 
 import { useTranslation } from "../../../i18n";
-import { INewAlert } from "../../../@types/alert";
+import { IAlert } from "../../../@types/alert";
 import DatePicker from "../../Input/DatePicker";
 
 import PreviewAlert from "./PreviewAlert";
 import { ModalProps } from "@codegouvfr/react-dsfr/Modal";
 
-const schema = yup.object({
+const date = new Date();
+export const alertSchema = yup.object({
+    id: yup.string().required(),
     title: yup.string().required("Titre requis"),
     description: yup.string(),
     link: yup.object({
         label: yup.string(),
         url: yup.string().test("check-url", "La chaîne doit être une url valide", (value) => value === "" || isURL(value)),
     }),
-    severity: yup.string().oneOf(["info", "warning", "error"]).required("Sévérité requise"),
+    severity: yup
+        .string()
+        .oneOf(["info", "warning", "alert", "weather-orange", "weather-purple", "weather-red", "kidnapping", "cyberattack", "witness", "attack"])
+        .required("Sévérité requise"),
     details: yup.string().required("Détails requis"),
     date: yup.date().required("Date requise"),
     visibility: yup.object({
@@ -34,21 +39,6 @@ const schema = yup.object({
     }),
 });
 
-const defaultAlert = {
-    title: "",
-    description: "",
-    link: { url: "", label: "" },
-    severity: "info" as const,
-    details: "",
-    date: new Date(),
-    visibility: {
-        homepage: false,
-        contact: false,
-        map: false,
-        serviceLevel: false,
-    },
-};
-
 const severityOptions = [
     { value: "info", label: "info" },
     { value: "warning", label: "warning" },
@@ -56,26 +46,32 @@ const severityOptions = [
 ];
 
 interface CreateAlertProps {
+    alert: IAlert;
+    isEdit: boolean;
     ModalComponent: (props: ModalProps) => JSX.Element;
-    onSubmit: (alert: INewAlert) => void;
+    onSubmit: (alert: IAlert) => void;
 }
 
 const CreateAlert: FC<CreateAlertProps> = (props) => {
-    const { ModalComponent, onSubmit } = props;
+    const { alert, isEdit, ModalComponent, onSubmit } = props;
     const { t } = useTranslation("ConfigAlerts");
 
-    const date = useMemo(() => new Date(), []);
     const methods = useForm({
         mode: "onSubmit",
-        defaultValues: { ...defaultAlert, date },
-        resolver: yupResolver(schema),
+        defaultValues: alert,
+        resolver: yupResolver(alertSchema),
     });
     const {
         control,
         formState: { errors },
         handleSubmit,
         register,
+        setValue,
     } = methods;
+
+    useEffect(() => {
+        setValue("visibility", alert.visibility);
+    }, [alert.visibility, setValue]);
 
     const addAlert = handleSubmit((values) => {
         onSubmit(values);
@@ -83,7 +79,7 @@ const CreateAlert: FC<CreateAlertProps> = (props) => {
 
     return (
         <ModalComponent
-            title={t("create_alert")}
+            title={isEdit ? t("edit_alert") : t("create_alert")}
             size="large"
             buttons={[
                 {
@@ -92,7 +88,7 @@ const CreateAlert: FC<CreateAlertProps> = (props) => {
                 },
                 {
                     doClosesModal: false,
-                    children: t("modal.add"),
+                    children: isEdit ? t("modal.edit") : t("modal.add"),
                     onClick: addAlert,
                 },
             ]}
