@@ -15,6 +15,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Uid\Uuid;
 
@@ -36,13 +37,54 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
     ) {
     }
 
+    /**
+     * @param array<string>|null $labels
+     */
     #[Route('', name: 'get_list', methods: ['GET'])]
-    public function getAnnexeList(string $datastoreId): JsonResponse
-    {
+    public function getAnnexeList(
+        string $datastoreId,
+        #[MapQueryParameter] ?string $path,
+        #[MapQueryParameter] ?array $labels,
+        #[MapQueryParameter('mime_type')] ?string $mimeType,
+    ): JsonResponse {
         try {
-            $annexeList = $this->annexeApiService->getAll($datastoreId);
+            $annexeList = $this->annexeApiService->getAll($datastoreId, $mimeType, $path, $labels);
 
             return $this->json($annexeList);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
+        }
+    }
+
+    #[Route('/{annexeId}', name: 'modify', methods: ['PATCH'])]
+    public function modify(string $datastoreId, string $annexeId, Request $request): JsonResponse
+    {
+        try {
+            $data = json_decode($request->getContent(), true);
+
+            return $this->json(
+                $this->annexeApiService->modify(
+                    $datastoreId,
+                    $annexeId,
+                    $data['paths'] ?? null,
+                    $data['labels'] ?? null,
+                    $data['published'] ?? null
+                )
+            );
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
+        }
+    }
+
+    #[Route('/{annexeId}', name: 'replace_file', methods: ['PUT'])]
+    public function replaceFile(string $datastoreId, string $annexeId, Request $request): JsonResponse
+    {
+        try {
+            $file = $request->files->get('file');
+
+            return $this->json(
+                $this->annexeApiService->replaceFile($datastoreId, $annexeId, $file->getRealPath())
+            );
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
         }
