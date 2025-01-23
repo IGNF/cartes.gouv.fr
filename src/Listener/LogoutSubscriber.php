@@ -16,7 +16,7 @@ class LogoutSubscriber implements EventSubscriberInterface
     public function __construct(
         private ClientRegistry $clientRegistry,
         private UrlGeneratorInterface $urlGenerator,
-        private ParameterBagInterface $parameters
+        private ParameterBagInterface $parameters,
     ) {
     }
 
