@@ -1,9 +1,15 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { useIsDark } from "@codegouvfr/react-dsfr/useIsDark";
-import MDEditor from "@uiw/react-md-editor";
-import { CSSProperties, FC } from "react";
+import { FC } from "react";
+import { MarkdownEditor as TiptapEditor } from "react-dsfr-tiptap/markdown";
+import { ControlImage, ControlLink, ControlUnlink } from "react-dsfr-tiptap/dialog";
+import StarterKit from "@tiptap/starter-kit";
+import Image from "@tiptap/extension-image";
+import Link from "@tiptap/extension-link";
+import Placeholder from "@tiptap/extension-placeholder";
+import { Markdown } from "tiptap-markdown";
 
-import getLocaleCommands from "../../modules/react-md/react-md-commands";
+import "../../sass/components/tiptap.scss";
 
 type MarkdownEditorProps = {
     label?: string;
@@ -16,16 +22,8 @@ type MarkdownEditorProps = {
 };
 
 const MarkdownEditor: FC<MarkdownEditorProps> = (props) => {
-    const { label, hintText, value, state, stateRelatedMessage, placeholder, onChange } = props;
+    const { label, hintText, value, state, stateRelatedMessage, placeholder = "", onChange } = props;
     const { isDark } = useIsDark();
-
-    const customStyle: CSSProperties = {
-        backgroundColor: fr.colors.decisions.background.contrast.grey.default,
-        borderRadius: `${fr.spacing("1v")} ${fr.spacing("1v")} 0 0`,
-        boxShadow: `inset 0 -2px 0 0 var(${fr.colors.decisions.border.plain.grey.default})`,
-        marginTop: fr.spacing("1v"),
-        fontFamily: "Marianne, arial, sans-serif",
-    };
 
     return (
         <div className={fr.cx("fr-input-group", state === "error" && "fr-input-group--error")} data-color-mode={isDark ? "dark" : "light"}>
@@ -35,17 +33,25 @@ const MarkdownEditor: FC<MarkdownEditorProps> = (props) => {
                     {hintText && <span className="fr-hint-text">{hintText}</span>}
                 </label>
             )}
-            <MDEditor
-                value={value}
-                height={200}
-                commands={getLocaleCommands("fr")}
-                extraCommands={[]}
-                textareaProps={{
-                    placeholder: placeholder,
-                }}
-                onChange={(newValue = "") => onChange(newValue)}
-                style={customStyle}
-                previewOptions={{ style: customStyle }}
+            <TiptapEditor
+                content={value}
+                controls={[
+                    ["Bold", "Italic", "Strike", "Code", "ClearFormatting"],
+                    ["H1", "H2", "H3", "H4", "H5", "H6", "Paragraph"],
+                    ["BulletList", "OrderedList", "CodeBlock", "Blockquote", "HorizontalRule"],
+                    [ControlLink, ControlUnlink, ControlImage],
+                    ["Undo", "Redo"],
+                ]}
+                extensions={[
+                    StarterKit,
+                    Image,
+                    Link,
+                    Placeholder.configure({
+                        placeholder,
+                    }),
+                    Markdown,
+                ]}
+                onContentUpdate={onChange}
             />
             {state === "error" && stateRelatedMessage !== undefined && <p className={fr.cx("fr-error-text")}>{stateRelatedMessage}</p>}
         </div>
