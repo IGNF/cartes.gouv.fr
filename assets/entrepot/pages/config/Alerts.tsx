@@ -1,23 +1,31 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Table from "@codegouvfr/react-dsfr/Table";
 import ToggleSwitch from "@codegouvfr/react-dsfr/ToggleSwitch";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
-import { FC, useEffect, useState } from "react";
+import { FC, useMemo, useState } from "react";
 import { symToStr } from "tsafe/symToStr";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 import { IAlert } from "../../../@types/alert";
 import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
 import CreateAlert, { alertSchema } from "../../../components/Modal/CreateAlert/CreateAlert";
 import { useTranslation } from "../../../i18n";
 import { formatDateFromISO } from "../../../utils";
+import { Annexe } from "../../../@types/app";
+import { CartesApiException } from "../../../modules/jsonFetch";
+import RQKeys from "../../../modules/entrepot/RQKeys";
+import api from "../../api";
 
 import "./Alerts.scss";
 
 const datastoreId = "5cb4fdb0-6f6c-4422-893d-e04564bfcc10";
+const annexePath = "/public/edito.json";
+const fileBase = "https://data.geopf.fr/annexes/cartes.gouv.fr-config";
 
 function getNewAlert() {
     return {
@@ -64,6 +72,27 @@ const Alerts: FC = () => {
     const { t } = useTranslation("ConfigAlerts");
     const title = t("title");
 
+    // Load annex list and find annex matching the given path
+    const annexeListQuery = useQuery<Annexe[], CartesApiException>({
+        queryKey: RQKeys.datastore_annexe_list(datastoreId),
+        queryFn: ({ signal }) => api.annexe.getList(datastoreId, { signal }),
+    });
+    const annexe = useMemo(() => annexeListQuery?.data?.find((annexe) => annexe.paths.includes(annexePath)), [annexeListQuery.data]);
+
+    // Update mutation
+    const { mutate, isError, isPending, isSuccess } = useMutation<Annexe | undefined, CartesApiException, object>({
+        mutationFn: (data) => {
+            if (annexe?._id) {
+                const blob = new Blob([JSON.stringify(data, null, 2)], {
+                    type: "application/json",
+                });
+                return api.annexe.update(datastoreId, annexe?._id, blob);
+            }
+            return Promise.resolve(undefined);
+        },
+    });
+
+    // Declare form
     const { control, getValues, handleSubmit, setValue } = useForm<{ alerts?: IAlert[] }>({
         mode: "onSubmit",
         defaultValues: { alerts: [] },
@@ -83,13 +112,22 @@ const Alerts: FC = () => {
         };
     }
 
-    function submitAlerts(values) {
-        console.log("submit", values);
+    function submitAlerts({ alerts }: { alerts?: IAlert[] }) {
+        if (alerts) {
+            mutate(alerts.map((alert) => ({ ...alert, date: alert.date.toISOString() })));
+        }
     }
 
-    function addAlert() {
+    function openAddAlert() {
         setAlert(getNewAlert());
         setTimeout(() => modal.open(), 0);
+    }
+
+    function openUpdateAlert(alert: IAlert) {
+        return () => {
+            setAlert(alert);
+            setTimeout(() => modal.open(), 0);
+        };
     }
 
     function addOrUpdateAlert(alert: IAlert) {
@@ -110,13 +148,6 @@ const Alerts: FC = () => {
         modal.close();
     }
 
-    function updateAlert(alert: IAlert) {
-        return () => {
-            setAlert(alert);
-            setTimeout(() => modal.open(), 0);
-        };
-    }
-
     function deleteAlert(alert: IAlert) {
         return () => {
             const alerts = getValues("alerts") ?? [];
@@ -128,10 +159,6 @@ const Alerts: FC = () => {
         };
     }
 
-    useEffect(() => {
-        // todo: fetch alerts from API
-    }, []);
-
     return (
         <DatastoreLayout datastoreId={datastoreId} documentTitle={title}>
             {/* <div className={fr.cx("fr-grid-row")}>
@@ -139,10 +166,11 @@ const Alerts: FC = () => {
                     <h1>{title}</h1>
                 </div>
             </div> */}
+            {isSuccess && <Alert description={t("alerts_updated")} title={t("alerts_updated")} severity="success" />}
             <form onSubmit={handleSubmit(submitAlerts)}>
                 <div className="alerts__caption">
                     <h1>{title}</h1>
-                    <Button iconId={"fr-icon-add-line"} onClick={addAlert} type="button">
+                    <Button iconId={"fr-icon-add-line"} onClick={openAddAlert} type="button">
                         {t("create_alert")}
                     </Button>
                 </div>
@@ -156,7 +184,6 @@ const Alerts: FC = () => {
                         return (
                             <Table
                                 className="alerts__table"
-                                fixed
                                 caption={t("table_caption")}
                                 noCaption
                                 data={alerts.map((alert, i) => [
@@ -198,7 +225,7 @@ const Alerts: FC = () => {
                                             title={t("update")}
                                             type="button"
                                             className={fr.cx("fr-mr-2v")}
-                                            onClick={updateAlert(alert)}
+                                            onClick={openUpdateAlert(alert)}
                                         />
                                         <Button
                                             iconId="fr-icon-delete-line"
