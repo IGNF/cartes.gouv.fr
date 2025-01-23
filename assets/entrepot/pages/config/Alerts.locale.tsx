@@ -5,6 +5,8 @@ import { Translations } from "../../../i18n/types";
 const { i18n } = declareComponentKeys<
     | "create_alert"
     | "edit_alert"
+    | "alerts_updated"
+    | "alerts_update_error"
     | "save"
     | "table_caption"
     | "title"
@@ -33,9 +35,11 @@ export type I18n = typeof i18n;
 export const AlertsFrTranslations: Translations<"fr">["ConfigAlerts"] = {
     create_alert: "Créer une alerte",
     edit_alert: "Modifier une alerte",
+    alerts_updated: "Alertes mises à jour",
+    alerts_update_error: "Erreur lors de la mise à jour des alertes",
     save: "Enregistrer",
     table_caption: "Alertes",
-    title: "configuration : Alerte",
+    title: "Configuration : Alertes",
     preview: "Prévisualisation",
     newWindow: "nouvelle fenêtre",
     actions: "Actions",
@@ -60,6 +64,8 @@ export const AlertsFrTranslations: Translations<"fr">["ConfigAlerts"] = {
 export const AlertsEnTranslations: Translations<"en">["ConfigAlerts"] = {
     create_alert: undefined,
     edit_alert: undefined,
+    alerts_updated: undefined,
+    alerts_update_error: undefined,
     save: undefined,
     table_caption: undefined,
     title: undefined,

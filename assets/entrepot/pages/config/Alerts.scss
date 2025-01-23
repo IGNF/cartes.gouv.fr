@@ -2,6 +2,10 @@
     width: 100%;
 }
 
+.alerts__table td {
+    white-space: nowrap;
+}
+
 .alerts__caption {
     display: flex;
     align-items: center;
