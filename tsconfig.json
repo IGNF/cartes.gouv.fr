@@ -1,22 +1,5 @@
 {
-    "compilerOptions": {
-        "target": "ESNext",
-        "esModuleInterop": true,
-        "module": "ESNext",
-        "moduleResolution": "Bundler",
-        "strict": true,
-        //"allowJs": true,
-        "jsx": "react-jsx",
-        "skipLibCheck": true,
-        "noImplicitAny": false, // mettre à true après avoir passé tous les fichiers en typescript
-        "resolveJsonModule": true
-    },
-    "include": ["assets"],
-    "exclude": ["node_modules", "public", "assets/@types/entrepot-generated.ts"],
-    "ts-node": {
-        "compilerOptions": {
-            "module": "ES2015",
-            "moduleResolution": "node"
-        }
-    }
+    "files": [],
+    "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }],
+    "exclude": ["node_modules", "public", "assets/@types/entrepot-generated.ts"]
 }

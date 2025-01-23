@@ -4,7 +4,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 // import { mountStoreDevtool } from "simple-zustand-devtools";
 
-import App from "./App";
+import App from "@/App";
 // import { useApiEspaceCoStore } from "./stores/ApiEspaceCoStore";
 // import { useAuthStore } from "./stores/AuthStore";
 // import { useSnackbarStore } from "./stores/SnackbarStore";
@@ -12,7 +12,7 @@ import App from "./App";
 import "ol/ol.css";
 
 // en prod
-if ((document.getElementById("root") as HTMLDivElement)?.dataset?.appEnv?.toLowerCase() === "prod") {
+if (import.meta.env?.APP_ENV?.toLowerCase() === "prod") {
     disableReactDevTools();
 }
 // en dev/qualif
