@@ -14,18 +14,17 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { IAlert } from "../../../@types/alert";
 import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
 import CreateAlert, { alertSchema } from "../../../components/Modal/CreateAlert/CreateAlert";
+import Wait from "../../../components/Utils/Wait";
+import LoadingIcon from "../../../components/Utils/LoadingIcon";
 import { useTranslation } from "../../../i18n";
-import { formatDateFromISO } from "../../../utils";
+import { formatDateTime } from "../../../utils";
 import { Annexe } from "../../../@types/app";
 import { CartesApiException } from "../../../modules/jsonFetch";
 import RQKeys from "../../../modules/entrepot/RQKeys";
+import { useAlertStore } from "../../../stores/AlertStore";
 import api from "../../api";
 
 import "./Alerts.scss";
-
-const datastoreId = "5cb4fdb0-6f6c-4422-893d-e04564bfcc10";
-const annexePath = "/public/edito.json";
-const fileBase = "https://data.geopf.fr/annexes/cartes.gouv.fr-config";
 
 function getNewAlert() {
     return {
@@ -45,57 +44,76 @@ function getNewAlert() {
     };
 }
 
-const schema = yup.object({
-    alerts: yup.array().of(alertSchema),
-});
-
 function getIcon(severity?: IAlert["severity"]) {
     switch (severity) {
-        // case "success":
-        //     return <span className={[fr.cx("fr-icon-success-fill"), "alerts__icon--success"].join(" ")} title={severity} />;
-        // case "warning":
-        //     return <span className={[fr.cx("fr-icon-warning-fill"), "alerts__icon--warning"].join(" ")} title={severity} />;
-        // case "error":
-        //     return <span className={[fr.cx("fr-icon-error-warning-fill"), "alerts__icon--error"].join(" ")} title={severity} />;
+        case "warning":
+            return <span className={[fr.cx("fr-icon-warning-fill"), "alerts__icon--warning"].join(" ")} title={severity} />;
+        case "alert":
+            return <span className={[fr.cx("fr-icon-error-warning-fill"), "alerts__icon--error"].join(" ")} title={severity} />;
         default:
             return <span className={[fr.cx("fr-icon-info-fill"), "alerts__icon--info"].join(" ")} title={severity} />;
     }
 }
+
+const schema = yup.object({
+    alerts: yup.array().of(alertSchema),
+});
 
 const modal = createModal({
     id: "alerts",
     isOpenedByDefault: false,
 });
 
+const { annexePath, datastoreId, fileName } = api.alerts;
+
+interface INotification {
+    severity: "success" | "warning" | "error";
+    title: string;
+}
+
 const Alerts: FC = () => {
+    const alerts = useAlertStore(({ alerts }) => alerts);
+    const setAlerts = useAlertStore(({ setAlerts }) => setAlerts);
     const [alert, setAlert] = useState<IAlert>(getNewAlert());
     const { t } = useTranslation("ConfigAlerts");
     const title = t("title");
+    const [notification, setNotification] = useState<INotification | null>(null);
 
     // Load annex list and find annex matching the given path
-    const annexeListQuery = useQuery<Annexe[], CartesApiException>({
-        queryKey: RQKeys.datastore_annexe_list(datastoreId),
+    const { data } = useQuery<Annexe[], CartesApiException>({
+        queryKey: RQKeys.datastore_annexe_list(api.alerts.datastoreId),
         queryFn: ({ signal }) => api.annexe.getList(datastoreId, { signal }),
     });
-    const annexe = useMemo(() => annexeListQuery?.data?.find((annexe) => annexe.paths.includes(annexePath)), [annexeListQuery.data]);
+    const annexe = useMemo(() => data?.find((annexe) => annexe.paths.includes(annexePath)), [data]);
 
-    // Update mutation
-    const { mutate, isError, isPending, isSuccess } = useMutation<Annexe | undefined, CartesApiException, object>({
-        mutationFn: (data) => {
+    // Update alerts mutation
+    const { mutate, isPending } = useMutation<Annexe | undefined, CartesApiException, IAlert[]>({
+        mutationFn: async (alerts) => {
             if (annexe?._id) {
-                const blob = new Blob([JSON.stringify(data, null, 2)], {
+                const data = alerts.map((alert) => ({ ...alert, date: alert.date.toISOString() }));
+                const blob = new Blob([JSON.stringify(data)], {
                     type: "application/json",
                 });
-                return api.annexe.update(datastoreId, annexe?._id, blob);
+                const file = new File([blob], fileName);
+                const response = await api.annexe.replaceFile(datastoreId, annexe?._id, file);
+                setAlerts(alerts);
+                return response;
             }
             return Promise.resolve(undefined);
+        },
+        onError: (error) => {
+            setNotification({ severity: "error", title: t("alerts_update_error") });
+            console.error(error);
+        },
+        onSuccess: () => {
+            setNotification({ severity: "success", title: t("alerts_updated") });
         },
     });
 
     // Declare form
     const { control, getValues, handleSubmit, setValue } = useForm<{ alerts?: IAlert[] }>({
         mode: "onSubmit",
-        defaultValues: { alerts: [] },
+        values: { alerts },
         resolver: yupResolver(schema),
     });
 
@@ -108,13 +126,14 @@ const Alerts: FC = () => {
                 }
                 alerts[index].visibility[visibility] = checked;
                 setValue("alerts", alerts);
+                setNotification({ severity: "warning", title: t("alerts_unsaved") });
             }
         };
     }
 
     function submitAlerts({ alerts }: { alerts?: IAlert[] }) {
         if (alerts) {
-            mutate(alerts.map((alert) => ({ ...alert, date: alert.date.toISOString() })));
+            mutate(alerts);
         }
     }
 
@@ -145,6 +164,7 @@ const Alerts: FC = () => {
             alerts.push({ ...alert, id: crypto.randomUUID() });
         }
         setValue("alerts", alerts);
+        setNotification({ severity: "warning", title: t("alerts_unsaved") });
         modal.close();
     }
 
@@ -159,6 +179,7 @@ const Alerts: FC = () => {
         };
     }
 
+    const closable = notification?.severity !== "warning";
     return (
         <DatastoreLayout datastoreId={datastoreId} documentTitle={title}>
             {/* <div className={fr.cx("fr-grid-row")}>
@@ -166,7 +187,6 @@ const Alerts: FC = () => {
                     <h1>{title}</h1>
                 </div>
             </div> */}
-            {isSuccess && <Alert description={t("alerts_updated")} title={t("alerts_updated")} severity="success" />}
             <form onSubmit={handleSubmit(submitAlerts)}>
                 <div className="alerts__caption">
                     <h1>{title}</h1>
@@ -189,7 +209,7 @@ const Alerts: FC = () => {
                                 data={alerts.map((alert, i) => [
                                     getIcon(alert.severity),
                                     alert.title,
-                                    formatDateFromISO(alert.date.toISOString()),
+                                    formatDateTime(alert.date),
                                     <ToggleSwitch
                                         key="switch-homepage"
                                         inputTitle={t("alert.homepage")}
@@ -250,11 +270,25 @@ const Alerts: FC = () => {
                         );
                     }}
                 />
-                <Button iconId={"fr-icon-add-line"} type="submit">
+                {notification && (
+                    <Alert
+                        className="fr-mb-5w"
+                        title={notification.title}
+                        severity={notification.severity}
+                        small={false}
+                        {...(closable ? { onClose: () => setNotification(null), closable: true } : { closable: false })}
+                    />
+                )}
+                <Button disabled={!annexe || isPending} iconId={"fr-icon-add-line"} type="submit">
                     {t("save")}
                 </Button>
             </form>
             <CreateAlert key={alert.id} alert={alert} isEdit={Boolean(alert.title)} ModalComponent={modal.Component} onSubmit={addOrUpdateAlert} />
+            {isPending && (
+                <Wait>
+                    <LoadingIcon largeIcon={true} />
+                </Wait>
+            )}
         </DatastoreLayout>
     );
 };
@@ -264,11 +298,10 @@ export default Alerts;
 
 /**
  * TODO
- * - update
+ * - problem with browser cache
  * - no alerts in table
- * - fetch alerts (json)
- * - submit alerts (json)
- * - make const id configurable
+ * - datepicker (with time ?)
+ * - make const id configurable?
  * - menu integration?
  * - dashboard integration
  * - display alert:

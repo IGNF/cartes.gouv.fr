@@ -7,6 +7,7 @@ const { i18n } = declareComponentKeys<
     | "edit_alert"
     | "alerts_updated"
     | "alerts_update_error"
+    | "alerts_unsaved"
     | "save"
     | "table_caption"
     | "title"
@@ -37,6 +38,7 @@ export const AlertsFrTranslations: Translations<"fr">["ConfigAlerts"] = {
     edit_alert: "Modifier une alerte",
     alerts_updated: "Alertes mises à jour",
     alerts_update_error: "Erreur lors de la mise à jour des alertes",
+    alerts_unsaved: "Vous avez des modifications non enregistrées",
     save: "Enregistrer",
     table_caption: "Alertes",
     title: "Configuration : Alertes",
@@ -66,6 +68,7 @@ export const AlertsEnTranslations: Translations<"en">["ConfigAlerts"] = {
     edit_alert: undefined,
     alerts_updated: undefined,
     alerts_update_error: undefined,
+    alerts_unsaved: undefined,
     save: undefined,
     table_caption: undefined,
     title: undefined,

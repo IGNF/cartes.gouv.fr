@@ -37,32 +37,44 @@ export const niceBytes = (x: string) => {
     return n.toFixed(n < 10 && l > 0 ? 2 : 0) + " " + units[l];
 };
 
+export const formatDate = (date: Date): string => {
+  return datefnsFormat(date, "dd MMMM yyyy", { locale: fr, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone });
+};
+
+export const formatDateTime = (date: Date): string => {
+  return (
+      datefnsFormat(date, "dd MMMM yyyy, HH", { locale: fr, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }) +
+      "h" +
+      datefnsFormat(date, "mm", { locale: fr, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone })
+  );
+};
+
+export const formatDateTimeLocal = (date: Date): string => {
+  return datefnsFormat(date, "yyyy-MM-dd'T'HH:mm", { locale: fr, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone });
+};
+
 export const formatDateFromISO = (isoDateString: string): string => {
-    const m = isoDateString.match(/([\d\-T:]+)\+\d{2}:\d{2}?/); // "2023-06-02T06:01:46+00:00"
-    if (m) {
-        isoDateString = m[1];
-    }
-    isoDateString = isoDateString.includes("Z") ? isoDateString : isoDateString + "Z";
+  const m = isoDateString.match(/([\d\-T:]+)\+\d{2}:\d{2}?/); // "2023-06-02T06:01:46+00:00"
+  if (m) {
+      isoDateString = m[1];
+  }
+  isoDateString = isoDateString.includes("Z") ? isoDateString : isoDateString + "Z";
 
-    const d = new Date(isoDateString);
+  const d = new Date(isoDateString);
 
-    return (
-        datefnsFormat(d, "dd MMMM yyyy, HH", { locale: fr, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }) +
-        "h" +
-        datefnsFormat(d, "mm", { locale: fr, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone })
-    );
+  return formatDateTime(d);
 };
 
 export const formatDateWithoutTimeFromISO = (isoDateString: string): string => {
-    const m = isoDateString.match(/([\d\-T:]+)\+\d{2}:\d{2}?/); // "2023-06-02T06:01:46+00:00"
-    if (m) {
-        isoDateString = m[1];
-    }
-    isoDateString = isoDateString.includes("Z") ? isoDateString : isoDateString + "Z";
+  const m = isoDateString.match(/([\d\-T:]+)\+\d{2}:\d{2}?/); // "2023-06-02T06:01:46+00:00"
+  if (m) {
+      isoDateString = m[1];
+  }
+  isoDateString = isoDateString.includes("Z") ? isoDateString : isoDateString + "Z";
 
-    const d = new Date(isoDateString);
+  const d = new Date(isoDateString);
 
-    return datefnsFormat(d, "dd MMMM yyyy", { locale: fr, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone });
+  return formatDate(d);
 };
 
 export const trimObject = (obj: object): object => {
