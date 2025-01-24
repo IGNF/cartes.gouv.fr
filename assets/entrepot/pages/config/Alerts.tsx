@@ -175,6 +175,7 @@ const Alerts: FC = () => {
             if (index !== -1) {
                 alerts.splice(index, 1);
                 setValue("alerts", alerts);
+                setNotification({ severity: "warning", title: t("alerts_unsaved") });
             }
         };
     }
@@ -192,78 +193,103 @@ const Alerts: FC = () => {
                 <Controller
                     control={control}
                     name="alerts"
-                    render={({ field: { value: alerts } }) => {
-                        if (!alerts) {
-                            return <></>;
-                        }
-                        return (
-                            <Table
-                                className="alerts__table"
-                                caption={t("table_caption")}
-                                noCaption
-                                data={alerts.map((alert, i) => [
-                                    getIcon(alert.severity),
-                                    alert.title,
-                                    formatDateTime(alert.date),
-                                    <ToggleSwitch
-                                        key="switch-homepage"
-                                        inputTitle={t("alert.homepage")}
-                                        label=""
-                                        onChange={handleChange(i, "homepage")}
-                                        checked={alert.visibility.homepage}
-                                    />,
-                                    <ToggleSwitch
-                                        key="switch-contact"
-                                        inputTitle={t("alert.contact")}
-                                        label=""
-                                        onChange={handleChange(i, "contact")}
-                                        checked={alert.visibility.contact}
-                                    />,
-                                    <ToggleSwitch
-                                        key="switch-map"
-                                        inputTitle={t("alert.map")}
-                                        label=""
-                                        onChange={handleChange(i, "map")}
-                                        checked={alert.visibility.map}
-                                    />,
-                                    <ToggleSwitch
-                                        key="switch-serviceLevel"
-                                        inputTitle={t("alert.serviceLevel")}
-                                        label=""
-                                        onChange={handleChange(i, "serviceLevel")}
-                                        checked={alert.visibility.serviceLevel}
-                                    />,
-                                    <div key="actions">
-                                        <Button
-                                            iconId="fr-icon-pencil-line"
-                                            priority="tertiary no outline"
-                                            title={t("update")}
-                                            type="button"
-                                            className={fr.cx("fr-mr-2v")}
-                                            onClick={openUpdateAlert(alert)}
-                                        />
-                                        <Button
-                                            iconId="fr-icon-delete-line"
-                                            priority="tertiary no outline"
-                                            title={t("delete")}
-                                            type="button"
-                                            onClick={deleteAlert(alert)}
-                                        />
-                                    </div>,
-                                ])}
-                                headers={[
-                                    t("alert.severity"),
-                                    t("alert.title"),
-                                    t("alert.date"),
-                                    t("alert.homepage"),
-                                    t("alert.contact"),
-                                    t("alert.map"),
-                                    t("alert.serviceLevel"),
-                                    t("actions"),
-                                ]}
-                            />
-                        );
-                    }}
+                    render={({ field: { value: alerts } }) => (
+                        <div className={fr.cx("fr-table", "fr-table--no-caption")}>
+                            <div className={fr.cx("fr-table__wrapper")}>
+                                <div className={fr.cx("fr-table__container")}>
+                                    <div className={fr.cx("fr-table__content")}>
+                                        <table className="alerts__table">
+                                            <caption>{t("table_caption")}</caption>
+                                            <thead>
+                                                <tr>
+                                                    <th />
+                                                    <th />
+                                                    <th />
+                                                    <th colSpan={4}>{t("alert.visible")}</th>
+                                                    <th />
+                                                </tr>
+                                                <tr>
+                                                    <th>{t("alert.severity")}</th>
+                                                    <th>{t("alert.title")}</th>
+                                                    <th>{t("alert.date")}</th>
+                                                    <th>{t("alert.homepage")}</th>
+                                                    <th>{t("alert.contact")}</th>
+                                                    <th>{t("alert.map")}</th>
+                                                    <th>{t("alert.serviceLevel")}</th>
+                                                    <th>{t("actions")}</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {(!alerts || alerts.length === 0) && (
+                                                    <tr>
+                                                        <td colSpan={8}>{t("no_alerts")}</td>
+                                                    </tr>
+                                                )}
+                                                {alerts?.map((alert, i) => (
+                                                    <tr key={i} data-row-key={i + 1}>
+                                                        <td>{getIcon(alert.severity)}</td>
+                                                        <td>{alert.title}</td>
+                                                        <td>{formatDateTime(alert.date)}</td>
+                                                        <td>
+                                                            <ToggleSwitch
+                                                                inputTitle={t("alert.homepage")}
+                                                                label=""
+                                                                onChange={handleChange(i, "homepage")}
+                                                                checked={alert.visibility.homepage}
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <ToggleSwitch
+                                                                inputTitle={t("alert.contact")}
+                                                                label=""
+                                                                onChange={handleChange(i, "contact")}
+                                                                checked={alert.visibility.contact}
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <ToggleSwitch
+                                                                inputTitle={t("alert.map")}
+                                                                label=""
+                                                                onChange={handleChange(i, "map")}
+                                                                checked={alert.visibility.map}
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <ToggleSwitch
+                                                                inputTitle={t("alert.serviceLevel")}
+                                                                label=""
+                                                                onChange={handleChange(i, "serviceLevel")}
+                                                                checked={alert.visibility.serviceLevel}
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <div>
+                                                                <Button
+                                                                    iconId="fr-icon-pencil-line"
+                                                                    priority="tertiary no outline"
+                                                                    title={t("update")}
+                                                                    type="button"
+                                                                    className={fr.cx("fr-mr-2v")}
+                                                                    onClick={openUpdateAlert(alert)}
+                                                                />
+                                                                <Button
+                                                                    iconId="fr-icon-delete-line"
+                                                                    priority="tertiary no outline"
+                                                                    title={t("delete")}
+                                                                    type="button"
+                                                                    onClick={deleteAlert(alert)}
+                                                                />
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 />
                 {notification && (
                     <Alert
@@ -293,9 +319,9 @@ export default Alerts;
 
 /**
  * TODO
- * - problem with browser cache (use `cache: "no-store"` temporary)
  * - no alerts in table
  * - dashboard integration
+ * - problem with browser cache (use `cache: "no-store"` temporary)
  * - make const id configurable?
  * - menu integration?
  * - detail as rich text (markdown)
