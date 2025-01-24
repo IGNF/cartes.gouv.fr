@@ -10,6 +10,7 @@ const { i18n } = declareComponentKeys<
     | "alerts_unsaved"
     | "save"
     | "table_caption"
+    | "no_alerts"
     | "title"
     | "preview"
     | "newWindow"
@@ -23,6 +24,7 @@ const { i18n } = declareComponentKeys<
     | "alert.linkLabel"
     | "alert.date"
     | "alert.details"
+    | "alert.visible"
     | "alert.homepage"
     | "alert.contact"
     | "alert.map"
@@ -41,6 +43,7 @@ export const AlertsFrTranslations: Translations<"fr">["alerts"] = {
     alerts_unsaved: "Vous avez des modifications non enregistrées",
     save: "Enregistrer",
     table_caption: "Alertes",
+    no_alerts: "Aucune alerte disponible",
     title: "Configuration : Alertes",
     preview: "Prévisualisation",
     newWindow: "nouvelle fenêtre",
@@ -54,10 +57,11 @@ export const AlertsFrTranslations: Translations<"fr">["alerts"] = {
     "alert.severity": "Sévérité",
     "alert.date": "Date",
     "alert.details": "Détails",
-    "alert.homepage": "Visible sur la page d'accueil",
-    "alert.contact": "Visible sur la page de contact",
-    "alert.map": "Visible sur la carte",
-    "alert.serviceLevel": "Visible sur la page niveau de service",
+    "alert.visible": "Visible sur",
+    "alert.homepage": "la page d'accueil",
+    "alert.contact": "la page de contact",
+    "alert.map": "la carte",
+    "alert.serviceLevel": "la page niveau de service",
     "modal.cancel": "Annuler",
     "modal.add": "Ajouter",
     "modal.edit": "Modifier",
@@ -71,6 +75,7 @@ export const AlertsEnTranslations: Translations<"en">["alerts"] = {
     alerts_unsaved: undefined,
     save: undefined,
     table_caption: undefined,
+    no_alerts: undefined,
     title: undefined,
     preview: undefined,
     newWindow: undefined,
@@ -84,6 +89,7 @@ export const AlertsEnTranslations: Translations<"en">["alerts"] = {
     "alert.severity": undefined,
     "alert.date": undefined,
     "alert.details": undefined,
+    "alert.visible": undefined,
     "alert.homepage": undefined,
     "alert.contact": undefined,
     "alert.map": undefined,
