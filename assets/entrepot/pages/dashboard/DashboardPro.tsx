@@ -28,6 +28,8 @@ const DashboardPro = () => {
     const setUser = useAuthStore((state) => state.setUser);
     const isApiEspaceCoDefined = useApiEspaceCoStore((state) => state.isUrlDefined);
 
+    const configDatastore = user?.communities_member?.find((community) => community.community?.datastore === api.alerts.datastoreId)?.community;
+
     const userQuery = useQuery<CartesUser, CartesApiException>({
         queryKey: RQKeys.user_me(),
         queryFn: ({ signal }) => api.user.getMe({ signal }),
@@ -159,7 +161,7 @@ const DashboardPro = () => {
                 )}
             </div>
 
-            <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
+            <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mb-3w")}>
                 <div className={fr.cx("fr-col-12", "fr-col-sm-6")}>
                     <Tile
                         linkProps={routes.datastore_create_request().link}
@@ -181,6 +183,15 @@ const DashboardPro = () => {
                     />
                 </div>
             </div>
+
+            {configDatastore && (
+                <>
+                    <h2>Configuration</h2>
+                    <div key={configDatastore.datastore} className={fr.cx("fr-col-12", "fr-col-sm-6", "fr-col-md-4", "fr-col-lg-3")}>
+                        <Tile linkProps={routes.config_alerts().link} grey={true} title={t("alerts")} />
+                    </div>
+                </>
+            )}
 
             {isApiEspaceCoDefined() && (
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--left", "fr-mt-4w")}>

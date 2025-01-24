@@ -1,7 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
-import Table from "@codegouvfr/react-dsfr/Table";
 import ToggleSwitch from "@codegouvfr/react-dsfr/ToggleSwitch";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { FC, useMemo, useState } from "react";
@@ -319,8 +318,6 @@ export default Alerts;
 
 /**
  * TODO
- * - no alerts in table
- * - dashboard integration
  * - problem with browser cache (use `cache: "no-store"` temporary)
  * - make const id configurable?
  * - menu integration?

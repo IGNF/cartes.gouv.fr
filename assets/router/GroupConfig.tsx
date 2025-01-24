@@ -16,7 +16,7 @@ function GroupConfig(props: IGroupConfigProps) {
 
     const content: { render: JSX.Element; layoutProps?: Omit<DatastoreLayoutProps, "datastoreId"> } = useMemo(() => {
         switch (route.name) {
-            case "config_events":
+            case "config_alerts":
                 return {
                     render: <ConfigEvents />,
                 }; 
