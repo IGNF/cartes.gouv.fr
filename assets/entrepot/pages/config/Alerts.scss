@@ -1,9 +1,5 @@
-.alerts__table caption {
-    width: 100%;
-}
-
-.alerts__table td {
-    white-space: nowrap;
+.alerts__table thead tr:first-child th {
+    background-image: none;
 }
 
 .alerts__caption {
