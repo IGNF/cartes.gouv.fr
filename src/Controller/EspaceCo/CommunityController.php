@@ -7,7 +7,6 @@ use App\Dto\Espaceco\Members\AddMembersDTO;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\EspaceCoApi\CommunityApiService;
-use App\Services\EspaceCoApi\CommunityDocumentApiService;
 use App\Services\EspaceCoApi\GridApiService;
 use App\Services\EspaceCoApi\UserApiService;
 use App\Services\MailerService;
@@ -41,7 +40,6 @@ class CommunityController extends AbstractController implements ApiControllerInt
         private MailerService $mailerService,
         private UserApiService $userApiService,
         private CommunityApiService $communityApiService,
-        private CommunityDocumentApiService $documentApiService,
         private GridApiService $gridApiService,
     ) {
         $this->varDataPath = $parameters->get('upload_path');
@@ -407,48 +405,6 @@ class CommunityController extends AbstractController implements ApiControllerInt
         $file->move($tempFileDir, $file->getClientOriginalName());
 
         return [$tempFileDir, $tempFilePath];
-    }
-
-    /**
-     * @param array<mixed> $documents
-     */
-    private function _manageDocuments(int $communityId, array $documents, Request $request): void
-    {
-        $oldDocuments = $this->documentApiService->getDocuments($communityId);
-        $oldIds = array_map(fn ($document) => $document->getId(), $oldDocuments);
-
-        foreach ($documents as $document) {
-            $id = $document['id'];
-            if ($id < 0) {  // Nouveau
-                $description = isset($document['description']) && '' !== $document['description'] ? $document['description'] : null;
-
-                $file = $request->files->get("file*$id");
-                [$fileDir, $filePath] = $this->_copyFile($file);
-                $this->documentApiService->addDocument($communityId, $document['title'], $description, $filePath);
-                $this->fs->remove($fileDir);
-                continue;
-            }
-
-            unset($oldIds[$id]);
-            $oldDocument = $this->documentApiService->getDocument($communityId, $id, ['title', 'description']);
-
-            $datas = [];
-            $description = isset($document['description']) && '' !== $document['description'] ? $document['description'] : null;
-            if ($oldDocument['title'] !== $document['title']) {
-                $datas['title'] = $document['title'];
-            }
-            if ($oldDocument['description'] !== $description) {
-                $datas['description'] = $description;
-            }
-            if (count($datas)) {
-                $this->documentApiService->updateDocument($communityId, $id, $datas);
-            }
-        }
-
-        // Suppression des autres ($oldIds restants)
-        foreach ($oldIds as $id) {
-            $this->documentApiService->deleteDocument($communityId, $id);
-        }
     }
 
     /**

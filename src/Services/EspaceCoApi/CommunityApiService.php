@@ -43,7 +43,7 @@ class CommunityApiService extends BaseEspaceCoApiService
 
     public function getCommunitiesName(): array
     {
-        $communities = $this->requestAll('communities', ['fields' => 'name', 'sort' => 'name:ASC']);
+        $communities = $this->requestAll('communities', ['fields' => ['name'], 'sort' => 'name:ASC']);
 
         return array_map(fn ($community) => $community['name'], $communities);
     }

@@ -9,6 +9,7 @@ const { i18n } = declareComponentKeys<
     | "loading"
     | "fetch_failed"
     | "back_to_list"
+    | "forbidden_access"
     | "tab1"
     | "tab2"
     | "tab3"
@@ -104,6 +105,7 @@ export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"
     loading: "Recherche du guichet en cours ...",
     fetch_failed: "La récupération des informations sur le guichet a échoué",
     back_to_list: "Retour à la liste des guichets",
+    forbidden_access: "Ce guichet est en cours de création, il n'est pas accessible en modification",
     tab1: "Description",
     tab2: "Bases de données",
     tab3: "Zoom, centrage",
@@ -242,6 +244,7 @@ export const ManageCommunityEnTranslations: Translations<"en">["ManageCommunity"
     loading: undefined,
     fetch_failed: undefined,
     back_to_list: undefined,
+    forbidden_access: undefined,
     tab1: undefined,
     tab2: undefined,
     tab3: undefined,

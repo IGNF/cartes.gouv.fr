@@ -8,11 +8,12 @@ import isEmail from "validator/lib/isEmail";
 import { BasicRecipientsArray, EmailPlannerFormType } from "../../../../../../@types/app_espaceco";
 import { CancelEvents, ReportStatusesDTO, ReportStatusesType, TriggerEvents } from "../../../../../../@types/espaceco";
 import AutocompleteSelect from "../../../../../../components/Input/AutocompleteSelect";
-import MarkdownEditor from "../../../../../../components/Input/MarkdownEditor";
 import { useTranslation } from "../../../../../../i18n/i18n";
-import getKeywordsExtraCommands from "./EmailPlannerKeywords";
+//import getKeywordsExtraCommands from "./EmailPlannerControls";
 
+import HtmlEditor from "../../../../../../components/Input/HtmlEditor";
 import "../../../../../../sass/components/react-md-editor.scss";
+import EmailPlannerControls from "./EmailPlannerControls";
 
 type PersonalEmailPlannerProps = {
     form: UseFormReturn<EmailPlannerFormType>;
@@ -25,6 +26,7 @@ type StatusAutocompleteOption = {
     title: string;
 };
 
+// TODO REVOIR AVEC REACT-DSFR-TIPTAP
 const PersonalEmailPlanner: FC<PersonalEmailPlannerProps> = ({ form, themes, statuses }) => {
     const { t } = useTranslation("AddOrEditEmailPlanner");
 
@@ -211,12 +213,12 @@ const PersonalEmailPlanner: FC<PersonalEmailPlannerProps> = ({ form, themes, sta
                 control={control}
                 name="body"
                 render={({ field }) => (
-                    <MarkdownEditor
+                    <HtmlEditor
                         label={t("dialog.body")}
                         hintText={t("dialog.body_explain")}
                         state={errors.body ? "error" : "default"}
                         stateRelatedMessage={errors?.body?.message?.toString()}
-                        extraCommands={getKeywordsExtraCommands()}
+                        extraControls={EmailPlannerControls}
                         value={field.value ?? ""}
                         onChange={(values) => {
                             field.onChange(values);

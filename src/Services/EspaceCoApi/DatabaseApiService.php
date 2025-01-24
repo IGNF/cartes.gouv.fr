@@ -2,11 +2,24 @@
 
 namespace App\Services\EspaceCoApi;
 
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
+
 class DatabaseApiService extends BaseEspaceCoApiService
 {
-    public function getTable(int $databaseId, int $tableId): array
+    /**
+     * @param array<mixed> $fields
+     */
+    public function getDatabase(int $databaseId, #[MapQueryParameter] ?array $fields = []): array
     {
-        return $this->request('GET', "databases/$databaseId/tables/$tableId");
+        return $this->request('GET', "databases/$databaseId", [], ['fields' => $fields]);
+    }
+
+    /**
+     * @param array<mixed> $fields
+     */
+    public function getTable(int $databaseId, int $tableId, #[MapQueryParameter] ?array $fields = []): array
+    {
+        return $this->request('GET', "databases/$databaseId/tables/$tableId", [], ['fields' => $fields]);
     }
 
     public function getTableFullName(int $databaseId, int $tableId): string
@@ -22,8 +35,8 @@ class DatabaseApiService extends BaseEspaceCoApiService
         return $this->requestAll("databases/$databaseId/tables", ['fields' => $fields]);
     }
 
-    public function getColumns(int $databaseId, int $tableId): array
+    /* public function getColumns(int $databaseId, int $tableId): array
     {
         return $this->request('GET', "databases/$databaseId/tables/$tableId", [], ['fields' => 'columns']);
-    }
+    } */
 }

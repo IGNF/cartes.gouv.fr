@@ -16,13 +16,14 @@ import "../../../../sass/components/autocomplete.scss";
 export type SearchGridsProps = {
     label: ReactNode;
     hintText?: ReactNode;
+    disableClearable?: boolean;
     filters: SearchGridFilters;
     state?: "default" | "error" | "success";
     stateRelatedMessage?: string;
     onChange: (grid: GridDTO | null) => void;
 };
 
-const SearchGrids: FC<SearchGridsProps> = ({ label, hintText, filters, state, stateRelatedMessage, onChange }) => {
+const SearchGrids: FC<SearchGridsProps> = ({ label, hintText, disableClearable, filters, state, stateRelatedMessage, onChange }) => {
     const { t } = useTranslation("Search");
 
     const [search, setSearch] = useDebounceValue("", 500);
@@ -65,7 +66,8 @@ const SearchGrids: FC<SearchGridsProps> = ({ label, hintText, filters, state, st
                         );
                     }} */
                     size={"small"}
-                    blurOnSelect={true}
+                    blurOnSelect={disableClearable !== true}
+                    disableClearable={disableClearable ? disableClearable : false}
                     loading={searchQuery.isLoading}
                     loadingText={t("loading")}
                     noOptionsText={t("no_results")}

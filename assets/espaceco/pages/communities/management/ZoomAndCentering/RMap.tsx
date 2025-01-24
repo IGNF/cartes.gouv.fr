@@ -1,4 +1,4 @@
-import { Feature } from "ol";
+import { Feature, MapEvent } from "ol";
 import { defaults as defaultControls, ScaleLine } from "ol/control";
 import { Coordinate } from "ol/coordinate";
 import Point from "ol/geom/Point";
@@ -13,12 +13,14 @@ import WMTS, { optionsFromCapabilities } from "ol/source/WMTS";
 import Icon from "ol/style/Icon";
 import Style from "ol/style/Style";
 import View from "ol/View";
-import { CSSProperties, FC, useEffect, useMemo, useRef } from "react";
+import { CSSProperties, FC, useCallback, useEffect, useMemo, useRef } from "react";
 import { UseFormReturn } from "react-hook-form";
+import { ZoomAndCenteringFormType } from "../../../../../@types/app_espaceco";
 import olDefaults from "../../../../../data/ol-defaults.json";
 import useCapabilities from "../../../../../hooks/useCapabilities";
 import punaise from "../../../../../img/punaise.png";
-import { ZoomAndCenteringFormType } from "../ZoomAndCentering";
+import DisplayCenterControl from "../../../../../ol/controls/DisplayCenterControl";
+import drawExtent from "../../../../../ol/drawextent";
 
 const mapStyle: CSSProperties = {
     height: "400px",
@@ -38,9 +40,12 @@ const RMap: FC<RMapProps> = ({ form, onPositionChanged, onZoomChanged }) => {
     const { data: capabilities } = useCapabilities();
 
     const { watch, getValues: getFormValues } = form;
-    const position = watch("position");
 
+    const position = watch("position");
     const position3857 = useMemo(() => fromLonLat(position), [position]);
+
+    const extent = watch("extent");
+    const renderExtent = useCallback((e: MapEvent) => drawExtent(e, extent), [extent]);
 
     // Création de la carte une fois bg layer créée
     useEffect(() => {
@@ -79,7 +84,7 @@ const RMap: FC<RMapProps> = ({ form, onPositionChanged, onZoomChanged }) => {
         mapRef.current = new Map({
             target: mapTargetRef.current as HTMLElement,
             layers: layers,
-            controls: defaultControls().extend([new ScaleLine()]),
+            controls: defaultControls().extend([new ScaleLine(), new DisplayCenterControl({})]),
             interactions: [
                 new DragPan(),
                 new MouseWheelZoom({
@@ -108,8 +113,10 @@ const RMap: FC<RMapProps> = ({ form, onPositionChanged, onZoomChanged }) => {
             }
         });
 
+        mapRef.current.on("postrender", (e) => renderExtent(e));
+
         return () => mapRef.current?.setTarget(undefined);
-    }, [capabilities, position3857, getFormValues, onPositionChanged, onZoomChanged]);
+    }, [capabilities, position3857, getFormValues, onPositionChanged, onZoomChanged, renderExtent]);
 
     return <div ref={mapTargetRef} style={mapStyle} />;
 };
