@@ -1,10 +1,11 @@
-export interface INewAlert {
+export interface IApiAlert {
+    id: string;
     title: string;
     description?: string;
     link: { url?: string; label?: string };
-    severity: "info" | "warning" | "alert" | "weather-orange" | "weather-purple" | "weather-red" | "kidnapping" | "cyberattack" | "witness" | "attack";
+    severity: "info" | "warning" | "alert";
     details: string;
-    date: Date;
+    date: string;
     visibility: {
         homepage: boolean;
         contact: boolean;
@@ -13,6 +14,6 @@ export interface INewAlert {
     };
 }
 
-export interface IAlert extends INewAlert {
-    id: string;
+export interface IAlert extends Omit<IApiAlert, "date"> {
+    date: Date;
 }

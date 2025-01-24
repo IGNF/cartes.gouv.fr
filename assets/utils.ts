@@ -164,6 +164,22 @@ const getFileExtension = (filename: string) => {
     return filename.split(".").pop()?.toLowerCase();
 };
 
+const formatDate = (date: Date): string => {
+    return datefnsFormat(date, "dd MMMM yyyy", { locale: fr, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone });
+};
+
+const formatDateTime = (date: Date): string => {
+    return (
+        datefnsFormat(date, "dd MMMM yyyy, HH", { locale: fr, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }) +
+        "h" +
+        datefnsFormat(date, "mm", { locale: fr, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone })
+    );
+};
+
+const formatDateTimeLocal = (date: Date): string => {
+    return datefnsFormat(date, "yyyy-MM-dd'T'HH:mm", { locale: fr, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone });
+};
+
 const formatDateFromISO = (isoDateString: string): string => {
     const m = isoDateString.match(/([\d\-T:]+)\+\d{2}:\d{2}?/); // "2023-06-02T06:01:46+00:00"
     if (m) {
@@ -173,11 +189,7 @@ const formatDateFromISO = (isoDateString: string): string => {
 
     const d = new Date(isoDateString);
 
-    return (
-        datefnsFormat(d, "dd MMMM yyyy, HH", { locale: fr, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }) +
-        "h" +
-        datefnsFormat(d, "mm", { locale: fr, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone })
-    );
+    return formatDateTime(d);
 };
 
 const formatDateWithoutTimeFromISO = (isoDateString: string): string => {
@@ -189,7 +201,7 @@ const formatDateWithoutTimeFromISO = (isoDateString: string): string => {
 
     const d = new Date(isoDateString);
 
-    return datefnsFormat(d, "dd MMMM yyyy", { locale: fr, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone });
+    return formatDate(d);
 };
 
 const getArrayRange = (start: number, stop: number, step: number = 1): number[] =>
@@ -243,6 +255,9 @@ export {
     niceBytes,
     getProjectionCode,
     getFileExtension,
+    formatDate,
+    formatDateTimeLocal,
+    formatDateTime,
     formatDateFromISO,
     formatDateWithoutTimeFromISO,
     getArrayRange,
