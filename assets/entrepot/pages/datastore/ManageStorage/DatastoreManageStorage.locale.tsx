@@ -126,7 +126,7 @@ export const DatastoreManageStorageFrTranslations: Translations<"fr">["Datastore
         `Êtes-vous sûr de vouloir supprimer la donnée stockée ${storedDataName} (${storedDataId}) ?`,
     "storage.s3.deletion.in_progress": "Suppression de la donnée stockée en cours",
     "storage.s3.explanation":
-        "Cet espace est utilisé pour le stockage des pyramides de tuiles vectorielles. Il est plus performant que le stockage sous forme de fichiers.",
+        "Cet espace est utilisé pour le stockage des pyramides de tuiles vectorielles utilisables par les services TMS ou images utilisables par les services WMS-raster et WMTS. Il est plus performant que le stockage sous forme de fichiers.",
     "storage.upload.label": (
         <span>
             Données <br /> déposées
@@ -136,7 +136,7 @@ export const DatastoreManageStorageFrTranslations: Translations<"fr">["Datastore
     "storage.upload.deletion.confirmation": ({ uploadName, uploadId }) => `Êtes-vous sûr de vouloir supprimer la donnée déposée ${uploadName} (${uploadId}) ?`,
     "storage.upload.deletion.in_progress": "Suppression de la donnée déposée en cours",
     "storage.upload.explanation":
-        "Il s'agit de l’espace occupé par les fichiers de données bruts que vous avez téléversés (fichiers csv, geopackage...). Ces fichiers sont normalement supprimés dès l’intégration en base réussie de vos données. Il est possible qu'il reste des traces de fichiers dans cet espace lorsque les intégrations en base ont échoué.",
+        "Il s'agit de l’espace occupé par les fichiers de données bruts que vous avez téléversés (fichiers zip, geopackage...). Ces fichiers sont normalement supprimés dès l’intégration en base réussie de vos données. Il est possible qu'il reste des traces de fichiers dans cet espace lorsque les intégrations en base ont échoué.",
 
     "storage.annexe.label": (
         <span>
@@ -166,7 +166,8 @@ export const DatastoreManageStorageFrTranslations: Translations<"fr">["Datastore
     "storage.endpoints.loading": "Chargement des flux publiés et des métadonnées en cours",
     "storage.endpoints.deletion.confirmation": ({ offeringName, offeringId }) => `Êtes-vous sûr de vouloir dépublier le flux ${offeringName} (${offeringId}) ?`,
     "storage.endpoints.deletion.in_progress": "Suppression du flux en cours",
-    "storage.endpoints.explanation": "Il s'agit du nombre de couches et de métadonnées publiées par point de publication dans votre espace de travail.",
+    "storage.endpoints.explanation":
+        "Il s'agit du nombre de couches ou services publiés par point de publication dans votre espace de travail. Le nombre de points de publication listés dépend de la configuration de votre espace de travail. Cette configuration peut éventuellement limiter le type de service que vous pouvez publier ainsi que leur caractère public ou privé. Le point de publication CSW concerne les métadonnées.",
 
     "storage.endpoints.metadata.deletion.confirmation": ({ metadataIdentifier, metadataId }) =>
         `Êtes-vous sûr de vouloir supprimer la métadonnée ${metadataIdentifier} (${metadataId}) ?`,
