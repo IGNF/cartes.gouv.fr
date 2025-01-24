@@ -30,10 +30,10 @@ const { i18n } = declareComponentKeys<
     | "modal.cancel"
     | "modal.add"
     | "modal.edit"
->()("ConfigAlerts");
+>()("alerts");
 export type I18n = typeof i18n;
 
-export const AlertsFrTranslations: Translations<"fr">["ConfigAlerts"] = {
+export const AlertsFrTranslations: Translations<"fr">["alerts"] = {
     create_alert: "Créer une alerte",
     edit_alert: "Modifier une alerte",
     alerts_updated: "Alertes mises à jour",
@@ -63,7 +63,7 @@ export const AlertsFrTranslations: Translations<"fr">["ConfigAlerts"] = {
     "modal.edit": "Modifier",
 };
 
-export const AlertsEnTranslations: Translations<"en">["ConfigAlerts"] = {
+export const AlertsEnTranslations: Translations<"en">["alerts"] = {
     create_alert: undefined,
     edit_alert: undefined,
     alerts_updated: undefined,

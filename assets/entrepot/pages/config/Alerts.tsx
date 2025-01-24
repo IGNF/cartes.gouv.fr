@@ -75,7 +75,7 @@ const Alerts: FC = () => {
     const alerts = useAlertStore(({ alerts }) => alerts);
     const setAlerts = useAlertStore(({ setAlerts }) => setAlerts);
     const [alert, setAlert] = useState<IAlert>(getNewAlert());
-    const { t } = useTranslation("ConfigAlerts");
+    const { t } = useTranslation("alerts");
     const title = t("title");
     const [notification, setNotification] = useState<INotification | null>(null);
 
@@ -182,13 +182,8 @@ const Alerts: FC = () => {
     const closable = notification?.severity !== "warning";
     return (
         <DatastoreLayout datastoreId={datastoreId} documentTitle={title}>
-            {/* <div className={fr.cx("fr-grid-row")}>
-                <div className={fr.cx("fr-col")}>
-                    <h1>{title}</h1>
-                </div>
-            </div> */}
             <form onSubmit={handleSubmit(submitAlerts)}>
-                <div className="alerts__caption">
+                <div className={[fr.cx("fr-mb-5w"), "alerts__caption"].join(" ")}>
                     <h1>{title}</h1>
                     <Button iconId={"fr-icon-add-line"} onClick={openAddAlert} type="button">
                         {t("create_alert")}
@@ -272,7 +267,7 @@ const Alerts: FC = () => {
                 />
                 {notification && (
                     <Alert
-                        className="fr-mb-5w"
+                        className={fr.cx("fr-mb-5w")}
                         title={notification.title}
                         severity={notification.severity}
                         small={false}
@@ -298,15 +293,10 @@ export default Alerts;
 
 /**
  * TODO
- * - problem with browser cache
+ * - problem with browser cache (use `cache: "no-store"` temporary)
  * - no alerts in table
- * - datepicker (with time ?)
+ * - dashboard integration
  * - make const id configurable?
  * - menu integration?
- * - dashboard integration
- * - display alert:
- *   - homepage
- *   - contact
- *   - map?
- *   - service level
+ * - detail as rich text (markdown)
  */

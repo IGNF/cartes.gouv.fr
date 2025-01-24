@@ -12,6 +12,10 @@
     justify-content: space-between;
 }
 
+.alerts__caption h1 {
+    margin: 0;
+}
+
 .alerts__icon--info {
     color: var(--text-default-info);
 }

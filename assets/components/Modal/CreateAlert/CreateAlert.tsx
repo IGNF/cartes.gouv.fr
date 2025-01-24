@@ -51,7 +51,7 @@ interface CreateAlertProps {
 
 const CreateAlert: FC<CreateAlertProps> = (props) => {
     const { alert, isEdit, ModalComponent, onSubmit } = props;
-    const { t } = useTranslation("ConfigAlerts");
+    const { t } = useTranslation("alerts");
 
     const methods = useForm({
         mode: "onSubmit",

@@ -90,5 +90,5 @@ export const translations: Translations<"fr"> = {
     DatasheetList: DatasheetListFrTranslations,
     AccessRestrictions: AccessRestrictionsFrTranslations,
     LoginDisabled: LoginDisabledFrTranslations,
-    ConfigAlerts: AlertsFrTranslations,
+    alerts: AlertsFrTranslations,
 };
