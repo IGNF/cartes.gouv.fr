@@ -194,6 +194,7 @@ const ExtentDialog: FC<ExtentDialogProps> = ({ onCancel, onApply }) => {
                             <div>
                                 <SearchGrids
                                     label={t("zoom.choice.autocomplete")}
+                                    disableClearable={true}
                                     filters={filters}
                                     state={errors.extent ? "error" : "default"}
                                     stateRelatedMessage={errors.extent?.message?.toString()}

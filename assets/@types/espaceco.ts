@@ -84,7 +84,8 @@ export type SharedGeorem = (typeof SharedGeoremOptions)[number];
 export interface CommunityResponseDTO {
     id: number;
     description: string | null;
-    about?: string | null;
+    editorial: string | null;
+    functionalities: string[];
     name: string;
     active: boolean;
     listed: boolean;
@@ -119,6 +120,29 @@ export interface UserDTO {
     surname?: string;
 }
 
+const layerTools = ["add_feature", "edit_geometry", "move_feature", "delete_feature", "cut_feature", "copy_paste_feature"] as const;
+export type LayerToolsType = (typeof layerTools)[number];
+
+export type LayerType = "feature-type" | "geoservice";
+export type RoleType = "edit" | "ref" | "visu" | "ref-edit";
+export interface LayerResponseDTO {
+    table: number | null;
+    database: number | null;
+    type: LayerType;
+    id: number;
+    geoservice: {
+        id: number;
+        title: string;
+        description: string;
+    } | null;
+    opacity: number;
+    visibility: boolean;
+    order: number;
+    role: RoleType;
+    snapto: string | null;
+    preferred_style: number | null;
+    tools: LayerToolsType[] | null;
+}
 export interface DocumentDTO {
     id: number;
     title: string;

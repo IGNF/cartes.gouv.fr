@@ -2,9 +2,9 @@ import { declareComponentKeys } from "i18nifty";
 import { Translations } from "../../../i18n/types";
 
 // traductions
-const { i18n } = declareComponentKeys<"forbidden_access" | "title" | { K: "step_title"; P: { stepNumber: number }; R: string } | "loading" | "fetch_failed">()(
-    "CreateCommunity"
-);
+const { i18n } = declareComponentKeys<
+    "forbidden_access" | "title" | { K: "step_title"; P: { stepNumber: number }; R: string } | "loading" | "fetch_failed" | "updating" | "updating_failed"
+>()("CreateCommunity");
 export type I18n = typeof i18n;
 
 export const CreateCommunityFrTranslations: Translations<"fr">["CreateCommunity"] = {
@@ -30,6 +30,8 @@ export const CreateCommunityFrTranslations: Translations<"fr">["CreateCommunity"
     },
     loading: "Recherche du guichet en cours ...",
     fetch_failed: "La récupération des informations sur le guichet a échoué",
+    updating: "Mise à jour du guichet en cours ...",
+    updating_failed: "La mise à jour du guichet a échoué",
 };
 
 export const CreateCommunityEnTranslations: Translations<"en">["CreateCommunity"] = {
@@ -38,4 +40,6 @@ export const CreateCommunityEnTranslations: Translations<"en">["CreateCommunity"
     step_title: ({ stepNumber }) => `step ${stepNumber}`,
     loading: "Fetching community ...",
     fetch_failed: "Fetching community failed",
+    updating: "Updating community ...",
+    updating_failed: "Updating community failed",
 };

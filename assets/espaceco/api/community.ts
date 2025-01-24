@@ -25,9 +25,15 @@ const add = (data: FormData) => {
     );
 };
 
-const update = (data: FormData | object) => {
-    // TODO
-    console.log(data);
+const update = (communityId: number, data: FormData) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_espaceco_community_update_community", { communityId });
+    return jsonFetch<CommunityResponseDTO>(
+        url,
+        {
+            method: "PATCH",
+        },
+        data
+    );
 };
 
 const getCommunitiesName = () => {

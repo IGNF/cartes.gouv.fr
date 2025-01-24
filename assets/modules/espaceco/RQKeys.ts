@@ -2,6 +2,13 @@ import { CommunityListFilter } from "../../@types/app_espaceco";
 
 const RQKeys = {
     communityList: (page: number, limit: number): string[] => ["communities", page.toString(), limit.toString()],
+    communities: (fields: string | null = null): string[] => {
+        const key = ["all_communities"];
+        if (fields) {
+            key.push(fields);
+        }
+        return key;
+    },
     communitiesName: (): string[] => ["communities_names"],
     community: (communityId: number): string[] => ["community", communityId.toString()],
     communityMembershipRequests: (communityId: number): string[] => ["community", "members", "pending", communityId.toString()],
@@ -22,6 +29,7 @@ const RQKeys = {
         limit.toString(),
     ],
     communityDocuments: (communityId?: number): string[] => ["community", "documents", communityId ? communityId.toString() : ""],
+    communityLayers: (communityId: number, filter: string[]): string[] => ["community", "layers", communityId.toString(), ...filter],
     userSharedThemes: (): string[] => ["user", "shared_themes"],
     searchAddress: (search: string): string[] => ["searchAddress", search],
     searchGrids: (text: string): string[] => ["searchGrids", text],

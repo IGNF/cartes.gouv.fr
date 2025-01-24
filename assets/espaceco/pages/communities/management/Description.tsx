@@ -13,23 +13,24 @@ import * as yup from "yup";
 import { CommunityFormMode, DescriptionFormType, MembershipRequestValues } from "../../../../@types/app_espaceco";
 import { CommunityResponseDTO, DocumentDTO } from "../../../../@types/espaceco";
 import AutocompleteSelect from "../../../../components/Input/AutocompleteSelect";
-import MarkdownEditor from "../../../../components/Input/MarkdownEditor";
 import categories from "../../../../data/topic_categories.json";
 import { declareComponentKeys, useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/espaceco/RQKeys";
 import { type CartesApiException } from "../../../../modules/jsonFetch";
 import "../../../../sass/pages/espaceco/community.scss";
 import api from "../../../api";
-import { getDescriptionDefaultValues } from "../DefaultValues";
+import { getDefaultValues } from "../DefaultValues";
 import DocumentList from "./description/DocumentList";
 import { OpenWithEmailsConfigDialog, OpenWithEmailsConfigDialogModal } from "./description/OpenWithEmailsConfigDialog";
 
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
+import HtmlEditor from "../../../../components/Input/HtmlEditor";
 import LoadingText from "../../../../components/Utils/LoadingText";
-import "../../../../sass/pages/espaceco/community.scss";
-import CommunityLogo from "./CommunityLogo";
 import { ComponentKey, Translations } from "../../../../i18n/types";
+import "../../../../sass/pages/espaceco/community.scss";
+import { COMMUNITY_FORM_STEPS } from "../FormSteps";
+import CommunityLogo from "./CommunityLogo";
 
 type DescriptionProps = {
     mode: CommunityFormMode;
@@ -134,7 +135,7 @@ const Description: FC<DescriptionProps> = ({ mode, community, onSubmit }) => {
         });
     };
 
-    const defaultValues = getDescriptionDefaultValues(community);
+    const defaultValues = getDefaultValues(community, COMMUNITY_FORM_STEPS.DESCRIPTION) as DescriptionFormType;
 
     const form = useForm<DescriptionFormType>({
         resolver: yupResolver(schema(tValid)),
@@ -203,7 +204,7 @@ const Description: FC<DescriptionProps> = ({ mode, community, onSubmit }) => {
 
     return (
         <>
-            {communityNamesQuery.isLoading || (communityDocumentsQuery.isLoading && <LoadingText as={"h6"} />)}
+            {(communityNamesQuery.isLoading || communityDocumentsQuery.isLoading) && <LoadingText as={"h6"} />}
             {communityNamesQuery.isError && <Alert severity="error" closable title={communityNamesQuery.error.message} />}
             {communityDocumentsQuery.isError && <Alert severity="error" closable title={communityDocumentsQuery.error.message} />}
             {communityNamesQuery.data && communityDocumentsQuery.data && (
@@ -224,7 +225,7 @@ const Description: FC<DescriptionProps> = ({ mode, community, onSubmit }) => {
                             control={control}
                             name="description"
                             render={({ field }) => (
-                                <MarkdownEditor
+                                <HtmlEditor
                                     label={tmc("desc.description")}
                                     hintText={tmc("desc.hint_description")}
                                     state={errors.description ? "error" : "default"}
@@ -329,14 +330,19 @@ const Description: FC<DescriptionProps> = ({ mode, community, onSubmit }) => {
                         )}
                         <OpenWithEmailsConfigDialog openWithEmailOriginal={openWithEmail} onUpdate={(values) => setFormValue("openWithEmail", values)} />
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--right")}>
-                            <Button
-                                priority="primary"
-                                nativeButtonProps={{
-                                    type: "submit",
-                                }}
-                            >
-                                {mode === "creation" ? tCommon("continue") : tCommon("save")}
+                            <Button priority={mode === "creation" ? "secondary" : "primary"} onClick={handleSubmit(onSubmitForm)}>
+                                {tCommon("save")}
                             </Button>
+                            {mode === "creation" && (
+                                <Button
+                                    priority="primary"
+                                    nativeButtonProps={{
+                                        type: "submit",
+                                    }}
+                                >
+                                    {tCommon("continue")}
+                                </Button>
+                            )}
                         </div>
                     </form>
                 </div>

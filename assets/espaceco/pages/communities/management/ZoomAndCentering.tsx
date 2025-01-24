@@ -1,62 +1,39 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
-import { containsCoordinate, Extent } from "ol/extent";
-import WKT from "ol/format/WKT";
-import { FC, useCallback, useEffect, useState } from "react";
+import { containsCoordinate } from "ol/extent";
+import { FC, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { CommunityFormMode, ZoomAndCenteringFormType } from "../../../../@types/app_espaceco";
 import { CommunityResponseDTO } from "../../../../@types/espaceco";
 import ZoomRange from "../../../../components/Utils/ZoomRange";
 import olDefaults from "../../../../data/ol-defaults.json";
 import { useTranslation } from "../../../../i18n/i18n";
+import { getDefaultValues } from "../DefaultValues";
+import { COMMUNITY_FORM_STEPS } from "../FormSteps";
 import { ExtentDialog, ExtentDialogModal } from "./ZoomAndCentering/ExtentDialog";
 import RMap from "./ZoomAndCentering/RMap";
 import Search from "./ZoomAndCentering/Search";
-import { Point } from "ol/geom";
+import DisplayExtent from "./ZoomAndCentering/DisplayExtent";
 
 type ZoomAndCenteringProps = {
+    mode: CommunityFormMode;
     community: CommunityResponseDTO;
+    onSubmit: (datas: FormData) => void;
 };
 
-export type ZoomAndCenteringFormType = {
-    position: number[];
-    zoom: number;
-    zoomMin: number;
-    zoomMax: number;
-    extent?: Extent | null;
-};
-
-const ZoomAndCentering: FC<ZoomAndCenteringProps> = ({ community }) => {
+const ZoomAndCentering: FC<ZoomAndCenteringProps> = ({ mode, community, onSubmit }) => {
     const { t: tCommon } = useTranslation("Common");
     const { t } = useTranslation("ManageCommunity");
 
     // Cohérence entre l'extent et la position
     const [consistent, setConsistent] = useState<boolean>(true);
 
-    const getValues = useCallback(() => {
-        let p;
-        if (community.position) {
-            const feature = new WKT().readFeature(community.position, {
-                dataProjection: "EPSG:4326",
-            });
-            p = feature.getGeometry() ? (feature.getGeometry() as Point).getCoordinates() : olDefaults.center;
-        } else p = olDefaults.center;
-
-        return {
-            position: p,
-            zoom: community.zoom ?? olDefaults.zoom,
-            zoomMin: community.zoom_min ?? olDefaults.zoom_levels.TOP,
-            zoomMax: community.zoom_max ?? olDefaults.zoom_levels.BOTTOM,
-            extent: community.extent,
-        };
-    }, [community]);
-
     const form = useForm<ZoomAndCenteringFormType>({
         mode: "onSubmit",
-        values: getValues(),
+        values: getDefaultValues(community, COMMUNITY_FORM_STEPS.ZOOM_AND_CENTERING) as ZoomAndCenteringFormType,
     });
-    const { watch, getValues: getFormValues, setValue: setFormValue } = form;
-    console.log(watch());
+    const { watch, getValues: getFormValues, setValue: setFormValue, handleSubmit } = form;
 
     const position = watch("position");
     const extent = watch("extent");
@@ -67,6 +44,20 @@ const ZoomAndCentering: FC<ZoomAndCenteringProps> = ({ community }) => {
         }
         return;
     }, [position, extent]);
+
+    const onSubmitForm = () => {
+        const { position, zoom, zoomMin, zoomMax, extent } = getFormValues();
+
+        const datas = new FormData();
+        datas.append("zoom", zoom.toString());
+        datas.append("zoom_min", zoomMin.toString());
+        datas.append("zoom_max", zoomMax.toString());
+        datas.append("position", JSON.stringify(position));
+        if (extent) {
+            datas.append("extent", JSON.stringify(extent));
+        }
+        onSubmit(datas);
+    };
 
     return (
         <div>
@@ -106,7 +97,7 @@ const ZoomAndCentering: FC<ZoomAndCenteringProps> = ({ community }) => {
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
                         <Button
                             className={fr.cx("fr-my-1v")}
-                            priority={"tertiary no outline"}
+                            priority={"secondary"}
                             onClick={() => {
                                 ExtentDialogModal.open();
                             }}
@@ -114,6 +105,7 @@ const ZoomAndCentering: FC<ZoomAndCenteringProps> = ({ community }) => {
                             {t("zoom.manage_extent")}
                         </Button>
                     </div>
+                    {extent && <DisplayExtent extent={extent} onRemove={() => setFormValue("extent", null)} />}
                 </div>
                 <div className={fr.cx("fr-col-7")}>
                     <RMap
@@ -129,6 +121,21 @@ const ZoomAndCentering: FC<ZoomAndCenteringProps> = ({ community }) => {
                         ExtentDialogModal.close();
                     }}
                 />
+            </div>
+            <div className={fr.cx("fr-grid-row", "fr-grid-row--right")}>
+                <Button priority={mode === "creation" ? "secondary" : "primary"} onClick={handleSubmit(onSubmitForm)}>
+                    {tCommon("save")}
+                </Button>
+                {mode === "creation" && (
+                    <Button
+                        priority="primary"
+                        nativeButtonProps={{
+                            type: "submit",
+                        }}
+                    >
+                        {tCommon("continue")}
+                    </Button>
+                )}
             </div>
         </div>
     );

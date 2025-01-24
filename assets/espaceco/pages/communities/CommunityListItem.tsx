@@ -27,13 +27,12 @@ const CommunityListItem: FC<CommunityListItemProps> = ({ className, community })
     }, [community, t, tCommon]);
 
     const infos = useMemo(() => {
-        if ((community.description === null || community.description === undefined) && (community.about === null || community.about === undefined)) {
+        if (!community.description) {
             return null;
         }
 
         const children: ReactNode[] = [];
         if (community.description) children.push(<p dangerouslySetInnerHTML={{ __html: community.description }} />);
-        if (community.about) children.push(<p dangerouslySetInnerHTML={{ __html: community.about }} />);
         return <div style={{ backgroundColor: fr.colors.decisions.background.default.grey.default }}>{children}</div>;
     }, [community]);
 

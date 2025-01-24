@@ -3,7 +3,7 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Tabs from "@codegouvfr/react-dsfr/Tabs";
 import { useQuery } from "@tanstack/react-query";
-import { FC, useState } from "react";
+import { FC, useMemo, useState } from "react";
 
 import { CommunityResponseDTO } from "../../../@types/espaceco";
 import AppLayout from "../../../components/Layout/AppLayout";
@@ -20,6 +20,7 @@ import Layer from "./management/Layer";
 import Members from "./management/Members";
 import Reports from "./management/Reports";
 import ZoomAndCentering from "./management/ZoomAndCentering";
+import EditTools from "./management/EditTools";
 
 type ManageCommunityProps = {
     communityId: number;
@@ -38,6 +39,13 @@ const ManageCommunity: FC<ManageCommunityProps> = ({ communityId }) => {
     });
 
     const [selectedTabId, setSelectedTabId] = useState("tab1");
+
+    const forbidden = useMemo(() => {
+        if (!communityQuery.data) {
+            return false;
+        }
+        return communityQuery.data.active === false;
+    }, [communityQuery.data]);
 
     return (
         <AppLayout
@@ -67,6 +75,8 @@ const ManageCommunity: FC<ManageCommunityProps> = ({ communityId }) => {
                 />
             ) : communityQuery.isLoading ? (
                 <LoadingText message={t("loading")} />
+            ) : forbidden ? (
+                <Alert severity="error" closable={false} title={t("forbidden_access")} />
             ) : (
                 communityQuery.data && (
                     <div className={fr.cx("fr-container", "fr-py-2w")}>
@@ -90,9 +100,13 @@ const ManageCommunity: FC<ManageCommunityProps> = ({ communityId }) => {
                                         case "tab1":
                                             return <Description mode={"edition"} community={communityQuery.data} onSubmit={(datas) => console.log(datas)} />;
                                         case "tab3":
-                                            return <ZoomAndCentering community={communityQuery.data} />;
+                                            return (
+                                                <ZoomAndCentering mode={"edition"} community={communityQuery.data} onSubmit={(datas) => console.log(datas)} />
+                                            );
                                         case "tab4":
                                             return <Layer />;
+                                        case "tab5":
+                                            return <EditTools mode={"edition"} community={communityQuery.data} onSubmit={(datas) => console.log(datas)} />;
                                         case "tab6":
                                             return <Reports community={communityQuery.data} />;
                                         case "tab7":

@@ -1,4 +1,17 @@
-import { BasicRecipients, DocumentDTO, EmailPlannerDTO, GridDTO, ReportStatusesDTO, SharedGeorem, SharedThemesDTO, ThemeDTO, UserDTO } from "./espaceco";
+import { Extent } from "ol/extent";
+import {
+    BasicRecipients,
+    DocumentDTO,
+    EmailPlannerDTO,
+    GridDTO,
+    LayerToolsType,
+    ReportStatusesDTO,
+    RoleType,
+    SharedGeorem,
+    SharedThemesDTO,
+    ThemeDTO,
+    UserDTO,
+} from "./espaceco";
 
 export type AtLeast<T, K extends keyof T> = Partial<T> & Pick<T, K>;
 
@@ -93,6 +106,21 @@ export type UserMe = {
     communities_member: CommunityMemberDetailed[];
 };
 
+export type LayerGeometryType = "Point" | "MultiPoint" | "LineString" | "MultiLineString" | "Polygon" | "MultiPolygon";
+
+export type CommunityLayer = {
+    table: number;
+    database: number;
+    role: RoleType;
+    snapto: string | null;
+    tools: LayerToolsType[] | null;
+    database_name: string;
+    database_title: string;
+    table_name: string;
+    table_title: string;
+    geometry_type: LayerGeometryType;
+};
+
 /* FORMULAIRES */
 export type CommunityFormMode = "creation" | "edition";
 
@@ -109,11 +137,58 @@ export type OpenWithEmailType = {
 export type DescriptionFormType = {
     name: string;
     description?: string;
+    editorial?: string;
     keywords?: string[];
     logo?: unknown | null;
     listed: boolean;
     membershipRequest: MembershipRequestType;
     openWithEmail: OpenWithEmailType[];
+};
+
+/* Les fonctionnalités (outils) */
+export type CommunityToolsType = "navigation" | "measure" | "report" | "other";
+
+export const navigationTools = [
+    "savePositions",
+    "locateControl",
+    "zoomControl",
+    "rotateControl",
+    "overviewMapControl",
+    "searchAddress",
+    "searchLonlat",
+] as const;
+export type NavigationToolsType = (typeof navigationTools)[number];
+
+export const otherTools = ["search", "print"] as const;
+export type OtherToolsType = (typeof otherTools)[number];
+
+export const reportTools = ["georem"] as const;
+export type ReportToolsType = (typeof reportTools)[number];
+
+export const measureTools = ["measureDistance", "measureArea", "measureAzimut"] as const;
+export type MeasureToolsType = (typeof measureTools)[number];
+
+/*************************************************************************************/
+
+// LES FORMULAIRES
+
+export type ZoomAndCenteringFormType = {
+    position: number[];
+    zoom: number;
+    zoomMin: number;
+    zoomMax: number;
+    extent?: Extent | null;
+};
+
+/* export type ToolsFormType = {
+    navigationTools?: NavigationToolsType[];
+    reportTools?: ReportToolsType[];
+    measureTools?: MeasureToolsType[];
+    otherTools?: OtherToolsType[];
+}; */
+
+export type ToolsFormType = {
+    functionalities: string[];
 };
 
 export type ReportFormType = {
