@@ -186,7 +186,7 @@ const DashboardPro = () => {
 
             {configDatastore && (
                 <>
-                    <h2>Configuration</h2>
+                    <h2>{t("configuration")}</h2>
                     <div key={configDatastore.datastore} className={fr.cx("fr-col-12", "fr-col-sm-6", "fr-col-md-4", "fr-col-lg-3")}>
                         <Tile linkProps={routes.config_alerts().link} grey={true} title={t("alerts")} />
                     </div>
