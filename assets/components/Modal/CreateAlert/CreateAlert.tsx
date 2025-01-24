@@ -11,10 +11,10 @@ import isURL from "validator/lib/isURL";
 
 import { useTranslation } from "../../../i18n";
 import { IAlert } from "../../../@types/alert";
-import DatePicker from "../../Input/DatePicker";
 
 import PreviewAlert from "./PreviewAlert";
 import { ModalProps } from "@codegouvfr/react-dsfr/Modal";
+import { formatDateTimeLocal } from "../../../utils";
 
 const date = new Date();
 export const alertSchema = yup.object({
@@ -25,10 +25,7 @@ export const alertSchema = yup.object({
         label: yup.string(),
         url: yup.string().test("check-url", "La chaîne doit être une url valide", (value) => value === "" || isURL(value)),
     }),
-    severity: yup
-        .string()
-        .oneOf(["info", "warning", "alert", "weather-orange", "weather-purple", "weather-red", "kidnapping", "cyberattack", "witness", "attack"])
-        .required("Sévérité requise"),
+    severity: yup.string().oneOf(["info", "warning", "alert"]).required("Sévérité requise"),
     details: yup.string().required("Détails requis"),
     date: yup.date().required("Date requise"),
     visibility: yup.object({
@@ -42,7 +39,7 @@ export const alertSchema = yup.object({
 const severityOptions = [
     { value: "info", label: "info" },
     { value: "warning", label: "warning" },
-    { value: "error", label: "error" },
+    { value: "alert", label: "alert" },
 ];
 
 interface CreateAlertProps {
@@ -145,25 +142,28 @@ const CreateAlert: FC<CreateAlertProps> = (props) => {
                                 stateRelatedMessage={errors?.severity?.message?.toString()}
                             />
                         </div>
-                        <Controller
-                            control={control}
-                            name="date"
-                            render={({ field: { onChange, value } }) => (
-                                <DatePicker
-                                    label={t("alert.date")}
-                                    value={value}
-                                    minDate={date}
-                                    onChange={onChange}
-                                    state={errors.date ? "error" : "default"}
-                                    stateRelatedMessage={errors.date?.message?.toString()}
-                                    className={fr.cx("fr-col-12", "fr-col-sm-6")}
-                                    // @ts-expect-error ignore
-                                    slotProps={{ field: { variant: "filled" } }}
-                                />
-                            )}
-                        />
+                        <div className={fr.cx("fr-col-12", "fr-col-sm-6")}>
+                            <Controller
+                                control={control}
+                                name="date"
+                                render={({ field: { onChange, value } }) => (
+                                    <Input
+                                        label={t("alert.date")}
+                                        nativeInputProps={{
+                                            value: formatDateTimeLocal(value),
+                                            min: formatDateTimeLocal(date),
+                                            type: "datetime-local",
+                                            onChange,
+                                        }}
+                                        state={errors.date ? "error" : "default"}
+                                        stateRelatedMessage={errors.date?.message?.toString()}
+                                    />
+                                )}
+                            />
+                        </div>
                     </div>
                     <Input
+                        className="fr-mt-3w"
                         label={t("alert.details")}
                         nativeInputProps={{
                             ...register("details"),

@@ -19,7 +19,7 @@ const replaceFile = (datastoreId: string, annexeId: string, file: File) => {
     formData.append("file", file);
 
     const url = SymfonyRouting.generate("cartesgouvfr_api_annexe_replace_file", { datastoreId, annexeId });
-    return jsonFetch<Annexe>(url, { method: "PUT" }, formData, true, true);
+    return jsonFetch<Annexe>(url, { method: "POST" }, formData, true, true);
 };
 
 const addThumbnail = (datastoreId: string, data: object) => {
