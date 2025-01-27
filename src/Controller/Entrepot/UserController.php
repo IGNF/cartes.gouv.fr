@@ -129,7 +129,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
 
         try {
             $body = array_filter((array) $dto, function ($value, $key) use ($filter) {
-                return !(null === $value || '' === $value || in_array($key, $filter));
+                return !(null === $value || ('' === $value && !in_array($key, ['user_agent', 'referer'])) || in_array($key, $filter));
             }, ARRAY_FILTER_USE_BOTH);
 
             $key = $this->userApiService->getMyKey($keyId);
