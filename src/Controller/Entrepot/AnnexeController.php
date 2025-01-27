@@ -76,7 +76,7 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
         }
     }
 
-    #[Route('/{annexeId}', name: 'replace_file', methods: ['PUT'])]
+    #[Route('/{annexeId}', name: 'replace_file', methods: ['POST'])]
     public function replaceFile(string $datastoreId, string $annexeId, Request $request): JsonResponse
     {
         try {

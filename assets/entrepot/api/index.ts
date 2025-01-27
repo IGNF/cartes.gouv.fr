@@ -18,6 +18,7 @@ import style from "./style";
 import metadata from "./metadata";
 import statics from "./statics";
 import geonetwork from "./geonetwork";
+import alerts from "./alerts";
 
 const api = {
     contact,
@@ -39,6 +40,7 @@ const api = {
     style,
     metadata,
     statics,
+    alerts,
     // epsg.io
     epsg,
     geonetwork,

@@ -19,10 +19,14 @@ import locationFranceSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms
 import mapSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/map/map.svg";
 import systemSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/system/system.svg";
 import homeImgUrl from "../img/home/home.png";
+import { useAlertStore } from "../stores/AlertStore";
+import { useAlert } from "../hooks/useAlert";
 
 const Home = () => {
     const { params } = useRoute();
     const user = useAuthStore((state) => state.user);
+    const alert = useAlertStore(({ alerts }) => alerts.find((alert) => alert.visibility.homepage));
+    const alertProps = useAlert(alert);
 
     useEffect(() => {
         if (user !== null && params?.["authentication_failed"] !== undefined) {
@@ -34,22 +38,8 @@ const Home = () => {
         }
     }, [params, user]);
 
-    const infoBannerMsg = (
-        <>
-            Devenez acteur de cartes.gouv.fr et co-construisez les fonctionnalités en participant à des ateliers thématiques.{" "}
-            <a
-                href="https://analytics-eu.clickdimensions.com/ignfr-agj1s/pages/dbg2dmemee4wanorp13w.html?PageId=0eb6b1752661ef11bfe3000d3aba75df"
-                target="_blank"
-                rel="noreferrer"
-                title="Formulaire d’inscription à des ateliers cartes.gouv.fr - Ouvre une nouvelle fenêtre"
-            >
-                Inscrivez-vous
-            </a>
-        </>
-    );
-
     return (
-        <AppLayout documentTitle="Le service public des cartes et données du territoire" infoBannerMsg={infoBannerMsg}>
+        <AppLayout documentTitle="Le service public des cartes et données du territoire" infoBannerMsg={alertProps?.title}>
             {params?.["authentication_failed"] === 1 && (
                 <Alert
                     severity="error"
