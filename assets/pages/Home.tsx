@@ -39,7 +39,7 @@ const Home = () => {
     }, [params, user]);
 
     return (
-        <AppLayout documentTitle="Le service public des cartes et données du territoire" infoBannerMsg={alertProps?.title}>
+        <AppLayout documentTitle="Le service public des cartes et données du territoire" noticeProps={alertProps}>
             {params?.["authentication_failed"] === 1 && (
                 <Alert
                     severity="error"

@@ -15,6 +15,7 @@ import { IAlert } from "../../../@types/alert";
 import PreviewAlert from "./PreviewAlert";
 import { ModalProps } from "@codegouvfr/react-dsfr/Modal";
 import { formatDateTimeLocal } from "../../../utils";
+import MarkdownEditor from "../../Input/MarkdownEditor";
 
 const date = new Date();
 export const alertSchema = yup.object({
@@ -162,7 +163,7 @@ const CreateAlert: FC<CreateAlertProps> = (props) => {
                             />
                         </div>
                     </div>
-                    <Input
+                    {/* <Input
                         className="fr-mt-3w"
                         label={t("alert.details")}
                         nativeInputProps={{
@@ -170,6 +171,21 @@ const CreateAlert: FC<CreateAlertProps> = (props) => {
                         }}
                         state={errors.details ? "error" : "default"}
                         stateRelatedMessage={errors?.details?.message?.toString()}
+                    /> */}
+                    <Controller
+                        control={control}
+                        name="details"
+                        render={({ field: { onChange, value } }) => (
+                            <MarkdownEditor
+                                className="fr-mt-3w"
+                                label={t("alert.details")}
+                                hintText={t("alert.details_hint")}
+                                state={errors.details ? "error" : "default"}
+                                stateRelatedMessage={errors?.details?.message?.toString()}
+                                value={value}
+                                onChange={onChange}
+                            />
+                        )}
                     />
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
                         <div className={fr.cx("fr-col-12", "fr-col-sm-6")}>

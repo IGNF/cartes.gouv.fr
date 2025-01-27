@@ -24,6 +24,7 @@ const { i18n } = declareComponentKeys<
     | "alert.linkLabel"
     | "alert.date"
     | "alert.details"
+    | "alert.details_hint"
     | "alert.visible"
     | "alert.homepage"
     | "alert.contact"
@@ -57,6 +58,7 @@ export const AlertsFrTranslations: Translations<"fr">["alerts"] = {
     "alert.severity": "Sévérité",
     "alert.date": "Date",
     "alert.details": "Détails",
+    "alert.details_hint": "Détails ne s'affichant que sur la page niveau de service",
     "alert.visible": "Visible sur",
     "alert.homepage": "la page d'accueil",
     "alert.contact": "la page de contact",
@@ -89,6 +91,7 @@ export const AlertsEnTranslations: Translations<"en">["alerts"] = {
     "alert.severity": undefined,
     "alert.date": undefined,
     "alert.details": undefined,
+    "alert.details_hint": undefined,
     "alert.visible": undefined,
     "alert.homepage": undefined,
     "alert.contact": undefined,

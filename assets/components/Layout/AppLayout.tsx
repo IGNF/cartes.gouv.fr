@@ -4,7 +4,7 @@ import { MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation";
 import { Notice, addNoticeTranslations } from "@codegouvfr/react-dsfr/Notice";
 import { SkipLinks } from "@codegouvfr/react-dsfr/SkipLinks";
 import { useQuery } from "@tanstack/react-query";
-import { FC, PropsWithChildren, ReactNode, memo, useMemo } from "react";
+import { FC, PropsWithChildren, memo, useMemo } from "react";
 
 import { ConsentBannerAndConsentManagement } from "../../config/consentManagement";
 import { defaultNavItems } from "../../config/navItems/navItems";
@@ -18,6 +18,7 @@ import SessionExpiredAlert from "../Utils/SessionExpiredAlert";
 import SnackbarMessage from "../Utils/SnackbarMessage";
 import AppFooter from "./AppFooter";
 import AppHeader from "./AppHeader";
+import { IUseAlert } from "../../hooks/useAlert";
 
 const HiddenElements: FC = () => {
     const { t } = useTranslation("Common");
@@ -45,10 +46,10 @@ type AppLayoutProps = {
     navItems?: MainNavigationProps.Item[];
     documentTitle?: string;
     customBreadcrumbProps?: BreadcrumbProps;
-    infoBannerMsg?: ReactNode;
+    noticeProps?: IUseAlert;
 };
 
-const AppLayout: FC<PropsWithChildren<AppLayoutProps>> = ({ children, navItems, documentTitle, customBreadcrumbProps, infoBannerMsg }) => {
+const AppLayout: FC<PropsWithChildren<AppLayoutProps>> = ({ children, navItems, documentTitle, customBreadcrumbProps, noticeProps }) => {
     useDocumentTitle(documentTitle);
     const { t } = useTranslation("navItems");
 
@@ -79,7 +80,7 @@ const AppLayout: FC<PropsWithChildren<AppLayoutProps>> = ({ children, navItems, 
             <AppHeader navItems={navItems} />
             <main id="main" role="main">
                 {/* doit être le premier élément atteignable après le lien d'évitement (Accessibilité) : https://www.systeme-de-design.gouv.fr/elements-d-interface/composants/bandeau-d-information-importante */}
-                {infoBannerMsg && <Notice title={infoBannerMsg} isClosable={true} />}
+                {noticeProps && <Notice isClosable {...noticeProps} />}
 
                 <div className={fr.cx("fr-container", "fr-my-2w")}>
                     {breadcrumbProps && <Breadcrumb {...breadcrumbProps} />}
