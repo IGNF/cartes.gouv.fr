@@ -38,6 +38,9 @@ class CswMetadata
     /** @var array<CswMetadataLayer> */
     public ?array $layers;
 
+    /** @var ?array<string,float> */
+    public ?array $bbox;
+
     /** @var array<CswStyleFile> */
     public ?array $styleFiles;
 
@@ -50,26 +53,24 @@ class CswMetadata
     public ?string $thumbnailUrl;
     public ?string $frequencyCode;
 
-    public static function createEmpty(): self
+    public function __construct()
     {
-        $empty = new self();
-        $empty->hierarchyLevel = CswHierarchyLevel::Series;
-        $empty->language = CswLanguage::default();
-        $empty->charset = 'utf8';
-        $empty->thumbnailUrl = null;
-        $empty->resolution = null;
-        $empty->frequencyCode = 'unknown';
-        $empty->resourceGenealogy = '';
+        $this->hierarchyLevel = CswHierarchyLevel::Series;
+        $this->language = CswLanguage::default();
+        $this->charset = 'utf8';
+        $this->thumbnailUrl = null;
+        $this->resolution = null;
+        $this->frequencyCode = 'unknown';
+        $this->resourceGenealogy = '';
 
-        $empty->topicCategories = [];
-        $empty->inspireKeywords = [];
-        $empty->freeKeywords = [];
-        $empty->layers = [];
-        $empty->styleFiles = [];
-        $empty->capabilitiesFiles = [];
-        $empty->documents = [];
-
-        return $empty;
+        $this->topicCategories = [];
+        $this->inspireKeywords = [];
+        $this->freeKeywords = [];
+        $this->layers = [];
+        $this->bbox = null;
+        $this->styleFiles = [];
+        $this->capabilitiesFiles = [];
+        $this->documents = [];
     }
 
     public function __clone()
