@@ -6,6 +6,7 @@ import LoadingIcon from "../../components/Utils/LoadingIcon";
 import Main from "../../components/Layout/Main";
 import { useAlertStore } from "../../stores/AlertStore";
 import { IAlert } from "../../@types/alert";
+import MarkdownRenderer from "../../components/Utils/MarkdownRenderer";
 
 const severityMap = {
     alert: "error",
@@ -33,7 +34,12 @@ const ServiceStatus = () => {
                 </div>
             </div>
             {alerts.map((alert) => (
-                <Alert key={alert.id} title={alert.title} severity={getAlertSeverity(alert.severity)} description={alert.details} />
+                <Alert
+                    key={alert.id}
+                    title={alert.title}
+                    severity={getAlertSeverity(alert.severity)}
+                    description={<MarkdownRenderer content={alert.details} />}
+                />
             ))}
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-12")}>

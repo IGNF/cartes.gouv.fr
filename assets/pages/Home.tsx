@@ -39,7 +39,7 @@ const Home = () => {
 
     return (
         <Main
-            infoBannerMsg={alertProps?.title}
+            noticeProps={alertProps}
             title="Le service public des cartes et données du territoire"
         >
             {params?.["authentication_failed"] === 1 && (

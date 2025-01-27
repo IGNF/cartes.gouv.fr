@@ -1,32 +1,31 @@
-import { fr } from "@codegouvfr/react-dsfr";
-
 import { IAlert } from "../@types/alert";
 import { useTranslation } from "../i18n";
-import { ReactNode } from "react";
+import { NoticeProps } from "@codegouvfr/react-dsfr/Notice";
 
-export function useAlert(alert?: IAlert): { isClosable: true; title: NonNullable<ReactNode> } | undefined {
+export type IUseAlert = Pick<NoticeProps, "title" | "description" | "link" | "severity"> & {
+    severity?: "info" | "warning" | "alert";
+};
+
+export function useAlert(alert?: IAlert): IUseAlert | undefined {
     const { t } = useTranslation("alerts");
     if (!alert) {
         return undefined;
     }
-    const title = (
-        <>
-            {alert.title} {alert.description}
-            {alert.link.label && (
-                <>
-                    {" "}
-                    <a
-                        className={fr.cx("fr-notice__link")}
-                        href={alert.link.url}
-                        target="_blank"
-                        rel="noreferrer external"
-                        title={`${alert.link.label} - ${t("newWindow")}`}
-                    >
-                        {alert.link.label}
-                    </a>
-                </>
-            )}
-        </>
-    );
-    return { isClosable: true, title };
+    const {
+        description,
+        link: { label, url },
+        severity,
+        title,
+    } = alert;
+    return {
+        description,
+        link: label
+            ? {
+                  linkProps: { href: url, target: "_blank", rel: "noreferrer external", title: `${label} - ${t("newWindow")}` },
+                  text: label,
+              }
+            : undefined,
+        severity,
+        title,
+    };
 }

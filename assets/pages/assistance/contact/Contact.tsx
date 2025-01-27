@@ -80,7 +80,7 @@ const Contact = () => {
     };
 
     return (
-        <Main title={t("title")} infoBannerMsg={alertProps?.title}>
+        <Main title={t("title")} noticeProps={alertProps}>
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
                     <h1>{t("title")}</h1>

@@ -318,9 +318,9 @@ export default Alerts;
 
 /**
  * TODO
- * - detail as rich text (markdown)
- * - use new Notice component when available in react-dsfr
+ * - RSS
+ * - check user rights
+ * - make const id configurable (CONFIG_COMMUNITY_ID)
  * - problem with browser cache (use `cache: "no-store"` temporary)
- * - make const id configurable?
  * - menu integration?
  */

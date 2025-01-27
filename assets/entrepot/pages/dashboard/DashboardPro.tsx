@@ -60,24 +60,21 @@ const DashboardPro = () => {
         mutate(undefined, { onSuccess: () => routes.datasheet_list({ datastoreId: datastoreId }).push() });
     };
 
+    const noticeProps = {
+        title: "Votre avis compte ! Participez à notre questionnaire pour nous aider à améliorer la fonctionnalité d’alimentation et de diffusion. Merci pour votre contribution précieuse.",
+        link: {
+            linkProps: {
+                href: "https://analytics-eu.clickdimensions.com/ignfr-agj1s/pages/dhzzawfjee4wanoryvba.html?PageId=01d97c744961ef11bfe3000d3ab6156c",
+                target: "_blank",
+                rel: "noreferrer",
+                title: "Questionnaire sur la fonctionnalité alimentation et diffusion - Ouvre une nouvelle fenêtre",
+            },
+            text: "Participer",
+        },
+    };
+
     return (
-        <Main
-            infoBannerMsg={
-                <>
-                    Votre avis compte ! Participez à notre questionnaire pour nous aider à améliorer la fonctionnalité d’alimentation et de diffusion. Merci
-                    pour votre contribution précieuse.{" "}
-                    <a
-                        href="https://analytics-eu.clickdimensions.com/ignfr-agj1s/pages/dhzzawfjee4wanoryvba.html?PageId=01d97c744961ef11bfe3000d3ab6156c"
-                        target="_blank"
-                        rel="noreferrer"
-                        title="Questionnaire sur la fonctionnalité alimentation et diffusion - Ouvre une nouvelle fenêtre"
-                    >
-                        Participer
-                    </a>
-                </>
-            }
-            title={t("document_title")}
-        >
+        <Main noticeProps={noticeProps} title={t("document_title")}>
             <h1>Bienvenue {user?.first_name ?? user?.user_name}</h1>
 
             <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mb-3w")}>
