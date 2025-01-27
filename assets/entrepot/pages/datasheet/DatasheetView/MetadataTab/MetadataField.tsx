@@ -1,6 +1,8 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import MDEditor from "@uiw/react-md-editor";
 import { CSSProperties, FC, ReactNode } from "react";
+import "react-dsfr-tiptap/index.css";
+
+import MarkdownRenderer from "../../../../../components/Utils/MarkdownRenderer";
 
 type MetadataFieldProps = {
     title?: ReactNode;
@@ -32,14 +34,7 @@ const MetadataField: FC<MetadataFieldProps> = ({ title, content, hintText, markd
             )}
 
             {markdown && typeof content === "string" ? (
-                <MDEditor.Markdown
-                    className={fr.cx()}
-                    source={content}
-                    style={customStyle}
-                    components={{
-                        a: (props) => <a target="_blank" rel="noreferrer" {...props} />,
-                    }}
-                />
+                <MarkdownRenderer content={content} style={customStyle} />
             ) : typeof content === "string" ? (
                 <p className={fr.cx("fr-m-0")}>{content}</p>
             ) : (
