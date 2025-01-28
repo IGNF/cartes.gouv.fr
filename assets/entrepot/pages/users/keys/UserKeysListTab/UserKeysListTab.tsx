@@ -21,6 +21,7 @@ import { CartesApiException } from "../../../../../modules/jsonFetch";
 import { routes } from "../../../../../router/router";
 import { useSnackbarStore } from "../../../../../stores/SnackbarStore";
 import api from "../../../../api";
+import UserKeyLink from "./UserKeyLink";
 
 type UserKeysListTabProps = {
     keys: UserKeyDetailedWithAccessesResponseDto[] | undefined;
@@ -138,11 +139,16 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
                                                               : 0;
                                                     })
                                                     .map((access) => (
-                                                        <li key={access.offering._id}>
+                                                        <li key={access.offering._id} className={fr.cx("fr-mb-5v")}>
                                                             {access.offering.layer_name}
                                                             <Badge className={fr.cx("fr-ml-2v")} noIcon={true} severity={"info"}>
                                                                 {access.offering.type}
                                                             </Badge>
+                                                            <UserKeyLink
+                                                                permissionId={access.permission._id}
+                                                                offeringId={access.offering._id}
+                                                                hash={(accessKey.type_infos as HashInfoDto).hash}
+                                                            />
                                                         </li>
                                                     ))}
                                             </ul>
