@@ -80,7 +80,7 @@ const PyramidVectorListItem: FC<PyramidVectorListItemProps> = ({ datasheetName, 
                 badge={<StoredDataStatusBadge status={pyramid.status} />}
                 buttonTitle={t("show_linked_datas")}
                 date={pyramid?.last_event?.date}
-                isSample
+                isSample={pyramid?.tags?.is_sample === "true"}
                 menuListItems={[
                     {
                         text: t("show_details"),
