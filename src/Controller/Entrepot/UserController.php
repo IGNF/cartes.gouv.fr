@@ -19,7 +19,7 @@ use Symfony\Component\Routing\Annotation\Route;
     '/api/users',
     name: 'cartesgouvfr_api_user_',
     options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()'
+    // condition: 'request.isXmlHttpRequest()'
 )]
 class UserController extends AbstractController implements ApiControllerInterface
 {
@@ -78,6 +78,14 @@ class UserController extends AbstractController implements ApiControllerInterfac
         $permissions = $this->userApiService->getMyPermissions();
 
         return $this->json($permissions);
+    }
+
+    #[Route('/me/permissions/{permissionId}', name: 'permission')]
+    public function getPermission(string $permissionId): JsonResponse
+    {
+        $permission = $this->userApiService->getPermission($permissionId);
+
+        return $this->json($permission);
     }
 
     #[Route('/add_key', name: 'add_key', methods: ['POST'],
