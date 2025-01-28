@@ -254,6 +254,9 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                             {datasheetQuery?.data?.pyramid_vector_list?.length && datasheetQuery?.data?.pyramid_vector_list.length > 0 ? (
                                 <li>{datasheetQuery?.data?.pyramid_vector_list.length} pyramide(s) de tuiles vectorielles</li>
                             ) : null}
+                            {datasheetQuery?.data?.pyramid_raster_list?.length && datasheetQuery?.data?.pyramid_raster_list.length > 0 ? (
+                                <li>{datasheetQuery?.data?.pyramid_raster_list.length} pyramide(s) de tuiles raster</li>
+                            ) : null}
                             {datasheetQuery.data?.service_list?.length && datasheetQuery.data.service_list.length > 0 ? (
                                 <li>{datasheetQuery.data?.service_list.length} service(s) publié(s)</li>
                             ) : null}
