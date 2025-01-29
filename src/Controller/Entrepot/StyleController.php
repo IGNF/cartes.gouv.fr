@@ -3,6 +3,8 @@
 namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\CommonTags;
+use App\Constants\EntrepotApi\ConfigurationMetadataTypes;
+use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Controller\ApiControllerInterface;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
@@ -20,7 +22,9 @@ use Symfony\Component\Uid\Uuid;
 
 #[Route(
     '/api/datastores/{datastoreId}/style',
-    name: 'cartesgouvfr_api_style_'
+    name: 'cartesgouvfr_api_style_',
+    options: ['expose' => true],
+    condition: 'request.isXmlHttpRequest()'
 )]
 class StyleController extends AbstractController implements ApiControllerInterface
 {
@@ -72,6 +76,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             $this->_addUrls($datastore, $styles);
 
             $this->updateStyles($datastoreId, $configuration['_id'], $styles);
+            $this->updateStylesTmsMetadata($datastoreId, $configuration, $offeringId, $styles);
 
             try {
                 $this->cartesMetadataApiService->updateStyleFiles($datastoreId, $datasheetName);
@@ -135,6 +140,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             }
 
             $this->updateStyles($datastoreId, $configuration['_id'], $styles);
+            $this->updateStylesTmsMetadata($datastoreId, $configuration, $offeringId, $styles);
 
             try {
                 $this->cartesMetadataApiService->updateStyleFiles($datastoreId, $datasheetName);
@@ -268,5 +274,59 @@ class StyleController extends AbstractController implements ApiControllerInterfa
     {
         $extra = ['styles' => $styles];
         $this->configurationApiService->modify($datastoreId, $configurationId, ['extra' => $extra]);
+    }
+
+    /**
+     * @param array<mixed> $configuration
+     * @param array<mixed> $styles
+     */
+    private function updateStylesTmsMetadata(string $datastoreId, array $configuration, string $offeringId, array $styles): void
+    {
+        if (ConfigurationTypes::WMTSTMS !== $configuration['type']) {
+            return;
+        }
+
+        $requestBody = [
+            'type' => $configuration['type'],
+            'name' => $configuration['name'],
+            'type_infos' => [
+                'title' => $configuration['type_infos']['title'],
+                'abstract' => $configuration['type_infos']['abstract'],
+                'keywords' => $configuration['type_infos']['keywords'],
+                'used_data' => $configuration['type_infos']['used_data'],
+            ],
+        ];
+
+        if (isset($configuration['attribution']['title']) && isset($configuration['attribution']['url'])) {
+            $requestBody['attribution'] = [
+                'title' => $configuration['attribution']['title'],
+                'url' => $configuration['attribution']['url'],
+            ];
+        }
+
+        $styleUrlRegex = '/^https?:\/\/[^\s\/$.?#].[^\s]*\/style\/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\.json$/';
+
+        $metadataList = $configuration['metadata'];
+
+        // suppression des fichiers de style venant de cartes.gouv.fr (voir styleUrlRegex)
+        $metadataList = array_values(array_filter($metadataList, function ($metadata) use ($styleUrlRegex) {
+            return !('application/json' === $metadata['format'] && preg_match($styleUrlRegex, $metadata['url']));
+        }));
+
+        // ajout des fichiers de style à jour dans la metadata de la configuration
+        foreach ($styles as $style) {
+            foreach ($style['layers'] as $layer) {
+                $metadataList[] = [
+                    'format' => 'application/json',
+                    'url' => $layer['url'],
+                    'type' => ConfigurationMetadataTypes::Other,
+                ];
+            }
+        }
+
+        $requestBody['metadata'] = $metadataList;
+
+        $this->configurationApiService->replace($datastoreId, $configuration['_id'], $requestBody);
+        $this->configurationApiService->syncOffering($datastoreId, $offeringId);
     }
 }
