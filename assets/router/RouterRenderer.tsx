@@ -66,6 +66,8 @@ const ServiceView = lazy(() => import("../entrepot/pages/service/view/ServiceVie
 
 const AccessesRequest = lazy(() => import("../entrepot/pages/accesses-request/AccessesRequest"));
 
+const ConfigAlerts = lazy(() => import("../entrepot/pages/config/Alerts"));
+
 const EspaceCoCommunityList = lazy(() => import("../espaceco/pages/communities/Communities"));
 
 const RouterRenderer: FC = () => {
@@ -242,6 +244,8 @@ const RouterRenderer: FC = () => {
                 );
             case "datastore_service_view":
                 return <ServiceView datastoreId={route.params.datastoreId} offeringId={route.params.offeringId} datasheetName={route.params.datasheetName} />;
+            case "config_alerts":
+                return <ConfigAlerts />;
             case "espaceco_community_list":
                 return <EspaceCoCommunityList />;
             default:

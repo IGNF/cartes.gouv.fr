@@ -22,6 +22,7 @@ import avatarSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/digital
 import mailSendSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/digital/mail-send.svg";
 import humanCoopSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/environment/human-cooperation.svg";
 import padlockSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/system/padlock.svg";
+import { CommunityMemberDtoRightsEnum } from "../../../@types/entrepot";
 
 const DashboardPro = () => {
     const { t } = useTranslation("DashboardPro");
@@ -31,6 +32,9 @@ const DashboardPro = () => {
     const user = useAuthStore((state) => state.user);
     const setUser = useAuthStore((state) => state.setUser);
     const isApiEspaceCoDefined = useApiEspaceCoStore((state) => state.isUrlDefined);
+
+    const configDatastore = user?.communities_member?.find((community) => community.community?.datastore === api.alerts.datastoreId);
+    const canShowConfig = configDatastore?.rights?.includes(CommunityMemberDtoRightsEnum.ANNEX);
 
     const userQuery = useQuery<CartesUser, CartesApiException>({
         queryKey: RQKeys.user_me(),
@@ -62,23 +66,21 @@ const DashboardPro = () => {
         mutate(undefined, { onSuccess: () => routes.datasheet_list({ datastoreId: datastoreId }).push() });
     };
 
-    const infoBannerMsg = (
-        <>
-            Votre avis compte ! Participez à notre questionnaire pour nous aider à améliorer la fonctionnalité d’alimentation et de diffusion. Merci pour votre
-            contribution précieuse.{" "}
-            <a
-                href="https://analytics-eu.clickdimensions.com/ignfr-agj1s/pages/dhzzawfjee4wanoryvba.html?PageId=01d97c744961ef11bfe3000d3ab6156c"
-                target="_blank"
-                rel="noreferrer"
-                title="Questionnaire sur la fonctionnalité alimentation et diffusion - Ouvre une nouvelle fenêtre"
-            >
-                Participer
-            </a>
-        </>
-    );
+    const noticeProps = {
+        title: "Votre avis compte ! Participez à notre questionnaire pour nous aider à améliorer la fonctionnalité d’alimentation et de diffusion. Merci pour votre contribution précieuse.",
+        link: {
+            linkProps: {
+                href: "https://analytics-eu.clickdimensions.com/ignfr-agj1s/pages/dhzzawfjee4wanoryvba.html?PageId=01d97c744961ef11bfe3000d3ab6156c",
+                target: "_blank",
+                rel: "noreferrer",
+                title: "Questionnaire sur la fonctionnalité alimentation et diffusion - Ouvre une nouvelle fenêtre",
+            },
+            text: "Participer",
+        },
+    };
 
     return (
-        <AppLayout navItems={navItems} documentTitle={t("document_title")} infoBannerMsg={infoBannerMsg}>
+        <AppLayout navItems={navItems} documentTitle={t("document_title")} noticeProps={noticeProps}>
             <h1>Bienvenue {user?.first_name ?? user?.user_name}</h1>
 
             <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mb-3w")}>
@@ -160,7 +162,7 @@ const DashboardPro = () => {
                 )}
             </div>
 
-            <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
+            <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mb-3w")}>
                 <div className={fr.cx("fr-col-12", "fr-col-sm-6")}>
                     <Tile
                         linkProps={routes.datastore_create_request().link}
@@ -182,6 +184,15 @@ const DashboardPro = () => {
                     />
                 </div>
             </div>
+
+            {canShowConfig && (
+                <>
+                    <h2>{t("configuration")}</h2>
+                    <div key={configDatastore?.community?.datastore} className={fr.cx("fr-col-12", "fr-col-sm-6", "fr-col-md-4", "fr-col-lg-3")}>
+                        <Tile linkProps={routes.config_alerts().link} grey={true} title={t("alerts")} />
+                    </div>
+                </>
+            )}
 
             {isApiEspaceCoDefined() && (
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--left", "fr-mt-4w")}>
