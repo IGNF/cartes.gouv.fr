@@ -14,8 +14,6 @@
         <link rel="shortcut icon" href="{{ app.request.baseUrl ~ '/favicon/favicon.ico' }}" type="image/x-icon" />
         <link rel="manifest" href="{{ app.request.baseUrl ~ '/favicon/manifest.webmanifest' }}" crossorigin="use-credentials" />
 
-        {# <link rel="stylesheet" href="{{ asset('node_modules/@codegouvfr/react-dsfr/main.css') }}" /> #}
-
         {% set fonts_list = ['Marianne-Regular', 'Marianne-Medium', 'Marianne-Bold'] %}
 
         {% for font_name in fonts_list %}
@@ -25,22 +23,16 @@
         {% block stylesheets %}
             {{ vite_entry_link_tags('dsfr') }}
             {{ vite_entry_link_tags('main') }}
-            {# {{ encore_entry_link_tags('main') }} #}
         {% endblock %}
 
         {% block javascripts %}
             {{ vite_entry_script_tags('dsfr') }}
             {{ vite_entry_script_tags('main', {dependency: 'react', attr: {referrerpolicy: 'origin'}}) }}
-            {# {{ encore_entry_script_tags('main') }} #}
         {% endblock %}
     </head>
     <body>
         {% block body %}
 
         {% endblock %}
-
-        {# bazinga traducteur #}
-        {# <script src="{{ asset('bundles/bazingajstranslation/js/translator.min.js') }}"></script> #}
-        {# <script src="{{ path('bazinga_jstranslation_js', {domain: 'cartesgouvfr', locales: 'fr'}) }}"></script> #}
     </body>
 </html>
