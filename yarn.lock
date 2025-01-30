@@ -1846,10 +1846,10 @@
   resolved "https://registry.npmjs.org/@types/lodash/-/lodash-4.17.13.tgz"
   integrity sha512-lfx+dftrEZcdBPczf9d0Qv0x+j/rfNCMuC6OcfXmO8gkfeNAY88PgKUbvG56whcN23gc27yenwF6oJZXGFpYxg==
 
-"@types/lodash@^4.14.190", "@types/lodash@^4.14.201":
-  version "4.17.0"
-  resolved "https://registry.npmjs.org/@types/lodash/-/lodash-4.17.0.tgz"
-  integrity sha512-t7dhREVv6dbNj0q17X12j7yDG4bD/DHYX7o5/DbDxobP0HnGPgpRz2Ej77aL7TZT3DSw13fqUTj8J4mMnqa7WA==
+"@types/lodash@^4.14.201":
+  version "4.17.15"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.17.15.tgz#12d4af0ed17cc7600ce1f9980cec48fc17ad1e89"
+  integrity sha512-w/P33JFeySuhN6JLkysYUK2gEmy9kHHFN7E8ro0tkfmlDOgxBDzWEZ/J8cWA+fHqFevpswDTFZnDx+R9lbL6xw==
 
 "@types/mapbox-gl@^2.7.18":
   version "2.7.21"
@@ -1885,9 +1885,9 @@
   integrity sha512-RGdgjQUZba5p6QEFAVx2OGb8rQDL/cPRG7GiedRzMcJ1tYnUANBncjbSB1NRGwbvjcPeikRABz2nshyPk1bhWg==
 
 "@types/node@*":
-  version "22.10.2"
-  resolved "https://registry.npmjs.org/@types/node/-/node-22.10.2.tgz"
-  integrity sha512-Xxr6BBRCAOQixvonOye19wnzyDiUtTeqldOOmj3CkeblonbccA12PFwlufvRdrpjXxqnmUaeiU5EOA+7s5diUQ==
+  version "22.12.0"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-22.12.0.tgz#bf8af3b2af0837b5a62a368756ff2b705ae0048c"
+  integrity sha512-Fll2FZ1riMjNmlmJOdAyY5pUbkftXslB5DgEzlIuNaiWhXd00FhWxVC/r4yV/4wBb9JfImTu+jiSvXTkJ7F/gA==
   dependencies:
     undici-types "~6.20.0"
 
@@ -1938,13 +1938,6 @@
   version "10.0.0"
   resolved "https://registry.npmjs.org/@types/uuid/-/uuid-10.0.0.tgz"
   integrity sha512-7gqG38EyHgyP1S+7+xomFtL+ZNHcKv6DwNaCZmJmo1vgMugyF3TCnXVg4t1uk89mLNwnLtnY3TpOpCOyp1/xHQ==
-
-"@types/xml2js@^0.4.11":
-  version "0.4.14"
-  resolved "https://registry.npmjs.org/@types/xml2js/-/xml2js-0.4.14.tgz"
-  integrity sha512-4YnrRemBShWRO2QjvUin8ESA41rH+9nQGLUGZV/1IDhi3SL9OhdpNC/MrulTWuptXKwhx/aDxE7toV0f/ypIXQ==
-  dependencies:
-    "@types/node" "*"
 
 "@types/yargs-parser@*":
   version "21.0.3"
@@ -2812,7 +2805,7 @@ color-convert@^1.9.0:
 
 color-convert@^2.0.1:
   version "2.0.1"
-  resolved "https://registry.npmjs.org/color-convert/-/color-convert-2.0.1.tgz"
+  resolved "https://registry.yarnpkg.com/color-convert/-/color-convert-2.0.1.tgz#72d3a68d598c9bdb3af2ad1e84f21d896abd4de3"
   integrity sha512-RRECPsj7iu/xb5oKYcsFHSppFNnsj/52OVTRKb4zP5onXwVF3zVmmToNcOfGC+CRDpfK/U584fMg38ZHCaElKQ==
   dependencies:
     color-name "~1.1.4"
@@ -2824,7 +2817,7 @@ color-name@1.1.3:
 
 color-name@^1.0.0, color-name@~1.1.4:
   version "1.1.4"
-  resolved "https://registry.npmjs.org/color-name/-/color-name-1.1.4.tgz"
+  resolved "https://registry.yarnpkg.com/color-name/-/color-name-1.1.4.tgz#c2a09a87acbde69543de6f63fa3995c826c536a2"
   integrity sha512-dOy+3AuW3a2wNbZHIuMZpTcgjGuLU/uBL/ubcZF9OXbDo8ff4O8yVp5Bf0efS8uEoYo5q4Fx7dY9OgQGXgAsQA==
 
 color-name@^2.0.0:
@@ -2854,7 +2847,7 @@ color-space@^2.0.0, color-space@^2.0.1:
 
 color-string@^1.9.0:
   version "1.9.1"
-  resolved "https://registry.npmjs.org/color-string/-/color-string-1.9.1.tgz"
+  resolved "https://registry.yarnpkg.com/color-string/-/color-string-1.9.1.tgz#4467f9146f036f855b764dfb5bf8582bf342c7a4"
   integrity sha512-shrVawQFojnZv6xM40anx4CkoDP+fZsw/ZerEMsW/pyzsRbElpsL/DBVW7q3ExxwusdNXI3lXpuhEZkzs8p5Eg==
   dependencies:
     color-name "^1.0.0"
@@ -2862,7 +2855,7 @@ color-string@^1.9.0:
 
 color@^4.2.3:
   version "4.2.3"
-  resolved "https://registry.npmjs.org/color/-/color-4.2.3.tgz"
+  resolved "https://registry.yarnpkg.com/color/-/color-4.2.3.tgz#d781ecb5e57224ee43ea9627560107c0e0c6463a"
   integrity sha512-1rXeuUUiGGrykh+CeBdu5Ie7OJwinCgQY0bc7GCRxy5xVHy+moaqkpL/jqQq0MtQOeYcrqEz4abc5f0KtU7W4A==
   dependencies:
     color-convert "^2.0.1"
@@ -2977,9 +2970,9 @@ core-js-compat@^3.38.0, core-js-compat@^3.38.1:
     browserslist "^4.24.2"
 
 core-js@^3.26.1:
-  version "3.37.0"
-  resolved "https://registry.npmjs.org/core-js/-/core-js-3.37.0.tgz"
-  integrity sha512-fu5vHevQ8ZG4og+LXug8ulUtVxjOcEYvifJr7L5Bfq9GOztVqsKd9/59hUk2ZSbCrS3BqUr3EpaYGIYzq7g3Ug==
+  version "3.40.0"
+  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.40.0.tgz#2773f6b06877d8eda102fc42f828176437062476"
+  integrity sha512-7vsMc/Lty6AGnn7uFpYT56QesI5D2Y/UkgKounk87OP9Z2H9Z8kj6jzcSGAxFmUtDOS0ntK6lbQz+Nsa0Jj6mQ==
 
 core-js@^3.31.1:
   version "3.39.0"
@@ -3463,11 +3456,6 @@ electron-to-chromium@^1.5.73:
   version "1.5.73"
   resolved "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.5.73.tgz"
   integrity sha512-8wGNxG9tAG5KhGd3eeA0o6ixhiNdgr0DcHWm85XPCphwZgD1lIEoi6t3VERayWao7SF7AAZTw6oARGJeVjH8Kg==
-
-emitter-component@^1.1.1:
-  version "1.1.2"
-  resolved "https://registry.npmjs.org/emitter-component/-/emitter-component-1.1.2.tgz"
-  integrity sha512-QdXO3nXOzZB4pAjM0n6ZE+R9/+kPpECA/XSELIcc54NeYVnBqIk+4DFiBgK+8QbV3mdvTG6nedl7dTYgO+5wDw==
 
 emoji-regex@^10.3.0:
   version "10.4.0"
@@ -4273,13 +4261,12 @@ geoportal-access-lib@3.4.4:
     es6-promise "^4.2.4"
     node-fetch "^2.6.1"
 
-geostyler-cql-parser@^3.0.1:
-  version "3.0.2"
-  resolved "https://registry.npmjs.org/geostyler-cql-parser/-/geostyler-cql-parser-3.0.2.tgz"
-  integrity sha512-nfQOnWwFSrWtgl7DRmhwoa3r0BnpsMvEv7rb5D8ihpCUQS/YP09C2C1j6zKQVSnYRMl0545VnhtYtqejMgPaBg==
+geostyler-cql-parser@4.0.0-beta.4:
+  version "4.0.0-beta.4"
+  resolved "https://registry.yarnpkg.com/geostyler-cql-parser/-/geostyler-cql-parser-4.0.0-beta.4.tgz#2d96c630cfc64b281a6e89093df7b892b8e2354e"
+  integrity sha512-aBR1oAx6gkmz6PZVbd8zmCQ0gwdeh/g7bkDL9v/YURZCInLAqH5o4oGP72ljt3Qjc6/zYwm5TYuJ3p+wwe2nkA==
   dependencies:
-    geostyler-style "^7.2.0"
-    lodash "^4.17.21"
+    geostyler-style "9.0.0-next.5"
 
 geostyler-mapbox-parser@^5.0.1:
   version "5.0.1"
@@ -4298,23 +4285,18 @@ geostyler-openlayers-parser@^4.3.0:
     geostyler-style "^8.1.0"
 
 geostyler-qgis-parser@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.npmjs.org/geostyler-qgis-parser/-/geostyler-qgis-parser-2.0.0.tgz"
-  integrity sha512-9lPl2kebQ3BGbmGA3Lk3as97RcTn65IODD1CAwJkyGcLs8hVOOc8YCciaXgsWHREENA275GIOtX+2aRHWG4D9Q==
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/geostyler-qgis-parser/-/geostyler-qgis-parser-2.1.0.tgz#f95112ac31cfafbf1992be194850f57d8b4cfdfd"
+  integrity sha512-0Xu3Dd1hBKSS7Qv8//ciHavVJI3Ez03JxrYfzF0HNZq32tNL/DITxxbD8nYb/uWawIsBWnJMFbmykxsqC1EEXA==
   dependencies:
-    "@types/lodash" "^4.14.190"
-    "@types/xml2js" "^0.4.11"
     buffer "^6.0.3"
     color "^4.2.3"
     core-js "^3.26.1"
-    geostyler-cql-parser "^3.0.1"
-    geostyler-style "^7.2.0"
-    lodash "^4.17.21"
-    stream "^0.0.2"
+    geostyler-cql-parser "4.0.0-beta.4"
+    geostyler-style "9.0.0-next.5"
     string_decoder "^1.3.0"
     timers "^0.1.1"
-    xml2js "^0.4.23"
-    xmldom "^0.6.0"
+    xml2js "^0.6.0"
 
 geostyler-sld-parser@^5.4.0:
   version "5.4.0"
@@ -4326,13 +4308,10 @@ geostyler-sld-parser@^5.4.0:
     i18next "^23.11.5"
     lodash "^4.17.21"
 
-geostyler-style@^7.2.0:
-  version "7.5.0"
-  resolved "https://registry.npmjs.org/geostyler-style/-/geostyler-style-7.5.0.tgz"
-  integrity sha512-0qlFOwDl9cdiiNUk6ijRSpBq+W3Kpry1aZS++BE8EPBxvbFgoTsKU6JIriKLmCqPqBmJIVnMFMUEk6Sf3n0ZIA==
-  dependencies:
-    "@types/lodash" "^4.14.201"
-    lodash "^4.17.21"
+geostyler-style@9.0.0-next.5:
+  version "9.0.0-next.5"
+  resolved "https://registry.yarnpkg.com/geostyler-style/-/geostyler-style-9.0.0-next.5.tgz#b7d319e42c70783ebd93f24b613963ba24cd4b46"
+  integrity sha512-nbTyL5i4zAB303RUXpVRKhrXceSKu2sOMWqjXjitjII31eOIKybS0iKV5C4f1qktE3TweJY/xPtC6aP6rTsQAw==
 
 geostyler-style@^8.0.0, geostyler-style@^8.1.0:
   version "8.1.0"
@@ -4738,7 +4717,7 @@ is-arrayish@^0.2.1:
 
 is-arrayish@^0.3.1:
   version "0.3.2"
-  resolved "https://registry.npmjs.org/is-arrayish/-/is-arrayish-0.3.2.tgz"
+  resolved "https://registry.yarnpkg.com/is-arrayish/-/is-arrayish-0.3.2.tgz#4574a2ae56f7ab206896fb431eaeed066fdf8f03"
   integrity sha512-eVRqCvVlZbuw3GrM63ovNSNAeA1K16kaR/LRY/92w0zxQ5/1YzwblUX652i4Xs9RwAGjW9d9y6X88t8OaAJfWQ==
 
 is-async-function@^2.0.0:
@@ -7019,9 +6998,9 @@ sass@^1.63.6:
     "@parcel/watcher" "^2.4.1"
 
 sax@>=0.6.0:
-  version "1.3.0"
-  resolved "https://registry.npmjs.org/sax/-/sax-1.3.0.tgz"
-  integrity sha512-0s+oAmw9zLl1V1cS9BtZN7JAd0cW5e0QH4W3LWEK6a4LaLEA2OTpGYWDY+6XasBLtz6wkm3u1xRw95mRuJ59WA==
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/sax/-/sax-1.4.1.tgz#44cc8988377f126304d3b3fc1010c733b929ef0f"
+  integrity sha512-+aWOz7yVScEGoKNd4PA10LZ8sk0A/z5+nXQG5giUO5rprX9jgYsTdov9qCchZiPIZezbZH+jRut8nPodFAX4Jg==
 
 scheduler@^0.23.2:
   version "0.23.2"
@@ -7158,7 +7137,7 @@ signal-exit@^4.1.0:
 
 simple-swizzle@^0.2.2:
   version "0.2.2"
-  resolved "https://registry.npmjs.org/simple-swizzle/-/simple-swizzle-0.2.2.tgz"
+  resolved "https://registry.yarnpkg.com/simple-swizzle/-/simple-swizzle-0.2.2.tgz#a4da6b635ffcccca33f70d17cb92592de95e557a"
   integrity sha512-JA//kQgZtbuY83m+xT+tXJkmJncGMTFT+C+g2h2R9uxkYIrE2yy9sgmcLhCnw57/WSD+Eh3J97FPEDFnbXnDUg==
   dependencies:
     is-arrayish "^0.3.1"
@@ -7288,13 +7267,6 @@ stackframe@^1.3.4:
   resolved "https://registry.npmjs.org/stackframe/-/stackframe-1.3.4.tgz"
   integrity sha512-oeVtt7eWQS+Na6F//S4kJ2K2VbRlS9D43mAlMyVpVWovy9o+jfgH8O9agzANzaiLjclA0oYzUXEM4PurhSUChw==
 
-stream@^0.0.2:
-  version "0.0.2"
-  resolved "https://registry.npmjs.org/stream/-/stream-0.0.2.tgz"
-  integrity sha512-gCq3NDI2P35B2n6t76YJuOp7d6cN/C7Rt0577l91wllh0sY9ZBuw9KaSGqH/b0hzn3CWWJbpbW0W0WvQ1H/Q7g==
-  dependencies:
-    emitter-component "^1.1.1"
-
 string-argv@~0.3.2:
   version "0.3.2"
   resolved "https://registry.npmjs.org/string-argv/-/string-argv-0.3.2.tgz"
@@ -7374,7 +7346,7 @@ string.prototype.trimstart@^1.0.8:
 
 string_decoder@^1.3.0:
   version "1.3.0"
-  resolved "https://registry.npmjs.org/string_decoder/-/string_decoder-1.3.0.tgz"
+  resolved "https://registry.yarnpkg.com/string_decoder/-/string_decoder-1.3.0.tgz#42f114594a46cf1a8e30b0a84f56c78c3edac21e"
   integrity sha512-hkRX8U1WjJFd8LsDJ2yQ/wWWxaopEsABU1XfkM8A+j0+85JAGppt16cr1Whg6KIbb4okU6Mql6BOj+uup/wKeA==
   dependencies:
     safe-buffer "~5.2.0"
@@ -7552,7 +7524,7 @@ timers-ext@^0.1.7:
 
 timers@^0.1.1:
   version "0.1.1"
-  resolved "https://registry.npmjs.org/timers/-/timers-0.1.1.tgz"
+  resolved "https://registry.yarnpkg.com/timers/-/timers-0.1.1.tgz#86ac5c78c1ee419694f35a58de4fd4183cfb9c1e"
   integrity sha512-pkJC8uIP/gxDHxNQUBUbjHyl6oZfT+ofn7tbaHW+CFIUjI+Q2MBbHcx1JSBQfhDaTcO9bNg328q0i7Vk5PismQ==
 
 tiny-case@^1.0.3:
@@ -7778,7 +7750,7 @@ unbox-primitive@^1.0.2:
 
 undici-types@~6.20.0:
   version "6.20.0"
-  resolved "https://registry.npmjs.org/undici-types/-/undici-types-6.20.0.tgz"
+  resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-6.20.0.tgz#8171bf22c1f588d1554d55bf204bc624af388433"
   integrity sha512-Ny6QZ2Nju20vw1SRHe3d9jVu6gJ+4e3+MMpqu7pqE5HT6WsTSlce++GQmK5UXS8mzV8DSYHrQH+Xrf2jVcuKNg==
 
 unicode-canonical-property-names-ecmascript@^2.0.0:
@@ -8116,23 +8088,18 @@ xml-utils@^1.0.2:
   resolved "https://registry.npmjs.org/xml-utils/-/xml-utils-1.8.0.tgz"
   integrity sha512-1TY5yLw8DApowZAUsWCniNr8HH6Ebt6O7UQvmIwziGKwUNsQx6e+4NkfOvCfnqmYIcPjCeoI6dh1JenPJ9a1hQ==
 
-xml2js@^0.4.23:
-  version "0.4.23"
-  resolved "https://registry.npmjs.org/xml2js/-/xml2js-0.4.23.tgz"
-  integrity sha512-ySPiMjM0+pLDftHgXY4By0uswI3SPKLDw/i3UXbnO8M/p28zqexCUoPmQFrYD+/1BzhGJSs2i1ERWKJAtiLrug==
+xml2js@^0.6.0:
+  version "0.6.2"
+  resolved "https://registry.yarnpkg.com/xml2js/-/xml2js-0.6.2.tgz#dd0b630083aa09c161e25a4d0901e2b2a929b499"
+  integrity sha512-T4rieHaC1EXcES0Kxxj4JWgaUQHDk+qwHcYOCFHfiwKz7tOVPLq7Hjq9dM1WCMhylqMEfP7hMcOIChvotiZegA==
   dependencies:
     sax ">=0.6.0"
     xmlbuilder "~11.0.0"
 
 xmlbuilder@~11.0.0:
   version "11.0.1"
-  resolved "https://registry.npmjs.org/xmlbuilder/-/xmlbuilder-11.0.1.tgz"
+  resolved "https://registry.yarnpkg.com/xmlbuilder/-/xmlbuilder-11.0.1.tgz#be9bae1c8a046e76b31127726347d0ad7002beb3"
   integrity sha512-fDlsI/kFEx7gLvbecc0/ohLG50fugQp8ryHzMTuW9vSa1GJ0XYWKnhsUx7oie3G98+r56aTQIUB4kht42R3JvA==
-
-xmldom@^0.6.0:
-  version "0.6.0"
-  resolved "https://registry.npmjs.org/xmldom/-/xmldom-0.6.0.tgz"
-  integrity sha512-iAcin401y58LckRZ0TkI4k0VSM1Qg0KGSc3i8rU+xrxe19A/BN1zHyVSJY7uoutVlaTSzYyk/v5AmkewAP7jtg==
 
 xtend@~4.0.1:
   version "4.0.2"
