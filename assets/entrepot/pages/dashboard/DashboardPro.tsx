@@ -22,6 +22,7 @@ import avatarSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/digital
 import mailSendSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/digital/mail-send.svg";
 import humanCoopSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/environment/human-cooperation.svg";
 import padlockSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/system/padlock.svg";
+import { CommunityMemberDtoRightsEnum } from "../../../@types/entrepot";
 
 const DashboardPro = () => {
     const { t } = useTranslation("DashboardPro");
@@ -32,7 +33,8 @@ const DashboardPro = () => {
     const setUser = useAuthStore((state) => state.setUser);
     const isApiEspaceCoDefined = useApiEspaceCoStore((state) => state.isUrlDefined);
 
-    const configDatastore = user?.communities_member?.find((community) => community.community?.datastore === api.alerts.datastoreId)?.community;
+    const configDatastore = user?.communities_member?.find((community) => community.community?.datastore === api.alerts.datastoreId);
+    const canShowConfig = configDatastore?.rights?.includes(CommunityMemberDtoRightsEnum.ANNEX);
 
     const userQuery = useQuery<CartesUser, CartesApiException>({
         queryKey: RQKeys.user_me(),
@@ -183,10 +185,10 @@ const DashboardPro = () => {
                 </div>
             </div>
 
-            {configDatastore && (
+            {canShowConfig && (
                 <>
                     <h2>{t("configuration")}</h2>
-                    <div key={configDatastore.datastore} className={fr.cx("fr-col-12", "fr-col-sm-6", "fr-col-md-4", "fr-col-lg-3")}>
+                    <div key={configDatastore?.community?.datastore} className={fr.cx("fr-col-12", "fr-col-sm-6", "fr-col-md-4", "fr-col-lg-3")}>
                         <Tile linkProps={routes.config_alerts().link} grey={true} title={t("alerts")} />
                     </div>
                 </>
