@@ -15,7 +15,7 @@ import { CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
 import { useApiEspaceCoStore } from "../../../stores/ApiEspaceCoStore";
 import { useAuthStore } from "../../../stores/AuthStore";
-import { getArrayRange } from "../../../utils";
+import { getArrayRange, hashStringSHA256 } from "../../../utils";
 import api from "../../api";
 
 import avatarSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/digital/avatar.svg";
@@ -52,6 +52,30 @@ const DashboardPro = () => {
         }
     }, [setUser, userQuery.data]);
 
+    useEffect(() => {
+        if (user) {
+            console.log(window.dsfr.analytics);
+
+            hashStringSHA256(user.email)
+                .then((hashedEmail) => {
+                    // window.dsfr = {
+                    //     analytics: {
+                    //         user: {
+                    //             uid: user.id,
+                    //             status: "connected",
+                    //         },
+                    //     },
+                    // };
+                    window.dsfr.analytics.user.connect(user.id, hashedEmail, false);
+                })
+                .catch((error) => {
+                    console.log("Email hash error", error);
+                });
+
+            console.log(window.dsfr.analytics);
+        }
+    }, [user]);
+
     const { mutate } = useMutation<undefined, CartesApiException>({
         mutationFn: () => {
             return api.user.addToSandbox();
@@ -71,6 +95,7 @@ const DashboardPro = () => {
                 target="_blank"
                 rel="noreferrer"
                 title="Questionnaire sur la fonctionnalité alimentation et diffusion - Ouvre une nouvelle fenêtre"
+                id="questionnaire-alimentation-diffusion-link"
             >
                 Participer
             </a>

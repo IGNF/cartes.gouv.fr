@@ -1,4 +1,5 @@
 import { BreadcrumbProps } from "@codegouvfr/react-dsfr/Breadcrumb";
+import { RegisteredLinkProps } from "@codegouvfr/react-dsfr/link";
 import { Route } from "type-route";
 
 import { Datastore } from "../../../@types/app";
@@ -7,12 +8,24 @@ import { routes } from "../../../router/router";
 
 const { t } = getTranslation("Breadcrumb");
 
+const getLinkWithAnalyticsId = (route: Route<typeof routes>): RegisteredLinkProps => {
+    const analyticsId = `breadcrumb-${typeof route.name === "string" ? route.name.replace(/_/g, "-") : route.name}-link`;
+
+    return { ...route.link, id: analyticsId };
+};
+
 const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): BreadcrumbProps | undefined => {
     const defaultProps: BreadcrumbProps = {
-        homeLinkProps: routes.home().link,
+        homeLinkProps: getLinkWithAnalyticsId(routes.home()),
         segments: [],
         currentPageLabel: null,
     };
+
+    const dashboardProLink = { label: t("dashboard_pro"), linkProps: getLinkWithAnalyticsId(routes.dashboard_pro()) };
+    const datasheetListLink = (datastoreId: string) => ({
+        label: datastore?.name,
+        linkProps: getLinkWithAnalyticsId(routes.datasheet_list({ datastoreId })),
+    });
 
     switch (route.name) {
         case "dashboard_pro":
@@ -30,7 +43,7 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): Brea
             return { ...defaultProps, currentPageLabel: t(route.name) };
 
         case "contact_confirmation":
-            defaultProps.segments.push({ label: t("contact"), linkProps: routes.contact().link });
+            defaultProps.segments.push({ label: t("contact"), linkProps: getLinkWithAnalyticsId(routes.contact()) });
             return { ...defaultProps, currentPageLabel: t(route.name) };
         case "news_list":
             return { ...defaultProps, currentPageLabel: t("news") };
@@ -41,43 +54,37 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): Brea
         // case "accesses_request":
         case "my_account":
         case "my_access_keys":
-            defaultProps.segments.push({ label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link });
+            defaultProps.segments.push(dashboardProLink);
             return { ...defaultProps, currentPageLabel: t(route.name) };
 
         case "user_key_add":
             defaultProps.segments = [
                 ...defaultProps.segments,
-                ...[
-                    { label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link },
-                    { label: t("my_access_keys"), linkProps: routes.my_access_keys().link },
-                ],
+                dashboardProLink,
+                { label: t("my_access_keys"), linkProps: getLinkWithAnalyticsId(routes.my_access_keys()) },
             ];
             return { ...defaultProps, currentPageLabel: t(route.name) };
         case "user_key_edit":
             defaultProps.segments = [
                 ...defaultProps.segments,
-                ...[
-                    { label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link },
-                    { label: t("my_access_keys"), linkProps: routes.my_access_keys().link },
-                ],
+                dashboardProLink,
+                { label: t("my_access_keys"), linkProps: getLinkWithAnalyticsId(routes.my_access_keys()) },
             ];
             return { ...defaultProps, currentPageLabel: t(route.name) };
 
         case "datastore_create_request":
-            defaultProps.segments.push({ label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link });
+            defaultProps.segments.push(dashboardProLink);
             return { ...defaultProps, currentPageLabel: t(route.name) };
         case "datastore_create_request_confirm":
             defaultProps.segments = [
                 ...defaultProps.segments,
-                ...[
-                    { label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link },
-                    { label: t("datastore_create_request"), linkProps: routes.datastore_create_request().link },
-                ],
+                dashboardProLink,
+                { label: t("datastore_create_request"), linkProps: getLinkWithAnalyticsId(routes.datastore_create_request()) },
             ];
             return { ...defaultProps, currentPageLabel: t(route.name) };
 
         case "join_community":
-            defaultProps.segments.push({ label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link });
+            defaultProps.segments.push(dashboardProLink);
             return { ...defaultProps, currentPageLabel: t(route.name) };
         case "members_list":
             // géré dans le composant CommunityMembers
@@ -85,43 +92,31 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): Brea
 
         case "datastore_manage_storage":
         case "datastore_manage_permissions":
-            defaultProps.segments = [
-                ...defaultProps.segments,
-                ...[
-                    { label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link },
-                    { label: datastore?.name, linkProps: routes.datasheet_list({ datastoreId: route.params.datastoreId }).link },
-                ],
-            ];
+            defaultProps.segments = [...defaultProps.segments, dashboardProLink, datasheetListLink(route.params.datastoreId)];
             return { ...defaultProps, currentPageLabel: t(route.name) };
         case "datastore_add_permission":
         case "datastore_edit_permission":
             defaultProps.segments = [
                 ...defaultProps.segments,
-                ...[
-                    { label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link },
-                    { label: datastore?.name, linkProps: routes.datasheet_list({ datastoreId: route.params.datastoreId }).link },
-                    {
-                        label: t("datastore_manage_permissions"),
-                        linkProps: routes.datastore_manage_permissions({ datastoreId: route.params.datastoreId }).link,
-                    },
-                ],
+                dashboardProLink,
+                datasheetListLink(route.params.datastoreId),
+                {
+                    label: t("datastore_manage_permissions"),
+                    linkProps: getLinkWithAnalyticsId(routes.datastore_manage_permissions({ datastoreId: route.params.datastoreId })),
+                },
             ];
             return { ...defaultProps, currentPageLabel: t(route.name) };
         case "datasheet_list":
-            defaultProps.segments = [...defaultProps.segments, ...[{ label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link }]];
+            defaultProps.segments = [...defaultProps.segments, dashboardProLink];
             return { ...defaultProps, currentPageLabel: datastore?.name };
         case "datastore_datasheet_upload":
-            defaultProps.segments = [
-                ...defaultProps.segments,
-                ...[
-                    { label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link },
-                    { label: datastore?.name, linkProps: routes.datasheet_list({ datastoreId: route.params.datastoreId }).link },
-                ],
-            ];
+            defaultProps.segments = [...defaultProps.segments, dashboardProLink, datasheetListLink(route.params.datastoreId)];
             if ("datasheetName" in route.params && route.params.datasheetName) {
                 defaultProps.segments.push({
                     label: route.params.datasheetName,
-                    linkProps: routes.datastore_datasheet_view({ datastoreId: route.params.datastoreId, datasheetName: route.params.datasheetName }).link,
+                    linkProps: getLinkWithAnalyticsId(
+                        routes.datastore_datasheet_view({ datastoreId: route.params.datastoreId, datasheetName: route.params.datasheetName })
+                    ),
                 });
                 defaultProps["currentPageLabel"] = t("upload");
             } else {
@@ -129,56 +124,38 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): Brea
             }
             return defaultProps;
         case "datastore_datasheet_upload_integration":
-            defaultProps.segments = [
-                ...defaultProps.segments,
-                ...[
-                    { label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link },
-                    { label: datastore?.name, linkProps: routes.datasheet_list({ datastoreId: route.params.datastoreId }).link },
-                ],
-            ];
+            defaultProps.segments = [...defaultProps.segments, dashboardProLink, datasheetListLink(route.params.datastoreId)];
             if ("datasheetName" in route.params && route.params.datasheetName) {
                 defaultProps.segments.push({
                     label: route.params.datasheetName,
-                    linkProps: routes.datastore_datasheet_view({ datastoreId: route.params.datastoreId, datasheetName: route.params.datasheetName }).link,
+                    linkProps: getLinkWithAnalyticsId(
+                        routes.datastore_datasheet_view({ datastoreId: route.params.datastoreId, datasheetName: route.params.datasheetName })
+                    ),
                 });
             }
             return { ...defaultProps, currentPageLabel: t("datastore_datasheet_upload_integration") };
         case "datastore_datasheet_view":
-            defaultProps.segments = [
-                ...defaultProps.segments,
-                ...[
-                    { label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link },
-                    { label: datastore?.name, linkProps: routes.datasheet_list({ datastoreId: route.params.datastoreId }).link },
-                ],
-            ];
+            defaultProps.segments = [...defaultProps.segments, dashboardProLink, datasheetListLink(route.params.datastoreId)];
             return { ...defaultProps, currentPageLabel: route.params.datasheetName };
         case "datastore_stored_data_details":
-            defaultProps.segments = [
-                ...defaultProps.segments,
-                ...[
-                    { label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link },
-                    { label: datastore?.name, linkProps: routes.datasheet_list({ datastoreId: route.params.datastoreId }).link },
-                ],
-            ];
+            defaultProps.segments = [...defaultProps.segments, dashboardProLink, datasheetListLink(route.params.datastoreId)];
             if ("datasheetName" in route.params && route.params.datasheetName) {
                 defaultProps.segments.push({
                     label: route.params.datasheetName,
-                    linkProps: routes.datastore_datasheet_view({ datastoreId: route.params.datastoreId, datasheetName: route.params.datasheetName }).link,
+                    linkProps: getLinkWithAnalyticsId(
+                        routes.datastore_datasheet_view({ datastoreId: route.params.datastoreId, datasheetName: route.params.datasheetName })
+                    ),
                 });
             }
             return { ...defaultProps, currentPageLabel: t("datastore_stored_data_details") };
         case "datastore_upload_details":
-            defaultProps.segments = [
-                ...defaultProps.segments,
-                ...[
-                    { label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link },
-                    { label: datastore?.name, linkProps: routes.datasheet_list({ datastoreId: route.params.datastoreId }).link },
-                ],
-            ];
+            defaultProps.segments = [...defaultProps.segments, dashboardProLink, datasheetListLink(route.params.datastoreId)];
             if ("datasheetName" in route.params && route.params.datasheetName) {
                 defaultProps.segments.push({
                     label: route.params.datasheetName,
-                    linkProps: routes.datastore_datasheet_view({ datastoreId: route.params.datastoreId, datasheetName: route.params.datasheetName }).link,
+                    linkProps: getLinkWithAnalyticsId(
+                        routes.datastore_datasheet_view({ datastoreId: route.params.datastoreId, datasheetName: route.params.datasheetName })
+                    ),
                 });
             }
             return { ...defaultProps, currentPageLabel: t("datastore_upload_details") };
@@ -198,18 +175,18 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): Brea
         case "datastore_service_view":
             defaultProps.segments = [
                 ...defaultProps.segments,
-                ...[
-                    { label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link },
-                    { label: datastore?.name, linkProps: routes.datasheet_list({ datastoreId: route.params.datastoreId }).link },
-                    {
-                        label: route.params.datasheetName,
-                        linkProps: routes.datastore_datasheet_view({
+                dashboardProLink,
+                datasheetListLink(route.params.datastoreId),
+                {
+                    label: route.params.datasheetName,
+                    linkProps: getLinkWithAnalyticsId(
+                        routes.datastore_datasheet_view({
                             datastoreId: route.params.datastoreId,
                             datasheetName: route.params.datasheetName,
                             activeTab: "offeringId" in route.params ? "services" : "dataset",
-                        }).link,
-                    },
-                ],
+                        })
+                    ),
+                },
             ];
             return { ...defaultProps, currentPageLabel: t(route.name) };
 
