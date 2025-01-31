@@ -46,6 +46,13 @@ const getMyPermissions = (otherOptions: RequestInit = {}) => {
     });
 };
 
+const getPermission = (permissionId: string, otherOptions: RequestInit = {}) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_user_permission", { permissionId });
+    return jsonFetch<PermissionWithOfferingsDetailsResponseDto>(url, {
+        ...otherOptions,
+    });
+};
+
 const addKey = (formData: UserKeyCreateDtoUserKeyInfoDto | object) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_user_add_key");
     return jsonFetch<UserKeyWithAccessesResponseDto>(
@@ -99,6 +106,7 @@ const user = {
     getMyKeyDetailedWithAccesses,
     getMyKeysDetailedWithAccesses,
     getMyPermissions,
+    getPermission,
     addKey,
     updateKey,
     removeKey,
