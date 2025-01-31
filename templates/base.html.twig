@@ -9,36 +9,30 @@
                 cartes.gouv.fr
             {% endblock %}
         </title>
-
-        <link rel="apple-touch-icon" href="{{ asset('build/react-dsfr/favicon/apple-touch-icon.png') }}" />
-        <link rel="icon" href="{{ asset('build/react-dsfr/favicon/favicon.svg') }}" type="image/svg+xml" />
-        <link rel="shortcut icon" href="{{ asset('build/react-dsfr/favicon/favicon.ico') }}" type="image/x-icon" />
-        <link rel="manifest" href="{{ asset('build/react-dsfr/favicon/manifest.webmanifest') }}" crossorigin="use-credentials" />
-
-        <link rel="stylesheet" href="{{ asset('build/react-dsfr/dsfr/utility/icons/icons.min.css') }}" />
-        <link rel="stylesheet" href="{{ asset('build/react-dsfr/dsfr/dsfr.min.css') }}" />
+        <link rel="apple-touch-icon" href="{{ app.request.baseUrl ~ '/favicon/apple-touch-icon.png' }}" />
+        <link rel="icon" href="{{ app.request.baseUrl ~ '/favicon/favicon.svg' }}" type="image/svg+xml" />
+        <link rel="shortcut icon" href="{{ app.request.baseUrl ~ '/favicon/favicon.ico' }}" type="image/x-icon" />
+        <link rel="manifest" href="{{ app.request.baseUrl ~ '/favicon/manifest.webmanifest' }}" crossorigin="use-credentials" />
 
         {% set fonts_list = ['Marianne-Regular', 'Marianne-Medium', 'Marianne-Bold'] %}
 
         {% for font_name in fonts_list %}
-            <link rel="preload" href="{{ asset('build/react-dsfr/dsfr/fonts/' ~ font_name ~ '.woff2') }}" as="font" crossorigin="anonymous" />
+            <link rel="preload" href="{{ asset('node_modules/@codegouvfr/react-dsfr/dsfr/fonts/' ~ font_name ~ '.woff2') }}" as="font" crossorigin="anonymous" />
         {% endfor %}
 
         {% block stylesheets %}
-            {{ encore_entry_link_tags('main') }}
+            {{ vite_entry_link_tags('dsfr') }}
+            {{ vite_entry_link_tags('main') }}
         {% endblock %}
 
         {% block javascripts %}
-            {{ encore_entry_script_tags('main') }}
+            {{ vite_entry_script_tags('dsfr') }}
+            {{ vite_entry_script_tags('main', {dependency: 'react', attr: {referrerpolicy: 'origin'}}) }}
         {% endblock %}
     </head>
     <body>
         {% block body %}
 
         {% endblock %}
-
-        {# bazinga traducteur #}
-        <script src="{{ asset('bundles/bazingajstranslation/js/translator.min.js') }}"></script>
-        <script src="{{ path('bazinga_jstranslation_js', {domain: 'cartesgouvfr', locales: 'fr'}) }}"></script>
     </body>
 </html>

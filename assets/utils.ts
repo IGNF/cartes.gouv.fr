@@ -2,16 +2,16 @@ import { format as datefnsFormat } from "date-fns-tz";
 import { fr } from "date-fns/locale";
 
 // Themes et mot cles INSPIRE
-import inspireKeywords from "./data/thematic-inspire.json";
+import inspireKeywords from "@/data/thematic-inspire.json";
 
 // charsets
-import charsets from "./data/charset_list.json";
+import charsets from "@/data/charset_list.json";
 
 // Langues iso639-2
 // https://github.com/haliaeetus/iso-639/blob/master/data/iso_639-2.json
-import langs from "./data/iso_639-2.json";
-import { OfferingTypeEnum } from "./@types/app";
-import { BoundingBox } from "./@types/entrepot";
+import langs from "@/data/iso_639-2.json";
+import { OfferingTypeEnum } from "@/@types/app";
+import { BoundingBox } from "@/@types/entrepot";
 
 export type LanguageType = {
     language: string;
