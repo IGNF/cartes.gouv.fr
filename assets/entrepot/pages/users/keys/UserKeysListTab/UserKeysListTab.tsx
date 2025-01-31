@@ -90,6 +90,18 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
                 <p>{t("no_keys")}</p>
             ) : (
                 keys.map((accessKey) => {
+                    const groupedServices = accessKey.accesses.reduce(
+                        (acc, access) => {
+                            const type = access.offering.type;
+                            if (!acc[type]) {
+                                acc[type] = [];
+                            }
+                            acc[type].push(access);
+                            return acc;
+                        },
+                        {} as Record<string, typeof accessKey.accesses>
+                    );
+
                     return (
                         <div key={accessKey._id} className={fr.cx("fr-my-1v")}>
                             <Accordion
@@ -129,29 +141,25 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
                                                 </div>
                                             )}
                                             <div className={fr.cx("fr-mb-1v")}>{t("services")}</div>
-                                            <ul className={fr.cx("fr-raw-list")}>
-                                                {accessKey.accesses
-                                                    .sort((a, b) => {
-                                                        return a.offering.layer_name.toLowerCase() < b.offering.layer_name.toLowerCase()
-                                                            ? -1
-                                                            : a.offering.layer_name.toLowerCase() > b.offering.layer_name.toLowerCase()
-                                                              ? 1
-                                                              : 0;
-                                                    })
-                                                    .map((access) => (
-                                                        <li key={access.offering._id} className={fr.cx("fr-mb-5v")}>
-                                                            {access.offering.layer_name}
-                                                            <Badge className={fr.cx("fr-ml-2v")} noIcon={true} severity={"info"}>
-                                                                {access.offering.type}
-                                                            </Badge>
-                                                            <UserKeyLink
-                                                                permissionId={access.permission._id}
-                                                                offeringId={access.offering._id}
-                                                                hash={(accessKey.type_infos as HashInfoDto).hash}
-                                                            />
-                                                        </li>
-                                                    ))}
-                                            </ul>
+                                            {Object.entries(groupedServices).map(([type, services]) => {
+                                                return (
+                                                    <div key={type} className={fr.cx("fr-mb-5v")}>
+                                                        <Badge className={fr.cx("fr-ml-2v")} noIcon={true} severity={"info"}>
+                                                            {type}
+                                                        </Badge>
+                                                        <ul>
+                                                            {services.map((service) => (
+                                                                <li key={service.offering._id}>{service.offering.layer_name}</li>
+                                                            ))}
+                                                        </ul>
+                                                        <UserKeyLink
+                                                            permissionId={services[0].permission._id}
+                                                            offeringId={services[0].offering._id}
+                                                            hash={(accessKey.type_infos as HashInfoDto).hash}
+                                                        />
+                                                    </div>
+                                                );
+                                            })}
                                         </>
                                     ) : (
                                         <div className={fr.cx("fr-mb-1v")}>{t("no_services")}</div>
