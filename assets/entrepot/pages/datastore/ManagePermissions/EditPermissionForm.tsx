@@ -9,7 +9,6 @@ import { FC, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import api from "../../../api";
 import DatePicker from "../../../../components/Input/DatePicker";
-import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../i18n/i18n";
@@ -19,6 +18,7 @@ import { DatastorePermissionResponseDto } from "../../../../@types/entrepot";
 import ScrollOfferingList from "./ScrollOfferingList";
 import { getEditSchema } from "./ValidationSchemas";
 import createRequestBody, { EditPermissionFormType } from "./utils";
+import Main from "../../../../components/Layout/Main";
 
 type EditPermissionFormProps = {
     datastoreId: string;
@@ -95,7 +95,7 @@ const EditPermissionForm: FC<EditPermissionFormProps> = ({ datastoreId, permissi
     };
 
     return (
-        <DatastoreLayout datastoreId={datastoreId} documentTitle={t("edit_form.document_title", { id: permissionId })}>
+        <Main title={t("edit_form.document_title", { id: permissionId })}>
             <h1>{t("edit_form.title", { permission: permissionQuery.data })}</h1>
             {updateMutation.isPending && (
                 <Wait>
@@ -182,7 +182,7 @@ const EditPermissionForm: FC<EditPermissionFormProps> = ({ datastoreId, permissi
                     </div>
                 </div>
             )}
-        </DatastoreLayout>
+        </Main>
     );
 };
 

@@ -1,13 +1,12 @@
 import { fr } from "@codegouvfr/react-dsfr";
 
-import AppLayout from "../../components/Layout/AppLayout";
 import { routes } from "../../router/router";
+import Main from "../../components/Layout/Main";
 
 const LegalNotice = () => {
     const siteName = "cartes.gouv.fr";
-
     return (
-        <AppLayout documentTitle="Mentions légales">
+        <Main title="Mentions légales">
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
                     <h1>Mentions légales</h1>
@@ -63,7 +62,7 @@ const LegalNotice = () => {
                     </p>
                 </div>
             </div>
-        </AppLayout>
+        </Main>
     );
 };
 

@@ -6,7 +6,6 @@ import { useQuery } from "@tanstack/react-query";
 import { FC, useMemo } from "react";
 
 import { UploadReport } from "../../../@types/app";
-import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
 import LoadingIcon from "../../../components/Utils/LoadingIcon";
 import RQKeys from "../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../modules/jsonFetch";
@@ -14,6 +13,8 @@ import { routes } from "../../../router/router";
 import api from "../../api";
 import UploadPreviewTab from "./PreviewTab/UploadPreviewTab";
 import ReportTab from "./ReportTab/ReportTab";
+import { useDatastore } from "../../../contexts/datastore";
+import Main from "../../../components/Layout/Main";
 
 type UploadDetailsProps = {
     datastoreId: string;
@@ -21,11 +22,7 @@ type UploadDetailsProps = {
 };
 
 const UploadDetails: FC<UploadDetailsProps> = ({ datastoreId, uploadId }) => {
-    const datastoreQuery = useQuery({
-        queryKey: RQKeys.datastore(datastoreId),
-        queryFn: ({ signal }) => api.datastore.get(datastoreId, { signal }),
-        staleTime: 3600000,
-    });
+    const { datastore } = useDatastore();
 
     const reportQuery = useQuery<UploadReport, CartesApiException>({
         queryKey: RQKeys.datastore_upload_report(datastoreId, uploadId),
@@ -35,7 +32,7 @@ const UploadDetails: FC<UploadDetailsProps> = ({ datastoreId, uploadId }) => {
     const datasheetName = useMemo(() => reportQuery?.data?.input_upload?.tags?.datasheet_name, [reportQuery?.data?.input_upload?.tags?.datasheet_name]);
 
     return (
-        <DatastoreLayout datastoreId={datastoreId} documentTitle={`Rapport de livraison ${reportQuery?.data?.input_upload?.name ?? ""}`}>
+        <Main title={`Rapport de livraison ${reportQuery?.data?.input_upload?.name ?? ""}`}>
             <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
                 {datasheetName ? (
                     <Button
@@ -80,14 +77,14 @@ const UploadDetails: FC<UploadDetailsProps> = ({ datastoreId, uploadId }) => {
                                 },
                                 {
                                     label: "Rapport de livraison",
-                                    content: <ReportTab datastoreName={datastoreQuery.data?.name} reportQuery={reportQuery} />,
+                                    content: <ReportTab datastoreName={datastore?.name} reportQuery={reportQuery} />,
                                 },
                             ]}
                         />
                     </div>
                 </div>
             )}
-        </DatastoreLayout>
+        </Main>
     );
 };
 

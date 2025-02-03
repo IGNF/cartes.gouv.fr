@@ -12,7 +12,6 @@ const { i18n } = declareComponentKeys<
     | "remove_user"
     | "confirm_remove"
     | { K: "add_remove_right_title"; P: { right: string }; R: string }
-    | "no_necessary_rights"
 >()("CommunityMembers");
 export type I18n = typeof i18n;
 
@@ -27,7 +26,6 @@ export const CommunityMembersFrTranslations: Translations<"fr">["CommunityMember
     remove_user: "Supprimer cet utilisateur",
     confirm_remove: "Êtes-vous sûr de vouloir supprimer cet utilisateur ?",
     add_remove_right_title: ({ right }) => `Ajouter/supprimer le droit ${right}`,
-    no_necessary_rights: "Vous n'avez pas les droits nécessaires pour visualiser les membres de cet espace de travail.",
 };
 
 export const CommunityMembersEnTranslations: Translations<"en">["CommunityMembers"] = {
@@ -41,5 +39,4 @@ export const CommunityMembersEnTranslations: Translations<"en">["CommunityMember
     remove_user: "Remove this user",
     confirm_remove: "Are you sure you want to delete this user ?",
     add_remove_right_title: ({ right }) => `Add/remove right ${right} to user`,
-    no_necessary_rights: "You do not have the necessary rights to view and modify the users of this community.",
 };

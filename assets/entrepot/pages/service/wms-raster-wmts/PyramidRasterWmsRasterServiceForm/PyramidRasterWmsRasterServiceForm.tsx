@@ -10,7 +10,6 @@ import { useForm } from "react-hook-form";
 import { symToStr } from "tsafe/symToStr";
 
 import { ConfigurationTypeEnum, EndpointTypeEnum, PyramidRaster, Service, ServiceFormValuesBaseType } from "../../../../../@types/app";
-import DatastoreLayout from "../../../../../components/Layout/DatastoreLayout";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import Wait from "../../../../../components/Utils/Wait";
@@ -26,6 +25,7 @@ import { getPyramidRasterWmsRasterServiceFormDefaultValues } from "../../common/
 import AdditionalInfo from "../../metadata/AdditionalInfo";
 import Description from "../../metadata/Description";
 import UploadMDFile from "../../metadata/UploadMDFile";
+import Main from "../../../../../components/Layout/Main";
 
 const STEPS = {
     METADATA_UPLOAD: 1,
@@ -162,7 +162,7 @@ const PyramidRasterWmsRasterServiceForm: FC<PyramidRasterWmsRasterServiceFormPro
     }, [createServiceMutation, editServiceMutation, currentStep, trigger, editMode]);
 
     return (
-        <DatastoreLayout datastoreId={datastoreId} documentTitle={t("title", { editMode })}>
+        <Main title={t("title", { editMode })}>
             <h1>{t("title", { editMode })}</h1>
 
             {pyramidQuery.isLoading || offeringQuery.isLoading || metadataQuery.isLoading ? (
@@ -255,7 +255,7 @@ const PyramidRasterWmsRasterServiceForm: FC<PyramidRasterWmsRasterServiceFormPro
                     </div>
                 </Wait>
             )}
-        </DatastoreLayout>
+        </Main>
     );
 };
 

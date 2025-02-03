@@ -5,7 +5,6 @@ import { useQuery } from "@tanstack/react-query";
 import { FC, useMemo } from "react";
 
 import { Datasheet, EndpointTypeEnum } from "../../../../@types/app";
-import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import Skeleton from "../../../../components/Utils/Skeleton";
 import { useTranslation } from "../../../../i18n/i18n";
@@ -13,42 +12,39 @@ import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { routes } from "../../../../router/router";
 import api from "../../../api";
 import DatasheetListItem from "./DatasheetListItem";
+import { useDatastore } from "../../../../contexts/datastore";
+import Main from "../../../../components/Layout/Main";
 
 type DatasheetListProps = {
     datastoreId: string;
 };
 const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
     const { t } = useTranslation("DatasheetList");
-
-    const datastoreQuery = useQuery({
-        queryKey: RQKeys.datastore(datastoreId),
-        queryFn: ({ signal }) => api.datastore.get(datastoreId, { signal }),
-        staleTime: 3600000,
-    });
+    const { datastore, isFetching } = useDatastore();
 
     const datasheetListQuery = useQuery({
         queryKey: RQKeys.datastore_datasheet_list(datastoreId),
         queryFn: ({ signal }) => api.datasheet.getList(datastoreId, { signal }),
         staleTime: 60000,
         refetchInterval: 60000,
-        enabled: datastoreQuery.data !== undefined,
+        enabled: datastore !== undefined,
     });
 
     const metadataEndpoint = useMemo(
-        () => datastoreQuery.data?.endpoints?.find((endpoint) => endpoint.endpoint.type === EndpointTypeEnum.METADATA),
-        [datastoreQuery.data?.endpoints]
+        () => datastore?.endpoints?.find((endpoint) => endpoint.endpoint.type === EndpointTypeEnum.METADATA),
+        [datastore?.endpoints]
     );
 
     return (
-        <DatastoreLayout datastoreId={datastoreId} documentTitle="Mes données">
+        <Main title="Mes données">
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col")}>
                     <h1>
-                        {t("title", { datastoreName: datastoreQuery?.data?.name })}
-                        {(datastoreQuery?.isFetching || datasheetListQuery?.isFetching) && <LoadingIcon className={fr.cx("fr-ml-2w")} largeIcon={true} />}
+                        {t("title", { datastoreName: datastore?.name })}
+                        {(isFetching || datasheetListQuery?.isFetching) && <LoadingIcon className={fr.cx("fr-ml-2w")} largeIcon={true} />}
                     </h1>
 
-                    {datastoreQuery.data?.is_sandbox === true && t("sandbox_datastore_explanation")}
+                    {datastore?.is_sandbox === true && t("sandbox_datastore_explanation")}
                 </div>
             </div>
 
@@ -71,7 +67,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                     <DatasheetListItem key={datasheet.name} datastoreId={datastoreId} datasheet={datasheet} />
                 ))
             )}
-        </DatastoreLayout>
+        </Main>
     );
 };
 

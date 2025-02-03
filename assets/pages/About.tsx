@@ -1,11 +1,11 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { Card } from "@codegouvfr/react-dsfr/Card";
 
-import AppLayout from "../components/Layout/AppLayout";
+import Main from "../components/Layout/Main";
 
 const About = () => {
     return (
-        <AppLayout documentTitle="A propos de cartes.gouv.fr">
+        <Main title="A propos de cartes.gouv.fr">
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
                     <h1>À propos</h1>
@@ -131,7 +131,7 @@ const About = () => {
                     <em>Mis à jour le 24/10/2023</em>
                 </div>
             </div>
-        </AppLayout>
+        </Main>
     );
 };
 

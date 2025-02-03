@@ -5,8 +5,7 @@ import Tabs from "@codegouvfr/react-dsfr/Tabs";
 import { useQuery } from "@tanstack/react-query";
 import { FC, useEffect, useMemo, useState } from "react";
 
-import { Datastore, StoredDataReport, StoredDataStatusEnum } from "../../../@types/app";
-import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
+import { StoredDataReport, StoredDataStatusEnum } from "../../../@types/app";
 import LoadingIcon from "../../../components/Utils/LoadingIcon";
 import RQKeys from "../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../modules/jsonFetch";
@@ -14,6 +13,8 @@ import { routes } from "../../../router/router";
 import api from "../../api";
 import StoredDataPreviewTab from "./PreviewTab/StoredDataPreviewTab";
 import ReportTab from "./ReportTab/ReportTab";
+import { useDatastore } from "../../../contexts/datastore";
+import Main from "../../../components/Layout/Main";
 
 type StoredDataDetailsProps = {
     datastoreId: string;
@@ -21,12 +22,7 @@ type StoredDataDetailsProps = {
 };
 const StoredDataDetails: FC<StoredDataDetailsProps> = ({ datastoreId, storedDataId }) => {
     const [reportQueryEnabled, setReportQueryEnabled] = useState(true);
-
-    const datastoreQuery = useQuery<Datastore, CartesApiException>({
-        queryKey: RQKeys.datastore(datastoreId),
-        queryFn: ({ signal }) => api.datastore.get(datastoreId, { signal }),
-        staleTime: 3600000,
-    });
+    const { datastore } = useDatastore();
 
     const reportQuery = useQuery<StoredDataReport, CartesApiException>({
         queryKey: RQKeys.datastore_stored_data_report(datastoreId, storedDataId),
@@ -47,7 +43,7 @@ const StoredDataDetails: FC<StoredDataDetailsProps> = ({ datastoreId, storedData
     const datasheetName = useMemo(() => reportQuery?.data?.stored_data?.tags?.datasheet_name, [reportQuery?.data?.stored_data?.tags?.datasheet_name]);
 
     return (
-        <DatastoreLayout datastoreId={datastoreId} documentTitle={`Détails de donnée stockée ${reportQuery?.data?.stored_data?.name ?? ""}`}>
+        <Main title={`Détails de donnée stockée ${reportQuery?.data?.stored_data?.name ?? ""}`}>
             <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
                 {datasheetName ? (
                     <Button
@@ -92,14 +88,14 @@ const StoredDataDetails: FC<StoredDataDetailsProps> = ({ datastoreId, storedData
                                 },
                                 {
                                     label: "Rapport de génération",
-                                    content: <ReportTab datastoreName={datastoreQuery.data?.name} reportQuery={reportQuery} />,
+                                    content: <ReportTab datastoreName={datastore?.name} reportQuery={reportQuery} />,
                                 },
                             ]}
                         />
                     </div>
                 </div>
             )}
-        </DatastoreLayout>
+        </Main>
     );
 };
 

@@ -9,7 +9,6 @@ import { FC, useCallback, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { ConfigurationTypeEnum, EndpointTypeEnum, PyramidVector, Service, ServiceFormValuesBaseType } from "../../../../../@types/app";
-import DatastoreLayout from "../../../../../components/Layout/DatastoreLayout";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import Wait from "../../../../../components/Utils/Wait";
@@ -25,6 +24,7 @@ import { getPyramidVectorTmsServiceFormDefaultValues } from "../../common/defaul
 import AdditionalInfo from "../../metadata/AdditionalInfo";
 import Description from "../../metadata/Description";
 import UploadMDFile from "../../metadata/UploadMDFile";
+import Main from "../../../../../components/Layout/Main";
 
 export type PyramidVectorTmsServiceFormValuesType = ServiceFormValuesBaseType;
 
@@ -182,7 +182,7 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
     }, [createServiceMutation, editServiceMutation, currentStep, trigger, editMode]);
 
     return (
-        <DatastoreLayout datastoreId={datastoreId} documentTitle={t("title", { editMode })}>
+        <Main title={t("title", { editMode })}>
             <h1>{t("title", { editMode })}</h1>
 
             {pyramidQuery.isLoading || offeringQuery.isLoading ? (
@@ -274,7 +274,7 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
                     </div>
                 </Wait>
             )}
-        </DatastoreLayout>
+        </Main>
     );
 };
 

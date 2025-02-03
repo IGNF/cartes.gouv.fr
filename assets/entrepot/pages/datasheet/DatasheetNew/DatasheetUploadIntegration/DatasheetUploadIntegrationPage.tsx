@@ -1,9 +1,9 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { FC } from "react";
 
-import DatastoreLayout from "../../../../../components/Layout/DatastoreLayout";
 import { useTranslation } from "../../../../../i18n";
 import DatasheetUploadIntegrationDialog from "./DatasheetUploadIntegrationDialog";
+import Main from "../../../../../components/Layout/Main";
 
 type DatasheetUploadIntegrationPageProps = {
     datastoreId: string;
@@ -14,14 +14,14 @@ const DatasheetUploadIntegrationPage: FC<DatasheetUploadIntegrationPageProps> = 
     const { t } = useTranslation("DatasheetUploadIntegration");
 
     return (
-        <DatastoreLayout datastoreId={datastoreId} documentTitle={t("integration_page.title")}>
+        <Main title={t("integration_page.title")}>
             <div className={fr.cx("fr-grid-row")}>
                 <h1>{t("integration_page.title")}</h1>
             </div>
             <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-grid-row--center", "fr-mt-2v")}>
                 <DatasheetUploadIntegrationDialog datastoreId={datastoreId} uploadId={uploadId} datasheetName={datasheetName} />
             </div>
-        </DatastoreLayout>
+        </Main>
     );
 };
 

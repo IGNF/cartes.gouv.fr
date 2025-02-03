@@ -1,4 +1,3 @@
-import { BreadcrumbProps } from "@codegouvfr/react-dsfr/Breadcrumb";
 import { useQuery } from "@tanstack/react-query";
 import { FC, PropsWithChildren, memo, useMemo } from "react";
 
@@ -7,30 +6,60 @@ import { datastoreNavItems } from "../../config/navItems/datastoreNavItems";
 import api from "../../entrepot/api";
 import RQKeys from "../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../modules/jsonFetch";
-import PageNotFound from "../../pages/error/PageNotFound";
-import AppLayout from "./AppLayout";
+import AppLayout, { AppLayoutProps } from "./AppLayout";
+import { DatastoreProvider } from "../../contexts/datastore";
+import LoadingText from "../Utils/LoadingText";
+import PageNotFoundWithLayout from "../../pages/error/PageNotFoundWithLayout";
+import { useAuthStore } from "../../stores/AuthStore";
+import Main from "./Main";
+import { CommunityMemberDtoRightsEnum } from "../../@types/entrepot";
+import Forbidden from "../../pages/error/Forbidden";
 
-type DatastoreLayoutProps = {
+export interface DatastoreLayoutProps extends Omit<AppLayoutProps, "navItems"> {
+    accessRight?: CommunityMemberDtoRightsEnum;
     datastoreId: string;
-    documentTitle?: string;
-    customBreadcrumbProps?: BreadcrumbProps;
-};
-const DatastoreLayout: FC<PropsWithChildren<DatastoreLayoutProps>> = ({ datastoreId, documentTitle, customBreadcrumbProps, children }) => {
-    const datastoreQuery = useQuery<Datastore, CartesApiException>({
+}
+const DatastoreLayout: FC<PropsWithChildren<DatastoreLayoutProps>> = (props) => {
+    const { accessRight, datastoreId, children, ...rest } = props;
+
+    const { user } = useAuthStore();
+    const { data, error, failureReason, isFetching, isLoading, status } = useQuery<Datastore, CartesApiException>({
         queryKey: RQKeys.datastore(datastoreId),
         queryFn: ({ signal }) => api.datastore.get(datastoreId, { signal }),
         staleTime: 3600000,
     });
 
-    const navItems = useMemo(() => datastoreNavItems(datastoreQuery.data), [datastoreQuery.data]);
+    const navItems = useMemo(() => datastoreNavItems(data), [data]);
 
-    if (datastoreQuery?.error?.code === 404 || datastoreQuery.failureReason?.code === 404) {
-        return <PageNotFound />;
+    const isAuthorized = useMemo(() => {
+        const communityMember = user?.communities_member.find((member) => member.community?.datastore === datastoreId);
+        if (!communityMember) {
+            return false; // is not part of the community
+        }
+        const { community, rights } = communityMember;
+        const isSupervisor = community?.supervisor === user?.id;
+        return isSupervisor || !accessRight || rights?.includes(accessRight);
+    }, [accessRight, user?.communities_member, datastoreId, user?.id]);
+
+    if (isLoading) {
+        return (
+            <AppLayout {...rest}>
+                <Main>
+                    <LoadingText withSpinnerIcon />
+                </Main>
+            </AppLayout>
+        );
+    }
+
+    if (error?.code === 404 || failureReason?.code === 404 || !data) {
+        return <PageNotFoundWithLayout />;
     }
 
     return (
-        <AppLayout navItems={navItems} documentTitle={documentTitle} customBreadcrumbProps={customBreadcrumbProps}>
-            {children}
+        <AppLayout {...rest} navItems={navItems}>
+            <DatastoreProvider datastore={data} isFetching={isFetching} status={status}>
+                {isAuthorized ? children : <Forbidden />}
+            </DatastoreProvider>
         </AppLayout>
     );
 };

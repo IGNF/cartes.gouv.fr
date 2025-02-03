@@ -2,6 +2,7 @@ import { useEffect } from "react";
 
 import AppLayout from "../components/Layout/AppLayout";
 import SymfonyRouting from "../modules/Routing";
+import Main from "../components/Layout/Main";
 
 const RedirectToLogin = () => {
     useEffect(() => {
@@ -9,8 +10,10 @@ const RedirectToLogin = () => {
     }, []);
 
     return (
-        <AppLayout documentTitle="Redirection vers la page de connexion">
-            <h1>Redirection vers la page de connexion...</h1>
+        <AppLayout>
+            <Main title="Redirection vers la page de connexion">
+                <h1>Redirection vers la page de connexion...</h1>
+            </Main>
         </AppLayout>
     );
 };

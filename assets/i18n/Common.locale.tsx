@@ -25,6 +25,7 @@ const { i18n } = declareComponentKeys<
     | "published"
     | "not_published"
     | "information"
+    | "no_necessary_rights"
     | "mandatory_fields"
     | "none"
     | "new_window"
@@ -60,6 +61,7 @@ export const commonFrTranslations: Translations<"fr">["Common"] = {
     published: "Publié",
     not_published: "Non publié",
     information: "Information",
+    no_necessary_rights: "Vous n'avez pas les droits nécessaires pour visualiser les membres de cet espace de travail.",
     mandatory_fields: "Sauf mention contraire “(optionnel)” dans le label, tous les champs sont obligatoires.",
     none: "Aucune",
     new_window: "ouvre une nouvelle fenêtre",
@@ -94,6 +96,7 @@ export const commonEnTranslations: Translations<"en">["Common"] = {
     published: "Published",
     not_published: "Not published",
     information: "Information",
+    no_necessary_rights: "You do not have the necessary rights to view and modify the users of this community.",
     mandatory_fields: "All fields are mandatory unless label states “optional”",
     none: "None",
     new_window: "new window",

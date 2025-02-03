@@ -1,14 +1,14 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import CallOut from "@codegouvfr/react-dsfr/CallOut";
 
-import AppLayout from "../components/Layout/AppLayout";
 import { routes } from "../router/router";
+import Main from "../components/Layout/Main";
 
 import "../sass/pages/offer.scss";
 
 const Offer = () => {
     return (
-        <AppLayout documentTitle="Offre">
+        <Main title="Offre">
             <h1>Offre</h1>
 
             <div className={fr.cx("fr-grid-row")}>
@@ -141,7 +141,7 @@ const Offer = () => {
                     </ul>
                 </div>
             </div>
-        </AppLayout>
+        </Main>
     );
 };
 

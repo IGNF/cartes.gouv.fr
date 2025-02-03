@@ -1,11 +1,11 @@
 import { fr } from "@codegouvfr/react-dsfr";
 
-import AppLayout from "../../components/Layout/AppLayout";
 import { routes } from "../../router/router";
+import Main from "../../components/Layout/Main";
 
 const SiteMap = () => {
     return (
-        <AppLayout documentTitle="Plan du site">
+        <Main title="Plan du site">
             <h1>Plan du site</h1>
 
             <section className={fr.cx("fr-py-6v")}>
@@ -73,7 +73,7 @@ const SiteMap = () => {
                     </div>
                 </div>
             </section>
-        </AppLayout>
+        </Main>
     );
 };
 

@@ -11,7 +11,6 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
 import { GeonetworkMetadataResponse } from "../../../@types/app";
-import AppLayout from "../../../components/Layout/AppLayout";
 import LoadingText from "../../../components/Utils/LoadingText";
 import Wait from "../../../components/Utils/Wait";
 import { useTranslation } from "../../../i18n/i18n";
@@ -21,6 +20,7 @@ import { CartesApiException, jsonFetch } from "../../../modules/jsonFetch";
 import { catalogueUrl, routes } from "../../../router/router";
 import { useAuthStore } from "../../../stores/AuthStore";
 import api from "../../api";
+import Main from "../../../components/Layout/Main";
 
 type AskForAccesses = {
     fileIdentifier: string;
@@ -121,108 +121,106 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
     };
 
     return (
-        <AppLayout>
-            <>
-                {query.error ? (
-                    <Alert
-                        severity="error"
-                        closable={false}
-                        title={query.error.message}
-                        description={<Button linkProps={routes.dashboard_pro().link}>{t("back_to_dashboard")}</Button>}
-                    />
-                ) : (
-                    <>
-                        <h1>{t("title")}</h1>
-                        {query.isLoading ? (
-                            <LoadingText />
-                        ) : sendError !== undefined ? (
-                            <Alert severity={"error"} title={tCommon("error")} description={sendError} className={fr.cx("fr-my-3w")} />
-                        ) : query.data?.private_layers.length ? (
-                            <div>
-                                {t("explain", { url: catalogueDatasheetUrl })}
-                                <Checkbox
-                                    legend={null}
-                                    options={query.data?.private_layers.map((layer) => {
-                                        const label = (
-                                            <span>
-                                                {layer.name}
-                                                {layer.endpointType && (
-                                                    <Badge noIcon={true} severity={"info"} className={fr.cx("fr-ml-2v")}>
-                                                        {layer.endpointType}
-                                                    </Badge>
-                                                )}
-                                            </span>
-                                        );
-                                        return {
-                                            label: label,
-                                            nativeInputProps: {
-                                                ...register("layers"),
-                                                value: layer.name,
+        <Main>
+            {query.error ? (
+                <Alert
+                    severity="error"
+                    closable={false}
+                    title={query.error.message}
+                    description={<Button linkProps={routes.dashboard_pro().link}>{t("back_to_dashboard")}</Button>}
+                />
+            ) : (
+                <>
+                    <h1>{t("title")}</h1>
+                    {query.isLoading ? (
+                        <LoadingText />
+                    ) : sendError !== undefined ? (
+                        <Alert severity={"error"} title={tCommon("error")} description={sendError} className={fr.cx("fr-my-3w")} />
+                    ) : query.data?.private_layers.length ? (
+                        <div>
+                            {t("explain", { url: catalogueDatasheetUrl })}
+                            <Checkbox
+                                legend={null}
+                                options={query.data?.private_layers.map((layer) => {
+                                    const label = (
+                                        <span>
+                                            {layer.name}
+                                            {layer.endpointType && (
+                                                <Badge noIcon={true} severity={"info"} className={fr.cx("fr-ml-2v")}>
+                                                    {layer.endpointType}
+                                                </Badge>
+                                            )}
+                                        </span>
+                                    );
+                                    return {
+                                        label: label,
+                                        nativeInputProps: {
+                                            ...register("layers"),
+                                            value: layer.name,
+                                        },
+                                    };
+                                })}
+                                state={errors.layers ? "error" : "default"}
+                                stateRelatedMessage={errors?.layers?.message?.toString()}
+                            />
+                            <Checkbox
+                                legend={t("beneficiaries")}
+                                hintText={t("beneficiaries_hintext")}
+                                options={[
+                                    {
+                                        label: t("myself"),
+                                        nativeInputProps: {
+                                            onChange: (e) => {
+                                                const checked = e.currentTarget.checked;
+                                                setValue("myself", checked);
                                             },
-                                        };
-                                    })}
-                                    state={errors.layers ? "error" : "default"}
-                                    stateRelatedMessage={errors?.layers?.message?.toString()}
-                                />
-                                <Checkbox
-                                    legend={t("beneficiaries")}
-                                    hintText={t("beneficiaries_hintext")}
-                                    options={[
-                                        {
-                                            label: t("myself"),
-                                            nativeInputProps: {
-                                                onChange: (e) => {
-                                                    const checked = e.currentTarget.checked;
-                                                    setValue("myself", checked);
-                                                },
-                                                checked: myself === true,
-                                                value: "myself",
-                                            },
+                                            checked: myself === true,
+                                            value: "myself",
                                         },
-                                    ]}
-                                />
-                                <Checkbox legend={null} options={beneficiariesOptions} />
-                                <ButtonsGroup
-                                    buttons={[
-                                        {
-                                            linkProps: routes.dashboard_pro().link,
-                                            children: t("back_to_dashboard"),
-                                            priority: "secondary",
-                                        },
-                                        {
-                                            children: tCommon("send"),
-                                            onClick: handleSubmit(onSubmit),
-                                        },
-                                    ]}
-                                    inlineLayoutWhen="always"
-                                    alignment="right"
-                                    className={fr.cx("fr-mt-2w")}
-                                />
+                                    },
+                                ]}
+                            />
+                            <Checkbox legend={null} options={beneficiariesOptions} />
+                            <ButtonsGroup
+                                buttons={[
+                                    {
+                                        linkProps: routes.dashboard_pro().link,
+                                        children: t("back_to_dashboard"),
+                                        priority: "secondary",
+                                    },
+                                    {
+                                        children: tCommon("send"),
+                                        onClick: handleSubmit(onSubmit),
+                                    },
+                                ]}
+                                inlineLayoutWhen="always"
+                                alignment="right"
+                                className={fr.cx("fr-mt-2w")}
+                            />
+                        </div>
+                    ) : (
+                        <div>
+                            <p>{t("explain_no_access")}</p>
+                            <Button linkProps={routes.dashboard_pro().link}>{t("back_to_dashboard")}</Button>
+                        </div>
+                    )}
+                </>
+            )}
+            {isSending && (
+                <Wait>
+                    <div className={fr.cx("fr-container")}>
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
+                            <div className={fr.cx("fr-col-2")}>
+                                <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg") + " frx-icon-spin"} />
                             </div>
-                        ) : (
-                            <div>
-                                <p>{t("explain_no_access")}</p>
-                                <Button linkProps={routes.dashboard_pro().link}>{t("back_to_dashboard")}</Button>
-                            </div>
-                        )}
-                    </>
-                )}
-                {isSending && (
-                    <Wait>
-                        <div className={fr.cx("fr-container")}>
-                            <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                                <div className={fr.cx("fr-col-2")}>
-                                    <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg") + " frx-icon-spin"} />
-                                </div>
-                                <div className={fr.cx("fr-col-10")}>
-                                    <h6 className={fr.cx("fr-h6", "fr-m-0")}>{t("sending_message")}</h6>
-                                </div>
+                            <div className={fr.cx("fr-col-10")}>
+                                <h6 className={fr.cx("fr-h6", "fr-m-0")}>{t("sending_message")}</h6>
                             </div>
                         </div>
-                    </Wait>
-                )}
-            </>
-        </AppLayout>
+                    </div>
+                </Wait>
+            )}
+        </Main>
     );
 };
 

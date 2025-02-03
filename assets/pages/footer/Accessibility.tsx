@@ -1,13 +1,12 @@
 import { fr } from "@codegouvfr/react-dsfr";
 
-import AppLayout from "../../components/Layout/AppLayout";
 import { routes } from "../../router/router";
+import Main from "../../components/Layout/Main";
 
 const Accessibility = () => {
     const siteName = "cartes.gouv.fr";
-
     return (
-        <AppLayout documentTitle="Accessibilité">
+        <Main title="Accessibilité">
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-12", "fr-col-md-8", "fr-py-12v")}>
                     <h1>Accessibilité&nbsp;: partiellement conforme</h1>
@@ -192,7 +191,7 @@ const Accessibility = () => {
                     </ul>
                 </div>
             </div>
-        </AppLayout>
+        </Main>
     );
 };
 

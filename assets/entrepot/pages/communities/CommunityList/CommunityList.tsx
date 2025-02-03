@@ -9,10 +9,8 @@ import { FC, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { CommunityListResponseDto } from "../../../../@types/entrepot";
-import AppLayout from "../../../../components/Layout/AppLayout";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
-import { datastoreNavItems } from "../../../../config/navItems/datastoreNavItems";
 import { useTranslation } from "../../../../i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
@@ -21,13 +19,12 @@ import { regex, removeDiacritics } from "../../../../utils";
 import api from "../../../api";
 
 import "../../../../sass/pages/community_list.scss";
+import Main from "../../../../components/Layout/Main";
 
 const joinCommunityModal = createModal({
     id: "join-community-modal",
     isOpenedByDefault: false,
 });
-
-const navItems = datastoreNavItems();
 
 const CommunityList: FC = () => {
     const { t } = useTranslation("CommunityList");
@@ -88,7 +85,7 @@ const CommunityList: FC = () => {
     };
 
     return (
-        <AppLayout navItems={navItems} documentTitle={t("title")}>
+        <Main title={t("title")}>
             <h1>{t("title")}</h1>
 
             <div className={fr.cx("fr-container", "fr-py-2w")}>
@@ -184,7 +181,7 @@ const CommunityList: FC = () => {
                     document.body
                 )}
             </>
-        </AppLayout>
+        </Main>
     );
 };
 

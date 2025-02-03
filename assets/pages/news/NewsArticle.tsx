@@ -4,12 +4,12 @@ import { FC } from "react";
 import { symToStr } from "tsafe/symToStr";
 
 import { type NewsArticle } from "../../@types/newsArticle";
-import AppLayout from "../../components/Layout/AppLayout";
 import articles from "../../data/actualites.json";
 import { useTranslation } from "../../i18n/i18n";
 import { appRoot, routes } from "../../router/router";
 import { formatDateFromISO } from "../../utils";
 import PageNotFound from "../error/PageNotFound";
+import Main from "../../components/Layout/Main";
 
 type NewsArticleProps = {
     slug: string;
@@ -31,13 +31,13 @@ const NewsArticle: FC<NewsArticleProps> = ({ slug }) => {
     ));
 
     return (
-        <AppLayout
-            documentTitle={newsArticle?.title}
+        <Main
             customBreadcrumbProps={{
                 homeLinkProps: routes.home().link,
                 segments: [{ label: tBreadcrumb("news"), linkProps: routes.news_list().link }],
                 currentPageLabel: newsArticle?.breadcrumb ?? newsArticle.title,
             }}
+            title={newsArticle?.title}
         >
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
@@ -82,7 +82,7 @@ const NewsArticle: FC<NewsArticleProps> = ({ slug }) => {
                     </div>
                 </div>
             </div>
-        </AppLayout>
+        </Main>
     );
 };
 

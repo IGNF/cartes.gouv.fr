@@ -3,12 +3,14 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { Tile } from "@codegouvfr/react-dsfr/Tile";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
+import avatarSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/digital/avatar.svg?no-inline";
+import mailSendSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/digital/mail-send.svg?no-inline";
+import humanCoopSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/environment/human-cooperation.svg?no-inline";
+import padlockSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/system/padlock.svg?no-inline";
 
 import { CartesUser, Datastore } from "../../../@types/app";
-import AppLayout from "../../../components/Layout/AppLayout";
 import LoadingIcon from "../../../components/Utils/LoadingIcon";
 import Skeleton from "../../../components/Utils/Skeleton";
-import { datastoreNavItems } from "../../../config/navItems/datastoreNavItems";
 import { useTranslation } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../modules/jsonFetch";
@@ -17,16 +19,10 @@ import { useApiEspaceCoStore } from "../../../stores/ApiEspaceCoStore";
 import { useAuthStore } from "../../../stores/AuthStore";
 import { getArrayRange } from "../../../utils";
 import api from "../../api";
-
-import avatarSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/digital/avatar.svg?no-inline";
-import mailSendSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/digital/mail-send.svg?no-inline";
-import humanCoopSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/environment/human-cooperation.svg?no-inline";
-import padlockSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/system/padlock.svg?no-inline";
+import Main from "../../../components/Layout/Main";
 
 const DashboardPro = () => {
     const { t } = useTranslation("DashboardPro");
-
-    const navItems = datastoreNavItems();
 
     const user = useAuthStore((state) => state.user);
     const setUser = useAuthStore((state) => state.setUser);
@@ -62,23 +58,24 @@ const DashboardPro = () => {
         mutate(undefined, { onSuccess: () => routes.datasheet_list({ datastoreId: datastoreId }).push() });
     };
 
-    const infoBannerMsg = (
-        <>
-            Votre avis compte ! Participez à notre questionnaire pour nous aider à améliorer la fonctionnalité d’alimentation et de diffusion. Merci pour votre
-            contribution précieuse.{" "}
-            <a
-                href="https://analytics-eu.clickdimensions.com/ignfr-agj1s/pages/dhzzawfjee4wanoryvba.html?PageId=01d97c744961ef11bfe3000d3ab6156c"
-                target="_blank"
-                rel="noreferrer"
-                title="Questionnaire sur la fonctionnalité alimentation et diffusion - Ouvre une nouvelle fenêtre"
-            >
-                Participer
-            </a>
-        </>
-    );
-
     return (
-        <AppLayout navItems={navItems} documentTitle={t("document_title")} infoBannerMsg={infoBannerMsg}>
+        <Main
+            infoBannerMsg={
+                <>
+                    Votre avis compte ! Participez à notre questionnaire pour nous aider à améliorer la fonctionnalité d’alimentation et de diffusion. Merci
+                    pour votre contribution précieuse.{" "}
+                    <a
+                        href="https://analytics-eu.clickdimensions.com/ignfr-agj1s/pages/dhzzawfjee4wanoryvba.html?PageId=01d97c744961ef11bfe3000d3ab6156c"
+                        target="_blank"
+                        rel="noreferrer"
+                        title="Questionnaire sur la fonctionnalité alimentation et diffusion - Ouvre une nouvelle fenêtre"
+                    >
+                        Participer
+                    </a>
+                </>
+            }
+            title={t("document_title")}
+        >
             <h1>Bienvenue {user?.first_name ?? user?.user_name}</h1>
 
             <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mb-3w")}>
@@ -190,7 +187,7 @@ const DashboardPro = () => {
                     <Button linkProps={routes.espaceco_community_list().link}>{t("espaceco_frontoffice_list")}</Button>
                 </div>
             )}
-        </AppLayout>
+        </Main>
     );
 };
 

@@ -1,16 +1,15 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { FC } from "react";
-
-import AppLayout from "../../components/Layout/AppLayout";
-import { routes } from "../../router/router";
-
 import ovoidSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/background/ovoid.svg";
 import technicalErrorSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/system/technical-error.svg";
 
+import { routes } from "../../router/router";
+import Main from "../../components/Layout/Main";
+
 const PageNotFound: FC = () => {
     return (
-        <AppLayout documentTitle="Page non trouvée">
+        <Main title="Page non trouvée">
             <div
                 className={fr.cx(
                     "fr-my-7w",
@@ -65,7 +64,7 @@ const PageNotFound: FC = () => {
                     </svg>
                 </div>
             </div>
-        </AppLayout>
+        </Main>
     );
 };
 

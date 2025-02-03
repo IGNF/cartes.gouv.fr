@@ -11,7 +11,6 @@ import { createPortal } from "react-dom";
 import { symToStr } from "tsafe/symToStr";
 
 import { type Datasheet, type DatasheetDetailed, type Metadata } from "../../../../../@types/app";
-import DatastoreLayout from "../../../../../components/Layout/DatastoreLayout";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import Wait from "../../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../../i18n/i18n";
@@ -24,6 +23,7 @@ import DatasheetThumbnail from "../DatasheetThumbnail";
 import DocumentsTab from "../DocumentsTab/DocumentsTab";
 import MetadataTab from "../MetadataTab/MetadataTab";
 import ServicesListTab from "../ServiceListTab/ServicesListTab";
+import Main from "../../../../../components/Layout/Main";
 
 const deleteDataConfirmModal = createModal({
     id: "delete-data-confirm-modal",
@@ -96,7 +96,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
     });
 
     return (
-        <DatastoreLayout datastoreId={datastoreId} documentTitle={`Données ${datasheetName}`}>
+        <Main title={`Données ${datasheetName}`}>
             <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-4w")}>
                 <Button
                     iconId="fr-icon-arrow-left-s-line"
@@ -292,7 +292,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                     document.body
                 )}
             </>
-        </DatastoreLayout>
+        </Main>
     );
 };
 

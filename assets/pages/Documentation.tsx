@@ -1,9 +1,9 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import AppLayout from "../components/Layout/AppLayout";
+import Main from "../components/Layout/Main";
 
 const Documentation = () => {
     return (
-        <AppLayout documentTitle="Documentation">
+        <Main title="Documentation">
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
                     <h1>Documentation</h1>
@@ -43,7 +43,7 @@ const Documentation = () => {
                     </p>
                 </div>
             </div>
-        </AppLayout>
+        </Main>
     );
 };
 

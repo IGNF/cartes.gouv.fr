@@ -7,16 +7,16 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { compareAsc } from "date-fns";
 import { FC, ReactNode, useMemo, useState } from "react";
 import api from "../../../api";
-import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { routes } from "../../../../router/router";
-import { Datastore } from "../../../../@types/app";
 import { DatastorePermissionResponseDto } from "../../../../@types/entrepot";
 import ConfirmDialog, { ConfirmDialogModal } from "../../../../components/Utils/ConfirmDialog";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import Wait from "../../../../components/Utils/Wait";
+import { useDatastore } from "../../../../contexts/datastore";
+import Main from "../../../../components/Layout/Main";
 
 type DatastoreManagePermissionsProps = {
     datastoreId: string;
@@ -29,11 +29,7 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
     const queryClient = useQueryClient();
 
     // Le datastore
-    const { data: datastore, status: datastoreStatus } = useQuery<Datastore>({
-        queryKey: RQKeys.datastore(datastoreId),
-        queryFn: ({ signal }) => api.datastore.get(datastoreId, { signal }),
-        staleTime: 3600000,
-    });
+    const { datastore, status: datastoreStatus } = useDatastore();
 
     // Les permissions
     const { data: permissions, status: permissionStatus } = useQuery<DatastorePermissionResponseDto[]>({
@@ -119,7 +115,7 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
     }, [datastoreId, permissions, tCommon, t]);
 
     return (
-        <DatastoreLayout datastoreId={datastoreId} documentTitle={t("list.title", { datastoreName: datastore?.name })}>
+        <Main title={t("list.title", { datastoreName: datastore?.name })}>
             <h1>{t("list.title", { datastoreName: datastore?.name })}</h1>
             {removeStatus === "error" && <Alert severity={"error"} closable title={tCommon("error")} description={removeError.message} />}
             {removeStatus === "pending" && (
@@ -148,7 +144,7 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
                     }
                 }}
             />
-        </DatastoreLayout>
+        </Main>
     );
 };
 

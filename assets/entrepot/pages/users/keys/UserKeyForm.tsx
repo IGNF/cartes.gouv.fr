@@ -11,10 +11,8 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { KeyFormValuesType, UserKeyDetailedWithAccessesResponseDto, UserKeyInfoDtoTypeEnum, UserKeyWithAccessesResponseDto } from "../../../../@types/app";
 import { PermissionWithOfferingsDetailsResponseDto, UserKeyResponseDto, UserKeyResponseDtoTypeEnum } from "../../../../@types/entrepot";
-import AppLayout from "../../../../components/Layout/AppLayout";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
-import { datastoreNavItems } from "../../../../config/navItems/datastoreNavItems";
 import { getTranslation, useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
@@ -26,6 +24,7 @@ import SecurityOptionsForm from "./SecurityOptionsForm";
 import ServicesForm from "./ServicesForm";
 import { getSecurityOptionsSchema, getServicesSchema } from "./ValidationSchemas";
 import { UserKeyDefaultValues, getDefaultValues } from "./utils/DefaultValues";
+import Main from "../../../../components/Layout/Main";
 
 const { t } = getTranslation("UserKey");
 
@@ -58,7 +57,6 @@ const createRequestBody = (editMode: boolean, formValues: KeyFormValuesType) => 
 };
 
 const UserKeyForm: FC<UserKeyFormProps> = ({ keyId }) => {
-    const navItems = datastoreNavItems();
     const { t: tCommon } = useTranslation("Common");
 
     /* Mode edition ? */
@@ -219,7 +217,7 @@ const UserKeyForm: FC<UserKeyFormProps> = ({ keyId }) => {
     });
 
     return (
-        <AppLayout documentTitle={t("title", { keyId: keyId })} navItems={navItems}>
+        <Main title={t("title", { keyId })}>
             <h1>{t("title", { keyId: keyId })}</h1>
             {(addKeyStatus === "pending" || updatekeyStatus === "pending") && (
                 <Wait>
@@ -268,7 +266,7 @@ const UserKeyForm: FC<UserKeyFormProps> = ({ keyId }) => {
                     />
                 </>
             )}
-        </AppLayout>
+        </Main>
     );
 };
 
