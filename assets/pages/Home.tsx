@@ -14,11 +14,11 @@ import { useAuthStore } from "@/stores/AuthStore";
 import "@/sass/pages/home.scss";
 
 import homeImgUrl from "@/img/home/home.png";
-import dataVisuSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/digital/data-visualization.svg";
-import humanCoopSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/environment/human-cooperation.svg";
-import locationFranceSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/map/location-france.svg";
-import mapSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/map/map.svg";
-import systemSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/system/system.svg";
+import dataVisuSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/digital/data-visualization.svg?no-inline";
+import humanCoopSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/environment/human-cooperation.svg?no-inline";
+import locationFranceSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/map/location-france.svg?no-inline";
+import mapSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/map/map.svg?no-inline";
+import systemSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/system/system.svg?no-inline";
 
 const Home = () => {
     const { params } = useRoute();
