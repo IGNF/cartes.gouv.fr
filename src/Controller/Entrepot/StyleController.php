@@ -310,7 +310,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
 
         // suppression des fichiers de style venant de cartes.gouv.fr (voir styleUrlRegex)
         $metadataList = array_values(array_filter($metadataList, function ($metadata) use ($styleUrlRegex) {
-            return !('application/json' === $metadata['format'] && preg_match($styleUrlRegex, $metadata['url']));
+            return !('application/json' === $metadata['format'] && preg_match($styleUrlRegex, $metadata['url']) && ConfigurationMetadataTypes::OTHER === $metadata['type']);
         }));
 
         // ajout des fichiers de style à jour dans la metadata de la configuration
@@ -319,7 +319,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
                 $metadataList[] = [
                     'format' => 'application/json',
                     'url' => $layer['url'],
-                    'type' => ConfigurationMetadataTypes::Other,
+                    'type' => ConfigurationMetadataTypes::OTHER,
                 ];
             }
         }

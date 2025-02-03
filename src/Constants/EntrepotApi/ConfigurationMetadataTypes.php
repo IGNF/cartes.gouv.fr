@@ -8,5 +8,5 @@ final readonly class ConfigurationMetadataTypes
     public const FGDC = 'FGDC';
     public const TC211 = 'TC211';
     public const _19139 = '19139';
-    public const Other = 'Other';
+    public const OTHER = 'Other';
 }
