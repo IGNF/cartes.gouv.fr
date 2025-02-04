@@ -38,8 +38,6 @@ const CommunityList = lazy(() => import("../entrepot/pages/communities/Community
 
 const DashboardPro = lazy(() => import("../entrepot/pages/dashboard/DashboardPro"));
 
-const baseDatastoreNavItems = datastoreNavItems();
-
 interface IGroupAppProps {
     route: Route<typeof routes>;
 }
@@ -48,6 +46,7 @@ function GroupApp(props: IGroupAppProps) {
     const { route } = props;
 
     const content: { render: JSX.Element; layoutProps?: AppLayoutProps } | undefined = useMemo(() => {
+        const baseDatastoreNavItems = datastoreNavItems();
         switch (route.name) {
             case "home":
                 return {
