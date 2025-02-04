@@ -59,6 +59,7 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                 .required(t("datasheet.name_mandatory_error"))
                 .max(99, t("datasheet.name_max_length_error"))
                 .matches(regex.datasheet_name, t("datasheet.name_regex_error"))
+                .transform((value) => value.trim())
                 .test({
                     name: "is-unique",
                     test(dataName, ctx) {
