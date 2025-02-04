@@ -152,11 +152,13 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
                                                                 <li key={service.offering._id}>{service.offering.layer_name}</li>
                                                             ))}
                                                         </ul>
-                                                        <UserKeyLink
-                                                            permissionId={services[0].permission._id}
-                                                            offeringId={services[0].offering._id}
-                                                            hash={(accessKey.type_infos as HashInfoDto).hash}
-                                                        />
+                                                        {accessKey.type_infos && (accessKey.type_infos as HashInfoDto).hash && (
+                                                            <UserKeyLink
+                                                                permissionId={services[0].permission._id}
+                                                                offeringId={services[0].offering._id}
+                                                                hash={(accessKey.type_infos as HashInfoDto).hash}
+                                                            />
+                                                        )}
                                                     </div>
                                                 );
                                             })}

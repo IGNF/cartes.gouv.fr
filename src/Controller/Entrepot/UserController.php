@@ -19,7 +19,7 @@ use Symfony\Component\Routing\Annotation\Route;
     '/api/users',
     name: 'cartesgouvfr_api_user_',
     options: ['expose' => true],
-    // condition: 'request.isXmlHttpRequest()'
+    condition: 'request.isXmlHttpRequest()'
 )]
 class UserController extends AbstractController implements ApiControllerInterface
 {
