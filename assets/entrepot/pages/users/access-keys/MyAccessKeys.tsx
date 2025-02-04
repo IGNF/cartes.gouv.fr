@@ -1,5 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import Tabs from "@codegouvfr/react-dsfr/Tabs";
+import { SideMenu } from "@codegouvfr/react-dsfr/SideMenu";
 import { useQuery } from "@tanstack/react-query";
 import { FC } from "react";
 
@@ -13,11 +13,20 @@ import RQKeys from "../../../../modules/entrepot/RQKeys";
 import api from "../../../api";
 import UserKeysListTab from "../keys/UserKeysListTab/UserKeysListTab";
 import PermissionsListTab from "../permissions/PermissionsListTab";
+import { routes } from "../../../../router/router";
+
+type MyAccessKeysProps = {
+    activeTab: string;
+};
 
 const { t } = getTranslation("MyAccessKeys");
 
-const MyAccessKeys: FC = () => {
+const MyAccessKeys: FC<MyAccessKeysProps> = ({ activeTab }) => {
     const navItems = datastoreNavItems();
+
+    const tab = activeTab;
+
+    const documentTitle = tab === "keys" ? t("my_access_keys") : t("my_permissions");
 
     // Les cles d'acces
     const { data: keys, isLoading: isLoadingKeys } = useQuery<UserKeyDetailedWithAccessesResponseDto[]>({
@@ -34,29 +43,54 @@ const MyAccessKeys: FC = () => {
     });
 
     return (
-        <AppLayout documentTitle={t("title")} navItems={navItems}>
+        <AppLayout documentTitle={documentTitle} navItems={navItems}>
             {isLoadingKeys || isLoadingPermissions ? (
                 <LoadingText />
             ) : (
                 <div className={fr.cx("fr-grid-row")}>
-                    <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
-                        <h1>{t("title")}</h1>
-                        {t("explain")}
-                        <Tabs
-                            tabs={[
+                    <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
+                        <SideMenu
+                            align="left"
+                            burgerMenuButtonText={"Dans cette rubrique"}
+                            items={[
                                 {
-                                    label: t("my_keys"),
-                                    iconId: "ri-key-2-line",
-                                    isDefault: true,
-                                    content: <UserKeysListTab keys={keys} permissions={permissions} />,
+                                    isActive: tab === "keys",
+                                    linkProps: {
+                                        href: "#",
+                                        onClick: async () => {
+                                            routes.my_access_keys().push();
+                                        },
+                                    },
+                                    text: t("my_access_keys"),
                                 },
                                 {
-                                    label: t("permissions"),
-                                    iconId: "ri-lock-line",
-                                    content: <PermissionsListTab permissions={permissions} />,
+                                    isActive: tab === "permissions",
+                                    linkProps: {
+                                        href: "#",
+                                        onClick: async () => {
+                                            routes.my_permissions().push();
+                                        },
+                                    },
+                                    text: t("my_permissions"),
                                 },
                             ]}
                         />
+                    </div>
+
+                    <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
+                        {tab === "keys" ? (
+                            <>
+                                <h1>{t("my_access_keys")}</h1>
+                                {t("explain_my_keys")}
+                                <UserKeysListTab keys={keys} permissions={permissions} />
+                            </>
+                        ) : (
+                            <>
+                                <h1>{t("my_permissions")}</h1>
+                                {t("explain_my_permissions")}
+                                <PermissionsListTab permissions={permissions} />
+                            </>
+                        )}
                     </div>
                 </div>
             )}

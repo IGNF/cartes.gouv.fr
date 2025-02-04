@@ -19,6 +19,7 @@ const { i18n } = declareComponentKeys<
     | "accesses_request"
     | "my_account"
     | "my_access_keys"
+    | "my_permissions"
     | "user_key_add"
     | "user_key_edit"
     | "datastore_create_request"
@@ -68,6 +69,7 @@ export const BreadcrumbFrTranslations: Translations<"fr">["Breadcrumb"] = {
     accesses_request: "Demande d'accès à un service privé",
     my_account: "Mon compte",
     my_access_keys: "Mes clés d'accès",
+    my_permissions: "Mes permissions",
     user_key_add: "Création d'une clé",
     user_key_edit: "Modification d'une clé",
     datastore_create_request: "Demande de création d'un espace de travail",
@@ -116,6 +118,7 @@ export const BreadcrumbEnTranslations: Translations<"en">["Breadcrumb"] = {
     accesses_request: "Request to private resources",
     my_account: "My account",
     my_access_keys: "My access keys",
+    my_permissions: "My permissions",
     user_key_add: "Create key",
     user_key_edit: "Modify key",
     datastore_create_request: "Request to create a workspace",

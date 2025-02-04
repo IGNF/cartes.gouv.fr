@@ -3,32 +3,39 @@ import { declareComponentKeys } from "i18nifty";
 
 import { Translations } from "../../../../i18n/types";
 
-const { i18n } = declareComponentKeys<"title" | { K: "explain"; R: JSX.Element } | "my_keys" | "permissions">()("MyAccessKeys");
+const { i18n } = declareComponentKeys<
+    "my_access_keys" | "my_permissions" | { K: "explain_my_keys"; R: JSX.Element } | { K: "explain_my_permissions"; R: JSX.Element }
+>()("MyAccessKeys");
 export type I18n = typeof i18n;
 
 export const MyAccessKeysFrTranslations: Translations<"fr">["MyAccessKeys"] = {
-    title: "Mes clés d’accès",
-    explain: (
+    my_access_keys: "Mes clés d’accès",
+    my_permissions: "Mes permissions",
+    explain_my_keys: (
         <>
-            <p>{"Les données publiques sont par défaut disponibles sans création de clé d’accès."}</p>
-            <span>Le cas échéant, cette section vous permet :</span>
-            <ul className={fr.cx("fr-mb-2w")}>
-                <li>{"De consulter les permissions d’accès aux services de diffusion qui vous ont été octroyées par le producteur de la donnée."}</li>
-                <li>
-                    {
-                        "De créer les clés d’accès et d’exploiter dans vos outils (SIG, site internet, etc.) les permissions qui vous ont été accordées par le producteur de la donnée."
-                    }
-                </li>
-            </ul>
+            <p>{"Les données publiques sont par défaut disponibles sans création de clé d'accès."}</p>
+            <p className={fr.cx("fr-mb-6v")}>
+                {
+                    "Sur cette page vous pouvez créer des clés d'accès et les utiliser dans vos outils (SIG, site internet, etc.) pour exploiter les permissions qui vous ont été accordées par les producteurs de données."
+                }
+            </p>
         </>
     ),
-    my_keys: "Mes clés",
-    permissions: "Permissions",
+    explain_my_permissions: (
+        <>
+            <p>{"Sur cette page vous pouvez consulter les permissions qui vous ont été octroyées par les producteurs de données."}</p>
+            <p className={fr.cx("fr-mb-6v")}>
+                {
+                    "Chaque permission ne vous permet d'accéder qu'aux services listés et a une date d'expiration. Vous ne pouvez pas modifier vos permissions, c'est le producteur de la donnée uniquement qui peut la modifier, ajouter de nouveaux services ou prolonger sa durée de validité."
+                }
+            </p>
+        </>
+    ),
 };
 
 export const MyAccessKeysEnTranslations: Translations<"en">["MyAccessKeys"] = {
-    title: "My access keys",
-    explain: undefined,
-    my_keys: "My keys",
-    permissions: "Permissions",
+    my_access_keys: "My keys",
+    my_permissions: "My permissions",
+    explain_my_keys: undefined,
+    explain_my_permissions: undefined,
 };
