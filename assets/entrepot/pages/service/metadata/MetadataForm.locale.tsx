@@ -99,10 +99,10 @@ export const MetadatasFormFrTranslations: Translations<"fr">["MetadatasForm"] = 
     "metadata.description_form.hint_organization_email": "Email de contact de l’organisme",
     "metadata.additionnal_infos_form.metadata_information_title": "Informations sur les métadonnées",
     "metadata.additionnal_infos_form.hierarchy_level": "Type de ressource",
-    "metadata.additionnal_infos_form.hierarchy_level_dataset": "Lot ou série",
+    "metadata.additionnal_infos_form.hierarchy_level_dataset": "Jeu de données",
     "metadata.additionnal_infos_form.hierarchy_level_dataset_hint":
         "Toute donnée faisant directement ou indirectement référence à un lieu ou une zone géographique spécifique",
-    "metadata.additionnal_infos_form.hierarchy_level_series": "Produit ou ensemble de séries",
+    "metadata.additionnal_infos_form.hierarchy_level_series": "Collection de données",
     "metadata.additionnal_infos_form.hierarchy_level_series_hint": "Compilation identifiable de données géographiques",
     "attribution.title": "Attribution",
     "attribution.explain":

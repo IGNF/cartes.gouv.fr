@@ -16,9 +16,9 @@
     {# généalogie de la ressource #}
     {% set hierarchy_level_name = '' %}
     {% if hierarchy_level == 'dataset' %}
-        {% set hierarchy_level_name = 'Lot' %}
+        {% set hierarchy_level_name = 'Jeu de données' %}
     {% elseif hierarchy_level == 'series' %}
-        {% set hierarchy_level_name = 'Produit' %}
+        {% set hierarchy_level_name = 'Collection des données' %}
     {% endif %}
 
     <gmd:hierarchyLevelName>
