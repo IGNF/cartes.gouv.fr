@@ -80,6 +80,14 @@ class UserController extends AbstractController implements ApiControllerInterfac
         return $this->json($permissions);
     }
 
+    #[Route('/me/permissions/{permissionId}', name: 'permission')]
+    public function getPermission(string $permissionId): JsonResponse
+    {
+        $permission = $this->userApiService->getPermission($permissionId);
+
+        return $this->json($permission);
+    }
+
     #[Route('/add_key', name: 'add_key', methods: ['POST'],
         options: ['expose' => true],
         condition: 'request.isXmlHttpRequest()')

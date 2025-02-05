@@ -125,7 +125,9 @@ const RouterRenderer: FC = () => {
             case "my_account":
                 return <Me />;
             case "my_access_keys":
-                return <MyAccessKeys />;
+                return <MyAccessKeys activeTab="keys" />;
+            case "my_permissions":
+                return <MyAccessKeys activeTab="permissions" />;
             case "user_key_add":
                 return <UserKeyForm />;
             case "user_key_edit":

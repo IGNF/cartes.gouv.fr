@@ -41,6 +41,7 @@ const routeDefs = {
     // utilisateur
     my_account: defineRoute(`${appRoot}/mon-compte`),
     my_access_keys: defineRoute(`${appRoot}/mes-cles`),
+    my_permissions: defineRoute(`${appRoot}/mes-permissions`),
     user_key_add: defineRoute(`${appRoot}/mes-cles/ajout`),
     user_key_edit: defineRoute(
         {
