@@ -30,7 +30,6 @@ const UploadDetails: FC<UploadDetailsProps> = ({ datastoreId, uploadId }) => {
     const reportQuery = useQuery<UploadReport, CartesApiException>({
         queryKey: RQKeys.datastore_upload_report(datastoreId, uploadId),
         queryFn: ({ signal }) => api.upload.getUploadReport(datastoreId, uploadId, { signal }),
-        staleTime: 3600000,
     });
 
     const datasheetName = useMemo(() => reportQuery?.data?.input_upload?.tags?.datasheet_name, [reportQuery?.data?.input_upload?.tags?.datasheet_name]);
@@ -80,7 +79,7 @@ const UploadDetails: FC<UploadDetailsProps> = ({ datastoreId, uploadId }) => {
                                     content: <UploadPreviewTab reportData={reportQuery.data} />,
                                 },
                                 {
-                                    label: "Rapport de génération",
+                                    label: "Rapport de livraison",
                                     content: <ReportTab datastoreName={datastoreQuery.data?.name} reportQuery={reportQuery} />,
                                 },
                             ]}

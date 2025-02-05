@@ -268,10 +268,12 @@ export type ProcessingExecution = ProcessingExecutionDetailResponseDto;
 
 export type StoredDataReport = {
     stored_data: StoredData;
-    input_upload: Upload & {
-        file_tree: UploadTree;
-        checks: CheckDetailed[];
-    };
+    input_upload:
+        | (Upload & {
+              file_tree: UploadTree;
+              checks: CheckDetailed[];
+          })
+        | null;
     processing_executions: StoredDataReportProcessingExecution[];
 };
 

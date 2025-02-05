@@ -4,20 +4,19 @@ import Table from "@codegouvfr/react-dsfr/Table";
 import { UseQueryResult, useQuery } from "@tanstack/react-query";
 import { FC, Fragment, useMemo } from "react";
 
-import { PyramidVector, StoredDataTypeEnum, VectorDb } from "../../../../@types/app";
+import { PyramidVector, StoredDataReport, StoredDataTypeEnum, VectorDb } from "../../../../@types/app";
 import ExtentMap from "../../../../components/Utils/ExtentMap";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import { niceBytes } from "../../../../utils";
 import api from "../../../api";
 import ReportStatusBadge from "../ReportTab/ReportStatusBadge";
-import ReportTab from "../ReportTab/ReportTab";
 
-type PreviewTabProps = {
+type StoredDataPreviewTabProps = {
     datastoreId: string;
-    reportQuery: UseQueryResult<ReportTab, CartesApiException>;
+    reportQuery: UseQueryResult<StoredDataReport, CartesApiException>;
 };
-const PreviewTab: FC<PreviewTabProps> = ({ datastoreId, reportQuery }) => {
+const StoredDataPreviewTab: FC<StoredDataPreviewTabProps> = ({ datastoreId, reportQuery }) => {
     const storedData = useMemo(() => reportQuery.data?.stored_data, [reportQuery.data?.stored_data]);
 
     const vectorDbQuery = useQuery<VectorDb, CartesApiException>({
@@ -99,4 +98,4 @@ const PreviewTab: FC<PreviewTabProps> = ({ datastoreId, reportQuery }) => {
     );
 };
 
-export default PreviewTab;
+export default StoredDataPreviewTab;

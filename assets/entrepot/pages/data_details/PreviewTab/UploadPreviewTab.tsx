@@ -26,7 +26,7 @@ const UploadPreviewTab: FC<UploadPreviewTabProps> = ({ reportData }) => {
                     <strong>Projection :</strong> {uploadData.srs}
                 </li>
                 <li>
-                    <strong>Statut :</strong> {<ReportStatusBadge status="FAILURE" />}
+                    <strong>Statut :</strong> {<ReportStatusBadge status={uploadData.status} />}
                 </li>
                 <li>
                     <strong>Taille :</strong> {uploadData.size && niceBytes(uploadData.size.toString())}

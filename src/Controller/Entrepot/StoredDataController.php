@@ -110,20 +110,22 @@ class StoredDataController extends AbstractController implements ApiControllerIn
         try {
             $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId);
 
-            // récupération de détails sur l'upload qui a servi à créer la stored_data
-            $inputUpload = $this->uploadApiService->get($datastoreId, $storedData['tags']['upload_id']);
-            $inputUpload['file_tree'] = $this->uploadApiService->getFileTree($datastoreId, $inputUpload['_id']);
-            $inputUpload['checks'] = [];
-            $uploadChecks = $this->uploadApiService->getCheckExecutions($datastoreId, $inputUpload['_id']);
+            // récupération de détails sur l'upload s'il y en a un qui a servi à créer la stored_data
+            if (isset($storedData['tags']['upload_id'])) {
+                $inputUpload = $this->uploadApiService->get($datastoreId, $storedData['tags']['upload_id']);
+                $inputUpload['file_tree'] = $this->uploadApiService->getFileTree($datastoreId, $inputUpload['_id']);
+                $inputUpload['checks'] = [];
+                $uploadChecks = $this->uploadApiService->getCheckExecutions($datastoreId, $inputUpload['_id']);
 
-            foreach ($uploadChecks as &$checkType) {
-                foreach ($checkType as &$checkExecution) {
-                    $checkExecution = array_merge($checkExecution, $this->uploadApiService->getCheckExecution($datastoreId, $checkExecution['_id']));
-                    try {
-                        $checkExecution['logs'] = $this->uploadApiService->getCheckExecutionLogs($datastoreId, $checkExecution['_id']);
-                    } catch (ApiException $ex) {
+                foreach ($uploadChecks as &$checkType) {
+                    foreach ($checkType as &$checkExecution) {
+                        $checkExecution = array_merge($checkExecution, $this->uploadApiService->getCheckExecution($datastoreId, $checkExecution['_id']));
+                        try {
+                            $checkExecution['logs'] = $this->uploadApiService->getCheckExecutionLogs($datastoreId, $checkExecution['_id']);
+                        } catch (ApiException $ex) {
+                        }
+                        $inputUpload['checks'][] = $checkExecution;
                     }
-                    $inputUpload['checks'][] = $checkExecution;
                 }
             }
 
@@ -154,7 +156,7 @@ class StoredDataController extends AbstractController implements ApiControllerIn
 
             return $this->json([
                 'stored_data' => $storedData,
-                'input_upload' => $inputUpload,
+                'input_upload' => $inputUpload ?? null,
                 'processing_executions' => $procExections,
             ]);
         } catch (ApiException $ex) {

@@ -5,14 +5,14 @@ import Tabs from "@codegouvfr/react-dsfr/Tabs";
 import { useQuery } from "@tanstack/react-query";
 import { FC, useEffect, useMemo, useState } from "react";
 
-import { Datastore, StoredDataStatusEnum } from "../../../@types/app";
+import { Datastore, StoredDataReport, StoredDataStatusEnum } from "../../../@types/app";
 import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
 import LoadingIcon from "../../../components/Utils/LoadingIcon";
 import RQKeys from "../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
 import api from "../../api";
-import PreviewTab from "./PreviewTab/StoredDataPreviewTab";
+import StoredDataPreviewTab from "./PreviewTab/StoredDataPreviewTab";
 import ReportTab from "./ReportTab/ReportTab";
 
 type StoredDataDetailsProps = {
@@ -28,7 +28,7 @@ const StoredDataDetails: FC<StoredDataDetailsProps> = ({ datastoreId, storedData
         staleTime: 3600000,
     });
 
-    const reportQuery = useQuery<ReportTab, CartesApiException>({
+    const reportQuery = useQuery<StoredDataReport, CartesApiException>({
         queryKey: RQKeys.datastore_stored_data_report(datastoreId, storedDataId),
         queryFn: ({ signal }) => api.storedData.getReportData(datastoreId, storedDataId, { signal }),
         refetchInterval: 30000,
@@ -88,12 +88,11 @@ const StoredDataDetails: FC<StoredDataDetailsProps> = ({ datastoreId, storedData
                             tabs={[
                                 {
                                     label: "Aperçu de la donnée",
-                                    content: <PreviewTab datastoreId={datastoreId} reportQuery={reportQuery} />,
+                                    content: <StoredDataPreviewTab datastoreId={datastoreId} reportQuery={reportQuery} />,
                                 },
                                 {
                                     label: "Rapport de génération",
                                     content: <ReportTab datastoreName={datastoreQuery.data?.name} reportQuery={reportQuery} />,
-                                    isDefault: true,
                                 },
                             ]}
                         />

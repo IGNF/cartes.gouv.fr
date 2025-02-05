@@ -1,9 +1,10 @@
+import { CheckDetailed, ProcessingExecution, StoredDataStatusEnum, UploadStatusEnum } from "@/@types/app";
 import { AlertProps } from "@codegouvfr/react-dsfr/Alert";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import { FC, memo } from "react";
 
 type ReportStatusBadgeProps = {
-    status: string;
+    status: ProcessingExecution["status"] | StoredDataStatusEnum | UploadStatusEnum | CheckDetailed["status"];
     className?: string;
 };
 const ReportStatusBadge: FC<ReportStatusBadgeProps> = ({ status, className }) => {
@@ -25,10 +26,26 @@ const ReportStatusBadge: FC<ReportStatusBadgeProps> = ({ status, className }) =>
             severity = "info";
             text = "En cours d’exécution";
             break;
+        case "CHECKING":
+            severity = "info";
+            text = "En cours de vérification";
+            break;
         case "SUCCESS":
         case "GENERATED":
             severity = "success";
             text = "Réussie";
+            break;
+        case "CLOSED":
+            severity = "success";
+            text = "Fermée";
+            break;
+        case "OPEN":
+            severity = "info";
+            text = "Ouverte";
+            break;
+        case "DELETED":
+            severity = "info";
+            text = "Supprimée";
             break;
         case "FAILURE":
         case "UNSTABLE":
