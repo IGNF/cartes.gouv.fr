@@ -1,6 +1,7 @@
 import { declareComponentKeys } from "i18nifty";
 import { ReactNode } from "react";
 import { Translations } from "../../../../i18n/types";
+import { formatDateFromISO } from "@/utils";
 
 const { i18n } = declareComponentKeys<
     | { K: "title"; P: { datastoreName?: string }; R: string }
@@ -10,6 +11,8 @@ const { i18n } = declareComponentKeys<
     | { K: "services_published"; P: { nbServices?: number }; R: string }
     | "no_services_published"
     | { K: "sandbox_datastore_explanation"; R: ReactNode }
+    | "refresh_datasheet_list"
+    | { K: "last_refresh_date"; P: { dataUpdatedAt: number }; R: string }
 >()("DatasheetList");
 export type I18n = typeof i18n;
 
@@ -27,6 +30,8 @@ export const DatasheetListFrTranslations: Translations<"fr">["DatasheetList"] = 
             }
         </p>
     ),
+    refresh_datasheet_list: "Rafraîchir",
+    last_refresh_date: ({ dataUpdatedAt }) => `Données mises à jour le ${formatDateFromISO(new Date(dataUpdatedAt).toISOString())}`,
 };
 
 export const DatasheetListEnTranslations: Translations<"en">["DatasheetList"] = {
@@ -37,4 +42,6 @@ export const DatasheetListEnTranslations: Translations<"en">["DatasheetList"] = 
     services_published: undefined,
     no_services_published: undefined,
     sandbox_datastore_explanation: undefined,
+    refresh_datasheet_list: undefined,
+    last_refresh_date: undefined,
 };

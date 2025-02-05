@@ -1,6 +1,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import Button from "@codegouvfr/react-dsfr/Button";
+import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
+import Pagination from "@codegouvfr/react-dsfr/Pagination";
 import { useQuery } from "@tanstack/react-query";
 import { FC, useMemo } from "react";
 
@@ -32,13 +33,16 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
         queryKey: RQKeys.datastore_datasheet_list(datastoreId),
         queryFn: ({ signal }) => api.datasheet.getList(datastoreId, { signal }),
         staleTime: 60000,
-        refetchInterval: 60000,
         enabled: datastore !== undefined,
     });
 
     const metadataEndpoint = useMemo(
         () => datastore?.endpoints?.find((endpoint) => endpoint.endpoint.type === EndpointTypeEnum.METADATA),
         [datastore?.endpoints]
+    );
+
+    const datasheetCreationImpossible = Boolean(
+        metadataEndpoint && metadataEndpoint?.quota && metadataEndpoint?.use && metadataEndpoint?.quota <= metadataEndpoint?.use
     );
 
     return (
@@ -54,22 +58,46 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                 </div>
             </div>
 
+            {/* on attend de savoir si création de nouvelle possible ou pas avant d'afficher les boutons */}
             {metadataEndpoint && (
-                <div className={fr.cx("fr-grid-row")}>
-                    {metadataEndpoint?.quota && metadataEndpoint?.use && metadataEndpoint?.quota === metadataEndpoint?.use ? (
+                <>
+                    {datasheetCreationImpossible && (
                         <Alert severity="warning" title={t("datasheet_creation_impossible")} description={t("metadata_endpoint_quota_reached")} />
-                    ) : (
-                        <Button linkProps={routes.datastore_datasheet_upload({ datastoreId: datastoreId }).link} iconId={"fr-icon-add-line"}>
-                            {t("create_datasheet")}
-                        </Button>
                     )}
-                </div>
+
+                    <div className={fr.cx("fr-grid-row", "fr-mt-4v")}>
+                        <ButtonsGroup
+                            buttons={[
+                                {
+                                    children: t("create_datasheet"),
+                                    linkProps: datasheetCreationImpossible
+                                        ? { href: undefined, "aria-hidden": true }
+                                        : routes.datastore_datasheet_upload({ datastoreId: datastoreId }).link,
+                                    iconId: "fr-icon-add-line",
+                                    className: fr.cx(datasheetCreationImpossible && "fr-hidden"),
+                                },
+                                {
+                                    children: t("refresh_datasheet_list"),
+                                    onClick: () => datasheetListQuery.refetch(),
+                                    nativeButtonProps: {
+                                        "aria-disabled": datasheetListQuery.isFetching,
+                                    },
+                                    priority: "secondary",
+                                    disabled: datasheetListQuery.isFetching,
+                                },
+                            ]}
+                            inlineLayoutWhen="sm and up"
+                        />
+                    </div>
+                </>
             )}
 
             {datasheetListQuery.data === undefined ? (
                 <Skeleton count={12} rectangleHeight={100} />
             ) : (
                 <>
+                    <p>{t("last_refresh_date", { dataUpdatedAt: datasheetListQuery.dataUpdatedAt })}</p>
+
                     {datasheetListQuery?.data
                         ?.slice((pagination.page - 1) * pagination.limit, pagination.page * pagination.limit)
                         .map((datasheet: Datasheet) => <DatasheetListItem key={datasheet.name} datastoreId={datastoreId} datasheet={datasheet} />)}
