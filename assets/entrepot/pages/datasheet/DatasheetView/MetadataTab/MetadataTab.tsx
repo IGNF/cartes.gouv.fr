@@ -6,7 +6,7 @@ import Tag from "@codegouvfr/react-dsfr/Tag";
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import { FC, useMemo } from "react";
 
-import { MetadataHierarchyLevel, type DatasheetDetailed, type Metadata, type StoredData } from "../../../../../@types/app";
+import { MetadataHierarchyLevel, type Metadata } from "../../../../../@types/app";
 import ExtentMap from "../../../../../components/Utils/ExtentMap";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import TextCopyToClipboard from "../../../../../components/Utils/TextCopyToClipboard";
@@ -21,10 +21,9 @@ import frequencyCodes from "../../../../../data/maintenance_frequency.json";
 
 type MetadataTabProps = {
     datastoreId: string;
-    datasheet: DatasheetDetailed;
     metadataQuery: UseQueryResult<Metadata, CartesApiException>;
 };
-const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, datasheet, metadataQuery }) => {
+const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, metadataQuery }) => {
     const { t: tDatasheet } = useTranslation("DatasheetView");
 
     const { data: metadata } = metadataQuery;
@@ -39,11 +38,6 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, datasheet, metadataQue
         const code = metadata?.csw_metadata?.frequency_code;
         return code ? frequencyCodes[code] : frequencyCodes["unknown"];
     }, [metadata]);
-
-    const storedDataList: StoredData[] = useMemo(
-        () => [...(datasheet?.vector_db_list ?? []), ...(datasheet?.pyramid_vector_list ?? [])],
-        [datasheet?.vector_db_list, datasheet?.pyramid_vector_list]
-    );
 
     const catalogueDatasheetUrl = useMemo(() => {
         // si datastore sandbox
@@ -167,13 +161,7 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, datasheet, metadataQue
                         </Accordion>
 
                         <Accordion titleAs="h2" defaultExpanded={true} label={"Délimitation géographique (localisation physique de la donnée)"}>
-                            <MetadataField
-                                content={
-                                    storedDataList.length > 0 && (
-                                        <ExtentMap extents={storedDataList.map((sd) => sd.extent).filter((extent) => extent !== undefined)} />
-                                    )
-                                }
-                            />
+                            <MetadataField content={metadata.csw_metadata?.bbox !== undefined && <ExtentMap bbox={metadata.csw_metadata?.bbox} />} />
                         </Accordion>
 
                         <Accordion titleAs="h2" defaultExpanded={true} label={"Qualité"}>

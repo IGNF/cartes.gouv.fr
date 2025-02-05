@@ -5,15 +5,16 @@ import { Feature, View } from "ol";
 import Map from "ol/Map";
 import { ScaleLine } from "ol/control";
 import GeoJSON from "ol/format/GeoJSON";
+import { fromExtent } from "ol/geom/Polygon";
 import { defaults as defaultInteractions } from "ol/interaction";
 import TileLayer from "ol/layer/Tile";
 import VectorLayer from "ol/layer/Vector";
-import { fromLonLat } from "ol/proj";
+import { fromLonLat, transformExtent } from "ol/proj";
 import VectorSource from "ol/source/Vector";
 import WMTS, { optionsFromCapabilities } from "ol/source/WMTS";
 import { FC, useEffect, useMemo, useRef } from "react";
 
-import { Geometry as EntrepotGeometry } from "../../@types/entrepot";
+import type { BoundingBox, Geometry as EntrepotGeometry } from "../../@types/entrepot";
 import olDefaults from "../../data/ol-defaults.json";
 import useCapabilities from "../../hooks/useCapabilities";
 
@@ -26,15 +27,26 @@ import "../../sass/components/map-view.scss";
 
 type ExtentMapProps = {
     extents?: EntrepotGeometry | EntrepotGeometry[];
+    bbox?: BoundingBox;
 };
 
-const ExtentMap: FC<ExtentMapProps> = ({ extents }) => {
-    const mapTargetRef = useRef<HTMLDivElement>(null);
+const ExtentMap: FC<ExtentMapProps> = ({ extents, bbox }) => {
     const mapRef = useRef<Map>();
+    const mapTargetRef = useRef<HTMLDivElement>(null);
 
     const { data: capabilities } = useCapabilities();
 
     const extentLayer = useMemo(() => {
+        if (bbox !== undefined) {
+            const feature = new Feature(fromExtent(transformExtent([bbox.west, bbox.south, bbox.east, bbox.north], "EPSG:4326", "EPSG:3857")));
+
+            return new VectorLayer({
+                source: new VectorSource({
+                    features: [feature],
+                }),
+            });
+        }
+
         if (!extents) return;
 
         const _extents = Array.isArray(extents) ? extents : [extents];
@@ -55,7 +67,7 @@ const ExtentMap: FC<ExtentMapProps> = ({ extents }) => {
         return new VectorLayer({
             source: extentSource,
         });
-    }, [extents]);
+    }, [bbox, extents]);
 
     const bgLayer = useMemo(() => {
         if (!capabilities) return;

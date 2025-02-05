@@ -272,8 +272,12 @@ class DatasheetController extends AbstractController implements ApiControllerInt
                 $storedDataList = array_merge($storedDataList, $datasheet['vector_db_list']);
             }
 
-            if (isset($datasheet['pyramid_list'])) {
-                $storedDataList = array_merge($storedDataList, $datasheet['pyramid_list']);
+            if (isset($datasheet['pyramid_vector_list'])) {
+                $storedDataList = array_merge($storedDataList, $datasheet['pyramid_vector_list']);
+            }
+
+            if (isset($datasheet['pyramid_raster_list'])) {
+                $storedDataList = array_merge($storedDataList, $datasheet['pyramid_raster_list']);
             }
 
             foreach ($storedDataList as $storedData) {
@@ -298,7 +302,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             }
 
             // TODO : autres données à supprimer
-            // Suppression des annexes
+            // Suppression des annexes : vignette, documents associés à la fiche de données etc
             $annexes = $this->annexeApiService->getAll($datastoreId, null, null, ["datasheet_name=$datasheetName"]);
             foreach ($annexes as $annexe) {
                 $this->annexeApiService->remove($datastoreId, $annexe['_id']);

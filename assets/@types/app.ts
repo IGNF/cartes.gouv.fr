@@ -31,6 +31,7 @@ import {
     UserKeyDetailsResponseDtoUserKeyInfoDto,
     UserKeyResponseDto,
     MetadataResponseDto,
+    BoundingBox,
 } from "./entrepot";
 
 /** user */
@@ -76,14 +77,6 @@ export enum DatasheetDocumentTypeEnum {
     File = "file",
     Link = "link",
 }
-
-// type PartialVectorDb = Pick<VectorDb, "name" | "description" | "type" | "visibility" | "status" | "srs" | "contact" | "size" | "last_event" | "tags"> & {
-//     bbox?: BoundingBox;
-// };
-
-// type PartialPyramid = Pick<Pyramid, "name" | "description" | "type" | "visibility" | "status" | "srs" | "contact" | "size" | "last_event" | "tags"> & {
-//     bbox?: BoundingBox;
-// };
 
 export type DatasheetDetailed = Datasheet & {
     vector_db_list: VectorDb[] | undefined;
@@ -364,6 +357,7 @@ export type CswMetadata = {
     organisation_email?: string;
     resolution?: string;
     layers?: CswMetadataLayer[];
+    bbox?: BoundingBox;
     style_files?: CswStyleFile[];
     capabilities_files?: CswCapabilitiesFile[];
     documents?: CswDocument[];

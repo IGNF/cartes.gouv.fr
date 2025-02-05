@@ -232,9 +232,10 @@ class CartesMetadataApiService
             throw new AppException('oldCswMetadata et formData ne peuvent pas être null à la fois', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
-        $newCswMetadata = null === $oldCswMetadata ? CswMetadata::createEmpty() : clone $oldCswMetadata;
+        $newCswMetadata = null === $oldCswMetadata ? new CswMetadata() : clone $oldCswMetadata;
 
         $layers = $this->getMetadataLayers($datastoreId, $datasheetName);
+        $bbox = $this->getBbox($datastoreId, $datasheetName);
 
         if ($formData) {
             $language = $formData['languages'][0] ?
@@ -259,6 +260,7 @@ class CartesMetadataApiService
             $newCswMetadata->resolution = $formData['resolution'] ?? null;
             $newCswMetadata->frequencyCode = $formData['frequency_code'] ?? null;
             $newCswMetadata->layers = $layers;
+            $newCswMetadata->bbox = $bbox;
             $newCswMetadata->styleFiles = $this->getStyleFiles($datastoreId, $datasheetName);
 
             // Doit-être calculé après la récupération des layers
@@ -487,5 +489,66 @@ class CartesMetadataApiService
         }
 
         return $endpointsList[0]['endpoint'];
+    }
+
+    private function getBbox(string $datastoreId, string $datasheetName): array
+    {
+        $storedDataList = $this->storedDataApiService->getAllDetailed($datastoreId, [
+            'tags' => [
+                CommonTags::DATASHEET_NAME => $datasheetName,
+            ],
+        ]);
+
+        $extents = [];
+        foreach ($storedDataList as $storedData) {
+            if (isset($storedData['extent'])) {
+                $extents[] = $storedData['extent'];
+            }
+        }
+
+        return $this->getBboxFromFeatures($extents);
+    }
+
+    /**
+     * @param array<mixed> $features
+     */
+    private function getBboxFromFeatures(array $features): array
+    {
+        $minLat = $minLng = PHP_FLOAT_MAX;
+        $maxLat = $maxLng = PHP_FLOAT_MIN;
+
+        foreach ($features as $feature) {
+            if (isset($feature['geometry']['coordinates'])) {
+                $this->processCoordinates($feature['geometry']['coordinates'], $minLat, $minLng, $maxLat, $maxLng);
+            }
+        }
+
+        return [
+            'west' => $minLng,
+            'south' => $minLat,
+            'east' => $maxLng,
+            'north' => $maxLat,
+        ];
+    }
+
+    /**
+     * @param array<mixed> $coordinates
+     */
+    private function processCoordinates(array $coordinates, float &$minLat, float &$minLng, float &$maxLat, float &$maxLng): void
+    {
+        if (is_array($coordinates[0])) {
+            // récursif pour les arrays imbriqués (ex: MultiPolygon, MultiLineString)
+            foreach ($coordinates as $subCoordinates) {
+                $this->processCoordinates($subCoordinates, $minLat, $minLng, $maxLat, $maxLng);
+            }
+        } else {
+            // cas basique : un ponctuel [lng, lat]
+            $lng = $coordinates[0];
+            $lat = $coordinates[1];
+            $minLat = min($minLat, $lat);
+            $minLng = min($minLng, $lng);
+            $maxLat = max($maxLat, $lat);
+            $maxLng = max($maxLng, $lng);
+        }
     }
 }

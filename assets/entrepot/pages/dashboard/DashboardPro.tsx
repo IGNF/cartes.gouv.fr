@@ -18,10 +18,10 @@ import { useAuthStore } from "../../../stores/AuthStore";
 import { getArrayRange } from "../../../utils";
 import api from "../../api";
 
-import avatarSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/digital/avatar.svg";
-import mailSendSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/digital/mail-send.svg";
-import humanCoopSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/environment/human-cooperation.svg";
-import padlockSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/system/padlock.svg";
+import avatarSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/digital/avatar.svg?no-inline";
+import mailSendSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/digital/mail-send.svg?no-inline";
+import humanCoopSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/environment/human-cooperation.svg?no-inline";
+import padlockSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/system/padlock.svg?no-inline";
 
 const DashboardPro = () => {
     const { t } = useTranslation("DashboardPro");
@@ -86,6 +86,7 @@ const DashboardPro = () => {
                     <Tile
                         linkProps={routes.my_account().link}
                         imageUrl={avatarSvgUrl}
+                        imageSvg={true}
                         desc="Consulter et modifier mes informations personnelles"
                         orientation="horizontal"
                         title="Mon compte"
@@ -95,6 +96,7 @@ const DashboardPro = () => {
                     <Tile
                         linkProps={routes.my_access_keys().link}
                         imageUrl={padlockSvgUrl}
+                        imageSvg={true}
                         desc="Consulter et modifier mes clés d'accès aux services privés"
                         orientation="horizontal"
                         title="Mes clés d’accès"

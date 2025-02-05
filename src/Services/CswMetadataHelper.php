@@ -89,7 +89,7 @@ class CswMetadataHelper
             throw new AppException('Load XML failed');
         }
 
-        $cswMetadata = CswMetadata::createEmpty();
+        $cswMetadata = new CswMetadata();
 
         /** @var \DOMNodeList<\DOMElement> $keywordsNodesList */
         $keywordsNodesList = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:descriptiveKeywords/gmd:MD_Keywords');
@@ -119,6 +119,15 @@ class CswMetadataHelper
             );
         }, iterator_to_array($layersNodesList));
         $cswMetadata->layers = $layersList;
+
+        /** @var \DOMElement $exBboxEl */
+        $exBboxEl = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox')->item(0);
+        $cswMetadata->bbox = [
+            'west' => floatval($exBboxEl->getElementsByTagName('westBoundLongitude')->item(0)->getElementsByTagName('Decimal')[0]->textContent),
+            'east' => floatval($exBboxEl->getElementsByTagName('eastBoundLongitude')->item(0)->getElementsByTagName('Decimal')[0]->textContent),
+            'south' => floatval($exBboxEl->getElementsByTagName('southBoundLatitude')->item(0)->getElementsByTagName('Decimal')[0]->textContent),
+            'north' => floatval($exBboxEl->getElementsByTagName('northBoundLatitude')->item(0)->getElementsByTagName('Decimal')[0]->textContent),
+        ];
 
         /** @var \DOMNodeList<\DOMElement> $styleFilesNodesList */
         $styleFilesNodesList = $xpath->query('/gmd:MD_Metadata/gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine[@type="style"]');
