@@ -357,7 +357,7 @@ export type CswMetadata = {
     organisation_email?: string;
     resolution?: string;
     layers?: CswMetadataLayer[];
-    bbox?: BoundingBox;
+    bbox?: BoundingBox | null;
     style_files?: CswStyleFile[];
     capabilities_files?: CswCapabilitiesFile[];
     documents?: CswDocument[];

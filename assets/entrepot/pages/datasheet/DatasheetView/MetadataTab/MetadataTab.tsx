@@ -161,7 +161,7 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, metadataQuery }) => {
                         </Accordion>
 
                         <Accordion titleAs="h2" defaultExpanded={true} label={"Délimitation géographique (localisation physique de la donnée)"}>
-                            <MetadataField content={metadata.csw_metadata?.bbox !== undefined && <ExtentMap bbox={metadata.csw_metadata?.bbox} />} />
+                            <MetadataField content={!!metadata.csw_metadata?.bbox && <ExtentMap bbox={metadata.csw_metadata?.bbox} />} />
                         </Accordion>
 
                         <Accordion titleAs="h2" defaultExpanded={true} label={"Qualité"}>
