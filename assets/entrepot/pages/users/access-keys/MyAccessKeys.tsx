@@ -51,26 +51,16 @@ const MyAccessKeys: FC<MyAccessKeysProps> = ({ activeTab }) => {
                     <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
                         <SideMenu
                             align="left"
-                            burgerMenuButtonText={"Dans cette rubrique"}
+                            burgerMenuButtonText={t("burger_menu")}
                             items={[
                                 {
                                     isActive: tab === "keys",
-                                    linkProps: {
-                                        href: "#",
-                                        onClick: async () => {
-                                            routes.my_access_keys().push();
-                                        },
-                                    },
+                                    linkProps: routes.my_access_keys().link,
                                     text: t("my_access_keys"),
                                 },
                                 {
                                     isActive: tab === "permissions",
-                                    linkProps: {
-                                        href: "#",
-                                        onClick: async () => {
-                                            routes.my_permissions().push();
-                                        },
-                                    },
+                                    linkProps: routes.my_permissions().link,
                                     text: t("my_permissions"),
                                 },
                             ]}
