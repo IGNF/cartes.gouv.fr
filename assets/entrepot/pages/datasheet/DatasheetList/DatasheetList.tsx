@@ -9,7 +9,7 @@ import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import Skeleton from "../../../../components/Utils/Skeleton";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
-import { routes } from "../../../../router/router";
+import { routes, useRoute } from "../../../../router/router";
 import api from "../../../api";
 import DatasheetListItem from "./DatasheetListItem";
 import { useDatastore } from "../../../../contexts/datastore";
@@ -21,6 +21,12 @@ type DatasheetListProps = {
 const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
     const { t } = useTranslation("DatasheetList");
     const { datastore, isFetching } = useDatastore();
+
+    const { params } = useRoute();
+    const pagination = {
+        page: params["page"] ? parseInt(params["page"]) : 1,
+        limit: params["limit"] ? parseInt(params["limit"]) : 20,
+    };
 
     const datasheetListQuery = useQuery({
         queryKey: RQKeys.datastore_datasheet_list(datastoreId),
@@ -63,9 +69,22 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
             {datasheetListQuery.data === undefined ? (
                 <Skeleton count={12} rectangleHeight={100} />
             ) : (
-                datasheetListQuery?.data?.map((datasheet: Datasheet) => (
-                    <DatasheetListItem key={datasheet.name} datastoreId={datastoreId} datasheet={datasheet} />
-                ))
+                <>
+                    {datasheetListQuery?.data
+                        ?.slice((pagination.page - 1) * pagination.limit, pagination.page * pagination.limit)
+                        .map((datasheet: Datasheet) => <DatasheetListItem key={datasheet.name} datastoreId={datastoreId} datasheet={datasheet} />)}
+
+                    <div className={fr.cx("fr-grid-row", "fr-grid-row--center", "fr-mt-6v")}>
+                        <Pagination
+                            count={Math.ceil(datasheetListQuery.data?.length / pagination.limit)}
+                            showFirstLast={true}
+                            getPageLinkProps={(pageNumber) => ({
+                                ...routes.datasheet_list({ datastoreId, page: pageNumber, limit: pagination.limit }).link,
+                            })}
+                            defaultPage={pagination.page}
+                        />
+                    </div>
+                </>
             )}
         </Main>
     );
