@@ -11,7 +11,6 @@ import * as yup from "yup";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 import { IAlert } from "../../../@types/alert";
-import DatastoreLayout from "../../../components/Layout/DatastoreLayout";
 import CreateAlert, { alertSchema } from "../../../components/Modal/CreateAlert/CreateAlert";
 import Wait from "../../../components/Utils/Wait";
 import LoadingIcon from "../../../components/Utils/LoadingIcon";
@@ -24,6 +23,7 @@ import { useAlertStore } from "../../../stores/AlertStore";
 import api from "../../api";
 
 import "./Alerts.scss";
+import Main from "@/components/Layout/Main";
 
 function getNewAlert() {
     return {
@@ -181,7 +181,7 @@ const Alerts: FC = () => {
 
     const closable = notification?.severity !== "warning";
     return (
-        <DatastoreLayout datastoreId={datastoreId} documentTitle={title}>
+        <Main title={title}>
             <form onSubmit={handleSubmit(submitAlerts)}>
                 <div className={[fr.cx("fr-mb-5w"), "alerts__caption"].join(" ")}>
                     <h1>{title}</h1>
@@ -309,7 +309,7 @@ const Alerts: FC = () => {
                     <LoadingIcon largeIcon={true} />
                 </Wait>
             )}
-        </DatastoreLayout>
+        </Main>
     );
 };
 Alerts.displayName = symToStr({ Alerts });

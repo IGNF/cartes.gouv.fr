@@ -4,8 +4,11 @@ import { Route } from "type-route";
 import { groups } from "./router";
 import DatastoreLayout, { DatastoreLayoutProps } from "../components/Layout/DatastoreLayout";
 import PageNotFoundWithLayout from "../pages/error/PageNotFoundWithLayout";
+import api from "@/entrepot/api";
 
 const ConfigEvents = lazy(() => import("../entrepot/pages/config/Alerts"));
+
+const { datastoreId } = api.alerts;
 
 interface IGroupConfigProps {
     route: Route<typeof groups.config>;
@@ -19,7 +22,7 @@ function GroupConfig(props: IGroupConfigProps) {
             case "config_alerts":
                 return {
                     render: <ConfigEvents />,
-                }; 
+                };
         }
     }, [route]);
 
@@ -28,7 +31,7 @@ function GroupConfig(props: IGroupConfigProps) {
     }
 
     return (
-        <DatastoreLayout datastoreId="5cb4fdb0-6f6c-4422-893d-e04564bfcc10" {...content?.layoutProps}>
+        <DatastoreLayout datastoreId={datastoreId} {...content?.layoutProps}>
             {content.render}
         </DatastoreLayout>
     );
