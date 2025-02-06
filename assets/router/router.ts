@@ -106,7 +106,7 @@ const datastoreRoutes = {
     ),
 
     // fiche de données
-    datasheet_list: datastoreRoute.extend("/permissions/donnees"),
+    datasheet_list: datastoreRoute.extend("/donnees"),
     datastore_datasheet_upload: datastoreRoute.extend(
         {
             datasheetName: param.query.optional.string,
