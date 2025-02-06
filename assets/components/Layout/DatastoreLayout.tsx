@@ -14,9 +14,10 @@ import { useAuthStore } from "../../stores/AuthStore";
 import Main from "./Main";
 import { CommunityMemberDtoRightsEnum } from "../../@types/entrepot";
 import Forbidden from "../../pages/error/Forbidden";
+import { canUserAccess } from "@/utils";
 
 export interface DatastoreLayoutProps extends Omit<AppLayoutProps, "navItems"> {
-    accessRight?: CommunityMemberDtoRightsEnum;
+    accessRight?: CommunityMemberDtoRightsEnum | CommunityMemberDtoRightsEnum[];
     datastoreId: string;
 }
 const DatastoreLayout: FC<PropsWithChildren<DatastoreLayoutProps>> = (props) => {
@@ -32,13 +33,14 @@ const DatastoreLayout: FC<PropsWithChildren<DatastoreLayoutProps>> = (props) => 
     const navItems = useMemo(() => datastoreNavItems(data), [data]);
 
     const isAuthorized = useMemo(() => {
+        if (!user?.id || user?.communities_member) {
+            return false;
+        }
         const communityMember = user?.communities_member.find((member) => member.community?.datastore === datastoreId);
         if (!communityMember) {
             return false; // is not part of the community
         }
-        const { community, rights } = communityMember;
-        const isSupervisor = community?.supervisor === user?.id;
-        return isSupervisor || !accessRight || rights?.includes(accessRight);
+        return canUserAccess(user.id, communityMember, accessRight);
     }, [accessRight, user?.communities_member, datastoreId, user?.id]);
 
     if (isLoading) {

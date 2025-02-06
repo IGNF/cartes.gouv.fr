@@ -16,9 +16,10 @@ import PageNotFoundWithLayout from "../../pages/error/PageNotFoundWithLayout";
 import Main from "./Main";
 import LoadingText from "../Utils/LoadingText";
 import { DatastoreProvider } from "../../contexts/datastore";
+import { canUserAccess } from "@/utils";
 
 export interface CommunityLayoutProps extends Omit<DatastoreLayoutProps, "datastoreId"> {
-    accessRight?: CommunityMemberDtoRightsEnum;
+    accessRight?: CommunityMemberDtoRightsEnum | CommunityMemberDtoRightsEnum[];
     communityId: string;
 }
 
@@ -44,13 +45,14 @@ const CommunityLayout: FC<PropsWithChildren<CommunityLayoutProps>> = (props) => 
     const navItems = useMemo(() => datastoreNavItems(datastore), [datastore]);
 
     const isAuthorized = useMemo(() => {
-        const communityMember = user?.communities_member.find((member) => member.community?._id === communityId);
+        if (!user?.id || user?.communities_member) {
+            return false;
+        }
+        const communityMember = user.communities_member.find((member) => member.community?._id === communityId);
         if (!communityMember) {
             return false; // is not part of the community
         }
-        const { community, rights } = communityMember;
-        const isSupervisor = community?.supervisor === user?.id;
-        return isSupervisor || !accessRight || rights?.includes(accessRight);
+        return canUserAccess(user.id, communityMember, accessRight);
     }, [accessRight, user?.communities_member, communityId, user?.id]);
 
     if (isLoading) {

@@ -1,4 +1,4 @@
-import { LanguageType } from "../utils";
+import { LanguageType } from "@/utils";
 import {
     AccessCreateDto,
     AccessDetailsResponseDto,
