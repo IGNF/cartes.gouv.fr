@@ -61,7 +61,7 @@ export const commonFrTranslations: Translations<"fr">["Common"] = {
     published: "Publié",
     not_published: "Non publié",
     information: "Information",
-    no_necessary_rights: "Vous n'avez pas les droits nécessaires pour visualiser les membres de cet espace de travail.",
+    no_necessary_rights: "Vous n'avez pas les droits nécessaires pour afficher cette page.",
     mandatory_fields: "Sauf mention contraire “(optionnel)” dans le label, tous les champs sont obligatoires.",
     none: "Aucune",
     new_window: "ouvre une nouvelle fenêtre",
