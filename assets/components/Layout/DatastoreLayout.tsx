@@ -33,10 +33,10 @@ const DatastoreLayout: FC<PropsWithChildren<DatastoreLayoutProps>> = (props) => 
     const navItems = useMemo(() => datastoreNavItems(data), [data]);
 
     const isAuthorized = useMemo(() => {
-        if (!user?.id || user?.communities_member) {
+        if (!user?.id || !user?.communities_member) {
             return false;
         }
-        const communityMember = user?.communities_member.find((member) => member.community?.datastore === datastoreId);
+        const communityMember = user.communities_member.find((member) => member.community?.datastore === datastoreId);
         if (!communityMember) {
             return false; // is not part of the community
         }

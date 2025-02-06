@@ -45,7 +45,7 @@ const CommunityLayout: FC<PropsWithChildren<CommunityLayoutProps>> = (props) => 
     const navItems = useMemo(() => datastoreNavItems(datastore), [datastore]);
 
     const isAuthorized = useMemo(() => {
-        if (!user?.id || user?.communities_member) {
+        if (!user?.id || !user?.communities_member) {
             return false;
         }
         const communityMember = user.communities_member.find((member) => member.community?._id === communityId);
