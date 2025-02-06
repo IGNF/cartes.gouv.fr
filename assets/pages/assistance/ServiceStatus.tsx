@@ -38,7 +38,12 @@ const ServiceStatus = () => {
                     key={alert.id}
                     title={alert.title}
                     severity={getAlertSeverity(alert.severity)}
-                    description={<MarkdownRenderer content={alert.details} />}
+                    description={
+                        <>
+                            {alert.description && <p>{alert.description}</p>}
+                            {alert.details && <MarkdownRenderer content={alert.details} />}
+                        </>
+                    }
                 />
             ))}
             <div className={fr.cx("fr-grid-row")}>

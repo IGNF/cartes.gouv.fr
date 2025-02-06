@@ -8,7 +8,7 @@ import { symToStr } from "tsafe/symToStr";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { IAlert } from "../../../@types/alert";
 import CreateAlert, { alertSchema } from "../../../components/Modal/CreateAlert/CreateAlert";
@@ -30,7 +30,7 @@ function getNewAlert() {
         id: crypto.randomUUID(),
         title: "",
         description: "",
-        link: { url: "", label: "" },
+        link: { url: "/niveau-de-service", label: "En savoir plus" },
         severity: "info" as const,
         details: "",
         date: new Date(),
@@ -72,11 +72,11 @@ interface INotification {
 
 const Alerts: FC = () => {
     const alerts = useAlertStore(({ alerts }) => alerts);
-    const setAlerts = useAlertStore(({ setAlerts }) => setAlerts);
     const [alert, setAlert] = useState<IAlert>(getNewAlert());
     const { t } = useTranslation("alerts");
     const title = t("title");
     const [notification, setNotification] = useState<INotification | null>(null);
+    const queryClient = useQueryClient();
 
     // Load annex list and find annex matching the given path
     const { data } = useQuery<Annexe[], CartesApiException>({
@@ -94,14 +94,15 @@ const Alerts: FC = () => {
                     type: "application/json",
                 });
                 const file = new File([blob], fileName);
+                queryClient.setQueryData(RQKeys.alerts(), () => data);
                 const response = await api.annexe.replaceFile(datastoreId, annexe?._id, file);
-                setAlerts(alerts);
                 return response;
             }
             return Promise.resolve(undefined);
         },
         onError: (error) => {
             setNotification({ severity: "error", title: t("alerts_update_error") });
+            queryClient.refetchQueries({ queryKey: RQKeys.alerts() });
             console.error(error);
         },
         onSuccess: () => {
@@ -160,9 +161,12 @@ const Alerts: FC = () => {
         if (index !== -1) {
             alerts[index] = alert;
         } else {
-            alerts.push({ ...alert, id: crypto.randomUUID() });
+            alerts.unshift({ ...alert, id: crypto.randomUUID() });
         }
-        setValue("alerts", alerts);
+        setValue(
+            "alerts",
+            alerts.sort((a, b) => b.date.getTime() - a.date.getTime())
+        );
         setNotification({ severity: "warning", title: t("alerts_unsaved") });
         modal.close();
     }

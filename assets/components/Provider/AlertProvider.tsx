@@ -19,7 +19,7 @@ const AlertProvider: FC<PropsWithChildren> = (props) => {
 
     useEffect(() => {
         if (data) {
-            setAlerts(data.map((rawAlert) => ({ ...rawAlert, date: new Date(rawAlert.date) })));
+            setAlerts(data.map((rawAlert) => ({ ...rawAlert, date: new Date(rawAlert.date) })).sort((a, b) => b.date.getTime() - a.date.getTime()));
         }
     }, [data, setAlerts]);
 

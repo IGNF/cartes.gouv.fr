@@ -4,7 +4,7 @@ export interface IApiAlert {
     description?: string;
     link: { url?: string; label?: string };
     severity: "info" | "warning" | "alert";
-    details: string;
+    details?: string;
     date: string;
     visibility: {
         homepage: boolean;

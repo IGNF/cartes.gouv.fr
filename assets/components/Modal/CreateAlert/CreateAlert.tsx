@@ -24,10 +24,10 @@ export const alertSchema = yup.object({
     description: yup.string(),
     link: yup.object({
         label: yup.string(),
-        url: yup.string().test("check-url", "La chaîne doit être une url valide", (value) => value === "" || isURL(value)),
+        url: yup.string().test("check-url", "La chaîne doit être une url valide", (value) => value === "" || value?.startsWith("/") || isURL(value)),
     }),
     severity: yup.string().oneOf(["info", "warning", "alert"]).required("Sévérité requise"),
-    details: yup.string().required("Détails requis"),
+    details: yup.string(),
     date: yup.date().required("Date requise"),
     visibility: yup.object({
         homepage: yup.boolean().required(),
@@ -163,15 +163,6 @@ const CreateAlert: FC<CreateAlertProps> = (props) => {
                             />
                         </div>
                     </div>
-                    {/* <Input
-                        className="fr-mt-3w"
-                        label={t("alert.details")}
-                        nativeInputProps={{
-                            ...register("details"),
-                        }}
-                        state={errors.details ? "error" : "default"}
-                        stateRelatedMessage={errors?.details?.message?.toString()}
-                    /> */}
                     <Controller
                         control={control}
                         name="details"
@@ -182,7 +173,7 @@ const CreateAlert: FC<CreateAlertProps> = (props) => {
                                 hintText={t("alert.details_hint")}
                                 state={errors.details ? "error" : "default"}
                                 stateRelatedMessage={errors?.details?.message?.toString()}
-                                value={value}
+                                value={value ?? ""}
                                 onChange={onChange}
                             />
                         )}
