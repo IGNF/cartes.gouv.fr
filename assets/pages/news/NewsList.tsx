@@ -4,11 +4,11 @@ import { Tag } from "@codegouvfr/react-dsfr/Tag";
 import { FC } from "react";
 import { symToStr } from "tsafe/symToStr";
 
-import AppLayout from "../../components/Layout/AppLayout";
 import articles from "../../data/actualites.json";
 import { appRoot, routes } from "../../router/router";
 import { type NewsArticle } from "../../@types/newsArticle";
 import { formatDateFromISO } from "../../utils";
+import Main from "../../components/Layout/Main";
 
 type NewsListItemProps = {
     slug: string;
@@ -49,7 +49,7 @@ NewsListItem.displayName = symToStr({ NewsListItem });
 
 const NewsList = () => {
     return (
-        <AppLayout documentTitle="Actualités">
+        <Main title="Actualités">
             <div className={fr.cx("fr-container")}>
                 <h1>Actualités</h1>
 
@@ -57,7 +57,7 @@ const NewsList = () => {
                     {Object.entries(articles)?.map(([slug, article]) => <NewsListItem key={slug} slug={slug} newsArticle={article} />)}
                 </div>
             </div>
-        </AppLayout>
+        </Main>
     );
 };
 

@@ -12,7 +12,6 @@ import * as yup from "yup";
 
 import type { PyramidRaster, Service } from "../../../../../@types/app";
 import type { ConfigurationWmsVectorDetailsContent } from "../../../../../@types/entrepot";
-import DatastoreLayout from "../../../../../components/Layout/DatastoreLayout";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import Wait from "../../../../../components/Utils/Wait";
@@ -26,6 +25,7 @@ import { routes } from "../../../../../router/router";
 import { bboxToWkt } from "../../../../../utils";
 import api from "../../../../api";
 import { DatasheetViewActiveTabEnum } from "../../../datasheet/DatasheetView/DatasheetView/DatasheetView";
+import Main from "../../../../../components/Layout/Main";
 
 const STEPS = {
     TECHNICAL_NAME: 1,
@@ -121,7 +121,7 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
     }, [currentStep, generatePyramidRasterMutation, trigger]);
 
     return (
-        <DatastoreLayout datastoreId={datastoreId} documentTitle={t("title")}>
+        <Main title={t("title")}>
             <h1>{t("title")}</h1>
 
             {serviceQuery.isLoading ? (
@@ -236,7 +236,7 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
                     </div>
                 </Wait>
             )}
-        </DatastoreLayout>
+        </Main>
     );
 };
 

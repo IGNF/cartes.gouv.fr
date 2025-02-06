@@ -1,14 +1,13 @@
 import { fr } from "@codegouvfr/react-dsfr";
 
-import AppLayout from "../../components/Layout/AppLayout";
-
 import { routes } from "../../router/router";
+import Main from "../../components/Layout/Main";
 
 import "../../sass/components/summary.scss";
 
 const TermsOfService = () => {
     return (
-        <AppLayout documentTitle="Conditions générales d’utilisation">
+        <Main title="Conditions générales d’utilisation">
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
                     <h1>Conditions générales d’utilisation</h1>
@@ -1330,7 +1329,7 @@ const TermsOfService = () => {
                     </div>
                 </div>
             </div>
-        </AppLayout>
+        </Main>
     );
 };
 

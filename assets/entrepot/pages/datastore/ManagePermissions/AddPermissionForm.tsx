@@ -13,7 +13,6 @@ import "../../../../sass/pages/permission.scss";
 import api from "../../../api";
 import DatePicker from "../../../../components/Input/DatePicker";
 import InputCollection from "../../../../components/Input/InputCollection";
-import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../i18n/i18n";
@@ -25,6 +24,7 @@ import CommunityListForm from "./CommunityListForm";
 import ScrollOfferingList from "./ScrollOfferingList";
 import { getAddSchema } from "./ValidationSchemas";
 import createRequestBody, { type AddPermissionFormType } from "./utils";
+import Main from "../../../../components/Layout/Main";
 
 type AddPermissionFormProps = {
     datastoreId: string;
@@ -137,7 +137,7 @@ const AddPermissionForm: FC<AddPermissionFormProps> = ({ datastoreId }) => {
     }, [type, setFormValue]);
 
     return (
-        <DatastoreLayout datastoreId={datastoreId} documentTitle={t("add_form.title")}>
+        <Main title={t("add_form.title")}>
             <h1>{t("add_form.title")}</h1>
             {addPermissionStatus === "pending" && (
                 <Wait>
@@ -270,7 +270,7 @@ const AddPermissionForm: FC<AddPermissionFormProps> = ({ datastoreId }) => {
                     </div>
                 </div>
             )}
-        </DatastoreLayout>
+        </Main>
     );
 };
 

@@ -1,10 +1,10 @@
 import { fr } from "@codegouvfr/react-dsfr";
 
-import AppLayout from "../../components/Layout/AppLayout";
+import Main from "../../components/Layout/Main";
 
 const PersonalData = () => {
     return (
-        <AppLayout documentTitle="Données à caractère personnel">
+        <Main title="Données à caractère personnel">
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
                     <h1>Données à caractère personnel</h1>
@@ -288,7 +288,7 @@ const PersonalData = () => {
                     </p>
                 </div>
             </div>
-        </AppLayout>
+        </Main>
     );
 };
 

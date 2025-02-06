@@ -7,14 +7,13 @@ import { FC, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
-import AppLayout from "../../../../components/Layout/AppLayout";
 import Wait from "../../../../components/Utils/Wait";
-import { datastoreNavItems } from "../../../../config/navItems/datastoreNavItems";
 import { useTranslation } from "../../../../i18n";
 import SymfonyRouting from "../../../../modules/Routing";
 import { jsonFetch } from "../../../../modules/jsonFetch";
 import { routes } from "../../../../router/router";
 import { removeDiacritics } from "../../../../utils";
+import Main from "../../../../components/Layout/Main";
 
 const DatastoreCreationForm: FC = () => {
     const { t } = useTranslation("DatastoreCreationForm");
@@ -66,10 +65,8 @@ const DatastoreCreationForm: FC = () => {
             .finally(() => setIsSending(false));
     };
 
-    const navItems = datastoreNavItems();
-
     return (
-        <AppLayout navItems={navItems} documentTitle={t("title")}>
+        <Main title={t("title")}>
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-12")}>
                     <h1>{t("title")}</h1>
@@ -128,7 +125,7 @@ const DatastoreCreationForm: FC = () => {
                     </div>
                 </Wait>
             )}
-        </AppLayout>
+        </Main>
     );
 };
 

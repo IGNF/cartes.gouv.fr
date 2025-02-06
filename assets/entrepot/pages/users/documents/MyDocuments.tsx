@@ -10,13 +10,13 @@ import { FC, FormEvent, useState } from "react";
 import { useDebounceCallback } from "usehooks-ts";
 
 import { DocumentListResponseDto } from "../../../../@types/entrepot";
-import AppLayout from "../../../../components/Layout/AppLayout";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import Wait from "../../../../components/Utils/Wait";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { CartesApiException, jsonFetch } from "../../../../modules/jsonFetch";
 import SymfonyRouting from "../../../../modules/Routing";
 import { niceBytes } from "../../../../utils";
+import Main from "../../../../components/Layout/Main";
 
 const MyDocuments: FC = () => {
     const [filter, setFilter] = useState<object>({});
@@ -66,7 +66,7 @@ const MyDocuments: FC = () => {
     };
 
     return (
-        <AppLayout documentTitle="Mes documents">
+        <Main title="Mes documents">
             <h1>Mes documents</h1>
 
             <h2>Liste de documents {documentsQuery.isFetching ? <LoadingIcon largeIcon={true} /> : `(${documentsQuery?.data?.length ?? 0})`}</h2>
@@ -151,7 +151,7 @@ const MyDocuments: FC = () => {
                     <p className={fr.cx("fr-h6", "fr-m-0", "fr-p-0")}>Suppression du document en cours</p>
                 </Wait>
             )}
-        </AppLayout>
+        </Main>
     );
 };
 

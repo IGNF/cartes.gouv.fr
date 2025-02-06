@@ -6,19 +6,22 @@ import { ErrorBoundary as BaseErrorBoundary, type FallbackProps } from "react-er
 
 import { routes } from "../../router/router";
 import AppLayout from "../Layout/AppLayout";
+import Main from "../Layout/Main";
 
 const Fallback: FC<FallbackProps> = ({ error, resetErrorBoundary }) => {
     return (
-        <AppLayout documentTitle="Une erreur est survenue">
-            <Alert severity="error" title="Une erreur est survenue" description={error?.message} className={fr.cx("fr-my-3w")} />
-            <Button
-                onClick={() => {
-                    resetErrorBoundary();
-                    routes.home().push();
-                }}
-            >
-                {"Retour à l'accueil"}
-            </Button>
+        <AppLayout>
+            <Main title="Une erreur est survenue">
+                <Alert severity="error" title="Une erreur est survenue" description={error?.message} className={fr.cx("fr-my-3w")} />
+                <Button
+                    onClick={() => {
+                        resetErrorBoundary();
+                        routes.home().push();
+                    }}
+                >
+                    {"Retour à l'accueil"}
+                </Button>
+            </Main>
         </AppLayout>
     );
 };

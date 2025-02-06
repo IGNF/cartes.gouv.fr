@@ -19,7 +19,6 @@ import {
     type StoredDataRelation,
     type VectorDb,
 } from "../../../../@types/app";
-import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
@@ -38,6 +37,7 @@ import AdditionalInfo from "../metadata/AdditionalInfo";
 import Description from "../metadata/Description";
 import UploadMDFile from "../metadata/UploadMDFile";
 import UploadStyleFile from "./UploadStyleFile";
+import Main from "../../../../components/Layout/Main";
 
 /**
  * Convertir en v1.0.0 si l'utilisateur a déposé un sld en v1.1.0
@@ -122,8 +122,8 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
     const { t } = useTranslation("WmsVectorServiceForm");
     const { t: tCommon } = useTranslation("Common");
 
-    const editMode = useMemo(() => !!offeringId, [offeringId]);
     const [currentStep, setCurrentStep] = useState(STEPS.TABLES_INFOS);
+    const editMode = useMemo(() => !!offeringId, [offeringId]);
 
     const queryClient = useQueryClient();
 
@@ -297,7 +297,7 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
     }, [createServiceMutation, editServiceMutation, currentStep, trigger, editMode]);
 
     return (
-        <DatastoreLayout datastoreId={datastoreId} documentTitle={t("title", { editMode })}>
+        <Main title={t("title", { editMode })}>
             <h1>{t("title", { editMode })}</h1>
 
             {vectorDbQuery.isLoading || offeringQuery.isLoading || metadataQuery.isLoading ? (
@@ -391,7 +391,7 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
                     </div>
                 </Wait>
             )}
-        </DatastoreLayout>
+        </Main>
     );
 };
 

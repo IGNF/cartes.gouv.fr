@@ -5,15 +5,14 @@ import { FC } from "react";
 
 import { UserKeyDetailedWithAccessesResponseDto } from "../../../../@types/app";
 import { PermissionWithOfferingsDetailsResponseDto } from "../../../../@types/entrepot";
-import AppLayout from "../../../../components/Layout/AppLayout";
 import LoadingText from "../../../../components/Utils/LoadingText";
-import { datastoreNavItems } from "../../../../config/navItems/datastoreNavItems";
 import { getTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import api from "../../../api";
 import UserKeysListTab from "../keys/UserKeysListTab/UserKeysListTab";
 import PermissionsListTab from "../permissions/PermissionsListTab";
 import { routes } from "../../../../router/router";
+import Main from "../../../../components/Layout/Main";
 
 type MyAccessKeysProps = {
     activeTab: string;
@@ -22,8 +21,6 @@ type MyAccessKeysProps = {
 const { t } = getTranslation("MyAccessKeys");
 
 const MyAccessKeys: FC<MyAccessKeysProps> = ({ activeTab }) => {
-    const navItems = datastoreNavItems();
-
     const tab = activeTab;
 
     const documentTitle = tab === "keys" ? t("my_access_keys") : t("my_permissions");
@@ -43,7 +40,7 @@ const MyAccessKeys: FC<MyAccessKeysProps> = ({ activeTab }) => {
     });
 
     return (
-        <AppLayout documentTitle={documentTitle} navItems={navItems}>
+        <Main title={documentTitle}>
             {isLoadingKeys || isLoadingPermissions ? (
                 <LoadingText />
             ) : (
@@ -84,7 +81,7 @@ const MyAccessKeys: FC<MyAccessKeysProps> = ({ activeTab }) => {
                     </div>
                 </div>
             )}
-        </AppLayout>
+        </Main>
     );
 };
 

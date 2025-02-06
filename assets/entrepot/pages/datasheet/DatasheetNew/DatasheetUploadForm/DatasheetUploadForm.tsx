@@ -13,7 +13,6 @@ import { symToStr } from "tsafe/symToStr";
 import { v4 as uuidv4 } from "uuid";
 import * as yup from "yup";
 
-import DatastoreLayout from "../../../../../components/Layout/DatastoreLayout";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import Progress from "../../../../../components/Utils/Progress";
@@ -27,6 +26,7 @@ import { routes, useRoute } from "../../../../../router/router";
 import { getFileExtension, regex } from "../../../../../utils";
 import api from "../../../../api";
 import DatasheetUploadIntegrationDialog from "../DatasheetUploadIntegration/DatasheetUploadIntegrationDialog";
+import Main from "../../../../../components/Layout/Main";
 
 const maxFileSize = 2000000000; // 2 GB
 const fileExtensions = ["gpkg", "zip"];
@@ -232,7 +232,7 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
     };
 
     return (
-        <DatastoreLayout datastoreId={datastoreId} documentTitle={t("title", { datasheetName: datasheetName })}>
+        <Main title={t("title", { datasheetName })}>
             <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-4w")}>
                 <Button
                     iconId="fr-icon-arrow-left-s-line"
@@ -345,7 +345,7 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                     <DatasheetUploadIntegrationDialog datastoreId={datastoreId} uploadId={addUploadMutation.data?._id} datasheetName={datasheetName} />
                 </Wait>
             )}
-        </DatastoreLayout>
+        </Main>
     );
 };
 

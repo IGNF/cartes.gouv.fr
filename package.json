@@ -84,7 +84,8 @@
         "cy:open": "cypress open",
         "cy:run": "cypress run",
         "cy:run:headed": "cypress run --headed",
-        "prepare": "husky"
+        "prepare": "husky",
+        "type-check": "tsc --noEmit"
     },
     "browserslist": [
         "last 2 versions",

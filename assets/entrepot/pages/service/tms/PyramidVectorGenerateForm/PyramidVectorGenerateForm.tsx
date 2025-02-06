@@ -10,7 +10,6 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
 import { type StoredDataRelation, type VectorDb } from "../../../../../@types/app";
-import DatastoreLayout from "../../../../../components/Layout/DatastoreLayout";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import Wait from "../../../../../components/Utils/Wait";
 import olDefaults from "../../../../../data/ol-defaults.json";
@@ -26,6 +25,7 @@ import Sample, { type SampleType } from "../sample/Sample";
 import TableAttributeSelection from "../tables/TableAttributeSelection";
 import TableZoomLevels from "../tables/TableZoomLevels";
 import TippeCanoe from "../tippecanoes/Tippecanoe";
+import Main from "../../../../../components/Layout/Main";
 
 export type PyramidVectorGenerateFormValuesType = {
     selected_tables?: string[];
@@ -160,7 +160,7 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, vec
     };
 
     return (
-        <DatastoreLayout datastoreId={datastoreId} documentTitle={t("title")}>
+        <Main title={t("title")}>
             <h1>{t("title")}</h1>
 
             {vectorDbQuery.isLoading ? (
@@ -232,7 +232,7 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, vec
                     </div>
                 </Wait>
             )}
-        </DatastoreLayout>
+        </Main>
     );
 };
 

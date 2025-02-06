@@ -11,7 +11,6 @@ import { symToStr } from "tsafe/symToStr";
 import * as yup from "yup";
 
 import { ConfigurationTypeEnum, EndpointTypeEnum, Service, ServiceFormValuesBaseType, StoredDataRelation, VectorDb } from "../../../../@types/app";
-import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
@@ -31,6 +30,7 @@ import Description from "../metadata/Description";
 import UploadMDFile from "../metadata/UploadMDFile";
 import TableInfosForm from "./TablesInfoForm";
 import { regex } from "../../../../utils";
+import Main from "../../../../components/Layout/Main";
 
 type TableInfoType = Record<string, WfsTableInfos>;
 
@@ -283,7 +283,7 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
     }, [createServiceMutation, editServiceMutation, currentStep, trigger, editMode]);
 
     return (
-        <DatastoreLayout datastoreId={datastoreId} documentTitle={t("title", { editMode })}>
+        <Main title={t("title", { editMode })}>
             <h1>{t("title", { editMode })}</h1>
 
             {vectorDbQuery.isLoading || offeringQuery.isLoading || metadataQuery.isLoading ? (
@@ -383,7 +383,7 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
                     </div>
                 </Wait>
             )}
-        </DatastoreLayout>
+        </Main>
     );
 };
 

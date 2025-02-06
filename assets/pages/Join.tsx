@@ -1,11 +1,11 @@
 import { fr } from "@codegouvfr/react-dsfr";
 
-import AppLayout from "../components/Layout/AppLayout";
 import { routes } from "../router/router";
+import Main from "../components/Layout/Main";
 
 const Join = () => {
     return (
-        <AppLayout documentTitle="Nous rejoindre">
+        <Main title="Nous rejoindre">
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
                     <h1>Rejoignez la communauté des utilisateurs et contributeurs de la Géoplateforme et cartes.gouv.fr</h1>
@@ -43,7 +43,7 @@ const Join = () => {
                     <a href={routes.personal_data().href}>{"En savoir plus sur la gestion des données à caractère personnel"}</a>.
                 </div>
             </div>
-        </AppLayout>
+        </Main>
     );
 };
 

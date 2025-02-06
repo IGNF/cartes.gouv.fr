@@ -7,7 +7,6 @@ import { useQuery } from "@tanstack/react-query";
 import { FC, useEffect, useMemo, useState } from "react";
 
 import { type CartesStyle, OfferingStatusEnum, OfferingTypeEnum, type Service, StoredDataTypeEnum, type TypeInfosWithBbox } from "../../../../@types/app";
-import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import type { MapInitial } from "../../../../components/Utils/RMap";
 import RMap from "../../../../components/Utils/RMap";
@@ -20,6 +19,7 @@ import DiffuseServiceTab from "./DiffuseServiceTab";
 import ManageStylesTab from "./ManageStylesTab";
 
 import "../../../../sass/pages/service_view.scss";
+import Main from "../../../../components/Layout/Main";
 
 type ServiceViewProps = {
     datastoreId: string;
@@ -96,7 +96,7 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
     }, [datasheetName, datastoreId, offeringId, serviceQuery.data, route.params]);
 
     return (
-        <DatastoreLayout datastoreId={datastoreId} documentTitle={`Visualisation données ${datasheetName ?? serviceQuery.data?.layer_name}`}>
+        <Main title={`Visualisation données ${datasheetName ?? serviceQuery.data?.layer_name}`}>
             {serviceQuery.isLoading ? (
                 <LoadingText />
             ) : serviceQuery.error ? (
@@ -159,7 +159,7 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
                     </div>
                 </>
             )}
-        </DatastoreLayout>
+        </Main>
     );
 };
 

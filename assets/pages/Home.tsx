@@ -4,21 +4,20 @@ import Badge from "@codegouvfr/react-dsfr/Badge";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import CallOut from "@codegouvfr/react-dsfr/CallOut";
 import Tile from "@codegouvfr/react-dsfr/Tile";
-import { useEffect } from "react";
-
-import AppLayout from "@/components/Layout/AppLayout";
-import SymfonyRouting from "@/modules/Routing";
-import { catalogueUrl, routes, useRoute } from "@/router/router";
-import { useAuthStore } from "@/stores/AuthStore";
-
-import "@/sass/pages/home.scss";
-
-import homeImgUrl from "@/img/home/home.png";
 import dataVisuSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/digital/data-visualization.svg?no-inline";
 import humanCoopSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/environment/human-cooperation.svg?no-inline";
 import locationFranceSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/map/location-france.svg?no-inline";
 import mapSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/map/map.svg?no-inline";
 import systemSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/system/system.svg?no-inline";
+import { useEffect } from "react";
+
+import SymfonyRouting from "@/modules/Routing";
+import { catalogueUrl, routes, useRoute } from "@/router/router";
+import { useAuthStore } from "@/stores/AuthStore";
+import homeImgUrl from "@/img/home/home.png";
+import Main from "@/components/Layout/Main";
+
+import "@/sass/pages/home.scss";
 
 const Home = () => {
     const { params } = useRoute();
@@ -34,22 +33,23 @@ const Home = () => {
         }
     }, [params, user]);
 
-    const infoBannerMsg = (
-        <>
-            Devenez acteur de cartes.gouv.fr et co-construisez les fonctionnalités en participant à des ateliers thématiques.{" "}
-            <a
-                href="https://analytics-eu.clickdimensions.com/ignfr-agj1s/pages/dbg2dmemee4wanorp13w.html?PageId=0eb6b1752661ef11bfe3000d3aba75df"
-                target="_blank"
-                rel="noreferrer"
-                title="Formulaire d’inscription à des ateliers cartes.gouv.fr - Ouvre une nouvelle fenêtre"
-            >
-                Inscrivez-vous
-            </a>
-        </>
-    );
-
     return (
-        <AppLayout documentTitle="Le service public des cartes et données du territoire" infoBannerMsg={infoBannerMsg}>
+        <Main
+            infoBannerMsg={
+                <>
+                    Devenez acteur de cartes.gouv.fr et co-construisez les fonctionnalités en participant à des ateliers thématiques.{" "}
+                    <a
+                        href="https://analytics-eu.clickdimensions.com/ignfr-agj1s/pages/dbg2dmemee4wanorp13w.html?PageId=0eb6b1752661ef11bfe3000d3aba75df"
+                        target="_blank"
+                        rel="noreferrer"
+                        title="Formulaire d’inscription à des ateliers cartes.gouv.fr - Ouvre une nouvelle fenêtre"
+                    >
+                        Inscrivez-vous
+                    </a>
+                </>
+            }
+            title="Le service public des cartes et données du territoire"
+        >
             {params?.["authentication_failed"] === 1 && (
                 <Alert
                     severity="error"
@@ -317,7 +317,7 @@ const Home = () => {
                     </div>
                 </div>
             </div>
-        </AppLayout>
+        </Main>
     );
 };
 

@@ -9,7 +9,6 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
-import AppLayout from "../../../components/Layout/AppLayout";
 import LoadingIcon from "../../../components/Utils/LoadingIcon";
 import Wait from "../../../components/Utils/Wait";
 import { useTranslation } from "../../../i18n/i18n";
@@ -19,6 +18,7 @@ import { jsonFetch } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
 import { useAuthStore } from "../../../stores/AuthStore";
 import { regex } from "../../../utils";
+import Main from "../../../components/Layout/Main";
 
 import "../../../sass/pages/nous_ecrire.scss";
 
@@ -76,7 +76,7 @@ const Contact = () => {
     };
 
     return (
-        <AppLayout documentTitle={t("title")}>
+        <Main title={t("title")}>
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
                     <h1>{t("title")}</h1>
@@ -178,7 +178,7 @@ const Contact = () => {
                     )}
                 </div>
             </div>
-        </AppLayout>
+        </Main>
     );
 };
 

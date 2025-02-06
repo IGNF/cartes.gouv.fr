@@ -1,12 +1,12 @@
-import { createRouter, defineRoute, param } from "type-route";
+import { createGroup, createRouter, defineRoute, param } from "type-route";
 
 import SymfonyRouting from "../modules/Routing";
 
 export const appRoot = SymfonyRouting.getBaseUrl(); // (document.getElementById("root") as HTMLDivElement).dataset?.appRoot ?? "";
 export const catalogueUrl = (document.getElementById("app_env") as HTMLDivElement)?.dataset?.["catalogueUrl"] ?? "/catalogue";
 
-const routeDefs = {
-    // NOTE : routes non protégées (doivent être listées plus bas dans publicRoutes)
+// Routes non protégées
+const publicRoutes = {
     home: defineRoute(
         {
             authentication_failed: param.query.optional.number,
@@ -36,8 +36,10 @@ const routeDefs = {
     terms_of_service: defineRoute(`${appRoot}/cgu`),
     service_status: defineRoute(`${appRoot}/niveau-de-service`),
     login_disabled: defineRoute(`${appRoot}/connexion-desactivee`),
+};
 
-    // NOTE : routes protégées
+// Routes protégées qui ne sont pas dans des groupes spécifiques plus bas (community, datastore...etc.)
+const privateRoutes = {
     // utilisateur
     my_account: defineRoute(`${appRoot}/mon-compte`),
     my_access_keys: defineRoute(`${appRoot}/mes-cles`),
@@ -60,223 +62,200 @@ const routeDefs = {
     // Demande pour rejoindre une communaute
     join_community: defineRoute(`${appRoot}/rejoindre-des-communautes`),
 
-    // Liste des membres d'une communaute
-    members_list: defineRoute(
-        {
-            communityId: param.path.string,
-            userId: param.query.optional.string,
-        },
-        (p) => `${appRoot}/communaute/${p.communityId}/membres`
-    ),
-
     accesses_request: defineRoute(
         {
             fileIdentifier: param.path.string,
         },
         (p) => `${appRoot}/demande-acces/${p.fileIdentifier}`
     ),
+};
 
-    datastore_manage_storage: defineRoute(
+const communityRoute = defineRoute(
+    {
+        communityId: param.path.string,
+    },
+    (p) => `${appRoot}/communaute/${p.communityId}`
+);
+const communityRoutes = {
+    // Liste des membres d'une communaute
+    members_list: communityRoute.extend(
         {
-            datastoreId: param.path.string,
+            userId: param.query.optional.string,
         },
-        (p) => `${appRoot}/entrepot/${p.datastoreId}/consommation`
+        () => "/membres"
     ),
+};
 
-    datastore_manage_permissions: defineRoute(
-        {
-            datastoreId: param.path.string,
-        },
-        (p) => `${appRoot}/entrepot/${p.datastoreId}/permissions`
-    ),
+const datastoreRoute = defineRoute(
+    {
+        datastoreId: param.path.string,
+    },
+    (p) => `${appRoot}/entrepot/${p.datastoreId}`
+);
+const datastoreRoutes = {
+    datastore_manage_storage: datastoreRoute.extend("/consommation"),
 
-    datastore_add_permission: defineRoute(
+    // permissions
+    datastore_manage_permissions: datastoreRoute.extend("/permissions"),
+    datastore_add_permission: datastoreRoute.extend("/permissions/ajout"),
+    datastore_edit_permission: datastoreRoute.extend(
         {
-            datastoreId: param.path.string,
-        },
-        (p) => `${appRoot}/entrepot/${p.datastoreId}/permissions/ajout`
-    ),
-
-    datastore_edit_permission: defineRoute(
-        {
-            datastoreId: param.path.string,
             permissionId: param.path.string,
         },
-        (p) => `${appRoot}/entrepot/${p.datastoreId}/permissions/${p.permissionId}/modification`
+        (p) => `/permissions/${p.permissionId}/modification`
     ),
 
     // fiche de données
-    datasheet_list: defineRoute(
+    datasheet_list: datastoreRoute.extend("/permissions/donnees"),
+    datastore_datasheet_upload: datastoreRoute.extend(
         {
-            datastoreId: param.path.string,
-        },
-        (p) => `${appRoot}/entrepot/${p.datastoreId}/donnees`
-    ),
-    datastore_datasheet_upload: defineRoute(
-        {
-            datastoreId: param.path.string,
             datasheetName: param.query.optional.string,
         },
-        (p) => `${appRoot}/entrepot/${p.datastoreId}/donnees/televersement`
+        () => "/donnees/televersement"
     ),
-    datastore_datasheet_upload_integration: defineRoute(
+    datastore_datasheet_upload_integration: datastoreRoute.extend(
         {
-            datastoreId: param.path.string,
             uploadId: param.query.string,
             datasheetName: param.query.optional.string,
         },
-        (p) => `${appRoot}/entrepot/${p.datastoreId}/donnees/integration`
+        () => "/donnees/integration"
     ),
-    datastore_datasheet_view: defineRoute(
+    datastore_datasheet_view: datastoreRoute.extend(
         {
-            datastoreId: param.path.string,
             datasheetName: param.path.string,
             activeTab: param.query.optional.string.default("metadata"),
         },
-        (p) => `${appRoot}/entrepot/${p.datastoreId}/donnees/${p.datasheetName}`
+        (p) => `/donnees/${p.datasheetName}`
     ),
-    datastore_stored_data_details: defineRoute(
+    datastore_stored_data_details: datastoreRoute.extend(
         {
-            datastoreId: param.path.string,
             storedDataId: param.path.string,
             datasheetName: param.query.optional.string,
         },
-        (p) => `${appRoot}/entrepot/${p.datastoreId}/donnees/${p.storedDataId}/details`
+        (p) => `/donnees/${p.storedDataId}/details`
     ),
-    datastore_upload_details: defineRoute(
+    datastore_upload_details: datastoreRoute.extend(
         {
-            datastoreId: param.path.string,
             uploadId: param.path.string,
             datasheetName: param.query.optional.string,
         },
-        (p) => `${appRoot}/entrepot/${p.datastoreId}/livraisons/${p.uploadId}/rapport`
+        (p) => `/livraisons/${p.uploadId}/rapport`
     ),
 
     // Creer et publier un service WFS
-    datastore_wfs_service_new: defineRoute(
+    datastore_wfs_service_new: datastoreRoute.extend(
         {
-            datastoreId: param.path.string,
             vectorDbId: param.query.string,
             datasheetName: param.query.string,
         },
-        (p) => `${appRoot}/entrepot/${p.datastoreId}/service/wfs/ajout`
+        () => "/service/wfs/ajout"
     ),
     // Modifier les infos d'un service WFS
-    datastore_wfs_service_edit: defineRoute(
+    datastore_wfs_service_edit: datastoreRoute.extend(
         {
-            datastoreId: param.path.string,
             vectorDbId: param.query.string,
             offeringId: param.path.string,
             datasheetName: param.query.string,
         },
-        (p) => `${appRoot}/entrepot/${p.datastoreId}/service/wfs/${p.offeringId}/modification`
+        (p) => `/service/wfs/${p.offeringId}/modification`
     ),
 
     // Creer et publier un service WMS-VECTEUR
-    datastore_wms_vector_service_new: defineRoute(
+    datastore_wms_vector_service_new: datastoreRoute.extend(
         {
-            datastoreId: param.path.string,
             vectorDbId: param.query.string,
             datasheetName: param.query.string,
         },
-        (p) => `${appRoot}/entrepot/${p.datastoreId}/service/wms-vecteur/ajout`
+        () => "/service/wms-vecteur/ajout"
     ),
     // Modifier les infos d'un service WMS-VECTEUR
-    datastore_wms_vector_service_edit: defineRoute(
+    datastore_wms_vector_service_edit: datastoreRoute.extend(
         {
-            datastoreId: param.path.string,
             vectorDbId: param.query.string,
             offeringId: param.path.string,
             datasheetName: param.query.string,
         },
-        (p) => `${appRoot}/entrepot/${p.datastoreId}/service/wms-vecteur/${p.offeringId}/modification`
+        (p) => `/service/wms-vecteur/${p.offeringId}/modification`
     ),
 
     // Création/génération d'une pyramide vecteur
-    datastore_pyramid_vector_generate: defineRoute(
+    datastore_pyramid_vector_generate: datastoreRoute.extend(
         {
-            datastoreId: param.path.string,
             vectorDbId: param.query.string,
             technicalName: param.query.string,
             datasheetName: param.query.string,
         },
-        (p) => `${appRoot}/entrepot/${p.datastoreId}/pyramide-vecteur/ajout`
+        () => "/pyramide-vecteur/ajout"
     ),
 
     // Publier une pyramide vecteur en tant que service TMS
-    datastore_pyramid_vector_tms_service_new: defineRoute(
+    datastore_pyramid_vector_tms_service_new: datastoreRoute.extend(
         {
-            datastoreId: param.path.string,
             pyramidId: param.query.string,
             datasheetName: param.query.string,
         },
-        (p) => `${appRoot}/entrepot/${p.datastoreId}/service/tms/ajout`
+        () => "/service/tms/ajout"
     ),
     // Modifier les infos d'un service WMS-VECTEUR
-    datastore_pyramid_vector_tms_service_edit: defineRoute(
+    datastore_pyramid_vector_tms_service_edit: datastoreRoute.extend(
         {
-            datastoreId: param.path.string,
             pyramidId: param.query.string,
             offeringId: param.path.string,
             datasheetName: param.query.string,
         },
-        (p) => `${appRoot}/entrepot/${p.datastoreId}/service/tms/${p.offeringId}/modification`
+        (p) => `/service/tms/${p.offeringId}/modification`
     ),
 
     // Création/génération d'une pyramide raster
-    datastore_pyramid_raster_generate: defineRoute(
+    datastore_pyramid_raster_generate: datastoreRoute.extend(
         {
-            datastoreId: param.path.string,
             offeringId: param.query.string,
             datasheetName: param.query.string,
         },
-        (p) => `${appRoot}/entrepot/${p.datastoreId}/pyramide-raster/ajout`
+        () => "/pyramide-raster/ajout"
     ),
-    datastore_pyramid_raster_wms_raster_service_new: defineRoute(
+    datastore_pyramid_raster_wms_raster_service_new: datastoreRoute.extend(
         {
-            datastoreId: param.path.string,
             pyramidId: param.query.string,
             datasheetName: param.query.string,
         },
-        (p) => `${appRoot}/entrepot/${p.datastoreId}/service/wms-raster/ajout`
+        () => "/service/wms-raster/ajout"
     ),
-    datastore_pyramid_raster_wms_raster_service_edit: defineRoute(
+    datastore_pyramid_raster_wms_raster_service_edit: datastoreRoute.extend(
         {
-            datastoreId: param.path.string,
             pyramidId: param.query.string,
             offeringId: param.path.string,
             datasheetName: param.query.string,
         },
-        (p) => `${appRoot}/entrepot/${p.datastoreId}/service/wms-raster/${p.offeringId}/modification`
+        () => "/service/wms-raster/${p.offeringId}/modification"
     ),
-    datastore_pyramid_raster_wmts_service_new: defineRoute(
+    datastore_pyramid_raster_wmts_service_new: datastoreRoute.extend(
         {
-            datastoreId: param.path.string,
             pyramidId: param.query.string,
             datasheetName: param.query.string,
         },
-        (p) => `${appRoot}/entrepot/${p.datastoreId}/service/wmts/ajout`
+        () => "/service/wmts/ajout"
     ),
-    datastore_pyramid_raster_wmts_service_edit: defineRoute(
+    datastore_pyramid_raster_wmts_service_edit: datastoreRoute.extend(
         {
-            datastoreId: param.path.string,
             pyramidId: param.query.string,
             offeringId: param.path.string,
             datasheetName: param.query.string,
         },
-        (p) => `${appRoot}/entrepot/${p.datastoreId}/service/wmts/${p.offeringId}/modification`
+        (p) => `/service/wmts/${p.offeringId}/modification`
     ),
 
-    datastore_service_view: defineRoute(
+    datastore_service_view: datastoreRoute.extend(
         {
-            datastoreId: param.path.string,
             offeringId: param.path.string,
             datasheetName: param.query.string,
             activeTab: param.query.optional.string.default("diffuse"),
         },
-        (p) => `${appRoot}/entrepot/${p.datastoreId}/service/${p.offeringId}/visualisation`
+        (p) => `/service/${p.offeringId}/visualisation`
     ),
+};
 
+const espacecoRoutes = {
     espaceco_community_list: defineRoute(
         {
             page: param.query.optional.number.default(1),
@@ -286,25 +265,26 @@ const routeDefs = {
     ),
 };
 
+const routeDefs = {
+    ...publicRoutes,
+    ...privateRoutes,
+    ...communityRoutes,
+    ...datastoreRoutes,
+    ...espacecoRoutes,
+};
 export const { RouteProvider, useRoute, routes, session } = createRouter(routeDefs);
 
 export const knownRoutes = Object.values(routes).map((r) => r.name);
-export const publicRoutes: typeof knownRoutes = [
-    "home",
-    "about",
-    "documentation",
-    "contact",
-    "contact_confirmation",
-    "news_list",
-    "news_article",
-    "faq",
-    "sitemap",
-    "accessibility",
-    "legal_notice",
-    "personal_data",
-    "offer",
-    "join",
-    "terms_of_service",
-    "service_status",
-    "login_disabled",
-];
+export const publicGroup = createGroup((Object.keys(publicRoutes) as (keyof typeof publicRoutes)[]).map((key) => routes[key]));
+export const privateGroup = createGroup((Object.keys(privateRoutes) as (keyof typeof privateRoutes)[]).map((key) => routes[key]));
+export const communityGroup = createGroup((Object.keys(communityRoutes) as (keyof typeof communityRoutes)[]).map((key) => routes[key]));
+export const datastoreGroup = createGroup((Object.keys(datastoreRoutes) as (keyof typeof datastoreRoutes)[]).map((key) => routes[key]));
+export const espacecoGroup = createGroup((Object.keys(espacecoRoutes) as (keyof typeof espacecoRoutes)[]).map((key) => routes[key]));
+
+export const groups = {
+    public: publicGroup,
+    private: privateGroup,
+    community: communityGroup,
+    datastore: datastoreGroup,
+    espaceco: espacecoGroup,
+};

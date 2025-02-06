@@ -3,11 +3,10 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { ToggleSwitch } from "@codegouvfr/react-dsfr/ToggleSwitch";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FC, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { UserRightsResponseDto } from "../../../../@types/app";
-import { CommunityMemberDtoRightsEnum, CommunityUserResponseDto, UserDto } from "../../../../@types/entrepot";
-import DatastoreLayout from "../../../../components/Layout/DatastoreLayout";
+import { CommunityUserResponseDto, UserDto } from "../../../../@types/entrepot";
 import ConfirmDialog, { ConfirmDialogModal } from "../../../../components/Utils/ConfirmDialog";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
@@ -21,9 +20,11 @@ import { AddMember, addMemberModal } from "../AddMember/AddMember";
 import { complete, getTranslatedRightTypes, UserRights } from "../UserRights";
 
 import "../../../../sass/pages/community_members.scss";
+import { useCommunity } from "../../../../contexts/community";
+import Main from "../../../../components/Layout/Main";
+import { useDatastore } from "../../../../contexts/datastore";
 
 type CommunityMembersProps = {
-    communityId: string;
     userId?: string;
 };
 
@@ -50,7 +51,7 @@ const getName = (member: UserDto) => {
     return name.replace(/\s+/g, "") === "" ? member.email : name;
 };
 
-const CommunityMembers: FC<CommunityMembersProps> = ({ communityId, userId }) => {
+function CommunityMembers({ userId }: CommunityMembersProps) {
     // Traductions
     const { t: tCommon } = useTranslation("Common");
     const { t } = useTranslation({ CommunityMembers });
@@ -60,46 +61,20 @@ const CommunityMembers: FC<CommunityMembersProps> = ({ communityId, userId }) =>
     // const [members, setMembers] = useState<Member[]>([]);
     const [currentMember, setCurrentMember] = useState<string | undefined>(undefined);
 
-    // La communauté
-    const { data: community, isLoading: isLoadingCommunity } = useQuery({
-        queryKey: RQKeys.community(communityId),
-        queryFn: ({ signal }) => api.community.get(communityId, { signal }),
+    // Data
+    const community = useCommunity();
+    const { datastore } = useDatastore();
+
+    // Les membres de cette communauté
+    const { data: communityMembers, isLoading: isLoadingMembers } = useQuery({
+        queryKey: RQKeys.community_members(community._id),
+        queryFn: ({ signal }) => api.community.getMembers(community._id, { signal }),
         staleTime: 20000,
-        enabled: !!communityId,
     });
-
-    const { data: datastore, isLoading: isLoadingDatastore } = useQuery({
-        queryKey: RQKeys.datastore(community?.datastore?._id ?? "XXXX"),
-        queryFn: ({ signal }) => {
-            if (community?.datastore?._id !== undefined) {
-                return api.datastore.get(community?.datastore?._id, { signal });
-            }
-        },
-        staleTime: 3600000,
-        enabled: community?.datastore?._id !== undefined,
-    });
-
-    // Les droits sur cette communauté
-    const userRights = useMemo(() => {
-        const communityMember = user?.communities_member.filter((member) => member.community?._id === communityId);
-        return communityMember?.length ? communityMember[0].rights : undefined;
-    }, [user?.communities_member, communityId]);
 
     const communitySupervisor = useMemo(() => {
         return community?.supervisor._id;
     }, [community]);
-
-    const isAuthorized = useMemo(() => {
-        const isSupervisor = communitySupervisor === user?.id;
-        return isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.COMMUNITY);
-    }, [communitySupervisor, user?.id, userRights]);
-
-    // Les membres de cette communauté
-    const { data: communityMembers, isLoading: isLoadingMembers } = useQuery({
-        queryKey: RQKeys.community_members(communityId),
-        queryFn: ({ signal }) => api.community.getMembers(communityId, { signal }),
-        staleTime: 20000,
-    });
 
     const communityMemberIds = useMemo(() => {
         return communityMembers?.map((member) => member.user._id) ?? [];
@@ -129,22 +104,22 @@ const CommunityMembers: FC<CommunityMembersProps> = ({ communityId, userId }) =>
     }, [communityMembers, communitySupervisor, user?.id]);
 
     useEffect(() => {
-        if (isAuthorized && userId && !isLoadingMembers && !communityMemberIds.includes(userId)) {
+        if (userId && !isLoadingMembers && !communityMemberIds.includes(userId)) {
             addMemberModal.open();
         }
-    }, [communityMemberIds, isAuthorized, isLoadingMembers, userId]);
+    }, [communityMemberIds, isLoadingMembers, userId]);
 
     const queryClient = useQueryClient();
 
     // Suppression d'un utilisateur
     const { isPending: isRemovePending, mutate: mutateRemove } = useMutation<{ user: string } | undefined, CartesApiException, string>({
         mutationFn: (user_id: string) => {
-            if (communityId) return api.community.removeMember(communityId, user_id);
+            if (community._id) return api.community.removeMember(community._id, user_id);
             return Promise.resolve(undefined);
         },
         onSuccess: (response) => {
             if (response) {
-                queryClient.setQueryData(RQKeys.community_members(communityId), () => {
+                queryClient.setQueryData(RQKeys.community_members(community._id), () => {
                     return communityMembers?.filter((member) => member.user._id !== response.user);
                 });
             }
@@ -154,12 +129,12 @@ const CommunityMembers: FC<CommunityMembersProps> = ({ communityId, userId }) =>
     // Modification des droits d'un utilisateur
     const { isPending: isModifyPending, mutate: mutateModify } = useMutation<UserRightsResponseDto | undefined, CartesApiException, updateMember>({
         mutationFn: (datas) => {
-            if (communityId) return api.community.updateMember(communityId, datas);
+            if (community._id) return api.community.updateMember(community._id, datas);
             return Promise.resolve(undefined);
         },
         onSuccess: (response) => {
             if (response) {
-                queryClient.setQueryData<CommunityUserResponseDto[]>(RQKeys.community_members(communityId), (communityMembers) => {
+                queryClient.setQueryData<CommunityUserResponseDto[]>(RQKeys.community_members(community._id), (communityMembers) => {
                     communityMembers?.forEach((member) => {
                         if (member.user._id === response.user) {
                             member.rights = response.rights; // Mise a jour des droits
@@ -186,9 +161,7 @@ const CommunityMembers: FC<CommunityMembersProps> = ({ communityId, userId }) =>
     };
 
     return (
-        <DatastoreLayout
-            datastoreId={datastore?._id ?? "XXXX"}
-            documentTitle="Membres"
+        <Main
             customBreadcrumbProps={{
                 homeLinkProps: routes.home().link,
                 segments: [
@@ -197,8 +170,9 @@ const CommunityMembers: FC<CommunityMembersProps> = ({ communityId, userId }) =>
                 ],
                 currentPageLabel: tBreadcrumb("members_list"),
             }}
+            title="Membres"
         >
-            {(isLoadingDatastore || isLoadingCommunity || isLoadingMembers) && <LoadingText />}
+            {isLoadingMembers && <LoadingText />}
             {!isLoadingMembers && userId && communityMemberIds.includes(userId) && (
                 <Alert
                     className={fr.cx("fr-mb-1w")}
@@ -206,11 +180,11 @@ const CommunityMembers: FC<CommunityMembersProps> = ({ communityId, userId }) =>
                     title={t("already_member", { userId: userId })}
                     closable
                     onClose={() => {
-                        routes.members_list({ communityId }).push();
+                        routes.members_list({ communityId: community._id }).push();
                     }}
                 />
             )}
-            {!isLoadingMembers && isAuthorized === true && (
+            {!isLoadingMembers && (
                 <>
                     <h1>{t("community_members", { communityName: community?.name ?? "" })}</h1>
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--right")}>
@@ -290,10 +264,7 @@ const CommunityMembers: FC<CommunityMembersProps> = ({ communityId, userId }) =>
                     )}
                 </>
             )}
-            {isLoadingCommunity === false && isAuthorized === false && (
-                <Alert className={fr.cx("fr-mb-2w")} title={tCommon("information")} closable description={t("no_necessary_rights")} severity={"info"} />
-            )}
-            <AddMember communityId={communityId} communityMemberIds={communityMemberIds} userId={userId} />
+            <AddMember communityId={community._id} communityMemberIds={communityMemberIds} userId={userId} />
             <ConfirmDialog
                 title={t("confirm_remove")}
                 onConfirm={() => {
@@ -302,8 +273,8 @@ const CommunityMembers: FC<CommunityMembersProps> = ({ communityId, userId }) =>
                     }
                 }}
             />
-        </DatastoreLayout>
+        </Main>
     );
-};
+}
 
 export default CommunityMembers;

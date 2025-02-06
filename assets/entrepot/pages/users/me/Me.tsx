@@ -1,25 +1,21 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
-import { useMemo } from "react";
 
-import AppLayout from "../../../../components/Layout/AppLayout";
-import { datastoreNavItems } from "../../../../config/navItems/datastoreNavItems";
 import { getTranslation, useTranslation } from "../../../../i18n/i18n";
 import SymfonyRouting from "../../../../modules/Routing";
 import { useAuthStore } from "../../../../stores/AuthStore";
 import { useSnackbarStore } from "../../../../stores/SnackbarStore";
 import { formatDateFromISO } from "../../../../utils";
+import Main from "../../../../components/Layout/Main";
 
 const Me = () => {
     const { t: tCommon } = getTranslation("Common");
     const { t } = useTranslation({ Me });
     const user = useAuthStore((state) => state.user);
-    const navItems = useMemo(() => datastoreNavItems(), []);
-
     const setMessage = useSnackbarStore((state) => state.setMessage);
 
     return (
-        <AppLayout documentTitle={t("my_account")} navItems={navItems}>
+        <Main title={t("my_account")}>
             <h1>{t("my_account")}</h1>
 
             {user && (
@@ -55,7 +51,7 @@ const Me = () => {
             >
                 {t("manage_my_account")}
             </Button>
-        </AppLayout>
+        </Main>
     );
 };
 
