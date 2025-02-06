@@ -38,10 +38,7 @@ const Home = () => {
     }, [params, user]);
 
     return (
-        <Main
-            noticeProps={alertProps}
-            title="Le service public des cartes et données du territoire"
-        >
+        <Main noticeProps={alertProps} title="Le service public des cartes et données du territoire">
             {params?.["authentication_failed"] === 1 && (
                 <Alert
                     severity="error"
