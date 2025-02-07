@@ -1,7 +1,9 @@
 import { declareComponentKeys } from "i18nifty";
 import { ReactNode } from "react";
-import { Translations } from "../../../../i18n/types";
+
 import { formatDateFromISO } from "@/utils";
+import { Translations } from "../../../../i18n/types";
+import { FilterEnum, SortByEnum, SortOrderEnum } from "./DatasheetList.types";
 
 const { i18n } = declareComponentKeys<
     | { K: "title"; P: { datastoreName?: string }; R: string }
@@ -13,6 +15,15 @@ const { i18n } = declareComponentKeys<
     | { K: "sandbox_datastore_explanation"; R: ReactNode }
     | "refresh_datasheet_list"
     | { K: "last_refresh_date"; P: { dataUpdatedAt: number }; R: string }
+    | "filter_label"
+    | "filter_placeholder"
+    | { K: "filter_option"; P: { filter: FilterEnum }; R: string }
+    | "sort_label"
+    | "sort_placeholder"
+    | { K: "sort_option"; P: { sort: SortByEnum }; R: string }
+    | "sort_order_label"
+    | "sort_order_placeholder"
+    | { K: "sort_order_option"; P: { sortOrder: SortOrderEnum }; R: string }
 >()("DatasheetList");
 export type I18n = typeof i18n;
 
@@ -32,6 +43,42 @@ export const DatasheetListFrTranslations: Translations<"fr">["DatasheetList"] = 
     ),
     refresh_datasheet_list: "Rafraîchir",
     last_refresh_date: ({ dataUpdatedAt }) => `Données mises à jour le ${formatDateFromISO(new Date(dataUpdatedAt).toISOString())}`,
+    filter_label: "Filtrer",
+    filter_placeholder: "Sélectionner un filtre",
+    filter_option: ({ filter }) => {
+        switch (filter) {
+            case FilterEnum.PUBLISHED:
+                return "Fiches publiées";
+            case FilterEnum.NOT_PUBLISHED:
+                return "Fiches non publiées";
+            default:
+                return "Filtre inconnu";
+        }
+    },
+    sort_label: "Trier",
+    sort_placeholder: "Trier par",
+    sort_option: ({ sort }) => {
+        switch (sort) {
+            case SortByEnum.NAME:
+                return "Nom";
+            case SortByEnum.NB_SERVICES:
+                return "Fiches publiées";
+            default:
+                return "Tri inconnu";
+        }
+    },
+    sort_order_label: "Trier",
+    sort_order_placeholder: "Dans l'ordre",
+    sort_order_option: ({ sortOrder }) => {
+        switch (sortOrder) {
+            case SortOrderEnum.ASCENDING:
+                return "Croissant";
+            case SortOrderEnum.DESCENDING:
+                return "Décroissant";
+            default:
+                return "Ordre inconnu";
+        }
+    },
 };
 
 export const DatasheetListEnTranslations: Translations<"en">["DatasheetList"] = {
@@ -44,4 +91,13 @@ export const DatasheetListEnTranslations: Translations<"en">["DatasheetList"] = 
     sandbox_datastore_explanation: undefined,
     refresh_datasheet_list: undefined,
     last_refresh_date: undefined,
+    filter_label: undefined,
+    filter_placeholder: undefined,
+    filter_option: undefined,
+    sort_label: undefined,
+    sort_placeholder: undefined,
+    sort_option: undefined,
+    sort_order_label: undefined,
+    sort_order_placeholder: undefined,
+    sort_order_option: undefined,
 };
