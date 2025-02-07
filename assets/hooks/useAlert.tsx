@@ -7,7 +7,8 @@ export type IUseAlert = Pick<NoticeProps, "title" | "description" | "link" | "se
 };
 
 export function useAlert(alert?: IAlert): IUseAlert | undefined {
-    const { t } = useTranslation("alerts");
+    const { t } = useTranslation("Common");
+
     if (!alert) {
         return undefined;
     }
@@ -21,7 +22,7 @@ export function useAlert(alert?: IAlert): IUseAlert | undefined {
         description,
         link: label
             ? {
-                  linkProps: { href: url, target: "_blank", rel: "noreferrer external", title: `${label} - ${t("newWindow")}` },
+                  linkProps: { href: url, target: "_blank", rel: "noreferrer external", title: `${label} - ${t("new_window")}` },
                   text: label,
               }
             : undefined,

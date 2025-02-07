@@ -256,7 +256,7 @@ const datastoreRoutes = {
 };
 
 const configRoutes = {
-    config_alerts: defineRoute(`${appRoot}/config/events`),
+    config_alerts: defineRoute(`${appRoot}/configuration/alertes`),
 };
 
 const espacecoRoutes = {

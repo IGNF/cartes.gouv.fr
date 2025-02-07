@@ -15,7 +15,7 @@ use Symfony\Component\Routing\Attribute\Route;
 )]
 class RSSFeedController extends AbstractController
 {
-    #[Route('/alerts', name: 'alerts')]
+    #[Route('/alertes', name: 'alerts')]
     #[Cache(public: true, maxage: 3600, mustRevalidate: true)]
     public function alerts(RSSFeed $rssFeed): Response
     {

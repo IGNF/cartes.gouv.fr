@@ -13,7 +13,6 @@ const { i18n } = declareComponentKeys<
     | "no_alerts"
     | "title"
     | "preview"
-    | "newWindow"
     | "actions"
     | "update"
     | "delete"
@@ -47,7 +46,6 @@ export const AlertsFrTranslations: Translations<"fr">["alerts"] = {
     no_alerts: "Aucune alerte disponible",
     title: "Configuration : Alertes",
     preview: "Prévisualisation",
-    newWindow: "nouvelle fenêtre",
     actions: "Actions",
     update: "Modifier",
     delete: "Supprimer",
@@ -80,7 +78,6 @@ export const AlertsEnTranslations: Translations<"en">["alerts"] = {
     no_alerts: undefined,
     title: undefined,
     preview: undefined,
-    newWindow: undefined,
     actions: undefined,
     update: undefined,
     delete: undefined,
