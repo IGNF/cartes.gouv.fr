@@ -231,7 +231,9 @@ const Alerts: FC = () => {
                                                 {alerts?.map((alert, i) => (
                                                     <tr key={i} data-row-key={i + 1}>
                                                         <td>{getIcon(alert.severity)}</td>
-                                                        <td>{alert.title}</td>
+                                                        <td className="alerts__cell-title" title={alert.title}>
+                                                            {alert.title}
+                                                        </td>
                                                         <td>{formatDateTime(alert.date)}</td>
                                                         <td>
                                                             <ToggleSwitch

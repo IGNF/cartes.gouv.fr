@@ -27,3 +27,11 @@
 .alerts__icon--success {
     color: var(--text-default-success);
 }
+
+.alerts__cell-title {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    min-width: 200px;
+    max-width: 0;
+}
