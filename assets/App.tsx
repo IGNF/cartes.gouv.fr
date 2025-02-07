@@ -9,6 +9,8 @@ import RouterRenderer from "./router/RouterRenderer";
 import { RouteProvider } from "./router/router";
 import AlertProvider from "./components/Provider/AlertProvider";
 
+import "./sass/helpers.scss";
+
 const queryClient = new QueryClient();
 
 const persister = createSyncStoragePersister({
