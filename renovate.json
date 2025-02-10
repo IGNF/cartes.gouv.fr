@@ -6,6 +6,5 @@
             "matchUpdateTypes": ["major"],
             "dependencyDashboardApproval": true
         }
-    ],
-    "ignoreDeps": ["ol", "ol-mapbox-style", "php"]
+    ]
 }
