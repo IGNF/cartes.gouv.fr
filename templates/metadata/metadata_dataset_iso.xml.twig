@@ -87,13 +87,11 @@
                 {% if inspire_keywords|length %}
                     <gmd:descriptiveKeywords>
                         <gmd:MD_Keywords>
-                            {% apply spaceless %}
-                            {% for item in inspire_keywords %}
+                            {%- for item in inspire_keywords -%}
                                 <gmd:keyword>
                                     <gco:CharacterString>{{ item }}</gco:CharacterString>
                                 </gmd:keyword>
-                            {% endfor %}
-                            {% endapply %}
+                            {%- endfor -%}
                             <gmd:thesaurusName>
                                 <gmd:CI_Citation>
                                     <gmd:title>
@@ -118,13 +116,11 @@
                 {% if free_keywords|length %}
                     <gmd:descriptiveKeywords>
                         <gmd:MD_Keywords>
-                            {% apply spaceless %}
-                            {% for item in free_keywords %}
+                            {%- for item in free_keywords -%}
                                 <gmd:keyword>
                                     <gco:CharacterString>{{ item }}</gco:CharacterString>
                                 </gmd:keyword>
-                            {% endfor %}
-                            {% endapply %}
+                            {%- endfor -%}
                             <gmd:type>
                                 <gmd:MD_KeywordTypeCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/ML_gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="theme">theme</gmd:MD_KeywordTypeCode>
                             </gmd:type>

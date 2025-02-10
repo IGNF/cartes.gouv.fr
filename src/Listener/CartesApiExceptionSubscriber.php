@@ -14,7 +14,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
 class CartesApiExceptionSubscriber implements EventSubscriberInterface
 {
     public function __construct(
-        private LoggerInterface $logger
+        private LoggerInterface $logger,
     ) {
     }
 
@@ -51,14 +51,12 @@ class CartesApiExceptionSubscriber implements EventSubscriberInterface
             'details' => [],
         ];
 
-        if ($throwable instanceof CartesApiException) {
-            $code = $throwable->getCode();
-            $responseData['code'] = $code;
+        $code = $throwable->getCode();
+        $responseData['code'] = $code;
 
-            $responseData['status'] = Response::$statusTexts[$code];
-            $responseData['message'] = $throwable->getMessage();
-            $responseData['details'] = $throwable->getDetails();
-        }
+        $responseData['status'] = Response::$statusTexts[$code];
+        $responseData['message'] = $throwable->getMessage();
+        $responseData['details'] = $throwable->getDetails();
 
         $this->logger->debug('Exception[{throwable}]: {message}', [
             'throwable' => get_class($throwable),

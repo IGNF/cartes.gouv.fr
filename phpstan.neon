@@ -7,8 +7,9 @@ parameters:
     paths:
         - src
     ignoreErrors:
-        - '#return type has no value type specified in iterable type array#'
+        - "#return type has no value type specified in iterable type array#"
     # excludes_analyse:
     #     - tests/bootstrap.php
     # bootstrapFiles:
     #     - bin/.phpunit/phpunit/vendor/autoload.php
+    treatPhpDocTypesAsCertain: false

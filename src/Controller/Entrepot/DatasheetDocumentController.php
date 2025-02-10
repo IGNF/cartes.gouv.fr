@@ -98,6 +98,8 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
                         $tempFilePath = join(DIRECTORY_SEPARATOR, [$tempFileDir, $file->getClientOriginalName()]);
 
                         $file->move($tempFileDir, $file->getClientOriginalName());
+                    } else {
+                        throw new CartesApiException('Fichier non fourni', Response::HTTP_BAD_REQUEST);
                     }
 
                     $annexePath = join('/', ['documents', $datasheetName, $uuid, $file->getClientOriginalName()]);

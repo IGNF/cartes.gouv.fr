@@ -38,6 +38,8 @@ class User implements UserInterface
         $this->firstName = $keycloakUserInfo['given_name'] ?? null;
         $this->lastName = $keycloakUserInfo['family_name'] ?? null;
         $this->userName = $keycloakUserInfo['preferred_username'];
+        $this->accountCreationDate = null;
+        $this->lastLoginDate = null;
 
         if (array_key_exists('creation', $apiUserInfo)) {
             $this->accountCreationDate = new \DateTime($apiUserInfo['creation']);
