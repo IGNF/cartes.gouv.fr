@@ -43,7 +43,7 @@ class UserDocumentsApiService extends BaseEntrepotApiService
      * @param array<mixed>  $extra
      * @param array<string> $labels
      */
-    public function modify(string $documentId, string $name, ?string $description = null, ?array $extra = null, ?array $labels = null, ?bool $publicUrl = null): array
+    public function modify(string $documentId, ?string $name = null, ?string $description = null, ?array $extra = null, ?array $labels = null, ?bool $publicUrl = null): array
     {
         $body = [];
 
