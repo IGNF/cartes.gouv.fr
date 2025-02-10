@@ -1,5 +1,5 @@
-import { EmailPlannerFormType, EmailPlannerType } from "../../../../../../@types/app_espaceco";
-import { EmailPlannerDTO } from "../../../../../../@types/espaceco";
+import { EmailPlannerAddType, EmailPlannerFormType, EmailPlannerType } from "../../../../../../@types/app_espaceco";
+import { CancelEventType, EmailPlannerDTO, TriggerEventType } from "../../../../../../@types/espaceco";
 
 const getAddDefaultValues = (type: EmailPlannerType): EmailPlannerFormType => {
     return {
@@ -34,4 +34,27 @@ const getEditDefaultValues = (emailPlanner: EmailPlannerDTO): EmailPlannerFormTy
     };
 };
 
-export { getAddDefaultValues, getEditDefaultValues };
+const prepareDatasForApi = (values: EmailPlannerFormType): EmailPlannerAddType => {
+    let datas: EmailPlannerAddType = {
+        subject: values.subject,
+        event: values.event as TriggerEventType,
+        cancel_event: values.cancel_event as CancelEventType,
+        body: values.body,
+        recipients: values.recipients,
+        themes: values.themes ?? [],
+        condition: null,
+        delay: values.delay,
+        repeat: values.repeat,
+    };
+
+    if (values.event === "georem_status_changed") {
+        const statuses = values.statuses ?? [];
+        if (statuses.length) {
+            datas = { ...datas, condition: { status: statuses } };
+        }
+    }
+
+    return datas;
+};
+
+export { getAddDefaultValues, getEditDefaultValues, prepareDatasForApi };

@@ -26,7 +26,6 @@ type StatusAutocompleteOption = {
     title: string;
 };
 
-// TODO REVOIR AVEC REACT-DSFR-TIPTAP
 const PersonalEmailPlanner: FC<PersonalEmailPlannerProps> = ({ form, themes, statuses }) => {
     const { t } = useTranslation("AddOrEditEmailPlanner");
 
@@ -120,7 +119,7 @@ const PersonalEmailPlanner: FC<PersonalEmailPlannerProps> = ({ form, themes, sta
             {event === "georem_status_changed" && (
                 <Controller
                     control={control}
-                    name="statuses"
+                    name={"statuses"}
                     render={({ field }) => {
                         return (
                             <AutocompleteSelect

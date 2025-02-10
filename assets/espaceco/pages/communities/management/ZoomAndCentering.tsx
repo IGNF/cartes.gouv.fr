@@ -7,22 +7,23 @@ import { useForm } from "react-hook-form";
 import { CommunityFormMode, ZoomAndCenteringFormType } from "../../../../@types/app_espaceco";
 import { CommunityResponseDTO } from "../../../../@types/espaceco";
 import ZoomRange from "../../../../components/Utils/ZoomRange";
-import olDefaults from "../../../../data/ol-defaults.json";
 import { useTranslation } from "../../../../i18n/i18n";
 import { getDefaultValues } from "../DefaultValues";
 import { COMMUNITY_FORM_STEPS } from "../FormSteps";
+import ActionButtons from "./ActionButtons";
+import DisplayExtent from "./ZoomAndCentering/DisplayExtent";
 import { ExtentDialog, ExtentDialogModal } from "./ZoomAndCentering/ExtentDialog";
 import RMap from "./ZoomAndCentering/RMap";
 import Search from "./ZoomAndCentering/Search";
-import DisplayExtent from "./ZoomAndCentering/DisplayExtent";
 
 type ZoomAndCenteringProps = {
     mode: CommunityFormMode;
     community: CommunityResponseDTO;
-    onSubmit: (datas: FormData) => void;
+    onPrevious?: () => void;
+    onSubmit: (datas: object, saveOnly: boolean) => void;
 };
 
-const ZoomAndCentering: FC<ZoomAndCenteringProps> = ({ mode, community, onSubmit }) => {
+const ZoomAndCentering: FC<ZoomAndCenteringProps> = ({ mode, community, onPrevious, onSubmit }) => {
     const { t: tCommon } = useTranslation("Common");
     const { t } = useTranslation("ManageCommunity");
 
@@ -45,18 +46,17 @@ const ZoomAndCentering: FC<ZoomAndCenteringProps> = ({ mode, community, onSubmit
         return;
     }, [position, extent]);
 
-    const onSubmitForm = () => {
-        const { position, zoom, zoomMin, zoomMax, extent } = getFormValues();
+    const onSubmitForm = (saveOnly: boolean) => {
+        const values = getFormValues();
 
-        const datas = new FormData();
-        datas.append("zoom", zoom.toString());
-        datas.append("zoom_min", zoomMin.toString());
-        datas.append("zoom_max", zoomMax.toString());
-        datas.append("position", JSON.stringify(position));
-        if (extent) {
-            datas.append("extent", JSON.stringify(extent));
-        }
-        onSubmit(datas);
+        const datas = {
+            zoom: values.zoom,
+            minZoom: values.minZoom,
+            maxZoom: values.maxZoom,
+            position: `POINT(${position[0]} ${position[1]})`,
+            extent: values.extent,
+        };
+        onSubmit(datas, saveOnly);
     };
 
     return (
@@ -84,13 +84,13 @@ const ZoomAndCentering: FC<ZoomAndCenteringProps> = ({ mode, community, onSubmit
                         label={t("zoom.zoom_range")}
                         hintText={t("zoom.zoom_range_hint")}
                         small={true}
-                        min={olDefaults.zoom_levels.TOP}
-                        max={olDefaults.zoom_levels.BOTTOM}
-                        values={[getFormValues("zoomMin"), getFormValues("zoomMax")]}
+                        min={0}
+                        max={20}
+                        values={[getFormValues("minZoom"), getFormValues("maxZoom")]}
                         onChange={(v) => {
                             const oldZoom = getFormValues("zoom");
-                            setFormValue("zoomMin", v[0]);
-                            setFormValue("zoomMax", v[1]);
+                            setFormValue("minZoom", v[0]);
+                            setFormValue("maxZoom", v[1]);
                             setFormValue("zoom", oldZoom < v[1] ? oldZoom : v[1]);
                         }}
                     />
@@ -122,21 +122,20 @@ const ZoomAndCentering: FC<ZoomAndCenteringProps> = ({ mode, community, onSubmit
                     }}
                 />
             </div>
-            <div className={fr.cx("fr-grid-row", "fr-grid-row--right")}>
-                <Button priority={mode === "creation" ? "secondary" : "primary"} onClick={handleSubmit(onSubmitForm)}>
-                    {tCommon("save")}
-                </Button>
-                {mode === "creation" && (
-                    <Button
-                        priority="primary"
-                        nativeButtonProps={{
-                            type: "submit",
-                        }}
-                    >
-                        {tCommon("continue")}
+            {mode === "edition" ? (
+                <div className="fr-grid-row fr-grid-row--right">
+                    <Button priority={"primary"} onClick={() => handleSubmit(() => onSubmitForm(true))()}>
+                        {tCommon("save")}
                     </Button>
-                )}
-            </div>
+                </div>
+            ) : (
+                <ActionButtons
+                    step={COMMUNITY_FORM_STEPS.ZOOM_AND_CENTERING}
+                    onPrevious={onPrevious}
+                    onSave={() => handleSubmit(() => onSubmitForm(true))()}
+                    onContinue={() => handleSubmit(() => onSubmitForm(false))()}
+                />
+            )}
         </div>
     );
 };

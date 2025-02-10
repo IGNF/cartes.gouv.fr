@@ -1,5 +1,6 @@
 import { Extent } from "ol/extent";
 import {
+    AttributeDTO,
     BasicRecipients,
     DocumentDTO,
     EmailPlannerDTO,
@@ -121,6 +122,27 @@ export type CommunityLayer = {
     geometry_type: LayerGeometryType;
 };
 
+export const autofillKeywords = [
+    "id",
+    "userId",
+    "userName",
+    "date",
+    "document1",
+    "document2",
+    "document3",
+    "document4",
+    "lon",
+    "lat",
+    "municipalityInsee",
+    "municipalityName",
+    "departmentInsee",
+    "departmentName",
+    "groupId",
+    "groupName",
+] as const;
+
+export type AutofillKeywordsType = (typeof autofillKeywords)[number];
+
 /* FORMULAIRES */
 export type CommunityFormMode = "creation" | "edition";
 
@@ -170,13 +192,14 @@ export type MeasureToolsType = (typeof measureTools)[number];
 
 /*************************************************************************************/
 
-// LES FORMULAIRES
+export type TableTheme = Record<string, { database: string; table: string; attributes: AttributeDTO[] }>;
 
+// LES FORMULAIRES
 export type ZoomAndCenteringFormType = {
     position: number[];
     zoom: number;
-    zoomMin: number;
-    zoomMax: number;
+    minZoom: number;
+    maxZoom: number;
     extent?: Extent | null;
 };
 
@@ -194,7 +217,6 @@ export type ToolsFormType = {
 export type ReportFormType = {
     attributes: ThemeDTO[];
     report_statuses: ReportStatusesDTO;
-    email_planners?: EmailPlannerDTO[];
     shared_themes?: SharedThemesDTO[];
     shared_georem: SharedGeorem;
     all_members_can_valid: boolean;

@@ -6,10 +6,10 @@ import { createPortal } from "react-dom";
 import { Controller, useForm } from "react-hook-form";
 import isEmail from "validator/lib/isEmail";
 import { BasicRecipientsArray, EmailPlannerAddType, EmailPlannerFormType, EmailPlannerTypes } from "../../../../../../@types/app_espaceco";
-import { CancelEventType, ReportStatusesDTO, TriggerEventType } from "../../../../../../@types/espaceco";
+import { ReportStatusesDTO } from "../../../../../../@types/espaceco";
 import AutocompleteSelect from "../../../../../../components/Input/AutocompleteSelect";
 import { useTranslation } from "../../../../../../i18n/i18n";
-import { getAddDefaultValues } from "./Defaults";
+import { getAddDefaultValues, prepareDatasForApi } from "./EmailPlannerUtils";
 import PersonalEmailPlanner from "./PersonalEmailPlanner";
 import { getBasicSchema, getPersonalSchema } from "./schemas";
 
@@ -21,7 +21,7 @@ const AddEmailPlannerDialogModal = createModal({
 type AddEmailPlannerDialogProps = {
     themes: string[];
     statuses: ReportStatusesDTO;
-    onAdd: (values: EmailPlannerAddType) => void;
+    onAdd: (datas: EmailPlannerAddType) => void;
 };
 
 const AddEmailPlannerDialog: FC<AddEmailPlannerDialogProps> = ({ themes, statuses, onAdd }) => {
@@ -58,29 +58,8 @@ const AddEmailPlannerDialog: FC<AddEmailPlannerDialogProps> = ({ themes, statuse
     }, [type, reset]);
 
     const onSubmit = () => {
-        const values = getFormValues();
-
-        let form: EmailPlannerAddType = {
-            subject: values.subject,
-            event: values.event as TriggerEventType,
-            cancel_event: values.cancel_event as CancelEventType,
-            body: values.body,
-            recipients: values.recipients,
-            themes: values.themes ?? [],
-            condition: null,
-            delay: values.delay,
-            repeat: values.repeat,
-        };
-
-        if (values.event === "georem_status_changed") {
-            const statuses = values.statuses ?? [];
-            if (statuses.length) {
-                form = { ...form, condition: { status: statuses } };
-            }
-        }
-
-        onAdd(form);
-
+        const datas = prepareDatasForApi(getFormValues());
+        onAdd(datas);
         resetForm();
         AddEmailPlannerDialogModal.close();
     };

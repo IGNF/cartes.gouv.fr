@@ -82,25 +82,18 @@ const Communities: FC = () => {
         staleTime: 3600000,
     });
 
+    const hasRights = useMemo(() => {
+        if (!me) return false;
+        if (me.administrator) return true;
+
+        const communityMemberHasAdmin = me.communities_member.filter((m) => m.role === "admin");
+        return communityMemberHasAdmin.length > 0;
+    }, [me]);
+
     const handleFilterChange = (filter: CommunityListFilter) => {
         setCommunity(null);
         routes.espaceco_community_list({ filter: filter, page: 1 }).push();
     };
-
-    const rightToCreate = useMemo(() => {
-        if (!me) return false;
-        if (me.administrator) return true;
-
-        let result = false;
-        me.communities_member.every((cm) => {
-            if (cm.role === "admin") {
-                result = true;
-                return false;
-            }
-            return true;
-        });
-        return result;
-    }, [me]);
 
     const queryClient = useQueryClient();
 
@@ -146,7 +139,7 @@ const Communities: FC = () => {
                 )}
                 {isError && <Alert severity="error" closable title={tCommon("error")} description={error.message} className={fr.cx("fr-my-3w")} />}
             </div>
-            {rightToCreate && (
+            {hasRights && (
                 <div className={fr.cx("fr-grid-row", "fr-my-2v")}>
                     <Button onClick={() => CreateCommunityDialogModal.open()}>{t("create_community")}</Button>
                 </div>

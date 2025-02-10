@@ -14,8 +14,6 @@ type ReportStatusesProps = {
     state?: "default" | "error" | "success";
 };
 
-// const minStatuses = getMinAuthorizedStatus();
-
 const ReportStatuses: FC<ReportStatusesProps> = ({ form, state }) => {
     const { t: tStatus } = useTranslation("ReportStatuses");
     const { t } = useTranslation("ManageCommunity");

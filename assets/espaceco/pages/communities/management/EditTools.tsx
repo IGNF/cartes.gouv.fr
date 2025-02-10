@@ -1,5 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
+import Button from "@codegouvfr/react-dsfr/Button";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useQuery } from "@tanstack/react-query";
@@ -13,19 +14,21 @@ import { useTranslation } from "../../../../i18n";
 import RQKeys from "../../../../modules/espaceco/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import api from "../../../api";
-import { getDefaultValues } from "../DefaultValues";
 import { COMMUNITY_FORM_STEPS } from "../FormSteps";
+import ActionButtons from "./ActionButtons";
 import { allTools } from "./tools/Functionalities";
 
 type EditToolsProps = {
     mode: CommunityFormMode;
     community: CommunityResponseDTO;
-    onSubmit: (datas: FormData) => void;
+    onPrevious?: () => void;
+    onSubmit: (datas: object, saveOnly: boolean) => void;
 };
 
 const fields = ["database", "table", "role", "snapto", "tools"];
 
-const EditTools: FC<EditToolsProps> = ({ mode, community, onSubmit }) => {
+const EditTools: FC<EditToolsProps> = ({ mode, community, onPrevious, onSubmit }) => {
+    const { t: tCommon } = useTranslation("Common");
     const { t } = useTranslation("Functionalities");
 
     const {
@@ -43,9 +46,17 @@ const EditTools: FC<EditToolsProps> = ({ mode, community, onSubmit }) => {
         functionalities: yup.array().of(yup.string().oneOf(allTools).required()).required(),
     });
 
-    const values = getDefaultValues(community, COMMUNITY_FORM_STEPS.TOOLS) as ToolsFormType;
+    // TODO REMETTRE
+    // const values = getDefaultValues(community, COMMUNITY_FORM_STEPS.TOOLS) as ToolsFormType;
 
-    const { register, watch } = useForm<ToolsFormType>({
+    // TODO SUPPRIMER
+    const values = { functionalities: [] };
+
+    const {
+        register,
+        getValues: getFormValues,
+        handleSubmit,
+    } = useForm<ToolsFormType>({
         mode: "onSubmit",
         values: values,
         resolver: yupResolver(schema),
@@ -60,6 +71,16 @@ const EditTools: FC<EditToolsProps> = ({ mode, community, onSubmit }) => {
 
     console.log(editables);
     // console.log(watch());
+
+    const onSubmitForm = (saveOnly: boolean) => {
+        const values = getFormValues();
+
+        // TODO REMETTRE
+        /*const datas = { ...values };
+        onSubmit(datas, saveOnly); */
+
+        onSubmit({}, saveOnly);
+    };
 
     return (
         <>
@@ -114,6 +135,20 @@ const EditTools: FC<EditToolsProps> = ({ mode, community, onSubmit }) => {
                     </div>
                 </div>
                 <h2>{t("direct_contribution_tools")}</h2>
+                {mode === "edition" ? (
+                    <div className="fr-grid-row fr-grid-row--right">
+                        <Button priority={"primary"} onClick={() => handleSubmit(() => onSubmitForm(true))()}>
+                            {tCommon("save")}
+                        </Button>
+                    </div>
+                ) : (
+                    <ActionButtons
+                        step={COMMUNITY_FORM_STEPS.TOOLS}
+                        onPrevious={onPrevious}
+                        onSave={() => handleSubmit(() => onSubmitForm(true))()}
+                        onContinue={() => handleSubmit(() => onSubmitForm(false))()}
+                    />
+                )}
             </div>
         </>
     );

@@ -25,14 +25,14 @@ const add = (data: FormData) => {
     );
 };
 
-const update = (communityId: number, data: FormData) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_espaceco_community_update_community", { communityId });
+const update = (communityId: number, datas: object) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_espaceco_community_update", { communityId });
     return jsonFetch<CommunityResponseDTO>(
         url,
         {
             method: "PATCH",
         },
-        data
+        datas
     );
 };
 

@@ -4,9 +4,9 @@ import { FC } from "react";
 import { createPortal } from "react-dom";
 import { useForm } from "react-hook-form";
 import { EmailPlannerAddType, EmailPlannerFormType } from "../../../../../../@types/app_espaceco";
-import { CancelEventType, EmailPlannerDTO, ReportStatusesDTO, TriggerEventType } from "../../../../../../@types/espaceco";
+import { EmailPlannerDTO, ReportStatusesDTO } from "../../../../../../@types/espaceco";
 import { useTranslation } from "../../../../../../i18n/i18n";
-import { getAddDefaultValues, getEditDefaultValues } from "./Defaults";
+import { getAddDefaultValues, getEditDefaultValues, prepareDatasForApi } from "./EmailPlannerUtils";
 import PersonalEmailPlanner from "./PersonalEmailPlanner";
 import { getPersonalSchema } from "./schemas";
 
@@ -19,7 +19,7 @@ type EditEmailPlannerDialogProps = {
     emailPlanner?: EmailPlannerDTO;
     themes: string[];
     statuses: ReportStatusesDTO;
-    onModify: (values: EmailPlannerAddType) => void;
+    onModify: (datas: EmailPlannerAddType) => void;
 };
 
 const EditEmailPlannerDialog: FC<EditEmailPlannerDialogProps> = ({ emailPlanner, themes, statuses, onModify }) => {
@@ -37,28 +37,8 @@ const EditEmailPlannerDialog: FC<EditEmailPlannerDialogProps> = ({ emailPlanner,
     const { handleSubmit, getValues: getFormValues } = form;
 
     const onSubmit = () => {
-        const values = getFormValues();
-
-        let form: EmailPlannerAddType = {
-            subject: values.subject,
-            event: values.event as TriggerEventType,
-            cancel_event: values.cancel_event as CancelEventType,
-            body: values.body,
-            recipients: values.recipients,
-            themes: values.themes ?? [],
-            condition: null,
-            delay: values.delay,
-            repeat: values.repeat,
-        };
-
-        if (values.event === "georem_status_changed") {
-            const statuses = values.statuses ?? [];
-            if (statuses.length) {
-                form = { ...form, condition: { status: statuses } };
-            }
-        }
-
-        onModify(form);
+        const datas = prepareDatasForApi(getFormValues());
+        onModify(datas);
         EditEmailPlannerDialogModal.close();
     };
 

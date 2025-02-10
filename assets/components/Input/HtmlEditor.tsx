@@ -7,12 +7,12 @@ import { ControlImage, ControlLink, ControlUnlink, ControlYoutube } from "react-
 type HtmlEditorEditorProps = {
     label?: string;
     hintText?: ReactNode;
+    removeEmptyParagraph?: boolean;
     extraControls?: (() => ReactNode)[];
     value: string;
     onChange: (values: string) => void;
     state?: "default" | "error" | "success";
     stateRelatedMessage?: string;
-    // placeholder?: string;
 };
 
 const extensionLoader = {
@@ -44,7 +44,7 @@ const standardControls: (Control | (() => ReactNode) | LazyExoticComponent<() =>
 const HtmlEditor: FC<HtmlEditorEditorProps> = (props) => {
     const { isDark } = useIsDark();
 
-    const { label, hintText, extraControls, value, state, stateRelatedMessage, /*placeholder,*/ onChange } = props;
+    const { label, hintText, extraControls, value, state, stateRelatedMessage, removeEmptyParagraph = true, onChange } = props;
 
     const controls = [...standardControls];
     if (extraControls) {
@@ -61,6 +61,7 @@ const HtmlEditor: FC<HtmlEditorEditorProps> = (props) => {
             )}
             <RichTextEditor
                 content={value}
+                removeEmptyParagraph={removeEmptyParagraph}
                 controlMap={{ Link: ControlLink, Unlink: ControlUnlink, Image: ControlImage, Youtube: ControlYoutube }}
                 extensionLoader={extensionLoader}
                 controls={controls}

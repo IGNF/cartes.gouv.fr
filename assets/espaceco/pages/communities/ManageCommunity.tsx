@@ -2,9 +2,10 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Tabs from "@codegouvfr/react-dsfr/Tabs";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useMemo, useState } from "react";
 
+import { UserMe } from "../../../@types/app_espaceco";
 import { CommunityResponseDTO } from "../../../@types/espaceco";
 import AppLayout from "../../../components/Layout/AppLayout";
 import LoadingText from "../../../components/Utils/LoadingText";
@@ -15,12 +16,13 @@ import { CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
 import api from "../../api";
 import Description from "./management/Description";
+import EditTools from "./management/EditTools";
 import Grid from "./management/Grid";
 import Layer from "./management/Layer";
 import Members from "./management/Members";
 import Reports from "./management/Reports";
 import ZoomAndCentering from "./management/ZoomAndCentering";
-import EditTools from "./management/EditTools";
+import Wait from "../../../components/Utils/Wait";
 
 type ManageCommunityProps = {
     communityId: number;
@@ -32,19 +34,60 @@ const ManageCommunity: FC<ManageCommunityProps> = ({ communityId }) => {
     const { t } = useTranslation("ManageCommunity");
     const { t: tBreadcrumb } = useTranslation("Breadcrumb");
 
+    const {
+        data: me,
+        isLoading,
+        isError,
+        error,
+    } = useQuery<UserMe, CartesApiException>({
+        queryKey: RQKeys.getMe(),
+        queryFn: ({ signal }) => api.user.getMe(signal),
+        staleTime: 3600000,
+    });
+
+    const queryClient = useQueryClient();
+
     const communityQuery = useQuery<CommunityResponseDTO, CartesApiException>({
         queryKey: RQKeys.community(communityId),
         queryFn: () => api.community.getCommunity(communityId),
         staleTime: 3600000,
     });
 
+    const {
+        isPending: isUpdatePending,
+        isError: isUpdateError,
+        mutate,
+    } = useMutation<CommunityResponseDTO, CartesApiException, object>({
+        mutationFn: (datas: object) => {
+            return api.community.update(communityId, datas);
+        },
+        onSuccess(community) {
+            queryClient.setQueryData<CommunityResponseDTO>(RQKeys.community(community.id), () => {
+                return community;
+            });
+        },
+    });
+
+    // Les droits pour pouvoir modifier un guichet
+    const hasRights = useMemo(() => {
+        if (me && communityQuery.data) {
+            if (me.administrator) {
+                return true;
+            }
+            const f = me.communities_member.filter((cm) => cm.role === "admin" && cm.community_id === communityQuery.data.id);
+            return f.length === 1;
+        }
+        return false;
+    }, [me, communityQuery.data]);
+
     const [selectedTabId, setSelectedTabId] = useState("tab1");
 
+    // S'il est active === false, il est toujours en cours de création
     const forbidden = useMemo(() => {
-        if (!communityQuery.data) {
-            return false;
+        if (communityQuery.data) {
+            return communityQuery.data.active === false;
         }
-        return communityQuery.data.active === false;
+        return false;
     }, [communityQuery.data]);
 
     return (
@@ -61,11 +104,19 @@ const ManageCommunity: FC<ManageCommunityProps> = ({ communityId }) => {
             documentTitle={t("title", { name: communityQuery.data?.name })}
         >
             <h1>{t("title", { name: communityQuery.data?.name })}</h1>
+            {isUpdateError && <Alert severity="error" closable title={t("updating_failed")} />}
+            {isUpdatePending && (
+                <Wait>
+                    <div className={fr.cx("fr-grid-row")}>
+                        <LoadingText as="h6" message={t("updating")} withSpinnerIcon={true} />
+                    </div>
+                </Wait>
+            )}
             {communityQuery.isError ? (
                 <Alert
                     severity="error"
                     closable={false}
-                    title={t("fetch_failed")}
+                    title={t("community_fetch_failed")}
                     description={
                         <>
                             <p>{communityQuery.error?.message}</p>
@@ -73,8 +124,22 @@ const ManageCommunity: FC<ManageCommunityProps> = ({ communityId }) => {
                         </>
                     }
                 />
-            ) : communityQuery.isLoading ? (
+            ) : isError ? (
+                <Alert
+                    severity="error"
+                    closable={false}
+                    title={t("me_fetch_failed")}
+                    description={
+                        <>
+                            <p>{error.message}</p>
+                            <Button linkProps={routes.espaceco_community_list().link}>{t("back_to_list")}</Button>
+                        </>
+                    }
+                />
+            ) : communityQuery.isLoading || isLoading ? (
                 <LoadingText message={t("loading")} />
+            ) : hasRights === false ? (
+                <Alert severity="error" closable={false} title={t("no_rights")} />
             ) : forbidden ? (
                 <Alert severity="error" closable={false} title={t("forbidden_access")} />
             ) : (
@@ -98,17 +163,51 @@ const ManageCommunity: FC<ManageCommunityProps> = ({ communityId }) => {
                                 {(() => {
                                     switch (selectedTabId) {
                                         case "tab1":
-                                            return <Description mode={"edition"} community={communityQuery.data} onSubmit={(datas) => console.log(datas)} />;
+                                            return (
+                                                <Description
+                                                    mode={"edition"}
+                                                    community={communityQuery.data}
+                                                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                                                    onSubmit={(datas, _) => {
+                                                        mutate(datas);
+                                                    }}
+                                                />
+                                            );
                                         case "tab3":
                                             return (
-                                                <ZoomAndCentering mode={"edition"} community={communityQuery.data} onSubmit={(datas) => console.log(datas)} />
+                                                <ZoomAndCentering
+                                                    mode={"edition"}
+                                                    community={communityQuery.data}
+                                                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                                                    onSubmit={(datas, _) => {
+                                                        mutate(datas);
+                                                    }}
+                                                />
                                             );
                                         case "tab4":
                                             return <Layer />;
                                         case "tab5":
-                                            return <EditTools mode={"edition"} community={communityQuery.data} onSubmit={(datas) => console.log(datas)} />;
+                                            return (
+                                                <EditTools
+                                                    mode={"edition"}
+                                                    community={communityQuery.data}
+                                                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                                                    onSubmit={(datas, _) => {
+                                                        mutate(datas);
+                                                    }}
+                                                />
+                                            );
                                         case "tab6":
-                                            return <Reports community={communityQuery.data} />;
+                                            return (
+                                                <Reports
+                                                    mode={"edition"}
+                                                    community={communityQuery.data}
+                                                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                                                    onSubmit={(datas, _) => {
+                                                        mutate(datas);
+                                                    }}
+                                                />
+                                            );
                                         case "tab7":
                                             return <Grid grids={communityQuery.data.grids ?? []} />; // TODO
                                         case "tab8":

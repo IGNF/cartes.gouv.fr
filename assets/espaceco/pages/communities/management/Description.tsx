@@ -7,14 +7,14 @@ import ToggleSwitch from "@codegouvfr/react-dsfr/ToggleSwitch";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useQuery } from "@tanstack/react-query";
 import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
-import { FC, useEffect, useMemo, useState, type ReactNode } from "react";
+import { FC, memo, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Controller, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { CommunityFormMode, DescriptionFormType, MembershipRequestValues } from "../../../../@types/app_espaceco";
 import { CommunityResponseDTO, DocumentDTO } from "../../../../@types/espaceco";
 import AutocompleteSelect from "../../../../components/Input/AutocompleteSelect";
 import categories from "../../../../data/topic_categories.json";
-import { declareComponentKeys, useTranslation } from "../../../../i18n/i18n";
+import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/espaceco/RQKeys";
 import { type CartesApiException } from "../../../../modules/jsonFetch";
 import "../../../../sass/pages/espaceco/community.scss";
@@ -27,15 +27,17 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import HtmlEditor from "../../../../components/Input/HtmlEditor";
 import LoadingText from "../../../../components/Utils/LoadingText";
-import { ComponentKey, Translations } from "../../../../i18n/types";
+import { ComponentKey } from "../../../../i18n/types";
 import "../../../../sass/pages/espaceco/community.scss";
+import { setToNull } from "../../../../utils";
 import { COMMUNITY_FORM_STEPS } from "../FormSteps";
+import ActionButtons from "./ActionButtons";
 import CommunityLogo from "./CommunityLogo";
 
 type DescriptionProps = {
     mode: CommunityFormMode;
     community: CommunityResponseDTO;
-    onSubmit: (datas: FormData) => void;
+    onSubmit: (datas: object, saveOnly: boolean) => void;
 };
 
 const Description: FC<DescriptionProps> = ({ mode, community, onSubmit }) => {
@@ -80,6 +82,7 @@ const Description: FC<DescriptionProps> = ({ mode, community, onSubmit }) => {
                 })
                 .required(t("description.name.mandatory")),
             description: yup.string().max(1024, t("description.desc.maxlength")),
+            editorial: yup.string(),
             keywords: yup.array().of(yup.string().required()),
             listed: yup.boolean().required(),
             membershipRequest: yup.string().oneOf(MembershipRequestValues).required(),
@@ -171,21 +174,20 @@ const Description: FC<DescriptionProps> = ({ mode, community, onSubmit }) => {
         setShowOpenWithEmail(membership === "partially_open");
     }, [membership]);
 
-    const onSubmitForm = () => {
+    const onSubmitForm = (saveOnly: boolean) => {
         const values = getFormValues();
 
-        const formData = new FormData();
-        formData.append("name", values.name);
-        formData.append("listed", Boolean(values.listed).toString());
-        if (values.description) {
-            formData.append("description", values.description);
-        }
-        if (values.logo) {
-            formData.append("logo", values.logo[0]);
-        }
-        if (values.keywords && values.keywords.length) {
-            formData.append("keywords", JSON.stringify(values.keywords));
-        }
+        const datas = {
+            name: values.name,
+            listed: Boolean(values.listed).toString(),
+            description: setToNull(values.description),
+            editorial: setToNull(values.editorial),
+            open_without_affiliation: "false",
+        };
+
+        /* if (values.keywords && values.keywords.length) {
+            datas["keywords"] = values.keywords;
+        } */
 
         if (values.membershipRequest === "partially_open") {
             const openWithEmail = values.openWithEmail.reduce((accumulator, owe) => {
@@ -197,9 +199,9 @@ const Description: FC<DescriptionProps> = ({ mode, community, onSubmit }) => {
                 accumulator[owe.email] = grids;
                 return accumulator;
             }, {});
-            formData.append("open_with_email", JSON.stringify(openWithEmail));
-        } else formData.append("open_without_affiliation", values.membershipRequest === "open" ? "true" : "false");
-        onSubmit(formData);
+            datas["open_with_email"] = Object.keys(openWithEmail).length === 0 ? null : openWithEmail;
+        } else datas["open_without_affiliation"] = values.membershipRequest === "open" ? "true" : "false";
+        onSubmit(datas, saveOnly);
     };
 
     return (
@@ -210,7 +212,7 @@ const Description: FC<DescriptionProps> = ({ mode, community, onSubmit }) => {
             {communityNamesQuery.data && communityDocumentsQuery.data && (
                 <div>
                     <h2>{tmc("desc.tab.title")}</h2>
-                    <form onSubmit={handleSubmit(onSubmitForm)}>
+                    <div>
                         <p>{tCommon("mandatory_fields")}</p>
                         <Input
                             label={tmc("desc.name")}
@@ -254,7 +256,6 @@ const Description: FC<DescriptionProps> = ({ mode, community, onSubmit }) => {
                                 />
                             )}
                         />
-                        <DocumentList communityId={community.id} documents={communityDocumentsQuery.data} />
                         <Controller
                             control={control}
                             name="listed"
@@ -328,39 +329,42 @@ const Description: FC<DescriptionProps> = ({ mode, community, onSubmit }) => {
                                 </div>
                             </div>
                         )}
-                        <OpenWithEmailsConfigDialog openWithEmailOriginal={openWithEmail} onUpdate={(values) => setFormValue("openWithEmail", values)} />
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--right")}>
-                            <Button priority={mode === "creation" ? "secondary" : "primary"} onClick={handleSubmit(onSubmitForm)}>
-                                {tCommon("save")}
-                            </Button>
-                            {mode === "creation" && (
-                                <Button
-                                    priority="primary"
-                                    nativeButtonProps={{
-                                        type: "submit",
+                        <Controller
+                            control={control}
+                            name="editorial"
+                            render={({ field }) => (
+                                <HtmlEditor
+                                    label={tmc("desc.editorial")}
+                                    hintText={tmc("desc.editorial_hint")}
+                                    state={errors.editorial ? "error" : "default"}
+                                    stateRelatedMessage={errors?.editorial?.message?.toString()}
+                                    value={field.value ?? ""}
+                                    onChange={(values) => {
+                                        field.onChange(values);
                                     }}
-                                >
-                                    {tCommon("continue")}
-                                </Button>
+                                />
                             )}
-                        </div>
-                    </form>
+                        />
+                        <DocumentList communityId={community.id} documents={communityDocumentsQuery.data} />
+                        <OpenWithEmailsConfigDialog openWithEmailOriginal={openWithEmail} onUpdate={(values) => setFormValue("openWithEmail", values)} />
+                        {mode === "edition" ? (
+                            <div className="fr-grid-row fr-grid-row--right">
+                                <Button priority={"primary"} onClick={() => handleSubmit(() => onSubmitForm(true))()}>
+                                    {tCommon("save")}
+                                </Button>
+                            </div>
+                        ) : (
+                            <ActionButtons
+                                step={COMMUNITY_FORM_STEPS.DESCRIPTION}
+                                onSave={() => handleSubmit(() => onSubmitForm(true))()}
+                                onContinue={() => handleSubmit(() => onSubmitForm(false))()}
+                            />
+                        )}
+                    </div>
                 </div>
             )}
         </>
     );
 };
 
-export default Description;
-
-// traductions
-const { i18n } = declareComponentKeys<"loading_documents">()("Description");
-export type I18n = typeof i18n;
-
-export const DescriptionFrTranslations: Translations<"fr">["Description"] = {
-    loading_documents: "Chargement des documents",
-};
-
-export const DescriptionEnTranslations: Translations<"en">["Description"] = {
-    loading_documents: undefined,
-};
+export default memo(Description);

@@ -70,6 +70,7 @@ const OpenWithEmailsConfigDialog: FC<OpenWithEmailsConfigDialogProps> = ({ openW
                     })
                     .required()
             )
+            .min(1, tmc("modal.openwithemail.min_error"))
             .required(),
     });
 
@@ -153,7 +154,7 @@ const OpenWithEmailsConfigDialog: FC<OpenWithEmailsConfigDialogProps> = ({ openW
                             },
                         },
                         {
-                            children: tCommon("add"),
+                            children: tCommon("apply"),
                             doClosesModal: false,
                             onClick: () => {
                                 handleSubmit(onSubmit)();
@@ -165,8 +166,8 @@ const OpenWithEmailsConfigDialog: FC<OpenWithEmailsConfigDialogProps> = ({ openW
                     <Controller
                         control={control}
                         name="openWithEmail"
-                        render={() => (
-                            <div className={fr.cx("fr-my-6v")}>
+                        render={({ fieldState }) => (
+                            <div className={fr.cx("fr-input-group", "fr-my-6v", fieldState.error && "fr-input-group--error")}>
                                 <Input
                                     label={tmc("modal.openwithemail.add_domain")}
                                     nativeInputProps={{
@@ -174,6 +175,7 @@ const OpenWithEmailsConfigDialog: FC<OpenWithEmailsConfigDialogProps> = ({ openW
                                         onKeyDown: (e) => handleKeyDown(e),
                                     }}
                                 />
+                                {fieldState.error && <p className={fr.cx("fr-error-text")}>{fieldState.error?.message?.toString()}</p>}
                                 {openWithEmail.map((owe, index) => {
                                     return (
                                         <div

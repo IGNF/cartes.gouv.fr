@@ -59,7 +59,6 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
 
     return (
         <div className={fr.cx(!visible && "fr-hidden")}>
-            <p>{tCommon("mandatory_fields")}</p>
             <h3>{t("metadata.description_form.description_title")}</h3>
             <Input
                 label={t("metadata.description_form.technical_name")}

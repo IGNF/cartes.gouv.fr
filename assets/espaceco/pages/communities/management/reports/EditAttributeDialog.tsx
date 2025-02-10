@@ -67,6 +67,23 @@ const EditAttributeDialog: FC<EditAttributeDialogProps> = ({ modal, theme, attri
         return yup.object().shape(s);
     });
 
+    const defaultValues = useMemo<AddOrEditAttributeFormType>(() => {
+        const v = {
+            name: attribute.name,
+            type: attribute.type,
+            mandatory: attribute.mandatory,
+            default: attribute.default,
+            multiple: attribute.multiple,
+            help: attribute.help,
+        };
+        let list: string | null = null;
+        if (attribute.values) {
+            list = (attribute.values as string[]).join("|");
+        }
+        v["values"] = list;
+        return v;
+    }, [attribute]);
+
     const {
         register,
         watch,
@@ -76,15 +93,7 @@ const EditAttributeDialog: FC<EditAttributeDialogProps> = ({ modal, theme, attri
         handleSubmit,
     } = useForm<AddOrEditAttributeFormType>({
         mode: "onSubmit",
-        values: {
-            name: attribute.name,
-            type: attribute.type,
-            mandatory: attribute.mandatory,
-            values: attribute.values ? attribute.values.join("|") : null,
-            default: attribute.default,
-            multiple: attribute.multiple,
-            help: attribute.help,
-        },
+        values: defaultValues,
         resolver: yupResolver(schema),
     });
 

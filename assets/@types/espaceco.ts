@@ -1,4 +1,5 @@
 import statuses from "../data/report_statuses.json";
+import { OpenWithEmailType } from "./app_espaceco";
 
 export interface ConstraintsDTO {
     minLength?: number;
@@ -11,26 +12,35 @@ export interface ConstraintsDTO {
 export const AttributeTypes = ["text", "integer", "double", "checkbox", "list", "date"];
 
 export type AttributeType = (typeof AttributeTypes)[number];
+
 export type AttributeDTO = {
     name: string;
+    title?: string;
     type: AttributeType;
     default?: string | null;
     mandatory?: boolean;
     multiple?: boolean;
     values?: string[] | null;
+    // values?: string[] | Record<string, number | string | null> | null;
     help?: string | null;
-    title?: string;
-    input_constraints?: ConstraintsDTO | null;
+    /* input_constraints?: ConstraintsDTO | null;
     json_schema?: object | null;
     required?: boolean;
-    condition_field?: string;
+    condition_field?: string; */
+    autofill?: string;
 };
 
+export type AttributeAutofillDTO = {
+    name: string;
+    type: string;
+    autofill: string;
+};
 export interface ThemeDTO {
     theme: string;
     database?: string;
     table?: string;
     attributes: AttributeDTO[];
+    autofilled_attributes: AttributeAutofillDTO[];
     help?: string;
     global?: boolean;
 }
@@ -96,12 +106,12 @@ export interface CommunityResponseDTO {
     default_comment: string | null;
     position: string | null;
     zoom: number;
-    zoom_min: number | null;
-    zoom_max: number | null;
+    min_zoom: number | null;
+    max_zoom: number | null;
     extent: number[] | null;
     all_members_can_valid: boolean;
     open_without_affiliation: boolean;
-    open_with_email: Record<string, string>;
+    open_with_email: OpenWithEmailType[];
     offline_allowed: boolean;
     /** @format date-time */
     creation: string;

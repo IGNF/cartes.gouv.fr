@@ -1,4 +1,4 @@
-// Utilisée dans yup.transform sur une chaine . Si la valeur est undefined ou égale à ""
+// Pour des chaines non définies ou vides => null
 export const setToNull = (value) => (value === undefined || value === "" ? null : value);
 
 export const cloneFile = (original: File) =>

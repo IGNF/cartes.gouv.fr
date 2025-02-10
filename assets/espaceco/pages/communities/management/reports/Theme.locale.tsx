@@ -9,6 +9,7 @@ const { i18n } = declareComponentKeys<
     | "attributes_not_conform"
     | { K: "modify_theme"; P: { text: string }; R: string }
     | { K: "delete_theme"; P: { text: string }; R: string }
+    | "configure_autofill"
     | { K: "modify_attribute"; P: { text: string }; R: string }
     | { K: "delete_attribute"; P: { text: string }; R: string }
     | "dialog.add_theme.name"
@@ -65,6 +66,7 @@ export const ThemeFrTranslations: Translations<"fr">["Theme"] = {
     attributes_not_conform: "Les attributs ne sont pas conformes",
     modify_theme: ({ text }) => `Modifier le thème [${text}]`,
     delete_theme: ({ text }) => `Supprimer le thème [${text}]`,
+    configure_autofill: "Paramétrage du remplissage automatique des champs",
     modify_attribute: ({ text }) => `Modifier l'attribut [${text}]`,
     delete_attribute: ({ text }) => `Supprimer l'attribut [${text}]`,
     "dialog.add_theme.name": "Nom du thème",
@@ -136,6 +138,7 @@ export const ThemeEnTranslations: Translations<"en">["Theme"] = {
     attributes_not_conform: undefined,
     modify_theme: ({ text }) => `Modify theme [${text}]`,
     delete_theme: ({ text }) => `Delete theme [${text}]`,
+    configure_autofill: undefined,
     modify_attribute: ({ text }) => `Modify attribute [${text}]`,
     delete_attribute: ({ text }) => `Delete attribute [${text}]`,
     "dialog.add_theme.name": undefined,

@@ -45,6 +45,9 @@ const RMap: FC<RMapProps> = ({ form, onPositionChanged, onZoomChanged }) => {
     const position3857 = useMemo(() => fromLonLat(position), [position]);
 
     const extent = watch("extent");
+    const minZoom = watch("minZoom");
+    const maxZoom = watch("maxZoom");
+
     const renderExtent = useCallback((e: MapEvent) => drawExtent(e, extent), [extent]);
 
     // Création de la carte une fois bg layer créée
@@ -94,8 +97,8 @@ const RMap: FC<RMapProps> = ({ form, onPositionChanged, onZoomChanged }) => {
             view: new View({
                 center: position3857,
                 zoom: getFormValues("zoom"),
-                minZoom: getFormValues("zoomMin"),
-                maxZoom: getFormValues("zoomMax"),
+                minZoom: minZoom,
+                maxZoom: maxZoom,
             }),
         });
 
@@ -116,7 +119,7 @@ const RMap: FC<RMapProps> = ({ form, onPositionChanged, onZoomChanged }) => {
         mapRef.current.on("postrender", (e) => renderExtent(e));
 
         return () => mapRef.current?.setTarget(undefined);
-    }, [capabilities, position3857, getFormValues, onPositionChanged, onZoomChanged, renderExtent]);
+    }, [capabilities, position3857, minZoom, maxZoom, getFormValues, onPositionChanged, onZoomChanged, renderExtent]);
 
     return <div ref={mapTargetRef} style={mapStyle} />;
 };

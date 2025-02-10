@@ -15,6 +15,7 @@ const { i18n } = declareComponentKeys<
     | { K: "zoom.extent.nan"; P: { field: string }; R: string }
     | { K: "zoom.extent.mandatory"; P: { field: string }; R: string }
     | { K: "zoom.f1_less_than_f2"; P: { field1: string; field2: string }; R: string }
+    | { K: "zoom.f1_more_than_f2"; P: { field1: string; field2: string }; R: string }
     | { K: "zoom.less_than"; P: { field: string; v: number }; R: string }
     | { K: "zoom.greater_than"; P: { field: string; v: number }; R: string }
     | "zoom.extent.required"
@@ -38,6 +39,7 @@ export const ManageCommunityValidationsFrTranslations: Translations<"fr">["Manag
     "zoom.extent.nan": ({ field }) => `${field} n'est pas un nombre`,
     "zoom.extent.mandatory": ({ field }) => `La valeur ${field} est obligatoire`,
     "zoom.f1_less_than_f2": ({ field1, field2 }) => `La valeur de ${field1} doit être inférieure à la valeur de ${field2}`,
+    "zoom.f1_more_than_f2": ({ field1, field2 }) => `La valeur de ${field1} doit être supérieure à la valeur de ${field2}`,
     "zoom.less_than": ({ field, v }) => `La valeur de ${field} doit être inférieure ou égale à ${v}`,
     "zoom.greater_than": ({ field, v }) => `La valeur de ${field} doit être supérieure ou égale à ${v}`,
     "zoom.extent.required": "La boîte englobante est obligatoire",
@@ -60,6 +62,7 @@ export const ManageCommunityValidationsEnTranslations: Translations<"en">["Manag
     "zoom.extent.nan": ({ field }) => `${field} is not a number`,
     "zoom.extent.mandatory": ({ field }) => `${field} value is mandatory`,
     "zoom.f1_less_than_f2": ({ field1, field2 }) => `${field1} value must be less then ${field2} value`,
+    "zoom.f1_more_than_f2": ({ field1, field2 }) => `La valeur de ${field1}  must be more than ${field2}`,
     "zoom.less_than": ({ field, v }) => `${field} value must be less or equal to ${v}`,
     "zoom.greater_than": ({ field, v }) => `${field} value must be greater or equal to ${v}`,
     "zoom.extent.required": undefined,

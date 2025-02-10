@@ -200,33 +200,42 @@ const EmailPlanners: FC<EmailPlannersProps> = ({ communityId, form, emailPlanner
             )}
             <h3>{tmc("report.manage.emailplanners")}</h3>
             <span className={fr.cx("fr-hint-text")}>{tmc("report.manage.emailplanners_explain")}</span>
-            <Table
-                className={fr.cx("fr-mb-0")}
-                bordered
-                headers={[
-                    "",
-                    t("event_header"),
-                    t("subject_header"),
-                    t("body_header"),
-                    t("delay_header"),
-                    t("recipients_header"),
-                    t("cancel_event_header"),
-                    t("repeat_header"),
-                    "",
-                ]}
-                data={datas}
-            />
-            <Button className={fr.cx("fr-my-1v")} iconId={"fr-icon-add-circle-line"} priority="secondary" onClick={() => AddEmailPlannerDialogModal.open()}>
-                {t("add")}
-            </Button>
-            <AddEmailPlannerDialog themes={themeNames} statuses={activeStatuses} onAdd={(values) => addPlannerMutation.mutate(values)} />
+            {datas.length === 0 ? (
+                <p>{tmc("report.manage.no_emailplanners")}</p>
+            ) : (
+                <Table
+                    className={fr.cx("fr-mb-0")}
+                    bordered
+                    headers={[
+                        "",
+                        t("event_header"),
+                        t("subject_header"),
+                        t("body_header"),
+                        t("delay_header"),
+                        t("recipients_header"),
+                        t("cancel_event_header"),
+                        t("repeat_header"),
+                        "",
+                    ]}
+                    data={datas}
+                />
+            )}
+            {/* Pas de thèmes, on ne peut pas créer d'email du suivi */}
+            {themeNames.length === 0 ? (
+                <Alert severity={"warning"} as={"h6"} closable title={t("warning_no_themes")} />
+            ) : (
+                <Button className={fr.cx("fr-my-1v")} iconId={"fr-icon-add-circle-line"} priority="secondary" onClick={() => AddEmailPlannerDialogModal.open()}>
+                    {t("add")}
+                </Button>
+            )}
+            <AddEmailPlannerDialog themes={themeNames} statuses={activeStatuses} onAdd={(datas) => addPlannerMutation.mutate(datas)} />
             <EditEmailPlannerDialog
                 emailPlanner={currentEmailPlanner}
                 themes={themeNames}
                 statuses={activeStatuses}
-                onModify={(data: EmailPlannerAddType) => {
+                onModify={(datas: EmailPlannerAddType) => {
                     if (currentEmailPlanner) {
-                        updatePlannerMutation.mutate(data);
+                        updatePlannerMutation.mutate(datas);
                     }
                 }}
             />
@@ -246,6 +255,7 @@ export default EmailPlanners;
 
 // traductions
 const { i18n } = declareComponentKeys<
+    | "warning_no_themes"
     | "event_header"
     | "subject_header"
     | "body_header"
@@ -264,6 +274,7 @@ const { i18n } = declareComponentKeys<
 export type I18n = typeof i18n;
 
 export const EmailPlannersFrTranslations: Translations<"fr">["EmailPlanners"] = {
+    warning_no_themes: "Aucun thème personnalisé pour ce guichet",
     event_header: "Evénement déclencheur",
     subject_header: "Sujet de l’email",
     body_header: "Corps de l’email",
@@ -281,6 +292,7 @@ export const EmailPlannersFrTranslations: Translations<"fr">["EmailPlanners"] = 
 };
 
 export const EmailPlannersEnTranslations: Translations<"en">["EmailPlanners"] = {
+    warning_no_themes: undefined,
     event_header: undefined,
     subject_header: undefined,
     body_header: undefined,

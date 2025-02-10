@@ -9,6 +9,7 @@ import * as yup from "yup";
 import { ReportStatusesType, ReportStatusParams } from "../../../../../@types/espaceco";
 import { useTranslation } from "../../../../../i18n/i18n";
 import { getDefaultStatuses } from "./Utils";
+import { setToNull } from "../../../../../utils";
 
 const EditReportParameterModal = createModal({
     id: "status-modal",
@@ -48,8 +49,10 @@ const EditReportStatusDialog: FC<EditReportStatusDialogProps> = ({ status, statu
     });
 
     const onSubmit = () => {
+        const datas = { ...getFormValues() };
+        setToNull(datas.description);
         EditReportParameterModal.close();
-        onModify(getFormValues());
+        onModify(datas);
     };
 
     return createPortal(

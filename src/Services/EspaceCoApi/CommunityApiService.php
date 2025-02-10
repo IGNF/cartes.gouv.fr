@@ -78,6 +78,14 @@ class CommunityApiService extends BaseEspaceCoApiService
     }
 
     /**
+     * @param array<mixed> $datas
+     */
+    public function updateCommunity(int $communityId, array $datas): array
+    {
+        return $this->request('PATCH', "communities/$communityId", $datas);
+    }
+
+    /**
      * @param array<string> $roles
      *
      * @return array<mixed>

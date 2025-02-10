@@ -43,7 +43,7 @@ const ExtentDialog: FC<ExtentDialogProps> = ({ onCancel, onApply }) => {
     schema["manual"] = yup.object({
         xmin: yup
             .number()
-            .typeError(tValid("zoom.extent.nan", { field: "${path}" }))
+            // .typeError(tValid("zoom.extent.nan", { field: "${path}" }))
             .min(-180, tValid("zoom.greater_than", { field: "${path}", v: -180 }))
             .max(180, tValid("zoom.less_than", { field: "${path}", v: 180 }))
             .required(tValid("zoom.extent.mandatory", { field: "${path}" }))
@@ -54,14 +54,14 @@ const ExtentDialog: FC<ExtentDialogProps> = ({ onCancel, onApply }) => {
                 test: (value, context) => {
                     const xmax = context.parent.xmax;
                     if (value) {
-                        return xmax !== undefined ? value < xmax : true;
+                        return !isNaN(xmax) ? value < xmax : true;
                     }
                     return true;
                 },
             }),
         ymin: yup
             .number()
-            .typeError(tValid("zoom.extent.nan", { field: "${path}" }))
+            // .typeError(tValid("zoom.extent.nan", { field: "${path}" }))
             .min(-90, tValid("zoom.greater_than", { field: "${path}", v: -90 }))
             .max(90, tValid("zoom.less_than", { field: "${path}", v: 90 }))
             .required(tValid("zoom.extent.mandatory", { field: "${path}" }))
@@ -71,37 +71,46 @@ const ExtentDialog: FC<ExtentDialogProps> = ({ onCancel, onApply }) => {
                 message: tValid("zoom.f1_less_than_f2", { field1: "ymin", field2: "ymax" }),
                 test: (value, context) => {
                     const ymax = context.parent.ymax;
-                    return ymax !== undefined ? value < ymax : true;
+                    if (value) {
+                        return !isNaN(ymax) ? value < ymax : true;
+                    }
+                    return true;
                 },
             }),
         xmax: yup
             .number()
-            .typeError(tValid("zoom.extent.nan", { field: "${path}" }))
+            // .typeError(tValid("zoom.extent.nan", { field: "${path}" }))
             .min(-180, tValid("zoom.greater_than", { field: "${path}", v: -180 }))
             .max(180, tValid("zoom.less_than", { field: "${path}", v: 180 }))
             .required(tValid("zoom.extent.mandatory", { field: "${path}" }))
             .transform(transform)
             .test({
                 name: "xmax_check",
-                message: tValid("zoom.f1_less_than_f2", { field1: "xmin", field2: "xmax" }),
+                message: tValid("zoom.f1_more_than_f2", { field1: "xmax", field2: "xmin" }),
                 test: (value, context) => {
                     const xmin = context.parent.xmin;
-                    return xmin !== undefined ? value > xmin : true;
+                    if (value) {
+                        return !isNaN(xmin) ? value > xmin : true;
+                    }
+                    return true;
                 },
             }),
         ymax: yup
             .number()
-            .typeError(tValid("zoom.extent.nan", { field: "${path}" }))
+            // .typeError(tValid("zoom.extent.nan", { field: "${path}" }))
             .min(-90, tValid("zoom.greater_than", { field: "${path}", v: -90 }))
             .max(90, tValid("zoom.less_than", { field: "${path}", v: 90 }))
             .required(tValid("zoom.extent.mandatory", { field: "${path}" }))
             .transform(transform)
             .test({
                 name: "ymax_check",
-                message: tValid("zoom.f1_less_than_f2", { field1: "ymin", field2: "ymax" }),
+                message: tValid("zoom.f1_more_than_f2", { field1: "ymax", field2: "ymin" }),
                 test: (value, context) => {
                     const ymin = context.parent.ymin;
-                    return ymin !== undefined ? value > ymin : true;
+                    if (value) {
+                        return !isNaN(ymin) ? value > ymin : true;
+                    }
+                    return true;
                 },
             }),
     });
@@ -110,7 +119,7 @@ const ExtentDialog: FC<ExtentDialogProps> = ({ onCancel, onApply }) => {
     });
 
     const form = useForm({
-        mode: "onChange",
+        mode: "onSubmit",
         resolver: yupResolver(schema[choice]),
     });
     const {
@@ -139,7 +148,11 @@ const ExtentDialog: FC<ExtentDialogProps> = ({ onCancel, onApply }) => {
         ExtentDialogModal.close();
 
         const values = getFormValues();
-        const extent = choice === "autocomplete" ? values.extent : [values.xmin, values.ymin, values.xmax, values.ymax];
+
+        let extent;
+        if (choice === "manual") {
+            extent = [values.xmin, values.ymin, values.xmax, values.ymax].map((c) => Number(c));
+        } else extent = values.extent;
         onApply(extent);
 
         if (choice !== "manual") {
@@ -213,13 +226,19 @@ const ExtentDialog: FC<ExtentDialogProps> = ({ onCancel, onApply }) => {
                                             label={t("zoom.xmin")}
                                             state={errors.xmin ? "error" : "default"}
                                             stateRelatedMessage={errors.xmin?.message?.toString()}
-                                            nativeInputProps={register("xmin")}
+                                            nativeInputProps={{
+                                                type: "number",
+                                                ...register("xmin"),
+                                            }}
                                         />
                                         <Input
                                             label={t("zoom.xmax")}
                                             state={errors.xmax ? "error" : "default"}
                                             stateRelatedMessage={errors.xmax?.message?.toString()}
-                                            nativeInputProps={register("xmax")}
+                                            nativeInputProps={{
+                                                type: "number",
+                                                ...register("xmax"),
+                                            }}
                                         />
                                     </div>
                                     <div className={fr.cx("fr-col-6", "fr-px-2w")}>
@@ -227,13 +246,19 @@ const ExtentDialog: FC<ExtentDialogProps> = ({ onCancel, onApply }) => {
                                             label={t("zoom.ymin")}
                                             state={errors.ymin ? "error" : "default"}
                                             stateRelatedMessage={errors.ymin?.message?.toString()}
-                                            nativeInputProps={register("ymin")}
+                                            nativeInputProps={{
+                                                type: "number",
+                                                ...register("ymin"),
+                                            }}
                                         />
                                         <Input
                                             label={t("zoom.ymax")}
                                             state={errors.ymax ? "error" : "default"}
                                             stateRelatedMessage={errors.ymax?.message?.toString()}
-                                            nativeInputProps={register("ymax")}
+                                            nativeInputProps={{
+                                                type: "number",
+                                                ...register("ymax"),
+                                            }}
                                         />
                                     </div>
                                 </div>

@@ -1,15 +1,15 @@
-import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useQuery } from "@tanstack/react-query";
-import { FC, useMemo } from "react";
+import { FC, useCallback, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
-import { ReportFormType } from "../../../../@types/app_espaceco";
+import { CommunityFormMode, ReportFormType } from "../../../../@types/app_espaceco";
 import {
     CommunityResponseDTO,
     EmailPlannerDTO,
+    ReportStatusesDTO,
     ReportStatusesType,
     SharedGeoremOptions,
     SharedThemesDTO,
@@ -22,6 +22,9 @@ import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/espaceco/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import api from "../../../api";
+import { getDefaultValues } from "../DefaultValues";
+import { COMMUNITY_FORM_STEPS } from "../FormSteps";
+import ActionButtons from "./ActionButtons";
 import Answers from "./reports/Answers";
 import EmailPlanners from "./reports/EmailPlanners";
 import Permissions from "./reports/Permissions";
@@ -29,17 +32,20 @@ import ReportStatuses from "./reports/ReportStatuses";
 import type { UserSharedThemesType } from "./reports/SetSharedThemesDialog";
 import SharedThemes from "./reports/SharedThemes";
 import ThemeList from "./reports/ThemeList";
-import { countActiveStatus, getDefaultStatuses, getMinAuthorizedStatus } from "./reports/Utils";
+import { countActiveStatus, getMinAuthorizedStatus } from "./reports/Utils";
 
 type ReportsProps = {
+    mode: CommunityFormMode;
     community: CommunityResponseDTO;
+    onPrevious?: () => void;
+    onSubmit: (datas: object, saveOnly: boolean) => void;
 };
 
 const minStatuses = getMinAuthorizedStatus();
 
-const Reports: FC<ReportsProps> = ({ community }) => {
-    const { t: tCommon } = useTranslation("Common");
+const Reports: FC<ReportsProps> = ({ mode, community, onPrevious, onSubmit }) => {
     const { t: tStatus } = useTranslation("ReportStatuses");
+    const { t: tCommon } = useTranslation("Common");
     const { t } = useTranslation("Reports");
 
     const schema: yup.ObjectSchema<ReportFormType> = yup.object({
@@ -73,7 +79,7 @@ const Reports: FC<ReportsProps> = ({ community }) => {
                                     })
                                     .nullable(),
                                 help: yup.string().nullable(),
-                                title: yup.string(),
+                                /* title: yup.string(),
                                 input_constraints: yup
                                     .object({
                                         minLength: yup.number(),
@@ -84,7 +90,17 @@ const Reports: FC<ReportsProps> = ({ community }) => {
                                     .nullable(),
                                 json_schema: yup.object().nullable(),
                                 required: yup.boolean(),
-                                condition_field: yup.string(),
+                                condition_field: yup.string(), */
+                            })
+                        )
+                        .required(),
+                    autofilled_attributes: yup
+                        .array()
+                        .of(
+                            yup.object({
+                                name: yup.string().required(),
+                                type: yup.string().required(),
+                                autofill: yup.string().required(),
                             })
                         )
                         .required(),
@@ -111,22 +127,6 @@ const Reports: FC<ReportsProps> = ({ community }) => {
                 })
                 .required();
         }),
-        email_planners: yup.array().of(
-            yup.object({
-                id: yup.number().required(),
-                subject: yup.string().required(),
-                body: yup.string().required(),
-                delay: yup.number().required(),
-                repeat: yup.boolean().required(),
-                recipients: yup.array().of(yup.string().required()).required(),
-                event: yup.string().oneOf(["georem_created", "georem_status_changed"]).required(),
-                cancel_event: yup.string().oneOf(["none", "georem_status_changed"]).required(),
-                condition: yup.object({
-                    status: yup.array().of(yup.string().required()).required(),
-                }),
-                themes: yup.array().of(yup.string().required()).required(),
-            })
-        ),
         shared_themes: yup.array().of(
             yup.object({
                 community_id: yup.number().required(),
@@ -196,27 +196,45 @@ const Reports: FC<ReportsProps> = ({ community }) => {
         return ret;
     }, [community, userSharedThemes]);
 
+    const defaultValues = useMemo(() => {
+        const values = getDefaultValues(community, COMMUNITY_FORM_STEPS.REPORTS) as ReportFormType;
+        values.shared_themes = sharedThemes;
+        return values;
+    }, [sharedThemes, community]);
+
     const form = useForm<ReportFormType>({
         resolver: yupResolver(schema),
         mode: "onChange",
-        values: {
-            attributes: community.attributes ?? [],
-            report_statuses: community.report_statuses ?? getDefaultStatuses(),
-            email_planners: emailPlannersQuery.data ?? [],
-            shared_themes: sharedThemes,
-            shared_georem: community.shared_georem,
-            all_members_can_valid: community.all_members_can_valid,
-        },
+        values: defaultValues,
     });
 
     const {
         handleSubmit,
         getValues: getFormValues,
         formState: { errors },
+        watch,
     } = form;
 
-    const onSubmit = () => {
-        console.log(getFormValues());
+    // TODO SUPPRIMER
+    console.log(watch());
+
+    /* Suppression de description s'il est null */
+    const cleanReportStatuses = useCallback((statuses: ReportStatusesDTO) => {
+        return Object.keys(statuses).reduce((acc, s) => {
+            const params = Object.fromEntries(Object.entries(statuses[s]).filter(([_, v]) => v !== null));
+            acc[s] = params;
+            return acc;
+        }, {});
+    }, []);
+
+    const onSubmitForm = (saveOnly: boolean) => {
+        const datas = { ...getFormValues() };
+        datas.report_statuses = cleanReportStatuses(datas.report_statuses);
+        console.log(datas);
+
+        // TODO
+        /* const datas = new FormData();
+        onSubmit(datas, saveOnly); */
     };
 
     return (
@@ -229,21 +247,32 @@ const Reports: FC<ReportsProps> = ({ community }) => {
             {emailPlannersQuery.isLoading && <LoadingText as="h6" message={t("loading_email_planners")} />}
             {tablesQuery.data && sharedThemesQuery.data && emailPlannersQuery.data && (
                 <div>
-                    <ThemeList form={form} tables={tablesQuery.data ?? []} state={errors.attributes ? "error" : "default"} />
+                    <p>{tCommon("mandatory_fields")}</p>
+                    <ThemeList
+                        form={form}
+                        tables={tablesQuery.data ?? []}
+                        state={errors.attributes ? "error" : "default"}
+                        stateRelatedMessage={errors.attributes?.message}
+                    />
                     <SharedThemes form={form} userSharedThemes={userSharedThemes} />
                     <ReportStatuses form={form} state={errors.report_statuses ? "error" : "default"} />
                     <EmailPlanners communityId={community.id} form={form} emailPlanners={emailPlannersQuery.data} />
                     <Permissions form={form} />
                     <Answers form={form} />
-                    <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-mt-2v")}>
-                        <Button
-                            onClick={() => {
-                                handleSubmit(onSubmit)();
-                            }}
-                        >
-                            {tCommon("record")}
-                        </Button>
-                    </div>
+                    {mode === "edition" ? (
+                        <div className="fr-grid-row fr-grid-row--right">
+                            <Button priority={"primary"} onClick={() => handleSubmit(() => onSubmitForm(true))()}>
+                                {tCommon("save")}
+                            </Button>
+                        </div>
+                    ) : (
+                        <ActionButtons
+                            step={COMMUNITY_FORM_STEPS.REPORTS}
+                            onPrevious={onPrevious}
+                            onSave={() => handleSubmit(() => onSubmitForm(true))()}
+                            onContinue={() => handleSubmit(() => onSubmitForm(false))()}
+                        />
+                    )}
                 </div>
             )}
         </div>

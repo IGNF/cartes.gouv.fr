@@ -187,40 +187,12 @@ class CommunityController extends AbstractController implements ApiControllerInt
         }
     }
 
-    #[Route('/update', name: 'update', methods: ['PUT'])]
-    public function update(Request $request): JsonResponse
+    #[Route('/{communityId}/update', name: 'update', methods: ['PATCH'])]
+    public function update(int $communityId, Request $request): JsonResponse
     {
         try {
-            $name = $request->request->get('name');
-            $datas['name'] = $name;
-
-            $description = $request->request->get('description');
-            if ($description) {
-                $datas['description'] = $description;
-            }
-
-            // TODO DECOMMENTER
-            // $listed = $request->request->get('listed');
-
-            $keywords = $request->request->get('keywords');
-
-            // TODO DECOMMENTER
-            /* if ($keywords) {
-                $datas['keywords'] = $keywords;
-            } */
-
-            // open_with_email
-            $openWithEmail = $request->get('open_with_email');
-            if ($openWithEmail) {
-                $datas['open_with_email'] = $openWithEmail;
-            }
-            $openWithoutAffiliation = $request->get('open_without_affiliation');
-            if ($openWithoutAffiliation) {
-                $datas['open_without_affiliation'] = $openWithoutAffiliation;
-            }
-
-            $community = $this->communityApiService->addCommunity($datas, null);
-            $this->_complete($community);
+            $datas = json_decode($request->getContent(), true);
+            $community = $this->communityApiService->updateCommunity($communityId, $datas);
 
             return new JsonResponse($community);
         } catch (ApiException $ex) {

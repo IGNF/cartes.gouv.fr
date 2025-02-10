@@ -39,20 +39,21 @@ import { CreateCommunityEnTranslations } from "../../espaceco/pages/communities/
 import { CreateCommunityDialogEnTranslations } from "../../espaceco/pages/communities/CreateCommunityDialog.locale";
 import { ManageCommunityEnTranslations } from "../../espaceco/pages/communities/ManageCommunity.locale";
 import { MemberInvitationEnTranslations } from "../../espaceco/pages/communities/MemberInvitation.locale";
-import { DescriptionEnTranslations } from "../../espaceco/pages/communities/management/Description";
 import { FunctionalitiesEnTranslations } from "../../espaceco/pages/communities/management/tools/Functionalities.locale";
 import { EscoCommunityMembersEnTranslations } from "../../espaceco/pages/communities/management/Members.locale";
 import { ReportsEnTranslations } from "../../espaceco/pages/communities/management/Reports.locale";
 import { SearchEnTranslations } from "../../espaceco/pages/communities/management/Search.locale";
 import { AddMembersDialogEnTranslations } from "../../espaceco/pages/communities/management/member/AddMembersDialog.locale";
 import { ManageGridsDialogEnTranslations } from "../../espaceco/pages/communities/management/member/ManageGridsDialog.locale";
-import { EmailPlannersEnTranslations } from "../../espaceco/pages/communities/management/reports/EmailPlanners";
+import { EmailPlannersEnTranslations } from "../../espaceco/pages/communities/management/reports/EmailPlanners.locale";
 import { ReportStatusesEnTranslations } from "../../espaceco/pages/communities/management/reports/ReportStatuses.locale";
 import { SharedThemesEnTranslations } from "../../espaceco/pages/communities/management/reports/SharedThemes.locale";
 import { ThemeEnTranslations } from "../../espaceco/pages/communities/management/reports/Theme.locale";
 import { AddOrEditEmailPlannerEnTranslations } from "../../espaceco/pages/communities/management/reports/emailplanners/AddOrEditEmailPlanner.locale";
 import { EmailPlannerKeywordsEnTranslations } from "../../espaceco/pages/communities/management/reports/emailplanners/EmailPlannerKeywords.locale";
 import { ManageCommunityValidationsEnTranslations } from "../../espaceco/pages/communities/management/ManageCommunityValidations.locale";
+import { AutofillDialogEnTranslations } from "../../espaceco/pages/communities/management/reports/AutofillDialog.locale";
+import { AutofillKeywordsEnTranslations } from "../../espaceco/pages/communities/management/reports/AutofillKeywords.locale";
 import { TMSStyleFilesManagerEnTranslations } from "../../modules/Style/TMSStyleFilesManager/TMSStyleFilesManager.locale";
 import { BreadcrumbEnTranslations } from "../../modules/entrepot/breadcrumbs/Breadcrumb.locale";
 import { LoginDisabledEnTranslations } from "../../pages/LoginDisabled/LoginDisabled.locale";
@@ -110,13 +111,14 @@ export const translations: Translations<"en"> = {
     CreateCommunity: CreateCommunityEnTranslations,
     ManageCommunity: ManageCommunityEnTranslations,
     ManageCommunityValidations: ManageCommunityValidationsEnTranslations,
+    AutofillKeywords: AutofillKeywordsEnTranslations,
+    AutofillDialog: AutofillDialogEnTranslations,
     DatasheetUploadForm: DatasheetUploadFormEnTranslations,
     DatasheetList: DatasheetListEnTranslations,
     AccessRestrictions: AccessRestrictionsEnTranslations,
     LoginDisabled: LoginDisabledEnTranslations,
     MemberInvitation: MemberInvitationEnTranslations,
     Theme: ThemeEnTranslations,
-    Description: DescriptionEnTranslations,
     Functionalities: FunctionalitiesEnTranslations,
     Reports: ReportsEnTranslations,
     EmailPlanners: EmailPlannersEnTranslations,

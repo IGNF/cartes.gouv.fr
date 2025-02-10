@@ -7,9 +7,13 @@ export type logoAction = "add" | "modify" | "delete";
 const { i18n } = declareComponentKeys<
     | { K: "title"; P: { name: string | undefined }; R: string }
     | "loading"
-    | "fetch_failed"
+    | "me_fetch_failed"
+    | "community_fetch_failed"
     | "back_to_list"
+    | "no_rights"
     | "forbidden_access"
+    | "updating"
+    | "updating_failed"
     | "tab1"
     | "tab2"
     | "tab3"
@@ -53,8 +57,11 @@ const { i18n } = declareComponentKeys<
     | "desc.openwithemail_no_domains"
     | "desc.openwithemail.domains_header"
     | "desc.openwithemail.grids_header"
+    | "desc.editorial"
+    | "desc.editorial_hint"
     | "modal.openwithemail.title"
     | "modal.openwithemail.add_domain"
+    | "modal.openwithemail.min_error"
     | { K: "modal.openwithemail.grids_not_empty_error"; P: { domain: string }; R: string }
     | "modal.document.title"
     | "modal.document.title_field"
@@ -88,6 +95,7 @@ const { i18n } = declareComponentKeys<
     | "report.configure_statuses.explain"
     | "report.manage.emailplanners"
     | "report.manage.emailplanners_explain"
+    | "report.manage.no_emailplanners"
     | "report.manage_permissions"
     | "report.manage_permissions.shared_report"
     | "report.manage_permissions.shared_report_hint"
@@ -103,9 +111,13 @@ export type I18n = typeof i18n;
 export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"] = {
     title: ({ name }) => (name === undefined ? "Gérer le guichet" : `Gérer le guichet - ${name}`),
     loading: "Recherche du guichet en cours ...",
-    fetch_failed: "La récupération des informations sur le guichet a échoué",
+    me_fetch_failed: "La récupération des informations sur mon compte",
+    community_fetch_failed: "La récupération des informations sur le guichet a échoué",
     back_to_list: "Retour à la liste des guichets",
+    no_rights: "Vous n'avez pas les droits de modifier un guichet. Il faut être admin ou gestionnaire",
     forbidden_access: "Ce guichet est en cours de création, il n'est pas accessible en modification",
+    updating: "Mise à jour du guichet en cours ...",
+    updating_failed: "La mise à jour du guichet a échoué",
     tab1: "Description",
     tab2: "Bases de données",
     tab3: "Zoom, centrage",
@@ -168,8 +180,12 @@ export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"
     "desc.openwithemail_no_domains": "Aucun domaine de configuré",
     "desc.openwithemail.domains_header": "Domaines acceptés",
     "desc.openwithemail.grids_header": "Emprises",
+    "desc.editorial": "Contenu éditorial (optionnel)",
+    "desc.editorial_hint":
+        "Ce contenu sera affiché dès qu’un utilisateur arrivera sur le guichet. Vous pouvez y saisir toute information utile: objectifs du guichet, source et licence des données, conditions d'utilisations spécifiques, conseils de saisie…etc.",
     "modal.openwithemail.title": "Paramétrer les domaines acceptés pour les demandes d’affiliation",
     "modal.openwithemail.add_domain": "Ajouter un domaine accepté (doit commencer par un @)",
+    "modal.openwithemail.min_error": "Il doit y avoir au moins un domaine",
     "modal.openwithemail.grids_not_empty_error": ({ domain }) => `Le domaine ${domain} doit avoir au moins une emprise`,
     "modal.document.title": "Ajouter un document",
     "modal.document.title_field": "Titre",
@@ -208,7 +224,7 @@ export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"
     "report.manage.emailplanners": "Gérer les emails de suivi des nouveaux signalements (optionnel)",
     "report.manage.emailplanners_explain":
         "Générer des emails de suivi des signalements automatiques. Vous pouvez ajouter des adresses email dont les destinataires recevront des emails simples et pré-configurés pour tout nouveau signalement, ou configurer vous même les emails pour un meilleur suivi des signalements.",
-
+    "report.manage.no_emailplanners": "Aucun email de suivi",
     "report.manage_permissions": "Gérer les permissions (optionnel)",
     "report.manage_permissions.shared_report": "Partage des signalements",
     "report.manage_permissions.shared_report_hint":
@@ -242,9 +258,13 @@ export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"
 export const ManageCommunityEnTranslations: Translations<"en">["ManageCommunity"] = {
     title: ({ name }) => (name === undefined ? "Manage front office" : `Manage front office - ${name}`),
     loading: undefined,
-    fetch_failed: undefined,
+    me_fetch_failed: undefined,
+    community_fetch_failed: undefined,
     back_to_list: undefined,
+    no_rights: undefined,
     forbidden_access: undefined,
+    updating: undefined,
+    updating_failed: undefined,
     tab1: undefined,
     tab2: undefined,
     tab3: undefined,
@@ -297,8 +317,11 @@ export const ManageCommunityEnTranslations: Translations<"en">["ManageCommunity"
     "desc.openwithemail_no_domains": undefined,
     "desc.openwithemail.domains_header": undefined,
     "desc.openwithemail.grids_header": undefined,
+    "desc.editorial": undefined,
+    "desc.editorial_hint": undefined,
     "modal.openwithemail.title": undefined,
     "modal.openwithemail.add_domain": "Add accepted domain",
+    "modal.openwithemail.min_error": undefined,
     "modal.openwithemail.grids_not_empty_error": undefined,
     "modal.document.title": "Add document",
     "modal.document.title_field": "Title",
@@ -332,6 +355,7 @@ export const ManageCommunityEnTranslations: Translations<"en">["ManageCommunity"
     "report.configure_statuses.explain": undefined,
     "report.manage.emailplanners": undefined,
     "report.manage.emailplanners_explain": undefined,
+    "report.manage.no_emailplanners": undefined,
     "report.manage_permissions": undefined,
     "report.manage_permissions.shared_report": undefined,
     "report.manage_permissions.shared_report_hint": undefined,

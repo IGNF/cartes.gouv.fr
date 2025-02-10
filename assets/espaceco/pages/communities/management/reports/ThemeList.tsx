@@ -4,12 +4,13 @@ import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { CSSProperties, FC, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { ReportFormType } from "../../../../../@types/app_espaceco";
-import { TableResponseDTO, ThemeDTO } from "../../../../../@types/espaceco";
+import { AttributeAutofillDTO, TableResponseDTO, ThemeDTO } from "../../../../../@types/espaceco";
 import { useTranslation } from "../../../../../i18n/i18n";
 import { AddThemeDialog, AddThemeDialogModal } from "./AddThemeDialog";
 import AttributeList from "./AttributeList";
 import { EditThemeDialog, EditThemeDialogModal } from "./EditThemeDialog";
 import ThemesHelper from "./ThemesHelper";
+import { AutofillDialog, AutofillDialogModal } from "./AutofillDialog";
 
 const customStyle: CSSProperties = {
     border: "solid 1.5px",
@@ -24,9 +25,10 @@ type ThemeListProps = {
     form: UseFormReturn<ReportFormType>;
     tables: Partial<TableResponseDTO>[];
     state?: "default" | "error" | "success";
+    stateRelatedMessage?: string;
 };
 
-const ThemeList: FC<ThemeListProps> = ({ form, tables, state }) => {
+const ThemeList: FC<ThemeListProps> = ({ form, tables, state, stateRelatedMessage }) => {
     const { t } = useTranslation("ManageCommunity");
     const { t: tTheme } = useTranslation("Theme");
 
@@ -60,7 +62,7 @@ const ThemeList: FC<ThemeListProps> = ({ form, tables, state }) => {
                                             <i className={cx(fr.cx("fr-icon--sm"), "ri-table-line")} />
                                         </span>
                                     )}
-                                    {t.global !== undefined && t.global === true && (
+                                    {t.global === true && (
                                         <span className={fr.cx("fr-ml-2v")}>
                                             <i className={fr.cx("fr-icon-earth-line", "fr-icon--sm")} />
                                         </span>
@@ -68,8 +70,21 @@ const ThemeList: FC<ThemeListProps> = ({ form, tables, state }) => {
                                 </div>
                                 <div className={fr.cx("fr-col-2")}>
                                     <div className={fr.cx("fr-grid-row", "fr-grid-row--right")}>
+                                        {t.table && (
+                                            <Button
+                                                title={tTheme("configure_autofill")}
+                                                priority="secondary"
+                                                iconId={"ri-settings-2-line"}
+                                                size={"small"}
+                                                onClick={() => {
+                                                    setCurrentTheme(t);
+                                                    AutofillDialogModal.open();
+                                                }}
+                                            />
+                                        )}
                                         <Button
                                             title={tTheme("modify_theme", { text: t.theme })}
+                                            className={t.table ? fr.cx("fr-ml-2v") : ""}
                                             priority="secondary"
                                             iconId="fr-icon-edit-line"
                                             size="small"
@@ -107,7 +122,7 @@ const ThemeList: FC<ThemeListProps> = ({ form, tables, state }) => {
                         })()
                     )}
                 >
-                    {tTheme("attributes_not_conform")}
+                    {stateRelatedMessage ? stateRelatedMessage : tTheme("attributes_not_conform")}
                 </p>
             )}
             <EditThemeDialog
@@ -124,6 +139,15 @@ const ThemeList: FC<ThemeListProps> = ({ form, tables, state }) => {
                 onAdd={(theme) => {
                     const th = ThemesHelper.addTheme(themes, theme);
                     setFormValue("attributes", th);
+                }}
+            />
+            <AutofillDialog
+                theme={currentTheme}
+                onRecord={(autofilled: AttributeAutofillDTO[]) => {
+                    if (currentTheme) {
+                        const th = ThemesHelper.updateTheme(currentTheme.theme, { autofilled_attributes: autofilled }, themes);
+                        setFormValue("attributes", th);
+                    }
                 }}
             />
         </div>

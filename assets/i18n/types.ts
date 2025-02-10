@@ -65,7 +65,6 @@ export type ComponentKey =
     | import("../espaceco/pages/communities/ManageCommunity.locale").I18n
     | import("../espaceco/pages/communities/management/ManageCommunityValidations.locale").I18n
     | import("../espaceco/pages/communities/management/Search.locale").I18n
-    | import("../espaceco/pages/communities/management/Description").I18n
     | import("../espaceco/pages/communities/management/tools/Functionalities.locale").I18n
     | import("../espaceco/pages/communities/management/Reports.locale").I18n
     | import("../espaceco/pages/communities/management/reports/Theme.locale").I18n
@@ -77,6 +76,8 @@ export type ComponentKey =
     | import("../espaceco/pages/communities/management/Members.locale").I18n
     | import("../espaceco/pages/communities/management/member/AddMembersDialog.locale").I18n
     | import("../espaceco/pages/communities/management/member/ManageGridsDialog.locale").I18n
+    | import("../espaceco/pages/communities/management/reports/AutofillKeywords.locale").I18n
+    | import("../espaceco/pages/communities/management/reports/AutofillDialog.locale").I18n
     | import("../espaceco/pages/communities/MemberInvitation.locale").I18n
     | import("../components/Input/InputCollection").I18n;
 
