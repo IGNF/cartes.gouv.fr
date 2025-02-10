@@ -1,4 +1,5 @@
 export enum FilterEnum {
+    ALL = 0,
     PUBLISHED = 1,
     NOT_PUBLISHED = 2,
 }
