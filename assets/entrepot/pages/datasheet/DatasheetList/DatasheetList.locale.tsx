@@ -15,6 +15,7 @@ const { i18n } = declareComponentKeys<
     | { K: "sandbox_datastore_explanation"; R: ReactNode }
     | "refresh_datasheet_list"
     | { K: "last_refresh_date"; P: { dataUpdatedAt: number }; R: string }
+    | { K: "nb_results"; P: { nb: number }; R: string }
     | "filter_label"
     | "filter_placeholder"
     | { K: "filter_option"; P: { filter: FilterEnum }; R: string }
@@ -43,10 +44,13 @@ export const DatasheetListFrTranslations: Translations<"fr">["DatasheetList"] = 
     ),
     refresh_datasheet_list: "Rafraîchir",
     last_refresh_date: ({ dataUpdatedAt }) => `Données mises à jour le ${formatDateFromISO(new Date(dataUpdatedAt).toISOString())}`,
+    nb_results: ({ nb }) => `(${nb}) résultats`,
     filter_label: "Filtrer",
     filter_placeholder: "Sélectionner un filtre",
     filter_option: ({ filter }) => {
         switch (filter) {
+            case FilterEnum.ALL:
+                return "Toutes les fiches";
             case FilterEnum.PUBLISHED:
                 return "Fiches publiées";
             case FilterEnum.NOT_PUBLISHED:
@@ -60,21 +64,21 @@ export const DatasheetListFrTranslations: Translations<"fr">["DatasheetList"] = 
     sort_option: ({ sort }) => {
         switch (sort) {
             case SortByEnum.NAME:
-                return "Nom";
+                return "Trier par : Nom";
             case SortByEnum.NB_SERVICES:
-                return "Fiches publiées";
+                return "Trier par : Nombre de services publiés";
             default:
                 return "Tri inconnu";
         }
     },
-    sort_order_label: "Trier",
-    sort_order_placeholder: "Dans l'ordre",
+    sort_order_label: "Ordre de tri",
+    sort_order_placeholder: "Ordre",
     sort_order_option: ({ sortOrder }) => {
         switch (sortOrder) {
             case SortOrderEnum.ASCENDING:
-                return "Croissant";
+                return "Ordre : Croissant";
             case SortOrderEnum.DESCENDING:
-                return "Décroissant";
+                return "Ordre : Décroissant";
             default:
                 return "Ordre inconnu";
         }
@@ -91,6 +95,7 @@ export const DatasheetListEnTranslations: Translations<"en">["DatasheetList"] = 
     sandbox_datastore_explanation: undefined,
     refresh_datasheet_list: undefined,
     last_refresh_date: undefined,
+    nb_results: undefined,
     filter_label: undefined,
     filter_placeholder: undefined,
     filter_option: undefined,

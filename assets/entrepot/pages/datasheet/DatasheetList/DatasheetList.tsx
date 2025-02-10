@@ -1,12 +1,12 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
+import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import Pagination from "@codegouvfr/react-dsfr/Pagination";
 import SearchBar from "@codegouvfr/react-dsfr/SearchBar";
 import SelectNext from "@codegouvfr/react-dsfr/SelectNext";
-import Tag from "@codegouvfr/react-dsfr/Tag";
 import { useQuery } from "@tanstack/react-query";
-import { FC, useMemo, useState } from "react";
+import { ChangeEvent, FC, useMemo, useState } from "react";
 
 import { Datasheet, EndpointTypeEnum } from "../../../../@types/app";
 import Main from "../../../../components/Layout/Main";
@@ -91,8 +91,18 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
 
     const datasheetList = getSortedList(getFilteredList(datasheetListQuery.data ?? [], filters, searchDatasheetName), sort);
 
+    function toggleFilter(e: ChangeEvent<HTMLInputElement>): void {
+        const selectedFilter = Number(e.currentTarget.value);
+
+        if (isNaN(selectedFilter) || selectedFilter === 0) return;
+
+        setFilters((prev) => (prev.includes(selectedFilter) ? prev.filter((f) => f !== selectedFilter) : [...prev, selectedFilter]));
+        e.currentTarget.value = "";
+        routes.datasheet_list({ datastoreId }).replace();
+    }
+
     return (
-        <Main title="Mes données">
+        <Main title={t("title", { datastoreName: datastore?.name })}>
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-12")}>
                     <h1>
@@ -157,128 +167,116 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                         </div>
                     </div>
 
-                    {/* <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
-                        <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
-                            <Chec
-                        </div>
-                        <div className={fr.cx("fr-col-12", "fr-col-md-4")}></div>
-                    </div> */}
-
-                    <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
-                        <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
-                            <SelectNext
-                                label={null}
+                    <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mt-4v")}>
+                        <div className={fr.cx("fr-col-12", "fr-col-sm-4", "fr-col-xl-2")}>
+                            <Checkbox
+                                legend={<strong className={fr.cx("fr-text--xl")}>{t("filter_label")}</strong>}
                                 options={[
                                     {
-                                        value: FilterEnum.PUBLISHED.toString(),
+                                        label: t("filter_option", { filter: FilterEnum.ALL }),
+                                        nativeInputProps: {
+                                            value: FilterEnum.ALL.toString(),
+                                            checked: filters.length === 0,
+                                            onChange: () => {
+                                                setFilters([]);
+                                                routes.datasheet_list({ datastoreId }).replace();
+                                            },
+                                        },
+                                    },
+                                    {
                                         label: t("filter_option", { filter: FilterEnum.PUBLISHED }),
+                                        nativeInputProps: {
+                                            value: FilterEnum.PUBLISHED.toString(),
+                                            checked: filters.includes(FilterEnum.PUBLISHED),
+                                            onChange: toggleFilter,
+                                        },
                                     },
                                     {
-                                        value: FilterEnum.NOT_PUBLISHED.toString(),
                                         label: t("filter_option", { filter: FilterEnum.NOT_PUBLISHED }),
+                                        nativeInputProps: {
+                                            value: FilterEnum.NOT_PUBLISHED.toString(),
+                                            checked: filters.includes(FilterEnum.NOT_PUBLISHED),
+                                            onChange: toggleFilter,
+                                        },
                                     },
                                 ]}
-                                nativeSelectProps={{
-                                    "aria-label": t("filter_label"),
-                                    onClick: (e) => {
-                                        const selectedFilter = Number(e.currentTarget.value);
-                                        if (isNaN(selectedFilter) || selectedFilter === 0) return;
-
-                                        setFilters((prev) => (prev.includes(selectedFilter) ? [...prev] : [...prev, selectedFilter]));
-                                        e.currentTarget.value = "";
-                                        routes.datasheet_list({ datastoreId }).replace();
-                                    },
-                                }}
-                                placeholder={t("filter_placeholder")}
                             />
                         </div>
-                        <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
-                            <ul className={fr.cx("fr-tags-group")}>
-                                {filters.map((filter) => (
-                                    <li key={filter}>
-                                        <Tag
-                                            dismissible
-                                            nativeButtonProps={{
-                                                onClick: () => {
-                                                    setFilters((prev) => prev.filter((f) => f !== filter));
-                                                    routes.datasheet_list({ datastoreId }).replace();
-                                                },
-                                            }}
-                                        >
-                                            {t("filter_option", { filter: Number(filter) })}
-                                        </Tag>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    </div>
-                    <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-grid-row--right", "fr-mb-4v")}>
-                        <div className={fr.cx("fr-col-12", "fr-col-sm-8")}>
-                            <SelectNext
-                                label={null}
-                                options={[
-                                    {
-                                        label: t("sort_option", { sort: SortByEnum.NAME }),
-                                        value: SortByEnum.NAME.toString(),
-                                    },
-                                    {
-                                        label: t("sort_option", { sort: SortByEnum.NB_SERVICES }),
-                                        value: SortByEnum.NB_SERVICES.toString(),
-                                    },
-                                ]}
-                                nativeSelectProps={{
-                                    "aria-label": t("sort_label"),
-                                    value: sort.by.toString(),
-                                    onChange: (e) => {
-                                        const selectedSortBy = Number(e.currentTarget.value);
+                        <div className={fr.cx("fr-col-12", "fr-col-sm-8", "fr-col-xl-10")}>
+                            <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mb-4v")}>
+                                <div className={fr.cx("fr-col-12", "fr-col-sm-4", "fr-col-md-2", "fr-col--middle")}>
+                                    <span className={fr.cx("fr-text--sm")}>{t("nb_results", { nb: datasheetList.length })}</span>
+                                </div>
+                                <div className={fr.cx("fr-col-12", "fr-col-sm", "fr-col-md")}>
+                                    <SelectNext
+                                        label={null}
+                                        options={[
+                                            {
+                                                label: t("sort_option", { sort: SortByEnum.NAME }),
+                                                value: SortByEnum.NAME.toString(),
+                                            },
+                                            {
+                                                label: t("sort_option", { sort: SortByEnum.NB_SERVICES }),
+                                                value: SortByEnum.NB_SERVICES.toString(),
+                                            },
+                                        ]}
+                                        nativeSelectProps={{
+                                            "aria-label": t("sort_label"),
+                                            value: sort.by.toString(),
+                                            onChange: (e) => {
+                                                const selectedSortBy = Number(e.currentTarget.value);
 
-                                        if (isNaN(selectedSortBy) || selectedSortBy === 0) return;
-                                        setSort((prev) => ({ ...prev, by: selectedSortBy }));
-                                    },
-                                }}
-                                placeholder={t("sort_placeholder")}
-                            />
-                        </div>
-                        <div className={fr.cx("fr-col-12", "fr-col-sm-4")}>
-                            <SelectNext
-                                label={null}
-                                options={[
-                                    {
-                                        label: t("sort_order_option", { sortOrder: SortOrderEnum.ASCENDING }),
-                                        value: SortOrderEnum.ASCENDING.toString(),
-                                    },
-                                    {
-                                        label: t("sort_order_option", { sortOrder: SortOrderEnum.DESCENDING }),
-                                        value: SortOrderEnum.DESCENDING.toString(),
-                                    },
-                                ]}
-                                nativeSelectProps={{
-                                    "aria-label": t("sort_order_label"),
-                                    value: sort.order.toString(),
-                                    onChange: (e) => {
-                                        const selectedSortOrder = Number(e.currentTarget.value);
-                                        if (isNaN(selectedSortOrder) || selectedSortOrder === 0) return;
-                                        setSort((prev) => ({ ...prev, order: selectedSortOrder }));
-                                    },
-                                }}
-                                placeholder={t("sort_order_placeholder")}
-                            />
-                        </div>
-                    </div>
+                                                if (isNaN(selectedSortBy) || selectedSortBy === 0) return;
+                                                setSort((prev) => ({ ...prev, by: selectedSortBy }));
+                                            },
+                                        }}
+                                        placeholder={t("sort_placeholder")}
+                                    />
+                                </div>
+                                <div className={fr.cx("fr-col-12", "fr-col-sm", "fr-col-md")}>
+                                    <SelectNext
+                                        label={null}
+                                        options={[
+                                            {
+                                                label: t("sort_order_option", { sortOrder: SortOrderEnum.ASCENDING }),
+                                                value: SortOrderEnum.ASCENDING.toString(),
+                                            },
+                                            {
+                                                label: t("sort_order_option", { sortOrder: SortOrderEnum.DESCENDING }),
+                                                value: SortOrderEnum.DESCENDING.toString(),
+                                            },
+                                        ]}
+                                        nativeSelectProps={{
+                                            "aria-label": t("sort_order_label"),
+                                            value: sort.order.toString(),
+                                            onChange: (e) => {
+                                                const selectedSortOrder = Number(e.currentTarget.value);
+                                                if (isNaN(selectedSortOrder) || selectedSortOrder === 0) return;
+                                                setSort((prev) => ({ ...prev, order: selectedSortOrder }));
+                                            },
+                                        }}
+                                        placeholder={t("sort_order_placeholder")}
+                                    />
+                                </div>
+                            </div>
 
-                    {datasheetList
-                        ?.slice((pagination.page - 1) * pagination.limit, pagination.page * pagination.limit)
-                        .map((datasheet: Datasheet) => <DatasheetListItem key={datasheet.name} datastoreId={datastoreId} datasheet={datasheet} />)}
+                            <hr className={fr.cx("fr-hr")} />
 
-                    <div className={fr.cx("fr-grid-row", "fr-grid-row--center", "fr-mt-6v")}>
-                        <Pagination
-                            count={Math.ceil(datasheetList.length / pagination.limit)}
-                            showFirstLast={true}
-                            getPageLinkProps={(pageNumber) => ({
-                                ...routes.datasheet_list({ datastoreId, page: pageNumber, limit: pagination.limit }).link,
-                            })}
-                            defaultPage={pagination.page}
-                        />
+                            {datasheetList
+                                ?.slice((pagination.page - 1) * pagination.limit, pagination.page * pagination.limit)
+                                .map((datasheet: Datasheet) => <DatasheetListItem key={datasheet.name} datastoreId={datastoreId} datasheet={datasheet} />)}
+
+                            <div className={fr.cx("fr-grid-row", "fr-grid-row--center", "fr-mt-6v")}>
+                                <Pagination
+                                    count={Math.ceil(datasheetList.length / pagination.limit)}
+                                    showFirstLast={true}
+                                    getPageLinkProps={(pageNumber) => ({
+                                        ...routes.datasheet_list({ datastoreId, page: pageNumber, limit: pagination.limit }).link,
+                                    })}
+                                    defaultPage={pagination.page}
+                                />
+                            </div>
+                        </div>
                     </div>
                 </>
             )}
