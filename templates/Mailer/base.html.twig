@@ -1,18 +1,21 @@
 {% trans_default_domain 'cartesgouvfr' %}
 
 {% block body_html %}
-    {% apply spaceless %}
-    <h2>{% block subject %}{% endblock %}</h2>
+    <h2>
+        {% block subject %}
 
-    <p>
-        {{ 'mailer.hello'|trans }},
-    </p>
+        {% endblock %}
+    </h2>
 
-    {% block body %}{% endblock %}
+    <p>{{ 'mailer.hello'|trans }},</p>
+
+    {% block body %}
+
+    {% endblock %}
 
     <p>{{ 'mailer.signature'|trans({'%href%': url('cartesgouvfr_app')})|raw }}</p>
-
-    {% endapply %}
 {% endblock %}
 
-{% block contact %}{% endblock %}
+{% block contact %}
+
+{% endblock %}
