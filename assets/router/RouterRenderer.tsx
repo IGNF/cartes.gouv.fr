@@ -1,4 +1,4 @@
-import { FC, JSX, lazy, Suspense, useMemo } from "react";
+import { FC, JSX, Suspense, useMemo } from "react";
 
 import AppLayout from "../components/Layout/AppLayout";
 import LoadingText from "../components/Utils/LoadingText";
@@ -12,11 +12,7 @@ import GroupDatastore from "./GroupDatastore";
 import GroupApp from "./GroupApp";
 import PageNotFoundWithLayout from "../pages/error/PageNotFoundWithLayout";
 import Main from "../components/Layout/Main";
-
-const EspaceCoCommunityList = lazy(() => import("../espaceco/pages/communities/Communities"));
-const EspaceCoCreateCommunity = lazy(() => import("../espaceco/pages/communities/CreateCommunity"));
-const EspaceCoManageCommunity = lazy(() => import("../espaceco/pages/communities/ManageCommunity"));
-const MemberInvitation = lazy(() => import("../espaceco/pages/communities/MemberInvitation"));
+import GroupEspaceCo from "./GroupEspaceCo";
 
 const RouterRenderer: FC = () => {
     const route = useRoute();
@@ -42,16 +38,7 @@ const RouterRenderer: FC = () => {
         }
 
         if (groups.espaceco.has(route)) {
-            switch (route.name) {
-                case "espaceco_community_list":
-                    return <EspaceCoCommunityList />;
-                case "espaceco_create_community":
-                    return <EspaceCoCreateCommunity communityId={route.params.communityId} />;
-                case "espaceco_manage_community":
-                    return <EspaceCoManageCommunity communityId={route.params.communityId} />;
-                case "espaceco_member_invitation":
-                    return <MemberInvitation communityId={route.params.communityId} />;
-            }
+            return <GroupEspaceCo route={route} />;
         }
 
         return <GroupApp route={route} />;

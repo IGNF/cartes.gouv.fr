@@ -16,7 +16,7 @@ type CommunityListItemProps = {
 };
 
 const CommunityListItem: FC<CommunityListItemProps> = ({ className, community }) => {
-    const { t } = useTranslation("CommunityList");
+    const { t } = useTranslation("EspaceCoCommunityList");
     const { t: tCommon } = useTranslation("Common");
 
     const [showDescription, toggleShowDescription] = useToggle(false);

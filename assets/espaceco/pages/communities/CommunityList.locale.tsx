@@ -18,10 +18,10 @@ const { i18n } = declareComponentKeys<
     | "community_creation"
     | "create_community"
     | "append_community"
->()("CommunityList");
+>()("EspaceCoCommunityList");
 export type I18n = typeof i18n;
 
-export const CommunityListFrTranslations: Translations<"fr">["CommunityList"] = {
+export const EspaceCoCommunityListFrTranslations: Translations<"fr">["EspaceCoCommunityList"] = {
     title: "Liste des guichets",
     filters: "Filtres",
     all_public_communities: "Tous les guichets publics",
@@ -44,7 +44,7 @@ export const CommunityListFrTranslations: Translations<"fr">["CommunityList"] = 
     append_community: "Reprendre la configuration de ce guichet",
 };
 
-export const CommunityListEnTranslations: Translations<"en">["CommunityList"] = {
+export const EspaceCoCommunityListEnTranslations: Translations<"en">["EspaceCoCommunityList"] = {
     title: "List of communities",
     filters: "Filters",
     all_public_communities: undefined,

@@ -34,7 +34,7 @@ import { UserKeyEnTranslations } from "../../entrepot/pages/users/keys/UserKey.l
 import { UserKeysListTabEnTranslations } from "../../entrepot/pages/users/keys/UserKeysListTab/UserKeysListTab.locale";
 import { MeEnTranslations } from "../../entrepot/pages/users/me/Me.locale";
 import { PermissionsEnTranslations } from "../../entrepot/pages/users/permissions/Permissions.locale";
-import { CommunityListEnTranslations } from "../../espaceco/pages/communities/CommunityList.locale";
+import { EspaceCoCommunityListEnTranslations } from "@/espaceco/pages/communities/CommunityList.locale";
 import { CreateCommunityEnTranslations } from "../../espaceco/pages/communities/CreateCommunity.locale";
 import { CreateCommunityDialogEnTranslations } from "../../espaceco/pages/communities/CreateCommunityDialog.locale";
 import { ManageCommunityEnTranslations } from "../../espaceco/pages/communities/ManageCommunity.locale";
@@ -106,7 +106,7 @@ export const translations: Translations<"en"> = {
     PyramidRasterGenerateForm: PyramidRasterGenerateFormEnTranslations,
     PyramidRasterWmsRasterServiceForm: PyramidRasterWmsRasterServiceFormEnTranslations,
     PyramidRasterWmtsServiceForm: PyramidRasterWmtsServiceFormEnTranslations,
-    CommunityList: CommunityListEnTranslations,
+    EspaceCoCommunityList: EspaceCoCommunityListEnTranslations,
     CreateCommunityDialog: CreateCommunityDialogEnTranslations,
     CreateCommunity: CreateCommunityEnTranslations,
     ManageCommunity: ManageCommunityEnTranslations,

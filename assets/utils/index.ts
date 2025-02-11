@@ -7,7 +7,7 @@ export * from "./offering";
 export * from "./types";
 export * from "./user";
 export * from "./image";
-export * from "./schema";
+export * from "./form";
 
 // charsets
 export { default as charsets } from "@/data/charset_list.json";

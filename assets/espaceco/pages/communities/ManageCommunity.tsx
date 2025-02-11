@@ -5,11 +5,10 @@ import Tabs from "@codegouvfr/react-dsfr/Tabs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useMemo, useState } from "react";
 
+import Main from "@/components/Layout/Main";
 import { UserMe } from "../../../@types/app_espaceco";
 import { CommunityResponseDTO } from "../../../@types/espaceco";
-import AppLayout from "../../../components/Layout/AppLayout";
 import LoadingText from "../../../components/Utils/LoadingText";
-import { datastoreNavItems } from "../../../config/navItems/datastoreNavItems";
 import { useTranslation } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/espaceco/RQKeys";
 import { CartesApiException } from "../../../modules/jsonFetch";
@@ -27,8 +26,6 @@ import Wait from "../../../components/Utils/Wait";
 type ManageCommunityProps = {
     communityId: number;
 };
-
-const navItems = datastoreNavItems();
 
 const ManageCommunity: FC<ManageCommunityProps> = ({ communityId }) => {
     const { t } = useTranslation("ManageCommunity");
@@ -91,8 +88,7 @@ const ManageCommunity: FC<ManageCommunityProps> = ({ communityId }) => {
     }, [communityQuery.data]);
 
     return (
-        <AppLayout
-            navItems={navItems}
+        <Main
             customBreadcrumbProps={{
                 homeLinkProps: routes.home().link,
                 segments: [
@@ -101,7 +97,7 @@ const ManageCommunity: FC<ManageCommunityProps> = ({ communityId }) => {
                 ],
                 currentPageLabel: tBreadcrumb("espaceco_manage_community", { communityName: communityQuery.data?.name }),
             }}
-            documentTitle={t("title", { name: communityQuery.data?.name })}
+            title={t("title", { name: communityQuery.data?.name })}
         >
             <h1>{t("title", { name: communityQuery.data?.name })}</h1>
             {isUpdateError && <Alert severity="error" closable title={t("updating_failed")} />}
@@ -221,7 +217,7 @@ const ManageCommunity: FC<ManageCommunityProps> = ({ communityId }) => {
                     </div>
                 )
             )}
-        </AppLayout>
+        </Main>
     );
 };
 

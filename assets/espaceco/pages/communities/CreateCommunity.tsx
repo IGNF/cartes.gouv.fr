@@ -5,12 +5,11 @@ import { FC, useMemo, useState } from "react";
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
+import Main from "@/components/Layout/Main";
 import { CommunityFormMode, UserMe } from "../../../@types/app_espaceco";
 import { CommunityResponseDTO } from "../../../@types/espaceco";
-import AppLayout from "../../../components/Layout/AppLayout";
 import LoadingText from "../../../components/Utils/LoadingText";
 import Wait from "../../../components/Utils/Wait";
-import { datastoreNavItems } from "../../../config/navItems/datastoreNavItems";
 import { useTranslation } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/espaceco/RQKeys";
 import { CartesApiException } from "../../../modules/jsonFetch";
@@ -21,8 +20,6 @@ import Description from "./management/Description";
 import ZoomAndCentering from "./management/ZoomAndCentering";
 import Reports from "./management/Reports";
 import EditTools from "./management/EditTools";
-
-const navItems = datastoreNavItems();
 
 type CreateCommunityProps = {
     communityId: number;
@@ -96,8 +93,7 @@ const CreateCommunity: FC<CreateCommunityProps> = ({ communityId }) => {
     }, [communityQuery.data]);
 
     return (
-        <AppLayout
-            navItems={navItems}
+        <Main
             customBreadcrumbProps={{
                 homeLinkProps: routes.home().link,
                 segments: [
@@ -106,7 +102,7 @@ const CreateCommunity: FC<CreateCommunityProps> = ({ communityId }) => {
                 ],
                 currentPageLabel: tBreadcrumb("espaceco_create_community"),
             }}
-            documentTitle={t("title")}
+            title={t("title")}
         >
             {communityQuery.data?.active ? (
                 <Alert severity="error" closable={false} title={t("forbidden_access")} />
@@ -211,7 +207,7 @@ const CreateCommunity: FC<CreateCommunityProps> = ({ communityId }) => {
                     )}
                 </div>
             )}
-        </AppLayout>
+        </Main>
     );
 };
 

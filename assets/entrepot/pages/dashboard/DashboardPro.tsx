@@ -188,6 +188,7 @@ const DashboardPro = () => {
                         <Tile
                             linkProps={routes.espaceco_community_list().link}
                             imageUrl={internetSvgUrl}
+                            imageSvg={true}
                             desc="Voir la liste des guichets"
                             orientation="horizontal"
                             title={t("espaceco_frontoffice_list")}

@@ -6,13 +6,12 @@ import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useMemo, useState } from "react";
 
+import Main from "@/components/Layout/Main";
 import { CommunityListFilter, GetResponse, UserMe, arrCommunityListFilters } from "../../../@types/app_espaceco";
 import { CommunityResponseDTO } from "../../../@types/espaceco";
-import AppLayout from "../../../components/Layout/AppLayout";
 import LoadingText from "../../../components/Utils/LoadingText";
 import Skeleton from "../../../components/Utils/Skeleton";
 import Wait from "../../../components/Utils/Wait";
-import { datastoreNavItems } from "../../../config/navItems/datastoreNavItems";
 import { useTranslation } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/espaceco/RQKeys";
 import { CartesApiException } from "../../../modules/jsonFetch";
@@ -23,8 +22,6 @@ import { CreateCommunityDialog, CreateCommunityDialogModal } from "./CreateCommu
 import SearchCommunity from "./SearchCommunity";
 
 const defaultLimit = 10;
-
-const navItems = datastoreNavItems();
 
 type QueryParamsType = {
     page: number;
@@ -37,7 +34,7 @@ const Communities: FC = () => {
 
     const { t: tCommon } = useTranslation("Common");
     const { t: tBreadcrumb } = useTranslation("Breadcrumb");
-    const { t } = useTranslation("CommunityList");
+    const { t } = useTranslation("EspaceCoCommunityList");
 
     const filter = useMemo<CommunityListFilter>(() => {
         const f = route.params["filter"];
@@ -117,14 +114,13 @@ const Communities: FC = () => {
     });
 
     return (
-        <AppLayout
-            navItems={navItems}
+        <Main
             customBreadcrumbProps={{
                 homeLinkProps: routes.home().link,
                 segments: [{ label: tBreadcrumb("dashboard_pro"), linkProps: routes.dashboard_pro().link }],
                 currentPageLabel: tBreadcrumb("espaceco_community_list"),
             }}
-            documentTitle={t("title")}
+            title={t("title")}
         >
             <h1>{t("title")}</h1>
             <div>
@@ -228,7 +224,7 @@ const Communities: FC = () => {
                     mutate(datas);
                 }}
             />
-        </AppLayout>
+        </Main>
     );
 };
 

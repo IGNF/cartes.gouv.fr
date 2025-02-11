@@ -8,20 +8,17 @@ import { FC, useEffect, useMemo, useState } from "react";
 
 import { CommunityMember, Role, UserMe } from "../../../@types/app_espaceco";
 import { CommunityResponseDTO } from "../../../@types/espaceco";
-import AppLayout from "../../../components/Layout/AppLayout";
 import LoadingText from "../../../components/Utils/LoadingText";
 import Wait from "../../../components/Utils/Wait";
-import { datastoreNavItems } from "../../../config/navItems/datastoreNavItems";
 import { useTranslation } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/espaceco/RQKeys";
 import { CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
 import { useApiEspaceCoStore } from "../../../stores/ApiEspaceCoStore";
 import api from "../../api";
+import Main from "@/components/Layout/Main";
 
 import "../../../../assets/sass/pages/espaceco/member_invitation.scss";
-
-const navItems = datastoreNavItems();
 
 type MemberInvitationProps = {
     communityId: number;
@@ -106,14 +103,13 @@ const MemberInvitation: FC<MemberInvitationProps> = ({ communityId }) => {
     const community = useMemo(() => query.data, [query.data]);
 
     return (
-        <AppLayout
-            navItems={navItems}
+        <Main
             customBreadcrumbProps={{
                 homeLinkProps: routes.home().link,
                 segments: [],
                 currentPageLabel: tBreadcrumb("espaceco_member_invitation"),
             }}
-            documentTitle={t("document_title")}
+            title={t("document_title")}
         >
             <h1>{t("document_title")}</h1>
             {meQuery.isLoading && <LoadingText as="h6" message={t("userme_loading")} />}
@@ -185,7 +181,7 @@ const MemberInvitation: FC<MemberInvitationProps> = ({ communityId }) => {
                     <Alert severity={"warning"} closable title={t("not_member")} />
                 ))
             )}
-        </AppLayout>
+        </Main>
     );
 };
 
