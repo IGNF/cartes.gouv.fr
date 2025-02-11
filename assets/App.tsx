@@ -7,6 +7,9 @@ import { FC } from "react";
 import ErrorBoundary from "./components/Utils/ErrorBoundary";
 import RouterRenderer from "./router/RouterRenderer";
 import { RouteProvider } from "./router/router";
+import AlertProvider from "./components/Provider/AlertProvider";
+
+import "./sass/helpers.scss";
 
 const queryClient = new QueryClient();
 
@@ -21,7 +24,9 @@ const App: FC = () => {
 
             <RouteProvider>
                 <ErrorBoundary>
-                    <RouterRenderer />
+                    <AlertProvider>
+                        <RouterRenderer />
+                    </AlertProvider>
                 </ErrorBoundary>
             </RouteProvider>
         </PersistQueryClientProvider>

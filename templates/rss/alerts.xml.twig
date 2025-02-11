@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0">
+<channel>
+    <title>cartes.gouv.fr - Alertes</title>
+    <description>Suivez les alertes, incidents ou maintenances programmées de cartes.gouv.fr et la géoplateforme</description>
+    <link>{{ link }}</link>
+    <language>fr-fr</language>
+    {# <copyright>2020 Example.com All rights reserved</copyright> #}
+    {# <lastBuildDate>Mon, 6 Sep 2010 00:01:00 +0000</lastBuildDate>
+    <pubDate>Sun, 6 Sep 2009 16:20:00 +0000</pubDate> #}
+    <ttl>3600</ttl>
+
+    {% for alert in alerts %}
+        <item>
+            <title>{{ alert.title }}</title>
+            <description>{{ alert.description }}</description>
+            <link>{{ alert.link.url }}</link>
+            <guid>{{ alert.id }}</guid>
+            <pubDate>{{ alert.date }}</pubDate>
+        </item>
+    {% endfor %}
+
+</channel>
+</rss>

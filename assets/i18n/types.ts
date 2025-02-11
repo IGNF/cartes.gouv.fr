@@ -58,6 +58,7 @@ export type ComponentKey =
     | import("../entrepot/pages/service/common/TableSelection/TableSelection.locale").I18n
     | import("../entrepot/pages/service/common/AccessRestrictions/AccessRestrictions.locale").I18n
     | import("../entrepot/pages/service/wms-vector/UploadStyleFile.locale").I18n
+    | import("../entrepot/pages/config/Alerts.locale").I18n
     | import("../espaceco/pages/communities/EspaceCoCommunities.locale").I18n
     | import("../pages/LoginDisabled/LoginDisabled.locale").I18n;
 

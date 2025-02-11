@@ -181,7 +181,7 @@
   resolved "https://registry.yarnpkg.com/@bufbuild/protobuf/-/protobuf-2.2.3.tgz#9cd136f6b687e63e9b517b3a54211ece942897ee"
   integrity sha512-tFQoXHJdkEOSwj5tRIZSPNUuXK3RaR7T1nUrPgbYX1pUbvqqaaZAsfo+NXBPsz5rZMSKVFrgK1WL8Q/MSLvprg==
 
-"@codegouvfr/react-dsfr@^1.10.11":
+"@codegouvfr/react-dsfr@^1.17.0":
   version "1.18.0"
   resolved "https://registry.yarnpkg.com/@codegouvfr/react-dsfr/-/react-dsfr-1.18.0.tgz#6b8015fce7a40852464646c98cb113f34cae892c"
   integrity sha512-fLdjbJfeDYNJjs5w0sce1tkCc6Qh7m/wNi0KHc/3bz0sG8Krw0h8+0xmjjPqiBG0MCS/dHNCOG4XBsxdP2ovIA==
