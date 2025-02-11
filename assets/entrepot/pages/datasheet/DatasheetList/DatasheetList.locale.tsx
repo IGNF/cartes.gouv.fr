@@ -17,14 +17,10 @@ const { i18n } = declareComponentKeys<
     | { K: "last_refresh_date"; P: { dataUpdatedAt: number }; R: string }
     | { K: "nb_results"; P: { nb: number }; R: string }
     | "filter_label"
-    | "filter_placeholder"
     | { K: "filter_option"; P: { filter: FilterEnum }; R: string }
     | "sort_label"
     | "sort_placeholder"
-    | { K: "sort_option"; P: { sort: SortByEnum }; R: string }
-    | "sort_order_label"
-    | "sort_order_placeholder"
-    | { K: "sort_order_option"; P: { sortOrder: SortOrderEnum }; R: string }
+    | { K: "sort_option"; P: { sort: SortByEnum; sortOrder: SortOrderEnum }; R: string }
 >()("DatasheetList");
 export type I18n = typeof i18n;
 
@@ -35,18 +31,12 @@ export const DatasheetListFrTranslations: Translations<"fr">["DatasheetList"] = 
     metadata_endpoint_quota_reached: "Quota du point d’accès de métadonnées atteint",
     services_published: ({ nbServices }) => `Publié (${nbServices})`,
     no_services_published: "Non publié",
-    sandbox_datastore_explanation: (
-        <p>
-            {
-                "Cet espace permet de tester les fonctions d’alimentation et de diffusion de la Géoplateforme. Les services publiés dans cet espace ne sont pas visibles sur le catalogue."
-            }
-        </p>
-    ),
+    sandbox_datastore_explanation:
+        "Cet espace permet de tester les fonctions d’alimentation et de diffusion de la Géoplateforme. Les services publiés dans cet espace ne sont pas visibles sur le catalogue.",
     refresh_datasheet_list: "Rafraîchir",
     last_refresh_date: ({ dataUpdatedAt }) => `Données mises à jour le ${formatDateFromISO(new Date(dataUpdatedAt).toISOString())}`,
     nb_results: ({ nb }) => `(${nb}) résultats`,
     filter_label: "Filtrer",
-    filter_placeholder: "Sélectionner un filtre",
     filter_option: ({ filter }) => {
         switch (filter) {
             case FilterEnum.ALL:
@@ -61,26 +51,14 @@ export const DatasheetListFrTranslations: Translations<"fr">["DatasheetList"] = 
     },
     sort_label: "Trier",
     sort_placeholder: "Trier par",
-    sort_option: ({ sort }) => {
+    sort_option: ({ sort, sortOrder }) => {
         switch (sort) {
             case SortByEnum.NAME:
-                return "Trier par : Nom";
+                return `Nom : ${sortOrder === SortOrderEnum.ASCENDING ? "de A à Z" : "de Z à A"}`;
             case SortByEnum.NB_SERVICES:
-                return "Trier par : Nombre de services publiés";
+                return `Nombre de services publiés : ${sortOrder === SortOrderEnum.ASCENDING ? "croissant" : "décroissant"}`;
             default:
                 return "Tri inconnu";
-        }
-    },
-    sort_order_label: "Ordre de tri",
-    sort_order_placeholder: "Ordre",
-    sort_order_option: ({ sortOrder }) => {
-        switch (sortOrder) {
-            case SortOrderEnum.ASCENDING:
-                return "Ordre : Croissant";
-            case SortOrderEnum.DESCENDING:
-                return "Ordre : Décroissant";
-            default:
-                return "Ordre inconnu";
         }
     },
 };
@@ -97,12 +75,8 @@ export const DatasheetListEnTranslations: Translations<"en">["DatasheetList"] = 
     last_refresh_date: undefined,
     nb_results: undefined,
     filter_label: undefined,
-    filter_placeholder: undefined,
     filter_option: undefined,
     sort_label: undefined,
     sort_placeholder: undefined,
     sort_option: undefined,
-    sort_order_label: undefined,
-    sort_order_placeholder: undefined,
-    sort_order_option: undefined,
 };
