@@ -229,7 +229,6 @@ class UploadController extends AbstractController implements ApiControllerInterf
                 case UploadTags::INT_STEP_PROCESSING:
                     switch ($currentStepStatus) {
                         case JobStatuses::WAITING:
-                            /** @var array<string> */
                             $processing = $this->datastoreService->getProcIntegrateVectorFilesInBase($datastoreId);
 
                             $procExecBody = [

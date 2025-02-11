@@ -36,7 +36,7 @@ class WfsController extends ServiceController implements ApiControllerInterface
         CartesServiceApiService $cartesServiceApiService,
         private CapabilitiesService $capabilitiesService,
         private CartesMetadataApiService $cartesMetadataApiService,
-        SandboxService $sandboxService
+        SandboxService $sandboxService,
     ) {
         parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $capabilitiesService, $cartesMetadataApiService, $sandboxService);
     }
