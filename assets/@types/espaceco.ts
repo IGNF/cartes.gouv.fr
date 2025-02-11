@@ -13,6 +13,8 @@ export const AttributeTypes = ["text", "integer", "double", "checkbox", "list", 
 
 export type AttributeType = (typeof AttributeTypes)[number];
 
+export type ValuesType = (string | null)[] | Record<string, string | null> | null;
+
 export type AttributeDTO = {
     name: string;
     title?: string;
@@ -20,8 +22,8 @@ export type AttributeDTO = {
     default?: string | null;
     mandatory?: boolean;
     multiple?: boolean;
-    values?: string[] | null;
-    // values?: string[] | Record<string, number | string | null> | null;
+    //values?: string[] | null;
+    values?: ValuesType;
     help?: string | null;
     /* input_constraints?: ConstraintsDTO | null;
     json_schema?: object | null;

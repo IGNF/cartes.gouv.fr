@@ -28,16 +28,6 @@ const ReportStatuses: FC<ReportStatusesProps> = ({ form, state }) => {
 
     const [currentStatus, setCurrentStatus] = useState<ReportStatusesType | undefined>();
 
-    // Changement d'etat d'un checkbox
-    /*const handleOnChange = (status: string, checked: boolean) => {
-        const v = { ...statuses };
-        const num = countActiveStatus(v);
-        if ((!checked && num > minStatuses) || checked) {
-            v[status].active = checked;
-        }
-        setFormValue("report_statuses", v);
-    }; */
-
     return (
         <div className={fr.cx("fr-input-group", "fr-my-1w", state === "error" && "fr-input-group--error")}>
             <h3>{t("report.configure_statuses")}</h3>

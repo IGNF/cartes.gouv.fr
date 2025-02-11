@@ -33,6 +33,7 @@ import type { UserSharedThemesType } from "./reports/SetSharedThemesDialog";
 import SharedThemes from "./reports/SharedThemes";
 import ThemeList from "./reports/ThemeList";
 import { countActiveStatus, getMinAuthorizedStatus } from "./reports/Utils";
+import { formatAttributesForApi } from "./reports/ThemeUtils";
 
 type ReportsProps = {
     mode: CommunityFormMode;
@@ -65,32 +66,23 @@ const Reports: FC<ReportsProps> = ({ mode, community, onPrevious, onSubmit }) =>
                                 default: yup.string().nullable(),
                                 mandatory: yup.boolean(),
                                 multiple: yup.boolean(),
-                                values: yup
-                                    .array()
-                                    .test({
-                                        name: "check-values",
-                                        test: (list) => {
-                                            if (!list) return true;
-                                            for (const element of list) {
-                                                if (element !== null && typeof element !== "string") return false;
+                                values: yup.mixed().test({
+                                    name: "check-values",
+                                    test: (value) => {
+                                        if (Array.isArray(value)) {
+                                            for (const v of value) {
+                                                if (v !== null && typeof v !== "string") return false;
                                             }
-                                            return true;
-                                        },
-                                    })
-                                    .nullable(),
+                                        } else if (typeof value === "object") {
+                                            for (const [key, v] of Object.entries(value)) {
+                                                if (key === "") return false;
+                                                if (v !== null || typeof v !== "string") return false;
+                                            }
+                                        }
+                                        return true;
+                                    },
+                                }),
                                 help: yup.string().nullable(),
-                                /* title: yup.string(),
-                                input_constraints: yup
-                                    .object({
-                                        minLength: yup.number(),
-                                        minValue: yup.string(),
-                                        maxValue: yup.string(),
-                                        pattern: yup.string(),
-                                    })
-                                    .nullable(),
-                                json_schema: yup.object().nullable(),
-                                required: yup.boolean(),
-                                condition_field: yup.string(), */
                             })
                         )
                         .required(),
@@ -230,6 +222,7 @@ const Reports: FC<ReportsProps> = ({ mode, community, onPrevious, onSubmit }) =>
     const onSubmitForm = (saveOnly: boolean) => {
         const datas = { ...getFormValues() };
         datas.report_statuses = cleanReportStatuses(datas.report_statuses);
+        datas.attributes = formatAttributesForApi(datas.attributes);
         console.log(datas);
 
         // TODO

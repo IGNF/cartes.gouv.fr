@@ -24,6 +24,7 @@ const normalizeAttribute = (attribute: AddOrEditAttributeFormType): AttributeDTO
     const result: AttributeDTO = {
         name: attribute.name,
         type: attribute.type,
+        values: [],
     };
 
     if (attribute.type === "list") {
@@ -45,9 +46,19 @@ const normalizeAttribute = (attribute: AddOrEditAttributeFormType): AttributeDTO
     return result;
 };
 
+const formatAttributesForApi = (attributes: ThemeDTO[]): ThemeDTO[] => {
+    return attributes.map((theme) => {
+        if (!theme.database) return theme;
+
+        const clone = { ...theme };
+        clone["attributes"] = theme.autofilled_attributes;
+        return clone;
+    });
+};
+
 /* Recuperation de input type à partir de type */
 const getInputType = (type?: AttributeType) => {
     return type === "date" ? "date" : "text";
 };
 
-export { normalizeTheme, normalizeAttribute, getInputType };
+export { normalizeTheme, normalizeAttribute, formatAttributesForApi, getInputType };
