@@ -228,25 +228,23 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                         </div>
                     </div>
 
-                    <div
-                        className={fr.cx("fr-grid-row", "fr-mt-2v")}
-                        style={{
-                            display: "flex",
-                            alignItems: "flex-start",
-                            justifyContent: "space-between",
-                        }}
-                    >
-                        <span className={fr.cx("fr-text--sm", "fr-m-0")}>{t("nb_results", { nb: datasheetList.length })}</span>
+                    <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mt-2v")}>
                         <div
+                            className={fr.cx("fr-col")}
                             style={{
-                                flex: "none",
-                                alignSelf: "stretch",
+                                display: "flex",
+                                alignItems: "center",
                             }}
                         >
-                            <span className={fr.cx("fr-text--sm", "fr-m-0", "fr-mr-2v")}>
+                            <span className={fr.cx("fr-text--sm", "fr-mb-0")}>{t("nb_results", { nb: datasheetList.length })}</span>
+                            <span
+                                className={fr.cx("fr-text--sm", "fr-mb-0", "fr-mr-2v")}
+                                style={{
+                                    marginLeft: "auto",
+                                }}
+                            >
                                 {t("last_refresh_date", { dataUpdatedAt: datasheetListQuery.dataUpdatedAt })}
                             </span>
-
                             <Button
                                 title={t("refresh_datasheet_list")}
                                 onClick={() => datasheetListQuery.refetch()}
