@@ -104,3 +104,21 @@ export const trimObject = (obj: object): object => {
 
     return newObject;
 };
+
+export function formatErrors(errors: unknown): string | undefined {
+    if (errors instanceof Array) {
+        const message = errors
+            .filter((x) => x)
+            .map(formatErrors)
+            .join(", ");
+        return message;
+    } else if (errors instanceof Object) {
+        if ("message" in errors) {
+            return errors.message as string;
+        } else if ("value" in errors) {
+            return formatErrors(errors.value);
+        } else {
+            return Object.values(errors).map(formatErrors).join(", ");
+        }
+    }
+}

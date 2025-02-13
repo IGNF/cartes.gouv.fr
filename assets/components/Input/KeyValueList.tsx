@@ -1,124 +1,116 @@
+import * as yup from "yup";
+import { Controller, useFieldArray, useFormContext } from "react-hook-form";
+
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
-import Input from "@codegouvfr/react-dsfr/Input";
-import { FC, useEffect, useState } from "react";
-import { v4 as uuidv4 } from "uuid";
+import ToggleSwitch from "@codegouvfr/react-dsfr/ToggleSwitch";
+import { useDrag } from "@/hooks/useDrag";
+import { DragProvider } from "@/contexts/drag";
 
-interface KeyValueListProps {
-    id?: string;
-    label: string;
-    hintText: string;
-    state?: "default" | "error" | "success";
-    stateRelatedMessage?: string;
-    defaultValue?: Record<string, string>;
-    onChange?: (value: Record<string, string>) => void;
+import KeyValueItem, { KeyValues } from "./KeyValueItem";
+import { InputHTMLAttributes } from "react";
+import { SelectProps } from "@codegouvfr/react-dsfr/SelectNext";
+import { get } from "@/utils";
+
+export interface KeyValuesForm {
+    values: KeyValues;
+    useKeys: boolean;
 }
 
-type HeaderDatas = Record<string, { name: string; value: string }>;
+function checkDuplicates({ useKeys, values }: KeyValuesForm) {
+    const attribute = useKeys ? "key" : "value";
+    const items = values.map((item) => item[attribute]);
+    return new Set(items).size === items.length;
+}
 
-const KeyValueList: FC<KeyValueListProps> = (props: KeyValueListProps) => {
-    const { label, hintText, state, stateRelatedMessage, defaultValue = {}, onChange } = props;
-
-    const [datas, setDatas] = useState<HeaderDatas>(() => {
-        const d: HeaderDatas = {};
-        Object.keys(defaultValue).forEach((keyname) => {
-            const uuid = uuidv4();
-            d[uuid] = { name: keyname, value: defaultValue[keyname] };
+export function getKeyValueSchema(testConfig?: yup.TestConfig<string | null> | yup.TestConfig<string | null>[]) {
+    let valueSchema = yup.string().nullable().defined().strict(true);
+    if (testConfig) {
+        const tests: yup.TestConfig<string | null>[] = testConfig instanceof Array ? testConfig : [testConfig];
+        tests.forEach((test) => {
+            valueSchema = valueSchema.test(test);
         });
-        return d;
+    }
+    return yup
+        .object({
+            useKeys: yup.boolean().required(),
+            values: yup
+                .array()
+                .of(
+                    yup.object({
+                        key: yup.string(),
+                        value: valueSchema,
+                    })
+                )
+                .required(),
+        })
+        .test("hasDuplicates", "remove or fix duplicates keys / values", checkDuplicates);
+}
+
+interface KeyValueListProps {
+    label: string;
+    hintText?: string;
+    name: string;
+    valueInputProps?: InputHTMLAttributes<HTMLInputElement>;
+    valueOptions?: SelectProps.Option[];
+    valueType?: "textInput" | "select";
+}
+
+function KeyValueList(props: KeyValueListProps) {
+    const { label, hintText, name, valueInputProps, valueOptions, valueType } = props;
+    const {
+        control,
+        formState: { errors },
+    } = useFormContext();
+    const { fields, append, remove, move } = useFieldArray({
+        name: `${name}.values`,
     });
+    const keyValueError = get(errors, `${name}.root.message`);
+    const hasError = Boolean(keyValueError);
+    const drag = useDrag(move);
 
-    useEffect(() => {
-        const result = {};
-        Object.keys(datas).forEach((uuid) => {
-            if (datas[uuid].name && datas[uuid].value) {
-                result[datas[uuid].name] = datas[uuid].value;
-            }
-        });
-        onChange?.(result);
-    }, [datas, onChange]);
-
-    // Ajout d'une ligne
-    const handleAdd = () => {
-        const uuid = uuidv4();
-        const d = { ...datas };
-        d[uuid] = { name: "", value: "" };
-        setDatas(d);
-    };
-
-    // Suppression d'une ligne
-    const handleRemove = (key: string) => {
-        const d = { ...datas };
-        delete d[key];
-        setDatas(d);
-    };
-
-    const handleChangeName = (key: string, name: string) => {
-        const d = { ...datas };
-        d[key].name = name;
-        setDatas(d);
-    };
-
-    const handleChangeValue = (key: string, value: string) => {
-        const d = { ...datas };
-        d[key].value = value;
-        setDatas(d);
-    };
+    function handleAdd() {
+        append({ key: "", value: "" });
+    }
 
     return (
-        <div>
-            <div className={fr.cx("fr-input-group", "fr-mb-1v")}>
-                <label className={fr.cx("fr-label")}>{label}</label>
-                <span className={fr.cx("fr-hint-text")}>{hintText}</span>
+        <div className={fr.cx("fr-input-group", { "fr-input-group--error": hasError })}>
+            <label className={fr.cx("fr-label")}>
+                {label}
+                {hintText && <span className={fr.cx("fr-hint-text")}>{hintText}</span>}
+            </label>
+            <div className={fr.cx("fr-mt-1w", "fr-mb-1w")}>
+                <Controller
+                    control={control}
+                    name={`${name}.useKeys`}
+                    render={({ field: { value, onChange } }) => (
+                        <ToggleSwitch checked={value} label="Définir les clés" inputTitle="Définir les clés" onChange={onChange} showCheckedHint={false} />
+                    )}
+                />
             </div>
+            <DragProvider value={drag}>
+                {fields.map((field, i) => {
+                    return (
+                        <KeyValueItem
+                            key={field.id}
+                            index={i}
+                            name={name}
+                            onRemove={remove}
+                            valueInputProps={valueInputProps}
+                            valueOptions={valueOptions}
+                            valueType={valueType}
+                        />
+                    );
+                })}
+            </DragProvider>
             <div>
-                <Button className={fr.cx("fr-mr-1v")} iconId={"fr-icon-add-circle-line"} priority="tertiary" onClick={handleAdd}>
+                <Button className={fr.cx("fr-mr-1v")} iconId={"fr-icon-add-circle-line"} priority="tertiary" onClick={handleAdd} type="button">
                     Ajouter
                 </Button>
             </div>
-            {Object.keys(datas).map((key) => {
-                return (
-                    <div key={key} className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-grid-row--middle")}>
-                        <div className={fr.cx("fr-col-3")}>
-                            <Input
-                                label={null}
-                                nativeInputProps={{
-                                    defaultValue: datas[key].name,
-                                    onChange: (e) => handleChangeName(key, e.currentTarget.value),
-                                }}
-                            />
-                        </div>
-                        <div className={fr.cx("fr-col-3")}>
-                            <Input
-                                label={null}
-                                nativeInputProps={{
-                                    defaultValue: datas[key].value,
-                                    onChange: (e) => handleChangeValue(key, e.currentTarget.value),
-                                }}
-                            />
-                        </div>
-                        <Button title={""} priority={"tertiary no outline"} iconId={"fr-icon-delete-line"} onClick={() => handleRemove(key)} />
-                    </div>
-                );
-            })}
-            {state !== "default" && (
-                <p
-                    className={fr.cx(
-                        (() => {
-                            switch (state) {
-                                case "error":
-                                    return "fr-error-text";
-                                case "success":
-                                    return "fr-valid-text";
-                            }
-                        })()
-                    )}
-                >
-                    {stateRelatedMessage}
-                </p>
-            )}
+            {hasError && <p className={fr.cx("fr-error-text")}>{String(keyValueError)}</p>}
         </div>
     );
-};
+}
 
 export default KeyValueList;
