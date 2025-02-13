@@ -10,7 +10,7 @@
         "cweagans/composer-patches": "^1.7",
         "friendsofsymfony/jsrouting-bundle": "^3.2",
         "knpuniversity/oauth2-client-bundle": "^2.14",
-        "pentatrion/vite-bundle": "^7.0",
+        "pentatrion/vite-bundle": "^8.0",
         "phpdocumentor/reflection-docblock": "^5.3",
         "phpstan/phpdoc-parser": "^2.0",
         "stevenmaguire/oauth2-keycloak": "^5.0",

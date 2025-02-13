@@ -81,6 +81,7 @@ RUN export APP_ENV=prod \
 RUN yarn install --production --frozen-lockfile \
     && yarn build \
     && yarn cache clean \
+    && APP_ENV=prod APP_DEBUG=0 php bin/console cache:clear \
     && rm -rf node_modules
 
 EXPOSE 8000

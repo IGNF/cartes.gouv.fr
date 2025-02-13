@@ -17,7 +17,7 @@ Le portail est construit sur le framework PHP Symfony. Il nécessite l'installat
     - `yarn build` : générer les assets en mode production
     - `yarn build:dev` : générer les assets en mode développement
 
-### Spécificités de l'installation avec Docker
+## Spécificités de l'installation avec Docker
 
 - Lancer les conteneurs docker : `docker compose -f compose[.prod].yml up [-d] [--build]`
 
@@ -26,3 +26,12 @@ Le portail est construit sur le framework PHP Symfony. Il nécessite l'installat
 > `-d` permet de créer le conteneur docker en mode "détaché"
 >
 > `--build` permet de demander la création/mise à jour de l'image docker
+
+- Consulter le site au :
+
+| mode | lien localhost        | lien avec traefik\*                        |
+| ---- | --------------------- | ------------------------------------------ |
+| dev  | http://localhost:9092 | https://cartesgouvfr-dev.docker.localhost  |
+| prod | http://localhost:9090 | https://cartesgouvfr-prod.docker.localhost |
+
+> \*Traefik doit être paramétré par vous-même

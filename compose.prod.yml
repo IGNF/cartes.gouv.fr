@@ -18,8 +18,15 @@ services:
             - HTTPS_PROXY=${HTTPS_PROXY}
             - http_proxy=${HTTP_PROXY}
             - https_proxy=${HTTPS_PROXY}
+            - APP_ENV=prod
+            - APP_ROOT_URL=https://cartesgouvfr-prod.docker.localhost
         ports:
             - "9090:8000"
         networks:
             - cartesgouvfr_network
         restart: unless-stopped
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.cartesgouvfr-prod.rule=Host(`cartesgouvfr-prod.docker.localhost`)"
+            - "traefik.http.routers.cartesgouvfr-prod.entrypoints=websecure"
+            - "traefik.http.services.cartesgouvfr-prod.loadbalancer.server.port=8000"
