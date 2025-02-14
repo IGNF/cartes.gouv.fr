@@ -8,7 +8,7 @@ const { i18n } = declareComponentKeys<
     | { K: "username"; P: { userName: string }; R: JSX.Element }
     | { K: "email"; P: { email: string }; R: JSX.Element }
     | { K: "registration_date"; P: { date: string }; R: JSX.Element }
-    | { K: "id"; P: { id: string }; R: JSX.Element }
+    | "id"
     | "userid_copied"
     | "manage_my_account"
 >()("Me");
@@ -41,11 +41,7 @@ export const MeFrTranslations: Translations<"fr">["Me"] = {
             <strong>Date d&apos;inscription</strong>&nbsp;: {date}
         </>
     ),
-    id: ({ id }) => (
-        <>
-            <strong>Identifiant utilisateur</strong>&nbsp;: {id}
-        </>
-    ),
+    id: "Identifiant utilisateur",
     userid_copied: "Identifiant utilisateur copié",
     manage_my_account: "Modifier mes informations",
 };
@@ -77,11 +73,7 @@ export const MeEnTranslations: Translations<"en">["Me"] = {
             <strong>Registration date</strong>: {date}
         </>
     ),
-    id: ({ id }) => (
-        <>
-            <strong>User Id</strong>: {id}
-        </>
-    ),
+    id: "User Id",
     userid_copied: "User Id copied",
     manage_my_account: "Manage my account",
 };

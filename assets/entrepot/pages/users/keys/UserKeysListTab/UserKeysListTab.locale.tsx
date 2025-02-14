@@ -5,7 +5,8 @@ import { Translations } from "../../../../../i18n/types";
 const { i18n } = declareComponentKeys<
     | "no_keys"
     | "no_permission_warning"
-    | { K: "hash_value"; P: { value?: string }; R: string }
+    | "hash_value"
+    | "unavailable"
     | "hash_value_copied"
     | "services"
     | "no_services"
@@ -19,7 +20,8 @@ export type I18n = typeof i18n;
 export const UserKeysListTabFrTranslations: Translations<"fr">["UserKeysListTab"] = {
     no_keys: "Vous n'avez aucune clé d’accès",
     no_permission_warning: "Vous n'avez aucune permission, il n'est pas possible d’ajouter une clé",
-    hash_value: ({ value }) => `Valeur du hash : ${value ?? "indisponible"}`,
+    hash_value: "Valeur du hash",
+    unavailable: "Indisponible",
     hash_value_copied: "Valeur du hash copiée",
     services: "Services accessibles",
     no_services: "Cette clé n'a accès à aucun service",
@@ -32,7 +34,8 @@ export const UserKeysListTabFrTranslations: Translations<"fr">["UserKeysListTab"
 export const UserKeysListTabEnTranslations: Translations<"en">["UserKeysListTab"] = {
     no_keys: "You don't have any access keys",
     no_permission_warning: "You have no permissions, it is not possible to add a key",
-    hash_value: ({ value }) => `Hash value : ${value}`,
+    hash_value: "Hash value",
+    unavailable: "Unavailable",
     hash_value_copied: "Hash value copied",
     services: "Accessible services",
     no_services: "This key does not have access to any services",

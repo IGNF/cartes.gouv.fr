@@ -1,44 +1,42 @@
-import { fr, type FrCxArg } from "@codegouvfr/react-dsfr";
+import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
-import { FC, memo } from "react";
+import { FC, memo, ReactNode } from "react";
 import { symToStr } from "tsafe/symToStr";
 import { tss } from "tss-react";
 
-import { useTranslation } from "../../i18n/i18n";
-import { useSnackbarStore } from "../../stores/SnackbarStore";
+import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
+import { useTranslation } from "@/i18n";
 
 type TextCopyToClipboardProps = {
+    label?: string;
     text: string;
-    className?: FrCxArg;
+    title?: string;
+    className?: string;
     successMessage?: string;
     disabled?: boolean;
+    children?: ReactNode;
 };
 
-const TextCopyToClipboard: FC<TextCopyToClipboardProps> = ({ text, successMessage, className, disabled = false }) => {
+const TextCopyToClipboard: FC<TextCopyToClipboardProps> = (props) => {
     const { t: tCommon } = useTranslation("Common");
+    const { children, label, text, title = tCommon("copy_to_clipboard"), successMessage, className, disabled = false } = props;
+    const copy = useCopyToClipboard();
+    const { classes, cx } = useStyles({ disabled });
 
-    const setMessage = useSnackbarStore((state) => state.setMessage);
-
-    const copyToClipboard = async () => {
-        await navigator.clipboard.writeText(text);
-
-        setMessage(successMessage ?? tCommon("url_copied"));
-    };
-
-    const { classes, cx } = useStyles({
-        disabled,
-    });
+    function copyToClipboard() {
+        copy(text, successMessage);
+    }
 
     return (
         <div className={cx(classes.root, className)}>
+            {label && (
+                <span>
+                    <strong>{label}</strong> :
+                </span>
+            )}
             <span className={classes.textBox}>{text}</span>
-            <Button
-                iconId="ri-file-copy-2-line"
-                priority="tertiary no outline"
-                title={tCommon("copy_to_clipboard")}
-                onClick={copyToClipboard}
-                disabled={disabled}
-            />
+            <Button iconId="ri-file-copy-line" priority="tertiary no outline" title={title} onClick={copyToClipboard} disabled={disabled} />
+            {children}
         </div>
     );
 };
@@ -58,10 +56,11 @@ const useStyles = tss
             position: "relative",
             gap: fr.spacing("2v"),
             flexWrap: "nowrap",
+            alignItems: "center",
         },
         textBox: {
             display: "block",
-            width: "100%",
+            flex: "1",
             borderRadius: "0.25rem 0.25rem 0 0",
             color: disabled ? fr.colors.decisions.text.disabled.grey.default : fr.colors.decisions.text.default.grey.default,
             userSelect: disabled ? "none" : "auto",
@@ -69,6 +68,6 @@ const useStyles = tss
             overflow: disabled ? "hidden" : "auto",
             backgroundColor: disabled ? fr.colors.decisions.background.disabled.grey.default : fr.colors.decisions.background.alt.blueFrance.default,
             padding: fr.spacing("2v"),
-            whiteSpace: "nowrap",
+            whiteSpace: "pre",
         },
     }));
