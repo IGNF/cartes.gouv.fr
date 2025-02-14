@@ -1,0 +1,24 @@
+#!/bin/bash
+set -e
+
+# Adapted from docker/php removing folders creation at runtime (requires root)
+# src : https://github.com/docker-library/php/blob/master/8.3/bullseye/apache/apache2-foreground
+source /etc/apache2/envvars
+
+rm -f "$APACHE_PID_FILE"
+
+# Start apache forwarding SIGINT and SIGTERM to SIGWINCH
+APACHE2_PID=""
+function stop_apache()
+{
+	if [ ! -z "$APACHE2_PID" ];
+	then
+		kill -s WINCH $APACHE2_PID
+	fi
+}
+
+trap stop_apache SIGINT SIGTERM SIGWINCH
+
+apache2 -DFOREGROUND "$@" &
+APACHE2_PID=$!
+wait $APACHE2_PID
