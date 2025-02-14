@@ -1,6 +1,8 @@
 /.git
 /.vscode
-/var
+# /var
+/var/data
+/var/log
 /vendor/
 /node_modules/
 /docs
