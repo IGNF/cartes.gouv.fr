@@ -38,3 +38,5 @@ services:
             - "traefik.http.routers.cartesgouvfr.rule=Host(`cartesgouvfr-dev.docker.localhost`)"
             - "traefik.http.routers.cartesgouvfr.entrypoints=websecure"
             - "traefik.http.services.cartesgouvfr.loadbalancer.server.port=8000"
+#
+# alias trivy="docker run -v trivy-cache:/root/.cache/ -v /var/run/docker.sock:/var/run/docker.sock -e HTTP_PROXY=$HTTP_PROXY -e HTTPS_PROXY=$HTTP_PROXY aquasec/trivy"

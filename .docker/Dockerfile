@@ -1,61 +1,132 @@
 #----------------------------------------------------------------------
-# Instructions communes aux env dev et prod
+# Installer les dépendances PHP à partir de composer.json dans une couche dédiée
 #----------------------------------------------------------------------
-FROM php:8.2-apache AS base
+ARG registry=docker.io
+FROM ${registry}/library/composer:latest AS deps_php
 
-RUN rm /etc/apt/preferences.d/no-debian-php
+RUN mkdir -p /opt/cartesgouvfr-site
+WORKDIR /opt/cartesgouvfr-site
+# COPY composer.json composer.lock symfony.lock ./
+# COPY patches ./patches
+# COPY bin ./bin
+COPY . .
+RUN composer install --prefer-dist --no-dev --no-cache --optimize-autoloader --no-progress \
+    && php bin/console cache:clear \
+    && php bin/console assets:install \
+    && composer symfony-routing-dump
+
+# COPY --from=node:20-slim /usr/local/lib/node_modules /usr/local/lib/node_modules
+# COPY --from=node:20-slim /usr/local/bin/node /usr/local/bin/node
+# RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm
+# ENV PATH="$PATH:/usr/local/bin"
+# RUN npm i -g yarn
+
+# RUN yarn install --production --frozen-lockfile \
+#     && yarn build \
+#     && yarn cache clean \
+#     && APP_ENV=prod APP_DEBUG=0 php bin/console cache:clear \
+#     && php bin/console cache:clear
+
+FROM ${registry}/library/node:20-alpine AS deps_nodejs
+RUN mkdir -p /opt/cartesgouvfr-site
+WORKDIR /opt/cartesgouvfr-site
+# COPY . /opt/cartesgouvfr-site
+# COPY . .
+COPY --from=deps_php /opt/cartesgouvfr-site .
+COPY --from=deps_php /opt/cartesgouvfr-site/var var
+COPY --from=deps_php /usr/local/bin/php /usr/local/bin/php
+RUN yarn install --production --frozen-lockfile \
+    && yarn build \
+    && yarn cache clean \
+    && APP_ENV=prod APP_DEBUG=0 php bin/console cache:clear
+# \    && APP_ENV=prod APP_DEBUG=0 php bin/console cache:clear
 
 #----------------------------------------------------------------------
-# Args et vars env
+# Créer l'image de l'application
 #----------------------------------------------------------------------
-# ENV COMPOSER_ALLOW_SUPERUSER=1
+FROM ${registry}/library/ubuntu:24.04 AS prod
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV LANG=fr_FR.UTF-8
 
 #----------------------------------------------------------------------
 # Configurer "fr_FR.UTF-8" comme locale
 # en savoir plus : https://stackoverflow.com/a/41797247
 #----------------------------------------------------------------------
-RUN apt-get -qq update && DEBIAN_FRONTEND=noninteractive apt-get -qq install -y locales \
+RUN apt-get -qq update && DEBIAN_FRONTEND=noninteractive apt-get -qq install --no-install-recommends -y locales \
     && sed -i -e 's/# en_US.UTF-8 UTF-8/fr_FR.UTF-8 UTF-8/' /etc/locale.gen \
     && dpkg-reconfigure --frontend=noninteractive locales \
     && update-locale LANG=fr_FR.UTF-8 \
     && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-ENV LANG=fr_FR.UTF-8
+#----------------------------------------------------------------------
+# Install common tools
+#----------------------------------------------------------------------
+RUN apt-get update \
+    && apt-get install --no-install-recommends -y \
+    unzip zip \
+    curl wget \
+    && rm -rf /var/lib/apt/lists/*
+
+#------------------------------------------------------------------------
+# Configure https://packages.sury.org/php/ to get latests PHP versions
+#------------------------------------------------------------------------
+RUN apt-get update \
+    && apt-get install --no-install-recommends -y gnupg2 software-properties-common \
+    && add-apt-repository -y ppa:ondrej/php \
+    && apt-get remove -y software-properties-common \
+    && rm -rf /var/lib/apt/lists/*
+
 
 #----------------------------------------------------------------------
-# PHP : Configuration & Extensions
+# Install Apache, PHP and its extensions
 #----------------------------------------------------------------------
-COPY .docker/php.ini /usr/local/etc/php/conf.d/app.ini
-RUN pear config-set php_ini /usr/local/etc/php/conf.d/app.ini
+ARG php_version=8.2
+RUN apt-get update \
+    && apt-get install --no-install-recommends -y \
+    apache2 php${php_version} libapache2-mod-php${php_version} \
+    php${php_version}-opcache \
+    php${php_version}-xml \
+    php${php_version}-zip \
+    php${php_version}-curl \
+    php${php_version}-intl \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get -qq update && DEBIAN_FRONTEND=noninteractive apt-get -qq install -y libzip-dev zip libicu-dev libxslt-dev \
-    && docker-php-ext-install zip \
-    && docker-php-ext-configure intl \
-    && docker-php-ext-install intl \
-    && docker-php-ext-install xsl \
-    && docker-php-ext-install opcache \
-    && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-COPY --from=composer /usr/bin/composer /usr/bin/composer
+#------------------------------------------------------------------------
+# Add helper script to start apache
+# (see https://github.com/docker-library/php)
+#------------------------------------------------------------------------
+COPY .docker/apache2-foreground /usr/local/bin/apache2-foreground
+RUN chmod +x /usr/local/bin/apache2-foreground
+
+#------------------------------------------------------------------------
+# Create apache2 repository
+# (see https://github.com/docker-library/php)
+#------------------------------------------------------------------------
+RUN mkdir -p /var/run/apache2 && chown -R www-data:www-data /var/run/apache2 \
+    && mkdir -p /var/lock/apache2 && chown -R www-data:www-data /var/lock/apache2 \
+    && mkdir -p /var/log/apache2 && chown -R www-data:www-data /var/log/apache2
+
+
+#------------------------------------------------------------------------
+# Redirects logs to stdout / stderr
+# (see https://github.com/docker-library/php)
+#------------------------------------------------------------------------
+RUN ln -sfT /dev/stderr "/var/log/apache2/error.log" \
+    && ln -sfT /dev/stdout "/var/log/apache2/access.log" \
+    && ln -sfT /dev/stdout "/var/log/apache2/other_vhosts_access.log" \
+    && chown www-data:www-data /var/log/apache2/*.log
+
 
 #----------------------------------------------------------------------
-# Nodejs : Installation
-# https://github.com/nodejs/docker-node/blob/main/18/bullseye/Dockerfile
-# https://stackoverflow.com/a/63108753
+# Configure PHP
 #----------------------------------------------------------------------
-COPY --from=node:20-slim /usr/local/lib/node_modules /usr/local/lib/node_modules
-COPY --from=node:20-slim /usr/local/bin/node /usr/local/bin/node
-RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm
-RUN npm i -g yarn pnpm npx
-# RUN yarn set version stable
+COPY .docker/php.ini /etc/php/${php_version}/apache2/conf.d/99-app.ini
+COPY .docker/php.ini /etc/php/${php_version}/cli/conf.d/99-app.ini
 
 #----------------------------------------------------------------------
-# Nettoyage Cache APT
-#----------------------------------------------------------------------
-RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-#----------------------------------------------------------------------
-# Configurer apache
+# Configure apache
 #----------------------------------------------------------------------
 COPY .docker/apache-ports.conf /etc/apache2/ports.conf
 COPY .docker/apache-security.conf /etc/apache2/conf-enabled/security.conf
@@ -64,63 +135,20 @@ COPY .docker/apache-vhost.conf /etc/apache2/sites-available/000-default.conf
 RUN a2enmod rewrite remoteip
 
 #----------------------------------------------------------------------
-# cartesgouvfr-site : Installation pour production
+# Install cartesgouvfr-site
 #----------------------------------------------------------------------
-FROM base AS prod
-
-COPY --chown=www-data:www-data . /opt/cartesgouvfr-site
+COPY . /opt/cartesgouvfr-site
 WORKDIR /opt/cartesgouvfr-site
+COPY --from=deps_php /opt/cartesgouvfr-site/vendor vendor
+COPY --from=deps_php /opt/cartesgouvfr-site/public/bundles public/bundles
+COPY --from=deps_nodejs /opt/cartesgouvfr-site/public/build public/build
+RUN APP_ENV=prod APP_DEBUG=0 php bin/console cache:clear
+
+# VOLUME /opt/cartesgouvfr-site/var
+
 USER www-data
 
 ENV APP_ENV=prod
-RUN export APP_ENV=prod \
-    && APP_ENV=prod composer install --prefer-dist --no-dev --no-cache --optimize-autoloader --no-progress \
-    && APP_ENV=prod APP_DEBUG=0 php bin/console cache:clear \
-    && php bin/console assets:install \
-    && composer symfony-routing-dump
-
-RUN yarn install --production --frozen-lockfile \
-    && yarn build \
-    && yarn cache clean \
-    && APP_ENV=prod APP_DEBUG=0 php bin/console cache:clear \
-    && rm -rf node_modules
 
 EXPOSE 8000
-
-#----------------------------------------------------------------------
-# cartesgouvfr-site : Installation pour developpement
-#----------------------------------------------------------------------
-FROM base AS dev
-
-RUN if [ "${http_proxy}" != "" ]; then \
-    pear config-set http_proxy ${http_proxy} \
-    ;fi
-
-RUN pecl install xdebug \
-    && docker-php-ext-enable xdebug \
-    && echo "xdebug.mode=debug" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
-    && echo "xdebug.client_host=host.docker.internal" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-
-#----------------------------------------------------------------------
-# Installation de divers outils dév
-#----------------------------------------------------------------------
-RUN apt-get -qq update \
-    && DEBIAN_FRONTEND=noninteractive apt-get -qq install -y lsb-release gnupg2 wget curl vim git \
-    && echo "deb https://packages.sury.org/php/ $(lsb_release -cs) main" > /etc/apt/sources.list.d/php.list \
-    && curl -sS https://packages.sury.org/php/apt.gpg | apt-key add - \
-    && apt-get -qq update \
-    && DEBIAN_FRONTEND=noninteractive apt-get -qq install -y \
-    unzip \
-    make \
-    php-dev \
-    zip \
-    && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-VOLUME [ "/opt/cartesgouvfr-site" ]
-WORKDIR /opt/cartesgouvfr-site
-
-RUN chown -R www-data .
-EXPOSE 8000
-
-RUN useradd -ms /bin/bash dev_user
-USER dev_user
+CMD [ "/bin/bash", "apache2-foreground" ]
