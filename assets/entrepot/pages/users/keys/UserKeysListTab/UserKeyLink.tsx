@@ -6,7 +6,7 @@ import { PermissionWithOfferingsDetailsResponseDto } from "../../../../../@types
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { useTranslation } from "../../../../../i18n/i18n";
-import { useSnackbarStore } from "../../../../../stores/SnackbarStore";
+import TextCopyToClipboard from "@/components/Utils/TextCopyToClipboard";
 
 type UserKeyLinkProps = {
     permissionId: string;
@@ -16,8 +16,6 @@ type UserKeyLinkProps = {
 
 const UserKeyLink: FC<UserKeyLinkProps> = ({ permissionId, hash, offeringId }) => {
     const { t: tCommon } = useTranslation("Common");
-
-    const setMessage = useSnackbarStore((state) => state.setMessage);
 
     const { data: permission } = useQuery<PermissionWithOfferingsDetailsResponseDto>({
         queryKey: RQKeys.get_permission(permissionId),
@@ -38,54 +36,26 @@ const UserKeyLink: FC<UserKeyLinkProps> = ({ permissionId, hash, offeringId }) =
         return (
             <div className={fr.cx("fr-mb-3v")}>
                 {wmtsCapabilitiesUrl && (
-                    <>
-                        <span className={fr.cx("fr-hint-text")}>WMTS</span>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-1v")}>
-                            <input className={fr.cx("fr-input", "fr-col-6")} type="text" value={wmtsCapabilitiesUrl} readOnly />
-                            <Button
-                                className={fr.cx("fr-ml-2v", "fr-col-3")}
-                                title={tCommon("copy")}
-                                priority={"tertiary no outline"}
-                                iconId={"ri-file-copy-2-line"}
-                                onClick={async () => {
-                                    await navigator.clipboard.writeText(wmtsCapabilitiesUrl);
-                                    setMessage(tCommon("url_copied"));
-                                }}
-                            />
-                            <Button
-                                className={fr.cx("fr-ml-2v", "fr-col-3")}
-                                title={tCommon("new_window")}
-                                priority="tertiary no outline"
-                                iconId={"fr-icon-external-link-line"}
-                                linkProps={{ href: wmtsCapabilitiesUrl, target: "_blank", rel: "noreferrer" }}
-                            />
-                        </div>
-                    </>
+                    <TextCopyToClipboard className={fr.cx("fr-mb-4v")} label="WMTS" text={wmtsCapabilitiesUrl} successMessage={tCommon("url_copied")}>
+                        <Button
+                            className={fr.cx("fr-ml-2v", "fr-col-3")}
+                            title={tCommon("new_window")}
+                            priority="tertiary no outline"
+                            iconId={"fr-icon-external-link-line"}
+                            linkProps={{ href: wmtsCapabilitiesUrl, target: "_blank", rel: "noreferrer" }}
+                        />
+                    </TextCopyToClipboard>
                 )}
                 {tmsCapabilitiesUrl && (
-                    <>
-                        <span className={fr.cx("fr-hint-text")}>TMS</span>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <input className={fr.cx("fr-input", "fr-col-6")} type="text" value={tmsCapabilitiesUrl} readOnly />
-                            <Button
-                                className={fr.cx("fr-ml-2v", "fr-col-3")}
-                                title={tCommon("copy")}
-                                priority={"tertiary no outline"}
-                                iconId={"ri-file-copy-2-line"}
-                                onClick={async () => {
-                                    await navigator.clipboard.writeText(tmsCapabilitiesUrl);
-                                    setMessage(tCommon("url_copied"));
-                                }}
-                            />
-                            <Button
-                                className={fr.cx("fr-ml-2v", "fr-col-3")}
-                                title={tCommon("new_window")}
-                                priority="tertiary no outline"
-                                iconId={"fr-icon-external-link-line"}
-                                linkProps={{ href: tmsCapabilitiesUrl, target: "_blank", rel: "noreferrer" }}
-                            />
-                        </div>
-                    </>
+                    <TextCopyToClipboard label="TMS" text={tmsCapabilitiesUrl} successMessage={tCommon("url_copied")}>
+                        <Button
+                            className={fr.cx("fr-ml-2v", "fr-col-3")}
+                            title={tCommon("new_window")}
+                            priority="tertiary no outline"
+                            iconId={"fr-icon-external-link-line"}
+                            linkProps={{ href: tmsCapabilitiesUrl, target: "_blank", rel: "noreferrer" }}
+                        />
+                    </TextCopyToClipboard>
                 )}
             </div>
         );
@@ -102,18 +72,7 @@ const UserKeyLink: FC<UserKeyLinkProps> = ({ permissionId, hash, offeringId }) =
         const capabilitiesUrl = `${rootUrl}?service=${service}&version=${version}&request=GetCapabilities&apikey=${hash}`;
 
         return (
-            <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mt-2v")}>
-                <input className={fr.cx("fr-input", "fr-col-6")} type="text" value={capabilitiesUrl} readOnly />
-                <Button
-                    className={fr.cx("fr-ml-2v", "fr-col-3")}
-                    title={tCommon("copy")}
-                    priority={"tertiary no outline"}
-                    iconId={"ri-file-copy-2-line"}
-                    onClick={async () => {
-                        await navigator.clipboard.writeText(capabilitiesUrl);
-                        setMessage(tCommon("url_copied"));
-                    }}
-                />
+            <TextCopyToClipboard className={fr.cx("fr-mb-4v")} text={capabilitiesUrl} successMessage={tCommon("url_copied")}>
                 <Button
                     className={fr.cx("fr-ml-2v", "fr-col-3")}
                     title={tCommon("new_window")}
@@ -121,7 +80,7 @@ const UserKeyLink: FC<UserKeyLinkProps> = ({ permissionId, hash, offeringId }) =
                     iconId={"fr-icon-external-link-line"}
                     linkProps={{ href: capabilitiesUrl, target: "_blank", rel: "noreferrer" }}
                 />
-            </div>
+            </TextCopyToClipboard>
         );
     }
 };
