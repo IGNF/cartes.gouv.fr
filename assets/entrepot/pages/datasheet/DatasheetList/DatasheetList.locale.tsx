@@ -21,6 +21,7 @@ const { i18n } = declareComponentKeys<
     | "sort_label"
     | "sort_placeholder"
     | { K: "sort_option"; P: { sort: SortByEnum; sortOrder: SortOrderEnum }; R: string }
+    | "view"
 >()("DatasheetList");
 export type I18n = typeof i18n;
 
@@ -35,7 +36,7 @@ export const DatasheetListFrTranslations: Translations<"fr">["DatasheetList"] = 
         "Cet espace permet de tester les fonctions d’alimentation et de diffusion de la Géoplateforme. Les services publiés dans cet espace ne sont pas visibles sur le catalogue.",
     refresh_datasheet_list: "Rafraîchir",
     last_refresh_date: ({ dataUpdatedAt }) => `Données mises à jour le ${formatDateFromISO(new Date(dataUpdatedAt).toISOString())}`,
-    nb_results: ({ nb }) => `(${nb}) résultats`,
+    nb_results: ({ nb }) => `${nb} résultats`,
     filter_label: "Filtrer",
     filter_option: ({ filter }) => {
         switch (filter) {
@@ -61,6 +62,7 @@ export const DatasheetListFrTranslations: Translations<"fr">["DatasheetList"] = 
                 return "Tri inconnu";
         }
     },
+    view: "Consulter",
 };
 
 export const DatasheetListEnTranslations: Translations<"en">["DatasheetList"] = {
@@ -79,4 +81,5 @@ export const DatasheetListEnTranslations: Translations<"en">["DatasheetList"] = 
     sort_label: undefined,
     sort_placeholder: undefined,
     sort_option: undefined,
+    view: undefined,
 };

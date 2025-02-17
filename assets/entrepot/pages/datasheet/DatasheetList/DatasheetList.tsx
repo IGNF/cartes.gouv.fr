@@ -4,12 +4,13 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Highlight from "@codegouvfr/react-dsfr/Highlight";
 import Pagination from "@codegouvfr/react-dsfr/Pagination";
+import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import SearchBar from "@codegouvfr/react-dsfr/SearchBar";
 import SelectNext from "@codegouvfr/react-dsfr/SelectNext";
 import { useQuery } from "@tanstack/react-query";
 import { FC, useMemo, useState } from "react";
+import { useStyles } from "tss-react";
 
-import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { Datasheet, EndpointTypeEnum } from "../../../../@types/app";
 import Main from "../../../../components/Layout/Main";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
@@ -93,48 +94,66 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
 
     const datasheetList = getSortedList(getFilteredList(datasheetListQuery.data ?? [], filters, searchDatasheetName), sort);
 
+    const { css } = useStyles();
+
     return (
         <Main title={t("title", { datastoreName: datastore?.name })}>
             <div className={fr.cx("fr-grid-row")}>
-                <div className={fr.cx("fr-col-12")}>
+                <div className={fr.cx("fr-col-12", "fr-col-lg-8")}>
                     <h1>
                         {t("title", { datastoreName: datastore?.name })}
                         {(isFetching || datasheetListQuery?.isFetching) && <LoadingIcon className={fr.cx("fr-ml-2w")} largeIcon={true} />}
                     </h1>
                     {datastore?.is_sandbox === true && <Highlight>{t("sandbox_datastore_explanation") ?? ""}</Highlight>}
                 </div>
+                <div
+                    className={fr.cx("fr-col-12", "fr-col-lg-4", "fr-col--top")}
+                    style={{
+                        display: "flex",
+                        alignItems: "center",
+                    }}
+                >
+                    {/* on attend de savoir si création de nouvelle fiche possible ou pas avant d'afficher le ou les boutons */}
+                    {metadataEndpoint && !datasheetCreationImpossible && (
+                        <div
+                            className={css({
+                                marginLeft: "inherit",
+                                [fr.breakpoints.up("lg")]: {
+                                    marginLeft: "auto",
+                                },
+                            })}
+                        >
+                            <ButtonsGroup
+                                buttons={[
+                                    {
+                                        children: t("create_datasheet"),
+                                        linkProps: datasheetCreationImpossible
+                                            ? { href: undefined, "aria-hidden": true }
+                                            : routes.datastore_datasheet_upload({ datastoreId: datastoreId }).link,
+                                        iconId: "fr-icon-add-line",
+                                        className: fr.cx(datasheetCreationImpossible && "fr-hidden"),
+                                    },
+                                ]}
+                                inlineLayoutWhen="sm and up"
+                            />
+                        </div>
+                    )}
+                </div>
             </div>
 
-            {/* on attend de savoir si création de nouvelle possible ou pas avant d'afficher les boutons */}
-            {metadataEndpoint && (
-                <>
-                    {datasheetCreationImpossible && (
-                        <Alert severity="warning" title={t("datasheet_creation_impossible")} description={t("metadata_endpoint_quota_reached")} />
-                    )}
-
-                    <div className={fr.cx("fr-grid-row", "fr-mt-4v")}>
-                        <ButtonsGroup
-                            buttons={[
-                                {
-                                    children: t("create_datasheet"),
-                                    linkProps: datasheetCreationImpossible
-                                        ? { href: undefined, "aria-hidden": true }
-                                        : routes.datastore_datasheet_upload({ datastoreId: datastoreId }).link,
-                                    iconId: "fr-icon-add-line",
-                                    className: fr.cx(datasheetCreationImpossible && "fr-hidden"),
-                                },
-                            ]}
-                            inlineLayoutWhen="sm and up"
-                        />
+            {metadataEndpoint && datasheetCreationImpossible && (
+                <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
+                    <div className={fr.cx("fr-col")}>
+                        <Alert severity="warning" title={t("datasheet_creation_impossible")} as="h2" description={t("metadata_endpoint_quota_reached")} />
                     </div>
-                </>
+                </div>
             )}
 
             {datasheetListQuery.data === undefined ? (
                 <Skeleton count={12} rectangleHeight={100} />
             ) : (
                 <>
-                    <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
+                    <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mt-2v")}>
                         <div className={fr.cx("fr-col-12", "fr-col-md-8", "fr-col-offset-md-2")}>
                             <SearchBar
                                 label={tCommon("search")}
@@ -151,7 +170,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mt-2v")}>
                         <div className={fr.cx("fr-col-12", "fr-col-sm")}>
                             <RadioButtons
-                                legend={t("filter_label")}
+                                legend={<h2 className={fr.cx("fr-h5")}>{t("filter_label")}</h2>}
                                 options={[
                                     {
                                         label: t("filter_option", { filter: FilterEnum.ALL }),
@@ -192,7 +211,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                         </div>
                         <div className={fr.cx("fr-col-12", "fr-col-sm")}>
                             <SelectNext
-                                label={t("sort_label")}
+                                label={<h2 className={fr.cx("fr-h5")}>{t("sort_label")}</h2>}
                                 options={[
                                     {
                                         label: t("sort_option", { sort: SortByEnum.NAME, sortOrder: SortOrderEnum.ASCENDING }),
@@ -236,7 +255,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                                 alignItems: "center",
                             }}
                         >
-                            <span className={fr.cx("fr-text--sm", "fr-mb-0")}>{t("nb_results", { nb: datasheetList.length })}</span>
+                            <h2 className={fr.cx("fr-text--sm", "fr-mb-0")}>{t("nb_results", { nb: datasheetList.length })}</h2>
                             <span
                                 className={fr.cx("fr-text--sm", "fr-mb-0", "fr-mr-2v")}
                                 style={{
@@ -254,12 +273,13 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                                 }}
                                 disabled={datasheetListQuery.isFetching}
                                 size="small"
+                                className={datasheetListQuery.isFetching ? "frx-icon-spin" : ""}
                             />
                         </div>
                     </div>
 
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mt-4v")}>
-                        <div className={fr.cx("fr-col-12")}>
+                        <div className={fr.cx("fr-col")}>
                             {datasheetList
                                 ?.slice((pagination.page - 1) * pagination.limit, pagination.page * pagination.limit)
                                 .map((datasheet: Datasheet) => <DatasheetListItem key={datasheet.name} datastoreId={datastoreId} datasheet={datasheet} />)}
