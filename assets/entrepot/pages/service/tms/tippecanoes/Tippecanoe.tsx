@@ -3,9 +3,8 @@ import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { FC } from "react";
 import { UseFormReturn } from "react-hook-form";
 
-import tippecanoes from "../../../../../data/tippecanoe.json";
+import tippecanoeOptions from "@/data/tippecanoe_options";
 import { useTranslation } from "../../../../../i18n";
-import { appRoot } from "../../../../../router/router";
 import RichLabel from "./RichLabel";
 
 import "../../../../../sass/components/tippecanoe.scss";
@@ -27,8 +26,8 @@ const TippeCanoe: FC<TippeCanoeProps> = ({ visible, form, state, stateRelatedMes
             <div className={fr.cx("fr-col-12", "fr-col-md-6")}>
                 <RadioButtons
                     legend={t("step_generalisation.tippecanoe_option.label")}
-                    options={Object.values(tippecanoes).map((tpc) => ({
-                        label: <RichLabel label={tpc.label} image={`${appRoot}/${tpc.image}`} />,
+                    options={Object.values(tippecanoeOptions).map((tpc) => ({
+                        label: <RichLabel label={tpc.label} image={tpc.image} />,
                         hintText: tpc.explain,
                         nativeInputProps: {
                             ...register("tippecanoe"),
