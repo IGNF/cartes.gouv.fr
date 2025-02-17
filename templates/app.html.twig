@@ -1,14 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-    <div id="root" data-app-root="{{ app_root }}" data-app-env="{{ app.request.server.get('APP_ENV') }}" data-site-title="cartes.gouv.fr"></div>
-
-    {# variable globale twig avec l'url de l'espace collaboratif et celle du catalogue #}
-    <div id="app_env"
-        {% if api_espaceco_url is defined and api_espaceco_url is not empty %}data-espaceco-url="{{ api_espaceco_url }}"{% endif %}
-        {% if catalogue_url is defined and catalogue_url is not empty %}data-catalogue-url="{{ catalogue_url }}"{% endif %}
-        >
-    </div>
+    <div id="root" data-site-title="cartes.gouv.fr"></div>
 
     {% if app.user is defined and app.user is not null %}
         <div id="user" data-user="{{ app.user|serialize('json') }}"></div>
