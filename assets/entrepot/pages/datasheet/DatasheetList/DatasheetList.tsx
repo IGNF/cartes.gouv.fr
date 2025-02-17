@@ -21,6 +21,9 @@ import { routes, useRoute } from "../../../../router/router";
 import api from "../../../api";
 import { FilterEnum, Sort, SortByEnum, SortOrderEnum } from "./DatasheetList.types";
 import DatasheetListItem from "./DatasheetListItem";
+import ToggleSwitch from "@codegouvfr/react-dsfr/ToggleSwitch";
+import { useToggle } from "usehooks-ts";
+import DatasheetListItemOld from "./DatasheetListItemOld";
 
 const getFilteredList = (list: Datasheet[], filters: FilterEnum[], filterName?: string) => {
     if (filterName) {
@@ -92,6 +95,8 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
     const [sort, setSort] = useState<Sort>({ by: SortByEnum.NAME, order: SortOrderEnum.ASCENDING });
 
     const datasheetList = getSortedList(getFilteredList(datasheetListQuery.data ?? [], filters, searchDatasheetName), sort);
+
+    const [showCard, toggleShowCard] = useToggle(true);
 
     return (
         <Main title={t("title", { datastoreName: datastore?.name })}>
@@ -254,15 +259,24 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                                 }}
                                 disabled={datasheetListQuery.isFetching}
                                 size="small"
+                                className={datasheetListQuery.isFetching ? "frx-icon-spin" : ""}
                             />
                         </div>
                     </div>
 
+                    <ToggleSwitch label={"Utiliser Card"} checked={showCard} onChange={() => toggleShowCard()} />
+
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mt-4v")}>
-                        <div className={fr.cx("fr-col-12")}>
+                        <div className={fr.cx("fr-col")}>
                             {datasheetList
                                 ?.slice((pagination.page - 1) * pagination.limit, pagination.page * pagination.limit)
-                                .map((datasheet: Datasheet) => <DatasheetListItem key={datasheet.name} datastoreId={datastoreId} datasheet={datasheet} />)}
+                                .map((datasheet: Datasheet) =>
+                                    showCard ? (
+                                        <DatasheetListItem key={datasheet.name} datastoreId={datastoreId} datasheet={datasheet} />
+                                    ) : (
+                                        <DatasheetListItemOld key={datasheet.name} datastoreId={datastoreId} datasheet={datasheet} />
+                                    )
+                                )}
 
                             <div className={fr.cx("fr-grid-row", "fr-grid-row--center", "fr-mt-6v")}>
                                 <Pagination
