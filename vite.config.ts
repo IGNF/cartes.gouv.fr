@@ -1,15 +1,10 @@
 import react from "@vitejs/plugin-react";
 import autoprefixer from "autoprefixer";
 import { configDotenv } from "dotenv";
-import { dirname, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
-import process from "process";
+import { join, resolve } from "path";
 import { defineConfig } from "vite";
 import run from "vite-plugin-run";
 import symfonyPlugin from "vite-plugin-symfony";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 configDotenv({
     path: [resolve(__dirname, ".env.local")],

@@ -76,7 +76,8 @@ ENV APP_ENV=prod
 RUN export APP_ENV=prod \
     && APP_ENV=prod composer install --prefer-dist --no-dev --no-cache --optimize-autoloader --no-progress \
     && APP_ENV=prod APP_DEBUG=0 php bin/console cache:clear \
-    && php bin/console assets:install
+    && php bin/console assets:install \
+    && composer symfony-routing-dump
 
 RUN yarn install --production --frozen-lockfile \
     && yarn build \
