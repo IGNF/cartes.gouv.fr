@@ -7,7 +7,7 @@ const getProjFromEpsg = (srid: string) => {
             message: `${srid} n'est pas une projection EPSG valide`,
         });
 
-    return jsonFetch<{ [key: string]: string }>(`https://epsg.io/${match[1]}.json`, undefined, undefined, false, false);
+    return jsonFetch<{ [key: string]: string }>(`https://spatialreference.org/ref/epsg/${match[1]}/projjson.json`, undefined, undefined, false, false);
 };
 
 const epsg = {
