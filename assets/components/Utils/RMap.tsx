@@ -138,7 +138,7 @@ const RMap: FC<RMapProps> = ({ initial, currentStyle }) => {
                             active: true,
                             hidden: true,
                         },
-                        position: "bottom-right",
+                        position: "top-right",
                     })
                 );
             }
