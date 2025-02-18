@@ -20,7 +20,6 @@ export default defineConfig({
         // Required to listen on all interfaces
         host: "0.0.0.0",
         cors: true,
-        force: true,
     },
     plugins: [
         react(), // if you're using React

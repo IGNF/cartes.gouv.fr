@@ -75,7 +75,7 @@
     },
     "scripts": {
         "dev": "yarn prebuild && vite",
-        "build": "tsc --noEmit && vite build",
+        "build": "tsc -b && vite build",
         "build:dev": "yarn prebuild && tsc --noEmit && cross-env NODE_ENV=development vite build --mode development",
         "prebuild": "yarn clean && react-dsfr update-icons",
         "clean": "rm -rf public/build",
