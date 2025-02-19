@@ -8,7 +8,7 @@ import { CommunityFormMode, ZoomAndCenteringFormType } from "../../../../@types/
 import { CommunityResponseDTO } from "../../../../@types/espaceco";
 import ZoomRange from "../../../../components/Utils/ZoomRange";
 import { useTranslation } from "../../../../i18n/i18n";
-import { getDefaultValues } from "../DefaultValues";
+import { getZoomAndCenteringDefaultValues } from "../DefaultValues";
 import { COMMUNITY_FORM_STEPS } from "../FormSteps";
 import ActionButtons from "./ActionButtons";
 import DisplayExtent from "./ZoomAndCentering/DisplayExtent";
@@ -32,7 +32,7 @@ const ZoomAndCentering: FC<ZoomAndCenteringProps> = ({ mode, community, onPrevio
 
     const form = useForm<ZoomAndCenteringFormType>({
         mode: "onSubmit",
-        values: getDefaultValues(community, COMMUNITY_FORM_STEPS.ZOOM_AND_CENTERING) as ZoomAndCenteringFormType,
+        values: getZoomAndCenteringDefaultValues(community),
     });
     const { watch, getValues: getFormValues, setValue: setFormValue, handleSubmit } = form;
 

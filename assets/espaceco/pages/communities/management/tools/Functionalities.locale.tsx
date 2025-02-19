@@ -1,84 +1,102 @@
-import { MeasureToolsType, NavigationToolsType, OtherToolsType, ReportToolsType } from "../../../../../@types/app_espaceco";
-import { declareComponentKeys } from "../../../../../i18n/i18n";
-import { Translations } from "../../../../../i18n/types";
+import { DisplayToolsType, MeasureToolsType, NavigationToolsType, ReportToolsType } from "@/@types/app_espaceco";
+import { declareComponentKeys } from "@/i18n/i18n";
+import { Translations } from "@/i18n/types";
 
 const { i18n } = declareComponentKeys<
     | "simple_tools_title"
-    | "direct_contribution_tools"
+    | "display_tools"
+    | { K: "tools_label"; P: { tool: DisplayToolsType | NavigationToolsType | MeasureToolsType | ReportToolsType }; R: string }
     | "navigation_tools"
-    | { K: "navigation_tools_label"; P: { tool: NavigationToolsType }; R: string }
-    | "other_tools"
-    | { K: "other_tools_label"; P: { tool: OtherToolsType }; R: string }
     | "report_tools"
-    | { K: "report_tools_label"; P: { tool: ReportToolsType }; R: string }
     | "measure_tools"
-    | { K: "measure_tools_label"; P: { tool: MeasureToolsType }; R: string }
-    | "loading_layers"
 >()("Functionalities");
 export type I18n = typeof i18n;
 
 export const FunctionalitiesFrTranslations: Translations<"fr">["Functionalities"] = {
     simple_tools_title: "Définir les outils simples",
-    direct_contribution_tools: "Définir les outils de contribution directe liés aux base de données",
-    navigation_tools: "Outils de navigation",
-    navigation_tools_label: ({ tool }) => {
+    display_tools: "Affichage",
+    tools_label: ({ tool }) => {
         switch (tool) {
-            case "savePositions":
-                return "Sauvegarder les positions préférées";
-            case "locateControl":
-                return "Se localiser";
-            case "zoomControl":
+            case "zoom_control":
                 return "Afficher les boutons de zoom";
-            case "rotateControl":
-                return "Rotation de la carte";
-            case "overviewMapControl":
+            case "rotate_control":
+                return "Pivoter une carte";
+            case "overviewmap_control":
                 return "Afficher une carte de localisation";
-            case "searchAddress":
-                return "Recherche de lieu ou d'adresse";
-            case "searchLonlat":
-                return "Se centrer sur des coordonnées";
-        }
-    },
-    other_tools: "Autres outils",
-    other_tools_label: ({ tool }) => {
-        switch (tool) {
+            case "print":
+                return "Imprimer en PDF/PNG";
+            case "search_address":
+                return "Rechercher un lieu ou une adresse";
+            case "search_lonlat":
+                return "Rechercher par coordonnées";
+            case "locate_control":
+                return "Se localiser";
             case "search":
                 return "Rechercher par attributs";
-            case "print":
-                return "Impression PDF/PNG";
-        }
-    },
-    report_tools: "Outils de signalement",
-    report_tools_label: ({ tool }) => {
-        switch (tool) {
+            case "save_positions":
+                return "Sauvegarder les positions préférées";
+            case "measure_distance":
+                return "Mesurer une distance";
+            case "measure_area":
+                return "Mesurer une surface";
+            case "measure_azimut":
+                return "Mesurer un azimut";
             case "georem":
                 return "Soumettre un signalement";
         }
     },
-    measure_tools: "Outils de mesure",
-    measure_tools_label: ({ tool }) => {
+    /* display_tools_label: ({ tool }) => {
         switch (tool) {
-            case "measureDistance":
+            case "zoom_control":
+                return "Afficher les boutons de zoom";
+            case "rotate_control":
+                return "Rotation de la carte";
+            case "overviewmap_control":
+                return "Afficher une carte de localisation";
+            case "print":
+                return "Impression PDF/PNG";
+        }
+    },*/
+    navigation_tools: "Navigation",
+    /* navigation_tools_label: ({ tool }) => {
+        switch (tool) {
+            case "search_address":
+                return "Recherche de lieu ou d'adresse";
+            case "search_lonlat":
+                return "Recherche par coordonnées";
+            case "locate_control":
+                return "Se localiser";
+            case "search":
+                return "Rechercher par attributs";
+            case "save_positions":
+                return "Sauvegarder les positions préférées";
+        }
+    }, */
+    report_tools: "Signalement",
+    /* report_tools_label: ({ tool }) => {
+        switch (tool) {
+            case "georem":
+                return "Soumettre un signalement";
+        }
+    }, */
+    measure_tools: "Mesure",
+    /* measure_tools_label: ({ tool }) => {
+        switch (tool) {
+            case "measure_distance":
                 return "Mesurer une distance";
-            case "measureArea":
+            case "measure_area":
                 return "Mesurer une surface";
-            case "measureAzimut":
+            case "measure_azimut":
                 return "Mesurer un azimut";
         }
-    },
-    loading_layers: "Recherche des couches associées à des tables ...",
+    }, */
 };
 
 export const FunctionalitiesEnTranslations: Translations<"en">["Functionalities"] = {
     simple_tools_title: undefined,
-    direct_contribution_tools: undefined,
+    display_tools: undefined,
     navigation_tools: undefined,
-    navigation_tools_label: ({ tool }) => `${tool}`,
-    other_tools: undefined,
-    other_tools_label: ({ tool }) => `${tool}`,
+    tools_label: ({ tool }) => `${tool}`,
     report_tools: undefined,
-    report_tools_label: ({ tool }) => `${tool}`,
     measure_tools: undefined,
-    measure_tools_label: ({ tool }) => `${tool}`,
-    loading_layers: undefined,
 };

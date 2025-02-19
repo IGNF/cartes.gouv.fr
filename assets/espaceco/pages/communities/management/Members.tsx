@@ -23,6 +23,9 @@ import api from "../../../api";
 import { AddMembersDialog, AddMembersDialogModal } from "./member/AddMembersDialog";
 import { ManageGridsDialog, ManageGridsDialogModal } from "./member/ManageGridsDialog";
 
+import "../../../../sass/pages/espaceco/member.scss";
+import { cx } from "@codegouvfr/react-dsfr/tools/cx";
+
 export type membersQueryParams = {
     page: number;
     limit: number;
@@ -171,51 +174,73 @@ const Members: FC<MembersProps> = ({ community }) => {
     const memberData: ReactNode[][] = useMemo(() => {
         const datas = membersQuery.data?.content ?? [];
         return (
-            datas.map((m) => [
-                m.username,
-                getName(m.firstname, m.surname),
-                <Select
-                    label={null}
-                    key={m.user_id}
-                    nativeSelectProps={{
-                        name: `role-${uuidv4()}`,
-                        onChange: (e) => {
-                            const value = e.currentTarget.value;
-                            updateRoleMutation.mutate({ communityId: community.id, userId: m.user_id, role: value as Role });
-                        },
-                        value: m.role,
-                    }}
-                >
-                    {["member", "admin"].map((r) => (
-                        <option key={r} value={r}>
-                            {t("role", { role: r as Role })}
-                        </option>
-                    ))}
-                </Select>,
-                <Button
-                    key={m.user_id}
-                    title={t("manage_grids")}
-                    priority={"secondary"}
-                    onClick={() => {
-                        setCurrentMember(m);
-                        ManageGridsDialogModal.open();
-                    }}
-                >
-                    {t("manage_grids")}
-                </Button>,
-                <div key={m.user_id} className={fr.cx("fr-grid-row", "fr-grid-row--right")}>
-                    <Button
-                        title={t("remove_title")}
-                        priority={"tertiary no outline"}
-                        iconId={"fr-icon-delete-line"}
-                        onClick={() => {
-                            setAction("remove");
-                            setCurrentMember(m);
-                            ConfirmDialogModal.open();
+            datas.map((m) => {
+                const grids = m.grids.map((grid) => grid.name).join(", ");
+
+                return [
+                    m.username,
+                    getName(m.firstname, m.surname),
+                    <Select
+                        label={null}
+                        key={m.user_id}
+                        nativeSelectProps={{
+                            name: `role-${uuidv4()}`,
+                            onChange: (e) => {
+                                const value = e.currentTarget.value;
+                                updateRoleMutation.mutate({ communityId: community.id, userId: m.user_id, role: value as Role });
+                            },
+                            value: m.role,
                         }}
-                    />
-                </div>,
-            ]) ?? []
+                    >
+                        {["member", "admin"].map((r) => (
+                            <option key={r} value={r}>
+                                {t("role", { role: r as Role })}
+                            </option>
+                        ))}
+                    </Select>,
+                    <div key={m.user_id} className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
+                        <div className={cx(fr.cx("fr-col-10"), "frx-member-grids")} title={grids}>
+                            {grids}
+                        </div>
+                        <div className={fr.cx("fr-col-2")}>
+                            <Button
+                                key={m.user_id}
+                                title={t("manage_grids")}
+                                priority={"secondary"}
+                                onClick={() => {
+                                    setCurrentMember(m);
+                                    ManageGridsDialogModal.open();
+                                }}
+                            >
+                                {t("manage_grids")}
+                            </Button>
+                        </div>
+                    </div>,
+                    /*                     <Button
+                        key={m.user_id}
+                        title={t("manage_grids")}
+                        priority={"secondary"}
+                        onClick={() => {
+                            setCurrentMember(m);
+                            ManageGridsDialogModal.open();
+                        }}
+                    >
+                        {t("manage_grids")}
+                    </Button>, */
+                    <div key={m.user_id} className={fr.cx("fr-grid-row", "fr-grid-row--right")}>
+                        <Button
+                            title={t("remove_title")}
+                            priority={"tertiary no outline"}
+                            iconId={"fr-icon-delete-line"}
+                            onClick={() => {
+                                setAction("remove");
+                                setCurrentMember(m);
+                                ConfirmDialogModal.open();
+                            }}
+                        />
+                    </div>,
+                ];
+            }) ?? []
         );
     }, [community, t, membersQuery.data, updateRoleMutation]);
 
@@ -287,13 +312,13 @@ const Members: FC<MembersProps> = ({ community }) => {
             )}
             {membersQuery.data?.content && membersQuery.data.content.length > 0 && (
                 <div>
-                    <div className={fr.cx("fr-grid-row", "fr-grid-row--right")}>
+                    <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-mb-2v")}>
                         <Button iconId="fr-icon-add-circle-line" onClick={() => AddMembersDialogModal.open()}>
                             {t("invite")}
                         </Button>
                     </div>
                     <Table headers={headers} data={memberData} fixed />
-                    <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
+                    <div className={fr.cx("fr-grid-row", "fr-grid-row--center", "fr-mt-2v")}>
                         <MuiDsfrThemeProvider>
                             <Pagination
                                 count={membersQuery.data.totalPages}

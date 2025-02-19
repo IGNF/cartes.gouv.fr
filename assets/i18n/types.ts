@@ -66,6 +66,7 @@ export type ComponentKey =
     | import("../espaceco/pages/communities/management/ManageCommunityValidations.locale").I18n
     | import("../espaceco/pages/communities/management/Search.locale").I18n
     | import("../espaceco/pages/communities/management/tools/Functionalities.locale").I18n
+    | import("../espaceco/pages/communities/management/tools/LayerTools.locale").I18n
     | import("../espaceco/pages/communities/management/Reports.locale").I18n
     | import("../espaceco/pages/communities/management/reports/Theme.locale").I18n
     | import("../espaceco/pages/communities/management/reports/ReportStatuses.locale").I18n

@@ -103,12 +103,14 @@ class CommunityApiService extends BaseEspaceCoApiService
         $nextPage = $page + 1 > $totalPages ? null : $page + 1;
 
         $members = $response['content'];
+        $gridsRequested = [];
+
         foreach ($members as &$member) {
             $user = $this->userApiService->getUser($member['user_id'], ['fields' => ['username', 'firstname', 'surname']]);
             $member = array_merge($member, $user);
 
             // Ajout des grids
-            $member['grids'] = $this->_transformGrids($member['grids']);
+            $member['grids'] = $this->_transformGrids($member['grids'], $gridsRequested);
         }
 
         usort($members, function ($mb1, $mb2) {
@@ -159,16 +161,30 @@ class CommunityApiService extends BaseEspaceCoApiService
 
     /**
      * @param array<string> $grids
+     * @param array<mixed>  $gridsRequested
      */
-    private function _transformGrids(array $grids): array
+    private function _transformGrids(array $grids, array &$gridsRequested = []): array
     {
         $result = [];
+        $gridsForMember = [];
         foreach ($grids as $name) {
-            $grid = $this->gridApiService->getGrid($name);
-            if (!$grid['deleted']) {
-                $grids[] = $grid;
+            $grid = null;
+            if (array_key_exists($name, $gridsRequested)) {
+                $grid = $gridsRequested[$name];
+            } else {
+                $g = $this->gridApiService->getGrid($name);
+                if (!$g['deleted']) {
+                    $grid = $g;
+                }
+            }
+
+            if (!is_null($grid)) {
+                $result[] = $grid;
+                $gridsForMember[$name] = $grid;
             }
         }
+
+        $gridsRequested = $gridsRequested + $gridsForMember;
 
         return $result;
     }

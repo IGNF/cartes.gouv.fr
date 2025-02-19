@@ -6,6 +6,7 @@ import {
     EmailPlannerDTO,
     GridDTO,
     LayerToolsType,
+    RefLayerToolsType,
     ReportStatusesDTO,
     RoleType,
     SharedGeorem,
@@ -109,18 +110,22 @@ export type UserMe = {
 
 export type LayerGeometryType = "Point" | "MultiPoint" | "LineString" | "MultiLineString" | "Polygon" | "MultiPolygon";
 
-export type CommunityLayer = {
+export type CommunityFeatureTypeLayer = {
+    id: number;
     table: number;
     database: number;
-    role: RoleType;
-    snapto: string | null;
-    tools: LayerToolsType[] | null;
     database_name: string;
     database_title: string;
     table_name: string;
     table_title: string;
     geometry_type: LayerGeometryType;
+    role: RoleType;
+    // snapto: string | null;
+    tools: LayerToolsType[] | null;
+    ref_tools: Record<RefLayerToolsType, string[]>;
 };
+
+export type PartialCommunityFeatureTypeLayer = Pick<CommunityFeatureTypeLayer, "table_name" | "geometry_type" | "tools" | "ref_tools">;
 
 export const autofillKeywords = [
     "id",
@@ -168,27 +173,19 @@ export type DescriptionFormType = {
 };
 
 /* Les fonctionnalités (outils) */
-export type CommunityToolsType = "navigation" | "measure" | "report" | "other";
+export type CommunityToolsType = "display" | "navigation" | "measure" | "report";
 
-export const navigationTools = [
-    "savePositions",
-    "locateControl",
-    "zoomControl",
-    "rotateControl",
-    "overviewMapControl",
-    "searchAddress",
-    "searchLonlat",
-] as const;
+export const displayTools = ["zoom_control", "rotate_control", "overviewmap_control", "print"] as const;
+export type DisplayToolsType = (typeof displayTools)[number];
+
+export const navigationTools = ["search_address", "search_lonlat", "locate_control", "search", "save_positions"] as const;
 export type NavigationToolsType = (typeof navigationTools)[number];
 
-export const otherTools = ["search", "print"] as const;
-export type OtherToolsType = (typeof otherTools)[number];
+export const measureTools = ["measure_distance", "measure_area", "measure_azimut"] as const;
+export type MeasureToolsType = (typeof measureTools)[number];
 
 export const reportTools = ["georem"] as const;
 export type ReportToolsType = (typeof reportTools)[number];
-
-export const measureTools = ["measureDistance", "measureArea", "measureAzimut"] as const;
-export type MeasureToolsType = (typeof measureTools)[number];
 
 /*************************************************************************************/
 
@@ -203,15 +200,10 @@ export type ZoomAndCenteringFormType = {
     extent?: Extent | null;
 };
 
-/* export type ToolsFormType = {
-    navigationTools?: NavigationToolsType[];
-    reportTools?: ReportToolsType[];
-    measureTools?: MeasureToolsType[];
-    otherTools?: OtherToolsType[];
-}; */
-
 export type ToolsFormType = {
     functionalities: string[];
+    layer_tools: Record<number, LayerToolsType[]>;
+    ref_tools: Record<number, Record<RefLayerToolsType, number[]>>;
 };
 
 export type ReportFormType = {

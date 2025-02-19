@@ -22,7 +22,7 @@ import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/espaceco/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import api from "../../../api";
-import { getDefaultValues } from "../DefaultValues";
+import { getReportsDefaultValues } from "../DefaultValues";
 import { COMMUNITY_FORM_STEPS } from "../FormSteps";
 import ActionButtons from "./ActionButtons";
 import Answers from "./reports/Answers";
@@ -32,8 +32,8 @@ import ReportStatuses from "./reports/ReportStatuses";
 import type { UserSharedThemesType } from "./reports/SetSharedThemesDialog";
 import SharedThemes from "./reports/SharedThemes";
 import ThemeList from "./reports/ThemeList";
-import { countActiveStatus, getMinAuthorizedStatus } from "./reports/Utils";
 import { formatAttributesForApi } from "./reports/ThemeUtils";
+import { countActiveStatus, getMinAuthorizedStatus } from "./reports/Utils";
 
 type ReportsProps = {
     mode: CommunityFormMode;
@@ -189,7 +189,7 @@ const Reports: FC<ReportsProps> = ({ mode, community, onPrevious, onSubmit }) =>
     }, [community, userSharedThemes]);
 
     const defaultValues = useMemo(() => {
-        const values = getDefaultValues(community, COMMUNITY_FORM_STEPS.REPORTS) as ReportFormType;
+        const values = getReportsDefaultValues(community);
         values.shared_themes = sharedThemes;
         return values;
     }, [sharedThemes, community]);

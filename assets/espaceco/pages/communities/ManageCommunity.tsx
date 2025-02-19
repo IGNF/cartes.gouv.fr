@@ -205,7 +205,15 @@ const ManageCommunity: FC<ManageCommunityProps> = ({ communityId }) => {
                                                 />
                                             );
                                         case "tab7":
-                                            return <Grid grids={communityQuery.data.grids ?? []} />; // TODO
+                                            return (
+                                                <Grid
+                                                    grids={communityQuery.data.grids}
+                                                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                                                    onSubmit={(datas, _) => {
+                                                        mutate(datas);
+                                                    }}
+                                                />
+                                            ); // TODO
                                         case "tab8":
                                             return <Members community={communityQuery.data} />;
                                         default:

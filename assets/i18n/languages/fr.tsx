@@ -36,12 +36,12 @@ import { UserKeysListTabFrTranslations } from "../../entrepot/pages/users/keys/U
 import { MeFrTranslations } from "../../entrepot/pages/users/me/Me.locale";
 import { PermissionsFrTranslations } from "../../entrepot/pages/users/permissions/Permissions.locale";
 import { EspaceCoCommunityListFrTranslations } from "@/espaceco/pages/communities/CommunityList.locale";
-
 import { CreateCommunityFrTranslations } from "../../espaceco/pages/communities/CreateCommunity.locale";
 import { CreateCommunityDialogFrTranslations } from "../../espaceco/pages/communities/CreateCommunityDialog.locale";
 import { ManageCommunityFrTranslations } from "../../espaceco/pages/communities/ManageCommunity.locale";
 import { MemberInvitationFrTranslations } from "../../espaceco/pages/communities/MemberInvitation.locale";
 import { FunctionalitiesFrTranslations } from "../../espaceco/pages/communities/management/tools/Functionalities.locale";
+import { LayerToolsFrTranslations } from "../../espaceco/pages/communities/management/tools/LayerTools.locale";
 import { EscoCommunityMembersFrTranslations } from "../../espaceco/pages/communities/management/Members.locale";
 import { ReportsFrTranslations } from "../../espaceco/pages/communities/management/Reports.locale";
 import { SearchFrTranslations } from "../../espaceco/pages/communities/management/Search.locale";
@@ -120,6 +120,7 @@ export const translations: Translations<"fr"> = {
     MemberInvitation: MemberInvitationFrTranslations,
     Reports: ReportsFrTranslations,
     Functionalities: FunctionalitiesFrTranslations,
+    LayerTools: LayerToolsFrTranslations,
     EmailPlanners: EmailPlannersFrTranslations,
     AddOrEditEmailPlanner: AddOrEditEmailPlannerFrTranslations,
     EmailPlannerKeywords: EmailPlannerKeywordsFrTranslations,

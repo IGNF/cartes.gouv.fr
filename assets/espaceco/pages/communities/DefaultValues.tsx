@@ -1,26 +1,18 @@
 import WKT from "ol/format/WKT";
 import Point from "ol/geom/Point";
-import { DescriptionFormType, MembershipRequestType, ReportFormType, ToolsFormType, ZoomAndCenteringFormType } from "../../../@types/app_espaceco";
+import {
+    DescriptionFormType,
+    MembershipRequestType,
+    PartialCommunityFeatureTypeLayer,
+    ReportFormType,
+    ToolsFormType,
+    ZoomAndCenteringFormType,
+} from "../../../@types/app_espaceco";
 import { CommunityResponseDTO } from "../../../@types/espaceco";
 import olDefaults from "../../../data/ol-defaults.json";
-import { COMMUNITY_FORM_STEPS } from "./FormSteps";
 import { getDefaultStatuses } from "./management/reports/Utils";
-import { allTools } from "./management/tools/Functionalities";
-
-const getDefaultValues = (community: CommunityResponseDTO, step: COMMUNITY_FORM_STEPS) => {
-    switch (step) {
-        case COMMUNITY_FORM_STEPS.DESCRIPTION:
-            return getDescriptionDefaultValues(community);
-        case COMMUNITY_FORM_STEPS.ZOOM_AND_CENTERING:
-            return getZoomAndCenteringDefaultValues(community);
-        case COMMUNITY_FORM_STEPS.TOOLS:
-            return getToolsDefaultValues(community);
-        case COMMUNITY_FORM_STEPS.REPORTS:
-            return getReportsDefaultValues(community);
-        default:
-            return {};
-    }
-};
+import { allFunctionalities } from "./management/tools/Functionalities";
+import { getAvailableRefTools, getLayerTools } from "./management/tools/LayerTools";
 
 const getDescriptionDefaultValues = (community: CommunityResponseDTO): DescriptionFormType => {
     const values: Partial<DescriptionFormType> = {
@@ -62,17 +54,35 @@ const getZoomAndCenteringDefaultValues = (community: CommunityResponseDTO): Zoom
     return values;
 };
 
-const getToolsDefaultValues = (community: CommunityResponseDTO): ToolsFormType => {
-    /* const values: ToolsFormType = {
-        navigationTools: getTools(community.functionalities, "navigation") as NavigationToolsType[],
-        measureTools: getTools(community.functionalities, "measure") as MeasureToolsType[],
-        reportTools: getTools(community.functionalities, "report") as ReportToolsType[],
-        otherTools: getTools(community.functionalities, "other") as OtherToolsType[],
-    };
-    return values; */
-    const functionalities = community.functionalities ?? [];
+const getToolsDefaultValues = (
+    community: CommunityResponseDTO,
+    editableLayers: Record<string, Record<number, PartialCommunityFeatureTypeLayer>>
+): ToolsFormType => {
+    const functionalities = community.functionalities;
+
+    const layerTools = getLayerTools(editableLayers);
+    const refTools = {};
+    for (const layers of Object.values(editableLayers)) {
+        for (const [id, config] of Object.entries(layers)) {
+            const availableRefTools = getAvailableRefTools(config.geometry_type);
+            if (!availableRefTools.length) {
+                continue;
+            }
+
+            const emptyTools = availableRefTools.reduce((acc, tool) => {
+                acc[tool] = [];
+                return acc;
+            }, {});
+
+            const tools = Array.isArray(config.ref_tools) ? {} : config.ref_tools;
+            refTools[id] = Object.keys(tools).length === 0 ? emptyTools : config.ref_tools;
+        }
+    }
+
     return {
-        functionalities: functionalities.filter((f) => allTools.includes(f)),
+        functionalities: functionalities.filter((f) => allFunctionalities.includes(f)),
+        layer_tools: layerTools,
+        ref_tools: refTools,
     };
 };
 
@@ -85,4 +95,4 @@ const getReportsDefaultValues = (community: CommunityResponseDTO): ReportFormTyp
     };
 };
 
-export { getDefaultValues };
+export { getDescriptionDefaultValues, getReportsDefaultValues, getToolsDefaultValues, getZoomAndCenteringDefaultValues };

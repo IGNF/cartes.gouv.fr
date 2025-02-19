@@ -28,8 +28,11 @@ const GridList: FC<GridListProps> = ({ grids = [], displayType = false, onChange
     );
 
     const handleAdd = (grid: GridDTO | null) => {
-        if (grid) {
-            const grids = Array.from(new Set([...internal, grid]));
+        if (!grid) return;
+
+        const found = internal.find((g) => g.name === grid.name);
+        if (!found) {
+            const grids = [...internal, grid];
             setInternal(grids);
             onChange(grids);
         }

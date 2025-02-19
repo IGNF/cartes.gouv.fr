@@ -1,22 +1,24 @@
-import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
-import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useQuery } from "@tanstack/react-query";
 import { FC, useMemo } from "react";
-import { useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
-import { CommunityFormMode, CommunityLayer, measureTools, navigationTools, otherTools, reportTools, ToolsFormType } from "../../../../@types/app_espaceco";
-import { CommunityResponseDTO } from "../../../../@types/espaceco";
+import { CommunityFeatureTypeLayer, CommunityFormMode, PartialCommunityFeatureTypeLayer, ToolsFormType } from "../../../../@types/app_espaceco";
+import { CommunityResponseDTO, LayerTools, RefLayerTools, RefLayerToolsType } from "../../../../@types/espaceco";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import { useTranslation } from "../../../../i18n";
 import RQKeys from "../../../../modules/espaceco/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import api from "../../../api";
+import { getToolsDefaultValues } from "../DefaultValues";
 import { COMMUNITY_FORM_STEPS } from "../FormSteps";
 import ActionButtons from "./ActionButtons";
-import { allTools } from "./tools/Functionalities";
+import ContributionTools from "./tools/ContributionTools";
+import { allFunctionalities } from "./tools/Functionalities";
+import { getEditableLayers, getRefLayers } from "./tools/LayerTools";
+import SimpleLayerTools from "./tools/SimpleLayerTools";
 
 type EditToolsProps = {
     mode: CommunityFormMode;
@@ -25,10 +27,9 @@ type EditToolsProps = {
     onSubmit: (datas: object, saveOnly: boolean) => void;
 };
 
-const fields = ["database", "table", "role", "snapto", "tools"];
-
 const EditTools: FC<EditToolsProps> = ({ mode, community, onPrevious, onSubmit }) => {
     const { t: tCommon } = useTranslation("Common");
+    const { t: tLayer } = useTranslation("LayerTools");
     const { t } = useTranslation("Functionalities");
 
     const {
@@ -36,44 +37,68 @@ const EditTools: FC<EditToolsProps> = ({ mode, community, onPrevious, onSubmit }
         isError,
         error,
         isLoading,
-    } = useQuery<CommunityLayer[], CartesApiException>({
-        queryKey: RQKeys.communityLayers(community.id, fields),
-        queryFn: ({ signal }) => api.communityLayers.getFeatureTypes(community.id, fields, signal),
+    } = useQuery<Record<string, CommunityFeatureTypeLayer[]>, CartesApiException>({
+        queryKey: RQKeys.communityLayers(community.id),
+        queryFn: ({ signal }) => api.communityLayers.getFeatureTypes(community.id, signal),
         staleTime: 3600000,
     });
 
+    // Couches editable role = "edit" ou "ref-edit"
+    const editableLayers = useMemo<Record<string, Record<number, PartialCommunityFeatureTypeLayer>>>(() => {
+        return getEditableLayers(layers);
+    }, [layers]);
+
+    // Couches de rérérence pour les outils d'accrochage ou de plus court chemin
+    const refLayers = useMemo<Record<RefLayerToolsType, Record<string, Record<number, PartialCommunityFeatureTypeLayer>>>>(() => {
+        const ref = { snap: {}, shortestpath: {} };
+        for (const tool of [...RefLayerTools]) {
+            ref[tool] = getRefLayers(tool, layers);
+        }
+        return ref;
+    }, [layers]);
+
+    // default values
+    const values = getToolsDefaultValues(community, editableLayers) as ToolsFormType;
+
+    const layerTools = values.layer_tools;
+    const refLayerTools = values.ref_tools;
+
     const schema = yup.object({
-        functionalities: yup.array().of(yup.string().oneOf(allTools).required()).required(),
+        functionalities: yup.array().of(yup.string().oneOf(allFunctionalities).required()).required(),
+        layer_tools: yup.lazy(() => {
+            const layersSchema = {};
+            Object.keys(layerTools).forEach((id) => {
+                layersSchema[id] = yup
+                    .array()
+                    .of(
+                        yup
+                            .string()
+                            .oneOf([...LayerTools])
+                            .required()
+                    )
+                    .required();
+            });
+            return yup.object().shape(layersSchema);
+        }),
+        ref_tools: yup.lazy(() => {
+            const layersSchema = {};
+            Object.keys(refLayerTools).forEach((id) => {
+                layersSchema[id] = yup.array().of(yup.number().required()).required();
+            });
+            return yup.object().shape(layersSchema);
+        }),
     });
 
-    // TODO REMETTRE
-    // const values = getDefaultValues(community, COMMUNITY_FORM_STEPS.TOOLS) as ToolsFormType;
-
-    // TODO SUPPRIMER
-    const values = { functionalities: [] };
-
-    const {
-        register,
-        getValues: getFormValues,
-        handleSubmit,
-    } = useForm<ToolsFormType>({
+    const methods = useForm<ToolsFormType>({
         mode: "onSubmit",
         values: values,
         resolver: yupResolver(schema),
     });
-
-    const editables = useMemo(() => {
-        if (layers) {
-            return layers.filter((l) => l.role === "edit" || l.role === "ref-edit");
-        }
-        return [];
-    }, [layers]);
-
-    console.log(editables);
-    // console.log(watch());
+    const { getValues: getFormValues, handleSubmit } = methods;
 
     const onSubmitForm = (saveOnly: boolean) => {
         const values = getFormValues();
+        console.log(values);
 
         // TODO REMETTRE
         /*const datas = { ...values };
@@ -83,74 +108,36 @@ const EditTools: FC<EditToolsProps> = ({ mode, community, onPrevious, onSubmit }
     };
 
     return (
-        <>
-            {isLoading && <LoadingText as={"h6"} message={t("loading_layers")} />}
-            {isError && <Alert severity="error" closable title={error.message} />}
-            <div>
-                <h2>{t("simple_tools_title")}</h2>
-                <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
-                    <div className={fr.cx("fr-col-6")}>
-                        <Checkbox
-                            legend={t("navigation_tools")}
-                            options={navigationTools.map((tool) => ({
-                                label: t("navigation_tools_label", { tool: tool }),
-                                nativeInputProps: {
-                                    ...register("functionalities"),
-                                    value: tool,
-                                },
-                            }))}
-                        />
-                        <Checkbox
-                            legend={t("other_tools")}
-                            options={otherTools.map((tool) => ({
-                                label: t("other_tools_label", { tool: tool }),
-                                nativeInputProps: {
-                                    ...register("functionalities"),
-                                    value: tool,
-                                },
-                            }))}
-                        />
+        <div>
+            {isError ? (
+                <Alert severity="error" closable title={error.message} />
+            ) : isLoading ? (
+                <LoadingText as={"h6"} message={tLayer("loading_layers")} />
+            ) : (
+                <FormProvider {...methods}>
+                    <div>
+                        <h2>{t("simple_tools_title")}</h2>
+                        <SimpleLayerTools />
+                        <h2>{tLayer("direct_contribution_tools")}</h2>
+                        <ContributionTools editableLayers={editableLayers} refLayers={refLayers} refLayerTools={refLayerTools} />
+                        {mode === "edition" ? (
+                            <div className="fr-grid-row fr-grid-row--right">
+                                <Button priority={"primary"} onClick={() => handleSubmit(() => onSubmitForm(true))()}>
+                                    {tCommon("save")}
+                                </Button>
+                            </div>
+                        ) : (
+                            <ActionButtons
+                                step={COMMUNITY_FORM_STEPS.TOOLS}
+                                onPrevious={onPrevious}
+                                onSave={() => handleSubmit(() => onSubmitForm(true))()}
+                                onContinue={() => handleSubmit(() => onSubmitForm(false))()}
+                            />
+                        )}
                     </div>
-                    <div className={fr.cx("fr-col-6")}>
-                        <Checkbox
-                            legend={t("report_tools")}
-                            options={reportTools.map((tool) => ({
-                                label: t("report_tools_label", { tool: tool }),
-                                nativeInputProps: {
-                                    ...register("functionalities"),
-                                    value: tool,
-                                },
-                            }))}
-                        />
-                        <Checkbox
-                            legend={t("measure_tools")}
-                            options={measureTools.map((tool) => ({
-                                label: t("measure_tools_label", { tool: tool }),
-                                nativeInputProps: {
-                                    ...register("functionalities"),
-                                    value: tool,
-                                },
-                            }))}
-                        />
-                    </div>
-                </div>
-                <h2>{t("direct_contribution_tools")}</h2>
-                {mode === "edition" ? (
-                    <div className="fr-grid-row fr-grid-row--right">
-                        <Button priority={"primary"} onClick={() => handleSubmit(() => onSubmitForm(true))()}>
-                            {tCommon("save")}
-                        </Button>
-                    </div>
-                ) : (
-                    <ActionButtons
-                        step={COMMUNITY_FORM_STEPS.TOOLS}
-                        onPrevious={onPrevious}
-                        onSave={() => handleSubmit(() => onSubmitForm(true))()}
-                        onContinue={() => handleSubmit(() => onSubmitForm(false))()}
-                    />
-                )}
-            </div>
-        </>
+                </FormProvider>
+            )}
+        </div>
     );
 };
 

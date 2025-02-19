@@ -19,7 +19,7 @@ import RQKeys from "../../../../modules/espaceco/RQKeys";
 import { type CartesApiException } from "../../../../modules/jsonFetch";
 import "../../../../sass/pages/espaceco/community.scss";
 import api from "../../../api";
-import { getDefaultValues } from "../DefaultValues";
+import { getDescriptionDefaultValues } from "../DefaultValues";
 import DocumentList from "./description/DocumentList";
 import { OpenWithEmailsConfigDialog, OpenWithEmailsConfigDialogModal } from "./description/OpenWithEmailsConfigDialog";
 
@@ -138,7 +138,7 @@ const Description: FC<DescriptionProps> = ({ mode, community, onSubmit }) => {
         });
     };
 
-    const defaultValues = getDefaultValues(community, COMMUNITY_FORM_STEPS.DESCRIPTION) as DescriptionFormType;
+    const defaultValues = getDescriptionDefaultValues(community);
 
     const form = useForm<DescriptionFormType>({
         resolver: yupResolver(schema(tValid)),

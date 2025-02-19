@@ -22,7 +22,7 @@ class GridController extends AbstractController implements ApiControllerInterfac
     public const SEARCH_LIMIT = 20;
 
     public function __construct(
-        private GridApiService $gridApiService
+        private GridApiService $gridApiService,
     ) {
     }
 
@@ -31,10 +31,10 @@ class GridController extends AbstractController implements ApiControllerInterfac
      */
     #[Route('/get_by_names', name: 'get_by_names', methods: ['GET'])]
     public function getFromArray(
-        #[MapQueryParameter] array $names
+        #[MapQueryParameter] array $names,
     ): JsonResponse {
         try {
-            if (!is_array($names) || 0 == count($names)) {
+            if (0 == count($names)) {
                 throw new ApiException('names is not an array or is empty');
             }
 

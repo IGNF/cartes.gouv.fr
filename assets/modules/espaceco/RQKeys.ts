@@ -29,7 +29,7 @@ const RQKeys = {
         limit.toString(),
     ],
     communityDocuments: (communityId?: number): string[] => ["community", "documents", communityId ? communityId.toString() : ""],
-    communityLayers: (communityId: number, filter: string[]): string[] => ["community", "layers", communityId.toString(), ...filter],
+    communityLayers: (communityId: number): string[] => ["community", "layers", communityId.toString()],
     userSharedThemes: (): string[] => ["user", "shared_themes"],
     searchAddress: (search: string): string[] => ["searchAddress", search],
     searchGrids: (text: string): string[] => ["searchGrids", text],

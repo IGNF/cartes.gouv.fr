@@ -132,8 +132,11 @@ export interface UserDTO {
     surname?: string;
 }
 
-const layerTools = ["add_feature", "edit_geometry", "move_feature", "delete_feature", "cut_feature", "copy_paste_feature"] as const;
-export type LayerToolsType = (typeof layerTools)[number];
+export const LayerTools = ["draw", "modify", "translate", "delete", "split", "snap_mandatory", "copy_paste"] as const;
+export type LayerToolsType = (typeof LayerTools)[number];
+
+export const RefLayerTools = ["snap", "shortestpath"] as const;
+export type RefLayerToolsType = (typeof RefLayerTools)[number];
 
 export type LayerType = "feature-type" | "geoservice";
 export type RoleType = "edit" | "ref" | "visu" | "ref-edit";

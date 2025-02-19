@@ -40,6 +40,7 @@ import { CreateCommunityDialogEnTranslations } from "../../espaceco/pages/commun
 import { ManageCommunityEnTranslations } from "../../espaceco/pages/communities/ManageCommunity.locale";
 import { MemberInvitationEnTranslations } from "../../espaceco/pages/communities/MemberInvitation.locale";
 import { FunctionalitiesEnTranslations } from "../../espaceco/pages/communities/management/tools/Functionalities.locale";
+import { LayerToolsEnTranslations } from "@/espaceco/pages/communities/management/tools/LayerTools.locale";
 import { EscoCommunityMembersEnTranslations } from "../../espaceco/pages/communities/management/Members.locale";
 import { ReportsEnTranslations } from "../../espaceco/pages/communities/management/Reports.locale";
 import { SearchEnTranslations } from "../../espaceco/pages/communities/management/Search.locale";
@@ -120,6 +121,7 @@ export const translations: Translations<"en"> = {
     MemberInvitation: MemberInvitationEnTranslations,
     Theme: ThemeEnTranslations,
     Functionalities: FunctionalitiesEnTranslations,
+    LayerTools: LayerToolsEnTranslations,
     Reports: ReportsEnTranslations,
     EmailPlanners: EmailPlannersEnTranslations,
     AddOrEditEmailPlanner: AddOrEditEmailPlannerEnTranslations,
