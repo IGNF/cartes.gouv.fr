@@ -43,7 +43,6 @@ const MyDocuments: FC = () => {
     const handleAddDocument = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
-        console.log(formData.values().toArray());
 
         addDocumentMutation.mutate(formData);
         e.currentTarget.reset();

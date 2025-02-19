@@ -321,7 +321,7 @@ class CartesMetadataApiService
                         $actualType = null;
 
                         if (StoredDataTypes::ROK4_PYRAMID_VECTOR === $pyramid['type']) {
-                            $endpointTypeOgc = 'OGC:TMS';
+                            $endpointTypeOgc = 'TMS';
                             $actualType = 'TMS';
                         } elseif (StoredDataTypes::ROK4_PYRAMID_RASTER === $pyramid['type']) {
                             $endpointTypeOgc = 'OGC:WMTS';

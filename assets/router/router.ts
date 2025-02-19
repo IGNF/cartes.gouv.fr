@@ -2,8 +2,8 @@ import { createGroup, createRouter, defineRoute, param } from "type-route";
 
 import SymfonyRouting from "../modules/Routing";
 
-export const appRoot = SymfonyRouting.getBaseUrl(); // (document.getElementById("root") as HTMLDivElement).dataset?.appRoot ?? "";
-export const catalogueUrl = (document.getElementById("app_env") as HTMLDivElement)?.dataset?.["catalogueUrl"] ?? "/catalogue";
+export const appRoot = SymfonyRouting.getBaseUrl();
+export const catalogueUrl = import.meta.env?.CATALOGUE_URL ?? "/catalogue";
 
 // Routes non protégées
 const publicRoutes = {
@@ -255,6 +255,10 @@ const datastoreRoutes = {
     ),
 };
 
+const configRoutes = {
+    config_alerts: defineRoute(`${appRoot}/configuration/alertes`),
+};
+
 const espacecoRoutes = {
     espaceco_community_list: defineRoute(
         {
@@ -291,6 +295,7 @@ const routeDefs = {
     ...privateRoutes,
     ...communityRoutes,
     ...datastoreRoutes,
+    ...configRoutes,
     ...espacecoRoutes,
 };
 export const { RouteProvider, useRoute, routes, session } = createRouter(routeDefs);
@@ -300,6 +305,7 @@ export const publicGroup = createGroup((Object.keys(publicRoutes) as (keyof type
 export const privateGroup = createGroup((Object.keys(privateRoutes) as (keyof typeof privateRoutes)[]).map((key) => routes[key]));
 export const communityGroup = createGroup((Object.keys(communityRoutes) as (keyof typeof communityRoutes)[]).map((key) => routes[key]));
 export const datastoreGroup = createGroup((Object.keys(datastoreRoutes) as (keyof typeof datastoreRoutes)[]).map((key) => routes[key]));
+export const configGroup = createGroup((Object.keys(configRoutes) as (keyof typeof configRoutes)[]).map((key) => routes[key]));
 export const espacecoGroup = createGroup((Object.keys(espacecoRoutes) as (keyof typeof espacecoRoutes)[]).map((key) => routes[key]));
 
 export const groups = {
@@ -307,5 +313,6 @@ export const groups = {
     private: privateGroup,
     community: communityGroup,
     datastore: datastoreGroup,
+    config: configGroup,
     espaceco: espacecoGroup,
 };

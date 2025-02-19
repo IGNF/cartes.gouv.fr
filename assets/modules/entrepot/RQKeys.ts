@@ -60,6 +60,8 @@ const RQKeys = {
     my_document: (documentId: string): string[] => ["user", "me", "documents", documentId],
 
     accesses_request: (fileIdentifier: string): string[] => ["accesses_request", fileIdentifier],
+
+    alerts: (): string[] => ["alerts"],
 };
 
 export default RQKeys;

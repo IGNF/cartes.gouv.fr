@@ -32,6 +32,7 @@ import {
     UserKeyResponseDto,
     MetadataResponseDto,
     BoundingBox,
+    CheckingExecutionDetailResponseDtoStatusEnum,
 } from "./entrepot";
 
 /** user */
@@ -263,6 +264,7 @@ export type CheckOrProcessingExecutionLogs = [string];
 export type CheckDetailed = CheckingExecutionDetailResponseDto & {
     logs?: CheckOrProcessingExecutionLogs;
 };
+export { CheckingExecutionDetailResponseDtoStatusEnum as CheckStatusEnum };
 
 export type ProcessingExecution = ProcessingExecutionDetailResponseDto;
 

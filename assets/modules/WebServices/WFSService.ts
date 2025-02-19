@@ -82,7 +82,7 @@ class WFSService extends BaseService {
         const vectorSource = new VectorSource({
             format: format,
             attributions: this.getAttribution(),
-            loader: function (ext, resolution, projection, success, failure) {
+            loader: function (ext, _, projection, success, failure) {
                 const proj = projection.getCode();
                 const bbox = transformExtent(ext, proj, "EPSG:4326").join(",") + ",EPSG:4326";
 

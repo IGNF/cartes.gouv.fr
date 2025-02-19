@@ -7,7 +7,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import api from "../../../../api";
 import { routes } from "../../../../../router/router";
-import { type DatasheetDetailed, Upload } from "../../../../../@types/app";
+import { CheckStatusEnum, type DatasheetDetailed, Upload } from "../../../../../@types/app";
 import ReportStatusBadge from "../../../data_details/ReportTab/ReportStatusBadge";
 import { deleteUploadConfirmModal } from "../DatasheetView/DatasheetView";
 import Wait from "../../../../../components/Utils/Wait";
@@ -63,9 +63,9 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
                             <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
                                 {upload.name}
                                 {failureCase ? (
-                                    <ReportStatusBadge status="FAILURE" className={fr.cx("fr-ml-2w")} />
+                                    <ReportStatusBadge status={CheckStatusEnum.FAILURE} className={fr.cx("fr-ml-2w")} />
                                 ) : (
-                                    <ReportStatusBadge status="WAITING" className={fr.cx("fr-ml-2w")} />
+                                    <ReportStatusBadge status={CheckStatusEnum.WAITING} className={fr.cx("fr-ml-2w")} />
                                 )}
                             </div>
                         </div>

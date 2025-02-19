@@ -19,6 +19,7 @@ services:
             - HTTPS_PROXY=${HTTPS_PROXY}
             - http_proxy=${HTTP_PROXY}
             - https_proxy=${HTTPS_PROXY}
+            - APP_ROOT_URL=https://cartesgouvfr-dev.docker.localhost
             - XDEBUG_MODE=debug
             - XDEBUG_CONFIG=client_host=host.docker.internal client_port=9003
         working_dir: /opt/cartesgouvfr-site

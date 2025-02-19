@@ -1,6 +1,10 @@
-import { Service } from "../../@types/app";
-// import BaseLayer from "ol/layer/Base";
 import Layer from "ol/layer/Layer";
+
+import { getTranslation } from "@/i18n";
+import { Service } from "../../@types/app";
+
+const { t: tCommon } = getTranslation("Common");
+
 abstract class BaseService {
     readonly service: Service;
 
@@ -11,7 +15,9 @@ abstract class BaseService {
     getAttribution(): string | undefined {
         if ("attribution" in this.service.configuration && this.service.configuration.attribution) {
             const attribution = this.service.configuration.attribution;
-            return `<a href=${attribution.url}>${attribution.title}</a>`;
+            const logo = attribution.logo ? `<img src="${attribution.logo}" /> ` : "";
+
+            return `<a href="${attribution.url}" title="${attribution.title} - ${tCommon("new_window")}" target="_blank">${logo}${attribution.title}</a>`;
         }
         return undefined;
     }

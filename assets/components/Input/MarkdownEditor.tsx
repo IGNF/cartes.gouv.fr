@@ -12,6 +12,7 @@ import { Markdown } from "tiptap-markdown";
 import "../../sass/components/tiptap.scss";
 
 type MarkdownEditorProps = {
+    className?: string;
     label?: string;
     hintText?: string;
     value: string;
@@ -22,11 +23,19 @@ type MarkdownEditorProps = {
 };
 
 const MarkdownEditor: FC<MarkdownEditorProps> = (props) => {
-    const { label, hintText, value, state, stateRelatedMessage, placeholder = "", onChange } = props;
+    const { className, label, hintText, value, state, stateRelatedMessage, placeholder = "", onChange } = props;
     const { isDark } = useIsDark();
 
+    const classNames = [fr.cx("fr-input-group")];
+    if (state === "error") {
+        classNames.push("fr-input-group--error");
+    }
+    if (className) {
+        classNames.push(className);
+    }
+
     return (
-        <div className={fr.cx("fr-input-group", state === "error" && "fr-input-group--error")} data-color-mode={isDark ? "dark" : "light"}>
+        <div className={classNames.join(" ")} data-color-mode={isDark ? "dark" : "light"}>
             {label && (
                 <label className={fr.cx("fr-label")}>
                     {label}

@@ -19,6 +19,8 @@ import { routes } from "../../../router/router";
 import { useAuthStore } from "../../../stores/AuthStore";
 import { regex } from "../../../utils";
 import Main from "../../../components/Layout/Main";
+import { useAlertStore } from "../../../stores/AlertStore";
+import { useAlert } from "../../../hooks/useAlert";
 
 import "../../../sass/pages/nous_ecrire.scss";
 
@@ -42,6 +44,8 @@ const schema = (t: TranslationFunction<"Contact", ComponentKey>) =>
 const Contact = () => {
     const { t } = useTranslation({ Contact });
     const { user } = useAuthStore();
+    const alert = useAlertStore(({ alerts }) => alerts.find((alert) => alert.visibility.homepage));
+    const alertProps = useAlert(alert);
 
     const [isSending, setIsSending] = useState(false);
     const [error, setError] = useState(null);
@@ -76,7 +80,7 @@ const Contact = () => {
     };
 
     return (
-        <Main title={t("title")}>
+        <Main title={t("title")} noticeProps={alertProps}>
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
                     <h1>{t("title")}</h1>

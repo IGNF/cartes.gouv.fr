@@ -62,6 +62,7 @@ import { ContactEnTranslations } from "../../pages/assistance/contact/Contact.lo
 import { mapboxStyleValidationEnTranslations } from "../../validations/mapbox/MapboxStyleValidator.locale";
 import { SldStyleValidationErrorsEnTranslations } from "../../validations/sld/SldStyleValidation.locale";
 import { commonEnTranslations } from "../Common.locale";
+import { AlertsEnTranslations } from "../../entrepot/pages/config/Alerts.locale";
 import type { Translations } from "../types";
 
 import { InputCollectionEnTranslations } from "../../components/Input/InputCollection";
@@ -132,4 +133,5 @@ export const translations: Translations<"en"> = {
     EscoCommunityMembers: EscoCommunityMembersEnTranslations,
     AddMembersDialog: AddMembersDialogEnTranslations,
     ManageGridsDialog: ManageGridsDialogEnTranslations,
+    alerts: AlertsEnTranslations,
 };

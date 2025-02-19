@@ -1,10 +1,10 @@
-import { CheckDetailed, ProcessingExecution, StoredDataStatusEnum, UploadStatusEnum } from "@/@types/app";
+import { CheckStatusEnum, ProcessingExecution, StoredDataStatusEnum, UploadStatusEnum } from "@/@types/app";
 import { AlertProps } from "@codegouvfr/react-dsfr/Alert";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import { FC, memo } from "react";
 
 type ReportStatusBadgeProps = {
-    status: ProcessingExecution["status"] | StoredDataStatusEnum | UploadStatusEnum | CheckDetailed["status"];
+    status: ProcessingExecution["status"] | StoredDataStatusEnum | UploadStatusEnum | CheckStatusEnum;
     className?: string;
 };
 const ReportStatusBadge: FC<ReportStatusBadgeProps> = ({ status, className }) => {
