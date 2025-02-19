@@ -80,9 +80,9 @@ export type ComponentKey =
     | import("../espaceco/pages/communities/management/reports/AutofillKeywords.locale").I18n
     | import("../espaceco/pages/communities/management/reports/AutofillDialog.locale").I18n
     | import("../espaceco/pages/communities/MemberInvitation.locale").I18n
-    | import("../components/Input/InputCollection").I18n;
+    | import("../components/Input/InputCollection").I18n
     | import("../entrepot/pages/config/Alerts.locale").I18n
-    | import("../espaceco/pages/communities/EspaceCoCommunities.locale").I18n
+    | import("../espaceco/pages/communities/CommunityList.locale").I18n
     | import("../pages/LoginDisabled/LoginDisabled.locale").I18n;
 
 export type Translations<L extends Language> = GenericTranslations<ComponentKey, Language, typeof fallbackLanguage, L>;

@@ -190,7 +190,7 @@ const CommunityLogo: FC<CommunityLogoProps> = ({ community }) => {
                 <img
                     className={logoIsHovered ? "frx-btn--transparent fr-img--transparent-transition" : ""}
                     loading="lazy"
-                    src={isValid ? community.logo_url : placeholder1x1}
+                    src={isValid ? (community.logo_url ?? placeholder1x1) : placeholder1x1}
                     onError={({ currentTarget }) => {
                         currentTarget.onerror = null; // prevents looping
                         currentTarget.src = placeholder1x1;

@@ -17,7 +17,7 @@ type SearchCommunityProps = {
 };
 
 const SearchCommunity: FC<SearchCommunityProps> = ({ filter, onChange }) => {
-    const { t } = useTranslation("CommunityList");
+    const { t } = useTranslation("EspaceCoCommunityList");
 
     const [search, setSearch] = useDebounceValue("", 500);
 

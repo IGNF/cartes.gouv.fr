@@ -12,10 +12,7 @@ type PermissionsProps = {
 const Permissions: FC<PermissionsProps> = ({ form }) => {
     const { t } = useTranslation("ManageCommunity");
 
-    const {
-        register,
-        formState: { errors },
-    } = form;
+    const { register } = form;
 
     return (
         <div className={fr.cx("fr-mt-6v")}>

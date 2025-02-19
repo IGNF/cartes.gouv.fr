@@ -9,6 +9,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 
 import { CartesUser, Datastore } from "../../../@types/app";
+import { CommunityMemberDtoRightsEnum } from "../../../@types/entrepot";
 import Main from "../../../components/Layout/Main";
 import LoadingIcon from "../../../components/Utils/LoadingIcon";
 import Skeleton from "../../../components/Utils/Skeleton";
@@ -20,8 +21,6 @@ import { useApiEspaceCoStore } from "../../../stores/ApiEspaceCoStore";
 import { useAuthStore } from "../../../stores/AuthStore";
 import { getArrayRange } from "../../../utils";
 import api from "../../api";
-import Main from "../../../components/Layout/Main";
-import { CommunityMemberDtoRightsEnum } from "../../../@types/entrepot";
 
 const DashboardPro = () => {
     const { t } = useTranslation("DashboardPro");
