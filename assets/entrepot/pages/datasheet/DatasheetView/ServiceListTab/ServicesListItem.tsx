@@ -27,7 +27,7 @@ type ServicesListItemProps = {
 const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, datastoreId }) => {
     const queryClient = useQueryClient();
     const setMessage = useSnackbarStore((state) => state.setMessage);
-    const copy = useCopyToClipboard();
+    const { copied, copy } = useCopyToClipboard();
 
     const unpublishServiceConfirmModal = createModal({
         id: `unpublish-service-confirm-modal-${service._id}`,
@@ -68,8 +68,9 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                 date={service?.configuration?.last_event?.date}
                 menuListItems={[
                     {
+                        autoClose: false,
                         text: "Copier l’URL de diffusion",
-                        iconId: "ri-file-copy-2-line",
+                        iconId: copied ? "fr-icon-check-line" : "ri-file-copy-line",
                         onClick: async () => {
                             if (!service.share_url) {
                                 setMessage("URL de diffusion indisponible");

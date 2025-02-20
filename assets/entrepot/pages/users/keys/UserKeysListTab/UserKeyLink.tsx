@@ -36,26 +36,33 @@ const UserKeyLink: FC<UserKeyLinkProps> = ({ permissionId, hash, offeringId }) =
         return (
             <div className={fr.cx("fr-mb-3v")}>
                 {wmtsCapabilitiesUrl && (
-                    <TextCopyToClipboard className={fr.cx("fr-mb-4v")} label="WMTS" text={wmtsCapabilitiesUrl} successMessage={tCommon("url_copied")}>
-                        <Button
-                            className={fr.cx("fr-ml-2v", "fr-col-3")}
-                            title={tCommon("new_window")}
-                            priority="tertiary no outline"
-                            iconId={"fr-icon-external-link-line"}
-                            linkProps={{ href: wmtsCapabilitiesUrl, target: "_blank", rel: "noreferrer" }}
-                        />
-                    </TextCopyToClipboard>
+                    <TextCopyToClipboard
+                        addon={
+                            <Button
+                                title={tCommon("new_window")}
+                                priority="secondary"
+                                iconId={"fr-icon-external-link-line"}
+                                linkProps={{ href: wmtsCapabilitiesUrl, target: "_blank", rel: "noreferrer" }}
+                            />
+                        }
+                        className={fr.cx("fr-mb-4v")}
+                        label="WMTS"
+                        text={wmtsCapabilitiesUrl}
+                    />
                 )}
                 {tmsCapabilitiesUrl && (
-                    <TextCopyToClipboard label="TMS" text={tmsCapabilitiesUrl} successMessage={tCommon("url_copied")}>
-                        <Button
-                            className={fr.cx("fr-ml-2v", "fr-col-3")}
-                            title={tCommon("new_window")}
-                            priority="tertiary no outline"
-                            iconId={"fr-icon-external-link-line"}
-                            linkProps={{ href: tmsCapabilitiesUrl, target: "_blank", rel: "noreferrer" }}
-                        />
-                    </TextCopyToClipboard>
+                    <TextCopyToClipboard
+                        addon={
+                            <Button
+                                title={tCommon("new_window")}
+                                priority="secondary"
+                                iconId={"fr-icon-external-link-line"}
+                                linkProps={{ href: tmsCapabilitiesUrl, target: "_blank", rel: "noreferrer" }}
+                            />
+                        }
+                        label="TMS"
+                        text={tmsCapabilitiesUrl}
+                    />
                 )}
             </div>
         );
@@ -72,15 +79,19 @@ const UserKeyLink: FC<UserKeyLinkProps> = ({ permissionId, hash, offeringId }) =
         const capabilitiesUrl = `${rootUrl}?service=${service}&version=${version}&request=GetCapabilities&apikey=${hash}`;
 
         return (
-            <TextCopyToClipboard className={fr.cx("fr-mb-4v")} text={capabilitiesUrl} successMessage={tCommon("url_copied")}>
-                <Button
-                    className={fr.cx("fr-ml-2v", "fr-col-3")}
-                    title={tCommon("new_window")}
-                    priority="tertiary no outline"
-                    iconId={"fr-icon-external-link-line"}
-                    linkProps={{ href: capabilitiesUrl, target: "_blank", rel: "noreferrer" }}
-                />
-            </TextCopyToClipboard>
+            <TextCopyToClipboard
+                addon={
+                    <Button
+                        title={tCommon("new_window")}
+                        priority="secondary"
+                        iconId={"fr-icon-external-link-line"}
+                        linkProps={{ href: capabilitiesUrl, target: "_blank", rel: "noreferrer" }}
+                    />
+                }
+                className={fr.cx("fr-mb-4v")}
+                label={offering?.type}
+                text={capabilitiesUrl}
+            />
         );
     }
 };
