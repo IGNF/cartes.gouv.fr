@@ -1,43 +1,66 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
-import { FC, memo, ReactNode } from "react";
+import Input, { InputProps } from "@codegouvfr/react-dsfr/Input";
+import { FC, memo } from "react";
 import { symToStr } from "tsafe/symToStr";
 import { tss } from "tss-react";
 
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 import { useTranslation } from "@/i18n";
 
-type TextCopyToClipboardProps = {
-    label?: string;
-    text: string;
-    title?: string;
-    className?: string;
-    successMessage?: string;
+interface TextCopyToClipboardProps extends InputProps.Common {
     disabled?: boolean;
-    children?: ReactNode;
-};
+    nativeInputProps?: InputProps.RegularInput["nativeInputProps"];
+    nativeTextAreaProps?: InputProps.TextArea["nativeTextAreaProps"];
+    text: string;
+    textArea?: boolean;
+    title?: string;
+}
 
 const TextCopyToClipboard: FC<TextCopyToClipboardProps> = (props) => {
-    const { t: tCommon } = useTranslation("Common");
-    const { children, label, text, title = tCommon("copy_to_clipboard"), successMessage, className, disabled = false } = props;
-    const copy = useCopyToClipboard();
-    const { classes, cx } = useStyles({ disabled });
-
-    function copyToClipboard() {
-        copy(text, successMessage);
-    }
+    const { t } = useTranslation("Common");
+    const { disabled = false, label, nativeInputProps, nativeTextAreaProps, text, textArea, title = t("copy_to_clipboard"), ...inputProps } = props;
+    const { classes } = useStyles({ disabled });
+    const { copied, copy } = useCopyToClipboard();
 
     return (
-        <div className={cx(classes.root, className)}>
-            {label && (
-                <span>
-                    <strong>{label}</strong> :
-                </span>
-            )}
-            <span className={classes.textBox}>{text}</span>
-            <Button iconId="ri-file-copy-line" priority="tertiary no outline" title={title} onClick={copyToClipboard} disabled={disabled} />
-            {children}
-        </div>
+        <Input
+            {...inputProps}
+            {...(textArea
+                ? {
+                      textArea: true,
+                      nativeTextAreaProps: {
+                          ...nativeTextAreaProps,
+                          readOnly: true,
+                          value: text,
+                      },
+                  }
+                : {
+                      textArea: false,
+                      nativeInputProps: {
+                          ...nativeInputProps,
+                          readOnly: true,
+                          value: text,
+                      },
+                  })}
+            label={
+                <div className={classes.label}>
+                    {label}
+                    <Button
+                        className={classes.button}
+                        disabled={disabled}
+                        iconId={copied ? "fr-icon-check-line" : "ri-file-copy-line"}
+                        iconPosition="right"
+                        priority="tertiary"
+                        title={title}
+                        onClick={() => copy(text)}
+                    >
+                        <span>{copied ? t("alert_copied") : t("copy")}</span>
+                    </Button>
+                </div>
+            }
+            disabled={disabled}
+        />
     );
 };
 
@@ -45,29 +68,24 @@ TextCopyToClipboard.displayName = symToStr({ TextCopyToClipboard });
 
 export default memo(TextCopyToClipboard);
 
-const useStyles = tss
-    .withName(TextCopyToClipboard.displayName)
-    .withParams<{ disabled: boolean }>()
-    .create(({ disabled }) => ({
-        root: {
-            display: "flex",
-            flexDirection: "row",
-            width: "100%",
-            position: "relative",
-            gap: fr.spacing("2v"),
-            flexWrap: "nowrap",
-            alignItems: "center",
+const useStyles = tss.withName(TextCopyToClipboard.displayName).create(() => ({
+    label: {
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+    },
+    button: {
+        [fr.breakpoints.down("lg")]: {
+            maxWidth: "2.5rem",
+            paddingLeft: "0.5rem",
+            paddingRight: "0.5rem",
+            "& span": {
+                display: "none",
+            },
+            "&::after": {
+                "--icon-size": "1.5rem  !important",
+                margin: "0  !important",
+            },
         },
-        textBox: {
-            display: "block",
-            flex: "1",
-            borderRadius: "0.25rem 0.25rem 0 0",
-            color: disabled ? fr.colors.decisions.text.disabled.grey.default : fr.colors.decisions.text.default.grey.default,
-            userSelect: disabled ? "none" : "auto",
-            cursor: disabled ? "not-allowed" : "auto",
-            overflow: disabled ? "hidden" : "auto",
-            backgroundColor: disabled ? fr.colors.decisions.background.disabled.grey.default : fr.colors.decisions.background.alt.blueFrance.default,
-            padding: fr.spacing("2v"),
-            whiteSpace: "pre",
-        },
-    }));
+    },
+}));

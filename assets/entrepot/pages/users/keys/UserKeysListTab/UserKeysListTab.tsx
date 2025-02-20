@@ -122,7 +122,6 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
                                                     label={t("hash_value")}
                                                     text={(accessKey.type_infos as HashInfoDto).hash ?? t("unavailable")}
                                                     disabled={!(accessKey.type_infos as HashInfoDto).hash}
-                                                    successMessage={t("hash_value_copied")}
                                                 />
                                             )}
                                             <div className={fr.cx("fr-mb-1v")}>{t("services")}</div>

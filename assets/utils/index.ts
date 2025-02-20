@@ -1,4 +1,5 @@
 export * from "./api";
+export * from "./browser";
 export * from "./format";
 export * from "./inspire";
 export * from "./lang";

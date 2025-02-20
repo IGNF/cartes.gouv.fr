@@ -1,16 +1,24 @@
-import { useTranslation } from "@/i18n";
-import { useSnackbarStore } from "@/stores/SnackbarStore";
+import { copyToClipboard } from "@/utils";
+import { useEffect, useRef, useState } from "react";
 
 export function useCopyToClipboard() {
-    const { t: tCommon } = useTranslation("Common");
-    const setMessage = useSnackbarStore((state) => state.setMessage);
+    const [copied, setCopied] = useState(false);
+    const timeout = useRef<NodeJS.Timeout>();
 
-    return async (text: string, title?: string, description?: string, severity?: "info" | "success" | "warning" | "error") => {
+    async function copy(text: string) {
         try {
-            await navigator.clipboard.writeText(text);
-            setMessage(title ?? tCommon("alert_copied"), description ?? tCommon("alert_copy_to_clipboard"), severity);
-        } catch (e) {
-            console.error(e);
+            await copyToClipboard(text);
+            setCopied(true);
+            clearTimeout(timeout.current);
+            timeout.current = setTimeout(() => setCopied(false), 5000);
+        } catch (error) {
+            console.error(error);
         }
-    };
+    }
+
+    useEffect(() => {
+        return () => clearTimeout(timeout.current);
+    }, []);
+
+    return { copied, copy };
 }
