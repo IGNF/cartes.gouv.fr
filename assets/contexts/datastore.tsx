@@ -18,7 +18,7 @@ export function useDatastore() {
     if (!datastore || !datastore.datastore) {
         throw new Error("useDatastore must be used within a DatastoreProvider");
     }
-    return datastore;
+    return datastore as Required<IDatastoreContext>;
 }
 
 interface IDatastoreProviderProps {
