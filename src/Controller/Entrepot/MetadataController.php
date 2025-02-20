@@ -32,7 +32,7 @@ class MetadataController extends AbstractController implements ApiControllerInte
     #[Route('', name: 'get_list', methods: ['GET'])]
     public function getList(
         string $datastoreId,
-        Request $request
+        Request $request,
     ): JsonResponse {
         try {
             $query = $request->query->all();

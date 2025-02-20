@@ -36,7 +36,7 @@ class GeonetworkController extends AbstractController
         $cswMetadata = $this->cswMetadataHelper->fromXml($xml);
 
         $privateLayers = array_filter($cswMetadata->layers, function ($layer) {
-            $parts = parse_url($layer->endpointUrl);
+            $parts = parse_url($layer->gmdOnlineResourceUrl);
 
             return preg_match('/private/', $parts['path']);
         });

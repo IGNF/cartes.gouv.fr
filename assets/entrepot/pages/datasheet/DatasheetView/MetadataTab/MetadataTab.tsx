@@ -189,8 +189,8 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, metadataQuery }) => {
                                     title={layer.name}
                                     content={
                                         <>
-                                            <strong>{"Type"}</strong> : {layer.endpoint_type}
-                                            <TextCopyToClipboard text={layer.endpoint_url ?? ""} />
+                                            <strong>{"Type"}</strong> : {layer.gmd_online_resource_protocol}
+                                            <TextCopyToClipboard text={layer.gmd_online_resource_url ?? ""} />
                                         </>
                                     }
                                 />

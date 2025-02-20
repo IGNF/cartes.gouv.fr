@@ -303,10 +303,10 @@ class CartesMetadataApiService
                     case ConfigurationTypes::WMSRASTER:
                     case ConfigurationTypes::WMSVECTOR:
                         $layerName = $offering['layer_name'];
-                        $endpointTypeOgc = 'OGC:WMS';
+                        $gmdOnlineResourceProtocol = 'OGC:WMS';
                         $endpointUrl = $serviceEndpoint['endpoint']['urls'][0]['url'];
 
-                        $layers[] = new CswMetadataLayer($layerName, $endpointTypeOgc, $endpointUrl, $offering['_id']);
+                        $layers[] = new CswMetadataLayer($layerName, $gmdOnlineResourceProtocol, $endpointUrl, $offering['_id']);
                         break;
 
                     case ConfigurationTypes::WMTSTMS:
@@ -317,14 +317,14 @@ class CartesMetadataApiService
                         }
                         $pyramid = $this->storedDataApiService->get($datastoreId, $configuration['type_infos']['used_data'][0]['stored_data']);
 
-                        $endpointTypeOgc = null;
+                        $gmdOnlineResourceProtocol = null;
                         $actualType = null;
 
                         if (StoredDataTypes::ROK4_PYRAMID_VECTOR === $pyramid['type']) {
-                            $endpointTypeOgc = 'TMS';
+                            $gmdOnlineResourceProtocol = 'TMS';
                             $actualType = 'TMS';
                         } elseif (StoredDataTypes::ROK4_PYRAMID_RASTER === $pyramid['type']) {
-                            $endpointTypeOgc = 'OGC:WMTS';
+                            $gmdOnlineResourceProtocol = 'OGC:WMTS';
                             $actualType = 'WMTS';
                         }
 
@@ -332,7 +332,7 @@ class CartesMetadataApiService
                         $endpoints = array_values($endpoints);
 
                         if (count($endpoints) > 0) {
-                            $layers[] = new CswMetadataLayer($layerName, $endpointTypeOgc, $endpoints[0]['url'], $offering['_id']);
+                            $layers[] = new CswMetadataLayer($layerName, $gmdOnlineResourceProtocol, $endpoints[0]['url'], $offering['_id']);
                         }
 
                         break;
@@ -355,9 +355,9 @@ class CartesMetadataApiService
 
         $relationLayers = array_map(function ($relation) use ($offering, $serviceEndpointUrl) {
             $layerName = sprintf('%s:%s', $offering['layer_name'], $relation['native_name']);
-            $endpointType = 'OGC:WFS';
+            $gmdOnlineResourceProtocol = 'OGC:WFS';
 
-            return new CswMetadataLayer($layerName, $endpointType, $serviceEndpointUrl, $offering['_id']);
+            return new CswMetadataLayer($layerName, $gmdOnlineResourceProtocol, $serviceEndpointUrl, $offering['_id']);
         }, $configRelations);
 
         return $relationLayers;

@@ -324,8 +324,8 @@ export type KeyFormValuesType = {
 
 export type CswMetadataLayer = {
     name?: string;
-    endpoint_type?: string;
-    endpoint_url?: string;
+    gmd_online_resource_protocol?: string;
+    gmd_online_resource_url?: string;
     offering_id?: string;
 };
 
