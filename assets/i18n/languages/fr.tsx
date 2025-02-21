@@ -64,6 +64,8 @@ import { mapboxStyleValidationFrTranslations } from "../../validations/mapbox/Ma
 import { SldStyleValidationErrorsFrTranslations } from "../../validations/sld/SldStyleValidation.locale";
 import { commonFrTranslations } from "../Common.locale";
 import { AlertsFrTranslations } from "../../entrepot/pages/config/Alerts.locale";
+import { KeyValueListFrTranslations } from "@/components/Input/KeyValueList.locale";
+
 import type { Translations } from "../types";
 
 export const translations: Translations<"fr"> = {
@@ -133,4 +135,5 @@ export const translations: Translations<"fr"> = {
     AddMembersDialog: AddMembersDialogFrTranslations,
     ManageGridsDialog: ManageGridsDialogFrTranslations,
     alerts: AlertsFrTranslations,
+    KeyValueList: KeyValueListFrTranslations,
 };

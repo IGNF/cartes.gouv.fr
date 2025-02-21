@@ -66,10 +66,10 @@ class AttributeValidations {
 
     #validateInList = (value: string): yup.ValidationError | boolean => {
         const {
-            parent: { values },
+            parent: { values: v },
         } = this.#context;
 
-        const list: string[] = values ? values.split("|") : [];
+        const list = v.values.map(({ value }) => value || null);
         if (!list.includes(value)) {
             return this.#context.createError({ message: t("dialog.add_attribute.value_not_in_list_error") });
         }
@@ -77,24 +77,4 @@ class AttributeValidations {
     };
 }
 
-const validateList = (value: string | null | undefined, context: yup.TestContext<yup.AnyObject>): yup.ValidationError | boolean => {
-    const {
-        parent: { type },
-    } = context;
-
-    if (type !== "list") {
-        return true;
-    }
-
-    const list: string[] = value ? value.split("|") : [];
-    if (!list.length) {
-        return context.createError({ message: t("dialog.add_attribute.type_list_not_empty_error") });
-    }
-    const duplicates = list.filter((item, index) => list.indexOf(item) !== index);
-    if (duplicates.length) {
-        return context.createError({ message: t("dialog.add_attribute.list_duplicates_error") });
-    }
-    return true;
-};
-
-export { AttributeValidations, validateList };
+export { AttributeValidations };

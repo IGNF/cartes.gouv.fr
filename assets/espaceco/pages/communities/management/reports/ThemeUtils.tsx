@@ -1,4 +1,5 @@
 import { AttributeDTO, AttributeType, ThemeDTO } from "../../../../../@types/espaceco";
+import { KeyValuesForm } from "@/components/Input/KeyValueList";
 
 export type AddOrEditAttributeFormType = {
     name: string;
@@ -7,7 +8,7 @@ export type AddOrEditAttributeFormType = {
     default?: string | null;
     help?: string | null;
     multiple?: boolean;
-    values?: string | null;
+    values: KeyValuesForm;
 };
 
 const normalizeTheme = (theme: ThemeDTO): ThemeDTO => {
@@ -20,19 +21,19 @@ const normalizeTheme = (theme: ThemeDTO): ThemeDTO => {
     return result;
 };
 
-const normalizeAttribute = (attribute: AddOrEditAttributeFormType): AttributeDTO => {
+type FormType = Omit<AddOrEditAttributeFormType, "values"> & { values: (string | null)[] };
+const normalizeAttribute = (attribute: FormType): AttributeDTO => {
     const result: AttributeDTO = {
         name: attribute.name,
         type: attribute.type,
-        values: [],
     };
 
     if (attribute.type === "list") {
-        result.values = attribute.values?.split("|") ?? [];
-    } else if (attribute.default !== "") {
+        result.values = attribute.values;
+    }
+    if (attribute.default !== "") {
         result.default = attribute.default === "" ? null : attribute.default;
     }
-
     if (attribute.help) {
         result.help = attribute.help;
     }

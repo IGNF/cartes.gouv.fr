@@ -20,10 +20,10 @@ type ContributionToolsProps = {
     editableLayers: Record<string, Record<number, PartialCommunityFeatureTypeLayer>>;
     refLayers: Record<RefLayerToolsType, Record<string, Record<number, PartialCommunityFeatureTypeLayer>>>;
     /* Outils d'accrochage ou de plus court chemin */
-    refLayerTools: Record<number, Record<RefLayerToolsType, number[]>>;
+    layerRefTools: Record<number, Record<RefLayerToolsType, number[]>>;
 };
 
-const ContributionTools: FC<ContributionToolsProps> = ({ editableLayers, refLayers, refLayerTools }) => {
+const ContributionTools: FC<ContributionToolsProps> = ({ editableLayers, refLayers, layerRefTools }) => {
     const { t: tLayer } = useTranslation("LayerTools");
     const { register } = useFormContext<ToolsFormType>();
 
@@ -64,8 +64,8 @@ const ContributionTools: FC<ContributionToolsProps> = ({ editableLayers, refLaye
                                         }))}
                                     />
                                     {/* ref tools */}
-                                    {layerId in refLayerTools &&
-                                        Object.keys(refLayerTools[layerId]).map((t) => {
+                                    {layerId in layerRefTools &&
+                                        Object.keys(layerRefTools[layerId]).map((t) => {
                                             return (
                                                 <div key={t}>
                                                     <hr />

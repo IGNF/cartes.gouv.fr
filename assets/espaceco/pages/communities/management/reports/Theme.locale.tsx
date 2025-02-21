@@ -12,6 +12,8 @@ const { i18n } = declareComponentKeys<
     | "configure_autofill"
     | { K: "modify_attribute"; P: { text: string }; R: string }
     | { K: "delete_attribute"; P: { text: string }; R: string }
+    | { K: "dialog.attribute.get_type"; P: { type: string }; R: string }
+    | "dialog.attribute.empty_list_error"
     | "dialog.add_theme.name"
     | "dialog.add_theme.name_mandatory_error"
     | "dialog.add_theme.name_unique_error"
@@ -36,7 +38,6 @@ const { i18n } = declareComponentKeys<
     | "dialog.add_attribute.name_unique_error"
     | "dialog.add_attribute.mandatory"
     | "dialog.add_attribute.type"
-    | { K: "dialog.add_attribute.get_type"; P: { type: string }; R: string }
     | "dialog.add_attribute.list.multiple"
     | "dialog.add_attribute.list.values"
     | "dialog.add_attribute.value"
@@ -44,7 +45,6 @@ const { i18n } = declareComponentKeys<
     | "dialog.add_attribute.value.not_a_valid_double"
     | "dialog.add_attribute.value.not_a_valid_checkbox"
     | "dialog.add_attribute.value.not_a_valid_date"
-    | "dialog.add_attribute.type_list_not_empty_error"
     | "dialog.add_attribute.list_duplicates_error"
     | "dialog.add_attribute.value_not_in_list_error"
     | "dialog.add_attribute.description"
@@ -69,6 +69,25 @@ export const ThemeFrTranslations: Translations<"fr">["Theme"] = {
     configure_autofill: "Paramétrage du remplissage automatique des champs",
     modify_attribute: ({ text }) => `Modifier l'attribut [${text}]`,
     delete_attribute: ({ text }) => `Supprimer l'attribut [${text}]`,
+    "dialog.attribute.get_type": ({ type }) => {
+        switch (type) {
+            case "text":
+                return "Texte";
+            case "integer":
+                return "Entier";
+            case "double":
+                return "Double";
+            case "checkbox":
+                return "Case à cocher";
+            case "list":
+                return "Liste déroulante";
+            case "date":
+                return "Date";
+            default:
+                return "";
+        }
+    },
+    "dialog.attribute.empty_list_error": "La liste de valeurs ne doit pas être vide",
     "dialog.add_theme.name": "Nom du thème",
     "dialog.add_theme.name_mandatory_error": "Le nom du thème est obligatoire",
     "dialog.add_theme.name_unique_error": "Le nom doit être unique",
@@ -92,7 +111,7 @@ export const ThemeFrTranslations: Translations<"fr">["Theme"] = {
     "dialog.add_attribute.name_mandatory_error": "Le nom de l'attribut est obligatoire",
     "dialog.add_attribute.name_unique_error": "Le nom doit être unique",
     "dialog.add_attribute.type": "Type",
-    "dialog.add_attribute.get_type": ({ type }) => {
+    /*"dialog.add_attribute.get_type": ({ type }) => {
         switch (type) {
             case "text":
                 return "Texte";
@@ -109,15 +128,14 @@ export const ThemeFrTranslations: Translations<"fr">["Theme"] = {
             default:
                 return "";
         }
-    },
+    },*/
     "dialog.add_attribute.list.multiple": "Choix multiple",
-    "dialog.add_attribute.list.values": "Valeurs (à séparer par des '|')",
+    "dialog.add_attribute.list.values": "Valeurs possibles",
     "dialog.add_attribute.value": "Valeur par défaut (optionnel sauf pour le type Liste)",
     "dialog.add_attribute.value.not_a_valid_integer": "La valeur n'est pas un entier valide",
     "dialog.add_attribute.value.not_a_valid_double": "La valeur n'est pas un double valide",
     "dialog.add_attribute.value.not_a_valid_checkbox": "La valeur doit être 0 ou 1",
     "dialog.add_attribute.value.not_a_valid_date": "La valeur n'est pas une date valide",
-    "dialog.add_attribute.type_list_not_empty_error": "La liste de valeurs ne doit pas être vide",
     "dialog.add_attribute.list_duplicates_error": "Il y a des valeurs en double dans la liste",
     "dialog.add_attribute.value_not_in_list_error": "La valeur doit être dans la liste",
     "dialog.add_attribute.description": "Description (optionnel)",
@@ -126,7 +144,7 @@ export const ThemeFrTranslations: Translations<"fr">["Theme"] = {
     "dialog.edit_attribute.name_unique_error": "Le nom doit être unique",
     "dialog.edit_attribute.mandatory": "Attribut obligatoire",
     "dialog.edit_attribute.list.multiple": "Choix multiple",
-    "dialog.edit_attribute.list.values": "Valeurs (à séparer par des '|')",
+    "dialog.edit_attribute.list.values": "Valeurs",
     "dialog.edit_attribute.value": "Valeur par défaut (optionnel sauf pour le type Liste)",
     "dialog.edit_attribute.description": "Nouvelle description",
 };
@@ -141,6 +159,25 @@ export const ThemeEnTranslations: Translations<"en">["Theme"] = {
     configure_autofill: undefined,
     modify_attribute: ({ text }) => `Modify attribute [${text}]`,
     delete_attribute: ({ text }) => `Delete attribute [${text}]`,
+    "dialog.attribute.get_type": ({ type }) => {
+        switch (type) {
+            case "text":
+                return "Text";
+            case "integer":
+                return "Integer";
+            case "double":
+                return "Double";
+            case "checkbox":
+                return "Checkbox";
+            case "list":
+                return "List";
+            case "date":
+                return "Date";
+            default:
+                return "";
+        }
+    },
+    "dialog.attribute.empty_list_error": undefined,
     "dialog.add_theme.name": undefined,
     "dialog.add_theme.name_mandatory_error": undefined,
     "dialog.add_theme.name_unique_error": undefined,
@@ -163,24 +200,6 @@ export const ThemeEnTranslations: Translations<"en">["Theme"] = {
     "dialog.add_attribute.name_mandatory_error": undefined,
     "dialog.add_attribute.name_unique_error": undefined,
     "dialog.add_attribute.type": undefined,
-    "dialog.add_attribute.get_type": ({ type }) => {
-        switch (type) {
-            case "text":
-                return "Text";
-            case "integer":
-                return "Integer";
-            case "double":
-                return "Double";
-            case "checkbox":
-                return "Checkbox";
-            case "list":
-                return "List";
-            case "date":
-                return "Date";
-            default:
-                return "";
-        }
-    },
     "dialog.add_attribute.list.multiple": undefined,
     "dialog.add_attribute.list.values": undefined,
     "dialog.add_attribute.value": undefined,
@@ -188,7 +207,6 @@ export const ThemeEnTranslations: Translations<"en">["Theme"] = {
     "dialog.add_attribute.value.not_a_valid_double": undefined,
     "dialog.add_attribute.value.not_a_valid_checkbox": undefined,
     "dialog.add_attribute.value.not_a_valid_date": undefined,
-    "dialog.add_attribute.type_list_not_empty_error": undefined,
     "dialog.add_attribute.list_duplicates_error": undefined,
     "dialog.add_attribute.value_not_in_list_error": undefined,
     "dialog.add_attribute.description": undefined,

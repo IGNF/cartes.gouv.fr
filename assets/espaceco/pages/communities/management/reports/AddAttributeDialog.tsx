@@ -1,3 +1,5 @@
+import KeyValueList, { getKeyValueSchema, KeyValuesForm } from "@/components/Input/KeyValueList";
+import { useKeyValue } from "@/hooks/useKeyValue";
 import { fr } from "@codegouvfr/react-dsfr";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
@@ -6,11 +8,11 @@ import ToggleSwitch from "@codegouvfr/react-dsfr/ToggleSwitch";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FC, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import { useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { AttributeDTO, AttributeType, AttributeTypes } from "../../../../../@types/espaceco";
 import { useTranslation } from "../../../../../i18n/i18n";
-import { AttributeValidations, validateList } from "./AttributeValidations";
+import { AttributeValidations } from "./AttributeValidations";
 import { AddOrEditAttributeFormType, getInputType, normalizeAttribute } from "./ThemeUtils";
 
 type AddAttributeDialogProps = {
@@ -19,17 +21,24 @@ type AddAttributeDialogProps = {
     onAdd: (attribute: AttributeDTO) => void;
 };
 
-const defaultValues: AddOrEditAttributeFormType = {
+const emptyKeyValue: KeyValuesForm = {
+    useKeys: false,
+    values: [],
+};
+
+const getDefautValues = (keyValue: KeyValuesForm): AddOrEditAttributeFormType => ({
     name: "",
     type: "text",
     mandatory: false,
     default: null,
     help: null,
     multiple: false,
-    values: null,
-};
+    values: keyValue,
+});
 
 const AddAttributeDialog: FC<AddAttributeDialogProps> = ({ modal, attributes, onAdd }) => {
+    const { keyValue, transformKeyValue } = useKeyValue([]);
+
     const { t: tCommon } = useTranslation("Common");
     const { t } = useTranslation("Theme");
 
@@ -64,15 +73,22 @@ const AddAttributeDialog: FC<AddAttributeDialogProps> = ({ modal, attributes, on
             }),
         help: yup.string().nullable(),
         multiple: yup.boolean(),
-        values: yup
-            .string()
-            .nullable()
-            .test({
-                name: "check-values",
-                test: (value, context) => {
-                    return validateList(value, context);
-                },
-            }),
+        values: getKeyValueSchema().test({
+            name: "isNotEmpty",
+            message: t("dialog.attribute.empty_list_error"),
+            test: (v, context) => {
+                const {
+                    parent: { type },
+                } = context;
+                return type === "list" ? v.values.length > 0 : true;
+            },
+        }),
+    });
+
+    const form = useForm<AddOrEditAttributeFormType>({
+        mode: "onSubmit",
+        defaultValues: getDefautValues(keyValue),
+        resolver: yupResolver(schema),
     });
 
     const {
@@ -84,11 +100,7 @@ const AddAttributeDialog: FC<AddAttributeDialogProps> = ({ modal, attributes, on
         reset,
         clearErrors,
         handleSubmit,
-    } = useForm<AddOrEditAttributeFormType>({
-        mode: "onSubmit",
-        defaultValues: defaultValues,
-        resolver: yupResolver(schema),
-    });
+    } = form;
 
     const mandatory = watch("mandatory");
     const multiple = watch("multiple");
@@ -97,7 +109,7 @@ const AddAttributeDialog: FC<AddAttributeDialogProps> = ({ modal, attributes, on
         setFormValue("default", "");
         clearErrors(["default", "values"]);
         if (type !== "list") {
-            setFormValue("values", "");
+            setFormValue("values", emptyKeyValue);
             setFormValue("multiple", false);
         }
     }, [type, setFormValue, clearErrors]);
@@ -106,10 +118,18 @@ const AddAttributeDialog: FC<AddAttributeDialogProps> = ({ modal, attributes, on
         setFormValue("type", type);
     }, [setFormValue, type]);
 
+    const resetForm = () => {
+        reset(getDefautValues(emptyKeyValue));
+        setType("text");
+        clearErrors();
+    };
+
     const onSubmit = () => {
         modal.close();
-        onAdd(normalizeAttribute(getFormValues()));
-        reset(defaultValues);
+        const values = transformKeyValue(getFormValues("values")) as (string | null)[];
+        const datas = { ...getFormValues(), values: values };
+        onAdd(normalizeAttribute(datas));
+        resetForm();
     };
 
     return (
@@ -123,7 +143,7 @@ const AddAttributeDialog: FC<AddAttributeDialogProps> = ({ modal, attributes, on
                             priority: "secondary",
                             doClosesModal: false,
                             onClick: () => {
-                                reset(defaultValues);
+                                resetForm();
                                 modal.close();
                             },
                         },
@@ -135,79 +155,74 @@ const AddAttributeDialog: FC<AddAttributeDialogProps> = ({ modal, attributes, on
                         },
                     ]}
                 >
-                    <div>
-                        <p>{tCommon("mandatory_fields")}</p>
-                        <Input
-                            label={t("dialog.add_attribute.name")}
-                            state={errors.name ? "error" : "default"}
-                            stateRelatedMessage={errors?.name?.message}
-                            nativeInputProps={{
-                                ...register("name"),
-                            }}
-                        />
-                        <RadioButtons // Ne fonctionne pas avec register ??????
-                            legend={t("dialog.add_attribute.type")}
-                            options={AttributeTypes.map((attrType) => ({
-                                label: t("dialog.add_attribute.get_type", { type: attrType }),
-                                nativeInputProps: {
-                                    checked: attrType === type,
-                                    onChange: () => setType(attrType),
-                                },
-                            }))}
-                            orientation={"horizontal"}
-                            state={errors.type ? "error" : "default"}
-                            stateRelatedMessage={errors?.type?.message}
-                        />
-                        <ToggleSwitch
-                            className={fr.cx("fr-mb-3w")}
-                            inputTitle={""}
-                            label={t("dialog.add_attribute.mandatory")}
-                            showCheckedHint
-                            checked={mandatory}
-                            onChange={(checked) => {
-                                setFormValue("mandatory", checked);
-                            }}
-                        />
-                        {type === "list" && (
-                            <>
-                                <Input
-                                    label={t("dialog.add_attribute.list.values")}
-                                    state={errors.values ? "error" : "default"}
-                                    stateRelatedMessage={errors?.values?.message}
-                                    nativeInputProps={{
-                                        ...register("values"),
-                                    }}
-                                />
-                                <ToggleSwitch
-                                    className={fr.cx("fr-mb-3w")}
-                                    inputTitle={""}
-                                    label={t("dialog.add_attribute.list.multiple")}
-                                    showCheckedHint
-                                    checked={multiple}
-                                    onChange={(checked) => {
-                                        setFormValue("multiple", checked);
-                                    }}
-                                />
-                            </>
-                        )}
-                        <Input
-                            label={t("dialog.add_attribute.value")}
-                            state={errors.default ? "error" : "default"}
-                            stateRelatedMessage={errors?.default?.message}
-                            nativeInputProps={{
-                                type: getInputType(type),
-                                ...register("default"),
-                            }}
-                        />
-                        <Input
-                            label={t("dialog.add_attribute.description")}
-                            state={errors.help ? "error" : "default"}
-                            stateRelatedMessage={errors?.help?.message}
-                            nativeInputProps={{
-                                ...register("help"),
-                            }}
-                        />
-                    </div>
+                    <FormProvider {...form}>
+                        <div>
+                            <p>{tCommon("mandatory_fields")}</p>
+                            <Input
+                                label={t("dialog.add_attribute.name")}
+                                state={errors.name ? "error" : "default"}
+                                stateRelatedMessage={errors?.name?.message}
+                                nativeInputProps={{
+                                    ...register("name"),
+                                }}
+                            />
+                            <RadioButtons // Ne fonctionne pas avec register ??????
+                                legend={t("dialog.add_attribute.type")}
+                                options={AttributeTypes.map((attrType) => ({
+                                    label: t("dialog.attribute.get_type", { type: attrType }),
+                                    nativeInputProps: {
+                                        checked: attrType === type,
+                                        onChange: () => setType(attrType),
+                                    },
+                                }))}
+                                orientation={"horizontal"}
+                                state={errors.type ? "error" : "default"}
+                                stateRelatedMessage={errors?.type?.message}
+                            />
+                            <ToggleSwitch
+                                className={fr.cx("fr-mb-3w")}
+                                inputTitle={""}
+                                label={t("dialog.add_attribute.mandatory")}
+                                showCheckedHint
+                                checked={mandatory}
+                                onChange={(checked) => {
+                                    setFormValue("mandatory", checked);
+                                }}
+                            />
+                            {type === "list" && (
+                                <>
+                                    <KeyValueList label={t("dialog.add_attribute.list.values")} name={"values"} />
+                                    <ToggleSwitch
+                                        className={fr.cx("fr-mb-3w")}
+                                        inputTitle={""}
+                                        label={t("dialog.add_attribute.list.multiple")}
+                                        showCheckedHint
+                                        checked={multiple}
+                                        onChange={(checked) => {
+                                            setFormValue("multiple", checked);
+                                        }}
+                                    />
+                                </>
+                            )}
+                            <Input
+                                label={t("dialog.add_attribute.value")}
+                                state={errors.default ? "error" : "default"}
+                                stateRelatedMessage={errors?.default?.message}
+                                nativeInputProps={{
+                                    type: getInputType(type),
+                                    ...register("default"),
+                                }}
+                            />
+                            <Input
+                                label={t("dialog.add_attribute.description")}
+                                state={errors.help ? "error" : "default"}
+                                stateRelatedMessage={errors?.help?.message}
+                                nativeInputProps={{
+                                    ...register("help"),
+                                }}
+                            />
+                        </div>
+                    </FormProvider>
                 </modal.Component>,
                 document.body
             )}

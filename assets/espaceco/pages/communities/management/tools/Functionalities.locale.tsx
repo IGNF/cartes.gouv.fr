@@ -45,51 +45,9 @@ export const FunctionalitiesFrTranslations: Translations<"fr">["Functionalities"
                 return "Soumettre un signalement";
         }
     },
-    /* display_tools_label: ({ tool }) => {
-        switch (tool) {
-            case "zoom_control":
-                return "Afficher les boutons de zoom";
-            case "rotate_control":
-                return "Rotation de la carte";
-            case "overviewmap_control":
-                return "Afficher une carte de localisation";
-            case "print":
-                return "Impression PDF/PNG";
-        }
-    },*/
     navigation_tools: "Navigation",
-    /* navigation_tools_label: ({ tool }) => {
-        switch (tool) {
-            case "search_address":
-                return "Recherche de lieu ou d'adresse";
-            case "search_lonlat":
-                return "Recherche par coordonnées";
-            case "locate_control":
-                return "Se localiser";
-            case "search":
-                return "Rechercher par attributs";
-            case "save_positions":
-                return "Sauvegarder les positions préférées";
-        }
-    }, */
     report_tools: "Signalement",
-    /* report_tools_label: ({ tool }) => {
-        switch (tool) {
-            case "georem":
-                return "Soumettre un signalement";
-        }
-    }, */
     measure_tools: "Mesure",
-    /* measure_tools_label: ({ tool }) => {
-        switch (tool) {
-            case "measure_distance":
-                return "Mesurer une distance";
-            case "measure_area":
-                return "Mesurer une surface";
-            case "measure_azimut":
-                return "Mesurer un azimut";
-        }
-    }, */
 };
 
 export const FunctionalitiesEnTranslations: Translations<"en">["Functionalities"] = {

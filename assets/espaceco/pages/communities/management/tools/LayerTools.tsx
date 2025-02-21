@@ -1,13 +1,19 @@
 import { CommunityFeatureTypeLayer, LayerGeometryType, PartialCommunityFeatureTypeLayer } from "@/@types/app_espaceco";
-import { LayerTools, LayerToolsType, RefLayerToolsType } from "@/@types/espaceco";
+import { LayerToolsType, RefLayerToolsType } from "@/@types/espaceco";
+
+const allTypesTools: LayerToolsType[] = ["draw", "translate", "delete", "snap_mandatory", "copy_paste"];
 
 const getAvailableTools = (geometryType: LayerGeometryType): LayerToolsType[] => {
     switch (geometryType) {
         case "Point":
         case "MultiPoint":
-            return ["draw", "translate", "delete", "copy_paste"];
-        default:
-            return [...LayerTools];
+            return allTypesTools;
+        case "LineString":
+        case "MultiLineString":
+            return [...allTypesTools, "modify", "split"];
+        case "Polygon":
+        case "MultiPolygon":
+            return [...allTypesTools, "modify"];
     }
 };
 
@@ -43,7 +49,7 @@ const getEditableLayers = (layers?: Record<string, CommunityFeatureTypeLayer[]>)
                 table_name: l.table_name,
                 geometry_type: l.geometry_type,
                 tools: l.tools?.filter((t) => availables.includes(t)) ?? [],
-                ref_tools: l.ref_tools,
+                ref_tools: Array.isArray(l.ref_tools) && l.ref_tools.length === 0 ? {} : l.ref_tools,
             };
             return accumulator;
         }, {});
@@ -63,12 +69,30 @@ const getRefLayers = (
     const availableGeometries: LayerGeometryType[] =
         tool === "snap" ? ["LineString", "MultiLineString", "Polygon", "MultiPolygon"] : ["LineString", "MultiLineString"];
 
+    const s = Object.entries(layers).reduce((accumulator, [dbname, layers]) => {
+        const lays = layers.reduce((acc, l) => {
+            if (availableGeometries.includes(l.geometry_type)) {
+                acc[l.id] = {
+                    database_name: l.database_name,
+                    table_name: l.table_name,
+                    geometry_type: l.geometry_type,
+                };
+            }
+            return acc;
+        }, {});
+        if (Object.keys(lays).length) {
+            accumulator[dbname] = lays;
+        }
+        return accumulator;
+    }, {});
+    console.log("SSSSS : ", s);
+
     return Object.values(layers).reduce((accumulator, array) => {
         const lays = array.reduce((acc, l) => {
             if (availableGeometries.includes(l.geometry_type)) {
                 acc[l.id] = {
                     table_name: l.table_name,
-                    geometry_type: l.geometry_type,
+                    //geometry_type: l.geometry_type,
                 };
             }
             return acc;
@@ -109,4 +133,4 @@ const getRefTools = (editableLayers: Record<string, Record<number, PartialCommun
     return refTools;
 };
 
-export { getEditableLayers, getRefLayers, getAvailableTools, getAvailableRefTools, getLayerTools, getRefTools };
+export { getAvailableRefTools, getAvailableTools, getEditableLayers, getLayerTools, getRefLayers, getRefTools };

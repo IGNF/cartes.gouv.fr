@@ -61,7 +61,10 @@ const EditTools: FC<EditToolsProps> = ({ mode, community, onPrevious, onSubmit }
     const values = getToolsDefaultValues(community, editableLayers) as ToolsFormType;
 
     const layerTools = values.layer_tools;
-    const refLayerTools = values.ref_tools;
+    const layerRefTools = values.ref_tools;
+    console.log("EDITABLELAYERS : ", editableLayers);
+    console.log("REFLAYERS : ", refLayers);
+    // console.log("LAYERREFTOOLS : ", layerRefTools);
 
     const schema = yup.object({
         functionalities: yup.array().of(yup.string().oneOf(allFunctionalities).required()).required(),
@@ -82,7 +85,7 @@ const EditTools: FC<EditToolsProps> = ({ mode, community, onPrevious, onSubmit }
         }),
         ref_tools: yup.lazy(() => {
             const layersSchema = {};
-            Object.keys(refLayerTools).forEach((id) => {
+            Object.keys(layerRefTools).forEach((id) => {
                 layersSchema[id] = yup.array().of(yup.number().required()).required();
             });
             return yup.object().shape(layersSchema);
@@ -119,7 +122,7 @@ const EditTools: FC<EditToolsProps> = ({ mode, community, onPrevious, onSubmit }
                         <h2>{t("simple_tools_title")}</h2>
                         <SimpleLayerTools />
                         <h2>{tLayer("direct_contribution_tools")}</h2>
-                        <ContributionTools editableLayers={editableLayers} refLayers={refLayers} refLayerTools={refLayerTools} />
+                        <ContributionTools editableLayers={editableLayers} refLayers={refLayers} layerRefTools={layerRefTools} />
                         {mode === "edition" ? (
                             <div className="fr-grid-row fr-grid-row--right">
                                 <Button priority={"primary"} onClick={() => handleSubmit(() => onSubmitForm(true))()}>
