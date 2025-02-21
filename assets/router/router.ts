@@ -106,7 +106,13 @@ const datastoreRoutes = {
     ),
 
     // fiche de données
-    datasheet_list: datastoreRoute.extend("/donnees"),
+    datasheet_list: datastoreRoute.extend(
+        {
+            page: param.query.optional.number.default(1),
+            limit: param.query.optional.number.default(20),
+        },
+        () => "/donnees"
+    ),
     datastore_datasheet_upload: datastoreRoute.extend(
         {
             datasheetName: param.query.optional.string,
