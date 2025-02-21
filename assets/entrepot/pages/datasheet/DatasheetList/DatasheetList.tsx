@@ -163,13 +163,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                         allowEmptySearch={true}
                         big
                         renderInput={({ className, id, placeholder, type }) => (
-                            <input
-                                className={className}
-                                id={id}
-                                placeholder={placeholder}
-                                type={type}
-                                disabled={isLoading}
-                            />
+                            <input className={className} id={id} placeholder={placeholder} type={type} disabled={isLoading} />
                         )}
                     />
                 </div>
