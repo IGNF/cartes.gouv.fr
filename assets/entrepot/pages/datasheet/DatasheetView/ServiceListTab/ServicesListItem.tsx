@@ -12,11 +12,12 @@ import OfferingStatusBadge from "../../../../../components/Utils/Badges/Offering
 import Wait from "../../../../../components/Utils/Wait";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import { routes } from "../../../../../router/router";
-import { useSnackbarStore } from "../../../../../stores/SnackbarStore";
 import { offeringTypeDisplayName } from "../../../../../utils";
 import api from "../../../../api";
 import ServiceDesc from "./ServiceDesc";
 import ListItem from "../ListItem";
+import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
+import { useSnackbarStore } from "@/stores/SnackbarStore";
 
 type ServicesListItemProps = {
     service: Service;
@@ -25,8 +26,8 @@ type ServicesListItemProps = {
 };
 const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, datastoreId }) => {
     const queryClient = useQueryClient();
-
     const setMessage = useSnackbarStore((state) => state.setMessage);
+    const { copied, copy } = useCopyToClipboard();
 
     const unpublishServiceConfirmModal = createModal({
         id: `unpublish-service-confirm-modal-${service._id}`,
@@ -67,15 +68,14 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                 date={service?.configuration?.last_event?.date}
                 menuListItems={[
                     {
+                        autoClose: false,
                         text: "Copier l’URL de diffusion",
-                        iconId: "ri-file-copy-2-line",
+                        iconId: copied ? "fr-icon-check-line" : "ri-file-copy-line",
                         onClick: async () => {
                             if (!service.share_url) {
                                 setMessage("URL de diffusion indisponible");
                             } else {
-                                await navigator.clipboard.writeText(service.share_url);
-
-                                setMessage("URL copiée");
+                                copy(service.share_url);
                             }
                         },
                     },

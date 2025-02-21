@@ -29,11 +29,12 @@ const DiffuseServiceTab: FC<DiffuseServiceTabProps> = ({ service }) => {
             <TextCopyToClipboard text={"<iframe width='600' height='40..."} className="fr-mb-4w" disabled /> */}
 
             {/* Adresse du service de données */}
-            <div className={fr.cx("fr-grid-row")}>
-                <strong>Adresse du service de données</strong>
-            </div>
-
-            <TextCopyToClipboard text={service?.share_url ?? "Indisponible"} disabled={!service?.share_url} className="fr-mb-1w" />
+            <TextCopyToClipboard
+                label="Adresse du service de données"
+                text={service?.share_url ?? "Indisponible"}
+                disabled={!service?.share_url}
+                className="fr-mb-1w"
+            />
 
             {currentStyleLayers && (
                 <>
@@ -42,13 +43,13 @@ const DiffuseServiceTab: FC<DiffuseServiceTabProps> = ({ service }) => {
                     </div>
                     {currentStyleLayers?.map((layer) => (
                         <div key={layer.annexe_id} className={fr.cx("fr-mt-2v")}>
-                            <span>
-                                {(() => {
+                            <TextCopyToClipboard
+                                label={(() => {
                                     const splitLayerName = layer.name?.split(":");
                                     return splitLayerName?.[1] ?? splitLayerName?.[0] ?? layer.name;
                                 })()}
-                            </span>
-                            <TextCopyToClipboard text={layer.url} successMessage="URL copiée" />
+                                text={layer.url}
+                            />
                         </div>
                     ))}
                 </>

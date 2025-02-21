@@ -1,9 +1,8 @@
-import { fr } from "@codegouvfr/react-dsfr";
-import Button from "@codegouvfr/react-dsfr/Button";
-import { Slide, SlideProps, Snackbar } from "@mui/material";
-import { FC, memo } from "react";
+import { Slide, SlideProps, Snackbar, SnackbarCloseReason } from "@mui/material";
+import { FC, memo, useEffect, useState } from "react";
 
 import { useSnackbarStore } from "../../stores/SnackbarStore";
+import Alert from "@codegouvfr/react-dsfr/Alert";
 
 function SlideTransition(props: SlideProps) {
     return <Slide {...props} direction="up" />;
@@ -11,40 +10,40 @@ function SlideTransition(props: SlideProps) {
 
 const SnackbarMessage: FC = () => {
     const message = useSnackbarStore((state) => state.message);
-    const messageUuid = useSnackbarStore((state) => state.messageUuid);
-    const clearMessage = useSnackbarStore((state) => state.clearMessage);
+    const [open, setOpen] = useState(false);
 
-    const handleClose = (_: React.SyntheticEvent | Event, reason?: string) => {
-        if (reason === "clickaway") {
-            return;
+    useEffect(() => {
+        if (message?.id) {
+            setOpen(true);
+        } else {
+            setOpen(false);
         }
+    }, [message?.id]);
 
-        clearMessage();
-    };
+    function handleClose(_, reason: SnackbarCloseReason) {
+        if (reason !== "clickaway") {
+            close();
+        }
+    }
+
+    function close() {
+        setOpen(false);
+    }
 
     return (
-        message && (
-            <Snackbar key={`${message}_${messageUuid}`} open={!!message} autoHideDuration={6000} onClose={handleClose} TransitionComponent={SlideTransition}>
-                <div
-                    style={{
-                        border: "solid 1.5px",
-                        borderColor: fr.colors.decisions.border.actionHigh.blueFrance.default,
-                        backgroundColor: fr.colors.decisions.background.contrast.grey.default,
-                    }}
-                    className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-px-2v", "fr-py-1v")}
-                >
-                    <span
-                        style={{
-                            color: fr.colors.decisions.text.actionHigh.blueFrance.default,
-                        }}
-                    >
-                        {message}
-                    </span>
-                    &nbsp;
-                    <Button priority="tertiary no outline" title="Fermer" iconId="ri-close-line" onClick={handleClose} />
-                </div>
-            </Snackbar>
-        )
+        <Snackbar key={message?.id ?? "empty"} autoHideDuration={6000} open={open} TransitionComponent={SlideTransition} onClose={handleClose}>
+            {message ? (
+                <Alert
+                    closable
+                    description={message.description}
+                    isClosed={false}
+                    severity={message.severity ?? "success"}
+                    title={message.title}
+                    onClose={close}
+                    style={{ backgroundColor: "var(--background-default-grey)" }}
+                />
+            ) : undefined}
+        </Snackbar>
     );
 };
 

@@ -8,6 +8,7 @@ import { FC, memo, MouseEvent, useId, useMemo, useState } from "react";
 import { symToStr } from "tsafe/symToStr";
 
 type MenuListItemCommon = {
+    autoClose?: boolean;
     disabled?: boolean;
     text: string;
     iconId?: FrIconClassName | RiIconClassName;
@@ -98,7 +99,9 @@ const MenuList: FC<MenuListProps> = ({ menuOpenButtonProps, items = [], disabled
                                 <MenuItem
                                     key={i}
                                     onClick={(e: MouseEvent<HTMLElement>) => {
-                                        handleClose();
+                                        if (item.autoClose !== false) {
+                                            handleClose();
+                                        }
                                         item.onClick?.(e);
                                     }}
                                     disabled={item.disabled}
