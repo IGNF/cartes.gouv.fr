@@ -3,7 +3,6 @@ import { Upload } from "@codegouvfr/react-dsfr/Upload";
 import { FC } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { getTranslation } from "../../../../../i18n/i18n";
-import { Alert } from "@codegouvfr/react-dsfr/Alert";
 
 type UploadLayerStylesProps = {
     form: UseFormReturn;
@@ -22,7 +21,6 @@ const UploadLayerStyles: FC<UploadLayerStylesProps> = ({ form, format, layers })
     return (
         <>
             <p>{t("add_file", { format: format })}</p>
-            {format === "qml" && <Alert className={fr.cx("fr-mb-3v")} closable={false} description={t("qml_message")} severity="warning" small />}
             {Object.keys(layers).map((uid) => {
                 return (
                     <div key={uid} className={fr.cx("fr-grid-row", "fr-mb-3w")}>
