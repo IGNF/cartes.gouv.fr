@@ -172,6 +172,9 @@ class ServiceController extends AbstractController implements ApiControllerInter
         $this->datastoreApiService->addPermission($datastoreId, $permissionRequestBody);
     }
 
+    /**
+     * @param array<mixed> $offering
+     */
     protected function addPermissionForCommunity(string $producerDatastoreId, string $consumerCommunityId, array $offering): void
     {
         $endDate = new \DateTime();
