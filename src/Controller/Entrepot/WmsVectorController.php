@@ -41,7 +41,7 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
         private CapabilitiesService $capabilitiesService,
         protected Filesystem $filesystem,
         private CartesMetadataApiService $cartesMetadataApiService,
-        SandboxService $sandboxService
+        SandboxService $sandboxService,
     ) {
         parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $capabilitiesService, $cartesMetadataApiService, $sandboxService);
     }
@@ -51,7 +51,7 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
         string $datastoreId,
         string $storedDataId,
         // #[MapRequestPayload] WmsVectorAddDTO $dto, // TODO : MapRequestPayload ne marche pas avec FormData (envoyé par js), essayer de trouver une solution
-        Request $request
+        Request $request,
     ): JsonResponse {
         $data = $request->request->all();
         $files = $request->files->all(); // les fichiers de style .sld
@@ -98,6 +98,12 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
                 $this->addPermissionForCurrentCommunity($datastoreId, $offering);
             }
 
+            // création d'une permission pour la communauté config
+            if (true === $data['allow_view_data']) {
+                $communityId = $this->getParameter('config')['community_id'];
+                $this->addPermissionForCommunity($datastoreId, $communityId, $offering);
+            }
+
             // Création ou mise à jour du capabilities
             try {
                 $this->capabilitiesService->createOrUpdate($datastoreId, $endpoint, $offering['urls'][0]['url']);
@@ -128,7 +134,7 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
         string $datastoreId,
         string $storedDataId,
         string $offeringId,
-        Request $request
+        Request $request,
     ): JsonResponse {
         $data = $request->request->all();
         $files = $request->files->all(); // les fichiers de style .sld

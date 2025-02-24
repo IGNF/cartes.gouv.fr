@@ -159,6 +159,12 @@ class PyramidRasterController extends ServiceController implements ApiController
                 $this->addPermissionForCurrentCommunity($datastoreId, $offering);
             }
 
+            // création d'une permission pour la communauté config
+            if (true === $data['allow_view_data']) {
+                $communityId = $this->getParameter('config')['community_id'];
+                $this->addPermissionForCommunity($datastoreId, $communityId, $offering);
+            }
+
             // Création ou mise à jour du capabilities
             try {
                 if (ConfigurationTypes::WMSRASTER === $configuration['type']) {

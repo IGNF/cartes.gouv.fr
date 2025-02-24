@@ -77,6 +77,9 @@ class PublishPyramidDTO
             'message' => 'common.share_with_error',
         ])]
         public readonly string $share_with,
+
+        #[Assert\Type('bool')]
+        public readonly bool $allow_view_data,
     ) {
     }
 }

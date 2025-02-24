@@ -154,6 +154,12 @@ class PyramidVectorController extends ServiceController implements ApiController
                 $this->addPermissionForCurrentCommunity($datastoreId, $offering);
             }
 
+            // création d'une permission pour la communauté config
+            if (true === $dto->allow_view_data) {
+                $communityId = $this->getParameter('config')['community_id'];
+                $this->addPermissionForCommunity($datastoreId, $communityId, $offering);
+            }
+
             // création ou mise à jour de metadata
             $formData = json_decode(json_encode($dto), true);
             if ($this->sandboxService->isSandboxDatastore($datastoreId)) {

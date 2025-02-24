@@ -77,6 +77,12 @@ class WfsController extends ServiceController implements ApiControllerInterface
                 $this->addPermissionForCurrentCommunity($datastoreId, $offering);
             }
 
+            // création d'une permission pour la communauté config
+            if (true === $dto->allow_view_data) {
+                $communityId = $this->getParameter('config')['community_id'];
+                $this->addPermissionForCommunity($datastoreId, $communityId, $offering);
+            }
+
             // Création ou mise à jour du capabilities
             try {
                 $this->capabilitiesService->createOrUpdate($datastoreId, $endpoint, $offering['urls'][0]['url']);

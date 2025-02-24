@@ -9,6 +9,7 @@ import { DatastoreEndpoint, EndpointTypeEnum, Service, ServiceFormValuesBaseType
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import api from "../../../../api";
+import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 
 type AccessRestrictionProps = {
     datastoreId: string;
@@ -24,10 +25,13 @@ const AccessRestrictions: FC<AccessRestrictionProps> = ({ datastoreId, endpointT
 
     const {
         register,
+        setValue,
         formState: { errors },
         watch,
     } = form;
 
+    const allowViewData = watch("allow_view_data");
+    console.log(typeof allowViewData);
     const shareWith = watch("share_with");
 
     const endpointsQuery = useQuery<DatastoreEndpoint[]>({
@@ -84,6 +88,25 @@ const AccessRestrictions: FC<AccessRestrictionProps> = ({ datastoreId, endpointT
                     },
                 ]}
             />
+
+            {shareWith === "your_community" && import.meta.env.CONFIG_COMMUNITY_ID && (
+                <Checkbox
+                    className={fr.cx("fr-ml-5v")}
+                    options={[
+                        {
+                            label: t("allow_view_data"),
+                            nativeInputProps: {
+                                onChange: (e) => {
+                                    const checked = e.currentTarget.checked;
+                                    setValue("allow_view_data", checked);
+                                },
+                                checked: allowViewData === true,
+                                value: "allowViewData",
+                            },
+                        },
+                    ]}
+                />
+            )}
 
             {/* message d'avertissement quand on passe de restreint à tout public, car cela va supprimer toutes les permissions sur ce service */}
             {service?.open === false && shareWith === "all_public" && (

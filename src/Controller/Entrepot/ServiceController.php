@@ -172,6 +172,24 @@ class ServiceController extends AbstractController implements ApiControllerInter
         $this->datastoreApiService->addPermission($datastoreId, $permissionRequestBody);
     }
 
+    protected function addPermissionForCommunity(string $producerDatastoreId, string $consumerCommunityId, array $offering): void
+    {
+        $endDate = new \DateTime();
+        $endDate->add(new \DateInterval('P3M')); // date du jour + 3 mois
+        $endDate->setTime(23, 59, 0);
+
+        $permissionRequestBody = [
+            'end_date' => $endDate->format(\DateTime::ATOM),
+            'licence' => sprintf('Utilisation de %s', $offering['layer_name']),
+            'offerings' => [$offering['_id']],
+            'type' => PermissionTypes::COMMUNITY,
+            'only_oauth' => false,
+            'communities' => [$consumerCommunityId],
+        ];
+
+        $this->datastoreApiService->addPermission($producerDatastoreId, $permissionRequestBody);
+    }
+
     /**
      * @param array<mixed> $pyramid
      *
