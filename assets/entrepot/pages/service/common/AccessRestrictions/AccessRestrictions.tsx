@@ -31,7 +31,6 @@ const AccessRestrictions: FC<AccessRestrictionProps> = ({ datastoreId, endpointT
     } = form;
 
     const allowViewData = watch("allow_view_data");
-    console.log(typeof allowViewData);
     const shareWith = watch("share_with");
 
     const endpointsQuery = useQuery<DatastoreEndpoint[]>({
