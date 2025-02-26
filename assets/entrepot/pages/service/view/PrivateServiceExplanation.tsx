@@ -1,51 +1,60 @@
-import { useTranslation } from "@/i18n";
 import { routes } from "@/router/router";
+
+import { fr } from "@codegouvfr/react-dsfr";
+import { Button } from "@codegouvfr/react-dsfr/Button";
+
+import ovoidSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/background/ovoid.svg";
+import locationFranceSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/map/location-france.svg";
 
 type PrivateServiceExplanationProps = {
     datastoreId: string;
 };
 function PrivateServiceExplanation({ datastoreId }: PrivateServiceExplanationProps) {
-    const { t: tCommon } = useTranslation("Common");
-
     return (
-        <>
-            <p>
-                Ce service est privé et ne peut pas être visualisé directement sur cartes.gouv.fr. Cependant, il peut être visualisé dans un Système
-                d’Information Géographique (SIG). Pour ce faire, vous devez d’abord créer une permission et ensuite créer une clé d’accès.
-            </p>
-            <p>
-                Si le service a été créé sur cartes.gouv.fr, une permission a été automatiquement créée pour la communauté courante. Sinon, vous pouvez en créer
-                une pour votre communauté soit en utilisant <a {...routes.datastore_add_permission({ datastoreId }).link}>ce formulaite</a>, soit en passant par
-                l’API Entrepôt en suivant ce tutoriel :{" "}
-                <a
-                    href="https://geoplateforme.github.io/tutoriels/production/controle-des-acces/diffusion/permission/"
-                    target="_blank"
-                    rel="noreferrer"
-                    title={tCommon("new_window")}
-                >
-                    Gestion des permissions
-                </a>
-                . Vous pouvez consulter vos permissions sur la page <a {...routes.my_permissions().link}>Mes permissions</a>.
-            </p>
+        <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-grid-row--center", "fr-grid-row--middle")}>
+            <div className={fr.cx("fr-py-0", "fr-col-12", "fr-col-md-6")}>
+                <p className={fr.cx("fr-text--lead", "fr-mb-3w")}>Ce service est privé et ne peux donc pas être affiché sur cartes.gouv.fr.</p>
 
-            <p>
-                Ensuite, vous devez créer une clé d’accès soit en utilisant <a {...routes.user_key_add().link}>ce formulaite</a>, soit en passant par l’API
-                Entrepôt en suivant ce tutoriel :{" "}
-                <a
-                    href="https://geoplateforme.github.io/tutoriels/production/controle-des-acces/diffusion/cle/"
-                    target="_blank"
-                    rel="noreferrer"
-                    title={tCommon("new_window")}
+                <p className={fr.cx("fr-text--sm")}>
+                    Vous pouvez utiliser un logiciel SIG (Système d’Information Géographique) pour le visualiser. Au préalable vous devez créer une clé d’accès
+                    ou modifier une de vos clés d’accès existantes.
+                </p>
+
+                <p className={fr.cx("fr-text--sm", "fr-mb-5w")}>
+                    Pour donner accès à d’autres personnes, vous pouvez leur donner une permission individuelle ou donner une permission à une communauté dont
+                    elles sont membres. Elles pourront ensuite configurer leurs propres clés.
+                </p>
+
+                <ul className={fr.cx("fr-btns-group", "fr-btns-group--inline-md")}>
+                    <li>
+                        <Button {...routes.my_access_keys().link}>Ajouter ou modifier une clé d’accès</Button>
+                    </li>
+                    <li>
+                        <Button {...routes.datastore_add_permission({ datastoreId }).link} className={fr.cx("fr-btn--secondary")}>
+                            Configurer des permissions
+                        </Button>
+                    </li>
+                </ul>
+            </div>
+            <div className={fr.cx("fr-col-12", "fr-col-md-3", "fr-col-offset-md-1", "fr-px-6w", "fr-px-md-0", "fr-py-0")}>
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className={"fr-responsive-img fr-artwork"}
+                    aria-hidden="true"
+                    width="160"
+                    height="200"
+                    viewBox="0 0 160 200"
                 >
-                    Gestion des clés
-                </a>
-                . Vous pouvez consulter vos clés sur la page <a {...routes.my_access_keys().link}>Mes clés d’accès</a>.
-            </p>
-            <p>
-                Vous pouvez ensuite récupérer l’URL du service avec la clé sur la page Mes clés d’accès et l’utiliser pour visualiser votre service privé dans
-                un SIG.
-            </p>
-        </>
+                    <use className={fr.cx("fr-artwork-motif")} href={`${ovoidSvgUrl}#artwork-motif`} />
+                    <use className={fr.cx("fr-artwork-background")} href={`${ovoidSvgUrl}#artwork-background`} />
+                    <g transform="translate(40, 60)">
+                        <use className={fr.cx("fr-artwork-decorative")} href={`${locationFranceSvgUrl}#artwork-decorative`} />
+                        <use className={fr.cx("fr-artwork-minor")} href={`${locationFranceSvgUrl}#artwork-minor`} />
+                        <use className={fr.cx("fr-artwork-major")} href={`${locationFranceSvgUrl}#artwork-major`} />
+                    </g>
+                </svg>
+            </div>
+        </div>
     );
 }
 
