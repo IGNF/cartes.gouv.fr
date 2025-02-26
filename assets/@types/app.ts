@@ -251,6 +251,7 @@ export type AttributionFormValuesType = {
 export type ServiceFormValuesBaseType = {
     technical_name?: string;
     public_name?: string;
+    service_name?: string;
     description?: string;
     share_with?: string;
     allow_view_data?: boolean;

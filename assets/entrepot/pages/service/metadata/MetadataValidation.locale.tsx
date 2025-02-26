@@ -6,6 +6,7 @@ const { i18n } = declareComponentKeys<
     | "metadatas.technical_name_regex"
     | "metadatas.technical_name_unicity_error"
     | "metadatas.public_name_error"
+    | "metadatas.service_name_error"
     | "metadatas.description_error"
     | "metadatas.identifier_error"
     | "metadatas.identifier_regex"
@@ -34,6 +35,7 @@ export const ValidationMetadatasFrTranslations: Translations<"fr">["ValidationMe
         "Le nom technique doit commencer par une lettre ou un underscore et ne doit contenir que des lettres, chiffres, tirets (-), underscores (_), ou points (.)",
     "metadatas.technical_name_unicity_error": "Ce nom technique existe déjà",
     "metadatas.public_name_error": "L’intitulé (nom public) est obligatoire",
+    "metadatas.service_name_error": "Le titre du service est obligatoire",
     "metadatas.description_error": "Un résumé est obligatoire",
     "metadatas.identifier_error": "L’identificateur est obligatoire",
     "metadatas.identifier_regex": "L’identificateur ne doit contenir que des lettres, chiffres, tirets (-), underscores (_), ou points (.)",
@@ -61,6 +63,7 @@ export const ValidationMetadatasEnTranslations: Translations<"en">["ValidationMe
         "Technical name must start with a letter or an underscore and must contain only letters, numbers, hyphens (-), underscores (_), or dots (.)",
     "metadatas.technical_name_unicity_error": "This technical name already exists",
     "metadatas.public_name_error": "Title (public name) is required",
+    "metadatas.service_name_error": undefined,
     "metadatas.description_error": "A summary is required",
     "metadatas.identifier_error": "Identifier is required",
     "metadatas.identifier_regex": "Identifier must contain only letters, numbers, hyphens (-), underscores (_), or dots (.)",
