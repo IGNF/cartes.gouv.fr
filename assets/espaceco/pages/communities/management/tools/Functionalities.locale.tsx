@@ -1,11 +1,11 @@
-import { DisplayToolsType, MeasureToolsType, NavigationToolsType, ReportToolsType } from "@/@types/app_espaceco";
+import { DisplayTools, MeasureTools, NavigationTools, ReportTools } from "@/@types/app_espaceco";
 import { declareComponentKeys } from "@/i18n/i18n";
 import { Translations } from "@/i18n/types";
 
 const { i18n } = declareComponentKeys<
     | "simple_tools_title"
     | "display_tools"
-    | { K: "tools_label"; P: { tool: DisplayToolsType | NavigationToolsType | MeasureToolsType | ReportToolsType }; R: string }
+    | { K: "tools_label"; P: { tool: DisplayTools | NavigationTools | MeasureTools | ReportTools }; R: string }
     | "navigation_tools"
     | "report_tools"
     | "measure_tools"

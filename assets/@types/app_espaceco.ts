@@ -5,10 +5,10 @@ import {
     DocumentDTO,
     EmailPlannerDTO,
     GridDTO,
-    LayerToolsType,
-    RefLayerToolsType,
+    LayerTools,
+    RefLayerTools,
     ReportStatusesDTO,
-    RoleType,
+    LayerRole,
     SharedGeorem,
     SharedThemesDTO,
     ThemeDTO,
@@ -108,7 +108,8 @@ export type UserMe = {
     communities_member: CommunityMemberDetailed[];
 };
 
-export type LayerGeometryType = "Point" | "MultiPoint" | "LineString" | "MultiLineString" | "Polygon" | "MultiPolygon";
+export const geometryTypes = ["Point", "MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon"] as const;
+export type LayerGeometryType = (typeof geometryTypes)[number];
 
 export type CommunityFeatureTypeLayer = {
     id: number;
@@ -119,13 +120,11 @@ export type CommunityFeatureTypeLayer = {
     table_name: string;
     table_title: string;
     geometry_type: LayerGeometryType;
-    role: RoleType;
+    role: LayerRole;
     // snapto: string | null;
-    tools: LayerToolsType[] | null;
-    ref_tools: Record<RefLayerToolsType, string[]>;
+    tools: LayerTools[];
+    ref_tools: Record<RefLayerTools, number[]>;
 };
-
-export type PartialCommunityFeatureTypeLayer = Pick<CommunityFeatureTypeLayer, "table_name" | "geometry_type" | "tools" | "ref_tools">;
 
 export const autofillKeywords = [
     "id",
@@ -173,19 +172,33 @@ export type DescriptionFormType = {
 };
 
 /* Les fonctionnalités (outils) */
-export type CommunityToolsType = "display" | "navigation" | "measure" | "report";
+export type CommunityTools = "display" | "navigation" | "measure" | "report";
 
-export const displayTools = ["zoom_control", "rotate_control", "overviewmap_control", "print"] as const;
-export type DisplayToolsType = (typeof displayTools)[number];
+export const arrDisplayTools = ["zoom_control", "rotate_control", "overviewmap_control", "print"] as const;
+export type DisplayTools = (typeof arrDisplayTools)[number];
 
-export const navigationTools = ["search_address", "search_lonlat", "locate_control", "search", "save_positions"] as const;
-export type NavigationToolsType = (typeof navigationTools)[number];
+export const arrNavigationTools = ["search_address", "search_lonlat", "locate_control", "search", "save_positions"] as const;
+export type NavigationTools = (typeof arrNavigationTools)[number];
 
-export const measureTools = ["measure_distance", "measure_area", "measure_azimut"] as const;
-export type MeasureToolsType = (typeof measureTools)[number];
+export const arrMeasureTools = ["measure_distance", "measure_area", "measure_azimut"] as const;
+export type MeasureTools = (typeof arrMeasureTools)[number];
 
-export const reportTools = ["georem"] as const;
-export type ReportToolsType = (typeof reportTools)[number];
+export const arrReportTools = ["georem"] as const;
+export type ReportTools = (typeof arrReportTools)[number];
+
+export type RefToolsConfig = {
+    active: boolean;
+    layers: number[];
+};
+
+export type RefTools = Record<RefLayerTools, RefToolsConfig>;
+export interface ICommunityLayer extends Pick<CommunityFeatureTypeLayer, "id" | "table_title" | "geometry_type" | "tools"> {
+    ref_tools: RefTools;
+}
+
+export type CommunityLayers = Record<number, ICommunityLayer>;
+export type CommunitiesLayers = Record<string, CommunityLayers>;
+export type RefLayersType = Record<RefLayerTools, Record<number, string>>;
 
 /*************************************************************************************/
 
@@ -202,8 +215,7 @@ export type ZoomAndCenteringFormType = {
 
 export type ToolsFormType = {
     functionalities: string[];
-    layer_tools: Record<number, LayerToolsType[]>;
-    ref_tools: Record<number, Record<RefLayerToolsType, number[]>>;
+    layer_tools: CommunityLayers;
 };
 
 export type ReportFormType = {

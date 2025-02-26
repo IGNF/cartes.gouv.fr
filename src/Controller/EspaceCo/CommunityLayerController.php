@@ -7,8 +7,10 @@ use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\EspaceCoApi\CommunityLayerApiService;
 use App\Services\EspaceCoApi\DatabaseApiService;
+use App\Services\EspaceCoApi\LayerApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -22,6 +24,7 @@ class CommunityLayerController extends AbstractController implements ApiControll
 {
     public function __construct(
         private CommunityLayerApiService $communityLayerApiService,
+        private LayerApiService $layerApiService,
         private DatabaseApiService $databaseApiService,
     ) {
     }
@@ -47,6 +50,23 @@ class CommunityLayerController extends AbstractController implements ApiControll
             $ftLayers = $this->_groupByDatabase($ftLayers);
 
             return new JsonResponse($ftLayers);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
+    #[Route('/update', name: 'update', methods: ['PATCH'])]
+    public function update(
+        int $communityId,
+        Request $request): JsonResponse
+    {
+        try {
+            $data = json_decode($request->getContent(), true);
+            foreach ($data['layer_tools'] as $layerId => $tools) {
+                $this->layerApiService->updateLayer($communityId, $layerId, $tools);
+            }
+
+            return $this->getAll($communityId, $data['fields']);
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
@@ -78,7 +98,7 @@ class CommunityLayerController extends AbstractController implements ApiControll
     {
         $layers = [];
         foreach ($ftLayers as $ftLayer) {
-            $dbName = $ftLayer['database_name'];
+            $dbName = $ftLayer['database_title'];
             if (!array_key_exists($dbName, $layers)) {
                 $layers[$dbName] = [];
             }

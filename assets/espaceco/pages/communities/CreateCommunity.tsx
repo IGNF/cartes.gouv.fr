@@ -180,13 +180,9 @@ const CreateCommunity: FC<CreateCommunityProps> = ({ communityId }) => {
                                         mode={mode}
                                         community={communityQuery.data}
                                         onPrevious={() => setCurrentStep(currentStep - 1)}
-                                        // TODO REMETTRE
-                                        /* onSubmit={(datas, saveOnly) => {
+                                        onSubmit={(datas, saveOnly) => {
                                             setSaveOnly(saveOnly);
                                             mutate(datas);
-                                        }} */
-                                        onSubmit={(datas, saveOnly) => {
-                                            setCurrentStep(currentStep + 1);
                                         }}
                                     />
                                 ) : currentStep === COMMUNITY_FORM_STEPS.REPORTS ? (

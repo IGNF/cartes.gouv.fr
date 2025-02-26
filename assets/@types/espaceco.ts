@@ -132,14 +132,14 @@ export interface UserDTO {
     surname?: string;
 }
 
-export const LayerTools = ["draw", "modify", "translate", "delete", "split", "snap_mandatory", "copy_paste"] as const;
-export type LayerToolsType = (typeof LayerTools)[number];
+export const arrLayerTools = ["draw", "modify", "translate", "delete", "split", "snap_mandatory", "copy_paste"] as const;
+export type LayerTools = (typeof arrLayerTools)[number];
 
-export const RefLayerTools = ["snap", "shortestpath"] as const;
-export type RefLayerToolsType = (typeof RefLayerTools)[number];
+export const arrRefLayerTools = ["snap", "shortestpath"] as const;
+export type RefLayerTools = (typeof arrRefLayerTools)[number];
 
 export type LayerType = "feature-type" | "geoservice";
-export type RoleType = "edit" | "ref" | "visu" | "ref-edit";
+export type LayerRole = "edit" | "ref" | "visu" | "ref-edit";
 export interface LayerResponseDTO {
     table: number | null;
     database: number | null;
@@ -153,10 +153,10 @@ export interface LayerResponseDTO {
     opacity: number;
     visibility: boolean;
     order: number;
-    role: RoleType;
+    role: LayerRole;
     snapto: string | null;
     preferred_style: number | null;
-    tools: LayerToolsType[] | null;
+    tools: LayerTools[] | null;
 }
 export interface DocumentDTO {
     id: number;

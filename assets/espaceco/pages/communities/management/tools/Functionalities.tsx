@@ -1,46 +1,46 @@
 import { getTranslation } from "@/i18n/i18n";
 import {
-    CommunityToolsType,
-    displayTools,
-    DisplayToolsType,
-    measureTools,
-    MeasureToolsType,
-    navigationTools,
-    NavigationToolsType,
-    reportTools,
-    ReportToolsType,
+    CommunityTools,
+    arrDisplayTools,
+    DisplayTools,
+    arrMeasureTools,
+    MeasureTools,
+    arrNavigationTools,
+    NavigationTools,
+    arrReportTools,
+    ReportTools,
 } from "../../../../../@types/app_espaceco";
 
 const { t } = getTranslation("Functionalities");
 
 type Functionalities = Record<
-    CommunityToolsType,
-    { title: string; iconId: string; functionalities: (DisplayToolsType | NavigationToolsType | MeasureToolsType | ReportToolsType)[] }
+    CommunityTools,
+    { title: string; iconId: string; functionalities: (DisplayTools | NavigationTools | MeasureTools | ReportTools)[] }
 >;
 
 const functionalityConfigs: Functionalities = {
     display: {
         title: t("display_tools"),
         iconId: "fr-icon-image-line",
-        functionalities: [...displayTools],
+        functionalities: [...arrDisplayTools],
     },
     navigation: {
         title: t("navigation_tools"),
         iconId: "ri-compass-line",
-        functionalities: [...navigationTools],
+        functionalities: [...arrNavigationTools],
     },
     measure: {
         title: t("measure_tools"),
         iconId: "ri-ruler-line",
-        functionalities: [...measureTools],
+        functionalities: [...arrMeasureTools],
     },
     report: {
         title: t("report_tools"),
         iconId: "ri-chat-check-line",
-        functionalities: [...reportTools],
+        functionalities: [...arrReportTools],
     },
 };
 
-const allFunctionalities: string[] = Array.from(new Set([...displayTools, ...navigationTools, ...measureTools, ...reportTools]));
+const allFunctionalities: string[] = Array.from(new Set([...arrDisplayTools, ...arrNavigationTools, ...arrMeasureTools, ...arrReportTools]));
 
 export { type Functionalities, functionalityConfigs, allFunctionalities };

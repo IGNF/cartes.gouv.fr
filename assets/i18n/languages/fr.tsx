@@ -41,7 +41,7 @@ import { CreateCommunityDialogFrTranslations } from "../../espaceco/pages/commun
 import { ManageCommunityFrTranslations } from "../../espaceco/pages/communities/ManageCommunity.locale";
 import { MemberInvitationFrTranslations } from "../../espaceco/pages/communities/MemberInvitation.locale";
 import { FunctionalitiesFrTranslations } from "../../espaceco/pages/communities/management/tools/Functionalities.locale";
-import { LayerToolsFrTranslations } from "../../espaceco/pages/communities/management/tools/LayerTools.locale";
+import { LayerToolsFrTranslations } from "../../espaceco/pages/communities/management/tools/Layers.locale";
 import { EscoCommunityMembersFrTranslations } from "../../espaceco/pages/communities/management/Members.locale";
 import { ReportsFrTranslations } from "../../espaceco/pages/communities/management/Reports.locale";
 import { SearchFrTranslations } from "../../espaceco/pages/communities/management/Search.locale";
