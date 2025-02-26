@@ -77,8 +77,8 @@ const EditTools: FC<EditToolsProps> = ({ mode, community, onPrevious, onSubmit }
     }, [layers]);
 
     // Couches de rérérence pour les outils d'accrochage ou de plus court chemin
-    const refLayers = useMemo<Record<RefLayerTools, Record<number, string>>>(() => {
-        const ref = { snap: {}, shortestpath: {} };
+    const refLayers = useMemo<Record<RefLayerTools, { id: string; name: string }[]>>(() => {
+        const ref: Record<RefLayerTools, { id: string; name: string }[]> = { snap: [], shortestpath: [] };
         for (const tool of [...arrRefLayerTools]) {
             ref[tool] = getRefLayers(tool, layers);
         }
@@ -114,11 +114,17 @@ const EditTools: FC<EditToolsProps> = ({ mode, community, onPrevious, onSubmit }
                         ref_tools: yup.object({
                             snap: yup.object({
                                 active: yup.boolean().required(),
-                                layers: yup.array().of(yup.number().required()).required(),
+                                layers: yup
+                                    .array()
+                                    .of(yup.object({ id: yup.string().required(), name: yup.string().required() }).required())
+                                    .required(),
                             }),
                             shortestpath: yup.object({
                                 active: yup.boolean().required(),
-                                layers: yup.array().of(yup.number().required()).required(),
+                                layers: yup
+                                    .array()
+                                    .of(yup.object({ id: yup.string().required(), name: yup.string().required() }).required())
+                                    .required(),
                             }),
                         }),
                     });

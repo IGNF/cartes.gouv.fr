@@ -30,14 +30,23 @@ const getAvailableRefTools = (geometryType: LayerGeometryType): RefLayerTools[] 
     }
 };
 
-const getRefTools = (refTools: Record<RefLayerTools, number[]>, availableRefTools: RefLayerTools[]): RefTools => {
+const getRefTools = (refs: Record<number, string>, refTools: Record<RefLayerTools, number[]>, availableRefTools: RefLayerTools[]): RefTools => {
     const rt = refTools === null ? {} : typeof refTools === "string" ? JSON.parse(refTools) : Array.isArray(refTools) && refTools.length === 0 ? {} : refTools;
 
     const result = {};
     arrRefLayerTools.forEach((t) => {
+        let layers = [];
+        if (t in rt && availableRefTools.includes(t)) {
+            layers = rt[t].reduce((acc, layerId) => {
+                if (layerId in refs) {
+                    acc.push({ id: layerId.toString(), name: refs[layerId] });
+                }
+                return acc;
+            }, []);
+        }
         result[t] = {
             active: t in rt && availableRefTools.includes(t),
-            layers: t in rt && availableRefTools.includes(t) ? rt[t].map((v: number) => v.toString()) : [],
+            layers: layers,
         };
     });
     return result as RefTools;
@@ -47,6 +56,16 @@ const getEditableLayers = (layers?: Record<string, CommunityFeatureTypeLayer[]>)
     if (!layers || Object.keys(layers).length === 0) {
         return {};
     }
+
+    // Les couches de référence
+    const refs: Record<number, string> = Object.values(layers).reduce((accumulator, layers) => {
+        const lays = layers.reduce((acc, l) => {
+            acc[l.id] = `${l.database_title}:${l.table_title}`;
+            return acc;
+        }, {});
+        accumulator = { ...accumulator, ...lays };
+        return accumulator;
+    }, {});
 
     const result = {};
     for (const [dbTitle, lays] of Object.entries(layers)) {
@@ -59,7 +78,7 @@ const getEditableLayers = (layers?: Record<string, CommunityFeatureTypeLayer[]>)
             const availablestools = getAvailableTools(l.geometry_type);
             const availableRefTools = getAvailableRefTools(l.geometry_type);
 
-            const ref_tools = getRefTools(l.ref_tools, availableRefTools);
+            const ref_tools = getRefTools(refs, l.ref_tools, availableRefTools);
             accumulator[l.id] = {
                 id: l.id,
                 table_title: l.table_title,
@@ -74,25 +93,28 @@ const getEditableLayers = (layers?: Record<string, CommunityFeatureTypeLayer[]>)
     return result;
 };
 
-const getRefLayers = (tool: RefLayerTools, layers?: Record<string, CommunityFeatureTypeLayer[]>): Record<number, string> => {
+const getRefLayers = (tool: RefLayerTools, layers?: Record<string, CommunityFeatureTypeLayer[]>): { id: string; name: string }[] => {
     if (!layers || Object.keys(layers).length === 0) {
-        return {};
+        return [];
     }
 
     const availableGeometries: LayerGeometryType[] = tool === "snap" ? [...geometryTypes] : ["LineString", "MultiLineString"];
 
+    const init: { name: string; id: string }[] = [];
     return Object.values(layers).reduce((accumulator, layers) => {
+        const initial: { name: string; id: string }[] = [];
         const lays = layers.reduce((acc, l) => {
             if (availableGeometries.includes(l.geometry_type)) {
-                acc[l.id] = `${l.database_title}:${l.table_title}`;
+                acc.push({
+                    id: l.id.toString(),
+                    name: `${l.database_title}:${l.table_title}`,
+                });
             }
             return acc;
-        }, {});
-        if (Object.keys(lays).length) {
-            accumulator = { ...accumulator, ...lays };
-        }
+        }, initial);
+        accumulator = [...accumulator, ...lays];
         return accumulator;
-    }, {});
+    }, init);
 };
 
 const prepareLayersForApi = (values: ToolsFormType): Record<number, { tools: LayerTools[]; ref_tools: Record<RefLayerTools, number[]> }> => {
@@ -100,7 +122,7 @@ const prepareLayersForApi = (values: ToolsFormType): Record<number, { tools: Lay
         const refTools = {};
         [...arrRefLayerTools].forEach((t) => {
             if (config.ref_tools[t].active && config.ref_tools[t].layers.length !== 0) {
-                refTools[t] = config.ref_tools[t].layers.map((l) => Number(l));
+                refTools[t] = config.ref_tools[t].layers.map((l) => Number(l.id));
             }
         });
         accumulator[id] = {

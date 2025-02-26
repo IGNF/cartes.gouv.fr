@@ -188,7 +188,7 @@ export type ReportTools = (typeof arrReportTools)[number];
 
 export type RefToolsConfig = {
     active: boolean;
-    layers: number[];
+    layers: { id: string; name: string }[];
 };
 
 export type RefTools = Record<RefLayerTools, RefToolsConfig>;

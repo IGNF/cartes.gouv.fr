@@ -16,7 +16,7 @@ const dbStyle: CSSProperties = {
 
 type ContributionToolsProps = {
     editableLayers: CommunitiesLayers;
-    refLayers: Record<RefLayerTools, Record<number, string>>;
+    refLayers: Record<RefLayerTools, { id: string; name: string }[]>;
 };
 
 const ContributionTools: FC<ContributionToolsProps> = ({ editableLayers, refLayers }) => {
