@@ -93,6 +93,11 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
 
         $sessionExpired = $request->getSession()->get('session_expired');
 
+        $app = $request->getSession()->get('app', null);
+        if (!is_null($app) && 'entree-carto' === $app) {
+            return $this->handleEntreeCartoLogin($request, true);
+        }
+
         if (!is_null($sessionExpired) && 1 === intval($sessionExpired)) {
             $redirectUrl = $this->router->generate(self::HOME_ROUTE, ['session_expired_login_success' => 1], RouterInterface::ABSOLUTE_URL);
 
@@ -124,5 +129,20 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
         return new RedirectResponse($this->router->generate(self::HOME_ROUTE, [
             'authentication_failed' => true,
         ]));
+    }
+
+    public function handleEntreeCartoLogin(Request $request, bool $success): ?Response
+    {
+        $redirectUrl = $this->router->generate(self::SUCCESS_ROUTE, [], RouterInterface::ABSOLUTE_URL);
+        $redirectUrl .= 'cartes/login?';
+
+        if (true === $success) {
+            $redirectUrl .= 'success=1';
+        } else {
+            $redirectUrl .= 'authentication_failed=1';
+        }
+        $request->getSession()->remove('app');
+
+        return new RedirectResponse($redirectUrl);
     }
 }

@@ -16,7 +16,7 @@ class LogoutSubscriber implements EventSubscriberInterface
     public function __construct(
         private ClientRegistry $clientRegistry,
         private UrlGeneratorInterface $urlGenerator,
-        private ParameterBagInterface $parameters
+        private ParameterBagInterface $parameters,
     ) {
     }
 
@@ -30,17 +30,22 @@ class LogoutSubscriber implements EventSubscriberInterface
         $session = $event->getRequest()->getSession();
         $session->remove(KeycloakToken::SESSION_KEY);
 
-        $homeUrl = $this->urlGenerator->generate('cartesgouvfr_app', [], UrlGeneratorInterface::ABSOLUTE_URL);
+        $redirectUrl = $this->urlGenerator->generate('cartesgouvfr_app', [], UrlGeneratorInterface::ABSOLUTE_URL);
+
+        $app = $event->getRequest()->query->get('app', null);
+        if (!is_null($app) && 'entree-carto' === $app) {
+            $redirectUrl .= 'cartes/logout?success=1';
+        }
 
         // comportement si mode test
         if ('test' === $this->parameters->get('app_env')) {
-            $response = new RedirectResponse($homeUrl);
+            $response = new RedirectResponse($redirectUrl);
         } else {
             /** @var Keycloak */
             $keycloak = $this->clientRegistry->getClient('keycloak')->getOAuth2Provider();
 
             $response = new RedirectResponse($keycloak->getLogoutUrl([
-                'post_logout_redirect_uri' => $homeUrl,
+                'post_logout_redirect_uri' => $redirectUrl,
             ]));
         }
 
