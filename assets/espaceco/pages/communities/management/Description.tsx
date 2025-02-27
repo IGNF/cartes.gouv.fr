@@ -33,6 +33,9 @@ import { setToNull } from "../../../../utils";
 import { COMMUNITY_FORM_STEPS } from "../FormSteps";
 import ActionButtons from "./ActionButtons";
 import CommunityLogo from "./CommunityLogo";
+import { DescriptionControlImage } from "./DescriptionControls/DescriptionControlImage";
+import { DocumentsProvider } from "./DescriptionControls/documentsContext";
+import { DescriptionControlLink } from "./DescriptionControls/DescriptionControlLink";
 
 type DescriptionProps = {
     mode: CommunityFormMode;
@@ -210,158 +213,161 @@ const Description: FC<DescriptionProps> = ({ mode, community, onSubmit }) => {
             {communityNamesQuery.isError && <Alert severity="error" closable title={communityNamesQuery.error.message} />}
             {communityDocumentsQuery.isError && <Alert severity="error" closable title={communityDocumentsQuery.error.message} />}
             {communityNamesQuery.data && communityDocumentsQuery.data && (
-                <div>
-                    <h2>{tmc("desc.tab.title")}</h2>
+                <DocumentsProvider communityId={community.id} documents={communityDocumentsQuery.data}>
                     <div>
-                        <p>{tCommon("mandatory_fields")}</p>
-                        <Input
-                            label={tmc("desc.name")}
-                            hintText={tmc("desc.hint_name")}
-                            state={errors.name ? "error" : "default"}
-                            stateRelatedMessage={errors?.name?.message?.toString()}
-                            nativeInputProps={{
-                                ...register("name"),
-                            }}
-                        />
-                        <Controller
-                            control={control}
-                            name="description"
-                            render={({ field }) => (
-                                <HtmlEditor
-                                    label={tmc("desc.description")}
-                                    hintText={tmc("desc.hint_description")}
-                                    state={errors.description ? "error" : "default"}
-                                    stateRelatedMessage={errors?.description?.message?.toString()}
-                                    value={field.value ?? ""}
-                                    onChange={(values) => {
-                                        field.onChange(values);
-                                    }}
-                                />
-                            )}
-                        />
-                        <CommunityLogo community={community} />
-                        <Controller
-                            control={control}
-                            name="keywords"
-                            render={({ field }) => (
-                                <AutocompleteSelect
-                                    label={tmc("desc.keywords")}
-                                    // hintText={t("")}
-                                    options={Object.values(categories).sort()}
-                                    searchFilter={{ limit: 40 }}
-                                    state={errors.keywords ? "error" : "default"}
-                                    stateRelatedMessage={errors?.keywords?.message?.toString()}
-                                    value={field.value}
-                                    onChange={(_, value) => field.onChange(value)}
-                                />
-                            )}
-                        />
-                        <Controller
-                            control={control}
-                            name="listed"
-                            render={({ field: { onChange } }) => (
-                                <ToggleSwitch
-                                    className={fr.cx("fr-my-3w")}
-                                    label={tmc("desc.listed.title")}
-                                    helperText={tmc("desc.listed_hint")}
-                                    checked={getFormValues("listed")}
-                                    showCheckedHint={false}
-                                    onChange={onChange}
-                                />
-                            )}
-                        />
-                        <RadioButtons
-                            legend={tmc("desc.membership_requests.title")}
-                            options={[
-                                {
-                                    label: tmc("desc.membership_requests.open"),
-                                    nativeInputProps: {
-                                        ...register("membershipRequest"),
-                                        value: "open",
-                                        checked: membership === "open",
-                                    },
-                                },
-                                {
-                                    label: tmc("desc.membership_requests.not_open"),
-                                    hintText: tmc("desc.membership_requests.not_open_hint"),
-                                    nativeInputProps: {
-                                        ...register("membershipRequest"),
-                                        value: "not_open",
-                                        checked: membership === "not_open",
-                                    },
-                                },
-                                {
-                                    label: tmc("desc.membership_requests.partial_open"),
-                                    hintText: tmc("desc.membership_requests.partial_open_hint"),
-                                    nativeInputProps: {
-                                        ...register("membershipRequest"),
-                                        value: "partially_open",
-                                        checked: membership === "partially_open",
-                                    },
-                                },
-                            ]}
-                        />
-                        {showOpenWithEmail && (
-                            <div>
-                                <Button
-                                    priority="secondary"
-                                    iconId={"fr-icon-settings-5-line"}
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        OpenWithEmailsConfigDialogModal.open();
-                                    }}
-                                >
-                                    {tmc("desc.membership_request.partial_open.parameter")}
-                                </Button>
-                                <div className={fr.cx("fr-input-group", errors.openWithEmail ? "fr-input-group--error" : undefined)}>
-                                    {errors.openWithEmail && <p className={fr.cx("fr-error-text")}>{errors.openWithEmail?.message?.toString()}</p>}
-                                    {data.length ? (
-                                        <Table
-                                            className={cx(fr.cx("fr-my-2v"), "frx-openwithemail")}
-                                            noCaption
-                                            fixed
-                                            data={data}
-                                            headers={[tmc("desc.openwithemail.domains_header"), tmc("desc.openwithemail.grids_header")]}
-                                        />
-                                    ) : (
-                                        <p>{tmc("desc.openwithemail_no_domains")}</p>
-                                    )}
-                                </div>
-                            </div>
-                        )}
-                        <Controller
-                            control={control}
-                            name="editorial"
-                            render={({ field }) => (
-                                <HtmlEditor
-                                    label={tmc("desc.editorial")}
-                                    hintText={tmc("desc.editorial_hint")}
-                                    state={errors.editorial ? "error" : "default"}
-                                    stateRelatedMessage={errors?.editorial?.message?.toString()}
-                                    value={field.value ?? ""}
-                                    onChange={(values) => {
-                                        field.onChange(values);
-                                    }}
-                                />
-                            )}
-                        />
-                        <DocumentList communityId={community.id} documents={communityDocumentsQuery.data} />
-                        <OpenWithEmailsConfigDialog openWithEmailOriginal={openWithEmail} onUpdate={(values) => setFormValue("openWithEmail", values)} />
-                        {mode === "edition" ? (
-                            <div className="fr-grid-row fr-grid-row--right">
-                                <Button priority={"primary"} onClick={() => handleSubmit(() => onSubmitForm(true))()}>
-                                    {tCommon("save")}
-                                </Button>
-                            </div>
-                        ) : (
-                            <ActionButtons
-                                step={COMMUNITY_FORM_STEPS.DESCRIPTION}
-                                onSave={() => handleSubmit(() => onSubmitForm(true))()}
-                                onContinue={() => handleSubmit(() => onSubmitForm(false))()}
+                        <h2>{tmc("desc.tab.title")}</h2>
+                        <div>
+                            <p>{tCommon("mandatory_fields")}</p>
+                            <Input
+                                label={tmc("desc.name")}
+                                hintText={tmc("desc.hint_name")}
+                                state={errors.name ? "error" : "default"}
+                                stateRelatedMessage={errors?.name?.message?.toString()}
+                                nativeInputProps={{
+                                    ...register("name"),
+                                }}
                             />
-                        )}
+                            <Controller
+                                control={control}
+                                name="description"
+                                render={({ field }) => (
+                                    <HtmlEditor
+                                        label={tmc("desc.description")}
+                                        hintText={tmc("desc.hint_description")}
+                                        state={errors.description ? "error" : "default"}
+                                        stateRelatedMessage={errors?.description?.message?.toString()}
+                                        value={field.value ?? ""}
+                                        onChange={(values) => {
+                                            field.onChange(values);
+                                        }}
+                                    />
+                                )}
+                            />
+                            <CommunityLogo community={community} />
+                            <Controller
+                                control={control}
+                                name="keywords"
+                                render={({ field }) => (
+                                    <AutocompleteSelect
+                                        label={tmc("desc.keywords")}
+                                        // hintText={t("")}
+                                        options={Object.values(categories).sort()}
+                                        searchFilter={{ limit: 40 }}
+                                        state={errors.keywords ? "error" : "default"}
+                                        stateRelatedMessage={errors?.keywords?.message?.toString()}
+                                        value={field.value}
+                                        onChange={(_, value) => field.onChange(value)}
+                                    />
+                                )}
+                            />
+                            <Controller
+                                control={control}
+                                name="listed"
+                                render={({ field: { onChange } }) => (
+                                    <ToggleSwitch
+                                        className={fr.cx("fr-my-3w")}
+                                        label={tmc("desc.listed.title")}
+                                        helperText={tmc("desc.listed_hint")}
+                                        checked={getFormValues("listed")}
+                                        showCheckedHint={false}
+                                        onChange={onChange}
+                                    />
+                                )}
+                            />
+                            <RadioButtons
+                                legend={tmc("desc.membership_requests.title")}
+                                options={[
+                                    {
+                                        label: tmc("desc.membership_requests.open"),
+                                        nativeInputProps: {
+                                            ...register("membershipRequest"),
+                                            value: "open",
+                                            checked: membership === "open",
+                                        },
+                                    },
+                                    {
+                                        label: tmc("desc.membership_requests.not_open"),
+                                        hintText: tmc("desc.membership_requests.not_open_hint"),
+                                        nativeInputProps: {
+                                            ...register("membershipRequest"),
+                                            value: "not_open",
+                                            checked: membership === "not_open",
+                                        },
+                                    },
+                                    {
+                                        label: tmc("desc.membership_requests.partial_open"),
+                                        hintText: tmc("desc.membership_requests.partial_open_hint"),
+                                        nativeInputProps: {
+                                            ...register("membershipRequest"),
+                                            value: "partially_open",
+                                            checked: membership === "partially_open",
+                                        },
+                                    },
+                                ]}
+                            />
+                            {showOpenWithEmail && (
+                                <div>
+                                    <Button
+                                        priority="secondary"
+                                        iconId={"fr-icon-settings-5-line"}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            OpenWithEmailsConfigDialogModal.open();
+                                        }}
+                                    >
+                                        {tmc("desc.membership_request.partial_open.parameter")}
+                                    </Button>
+                                    <div className={fr.cx("fr-input-group", errors.openWithEmail ? "fr-input-group--error" : undefined)}>
+                                        {errors.openWithEmail && <p className={fr.cx("fr-error-text")}>{errors.openWithEmail?.message?.toString()}</p>}
+                                        {data.length ? (
+                                            <Table
+                                                className={cx(fr.cx("fr-my-2v"), "frx-openwithemail")}
+                                                noCaption
+                                                fixed
+                                                data={data}
+                                                headers={[tmc("desc.openwithemail.domains_header"), tmc("desc.openwithemail.grids_header")]}
+                                            />
+                                        ) : (
+                                            <p>{tmc("desc.openwithemail_no_domains")}</p>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                            <Controller
+                                control={control}
+                                name="editorial"
+                                render={({ field }) => (
+                                    <HtmlEditor
+                                        controlMap={{ Image: DescriptionControlImage, Link: DescriptionControlLink }}
+                                        label={tmc("desc.editorial")}
+                                        hintText={tmc("desc.editorial_hint")}
+                                        state={errors.editorial ? "error" : "default"}
+                                        stateRelatedMessage={errors?.editorial?.message?.toString()}
+                                        value={field.value ?? ""}
+                                        onChange={(values) => {
+                                            field.onChange(values);
+                                        }}
+                                    />
+                                )}
+                            />
+                            <DocumentList communityId={community.id} documents={communityDocumentsQuery.data} />
+                            <OpenWithEmailsConfigDialog openWithEmailOriginal={openWithEmail} onUpdate={(values) => setFormValue("openWithEmail", values)} />
+                            {mode === "edition" ? (
+                                <div className="fr-grid-row fr-grid-row--right">
+                                    <Button priority={"primary"} onClick={() => handleSubmit(() => onSubmitForm(true))()}>
+                                        {tCommon("save")}
+                                    </Button>
+                                </div>
+                            ) : (
+                                <ActionButtons
+                                    step={COMMUNITY_FORM_STEPS.DESCRIPTION}
+                                    onSave={() => handleSubmit(() => onSubmitForm(true))()}
+                                    onContinue={() => handleSubmit(() => onSubmitForm(false))()}
+                                />
+                            )}
+                        </div>
                     </div>
-                </div>
+                </DocumentsProvider>
             )}
         </>
     );
