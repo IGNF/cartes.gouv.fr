@@ -3,7 +3,9 @@ import { ReactNode } from "react";
 
 import { formatDateFromISO } from "@/utils";
 import { Translations } from "../../../../i18n/types";
-import { FilterEnum, SortByEnum, SortOrderEnum } from "./DatasheetList.types";
+import { FilterEnum } from "@/hooks/useFilters";
+import { SortOrderEnum } from "@/hooks/useSort";
+import { SortByEnum } from "./DatasheetList.types";
 
 const { i18n } = declareComponentKeys<
     | { K: "title"; P: { datastoreName?: string }; R: string }
@@ -42,9 +44,9 @@ export const DatasheetListFrTranslations: Translations<"fr">["DatasheetList"] = 
         switch (filter) {
             case FilterEnum.ALL:
                 return "Toutes les fiches";
-            case FilterEnum.PUBLISHED:
+            case FilterEnum.ENABLED:
                 return "Fiches publiées";
-            case FilterEnum.NOT_PUBLISHED:
+            case FilterEnum.DISABLED:
                 return "Fiches non publiées";
             default:
                 return "Filtre inconnu";

@@ -23,6 +23,11 @@ import "../../../../sass/pages/community_members.scss";
 import { useCommunity } from "../../../../contexts/community";
 import Main from "../../../../components/Layout/Main";
 import { useDatastore } from "../../../../contexts/datastore";
+import Pagination from "@codegouvfr/react-dsfr/Pagination";
+import { usePagination } from "@/hooks/usePagination";
+import SearchBar from "@codegouvfr/react-dsfr/SearchBar";
+import PageTitle from "@/components/Layout/PageTitle";
+import { useSearch } from "@/hooks/useSearch";
 
 type CommunityMembersProps = {
     userId?: string;
@@ -66,7 +71,7 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
     const { datastore } = useDatastore();
 
     // Les membres de cette communauté
-    const { data: communityMembers, isLoading: isLoadingMembers } = useQuery({
+    const { data: communityMembers, isLoading } = useQuery({
         queryKey: RQKeys.community_members(community._id),
         queryFn: ({ signal }) => api.community.getMembers(community._id, { signal }),
         staleTime: 20000,
@@ -103,11 +108,14 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
         return members;
     }, [communityMembers, communitySupervisor, user?.id]);
 
+    const { search,searchedItems } = useSearch(members);
+    const { limit, page, paginatedItems, totalPages } = usePagination(searchedItems);
+
     useEffect(() => {
-        if (userId && !isLoadingMembers && !communityMemberIds.includes(userId)) {
+        if (userId && !isLoading && !communityMemberIds.includes(userId)) {
             addMemberModal.open();
         }
-    }, [communityMemberIds, isLoadingMembers, userId]);
+    }, [communityMemberIds, isLoading, userId]);
 
     const queryClient = useQueryClient();
 
@@ -172,8 +180,8 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
             }}
             title="Membres"
         >
-            {isLoadingMembers && <LoadingText />}
-            {!isLoadingMembers && userId && communityMemberIds.includes(userId) && (
+            {isLoading && <LoadingText />}
+            {!isLoading && userId && communityMemberIds.includes(userId) && (
                 <Alert
                     className={fr.cx("fr-mb-1w")}
                     severity={"warning"}
@@ -184,14 +192,38 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
                     }}
                 />
             )}
-            {!isLoadingMembers && (
+            {!isLoading && (
                 <>
-                    <h1>{t("community_members", { communityName: community?.name ?? "" })}</h1>
-                    <div className={fr.cx("fr-grid-row", "fr-grid-row--right")}>
-                        <Button priority={"primary"} iconId={"fr-icon-add-circle-line"} onClick={() => addMemberModal.open()}>
-                            {t("add_user")}
-                        </Button>
+                    <PageTitle
+                        buttons={[
+                            {
+                                children: t("add_user"),
+                                iconId: "fr-icon-add-circle-line",
+                                onClick: () => addMemberModal.open(),
+                            },
+                        ]}
+                        showButtons
+                        title={t("community_members", { communityName: community?.name ?? "" })}
+                    />
+
+                    <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mt-2v")}>
+                        <div className={fr.cx("fr-col-12", "fr-col-md-8", "fr-col-offset-md-2")}>
+                            <SearchBar
+                                label={tCommon("search")}
+                                onButtonClick={(text) => {
+                                    if (!isLoading) {
+                                        routes.members_list({ communityId: community._id, userId, search: text }).replace();
+                                    }
+                                }}
+                                allowEmptySearch={true}
+                                big
+                                renderInput={({ className, id, placeholder, type }) => (
+                                    <input className={className} id={id} placeholder={placeholder} type={type} disabled={isLoading} />
+                                )}
+                            />
+                        </div>
                     </div>
+
                     <div className={tableContainerClassName}>
                         <table>
                             <thead>
@@ -209,7 +241,7 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
                                 </tr>
                             </thead>
                             <tbody>
-                                {members.map((member) => {
+                                {paginatedItems.map((member) => {
                                     return (
                                         <tr key={member.id}>
                                             <td>
@@ -250,6 +282,16 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
                                 })}
                             </tbody>
                         </table>
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--center", "fr-mt-6v")}>
+                            <Pagination
+                                count={totalPages}
+                                showFirstLast={true}
+                                getPageLinkProps={(pageNumber) => ({
+                                    ...routes.members_list({ communityId: community._id, userId, page: pageNumber, limit: limit, search }).link,
+                                })}
+                                defaultPage={page}
+                            />
+                        </div>
                     </div>
                     <UserRights />
                     {(isRemovePending || isModifyPending) && (

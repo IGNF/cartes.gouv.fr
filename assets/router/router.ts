@@ -81,6 +81,9 @@ const communityRoutes = {
     members_list: communityRoute.extend(
         {
             userId: param.query.optional.string,
+            page: param.query.optional.number.default(1),
+            limit: param.query.optional.number.default(20),
+            search: param.query.optional.string.default(""),
         },
         () => "/membres"
     ),
@@ -110,6 +113,10 @@ const datastoreRoutes = {
         {
             page: param.query.optional.number.default(1),
             limit: param.query.optional.number.default(20),
+            search: param.query.optional.string,
+            sortBy: param.query.optional.string,
+            sortOrder: param.query.optional.number.default(1),
+            published: param.query.optional.number.default(0),
         },
         () => "/donnees"
     ),
