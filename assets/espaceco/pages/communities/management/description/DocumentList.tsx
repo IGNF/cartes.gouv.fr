@@ -118,6 +118,7 @@ const DocumentList: FC<DocumentListProps> = ({ communityId, documents }) => {
                             onClick={() => {
                                 copyToClipboard(d.uri);
                             }}
+                            type="button"
                         />
                     )}
                     <Button
@@ -138,6 +139,7 @@ const DocumentList: FC<DocumentListProps> = ({ communityId, documents }) => {
                             setCurrentDocument(d);
                             EditDocumentDialogModal.open();
                         }}
+                        type="button"
                     />
                     <Button
                         title={tCommon("delete")}
@@ -147,6 +149,7 @@ const DocumentList: FC<DocumentListProps> = ({ communityId, documents }) => {
                             setCurrentDocument(d);
                             ConfirmRemoveDocumentDialogModal.open();
                         }}
+                        type="button"
                     />
                 </div>,
             ];
@@ -193,6 +196,7 @@ const DocumentList: FC<DocumentListProps> = ({ communityId, documents }) => {
                 priority="secondary"
                 disabled={documents.length >= 4}
                 onClick={() => AddDocumentDialogModal.open()}
+                type="button"
             >
                 {tCommon("add")}
             </Button>

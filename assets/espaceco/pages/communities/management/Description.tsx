@@ -34,6 +34,9 @@ import ActionButtonsEdition from "./ActionButtonsEdition";
 import CommunityLogo from "./description/CommunityLogo";
 import DocumentList from "./description/DocumentList";
 import { OpenWithEmailsConfigDialog, OpenWithEmailsConfigDialogModal } from "./description/OpenWithEmailsConfigDialog";
+import { DescriptionControlImage } from "./DescriptionControls/DescriptionControlImage";
+import { DocumentsProvider } from "./DescriptionControls/documentsContext";
+import { DescriptionControlLink } from "./DescriptionControls/DescriptionControlLink";
 
 type DescriptionProps = {
     isAdmin: boolean;
@@ -248,7 +251,7 @@ const Description: FC<DescriptionProps> = ({ isAdmin }) => {
             {communityNamesQuery.isError && <Alert className={fr.cx("fr-my-2v")} severity="error" closable title={communityNamesQuery.error.message} />}
             {communityDocumentsQuery.isError && <Alert className={fr.cx("fr-my-2v")} severity="error" closable title={communityDocumentsQuery.error.message} />}
             {communityNamesQuery.data && communityDocumentsQuery.data && (
-                <div>
+                <DocumentsProvider communityId={community.id} documents={communityDocumentsQuery.data}>
                     <h2>{tmc("desc.tab.title")}</h2>
                     <ReuseCommunityConfig
                         title={tmc("desc.reuse_label")}
@@ -385,6 +388,7 @@ const Description: FC<DescriptionProps> = ({ isAdmin }) => {
                             name="editorial"
                             render={({ field }) => (
                                 <HtmlEditor
+                                    controlMap={{ Image: DescriptionControlImage, Link: DescriptionControlLink }}
                                     label={tmc("desc.editorial")}
                                     hintText={tmc("desc.editorial_hint")}
                                     state={errors.editorial ? "error" : "default"}
@@ -407,7 +411,7 @@ const Description: FC<DescriptionProps> = ({ isAdmin }) => {
                             <ActionButtonsEdition onSave={() => handleSubmit(() => onSubmitForm(true))()} />
                         )}
                     </div>
-                </div>
+                </DocumentsProvider>
             )}
         </>
     );
