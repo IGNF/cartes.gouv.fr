@@ -13,7 +13,7 @@ function PrivateServiceExplanation({ datastoreId }: PrivateServiceExplanationPro
     return (
         <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-grid-row--center", "fr-grid-row--middle")}>
             <div className={fr.cx("fr-py-0", "fr-col-12", "fr-col-md-6")}>
-                <p className={fr.cx("fr-text--lead", "fr-mb-3w")}>Ce service est privé et ne peux donc pas être affiché sur cartes.gouv.fr.</p>
+                <p className={fr.cx("fr-text--lead", "fr-mb-3w")}>Ce service est privé et ne peut donc pas être affiché sur cartes.gouv.fr.</p>
 
                 <p className={fr.cx("fr-text--sm")}>
                     Vous pouvez utiliser un logiciel SIG (Système d’Information Géographique) pour le visualiser. Au préalable vous devez créer une clé d’accès
