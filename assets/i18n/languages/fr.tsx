@@ -1,3 +1,4 @@
+import { InputCollectionFrTranslations } from "../../components/Input/InputCollection";
 import { datastoreNavItemsFrTranslations } from "../../config/navItems/datastoreNavItems.locale";
 import { navItemsFrTranslations } from "../../config/navItems/navItems.locale";
 import { AccessesRequestFrTranslations } from "../../entrepot/pages/accesses-request/AccessesRequest.locale";
@@ -34,7 +35,27 @@ import { UserKeyFrTranslations } from "../../entrepot/pages/users/keys/UserKey.l
 import { UserKeysListTabFrTranslations } from "../../entrepot/pages/users/keys/UserKeysListTab/UserKeysListTab.locale";
 import { MeFrTranslations } from "../../entrepot/pages/users/me/Me.locale";
 import { PermissionsFrTranslations } from "../../entrepot/pages/users/permissions/Permissions.locale";
-import { EspaceCoCommunitiesFrTranslations } from "../../espaceco/pages/communities/EspaceCoCommunities.locale";
+import { EspaceCoCommunityListFrTranslations } from "@/espaceco/pages/communities/CommunityList.locale";
+import { CreateCommunityFrTranslations } from "../../espaceco/pages/communities/CreateCommunity.locale";
+import { CreateCommunityDialogFrTranslations } from "../../espaceco/pages/communities/CreateCommunityDialog.locale";
+import { ManageCommunityFrTranslations } from "../../espaceco/pages/communities/ManageCommunity.locale";
+import { MemberInvitationFrTranslations } from "../../espaceco/pages/communities/MemberInvitation.locale";
+import { FunctionalitiesFrTranslations } from "../../espaceco/pages/communities/management/tools/Functionalities.locale";
+import { LayerToolsFrTranslations } from "../../espaceco/pages/communities/management/tools/Layers.locale";
+import { EscoCommunityMembersFrTranslations } from "../../espaceco/pages/communities/management/Members.locale";
+import { ReportsFrTranslations } from "../../espaceco/pages/communities/management/Reports.locale";
+import { SearchFrTranslations } from "../../espaceco/pages/communities/management/Search.locale";
+import { AddMembersDialogFrTranslations } from "../../espaceco/pages/communities/management/member/AddMembersDialog.locale";
+import { ManageGridsDialogFrTranslations } from "../../espaceco/pages/communities/management/member/ManageGridsDialog.locale";
+import { EmailPlannersFrTranslations } from "../../espaceco/pages/communities/management/reports/EmailPlanners.locale";
+import { ReportStatusesFrTranslations } from "../../espaceco/pages/communities/management/reports/ReportStatuses.locale";
+import { SharedThemesFrTranslations } from "../../espaceco/pages/communities/management/reports/SharedThemes.locale";
+import { ThemeFrTranslations } from "../../espaceco/pages/communities/management/reports/Theme.locale";
+import { AddOrEditEmailPlannerFrTranslations } from "../../espaceco/pages/communities/management/reports/emailplanners/AddOrEditEmailPlanner.locale";
+import { EmailPlannerKeywordsFrTranslations } from "../../espaceco/pages/communities/management/reports/emailplanners/EmailPlannerKeywords.locale";
+import { ManageCommunityValidationsFrTranslations } from "../../espaceco/pages/communities/management/ManageCommunityValidations.locale";
+import { AutofillKeywordsFrTranslations } from "../../espaceco/pages/communities/management/reports/AutofillKeywords.locale";
+import { AutofillDialogFrTranslations } from "../../espaceco/pages/communities/management/reports/AutofillDialog.locale";
 import { TMSStyleFilesManagerFrTranslations } from "../../modules/Style/TMSStyleFilesManager/TMSStyleFilesManager.locale";
 import { BreadcrumbFrTranslations } from "../../modules/entrepot/breadcrumbs/Breadcrumb.locale";
 import { LoginDisabledFrTranslations } from "../../pages/LoginDisabled/LoginDisabled.locale";
@@ -43,6 +64,8 @@ import { mapboxStyleValidationFrTranslations } from "../../validations/mapbox/Ma
 import { SldStyleValidationErrorsFrTranslations } from "../../validations/sld/SldStyleValidation.locale";
 import { commonFrTranslations } from "../Common.locale";
 import { AlertsFrTranslations } from "../../entrepot/pages/config/Alerts.locale";
+import { KeyValueListFrTranslations } from "@/components/Input/KeyValueList.locale";
+
 import type { Translations } from "../types";
 
 export const translations: Translations<"fr"> = {
@@ -50,6 +73,7 @@ export const translations: Translations<"fr"> = {
     Breadcrumb: BreadcrumbFrTranslations,
     Rights: RightsFrTranslations,
     Style: StyleFrTranslations,
+    InputCollection: InputCollectionFrTranslations,
     Me: MeFrTranslations,
     AddMember: AddMemberFrTranslations,
     CommunityMembers: CommunityMembersFrTranslations,
@@ -85,10 +109,31 @@ export const translations: Translations<"fr"> = {
     PyramidRasterGenerateForm: PyramidRasterGenerateFormFrTranslations,
     PyramidRasterWmsRasterServiceForm: PyramidRasterWmsRasterServiceFormFrTranslations,
     PyramidRasterWmtsServiceForm: PyramidRasterWmtsServiceFormFrTranslations,
-    EspaceCoCommunities: EspaceCoCommunitiesFrTranslations,
     DatasheetUploadForm: DatasheetUploadFormFrTranslations,
     DatasheetList: DatasheetListFrTranslations,
     AccessRestrictions: AccessRestrictionsFrTranslations,
+    EspaceCoCommunityList: EspaceCoCommunityListFrTranslations,
+    ManageCommunity: ManageCommunityFrTranslations,
+    CreateCommunityDialog: CreateCommunityDialogFrTranslations,
+    CreateCommunity: CreateCommunityFrTranslations,
+    ManageCommunityValidations: ManageCommunityValidationsFrTranslations,
+    AutofillKeywords: AutofillKeywordsFrTranslations,
+    AutofillDialog: AutofillDialogFrTranslations,
     LoginDisabled: LoginDisabledFrTranslations,
+    MemberInvitation: MemberInvitationFrTranslations,
+    Reports: ReportsFrTranslations,
+    Functionalities: FunctionalitiesFrTranslations,
+    LayerTools: LayerToolsFrTranslations,
+    EmailPlanners: EmailPlannersFrTranslations,
+    AddOrEditEmailPlanner: AddOrEditEmailPlannerFrTranslations,
+    EmailPlannerKeywords: EmailPlannerKeywordsFrTranslations,
+    Theme: ThemeFrTranslations,
+    ReportStatuses: ReportStatusesFrTranslations,
+    SharedThemes: SharedThemesFrTranslations,
+    Search: SearchFrTranslations,
+    EscoCommunityMembers: EscoCommunityMembersFrTranslations,
+    AddMembersDialog: AddMembersDialogFrTranslations,
+    ManageGridsDialog: ManageGridsDialogFrTranslations,
     alerts: AlertsFrTranslations,
+    KeyValueList: KeyValueListFrTranslations,
 };

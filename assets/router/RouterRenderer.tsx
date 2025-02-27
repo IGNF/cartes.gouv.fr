@@ -1,4 +1,4 @@
-import { FC, JSX, lazy, Suspense, useMemo } from "react";
+import { FC, JSX, Suspense, useMemo } from "react";
 
 import AppLayout from "../components/Layout/AppLayout";
 import LoadingText from "../components/Utils/LoadingText";
@@ -12,9 +12,8 @@ import GroupDatastore from "./GroupDatastore";
 import GroupApp from "./GroupApp";
 import PageNotFoundWithLayout from "../pages/error/PageNotFoundWithLayout";
 import Main from "../components/Layout/Main";
+import GroupEspaceCo from "./GroupEspaceCo";
 import GroupConfig from "./GroupConfig";
-
-const EspaceCoCommunityList = lazy(() => import("../espaceco/pages/communities/Communities"));
 
 const RouterRenderer: FC = () => {
     const route = useRoute();
@@ -44,10 +43,7 @@ const RouterRenderer: FC = () => {
         }
 
         if (groups.espaceco.has(route)) {
-            switch (route.name) {
-                case "espaceco_community_list":
-                    return <EspaceCoCommunityList />;
-            }
+            return <GroupEspaceCo route={route} />;
         }
 
         return <GroupApp route={route} />;

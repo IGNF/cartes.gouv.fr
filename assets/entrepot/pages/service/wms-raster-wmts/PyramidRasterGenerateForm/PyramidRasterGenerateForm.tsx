@@ -193,8 +193,6 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
                                     max={olDefaults.zoom_levels.BOTTOM}
                                     values={zoomRange}
                                     onChange={(values) => setFormValue("zoom_range", values)}
-                                    step={1}
-                                    mode="both"
                                 />
                                 {errors.zoom_range?.message !== undefined && <p className={fr.cx("fr-error-text")}>{errors.zoom_range?.message}</p>}
                             </>
