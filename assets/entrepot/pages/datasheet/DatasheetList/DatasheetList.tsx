@@ -133,9 +133,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                                     value: FilterEnum.ENABLED.toString(),
                                     checked: filters.published === FilterEnum.ENABLED,
                                     onChange: () => {
-                                        routes
-                                            .datasheet_list({ ...filters, datastoreId, search, sortBy, sortOrder, published: FilterEnum.ENABLED })
-                                            .replace();
+                                        routes.datasheet_list({ ...filters, datastoreId, search, sortBy, sortOrder, published: FilterEnum.ENABLED }).replace();
                                     },
                                 },
                             },
@@ -145,9 +143,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                                     value: FilterEnum.DISABLED.toString(),
                                     checked: filters.published === FilterEnum.DISABLED,
                                     onChange: () => {
-                                        routes
-                                            .datasheet_list({ ...filters, datastoreId, search, sortBy, sortOrder, published: FilterEnum.DISABLED })
-                                            .replace();
+                                        routes.datasheet_list({ ...filters, datastoreId, search, sortBy, sortOrder, published: FilterEnum.DISABLED }).replace();
                                     },
                                 },
                             },

@@ -108,7 +108,7 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
         return members;
     }, [communityMembers, communitySupervisor, user?.id]);
 
-    const { search,searchedItems } = useSearch(members);
+    const { search, searchedItems } = useSearch(members);
     const { limit, page, paginatedItems, totalPages } = usePagination(searchedItems);
 
     useEffect(() => {
