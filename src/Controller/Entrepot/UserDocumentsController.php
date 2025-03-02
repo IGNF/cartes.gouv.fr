@@ -12,8 +12,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route(
-    '/api/users/documents',
-    name: 'cartesgouvfr_api_user_documents_',
+    '/api/users/me/documents',
+    name: 'cartesgouvfr_api_user_me_documents_',
     options: ['expose' => true],
     condition: 'request.isXmlHttpRequest()'
 )]
