@@ -30,7 +30,7 @@ class UserDocumentsApiService extends BaseEntrepotApiService
         }
 
         if (null !== $labels) {
-            $formFields['labels'] = join(',', $labels);
+            $formFields['labels'] = $labels;
         }
 
         $response = $this->sendFile('POST', 'users/me/documents', $filePath, $formFields);
@@ -60,7 +60,7 @@ class UserDocumentsApiService extends BaseEntrepotApiService
         }
 
         if (null !== $labels) {
-            $body['labels'] = join(',', $labels);
+            $body['labels'] = $labels;
         }
 
         if (null !== $publicUrl) {
