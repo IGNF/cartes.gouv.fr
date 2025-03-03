@@ -83,7 +83,7 @@ class UserDocumentsController extends AbstractController implements ApiControlle
         }
     }
 
-    #[Route('/{documentId}', name: 'replace_file', methods: ['PUT'])]
+    #[Route('/{documentId}', name: 'replace_file', methods: ['POST'])]
     public function replaceFile(string $documentId, Request $request): Response
     {
         try {
