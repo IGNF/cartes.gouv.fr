@@ -102,7 +102,7 @@ class UserDocumentsController extends AbstractController implements ApiControlle
     public function remove(string $documentId): Response
     {
         try {
-            return $this->json($this->userDocumentsApiService->remove($documentId));
+            return $this->json($this->userDocumentsApiService->remove($documentId), Response::HTTP_NO_CONTENT);
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
         }
