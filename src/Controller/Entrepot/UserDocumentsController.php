@@ -9,6 +9,7 @@ use App\Services\EntrepotApi\UserDocumentsApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route(
@@ -25,10 +26,13 @@ class UserDocumentsController extends AbstractController implements ApiControlle
     }
 
     #[Route('', name: 'get_list', methods: ['GET'])]
-    public function getAll(Request $request): Response
+    public function getAll(Request $request, #[MapQueryParameter] ?bool $detailed): Response
     {
         try {
-            return $this->json($this->userDocumentsApiService->getAll($request->query->all()));
+            return $this->json(
+                true === $detailed
+                ? $this->userDocumentsApiService->getAllDetailed($request->query->all())
+                 : $this->userDocumentsApiService->getAll($request->query->all()));
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
         }

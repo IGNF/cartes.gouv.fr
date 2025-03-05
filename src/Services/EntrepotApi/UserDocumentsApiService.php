@@ -12,6 +12,19 @@ class UserDocumentsApiService extends BaseEntrepotApiService
         return $this->requestAll('users/me/documents', $query);
     }
 
+    /**
+     * @param array<mixed>|null $query
+     */
+    public function getAllDetailed(?array $query = []): array
+    {
+        $list = $this->getAll($query);
+        foreach ($list as &$item) {
+            $item = $this->get($item['_id']);
+        }
+
+        return $list;
+    }
+
     public function get(string $documentId): array
     {
         return $this->request('GET', "users/me/documents/$documentId");
