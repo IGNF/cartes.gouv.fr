@@ -217,9 +217,8 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
                                 }}
                                 allowEmptySearch={true}
                                 big
-                                renderInput={({ className, id, placeholder, type }) => (
-                                    <input className={className} id={id} placeholder={placeholder} type={type} disabled={isLoading} />
-                                )}
+                                renderInput={(props) => <input {...props} disabled={isLoading} />}
+                                defaultValue={search}
                             />
                         </div>
                     </div>
