@@ -29,7 +29,6 @@
         "geostyler-openlayers-parser": "^5.0.0",
         "geostyler-qgis-parser": "^4.0.0",
         "geostyler-sld-parser": "^7.0.0",
-        "geostyler-style": "^10.0.0",
         "i18nifty": "^3.0.0",
         "intl-messageformat": "^10.5.14",
         "markdown-it": "^14.1.0",
@@ -37,7 +36,7 @@
         "postcss": "^8.5.1",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
-        "react-dsfr-tiptap": "^1.0.3",
+        "react-dsfr-tiptap": "^1.1.1",
         "react-error-boundary": "^5.0.0",
         "react-hook-form": "^7.45.1",
         "simple-zustand-devtools": "^1.1.0",
@@ -103,5 +102,9 @@
         "*.twig": [
             "vendor/bin/twig-cs-fixer lint --fix"
         ]
-    }
+    },
+    "resolutions": {
+        "geostyler-style": "10.0.0"
+    },
+    "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

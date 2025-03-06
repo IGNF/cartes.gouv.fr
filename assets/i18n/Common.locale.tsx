@@ -1,3 +1,4 @@
+import { formatDateFromISO } from "@/utils";
 import { declareComponentKeys } from "./i18n";
 import { type Translations } from "./types";
 
@@ -34,6 +35,11 @@ const { i18n } = declareComponentKeys<
     | "url_copied"
     | "copy_to_clipboard"
     | "go_to_content"
+    | "search"
+    | "clear"
+    | "refresh"
+    | { K: "last_refresh_date"; P: { dataUpdatedAt: number }; R: string }
+    | { K: "nb_results"; P: { nb: number }; R: string }
 >()("Common");
 export type I18n = typeof i18n;
 
@@ -70,6 +76,11 @@ export const commonFrTranslations: Translations<"fr">["Common"] = {
     url_copied: "URL copiée",
     copy_to_clipboard: "Copier dans le presse-papier",
     go_to_content: "Aller au contenu",
+    search: "Rechercher",
+    clear: "Effacer",
+    refresh: "Rafraîchir",
+    last_refresh_date: ({ dataUpdatedAt }) => `Données mises à jour le ${formatDateFromISO(new Date(dataUpdatedAt).toISOString())}`,
+    nb_results: ({ nb }) => (nb > 1 ? `${nb} résultats` : `${nb} résultat`),
 };
 
 export const commonEnTranslations: Translations<"en">["Common"] = {
@@ -105,4 +116,9 @@ export const commonEnTranslations: Translations<"en">["Common"] = {
     url_copied: "URL copied",
     copy_to_clipboard: "Copy to clipboard",
     go_to_content: "Go to content",
+    search: "Search",
+    clear: "Clear",
+    refresh: undefined,
+    last_refresh_date: undefined,
+    nb_results: undefined,
 };
