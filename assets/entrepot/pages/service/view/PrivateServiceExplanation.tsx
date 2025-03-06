@@ -1,9 +1,9 @@
 import { routes } from "@/router/router";
 
 import { fr } from "@codegouvfr/react-dsfr";
-import { Button } from "@codegouvfr/react-dsfr/Button";
+import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 
-import ovoidSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/background/ovoid.svg";
+import ovoidSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/background/ovoid.svg?no-inline";
 import padlockSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/system/padlock.svg?no-inline";
 
 type PrivateServiceExplanationProps = {
@@ -27,21 +27,25 @@ function PrivateServiceExplanation({ datastoreId }: PrivateServiceExplanationPro
                     puissent créer leur propre clé.
                 </p>
 
-                <ul className={fr.cx("fr-btns-group", "fr-btns-group--inline-md")}>
-                    <li>
-                        <Button {...routes.my_access_keys().link}>Voir mes clé d’accès</Button>
-                    </li>
-                    <li>
-                        <Button {...routes.datastore_add_permission({ datastoreId }).link} className={fr.cx("fr-btn--secondary")}>
-                            Configurer les permissions
-                        </Button>
-                    </li>
-                </ul>
+                <ButtonsGroup
+                    buttons={[
+                        {
+                            children: "Voir mes clé d’accès",
+                            linkProps: routes.my_access_keys().link,
+                        },
+                        {
+                            children: "Configurer les permissions",
+                            linkProps: routes.datastore_add_permission({ datastoreId }).link,
+                            priority: "secondary",
+                        },
+                    ]}
+                    inlineLayoutWhen="md and up"
+                />
             </div>
             <div className={fr.cx("fr-col-12", "fr-col-md-3", "fr-col-offset-md-1", "fr-px-6w", "fr-px-md-0", "fr-py-0")}>
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className={"fr-responsive-img fr-artwork"}
+                    className={fr.cx("fr-responsive-img", "fr-artwork")}
                     aria-hidden="true"
                     width="160"
                     height="200"
