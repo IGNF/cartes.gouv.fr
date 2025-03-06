@@ -28,6 +28,7 @@ import { usePagination } from "@/hooks/usePagination";
 import SearchBar from "@codegouvfr/react-dsfr/SearchBar";
 import PageTitle from "@/components/Layout/PageTitle";
 import { useSearch } from "@/hooks/useSearch";
+import { ListHeader } from "@/components/Layout/ListHeader";
 
 type CommunityMembersProps = {
     userId?: string;
@@ -222,6 +223,8 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
                             />
                         </div>
                     </div>
+
+                    <ListHeader nbResults={searchedItems.length} />
 
                     <div className={tableContainerClassName}>
                         <table>

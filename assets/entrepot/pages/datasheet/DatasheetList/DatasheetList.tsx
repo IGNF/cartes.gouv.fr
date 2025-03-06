@@ -1,6 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import Button from "@codegouvfr/react-dsfr/Button";
 import Highlight from "@codegouvfr/react-dsfr/Highlight";
 import Pagination from "@codegouvfr/react-dsfr/Pagination";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
@@ -25,6 +24,7 @@ import { useSearch } from "@/hooks/useSearch";
 import { FilterEnum, useFilters } from "@/hooks/useFilters";
 import { SortOrderEnum, useSort } from "@/hooks/useSort";
 import { SortByEnum } from "./DatasheetList.types";
+import { ListHeader } from "@/components/Layout/ListHeader";
 
 const filterTests = {
     [FilterEnum.ENABLED]: (d: Datasheet) => d.nb_publications > 0,
@@ -193,36 +193,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                 <Skeleton count={12} rectangleHeight={100} />
             ) : (
                 <>
-                    <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mt-2v")}>
-                        <div
-                            className={fr.cx("fr-col")}
-                            style={{
-                                display: "flex",
-                                alignItems: "center",
-                            }}
-                        >
-                            <h2 className={fr.cx("fr-text--sm", "fr-mb-0")}>{t("nb_results", { nb: filteredItems.length })}</h2>
-                            <span
-                                className={fr.cx("fr-text--sm", "fr-mb-0", "fr-mr-2v")}
-                                style={{
-                                    marginLeft: "auto",
-                                }}
-                            >
-                                {t("last_refresh_date", { dataUpdatedAt })}
-                            </span>
-                            <Button
-                                title={t("refresh_datasheet_list")}
-                                onClick={() => refetch()}
-                                iconId="ri-refresh-line"
-                                nativeButtonProps={{
-                                    "aria-disabled": isFetching,
-                                }}
-                                disabled={isFetching}
-                                size="small"
-                                className={isFetching ? "frx-icon-spin" : ""}
-                            />
-                        </div>
-                    </div>
+                    <ListHeader nbResults={filteredItems.length} dataUpdatedAt={dataUpdatedAt} isFetching={isFetching} refetch={refetch} />
 
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mt-4v")}>
                         <div className={fr.cx("fr-col")}>

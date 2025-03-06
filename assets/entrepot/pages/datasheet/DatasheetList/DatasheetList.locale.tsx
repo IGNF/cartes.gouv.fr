@@ -1,7 +1,6 @@
 import { declareComponentKeys } from "i18nifty";
 import { ReactNode } from "react";
 
-import { formatDateFromISO } from "@/utils";
 import { Translations } from "../../../../i18n/types";
 import { FilterEnum } from "@/hooks/useFilters";
 import { SortOrderEnum } from "@/hooks/useSort";
@@ -15,9 +14,6 @@ const { i18n } = declareComponentKeys<
     | { K: "services_published"; P: { nbServices?: number }; R: string }
     | "no_services_published"
     | { K: "sandbox_datastore_explanation"; R: ReactNode }
-    | "refresh_datasheet_list"
-    | { K: "last_refresh_date"; P: { dataUpdatedAt: number }; R: string }
-    | { K: "nb_results"; P: { nb: number }; R: string }
     | "filter_label"
     | { K: "filter_option"; P: { filter: FilterEnum }; R: string }
     | "sort_label"
@@ -36,9 +32,6 @@ export const DatasheetListFrTranslations: Translations<"fr">["DatasheetList"] = 
     no_services_published: "Non publié",
     sandbox_datastore_explanation:
         "Cet espace permet de tester les fonctions d’alimentation et de diffusion de la Géoplateforme. Les services publiés dans cet espace ne sont pas visibles sur le catalogue.",
-    refresh_datasheet_list: "Rafraîchir",
-    last_refresh_date: ({ dataUpdatedAt }) => `Données mises à jour le ${formatDateFromISO(new Date(dataUpdatedAt).toISOString())}`,
-    nb_results: ({ nb }) => `${nb} résultats`,
     filter_label: "Filtrer",
     filter_option: ({ filter }) => {
         switch (filter) {
@@ -75,9 +68,6 @@ export const DatasheetListEnTranslations: Translations<"en">["DatasheetList"] = 
     services_published: undefined,
     no_services_published: undefined,
     sandbox_datastore_explanation: undefined,
-    refresh_datasheet_list: undefined,
-    last_refresh_date: undefined,
-    nb_results: undefined,
     filter_label: undefined,
     filter_option: undefined,
     sort_label: undefined,
