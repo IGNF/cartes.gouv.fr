@@ -3071,15 +3071,10 @@ geostyler-sld-parser@^7.0.0:
     geostyler-style "^10.0.0"
     lodash "^4.17.21"
 
-geostyler-style@^10.0.0:
+geostyler-style@10.0.0, geostyler-style@^10.0.0, geostyler-style@^9.0.0, geostyler-style@^9.0.1, geostyler-style@^9.2.0:
   version "10.0.0"
   resolved "https://registry.yarnpkg.com/geostyler-style/-/geostyler-style-10.0.0.tgz#2d88c9b49d8f56e63ca305b4248709b941e4d99e"
   integrity sha512-Gafn436MLApVvE1hsKrJ40KuH+6IUWM9V88IOuFxvZzsosn4a56ZJCXHXznN3usK/6ZZtmD0M5gO8ZhbB1wcwQ==
-
-geostyler-style@^9.0.0, geostyler-style@^9.0.1, geostyler-style@^9.2.0:
-  version "9.2.0"
-  resolved "https://registry.yarnpkg.com/geostyler-style/-/geostyler-style-9.2.0.tgz#30550dcc2163d08d5fe1896f010999af403f4a0b"
-  integrity sha512-LwYkkbgD6VIGEbqcvG7U5hqgWrpWnwTdYtltIGt7bo+toKW9JcSoO6rIpbVPkbpblXJRWYQlbv80D8q3pqo+JQ==
 
 geotiff@^2.1.3:
   version "2.1.3"
@@ -4859,10 +4854,10 @@ react-dom@^18.2.0:
     loose-envify "^1.1.0"
     scheduler "^0.23.2"
 
-react-dsfr-tiptap@^1.0.3:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/react-dsfr-tiptap/-/react-dsfr-tiptap-1.1.0.tgz#e510fbc4919bbaf86d504e603d1f7ef88a3e9534"
-  integrity sha512-lZ124gw53sMevzWlGJlp1m+HIVL15lvqDtFJCj5wJkVGYbcDEkbo9QVLvxjsENpEBcqMzJieEPQzx4w85bhtpw==
+react-dsfr-tiptap@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/react-dsfr-tiptap/-/react-dsfr-tiptap-1.1.1.tgz#43ba3031378127f6159e328c22e914729104f819"
+  integrity sha512-mjLgzSGME+J1QaB23ZsCGvEaJLl3Ytj/mwapAl3PcMcc7sSOPQ/7AYV8Xirc6j3db0Tivhrueap0f02kkXqcaw==
   dependencies:
     "@tiptap/pm" "^2.10.4"
     "@tiptap/react" "^2.10.4"
@@ -5752,17 +5747,17 @@ tiptap-markdown@^0.8.10:
     markdown-it-task-lists "^2.1.1"
     prosemirror-markdown "^1.11.1"
 
-tldts-core@^6.1.82:
-  version "6.1.82"
-  resolved "https://registry.yarnpkg.com/tldts-core/-/tldts-core-6.1.82.tgz#b93e0312378f67cfc15ea1da9bc1b699ec621ae9"
-  integrity sha512-Jabl32m21tt/d/PbDO88R43F8aY98Piiz6BVH9ShUlOAiiAELhEqwrAmBocjAqnCfoUeIsRU+h3IEzZd318F3w==
+tldts-core@^6.1.83:
+  version "6.1.83"
+  resolved "https://registry.yarnpkg.com/tldts-core/-/tldts-core-6.1.83.tgz#8f31172cb5763cc1128d4e18ee5095aa2f990eb8"
+  integrity sha512-I2wb9OJc6rXyh9d4aInhSNWChNI+ra6qDnFEGEwe9OoA68lE4Temw29bOkf1Uvwt8VZS079t1BFZdXVBmmB4dw==
 
 tldts@^6.1.32:
-  version "6.1.82"
-  resolved "https://registry.yarnpkg.com/tldts/-/tldts-6.1.82.tgz#1c06e884bcdbcccbaf73bd552e2f188ad670a4a9"
-  integrity sha512-KCTjNL9F7j8MzxgfTgjT+v21oYH38OidFty7dH00maWANAI2IsLw2AnThtTJi9HKALHZKQQWnNebYheadacD+g==
+  version "6.1.83"
+  resolved "https://registry.yarnpkg.com/tldts/-/tldts-6.1.83.tgz#2ba9aa8db0cbcc2d75291f148f8acf9ac469429a"
+  integrity sha512-FHxxNJJ0WNsEBPHyC1oesQb3rRoxpuho/z2g3zIIAhw1WHJeQsUzK1jYK8TI1/iClaa4fS3Z2TCA9mtxXsENSg==
   dependencies:
-    tldts-core "^6.1.82"
+    tldts-core "^6.1.83"
 
 tmp@~0.2.3:
   version "0.2.3"
