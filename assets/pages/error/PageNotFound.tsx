@@ -1,11 +1,12 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import { Button } from "@codegouvfr/react-dsfr/Button";
+import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { FC } from "react";
-import ovoidSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/background/ovoid.svg";
-import technicalErrorSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/system/technical-error.svg";
 
-import { routes } from "../../router/router";
-import Main from "../../components/Layout/Main";
+import Main from "@/components/Layout/Main";
+import { routes } from "@/router/router";
+
+import ovoidSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/background/ovoid.svg?no-inline";
+import technicalErrorSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/system/technical-error.svg?no-inline";
 
 const PageNotFound: FC = () => {
     return (
@@ -34,21 +35,25 @@ const PageNotFound: FC = () => {
                         bonne information.
                     </p>
 
-                    <ul className={fr.cx("fr-btns-group", "fr-btns-group--inline-md")}>
-                        <li>
-                            <Button linkProps={routes.home().link}>Page d&apos;accueil</Button>
-                        </li>
-                        <li>
-                            <Button linkProps={routes.contact().link} className={fr.cx("fr-btn--secondary")}>
-                                Nous écrire
-                            </Button>
-                        </li>
-                    </ul>
+                    <ButtonsGroup
+                        buttons={[
+                            {
+                                children: "Page d’accueil",
+                                linkProps: routes.home().link,
+                            },
+                            {
+                                children: "Nous écrire",
+                                linkProps: routes.contact().link,
+                                priority: "secondary",
+                            },
+                        ]}
+                        inlineLayoutWhen="md and up"
+                    />
                 </div>
                 <div className={fr.cx("fr-col-12", "fr-col-md-3", "fr-col-offset-md-1", "fr-px-6w", "fr-px-md-0", "fr-py-0")}>
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className={"fr-responsive-img fr-artwork"}
+                        className={fr.cx("fr-responsive-img", "fr-artwork")}
                         aria-hidden="true"
                         width="160"
                         height="200"
