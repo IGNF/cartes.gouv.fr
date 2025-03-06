@@ -188,10 +188,14 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, metadataQuery }) => {
                                     key={`${layer.offering_id}_${layer.name}`}
                                     title={layer.name}
                                     content={
-                                        <>
-                                            <strong>{"Type"}</strong> : {layer.gmd_online_resource_protocol}
-                                            <TextCopyToClipboard text={layer.gmd_online_resource_url ?? ""} />
-                                        </>
+                                        <TextCopyToClipboard
+                                            label={
+                                                <span>
+                                                    <strong>{"Type"}</strong> : {layer.gmd_online_resource_protocol}
+                                                </span>
+                                            }
+                                            text={layer.gmd_online_resource_url ?? ""}
+                                        />
                                     }
                                 />
                             )) ?? ""}
@@ -203,14 +207,18 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, metadataQuery }) => {
                                     key={`${styleFile.url}`}
                                     title={styleFile.name}
                                     content={
-                                        <>
-                                            {styleFile?.description !== "" && (
-                                                <>
-                                                    <strong>Description</strong> : {styleFile.description}
-                                                </>
-                                            )}
-                                            <TextCopyToClipboard text={styleFile.url ?? ""} />
-                                        </>
+                                        <TextCopyToClipboard
+                                            label={
+                                                styleFile?.description !== "" ? (
+                                                    <span>
+                                                        <strong>Description</strong> : {styleFile.description}
+                                                    </span>
+                                                ) : (
+                                                    ""
+                                                )
+                                            }
+                                            text={styleFile.url ?? ""}
+                                        />
                                     }
                                 />
                             )) ?? ""}
@@ -222,14 +230,18 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, metadataQuery }) => {
                                     key={`${capFile.url}`}
                                     title={capFile.name}
                                     content={
-                                        <>
-                                            {capFile?.description !== "" && (
-                                                <>
-                                                    <strong>Description</strong> : {capFile.description}
-                                                </>
-                                            )}
-                                            <TextCopyToClipboard text={capFile.url ?? ""} />
-                                        </>
+                                        <TextCopyToClipboard
+                                            label={
+                                                capFile?.description !== "" ? (
+                                                    <span>
+                                                        <strong>Description</strong> : {capFile.description}
+                                                    </span>
+                                                ) : (
+                                                    ""
+                                                )
+                                            }
+                                            text={capFile.url ?? ""}
+                                        />
                                     }
                                 />
                             )) ?? ""}
@@ -241,15 +253,18 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, metadataQuery }) => {
                                     key={`${document.url}`}
                                     title={document.name}
                                     content={
-                                        <>
-                                            {document?.description !== null && document?.description !== "" && (
-                                                <>
-                                                    <strong>Description</strong> : {document.description}
-                                                </>
-                                            )}
-
-                                            <TextCopyToClipboard text={document.url ?? ""} />
-                                        </>
+                                        <TextCopyToClipboard
+                                            label={
+                                                document?.description !== null && document?.description !== "" ? (
+                                                    <span>
+                                                        <strong>Description</strong> : {document.description}
+                                                    </span>
+                                                ) : (
+                                                    ""
+                                                )
+                                            }
+                                            text={document.url ?? ""}
+                                        />
                                     }
                                 />
                             )) ?? ""}

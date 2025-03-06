@@ -20,23 +20,28 @@ import { v4 as uuidv4 } from "uuid";
 //     },
 // }));
 
+interface IMessage {
+    id: string;
+    title: string;
+    description?: string;
+    severity?: "info" | "success" | "warning" | "error";
+}
+
 interface SnackbarStore {
-    messageUuid?: string | null;
-    message?: string | null;
-    setMessage: (newMessage: string) => void;
+    message: IMessage | null;
+    setMessage: (title: string, description?: string, severity?: "info" | "success" | "warning" | "error") => void;
     clearMessage: () => void;
 }
 export const useSnackbarStore = create<SnackbarStore>()((set) => ({
     message: null,
-    messageUuid: null,
-    setMessage: (newMessage) =>
+    setMessage: (title, description, severity) =>
         set(() => ({
-            message: newMessage,
-            messageUuid: uuidv4(),
+            message: {
+                id: uuidv4(),
+                title,
+                description,
+                severity,
+            },
         })),
-    clearMessage: () =>
-        set(() => ({
-            message: null,
-            messageUuid: null,
-        })),
+    clearMessage: () => set(() => ({ message: null })),
 }));
