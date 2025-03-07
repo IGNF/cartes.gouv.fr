@@ -85,6 +85,7 @@ const createFormData = async (formValues: WmsVectorServiceFormValuesType) => {
     fd.set("hierarchy_level", formValues.hierarchy_level!);
     fd.set("frequency_code", formValues.frequency_code!);
     fd.set("share_with", formValues.share_with!);
+    fd.set("allow_view_data", String(formValues.allow_view_data!));
     fd.set("technical_name", formValues.technical_name!);
 
     // filtrer en fonction des tables sélectionnées

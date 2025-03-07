@@ -94,6 +94,9 @@ class WfsAddDTO
          */
         #[Assert\Valid]
         public readonly array $table_infos,
+
+        #[Assert\Type('bool')]
+        public readonly bool $allow_view_data,
     ) {
     }
 }

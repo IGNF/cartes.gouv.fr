@@ -154,11 +154,33 @@ class ServiceController extends AbstractController implements ApiControllerInter
      */
     protected function addPermissionForCurrentCommunity(string $datastoreId, array $offering): void
     {
+        $datastore = $this->datastoreApiService->get($datastoreId);
+        $this->addPermissionForCommunity($datastoreId, $datastore['community']['_id'], $offering);
+    }
+
+    /**
+     * @param array<mixed> $offering
+     */
+    protected function addPermissionForCommunity(string $producerDatastoreId, string $consumerCommunityId, array $offering): void
+    {
+        $permissions = $this->datastoreApiService->getPermissions($producerDatastoreId);
+        $offeringId = $offering['_id'];
+
+        $offeringPermissions = array_filter($permissions, function ($permission) use ($offeringId) {
+            return isset($permission['offerings']) && in_array($offeringId, array_column($permission['offerings'], '_id'));
+        });
+
+        $isPermission = array_reduce($offeringPermissions, function ($carry, $permission) use ($consumerCommunityId) {
+            return $carry || (isset($permission['beneficiary']['_id']) && $permission['beneficiary']['_id'] === $consumerCommunityId);
+        }, false);
+
+        if ($isPermission) {
+            return;
+        }
+
         $endDate = new \DateTime();
         $endDate->add(new \DateInterval('P3M')); // date du jour + 3 mois
         $endDate->setTime(23, 59, 0);
-
-        $datastore = $this->datastoreApiService->get($datastoreId);
 
         $permissionRequestBody = [
             'end_date' => $endDate->format(\DateTime::ATOM),
@@ -166,10 +188,10 @@ class ServiceController extends AbstractController implements ApiControllerInter
             'offerings' => [$offering['_id']],
             'type' => PermissionTypes::COMMUNITY,
             'only_oauth' => false,
-            'communities' => [$datastore['community']['_id']],
+            'communities' => [$consumerCommunityId],
         ];
 
-        $this->datastoreApiService->addPermission($datastoreId, $permissionRequestBody);
+        $this->datastoreApiService->addPermission($producerDatastoreId, $permissionRequestBody);
     }
 
     /**
