@@ -160,7 +160,7 @@ class PyramidRasterController extends ServiceController implements ApiController
             }
 
             // création d'une permission pour la communauté config
-            if (true === $data['allow_view_data']) {
+            if (true === filter_var($data['allow_view_data'], FILTER_VALIDATE_BOOLEAN)) {
                 $communityId = $this->getParameter('config')['community_id'];
                 $this->addPermissionForCommunity($datastoreId, $communityId, $offering);
             }
@@ -225,13 +225,33 @@ class PyramidRasterController extends ServiceController implements ApiController
                 $this->configurationApiService->removeOffering($datastoreId, $oldOffering['_id']);
 
                 $offering = $this->configurationApiService->addOffering($datastoreId, $oldConfiguration['_id'], $endpoint['_id'], $endpoint['open']);
-
-                if (false === $offering['open']) {
-                    // création d'une permission pour la communauté actuelle
-                    $this->addPermissionForCurrentCommunity($datastoreId, $offering);
-                }
             } else {
                 $offering = $this->configurationApiService->syncOffering($datastoreId, $offeringId);
+            }
+
+            if (false === $offering['open']) {
+                // création d'une permission pour la communauté config
+                if (true === filter_var($data['allow_view_data'], FILTER_VALIDATE_BOOLEAN)) {
+                    $communityId = $this->getParameter('config')['community_id'];
+                    $this->addPermissionForCommunity($datastoreId, $communityId, $offering);
+                } else {
+                    $communityId = $this->getParameter('config')['community_id'];
+                    $permissions = $this->datastoreApiService->getPermissions($datastoreId);
+
+                    $targetPermission = array_filter($permissions, function ($permission) use ($offering, $communityId) {
+                        return isset($permission['offerings'])
+                            && in_array($offering['_id'], array_column($permission['offerings'], '_id'))
+                            && isset($permission['beneficiary']['_id'])
+                            && $permission['beneficiary']['_id'] === $communityId;
+                    });
+
+                    if (!empty($targetPermission)) {
+                        $permissionId = reset($targetPermission)['_id'];
+                        $this->datastoreApiService->removePermission($datastoreId, $permissionId);
+                    }
+                }
+                // création d'une permission pour la communauté actuelle
+                $this->addPermissionForCurrentCommunity($datastoreId, $offering);
             }
 
             $offering['configuration'] = $configuration;

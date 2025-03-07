@@ -2,7 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { useQuery } from "@tanstack/react-query";
-import { FC, useMemo } from "react";
+import { FC, useEffect, useMemo } from "react";
 import { UseFormReturn } from "react-hook-form";
 
 import { DatastoreEndpoint, EndpointTypeEnum, Service, ServiceFormValuesBaseType } from "../../../../../@types/app";
@@ -10,6 +10,7 @@ import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import api from "../../../../api";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
+import { DatastorePermissionResponseDto } from "../../../../../@types/entrepot";
 
 type AccessRestrictionProps = {
     datastoreId: string;
@@ -30,7 +31,18 @@ const AccessRestrictions: FC<AccessRestrictionProps> = ({ datastoreId, endpointT
         watch,
     } = form;
 
-    const allowViewData = watch("allow_view_data");
+    const { data: permissions } = useQuery<DatastorePermissionResponseDto[]>({
+        queryKey: RQKeys.datastore_permission_offering(datastoreId, service?._id ?? ""),
+        queryFn: ({ signal }) => api.datastore.getPermissions(datastoreId, { offering: service?._id }, { signal }),
+    });
+
+    const offeringPermissions = permissions?.filter((permission) => permission.offerings.map((offering) => offering._id).includes(service?._id ?? ""));
+    const isPermission = offeringPermissions?.some((permission) => permission.beneficiary?._id === import.meta.env.CONFIG_COMMUNITY_ID) ?? false;
+
+    useEffect(() => {
+        setValue("allow_view_data", isPermission);
+    }, [setValue, isPermission]);
+
     const shareWith = watch("share_with");
 
     const endpointsQuery = useQuery<DatastoreEndpoint[]>({
@@ -99,8 +111,7 @@ const AccessRestrictions: FC<AccessRestrictionProps> = ({ datastoreId, endpointT
                                     const checked = e.currentTarget.checked;
                                     setValue("allow_view_data", checked);
                                 },
-                                checked: allowViewData === true,
-                                value: "allowViewData",
+                                checked: watch("allow_view_data"),
                             },
                         },
                     ]}
