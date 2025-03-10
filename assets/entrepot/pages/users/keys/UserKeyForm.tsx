@@ -79,14 +79,14 @@ const UserKeyForm: FC<UserKeyFormProps> = ({ keyId }) => {
     const { data: keys, isLoading: isLoadingKeys } = useQuery<UserKeyResponseDto[]>({
         queryKey: RQKeys.my_keys(),
         queryFn: ({ signal }) => api.user.getMyKeys({ signal }),
-        staleTime: 3600000,
+        staleTime: 30000,
     });
 
     // Les permissions
     const { data: permissions, isLoading: isLoadingPermissions } = useQuery<PermissionWithOfferingsDetailsResponseDto[]>({
         queryKey: RQKeys.my_permissions(),
         queryFn: ({ signal }) => api.user.getMyPermissions({ signal }),
-        staleTime: 3600000,
+        staleTime: 30000,
     });
 
     /* Le nom de la cle */

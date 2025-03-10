@@ -253,6 +253,7 @@ export type ServiceFormValuesBaseType = {
     public_name?: string;
     description?: string;
     share_with?: string;
+    allow_view_data?: boolean;
 } & MetadataFormValuesType &
     AttributionFormValuesType;
 
