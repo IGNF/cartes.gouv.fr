@@ -33,7 +33,7 @@ use Symfony\Component\Uid\Uuid;
 class WmsVectorController extends ServiceController implements ApiControllerInterface
 {
     public function __construct(
-        DatastoreApiService $datastoreApiService,
+        private DatastoreApiService $datastoreApiService,
         private ConfigurationApiService $configurationApiService,
         private StoredDataApiService $storedDataApiService,
         CartesServiceApiService $cartesServiceApiService,
@@ -41,7 +41,7 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
         private CapabilitiesService $capabilitiesService,
         protected Filesystem $filesystem,
         private CartesMetadataApiService $cartesMetadataApiService,
-        SandboxService $sandboxService
+        SandboxService $sandboxService,
     ) {
         parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $capabilitiesService, $cartesMetadataApiService, $sandboxService);
     }
@@ -51,7 +51,7 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
         string $datastoreId,
         string $storedDataId,
         // #[MapRequestPayload] WmsVectorAddDTO $dto, // TODO : MapRequestPayload ne marche pas avec FormData (envoyé par js), essayer de trouver une solution
-        Request $request
+        Request $request,
     ): JsonResponse {
         $data = $request->request->all();
         $files = $request->files->all(); // les fichiers de style .sld
@@ -98,6 +98,12 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
                 $this->addPermissionForCurrentCommunity($datastoreId, $offering);
             }
 
+            // création d'une permission pour la communauté config
+            if (true === filter_var($data['allow_view_data'], FILTER_VALIDATE_BOOLEAN)) {
+                $communityId = $this->getParameter('config')['community_id'];
+                $this->addPermissionForCommunity($datastoreId, $communityId, $offering);
+            }
+
             // Création ou mise à jour du capabilities
             try {
                 $this->capabilitiesService->createOrUpdate($datastoreId, $endpoint, $offering['urls'][0]['url']);
@@ -128,7 +134,7 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
         string $datastoreId,
         string $storedDataId,
         string $offeringId,
-        Request $request
+        Request $request,
     ): JsonResponse {
         $data = $request->request->all();
         $files = $request->files->all(); // les fichiers de style .sld
@@ -157,13 +163,33 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
                 $this->configurationApiService->removeOffering($datastoreId, $oldOffering['_id']);
 
                 $offering = $this->configurationApiService->addOffering($datastoreId, $oldConfiguration['_id'], $endpoint['_id'], $endpoint['open']);
-
-                if (false === $offering['open']) {
-                    // création d'une permission pour la communauté actuelle
-                    $this->addPermissionForCurrentCommunity($datastoreId, $offering);
-                }
             } else {
                 $offering = $this->configurationApiService->syncOffering($datastoreId, $offeringId);
+            }
+
+            if (false === $offering['open']) {
+                // création d'une permission pour la communauté config
+                if (true === filter_var($data['allow_view_data'], FILTER_VALIDATE_BOOLEAN)) {
+                    $communityId = $this->getParameter('config')['community_id'];
+                    $this->addPermissionForCommunity($datastoreId, $communityId, $offering);
+                } else {
+                    $communityId = $this->getParameter('config')['community_id'];
+                    $permissions = $this->datastoreApiService->getPermissions($datastoreId);
+
+                    $targetPermission = array_filter($permissions, function ($permission) use ($offering, $communityId) {
+                        return isset($permission['offerings'])
+                            && in_array($offering['_id'], array_column($permission['offerings'], '_id'))
+                            && isset($permission['beneficiary']['_id'])
+                            && $permission['beneficiary']['_id'] === $communityId;
+                    });
+
+                    if (!empty($targetPermission)) {
+                        $permissionId = reset($targetPermission)['_id'];
+                        $this->datastoreApiService->removePermission($datastoreId, $permissionId);
+                    }
+                }
+                // création d'une permission pour la communauté actuelle
+                $this->addPermissionForCurrentCommunity($datastoreId, $offering);
             }
 
             $offering['configuration'] = $configuration;

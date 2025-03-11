@@ -8,6 +8,7 @@ const RQKeys = {
     datastore: (datastoreId: string): string[] => ["datastore", datastoreId],
     datastore_endpoints: (datastoreId: string): string[] => ["datastore", datastoreId, "endpoints"],
     datastore_permissions: (datastoreId: string): string[] => ["datastore", datastoreId, "permissions"],
+    datastore_permission_offering: (datastoreId: string, offeringId: string): string[] => ["datastore", datastoreId, "permissions", "offering", offeringId],
     datastore_permission: (datastoreId: string, permissionId: string): string[] => ["datastore", datastoreId, "permission", permissionId],
 
     datastore_upload_list: (datastoreId: string): string[] => ["datastore", datastoreId, "upload"],

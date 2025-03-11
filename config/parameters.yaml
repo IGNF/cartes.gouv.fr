@@ -22,6 +22,9 @@ parameters:
             create_vect_pyr: "%env(resolve:SANDBOX_PROC_CREATE_VECT_PYR)%"
             create_rast_pyr: "%env(resolve:SANDBOX_PROC_CREATE_RAST_PYR)%"
 
+    config:
+        community_id: "%env(resolve:CONFIG_COMMUNITY_ID)%"
+
     api_entrepot_url: "%env(resolve:API_ENTREPOT_URL)%"
     annexes_url: "%env(resolve:ANNEXES_URL)%"
 

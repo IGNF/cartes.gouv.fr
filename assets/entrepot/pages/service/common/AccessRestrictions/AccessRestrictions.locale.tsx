@@ -11,6 +11,7 @@ const { i18n } = declareComponentKeys<
     | "share_with_value_change_warning_title"
     | "share_with_value_change_warning_desc_restricted_to_public"
     | "share_with_value_change_warning_desc_public_to_restricted"
+    | "allow_view_data"
 >()("AccessRestrictions");
 export type I18n = typeof i18n;
 
@@ -29,6 +30,7 @@ export const AccessRestrictionsFrTranslations: Translations<"fr">["AccessRestric
     share_with_value_change_warning_desc_public_to_restricted:
         // eslint-disable-next-line quotes
         'Vous êtes sur le point de modifier les restrictions d\'accès de "Tout public" à "Restreint". Le service changera d\'adresse.',
+    allow_view_data: "Autoriser l'affichage de ce service sur l'entrée cartographique de cartes.gouv.fr",
 };
 
 export const AccessRestrictionsEnTranslations: Translations<"en">["AccessRestrictions"] = {
@@ -41,4 +43,5 @@ export const AccessRestrictionsEnTranslations: Translations<"en">["AccessRestric
     share_with_value_change_warning_title: undefined,
     share_with_value_change_warning_desc_restricted_to_public: undefined,
     share_with_value_change_warning_desc_public_to_restricted: undefined,
+    allow_view_data: undefined,
 };
