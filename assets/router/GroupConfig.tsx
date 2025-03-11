@@ -26,7 +26,7 @@ function GroupConfig(props: IGroupConfigProps) {
         }
     }, [route]);
 
-    if (!content) {
+    if (!content || !communityId) {
         return <PageNotFoundWithLayout />;
     }
 
