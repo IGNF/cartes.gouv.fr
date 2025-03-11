@@ -3,6 +3,7 @@ twig:
     globals:
         api_espaceco_url: "%api_espaceco_url%"
         catalogue_url: "%catalogue_url%"
+        config: "%config%"
 
 when@test:
     twig:

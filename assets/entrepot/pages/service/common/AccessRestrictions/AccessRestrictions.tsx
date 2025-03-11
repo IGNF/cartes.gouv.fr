@@ -37,7 +37,7 @@ const AccessRestrictions: FC<AccessRestrictionProps> = ({ datastoreId, endpointT
     });
 
     const offeringPermissions = permissions?.filter((permission) => permission.offerings.map((offering) => offering._id).includes(service?._id ?? ""));
-    const isPermission = offeringPermissions?.some((permission) => permission.beneficiary?._id === import.meta.env.CONFIG_COMMUNITY_ID) ?? false;
+    const isPermission = offeringPermissions?.some((permission) => permission.beneficiary?._id === api.alerts.communityId) ?? false;
 
     useEffect(() => {
         setValue("allow_view_data", isPermission);
@@ -100,7 +100,7 @@ const AccessRestrictions: FC<AccessRestrictionProps> = ({ datastoreId, endpointT
                 ]}
             />
 
-            {shareWith === "your_community" && import.meta.env.CONFIG_COMMUNITY_ID && (
+            {shareWith === "your_community" && api.alerts.communityId && (
                 <Checkbox
                     className={fr.cx("fr-ml-5v")}
                     options={[

@@ -23,7 +23,7 @@ export default defineConfig({
             refresh: true,
             sriAlgorithm: "sha384",
             debug: process.env.APP_ENV === "dev",
-            exposedEnvVars: ["APP_ENV", "APP_ROOT_URL", "CATALOGUE_URL", "API_ESPACE_COLLABORATIF_URL", "CONFIG_COMMUNITY_ID"],
+            exposedEnvVars: ["APP_ENV"],
         }),
         run([
             {

@@ -1,7 +1,11 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-    <div id="root" data-site-title="cartes.gouv.fr"></div>
+    <div id="root" data-site-title="cartes.gouv.fr"
+        {% if api_espaceco_url is defined and api_espaceco_url is not empty %}data-api-espaceco-url="{{ api_espaceco_url }}"{% endif %}
+        {% if catalogue_url is defined and catalogue_url is not empty %}data-catalogue-url="{{ catalogue_url }}"{% endif %}
+        {% if config is defined and config.community_id is defined and config.community_id is not empty %}data-config-community-id="{{ config.community_id }}"{% endif %}
+    ></div>
 
     {% if app.user is defined and app.user is not null %}
         <div id="user" data-user="{{ app.user|serialize('json') }}"></div>

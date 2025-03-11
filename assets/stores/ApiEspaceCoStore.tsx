@@ -6,9 +6,8 @@ interface ApiEspaceCoStore {
     isUrlDefined: () => boolean;
 }
 
-/* l'url de l'API espace collaboratif (definie dans le .env.local, récupéré et injecté par vite) */
-const url =
-    import.meta.env?.API_ESPACE_COLLABORATIF_URL && import.meta.env.API_ESPACE_COLLABORATIF_URL !== "" ? import.meta.env.API_ESPACE_COLLABORATIF_URL : null;
+/* l'url de l'API espace collaboratif (definie dans le .env.local, ensuite injecté dans le twig) */
+const url = (document.getElementById("root") as HTMLDivElement)?.dataset?.["apiEspacecoUrl"] ?? null;
 
 export const useApiEspaceCoStore = create<ApiEspaceCoStore>()((set, get) => ({
     api_espaceco_url: url,

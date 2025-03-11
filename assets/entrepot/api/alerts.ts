@@ -1,7 +1,7 @@
 import { IApiAlert } from "../../@types/alert";
 import { jsonFetch } from "../../modules/jsonFetch";
 
-const communityId = import.meta.env.CONFIG_COMMUNITY_ID;
+const communityId = (document.getElementById("root") as HTMLDivElement)?.dataset?.["configCommunityId"];
 const annexePath = "/public/alerts.json";
 const fileName = annexePath.substring(annexePath.lastIndexOf("/") + 1);
 const baseUrl = "https://data.geopf.fr/annexes/cartes.gouv.fr-config";
