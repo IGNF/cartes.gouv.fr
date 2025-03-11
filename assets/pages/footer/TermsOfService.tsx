@@ -1212,7 +1212,7 @@ const TermsOfService = () => {
                                         <tbody>
                                             <tr>
                                                 <td>API Géoplateforme - Diffusion d’images tuilées WMTS</td>
-                                                <td rowSpan={6}>400 requêtes/s</td>
+                                                <td rowSpan={6}>Non soumis au rate limiting</td>
                                             </tr>
                                             <tr>
                                                 <td>API Géoplateforme - Diffusion d’images tuilées WMTS - Privé</td>
