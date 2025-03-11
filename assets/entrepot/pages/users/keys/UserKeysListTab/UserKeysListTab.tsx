@@ -90,7 +90,7 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
                 <p>{t("no_keys")}</p>
             ) : (
                 keys.map((accessKey) => {
-                    const groupedServices = accessKey.accesses.reduce(
+                    const groupedServices = (accessKey.accesses ?? []).reduce(
                         (acc, access) => {
                             const type = access.offering.type;
                             if (!acc[type]) {
