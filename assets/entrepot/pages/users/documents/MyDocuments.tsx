@@ -91,8 +91,10 @@ const MyDocuments: FC = () => {
         }
 
         const data = Object.fromEntries(formData);
-        // @ts-expect-error // TODO à corriger plus tard, c'est pas très grave
-        data["extra"] = JSON.parse(data["extra"]);
+        if (data["extra"] && data["extra"] !== "") {
+            // @ts-expect-error // TODO à corriger plus tard, c'est pas très grave
+            data["extra"] = JSON.parse(data["extra"]);
+        }
 
         // remove keys from data whose value is empty or nullish
         Object.entries(data).forEach(([key, value]) => {
@@ -235,6 +237,16 @@ const MyDocuments: FC = () => {
                                 name: "file",
                                 required: true,
                             }}
+                        />
+                        <Checkbox
+                            options={[
+                                {
+                                    label: "Accessible via une URL publique",
+                                    nativeInputProps: {
+                                        name: "public_url",
+                                    },
+                                },
+                            ]}
                         />
                         <ButtonsGroup
                             buttons={[

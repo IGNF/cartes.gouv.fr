@@ -56,12 +56,14 @@ class UserDocumentsController extends AbstractController implements ApiControlle
             $name = $request->request->get('name');
             $description = $request->request->get('description');
             $labels = $request->request->get('labels') ? explode(',', $request->request->get('labels')) : null;
+            $publicUrl = $request->request->get('public_url', false);
 
             return $this->json($this->userDocumentsApiService->add(
                 $file->getRealPath(),
                 $name,
                 $description,
-                $labels
+                $labels,
+                $publicUrl
             ));
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
