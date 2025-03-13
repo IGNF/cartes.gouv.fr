@@ -6,8 +6,8 @@ use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Constants\EntrepotApi\Sandbox;
 use App\Controller\ApiControllerInterface;
-use App\Dto\WfsAddDTO;
-use App\Dto\WfsTableDTO;
+use App\Dto\Services\Wfs\WfsServiceDTO;
+use App\Dto\Services\Wfs\WfsTableDTO;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\CapabilitiesService;
@@ -45,7 +45,7 @@ class WfsController extends ServiceController implements ApiControllerInterface
     public function add(
         string $datastoreId,
         string $storedDataId,
-        #[MapRequestPayload] WfsAddDTO $dto,
+        #[MapRequestPayload] WfsServiceDTO $dto,
     ): JsonResponse {
         try {
             // création de requête pour la config
@@ -110,7 +110,7 @@ class WfsController extends ServiceController implements ApiControllerInterface
         string $datastoreId,
         string $storedDataId,
         string $offeringId,
-        #[MapRequestPayload] WfsAddDTO $dto,
+        #[MapRequestPayload] WfsServiceDTO $dto,
     ): JsonResponse {
         try {
             // récup config et offering existants
@@ -181,7 +181,7 @@ class WfsController extends ServiceController implements ApiControllerInterface
         }
     }
 
-    private function getConfigRequestBody(WfsAddDTO $dto, string $storedDataId, bool $editMode = false, ?string $datastoreId = null): array
+    private function getConfigRequestBody(WfsServiceDTO $dto, string $storedDataId, bool $editMode = false, ?string $datastoreId = null): array
     {
         $relations = [];
 
@@ -204,7 +204,7 @@ class WfsController extends ServiceController implements ApiControllerInterface
 
         $body = [
             'type' => ConfigurationTypes::WFS,
-            'name' => $dto->public_name,
+            'name' => $dto->service_name,
             'type_infos' => [
                 'used_data' => [[
                     'relations' => $relations,

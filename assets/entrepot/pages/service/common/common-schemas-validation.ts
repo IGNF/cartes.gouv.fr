@@ -80,16 +80,12 @@ export class CommonSchemasValidation {
                 // NOTE : attribution rendu non obligatoire
                 attribution_text: yup.string(), //.required(tValidMD("attribution.text_required_error")),
                 attribution_url: yup.string().url(tValidMD("attribution.url_error")), //.required(tValidMD("attribution.url_required_error")),
-                languages: yup
-                    .array()
-                    .of(
-                        yup.object({
-                            language: yup.string(),
-                            code: yup.string(),
-                        })
-                    )
-                    .required(tValidMD("metadatas.language_error"))
-                    .min(1, tValidMD("metadatas.language_error")),
+                language: yup
+                    .object({
+                        language: yup.string(),
+                        code: yup.string(),
+                    })
+                    .required(tValidMD("metadatas.language_error")),
                 charset: yup.string().required(tValidMD("metadatas.charset_error")),
                 projection: yup.string().required(tValidMD("metadatas.projection_error")),
                 // encoding: yup.string().required(tValidMD("metadatas.encoding_error")),

@@ -26,6 +26,7 @@ const { i18n } = declareComponentKeys<
     | "attribution.url_required_error"
     | "attribution.url_error"
     | "share_with_error"
+    // | (string & { _type?: never })
 >()("ValidationMetadatas");
 export type I18n = typeof i18n;
 

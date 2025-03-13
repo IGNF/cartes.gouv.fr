@@ -29,7 +29,7 @@ export const getEndpointSuffix = (endpointType: EndpointTypeEnum | string) => {
 
 const getMetadataFormDefaultValues = (metadata?: Metadata): MetadataFormValuesType => {
     return {
-        languages: metadata?.csw_metadata?.language ? [metadata?.csw_metadata?.language] : [DEFAULT_LANGUAGE],
+        language: metadata?.csw_metadata?.language ? metadata?.csw_metadata?.language : DEFAULT_LANGUAGE,
         creation_date: metadata?.csw_metadata?.creation_date,
         resource_genealogy: metadata?.csw_metadata?.resource_genealogy ?? "",
         hierarchy_level: metadata?.csw_metadata?.hierarchy_level ?? MetadataHierarchyLevel.Dataset,

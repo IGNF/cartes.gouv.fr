@@ -6,9 +6,9 @@ use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Constants\EntrepotApi\Sandbox;
 use App\Controller\ApiControllerInterface;
-use App\Dto\PyramidVector\AddPyramidDTO;
-use App\Dto\PyramidVector\CompositionDTO;
-use App\Dto\PyramidVector\PublishPyramidDTO;
+use App\Dto\Services\PyramidVector\PyramidVectorCompositionDTO;
+use App\Dto\Services\PyramidVector\PyramidVectorGenerateDTO;
+use App\Dto\Services\PyramidVector\PyramidVectorTmsServiceDTO;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\CapabilitiesService;
@@ -45,7 +45,7 @@ class PyramidVectorController extends ServiceController implements ApiController
     }
 
     #[Route('/add', name: 'add', methods: ['POST'])]
-    public function add(string $datastoreId, #[MapRequestPayload] AddPyramidDTO $dto): JsonResponse
+    public function add(string $datastoreId, #[MapRequestPayload] PyramidVectorGenerateDTO $dto): JsonResponse
     {
         try {
             // TODO
@@ -117,7 +117,7 @@ class PyramidVectorController extends ServiceController implements ApiController
     public function addTms(
         string $datastoreId,
         string $pyramidId,
-        #[MapRequestPayload] PublishPyramidDTO $dto,
+        #[MapRequestPayload] PyramidVectorTmsServiceDTO $dto,
     ): JsonResponse {
         try {
             $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId);
@@ -178,7 +178,7 @@ class PyramidVectorController extends ServiceController implements ApiController
         string $datastoreId,
         string $pyramidId,
         string $offeringId,
-        #[MapRequestPayload] PublishPyramidDTO $dto,
+        #[MapRequestPayload] PyramidVectorTmsServiceDTO $dto,
     ): JsonResponse {
         try {
             // récup config et offering existants
@@ -248,16 +248,16 @@ class PyramidVectorController extends ServiceController implements ApiController
     /**
      * @param array<mixed> $pyramid
      */
-    private function getConfigRequestBody(PublishPyramidDTO $dto, array $pyramid, bool $editMode = false, ?string $datastoreId = null): array
+    private function getConfigRequestBody(PyramidVectorTmsServiceDTO $dto, array $pyramid, bool $editMode = false, ?string $datastoreId = null): array
     {
         // Recherche de bottom_level et top_level
         $levels = $this->getPyramidZoomLevels($pyramid);
 
         $requestBody = [
             'type' => ConfigurationTypes::WMTSTMS,
-            'name' => $dto->public_name,
+            'name' => $dto->service_name,
             'type_infos' => [
-                'title' => $dto->public_name,
+                'title' => $dto->service_name,
                 'abstract' => json_encode($dto->description),
                 'keywords' => $dto->category,
                 'used_data' => [[
@@ -288,7 +288,7 @@ class PyramidVectorController extends ServiceController implements ApiController
     }
 
     /**
-     * @param array<CompositionDTO> $composition
+     * @param array<PyramidVectorCompositionDTO> $composition
      */
     private function getLevels($composition): array
     {

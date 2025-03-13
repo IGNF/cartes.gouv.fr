@@ -10,7 +10,9 @@ import { useForm, useWatch } from "react-hook-form";
 import { symToStr } from "tsafe/symToStr";
 import * as yup from "yup";
 
+import ServiceFormErrors from "@/components/Utils/ServiceFormErrors";
 import { ConfigurationTypeEnum, EndpointTypeEnum, Service, ServiceFormValuesBaseType, StoredDataRelation, VectorDb } from "../../../../@types/app";
+import Main from "../../../../components/Layout/Main";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
@@ -20,7 +22,7 @@ import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import { routes } from "../../../../router/router";
-import { trimObject } from "../../../../utils";
+import { regex, trimObject } from "../../../../utils";
 import api from "../../../api";
 import AccessRestrictions from "../common/AccessRestrictions/AccessRestrictions";
 import { CommonSchemasValidation } from "../common/common-schemas-validation";
@@ -29,8 +31,6 @@ import AdditionalInfo from "../metadata/AdditionalInfo";
 import Description from "../metadata/Description";
 import UploadMDFile from "../metadata/UploadMDFile";
 import TableInfosForm from "./TablesInfoForm";
-import { regex } from "../../../../utils";
-import Main from "../../../../components/Layout/Main";
 
 type TableInfoType = Record<string, WfsTableInfos>;
 
@@ -321,9 +321,21 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
                         title={t("step.title", { stepNumber: currentStep })}
                     />
                     {createServiceMutation.error && (
-                        <Alert closable description={createServiceMutation.error.message} severity="error" title={tCommon("error")} />
+                        <Alert
+                            closable
+                            description={<ServiceFormErrors message={createServiceMutation.error.message} />}
+                            severity="error"
+                            title={tCommon("error")}
+                        />
                     )}
-                    {editServiceMutation.error && <Alert closable description={editServiceMutation.error.message} severity="error" title={tCommon("error")} />}
+                    {editServiceMutation.error && (
+                        <Alert
+                            closable
+                            description={<ServiceFormErrors message={editServiceMutation.error.message} />}
+                            severity="error"
+                            title={tCommon("error")}
+                        />
+                    )}
 
                     <TableInfosForm
                         visible={currentStep === STEPS.TABLES_INFOS}

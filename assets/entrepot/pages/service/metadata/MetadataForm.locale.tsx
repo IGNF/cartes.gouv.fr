@@ -118,7 +118,7 @@ export const MetadatasFormFrTranslations: Translations<"fr">["MetadatasForm"] = 
     "attribution_form.hint_url":
         "Adresse de la page web vers laquelle doit pointer l’attribution. Il peut s’agir du site web de l’organisme producteur, d’une page de conditions d’utilisation des données ou de toute autre URL valide en lien avec les données représentées.",
     "metadata.additionnal_infos_form.language": "Langue des métadonnées",
-    "metadata.additionnal_infos_form.hint_language": "La ou les langues utilisées pour décrire les métadonnées",
+    "metadata.additionnal_infos_form.hint_language": "La langue utilisée pour décrire les métadonnées",
     "metadata.additionnal_infos_form.charset": "Jeu de caractères de la ressource",
     "metadata.additionnal_infos_form.hint_charset":
         "Codification utilisée par la métadonnée pour restituer les caractères spécifiques de la langue (accents, caractères spéciaux …). Utf8 correspond à un codage souvent employé pour les caractères du français.",
@@ -188,7 +188,7 @@ export const MetadatasFormEnTranslations: Translations<"en">["MetadatasForm"] = 
     "attribution_form.hint_url":
         "Address of the web page to which the attribution should point. This may be the producing organization’s website, a data use conditions page, or any other valid URL related to the data represented.",
     "metadata.additionnal_infos_form.language": "Metadata language",
-    "metadata.additionnal_infos_form.hint_language": "The language(s) used to describe the metadata",
+    "metadata.additionnal_infos_form.hint_language": "The language used to describe the metadata",
     "metadata.additionnal_infos_form.charset": "Resource charset",
     "metadata.additionnal_infos_form.hint_charset":
         "Coding used by the metadata to restore the specific characters of the language (accents, special characters, etc.). Utf8 corresponds to an encoding often used for French characters.",

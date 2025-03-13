@@ -238,8 +238,8 @@ class CartesMetadataApiService
         $bbox = $this->getBbox($datastoreId, $datasheetName);
 
         if ($formData) {
-            $language = $formData['languages'][0] ?
-                 new CswLanguage($formData['languages'][0]['code'], $formData['languages'][0]['language'])
+            $language = $formData['language'] ?
+                 new CswLanguage($formData['language']['code'], $formData['language']['language'])
                  : CswLanguage::default();
 
             $newCswMetadata->fileIdentifier = $formData['identifier'];
@@ -370,7 +370,7 @@ class CartesMetadataApiService
     {
         $styleFiles = [];
 
-        $configurationsList = $this->configurationApiService->getAll($datastoreId, [
+        $configurationsList = $this->configurationApiService->getAllDetailed($datastoreId, [
             'tags' => [
                 CommonTags::DATASHEET_NAME => $datasheetName,
             ],
