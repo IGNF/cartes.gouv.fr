@@ -1,0 +1,64 @@
+{
+    "total": {
+        "begin_date": "2025-03-03T09:29:33.351Z",
+        "end_date": "2025-03-03T18:52:12.406Z",
+        "data_transfer": 167127,
+        "hits": 367
+    },
+    "details": [
+        {
+            "begin_date": "2025-03-03T18:02:12.234Z",
+            "end_date": "2025-03-03T18:03:28.416Z",
+            "data_transfer": 3020,
+            "hits": 7
+        },
+        {
+            "begin_date": "2025-03-03T18:09:52.211Z",
+            "end_date": "2025-03-03T18:09:52.211Z",
+            "data_transfer": 979,
+            "hits": 1
+        },
+        {
+            "begin_date": "2025-03-03T18:11:21.330Z",
+            "end_date": "2025-03-03T18:14:49.624Z",
+            "data_transfer": 3772,
+            "hits": 7
+        },
+        {
+            "begin_date": "2025-03-03T18:16:05.823Z",
+            "end_date": "2025-03-03T18:16:10.100Z",
+            "data_transfer": 1141,
+            "hits": 2
+        },
+        {
+            "begin_date": "2025-03-03T18:21:08.115Z",
+            "end_date": "2025-03-03T18:21:08.377Z",
+            "data_transfer": 1146,
+            "hits": 2
+        },
+        {
+            "begin_date": "2025-03-03T18:25:46.764Z",
+            "end_date": "2025-03-03T18:25:47.001Z",
+            "data_transfer": 1145,
+            "hits": 2
+        },
+        {
+            "begin_date": "2025-03-03T18:37:46.907Z",
+            "end_date": "2025-03-03T18:39:40.308Z",
+            "data_transfer": 2457,
+            "hits": 5
+        },
+        {
+            "begin_date": "2025-03-03T18:46:31.704Z",
+            "end_date": "2025-03-03T18:46:31.704Z",
+            "data_transfer": 974,
+            "hits": 1
+        },
+        {
+            "begin_date": "2025-03-03T18:52:12.096Z",
+            "end_date": "2025-03-03T18:52:12.406Z",
+            "data_transfer": 1168,
+            "hits": 2
+        }
+    ]
+}

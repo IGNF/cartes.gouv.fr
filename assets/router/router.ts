@@ -35,6 +35,7 @@ const publicRoutes = {
     terms_of_service: defineRoute(`${appRoot}/cgu`),
     service_status: defineRoute(`${appRoot}/niveau-de-service`),
     login_disabled: defineRoute(`${appRoot}/connexion-desactivee`),
+    test: defineRoute(`${appRoot}/test`),
 };
 
 // Routes protégées qui ne sont pas dans des groupes spécifiques plus bas (community, datastore...etc.)

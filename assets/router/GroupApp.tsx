@@ -37,6 +37,7 @@ const DatastoreCreationRequestConfirmation = lazy(() => import("../entrepot/page
 const CommunityList = lazy(() => import("../entrepot/pages/communities/CommunityList/CommunityList"));
 
 const DashboardPro = lazy(() => import("../entrepot/pages/dashboard/DashboardPro"));
+const Test = lazy(() => import("../pages/Test"));
 
 interface IGroupAppProps {
     route: Route<typeof routes>;
@@ -117,6 +118,8 @@ function GroupApp(props: IGroupAppProps) {
                     },
                     render: <DashboardPro />,
                 };
+            case "test":
+                return { render: <Test /> };
         }
     }, [route]);
 
