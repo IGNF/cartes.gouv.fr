@@ -12,8 +12,7 @@
         "knpuniversity/oauth2-client-bundle": "^2.14",
         "pentatrion/vite-bundle": "^8.0",
         "phpdocumentor/reflection-docblock": "^5.3",
-        "phpdocumentor/type-resolver": "^1.10",
-        "phpstan/phpdoc-parser": "^2.1",
+        "phpstan/phpdoc-parser": "^2.0",
         "stevenmaguire/oauth2-keycloak": "^5.0",
         "symfony/asset": "6.4.*",
         "symfony/console": "6.4.*",
@@ -97,7 +96,6 @@
         "post-update-cmd": [
             "@auto-scripts"
         ],
-        "symfony-routing-dump": "php bin/console fos:js-routing:dump --target ./var/cache/fosRoutes.json --format json",
         "check-rules": [
             "php bin/console lint:twig templates/",
             "php bin/console lint:container",
