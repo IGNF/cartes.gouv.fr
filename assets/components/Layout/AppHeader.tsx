@@ -3,9 +3,10 @@ import Header, { HeaderProps } from "@codegouvfr/react-dsfr/Header";
 import { MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation/MainNavigation";
 import { FC, memo } from "react";
 
+import { catalogueUrl } from "@/env";
 // import { useLang } from "../../i18n/i18n";
 import SymfonyRouting from "../../modules/Routing";
-import { catalogueUrl, groups, routes, useRoute } from "../../router/router";
+import { groups, routes, useRoute } from "../../router/router";
 import { useAuthStore } from "../../stores/AuthStore";
 // import LanguageSelector from "../Utils/LanguageSelector";
 

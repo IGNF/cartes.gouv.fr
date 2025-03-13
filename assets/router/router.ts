@@ -3,7 +3,6 @@ import { createGroup, createRouter, defineRoute, param } from "type-route";
 import SymfonyRouting from "../modules/Routing";
 
 export const appRoot = SymfonyRouting.getBaseUrl();
-export const catalogueUrl = (document.getElementById("root") as HTMLDivElement)?.dataset?.["catalogueUrl"] ?? "/catalogue";
 
 // Routes non protégées
 const publicRoutes = {
