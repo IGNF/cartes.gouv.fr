@@ -6,6 +6,7 @@ import Tag from "@codegouvfr/react-dsfr/Tag";
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import { FC, useMemo } from "react";
 
+import { catalogueUrl } from "@/env";
 import { MetadataHierarchyLevel, type Metadata } from "../../../../../@types/app";
 import ExtentMap from "../../../../../components/Utils/ExtentMap";
 import LoadingText from "../../../../../components/Utils/LoadingText";
@@ -13,7 +14,6 @@ import TextCopyToClipboard from "../../../../../components/Utils/TextCopyToClipb
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../../modules/jsonFetch";
-import { catalogueUrl } from "../../../../../router/router";
 import api from "../../../../api";
 import MetadataField from "./MetadataField";
 

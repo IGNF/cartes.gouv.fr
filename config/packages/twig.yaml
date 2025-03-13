@@ -4,6 +4,7 @@ twig:
         api_espaceco_url: "%api_espaceco_url%"
         catalogue_url: "%catalogue_url%"
         config: "%config%"
+        annexes_url: "%annexes_url%"
 
 when@test:
     twig:
