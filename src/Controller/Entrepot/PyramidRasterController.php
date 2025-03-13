@@ -7,6 +7,7 @@ use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Constants\EntrepotApi\Sandbox;
 use App\Constants\EntrepotApi\StoredDataTypes;
 use App\Controller\ApiControllerInterface;
+use App\Dto\Services\CommonDTO;
 use App\Exception\ApiException;
 use App\Exception\AppException;
 use App\Exception\CartesApiException;
@@ -22,6 +23,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route(
@@ -120,7 +122,7 @@ class PyramidRasterController extends ServiceController implements ApiController
         string $datastoreId,
         string $pyramidId,
         #[MapQueryParameter] string $type,
-        Request $request,
+        #[MapRequestPayload] CommonDTO $dto,
     ): JsonResponse {
         try {
             $acceptedTypes = [ConfigurationTypes::WMSRASTER, ConfigurationTypes::WMTSTMS];
@@ -128,15 +130,14 @@ class PyramidRasterController extends ServiceController implements ApiController
                 throw new AppException(sprintf("Le type %s n'est pas accepté. Les types acceptés sont %s.", $type, join(', ', $acceptedTypes)), Response::HTTP_BAD_REQUEST);
             }
 
-            $data = json_decode($request->getContent(), true);
             $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId);
             $datasheetName = $pyramid['tags'][CommonTags::DATASHEET_NAME];
 
             // création de requête pour la config
-            $configRequestBody = $this->getConfigRequestBody($data, $pyramid, $type, false, $datastoreId);
+            $configRequestBody = $this->getConfigRequestBody($dto, $pyramid, $type, false, $datastoreId);
 
             // Restriction d'acces
-            $endpoint = $this->getEndpointByShareType($datastoreId, $type, $data['share_with']);
+            $endpoint = $this->getEndpointByShareType($datastoreId, $type, $dto->share_with);
 
             // Ajout de la configuration
             $configuration = $this->configurationApiService->add($datastoreId, $configRequestBody);
@@ -155,12 +156,12 @@ class PyramidRasterController extends ServiceController implements ApiController
             }
 
             // création d'une permission pour la communauté actuelle
-            if ('your_community' === $data['share_with']) {
+            if ('your_community' === $dto->share_with) {
                 $this->addPermissionForCurrentCommunity($datastoreId, $offering);
             }
 
             // création d'une permission pour la communauté config
-            if (true === filter_var($data['allow_view_data'], FILTER_VALIDATE_BOOLEAN)) {
+            if (true === filter_var($dto->allow_view_data, FILTER_VALIDATE_BOOLEAN)) {
                 $communityId = $this->getParameter('config')['community_id'];
                 $this->addPermissionForCommunity($datastoreId, $communityId, $offering);
             }
@@ -179,10 +180,11 @@ class PyramidRasterController extends ServiceController implements ApiController
             }
 
             // création ou mise à jour de metadata
+            $formData = json_decode(json_encode($dto), true);
             if ($this->sandboxService->isSandboxDatastore($datastoreId)) {
-                $data['identifier'] = Sandbox::LAYERNAME_PREFIX.$data['identifier'];
+                $formData['identifier'] = Sandbox::LAYERNAME_PREFIX.$formData['identifier'];
             }
-            $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $data);
+            $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $formData);
 
             return $this->json($offering);
         } catch (ApiException|AppException $ex) {
@@ -196,14 +198,13 @@ class PyramidRasterController extends ServiceController implements ApiController
         string $pyramidId,
         string $offeringId,
         #[MapQueryParameter] string $type,
-        Request $request,
+        #[MapRequestPayload] CommonDTO $dto,
     ): JsonResponse {
         try {
             $acceptedTypes = [ConfigurationTypes::WMSRASTER, ConfigurationTypes::WMTSTMS];
             if (!in_array($type, $acceptedTypes)) {
                 throw new AppException(sprintf("Le type %s n'est pas accepté. Les types acceptés sont %s.", $type, join(', ', $acceptedTypes)), Response::HTTP_BAD_REQUEST);
             }
-            $data = json_decode($request->getContent(), true);
 
             // récup config et offering existants
             $oldOffering = $this->configurationApiService->getOffering($datastoreId, $offeringId);
@@ -213,9 +214,9 @@ class PyramidRasterController extends ServiceController implements ApiController
             $datasheetName = $pyramid['tags'][CommonTags::DATASHEET_NAME];
 
             // création de requête pour la config
-            $configRequestBody = $this->getConfigRequestBody($data, $pyramid, $type, true);
+            $configRequestBody = $this->getConfigRequestBody($dto, $pyramid, $type, true);
 
-            $endpoint = $this->getEndpointByShareType($datastoreId, $type, $data['share_with']);
+            $endpoint = $this->getEndpointByShareType($datastoreId, $type, $dto->share_with);
 
             // Mise à jour de la configuration
             $configuration = $this->configurationApiService->replace($datastoreId, $oldConfiguration['_id'], $configRequestBody);
@@ -231,7 +232,7 @@ class PyramidRasterController extends ServiceController implements ApiController
 
             if (false === $offering['open']) {
                 // création d'une permission pour la communauté config
-                if (true === filter_var($data['allow_view_data'], FILTER_VALIDATE_BOOLEAN)) {
+                if (true === filter_var($dto->allow_view_data, FILTER_VALIDATE_BOOLEAN)) {
                     $communityId = $this->getParameter('config')['community_id'];
                     $this->addPermissionForCommunity($datastoreId, $communityId, $offering);
                 } else {
@@ -270,10 +271,11 @@ class PyramidRasterController extends ServiceController implements ApiController
             }
 
             // création ou mise à jour de metadata
+            $formData = json_decode(json_encode($dto), true);
             if ($this->sandboxService->isSandboxDatastore($datastoreId)) {
-                $data['identifier'] = Sandbox::LAYERNAME_PREFIX.$data['identifier'];
+                $formData['identifier'] = Sandbox::LAYERNAME_PREFIX.$formData['identifier'];
             }
-            $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $data);
+            $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $formData);
 
             return $this->json($offering);
         } catch (ApiException $ex) {
@@ -282,20 +284,19 @@ class PyramidRasterController extends ServiceController implements ApiController
     }
 
     /**
-     * @param array<mixed> $data
      * @param array<mixed> $pyramid
      */
-    private function getConfigRequestBody(array $data, array $pyramid, string $type, bool $editMode = false, ?string $datastoreId = null): array
+    private function getConfigRequestBody(CommonDTO $dto, array $pyramid, string $type, bool $editMode = false, ?string $datastoreId = null): array
     {
         $levels = $this->getPyramidZoomLevels($pyramid);
 
         $requestBody = [
             'type' => $type,
-            'name' => $data['public_name'],
+            'name' => $dto->service_name,
             'type_infos' => [
-                'title' => $data['public_name'],
-                'abstract' => json_encode($data['description']),
-                'keywords' => $data['category'],
+                'title' => $dto->service_name,
+                'abstract' => json_encode($dto->description),
+                'keywords' => $dto->category,
                 'used_data' => [[
                     'bottom_level' => $levels['bottom_level'],
                     'top_level' => $levels['top_level'],
@@ -305,7 +306,7 @@ class PyramidRasterController extends ServiceController implements ApiController
         ];
 
         if (false === $editMode) {
-            $requestBody['layer_name'] = $data['technical_name'];
+            $requestBody['layer_name'] = $dto->technical_name;
 
             // rajoute le préfixe "sandbox." si c'est la communauté bac à sable
             if ($this->sandboxService->isSandboxDatastore($datastoreId)) {
@@ -313,10 +314,10 @@ class PyramidRasterController extends ServiceController implements ApiController
             }
         }
 
-        if ('' !== $data['attribution_text'] && '' !== $data['attribution_url']) {
+        if ('' !== $dto->attribution_text && '' !== $dto->attribution_url) {
             $requestBody['attribution'] = [
-                'title' => $data['attribution_text'],
-                'url' => $data['attribution_url'],
+                'title' => $dto->attribution_text,
+                'url' => $dto->attribution_url,
             ];
         }
 

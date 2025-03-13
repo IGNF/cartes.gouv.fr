@@ -239,7 +239,7 @@ export type MetadataFormValuesType = {
     projection?: string;
     // encoding?: string;
     resolution?: string;
-    languages?: LanguageType[];
+    language?: LanguageType;
     frequency_code?: string;
 };
 

@@ -8,7 +8,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useCallback, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 
+import ServiceFormErrors from "@/components/Utils/ServiceFormErrors";
 import { ConfigurationTypeEnum, EndpointTypeEnum, PyramidVector, Service, ServiceFormValuesBaseType } from "../../../../../@types/app";
+import Main from "../../../../../components/Layout/Main";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import Wait from "../../../../../components/Utils/Wait";
@@ -24,7 +26,6 @@ import { getPyramidVectorTmsServiceFormDefaultValues } from "../../common/defaul
 import AdditionalInfo from "../../metadata/AdditionalInfo";
 import Description from "../../metadata/Description";
 import UploadMDFile from "../../metadata/UploadMDFile";
-import Main from "../../../../../components/Layout/Main";
 
 export type PyramidVectorTmsServiceFormValuesType = ServiceFormValuesBaseType;
 
@@ -220,9 +221,21 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
                         title={t("step.title", { stepNumber: currentStep })}
                     />
                     {createServiceMutation.error && (
-                        <Alert closable description={createServiceMutation.error.message} severity="error" title={tCommon("error")} />
+                        <Alert
+                            closable
+                            description={<ServiceFormErrors message={createServiceMutation.error.message} />}
+                            severity="error"
+                            title={tCommon("error")}
+                        />
                     )}
-                    {editServiceMutation.error && <Alert closable description={editServiceMutation.error.message} severity="error" title={tCommon("error")} />}
+                    {editServiceMutation.error && (
+                        <Alert
+                            closable
+                            description={<ServiceFormErrors message={editServiceMutation.error.message} />}
+                            severity="error"
+                            title={tCommon("error")}
+                        />
+                    )}
 
                     <UploadMDFile visible={currentStep === STEPS.METADATA_UPLOAD} form={form} />
                     <Description visible={currentStep === STEPS.METADATA_DESCRIPTION} form={form} editMode={editMode} />

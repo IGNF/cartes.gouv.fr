@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Dto\PyramidVector;
+namespace App\Dto\Services\PyramidVector;
 
 use App\Constants\EntrepotApi\ZoomLevels;
+use Symfony\Component\Serializer\Attribute\SerializedName;
 use Symfony\Component\Validator\Constraints as Assert;
 
-class CompositionDTO
+class PyramidVectorCompositionDTO
 {
     public function __construct(
         #[Assert\NotBlank(['message' => 'pyramid_add.composition.table_error'])]
@@ -22,6 +23,7 @@ class CompositionDTO
             max: ZoomLevels::BOTTOM_LEVEL_DEFAULT,
             notInRangeMessage: 'pyramid_add.composition.bottom_level_error'
         )]
+        #[SerializedName('bottom_level')]
         public readonly int $bottom_level,
 
         #[Assert\Range(
@@ -33,6 +35,7 @@ class CompositionDTO
             'value <= this.bottom_level',
             message: 'pyramid_add.composition.level_error'
         )]
+        #[SerializedName('top_level')]
         public readonly int $top_level,
     ) {
     }
