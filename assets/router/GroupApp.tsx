@@ -21,6 +21,7 @@ const DatastoreAdd = lazy(() => import("../entrepot/pages/datastore/DatastoreAdd
 const Dashboard = lazy(() => import("../entrepot/pages/dashboard/Dashboard"));
 const DatastoreSelection = lazy(() => import("../entrepot/pages/datastore/DatastoreSelection/DatastoreSelection"));
 
+const Test = lazy(() => import("../pages/Test"));
 interface IGroupAppProps {
     route: Route<typeof routes>;
 }
@@ -70,6 +71,8 @@ function GroupApp(props: IGroupAppProps) {
                 return {
                     render: <PageNotFoundWithLayout />,
                 };
+            case "test":
+                return { render: <Test /> };
         }
     }, [route]);
 

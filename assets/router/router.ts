@@ -15,6 +15,7 @@ const publicRoutes = {
     ),
     page_not_found: defineRoute(`${appRoot}/404`),
     login_disabled: defineRoute(`${appRoot}/connexion-desactivee`),
+    test: defineRoute(`${appRoot}/test`),
 };
 
 // Routes protégées qui ne sont pas dans des groupes spécifiques plus bas (community, datastore...etc.)

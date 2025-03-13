@@ -1,0 +1,70 @@
+{
+    "total": {
+        "begin_date": "2025-03-03T09:29:33.351Z",
+        "end_date": "2025-03-03T18:52:12.406Z",
+        "data_transfer": 167127,
+        "hits": 367
+    },
+    "details": [
+        {
+            "begin_date": "2025-03-03T10:15:23.246Z",
+            "end_date": "2025-03-03T10:19:10.725Z",
+            "data_transfer": 4529,
+            "hits": 10
+        },
+        {
+            "begin_date": "2025-03-03T10:20:41.665Z",
+            "end_date": "2025-03-03T10:22:07.312Z",
+            "data_transfer": 2816,
+            "hits": 5
+        },
+        {
+            "begin_date": "2025-03-03T10:28:05.372Z",
+            "end_date": "2025-03-03T10:29:45.510Z",
+            "data_transfer": 2522,
+            "hits": 4
+        },
+        {
+            "begin_date": "2025-03-03T13:17:42.953Z",
+            "end_date": "2025-03-03T13:19:50.931Z",
+            "data_transfer": 6006,
+            "hits": 19
+        },
+        {
+            "begin_date": "2025-03-03T13:21:27.366Z",
+            "end_date": "2025-03-03T13:23:24.398Z",
+            "data_transfer": 3434,
+            "hits": 7
+        },
+        {
+            "begin_date": "2025-03-03T13:25:05.711Z",
+            "end_date": "2025-03-03T13:27:36.012Z",
+            "data_transfer": 3636,
+            "hits": 9
+        },
+        {
+            "begin_date": "2025-03-03T13:37:58.346Z",
+            "end_date": "2025-03-03T13:39:47.894Z",
+            "data_transfer": 2841,
+            "hits": 5
+        },
+        {
+            "begin_date": "2025-03-03T13:41:26.731Z",
+            "end_date": "2025-03-03T13:44:53.524Z",
+            "data_transfer": 5053,
+            "hits": 10
+        },
+        {
+            "begin_date": "2025-03-03T13:45:17.856Z",
+            "end_date": "2025-03-03T13:49:06.256Z",
+            "data_transfer": 4419,
+            "hits": 8
+        },
+        {
+            "begin_date": "2025-03-03T13:50:27.497Z",
+            "end_date": "2025-03-03T13:53:39.309Z",
+            "data_transfer": 5306,
+            "hits": 11
+        }
+    ]
+}
