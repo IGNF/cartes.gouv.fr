@@ -16,8 +16,8 @@ import { offeringTypeDisplayName } from "../../../../../utils";
 import api from "../../../../api";
 import ServiceDesc from "./ServiceDesc";
 import ListItem from "../ListItem";
-import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 import { useSnackbarStore } from "@/stores/SnackbarStore";
+import { TextCopyToClipboardDialog, TextCopyToClipboardModal } from "@/components/Utils/TextCopyToClipboardDialog";
 
 type ServicesListItemProps = {
     service: Service;
@@ -27,7 +27,6 @@ type ServicesListItemProps = {
 const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, datastoreId }) => {
     const queryClient = useQueryClient();
     const setMessage = useSnackbarStore((state) => state.setMessage);
-    const { copied, copy } = useCopyToClipboard();
 
     const unpublishServiceConfirmModal = createModal({
         id: `unpublish-service-confirm-modal-${service._id}`,
@@ -70,12 +69,12 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                     {
                         autoClose: false,
                         text: "Copier l’URL de diffusion",
-                        iconId: copied ? "fr-icon-check-line" : "ri-file-copy-line",
+                        iconId: "ri-file-copy-line",
                         onClick: async () => {
                             if (!service.share_url) {
                                 setMessage("URL de diffusion indisponible");
                             } else {
-                                copy(service.share_url);
+                                TextCopyToClipboardModal.open();
                             }
                         },
                     },
@@ -213,6 +212,8 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                     </div>
                 </Wait>
             )}
+
+            {service.share_url && <TextCopyToClipboardDialog title="Copier l'URL" label="URL de diffusion" text={service.share_url} />}
         </>
     );
 };

@@ -8,7 +8,7 @@ import { tss } from "tss-react";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 import { useTranslation } from "@/i18n";
 
-interface TextCopyToClipboardProps extends InputProps.Common {
+export interface TextCopyToClipboardProps extends InputProps.Common {
     disabled?: boolean;
     nativeInputProps?: InputProps.RegularInput["nativeInputProps"];
     nativeTextAreaProps?: InputProps.TextArea["nativeTextAreaProps"];
