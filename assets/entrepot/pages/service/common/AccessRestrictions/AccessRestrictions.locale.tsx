@@ -27,13 +27,13 @@ export const AccessRestrictionsFrTranslations: Translations<"fr">["AccessRestric
     share_with_value_change_warning_title: "Changement de restrictions d’accès",
     share_with_value_change_warning_desc_restricted_to_public:
         // eslint-disable-next-line quotes
-        'Vous êtes sur le point de modifier les restrictions d\'accès de "Restreint" à "Tout public". Le service changera d\'adresse et les permissions que vous aviez configurées seront supprimées définitivement car elles ne seront plus nécessaires.',
+        'Vous êtes sur le point de modifier les restrictions d’accès de "Restreint" à "Tout public". Le service changera d’adresse et les permissions que vous aviez configurées seront supprimées définitivement car elles ne seront plus nécessaires.',
     share_with_value_change_warning_desc_public_to_restricted:
         // eslint-disable-next-line quotes
-        'Vous êtes sur le point de modifier les restrictions d\'accès de "Tout public" à "Restreint". Le service changera d\'adresse.',
+        'Vous êtes sur le point de modifier les restrictions d’accès de "Tout public" à "Restreint". Le service changera d’adresse.',
     allow_view_data: "Autoriser l'affichage de ce service sur l'entrée cartographique de cartes.gouv.fr",
     allow_view_data_hint_text:
-        "La permission d'accès à cartes.gouv.fr est accordée pour 6 mois. Vous pouvez modifier la durée de cette permission depuis le menu Gérer l'espace de travail > Permissions accordées.",
+        "La permission d’accès à cartes.gouv.fr est accordée pour 6 mois. Vous pouvez modifier la durée de cette permission depuis le menu Gérer l’espace de travail > Permissions accordées.",
 };
 
 export const AccessRestrictionsEnTranslations: Translations<"en">["AccessRestrictions"] = {
