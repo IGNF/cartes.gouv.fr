@@ -51,8 +51,8 @@ RUN apt-get -qq update && DEBIAN_FRONTEND=noninteractive apt-get -qq install --n
 #----------------------------------------------------------------------
 # Install common tools
 #----------------------------------------------------------------------
-RUN apt-get update \
-    && apt-get install --no-install-recommends -y \
+RUN apt-get -qq update \
+    && apt-get -qq install --no-install-recommends -y \
     unzip zip \
     curl wget \
     && rm -rf /var/lib/apt/lists/*
@@ -60,8 +60,8 @@ RUN apt-get update \
 #------------------------------------------------------------------------
 # Configure https://packages.sury.org/php/ to get latests PHP versions
 #------------------------------------------------------------------------
-RUN apt-get update \
-    && apt-get install --no-install-recommends -y gnupg2 software-properties-common \
+RUN apt-get -qq update \
+    && apt-get -qq install --no-install-recommends -y gnupg2 software-properties-common \
     && add-apt-repository -y ppa:ondrej/php \
     && apt-get remove -y software-properties-common \
     && rm -rf /var/lib/apt/lists/*
@@ -70,8 +70,8 @@ RUN apt-get update \
 # Install Apache, PHP and its extensions
 #----------------------------------------------------------------------
 ARG php_version=8.2
-RUN apt-get update \
-    && apt-get install --no-install-recommends -y \
+RUN apt-get -qq update \
+    && apt-get -qq install --no-install-recommends -y \
     apache2 php${php_version} libapache2-mod-php${php_version} \
     php${php_version}-opcache \
     php${php_version}-xml \
