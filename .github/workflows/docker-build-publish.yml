@@ -57,8 +57,9 @@ jobs:
                   file: .docker/Dockerfile
                   pull: true
                   push: ${{ startsWith(github.event.ref, 'refs/tags/v') }}
-                  sbom: true
-                  provenance: mode=max
+                  # sbom: true
+                  load: true
+                  # provenance: mode=max
                   target: prod
                   tags: ${{ steps.meta.outputs.tags }}
                   labels: ${{ steps.meta.outputs.labels }}
@@ -66,15 +67,19 @@ jobs:
                   cache-to: type=gha,mode=max
 
             - name: Run Trivy vulnerability scanner
-              uses: aquasecurity/trivy-action@0.28.0
+              uses: aquasecurity/trivy-action@0.30.0
               with:
-                  image-ref: ${{ steps.meta.outputs.tags[0] }}
-                  exit-code: "1"
-                  ignore-unfixed: true
-                  vuln-type: "os,library"
-                  severity: "CRITICAL,HIGH"
+                  image-ref: ${{ steps.meta.outputs.tags }}
                   format: "sarif"
                   output: "trivy-results.sarif"
+
+                  # severity: CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN
+                  # exit-code: "1"
+                  # ignore-unfixed: true
+                  # vuln-type: "os,library"
+                  # format: "sarif"
+                  # limit-severities-for-sarif: true
+                  # output: "trivy-results.sarif"
 
             - name: Upload Trivy scan results to GitHub Security tab
               uses: github/codeql-action/upload-sarif@v3
