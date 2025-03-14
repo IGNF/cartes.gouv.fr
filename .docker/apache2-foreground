@@ -9,10 +9,8 @@ rm -f "$APACHE_PID_FILE"
 
 # Start apache forwarding SIGINT and SIGTERM to SIGWINCH
 APACHE2_PID=""
-function stop_apache()
-{
-	if [ ! -z "$APACHE2_PID" ];
-	then
+function stop_apache() {
+	if [ ! -z "$APACHE2_PID" ]; then
 		kill -s WINCH $APACHE2_PID
 	fi
 }
