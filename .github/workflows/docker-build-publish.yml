@@ -57,9 +57,24 @@ jobs:
                   file: .docker/Dockerfile
                   pull: true
                   push: ${{ startsWith(github.event.ref, 'refs/tags/v') }}
-                  # sbom: true
                   load: true
-                  # provenance: mode=max
+                  target: prod
+                  tags: ${{ steps.meta.outputs.tags }}
+                  labels: ${{ steps.meta.outputs.labels }}
+                  cache-from: type=gha
+                  cache-to: type=gha,mode=max
+
+            - name: Generate SBOM
+              id: generate-sbom
+              uses: docker/build-push-action@v6
+              with:
+                  context: .
+                  file: .docker/Dockerfile
+                  pull: true
+                  push: false
+                  load: false
+                  sbom: true
+                  provenance: mode=max
                   target: prod
                   tags: ${{ steps.meta.outputs.tags }}
                   labels: ${{ steps.meta.outputs.labels }}
