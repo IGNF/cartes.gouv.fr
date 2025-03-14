@@ -179,7 +179,7 @@ class ServiceController extends AbstractController implements ApiControllerInter
         }
 
         $endDate = new \DateTime();
-        $endDate->add(new \DateInterval('P3M')); // date du jour + 3 mois
+        $endDate->add(new \DateInterval('P6M')); // date du jour + 6 mois
         $endDate->setTime(23, 59, 0);
 
         $permissionRequestBody = [

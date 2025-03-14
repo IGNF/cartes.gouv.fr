@@ -105,6 +105,7 @@ const AccessRestrictions: FC<AccessRestrictionProps> = ({ datastoreId, endpointT
                     className={fr.cx("fr-ml-5v")}
                     options={[
                         {
+                            hintText: t("allow_view_data_hint_text"),
                             label: t("allow_view_data"),
                             nativeInputProps: {
                                 onChange: (e) => {
