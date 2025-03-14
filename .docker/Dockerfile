@@ -10,22 +10,11 @@ WORKDIR /opt/cartesgouvfr-site
 # COPY patches ./patches
 # COPY bin ./bin
 COPY . .
-RUN composer install --prefer-dist --no-dev --no-cache --optimize-autoloader --no-progress \
-    && php bin/console cache:clear \
+ENV APP_ENV=prod
+RUN APP_ENV=prod composer install --prefer-dist --no-dev --no-cache --optimize-autoloader --no-progress \
+    && APP_ENV=prod APP_DEBUG=0 php bin/console cache:clear \
     && php bin/console assets:install \
     && composer symfony-routing-dump
-
-# COPY --from=node:20-slim /usr/local/lib/node_modules /usr/local/lib/node_modules
-# COPY --from=node:20-slim /usr/local/bin/node /usr/local/bin/node
-# RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm
-# ENV PATH="$PATH:/usr/local/bin"
-# RUN npm i -g yarn
-
-# RUN yarn install --production --frozen-lockfile \
-#     && yarn build \
-#     && yarn cache clean \
-#     && APP_ENV=prod APP_DEBUG=0 php bin/console cache:clear \
-#     && php bin/console cache:clear
 
 FROM ${registry}/library/node:20-alpine AS deps_nodejs
 RUN mkdir -p /opt/cartesgouvfr-site
@@ -37,9 +26,9 @@ COPY --from=deps_php /opt/cartesgouvfr-site/var var
 COPY --from=deps_php /usr/local/bin/php /usr/local/bin/php
 RUN yarn install --production --frozen-lockfile \
     && yarn build \
-    && yarn cache clean \
-    && APP_ENV=prod APP_DEBUG=0 php bin/console cache:clear
-# \    && APP_ENV=prod APP_DEBUG=0 php bin/console cache:clear
+    && yarn cache clean
+# \
+# && APP_ENV=prod APP_DEBUG=0 php bin/console cache:clear
 
 #----------------------------------------------------------------------
 # Créer l'image de l'application
@@ -77,7 +66,6 @@ RUN apt-get update \
     && apt-get remove -y software-properties-common \
     && rm -rf /var/lib/apt/lists/*
 
-
 #----------------------------------------------------------------------
 # Install Apache, PHP and its extensions
 #----------------------------------------------------------------------
@@ -90,8 +78,8 @@ RUN apt-get update \
     php${php_version}-zip \
     php${php_version}-curl \
     php${php_version}-intl \
+    php${php_version}-sqlite3 \
     && rm -rf /var/lib/apt/lists/*
-
 
 #------------------------------------------------------------------------
 # Add helper script to start apache
@@ -137,18 +125,24 @@ RUN a2enmod rewrite remoteip
 #----------------------------------------------------------------------
 # Install cartesgouvfr-site
 #----------------------------------------------------------------------
+# COPY --chown=www-data:www-data . /opt/cartesgouvfr-site
 COPY . /opt/cartesgouvfr-site
 WORKDIR /opt/cartesgouvfr-site
 COPY --from=deps_php /opt/cartesgouvfr-site/vendor vendor
 COPY --from=deps_php /opt/cartesgouvfr-site/public/bundles public/bundles
 COPY --from=deps_nodejs /opt/cartesgouvfr-site/public/build public/build
-RUN APP_ENV=prod APP_DEBUG=0 php bin/console cache:clear
 
-# VOLUME /opt/cartesgouvfr-site/var
+RUN mkdir -p /opt/cartesgouvfr-site/var \
+    && chown -R www-data:www-data /opt/cartesgouvfr-site/var/
 
 USER www-data
 
+VOLUME /opt/cartesgouvfr-site/var
+
 ENV APP_ENV=prod
+ENV APP_DEBUG=0
 
 EXPOSE 8000
-CMD [ "/bin/bash", "apache2-foreground" ]
+CMD [ "/bin/bash", ".docker/start.sh" ]
+
+# docker compose -f compose.prod.yml up -d --build --remove-orphans --force-recreate --pull=always
