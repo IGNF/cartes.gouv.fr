@@ -6,38 +6,68 @@ use App\Controller\ApiControllerInterface;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\EspaceCoApi\DatabaseApiService;
+use App\Services\EspaceCoApi\PermissionApiService;
+use App\Services\EspaceCoApi\UserApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route(
-    '/api/espaceco/databases/{databaseId}',
-    name: 'cartesgouvfr_api_espaceco_databases',
+    '/api/espaceco/databases',
+    name: 'cartesgouvfr_api_espaceco_databases_',
     options: ['expose' => true],
     condition: 'request.isXmlHttpRequest()'
 )]
 class DatabaseController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
+        private UserApiService $userApiService,
         private DatabaseApiService $databaseApiService,
+        private PermissionApiService $permissionApiService,
     ) {
     }
 
-    /**
-     * @param array<string> $fields
-     */
-    #[Route('/table/{tableId}', name: 'get_table', methods: ['GET'])]
-    public function getTable(
-        int $databaseId,
-        int $tableId,
-        #[MapQueryParameter] ?array $fields = [],
-    ): JsonResponse {
+    #[Route('/', name: 'get_all', methods: ['GET'])]
+    public function getAll(): JsonResponse
+    {
         try {
-            $table = $this->databaseApiService->getTable($databaseId, $tableId, $fields);
+            $databaseIds = [];
 
-            // return new JsonResponse($featureTypes);
-            return new JsonResponse();
+            $me = $this->userApiService->getMe();
+            if (true === $me['administrator']) {
+                $dbs = $this->databaseApiService->getAll(['id']);
+                foreach ($dbs as $database) {
+                    $databaseIds[] = $database['id'];
+                }
+            } else {
+                $memberAsAdmin = array_values(array_filter($me['communities_member'], function ($member) {
+                    return 'admin' == $member['role'];
+                }));
+                foreach ($memberAsAdmin as $member) {
+                    $dbIds = [];
+                    $permissions = $this->permissionApiService->getAllByCommunity($member['community_id'], 'ADMIN');
+                    foreach ($permissions as $permission) {
+                        $dbIds[] = $permission['database'];
+                    }
+                    $databaseIds = array_merge($databaseIds, $dbIds);
+                }
+            }
+
+            $unique = array_unique($databaseIds);
+
+            $databases = [];
+            foreach ($unique as $id) {
+                $database = $this->databaseApiService->getDatabase($id, ['id', 'name', 'title']);
+                $tables = $this->databaseApiService->getAllTables($database['id'], ['id', 'name', 'title', 'geometry_name']);
+                foreach ($tables as &$table) {
+                    $t = $this->databaseApiService->getTable($database['id'], $table['id'], ['id', 'name', 'title', 'columns']);
+                    $table['columns'] = array_map(fn ($column) => ['id' => $column['id'], 'name' => $column['name'], 'title' => $column['title']], $t['columns']);
+                }
+                $database['tables'] = $tables;
+                $databases[] = $database;
+            }
+
+            return new JsonResponse($databases);
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }

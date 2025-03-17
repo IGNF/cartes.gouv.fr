@@ -9,13 +9,21 @@ class DatabaseApiService extends BaseEspaceCoApiService
     /**
      * @param array<mixed> $fields
      */
+    public function getAll(#[MapQueryParameter] ?array $fields = []): array
+    {
+        return $this->requestAll('databases', ['fields' => $fields]);
+    }
+
+    /**
+     * @param array<mixed> $fields
+     */
     public function getDatabase(int $databaseId, #[MapQueryParameter] ?array $fields = []): array
     {
         return $this->request('GET', "databases/$databaseId", [], ['fields' => $fields]);
     }
 
     /**
-     * @param array<mixed> $fields
+     * @param array<string> $fields
      */
     public function getTable(int $databaseId, int $tableId, #[MapQueryParameter] ?array $fields = []): array
     {

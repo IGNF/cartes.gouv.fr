@@ -9,6 +9,7 @@ use App\Services\EspaceCoApi\DatabaseApiService;
 use App\Services\EspaceCoApi\PermissionApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route(
@@ -29,7 +30,7 @@ class PermissionController extends AbstractController implements ApiControllerIn
 
     public function __construct(
         private PermissionApiService $permissionApiService,
-        private DatabaseApiService $databaseApiService
+        private DatabaseApiService $databaseApiService,
     ) {
     }
 
@@ -84,6 +85,30 @@ class PermissionController extends AbstractController implements ApiControllerIn
             $t = array_values(array_unique($response, SORT_REGULAR));
 
             return new JsonResponse($t);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
+    /**
+     * @param array<string> $dbIds
+     */
+    #[Route('/get/{communityId}', name: 'get_databases_permissions', methods: ['GET'])]
+    public function getDatabasesPermissions(
+        int $communityId,
+        #[MapQueryParameter] array $dbIds,
+    ): JsonResponse {
+        try {
+            $permissions = [];
+            foreach ($dbIds as $databaseId) {
+                $dbPermissions = $this->permissionApiService->getAllPermissionsForDatabase($communityId, (int) $databaseId);
+                $p = array_values(array_filter($dbPermissions, function ($p) {
+                    return 'ADMIN' !== $p['level'];
+                }));
+                $permissions = array_merge($permissions, $p);
+            }
+
+            return new JsonResponse($permissions);
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
