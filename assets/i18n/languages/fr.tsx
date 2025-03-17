@@ -49,6 +49,7 @@ import { AddMembersDialogFrTranslations } from "../../espaceco/pages/communities
 import { ManageGridsDialogFrTranslations } from "../../espaceco/pages/communities/management/member/ManageGridsDialog.locale";
 import { EmailPlannersFrTranslations } from "../../espaceco/pages/communities/management/reports/EmailPlanners.locale";
 import { ReportStatusesFrTranslations } from "../../espaceco/pages/communities/management/reports/ReportStatuses.locale";
+import { DatabasesFrTranslations } from "@/espaceco/pages/communities/management/databases/Databases.locale";
 import { SharedThemesFrTranslations } from "../../espaceco/pages/communities/management/reports/SharedThemes.locale";
 import { ThemeFrTranslations } from "../../espaceco/pages/communities/management/reports/Theme.locale";
 import { AddOrEditEmailPlannerFrTranslations } from "../../espaceco/pages/communities/management/reports/emailplanners/AddOrEditEmailPlanner.locale";
@@ -122,6 +123,7 @@ export const translations: Translations<"fr"> = {
     LoginDisabled: LoginDisabledFrTranslations,
     MemberInvitation: MemberInvitationFrTranslations,
     Reports: ReportsFrTranslations,
+    Databases: DatabasesFrTranslations,
     Functionalities: FunctionalitiesFrTranslations,
     LayerTools: LayerToolsFrTranslations,
     EmailPlanners: EmailPlannersFrTranslations,

@@ -59,6 +59,7 @@ const { i18n } = declareComponentKeys<
     | "desc.openwithemail.grids_header"
     | "desc.editorial"
     | "desc.editorial_hint"
+    | "database.tab.title"
     | "modal.openwithemail.title"
     | "modal.openwithemail.add_domain"
     | "modal.openwithemail.min_error"
@@ -183,6 +184,7 @@ export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"
     "desc.editorial": "Contenu éditorial (optionnel)",
     "desc.editorial_hint":
         "Ce contenu sera affiché dès qu’un utilisateur arrivera sur le guichet. Vous pouvez y saisir toute information utile: objectifs du guichet, source et licence des données, conditions d'utilisations spécifiques, conseils de saisie…etc.",
+    "database.tab.title": "Ajouter des bases de données au guichet (optionnel)",
     "modal.openwithemail.title": "Paramétrer les domaines acceptés pour les demandes d’affiliation",
     "modal.openwithemail.add_domain": "Ajouter un domaine accepté (doit commencer par un @)",
     "modal.openwithemail.min_error": "Il doit y avoir au moins un domaine",
@@ -319,6 +321,7 @@ export const ManageCommunityEnTranslations: Translations<"en">["ManageCommunity"
     "desc.openwithemail.grids_header": undefined,
     "desc.editorial": undefined,
     "desc.editorial_hint": undefined,
+    "database.tab.title": undefined,
     "modal.openwithemail.title": undefined,
     "modal.openwithemail.add_domain": "Add accepted domain",
     "modal.openwithemail.min_error": undefined,

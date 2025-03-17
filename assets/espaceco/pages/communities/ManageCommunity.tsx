@@ -15,13 +15,14 @@ import { CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
 import api from "../../api";
 import Description from "./management/Description";
-import EditTools from "./management/EditTools";
+import Tools from "./management/Tools";
 import Grid from "./management/Grid";
 import Layer from "./management/Layer";
 import Members from "./management/Members";
 import Reports from "./management/Reports";
 import ZoomAndCentering from "./management/ZoomAndCentering";
 import Wait from "../../../components/Utils/Wait";
+import Databases from "./management/Databases";
 
 type ManageCommunityProps = {
     communityId: number;
@@ -169,6 +170,8 @@ const ManageCommunity: FC<ManageCommunityProps> = ({ communityId }) => {
                                                     }}
                                                 />
                                             );
+                                        case "tab2":
+                                            return <Databases mode={"edition"} community={communityQuery.data} />;
                                         case "tab3":
                                             return (
                                                 <ZoomAndCentering
@@ -184,7 +187,7 @@ const ManageCommunity: FC<ManageCommunityProps> = ({ communityId }) => {
                                             return <Layer />;
                                         case "tab5":
                                             return (
-                                                <EditTools
+                                                <Tools
                                                     mode={"edition"}
                                                     community={communityQuery.data}
                                                     // eslint-disable-next-line @typescript-eslint/no-unused-vars

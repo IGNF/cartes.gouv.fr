@@ -79,6 +79,7 @@ export type ComponentKey =
     | import("../espaceco/pages/communities/management/member/ManageGridsDialog.locale").I18n
     | import("../espaceco/pages/communities/management/reports/AutofillKeywords.locale").I18n
     | import("../espaceco/pages/communities/management/reports/AutofillDialog.locale").I18n
+    | import("../espaceco/pages/communities/management/databases/Databases.locale").I18n
     | import("../espaceco/pages/communities/MemberInvitation.locale").I18n
     | import("../components/Input/InputCollection").I18n
     | import("../entrepot/pages/config/Alerts.locale").I18n

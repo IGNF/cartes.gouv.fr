@@ -7,7 +7,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useMemo, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
-import { CommunitiesLayers, CommunityFeatureTypeLayer, CommunityFormMode, geometryTypes, ToolsFormType } from "../../../../@types/app_espaceco";
+import { CommunitiesLayers, CommunityFeatureTypeLayer, CommunityFormMode, geometryTypes, RefToolLayer, ToolsFormType } from "../../../../@types/app_espaceco";
 import { arrLayerTools, arrRefLayerTools, CommunityResponseDTO, LayerTools, RefLayerTools } from "../../../../@types/espaceco";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import { useTranslation } from "../../../../i18n";
@@ -22,14 +22,14 @@ import { allFunctionalities } from "./tools/Functionalities";
 import { getEditableLayers, getRefLayers, prepareLayersForApi } from "./tools/LayerUtils";
 import SimpleLayerTools from "./tools/SimpleLayerTools";
 
-type EditToolsProps = {
+type ToolsProps = {
     mode: CommunityFormMode;
     community: CommunityResponseDTO;
     onPrevious?: () => void;
     onSubmit: (datas: object, saveOnly: boolean) => void;
 };
 
-const EditTools: FC<EditToolsProps> = ({ mode, community, onPrevious, onSubmit }) => {
+const Tools: FC<ToolsProps> = ({ mode, community, onPrevious, onSubmit }) => {
     const { t: tCommon } = useTranslation("Common");
     const { t: tLayer } = useTranslation("LayerTools");
     const { t } = useTranslation("Functionalities");
@@ -68,7 +68,7 @@ const EditTools: FC<EditToolsProps> = ({ mode, community, onPrevious, onSubmit }
     } = useQuery<Record<string, CommunityFeatureTypeLayer[]>, CartesApiException>({
         queryKey: RQKeys.communityLayers(community.id),
         queryFn: ({ signal }) => api.communityLayers.getFeatureTypes(community.id, signal),
-        staleTime: 60000,
+        staleTime: 3600000,
     });
 
     // Couches editable role = "edit" ou "ref-edit"
@@ -77,8 +77,8 @@ const EditTools: FC<EditToolsProps> = ({ mode, community, onPrevious, onSubmit }
     }, [layers]);
 
     // Couches de rérérence pour les outils d'accrochage ou de plus court chemin
-    const refLayers = useMemo<Record<RefLayerTools, { id: string; name: string }[]>>(() => {
-        const ref: Record<RefLayerTools, { id: string; name: string }[]> = { snap: [], shortestpath: [] };
+    const refLayers = useMemo<Record<RefLayerTools, RefToolLayer[]>>(() => {
+        const ref: Record<RefLayerTools, RefToolLayer[]> = { snap: [], shortestpath: [] };
         for (const tool of [...arrRefLayerTools]) {
             ref[tool] = getRefLayers(tool, layers);
         }
@@ -200,4 +200,4 @@ const EditTools: FC<EditToolsProps> = ({ mode, community, onPrevious, onSubmit }
     );
 };
 
-export default EditTools;
+export default Tools;

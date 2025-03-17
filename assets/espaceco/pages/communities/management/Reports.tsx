@@ -34,6 +34,7 @@ import SharedThemes from "./reports/SharedThemes";
 import ThemeList from "./reports/ThemeList";
 import { formatAttributesForApi } from "./reports/ThemeUtils";
 import { countActiveStatus, getMinAuthorizedStatus } from "./reports/Utils";
+import { AttributeValidations } from "./reports/AttributeValidations";
 
 type ReportsProps = {
     mode: CommunityFormMode;
@@ -63,12 +64,29 @@ const Reports: FC<ReportsProps> = ({ mode, community, onPrevious, onSubmit }) =>
                             yup.object({
                                 name: yup.string().required(),
                                 type: yup.string().required(),
-                                default: yup.string().nullable(),
+                                default: yup
+                                    .string()
+                                    .nullable()
+                                    .test({
+                                        name: "check-value",
+                                        test: (value, context) => {
+                                            const validator = new AttributeValidations(context);
+                                            return validator.validateValue(value);
+                                        },
+                                    }),
                                 mandatory: yup.boolean(),
                                 multiple: yup.boolean(),
                                 values: yup.mixed().test({
                                     name: "check-values",
-                                    test: (value) => {
+                                    test: (value, context) => {
+                                        const {
+                                            parent: { type },
+                                        } = context;
+
+                                        if (type !== "list") {
+                                            return value ? false : true;
+                                        }
+
                                         if (Array.isArray(value)) {
                                             for (const v of value) {
                                                 if (v !== null && typeof v !== "string") return false;
@@ -76,7 +94,7 @@ const Reports: FC<ReportsProps> = ({ mode, community, onPrevious, onSubmit }) =>
                                         } else if (typeof value === "object") {
                                             for (const [key, v] of Object.entries(value)) {
                                                 if (key === "") return false;
-                                                if (v !== null || typeof v !== "string") return false;
+                                                if (v !== null && typeof v !== "string") return false;
                                             }
                                         }
                                         return true;
@@ -204,15 +222,12 @@ const Reports: FC<ReportsProps> = ({ mode, community, onPrevious, onSubmit }) =>
         handleSubmit,
         getValues: getFormValues,
         formState: { errors },
-        watch,
     } = form;
-
-    // TODO SUPPRIMER
-    console.log(watch());
 
     /* Suppression de description s'il est null */
     const cleanReportStatuses = useCallback((statuses: ReportStatusesDTO) => {
         return Object.keys(statuses).reduce((acc, s) => {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const params = Object.fromEntries(Object.entries(statuses[s]).filter(([_, v]) => v !== null));
             acc[s] = params;
             return acc;
@@ -223,11 +238,7 @@ const Reports: FC<ReportsProps> = ({ mode, community, onPrevious, onSubmit }) =>
         const datas = { ...getFormValues() };
         datas.report_statuses = cleanReportStatuses(datas.report_statuses);
         datas.attributes = formatAttributesForApi(datas.attributes);
-        console.log(datas);
-
-        // TODO
-        /* const datas = new FormData();
-        onSubmit(datas, saveOnly); */
+        onSubmit(datas, saveOnly);
     };
 
     return (

@@ -15,11 +15,12 @@ import { CommunityFormMode } from "../../../@types/app_espaceco";
 // PROVISOIRE
 enum COMMUNITY_FORM_STEPS {
     DESCRIPTION = 1,
-    ZOOM_AND_CENTERING = 2,
-    TOOLS = 3,
-    REPORTS = 4,
-    GRIDS = 5,
-    MEMBERS = 6,
+    DATABASE = 2,
+    ZOOM_AND_CENTERING = 3,
+    TOOLS = 4,
+    REPORTS = 5,
+    GRIDS = 6,
+    MEMBERS = 7,
 }
 
 const getMaxSteps = (mode: CommunityFormMode) => (mode === "creation" ? COMMUNITY_FORM_STEPS.REPORTS : COMMUNITY_FORM_STEPS.MEMBERS);

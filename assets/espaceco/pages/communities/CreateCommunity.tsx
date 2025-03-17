@@ -2,10 +2,10 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useMemo, useState } from "react";
 
+import Main from "@/components/Layout/Main";
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
-import Main from "@/components/Layout/Main";
 import { CommunityFormMode, UserMe } from "../../../@types/app_espaceco";
 import { CommunityResponseDTO } from "../../../@types/espaceco";
 import LoadingText from "../../../components/Utils/LoadingText";
@@ -16,10 +16,11 @@ import { CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
 import api from "../../api";
 import { COMMUNITY_FORM_STEPS, getMaxSteps } from "./FormSteps";
+import Databases from "./management/Databases";
 import Description from "./management/Description";
-import ZoomAndCentering from "./management/ZoomAndCentering";
 import Reports from "./management/Reports";
-import EditTools from "./management/EditTools";
+import Tools from "./management/Tools";
+import ZoomAndCentering from "./management/ZoomAndCentering";
 
 type CreateCommunityProps = {
     communityId: number;
@@ -79,7 +80,7 @@ const CreateCommunity: FC<CreateCommunityProps> = ({ communityId }) => {
                 return true;
             }
             const f = me.communities_member.filter((cm) => cm.role === "admin");
-            return f.length > 1;
+            return f.length > 0;
         }
         return false;
     }, [meQuery.data, communityQuery.data]);
@@ -165,6 +166,8 @@ const CreateCommunity: FC<CreateCommunityProps> = ({ communityId }) => {
                                             mutate(datas);
                                         }}
                                     />
+                                ) : currentStep === COMMUNITY_FORM_STEPS.DATABASE ? (
+                                    <Databases mode={mode} community={communityQuery.data} />
                                 ) : currentStep === COMMUNITY_FORM_STEPS.ZOOM_AND_CENTERING ? (
                                     <ZoomAndCentering
                                         mode={mode}
@@ -176,7 +179,7 @@ const CreateCommunity: FC<CreateCommunityProps> = ({ communityId }) => {
                                         }}
                                     />
                                 ) : currentStep === COMMUNITY_FORM_STEPS.TOOLS ? (
-                                    <EditTools
+                                    <Tools
                                         mode={mode}
                                         community={communityQuery.data}
                                         onPrevious={() => setCurrentStep(currentStep - 1)}

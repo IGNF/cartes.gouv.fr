@@ -171,6 +171,10 @@ export type DescriptionFormType = {
     openWithEmail: OpenWithEmailType[];
 };
 
+/* Pour les bases de données */
+export const arrDBOptions = ["none", "add", "reuse", "import"] as const;
+export type DBOption = (typeof arrDBOptions)[number];
+
 /* Les fonctionnalités (outils) */
 export type CommunityTools = "display" | "navigation" | "measure" | "report";
 
@@ -186,9 +190,14 @@ export type MeasureTools = (typeof arrMeasureTools)[number];
 export const arrReportTools = ["georem"] as const;
 export type ReportTools = (typeof arrReportTools)[number];
 
+export type RefToolLayer = {
+    id: string;
+    name: string;
+};
+
 export type RefToolsConfig = {
     active: boolean;
-    layers: { id: string; name: string }[];
+    layers: RefToolLayer[];
 };
 
 export type RefTools = Record<RefLayerTools, RefToolsConfig>;

@@ -48,6 +48,7 @@ import { AddMembersDialogEnTranslations } from "../../espaceco/pages/communities
 import { ManageGridsDialogEnTranslations } from "../../espaceco/pages/communities/management/member/ManageGridsDialog.locale";
 import { EmailPlannersEnTranslations } from "../../espaceco/pages/communities/management/reports/EmailPlanners.locale";
 import { ReportStatusesEnTranslations } from "../../espaceco/pages/communities/management/reports/ReportStatuses.locale";
+import { DatabasesEnTranslations } from "@/espaceco/pages/communities/management/databases/Databases.locale";
 import { SharedThemesEnTranslations } from "../../espaceco/pages/communities/management/reports/SharedThemes.locale";
 import { ThemeEnTranslations } from "../../espaceco/pages/communities/management/reports/Theme.locale";
 import { AddOrEditEmailPlannerEnTranslations } from "../../espaceco/pages/communities/management/reports/emailplanners/AddOrEditEmailPlanner.locale";
@@ -129,6 +130,7 @@ export const translations: Translations<"en"> = {
     AddOrEditEmailPlanner: AddOrEditEmailPlannerEnTranslations,
     EmailPlannerKeywords: EmailPlannerKeywordsEnTranslations,
     ReportStatuses: ReportStatusesEnTranslations,
+    Databases: DatabasesEnTranslations,
     SharedThemes: SharedThemesEnTranslations,
     Search: SearchEnTranslations,
     EscoCommunityMembers: EscoCommunityMembersEnTranslations,

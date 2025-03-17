@@ -1,4 +1,4 @@
-import { CommunitiesLayers } from "@/@types/app_espaceco";
+import { CommunitiesLayers, RefToolLayer } from "@/@types/app_espaceco";
 import { RefLayerTools } from "@/@types/espaceco";
 import { fr } from "@codegouvfr/react-dsfr";
 import { CSSProperties, FC } from "react";
@@ -16,7 +16,7 @@ const dbStyle: CSSProperties = {
 
 type ContributionToolsProps = {
     editableLayers: CommunitiesLayers;
-    refLayers: Record<RefLayerTools, { id: string; name: string }[]>;
+    refLayers: Record<RefLayerTools, RefToolLayer[]>;
 };
 
 const ContributionTools: FC<ContributionToolsProps> = ({ editableLayers, refLayers }) => {

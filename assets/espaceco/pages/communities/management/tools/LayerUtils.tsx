@@ -1,4 +1,4 @@
-import { CommunitiesLayers, CommunityFeatureTypeLayer, geometryTypes, LayerGeometryType, RefTools, ToolsFormType } from "@/@types/app_espaceco";
+import { CommunitiesLayers, CommunityFeatureTypeLayer, geometryTypes, LayerGeometryType, RefToolLayer, RefTools, ToolsFormType } from "@/@types/app_espaceco";
 import { arrRefLayerTools, LayerTools, RefLayerTools } from "@/@types/espaceco";
 
 const allTypesTools: LayerTools[] = ["draw", "translate", "delete", "snap_mandatory", "copy_paste"];
@@ -93,7 +93,7 @@ const getEditableLayers = (layers?: Record<string, CommunityFeatureTypeLayer[]>)
     return result;
 };
 
-const getRefLayers = (tool: RefLayerTools, layers?: Record<string, CommunityFeatureTypeLayer[]>): { id: string; name: string }[] => {
+const getRefLayers = (tool: RefLayerTools, layers?: Record<string, CommunityFeatureTypeLayer[]>): RefToolLayer[] => {
     if (!layers || Object.keys(layers).length === 0) {
         return [];
     }

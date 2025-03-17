@@ -69,10 +69,18 @@ class AttributeValidations {
             parent: { values: v },
         } = this.#context;
 
-        const list = v.values.map(({ value }) => value || null);
-        if (!list.includes(value)) {
-            return this.#context.createError({ message: t("dialog.add_attribute.value_not_in_list_error") });
+        if (Array.isArray(v)) {
+            if (!v.includes(value)) {
+                return this.#context.createError({ message: t("dialog.add_attribute.value_not_in_list_error") });
+            }
+        } else if (typeof v === "object") {
+            const list = "values" in v ? v.values.map(({ value }) => value || null) : v.map((value) => value || null);
+            if (!list.includes(value)) {
+                return this.#context.createError({ message: t("dialog.add_attribute.value_not_in_list_error") });
+            }
+            return true;
         }
+
         return true;
     };
 }

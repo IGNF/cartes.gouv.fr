@@ -31,6 +31,10 @@ const update = (communityId: number, datas: object) => {
         url,
         {
             method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+            },
         },
         datas
     );

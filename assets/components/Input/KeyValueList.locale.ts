@@ -6,7 +6,7 @@ export type I18n = typeof i18n;
 
 export const KeyValueListFrTranslations: Translations<"fr">["KeyValueList"] = {
     has_duplicates_error: "Supprimer ou corriger les clés/valeurs en double",
-    define_keys: "",
+    define_keys: "Définir les clés/valeurs",
 };
 
 export const KeyValueListEnTranslations: Translations<"en">["KeyValueList"] = {

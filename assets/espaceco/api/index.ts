@@ -1,6 +1,7 @@
 import community from "./community";
 import communityDocuments from "./communityDocuments";
 import communityLayers from "./communityLayers";
+import database from "./database";
 
 import emailplanner from "./emailplanner";
 import grid from "./grid";
@@ -13,6 +14,7 @@ const api = {
     communityDocuments,
     communityLayers,
     emailplanner,
+    database,
     permission,
     grid,
 };

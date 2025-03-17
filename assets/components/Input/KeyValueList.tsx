@@ -11,7 +11,7 @@ import KeyValueItem, { KeyValues } from "./KeyValueItem";
 import { InputHTMLAttributes } from "react";
 import { SelectProps } from "@codegouvfr/react-dsfr/SelectNext";
 import { get } from "@/utils";
-import { getTranslation } from "@/i18n";
+import { getTranslation, useTranslation } from "@/i18n";
 
 export interface KeyValuesForm {
     values: KeyValues;
@@ -60,6 +60,8 @@ interface KeyValueListProps {
 }
 
 function KeyValueList(props: KeyValueListProps) {
+    const { t } = useTranslation("KeyValueList");
+
     const { label, hintText, name, valueInputProps, valueOptions, valueType } = props;
     const {
         control,
