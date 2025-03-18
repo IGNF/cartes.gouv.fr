@@ -1212,7 +1212,7 @@ const TermsOfService = () => {
                                         <tbody>
                                             <tr>
                                                 <td>API Géoplateforme - Diffusion d’images tuilées WMTS</td>
-                                                <td rowSpan={6}>Non soumis à limite d’usage</td>
+                                                <td rowSpan={3}>Non soumis à limite d’usage</td>
                                             </tr>
                                             <tr>
                                                 <td>API Géoplateforme - Diffusion d’images tuilées WMTS - Privé</td>
@@ -1222,6 +1222,7 @@ const TermsOfService = () => {
                                             </tr>
                                             <tr>
                                                 <td>API Géoplateforme - Diffusion de tuiles vectorielles TMS</td>
+                                                <td rowSpan={3}>400 requêtes/s</td>
                                             </tr>
                                             <tr>
                                                 <td>API Géoplateforme - Diffusion de tuiles vectorielles TMS - Privé</td>
