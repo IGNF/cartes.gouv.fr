@@ -34,6 +34,8 @@ const { i18n } = declareComponentKeys<
     | "next_step"
     | "url_copied"
     | "copy_to_clipboard"
+    | "alert_copied"
+    | "alert_copy_to_clipboard"
     | "go_to_content"
     | "search"
     | "clear"
@@ -75,6 +77,8 @@ export const commonFrTranslations: Translations<"fr">["Common"] = {
     next_step: "Étape suivante",
     url_copied: "URL copiée",
     copy_to_clipboard: "Copier dans le presse-papier",
+    alert_copied: "Copié",
+    alert_copy_to_clipboard: "Le texte a été copié dans le presse-papier.",
     go_to_content: "Aller au contenu",
     search: "Rechercher",
     clear: "Effacer",
@@ -115,6 +119,8 @@ export const commonEnTranslations: Translations<"en">["Common"] = {
     next_step: "Next step",
     url_copied: "URL copied",
     copy_to_clipboard: "Copy to clipboard",
+    alert_copied: "Copied",
+    alert_copy_to_clipboard: "Text has been copied to clipboard.",
     go_to_content: "Go to content",
     search: "Search",
     clear: "Clear",

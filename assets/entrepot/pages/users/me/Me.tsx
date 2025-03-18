@@ -4,15 +4,14 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { getTranslation, useTranslation } from "../../../../i18n/i18n";
 import SymfonyRouting from "../../../../modules/Routing";
 import { useAuthStore } from "../../../../stores/AuthStore";
-import { useSnackbarStore } from "../../../../stores/SnackbarStore";
 import { formatDateFromISO } from "../../../../utils";
 import Main from "../../../../components/Layout/Main";
+import TextCopyToClipboard from "@/components/Utils/TextCopyToClipboard";
 
 const Me = () => {
     const { t: tCommon } = getTranslation("Common");
     const { t } = useTranslation({ Me });
     const user = useAuthStore((state) => state.user);
-    const setMessage = useSnackbarStore((state) => state.setMessage);
 
     return (
         <Main title={t("my_account")}>
@@ -25,19 +24,7 @@ const Me = () => {
                     <p>{t("username", { userName: user?.user_name ?? "" })}</p>
                     <p>{t("email", { email: user.email })}</p>
                     {user.account_creation_date !== undefined && <p>{t("registration_date", { date: formatDateFromISO(user.account_creation_date) })}</p>}
-                    <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-6v")}>
-                        {t("id", { id: user.id })}
-                        <Button
-                            className={fr.cx("fr-ml-2v")}
-                            title={tCommon("copy")}
-                            priority={"tertiary no outline"}
-                            iconId={"ri-file-copy-2-line"}
-                            onClick={async () => {
-                                await navigator.clipboard.writeText(user.id);
-                                setMessage(t("userid_copied"));
-                            }}
-                        />
-                    </div>
+                    <TextCopyToClipboard className={fr.cx("fr-mb-6v")} label={t("id")} text={user.id} />
                 </>
             )}
 
