@@ -1,10 +1,11 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { useIsDark } from "@codegouvfr/react-dsfr/useIsDark";
 import { FC, LazyExoticComponent, ReactNode } from "react";
-import { Control, RichTextEditor } from "react-dsfr-tiptap";
+import { Control, ControlComponent, RichTextEditor } from "react-dsfr-tiptap";
 import { ControlImage, ControlLink, ControlUnlink, ControlYoutube } from "react-dsfr-tiptap/dialog";
 
 type HtmlEditorEditorProps = {
+    controlMap?: Partial<Record<Control, ControlComponent>>;
     label?: string;
     hintText?: ReactNode;
     removeEmptyParagraph?: boolean;
@@ -44,7 +45,7 @@ const standardControls: (Control | (() => ReactNode) | LazyExoticComponent<() =>
 const HtmlEditor: FC<HtmlEditorEditorProps> = (props) => {
     const { isDark } = useIsDark();
 
-    const { label, hintText, extraControls, value, state, stateRelatedMessage, removeEmptyParagraph = true, onChange } = props;
+    const { controlMap, label, hintText, extraControls, value, state, stateRelatedMessage, removeEmptyParagraph = true, onChange } = props;
 
     const controls = [...standardControls];
     if (extraControls) {
@@ -62,7 +63,7 @@ const HtmlEditor: FC<HtmlEditorEditorProps> = (props) => {
             <RichTextEditor
                 content={value}
                 removeEmptyParagraph={removeEmptyParagraph}
-                controlMap={{ Link: ControlLink, Unlink: ControlUnlink, Image: ControlImage, Youtube: ControlYoutube }}
+                controlMap={{ Link: ControlLink, Unlink: ControlUnlink, Image: ControlImage, Youtube: ControlYoutube, ...controlMap }}
                 extensionLoader={extensionLoader}
                 controls={controls}
                 onContentUpdate={onChange}
