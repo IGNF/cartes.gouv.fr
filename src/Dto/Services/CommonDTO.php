@@ -107,5 +107,5 @@ class CommonDTO
 
     #[Assert\Type('bool')]
     #[SerializedName('allow_view_data')]
-    public bool $allow_view_data;
+    public ?bool $allow_view_data = false;
 }

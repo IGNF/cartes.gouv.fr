@@ -62,6 +62,7 @@ class CswMetadata
         $this->resolution = null;
         $this->frequencyCode = 'unknown';
         $this->resourceGenealogy = '';
+        $this->updateDate = '';
 
         $this->topicCategories = [];
         $this->inspireKeywords = [];
