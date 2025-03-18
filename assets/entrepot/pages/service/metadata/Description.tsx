@@ -139,7 +139,7 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
                     <AutocompleteSelect
                         label={t("metadata.description_form.category")}
                         hintText={t("metadata.description_form.hint_category")}
-                        options={Object.values(categories).sort()}
+                        options={Object.values(categories).sort((a, b) => a.localeCompare(b))}
                         searchFilter={{ limit: 40 }}
                         state={errors.category ? "error" : "default"}
                         stateRelatedMessage={errors?.category?.message?.toString()}
