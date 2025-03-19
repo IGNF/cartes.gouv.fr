@@ -3,7 +3,7 @@ networks:
 
 services:
     app:
-        image: ignf/cartes.gouv.fr:ubuntu
+        image: ignf/cartes.gouv.fr:latest
         build:
             context: .
             dockerfile: .docker/Dockerfile

@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 php bin/console cache:clear
-apache2-foreground
+exec apache2-foreground
