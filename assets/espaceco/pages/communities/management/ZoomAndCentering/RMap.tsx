@@ -48,7 +48,7 @@ const RMap: FC<RMapProps> = ({ form, onPositionChanged, onZoomChanged }) => {
     const minZoom = watch("minZoom");
     const maxZoom = watch("maxZoom");
 
-    const renderExtent = useCallback((e: MapEvent) => drawExtent(e, extent), [extent]);
+    const renderExtent = useCallback((e: MapEvent) => drawExtent(e, extent ?? []), [extent]);
 
     // Création de la carte une fois bg layer créée
     useEffect(() => {

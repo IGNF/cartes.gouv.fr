@@ -1,44 +1,34 @@
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FC, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { FC, useMemo } from "react";
 
 import Main from "@/components/Layout/Main";
-import { fr } from "@codegouvfr/react-dsfr";
+import { useCommunityContext } from "@/espaceco/contexts/CommunityContext";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
-import { CommunityFormMode, UserMe } from "../../../@types/app_espaceco";
-import { CommunityResponseDTO } from "../../../@types/espaceco";
+import { UserMe } from "../../../@types/app_espaceco";
 import LoadingText from "../../../components/Utils/LoadingText";
-import Wait from "../../../components/Utils/Wait";
 import { useTranslation } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/espaceco/RQKeys";
 import { CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
 import api from "../../api";
-import { COMMUNITY_FORM_STEPS, getMaxSteps } from "./FormSteps";
-import Databases from "./management/Databases";
+import { COMMUNITY_FORM_STEPS } from "./FormSteps";
 import Description from "./management/Description";
 import Reports from "./management/Reports";
 import Tools from "./management/Tools";
 import ZoomAndCentering from "./management/ZoomAndCentering";
+import Wait from "@/components/Utils/Wait";
+import { fr } from "@codegouvfr/react-dsfr";
 
-type CreateCommunityProps = {
-    communityId: number;
-};
-
-const CreateCommunity: FC<CreateCommunityProps> = ({ communityId }) => {
+const CreateCommunity: FC = () => {
+    const { t: tCommon } = useTranslation("Common");
     const { t: tBreadcrumb } = useTranslation("Breadcrumb");
+    const { t: tmc } = useTranslation("ManageCommunity");
     const { t } = useTranslation("CreateCommunity");
 
-    const mode: CommunityFormMode = "creation";
-    const maxSteps = getMaxSteps(mode);
-
-    const [currentStep, setCurrentStep] = useState<COMMUNITY_FORM_STEPS>(COMMUNITY_FORM_STEPS.DESCRIPTION);
-    const [saveOnly, setSaveOnly] = useState<boolean>(true);
-
-    /*----------------------------------------------------- */
-
-    const queryClient = useQueryClient();
+    const { currentStep, maxSteps, isLastStep, community, isCommunityLoading, isCommunityUpdating, isCommunityUpdatingError, updatingCommunityError } =
+        useCommunityContext();
 
     const meQuery = useQuery<UserMe, CartesApiException>({
         queryKey: RQKeys.getMe(),
@@ -46,52 +36,29 @@ const CreateCommunity: FC<CreateCommunityProps> = ({ communityId }) => {
         staleTime: 3600000,
     });
 
-    const communityQuery = useQuery<CommunityResponseDTO>({
-        queryKey: RQKeys.community(communityId),
-        queryFn: () => api.community.getCommunity(communityId),
-        staleTime: 3600000,
-    });
-
-    const { isPending, isError, mutate } = useMutation<CommunityResponseDTO, CartesApiException, object>({
-        mutationFn: (datas: object) => {
-            return api.community.update(communityId, datas);
-        },
-        onSuccess(community) {
-            queryClient.setQueryData<CommunityResponseDTO>(RQKeys.community(community.id), () => {
-                return community;
-            });
-            if (saveOnly) {
-                return;
-            }
-
-            if (currentStep < maxSteps) {
-                setCurrentStep(currentStep + 1);
-            } else {
-                // TODO on est à la dernière étape du formulaire
-            }
-        },
-    });
+    const isAdmin = useMemo(() => {
+        return meQuery.data?.administrator === true;
+    }, [meQuery.data]);
 
     // Les droits pour pouvoir modifier un guichet
     const hasRights = useMemo(() => {
-        if (meQuery.data && communityQuery.data) {
-            const me = meQuery.data;
-            if (me.administrator) {
+        if (meQuery.data) {
+            if (meQuery.data.administrator) {
                 return true;
             }
-            const f = me.communities_member.filter((cm) => cm.role === "admin");
+            const f = meQuery.data.communities_member.filter((cm) => cm.role === "admin");
             return f.length > 0;
         }
         return false;
-    }, [meQuery.data, communityQuery.data]);
+    }, [meQuery.data]);
 
     // S'il est active === true, il peut être modifier mais ne peut pas être en cours de creation
     const forbidden = useMemo(() => {
-        if (communityQuery.data) {
-            return communityQuery.data.active === true;
+        if (community) {
+            return community.active === true;
         }
         return false;
-    }, [communityQuery.data]);
+    }, [community]);
 
     return (
         <Main
@@ -105,7 +72,7 @@ const CreateCommunity: FC<CreateCommunityProps> = ({ communityId }) => {
             }}
             title={t("title")}
         >
-            {communityQuery.data?.active ? (
+            {community?.active ? (
                 <Alert severity="error" closable={false} title={t("forbidden_access")} />
             ) : (
                 <div>
@@ -114,15 +81,17 @@ const CreateCommunity: FC<CreateCommunityProps> = ({ communityId }) => {
                         currentStep={currentStep}
                         stepCount={maxSteps}
                         title={t("step_title", { step: currentStep })}
-                        nextTitle={currentStep < maxSteps ? t("step_title", { step: currentStep + 1 }) : ""}
+                        nextTitle={!isLastStep() ? t("step_title", { step: currentStep + 1 }) : ""}
                     />
-                    {isError && <Alert severity="error" closable title={t("updating_failed")} />}
-                    {isPending && (
+                    {isCommunityUpdating && (
                         <Wait>
                             <div className={fr.cx("fr-grid-row")}>
-                                <LoadingText as="h6" message={t("updating")} withSpinnerIcon={true} />
+                                <LoadingText as="h6" message={tmc("updating")} withSpinnerIcon={true} />
                             </div>
                         </Wait>
+                    )}
+                    {isCommunityUpdatingError && (
+                        <Alert className={fr.cx("fr-my-2v")} severity="error" closable title={tCommon("error")} description={updatingCommunityError?.message} />
                     )}
                     {meQuery.isError ? (
                         <Alert
@@ -136,68 +105,25 @@ const CreateCommunity: FC<CreateCommunityProps> = ({ communityId }) => {
                                 </>
                             }
                         />
-                    ) : communityQuery.isError ? (
-                        <Alert
-                            severity="error"
-                            closable={false}
-                            title={t("community_fetch_failed")}
-                            description={
-                                <>
-                                    <p>{communityQuery.error.message}</p>
-                                    <Button linkProps={routes.espaceco_community_list().link}>{t("back_to_list")}</Button>
-                                </>
-                            }
-                        />
-                    ) : meQuery.isLoading || communityQuery.isLoading ? (
-                        <LoadingText as={"h2"} message={t("loading")} />
+                    ) : meQuery.isLoading || isCommunityLoading ? (
+                        <LoadingText as={"h2"} message={t("loading_me")} />
                     ) : hasRights === false ? (
                         <Alert severity="error" closable={false} title={t("no_rights")} />
                     ) : forbidden ? (
                         <Alert severity="error" closable={false} title={t("forbidden_access")} />
                     ) : (
-                        communityQuery.data && (
+                        community && (
                             <div>
                                 {currentStep === COMMUNITY_FORM_STEPS.DESCRIPTION ? (
-                                    <Description
-                                        mode={mode}
-                                        community={communityQuery.data}
-                                        onSubmit={(datas, saveOnly) => {
-                                            setSaveOnly(saveOnly);
-                                            mutate(datas);
-                                        }}
-                                    />
-                                ) : currentStep === COMMUNITY_FORM_STEPS.DATABASE ? (
-                                    <Databases mode={mode} community={communityQuery.data} />
-                                ) : currentStep === COMMUNITY_FORM_STEPS.ZOOM_AND_CENTERING ? (
-                                    <ZoomAndCentering
-                                        mode={mode}
-                                        community={communityQuery.data}
-                                        onPrevious={() => setCurrentStep(currentStep - 1)}
-                                        onSubmit={(datas, saveOnly) => {
-                                            setSaveOnly(saveOnly);
-                                            mutate(datas);
-                                        }}
-                                    />
+                                    <Description isAdmin={isAdmin} />
+                                ) : /* currentStep === COMMUNITY_FORM_STEPS.DATABASE ? (
+                                    <Databases mode={mode} community={community} />
+                                ) :*/ currentStep === COMMUNITY_FORM_STEPS.ZOOM_AND_CENTERING ? (
+                                    <ZoomAndCentering />
                                 ) : currentStep === COMMUNITY_FORM_STEPS.TOOLS ? (
-                                    <Tools
-                                        mode={mode}
-                                        community={communityQuery.data}
-                                        onPrevious={() => setCurrentStep(currentStep - 1)}
-                                        onSubmit={(datas, saveOnly) => {
-                                            setSaveOnly(saveOnly);
-                                            mutate(datas);
-                                        }}
-                                    />
+                                    <Tools />
                                 ) : currentStep === COMMUNITY_FORM_STEPS.REPORTS ? (
-                                    <Reports
-                                        mode={mode}
-                                        community={communityQuery.data}
-                                        onPrevious={() => setCurrentStep(currentStep - 1)}
-                                        onSubmit={(datas, saveOnly) => {
-                                            setSaveOnly(saveOnly);
-                                            mutate(datas);
-                                        }}
-                                    />
+                                    <Reports />
                                 ) : (
                                     <div>TODO ...</div>
                                 )}

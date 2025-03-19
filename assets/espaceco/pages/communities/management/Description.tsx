@@ -10,8 +10,8 @@ import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
 import { FC, memo, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Controller, useForm } from "react-hook-form";
 import * as yup from "yup";
-import { CommunityFormMode, DescriptionFormType, MembershipRequestValues } from "../../../../@types/app_espaceco";
-import { CommunityResponseDTO, DocumentDTO } from "../../../../@types/espaceco";
+import { DescriptionFormType, MembershipRequestValues } from "../../../../@types/app_espaceco";
+import { DocumentDTO } from "../../../../@types/espaceco";
 import AutocompleteSelect from "../../../../components/Input/AutocompleteSelect";
 import categories from "../../../../data/topic_categories.json";
 import { useTranslation } from "../../../../i18n/i18n";
@@ -23,6 +23,8 @@ import { getDescriptionDefaultValues } from "../DefaultValues";
 import DocumentList from "./description/DocumentList";
 import { OpenWithEmailsConfigDialog, OpenWithEmailsConfigDialogModal } from "./description/OpenWithEmailsConfigDialog";
 
+import Wait from "@/components/Utils/Wait";
+import { useCommunityContext } from "@/espaceco/contexts/CommunityContext";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import HtmlEditor from "../../../../components/Input/HtmlEditor";
@@ -30,20 +32,23 @@ import LoadingText from "../../../../components/Utils/LoadingText";
 import { ComponentKey } from "../../../../i18n/types";
 import "../../../../sass/pages/espaceco/community.scss";
 import { setToNull } from "../../../../utils";
-import { COMMUNITY_FORM_STEPS } from "../FormSteps";
-import ActionButtons from "./ActionButtons";
+import ActionButtonsCreation from "./ActionButtonsCreation";
+import ActionButtonsEdition from "./ActionButtonsEdition";
 import CommunityLogo from "./CommunityLogo";
 
 type DescriptionProps = {
-    mode: CommunityFormMode;
-    community: CommunityResponseDTO;
-    onSubmit: (datas: object, saveOnly: boolean) => void;
+    isAdmin: boolean;
 };
 
-const Description: FC<DescriptionProps> = ({ mode, community, onSubmit }) => {
+const Description: FC<DescriptionProps> = ({ isAdmin }) => {
     const { t: tCommon } = useTranslation("Common");
     const { t: tValid } = useTranslation("ManageCommunityValidations");
     const { t: tmc } = useTranslation("ManageCommunity");
+
+    const context = useCommunityContext();
+
+    const { mode, isLastStep, nextStep, updateCommunity, isCommunityUpdating, isCommunityUpdatingError, updatingCommunityError } = context;
+    const community = context.community!;
 
     const communityNamesQuery = useQuery<string[], CartesApiException>({
         queryKey: RQKeys.communitiesName(),
@@ -57,15 +62,11 @@ const Description: FC<DescriptionProps> = ({ mode, community, onSubmit }) => {
     }, [community, communityNamesQuery]);
 
     const communityDocumentsQuery = useQuery<DocumentDTO[] | null, CartesApiException>({
-        queryKey: RQKeys.communityDocuments(community.id),
+        queryKey: RQKeys.communityDocuments(community?.id),
         queryFn: ({ signal }) => {
-            if (community) {
-                return api.communityDocuments.getAll(community.id, [], signal);
-            }
-            return Promise.resolve(null);
+            return api.communityDocuments.getAll(community.id, [], signal);
         },
         staleTime: 3600000,
-        enabled: community !== undefined,
     });
 
     const schema = (t: TranslationFunction<"ManageCommunityValidations", ComponentKey>) => {
@@ -182,33 +183,51 @@ const Description: FC<DescriptionProps> = ({ mode, community, onSubmit }) => {
             listed: Boolean(values.listed).toString(),
             description: setToNull(values.description),
             editorial: setToNull(values.editorial),
-            open_without_affiliation: "false",
         };
 
         /* if (values.keywords && values.keywords.length) {
             datas["keywords"] = values.keywords;
         } */
 
-        if (values.membershipRequest === "partially_open") {
-            const openWithEmail = values.openWithEmail.reduce((accumulator, owe) => {
-                const grids: string[] = [];
-                owe.grids.reduce((acc, grid) => {
-                    acc.push(grid.name);
-                    return acc;
-                }, grids);
-                accumulator[owe.email] = grids;
-                return accumulator;
-            }, {});
-            datas["open_with_email"] = Object.keys(openWithEmail).length === 0 ? null : openWithEmail;
-        } else datas["open_without_affiliation"] = values.membershipRequest === "open" ? "true" : "false";
-        onSubmit(datas, saveOnly);
+        if (isAdmin) {
+            datas["open_without_affiliation"] = "false";
+
+            if (values.membershipRequest === "partially_open") {
+                const openWithEmail = values.openWithEmail.reduce((accumulator, owe) => {
+                    const grids: string[] = [];
+                    owe.grids.reduce((acc, grid) => {
+                        acc.push(grid.name);
+                        return acc;
+                    }, grids);
+                    accumulator[owe.email] = grids;
+                    return accumulator;
+                }, {});
+                datas["open_with_email"] = Object.keys(openWithEmail).length === 0 ? null : openWithEmail;
+            } else datas["open_without_affiliation"] = values.membershipRequest === "open" ? "true" : "false";
+        }
+
+        updateCommunity(datas, () => {
+            if (mode === "creation" && !saveOnly && !isLastStep()) {
+                nextStep();
+            }
+        });
     };
 
     return (
         <>
+            {isCommunityUpdating && (
+                <Wait>
+                    <div className={fr.cx("fr-grid-row")}>
+                        <LoadingText as="h6" message={tmc("updating")} withSpinnerIcon={true} />
+                    </div>
+                </Wait>
+            )}
+            {isCommunityUpdatingError && (
+                <Alert className={fr.cx("fr-my-2v")} severity="error" closable title={tCommon("error")} description={updatingCommunityError?.message} />
+            )}
             {(communityNamesQuery.isLoading || communityDocumentsQuery.isLoading) && <LoadingText as={"h6"} />}
-            {communityNamesQuery.isError && <Alert severity="error" closable title={communityNamesQuery.error.message} />}
-            {communityDocumentsQuery.isError && <Alert severity="error" closable title={communityDocumentsQuery.error.message} />}
+            {communityNamesQuery.isError && <Alert className={fr.cx("fr-my-2v")} severity="error" closable title={communityNamesQuery.error.message} />}
+            {communityDocumentsQuery.isError && <Alert className={fr.cx("fr-my-2v")} severity="error" closable title={communityDocumentsQuery.error.message} />}
             {communityNamesQuery.data && communityDocumentsQuery.data && (
                 <div>
                     <h2>{tmc("desc.tab.title")}</h2>
@@ -270,37 +289,39 @@ const Description: FC<DescriptionProps> = ({ mode, community, onSubmit }) => {
                                 />
                             )}
                         />
-                        <RadioButtons
-                            legend={tmc("desc.membership_requests.title")}
-                            options={[
-                                {
-                                    label: tmc("desc.membership_requests.open"),
-                                    nativeInputProps: {
-                                        ...register("membershipRequest"),
-                                        value: "open",
-                                        checked: membership === "open",
+                        {isAdmin && (
+                            <RadioButtons
+                                legend={tmc("desc.membership_requests.title")}
+                                options={[
+                                    {
+                                        label: tmc("desc.membership_requests.open"),
+                                        nativeInputProps: {
+                                            ...register("membershipRequest"),
+                                            value: "open",
+                                            checked: membership === "open",
+                                        },
                                     },
-                                },
-                                {
-                                    label: tmc("desc.membership_requests.not_open"),
-                                    hintText: tmc("desc.membership_requests.not_open_hint"),
-                                    nativeInputProps: {
-                                        ...register("membershipRequest"),
-                                        value: "not_open",
-                                        checked: membership === "not_open",
+                                    {
+                                        label: tmc("desc.membership_requests.not_open"),
+                                        hintText: tmc("desc.membership_requests.not_open_hint"),
+                                        nativeInputProps: {
+                                            ...register("membershipRequest"),
+                                            value: "not_open",
+                                            checked: membership === "not_open",
+                                        },
                                     },
-                                },
-                                {
-                                    label: tmc("desc.membership_requests.partial_open"),
-                                    hintText: tmc("desc.membership_requests.partial_open_hint"),
-                                    nativeInputProps: {
-                                        ...register("membershipRequest"),
-                                        value: "partially_open",
-                                        checked: membership === "partially_open",
+                                    {
+                                        label: tmc("desc.membership_requests.partial_open"),
+                                        hintText: tmc("desc.membership_requests.partial_open_hint"),
+                                        nativeInputProps: {
+                                            ...register("membershipRequest"),
+                                            value: "partially_open",
+                                            checked: membership === "partially_open",
+                                        },
                                     },
-                                },
-                            ]}
-                        />
+                                ]}
+                            />
+                        )}
                         {showOpenWithEmail && (
                             <div>
                                 <Button
@@ -347,18 +368,13 @@ const Description: FC<DescriptionProps> = ({ mode, community, onSubmit }) => {
                         />
                         <DocumentList communityId={community.id} documents={communityDocumentsQuery.data} />
                         <OpenWithEmailsConfigDialog openWithEmailOriginal={openWithEmail} onUpdate={(values) => setFormValue("openWithEmail", values)} />
-                        {mode === "edition" ? (
-                            <div className="fr-grid-row fr-grid-row--right">
-                                <Button priority={"primary"} onClick={() => handleSubmit(() => onSubmitForm(true))()}>
-                                    {tCommon("save")}
-                                </Button>
-                            </div>
-                        ) : (
-                            <ActionButtons
-                                step={COMMUNITY_FORM_STEPS.DESCRIPTION}
+                        {mode === "creation" ? (
+                            <ActionButtonsCreation
                                 onSave={() => handleSubmit(() => onSubmitForm(true))()}
                                 onContinue={() => handleSubmit(() => onSubmitForm(false))()}
                             />
+                        ) : (
+                            <ActionButtonsEdition onSave={() => handleSubmit(() => onSubmitForm(true))()} />
                         )}
                     </div>
                 </div>

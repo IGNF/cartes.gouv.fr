@@ -10,11 +10,8 @@ const { i18n } = declareComponentKeys<
     | "previous_step"
     | "title"
     | { K: "step_title"; P: { step: COMMUNITY_FORM_STEPS }; R: string }
-    | "loading"
+    | "loading_me"
     | "me_fetch_failed"
-    | "community_fetch_failed"
-    | "updating"
-    | "updating_failed"
 >()("CreateCommunity");
 export type I18n = typeof i18n;
 
@@ -31,8 +28,9 @@ export const CreateCommunityFrTranslations: Translations<"fr">["CreateCommunity"
             // TODO REMETTRE
             /* case COMMUNITY_FORM_STEPS.DATABASE:
                 return "Base de données";
+            
             case COMMUNITY_FORM_STEPS.LAYERS:
-                return "Couches"; */
+                return "Couches";  */
             case COMMUNITY_FORM_STEPS.ZOOM_AND_CENTERING:
                 return "Zoom et centrage";
             case COMMUNITY_FORM_STEPS.TOOLS:
@@ -43,11 +41,8 @@ export const CreateCommunityFrTranslations: Translations<"fr">["CreateCommunity"
                 return "";
         }
     },
-    loading: "Recherche du guichet en cours ...",
     me_fetch_failed: "La récupération des informations sur mon compte",
-    community_fetch_failed: "La récupération des informations sur le guichet a échoué",
-    updating: "Mise à jour du guichet en cours ...",
-    updating_failed: "La mise à jour du guichet a échoué",
+    loading_me: "Recherche des informations de votre compte",
 };
 
 export const CreateCommunityEnTranslations: Translations<"en">["CreateCommunity"] = {
@@ -57,9 +52,6 @@ export const CreateCommunityEnTranslations: Translations<"en">["CreateCommunity"
     previous_step: "Previous step",
     title: "Create community",
     step_title: ({ step }) => `step ${step}`,
-    loading: "Fetching community ...",
+    loading_me: "Fetching informations ...",
     me_fetch_failed: undefined,
-    community_fetch_failed: undefined,
-    updating: "Updating community ...",
-    updating_failed: "Updating community failed",
 };

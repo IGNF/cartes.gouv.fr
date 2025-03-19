@@ -10,7 +10,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, ReactNode, useCallback, useMemo, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { CommunityMember, GetResponse, Role } from "../../../../@types/app_espaceco";
-import { CommunityResponseDTO } from "../../../../@types/espaceco";
 import ConfirmDialog, { ConfirmDialogModal } from "../../../../components/Utils/ConfirmDialog";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../components/Utils/LoadingText";
@@ -23,23 +22,23 @@ import api from "../../../api";
 import { AddMembersDialog, AddMembersDialogModal } from "./member/AddMembersDialog";
 import { ManageGridsDialog, ManageGridsDialogModal } from "./member/ManageGridsDialog";
 
-import "../../../../sass/pages/espaceco/member.scss";
+import { useCommunityContext } from "@/espaceco/contexts/CommunityContext";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
+import "../../../../sass/pages/espaceco/member.scss";
 
 export type membersQueryParams = {
     page: number;
     limit: number;
 };
 
-type MembersProps = {
-    community: CommunityResponseDTO;
-};
-
 const maxFetchedMembers = 10;
 const getName = (firstname: string | null, surname: string | null) => `${firstname ? firstname : ""} ${surname ? surname : ""}`;
 
-const Members: FC<MembersProps> = ({ community }) => {
+const Members: FC = () => {
     const { t } = useTranslation("EscoCommunityMembers");
+
+    const context = useCommunityContext();
+    const community = context.community!;
 
     const queryClient = useQueryClient();
 

@@ -11,6 +11,9 @@ type DisplayExtentProps = {
 
 const DisplayExtent: FC<DisplayExtentProps> = ({ extent, onRemove }) => {
     const { t: tCommon } = useTranslation("Common");
+    if (!extent.length) {
+        return <div />;
+    }
 
     return (
         <div className={fr.cx("fr-grid-row", "fr-my-2v")}>

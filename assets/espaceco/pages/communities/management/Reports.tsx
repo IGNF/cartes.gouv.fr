@@ -1,13 +1,14 @@
+import Wait from "@/components/Utils/Wait";
+import { useCommunityContext } from "@/espaceco/contexts/CommunityContext";
+import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import Button from "@codegouvfr/react-dsfr/Button";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useQuery } from "@tanstack/react-query";
 import { FC, useCallback, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
-import { CommunityFormMode, ReportFormType } from "../../../../@types/app_espaceco";
+import { ReportFormType } from "../../../../@types/app_espaceco";
 import {
-    CommunityResponseDTO,
     EmailPlannerDTO,
     ReportStatusesDTO,
     ReportStatusesType,
@@ -23,9 +24,10 @@ import RQKeys from "../../../../modules/espaceco/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import api from "../../../api";
 import { getReportsDefaultValues } from "../DefaultValues";
-import { COMMUNITY_FORM_STEPS } from "../FormSteps";
-import ActionButtons from "./ActionButtons";
+import ActionButtonsCreation from "./ActionButtonsCreation";
+import ActionButtonsEdition from "./ActionButtonsEdition";
 import Answers from "./reports/Answers";
+import { AttributeValidations } from "./reports/AttributeValidations";
 import EmailPlanners from "./reports/EmailPlanners";
 import Permissions from "./reports/Permissions";
 import ReportStatuses from "./reports/ReportStatuses";
@@ -34,21 +36,20 @@ import SharedThemes from "./reports/SharedThemes";
 import ThemeList from "./reports/ThemeList";
 import { formatAttributesForApi } from "./reports/ThemeUtils";
 import { countActiveStatus, getMinAuthorizedStatus } from "./reports/Utils";
-import { AttributeValidations } from "./reports/AttributeValidations";
-
-type ReportsProps = {
-    mode: CommunityFormMode;
-    community: CommunityResponseDTO;
-    onPrevious?: () => void;
-    onSubmit: (datas: object, saveOnly: boolean) => void;
-};
+import { routes } from "@/router/router";
 
 const minStatuses = getMinAuthorizedStatus();
 
-const Reports: FC<ReportsProps> = ({ mode, community, onPrevious, onSubmit }) => {
+const Reports: FC = () => {
     const { t: tStatus } = useTranslation("ReportStatuses");
     const { t: tCommon } = useTranslation("Common");
+    const { t: tmc } = useTranslation("ManageCommunity");
     const { t } = useTranslation("Reports");
+
+    const context = useCommunityContext();
+
+    const { mode, updateCommunity, isCommunityUpdating, isCommunityUpdatingError, updatingCommunityError } = context;
+    const community = context.community!;
 
     const schema: yup.ObjectSchema<ReportFormType> = yup.object({
         attributes: yup
@@ -236,9 +237,16 @@ const Reports: FC<ReportsProps> = ({ mode, community, onPrevious, onSubmit }) =>
 
     const onSubmitForm = (saveOnly: boolean) => {
         const datas = { ...getFormValues() };
+        if (!saveOnly) {
+            datas["active"] = true;
+        }
         datas.report_statuses = cleanReportStatuses(datas.report_statuses);
         datas.attributes = formatAttributesForApi(datas.attributes);
-        onSubmit(datas, saveOnly);
+        updateCommunity(datas, () => {
+            if (mode === "creation" && !saveOnly) {
+                routes.espaceco_community_list().push();
+            }
+        });
     };
 
     return (
@@ -249,6 +257,16 @@ const Reports: FC<ReportsProps> = ({ mode, community, onPrevious, onSubmit }) =>
             {tablesQuery.isLoading && <LoadingText as="h6" message={t("loading_tables")} />}
             {sharedThemesQuery.isLoading && <LoadingText as="h6" message={t("loading_shared_themes")} />}
             {emailPlannersQuery.isLoading && <LoadingText as="h6" message={t("loading_email_planners")} />}
+            {isCommunityUpdating && (
+                <Wait>
+                    <div className={fr.cx("fr-grid-row")}>
+                        <LoadingText as="h6" message={tmc("updating")} withSpinnerIcon={true} />
+                    </div>
+                </Wait>
+            )}
+            {isCommunityUpdatingError && (
+                <Alert className={fr.cx("fr-my-2v")} severity="error" closable title={tCommon("error")} description={updatingCommunityError?.message} />
+            )}
             {tablesQuery.data && sharedThemesQuery.data && emailPlannersQuery.data && (
                 <div>
                     <p>{tCommon("mandatory_fields")}</p>
@@ -263,19 +281,13 @@ const Reports: FC<ReportsProps> = ({ mode, community, onPrevious, onSubmit }) =>
                     <EmailPlanners communityId={community.id} form={form} emailPlanners={emailPlannersQuery.data} />
                     <Permissions form={form} />
                     <Answers form={form} />
-                    {mode === "edition" ? (
-                        <div className="fr-grid-row fr-grid-row--right">
-                            <Button priority={"primary"} onClick={() => handleSubmit(() => onSubmitForm(true))()}>
-                                {tCommon("save")}
-                            </Button>
-                        </div>
-                    ) : (
-                        <ActionButtons
-                            step={COMMUNITY_FORM_STEPS.REPORTS}
-                            onPrevious={onPrevious}
+                    {mode === "creation" ? (
+                        <ActionButtonsCreation
                             onSave={() => handleSubmit(() => onSubmitForm(true))()}
                             onContinue={() => handleSubmit(() => onSubmitForm(false))()}
                         />
+                    ) : (
+                        <ActionButtonsEdition onSave={() => handleSubmit(() => onSubmitForm(true))()} />
                     )}
                 </div>
             )}

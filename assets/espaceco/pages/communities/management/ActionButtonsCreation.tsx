@@ -1,31 +1,25 @@
+import { useCommunityContext } from "@/espaceco/contexts/CommunityContext";
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { FC } from "react";
 import { useTranslation } from "../../../../i18n";
-import { COMMUNITY_FORM_STEPS, getMaxSteps } from "../FormSteps";
 
-type ActionButtonsProps = {
-    step: COMMUNITY_FORM_STEPS;
-    onPrevious?: () => void;
+type ActionButtonsCreationProps = {
     onSave: () => void;
     onContinue: () => void;
 };
 
-const lastStep = getMaxSteps("creation");
-
-const ActionButtons: FC<ActionButtonsProps> = ({ step, onPrevious, onSave, onContinue }) => {
+const ActionButtonsCreation: FC<ActionButtonsCreationProps> = ({ onSave, onContinue }) => {
     const { t: tCommon } = useTranslation("Common");
+    const { t: tmc } = useTranslation("ManageCommunity");
+
+    const { isFirstStep, isLastStep, previousStep } = useCommunityContext();
 
     return (
         <div className={fr.cx("fr-grid-row", "fr-my-2w")}>
             <div className="fr-col-6">
                 <div className="fr-grid-row fr-grid-row--left">
-                    <Button
-                        priority={"secondary"}
-                        iconId={"fr-icon-arrow-left-fill"}
-                        onClick={() => onPrevious?.()}
-                        disabled={step === COMMUNITY_FORM_STEPS.DESCRIPTION}
-                    >
+                    <Button priority={"secondary"} iconId={"fr-icon-arrow-left-fill"} onClick={() => previousStep()} disabled={isFirstStep()}>
                         {tCommon("previous_step")}
                     </Button>
                 </div>
@@ -35,15 +29,13 @@ const ActionButtons: FC<ActionButtonsProps> = ({ step, onPrevious, onSave, onCon
                     <Button priority={"primary"} onClick={onSave}>
                         {tCommon("save")}
                     </Button>
-                    {step < lastStep && (
-                        <Button className={fr.cx("fr-ml-2v")} priority="primary" onClick={onContinue}>
-                            {tCommon("continue")}
-                        </Button>
-                    )}
+                    <Button className={fr.cx("fr-ml-2v")} priority="primary" onClick={onContinue}>
+                        {!isLastStep() ? tCommon("continue") : tmc("create_now")}
+                    </Button>
                 </div>
             </div>
         </div>
     );
 };
 
-export default ActionButtons;
+export default ActionButtonsCreation;

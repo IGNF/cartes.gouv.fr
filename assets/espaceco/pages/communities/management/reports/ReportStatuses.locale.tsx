@@ -1,13 +1,14 @@
 import { declareComponentKeys } from "../../../../../i18n/i18n";
 import { Translations } from "../../../../../i18n/types";
 
-const { i18n } = declareComponentKeys<"parameter" | "title" | "description" | "description_placeholder" | "back_to_default" | "min_statuses">()(
+const { i18n } = declareComponentKeys<"parameter" | "modal_title" | "title" | "description" | "description_placeholder" | "back_to_default" | "min_statuses">()(
     "ReportStatuses"
 );
 export type I18n = typeof i18n;
 
 export const ReportStatusesFrTranslations: Translations<"fr">["ReportStatuses"] = {
     parameter: "Paramétrer",
+    modal_title: "Paramétrer le statut",
     title: "Titre",
     description: "Description",
     description_placeholder: "Entrer le texte d'aide pour vos utilisateurs.",
@@ -17,6 +18,7 @@ export const ReportStatusesFrTranslations: Translations<"fr">["ReportStatuses"] 
 
 export const ReportStatusesEnTranslations: Translations<"en">["ReportStatuses"] = {
     parameter: "Parameter",
+    modal_title: "Setting status",
     title: "Title",
     description: "Description",
     description_placeholder: "Enter help text for your users.",

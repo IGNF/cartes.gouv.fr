@@ -13,7 +13,9 @@ const { i18n } = declareComponentKeys<
     | "no_rights"
     | "forbidden_access"
     | "updating"
+    | "updating_success"
     | "updating_failed"
+    | "create_now"
     | "tab1"
     | "tab2"
     | "tab3"
@@ -112,13 +114,15 @@ export type I18n = typeof i18n;
 export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"] = {
     title: ({ name }) => (name === undefined ? "Gérer le guichet" : `Gérer le guichet - ${name}`),
     loading: "Recherche du guichet en cours ...",
-    me_fetch_failed: "La récupération des informations sur mon compte",
-    community_fetch_failed: "La récupération des informations sur le guichet a échoué",
+    me_fetch_failed: "La récupération des informations sur mon compte a échoué.",
+    community_fetch_failed: "La récupération des informations sur le guichet a échoué.",
     back_to_list: "Retour à la liste des guichets",
-    no_rights: "Vous n'avez pas les droits de modifier un guichet. Il faut être admin ou gestionnaire",
-    forbidden_access: "Ce guichet est en cours de création, il n'est pas accessible en modification",
+    no_rights: "Vous n'avez pas les droits de modifier un guichet. Il faut être admin ou gestionnaire d'un guichet.",
+    forbidden_access: "Ce guichet est en cours de création, il n'est pas accessible en modification.",
     updating: "Mise à jour du guichet en cours ...",
-    updating_failed: "La mise à jour du guichet a échoué",
+    updating_success: "La mise à jour du guichet s'est bien passée.",
+    updating_failed: "La mise à jour du guichet a échoué.",
+    create_now: "Créer le guichet maintenant",
     tab1: "Description",
     tab2: "Bases de données",
     tab3: "Zoom, centrage",
@@ -266,7 +270,9 @@ export const ManageCommunityEnTranslations: Translations<"en">["ManageCommunity"
     no_rights: undefined,
     forbidden_access: undefined,
     updating: undefined,
+    updating_success: undefined,
     updating_failed: undefined,
+    create_now: undefined,
     tab1: undefined,
     tab2: undefined,
     tab3: undefined,

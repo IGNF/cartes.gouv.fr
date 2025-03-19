@@ -219,7 +219,7 @@ export type ZoomAndCenteringFormType = {
     zoom: number;
     minZoom: number;
     maxZoom: number;
-    extent?: Extent | null;
+    extent: Extent | null;
 };
 
 export type ToolsFormType = {

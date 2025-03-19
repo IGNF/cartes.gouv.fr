@@ -1,47 +1,46 @@
 import Wait from "@/components/Utils/Wait";
+import { useCommunityContext } from "@/espaceco/contexts/CommunityContext";
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import Button from "@codegouvfr/react-dsfr/Button";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useMemo, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
-import { CommunitiesLayers, CommunityFeatureTypeLayer, CommunityFormMode, geometryTypes, RefToolLayer, ToolsFormType } from "../../../../@types/app_espaceco";
-import { arrLayerTools, arrRefLayerTools, CommunityResponseDTO, LayerTools, RefLayerTools } from "../../../../@types/espaceco";
+import { CommunitiesLayers, CommunityFeatureTypeLayer, geometryTypes, RefToolLayer, ToolsFormType } from "../../../../@types/app_espaceco";
+import { arrLayerTools, arrRefLayerTools, LayerTools, RefLayerTools } from "../../../../@types/espaceco";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import { useTranslation } from "../../../../i18n";
 import RQKeys from "../../../../modules/espaceco/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import api from "../../../api";
 import { getToolsDefaultValues } from "../DefaultValues";
-import { COMMUNITY_FORM_STEPS } from "../FormSteps";
-import ActionButtons from "./ActionButtons";
+import ActionButtonsCreation from "./ActionButtonsCreation";
+import ActionButtonsEdition from "./ActionButtonsEdition";
 import ContributionTools from "./tools/ContributionTools";
 import { allFunctionalities } from "./tools/Functionalities";
 import { getEditableLayers, getRefLayers, prepareLayersForApi } from "./tools/LayerUtils";
 import SimpleLayerTools from "./tools/SimpleLayerTools";
 
-type ToolsProps = {
-    mode: CommunityFormMode;
-    community: CommunityResponseDTO;
-    onPrevious?: () => void;
-    onSubmit: (datas: object, saveOnly: boolean) => void;
-};
-
-const Tools: FC<ToolsProps> = ({ mode, community, onPrevious, onSubmit }) => {
+const Tools: FC = () => {
     const { t: tCommon } = useTranslation("Common");
     const { t: tLayer } = useTranslation("LayerTools");
     const { t } = useTranslation("Functionalities");
+    const { t: tmc } = useTranslation("ManageCommunity");
 
     const [saveOnly, setSaveOnly] = useState<boolean>(true);
+
+    const context = useCommunityContext();
+
+    const { mode, updateCommunity, isLastStep, nextStep, isCommunityUpdating, isCommunityUpdatingError, updatingCommunityError } = context;
+    const community = context.community!;
 
     const queryClient = useQueryClient();
 
     const {
-        isPending: isUpdatePending,
-        isError: isUpdateError,
-        error: updateError,
+        isPending: isUpdatingLayers,
+        isError: isUpdatingLayersError,
+        error: updatingLayersError,
         mutate,
     } = useMutation<
         Record<string, CommunityFeatureTypeLayer[]>,
@@ -55,7 +54,11 @@ const Tools: FC<ToolsProps> = ({ mode, community, onPrevious, onSubmit }) => {
             queryClient.setQueryData<Record<string, CommunityFeatureTypeLayer[]>>(RQKeys.communityLayers(community.id), (oldLayers) => {
                 return response ? response : { ...oldLayers };
             });
-            onSubmit({ functionalities: getFormValues("functionalities") }, saveOnly);
+            updateCommunity({ functionalities: getFormValues("functionalities") }, () => {
+                if (mode === "creation" && !saveOnly && !isLastStep()) {
+                    nextStep();
+                }
+            });
         },
     });
 
@@ -64,7 +67,6 @@ const Tools: FC<ToolsProps> = ({ mode, community, onPrevious, onSubmit }) => {
         isError,
         error,
         isLoading,
-        //isFetching,
     } = useQuery<Record<string, CommunityFeatureTypeLayer[]>, CartesApiException>({
         queryKey: RQKeys.communityLayers(community.id),
         queryFn: ({ signal }) => api.communityLayers.getFeatureTypes(community.id, signal),
@@ -152,18 +154,26 @@ const Tools: FC<ToolsProps> = ({ mode, community, onPrevious, onSubmit }) => {
 
     return (
         <div>
-            {isError ? (
-                <Alert severity="error" closable title={error.message} />
-            ) : isUpdateError ? (
-                <Alert severity="error" closable title={updateError.message} />
-            ) : isUpdatePending ? (
+            {isLoading && <LoadingText as={"h6"} message={tLayer("loading_layers")} />}
+            {isError && <Alert severity="error" closable title={error.message} />}
+            {isCommunityUpdating && (
+                <Wait>
+                    <div className={fr.cx("fr-grid-row")}>
+                        <LoadingText as="h6" message={tmc("updating")} withSpinnerIcon={true} />
+                    </div>
+                </Wait>
+            )}
+            {isCommunityUpdatingError && (
+                <Alert className={fr.cx("fr-my-2v")} severity="error" closable title={tCommon("error")} description={updatingCommunityError?.message} />
+            )}
+            {isUpdatingLayersError ? (
+                <Alert severity="error" closable title={updatingLayersError.message} />
+            ) : isUpdatingLayers ? (
                 <Wait>
                     <div className={fr.cx("fr-grid-row")}>
                         <LoadingText as="h6" message={tLayer("updating_layers")} withSpinnerIcon={true} />
                     </div>
                 </Wait>
-            ) : isLoading ? (
-                <LoadingText as={"h6"} message={tLayer("loading_layers")} />
             ) : (
                 <FormProvider {...methods}>
                     <div>
@@ -179,19 +189,13 @@ const Tools: FC<ToolsProps> = ({ mode, community, onPrevious, onSubmit }) => {
                                 <ContributionTools editableLayers={editableLayers} refLayers={refLayers} />
                             </>
                         )}
-                        {mode === "edition" ? (
-                            <div className="fr-grid-row fr-grid-row--right">
-                                <Button priority={"primary"} onClick={() => handleSubmit(() => onSubmitForm(true))()}>
-                                    {tCommon("save")}
-                                </Button>
-                            </div>
-                        ) : (
-                            <ActionButtons
-                                step={COMMUNITY_FORM_STEPS.TOOLS}
-                                onPrevious={onPrevious}
+                        {mode === "creation" ? (
+                            <ActionButtonsCreation
                                 onSave={() => handleSubmit(() => onSubmitForm(true))()}
                                 onContinue={() => handleSubmit(() => onSubmitForm(false))()}
                             />
+                        ) : (
+                            <ActionButtonsEdition onSave={() => handleSubmit(() => onSubmitForm(true))()} />
                         )}
                     </div>
                 </FormProvider>

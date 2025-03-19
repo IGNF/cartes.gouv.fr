@@ -57,7 +57,7 @@ const EditReportStatusDialog: FC<EditReportStatusDialogProps> = ({ status, statu
 
     return createPortal(
         <EditReportParameterModal.Component
-            title={null}
+            title={t("modal_title")}
             buttons={[
                 {
                     children: tCommon("cancel"),

@@ -1,43 +1,56 @@
+import { useCommunityContext } from "@/espaceco/contexts/CommunityContext";
+import { fr } from "@codegouvfr/react-dsfr";
+import Button from "@codegouvfr/react-dsfr/Button";
 import { FC } from "react";
 import { useForm } from "react-hook-form";
-import { GridDTO } from "../../../../@types/espaceco";
 import { useTranslation } from "../../../../i18n/i18n";
 import GridList from "./GridList";
-import Button from "@codegouvfr/react-dsfr/Button";
-import { fr } from "@codegouvfr/react-dsfr";
-
-type GridProps = {
-    grids: GridDTO[];
-    onSubmit: (datas: object, saveOnly: boolean) => void;
-};
+import Wait from "@/components/Utils/Wait";
+import LoadingText from "@/components/Utils/LoadingText";
+import Alert from "@codegouvfr/react-dsfr/Alert";
 
 type GridForm = {
     grids: string[];
 };
 
-const Grid: FC<GridProps> = ({ grids, onSubmit }) => {
+const Grid: FC = () => {
     const { t: tCommon } = useTranslation("Common");
-    const { t } = useTranslation("ManageCommunity");
+    const { t: tmc } = useTranslation("ManageCommunity");
+
+    const context = useCommunityContext();
+
+    const { updateCommunity, isCommunityUpdating, isCommunityUpdatingError, updatingCommunityError } = context;
+    const community = context.community!;
 
     const form = useForm<GridForm>({
         mode: "onSubmit",
         values: {
-            grids: Array.from(grids, (g) => g.name),
+            grids: Array.from(community.grids, (g) => g.name),
         },
     });
     const { setValue: setFormValue, getValues: getFormValues, handleSubmit } = form;
 
     const onSubmitForm = () => {
         const datas = { ...getFormValues() };
-        onSubmit(datas, true);
+        updateCommunity(datas);
     };
 
     return (
         <>
-            <h3>{t("grid.grids")}</h3>
-            {t("grid.explain")}
+            <h3>{tmc("grid.grids")}</h3>
+            {tmc("grid.explain")}
+            {isCommunityUpdating && (
+                <Wait>
+                    <div className={fr.cx("fr-grid-row")}>
+                        <LoadingText as="h6" message={tmc("updating")} withSpinnerIcon={true} />
+                    </div>
+                </Wait>
+            )}
+            {isCommunityUpdatingError && (
+                <Alert className={fr.cx("fr-my-2v")} severity="error" closable title={tCommon("error")} description={updatingCommunityError?.message} />
+            )}
             <GridList
-                grids={grids}
+                grids={community.grids}
                 onChange={(grids) => {
                     setFormValue(
                         "grids",

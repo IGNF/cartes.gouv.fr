@@ -5,6 +5,7 @@ import AppLayout from "@/components/Layout/AppLayout";
 import { datastoreNavItems } from "@/config/navItems/datastoreNavItems";
 import PageNotFoundWithLayout from "@/pages/error/PageNotFoundWithLayout";
 import { groups } from "./router";
+import { CommunityProvider } from "@/espaceco/contexts/CommunityContext";
 
 const EspaceCoCommunityList = lazy(() => import("../espaceco/pages/communities/Communities"));
 const EspaceCoCreateCommunity = lazy(() => import("../espaceco/pages/communities/CreateCommunity"));
@@ -25,9 +26,21 @@ function GroupEspaceCo(props: IGroupEspaceCoProps) {
             case "espaceco_community_list":
                 return { render: <EspaceCoCommunityList /> };
             case "espaceco_create_community":
-                return { render: <EspaceCoCreateCommunity communityId={route.params.communityId} /> };
+                return {
+                    render: (
+                        <CommunityProvider communityId={route.params.communityId} mode={"creation"}>
+                            <EspaceCoCreateCommunity />;
+                        </CommunityProvider>
+                    ),
+                };
             case "espaceco_manage_community":
-                return { render: <EspaceCoManageCommunity communityId={route.params.communityId} /> };
+                return {
+                    render: (
+                        <CommunityProvider communityId={route.params.communityId} mode={"edition"}>
+                            <EspaceCoManageCommunity />;
+                        </CommunityProvider>
+                    ),
+                };
             case "espaceco_member_invitation":
                 return { render: <MemberInvitation communityId={route.params.communityId} /> };
         }

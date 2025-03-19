@@ -2,8 +2,8 @@ import { Extent } from "ol/extent";
 import MapEvent from "ol/MapEvent";
 import { transformExtent } from "ol/proj";
 
-const drawExtent = (e: MapEvent, extent?: Extent | null) => {
-    if (!extent) {
+const drawExtent = (e: MapEvent, extent: Extent) => {
+    if (!extent.length) {
         return;
     }
 

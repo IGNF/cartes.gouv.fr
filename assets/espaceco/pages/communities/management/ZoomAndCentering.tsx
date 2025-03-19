@@ -1,31 +1,31 @@
+import LoadingText from "@/components/Utils/LoadingText";
+import Wait from "@/components/Utils/Wait";
+import { useCommunityContext } from "@/espaceco/contexts/CommunityContext";
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { containsCoordinate } from "ol/extent";
 import { FC, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { CommunityFormMode, ZoomAndCenteringFormType } from "../../../../@types/app_espaceco";
-import { CommunityResponseDTO } from "../../../../@types/espaceco";
+import { ZoomAndCenteringFormType } from "../../../../@types/app_espaceco";
 import ZoomRange from "../../../../components/Utils/ZoomRange";
 import { useTranslation } from "../../../../i18n/i18n";
 import { getZoomAndCenteringDefaultValues } from "../DefaultValues";
-import { COMMUNITY_FORM_STEPS } from "../FormSteps";
-import ActionButtons from "./ActionButtons";
+import ActionButtonsCreation from "./ActionButtonsCreation";
+import ActionButtonsEdition from "./ActionButtonsEdition";
 import DisplayExtent from "./ZoomAndCentering/DisplayExtent";
 import { ExtentDialog, ExtentDialogModal } from "./ZoomAndCentering/ExtentDialog";
 import RMap from "./ZoomAndCentering/RMap";
 import Search from "./ZoomAndCentering/Search";
 
-type ZoomAndCenteringProps = {
-    mode: CommunityFormMode;
-    community: CommunityResponseDTO;
-    onPrevious?: () => void;
-    onSubmit: (datas: object, saveOnly: boolean) => void;
-};
-
-const ZoomAndCentering: FC<ZoomAndCenteringProps> = ({ mode, community, onPrevious, onSubmit }) => {
+const ZoomAndCentering: FC = () => {
     const { t: tCommon } = useTranslation("Common");
-    const { t } = useTranslation("ManageCommunity");
+    const { t: tmc } = useTranslation("ManageCommunity");
+
+    const context = useCommunityContext();
+
+    const { mode, isLastStep, nextStep, updateCommunity, isCommunityUpdating, isCommunityUpdatingError, updatingCommunityError } = context;
+    const community = context.community!;
 
     // Cohérence entre l'extent et la position
     const [consistent, setConsistent] = useState<boolean>(true);
@@ -40,7 +40,7 @@ const ZoomAndCentering: FC<ZoomAndCenteringProps> = ({ mode, community, onPrevio
     const extent = watch("extent");
 
     useEffect(() => {
-        if (position && extent) {
+        if (position.length && extent?.length) {
             setConsistent(containsCoordinate(extent, position));
         }
         return;
@@ -54,22 +54,38 @@ const ZoomAndCentering: FC<ZoomAndCenteringProps> = ({ mode, community, onPrevio
             minZoom: values.minZoom,
             maxZoom: values.maxZoom,
             position: `POINT(${position[0]} ${position[1]})`,
-            extent: values.extent,
         };
-        onSubmit(datas, saveOnly);
+
+        datas["extent"] = values.extent && values.extent.length ? values.extent : null;
+
+        updateCommunity(datas, () => {
+            if (mode === "creation" && !saveOnly && !isLastStep()) {
+                nextStep();
+            }
+        });
     };
 
     return (
         <div>
-            {consistent === false && (
-                <Alert severity="warning" title={tCommon("warning")} description={t("zoom.consistant_error")} className={fr.cx("fr-my-2w")} />
+            {isCommunityUpdating && (
+                <Wait>
+                    <div className={fr.cx("fr-grid-row")}>
+                        <LoadingText as="h6" message={tmc("updating")} withSpinnerIcon={true} />
+                    </div>
+                </Wait>
             )}
-            <h2>{t("zoom.tab.title")}</h2>
+            {isCommunityUpdatingError && (
+                <Alert className={fr.cx("fr-my-2v")} severity="error" closable title={tCommon("error")} description={updatingCommunityError?.message} />
+            )}
+            {consistent === false && (
+                <Alert severity="warning" title={tCommon("warning")} description={tmc("zoom.consistant_error")} className={fr.cx("fr-my-2w")} />
+            )}
+            <h2>{tmc("zoom.tab.title")}</h2>
             <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
                 <div className={fr.cx("fr-col-5")}>
                     <Search
-                        label={t("zoom.position")}
-                        hintText={t("zoom.position_hint")}
+                        label={tmc("zoom.position")}
+                        hintText={tmc("zoom.position_hint")}
                         filter={{
                             type: "StreetAddress",
                             maximumResponses: 10,
@@ -81,8 +97,8 @@ const ZoomAndCentering: FC<ZoomAndCenteringProps> = ({ mode, community, onPrevio
                         }}
                     />
                     <ZoomRange
-                        label={t("zoom.zoom_range")}
-                        hintText={t("zoom.zoom_range_hint")}
+                        label={tmc("zoom.zoom_range")}
+                        hintText={tmc("zoom.zoom_range_hint")}
                         small={true}
                         min={0}
                         max={20}
@@ -102,7 +118,7 @@ const ZoomAndCentering: FC<ZoomAndCenteringProps> = ({ mode, community, onPrevio
                                 ExtentDialogModal.open();
                             }}
                         >
-                            {t("zoom.manage_extent")}
+                            {tmc("zoom.manage_extent")}
                         </Button>
                     </div>
                     {extent && <DisplayExtent extent={extent} onRemove={() => setFormValue("extent", null)} />}
@@ -122,19 +138,10 @@ const ZoomAndCentering: FC<ZoomAndCenteringProps> = ({ mode, community, onPrevio
                     }}
                 />
             </div>
-            {mode === "edition" ? (
-                <div className="fr-grid-row fr-grid-row--right">
-                    <Button priority={"primary"} onClick={() => handleSubmit(() => onSubmitForm(true))()}>
-                        {tCommon("save")}
-                    </Button>
-                </div>
+            {mode === "creation" ? (
+                <ActionButtonsCreation onSave={() => handleSubmit(() => onSubmitForm(true))()} onContinue={() => handleSubmit(() => onSubmitForm(false))()} />
             ) : (
-                <ActionButtons
-                    step={COMMUNITY_FORM_STEPS.ZOOM_AND_CENTERING}
-                    onPrevious={onPrevious}
-                    onSave={() => handleSubmit(() => onSubmitForm(true))()}
-                    onContinue={() => handleSubmit(() => onSubmitForm(false))()}
-                />
+                <ActionButtonsEdition onSave={() => handleSubmit(() => onSubmitForm(true))()} />
             )}
         </div>
     );
