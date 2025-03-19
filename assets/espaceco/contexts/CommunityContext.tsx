@@ -80,7 +80,7 @@ export const CommunityProvider = ({ children, communityId, mode }: { children: R
                 queryClient.setQueryData<CommunityResponseDTO>(RQKeys.community(community.id), () => {
                     return community;
                 });
-                if (onSuccess) onSuccess();
+                onSuccess?.();
             },
         });
     };
