@@ -93,11 +93,15 @@ const CreateCommunity: FC = () => {
                     {isCommunityUpdatingError && (
                         <Alert className={fr.cx("fr-my-2v")} severity="error" closable title={tCommon("error")} description={updatingCommunityError?.message} />
                     )}
-                    {meQuery.isError ? (
+                    {isCommunityLoading ? (
+                        <LoadingText as={"h2"} message={tmc("loading")} />
+                    ) : meQuery.isLoading ? (
+                        <LoadingText as={"h2"} message={tmc("loading_me")} />
+                    ) : meQuery.isError ? (
                         <Alert
                             severity="error"
                             closable={false}
-                            title={t("me_fetch_failed")}
+                            title={tmc("me_fetch_failed")}
                             description={
                                 <>
                                     <p>{meQuery.error.message}</p>
@@ -105,8 +109,6 @@ const CreateCommunity: FC = () => {
                                 </>
                             }
                         />
-                    ) : meQuery.isLoading || isCommunityLoading ? (
-                        <LoadingText as={"h2"} message={t("loading_me")} />
                     ) : hasRights === false ? (
                         <Alert severity="error" closable={false} title={t("no_rights")} />
                     ) : forbidden ? (

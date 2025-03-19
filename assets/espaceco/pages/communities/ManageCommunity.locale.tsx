@@ -7,6 +7,7 @@ export type logoAction = "add" | "modify" | "delete";
 const { i18n } = declareComponentKeys<
     | { K: "title"; P: { name: string | undefined }; R: string }
     | "loading"
+    | "loading_me"
     | "me_fetch_failed"
     | "community_fetch_failed"
     | "back_to_list"
@@ -113,8 +114,9 @@ export type I18n = typeof i18n;
 
 export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"] = {
     title: ({ name }) => (name === undefined ? "Gérer le guichet" : `Gérer le guichet - ${name}`),
-    loading: "Recherche du guichet en cours ...",
-    me_fetch_failed: "La récupération des informations sur mon compte a échoué.",
+    loading: "Chargement du guichet en cours ...",
+    loading_me: "Récupération des informations de votre compte en cours ...",
+    me_fetch_failed: "La récupération des informations sur votre compte a échoué.",
     community_fetch_failed: "La récupération des informations sur le guichet a échoué.",
     back_to_list: "Retour à la liste des guichets",
     no_rights: "Vous n'avez pas les droits de modifier un guichet. Il faut être admin ou gestionnaire d'un guichet.",
@@ -264,6 +266,7 @@ export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"
 export const ManageCommunityEnTranslations: Translations<"en">["ManageCommunity"] = {
     title: ({ name }) => (name === undefined ? "Manage front office" : `Manage front office - ${name}`),
     loading: undefined,
+    loading_me: undefined,
     me_fetch_failed: undefined,
     community_fetch_failed: undefined,
     back_to_list: undefined,

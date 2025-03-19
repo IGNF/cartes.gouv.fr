@@ -99,8 +99,10 @@ const ManageCommunity: FC = () => {
                         </>
                     }
                 />
-            ) : isCommunityLoading || isLoading ? (
-                <LoadingText message={t("loading")} />
+            ) : isCommunityLoading ? (
+                <LoadingText as={"h2"} message={t("loading")} />
+            ) : isLoading ? (
+                <LoadingText message={t("loading_me")} />
             ) : hasRights === false ? (
                 <Alert severity="error" closable={false} title={t("no_rights")} />
             ) : forbidden ? (

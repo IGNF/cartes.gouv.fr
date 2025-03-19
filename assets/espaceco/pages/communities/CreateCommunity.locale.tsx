@@ -4,14 +4,7 @@ import { COMMUNITY_FORM_STEPS } from "./FormSteps";
 
 // traductions
 const { i18n } = declareComponentKeys<
-    | "no_rights"
-    | "forbidden_access"
-    | "back_to_list"
-    | "previous_step"
-    | "title"
-    | { K: "step_title"; P: { step: COMMUNITY_FORM_STEPS }; R: string }
-    | "loading_me"
-    | "me_fetch_failed"
+    "no_rights" | "forbidden_access" | "back_to_list" | "previous_step" | "title" | { K: "step_title"; P: { step: COMMUNITY_FORM_STEPS }; R: string }
 >()("CreateCommunity");
 export type I18n = typeof i18n;
 
@@ -41,8 +34,6 @@ export const CreateCommunityFrTranslations: Translations<"fr">["CreateCommunity"
                 return "";
         }
     },
-    me_fetch_failed: "La récupération des informations sur mon compte",
-    loading_me: "Recherche des informations de votre compte",
 };
 
 export const CreateCommunityEnTranslations: Translations<"en">["CreateCommunity"] = {
@@ -52,6 +43,4 @@ export const CreateCommunityEnTranslations: Translations<"en">["CreateCommunity"
     previous_step: "Previous step",
     title: "Create community",
     step_title: ({ step }) => `step ${step}`,
-    loading_me: "Fetching informations ...",
-    me_fetch_failed: undefined,
 };
