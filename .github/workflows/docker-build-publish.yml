@@ -4,7 +4,7 @@ on:
     push:
         branches: ["*"]
         # Publish semver tags as releases.
-        tags: ["v*.*.*"]
+        tags: ["v*"]
     pull_request:
         branches: ["*"]
 
@@ -37,6 +37,11 @@ jobs:
               uses: docker/metadata-action@v5
               with:
                   images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+                  tags: |
+                      type=ref,event=branch
+                      type=ref,event=pr
+                      type=semver,pattern={{version}}
+                      type=semver,pattern={{major}}.{{minor}}
 
             # https://github.com/docker/build-push-action
             - name: Build Docker image
@@ -96,6 +101,11 @@ jobs:
               uses: docker/metadata-action@v5
               with:
                   images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+                  tags: |
+                      type=ref,event=branch
+                      type=ref,event=pr
+                      type=semver,pattern={{version}}
+                      type=semver,pattern={{major}}.{{minor}}
 
             - name: Build & Push image to github registry and generate SBOM
               uses: docker/build-push-action@v6
