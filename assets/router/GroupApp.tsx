@@ -38,6 +38,8 @@ const CommunityList = lazy(() => import("../entrepot/pages/communities/Community
 
 const DashboardPro = lazy(() => import("../entrepot/pages/dashboard/DashboardPro"));
 
+const MetadataGenerator = lazy(() => import("@/pages/MetadataGenerator"));
+
 interface IGroupAppProps {
     route: Route<typeof routes>;
 }
@@ -116,6 +118,10 @@ function GroupApp(props: IGroupAppProps) {
                         navItems: baseDatastoreNavItems,
                     },
                     render: <DashboardPro />,
+                };
+            case "metadata_generator":
+                return {
+                    render: <MetadataGenerator />,
                 };
         }
     }, [route]);
