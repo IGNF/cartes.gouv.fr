@@ -30,3 +30,5 @@ root.render(
         <App />
     </React.StrictMode>
 );
+
+console.info("Version:", __GIT_TAG__);

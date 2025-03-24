@@ -23,9 +23,9 @@ ARG project_dir
 RUN mkdir -p ${project_dir}
 WORKDIR ${project_dir}
 
-COPY --from=deps_php ${project_dir} .
+RUN apk add --no-cache git
 
-COPY --from=deps_php /usr/local/bin/php /usr/local/bin/php
+COPY --from=deps_php ${project_dir} .
 RUN yarn install --production --frozen-lockfile \
     && yarn build \
     && yarn cache clean
@@ -170,6 +170,7 @@ RUN apt-get -qq update && apt-get -qq install -y \
     php-pear \
     php-xml \
     zlib1g-dev \
+    git \
     && apt-get -qq clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 COPY .docker/php-xdebug.ini /etc/php/${php_version}/apache2/conf.d/20-xdebug.ini
