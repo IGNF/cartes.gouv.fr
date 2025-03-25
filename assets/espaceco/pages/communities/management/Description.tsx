@@ -176,7 +176,7 @@ const Description: FC<DescriptionProps> = ({ isAdmin }) => {
 
             fields.forEach((f) => {
                 if (f in values) {
-                    // setFormValue(f as keyof DescriptionFormType, values[f], { shouldValidate: false, shouldDirty: false });
+                    // TODO Ne fonctionne pas => re rendu du composant entier !!!!
                     setFormValue(f as keyof DescriptionFormType, values[f]);
                 }
             });
