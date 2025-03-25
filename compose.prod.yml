@@ -1,5 +1,6 @@
 networks:
-    cartesgouvfr_network:
+    web_dev:
+        external: true
 
 services:
     app:
@@ -23,7 +24,7 @@ services:
         ports:
             - "9090:8000"
         networks:
-            - cartesgouvfr_network
+            - web_dev
         restart: unless-stopped
         labels:
             - "traefik.enable=true"
