@@ -34,7 +34,7 @@ class CommunityDocumentApiService extends BaseEspaceCoApiService
      */
     public function getDocument(int $communityId, int $documentId, array $fields = []): array
     {
-        return $this->request('GET', "communities/$communityId/documents/$communityId", ['fields' => $fields]);
+        return $this->request('GET', "communities/$communityId/documents/$documentId", ['fields' => $fields]);
     }
 
     public function addDocument(int $communityId, string $title, ?string $description, string $tempFilePath): array
