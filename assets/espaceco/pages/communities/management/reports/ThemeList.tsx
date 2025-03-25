@@ -4,13 +4,13 @@ import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { CSSProperties, FC, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { ReportFormType } from "../../../../../@types/app_espaceco";
-import { AttributeAutofillDTO, TableResponseDTO, ThemeDTO } from "../../../../../@types/espaceco";
+import { AttributeAutofillDTO, ThemeDTO } from "../../../../../@types/espaceco";
 import { useTranslation } from "../../../../../i18n/i18n";
 import { AddThemeDialog, AddThemeDialogModal } from "./AddThemeDialog";
 import AttributeList from "./AttributeList";
+import { AutofillDialog, AutofillDialogModal } from "./AutofillDialog";
 import { EditThemeDialog, EditThemeDialogModal } from "./EditThemeDialog";
 import ThemesHelper from "./ThemesHelper";
-import { AutofillDialog, AutofillDialogModal } from "./AutofillDialog";
 
 const customStyle: CSSProperties = {
     border: "solid 1.5px",
@@ -23,7 +23,7 @@ const themeStyle: CSSProperties = {
 
 type ThemeListProps = {
     form: UseFormReturn<ReportFormType>;
-    tables: Partial<TableResponseDTO>[];
+    tables: string[];
     state?: "default" | "error" | "success";
     stateRelatedMessage?: string;
 };

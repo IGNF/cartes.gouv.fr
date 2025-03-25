@@ -59,7 +59,7 @@ const SearchUsers: FC<SearchUsersProps> = ({ label, hintText, value, state, stat
                     noOptionsText={t("no_results")}
                     getOptionLabel={(option) => (typeof option === "string" ? option : option.username)}
                     options={searchQuery.data?.filter((u) => !usernames?.includes(u.username)) ?? []}
-                    renderInput={(params) => <TextField {...params} />}
+                    renderInput={(params) => <TextField {...params} variant={"filled"} size={"small"} />}
                     isOptionEqualToValue={(option, v) => {
                         if (isUser(option) && isUser(v)) return option.username === v.username;
                         if (typeof option !== typeof v) return false;

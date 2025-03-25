@@ -3,9 +3,9 @@ import { Route } from "type-route";
 
 import AppLayout from "@/components/Layout/AppLayout";
 import { datastoreNavItems } from "@/config/navItems/datastoreNavItems";
+import { CommunityProvider } from "@/espaceco/contexts/CommunityContext";
 import PageNotFoundWithLayout from "@/pages/error/PageNotFoundWithLayout";
 import { groups } from "./router";
-import { CommunityProvider } from "@/espaceco/contexts/CommunityContext";
 
 const EspaceCoCommunityList = lazy(() => import("../espaceco/pages/communities/Communities"));
 const EspaceCoCreateCommunity = lazy(() => import("../espaceco/pages/communities/CreateCommunity"));

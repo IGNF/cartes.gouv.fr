@@ -74,7 +74,7 @@ const SearchGrids: FC<SearchGridsProps> = ({ label, hintText, disableClearable, 
                     getOptionLabel={(option) => `${option.name} : ${option.title}`}
                     options={searchQuery.data?.content ?? []}
                     filterOptions={(x) => x}
-                    renderInput={(params) => <TextField {...params} />}
+                    renderInput={(params) => <TextField {...params} variant={"filled"} size={"small"} />}
                     isOptionEqualToValue={(option, v) => option.name === v.name}
                     onInputChange={(_, v) => {
                         setSearch(v);

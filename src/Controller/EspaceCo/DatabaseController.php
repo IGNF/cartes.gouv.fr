@@ -6,8 +6,6 @@ use App\Controller\ApiControllerInterface;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\EspaceCoApi\DatabaseApiService;
-use App\Services\EspaceCoApi\PermissionApiService;
-use App\Services\EspaceCoApi\UserApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
@@ -21,9 +19,7 @@ use Symfony\Component\Routing\Attribute\Route;
 class DatabaseController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
-        private UserApiService $userApiService,
         private DatabaseApiService $databaseApiService,
-        private PermissionApiService $permissionApiService,
     ) {
     }
 
@@ -31,33 +27,11 @@ class DatabaseController extends AbstractController implements ApiControllerInte
     public function getAll(): JsonResponse
     {
         try {
-            $databaseIds = [];
-
-            $me = $this->userApiService->getMe();
-            if (true === $me['administrator']) {
-                $dbs = $this->databaseApiService->getAll(['id']);
-                foreach ($dbs as $database) {
-                    $databaseIds[] = $database['id'];
-                }
-            } else {
-                $memberAsAdmin = array_values(array_filter($me['communities_member'], function ($member) {
-                    return 'admin' == $member['role'];
-                }));
-                foreach ($memberAsAdmin as $member) {
-                    $dbIds = [];
-                    $permissions = $this->permissionApiService->getAllByCommunity($member['community_id'], 'ADMIN');
-                    foreach ($permissions as $permission) {
-                        $dbIds[] = $permission['database'];
-                    }
-                    $databaseIds = array_merge($databaseIds, $dbIds);
-                }
-            }
-
-            $unique = array_unique($databaseIds);
+            $dbs = $this->databaseApiService->getAll(['id']);
 
             $databases = [];
-            foreach ($unique as $id) {
-                $database = $this->databaseApiService->getDatabase($id, ['id', 'name', 'title']);
+            foreach ($dbs as $db) {
+                $database = $this->databaseApiService->getDatabase($db['id'], ['id', 'name', 'title']);
                 $tables = $this->databaseApiService->getAllTables($database['id'], ['id', 'name', 'title', 'geometry_name']);
                 foreach ($tables as &$table) {
                     $t = $this->databaseApiService->getTable($database['id'], $table['id'], ['id', 'name', 'title', 'columns']);

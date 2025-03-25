@@ -1,58 +1,49 @@
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import { useQuery } from "@tanstack/react-query";
 import { FC, useMemo } from "react";
 
 import Main from "@/components/Layout/Main";
+import Wait from "@/components/Utils/Wait";
 import { useCommunityContext } from "@/espaceco/contexts/CommunityContext";
+import useUserMe from "@/espaceco/hooks/useUserMe";
+import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
-import { UserMe } from "../../../@types/app_espaceco";
 import LoadingText from "../../../components/Utils/LoadingText";
 import { useTranslation } from "../../../i18n/i18n";
-import RQKeys from "../../../modules/espaceco/RQKeys";
-import { CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
-import api from "../../api";
 import { COMMUNITY_FORM_STEPS } from "./FormSteps";
+import Databases from "./management/Databases";
 import Description from "./management/Description";
 import Reports from "./management/Reports";
 import Tools from "./management/Tools";
 import ZoomAndCentering from "./management/ZoomAndCentering";
-import Wait from "@/components/Utils/Wait";
-import { fr } from "@codegouvfr/react-dsfr";
 
 const CreateCommunity: FC = () => {
+    const { data: me, isLoading: isMeLoading, isError: isMeError, error: meError } = useUserMe();
+
     const { t: tCommon } = useTranslation("Common");
     const { t: tBreadcrumb } = useTranslation("Breadcrumb");
     const { t: tmc } = useTranslation("ManageCommunity");
     const { t } = useTranslation("CreateCommunity");
 
-    const { currentStep, maxSteps, isLastStep, community, isCommunityLoading, isCommunityUpdating, isCommunityUpdatingError, updatingCommunityError } =
-        useCommunityContext();
-
-    const meQuery = useQuery<UserMe, CartesApiException>({
-        queryKey: RQKeys.getMe(),
-        queryFn: ({ signal }) => api.user.getMe(signal),
-        staleTime: 3600000,
-    });
+    const context = useCommunityContext();
+    const { currentStep, community, isCommunityLoading, isCommunityUpdating, isCommunityUpdatingError, updatingCommunityError } = context;
+    const stepper = context.stepper!;
 
     const isAdmin = useMemo(() => {
-        return meQuery.data?.administrator === true;
-    }, [meQuery.data]);
+        return me?.administrator === true;
+    }, [me]);
 
-    // Les droits pour pouvoir modifier un guichet
+    // Les droits pour pouvoir créer un guichet
     const hasRights = useMemo(() => {
-        if (meQuery.data) {
-            if (meQuery.data.administrator) {
-                return true;
-            }
-            const f = meQuery.data.communities_member.filter((cm) => cm.role === "admin");
-            return f.length > 0;
+        if (me?.administrator) {
+            return true;
         }
-        return false;
-    }, [meQuery.data]);
+        const f = me?.communities_member.filter((cm) => cm.role === "admin") || [];
+        return f.length > 0;
+    }, [me]);
 
-    // S'il est active === true, il peut être modifier mais ne peut pas être en cours de creation
+    // S'il est active === true, il peut être modifié mais ne peut pas être en cours de creation
     const forbidden = useMemo(() => {
         if (community) {
             return community.active === true;
@@ -79,9 +70,9 @@ const CreateCommunity: FC = () => {
                     <h1>{t("title")}</h1>
                     <Stepper
                         currentStep={currentStep}
-                        stepCount={maxSteps}
+                        stepCount={stepper.maxSteps}
                         title={t("step_title", { step: currentStep })}
-                        nextTitle={!isLastStep() ? t("step_title", { step: currentStep + 1 }) : ""}
+                        nextTitle={!stepper.isLastStep() ? t("step_title", { step: currentStep + 1 }) : ""}
                     />
                     {isCommunityUpdating && (
                         <Wait>
@@ -93,22 +84,22 @@ const CreateCommunity: FC = () => {
                     {isCommunityUpdatingError && (
                         <Alert className={fr.cx("fr-my-2v")} severity="error" closable title={tCommon("error")} description={updatingCommunityError?.message} />
                     )}
-                    {isCommunityLoading ? (
-                        <LoadingText as={"h2"} message={tmc("loading")} />
-                    ) : meQuery.isLoading ? (
-                        <LoadingText as={"h2"} message={tmc("loading_me")} />
-                    ) : meQuery.isError ? (
+                    {isMeLoading ? (
+                        <LoadingText as={"h6"} message={tmc("loading_me")} />
+                    ) : isMeError ? (
                         <Alert
                             severity="error"
                             closable={false}
                             title={tmc("me_fetch_failed")}
                             description={
                                 <>
-                                    <p>{meQuery.error.message}</p>
+                                    <p>{meError.message}</p>
                                     <Button linkProps={routes.espaceco_community_list().link}>{t("back_to_list")}</Button>
                                 </>
                             }
                         />
+                    ) : isCommunityLoading ? (
+                        <LoadingText as={"h6"} message={tmc("loading")} />
                     ) : hasRights === false ? (
                         <Alert severity="error" closable={false} title={t("no_rights")} />
                     ) : forbidden ? (
@@ -118,9 +109,9 @@ const CreateCommunity: FC = () => {
                             <div>
                                 {currentStep === COMMUNITY_FORM_STEPS.DESCRIPTION ? (
                                     <Description isAdmin={isAdmin} />
-                                ) : /* currentStep === COMMUNITY_FORM_STEPS.DATABASE ? (
-                                    <Databases mode={mode} community={community} />
-                                ) :*/ currentStep === COMMUNITY_FORM_STEPS.ZOOM_AND_CENTERING ? (
+                                ) : currentStep === COMMUNITY_FORM_STEPS.DATABASE ? (
+                                    <Databases />
+                                ) : currentStep === COMMUNITY_FORM_STEPS.ZOOM_AND_CENTERING ? (
                                     <ZoomAndCentering />
                                 ) : currentStep === COMMUNITY_FORM_STEPS.TOOLS ? (
                                     <Tools />

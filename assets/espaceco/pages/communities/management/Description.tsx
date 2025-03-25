@@ -1,44 +1,45 @@
+import Wait from "@/components/Utils/Wait";
+import { useCommunityContext } from "@/espaceco/contexts/CommunityContext";
 import { fr } from "@codegouvfr/react-dsfr";
+import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import Table from "@codegouvfr/react-dsfr/Table";
 import ToggleSwitch from "@codegouvfr/react-dsfr/ToggleSwitch";
+import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
-import { FC, memo, useEffect, useMemo, useState, type ReactNode } from "react";
+import { FC, memo, useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Controller, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { DescriptionFormType, MembershipRequestValues } from "../../../../@types/app_espaceco";
-import { DocumentDTO } from "../../../../@types/espaceco";
+import { CommunityResponseDTO, DocumentDTO } from "../../../../@types/espaceco";
 import AutocompleteSelect from "../../../../components/Input/AutocompleteSelect";
+import HtmlEditor from "../../../../components/Input/HtmlEditor";
+import LoadingText from "../../../../components/Utils/LoadingText";
 import categories from "../../../../data/topic_categories.json";
 import { useTranslation } from "../../../../i18n/i18n";
+import { ComponentKey } from "../../../../i18n/types";
 import RQKeys from "../../../../modules/espaceco/RQKeys";
 import { type CartesApiException } from "../../../../modules/jsonFetch";
 import "../../../../sass/pages/espaceco/community.scss";
+import { setToNull } from "../../../../utils";
 import api from "../../../api";
 import { getDescriptionDefaultValues } from "../DefaultValues";
-import DocumentList from "./description/DocumentList";
-import { OpenWithEmailsConfigDialog, OpenWithEmailsConfigDialogModal } from "./description/OpenWithEmailsConfigDialog";
-
-import Wait from "@/components/Utils/Wait";
-import { useCommunityContext } from "@/espaceco/contexts/CommunityContext";
-import Alert from "@codegouvfr/react-dsfr/Alert";
-import { cx } from "@codegouvfr/react-dsfr/tools/cx";
-import HtmlEditor from "../../../../components/Input/HtmlEditor";
-import LoadingText from "../../../../components/Utils/LoadingText";
-import { ComponentKey } from "../../../../i18n/types";
-import "../../../../sass/pages/espaceco/community.scss";
-import { setToNull } from "../../../../utils";
+import ReuseCommunityConfig from "../ReuseCommunityConfig";
 import ActionButtonsCreation from "./ActionButtonsCreation";
 import ActionButtonsEdition from "./ActionButtonsEdition";
-import CommunityLogo from "./CommunityLogo";
+import CommunityLogo from "./description/CommunityLogo";
+import DocumentList from "./description/DocumentList";
+import { OpenWithEmailsConfigDialog, OpenWithEmailsConfigDialogModal } from "./description/OpenWithEmailsConfigDialog";
 
 type DescriptionProps = {
     isAdmin: boolean;
 };
+
+const fieldsToCopy = ["description", "editorial", "keywords"];
 
 const Description: FC<DescriptionProps> = ({ isAdmin }) => {
     const { t: tCommon } = useTranslation("Common");
@@ -47,8 +48,10 @@ const Description: FC<DescriptionProps> = ({ isAdmin }) => {
 
     const context = useCommunityContext();
 
-    const { mode, isLastStep, nextStep, updateCommunity, isCommunityUpdating, isCommunityUpdatingError, updatingCommunityError } = context;
+    const { mode, stepper, updateCommunity, isCommunityUpdating, isCommunityUpdatingError, updatingCommunityError } = context;
     const community = context.community!;
+
+    const queryClient = useQueryClient();
 
     const communityNamesQuery = useQuery<string[], CartesApiException>({
         queryKey: RQKeys.communitiesName(),
@@ -139,7 +142,7 @@ const Description: FC<DescriptionProps> = ({ isAdmin }) => {
         });
     };
 
-    const defaultValues = getDescriptionDefaultValues(community);
+    const defaultValues = useMemo(() => getDescriptionDefaultValues(community), [community]);
 
     const form = useForm<DescriptionFormType>({
         resolver: yupResolver(schema(tValid)),
@@ -159,6 +162,27 @@ const Description: FC<DescriptionProps> = ({ isAdmin }) => {
 
     const membership = watch("membershipRequest");
     const openWithEmail = watch("openWithEmail");
+
+    const copyFromCommunity = useCallback(
+        async (communityId: number) => {
+            const data = await queryClient.fetchQuery<CommunityResponseDTO, CartesApiException>({
+                queryKey: RQKeys.community(communityId),
+                queryFn: () => api.community.getCommunity(communityId),
+                staleTime: 36000000,
+            });
+
+            const fields = isAdmin ? [...fieldsToCopy, ...["membershipRequest", "openWithEmail"]] : [...fieldsToCopy];
+            const values = getDescriptionDefaultValues(data);
+
+            fields.forEach((f) => {
+                if (f in values) {
+                    // setFormValue(f as keyof DescriptionFormType, values[f], { shouldValidate: false, shouldDirty: false });
+                    setFormValue(f as keyof DescriptionFormType, values[f]);
+                }
+            });
+        },
+        [queryClient, isAdmin, setFormValue]
+    );
 
     const data: ReactNode[][] = useMemo(() => {
         return Array.from(openWithEmail, (owe) => {
@@ -207,8 +231,8 @@ const Description: FC<DescriptionProps> = ({ isAdmin }) => {
         }
 
         updateCommunity(datas, () => {
-            if (mode === "creation" && !saveOnly && !isLastStep()) {
-                nextStep();
+            if (mode === "creation" && !saveOnly && !stepper?.isLastStep()) {
+                stepper?.nextStep();
             }
         });
     };
@@ -231,6 +255,16 @@ const Description: FC<DescriptionProps> = ({ isAdmin }) => {
             {communityNamesQuery.data && communityDocumentsQuery.data && (
                 <div>
                     <h2>{tmc("desc.tab.title")}</h2>
+                    <ReuseCommunityConfig
+                        title={tmc("desc.reuse_label")}
+                        description={tmc("desc.reuse_description")}
+                        confirmation={tmc("desc.reuse_confirmation")}
+                        onCopy={(communityId) => {
+                            if (communityId) {
+                                copyFromCommunity(communityId);
+                            }
+                        }}
+                    />
                     <div>
                         <p>{tCommon("mandatory_fields")}</p>
                         <Input
@@ -258,7 +292,7 @@ const Description: FC<DescriptionProps> = ({ isAdmin }) => {
                                 />
                             )}
                         />
-                        <CommunityLogo community={community} />
+                        <CommunityLogo />
                         <Controller
                             control={control}
                             name="keywords"

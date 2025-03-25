@@ -92,7 +92,7 @@ const AutocompleteSelect = <T,>(props: AutocompleteSelectProps<T>) => {
                     onChange={onChange}
                     filterOptions={createFilterOptions(searchFilter)}
                     options={options}
-                    renderInput={(params) => <TextField {...params} />}
+                    renderInput={(params) => <TextField {...params} variant={"filled"} size={"small"} />}
                     getOptionLabel={getOptionLabel}
                     isOptionEqualToValue={isOptionEqualToValue}
                     disabled={disabled}

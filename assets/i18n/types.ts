@@ -60,6 +60,7 @@ export type ComponentKey =
     | import("../entrepot/pages/service/wms-vector/UploadStyleFile.locale").I18n
     | import("../pages/LoginDisabled/LoginDisabled.locale").I18n
     | import("../espaceco/pages/communities/CommunityList.locale").I18n
+    | import("../espaceco/pages/communities/SearchCommunity.locale").I18n
     | import("../espaceco/pages/communities/CreateCommunityDialog.locale").I18n
     | import("../espaceco/pages/communities/CreateCommunity.locale").I18n
     | import("../espaceco/pages/communities/ManageCommunity.locale").I18n

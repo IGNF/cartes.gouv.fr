@@ -21,7 +21,7 @@ export const DatabasesFrTranslations: Translations<"fr">["Databases"] = {
             case "add":
                 return "Ajouter des bases de données dont vous êtes gestionnaire à partir de votre espace collaboratif";
             case "reuse":
-                return "Ré-utiliser la configuration de bases de données d’un autre guichet dont vous êtes gestionnaire";
+                return "Réutiliser la configuration de bases de données d’un autre guichet dont vous êtes gestionnaire";
             case "import":
                 return "Importer des nouvelles bases de données à votre espace collaboratif";
         }

@@ -24,7 +24,7 @@ const ZoomAndCentering: FC = () => {
 
     const context = useCommunityContext();
 
-    const { mode, isLastStep, nextStep, updateCommunity, isCommunityUpdating, isCommunityUpdatingError, updatingCommunityError } = context;
+    const { mode, stepper, updateCommunity, isCommunityUpdating, isCommunityUpdatingError, updatingCommunityError } = context;
     const community = context.community!;
 
     // Cohérence entre l'extent et la position
@@ -59,8 +59,8 @@ const ZoomAndCentering: FC = () => {
         datas["extent"] = values.extent && values.extent.length ? values.extent : null;
 
         updateCommunity(datas, () => {
-            if (mode === "creation" && !saveOnly && !isLastStep()) {
-                nextStep();
+            if (mode === "creation" && !saveOnly && !stepper?.isLastStep()) {
+                stepper?.nextStep();
             }
         });
     };

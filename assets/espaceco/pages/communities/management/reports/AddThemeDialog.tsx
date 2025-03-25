@@ -8,7 +8,7 @@ import { FC, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
-import { TableResponseDTO, ThemeDTO } from "../../../../../@types/espaceco";
+import { ThemeDTO } from "../../../../../@types/espaceco";
 import { useTranslation } from "../../../../../i18n/i18n";
 import { normalizeTheme } from "./ThemeUtils";
 
@@ -19,7 +19,7 @@ const AddThemeDialogModal = createModal({
 
 type AddThemeDialogProps = {
     themes: ThemeDTO[];
-    tables: Partial<TableResponseDTO>[];
+    tables: string[];
     onAdd: (theme: ThemeDTO) => void;
 };
 
@@ -60,12 +60,12 @@ const AddThemeDialog: FC<AddThemeDialogProps> = ({ themes, tables, onAdd }) => {
 
     const tableOptions = useMemo(() => {
         const a = Array.from(tables, (t) => (
-            <option key={t.id} value={t.full_name}>
-                {t.full_name}
+            <option key={t} value={t}>
+                {t}
             </option>
         ));
         a.unshift(
-            <option key={0} value={""}>
+            <option key={""} value={""}>
                 {t("dialog.add_theme.not_link")}
             </option>
         );

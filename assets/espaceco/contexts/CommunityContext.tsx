@@ -7,15 +7,18 @@ import { createContext, ReactNode, useContext, useState } from "react";
 import api from "../api";
 import { COMMUNITY_FORM_STEPS } from "../pages/communities/FormSteps";
 
-interface ICommunityContext {
-    mode: CommunityFormMode;
-    community?: CommunityResponseDTO;
-    currentStep: COMMUNITY_FORM_STEPS;
-    maxSteps: COMMUNITY_FORM_STEPS;
+interface IStepper {
+    maxSteps: number;
     previousStep: () => void;
     nextStep: () => void;
     isFirstStep: () => boolean;
     isLastStep: () => boolean;
+}
+interface ICommunityContext {
+    mode: CommunityFormMode;
+    community?: CommunityResponseDTO;
+    currentStep: COMMUNITY_FORM_STEPS;
+    stepper: IStepper | null;
     isCommunityLoading: boolean;
     isCommunityError: boolean;
     communityError: CartesApiException | null;
@@ -34,22 +37,28 @@ export const CommunityProvider = ({ children, communityId, mode }: { children: R
     const maxSteps = COMMUNITY_FORM_STEPS.REPORTS;
     const [currentStep, setCurrentStep] = useState<COMMUNITY_FORM_STEPS>(COMMUNITY_FORM_STEPS.DESCRIPTION);
 
-    const previousStep = () => {
-        if (currentStep > COMMUNITY_FORM_STEPS.DESCRIPTION) {
-            setCurrentStep(currentStep - 1);
-        }
-    };
-    const nextStep = () => {
-        if (currentStep < maxSteps) {
-            setCurrentStep(currentStep + 1);
-        }
-    };
-    const isFirstStep = () => {
-        return currentStep === COMMUNITY_FORM_STEPS.DESCRIPTION;
-    };
-    const isLastStep = () => {
-        return currentStep === maxSteps;
-    };
+    const stepper =
+        mode === "edition"
+            ? null
+            : {
+                  maxSteps: COMMUNITY_FORM_STEPS.REPORTS,
+                  previousStep: () => {
+                      if (currentStep > COMMUNITY_FORM_STEPS.DESCRIPTION) {
+                          setCurrentStep(currentStep - 1);
+                      }
+                  },
+                  nextStep: () => {
+                      if (currentStep < maxSteps) {
+                          setCurrentStep(currentStep + 1);
+                      }
+                  },
+                  isFirstStep: () => {
+                      return currentStep === COMMUNITY_FORM_STEPS.DESCRIPTION;
+                  },
+                  isLastStep: () => {
+                      return currentStep === maxSteps;
+                  },
+              };
 
     const {
         data: community,
@@ -90,11 +99,7 @@ export const CommunityProvider = ({ children, communityId, mode }: { children: R
             value={{
                 mode,
                 currentStep,
-                maxSteps,
-                previousStep,
-                nextStep,
-                isFirstStep,
-                isLastStep,
+                stepper,
                 community,
                 isCommunityLoading,
                 isCommunityError,

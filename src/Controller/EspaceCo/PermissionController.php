@@ -41,50 +41,37 @@ class PermissionController extends AbstractController implements ApiControllerIn
     public function getThemableTables(int $communityId): JsonResponse
     {
         try {
-            $tablesToremove = [];   // Les tables a supprimer (celles qui ont une permission NONE ou ADMIN)
-
-            $response = [];
+            $tables = [];
+            $tablesToremove = [];
 
             $permissions = $this->permissionApiService->getAllByCommunity($communityId);
             foreach ($permissions as $permission) {
                 $tableId = $permission['table'];
-                if ('NONE' === $permission['level'] || 'ADMIN' === $permission['level']) {
-                    if (!is_null($tableId)) {
-                        // Table a supprimer
-                        $fullName = $this->databaseApiService->getTableFullName($permission['database'], $tableId);
-                        if (!in_array($fullName, $tablesToremove)) {
-                            $tablesToremove[] = $fullName;
-                        }
-                    }
-                    continue;
-                }
 
-                if (is_null($permission['table'])) {   // Ajout de toutes les tables
-                    // TODO Ajouter columns
-                    $tables = $this->databaseApiService->getAllTables($permission['database'], ['id', 'database_id', 'full_name'/* , 'columns' */]);
-                    foreach ($tables as $table) {
-                        $response[] = $table;
+                // On doit avoir au moins une permission en lecture et non ADMIN
+                $isOK = 'NONE' !== $permission['level'] && 'ADMIN' !== $permission['level'];
+
+                if (is_null($tableId) && $isOK) {	// Permission sur une base de données
+                    // Ajout de toutes les tables
+                    $allTables = $this->databaseApiService->getAllTables($permission['database'], ['id', 'database_id', 'full_name']);
+                    foreach ($allTables as $table) {
+                        $tables[] = $table['full_name'];
+                    }
+                } elseif (!is_null($tableId) && !$isOK) { // Permission sur une table non désirée
+                    $fullName = $this->databaseApiService->getTableFullName($permission['database'], $tableId);
+                    if (!in_array($fullName, $tablesToremove)) {
+                        $tablesToremove[] = $fullName;
                     }
                 }
             }
 
-            $response = array_filter($response, function ($table, $name) use ($tablesToremove) {
-                return !in_array($name, $tablesToremove);
-            }, ARRAY_FILTER_USE_BOTH);
-
-            usort($response, function ($a, $b) {
-                $fna = $a['full_name'];
-                $fnb = $b['full_name'];
-                if ($fna === $fnb) {
-                    return 0;
-                }
-
-                return ($fna < $fnb) ? -1 : 1;
+            $tables = array_filter($tables, function ($fullName) use ($tablesToremove) {
+                return !in_array($fullName, $tablesToremove);
             });
+            asort($tables);
+            $t = array_unique($tables);
 
-            $t = array_values(array_unique($response, SORT_REGULAR));
-
-            return new JsonResponse($t);
+            return new JsonResponse(array_values($t));
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }

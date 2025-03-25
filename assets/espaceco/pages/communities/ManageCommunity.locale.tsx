@@ -25,6 +25,9 @@ const { i18n } = declareComponentKeys<
     | "tab6"
     | "tab7"
     | "tab8"
+    | "desc.reuse_label"
+    | "desc.reuse_description"
+    | "desc.reuse_confirmation"
     | "desc.tab.title"
     | "desc.name"
     | "desc.hint_name"
@@ -63,6 +66,8 @@ const { i18n } = declareComponentKeys<
     | "desc.editorial"
     | "desc.editorial_hint"
     | "database.tab.title"
+    | "database.explain_import"
+    | "database.import"
     | "modal.openwithemail.title"
     | "modal.openwithemail.add_domain"
     | "modal.openwithemail.min_error"
@@ -133,6 +138,9 @@ export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"
     tab6: "Signalements",
     tab7: "Emprises",
     tab8: "Membres",
+    "desc.reuse_label": "Utiliser la description d’un autre guichet (optionnel)",
+    "desc.reuse_description": "Si vous choisissez un guichet existant, la description de ce guichet sera récupérée et pourra être modifiée ci-dessous",
+    "desc.reuse_confirmation": "Je veux réutiliser la description d'un guichet existant",
     "desc.tab.title": "Décrire le guichet",
     "desc.name": "Nom du guichet",
     "desc.hint_name": "Donnez un nom clair et compréhensible",
@@ -191,6 +199,9 @@ export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"
     "desc.editorial_hint":
         "Ce contenu sera affiché dès qu’un utilisateur arrivera sur le guichet. Vous pouvez y saisir toute information utile: objectifs du guichet, source et licence des données, conditions d'utilisations spécifiques, conseils de saisie…etc.",
     "database.tab.title": "Ajouter des bases de données au guichet (optionnel)",
+    "database.explain_import":
+        "Vous allez rejoindre la section Bases de Données de votre Espace Collaboratif où vous pourrez importer les bases de données nécessaires à votre guichet. Une fois les bases de données importées à votre espace collaboratif vous pourrez retrouver ce guichet comme non publié dans la liste de vos guichets et reprendre sa création à partir de cette étape. Importer une base de données à votre espace collaboratif",
+    "database.import": "Importer une base de données à votre espace collaboratif",
     "modal.openwithemail.title": "Paramétrer les domaines acceptés pour les demandes d’affiliation",
     "modal.openwithemail.add_domain": "Ajouter un domaine accepté (doit commencer par un @)",
     "modal.openwithemail.min_error": "Il doit y avoir au moins un domaine",
@@ -285,6 +296,9 @@ export const ManageCommunityEnTranslations: Translations<"en">["ManageCommunity"
     tab7: undefined,
     tab8: undefined,
     "desc.tab.title": undefined,
+    "desc.reuse_label": undefined,
+    "desc.reuse_description": undefined,
+    "desc.reuse_confirmation": undefined,
     "desc.name": undefined,
     "desc.hint_name": undefined,
     "desc.description": undefined,
@@ -331,6 +345,8 @@ export const ManageCommunityEnTranslations: Translations<"en">["ManageCommunity"
     "desc.editorial": undefined,
     "desc.editorial_hint": undefined,
     "database.tab.title": undefined,
+    "database.explain_import": undefined,
+    "database.import": undefined,
     "modal.openwithemail.title": undefined,
     "modal.openwithemail.add_domain": "Add accepted domain",
     "modal.openwithemail.min_error": undefined,

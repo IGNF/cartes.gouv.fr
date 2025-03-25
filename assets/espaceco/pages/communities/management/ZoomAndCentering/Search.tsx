@@ -48,7 +48,7 @@ const Search: FC<SearchProps> = ({ label, hintText, filter, onChange }) => {
                     getOptionLabel={(option) => option.fulltext}
                     options={searchQuery.data?.results ?? []}
                     filterOptions={(x) => x}
-                    renderInput={(params) => <TextField {...params} />}
+                    renderInput={(params) => <TextField {...params} variant={"filled"} size={"small"} />}
                     isOptionEqualToValue={(option, v) => option.fulltext === v.fulltext}
                     onInputChange={(_, v) => setText(v)}
                     onChange={(_, v) => {

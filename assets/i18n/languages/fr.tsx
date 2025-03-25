@@ -36,6 +36,7 @@ import { UserKeysListTabFrTranslations } from "../../entrepot/pages/users/keys/U
 import { MeFrTranslations } from "../../entrepot/pages/users/me/Me.locale";
 import { PermissionsFrTranslations } from "../../entrepot/pages/users/permissions/Permissions.locale";
 import { EspaceCoCommunityListFrTranslations } from "@/espaceco/pages/communities/CommunityList.locale";
+import { SearchCommunityFrTranslations } from "@/espaceco/pages/communities/SearchCommunity.locale";
 import { CreateCommunityFrTranslations } from "../../espaceco/pages/communities/CreateCommunity.locale";
 import { CreateCommunityDialogFrTranslations } from "../../espaceco/pages/communities/CreateCommunityDialog.locale";
 import { ManageCommunityFrTranslations } from "../../espaceco/pages/communities/ManageCommunity.locale";
@@ -114,6 +115,7 @@ export const translations: Translations<"fr"> = {
     DatasheetList: DatasheetListFrTranslations,
     AccessRestrictions: AccessRestrictionsFrTranslations,
     EspaceCoCommunityList: EspaceCoCommunityListFrTranslations,
+    SearchCommunity: SearchCommunityFrTranslations,
     ManageCommunity: ManageCommunityFrTranslations,
     CreateCommunityDialog: CreateCommunityDialogFrTranslations,
     CreateCommunity: CreateCommunityFrTranslations,

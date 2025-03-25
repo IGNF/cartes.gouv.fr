@@ -1,5 +1,6 @@
 import Wait from "@/components/Utils/Wait";
 import { useCommunityContext } from "@/espaceco/contexts/CommunityContext";
+import { routes } from "@/router/router";
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -8,15 +9,7 @@ import { FC, useCallback, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { ReportFormType } from "../../../../@types/app_espaceco";
-import {
-    EmailPlannerDTO,
-    ReportStatusesDTO,
-    ReportStatusesType,
-    SharedGeoremOptions,
-    SharedThemesDTO,
-    TableResponseDTO,
-    UserSharedThemesDTO,
-} from "../../../../@types/espaceco";
+import { EmailPlannerDTO, ReportStatusesDTO, ReportStatusesType, SharedGeoremOptions, SharedThemesDTO, UserSharedThemesDTO } from "../../../../@types/espaceco";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import statuses from "../../../../data/report_statuses.json";
 import { useTranslation } from "../../../../i18n/i18n";
@@ -36,7 +29,6 @@ import SharedThemes from "./reports/SharedThemes";
 import ThemeList from "./reports/ThemeList";
 import { formatAttributesForApi } from "./reports/ThemeUtils";
 import { countActiveStatus, getMinAuthorizedStatus } from "./reports/Utils";
-import { routes } from "@/router/router";
 
 const minStatuses = getMinAuthorizedStatus();
 
@@ -150,7 +142,7 @@ const Reports: FC = () => {
     });
 
     // Tables
-    const tablesQuery = useQuery<Partial<TableResponseDTO>[], CartesApiException>({
+    const tablesQuery = useQuery<string[], CartesApiException>({
         queryKey: RQKeys.tables(community.id),
         queryFn: ({ signal }) => api.permission.getThemableTables(community.id, signal),
         staleTime: 60000,

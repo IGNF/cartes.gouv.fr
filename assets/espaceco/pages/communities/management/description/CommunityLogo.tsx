@@ -1,3 +1,7 @@
+import ConfirmDialog, { ConfirmDialogModal } from "@/components/Utils/ConfirmDialog";
+import { useCommunityContext } from "@/espaceco/contexts/CommunityContext";
+import { useTranslation } from "@/i18n/i18n";
+import RQKeys from "@/modules/espaceco/RQKeys";
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
@@ -12,23 +16,15 @@ import { createPortal } from "react-dom";
 import { useForm } from "react-hook-form";
 import { useHover } from "usehooks-ts";
 import * as yup from "yup";
+import { CommunityResponseDTO } from "../../../../../@types/espaceco";
+import { ComponentKey } from "../../../../../i18n/types";
+import placeholder1x1 from "../../../../../img/placeholder.1x1.png";
+import { CartesApiException } from "../../../../../modules/jsonFetch";
+import { getFileExtension, getImageSize, ImageSize } from "../../../../../utils";
+import api from "../../../../api";
+import { logoAction } from "../../ManageCommunity.locale";
 
-import { CommunityResponseDTO } from "../../../../@types/espaceco";
-import { ConfirmDialog, ConfirmDialogModal } from "../../../../components/Utils/ConfirmDialog";
-import { useTranslation } from "../../../../i18n/i18n";
-import { ComponentKey } from "../../../../i18n/types";
-import placeholder1x1 from "../../../../img/placeholder.1x1.png";
-import RQKeys from "../../../../modules/espaceco/RQKeys";
-import { CartesApiException } from "../../../../modules/jsonFetch";
-import { getFileExtension, getImageSize, ImageSize } from "../../../../utils";
-import api from "../../../api";
-import { logoAction } from "../ManageCommunity.locale";
-
-import "../../../../sass/components/buttons.scss";
-
-type CommunityLogoProps = {
-    community: CommunityResponseDTO;
-};
+import "../../../../../sass/components/buttons.scss";
 
 const AddLogoModal = createModal({
     id: "add-logo-modal",
@@ -71,7 +67,10 @@ const schema = (t: TranslationFunction<"ManageCommunityValidations", ComponentKe
             }),
     });
 
-const CommunityLogo: FC<CommunityLogoProps> = ({ community }) => {
+const CommunityLogo: FC = () => {
+    const context = useCommunityContext();
+    const community = context.community!;
+
     const { t: tCommon } = useTranslation("Common");
     const { t: tValidation } = useTranslation("ManageCommunityValidations");
     const { t } = useTranslation("ManageCommunity");

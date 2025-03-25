@@ -32,7 +32,7 @@ const Tools: FC = () => {
 
     const context = useCommunityContext();
 
-    const { mode, updateCommunity, isLastStep, nextStep, isCommunityUpdating, isCommunityUpdatingError, updatingCommunityError } = context;
+    const { mode, updateCommunity, stepper, isCommunityUpdating, isCommunityUpdatingError, updatingCommunityError } = context;
     const community = context.community!;
 
     const queryClient = useQueryClient();
@@ -55,8 +55,8 @@ const Tools: FC = () => {
                 return response ? response : { ...oldLayers };
             });
             updateCommunity({ functionalities: getFormValues("functionalities") }, () => {
-                if (mode === "creation" && !saveOnly && !isLastStep()) {
-                    nextStep();
+                if (mode === "creation" && !saveOnly && !stepper?.isLastStep()) {
+                    stepper?.nextStep();
                 }
             });
         },

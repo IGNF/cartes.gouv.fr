@@ -2,18 +2,15 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Tabs from "@codegouvfr/react-dsfr/Tabs";
-import { useQuery } from "@tanstack/react-query";
 import { FC, useMemo, useState } from "react";
 
 import Main from "@/components/Layout/Main";
 import { useCommunityContext } from "@/espaceco/contexts/CommunityContext";
-import { UserMe } from "../../../@types/app_espaceco";
+import useUserMe from "@/espaceco/hooks/useUserMe";
 import LoadingText from "../../../components/Utils/LoadingText";
 import { useTranslation } from "../../../i18n/i18n";
-import RQKeys from "../../../modules/espaceco/RQKeys";
-import { CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
-import api from "../../api";
+import Databases from "./management/Databases";
 import Description from "./management/Description";
 import Grid from "./management/Grid";
 import Layer from "./management/Layer";
@@ -23,33 +20,24 @@ import Tools from "./management/Tools";
 import ZoomAndCentering from "./management/ZoomAndCentering";
 
 const ManageCommunity: FC = () => {
+    const { data: me, isLoading: isMeLoading, isError: isMeError, error: meError } = useUserMe();
+
     const { t } = useTranslation("ManageCommunity");
     const { t: tBreadcrumb } = useTranslation("Breadcrumb");
 
     const { community, isCommunityLoading, isCommunityError, communityError } = useCommunityContext();
 
-    const {
-        data: me,
-        isLoading,
-        isError,
-        error,
-    } = useQuery<UserMe, CartesApiException>({
-        queryKey: RQKeys.getMe(),
-        queryFn: ({ signal }) => api.user.getMe(signal),
-        staleTime: 3600000,
-    });
-
     const isAdmin = useMemo(() => {
         return me?.administrator === true;
     }, [me]);
 
-    // Les droits pour pouvoir modifier un guichet
+    // Les droits pour pouvoir créer un guichet
     const hasRights = useMemo(() => {
         if (me?.administrator) {
             return true;
         }
-        const f = me?.communities_member.filter((cm) => cm.role === "admin");
-        return f ? f.length > 0 : false;
+        const f = me?.communities_member.filter((cm) => cm.role === "admin") || [];
+        return f.length > 0;
     }, [me]);
 
     const [selectedTabId, setSelectedTabId] = useState("tab1");
@@ -75,7 +63,21 @@ const ManageCommunity: FC = () => {
             title={t("title", { name: community?.name })}
         >
             <h1>{t("title", { name: community?.name })}</h1>
-            {isCommunityError ? (
+            {isMeLoading ? (
+                <LoadingText as={"h2"} message={t("loading_me")} />
+            ) : isMeError ? (
+                <Alert
+                    severity="error"
+                    closable={false}
+                    title={t("me_fetch_failed")}
+                    description={
+                        <>
+                            <p>{meError.message}</p>
+                            <Button linkProps={routes.espaceco_community_list().link}>{t("back_to_list")}</Button>
+                        </>
+                    }
+                />
+            ) : isCommunityError ? (
                 <Alert
                     severity="error"
                     closable={false}
@@ -87,22 +89,8 @@ const ManageCommunity: FC = () => {
                         </>
                     }
                 />
-            ) : isError ? (
-                <Alert
-                    severity="error"
-                    closable={false}
-                    title={t("me_fetch_failed")}
-                    description={
-                        <>
-                            <p>{error.message}</p>
-                            <Button linkProps={routes.espaceco_community_list().link}>{t("back_to_list")}</Button>
-                        </>
-                    }
-                />
             ) : isCommunityLoading ? (
                 <LoadingText as={"h2"} message={t("loading")} />
-            ) : isLoading ? (
-                <LoadingText message={t("loading_me")} />
             ) : hasRights === false ? (
                 <Alert severity="error" closable={false} title={t("no_rights")} />
             ) : forbidden ? (
@@ -129,9 +117,8 @@ const ManageCommunity: FC = () => {
                                     switch (selectedTabId) {
                                         case "tab1":
                                             return <Description isAdmin={isAdmin} />;
-                                        // TODO
-                                        /* case "tab2":
-                                            return <Databases mode={"edition"} community={communityQuery.data} />; */
+                                        case "tab2":
+                                            return <Databases />;
                                         case "tab3":
                                             return <ZoomAndCentering />;
                                         case "tab4":

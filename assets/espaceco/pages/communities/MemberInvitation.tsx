@@ -6,7 +6,8 @@ import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { FC, useEffect, useMemo, useState } from "react";
 
-import { CommunityMember, Role, UserMe } from "../../../@types/app_espaceco";
+import Main from "@/components/Layout/Main";
+import { CommunityMember, Role } from "../../../@types/app_espaceco";
 import { CommunityResponseDTO } from "../../../@types/espaceco";
 import LoadingText from "../../../components/Utils/LoadingText";
 import Wait from "../../../components/Utils/Wait";
@@ -14,11 +15,10 @@ import { useTranslation } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/espaceco/RQKeys";
 import { CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
-import { useApiEspaceCoStore } from "../../../stores/ApiEspaceCoStore";
 import api from "../../api";
-import Main from "@/components/Layout/Main";
-
 import "../../../../assets/sass/pages/espaceco/member_invitation.scss";
+import useUserMe from "@/espaceco/hooks/useUserMe";
+import { useApiEspaceCoStore } from "@/espaceco/stores/ApiEspaceCoStore";
 
 type MemberInvitationProps = {
     communityId: number;
@@ -30,6 +30,8 @@ type ErrorMessage = {
 };
 
 const MemberInvitation: FC<MemberInvitationProps> = ({ communityId }) => {
+    const { data: me, isError: isMeError, error: meError } = useUserMe();
+
     const { t } = useTranslation("MemberInvitation");
     const { t: tBreadcrumb } = useTranslation("Breadcrumb");
 
@@ -38,52 +40,46 @@ const MemberInvitation: FC<MemberInvitationProps> = ({ communityId }) => {
 
     const [errorMessage, setErrorMessage] = useState<ErrorMessage | undefined>();
 
-    const meQuery = useQuery<UserMe, CartesApiException>({
-        queryKey: RQKeys.getMe(),
-        queryFn: ({ signal }) => api.user.getMe(signal),
-        staleTime: 3600000,
-        retry: false,
-    });
-
     useEffect(() => {
-        if (meQuery.error) {
-            if (meQuery.error.code === 403 && meQuery.error?.message.includes("CGU")) {
+        if (isMeError) {
+            if (meError.code === 403 && meError?.message.includes("CGU")) {
                 setErrorMessage({
                     message: t("espaceco_accept_cgu", { url: espaceCoUrl }),
                     type: "warning",
                 });
-            } else
+            } else {
                 setErrorMessage({
-                    message: meQuery.error.message,
+                    message: meError.message,
                     type: "warning",
                 });
+            }
         }
-    }, [espaceCoUrl, meQuery, t]);
+    }, [espaceCoUrl, isMeError, meError, t]);
 
     const query = useQuery<CommunityResponseDTO, CartesApiException>({
         queryKey: RQKeys.community(communityId),
         queryFn: () => api.community.getCommunity(communityId),
         staleTime: 3600000,
-        enabled: meQuery.data !== undefined,
+        enabled: me !== undefined,
     });
 
     const myRole = useMemo<Role | undefined>(() => {
         let role: Role | undefined;
-        if (meQuery.data) {
-            const user_id = meQuery.data.id;
-            const members = meQuery.data.communities_member.filter((m) => m.community_id === communityId && m.user_id === user_id);
+        if (me) {
+            const user_id = me.id;
+            const members = me.communities_member.filter((m) => m.community_id === communityId && m.user_id === user_id);
             if (members.length === 1) {
                 role = members[0].role;
             }
         }
         return role;
-    }, [meQuery.data, communityId]);
+    }, [me, communityId]);
 
     /* Invitation : role : "invited" => "member" */
     const updateRoleMutation = useMutation<CommunityMember | undefined, CartesApiException>({
         mutationFn: () => {
-            if (meQuery.data?.id) {
-                return api.community.updateMemberRole(communityId, meQuery.data.id, "member");
+            if (me?.id) {
+                return api.community.updateMemberRole(communityId, me.id, "member");
             }
             return Promise.resolve(undefined);
         },
@@ -92,8 +88,8 @@ const MemberInvitation: FC<MemberInvitationProps> = ({ communityId }) => {
     /* Suppression du membre, Mais comme il a créé son compte, il reste inscrit sur cartes.gouv. */
     const removeMemberMutation = useMutation<{ user_id: number } | undefined, CartesApiException>({
         mutationFn: () => {
-            if (meQuery.data?.id) {
-                return api.community.removeMember(communityId, meQuery.data.id);
+            if (me?.id) {
+                return api.community.removeMember(communityId, me.id);
             }
             return Promise.resolve(undefined);
         },
@@ -112,11 +108,8 @@ const MemberInvitation: FC<MemberInvitationProps> = ({ communityId }) => {
             title={t("document_title")}
         >
             <h1>{t("document_title")}</h1>
-            {meQuery.isLoading && <LoadingText as="h6" message={t("userme_loading")} />}
-
             {query.isLoading && <LoadingText as="h6" message={t("community_loading")} />}
             {query.isError && <Alert severity="error" closable title={t("community_loading_failed")} />}
-
             {updateRoleMutation.isError && <Alert severity="error" closable title={updateRoleMutation.error.message} />}
             {updateRoleMutation.isPending && (
                 <Wait>

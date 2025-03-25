@@ -1,22 +1,25 @@
-import { arrDBOptions, CommunityFormMode, DBOption } from "@/@types/app_espaceco";
-import { CommunityResponseDTO, DatabaseResponseDTO, PermissionResponseDTO } from "@/@types/espaceco";
+import { arrDBOptions, DBOption } from "@/@types/app_espaceco";
+import { DatabaseResponseDTO, PermissionResponseDTO } from "@/@types/espaceco";
 import LoadingText from "@/components/Utils/LoadingText";
 import api from "@/espaceco/api";
+import { useCommunityContext } from "@/espaceco/contexts/CommunityContext";
 import { useTranslation } from "@/i18n";
 import RQKeys from "@/modules/espaceco/RQKeys";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { useQuery } from "@tanstack/react-query";
 import { FC, useMemo, useState } from "react";
+import ActionButtonsCreation from "./ActionButtonsCreation";
+import Button from "@codegouvfr/react-dsfr/Button";
 
-type DatabasesProps = {
-    mode: CommunityFormMode;
-    community: CommunityResponseDTO;
-};
-
-const Databases: FC<DatabasesProps> = ({ mode, community }) => {
+const Databases: FC = () => {
     const { t } = useTranslation("Databases");
     const { t: tmc } = useTranslation("ManageCommunity");
+
+    const context = useCommunityContext();
+
+    const { mode, stepper } = context;
+    const community = context.community!;
 
     const [option, setOption] = useState<DBOption>("none");
 
@@ -29,6 +32,7 @@ const Databases: FC<DatabasesProps> = ({ mode, community }) => {
         queryKey: RQKeys.databases(),
         queryFn: ({ signal }) => api.database.getAll(signal),
         staleTime: 3600000,
+        enabled: false, // TODO SUPPRIMER
     });
 
     const dbIds = useMemo(() => {
@@ -53,7 +57,7 @@ const Databases: FC<DatabasesProps> = ({ mode, community }) => {
             {isErrorDBs && <Alert severity="error" closable title={errorDBs.message} />}
             {isLoading && <LoadingText as="h6" message={t("loading_permissions")} />}
             {isError && <Alert severity="error" closable title={error.message} />}
-            {databases && databases.length > 0 && permissions && permissions.length /* TODO REMETTRE && mode === "creation" */ ? (
+            {mode === "creation" && databases && permissions ? (
                 <>
                     <h2>{tmc("database.tab.title")}</h2>
                     <div>
@@ -67,6 +71,16 @@ const Databases: FC<DatabasesProps> = ({ mode, community }) => {
                                 },
                             }))}
                         />
+                        {option === "none" ? (
+                            <ActionButtonsCreation onContinue={() => stepper?.nextStep()} />
+                        ) : option === "import" ? (
+                            <>
+                                <p>{tmc("database.explain_import")}</p>
+                                <Button onClick={() => console.log("TODO")}>{tmc("database.import")}</Button>
+                            </>
+                        ) : (
+                            <div />
+                        )}
                     </div>
                 </>
             ) : (

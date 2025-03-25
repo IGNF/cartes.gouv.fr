@@ -18,11 +18,9 @@ export const CreateCommunityFrTranslations: Translations<"fr">["CreateCommunity"
         switch (step) {
             case COMMUNITY_FORM_STEPS.DESCRIPTION:
                 return "Description";
-            // TODO REMETTRE
-            /* case COMMUNITY_FORM_STEPS.DATABASE:
+            case COMMUNITY_FORM_STEPS.DATABASE:
                 return "Base de données";
-            
-            case COMMUNITY_FORM_STEPS.LAYERS:
+            /*case COMMUNITY_FORM_STEPS.LAYERS:
                 return "Couches";  */
             case COMMUNITY_FORM_STEPS.ZOOM_AND_CENTERING:
                 return "Zoom et centrage";

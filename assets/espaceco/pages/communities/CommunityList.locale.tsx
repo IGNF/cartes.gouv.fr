@@ -11,9 +11,6 @@ const { i18n } = declareComponentKeys<
     | "communities_as_member"
     | "pending_membership"
     | { K: "no_result"; P: { filter: CommunityListFilter }; R: string }
-    | "search_placeholder"
-    | "no_options"
-    | "loading"
     | "show_details"
     | "community_creation"
     | "create_community"
@@ -35,9 +32,6 @@ export const EspaceCoCommunityListFrTranslations: Translations<"fr">["EspaceCoCo
               : filter === "affiliation"
                 ? "Aucune affiliation en cours"
                 : "[TODO]",
-    search_placeholder: "Recherche d’un guichet par son nom",
-    no_options: "Aucun guichet",
-    loading: "Recherche en cours ...",
     show_details: "Afficher les détails",
     community_creation: "Création du guichet en cours ...",
     create_community: "Création d'un guichet",
@@ -51,9 +45,6 @@ export const EspaceCoCommunityListEnTranslations: Translations<"en">["EspaceCoCo
     communities_as_member: undefined,
     pending_membership: undefined,
     no_result: ({ filter }) => `[TODO] ${filter}`,
-    search_placeholder: undefined,
-    no_options: undefined,
-    loading: undefined,
     show_details: undefined,
     community_creation: undefined,
     create_community: undefined,

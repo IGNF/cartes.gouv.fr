@@ -7,7 +7,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useMemo, useState } from "react";
 
 import Main from "@/components/Layout/Main";
-import { CommunityListFilter, GetResponse, UserMe, arrCommunityListFilters } from "../../../@types/app_espaceco";
+import { CommunityListFilter, GetResponse, arrCommunityListFilters } from "../../../@types/app_espaceco";
 import { CommunityResponseDTO } from "../../../@types/espaceco";
 import LoadingText from "../../../components/Utils/LoadingText";
 import Skeleton from "../../../components/Utils/Skeleton";
@@ -20,6 +20,7 @@ import api from "../../api";
 import CommunityList from "./CommunityList";
 import { CreateCommunityDialog, CreateCommunityDialogModal } from "./CreateCommunityDialog";
 import SearchCommunity from "./SearchCommunity";
+import useUserMe from "@/espaceco/hooks/useUserMe";
 
 const defaultLimit = 10;
 
@@ -31,6 +32,9 @@ type QueryParamsType = {
 
 const Communities: FC = () => {
     const route = useRoute();
+
+    const meQuery = useUserMe();
+    const { data: me } = meQuery;
 
     const { t: tCommon } = useTranslation("Common");
     const { t: tBreadcrumb } = useTranslation("Breadcrumb");
@@ -53,12 +57,6 @@ const Communities: FC = () => {
 
     const [community, setCommunity] = useState<CommunityResponseDTO | null>(null);
 
-    const { data: me } = useQuery<UserMe, CartesApiException>({
-        queryKey: RQKeys.getMe(),
-        queryFn: ({ signal }) => api.user.getMe(signal),
-        staleTime: 3600000,
-    });
-
     const communityQuery = useQuery<GetResponse<CommunityResponseDTO>, CartesApiException>({
         queryKey: RQKeys.communityList(queryParams.page, queryParams.limit),
         queryFn: ({ signal }) => api.community.get(queryParams, signal),
@@ -66,7 +64,7 @@ const Communities: FC = () => {
         enabled: filter === "listed",
     });
 
-    const communitiesAsMember = useQuery<GetResponse<CommunityResponseDTO>, CartesApiException>({
+    const communitiesAsMemberQuery = useQuery<GetResponse<CommunityResponseDTO>, CartesApiException>({
         queryKey: RQKeys.communitiesAsMember(queryParams.pending ?? false, queryParams.page, queryParams.limit),
         queryFn: ({ signal }) => api.community.getAsMember(queryParams, signal),
         staleTime: 3600000,
@@ -80,10 +78,9 @@ const Communities: FC = () => {
     });
 
     const hasRights = useMemo(() => {
-        if (!me) return false;
-        if (me.administrator) return true;
+        if (me?.administrator) return true;
 
-        const communityMemberHasAdmin = me.communities_member.filter((m) => m.role === "admin");
+        const communityMemberHasAdmin = me?.communities_member.filter((m) => m.role === "admin") || [];
         return communityMemberHasAdmin.length > 0;
     }, [me]);
 
@@ -100,6 +97,9 @@ const Communities: FC = () => {
             return api.community.add(data);
         },
         onSuccess: (community) => {
+            // Mise a jour de users/me
+            meQuery.refetch();
+
             queryClient.setQueryData<string[]>(RQKeys.communitiesName(), (oldNames) => {
                 const names = oldNames ? [...oldNames] : [];
                 names.push(community.name);
@@ -124,8 +124,6 @@ const Communities: FC = () => {
         >
             <h1>{t("title")}</h1>
             <div>
-                {communityQuery.isError && <Alert severity="error" closable={false} title={communityQuery.error?.message} />}
-                {communitiesAsMember.isError && <Alert severity="error" closable={false} title={communitiesAsMember.error?.message} />}
                 {isPending && (
                     <Wait>
                         <div className={fr.cx("fr-grid-row")}>
@@ -134,15 +132,17 @@ const Communities: FC = () => {
                     </Wait>
                 )}
                 {isError && <Alert severity="error" closable title={tCommon("error")} description={error.message} className={fr.cx("fr-my-3w")} />}
+                {communityQuery.isError && <Alert severity="error" closable={false} title={communityQuery.error?.message} />}
+                {communitiesAsMemberQuery.isError && <Alert severity="error" closable={false} title={communitiesAsMemberQuery.error?.message} />}
             </div>
             {hasRights && (
-                <div className={fr.cx("fr-grid-row", "fr-my-2v")}>
+                <div className={fr.cx("fr-grid-row", "fr-my-2w")}>
                     <Button onClick={() => CreateCommunityDialogModal.open()}>{t("create_community")}</Button>
                 </div>
             )}
             <div className={fr.cx("fr-grid-row")}>
-                <div className={fr.cx("fr-col-3", "fr-px-2v")}>
-                    <div className={fr.cx("fr-mb-4v")}>
+                <div className={fr.cx("fr-col-4", "fr-px-2v")}>
+                    <div className={fr.cx("fr-my-4v")}>
                         <SearchCommunity
                             filter={filter}
                             onChange={(community) => {
@@ -176,8 +176,8 @@ const Communities: FC = () => {
                         ]}
                     />
                 </div>
-                <div className={fr.cx("fr-col-9", "fr-px-2v")}>
-                    {communityQuery.isLoading || communitiesAsMember.isLoading ? (
+                <div className={fr.cx("fr-col-8", "fr-px-2v")}>
+                    {communityQuery.isLoading || communitiesAsMemberQuery.isLoading ? (
                         <Skeleton count={10} />
                     ) : community ? (
                         <CommunityList communities={[community]} />
@@ -198,12 +198,12 @@ const Communities: FC = () => {
                                 <Alert severity={"info"} title={t("no_result", { filter: filter })} closable />
                             </div>
                         )
-                    ) : communitiesAsMember.data && communitiesAsMember.data.content.length ? (
+                    ) : communitiesAsMemberQuery.data && communitiesAsMemberQuery.data.content.length ? (
                         <div>
-                            <CommunityList communities={communitiesAsMember.data.content} />
+                            <CommunityList communities={communitiesAsMemberQuery.data.content} />
                             <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
                                 <Pagination
-                                    count={communitiesAsMember.data.totalPages}
+                                    count={communitiesAsMemberQuery.data.totalPages}
                                     defaultPage={queryParams.page}
                                     getPageLinkProps={(pageNumber) => routes.espaceco_community_list({ filter: filter, page: pageNumber }).link}
                                 />

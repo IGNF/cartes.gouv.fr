@@ -17,7 +17,7 @@ import { useTranslation } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
-import { useApiEspaceCoStore } from "../../../stores/ApiEspaceCoStore";
+import { useApiEspaceCoStore } from "../../../espaceco/stores/ApiEspaceCoStore";
 import { useAuthStore } from "../../../stores/AuthStore";
 import { getArrayRange } from "../../../utils";
 import api from "../../api";
