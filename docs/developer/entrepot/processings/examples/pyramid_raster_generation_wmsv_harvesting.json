@@ -1,0 +1,20 @@
+{
+    "processing": "748e4ebe-3ef6-447d-8221-ecd3bc2157e6",
+    "output": {
+        "stored_data": {
+            "name": "nom_pyramide"
+        }
+    },
+    "parameters": {
+        "samplesperpixel": 3,
+        "sampleformat": "UINT8",
+        "tms": "PM",
+        "compression": "jpg",
+        "bottom": "14",
+        "harvest_levels": ["14", "13", "12", "11", "10", "9", "8", "7"],
+        "harvest_format": "image\/jpeg",
+        "harvest_url": "https:\/\/data-qua.priv.geopf.fr\/wms-v",
+        "harvest_layers": "hydro-ardennes-l93_zip_07-04-2024_wmsv",
+        "harvest_area": "POLYGON((1.999375 50.25875,5.8734375 50.25875,5.8734375 47.940898437,1.999375 47.940898437,1.999375 50.25875))"
+    }
+}

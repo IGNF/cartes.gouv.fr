@@ -1,0 +1,31 @@
+{
+    "processing": "d78ff336-452c-43e8-a81d-cc7e9baa6f7e",
+    "inputs": {
+        "stored_data": ["139811cf-0d59-45e4-b2a0-565c98970d23"]
+    },
+    "output": {
+        "stored_data": {
+            "name": "hydro-ardennes-l93_zip_07-04-2024",
+            "storage_tags": ["PYRAMIDE"]
+        }
+    },
+    "parameters": {
+        "composition": [
+            {
+                "table": "detail_hydrographique",
+                "attributes": ["cleabs", "date_creation"],
+                "bottom_level": "12",
+                "top_level": "6"
+            },
+            {
+                "table": "cours_d_eau",
+                "attributes": ["caractere_permanent", "cleabs"],
+                "bottom_level": "13",
+                "top_level": "7"
+            }
+        ],
+        "bottom_level": "13",
+        "top_level": "6",
+        "tippecanoe_options": "-S10"
+    }
+}
