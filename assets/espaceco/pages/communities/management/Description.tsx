@@ -9,7 +9,7 @@ import Table from "@codegouvfr/react-dsfr/Table";
 import ToggleSwitch from "@codegouvfr/react-dsfr/ToggleSwitch";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
 import { FC, memo, useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -50,8 +50,6 @@ const Description: FC<DescriptionProps> = ({ isAdmin }) => {
 
     const { mode, stepper, updateCommunity, isCommunityUpdating, isCommunityUpdatingError, updatingCommunityError } = context;
     const community = context.community!;
-
-    const queryClient = useQueryClient();
 
     const communityNamesQuery = useQuery<string[], CartesApiException>({
         queryKey: RQKeys.communitiesName(),
@@ -164,24 +162,21 @@ const Description: FC<DescriptionProps> = ({ isAdmin }) => {
     const openWithEmail = watch("openWithEmail");
 
     const copyFromCommunity = useCallback(
-        async (communityId: number) => {
-            const data = await queryClient.fetchQuery<CommunityResponseDTO, CartesApiException>({
-                queryKey: RQKeys.community(communityId),
-                queryFn: () => api.community.getCommunity(communityId),
-                staleTime: 36000000,
-            });
+        (reUsedCommunity?: CommunityResponseDTO) => {
+            if (!reUsedCommunity) {
+                return;
+            }
 
             const fields = isAdmin ? [...fieldsToCopy, ...["membershipRequest", "openWithEmail"]] : [...fieldsToCopy];
-            const values = getDescriptionDefaultValues(data);
+            const values = getDescriptionDefaultValues(reUsedCommunity);
 
             fields.forEach((f) => {
                 if (f in values) {
-                    // TODO Ne fonctionne pas => re rendu du composant entier !!!!
                     setFormValue(f as keyof DescriptionFormType, values[f]);
                 }
             });
         },
-        [queryClient, isAdmin, setFormValue]
+        [isAdmin, setFormValue]
     );
 
     const data: ReactNode[][] = useMemo(() => {
@@ -259,10 +254,8 @@ const Description: FC<DescriptionProps> = ({ isAdmin }) => {
                         title={tmc("desc.reuse_label")}
                         description={tmc("desc.reuse_description")}
                         confirmation={tmc("desc.reuse_confirmation")}
-                        onCopy={(communityId) => {
-                            if (communityId) {
-                                copyFromCommunity(communityId);
-                            }
+                        onCopy={(reUsedCommunity) => {
+                            copyFromCommunity(reUsedCommunity);
                         }}
                     />
                     <div>
@@ -279,18 +272,21 @@ const Description: FC<DescriptionProps> = ({ isAdmin }) => {
                         <Controller
                             control={control}
                             name="description"
-                            render={({ field }) => (
-                                <HtmlEditor
-                                    label={tmc("desc.description")}
-                                    hintText={tmc("desc.hint_description")}
-                                    state={errors.description ? "error" : "default"}
-                                    stateRelatedMessage={errors?.description?.message?.toString()}
-                                    value={field.value ?? ""}
-                                    onChange={(values) => {
-                                        field.onChange(values);
-                                    }}
-                                />
-                            )}
+                            render={({ field }) => {
+                                console.log("FIELDVALUE : ", field.value);
+                                return (
+                                    <HtmlEditor
+                                        label={tmc("desc.description")}
+                                        hintText={tmc("desc.hint_description")}
+                                        state={errors.description ? "error" : "default"}
+                                        stateRelatedMessage={errors?.description?.message?.toString()}
+                                        value={field.value ?? ""}
+                                        onChange={(values) => {
+                                            field.onChange(values);
+                                        }}
+                                    />
+                                );
+                            }}
                         />
                         <CommunityLogo />
                         <Controller

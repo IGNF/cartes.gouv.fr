@@ -29,7 +29,7 @@ function GroupEspaceCo(props: IGroupEspaceCoProps) {
                 return {
                     render: (
                         <CommunityProvider communityId={route.params.communityId} mode={"creation"}>
-                            <EspaceCoCreateCommunity />;
+                            <EspaceCoCreateCommunity />
                         </CommunityProvider>
                     ),
                 };
@@ -37,7 +37,7 @@ function GroupEspaceCo(props: IGroupEspaceCoProps) {
                 return {
                     render: (
                         <CommunityProvider communityId={route.params.communityId} mode={"edition"}>
-                            <EspaceCoManageCommunity />;
+                            <EspaceCoManageCommunity />
                         </CommunityProvider>
                     ),
                 };

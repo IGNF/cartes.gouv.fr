@@ -69,6 +69,7 @@ import { KeyValueListEnTranslations } from "@/components/Input/KeyValueList.loca
 import type { Translations } from "../types";
 
 import { InputCollectionEnTranslations } from "../../components/Input/InputCollection";
+import { ReuseCommunityConfigEnTranslations } from "@/espaceco/pages/communities/ReuseCommunityConfig.locale";
 
 export const translations: Translations<"en"> = {
     Common: commonEnTranslations,
@@ -113,6 +114,7 @@ export const translations: Translations<"en"> = {
     PyramidRasterWmtsServiceForm: PyramidRasterWmtsServiceFormEnTranslations,
     EspaceCoCommunityList: EspaceCoCommunityListEnTranslations,
     SearchCommunity: SearchCommunityEnTranslations,
+    ReuseCommunityConfig: ReuseCommunityConfigEnTranslations,
     CreateCommunityDialog: CreateCommunityDialogEnTranslations,
     CreateCommunity: CreateCommunityEnTranslations,
     ManageCommunity: ManageCommunityEnTranslations,

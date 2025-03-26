@@ -64,6 +64,7 @@ export type ComponentKey =
     | import("../espaceco/pages/communities/CreateCommunityDialog.locale").I18n
     | import("../espaceco/pages/communities/CreateCommunity.locale").I18n
     | import("../espaceco/pages/communities/ManageCommunity.locale").I18n
+    | import("../espaceco/pages/communities/ReuseCommunityConfig.locale").I18n
     | import("../espaceco/pages/communities/management/ManageCommunityValidations.locale").I18n
     | import("../espaceco/pages/communities/management/Search.locale").I18n
     | import("../espaceco/pages/communities/management/tools/Functionalities.locale").I18n

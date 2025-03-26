@@ -78,6 +78,9 @@ const { i18n } = declareComponentKeys<
     | "modal.document.file_hint"
     | "zoom.consistant_error"
     | "zoom.tab.title"
+    | "zoom.reuse_label"
+    | "zoom.reuse_description"
+    | "zoom.reuse_confirmation"
     | "zoom.position"
     | "zoom.position_hint"
     | "zoom.zoom_range"
@@ -96,6 +99,9 @@ const { i18n } = declareComponentKeys<
     | "layer.tabl"
     | "layer.tab2"
     | "layer.tab3"
+    | "tools.reuse_label"
+    | "tools.reuse_description"
+    | "tools.reuse_confirmation"
     | "report.configure_themes"
     | "report.configure_themes.explain"
     | "report.configure_shared_themes"
@@ -212,6 +218,10 @@ export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"
     "modal.document.file_hint": "Taille maximale : 5 Mo.",
     "zoom.consistant_error": "Emprise et position ne sont pas cohérents",
     "zoom.tab.title": "Définir l’état initial de la carte à l’ouverture du guichet",
+    "zoom.reuse_label": "Utiliser la configuration des zooms et de l'emprise d’un autre guichet (optionnel)",
+    "zoom.reuse_description":
+        "Si vous choisissez un guichet existant, la configuration des zooms et de l'emprise de ce guichet sera récupérée et pourra être modifiée ci-dessous",
+    "zoom.reuse_confirmation": "Je veux réutiliser la configuration d'un guichet existant",
     "zoom.position": "Position",
     "zoom.position_hint": "Fixer la position et définissez le niveau de zoom (utilisez votre souris ou la barre de recherche ci-dessous",
     "zoom.zoom_range": "Gérer les niveaux de zoom minimum et maximum permis (optionnel)",
@@ -232,6 +242,10 @@ export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"
     "layer.tabl": "Mes données",
     "layer.tab2": "Données de la géoplateforme",
     "layer.tab3": "Fonds de carte",
+    "tools.reuse_label": "Utiliser la configuration des outils d’un autre guichet (optionnel)",
+    "tools.reuse_description":
+        "Pour faciliter la gestion de vos outils, vous pouvez ré-utiliser la configuration d’un guichet existant dont vous être gestionnaire. Si vous choisissez un guichet existant, la configuration des outils de ce guichet sera récupérée et pourra être modifiée ci-dessous.",
+    "tools.reuse_confirmation": "Je veux ré-utiliser la configuration des outils d’un guichet existant",
     "report.configure_themes": "Configurer les thèmes et attributs des signalements (optionnel)",
     "report.configure_themes.explain":
         "Afin de permettre aux membres de votre groupe de soumettre des signalements sur d'autres thématiques que celles IGN (Adresse, Bâti, Points d'intérêts...), vous pouvez ajouter vos propres thèmes et personnaliser le formulaire de saisie d'un nouveau signalement pour l'adapter à vos besoins métier. Les membres de votre groupe verront ces thèmes, en plus ou à la place des thèmes IGN, sur l'interface de saisie d'un nouveau signalement sur l'espace collaboratif, les plugins SIG et l'application mobile.",
@@ -357,6 +371,9 @@ export const ManageCommunityEnTranslations: Translations<"en">["ManageCommunity"
     "modal.document.file_hint": "Maximum file size : 5 Mo.",
     "zoom.consistant_error": undefined,
     "zoom.tab.title": undefined,
+    "zoom.reuse_label": undefined,
+    "zoom.reuse_description": undefined,
+    "zoom.reuse_confirmation": undefined,
     "zoom.position": "Position",
     "zoom.position_hint": undefined,
     "zoom.zoom_range": undefined,
@@ -375,6 +392,9 @@ export const ManageCommunityEnTranslations: Translations<"en">["ManageCommunity"
     "layer.tabl": "My datas",
     "layer.tab2": "Geoplateforme datas",
     "layer.tab3": "Base maps",
+    "tools.reuse_label": undefined,
+    "tools.reuse_description": undefined,
+    "tools.reuse_confirmation": undefined,
     "report.configure_themes": undefined,
     "report.configure_themes.explain": undefined,
     "report.configure_shared_themes": undefined,

@@ -1,3 +1,4 @@
+import { CommunityResponseDTO } from "@/@types/espaceco";
 import LoadingText from "@/components/Utils/LoadingText";
 import Wait from "@/components/Utils/Wait";
 import { useCommunityContext } from "@/espaceco/contexts/CommunityContext";
@@ -5,18 +6,21 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { containsCoordinate } from "ol/extent";
-import { FC, useEffect, useState } from "react";
+import { FC, useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { ZoomAndCenteringFormType } from "../../../../@types/app_espaceco";
 import ZoomRange from "../../../../components/Utils/ZoomRange";
 import { useTranslation } from "../../../../i18n/i18n";
 import { getZoomAndCenteringDefaultValues } from "../DefaultValues";
+import ReuseCommunityConfig from "../ReuseCommunityConfig";
 import ActionButtonsCreation from "./ActionButtonsCreation";
 import ActionButtonsEdition from "./ActionButtonsEdition";
 import DisplayExtent from "./ZoomAndCentering/DisplayExtent";
 import { ExtentDialog, ExtentDialogModal } from "./ZoomAndCentering/ExtentDialog";
 import RMap from "./ZoomAndCentering/RMap";
 import Search from "./ZoomAndCentering/Search";
+
+const fields = ["position", "zoom", "minZoom", "maxZoom", "extent"];
 
 const ZoomAndCentering: FC = () => {
     const { t: tCommon } = useTranslation("Common");
@@ -45,6 +49,23 @@ const ZoomAndCentering: FC = () => {
         }
         return;
     }, [position, extent]);
+
+    // TODO A VOIR LES INCOHERENCES POSSIBLES
+    const copyFromCommunity = useCallback(
+        (reUsedCommunity?: CommunityResponseDTO) => {
+            if (!reUsedCommunity) {
+                return;
+            }
+
+            const values = getZoomAndCenteringDefaultValues(reUsedCommunity);
+            fields.forEach((f) => {
+                if (f in values) {
+                    setFormValue(f as keyof ZoomAndCenteringFormType, values[f]);
+                }
+            });
+        },
+        [setFormValue]
+    );
 
     const onSubmitForm = (saveOnly: boolean) => {
         const values = getFormValues();
@@ -81,6 +102,14 @@ const ZoomAndCentering: FC = () => {
                 <Alert severity="warning" title={tCommon("warning")} description={tmc("zoom.consistant_error")} className={fr.cx("fr-my-2w")} />
             )}
             <h2>{tmc("zoom.tab.title")}</h2>
+            <ReuseCommunityConfig
+                title={tmc("zoom.reuse_label")}
+                description={tmc("zoom.reuse_description")}
+                confirmation={tmc("zoom.reuse_confirmation")}
+                onCopy={(reUsedCommunity) => {
+                    copyFromCommunity(reUsedCommunity);
+                }}
+            />
             <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
                 <div className={fr.cx("fr-col-5")}>
                     <Search

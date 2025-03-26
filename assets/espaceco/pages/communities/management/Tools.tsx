@@ -4,23 +4,24 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FC, useMemo, useState } from "react";
+import { FC, useCallback, useMemo, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { CommunitiesLayers, CommunityFeatureTypeLayer, geometryTypes, RefToolLayer, ToolsFormType } from "../../../../@types/app_espaceco";
-import { arrLayerTools, arrRefLayerTools, LayerTools, RefLayerTools } from "../../../../@types/espaceco";
+import { arrLayerTools, arrRefLayerTools, CommunityResponseDTO, LayerTools, RefLayerTools } from "../../../../@types/espaceco";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import { useTranslation } from "../../../../i18n";
 import RQKeys from "../../../../modules/espaceco/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import api from "../../../api";
-import { getToolsDefaultValues } from "../DefaultValues";
+import { getFunctionalities, getToolsDefaultValues } from "../DefaultValues";
 import ActionButtonsCreation from "./ActionButtonsCreation";
 import ActionButtonsEdition from "./ActionButtonsEdition";
 import ContributionTools from "./tools/ContributionTools";
 import { allFunctionalities } from "./tools/Functionalities";
 import { getEditableLayers, getRefLayers, prepareLayersForApi } from "./tools/LayerUtils";
 import SimpleLayerTools from "./tools/SimpleLayerTools";
+import ReuseCommunityConfig from "../ReuseCommunityConfig";
 
 const Tools: FC = () => {
     const { t: tCommon } = useTranslation("Common");
@@ -142,7 +143,7 @@ const Tools: FC = () => {
         resolver: yupResolver(schema),
     });
 
-    const { getValues: getFormValues, handleSubmit } = methods;
+    const { getValues: getFormValues, setValue: setFormValue, handleSubmit } = methods;
 
     const onSubmitForm = (saveOnly: boolean) => {
         setSaveOnly(saveOnly);
@@ -151,6 +152,18 @@ const Tools: FC = () => {
         const datas = prepareLayersForApi(values);
         mutate(datas);
     };
+
+    const copyFromCommunity = useCallback(
+        (reUsedCommunity?: CommunityResponseDTO) => {
+            if (!reUsedCommunity) {
+                return;
+            }
+
+            const functionalities = getFunctionalities(reUsedCommunity.functionalities);
+            setFormValue("functionalities", functionalities);
+        },
+        [setFormValue]
+    );
 
     return (
         <div>
@@ -178,6 +191,14 @@ const Tools: FC = () => {
                 <FormProvider {...methods}>
                     <div>
                         <h2>{t("simple_tools_title")}</h2>
+                        <ReuseCommunityConfig
+                            title={tmc("tools.reuse_label")}
+                            description={tmc("tools.reuse_description")}
+                            confirmation={tmc("tools.reuse_confirmation")}
+                            onCopy={(reUsedCommunity) => {
+                                copyFromCommunity(reUsedCommunity);
+                            }}
+                        />
                         <SimpleLayerTools />
                         {Object.keys(editableLayers).length === 0 ? (
                             <div className={fr.cx("fr-my-2v")}>

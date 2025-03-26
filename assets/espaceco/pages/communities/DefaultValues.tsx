@@ -42,15 +42,17 @@ const getZoomAndCenteringDefaultValues = (community: CommunityResponseDTO): Zoom
         p = feature.getGeometry() ? (feature.getGeometry() as Point).getCoordinates() : olDefaults.center;
     } else p = olDefaults.center;
 
-    const values = {
+    return {
         position: p,
         zoom: community.zoom ?? olDefaults.zoom,
         minZoom: community.min_zoom ?? 5,
         maxZoom: community.max_zoom ?? 18,
         extent: community.extent,
     };
+};
 
-    return values;
+const getFunctionalities = (functionalities: string[]) => {
+    return functionalities.filter((f) => allFunctionalities.includes(f));
 };
 
 const getToolsDefaultValues = (community: CommunityResponseDTO, editableLayers: CommunitiesLayers): ToolsFormType => {
@@ -64,7 +66,7 @@ const getToolsDefaultValues = (community: CommunityResponseDTO, editableLayers: 
     }, {});
 
     return {
-        functionalities: community.functionalities.filter((f) => allFunctionalities.includes(f)),
+        functionalities: getFunctionalities(community.functionalities),
         layer_tools: layerTools,
     };
 };
@@ -78,4 +80,4 @@ const getReportsDefaultValues = (community: CommunityResponseDTO): ReportFormTyp
     };
 };
 
-export { getDescriptionDefaultValues, getReportsDefaultValues, getToolsDefaultValues, getZoomAndCenteringDefaultValues };
+export { getDescriptionDefaultValues, getReportsDefaultValues, getToolsDefaultValues, getZoomAndCenteringDefaultValues, getFunctionalities };

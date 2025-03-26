@@ -69,6 +69,7 @@ import { AlertsFrTranslations } from "../../entrepot/pages/config/Alerts.locale"
 import { KeyValueListFrTranslations } from "@/components/Input/KeyValueList.locale";
 
 import type { Translations } from "../types";
+import { ReuseCommunityConfigFrTranslations } from "@/espaceco/pages/communities/ReuseCommunityConfig.locale";
 
 export const translations: Translations<"fr"> = {
     Common: commonFrTranslations,
@@ -116,6 +117,7 @@ export const translations: Translations<"fr"> = {
     AccessRestrictions: AccessRestrictionsFrTranslations,
     EspaceCoCommunityList: EspaceCoCommunityListFrTranslations,
     SearchCommunity: SearchCommunityFrTranslations,
+    ReuseCommunityConfig: ReuseCommunityConfigFrTranslations,
     ManageCommunity: ManageCommunityFrTranslations,
     CreateCommunityDialog: CreateCommunityDialogFrTranslations,
     CreateCommunity: CreateCommunityFrTranslations,
