@@ -1,0 +1,12 @@
+{
+    "processing": "af012611-13eb-4a18-8d04-9b7604a031cc",
+    "inputs": {
+        "upload": ["139811cf-0d59-45e4-b2a0-565c98970d23"]
+    },
+    "output": {
+        "stored_data": {
+            "name": "hydro-ardennes-l93_zip_07-04-2024",
+            "storage_tags": ["VECTEUR"]
+        }
+    }
+}
