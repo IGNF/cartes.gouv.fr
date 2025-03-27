@@ -1,10 +1,27 @@
 # Traitements (`processings`)
 
 > [!NOTE]
-> La liste de paramètres est non exhaustive. Seulement les paramètres exploités par cartes.gouv.fr sont listés ici.
+> La liste de paramètres est non exhaustive. Seulement les paramètres exploités par cartes.gouv.fr sont listés ici. Consulter la documentation de chaque traitement pour connaître tous les paramètres : GET https://data.geopf.fr/api/datastores/{datastore}/processings/{processing}
 
 > [!IMPORTANT]
 > string (number) signifie que la valeur est un nombre mais l'API attend qu'elle soit envoyée sous forme de chaîne de caractères. Par exemple, `1` est envoyé sous la forme `"1"`.
+
+## Intégration de données vecteur livrées en base
+
+Ce traitement permet de stocker dans les bases de données PostgreSQL de la plateforme des données vecteurs livrées. Les formats pris en charge sont le CSV, le Shapefile, le Geopackage et le GeoJSON _(seulement le Geopackage est pris en charge par cartes.gouv.fr aujourd'hui)_. Il est également possible de préciser un autre système afin de réaliser une reprojection à l'intégration.
+
+[Exemple de corps de requête JSON](./examples/integration_vector_data_to_db_postgres.json)
+
+**Lien du formulaire** : https\://cartes.gouv.fr/entrepot/`datastore`/donnees/televersement
+
+Une livraison (`upload`) est créée à la soumission de ce formulaire. Une fois que toutes les vérifications associées à la livraison sont validées, le traitement est exécuté en arrière-plan par cartes.gouv.fr.
+
+| paramètre                         | description                           | type     | commentaire                                                              |
+| --------------------------------- | ------------------------------------- | -------- | ------------------------------------------------------------------------ |
+| `processing`                      | id du traitement                      | string   | saisie auto, non modifiable par l'utilisateur                            |
+| `inputs[0].upload[0]`             | id de la livraison (VECTOR) en entrée | string   | `upload._id`, saisie par l'utilisateur                                   |
+| `output.stored_data.name`         | nom de la donnée stockée en sortie    | string   | `upload.name`, saisie par l'utilisateur                                  |
+| `output.stored_data.storage_tags` | tags du stockage                      | string[] | valeur fixe : ["VECTEUR"], saisie auto, non modifiable par l'utilisateur |
 
 ## Calcul de pyramide vecteur
 
@@ -12,7 +29,7 @@ Génération ou mise à jour d'une pyramide de tuiles vectorielles à partir d'u
 
 [Exemple de corps de requête JSON](./examples/pyramid_vector_generation.json)
 
-Lien du formulaire : https\://cartes.gouv.fr/entrepot/`datastore`/pyramide-vecteur/ajout?vectorDbId=`vectorDbId`&technicalName=`outputStoredDataName`&datasheetName=`datasheetName`
+**Lien du formulaire** : https\://cartes.gouv.fr/entrepot/`datastore`/pyramide-vecteur/ajout?vectorDbId=`vectorDbId`&technicalName=`outputStoredDataName`&datasheetName=`datasheetName`
 
 | paramètre                                | description                                   | type            | commentaire                                                                                                           |
 | ---------------------------------------- | --------------------------------------------- | --------------- | --------------------------------------------------------------------------------------------------------------------- |
@@ -34,7 +51,7 @@ Il n'y a pas besoin de donnée en entrée. Sont fournis en paramètres toutes le
 
 [Exemple de corps de requête JSON](./examples/pyramid_raster_generation_wmsv_harvesting.json)
 
-Lien du formulaire : https\://cartes.gouv.fr/entrepot/`datastore`/pyramide-raster/ajout?offeringId=`wmsv_service_id`&datasheetName=`datasheetName`
+**Lien du formulaire** : https\://cartes.gouv.fr/entrepot/`datastore`/pyramide-raster/ajout?offeringId=`wmsv_service_id`&datasheetName=`datasheetName`
 
 `wmsv_service` = récupération d'informations sur le service en entrée à partir de `wmsv_service_id`
 

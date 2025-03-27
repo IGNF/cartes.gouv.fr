@@ -11,3 +11,4 @@ Voici les liens de sa documentation en [production](https://geoplateforme.github
     - [extra](./extra.md)
     - [annexes](./annexes.md)
     - [fichiers statiques](./statics.md)
+- [Traitements](./processings/README.md)
