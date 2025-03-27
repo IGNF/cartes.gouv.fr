@@ -45,7 +45,9 @@ npm install --global yarn
     - `yarn build` : générer les assets en mode production
     - `yarn build:dev` : générer les assets en mode développement
 
-7. Consulter le site au : https://localhost/cartes.gouv.fr
+7. Réinitialiser le cache symfony : `php bin/console cache:clear`
+
+8. Consulter le site au : https://localhost/cartes.gouv.fr
 
 ## Docker sous Linux (recommandé)
 
@@ -64,7 +66,8 @@ npm install --global yarn
     - `composer install`
     - `yarn install`
     - `yarn dev`, `yarn build` ou `yarn build:dev`
-5. Consulter le site au http://localhost:9092 ou https://cartesgouvfr-dev.docker.localhost (si traefik est configuré)
+5. Réinitialiser le cache symfony : `php bin/console cache:clear`
+6. Consulter le site au http://localhost:9092 ou https://cartesgouvfr-dev.docker.localhost (si traefik est configuré)
 
 ### Installation (mode prod)
 
