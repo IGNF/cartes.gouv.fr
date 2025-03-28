@@ -27,7 +27,6 @@ const gitInfo = getGitInfo();
 
 export default defineConfig({
     define: {
-        __GIT_BRANCH__: JSON.stringify(gitInfo?.branch),
         __GIT_TAG__: JSON.stringify(gitInfo?.tag),
         __GIT_COMMIT__: JSON.stringify(gitInfo?.commit),
     },

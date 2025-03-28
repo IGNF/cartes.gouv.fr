@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1-labs
 #----------------------------------------------------------------------
 # Installer les dépendances PHP dans une couche dédiée
 #----------------------------------------------------------------------
@@ -128,7 +129,7 @@ RUN a2enmod rewrite remoteip
 FROM base_app AS prod
 ARG project_dir
 WORKDIR ${project_dir}
-COPY . .
+COPY --exclude=.git --exclude=var . .
 COPY --from=deps_php ${project_dir}/vendor vendor
 COPY --from=deps_php ${project_dir}/public/bundles public/bundles
 COPY --from=deps_nodejs ${project_dir}/public/build public/build

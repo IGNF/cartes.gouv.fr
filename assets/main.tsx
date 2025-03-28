@@ -31,4 +31,4 @@ root.render(
     </React.StrictMode>
 );
 
-console.info("Version:", __GIT_TAG__);
+console.info(`cartes.gouv.fr: ${__GIT_TAG__}`);
