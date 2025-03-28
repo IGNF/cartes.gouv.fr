@@ -10,6 +10,8 @@ const { i18n } = declareComponentKeys<
     | "metadata.description_form.hint_technical_name"
     | "metadata.description_form.public_name"
     | "metadata.description_form.hint_public_name"
+    | "metadata.description_form.service_name"
+    | "metadata.description_form.hint_service_name"
     | "metadata.description_form.description"
     | "metadata.description_form.hint_description"
     | "metadata.description_form.placeholder_description"
@@ -66,9 +68,12 @@ export const MetadatasFormFrTranslations: Translations<"fr">["MetadatasForm"] = 
     "metadata.upload_form.used_format": "Formats de fichiers autorisés : .xml",
     "metadata.description_form.description_title": "Description",
     "metadata.description_form.technical_name": "Nom technique du service",
-    "metadata.description_form.hint_technical_name": "Nom technique qui sera visible de vos utilisateurs dans l’adresse de votre service",
+    "metadata.description_form.hint_technical_name": "Nom technique du service qui sera utilisé par les interfaces logicielles clientes.",
     "metadata.description_form.public_name": "Intitulé (nom public)",
-    "metadata.description_form.hint_public_name": "Nom caractéristique et souvent unique sous lequel la ressource est connue",
+    "metadata.description_form.hint_public_name":
+        "Nom caractéristique  sous lequel la ressource est connue. Il correspond à l’intitulé de la métadonnée de données.",
+    "metadata.description_form.service_name": "Titre du service",
+    "metadata.description_form.hint_service_name": "Intitulé permettant aux utilisateurs finaux d’identifier aisément le service.",
     "metadata.description_form.description": "Résumé",
     "metadata.description_form.hint_description": "Bref résumé narratif du contenu de la ressource",
     "metadata.description_form.placeholder_description": "Veuillez saisir le texte Markdown",
@@ -111,9 +116,9 @@ export const MetadatasFormFrTranslations: Translations<"fr">["MetadatasForm"] = 
     "attribution_form.hint_text": "Texte bref à faire figurer sur les cartes pour désigner la source des données",
     "attribution_form.url": "URL de l’attribution (optionnel)",
     "attribution_form.hint_url":
-        "Adresse de la page web vers laquelle doit pointer l’attribution. Il peut s'agir du site web de l’organisme producteur, d’une page de conditions d’utilisation des données ou de toute autre URL valide en lien avec les données représentées.",
+        "Adresse de la page web vers laquelle doit pointer l’attribution. Il peut s’agir du site web de l’organisme producteur, d’une page de conditions d’utilisation des données ou de toute autre URL valide en lien avec les données représentées.",
     "metadata.additionnal_infos_form.language": "Langue des métadonnées",
-    "metadata.additionnal_infos_form.hint_language": "La ou les langues utilisées pour décrire les métadonnées",
+    "metadata.additionnal_infos_form.hint_language": "La langue utilisée pour décrire les métadonnées",
     "metadata.additionnal_infos_form.charset": "Jeu de caractères de la ressource",
     "metadata.additionnal_infos_form.hint_charset":
         "Codification utilisée par la métadonnée pour restituer les caractères spécifiques de la langue (accents, caractères spéciaux …). Utf8 correspond à un codage souvent employé pour les caractères du français.",
@@ -128,7 +133,7 @@ export const MetadatasFormFrTranslations: Translations<"fr">["MetadatasForm"] = 
         <>
             {"Échelle approximative à laquelle les données sont les plus pertinentes."}
             <br />
-            {"Exemple : 25 000 si les données sont faites pour un affichage à l’échelle d'une carte topographique."}
+            {"Exemple : 25 000 si les données sont faites pour un affichage à l’échelle d’une carte topographique."}
         </>
     ),
 };
@@ -142,6 +147,8 @@ export const MetadatasFormEnTranslations: Translations<"en">["MetadatasForm"] = 
     "metadata.description_form.hint_technical_name": "Technical name that will be visible to your users in the address of your service",
     "metadata.description_form.public_name": "Public name (title)",
     "metadata.description_form.hint_public_name": "Characteristic and often unique name by which the resource is known",
+    "metadata.description_form.service_name": undefined,
+    "metadata.description_form.hint_service_name": undefined,
     "metadata.description_form.description": "Description",
     "metadata.description_form.hint_description": "Brief narrative summary of resource content",
     "metadata.description_form.placeholder_description": undefined,
@@ -179,9 +186,9 @@ export const MetadatasFormEnTranslations: Translations<"en">["MetadatasForm"] = 
     "attribution_form.hint_text": "Brief text to appear on maps to designate the data source",
     "attribution_form.url": "Attribution URL",
     "attribution_form.hint_url":
-        "Address of the web page to which the attribution should point. This may be the producing organization's website, a data use conditions page, or any other valid URL related to the data represented.",
+        "Address of the web page to which the attribution should point. This may be the producing organization’s website, a data use conditions page, or any other valid URL related to the data represented.",
     "metadata.additionnal_infos_form.language": "Metadata language",
-    "metadata.additionnal_infos_form.hint_language": "The language(s) used to describe the metadata",
+    "metadata.additionnal_infos_form.hint_language": "The language used to describe the metadata",
     "metadata.additionnal_infos_form.charset": "Resource charset",
     "metadata.additionnal_infos_form.hint_charset":
         "Coding used by the metadata to restore the specific characters of the language (accents, special characters, etc.). Utf8 corresponds to an encoding often used for French characters.",

@@ -11,7 +11,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -43,6 +43,8 @@ class SecurityController extends AbstractController
 
         $sessionExpired = $request->query->get('session_expired');
         $request->getSession()->set('session_expired', $sessionExpired);
+
+        $request->getSession()->set('app', $request->query->get('app', null));
 
         //  création d'un utilisateur bidon si en mode test
         if ('test' === $params->get('app_env')) {

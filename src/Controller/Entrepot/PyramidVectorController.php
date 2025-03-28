@@ -6,9 +6,9 @@ use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Constants\EntrepotApi\Sandbox;
 use App\Controller\ApiControllerInterface;
-use App\Dto\PyramidVector\AddPyramidDTO;
-use App\Dto\PyramidVector\CompositionDTO;
-use App\Dto\PyramidVector\PublishPyramidDTO;
+use App\Dto\Services\PyramidVector\PyramidVectorCompositionDTO;
+use App\Dto\Services\PyramidVector\PyramidVectorGenerateDTO;
+use App\Dto\Services\PyramidVector\PyramidVectorTmsServiceDTO;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\CapabilitiesService;
@@ -21,7 +21,7 @@ use App\Services\EntrepotApi\StoredDataApiService;
 use App\Services\SandboxService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 #[Route(
     '/api/datastores/{datastoreId}/pyramid-vector',
@@ -32,7 +32,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class PyramidVectorController extends ServiceController implements ApiControllerInterface
 {
     public function __construct(
-        DatastoreApiService $datastoreApiService,
+        private DatastoreApiService $datastoreApiService,
         private ConfigurationApiService $configurationApiService,
         private StoredDataApiService $storedDataApiService,
         private ProcessingApiService $processingApiService,
@@ -45,7 +45,7 @@ class PyramidVectorController extends ServiceController implements ApiController
     }
 
     #[Route('/add', name: 'add', methods: ['POST'])]
-    public function add(string $datastoreId, #[MapRequestPayload] AddPyramidDTO $dto): JsonResponse
+    public function add(string $datastoreId, #[MapRequestPayload] PyramidVectorGenerateDTO $dto): JsonResponse
     {
         try {
             // TODO
@@ -117,7 +117,7 @@ class PyramidVectorController extends ServiceController implements ApiController
     public function addTms(
         string $datastoreId,
         string $pyramidId,
-        #[MapRequestPayload] PublishPyramidDTO $dto,
+        #[MapRequestPayload] PyramidVectorTmsServiceDTO $dto,
     ): JsonResponse {
         try {
             $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId);
@@ -154,6 +154,12 @@ class PyramidVectorController extends ServiceController implements ApiController
                 $this->addPermissionForCurrentCommunity($datastoreId, $offering);
             }
 
+            // création d'une permission pour la communauté config
+            if (true === $dto->allow_view_data) {
+                $communityId = $this->getParameter('config')['community_id'];
+                $this->addPermissionForCommunity($datastoreId, $communityId, $offering);
+            }
+
             // création ou mise à jour de metadata
             $formData = json_decode(json_encode($dto), true);
             if ($this->sandboxService->isSandboxDatastore($datastoreId)) {
@@ -172,7 +178,7 @@ class PyramidVectorController extends ServiceController implements ApiController
         string $datastoreId,
         string $pyramidId,
         string $offeringId,
-        #[MapRequestPayload] PublishPyramidDTO $dto,
+        #[MapRequestPayload] PyramidVectorTmsServiceDTO $dto,
     ): JsonResponse {
         try {
             // récup config et offering existants
@@ -195,13 +201,33 @@ class PyramidVectorController extends ServiceController implements ApiController
                 $this->configurationApiService->removeOffering($datastoreId, $oldOffering['_id']);
 
                 $offering = $this->configurationApiService->addOffering($datastoreId, $oldConfiguration['_id'], $endpoint['_id'], $endpoint['open']);
-
-                if (false === $offering['open']) {
-                    // création d'une permission pour la communauté actuelle
-                    $this->addPermissionForCurrentCommunity($datastoreId, $offering);
-                }
             } else {
                 $offering = $this->configurationApiService->syncOffering($datastoreId, $offeringId);
+            }
+
+            if (false === $offering['open']) {
+                // création d'une permission pour la communauté config
+                if (true === $dto->allow_view_data) {
+                    $communityId = $this->getParameter('config')['community_id'];
+                    $this->addPermissionForCommunity($datastoreId, $communityId, $offering);
+                } else {
+                    $communityId = $this->getParameter('config')['community_id'];
+                    $permissions = $this->datastoreApiService->getPermissions($datastoreId);
+
+                    $targetPermission = array_filter($permissions, function ($permission) use ($offering, $communityId) {
+                        return isset($permission['offerings'])
+                            && in_array($offering['_id'], array_column($permission['offerings'], '_id'))
+                            && isset($permission['beneficiary']['_id'])
+                            && $permission['beneficiary']['_id'] === $communityId;
+                    });
+
+                    if (!empty($targetPermission)) {
+                        $permissionId = reset($targetPermission)['_id'];
+                        $this->datastoreApiService->removePermission($datastoreId, $permissionId);
+                    }
+                }
+                // création d'une permission pour la communauté actuelle
+                $this->addPermissionForCurrentCommunity($datastoreId, $offering);
             }
 
             $offering['configuration'] = $configuration;
@@ -222,16 +248,16 @@ class PyramidVectorController extends ServiceController implements ApiController
     /**
      * @param array<mixed> $pyramid
      */
-    private function getConfigRequestBody(PublishPyramidDTO $dto, array $pyramid, bool $editMode = false, ?string $datastoreId = null): array
+    private function getConfigRequestBody(PyramidVectorTmsServiceDTO $dto, array $pyramid, bool $editMode = false, ?string $datastoreId = null): array
     {
         // Recherche de bottom_level et top_level
         $levels = $this->getPyramidZoomLevels($pyramid);
 
         $requestBody = [
             'type' => ConfigurationTypes::WMTSTMS,
-            'name' => $dto->public_name,
+            'name' => $dto->service_name,
             'type_infos' => [
-                'title' => $dto->public_name,
+                'title' => $dto->service_name,
                 'abstract' => json_encode($dto->description),
                 'keywords' => $dto->category,
                 'used_data' => [[
@@ -262,7 +288,7 @@ class PyramidVectorController extends ServiceController implements ApiController
     }
 
     /**
-     * @param array<CompositionDTO> $composition
+     * @param array<PyramidVectorCompositionDTO> $composition
      */
     private function getLevels($composition): array
     {

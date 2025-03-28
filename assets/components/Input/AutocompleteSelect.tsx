@@ -27,7 +27,7 @@ interface AutocompleteSelectProps<T> {
     /** utiliser `controllerField` et `onChange` si contrôlé par le Controller de react-hook-form, ne pas utiliser en même temps que `value` */
     controllerField?: ControllerRenderProps;
     /** utiliser `value` et `onChange` si contrôlé par useState, ne pas utiliser en même temps que `controllerField` */
-    value?: T[];
+    value?: T[] | T;
 }
 
 const AutocompleteSelect = <T,>(props: AutocompleteSelectProps<T>) => {

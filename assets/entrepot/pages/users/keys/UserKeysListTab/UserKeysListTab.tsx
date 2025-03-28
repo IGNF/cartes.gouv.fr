@@ -19,9 +19,9 @@ import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../../modules/jsonFetch";
 import { routes } from "../../../../../router/router";
-import { useSnackbarStore } from "../../../../../stores/SnackbarStore";
 import api from "../../../../api";
 import UserKeyLink from "./UserKeyLink";
+import TextCopyToClipboard from "@/components/Utils/TextCopyToClipboard";
 
 type UserKeysListTabProps = {
     keys: UserKeyDetailedWithAccessesResponseDto[] | undefined;
@@ -31,8 +31,6 @@ type UserKeysListTabProps = {
 const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
     const { t: tCommon } = useTranslation("Common");
     const { t } = useTranslation("UserKeysListTab");
-
-    const setMessage = useSnackbarStore((state) => state.setMessage);
 
     const [currentKey, setCurrentKey] = useState<string | undefined>(undefined);
 
@@ -90,7 +88,7 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
                 <p>{t("no_keys")}</p>
             ) : (
                 keys.map((accessKey) => {
-                    const groupedServices = accessKey.accesses.reduce(
+                    const groupedServices = (accessKey.accesses ?? []).reduce(
                         (acc, access) => {
                             const type = access.offering.type;
                             if (!acc[type]) {
@@ -120,25 +118,11 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
                                     {accessKey.accesses !== undefined && accessKey.accesses.length !== 0 ? (
                                         <>
                                             {accessKey.type && accessKey.type === UserKeyDetailsResponseDtoUserKeyInfoDtoTypeEnum.HASH && (
-                                                <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-2v")}>
-                                                    {t("hash_value", { value: (accessKey.type_infos as HashInfoDto).hash })}
-
-                                                    {(accessKey.type_infos as HashInfoDto).hash !== undefined && (
-                                                        <Button
-                                                            className={fr.cx("fr-ml-2v")}
-                                                            title={tCommon("copy")}
-                                                            priority={"tertiary no outline"}
-                                                            iconId={"ri-file-copy-2-line"}
-                                                            onClick={async () => {
-                                                                const hash = (accessKey.type_infos as HashInfoDto).hash;
-                                                                if (hash !== undefined) {
-                                                                    await navigator.clipboard.writeText(hash);
-                                                                    setMessage(t("hash_value_copied"));
-                                                                }
-                                                            }}
-                                                        />
-                                                    )}
-                                                </div>
+                                                <TextCopyToClipboard
+                                                    label={t("hash_value")}
+                                                    text={(accessKey.type_infos as HashInfoDto).hash ?? t("unavailable")}
+                                                    disabled={!(accessKey.type_infos as HashInfoDto).hash}
+                                                />
                                             )}
                                             <div className={fr.cx("fr-mb-1v")}>{t("services")}</div>
                                             {Object.entries(groupedServices).map(([type, services]) => {

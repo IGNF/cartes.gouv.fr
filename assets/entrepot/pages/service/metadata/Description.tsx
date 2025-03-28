@@ -27,7 +27,7 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
 
     const {
         register,
-        formState: { errors },
+        formState: { errors, dirtyFields },
         setValue: setFormValue,
         watch,
         control,
@@ -57,10 +57,44 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
         })();
     }, [setFormValue, metadata]);
 
+    useEffect(() => {
+        const { unsubscribe } = watch(({ public_name }, { name }) => {
+            // si l'utilisateur n'a pas modifié la valeur de service_name
+            if (dirtyFields.service_name === true) {
+                return;
+            }
+
+            // si le champ public_name a été modifié, on synchronise avec le champ service_name
+            if (public_name && name === "public_name") {
+                setFormValue("service_name", public_name);
+            }
+        });
+
+        return () => unsubscribe();
+    }, [watch, setFormValue, dirtyFields.service_name]);
+
     return (
         <div className={fr.cx(!visible && "fr-hidden")}>
             <p>{tCommon("mandatory_fields")}</p>
             <h3>{t("metadata.description_form.description_title")}</h3>
+            <Input
+                label={t("metadata.description_form.public_name")}
+                hintText={t("metadata.description_form.hint_public_name")}
+                state={errors.public_name ? "error" : "default"}
+                stateRelatedMessage={errors?.public_name?.message?.toString()}
+                nativeInputProps={{
+                    ...register("public_name"),
+                }}
+            />
+            <Input
+                label={t("metadata.description_form.service_name")}
+                hintText={t("metadata.description_form.hint_service_name")}
+                state={errors.service_name ? "error" : "default"}
+                stateRelatedMessage={errors?.service_name?.message?.toString()}
+                nativeInputProps={{
+                    ...register("service_name"),
+                }}
+            />
             <Input
                 label={t("metadata.description_form.technical_name")}
                 hintText={t("metadata.description_form.hint_technical_name")}
@@ -70,15 +104,6 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
                     ...register("technical_name"),
                 }}
                 disabled={editMode === true}
-            />
-            <Input
-                label={t("metadata.description_form.public_name")}
-                hintText={t("metadata.description_form.hint_public_name")}
-                state={errors.public_name ? "error" : "default"}
-                stateRelatedMessage={errors?.public_name?.message?.toString()}
-                nativeInputProps={{
-                    ...register("public_name"),
-                }}
             />
             <Controller
                 control={control}
@@ -114,7 +139,7 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
                     <AutocompleteSelect
                         label={t("metadata.description_form.category")}
                         hintText={t("metadata.description_form.hint_category")}
-                        options={Object.values(categories).sort()}
+                        options={Object.values(categories).sort((a, b) => a.localeCompare(b))}
                         searchFilter={{ limit: 40 }}
                         state={errors.category ? "error" : "default"}
                         stateRelatedMessage={errors?.category?.message?.toString()}

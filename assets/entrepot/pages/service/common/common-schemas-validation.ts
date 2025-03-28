@@ -26,6 +26,7 @@ export class CommonSchemasValidation {
                     .string()
                     .required(tValidMD("metadatas.technical_name_error"))
                     .matches(regex.technical_name, tValidMD("metadatas.technical_name_regex"))
+                    .transform((value) => value.trim())
                     .test({
                         name: "is-unique",
                         message: tValidMD("metadatas.technical_name_unicity_error"),
@@ -40,7 +41,14 @@ export class CommonSchemasValidation {
                             return !existingLayerNames?.includes(technicalName);
                         },
                     }),
-                public_name: yup.string().required(tValidMD("metadatas.public_name_error")),
+                public_name: yup
+                    .string()
+                    .required(tValidMD("metadatas.public_name_error"))
+                    .transform((value) => value.trim()),
+                service_name: yup
+                    .string()
+                    .required(tValidMD("metadatas.service_name_error"))
+                    .transform((value) => value.trim()),
                 description: yup.string().required(tValidMD("metadatas.description_error")),
                 identifier: yup
                     .string()
@@ -72,16 +80,12 @@ export class CommonSchemasValidation {
                 // NOTE : attribution rendu non obligatoire
                 attribution_text: yup.string(), //.required(tValidMD("attribution.text_required_error")),
                 attribution_url: yup.string().url(tValidMD("attribution.url_error")), //.required(tValidMD("attribution.url_required_error")),
-                languages: yup
-                    .array()
-                    .of(
-                        yup.object({
-                            language: yup.string(),
-                            code: yup.string(),
-                        })
-                    )
-                    .required(tValidMD("metadatas.language_error"))
-                    .min(1, tValidMD("metadatas.language_error")),
+                language: yup
+                    .object({
+                        language: yup.string(),
+                        code: yup.string(),
+                    })
+                    .required(tValidMD("metadatas.language_error")),
                 charset: yup.string().required(tValidMD("metadatas.charset_error")),
                 projection: yup.string().required(tValidMD("metadatas.projection_error")),
                 // encoding: yup.string().required(tValidMD("metadatas.encoding_error")),

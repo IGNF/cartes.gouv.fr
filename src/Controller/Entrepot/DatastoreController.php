@@ -13,9 +13,10 @@ use App\Services\EntrepotApi\ServiceAccount;
 use App\Services\SandboxService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 #[Route(
     '/api/datastores',
@@ -28,7 +29,7 @@ class DatastoreController extends AbstractController implements ApiControllerInt
     public function __construct(
         private DatastoreApiService $datastoreApiService,
         private SandboxService $sandboxService,
-        private ServiceAccount $serviceAccount
+        private ServiceAccount $serviceAccount,
     ) {
     }
 
@@ -68,7 +69,7 @@ class DatastoreController extends AbstractController implements ApiControllerInt
     public function getEndpoints(
         string $datastoreId,
         #[MapQueryParameter] ?string $type = null,
-        #[MapQueryParameter] ?bool $open = null
+        #[MapQueryParameter] ?bool $open = null,
     ): JsonResponse {
         $endpoints = $this->datastoreApiService->getEndpointsList($datastoreId, [
             'type' => $type,
@@ -79,9 +80,9 @@ class DatastoreController extends AbstractController implements ApiControllerInt
     }
 
     #[Route('/{datastoreId}/permissions', name: 'get_permissions', methods: ['GET'])]
-    public function getPermissions(string $datastoreId): JsonResponse
+    public function getPermissions(string $datastoreId, Request $request): JsonResponse
     {
-        $permissions = $this->datastoreApiService->getPermissions($datastoreId);
+        $permissions = $this->datastoreApiService->getPermissions($datastoreId, $request->query->all());
 
         return $this->json($permissions);
     }

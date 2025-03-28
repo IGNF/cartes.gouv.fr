@@ -6,8 +6,8 @@ class CswMetadataLayer
 {
     public function __construct(
         public string $name,
-        public string $endpointType,
-        public string $endpointUrl,
+        public string $gmdOnlineResourceProtocol,
+        public string $gmdOnlineResourceUrl,
         public string $offeringId,
     ) {
     }

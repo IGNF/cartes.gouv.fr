@@ -4,7 +4,7 @@ on:
     push:
         branches: ["*"]
         # Publish semver tags as releases.
-        tags: ["v*.*.*"]
+        tags: ["v*"]
     pull_request:
         branches: ["*"]
 
@@ -21,6 +21,64 @@ jobs:
         permissions:
             contents: read
             packages: write
+            security-events: write
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            # Workaround: https://github.com/docker/build-push-action/issues/461
+            - name: Setup Docker buildx
+              uses: docker/setup-buildx-action@v3
+
+            # Extract metadata (tags, labels) for Docker
+            # https://github.com/docker/metadata-action?tab=readme-ov-file#semver
+            - name: Extract Docker metadata
+              id: meta
+              uses: docker/metadata-action@v5
+              with:
+                  images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+                  tags: |
+                      type=ref,event=branch
+                      type=ref,event=pr
+                      type=semver,pattern={{version}}
+                  # type=semver,pattern={{major}}.{{minor}}
+
+            # https://github.com/docker/build-push-action
+            - name: Build Docker image
+              id: build
+              uses: docker/build-push-action@v6
+              with:
+                  context: .
+                  file: .docker/Dockerfile
+                  pull: true
+                  push: false
+                  load: true
+                  target: prod
+                  tags: ${{ steps.meta.outputs.tags }}
+                  labels: ${{ steps.meta.outputs.labels }}
+                  cache-from: type=gha
+                  cache-to: type=gha,mode=max
+
+            - name: Run Trivy vulnerability scanner
+              uses: aquasecurity/trivy-action@0.30.0
+              with:
+                  image-ref: ${{ steps.meta.outputs.tags }}
+                  format: "sarif"
+                  output: "trivy-results.sarif"
+
+            - name: Upload Trivy scan results to GitHub Security tab
+              uses: github/codeql-action/upload-sarif@v3
+              with:
+                  sarif_file: "trivy-results.sarif"
+
+    push:
+        if: startsWith(github.event.ref, 'refs/tags/v')
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            packages: write
         steps:
             - name: Checkout repository
               uses: actions/checkout@v4
@@ -32,7 +90,6 @@ jobs:
             # Login against a Docker registry (only if semver tag)
             # https://github.com/docker/login-action
             - name: Log into registry ${{ env.REGISTRY }}
-              if: startsWith(github.event.ref, 'refs/tags/v')
               uses: docker/login-action@v3
               with:
                   registry: ${{ env.REGISTRY }}
@@ -40,23 +97,28 @@ jobs:
                   password: ${{ secrets.GITHUB_TOKEN }}
 
             # Extract metadata (tags, labels) for Docker
-            # https://github.com/docker/metadata-action
+            # https://github.com/docker/metadata-action?tab=readme-ov-file#semver
             - name: Extract Docker metadata
               id: meta
               uses: docker/metadata-action@v5
               with:
                   images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+                  tags: |
+                      type=ref,event=branch
+                      type=ref,event=pr
+                      type=semver,pattern={{version}}
+                      type=semver,pattern={{major}}.{{minor}}
 
-            ## Build and push Docker image with Buildx (push only if semver tag)
-            # https://github.com/docker/build-push-action
-            - name: Build and push Docker image
-              id: build-and-push
+            - name: Build & Push image to github registry and generate SBOM
               uses: docker/build-push-action@v6
               with:
                   context: .
                   file: .docker/Dockerfile
                   pull: true
-                  push: ${{ startsWith(github.event.ref, 'refs/tags/v') }}
+                  push: true
+                  load: false
+                  sbom: true
+                  provenance: mode=max
                   target: prod
                   tags: ${{ steps.meta.outputs.tags }}
                   labels: ${{ steps.meta.outputs.labels }}

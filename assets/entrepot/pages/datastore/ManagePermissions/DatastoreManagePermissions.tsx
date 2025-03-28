@@ -34,9 +34,9 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
     // Les permissions
     const { data: permissions, status: permissionStatus } = useQuery<DatastorePermissionResponseDto[]>({
         queryKey: RQKeys.datastore_permissions(datastoreId),
-        queryFn: ({ signal }) => api.datastore.getPermissions(datastoreId, { signal }),
-        staleTime: 60000,
-        refetchInterval: 60000,
+        queryFn: ({ signal }) => api.datastore.getPermissions(datastoreId, {}, { signal }),
+        staleTime: 30000,
+        refetchInterval: 30000,
     });
 
     /* Suppression d'une permission */

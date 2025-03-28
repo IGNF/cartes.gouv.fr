@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { FC, useEffect, useMemo, useState } from "react";
 
 import { type CartesStyle, OfferingStatusEnum, OfferingTypeEnum, type Service, StoredDataTypeEnum, type TypeInfosWithBbox } from "../../../../@types/app";
+import Main from "../../../../components/Layout/Main";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import type { MapInitial } from "../../../../components/Utils/RMap";
 import RMap from "../../../../components/Utils/RMap";
@@ -17,9 +18,9 @@ import { routes, useRoute } from "../../../../router/router";
 import api from "../../../api";
 import DiffuseServiceTab from "./DiffuseServiceTab";
 import ManageStylesTab from "./ManageStylesTab";
+import PrivateServiceExplanation from "./PrivateServiceExplanation";
 
 import "../../../../sass/pages/service_view.scss";
-import Main from "../../../../components/Layout/Main";
 
 type ServiceViewProps = {
     datastoreId: string;
@@ -40,7 +41,7 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
     const [currentStyle, setCurrentStyle] = useState<CartesStyle | undefined>();
 
     useEffect(() => {
-        if (!serviceQuery.data) return;
+        if (!serviceQuery.data || serviceQuery.data?.open === false) return;
 
         let initial: MapInitial = { type: serviceQuery.data.type, bbox: undefined, layers: [] };
 
@@ -151,12 +152,22 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
                         </div>
                     )}
 
-                    <div className={fr.cx("fr-grid-row", "fr-mb-4w")}>
-                        <div className={fr.cx("fr-col-12", "fr-col-md-8")}>{initialValues && <RMap initial={initialValues} currentStyle={currentStyle} />}</div>
-                        <div className={fr.cx("fr-col-12", "fr-col-md-4", "fr-p-1w", "fr-px-2w")}>
-                            <Tabs tabs={tabs} />
+                    {serviceQuery.data?.open === true ? (
+                        <div className={fr.cx("fr-grid-row", "fr-mb-4w")}>
+                            <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
+                                {initialValues && <RMap initial={initialValues} currentStyle={currentStyle} />}
+                            </div>
+                            <div className={fr.cx("fr-col-12", "fr-col-md-4", "fr-p-1w", "fr-px-2w")}>
+                                <Tabs tabs={tabs} />
+                            </div>
                         </div>
-                    </div>
+                    ) : (
+                        <div className={fr.cx("fr-grid-row", "fr-mb-4w")}>
+                            <div className={fr.cx("fr-col")}>
+                                <PrivateServiceExplanation datastoreId={datastoreId} />
+                            </div>
+                        </div>
+                    )}
                 </>
             )}
         </Main>

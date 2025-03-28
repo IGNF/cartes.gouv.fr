@@ -12,7 +12,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
 
 #[Route(
@@ -32,7 +32,7 @@ class MetadataController extends AbstractController implements ApiControllerInte
     #[Route('', name: 'get_list', methods: ['GET'])]
     public function getList(
         string $datastoreId,
-        Request $request
+        Request $request,
     ): JsonResponse {
         try {
             $query = $request->query->all();

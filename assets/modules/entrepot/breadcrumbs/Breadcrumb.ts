@@ -40,6 +40,8 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): Brea
 
         // case "accesses_request":
         case "my_account":
+            defaultProps.segments.push({ label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link });
+            return { ...defaultProps, currentPageLabel: t("my_account") };
         case "my_access_keys":
             defaultProps.segments.push({ label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link });
             return { ...defaultProps, currentPageLabel: t("my_access_keys") };

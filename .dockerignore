@@ -1,5 +1,7 @@
-/.git
 /.vscode
+/.history
+/.github
+/.husky
 /var
 /vendor/
 /node_modules/

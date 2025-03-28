@@ -1,3 +1,4 @@
+import Alert from "@codegouvfr/react-dsfr/Alert";
 import LayerSwitcher from "geopf-extensions-openlayers/src/packages/Controls/LayerSwitcher/LayerSwitcher";
 import SearchEngine from "geopf-extensions-openlayers/src/packages/Controls/SearchEngine/SearchEngine";
 import GeoportalZoom from "geopf-extensions-openlayers/src/packages/Controls/Zoom/GeoportalZoom";
@@ -61,13 +62,17 @@ const ExtentMap: FC<ExtentMapProps> = ({ extents, bbox }) => {
             .flat();
 
         const extentSource = new VectorSource({
-            features: extentFeatures as Feature[], // NOTE : un peu dégeu mais j'ai pas trouvé mieux comme solution qui marche
+            features: extentFeatures,
         });
 
         return new VectorLayer({
             source: extentSource,
         });
     }, [bbox, extents]);
+
+    const extentLayerSource = extentLayer?.getSource();
+    const extentLayerExtent = extentLayerSource?.getExtent();
+    const extentValid = extentLayerExtent?.every((c) => isFinite(c));
 
     const bgLayer = useMemo(() => {
         if (!capabilities) return;
@@ -133,13 +138,17 @@ const ExtentMap: FC<ExtentMapProps> = ({ extents, bbox }) => {
                 zoom: olDefaults.zoom,
             }),
         });
-        const extentLayerSource = extentLayer.getSource();
-        if (extentLayerSource) {
-            mapRef.current.getView().fit(extentLayerSource.getExtent());
+
+        if (extentLayerExtent !== undefined && extentValid === true) {
+            mapRef.current.getView().fit(extentLayerExtent);
         }
 
         return () => mapRef.current?.setTarget(undefined);
-    }, [bgLayer, extentLayer]);
+    }, [bgLayer, extentLayer, extentLayerExtent, extentValid]);
+
+    if (extentValid === false) {
+        return <Alert title="Emprise invalide" description="L'emprise de la donnée est invalide" severity="warning" />;
+    }
 
     return <div ref={mapTargetRef} className="map-view" />;
 };

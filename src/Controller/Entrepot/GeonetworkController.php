@@ -6,7 +6,7 @@ use App\Services\CswMetadataHelper;
 use App\Services\GeonetworkApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 #[Route(
     '/api/geonetwork/metadata',
@@ -36,7 +36,7 @@ class GeonetworkController extends AbstractController
         $cswMetadata = $this->cswMetadataHelper->fromXml($xml);
 
         $privateLayers = array_filter($cswMetadata->layers, function ($layer) {
-            $parts = parse_url($layer->endpointUrl);
+            $parts = parse_url($layer->gmdOnlineResourceUrl);
 
             return preg_match('/private/', $parts['path']);
         });

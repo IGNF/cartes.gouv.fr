@@ -29,7 +29,7 @@ const DashboardPro = () => {
     const setUser = useAuthStore((state) => state.setUser);
     const isApiEspaceCoDefined = useApiEspaceCoStore((state) => state.isUrlDefined);
 
-    const configDatastore = user?.communities_member?.find((community) => community.community?.datastore === api.alerts.datastoreId);
+    const configDatastore = user?.communities_member?.find((community) => community.community?._id === api.alerts.communityId);
     const canShowConfig = configDatastore?.rights?.includes(CommunityMemberDtoRightsEnum.ANNEX);
 
     const userQuery = useQuery<CartesUser, CartesApiException>({

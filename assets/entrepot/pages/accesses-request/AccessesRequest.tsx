@@ -10,6 +10,7 @@ import { ComponentProps, FC, ReactNode, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
+import { catalogueUrl } from "@/env";
 import { GeonetworkMetadataResponse } from "../../../@types/app";
 import LoadingText from "../../../components/Utils/LoadingText";
 import Wait from "../../../components/Utils/Wait";
@@ -17,7 +18,7 @@ import { useTranslation } from "../../../i18n/i18n";
 import SymfonyRouting from "../../../modules/Routing";
 import RQKeys from "../../../modules/entrepot/RQKeys";
 import { CartesApiException, jsonFetch } from "../../../modules/jsonFetch";
-import { catalogueUrl, routes } from "../../../router/router";
+import { routes } from "../../../router/router";
 import { useAuthStore } from "../../../stores/AuthStore";
 import api from "../../api";
 import Main from "../../../components/Layout/Main";

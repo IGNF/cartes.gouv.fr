@@ -7,6 +7,7 @@ use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Constants\EntrepotApi\Sandbox;
 use App\Constants\EntrepotApi\StaticFileTypes;
 use App\Controller\ApiControllerInterface;
+use App\Dto\Services\WmsVector\WmsVectorServiceDTO;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\CapabilitiesService;
@@ -21,7 +22,8 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Uid\Uuid;
 
 #[Route(
@@ -33,7 +35,7 @@ use Symfony\Component\Uid\Uuid;
 class WmsVectorController extends ServiceController implements ApiControllerInterface
 {
     public function __construct(
-        DatastoreApiService $datastoreApiService,
+        private DatastoreApiService $datastoreApiService,
         private ConfigurationApiService $configurationApiService,
         private StoredDataApiService $storedDataApiService,
         CartesServiceApiService $cartesServiceApiService,
@@ -41,7 +43,7 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
         private CapabilitiesService $capabilitiesService,
         protected Filesystem $filesystem,
         private CartesMetadataApiService $cartesMetadataApiService,
-        SandboxService $sandboxService
+        SandboxService $sandboxService,
     ) {
         parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $capabilitiesService, $cartesMetadataApiService, $sandboxService);
     }
@@ -50,25 +52,24 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
     public function add(
         string $datastoreId,
         string $storedDataId,
-        // #[MapRequestPayload] WmsVectorAddDTO $dto, // TODO : MapRequestPayload ne marche pas avec FormData (envoyé par js), essayer de trouver une solution
-        Request $request
+        #[MapRequestPayload] WmsVectorServiceDTO $dto,
+        Request $request,
     ): JsonResponse {
-        $data = $request->request->all();
         $files = $request->files->all(); // les fichiers de style .sld
 
-        $tablesNamesList = isset($data['selected_tables']) ? json_decode($data['selected_tables'], true) : [];
+        $tablesNamesList = $dto->selected_tables ?? [];
 
         try {
             // ajout ou mise à jour des fichiers de styles SLD
             $styleFilesByTable = $this->sendStyleFiles($datastoreId, $tablesNamesList, $files);
 
             // création de requête pour la config
-            $configRequestBody = $this->getConfigRequestBody($data, $tablesNamesList, $styleFilesByTable, $storedDataId, false, $datastoreId);
+            $configRequestBody = $this->getConfigRequestBody($dto, $tablesNamesList, $styleFilesByTable, $storedDataId, false, $datastoreId);
 
             $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId);
             $datasheetName = $storedData['tags'][CommonTags::DATASHEET_NAME];
 
-            $endpoint = $this->getEndpointByShareType($datastoreId, ConfigurationTypes::WMSVECTOR, $data['share_with']);
+            $endpoint = $this->getEndpointByShareType($datastoreId, ConfigurationTypes::WMSVECTOR, $dto->share_with);
 
             // Ajout de la configuration
             $configuration = $this->configurationApiService->add($datastoreId, $configRequestBody);
@@ -94,8 +95,14 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
             }
 
             // création d'une permission pour la communauté actuelle
-            if ('your_community' === $data['share_with']) {
+            if ('your_community' === $dto->share_with) {
                 $this->addPermissionForCurrentCommunity($datastoreId, $offering);
+            }
+
+            // création d'une permission pour la communauté config
+            if (true === filter_var($dto->allow_view_data, FILTER_VALIDATE_BOOLEAN)) {
+                $communityId = $this->getParameter('config')['community_id'];
+                $this->addPermissionForCommunity($datastoreId, $communityId, $offering);
             }
 
             // Création ou mise à jour du capabilities
@@ -105,14 +112,11 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
             }
 
             // création ou mise à jour de metadata
-            $data['languages'] = json_decode($data['languages'], true);
-            $data['category'] = json_decode($data['category'], true);
-            $data['keywords'] = json_decode($data['keywords'], true);
-            $data['free_keywords'] = json_decode($data['free_keywords'], true);
+            $formData = json_decode(json_encode($dto), true);
             if ($this->sandboxService->isSandboxDatastore($datastoreId)) {
-                $data['identifier'] = Sandbox::LAYERNAME_PREFIX.$data['identifier'];
+                $formData['identifier'] = Sandbox::LAYERNAME_PREFIX.$formData['identifier'];
             }
-            $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $data);
+            $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $formData);
 
             return $this->json($offering);
         } catch (ApiException $ex) {
@@ -128,12 +132,12 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
         string $datastoreId,
         string $storedDataId,
         string $offeringId,
-        Request $request
+        Request $request,
+        #[MapRequestPayload('form')] WmsVectorServiceDTO $dto,
     ): JsonResponse {
-        $data = $request->request->all();
         $files = $request->files->all(); // les fichiers de style .sld
 
-        $tablesNamesList = isset($data['selected_tables']) ? json_decode($data['selected_tables'], true) : [];
+        $tablesNamesList = $dto->selected_tables ?? [];
 
         try {
             // récup config et offering existants
@@ -145,9 +149,9 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
             $styleFilesByTable = $this->sendStyleFiles($datastoreId, $tablesNamesList, $files, $oldConfiguration);
 
             // création de requête pour la config
-            $configRequestBody = $this->getConfigRequestBody($data, $tablesNamesList, $styleFilesByTable, $storedDataId, true);
+            $configRequestBody = $this->getConfigRequestBody($dto, $tablesNamesList, $styleFilesByTable, $storedDataId, true);
 
-            $endpoint = $this->getEndpointByShareType($datastoreId, ConfigurationTypes::WMSVECTOR, $data['share_with']);
+            $endpoint = $this->getEndpointByShareType($datastoreId, ConfigurationTypes::WMSVECTOR, $dto->share_with);
 
             // Mise à jour de la configuration
             $configuration = $this->configurationApiService->replace($datastoreId, $oldConfiguration['_id'], $configRequestBody);
@@ -157,13 +161,33 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
                 $this->configurationApiService->removeOffering($datastoreId, $oldOffering['_id']);
 
                 $offering = $this->configurationApiService->addOffering($datastoreId, $oldConfiguration['_id'], $endpoint['_id'], $endpoint['open']);
-
-                if (false === $offering['open']) {
-                    // création d'une permission pour la communauté actuelle
-                    $this->addPermissionForCurrentCommunity($datastoreId, $offering);
-                }
             } else {
                 $offering = $this->configurationApiService->syncOffering($datastoreId, $offeringId);
+            }
+
+            if (false === $offering['open']) {
+                // création d'une permission pour la communauté config
+                if (true === filter_var($dto->allow_view_data, FILTER_VALIDATE_BOOLEAN)) {
+                    $communityId = $this->getParameter('config')['community_id'];
+                    $this->addPermissionForCommunity($datastoreId, $communityId, $offering);
+                } else {
+                    $communityId = $this->getParameter('config')['community_id'];
+                    $permissions = $this->datastoreApiService->getPermissions($datastoreId);
+
+                    $targetPermission = array_filter($permissions, function ($permission) use ($offering, $communityId) {
+                        return isset($permission['offerings'])
+                            && in_array($offering['_id'], array_column($permission['offerings'], '_id'))
+                            && isset($permission['beneficiary']['_id'])
+                            && $permission['beneficiary']['_id'] === $communityId;
+                    });
+
+                    if (!empty($targetPermission)) {
+                        $permissionId = reset($targetPermission)['_id'];
+                        $this->datastoreApiService->removePermission($datastoreId, $permissionId);
+                    }
+                }
+                // création d'une permission pour la communauté actuelle
+                $this->addPermissionForCurrentCommunity($datastoreId, $offering);
             }
 
             $offering['configuration'] = $configuration;
@@ -177,14 +201,11 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
             $this->cleanUnusedStyleFiles($datastoreId, $oldConfiguration, $styleFilesByTable);
 
             // création ou mise à jour de metadata
-            $data['languages'] = json_decode($data['languages'], true);
-            $data['category'] = json_decode($data['category'], true);
-            $data['keywords'] = json_decode($data['keywords'], true);
-            $data['free_keywords'] = json_decode($data['free_keywords'], true);
+            $formData = json_decode(json_encode($dto), true);
             if ($this->sandboxService->isSandboxDatastore($datastoreId)) {
-                $data['identifier'] = Sandbox::LAYERNAME_PREFIX.$data['identifier'];
+                $formData['identifier'] = Sandbox::LAYERNAME_PREFIX.$formData['identifier'];
             }
-            $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $data);
+            $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $formData);
 
             return $this->json($offering);
         } catch (ApiException $ex) {
@@ -193,13 +214,12 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
     }
 
     /**
-     * @param array<mixed>         $data
      * @param array<string>        $tablesNamesList
      * @param array<string,string> $tables
      *
      * @return array<mixed>
      */
-    private function getConfigRequestBody(array $data, array $tablesNamesList, array $tables, string $storedDataId, bool $editMode = false, ?string $datastoreId = null): array
+    private function getConfigRequestBody(WmsVectorServiceDTO $dto, array $tablesNamesList, array $tables, string $storedDataId, bool $editMode = false, ?string $datastoreId = null): array
     {
         $relations = [];
         foreach ($tablesNamesList as $tableName) {
@@ -211,11 +231,11 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
 
         $body = [
             'type' => ConfigurationTypes::WMSVECTOR,
-            'name' => $data['public_name'],
+            'name' => $dto->service_name,
             'type_infos' => [
-                'title' => $data['public_name'],
-                'abstract' => $data['description'],
-                'keywords' => json_decode($data['category'], true),
+                'title' => $dto->service_name,
+                'abstract' => $dto->description,
+                'keywords' => $dto->category,
                 'used_data' => [
                     [
                         'relations' => $relations,
@@ -226,7 +246,7 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
         ];
 
         if (false === $editMode) {
-            $body['layer_name'] = $data['technical_name'];
+            $body['layer_name'] = $dto->technical_name;
 
             // rajoute le préfixe "sandbox." si c'est la communauté bac à sable
             if ($this->sandboxService->isSandboxDatastore($datastoreId)) {
@@ -234,10 +254,10 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
             }
         }
 
-        if ('' !== $data['attribution_text'] && '' !== $data['attribution_url']) {
+        if ('' !== $dto->attribution_text && '' !== $dto->attribution_url) {
             $body['attribution'] = [
-                'title' => $data['attribution_text'],
-                'url' => $data['attribution_url'],
+                'title' => $dto->attribution_text,
+                'url' => $dto->attribution_url,
             ];
         }
 

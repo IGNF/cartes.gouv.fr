@@ -2,13 +2,13 @@ import { lazy, useMemo } from "react";
 import { Route } from "type-route";
 
 import { groups } from "./router";
-import DatastoreLayout, { DatastoreLayoutProps } from "../components/Layout/DatastoreLayout";
 import PageNotFoundWithLayout from "../pages/error/PageNotFoundWithLayout";
+import CommunityLayout, { CommunityLayoutProps } from "@/components/Layout/CommunityLayout";
 import api from "@/entrepot/api";
 
 const ConfigEvents = lazy(() => import("../entrepot/pages/config/Alerts"));
 
-const { datastoreId } = api.alerts;
+const { communityId } = api.alerts;
 
 interface IGroupConfigProps {
     route: Route<typeof groups.config>;
@@ -17,7 +17,7 @@ interface IGroupConfigProps {
 function GroupConfig(props: IGroupConfigProps) {
     const { route } = props;
 
-    const content: { render: JSX.Element; layoutProps?: Omit<DatastoreLayoutProps, "datastoreId"> } = useMemo(() => {
+    const content: { render: JSX.Element; layoutProps?: Omit<CommunityLayoutProps, "communityId"> } = useMemo(() => {
         switch (route.name) {
             case "config_alerts":
                 return {
@@ -26,14 +26,14 @@ function GroupConfig(props: IGroupConfigProps) {
         }
     }, [route]);
 
-    if (!content) {
+    if (!content || !communityId) {
         return <PageNotFoundWithLayout />;
     }
 
     return (
-        <DatastoreLayout datastoreId={datastoreId} {...content?.layoutProps}>
+        <CommunityLayout communityId={communityId} {...content?.layoutProps}>
             {content.render}
-        </DatastoreLayout>
+        </CommunityLayout>
     );
 }
 

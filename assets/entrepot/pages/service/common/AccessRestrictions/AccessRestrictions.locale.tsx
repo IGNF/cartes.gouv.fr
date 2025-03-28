@@ -11,6 +11,8 @@ const { i18n } = declareComponentKeys<
     | "share_with_value_change_warning_title"
     | "share_with_value_change_warning_desc_restricted_to_public"
     | "share_with_value_change_warning_desc_public_to_restricted"
+    | "allow_view_data"
+    | "allow_view_data_hint_text"
 >()("AccessRestrictions");
 export type I18n = typeof i18n;
 
@@ -21,14 +23,17 @@ export const AccessRestrictionsFrTranslations: Translations<"fr">["AccessRestric
     share_with_all_public_hint_text: "Le service sera accessible à tout utilisateur sans restriction.",
     share_with_your_community: "Restreint",
     share_with_your_community_hint_text:
-        "Vous devrez accorder une permission aux communautés et/ou utilisateurs souhaités pour leur autoriser l’accès. Ils devront par la suite configurer une clé à partir de cette permission pour accéder au service. Une permission va être créée automatiquement votre propre communauté.",
+        "Vous devrez accorder une permission aux communautés et/ou utilisateurs souhaités pour leur autoriser l’accès. Ils devront par la suite configurer une clé à partir de cette permission pour accéder au service. Une permission va être créée automatiquement pour votre propre communauté.",
     share_with_value_change_warning_title: "Changement de restrictions d’accès",
     share_with_value_change_warning_desc_restricted_to_public:
         // eslint-disable-next-line quotes
-        'Vous êtes sur le point de modifier les restrictions d\'accès de "Restreint" à "Tout public". Le service changera d\'adresse et les permissions que vous aviez configurées seront supprimées définitivement car elles ne seront plus nécessaires.',
+        'Vous êtes sur le point de modifier les restrictions d’accès de "Restreint" à "Tout public". Le service changera d’adresse et les permissions que vous aviez configurées seront supprimées définitivement car elles ne seront plus nécessaires.',
     share_with_value_change_warning_desc_public_to_restricted:
         // eslint-disable-next-line quotes
-        'Vous êtes sur le point de modifier les restrictions d\'accès de "Tout public" à "Restreint". Le service changera d\'adresse.',
+        'Vous êtes sur le point de modifier les restrictions d’accès de "Tout public" à "Restreint". Le service changera d’adresse.',
+    allow_view_data: "Autoriser l'affichage de ce service sur l'entrée cartographique de cartes.gouv.fr",
+    allow_view_data_hint_text:
+        "La permission d’accès à cartes.gouv.fr est accordée pour 6 mois. Vous pouvez modifier la durée de cette permission depuis le menu Gérer l’espace de travail > Permissions accordées.",
 };
 
 export const AccessRestrictionsEnTranslations: Translations<"en">["AccessRestrictions"] = {
@@ -41,4 +46,6 @@ export const AccessRestrictionsEnTranslations: Translations<"en">["AccessRestric
     share_with_value_change_warning_title: undefined,
     share_with_value_change_warning_desc_restricted_to_public: undefined,
     share_with_value_change_warning_desc_public_to_restricted: undefined,
+    allow_view_data: undefined,
+    allow_view_data_hint_text: undefined,
 };

@@ -12,11 +12,12 @@ import OfferingStatusBadge from "../../../../../components/Utils/Badges/Offering
 import Wait from "../../../../../components/Utils/Wait";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import { routes } from "../../../../../router/router";
-import { useSnackbarStore } from "../../../../../stores/SnackbarStore";
 import { offeringTypeDisplayName } from "../../../../../utils";
 import api from "../../../../api";
 import ServiceDesc from "./ServiceDesc";
 import ListItem from "../ListItem";
+import { useSnackbarStore } from "@/stores/SnackbarStore";
+import { TextCopyToClipboardDialog, TextCopyToClipboardModal } from "@/components/Utils/TextCopyToClipboardDialog";
 
 type ServicesListItemProps = {
     service: Service;
@@ -25,7 +26,6 @@ type ServicesListItemProps = {
 };
 const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, datastoreId }) => {
     const queryClient = useQueryClient();
-
     const setMessage = useSnackbarStore((state) => state.setMessage);
 
     const unpublishServiceConfirmModal = createModal({
@@ -67,15 +67,14 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                 date={service?.configuration?.last_event?.date}
                 menuListItems={[
                     {
+                        autoClose: false,
                         text: "Copier l’URL de diffusion",
-                        iconId: "ri-file-copy-2-line",
+                        iconId: "ri-file-copy-line",
                         onClick: async () => {
                             if (!service.share_url) {
                                 setMessage("URL de diffusion indisponible");
                             } else {
-                                await navigator.clipboard.writeText(service.share_url);
-
-                                setMessage("URL copiée");
+                                TextCopyToClipboardModal.open();
                             }
                         },
                     },
@@ -213,6 +212,8 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                     </div>
                 </Wait>
             )}
+
+            {service.share_url && <TextCopyToClipboardDialog title="Copier l'URL" label="URL de diffusion" text={service.share_url} />}
         </>
     );
 };

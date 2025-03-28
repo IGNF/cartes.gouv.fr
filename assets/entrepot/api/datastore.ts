@@ -32,8 +32,8 @@ const getPermission = (datastoreId: string, permissionId: string, otherOptions: 
     });
 };
 
-const getPermissions = (datastoreId: string, otherOptions: RequestInit = {}) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_datastore_get_permissions", { datastoreId });
+const getPermissions = (datastoreId: string, query: object, otherOptions: RequestInit = {}) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_datastore_get_permissions", { datastoreId, ...query });
     return jsonFetch<DatastorePermissionResponseDto[]>(url, {
         ...otherOptions,
     });

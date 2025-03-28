@@ -239,7 +239,7 @@ export type MetadataFormValuesType = {
     projection?: string;
     // encoding?: string;
     resolution?: string;
-    languages?: LanguageType[];
+    language?: LanguageType;
     frequency_code?: string;
 };
 
@@ -251,8 +251,10 @@ export type AttributionFormValuesType = {
 export type ServiceFormValuesBaseType = {
     technical_name?: string;
     public_name?: string;
+    service_name?: string;
     description?: string;
     share_with?: string;
+    allow_view_data?: boolean;
 } & MetadataFormValuesType &
     AttributionFormValuesType;
 
@@ -324,8 +326,8 @@ export type KeyFormValuesType = {
 
 export type CswMetadataLayer = {
     name?: string;
-    endpoint_type?: string;
-    endpoint_url?: string;
+    gmd_online_resource_protocol?: string;
+    gmd_online_resource_url?: string;
     offering_id?: string;
 };
 
