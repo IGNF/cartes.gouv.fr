@@ -1,3 +1,4 @@
+import { GroupByPermission } from "@/@types/app_espaceco";
 import { PermissionResponseDTO } from "../../@types/espaceco";
 import { jsonFetch } from "../../modules/jsonFetch";
 import SymfonyRouting from "../../modules/Routing";
@@ -9,8 +10,16 @@ const getThemableTables = (communityId: number, signal: AbortSignal) => {
     });
 };
 
+// Retourne les permissions données à une communauté
+const get = (communityId: number, signal: AbortSignal) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_espaceco_permission_get", { communityId });
+    return jsonFetch<GroupByPermission>(url, {
+        signal: signal,
+    });
+};
+
 // Retourne les permissions données à une communauté sur les bases de données databaseIds
-const get = (communityId: number, databaseIds: number[], signal: AbortSignal) => {
+const getOnDBs = (communityId: number, databaseIds: number[], signal: AbortSignal) => {
     const params = { communityId: communityId, dbIds: databaseIds };
 
     const url = SymfonyRouting.generate("cartesgouvfr_api_espaceco_permission_get_databases_permissions", params);
@@ -18,6 +27,6 @@ const get = (communityId: number, databaseIds: number[], signal: AbortSignal) =>
         signal: signal,
     });
 };
-const permission = { getThemableTables, get };
+const permission = { getThemableTables, get, getOnDBs };
 
 export default permission;

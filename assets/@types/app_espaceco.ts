@@ -13,6 +13,7 @@ import {
     SharedThemesDTO,
     ThemeDTO,
     UserDTO,
+    PermissionLevel,
 } from "./espaceco";
 
 export type AtLeast<T, K extends keyof T> = Partial<T> & Pick<T, K>;
@@ -174,6 +175,28 @@ export type DescriptionFormType = {
 /* Pour les bases de données */
 export const arrDBOptions = ["none", "add", "reuse", "import"] as const;
 export type DBOption = (typeof arrDBOptions)[number];
+
+export type GroupByPermission = Record<
+    string,
+    {
+        level: PermissionLevel;
+        title: string;
+        tables: Record<
+            string,
+            {
+                level: PermissionLevel;
+                title: string;
+                columns: Record<
+                    string,
+                    {
+                        level: PermissionLevel;
+                        title: string;
+                    }
+                > | null;
+            }
+        > | null;
+    }
+>;
 
 /* Les fonctionnalités (outils) */
 export type CommunityTools = "display" | "navigation" | "measure" | "report";

@@ -7,11 +7,23 @@ use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 class DatabaseApiService extends BaseEspaceCoApiService
 {
     /**
+     * @param array<mixed> $dbIds
      * @param array<mixed> $fields
      */
-    public function getAll(#[MapQueryParameter] ?array $fields = []): array
+    public function getAll(
+        #[MapQueryParameter] array $dbIds = [],
+        #[MapQueryParameter] ?array $fields = []): array
     {
-        return $this->requestAll('databases', ['fields' => $fields]);
+        if (!count($dbIds)) {
+            return $this->requestAll('databases', ['fields' => $fields]);
+        }
+
+        $databases = [];
+        foreach ($dbIds as $id) {
+            $databases[] = $this->getDatabase($id, $fields);
+        }
+
+        return $databases;
     }
 
     /**
@@ -28,6 +40,14 @@ class DatabaseApiService extends BaseEspaceCoApiService
     public function getTable(int $databaseId, int $tableId, #[MapQueryParameter] ?array $fields = []): array
     {
         return $this->request('GET', "databases/$databaseId/tables/$tableId", [], ['fields' => $fields]);
+    }
+
+    /**
+     * @param array<string> $fields
+     */
+    public function getColumn(int $databaseId, int $tableId, int $columnId, #[MapQueryParameter] ?array $fields = []): array
+    {
+        return $this->request('GET', "databases/$databaseId/tables/$tableId/columns/$columnId", [], ['fields' => $fields]);
     }
 
     public function getTableFullName(int $databaseId, int $tableId): string
