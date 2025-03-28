@@ -21,7 +21,7 @@ use App\Services\EntrepotApi\StoredDataApiService;
 use App\Services\SandboxService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 #[Route(
     '/api/datastores/{datastoreId}/pyramid-vector',

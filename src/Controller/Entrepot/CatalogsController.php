@@ -8,7 +8,7 @@ use App\Exception\CartesApiException;
 use App\Services\EntrepotApi\CatalogsApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 #[Route(
     '/api/catalogs',
