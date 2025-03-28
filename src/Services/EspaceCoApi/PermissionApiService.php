@@ -5,13 +5,17 @@ namespace App\Services\EspaceCoApi;
 class PermissionApiService extends BaseEspaceCoApiService
 {
     /**
-     * @param string|null $level
+     * @param string|null   $levels
+     * @param array<string> $fields
      */
-    public function getAllByCommunity(int $communityId, $level = null): array
+    public function getAllByCommunity(int $communityId, $levels = null, $fields = []): array
     {
-        $query = ['group' => $communityId];
-        if (!is_null($level)) {
-            $query['level'] = $level;
+        $query = ['community' => $communityId];
+        if ($levels) {
+            $query['level'] = $levels;
+        }
+        if (count($fields)) {
+            $query['fields'] = $fields;
         }
 
         return $this->requestAll('permissions', $query);

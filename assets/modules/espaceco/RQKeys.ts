@@ -35,8 +35,9 @@ const RQKeys = {
     searchGrids: (text: string): string[] => ["searchGrids", text],
     getMe: (): string[] => ["espaceco", "users", "me"],
     searchUsers: (text: string): string[] => ["searchUsers", text],
-    databases: () => ["databases"],
-    permissions: (communityId: number, databaseIds: number[]) => ["permissions", communityId.toString(), databaseIds.map((id) => id.toString()).join(",")],
+    databases: (databaseIds: number[]) => ["databases", databaseIds.map((id) => id.toString()).join(",")],
+    permissions: (communityId: number) => ["permissions", communityId.toString()],
+    permissionsOnDB: (communityId: number, databaseIds: number[]) => ["permissions", communityId.toString(), databaseIds.map((id) => id.toString()).join(",")],
     tables: (communityId: number): string[] => ["feature_types", communityId.toString()],
     emailPlanners: (communityId: number): string[] => ["emailplanners", communityId.toString()],
 };

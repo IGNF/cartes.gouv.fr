@@ -64,7 +64,7 @@ const ManageCommunity: FC = () => {
         >
             <h1>{t("title", { name: community?.name })}</h1>
             {isMeLoading ? (
-                <LoadingText as={"h2"} message={t("loading_me")} />
+                <LoadingText as={"h6"} message={t("loading_me")} />
             ) : isMeError ? (
                 <Alert
                     severity="error"
