@@ -28,8 +28,8 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
 
     const filteredUploadList = uploadList?.filter((upload) => upload.type === "VECTOR") ?? [];
 
-    const isLastUpload = (filteredUploadList: Upload[]): boolean => {
-        return filteredUploadList.length === 1 && nbPublications === 0;
+    const isLastUpload = (uploadList: Upload[]): boolean => {
+        return uploadList.length === 1 && nbPublications === 0;
     };
 
     const deleteUnfinishedUpload = useMutation({
