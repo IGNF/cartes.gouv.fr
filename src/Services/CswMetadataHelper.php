@@ -116,6 +116,7 @@ class CswMetadataHelper
                 $onlineEl->getElementsByTagName('protocol')[0]?->getElementsByTagName('CharacterString')[0]?->textContent,
                 $onlineEl->getElementsByTagName('linkage')[0]?->getElementsByTagName('URL')[0]?->textContent,
                 $layer->getAttribute('offeringId'),
+                $layer->getAttribute('offeringOpen'),
             );
         }, iterator_to_array($layersNodesList));
         $cswMetadata->layers = $layersList;

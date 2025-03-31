@@ -306,7 +306,7 @@ class CartesMetadataApiService
                         $gmdOnlineResourceProtocol = 'OGC:WMS';
                         $endpointUrl = $serviceEndpoint['endpoint']['urls'][0]['url'];
 
-                        $layers[] = new CswMetadataLayer($layerName, $gmdOnlineResourceProtocol, $endpointUrl, $offering['_id']);
+                        $layers[] = new CswMetadataLayer($layerName, $gmdOnlineResourceProtocol, $endpointUrl, $offering['_id'], $offering['open']);
                         break;
 
                     case ConfigurationTypes::WMTSTMS:
@@ -332,7 +332,7 @@ class CartesMetadataApiService
                         $endpoints = array_values($endpoints);
 
                         if (count($endpoints) > 0) {
-                            $layers[] = new CswMetadataLayer($layerName, $gmdOnlineResourceProtocol, $endpoints[0]['url'], $offering['_id']);
+                            $layers[] = new CswMetadataLayer($layerName, $gmdOnlineResourceProtocol, $endpoints[0]['url'], $offering['_id'], $offering['open']);
                         }
 
                         break;
@@ -357,7 +357,7 @@ class CartesMetadataApiService
             $layerName = sprintf('%s:%s', $offering['layer_name'], $relation['native_name']);
             $gmdOnlineResourceProtocol = 'OGC:WFS';
 
-            return new CswMetadataLayer($layerName, $gmdOnlineResourceProtocol, $serviceEndpointUrl, $offering['_id']);
+            return new CswMetadataLayer($layerName, $gmdOnlineResourceProtocol, $serviceEndpointUrl, $offering['_id'], $offering['open']);
         }, $configRelations);
 
         return $relationLayers;
