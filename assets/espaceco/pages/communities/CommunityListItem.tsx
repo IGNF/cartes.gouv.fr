@@ -1,12 +1,13 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
-import { FC, ReactNode, useMemo } from "react";
+import { FC, useMemo } from "react";
+
 import { CommunityResponseDTO } from "../../../@types/espaceco";
 import useToggle from "../../../hooks/useToggle";
 import { useTranslation } from "../../../i18n/i18n";
-import { routes } from "../../../router/router";
 import placeholder1x1 from "../../../img/placeholder.1x1.png";
+import { routes } from "../../../router/router";
 
 import "../../../sass/pages/espaceco/community.scss";
 
@@ -25,16 +26,6 @@ const CommunityListItem: FC<CommunityListItemProps> = ({ className, community })
             ? { link: routes.espaceco_manage_community({ communityId: community.id }).link, title: tCommon("modify") }
             : { link: routes.espaceco_create_community({ communityId: community.id }).link, title: t("append_community") };
     }, [community, t, tCommon]);
-
-    const infos = useMemo(() => {
-        if (!community.description) {
-            return null;
-        }
-
-        const children: ReactNode[] = [];
-        if (community.description) children.push(<p dangerouslySetInnerHTML={{ __html: community.description }} />);
-        return <div style={{ backgroundColor: fr.colors.decisions.background.default.grey.default }}>{children}</div>;
-    }, [community]);
 
     return (
         <>
@@ -67,8 +58,16 @@ const CommunityListItem: FC<CommunityListItemProps> = ({ className, community })
                     </Button>
                 </div>
             </div>
-            {}
-            {showDescription && infos}
+
+            {showDescription && (
+                <div style={{ backgroundColor: fr.colors.decisions.background.default.grey.default }}>
+                    {community.description ? (
+                        <p dangerouslySetInnerHTML={{ __html: community.description }} />
+                    ) : (
+                        "Aucune description n’a été renseignée sur ce guichet"
+                    )}
+                </div>
+            )}
         </>
     );
 };
