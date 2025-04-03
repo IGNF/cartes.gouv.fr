@@ -1,5 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Main from "../components/Layout/Main";
+import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 
 const Documentation = () => {
     return (
@@ -17,16 +18,20 @@ const Documentation = () => {
                         Vous pouvez accéder à la documentation de ces services en cliquant sur «&nbsp;en savoir plus&nbsp;».
                     </p>
 
-                    <p className={fr.cx("fr-btns-group--center")}>
-                        <a
-                            className={fr.cx("fr-btn")}
-                            href="https://www.ign.fr/geoplateforme/fonctionnalites-de-la-geoplateforme-premieres-briques-et-prochaines-mises-en-service"
-                            rel="noreferrer"
-                            target="_blank"
-                        >
-                            En savoir plus
-                        </a>
-                    </p>
+                    <ButtonsGroup
+                        buttons={[
+                            {
+                                linkProps: {
+                                    href: "https://www.ign.fr/geoplateforme/fonctionnalites-de-la-geoplateforme-premieres-briques-et-prochaines-mises-en-service",
+                                    rel: "noreferrer",
+                                    target: "_blank",
+                                },
+                                children: "En savoir plus",
+                            },
+                        ]}
+                        inlineLayoutWhen="always"
+                        alignment="center"
+                    />
 
                     <p>
                         La <strong>Géoplateforme</strong> est une infrastructure ouverte et collaborative pour l’hébergement, le partage, le traitement et la
