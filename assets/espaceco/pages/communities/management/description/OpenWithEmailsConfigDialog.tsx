@@ -12,15 +12,9 @@ import { GridDTO } from "../../../../../@types/espaceco";
 import { useTranslation } from "../../../../../i18n/i18n";
 import GridList from "../GridList";
 
-const OpenWithEmailsConfigDialogModal = createModal({
-    id: "open-with-email-modal",
-    isOpenedByDefault: false,
-});
+const OpenWithEmailsConfigDialogModal = createModal({ id: "open-with-email-modal", isOpenedByDefault: false });
 
-type OpenWithEmailsConfigDialogProps = {
-    openWithEmailOriginal: OpenWithEmailType[];
-    onUpdate: (openWithEmail: OpenWithEmailType[]) => void;
-};
+type OpenWithEmailsConfigDialogProps = { openWithEmailOriginal: OpenWithEmailType[]; onUpdate: (openWithEmail: OpenWithEmailType[]) => void };
 
 const domainRegex = new RegExp(/^@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
 
@@ -45,12 +39,7 @@ const OpenWithEmailsConfigDialog: FC<OpenWithEmailsConfigDialogProps> = ({ openW
                                     .object({
                                         name: yup.string().required(),
                                         title: yup.string().required(),
-                                        type: yup
-                                            .object({
-                                                name: yup.string().required(),
-                                                title: yup.string().required(),
-                                            })
-                                            .required(),
+                                        type: yup.object({ name: yup.string().required(), title: yup.string().required() }).required(),
                                         deleted: yup.boolean().required(),
                                         extent: yup.array().of(yup.number().required()),
                                     })
@@ -77,9 +66,7 @@ const OpenWithEmailsConfigDialog: FC<OpenWithEmailsConfigDialogProps> = ({ openW
     const form = useForm<{ openWithEmail: OpenWithEmailType[] }>({
         resolver: yupResolver(schema),
         mode: "onSubmit",
-        values: {
-            openWithEmail: [...openWithEmailOriginal],
-        },
+        values: { openWithEmail: [...openWithEmailOriginal] },
     });
 
     const {
@@ -95,12 +82,8 @@ const OpenWithEmailsConfigDialog: FC<OpenWithEmailsConfigDialogProps> = ({ openW
     const openWithEmail = watch("openWithEmail");
     console.log(errors);
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const addDomain = () => {
         if (!addDomainRef.current) {
-            return;
-        }
-
-        if (e.key !== "Enter") {
             return;
         }
 
@@ -111,6 +94,13 @@ const OpenWithEmailsConfigDialog: FC<OpenWithEmailsConfigDialogProps> = ({ openW
             setFormValue("openWithEmail", values);
         }
         addDomainRef.current.value = "";
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key !== "Enter") {
+            return;
+        }
+        addDomain();
     };
 
     const handleGrids = (email: string, grids: GridDTO[]) => {
@@ -170,10 +160,9 @@ const OpenWithEmailsConfigDialog: FC<OpenWithEmailsConfigDialogProps> = ({ openW
                             <div className={fr.cx("fr-input-group", "fr-my-6v", fieldState.error && "fr-input-group--error")}>
                                 <Input
                                     label={tmc("modal.openwithemail.add_domain")}
-                                    nativeInputProps={{
-                                        ref: addDomainRef,
-                                        onKeyDown: (e) => handleKeyDown(e),
-                                    }}
+                                    hintText={tmc("modal.openwithemail.add_domain_hint")}
+                                    addon={<Button onClick={() => addDomain()}>{tCommon("add")}</Button>}
+                                    nativeInputProps={{ ref: addDomainRef, onKeyDown: (e) => handleKeyDown(e) }}
                                 />
                                 {fieldState.error && <p className={fr.cx("fr-error-text")}>{fieldState.error?.message?.toString()}</p>}
                                 {openWithEmail.map((owe, index) => {
@@ -181,10 +170,7 @@ const OpenWithEmailsConfigDialog: FC<OpenWithEmailsConfigDialogProps> = ({ openW
                                         <div
                                             key={index}
                                             className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-p-2v", "fr-my-2v")}
-                                            style={{
-                                                border: "solid 1.5px",
-                                                borderColor: fr.colors.decisions.border.default.blueFrance.default,
-                                            }}
+                                            style={{ border: "solid 1.5px", borderColor: fr.colors.decisions.border.default.blueFrance.default }}
                                         >
                                             <div className={fr.cx("fr-col-2")}>
                                                 <strong>{owe.email}</strong>

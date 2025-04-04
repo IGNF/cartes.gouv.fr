@@ -70,6 +70,7 @@ const { i18n } = declareComponentKeys<
     | "database.import"
     | "modal.openwithemail.title"
     | "modal.openwithemail.add_domain"
+    | "modal.openwithemail.add_domain_hint"
     | "modal.openwithemail.min_error"
     | { K: "modal.openwithemail.grids_not_empty_error"; P: { domain: string }; R: string }
     | "modal.document.title"
@@ -210,6 +211,7 @@ export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"
     "database.import": "Importer une base de données à votre espace collaboratif",
     "modal.openwithemail.title": "Paramétrer les domaines acceptés pour les demandes d’affiliation",
     "modal.openwithemail.add_domain": "Ajouter un domaine accepté (doit commencer par un @)",
+    "modal.openwithemail.add_domain_hint": "Une fois la saisie terminée, appuyez sur Entrée ou cliquez sur le bouton [Ajouter]",
     "modal.openwithemail.min_error": "Il doit y avoir au moins un domaine",
     "modal.openwithemail.grids_not_empty_error": ({ domain }) => `Le domaine ${domain} doit avoir au moins une emprise`,
     "modal.document.title": "Ajouter un document",
@@ -363,6 +365,7 @@ export const ManageCommunityEnTranslations: Translations<"en">["ManageCommunity"
     "database.import": undefined,
     "modal.openwithemail.title": undefined,
     "modal.openwithemail.add_domain": "Add accepted domain",
+    "modal.openwithemail.add_domain_hint": undefined,
     "modal.openwithemail.min_error": undefined,
     "modal.openwithemail.grids_not_empty_error": undefined,
     "modal.document.title": "Add document",
