@@ -13,16 +13,18 @@ import { fr } from "@codegouvfr/react-dsfr";
 
 type SearchCommunityProps = {
     filter: CommunityListFilter;
+    label?: string;
+    placeholder?: string;
     onChange: (value: CommunityResponseDTO | null) => void;
 };
 
-const SearchCommunity: FC<SearchCommunityProps> = ({ filter, onChange }) => {
-    const { t } = useTranslation("EspaceCoCommunities");
+const SearchCommunity: FC<SearchCommunityProps> = ({ filter, onChange, label, placeholder }) => {
+    const { t } = useTranslation("SearchCommunity");
 
     const [search, setSearch] = useDebounceValue("", 500);
 
     const searchQuery = useQuery<CommunityResponseDTO[]>({
-        queryKey: RQKeys.search(search, filter),
+        queryKey: RQKeys.searchCommunities(search, filter),
         queryFn: ({ signal }) => api.community.searchByName(search, filter, signal),
         enabled: search.length > 3,
     });
@@ -30,7 +32,7 @@ const SearchCommunity: FC<SearchCommunityProps> = ({ filter, onChange }) => {
     return (
         <div>
             <div className={fr.cx("fr-mb-2v")}>
-                <label>Nom du guichet :</label>
+                <label>{label ? label : t("default_label")}</label>
             </div>
             <MuiDsfrThemeProvider>
                 <Autocomplete
@@ -39,15 +41,9 @@ const SearchCommunity: FC<SearchCommunityProps> = ({ filter, onChange }) => {
                     noOptionsText={t("no_options")}
                     getOptionLabel={(option) => option.name}
                     options={searchQuery.data || []}
+                    filterOptions={(x) => x}
                     renderInput={(params) => (
-                        <TextField
-                            {...params}
-                            //label={t("search_placeholder")}
-                            InputProps={{
-                                ...params.InputProps,
-                                type: "search",
-                            }}
-                        />
+                        <TextField {...params} variant={"filled"} size={"small"} label={placeholder ? placeholder : t("default_placeholder")} />
                     )}
                     isOptionEqualToValue={(option, v) => option.id === v.id}
                     onInputChange={(_, v) => setSearch(v)}

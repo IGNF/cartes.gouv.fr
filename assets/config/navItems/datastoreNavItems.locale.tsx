@@ -3,7 +3,7 @@ import { declareComponentKeys } from "i18nifty";
 import { Translations } from "../../i18n/types";
 
 const { i18n } = declareComponentKeys<
-    "dashboard" | "data" | "members" | "manage_storage" | "consumption_monitoring" | "permissions_granted" | "my_account" | "my_access_keys"
+    "dashboard" | "data" | "members" | "manage_storage" | "consumption_monitoring" | "permissions_granted" | "my_account" | "my_access_keys" | "espaceco"
 >()("datastoreNavItems");
 export type I18n = typeof i18n;
 
@@ -16,6 +16,7 @@ export const datastoreNavItemsFrTranslations: Translations<"fr">["datastoreNavIt
     permissions_granted: "Permissions accordées",
     my_account: "Mon compte",
     my_access_keys: "Mes clés d’accès",
+    espaceco: "Espace Collaboratif",
 };
 
 export const datastoreNavItemsEnTranslations: Translations<"en">["datastoreNavItems"] = {
@@ -27,4 +28,5 @@ export const datastoreNavItemsEnTranslations: Translations<"en">["datastoreNavIt
     permissions_granted: undefined,
     my_account: undefined,
     my_access_keys: undefined,
+    espaceco: undefined,
 };
