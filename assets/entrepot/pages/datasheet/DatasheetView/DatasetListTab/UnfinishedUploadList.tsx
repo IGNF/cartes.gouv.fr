@@ -26,6 +26,8 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
 
     const queryClient = useQueryClient();
 
+    const filteredUploadList = uploadList?.filter((upload) => upload.type === "VECTOR") ?? [];
+
     const isLastUpload = (uploadList: Upload[]): boolean => {
         return uploadList.length === 1 && nbPublications === 0;
     };
@@ -52,7 +54,7 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
                 </h5>
             </div>
 
-            {uploadList?.map((upload) => {
+            {filteredUploadList?.map((upload) => {
                 const integrationProgress = JSON.parse(upload.tags.integration_progress || "{}");
                 const steps = Object.entries(integrationProgress);
                 const failureCase = steps.some(([, status]) => status === "failed");
@@ -103,7 +105,7 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
                                     iconId="fr-icon-delete-fill"
                                     priority="secondary"
                                     onClick={() => {
-                                        if (isLastUpload(uploadList)) {
+                                        if (isLastUpload(filteredUploadList)) {
                                             deleteUploadConfirmModal.open();
                                         } else {
                                             deleteUnfinishedUpload.mutate(upload._id);

@@ -2,6 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 
 import { routes } from "../router/router";
 import Main from "../components/Layout/Main";
+import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 
 const Join = () => {
     return (
@@ -24,14 +25,19 @@ const Join = () => {
                         envoyée, vous recevrez un e-mail de confirmation, puis un e-mail de la plateforme OSMOSE qui vous permettra d’activer votre compte et de
                         modifier le mot de passe.
                     </p>
-                </div>
-            </div>
-            <div className={fr.cx("fr-grid-row")}>
-                <div className={fr.cx("fr-col-12")}>
-                    <iframe
-                        src="https://analytics-eu.clickdimensions.com/ignfr-agj1s/pages/gcw4gjajee2dsqaisj8xtw.html?PageId=82b8c5810930ed119db10022489f174f"
-                        height="880px"
-                        width="100%"
+                    <ButtonsGroup
+                        buttons={[
+                            {
+                                linkProps: {
+                                    href: "https://www.expertises-territoires.fr/jcms/pl1_557493/fr/communaute-geoplateforme-et-cartes-gouv",
+                                    rel: "noreferrer",
+                                    target: "_blank",
+                                },
+                                children: "Rejoignez la communauté",
+                            },
+                        ]}
+                        inlineLayoutWhen="always"
+                        alignment="center"
                     />
                 </div>
             </div>
