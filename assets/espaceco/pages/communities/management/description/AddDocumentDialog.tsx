@@ -36,7 +36,12 @@ const AddDocumentDialog: FC<AddDocumentDialogProps> = ({ onAdd }) => {
     const getSchema = useCallback(
         (t: TranslationFunction<"ManageCommunityValidations", ComponentKey>) =>
             yup.object().shape({
-                title: yup.string().min(10, t("description.modal.document.name.minlength")).required(t("description.modal.document.name.mandatory")),
+                title: yup
+                    .string()
+                    .trim(tCommon("trimmed_error"))
+                    .strict(true)
+                    .min(2, t("description.modal.document.name.minlength"))
+                    .required(t("description.modal.document.name.mandatory")),
                 description: yup.string(),
                 document: yup
                     .mixed()
