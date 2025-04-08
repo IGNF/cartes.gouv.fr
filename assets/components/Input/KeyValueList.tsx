@@ -11,11 +11,14 @@ import KeyValueItem, { KeyValues } from "./KeyValueItem";
 import { InputHTMLAttributes } from "react";
 import { SelectProps } from "@codegouvfr/react-dsfr/SelectNext";
 import { get } from "@/utils";
+import { getTranslation, useTranslation } from "@/i18n";
 
 export interface KeyValuesForm {
     values: KeyValues;
     useKeys: boolean;
 }
+
+const { t } = getTranslation("KeyValueList");
 
 function checkDuplicates({ useKeys, values }: KeyValuesForm) {
     const attribute = useKeys ? "key" : "value";
@@ -44,7 +47,7 @@ export function getKeyValueSchema(testConfig?: yup.TestConfig<string | null> | y
                 )
                 .required(),
         })
-        .test("hasDuplicates", "remove or fix duplicates keys / values", checkDuplicates);
+        .test("hasDuplicates", t("has_duplicates_error"), checkDuplicates);
 }
 
 interface KeyValueListProps {
@@ -57,6 +60,8 @@ interface KeyValueListProps {
 }
 
 function KeyValueList(props: KeyValueListProps) {
+    const { t } = useTranslation("KeyValueList");
+
     const { label, hintText, name, valueInputProps, valueOptions, valueType } = props;
     const {
         control,
@@ -65,7 +70,7 @@ function KeyValueList(props: KeyValueListProps) {
     const { fields, append, remove, move } = useFieldArray({
         name: `${name}.values`,
     });
-    const keyValueError = get(errors, `${name}.root.message`);
+    const keyValueError = get(errors, `${name}.message`) ?? get(errors, `${name}.root.message`);
     const hasError = Boolean(keyValueError);
     const drag = useDrag(move);
 
@@ -84,7 +89,7 @@ function KeyValueList(props: KeyValueListProps) {
                     control={control}
                     name={`${name}.useKeys`}
                     render={({ field: { value, onChange } }) => (
-                        <ToggleSwitch checked={value} label="Définir les clés" inputTitle="Définir les clés" onChange={onChange} showCheckedHint={false} />
+                        <ToggleSwitch checked={value} label={t("define_keys")} inputTitle={t("define_keys")} onChange={onChange} showCheckedHint={false} />
                     )}
                 />
             </div>
