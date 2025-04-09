@@ -2,16 +2,15 @@
 
 namespace App\Services\EspaceCoApi;
 
-use Psr\Log\LoggerInterface;
 use App\Exception\ApiException;
 use App\Services\AbstractApiService;
-use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Contracts\HttpClient\ResponseInterface;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Contracts\HttpClient\ResponseInterface;
 
 class BaseEspaceCoApiService extends AbstractApiService
 {
@@ -20,7 +19,7 @@ class BaseEspaceCoApiService extends AbstractApiService
         ParameterBagInterface $parameters,
         Filesystem $filesystem,
         RequestStack $requestStack,
-        LoggerInterface $logger
+        LoggerInterface $logger,
     ) {
         parent::__construct($httpClient, $parameters, $filesystem, $requestStack, $logger, 'api_espaceco_url');
     }

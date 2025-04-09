@@ -20,7 +20,7 @@ class AccessDTO
         #[Assert\All(
             new Assert\Uuid(['message' => 'user_key.access.offerings.uuid_error'])
         )]
-        public readonly array $offerings
+        public readonly array $offerings,
     ) {
     }
 }

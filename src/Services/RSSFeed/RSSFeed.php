@@ -12,8 +12,7 @@ use Twig\Environment as TwigEnvironment;
 
 class RSSFeed
 {
-    private const ALERTS_JSON_URL = 'https://data.geopf.fr/annexes/cartes.gouv.fr-config/public/alerts.json';
-
+    private string $alertsJsonUrl;
     private HttpClientInterface $httpClient;
 
     public function __construct(
@@ -28,6 +27,7 @@ class RSSFeed
             'verify_peer' => false,
             'verify_host' => false,
         ]);
+        $this->alertsJsonUrl = $parameters->get('annexes_url').'/cartes.gouv.fr-config/public/alerts.json';
     }
 
     public function renderRssAlerts(): string
@@ -61,7 +61,7 @@ class RSSFeed
         return $this->cache->get('alerts', function (ItemInterface $item) {
             $item->expiresAfter(3600);
 
-            $response = $this->httpClient->request('GET', self::ALERTS_JSON_URL);
+            $response = $this->httpClient->request('GET', $this->alertsJsonUrl);
             if (Response::HTTP_OK !== $response->getStatusCode()) {
                 throw new \Exception('Une erreur est survenue, veuillez réessayer ultérieurement');
             }
