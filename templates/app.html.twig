@@ -6,6 +6,7 @@
         {% if catalogue_url is defined and catalogue_url is not empty %}data-catalogue-url="{{ catalogue_url }}"{% endif %}
         {% if annexes_url is defined and annexes_url is not empty %}data-annexes-url="{{ annexes_url }}"{% endif %}
         {% if config is defined and config.community_id is defined and config.community_id is not empty %}data-config-community-id="{{ config.community_id }}"{% endif %}
+        {% if config is defined and config.technical_name is defined and config.technical_name is not empty %}data-config-technical-name="{{ config.technical_name }}"{% endif %}
     ></div>
 
     {% if app.user is defined and app.user is not null %}
