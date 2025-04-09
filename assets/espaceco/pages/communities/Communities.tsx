@@ -38,6 +38,7 @@ const Communities: FC = () => {
 
     const { t: tCommon } = useTranslation("Common");
     const { t: tBreadcrumb } = useTranslation("Breadcrumb");
+    const { t: tValid } = useTranslation("ManageCommunityValidations");
     const { t } = useTranslation("EspaceCoCommunityList");
 
     const filter = useMemo<CommunityListFilter>(() => {
@@ -71,12 +72,6 @@ const Communities: FC = () => {
         enabled: filter === "iam_member" || filter === "affiliation",
     });
 
-    const { data: communityNames } = useQuery<string[], CartesApiException>({
-        queryKey: RQKeys.communitiesName(),
-        queryFn: () => api.community.getCommunitiesName(),
-        staleTime: 3600000,
-    });
-
     const hasRights = useMemo(() => {
         if (me?.administrator) return true;
 
@@ -92,9 +87,9 @@ const Communities: FC = () => {
     const queryClient = useQueryClient();
 
     /* Creation du guichet */
-    const { isPending, isError, error, mutate } = useMutation<CommunityResponseDTO, CartesApiException, FormData>({
-        mutationFn: (data: FormData) => {
-            return api.community.add(data);
+    const { isPending, isError, error, mutate } = useMutation<CommunityResponseDTO, CartesApiException, string>({
+        mutationFn: (name: string) => {
+            return api.community.add({ name });
         },
         onSuccess: (community) => {
             // Mise a jour de users/me
@@ -131,7 +126,15 @@ const Communities: FC = () => {
                         </div>
                     </Wait>
                 )}
-                {isError && <Alert severity="error" closable title={tCommon("error")} description={error.message} className={fr.cx("fr-my-3w")} />}
+                {isError && (
+                    <Alert
+                        severity="error"
+                        closable
+                        title={tCommon("error")}
+                        description={error.code === 400 ? tValid("description.name.unique") : error.message}
+                        className={fr.cx("fr-my-3w")}
+                    />
+                )}
                 {communityQuery.isError && <Alert severity="error" closable={false} title={communityQuery.error?.message} />}
                 {communitiesAsMemberQuery.isError && <Alert severity="error" closable={false} title={communitiesAsMemberQuery.error?.message} />}
             </div>
@@ -217,11 +220,8 @@ const Communities: FC = () => {
                 </div>
             </div>
             <CreateCommunityDialog
-                communityNames={communityNames ?? []}
                 onAdd={(name) => {
-                    const datas = new FormData();
-                    datas.append("name", name);
-                    mutate(datas);
+                    mutate(name);
                 }}
             />
         </Main>

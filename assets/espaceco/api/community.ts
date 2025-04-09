@@ -13,15 +13,14 @@ const get = (queryParams: { page: number; limit: number }, signal: AbortSignal) 
     });
 };
 
-const add = (data: FormData) => {
+const add = (data: object) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_espaceco_community_add");
     return jsonFetch<CommunityResponseDTO>(
         url,
         {
             method: "POST",
         },
-        data,
-        true
+        data
     );
 };
 

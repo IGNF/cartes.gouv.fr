@@ -60,7 +60,7 @@ const AddDocumentDialog: FC<AddDocumentDialogProps> = ({ onAdd }) => {
                     })
                     .required(),
             }),
-        []
+        [tCommon]
     );
 
     const schema = getSchema(tValid);

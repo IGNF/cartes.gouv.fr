@@ -13,7 +13,7 @@ const CreateCommunityDialogModal = createModal({
 });
 
 type CreateCommunityDialogProps = {
-    communityNames: string[];
+    communityNames?: string[];
     onAdd: (name: string) => void;
 };
 
@@ -31,7 +31,7 @@ const CreateCommunityDialog: FC<CreateCommunityDialogProps> = ({ communityNames,
             .max(80, tValid("description.name.maxlength"))
             .test("is-unique", tValid("description.name.unique"), (name) => {
                 if (name === undefined) return true;
-                return !communityNames.includes(name.trim());
+                return !communityNames?.includes(name.trim());
             })
             .required(tValid("description.name.mandatory")),
     });

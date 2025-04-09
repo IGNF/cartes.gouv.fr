@@ -176,10 +176,10 @@ class CommunityController extends AbstractController implements ApiControllerInt
     public function add(Request $request): JsonResponse
     {
         try {
-            $name = $request->request->get('name');
-            $datas = ['name' => $name, 'active' => 'false'];
+            $data = json_decode($request->getContent(), true);
+            $data['active'] = 'false';
 
-            $community = $this->communityApiService->addCommunity($datas, null);
+            $community = $this->communityApiService->addCommunity($data, null);
 
             return new JsonResponse($community);
         } catch (ApiException $ex) {
