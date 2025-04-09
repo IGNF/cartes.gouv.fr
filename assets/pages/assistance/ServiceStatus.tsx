@@ -22,7 +22,7 @@ function getAlertSeverity(severity: IAlert["severity"]): "info" | "warning" | "e
 
 const ServiceStatus = () => {
     const [loading, setLoading] = useState(true);
-    const alerts = useAlertStore(({ alerts }) => alerts);
+    const alerts = useAlertStore(({ alerts }) => alerts).filter((alert) => alert.visibility.serviceLevel);
 
     return (
         <Main title="Niveau de service">
