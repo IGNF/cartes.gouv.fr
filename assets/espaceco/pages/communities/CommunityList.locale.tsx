@@ -15,6 +15,7 @@ const { i18n } = declareComponentKeys<
     | "community_creation"
     | "create_community"
     | "append_community"
+    | "no_description"
 >()("EspaceCoCommunityList");
 export type I18n = typeof i18n;
 
@@ -36,6 +37,7 @@ export const EspaceCoCommunityListFrTranslations: Translations<"fr">["EspaceCoCo
     community_creation: "Création du guichet en cours ...",
     create_community: "Création d'un guichet",
     append_community: "Reprendre la configuration de ce guichet",
+    no_description: "Aucune description n’a été renseignée sur ce guichet",
 };
 
 export const EspaceCoCommunityListEnTranslations: Translations<"en">["EspaceCoCommunityList"] = {
@@ -49,4 +51,5 @@ export const EspaceCoCommunityListEnTranslations: Translations<"en">["EspaceCoCo
     community_creation: undefined,
     create_community: undefined,
     append_community: undefined,
+    no_description: undefined,
 };

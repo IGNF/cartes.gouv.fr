@@ -61,11 +61,7 @@ const CommunityListItem: FC<CommunityListItemProps> = ({ className, community })
 
             {showDescription && (
                 <div style={{ backgroundColor: fr.colors.decisions.background.default.grey.default }}>
-                    {community.description ? (
-                        <p dangerouslySetInnerHTML={{ __html: community.description }} />
-                    ) : (
-                        "Aucune description n’a été renseignée sur ce guichet"
-                    )}
+                    {community.description ? <p dangerouslySetInnerHTML={{ __html: community.description }} /> : t("no_description")}
                 </div>
             )}
         </>
