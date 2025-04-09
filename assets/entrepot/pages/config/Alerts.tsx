@@ -323,12 +323,3 @@ const Alerts: FC = () => {
 Alerts.displayName = symToStr({ Alerts });
 
 export default Alerts;
-
-/**
- * TODO
- * - RSS
- * - check user rights
- * - make const id configurable (CONFIG_COMMUNITY_ID)
- * - problem with browser cache (use `cache: "no-store"` temporary)
- * - menu integration?
- */
