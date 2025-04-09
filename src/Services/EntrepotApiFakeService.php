@@ -13,7 +13,7 @@ class EntrepotApiFakeService
 
     public function __construct(
         ParameterBagInterface $parameterBag,
-        private Filesystem $fs
+        private Filesystem $fs,
     ) {
         $this->mockDataDir = $parameterBag->get('kernel.project_dir').'/tests/mock/entrepot';
     }

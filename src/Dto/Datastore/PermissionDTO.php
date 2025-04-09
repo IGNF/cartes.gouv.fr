@@ -53,7 +53,7 @@ class PermissionDTO
             type: 'boolean',
             message: 'permission.only_oauth_error',
         )]
-        public readonly bool $only_oauth
+        public readonly bool $only_oauth,
     ) {
     }
 }

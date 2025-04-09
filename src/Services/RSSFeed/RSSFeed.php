@@ -12,6 +12,7 @@ use Twig\Environment as TwigEnvironment;
 
 class RSSFeed
 {
+    private string $alertsJsonUrl;
     private HttpClientInterface $httpClient;
 
     public function __construct(
