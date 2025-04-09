@@ -10,16 +10,14 @@ import { v4 as uuidv4 } from "uuid";
 import { DocumentDTO } from "../../../../../@types/espaceco";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import Wait from "../../../../../components/Utils/Wait";
-import thumbnails from "../../../../../data/doc_thumbnail.json";
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/espaceco/RQKeys";
 import { CartesApiException } from "../../../../../modules/jsonFetch";
-import { appRoot } from "../../../../../router/router";
 import { useSnackbarStore } from "../../../../../stores/SnackbarStore";
-import { getFileExtension } from "../../../../../utils";
 import api from "../../../../api";
 import { AddDocumentDialog, AddDocumentDialogModal } from "./AddDocumentDialog";
 import { EditDocumentDialog, EditDocumentDialogModal } from "./EditDocumentDialog";
+import { getThumbnailFromFileName } from "../../../../esco_utils";
 
 type DocumentListProps = {
     communityId: number;
@@ -45,16 +43,6 @@ const DocumentList: FC<DocumentListProps> = ({ communityId, documents }) => {
         },
         [tCommon, setMessage]
     );
-
-    const getThumbnail = useCallback((fileName: string) => {
-        const extension = getFileExtension(fileName);
-
-        let src = thumbnails.defaut;
-        if (extension) {
-            src = thumbnails[extension].src;
-        }
-        return `${appRoot}/${src}`;
-    }, []);
 
     const queryClient = useQueryClient();
 
@@ -111,7 +99,7 @@ const DocumentList: FC<DocumentListProps> = ({ communityId, documents }) => {
             const element = d.uri ? (
                 <img className={"frx-document-image"} src={d.uri} />
             ) : (
-                <img className={"frx-document-image"} src={getThumbnail(d.short_fileName)} />
+                <img className={"frx-document-image"} src={getThumbnailFromFileName(d.short_fileName)} />
             );
             return [
                 <div key={d.id} className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
@@ -163,7 +151,7 @@ const DocumentList: FC<DocumentListProps> = ({ communityId, documents }) => {
                 </div>,
             ];
         });
-    }, [tCommon, documents, getThumbnail, copyToClipboard]);
+    }, [tCommon, documents, copyToClipboard]);
 
     return (
         <div>

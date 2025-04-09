@@ -12,7 +12,6 @@ import * as yup from "yup";
 
 import { useTranslation } from "../../../../../i18n/i18n";
 import { ComponentKey } from "../../../../../i18n/types";
-import { appRoot } from "../../../../../router/router";
 import { getThumbnail } from "../../../../esco_utils";
 
 import placeholder1x1 from "../../../../../img/placeholder.1x1.png";
@@ -107,7 +106,7 @@ const AddDocumentDialog: FC<AddDocumentDialogProps> = ({ onAdd }) => {
         if (!documentFile) {
             return;
         }
-        getThumbnail(appRoot, documentFile).then((uri) => {
+        getThumbnail(documentFile).then((uri) => {
             setModalImageUrl(uri ? uri : "");
         });
     }, [documentFile]);
