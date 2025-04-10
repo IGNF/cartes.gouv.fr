@@ -6,6 +6,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import isMailto from "validator/lib/isMailtoURI.js";
 import isURL from "validator/lib/isURL.js";
 import * as yup from "yup";
+import { useTranslation } from "@/i18n";
 
 const schema = yup.object({
     label: yup.string().required(),
@@ -29,6 +30,7 @@ interface ICustomLinkFormProps {
 }
 
 function ExternalLinkForm(props: ICustomLinkFormProps, ref) {
+    const { t } = useTranslation("ManageCommunity");
     const { isOpened } = props;
     const editor = useEditor();
 
@@ -76,7 +78,7 @@ function ExternalLinkForm(props: ICustomLinkFormProps, ref) {
     return (
         <form onSubmit={onSubmit}>
             <Input
-                label="URL"
+                label={t("tiptap.url")}
                 state={errors.href ? "error" : "default"}
                 stateRelatedMessage={errors?.href?.message?.toString()}
                 nativeInputProps={{
@@ -85,7 +87,7 @@ function ExternalLinkForm(props: ICustomLinkFormProps, ref) {
                 }}
             />
             <Input
-                label="Label"
+                label={"tiptap.label"}
                 state={errors.label ? "error" : "default"}
                 stateRelatedMessage={errors?.label?.message?.toString()}
                 nativeInputProps={{

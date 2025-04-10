@@ -4,9 +4,9 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { getThumbnailFromFileName } from "@/espaceco/esco_utils";
-import { appRoot } from "@/router/router";
 import { forwardRef, useEffect, useImperativeHandle } from "react";
 import { DocumentDTO } from "@/@types/espaceco";
+import { useTranslation } from "@/i18n";
 
 const schema = yup.object({
     id: yup.string().required(),
@@ -26,6 +26,7 @@ interface IDocumentsLinkFormProps {
 }
 
 function DocumentsLinkForm(props: IDocumentsLinkFormProps, ref) {
+    const { t } = useTranslation("ManageCommunity");
     const { documents, isOpened } = props;
     const editor = useEditor();
 
@@ -74,11 +75,11 @@ function DocumentsLinkForm(props: IDocumentsLinkFormProps, ref) {
     return (
         <form onSubmit={onSubmit}>
             <RadioButtons
-                legend="Sélectionnez un document"
+                legend={t("tiptap.select_document")}
                 name="radio"
                 options={documents.map((document) => ({
                     illustration: document.mime_type.startsWith("image") ? (
-                        <img alt={document.title} src={document.uri ?? getThumbnailFromFileName(appRoot, document.short_fileName)} />
+                        <img alt={document.title} src={document.uri ?? getThumbnailFromFileName(document.short_fileName)} />
                     ) : undefined,
                     label: document.title,
                     nativeInputProps: {

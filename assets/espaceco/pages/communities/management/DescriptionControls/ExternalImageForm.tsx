@@ -5,6 +5,7 @@ import { Input } from "@codegouvfr/react-dsfr/Input.js";
 import { yupResolver } from "@hookform/resolvers/yup";
 import isURL from "validator/lib/isURL.js";
 import * as yup from "yup";
+import { useTranslation } from "@/i18n";
 
 const schema = yup.object({
     src: yup
@@ -30,6 +31,7 @@ interface ICustomImageFormProps {
 }
 
 function ExternalImageForm(props: ICustomImageFormProps, ref) {
+    const { t } = useTranslation("ManageCommunity");
     const { isOpened } = props;
     const editor = useEditor();
 
@@ -70,7 +72,7 @@ function ExternalImageForm(props: ICustomImageFormProps, ref) {
     return (
         <form onSubmit={onSubmit}>
             <Input
-                label={"URL"}
+                label={t("tiptap.url")}
                 state={errors.src ? "error" : "default"}
                 stateRelatedMessage={errors?.src?.message?.toString()}
                 nativeInputProps={{
@@ -79,7 +81,7 @@ function ExternalImageForm(props: ICustomImageFormProps, ref) {
                 }}
             />
             <Input
-                label={"Alt"}
+                label={t("tiptap.alt")}
                 state={errors.alt ? "error" : "default"}
                 stateRelatedMessage={errors?.alt?.message?.toString()}
                 nativeInputProps={{
@@ -87,7 +89,7 @@ function ExternalImageForm(props: ICustomImageFormProps, ref) {
                 }}
             />
             <Input
-                label={"Titre"}
+                label={t("tiptap.title")}
                 state={errors.title ? "error" : "default"}
                 stateRelatedMessage={errors?.title?.message?.toString()}
                 nativeInputProps={{

@@ -7,9 +7,10 @@ import ExternalImageForm, { ExternalImageFormRef } from "./ExternalImageForm";
 import DocumentsImageForm, { DocumentsImageFormRef } from "./DocumentsImageForm";
 import { useDocuments } from "./documentsContext";
 import { getThumbnailFromFileName } from "@/espaceco/esco_utils";
-import { appRoot } from "@/router/router";
+import { useTranslation } from "@/i18n";
 
 function DescriptionImageDialog() {
+    const { t } = useTranslation("ManageCommunity");
     const { isOpened, modal, onClose } = useDialog();
     const [selectedTabId, setSelectedTabId] = useState("documents");
     const documentsFormRef = useRef<DocumentsImageFormRef>();
@@ -20,7 +21,7 @@ function DescriptionImageDialog() {
         () =>
             documents
                 .filter((document) => document.mime_type.startsWith("image"))
-                .map((image) => ({ ...image, src: image.uri ?? getThumbnailFromFileName(appRoot, image.short_fileName) })),
+                .map((image) => ({ ...image, src: image.uri ?? getThumbnailFromFileName(image.short_fileName) })),
         [documents]
     );
 
@@ -51,16 +52,16 @@ function DescriptionImageDialog() {
 
     return (
         <modal.Component
-            title="Définir l'image"
+            title={t("tiptap.define_image")}
             size="large"
             buttons={[
                 {
                     doClosesModal: true,
-                    children: "Annuler",
+                    children: t("tiptap.cancel"),
                 },
                 {
                     doClosesModal: false,
-                    children: "Ajouter",
+                    children: t("tiptap.add"),
                     onClick: onSubmit,
                 },
             ]}
@@ -69,8 +70,8 @@ function DescriptionImageDialog() {
                 selectedTabId={selectedTabId}
                 onTabChange={setSelectedTabId}
                 tabs={[
-                    { tabId: "documents", label: "Documents" },
-                    { tabId: "external", label: "External image" },
+                    { tabId: "documents", label: t("tiptap.documents") },
+                    { tabId: "external", label: t("tiptap.external_image") },
                 ]}
             >
                 {selectedTabId === "documents" && <DocumentsImageForm ref={documentsFormRef} isOpened={isOpened} images={images} />}
