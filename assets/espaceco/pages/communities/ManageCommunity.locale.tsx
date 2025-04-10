@@ -121,6 +121,19 @@ const { i18n } = declareComponentKeys<
     | "report.manage_permissions.authorize_hint"
     | "grid.grids"
     | { K: "grid.explain"; R: JSX.Element }
+    | "tiptap.define_image"
+    | "tiptap.cancel"
+    | "tiptap.add"
+    | "tiptap.documents"
+    | "tiptap.external_image"
+    | "tiptap.define_link"
+    | "tiptap.external_link"
+    | "tiptap.select_image"
+    | "tiptap.select_document"
+    | "tiptap.url"
+    | "tiptap.alt"
+    | "tiptap.title"
+    | "tiptap.label"
 >()("ManageCommunity");
 export type I18n = typeof i18n;
 
@@ -288,6 +301,19 @@ export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"
             Tous les membres du guichet y auront accès et pourront donc réaliser des contributions directes sur la base de données.
         </p>
     ),
+    "tiptap.define_image": "Définir l'image",
+    "tiptap.cancel": "Annuler",
+    "tiptap.add": "Ajouter",
+    "tiptap.documents": "Documents",
+    "tiptap.external_image": "Image externe",
+    "tiptap.define_link": "Définir le lien",
+    "tiptap.external_link": "Lien externe",
+    "tiptap.select_image": "Sélectionnez une image",
+    "tiptap.select_document": "Sélectionnez un document",
+    "tiptap.url": "URL",
+    "tiptap.alt": "Alt",
+    "tiptap.title": "Titre",
+    "tiptap.label": "Étiquette",
 };
 
 export const ManageCommunityEnTranslations: Translations<"en">["ManageCommunity"] = {
@@ -418,4 +444,17 @@ export const ManageCommunityEnTranslations: Translations<"en">["ManageCommunity"
     "report.manage_permissions.authorize_hint": undefined,
     "grid.grids": undefined,
     "grid.explain": undefined,
+    "tiptap.define_image": undefined,
+    "tiptap.cancel": undefined,
+    "tiptap.add": undefined,
+    "tiptap.documents": undefined,
+    "tiptap.external_image": undefined,
+    "tiptap.define_link": undefined,
+    "tiptap.external_link": undefined,
+    "tiptap.select_image": undefined,
+    "tiptap.select_document": undefined,
+    "tiptap.url": undefined,
+    "tiptap.alt": undefined,
+    "tiptap.title": undefined,
+    "tiptap.label": undefined,
 };

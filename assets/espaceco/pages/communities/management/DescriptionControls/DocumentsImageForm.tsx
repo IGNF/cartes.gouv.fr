@@ -5,6 +5,7 @@ import * as yup from "yup";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { forwardRef, useEffect, useImperativeHandle } from "react";
 import { DocumentDTO } from "@/@types/espaceco";
+import { useTranslation } from "@/i18n";
 
 const schema = yup.object({
     id: yup.string().required(),
@@ -28,6 +29,7 @@ interface IDocumentsImageFormProps {
 }
 
 function DocumentsImageForm(props: IDocumentsImageFormProps, ref) {
+    const { t } = useTranslation("ManageCommunity");
     const { isOpened, images } = props;
     const editor = useEditor();
 
@@ -68,7 +70,7 @@ function DocumentsImageForm(props: IDocumentsImageFormProps, ref) {
     return (
         <form onSubmit={onSubmit}>
             <RadioButtons
-                legend="Sélectionnez une image"
+                legend={t("tiptap.select_image")}
                 name="radio"
                 options={images.map((image) => ({
                     illustration: <img alt={image.title} src={image.src} />,

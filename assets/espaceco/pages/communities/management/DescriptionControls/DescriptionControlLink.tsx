@@ -6,8 +6,10 @@ import { useEffect, useRef, useState } from "react";
 import ExternalLinkForm, { ExternalLinkFormRef } from "./ExternalLinkForm";
 import DocumentsLinkForm, { DocumentsLinkFormRef } from "./DocumentsLinkForm";
 import { useDocuments } from "./documentsContext";
+import { useTranslation } from "@/i18n";
 
 function DescriptionLinkDialog() {
+    const { t } = useTranslation("ManageCommunity");
     const { isOpened, modal, onClose } = useDialog();
     const [selectedTabId, setSelectedTabId] = useState("documents");
     const documentsFormRef = useRef<DocumentsLinkFormRef>();
@@ -42,16 +44,16 @@ function DescriptionLinkDialog() {
 
     return (
         <modal.Component
-            title="Définir le lien"
+            title={t("tiptap.define_link")}
             size="large"
             buttons={[
                 {
                     doClosesModal: true,
-                    children: "Annuler",
+                    children: t("tiptap.cancel"),
                 },
                 {
                     doClosesModal: false,
-                    children: "Ajouter",
+                    children: t("tiptap.add"),
                     onClick: onSubmit,
                 },
             ]}
@@ -60,8 +62,8 @@ function DescriptionLinkDialog() {
                 selectedTabId={selectedTabId}
                 onTabChange={setSelectedTabId}
                 tabs={[
-                    { tabId: "documents", label: "Documents" },
-                    { tabId: "external", label: "External image" },
+                    { tabId: "documents", label: t("tiptap.documents") },
+                    { tabId: "external", label: t("tiptap.external_link") },
                 ]}
             >
                 {selectedTabId === "documents" && <DocumentsLinkForm ref={documentsFormRef} documents={documents} isOpened={isOpened} />}
