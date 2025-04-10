@@ -1,4 +1,4 @@
-import GetFeatureInfo from "geopf-extensions-openlayers/src/packages/Controls/GetFeatureInfo/GetFeatureInfo";
+// import GetFeatureInfo from "geopf-extensions-openlayers/src/packages/Controls/GetFeatureInfo/GetFeatureInfo";
 import LayerSwitcher from "geopf-extensions-openlayers/src/packages/Controls/LayerSwitcher/LayerSwitcher";
 import SearchEngine from "geopf-extensions-openlayers/src/packages/Controls/SearchEngine/SearchEngine";
 import GeoportalZoom from "geopf-extensions-openlayers/src/packages/Controls/Zoom/GeoportalZoom";
@@ -41,18 +41,51 @@ export interface MapInitial {
 
 type RMapProps = {
     initial: MapInitial;
-    currentStyle?: CartesStyle;
 };
 
-const RMap: FC<RMapProps> = ({ initial, currentStyle }) => {
+const RMap: FC<RMapProps> = ({ initial }) => {
+    // const gfinfo = useMemo(() => {
+    //     return [OfferingDetailResponseDtoTypeEnum.WFS, OfferingDetailResponseDtoTypeEnum.WMSVECTOR, OfferingDetailResponseDtoTypeEnum.WMTSTMS].includes(
+    //         initial.type
+    //     );
+    // }, [initial.type]);
+
     const mapTargetRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<Map>();
+    const layerSwitcherControl = useRef(
+        new LayerSwitcher({
+            options: {
+                position: "top-right",
+                collapsed: true,
+                panel: true,
+                counter: true,
+            },
+        })
+    );
+    const controls = useRef([
+        new GeoportalZoom({ position: "top-left" }),
+        new Attribution({ collapsible: true, collapsed: true }),
+        layerSwitcherControl.current,
+        new ScaleLine(),
+        new SearchEngine({
+            collapsed: false,
+            displayAdvancedSearch: false,
+            apiKey: "essentiels",
+            zoomTo: "auto",
+        }),
+        // gfinfo
+        //     ? new GetFeatureInfo({
+        //           options: {
+        //               active: true,
+        //               hidden: true,
+        //           },
+        //           position: "top-right",
+        //       })
+        //     : undefined,
+    ]);
+    const bkLayer = useRef(new TileLayer({ properties: { title: null, description: null } }));
 
     const { data: capabilities } = useCapabilities();
-
-    const bkLayer = useMemo(() => {
-        return new TileLayer({ properties: { title: null, description: null } });
-    }, []);
 
     // Extent dans la configuration
     const extent = useMemo(() => {
@@ -66,28 +99,12 @@ const RMap: FC<RMapProps> = ({ initial, currentStyle }) => {
         return extent;
     }, [initial.bbox]);
 
-    const gfinfo = useMemo(() => {
-        return [OfferingDetailResponseDtoTypeEnum.WFS, OfferingDetailResponseDtoTypeEnum.WMSVECTOR, OfferingDetailResponseDtoTypeEnum.WMTSTMS].includes(
-            initial.type
-        );
-    }, [initial.type]);
-
-    const getControl = (className: string): typeof LayerSwitcher | typeof GetFeatureInfo => {
-        const controls = mapRef.current
-            ?.getControls()
-            .getArray()
-            .filter((c) => {
-                return c.constructor.name === className;
-            });
-        return controls ? controls[0] : controls;
-    };
-
     const getWorkingLayers = useCallback((): BaseLayer[] => {
         const workingLayers = mapRef.current
             ?.getLayers()
             .getArray()
             .filter((l) => l.get("name") !== olDefaults.default_background_layer);
-        return workingLayers ? workingLayers : [];
+        return workingLayers ?? [];
     }, []);
 
     /**
@@ -100,7 +117,7 @@ const RMap: FC<RMapProps> = ({ initial, currentStyle }) => {
             }
             // Ajout du layer dans la carte et dans le LayerSwitcher
             mapRef.current?.addLayer(layer);
-            getControl("LayerSwitcher")?.addLayer(layer, {
+            layerSwitcherControl.current.addLayer(layer, {
                 title: layer.get("title"),
                 description: layer.get("abstract"),
             });
@@ -111,38 +128,6 @@ const RMap: FC<RMapProps> = ({ initial, currentStyle }) => {
     useEffect(() => {
         // Creation de la carte
         if (!mapRef.current) {
-            const controls = [
-                new GeoportalZoom({ position: "top-left" }),
-                new Attribution({ collapsible: true, collapsed: true }),
-                new LayerSwitcher({
-                    options: {
-                        position: "top-right",
-                        collapsed: true,
-                        panel: true,
-                        counter: true,
-                    },
-                }),
-                new ScaleLine(),
-                new SearchEngine({
-                    collapsed: false,
-                    displayAdvancedSearch: false,
-                    apiKey: "essentiels",
-                    zoomTo: "auto",
-                }),
-            ];
-
-            if (gfinfo) {
-                controls.push(
-                    new GetFeatureInfo({
-                        options: {
-                            active: true,
-                            hidden: true,
-                        },
-                        position: "top-right",
-                    })
-                );
-            }
-
             mapRef.current = new Map({
                 view: new View({
                     projection: olDefaults.projection,
@@ -150,7 +135,7 @@ const RMap: FC<RMapProps> = ({ initial, currentStyle }) => {
                     zoom: olDefaults.zoom,
                 }),
                 interactions: defaultInteractions(),
-                controls: controls,
+                controls: controls.current,
             });
         }
         mapRef.current.setTarget(mapTargetRef.current || "");
@@ -161,7 +146,7 @@ const RMap: FC<RMapProps> = ({ initial, currentStyle }) => {
          * re-render.
          */
         return () => mapRef.current?.setTarget(undefined);
-    }, [gfinfo]);
+    }, []);
 
     useEffect(() => {
         (async () => {
@@ -169,17 +154,17 @@ const RMap: FC<RMapProps> = ({ initial, currentStyle }) => {
             mapRef.current?.getLayers().clear();
 
             // Ajout de la couche de fond PlanIgnV2
-            addLayer(bkLayer);
+            addLayer(bkLayer.current);
 
             // Ajout des autres couches
             const layers = initial.layers;
 
-            const gfiLayers: object[] = [];
+            // const gfiLayers: object[] = [];
             layers.forEach((layer) => {
                 addLayer(layer);
-                if (gfinfo) {
-                    gfiLayers.push({ obj: layer });
-                }
+                // if (gfinfo) {
+                //     gfiLayers.push({ obj: layer });
+                // }
             });
             // NOTE : il me semble que ce n'est plus nécessaire et plus possible sur geopf-ext-ol, à vérifier
             // getControl("GetFeatureInfo")?.setLayers(gfiLayers);
@@ -189,7 +174,7 @@ const RMap: FC<RMapProps> = ({ initial, currentStyle }) => {
                 mapRef.current?.getView().fit(extent);
             }
         })();
-    }, [gfinfo, bkLayer, extent, initial.layers, addLayer]);
+    }, [extent, initial.layers, addLayer]);
 
     useEffect(() => {
         if (!capabilities) return;
@@ -203,15 +188,15 @@ const RMap: FC<RMapProps> = ({ initial, currentStyle }) => {
                 return l.Identifier === olDefaults.default_background_layer;
             });
 
-            bkLayer.setSource(new WMTS(wmtsOptions));
-            bkLayer.set("name", capLayer?.Identifier);
-            bkLayer.set("title", capLayer?.Title);
+            bkLayer.current.setSource(new WMTS(wmtsOptions));
+            bkLayer.current.set("name", capLayer?.Identifier);
+            bkLayer.current.set("title", capLayer?.Title);
         }
-    }, [capabilities, bkLayer]);
+    }, [capabilities]);
 
     useEffect(() => {
-        getWorkingLayers().forEach((layer) => StyleHelper.applyStyle(layer, currentStyle));
-    }, [currentStyle, getWorkingLayers]);
+        getWorkingLayers().forEach((layer) => StyleHelper.applyStyle(layer, initial.currentStyle));
+    }, [initial.currentStyle, getWorkingLayers]);
 
     return <div className={"map-view"} ref={mapTargetRef} />;
 };
