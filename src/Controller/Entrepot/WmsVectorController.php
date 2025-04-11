@@ -133,7 +133,7 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
         string $storedDataId,
         string $offeringId,
         Request $request,
-        #[MapRequestPayload('form')] WmsVectorServiceDTO $dto,
+        #[MapRequestPayload()] WmsVectorServiceDTO $dto,
     ): JsonResponse {
         $files = $request->files->all(); // les fichiers de style .sld
 
