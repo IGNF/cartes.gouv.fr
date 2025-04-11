@@ -76,7 +76,10 @@ npm install --global yarn
 3. Lancer les conteneurs docker : `docker compose -f compose.prod.yml up -d --build`
 4. Consulter le site au http://localhost:9090 ou https://cartesgouvfr-prod.docker.localhost (si traefik est configuré)
 
-> [!TIP] Aide mémoire options docker compose
+> [!TIP]
+>
+> **Aide mémoire options docker compose**
+> 
 > `docker compose up ...`
 >
 > `-f` permet de spécifier le fichier compose.yml à utiliser (il y a plusieurs fichiers, chaque fichier correspondant à un environnement)
