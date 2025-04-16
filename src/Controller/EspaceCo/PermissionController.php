@@ -9,7 +9,7 @@ use App\Services\EspaceCoApi\DatabaseApiService;
 use App\Services\EspaceCoApi\PermissionApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route(
@@ -81,102 +81,76 @@ class PermissionController extends AbstractController implements ApiControllerIn
     public function get(int $communityId): JsonResponse
     {
         try {
-            $permissions = $this->permissionApiService->getAllByCommunity($communityId, 'VIEW,EDIT,EXPORT');
+            $permissions = $this->permissionApiService->getAllByCommunity(
+                $communityId,
+                ['NONE', 'VIEW', 'EDIT', 'EXPORT'],
+                ['database', 'table', 'column', 'level', 'database_title', 'table_name', 'table_title', 'column_name', 'column_title']
+            );
             $groupBy = $this->_groupBy($permissions);
 
-            // Ajout du nom et title des bases, tables et colonnes
-            foreach ($groupBy as $dbId => &$config) {
-                $database = $this->databaseApiService->getDatabase($dbId, ['title']);
-                $config['title'] = $database['title'];
-                if (!count($config['tables'])) {
-                    $config['tables'] = null;
-                    continue;
-                }
-
-                foreach ($config['tables'] as $tableId => &$configTable) {
-                    $table = $this->databaseApiService->getTable($dbId, $tableId, ['title']);
-                    $configTable['title'] = $table['title'];
-                    if (!count($configTable['columns'])) {
-                        $config['columns'] = null;
-                        continue;
-                    }
-
-                    foreach ($configTable['columns'] as $columnId => &$configColumn) {
-                        $column = $this->databaseApiService->getColumn($dbId, $tableId, $columnId, ['title']);
-                        $configColumn['title'] = $column['title'];
-                    }
-                }
-            }
-
             return new JsonResponse($groupBy);
-            /* $dbs = []; $tables = []; $columns = [];
-            foreach($permissions as &$permission) {
-                if (! array_key_exists($permission['database'], $dbs)) {
-                    $database = $this->databaseApiService->getDatabase($permission['database'], ['title']);
-
-                    $partialDb = ['id' => $permission['database'], 'title' => $database['title']];
-                    $dbs[$permission['database']] = $partialDb;
-                    $permission['database'] = $partialDb;
-                } else {
-                    $permission['database'] = $dbs[$permission['database']];
-                }
-
-                // Les tables
-                if (! is_null($permission['table'])) {
-                    $db = $permission['database']['id']; $t = $permission['table'];
-                    $id = "$db:$t";
-                    if (! array_key_exists($id, $tables)) {
-                        $table = $this->databaseApiService->getTable($db, $t, ['title']);
-
-                        $partialTable = ['id' => $permission['table'], 'title' => $table['title']];
-                        $tables[$id] = $partialTable;
-                        $permission['table'] = $partialTable;
-                    } else {
-                        $permission['table'] = $tables[$id];
-                    }
-                }
-
-                // les colonnes
-                if (! is_null($permission['column'])) {
-                    $db = $permission['database']['id']; $t = $permission['table']['id']; $col = $permission['column'];
-                    $id = "$db:$t:$col";
-                    if (! array_key_exists($id, $columns)) {
-                        $column = $this->databaseApiService->getColumn($db, $t, $permission['column'], ['title']);
-
-                        $partialColumn = ['id' => $permission['column'], 'title' => $column['title']];
-                        $columns[$id] = $partialColumn;
-                        $permission['column'] = $partialColumn;
-                    } else {
-                        $partialColumn = $columns[$id];
-                        $permission['column'] = $partialColumn;
-                    }
-                }
-            }
-            return new JsonResponse($permissions); */
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
     }
 
-    /**
-     * @param array<string> $dbIds
-     */
-    #[Route('/get_on_dbs/{communityId}', name: 'get_databases_permissions', methods: ['GET'])]
-    public function getDatabasesPermissions(
-        int $communityId,
-        #[MapQueryParameter] array $dbIds,
-    ): JsonResponse {
+    #[Route('/update/{communityId}', name: 'update', methods: ['PATCH'])]
+    public function update(int $communityId, Request $request): JsonResponse
+    {
         try {
-            $permissions = [];
-            foreach ($dbIds as $databaseId) {
-                $dbPermissions = $this->permissionApiService->getAllPermissionsForDatabase($communityId, (int) $databaseId);
-                $p = array_values(array_filter($dbPermissions, function ($p) {
-                    return 'ADMIN' !== $p['level'];
-                }));
-                $permissions = array_merge($permissions, $p);
+            $permissions = $this->permissionApiService->getAllByCommunity(
+                $communityId,
+                ['NONE', 'VIEW', 'EDIT', 'EXPORT']
+            );
+
+            $oldPermissionsByKey = [];
+
+            // On regroupe par cle (database:table:column)
+            foreach ($permissions as $permission) {
+                $key = $this->_composeKey($permission);
+                $oldPermissionsByKey[$key] = ['id' => $permission['id'], 'level' => $permission['level']];
             }
 
-            return new JsonResponse($permissions);
+            // On regroupe par cle (database:table:column)
+            $datas = json_decode($request->getContent(), true);
+            $newPermissionsByKey = $this->_groupByKey($datas);
+
+            // Les cles communes
+            $commons = array_keys(array_intersect_key($oldPermissionsByKey, $newPermissionsByKey));
+
+            if (0 != count($commons)) {
+                // Recherche des modifications
+                foreach ($commons as $key) {
+                    $oldPermissionConfig = $oldPermissionsByKey[$key];
+                    $newPermission = $newPermissionsByKey[$key];
+                    if ($newPermission['level'] != $oldPermissionConfig['level']) {
+                        $this->permissionApiService->update($oldPermissionConfig['id'], ['level' => $newPermission['level']]);
+                    }
+                }
+            }
+
+            $diff = array_diff_key($oldPermissionsByKey, $newPermissionsByKey);
+            if (0 != count($diff)) {    // Suppressions
+                foreach ($oldPermissionsByKey as $key => $config) {
+                    $this->permissionApiService->remove($config['id']);
+                }
+            }
+
+            $diff = array_diff_key($newPermissionsByKey, $oldPermissionsByKey);
+            if (0 != count($diff)) {    // Ajouts
+                foreach ($newPermissionsByKey as $key => $config) {
+                    $this->permissionApiService->add($config);
+                }
+            }
+
+            $permissions = $this->permissionApiService->getAllByCommunity(
+                $communityId,
+                ['NONE', 'VIEW', 'EDIT', 'EXPORT'],
+                ['database', 'table', 'column', 'level', 'database_title', 'table_name', 'table_title', 'column_name', 'column_title']
+            );
+            $groupBy = $this->_groupBy($permissions);
+
+            return new JsonResponse($groupBy);
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
@@ -214,10 +188,11 @@ class PermissionController extends AbstractController implements ApiControllerIn
         $database = $permission['database'];
         $level = 'EXPORT' == $permission['level'] ? 'VIEW' : $permission['level'];
 
-        if (!array_key_exists($database, $groupBy)) {
-            $groupBy[$database] = ['level' => $level, 'tables' => []];
+        $index = $this->_findDatabase($database, $groupBy);
+        if ($index < 0) {
+            $groupBy[] = ['id' => $database, 'title' => $permission['database_title'], 'level' => $level, 'tables' => []];
         } else {
-            $groupBy[$database]['level'] = $level;
+            $groupBy[$index]['level'] = $level;
         }
     }
 
@@ -234,16 +209,18 @@ class PermissionController extends AbstractController implements ApiControllerIn
 
         $level = 'EXPORT' == $permission['level'] ? 'VIEW' : $permission['level'];
 
-        // la base de donnes n'existe pas
-        if (!array_key_exists($database, $groupBy)) {
-            $groupBy[$database] = ['level' => 'NONE', 'tables' => []];
+        $index = $this->_findDatabase($database, $groupBy);
+        if ($index < 0) {   // la base de donnes n'existe pas
+            $groupBy[] = ['id' => $database, 'title' => $permission['database_title'], 'level' => 'NONE', 'tables' => []];
+            $index = $this->_findDatabase($database, $groupBy);
         }
 
-        // la table n'existe pas
-        if (!array_key_exists($table, $groupBy[$database]['tables'])) {
-            $groupBy[$database]['tables'][$table] = ['level' => $level, 'columns' => []];
+        $tableIndex = $this->_findTable($table, $groupBy[$index]['tables']);
+        if ($tableIndex < 0) {
+            $title = is_null($permission['table_title']) ? $permission['table_name'] : $permission['table_title'];
+            $groupBy[$index]['tables'][] = ['id' => $table, 'title' => $title, 'level' => 'NONE', 'columns' => []];
         } else {
-            $groupBy[$database]['tables'][$table]['level'] = $level;
+            $groupBy[$index]['tables'][$tableIndex]['level'] = $level;
         }
     }
 
@@ -261,16 +238,84 @@ class PermissionController extends AbstractController implements ApiControllerIn
 
         $level = 'EXPORT' == $permission['level'] ? 'VIEW' : $permission['level'];
 
-        // la base de donnes n'existe pas
-        if (!array_key_exists($database, $groupBy)) {
-            $groupBy[$database] = ['level' => 'NONE', 'tables' => []];
+        $index = $this->_findDatabase($database, $groupBy);
+        if ($index < 0) {
+            $groupBy[] = ['id' => $database, 'title' => $permission['database_title'], 'level' => 'NONE', 'tables' => []];
+            $index = $this->_findDatabase($database, $groupBy);
         }
 
-        // la table n'existe pas
-        if (!array_key_exists($table, $groupBy[$database]['tables'])) {
-            $groupBy[$database]['tables'][$table] = ['level' => 'NONE', 'columns' => []];
+        $tableIndex = $this->_findTable($table, $groupBy[$index]['tables']);
+        if ($tableIndex < 0) {
+            $title = is_null($permission['table_title']) ? $permission['table_name'] : $permission['table_title'];
+            $groupBy[$index]['tables'][] = ['id' => $table, 'title' => $title, 'level' => 'NONE', 'columns' => []];
+            $tableIndex = $this->_findTable($table, $groupBy[$index]['tables']);
         }
 
-        $groupBy[$database]['tables'][$table]['columns'][$column] = ['level' => $level];
+        $title = is_null($permission['column_title']) ? $permission['column_name'] : $permission['column_title'];
+        $groupBy[$index]['tables'][$tableIndex]['columns'][] = ['id' => $column, 'title' => $title, 'level' => $level];
+    }
+
+    /**
+     * @param array<mixed> $groupBy
+     */
+    private function _findDatabase(int $databaseId, array $groupBy): int
+    {
+        foreach ($groupBy as $index => $database) {
+            if ($database['id'] == $databaseId) {
+                return $index;
+            }
+        }
+
+        return -1;
+    }
+
+    /**
+     * @param array<mixed> $tables
+     */
+    private function _findTable(int $tableId, array $tables): int
+    {
+        foreach ($tables as $index => $table) {
+            if ($table['id'] == $tableId) {
+                return $index;
+            }
+        }
+
+        return -1;
+    }
+
+    /**
+     * @param array<mixed> $permission
+     */
+    private function _composeKey(array $permission): string
+    {
+        $values = [$permission['database']];
+        $values[] = $permission['table'] ? $permission['table'] : '';
+        $values[] = $permission['column'] ? $permission['column'] : '';
+
+        return implode(':', $values);
+    }
+
+    /**
+     * @param array<mixed> $permissions
+     *
+     * @return array<mixed>
+     */
+    private function _groupByKey(array $permissions): array
+    {
+        $newPermissionsByKey = [];
+        foreach ($permissions as $dbPermission) {
+            $database = $dbPermission['id'];
+            $newPermissionsByKey["$database::"] = ['database' => $database, 'level' => $dbPermission['level']];
+            foreach ($dbPermission['tables'] as $tablePermission) {
+                $table = $tablePermission['id'];
+                $newPermissionsByKey["$database:$table:"] = ['database' => $database, 'table' => $table, 'level' => $tablePermission['level']];
+                foreach ($tablePermission['columns'] as $columnPermission) {
+                    $column = $columnPermission['id'];
+                    $newPermissionsByKey["$database:$table:$column"] = ['database' => $database, 'table' => $table, 'column' => $column, 'level' => $dbPermission['level']];
+                }
+            }
+        }
+
+        return $newPermissionsByKey;
     }
 }

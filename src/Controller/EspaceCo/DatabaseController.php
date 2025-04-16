@@ -25,33 +25,69 @@ class DatabaseController extends AbstractController implements ApiControllerInte
     }
 
     /**
-     * @param array<string> $dbIds
+     * @param array<string> $fields
      */
-    #[Route('/', name: 'get', methods: ['GET'])]
-    public function get(#[MapQueryParameter] array $dbIds = []): JsonResponse
+    #[Route('/', name: 'get_all', requirements: ['communityId' => '\d+'], methods: ['GET'])]
+    public function getAll(#[MapQueryParameter] array $fields = []): JsonResponse
     {
         try {
-            $dbs = $this->databaseApiService->getAll($dbIds, ['id']);
-
-            $databases = [];
-            foreach ($dbs as $db) {
-                $database = $this->databaseApiService->getDatabase($db['id'], ['id', 'name', 'title', 'tables']);
-                foreach ($database['tables'] as &$t) {
-                    $t = $this->databaseApiService->getTable($database['id'], $t['id'], ['id', 'name', 'title', 'columns']);
-                    $t['columns'] = array_map(fn ($column) => ['id' => $column['id'], 'name' => $column['name'], 'title' => $column['title']], $t['columns']);
-                }
-                $databases[] = $database;
-
-                /* $tables = $this->databaseApiService->getAllTables($database['id'], ['id', 'name', 'title', 'geometry_name']);
-                foreach ($tables as &$table) {
-                    $t = $this->databaseApiService->getTable($database['id'], $table['id'], ['id', 'name', 'title', 'columns']);
-                    $table['columns'] = array_map(fn ($column) => ['id' => $column['id'], 'name' => $column['name'], 'title' => $column['title']], $t['columns']);
-                }
-                $database['tables'] = $tables;
-                $databases[] = $database; */
-            }
+            $databases = $this->databaseApiService->getAll($fields);
 
             return new JsonResponse($databases);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
+    /**
+     * @param array<string> $fields
+     */
+    #[Route('/{databaseId}', name: 'get', requirements: ['databaseId' => '\d+'], methods: ['GET'])]
+    public function get(
+        int $databaseId,
+        #[MapQueryParameter] array $fields = []): JsonResponse
+    {
+        try {
+            $database = $this->databaseApiService->getDatabase($databaseId, $fields);
+
+            return new JsonResponse($database);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
+    /**
+     * @param array<string> $fields
+     */
+    #[Route('/search_by', name: 'search_by', methods: ['GET'])]
+    public function searchBy(
+        #[MapQueryParameter] string $field,
+        #[MapQueryParameter] string $value,
+        #[MapQueryParameter] string $sort,
+        #[MapQueryParameter] array $fields = []): JsonResponse
+    {
+        try {
+            $databases = $this->databaseApiService->searchBy($field, $value, $sort, $fields);
+
+            return new JsonResponse($databases);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
+    /**
+     * @param array<string> $fields
+     */
+    #[Route('/{databaseId}/{tableId}', name: 'get_table', requirements: ['databaseId' => '\d+', 'tableId' => '\d+'], methods: ['GET'])]
+    public function getTable(
+        int $databaseId,
+        int $tableId,
+        #[MapQueryParameter] array $fields = []): JsonResponse
+    {
+        try {
+            $table = $this->databaseApiService->getTable($databaseId, $tableId, $fields);
+
+            return new JsonResponse($table);
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }

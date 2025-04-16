@@ -93,7 +93,6 @@ const OpenWithEmailsConfigDialog: FC<OpenWithEmailsConfigDialogProps> = ({ openW
     } = form;
 
     const openWithEmail = watch("openWithEmail");
-    console.log(errors);
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (!addDomainRef.current) {

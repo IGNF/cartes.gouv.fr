@@ -2,52 +2,59 @@
 
 namespace App\Services\EspaceCoApi;
 
-use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
-
 class DatabaseApiService extends BaseEspaceCoApiService
 {
     /**
-     * @param array<mixed> $dbIds
      * @param array<mixed> $fields
      */
-    public function getAll(
-        #[MapQueryParameter] array $dbIds = [],
-        #[MapQueryParameter] ?array $fields = []): array
+    public function getAll(?array $fields = []): array
     {
-        if (!count($dbIds)) {
-            return $this->requestAll('databases', ['fields' => $fields]);
-        }
+        $query = empty($fields) ? [] : ['fields' => $fields];
 
-        $databases = [];
-        foreach ($dbIds as $id) {
-            $databases[] = $this->getDatabase($id, $fields);
-        }
-
-        return $databases;
-    }
-
-    /**
-     * @param array<mixed> $fields
-     */
-    public function getDatabase(int $databaseId, #[MapQueryParameter] ?array $fields = []): array
-    {
-        return $this->request('GET', "databases/$databaseId", [], ['fields' => $fields]);
+        return $this->requestAll('databases', $query);
     }
 
     /**
      * @param array<string> $fields
      */
-    public function getTable(int $databaseId, int $tableId, #[MapQueryParameter] ?array $fields = []): array
+    public function searchBy(string $field, string $value, string $sort, ?array $fields = []): array
     {
-        return $this->request('GET', "databases/$databaseId/tables/$tableId", [], ['fields' => $fields]);
+        $query = [$field => $value, 'sort' => $sort];
+        if (!empty($fields)) {
+            $query['fields'] = $fields;
+        }
+
+        return $this->requestAll('databases', $query);
+    }
+
+    /**
+     * @param array<mixed> $fields
+     */
+    public function getDatabase(int $databaseId, ?array $fields = []): array
+    {
+        $query = empty($fields) ? [] : ['fields' => $fields];
+
+        return $this->request('GET', "databases/$databaseId", [], $query);
     }
 
     /**
      * @param array<string> $fields
      */
-    public function getColumn(int $databaseId, int $tableId, int $columnId, #[MapQueryParameter] ?array $fields = []): array
+    public function getTable(int $databaseId, int $tableId, ?array $fields = []): array
     {
-        return $this->request('GET', "databases/$databaseId/tables/$tableId/columns/$columnId", [], ['fields' => $fields]);
+        $query = empty($fields) ? [] : ['fields' => $fields];
+
+        return $this->request('GET', "databases/$databaseId/tables/$tableId", [], $query);
+    }
+
+    /**
+     * @param array<string> $fields
+     */
+    public function getColumn(int $databaseId, int $tableId, int $columnId, ?array $fields = []): array
+    {
+        $query = empty($fields) ? [] : ['fields' => $fields];
+
+        return $this->request('GET', "databases/$databaseId/tables/$tableId/columns/$columnId", [], $query);
     }
 
     public function getTableFullName(int $databaseId, int $tableId): string
@@ -58,13 +65,10 @@ class DatabaseApiService extends BaseEspaceCoApiService
     /**
      * @param array<string> $fields
      */
-    public function getAllTables(int $databaseId, array $fields = []): array
+    public function getAllTables(int $databaseId, ?array $fields = []): array
     {
-        return $this->requestAll("databases/$databaseId/tables", ['fields' => $fields]);
-    }
+        $query = empty($fields) ? [] : ['fields' => $fields];
 
-    /* public function getColumns(int $databaseId, int $tableId): array
-    {
-        return $this->request('GET', "databases/$databaseId/tables/$tableId", [], ['fields' => 'columns']);
-    } */
+        return $this->requestAll("databases/$databaseId/tables", $query);
+    }
 }

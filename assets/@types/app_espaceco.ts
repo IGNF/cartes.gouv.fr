@@ -14,6 +14,8 @@ import {
     ThemeDTO,
     UserDTO,
     PermissionLevel,
+    DatabaseResponseDTO,
+    TableDetailedDTO,
 } from "./espaceco";
 
 export type AtLeast<T, K extends keyof T> = Partial<T> & Pick<T, K>;
@@ -176,27 +178,29 @@ export type DescriptionFormType = {
 export const arrDBOptions = ["none", "add", "reuse", "import"] as const;
 export type DBOption = (typeof arrDBOptions)[number];
 
-export type GroupByPermission = Record<
-    string,
-    {
-        level: PermissionLevel;
-        title: string;
-        tables: Record<
-            string,
-            {
-                level: PermissionLevel;
-                title: string;
-                columns: Record<
-                    string,
-                    {
-                        level: PermissionLevel;
-                        title: string;
-                    }
-                > | null;
-            }
-        > | null;
-    }
->;
+export interface IPermission {
+    id: number;
+    title: string;
+    level: PermissionLevel;
+}
+
+export interface ITablePermission extends IPermission {
+    columns: IPermission[];
+}
+
+export interface IDatabasePermission extends IPermission {
+    tables: ITablePermission[];
+}
+
+export interface IDBItemOption {
+    id: number;
+    title: string;
+}
+
+export type DBItemKind = "table" | "column";
+
+export type PartialDatabase = Pick<DatabaseResponseDTO, "id" | "title">;
+export type PartialTable = Pick<TableDetailedDTO, "id" | "title">;
 
 /* Les fonctionnalités (outils) */
 export type CommunityTools = "display" | "navigation" | "measure" | "report";

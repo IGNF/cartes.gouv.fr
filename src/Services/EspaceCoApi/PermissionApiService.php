@@ -5,14 +5,14 @@ namespace App\Services\EspaceCoApi;
 class PermissionApiService extends BaseEspaceCoApiService
 {
     /**
-     * @param string|null   $levels
+     * @param array<string> $levels
      * @param array<string> $fields
      */
-    public function getAllByCommunity(int $communityId, $levels = null, $fields = []): array
+    public function getAllByCommunity(int $communityId, array $levels = [], $fields = []): array
     {
         $query = ['community' => $communityId];
-        if ($levels) {
-            $query['level'] = $levels;
+        if (count($levels)) {
+            $query['level'] = implode(',', $levels);
         }
         if (count($fields)) {
             $query['fields'] = $fields;
@@ -21,10 +21,33 @@ class PermissionApiService extends BaseEspaceCoApiService
         return $this->requestAll('permissions', $query);
     }
 
-    public function getAllPermissionsForDatabase(int $communityId, int $databaseId): array
+    /**
+     * Ajout d'une permissions.
+     *
+     * @param array<mixed> $datas
+     *
+     * @return array<mixed>
+     */
+    public function add(array $datas): array
     {
-        $query = ['group' => $communityId, 'database' => $databaseId];
+        return $this->request('POST', 'permissions', $datas);
+    }
 
-        return $this->requestAll('permissions', $query);
+    /**
+     * Mise a jour d'une permission.
+     *
+     * @param array<mixed> $datas
+     */
+    public function update(int $permissionId, array $datas): array
+    {
+        return $this->request('PATCH', "permissions/$permissionId", $datas);
+    }
+
+    /**
+     * Suppression d'une permission.
+     */
+    public function remove(int $permissionId): void
+    {
+        $this->request('DELETE', "permissions/$permissionId");
     }
 }

@@ -53,9 +53,9 @@ class CommunityApiService extends BaseEspaceCoApiService
      *
      * @return array<mixed>
      */
-    public function getCommunity(int $communityId, array $fields = []): array
+    public function getCommunity(int $communityId, ?array $fields = []): array
     {
-        $query = empty($fields) ? [] : ['fields' => implode(',', $fields)];
+        $query = empty($fields) ? [] : ['fields' => $fields];
 
         return $this->request('GET', "communities/$communityId", [], $query);
     }

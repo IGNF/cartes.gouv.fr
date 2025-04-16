@@ -190,42 +190,31 @@ export interface CommunityPatchDTO extends Partial<Omit<CommunityResponseDTO, "l
     logo: File | null;
 }
 
-export type PermissionLevel = "NONE" | "VIEW" | "EXPORT" | "EDIT" | "ADMIN";
-export interface PermissionResponseDTO {
+export const arrPermissionLevel = ["NONE", "VIEW", "EDIT"] as const;
+export type PermissionLevel = (typeof arrPermissionLevel)[number];
+7;
+export type PermissionResponseDTO = {
     id: number;
     database: number;
     table: number | null;
     column: number | null;
     level: PermissionLevel;
-}
+};
 
-export interface DatabaseResponseDTO {
-    id: number;
-    name: string;
-    title: string | null;
-    /* database_type: "standard" | "bduni";
-    versioning: boolean;
-    conflict: boolean;
-    extent: string;
-    description: string | null;
-    full_download_allowed: boolean;
-    writable_time_range: string; */
-}
-
-export interface ColumnDTO {
-    /* table_id: number;
+export interface ColumnDetailedDTO {
+    table_id: number;
     crs: string | null;
-    enum: object | string[] | null;
+    enum: (string | null)[] | null;
     default_value: string | null;
-    read_only: boolean; */
+    read_only: boolean;
     id: number;
-    /* type: string;
-    target_table: string | null;
-    target_entity: string | null; */
+    type: string;
+    target_table: number | null;
+    target_entity: string | null;
     name: string;
-    // short_name: string;
+    short_name: string | null;
     title: string;
-    /* description: string | null;
+    description: string | null;
     min_length: number | null;
     max_length: number | null;
     nullable: boolean;
@@ -246,29 +235,53 @@ export interface ColumnDTO {
     jeux_attributs: object | null;
     queryable: boolean;
     required: boolean;
-    mime_types: string | null; */
+    mime_types: string | null;
 }
-
-export interface TableResponseDTO {
-    /* database_id: number;
-    database: string;
-    database_versioning: boolean;
-    full_name: string;
-    id_name: string; */
-    geometry_name: string;
-    /* min_zoom_level: number | null;
-    max_zoom_level: number | null;
-    tile_zoom_level: number | null;
-    read_only: boolean; */
+export interface TableDTO {
     id: number;
     name: string;
     title: string;
-    /* description: string | null;
-    thematic_ids: string[] | null;
-    position: number;
+}
+
+// TODO A VOIR PLUS TARD LES STYLES
+export interface TableDetailedDTO extends TableDTO {
+    database_id: number;
+    database: string;
+    database_versioning: boolean;
+    full_name: string;
+    id_name: string;
+    geometry_name: string;
+    min_zoom_level: number;
+    max_zoom_level: number;
+    tile_zoom_level: number | null;
+    read_only: boolean;
+    columns: ColumnDetailedDTO[];
+    description: string | null;
+    // thematic_ids?: null;
+    // position: number;
+    // style: Style;
+    // styles?: (null)[] | null;
     wfs: string;
-    wfs_transactions: string; */
-    columns: ColumnDTO[];
+    wfs_transactions: string;
+}
+
+export interface DatabaseResponseDTO {
+    id: number;
+    name: string;
+    title: string;
+    database_type: "standard" | "bduni";
+    versioning: boolean;
+    conflict: boolean;
+    extent: string;
+    description: string | null;
+    full_download_allowed: boolean;
+    // mailers: ???
+    writable_time_range: string;
+}
+
+export interface DatabaseDetailedResponseDTO extends DatabaseResponseDTO {
+    tables: TableDTO[];
+    // styles: ????
 }
 
 export { SharedGeoremOptions };

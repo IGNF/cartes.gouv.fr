@@ -24,8 +24,10 @@ class CommunityLayerApiService extends BaseEspaceCoApiService
      *
      * @return array<mixed>
      */
-    public function getLayers(int $communityId, array $fields = []): array
+    public function getLayers(int $communityId, ?array $fields = []): array
     {
-        return $this->requestAll("communities/$communityId/layers", ['fields' => $fields]);
+        $query = empty($fields) ? [] : ['fields' => $fields];
+
+        return $this->requestAll("communities/$communityId/layers", $query);
     }
 }

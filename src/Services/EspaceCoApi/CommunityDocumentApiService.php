@@ -24,17 +24,21 @@ class CommunityDocumentApiService extends BaseEspaceCoApiService
     /**
      * @param array<string> $fields
      */
-    public function getDocuments(int $communityId, array $fields = []): array
+    public function getDocuments(int $communityId, ?array $fields = []): array
     {
-        return $this->request('GET', "communities/$communityId/documents", ['fields' => $fields]);
+        $query = empty($fields) ? [] : ['fields' => $fields];
+
+        return $this->request('GET', "communities/$communityId/documents", $query);
     }
 
     /**
      * @param array<string> $fields
      */
-    public function getDocument(int $communityId, int $documentId, array $fields = []): array
+    public function getDocument(int $communityId, int $documentId, ?array $fields = []): array
     {
-        return $this->request('GET', "communities/$communityId/documents/$documentId", ['fields' => $fields]);
+        $query = empty($fields) ? [] : ['fields' => $fields];
+
+        return $this->request('GET', "communities/$communityId/documents/$documentId", $query);
     }
 
     public function addDocument(int $communityId, string $title, ?string $description, string $tempFilePath): array
