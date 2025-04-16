@@ -8,6 +8,8 @@ use App\Exception\CartesApiException;
 use App\Services\EntrepotApi\StaticApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route(
@@ -26,9 +28,10 @@ class StaticController extends AbstractController implements ApiControllerInterf
     #[Route('', name: 'get_list', methods: ['GET'])]
     public function getStaticsList(
         string $datastoreId,
+        Request $request,
     ): JsonResponse {
         try {
-            $staticsList = $this->staticApiService->getAll($datastoreId);
+            $staticsList = $this->staticApiService->getAll($datastoreId, $request->query->all());
 
             return $this->json($staticsList);
         } catch (ApiException $ex) {
@@ -45,6 +48,22 @@ class StaticController extends AbstractController implements ApiControllerInterf
             return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
+    #[Route('/{staticFileId}', name: 'get_file_content', methods: ['GET'])]
+    public function getFileContent(string $datastoreId, string $staticFileId): Response
+    {
+        try {
+            $xmlFileContent = $this->staticApiService->downloadFile($datastoreId, $staticFileId);
+
+            return new Response($xmlFileContent, Response::HTTP_OK, [
+                'Content-Type' => 'application/xml',
+            ]);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        } catch (\Exception $ex) {
+            throw new CartesApiException($ex->getMessage(), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }

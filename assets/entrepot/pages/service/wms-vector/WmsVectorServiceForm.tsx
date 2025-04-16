@@ -193,6 +193,16 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
         enabled: !!vectorDbQuery.data?.tags?.datasheet_name,
     });
 
+    const configId = offeringQuery.data?.configuration._id;
+    const staticFilesParams = {
+        name: `config_${configId}_style_wmsv%`,
+    };
+    const staticFilesQuery = useQuery({
+        queryKey: RQKeys.datastore_statics_list(datastoreId, staticFilesParams),
+        queryFn: () => api.statics.getList(datastoreId, staticFilesParams),
+        enabled: !!configId,
+    });
+
     // Definition du schema
     const schemas = {};
     schemas[STEPS.TABLES_INFOS] = yup.object({
@@ -321,7 +331,17 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
                     {editServiceMutation.error && <Alert closable description={editServiceMutation.error.message} severity="error" title={tCommon("error")} />}
 
                     <TableSelection visible={currentStep === STEPS.TABLES_INFOS} vectorDb={vectorDbQuery.data} form={form} />
-                    {currentStep === STEPS.STYLE_FILE && <UploadStyleFiles tables={selectedTables} form={form} />}
+                    {currentStep === STEPS.STYLE_FILE && (
+                        <UploadStyleFiles
+                            configId={configId}
+                            datastoreId={datastoreId}
+                            editMode={editMode}
+                            files={staticFilesQuery.data}
+                            tables={selectedTables}
+                            typeConfig="wmsv"
+                            form={form}
+                        />
+                    )}
                     <UploadMDFile visible={currentStep === STEPS.METADATAS_UPLOAD} form={form} />
                     <Description visible={currentStep === STEPS.METADATAS_DESCRIPTION} form={form} editMode={editMode} />
                     <AdditionalInfo

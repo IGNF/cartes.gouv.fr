@@ -30,13 +30,14 @@ import { useTranslation } from "../../../../i18n/i18n";
 
 type UploadStyleFileProps = {
     error?: string;
+    filename: string;
     onChange: (value: File) => void;
     table: string;
     value: File;
 };
 
 const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
-    const { error, onChange, table, value } = props;
+    const { error, filename, onChange, table, value } = props;
     const { t } = useTranslation("UploadStyleFile");
     const [gsStyle, setGsStyle] = useState<Style>({
         name: table,
@@ -46,7 +47,7 @@ const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
 
     useEffect(() => {
         if (value !== file) {
-            convertFile(value[0]);
+            convertFile(value);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [value]);
@@ -79,7 +80,7 @@ const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
         try {
             const convertedStyle = await sld100Parser.writeStyle(style);
             const blob = new Blob([convertedStyle.output!]);
-            const newFile = new File([blob], file?.name ?? table);
+            const newFile = new File([blob], filename);
             setGsStyle(style);
             setFile(newFile);
             onChange(newFile);

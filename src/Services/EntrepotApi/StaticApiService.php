@@ -59,6 +59,6 @@ class StaticApiService extends BaseEntrepotApiService
 
     public function downloadFile(string $datastoreId, string $staticId): mixed
     {
-        return $this->request('GET', "datastores/$datastoreId/statics/$staticId/file");
+        return $this->request('GET', "datastores/$datastoreId/statics/$staticId/file", [], [], [], false, false);
     }
 }
