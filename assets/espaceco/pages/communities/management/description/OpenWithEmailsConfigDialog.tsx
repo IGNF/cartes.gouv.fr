@@ -80,7 +80,6 @@ const OpenWithEmailsConfigDialog: FC<OpenWithEmailsConfigDialogProps> = ({ openW
     } = form;
 
     const openWithEmail = watch("openWithEmail");
-    console.log(errors);
 
     const addDomain = () => {
         if (!addDomainRef.current) {
