@@ -15,9 +15,9 @@ export default class SldStyleWmsVectorValidator {
      *
      * En gros, un fichier de style pour toutes les tables est obligatoire en mode création. En édition, le fichier de style est obligatoire seulement pour une nouvelle table.
      */
-    async validate(tableName: string, value: FileList, ctx: TestContext, offering: Service | undefined | null) {
-        const exists = this.#exists(tableName, value as FileList, ctx);
-        const isValid = await this.#isValid(tableName, value as FileList, ctx);
+    async validate(tableName: string, value: File, ctx: TestContext, offering: Service | undefined | null) {
+        const exists = this.#exists(tableName, value, ctx);
+        const isValid = await this.#isValid(tableName, value, ctx);
 
         const typeInfos = offering?.configuration?.type_infos as ConfigurationWmsVectorDetailsContent | undefined;
         const oldTables = typeInfos?.used_data[0].relations.map((rel) => rel.name);
@@ -36,16 +36,16 @@ export default class SldStyleWmsVectorValidator {
         return true;
     }
 
-    #exists(tableName: string, value: FileList, ctx: TestContext) {
-        if (value instanceof FileList && value.length === 0) {
+    #exists(tableName: string, value: File, ctx: TestContext) {
+        if (value instanceof File) {
             return ctx.createError({ message: tSld("no_file_provided", { tableName }) });
         }
 
         return true;
     }
 
-    async #isValid(tableName: string, value: FileList, ctx: TestContext) {
-        const file = value?.[0] ?? undefined;
+    async #isValid(tableName: string, value: File, ctx: TestContext) {
+        const file = value;
 
         /**
          * // TODO : il manque la validation des contraintes suivantes :

@@ -5,7 +5,6 @@ import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import SldStyleParser from "geostyler-sld-parser";
 import { FC, useCallback, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { symToStr } from "tsafe/symToStr";
@@ -37,28 +36,7 @@ import { getWmsVectorServiceFormDefaultValues } from "../common/default-values";
 import AdditionalInfo from "../metadata/AdditionalInfo";
 import Description from "../metadata/Description";
 import UploadMDFile from "../metadata/UploadMDFile";
-import UploadStyleFile from "./UploadStyleFile";
-
-/**
- * Convertir en v1.0.0 si l'utilisateur a déposé un sld en v1.1.0
- */
-const getSld100 = async (originalFile: File): Promise<File> => {
-    const fileContent = await originalFile.text();
-
-    const sldParser = new SldStyleParser({ locale: "fr" });
-
-    const result = await sldParser.readStyle(fileContent);
-    if (sldParser.readingSldVersion === "1.1.0") {
-        sldParser.sldVersion = "1.0.0";
-        const convertedStyle = await sldParser.writeStyle(result.output!);
-
-        const blob = new Blob([convertedStyle.output!]);
-        const newFile = new File([blob], originalFile.name);
-        return newFile;
-    } else {
-        return originalFile;
-    }
-};
+import UploadStyleFiles from "./UploadStyleFiles";
 
 const createFormData = async (formValues: WmsVectorServiceFormValuesType) => {
     const fd = new FormData();
@@ -97,7 +75,7 @@ const createFormData = async (formValues: WmsVectorServiceFormValuesType) => {
     // filtrer en fonction des tables sélectionnées
     for (const tableName of formValues.selected_tables!) {
         if (formValues?.style_files?.[tableName]?.[0] !== undefined) {
-            fd.set(`style_${tableName}`, await getSld100(formValues?.style_files?.[tableName]?.[0]));
+            fd.set(`style_${tableName}`, formValues?.style_files?.[tableName]?.[0]);
         }
     }
 
@@ -117,7 +95,7 @@ const STEPS = {
 
 export type WmsVectorServiceFormValuesType = ServiceFormValuesBaseType & {
     selected_tables?: string[];
-    style_files?: Record<string, FileList>;
+    style_files?: Record<string, File>;
 };
 
 type WmsVectorServiceFormProps = {
@@ -235,7 +213,7 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
                 styleFiles[table.name] = yup.mixed().test({
                     name: "is-valid-sld",
                     async test(value, ctx) {
-                        return new SldStyleWmsVectorValidator().validate(table.name, value as FileList, ctx, offeringQuery.data);
+                        return new SldStyleWmsVectorValidator().validate(table.name, value as File, ctx, offeringQuery.data);
                     },
                 });
             });
@@ -343,7 +321,7 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
                     {editServiceMutation.error && <Alert closable description={editServiceMutation.error.message} severity="error" title={tCommon("error")} />}
 
                     <TableSelection visible={currentStep === STEPS.TABLES_INFOS} vectorDb={vectorDbQuery.data} form={form} />
-                    <UploadStyleFile visible={currentStep === STEPS.STYLE_FILE} selectedTables={selectedTables} form={form} />
+                    {currentStep === STEPS.STYLE_FILE && <UploadStyleFiles tables={selectedTables} form={form} />}
                     <UploadMDFile visible={currentStep === STEPS.METADATAS_UPLOAD} form={form} />
                     <Description visible={currentStep === STEPS.METADATAS_DESCRIPTION} form={form} editMode={editMode} />
                     <AdditionalInfo
