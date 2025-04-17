@@ -13,6 +13,6 @@ class GeoserviceApiService extends BaseEspaceCoApiService
     {
         $query = empty($fields) ? [] : ['fields' => $fields];
 
-        return $this->request('GET', "/geoservices/$geoserviceId", [], $query);
+        return $this->request('GET', "geoservices/$geoserviceId", [], $query);
     }
 }
