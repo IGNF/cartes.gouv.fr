@@ -7,7 +7,6 @@ use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\EspaceCoApi\CommunityLayerApiService;
 use App\Services\EspaceCoApi\DatabaseApiService;
-use App\Services\EspaceCoApi\GeoserviceApiService;
 use App\Services\EspaceCoApi\LayerApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -25,27 +24,9 @@ class CommunityLayerController extends AbstractController implements ApiControll
 {
     public function __construct(
         private CommunityLayerApiService $communityLayerApiService,
-        private GeoserviceApiService $geoserviceApiService,
         private LayerApiService $layerApiService,
         private DatabaseApiService $databaseApiService,
     ) {
-    }
-
-    /**
-     * @param array<string> $fields
-     */
-    #[Route('/get_geoservice/{geoserviceId}', name: 'get_geoservice', methods: ['GET'])]
-    public function get(
-        int $geoserviceId,
-        #[MapQueryParameter] ?array $fields = [],
-    ): JsonResponse {
-        try {
-            $geoservice = $this->geoserviceApiService->getGeoservice($geoserviceId, $fields);
-
-            return new JsonResponse($geoservice);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
     }
 
     /**
