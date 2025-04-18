@@ -47,35 +47,22 @@ const UploadStyleFiles: FC<UploadStyleFileProps> = (props) => {
     });
 
     useEffect(() => {
-        const formValue = getValues(`style_files.${selectedTable}`);
-        if (data && !formValue) {
-            // TODO: remove the usage of blob and files to directly use the string
-            const blob = new Blob([data]);
-            const file = new File([blob], filename);
-            setValue(`style_files.${selectedTable}`, file);
+        if (data) {
+            setValue(`style_files.${selectedTable}`, data);
         }
     }, [data, filename, getValues, selectedTable, setValue]);
 
     return (
         <div>
             <h3>{t("title")}</h3>
-
             <p>{tCommon("mandatory_fields")}</p>
-
             <RadioButtons legend="Tables" name="radio" options={options} orientation="horizontal" state="default" stateRelatedMessage="State description" />
-
             <Controller
                 key={selectedTable}
                 name={`style_files.${selectedTable}`}
                 control={control}
                 render={({ field: { value, onChange }, formState: { errors } }) => (
-                    <UploadStyleFile
-                        error={errors?.style_files?.[selectedTable]?.message}
-                        filename={filename}
-                        onChange={onChange}
-                        table={selectedTable}
-                        value={value}
-                    />
+                    <UploadStyleFile error={errors?.style_files?.[selectedTable]?.message} onChange={onChange} table={selectedTable} value={value} />
                 )}
             />
         </div>

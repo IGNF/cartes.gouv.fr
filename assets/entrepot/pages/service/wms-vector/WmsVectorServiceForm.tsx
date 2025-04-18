@@ -74,8 +74,11 @@ const createFormData = async (formValues: WmsVectorServiceFormValuesType) => {
 
     // filtrer en fonction des tables sélectionnées
     for (const tableName of formValues.selected_tables!) {
-        if (formValues?.style_files?.[tableName]?.[0] !== undefined) {
-            fd.set(`style_${tableName}`, formValues?.style_files?.[tableName]?.[0]);
+        if (formValues?.style_files?.[tableName] !== undefined) {
+            const fileContent = formValues?.style_files?.[tableName];
+            const blob = new Blob([fileContent]);
+            const file = new File([blob], tableName);
+            fd.set(`style_${tableName}`, file);
         }
     }
 
@@ -95,7 +98,7 @@ const STEPS = {
 
 export type WmsVectorServiceFormValuesType = ServiceFormValuesBaseType & {
     selected_tables?: string[];
-    style_files?: Record<string, File>;
+    style_files?: Record<string, string>;
 };
 
 type WmsVectorServiceFormProps = {
@@ -220,10 +223,10 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
 
             const styleFiles = {};
             selectedTables.forEach((table) => {
-                styleFiles[table.name] = yup.mixed().test({
+                styleFiles[table.name] = yup.string().test({
                     name: "is-valid-sld",
                     async test(value, ctx) {
-                        return new SldStyleWmsVectorValidator().validate(table.name, value as File, ctx, offeringQuery.data);
+                        return new SldStyleWmsVectorValidator().validate(table.name, value, ctx, offeringQuery.data);
                     },
                 });
             });
