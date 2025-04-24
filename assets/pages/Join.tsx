@@ -1,6 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
 
-import { routes } from "../router/router";
 import Main from "../components/Layout/Main";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 
