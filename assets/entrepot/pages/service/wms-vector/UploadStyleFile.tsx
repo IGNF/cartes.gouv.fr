@@ -1,20 +1,22 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { Upload } from "@codegouvfr/react-dsfr/Upload";
 import { FC, useEffect, useState } from "react";
-import { type Style } from "geostyler-style";
+import { StyleParser, type Style } from "geostyler-style";
 
-import GeostylerEditor, { sld100Parser } from "@/components/Utils/GeostylerEditor";
+import GeostylerEditor from "@/components/Utils/GeostylerEditor";
+import { sldParser } from "@/utils/geostyler";
 import { useTranslation } from "../../../../i18n/i18n";
 
 type UploadStyleFileProps = {
     error?: string;
     onChange: (value?: string) => void;
+    parser?: StyleParser<string>;
     table: string;
     value: string;
 };
 
 const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
-    const { error, onChange, table, value } = props;
+    const { error, onChange, parser = sldParser, table, value } = props;
     const { t } = useTranslation("UploadStyleFile");
     const [gsStyle, setGsStyle] = useState<Style>({
         name: table,
@@ -30,8 +32,7 @@ const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
     }, [value]);
 
     async function convertContent(content: string) {
-        const result = await sld100Parser.readStyle(content);
-        console.log("convertContent", result.output);
+        const result = await parser.readStyle(content);
         if (result.output) {
             setGsStyle(result.output);
             setFile(content);
@@ -61,7 +62,7 @@ const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
 
     async function handleStyleChange(style: Style) {
         try {
-            const convertedStyle = await sld100Parser.writeStyle(style);
+            const convertedStyle = await parser.writeStyle(style);
             setGsStyle(style);
             setFile(convertedStyle.output);
             onChange(convertedStyle.output);

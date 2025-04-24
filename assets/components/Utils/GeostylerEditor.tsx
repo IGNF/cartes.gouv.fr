@@ -1,20 +1,12 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
 import { CodeEditor, GeoStylerContext, GeoStylerContextInterface, Style, locale } from "geostyler";
-import SldStyleParser from "geostyler-sld-parser";
-import { Style as GsStyle } from "geostyler-style";
+import { Style as GsStyle, StyleParser } from "geostyler-style";
 import { FC } from "react";
 import { tss } from "tss-react";
 
 import DsfrAntdConfig from "../Provider/DsfrAntdConfig";
-
-export const sld100Parser = new SldStyleParser({
-    builderOptions: {
-        format: true,
-    },
-    sldVersion: "1.0.0",
-});
-sld100Parser.title = "SLD 1.0.0";
+import { mbParser, qgisParser, sldParser } from "@/utils/geostyler";
 
 const ctx: GeoStylerContextInterface = {
     composition: {
@@ -26,12 +18,14 @@ const ctx: GeoStylerContextInterface = {
 };
 
 type GeostylerEditorProps = {
+    defaultParser?: StyleParser<string>;
     onChange?: (style: GsStyle) => void;
+    parsers?: StyleParser<string>[];
     value: GsStyle;
 };
 
 const GeostylerEditor: FC<GeostylerEditorProps> = (props) => {
-    const { onChange, value } = props;
+    const { defaultParser = sldParser, onChange, parsers = [sldParser, qgisParser, mbParser], value } = props;
     const { classes } = useStyles();
 
     return (
@@ -59,10 +53,10 @@ const GeostylerEditor: FC<GeostylerEditorProps> = (props) => {
                                             <CodeEditor
                                                 style={value}
                                                 onStyleChange={onChange}
-                                                defaultParser={sld100Parser}
+                                                defaultParser={defaultParser}
                                                 showCopyButton={true}
                                                 showSaveButton={true}
-                                                parsers={[sld100Parser]}
+                                                parsers={parsers}
                                             />
                                         </div>
                                     </div>
