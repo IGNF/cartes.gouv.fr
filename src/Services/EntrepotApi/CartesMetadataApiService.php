@@ -34,7 +34,7 @@ class CartesMetadataApiService
         private MetadataApiService $metadataApiService,
         private ConfigurationApiService $configurationApiService,
         private CswMetadataHelper $cswMetadataHelper,
-        private CartesServiceApiService $cartesServiceApiService,
+        private CartesStylesApiService $cartesStylesApiService,
         private StoredDataApiService $storedDataApiService,
     ) {
     }
@@ -376,7 +376,7 @@ class CartesMetadataApiService
             ],
         ]);
 
-        $configStyles = array_map(fn ($config) => $this->cartesServiceApiService->getStyles($datastoreId, $config), $configurationsList);
+        $configStyles = array_map(fn ($config) => $this->cartesStylesApiService->getStyles($datastoreId, $config), $configurationsList);
         $configStyles = array_filter($configStyles, fn ($stylesList) => count($stylesList) > 0);
         $configStyles = array_merge([], ...$configStyles);
 
