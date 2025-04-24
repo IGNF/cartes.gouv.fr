@@ -21,9 +21,7 @@ const Join = () => {
                         <li>Pour participer à des événements, à des temps d’information, à des ateliers thématiques...</li>
                     </ul>
                     <p>
-                        N’attendez plus pour rejoindre la <strong>communauté d’utilisateurs Géoplateforme - Cartes.gouv</strong> ! Une fois votre demande
-                        envoyée, vous recevrez un e-mail de confirmation, puis un e-mail de la plateforme OSMOSE qui vous permettra d’activer votre compte et de
-                        modifier le mot de passe.
+                        N’attendez plus pour rejoindre la <strong>communauté d’utilisateurs Géoplateforme - Cartes.gouv</strong>&nbsp;!
                     </p>
                     <ButtonsGroup
                         buttons={[
@@ -39,14 +37,6 @@ const Join = () => {
                         inlineLayoutWhen="always"
                         alignment="center"
                     />
-                </div>
-            </div>
-            <div className={fr.cx("fr-grid-row")}>
-                <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
-                    {
-                        "Les informations recueillies à partir de ce formulaire sont nécessaires à la gestion de votre demande par les services de l’IGN concernés. "
-                    }
-                    <a href={routes.personal_data().href}>{"En savoir plus sur la gestion des données à caractère personnel"}</a>.
                 </div>
             </div>
         </Main>
