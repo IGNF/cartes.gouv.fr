@@ -155,7 +155,7 @@ class PyramidVectorController extends ServiceController implements ApiController
             // création de requête pour la config
             $configRequestBody = $this->getConfigRequestBody($dto, $pyramid, true);
 
-            $offering = $this->cartesServiceApiService->saveService($datastoreId, $pyramidId, $dto, ConfigurationTypes::WMTSTMS, $configRequestBody);
+            $offering = $this->cartesServiceApiService->saveService($datastoreId, $pyramidId, $dto, ConfigurationTypes::WMTSTMS, $configRequestBody, $oldOffering);
 
             return $this->json($offering);
         } catch (ApiException $ex) {
