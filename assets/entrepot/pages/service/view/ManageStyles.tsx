@@ -11,21 +11,21 @@ import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import api from "../../../api";
-import { StyleManager, addStyleModal } from "./Style/StyleManager";
+import StyleManager, { StyleForm } from "./Style/StyleManager";
 
 import "../../../../sass/components/style-tab.scss";
 
-type ManageStylesTabProps = {
+type ManageStylesProps = {
     datastoreId: string;
     datasheetName: string;
     offeringId: string;
     service?: Service;
 };
 
-const ManageStylesTab: FC<ManageStylesTabProps> = ({ service, offeringId, datastoreId, datasheetName }) => {
+const ManageStyles: FC<ManageStylesProps> = ({ service, offeringId, datastoreId, datasheetName }) => {
     const { t: tStyle } = useTranslation("Style");
     const { t: tCommon } = useTranslation("Common");
-
+    const [styleToAdd, setStyleToAdd] = useState<StyleForm>();
     const [styleToRemove, setStyleToRemove] = useState<string>();
 
     // Recherche des services (offerings) contenant le tag datasheet_name a datasheetName
@@ -146,10 +146,12 @@ const ManageStylesTab: FC<ManageStylesTabProps> = ({ service, offeringId, datast
                     />
                 )}
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
-                    <Button onClick={() => addStyleModal.open()}>{tStyle("add_style")}</Button>
+                    <Button onClick={() => setStyleToAdd({ style_name: "", style_files: {} })}>{tStyle("add_style")}</Button>
                 </div>
             </div>
-            {service !== undefined && <StyleManager datastoreId={datastoreId} datasheetName={datasheetName} service={service} styleNames={styleNames} />}
+            {service !== undefined && styleToAdd && (
+                <StyleManager datastoreId={datastoreId} datasheetName={datasheetName} service={service} style={styleToAdd} styleNames={styleNames} />
+            )}
 
             {(isPendingChangeCurrentStyle || isRemovePending) && (
                 <Wait>
@@ -173,4 +175,4 @@ const ManageStylesTab: FC<ManageStylesTabProps> = ({ service, offeringId, datast
     );
 };
 
-export default ManageStylesTab;
+export default ManageStyles;

@@ -1,6 +1,6 @@
 import { declareComponentKeys } from "i18nifty";
 
-import { Translations } from "../../../../i18n/types";
+import { Translations } from "../../../i18n/types";
 
 const { i18n } = declareComponentKeys<"title" | "file_input_hint">()("UploadStyleFile");
 export type I18n = typeof i18n;

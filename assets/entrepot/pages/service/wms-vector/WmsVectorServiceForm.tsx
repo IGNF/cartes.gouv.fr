@@ -36,7 +36,8 @@ import { getWmsVectorServiceFormDefaultValues } from "../common/default-values";
 import AdditionalInfo from "../metadata/AdditionalInfo";
 import Description from "../metadata/Description";
 import UploadMDFile from "../metadata/UploadMDFile";
-import UploadStyleFiles from "./UploadStyleFiles";
+import UploadStyleFiles from "./StyleLoader";
+import { MapStyleProvider } from "@/contexts/mapStyle";
 
 const createFormData = async (formValues: WmsVectorServiceFormValuesType) => {
     const fd = new FormData();
@@ -335,15 +336,17 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
 
                     <TableSelection visible={currentStep === STEPS.TABLES_INFOS} vectorDb={vectorDbQuery.data} form={form} />
                     {currentStep === STEPS.STYLE_FILE && (
-                        <UploadStyleFiles
-                            configId={configId}
-                            datastoreId={datastoreId}
-                            editMode={editMode}
-                            files={staticFilesQuery.data}
-                            tables={selectedTables}
-                            typeConfig="wmsv"
-                            form={form}
-                        />
+                        <MapStyleProvider defaultTable={selectedTables[0].name}>
+                            <UploadStyleFiles
+                                configId={configId}
+                                datastoreId={datastoreId}
+                                editMode={editMode}
+                                files={staticFilesQuery.data}
+                                tables={selectedTables}
+                                typeConfig="wmsv"
+                                form={form}
+                            />
+                        </MapStyleProvider>
                     )}
                     <UploadMDFile visible={currentStep === STEPS.METADATAS_UPLOAD} form={form} />
                     <Description visible={currentStep === STEPS.METADATAS_DESCRIPTION} form={form} editMode={editMode} />

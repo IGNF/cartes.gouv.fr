@@ -1,7 +1,6 @@
 import { TestContext, ValidationError } from "yup";
 
 import { Service, StyleFormat } from "../@types/app";
-import { getFileExtension } from "../utils";
 
 class StyleValidator {
     readonly service: Service;
@@ -12,12 +11,17 @@ class StyleValidator {
         this.format = format;
     }
 
-    async validate(files: FileList, ctx: TestContext): Promise<ValidationError | boolean> {
-        const extension = this.format === "mapbox" ? "json" : this.format;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async validate(value: string | undefined, ctx: TestContext): Promise<ValidationError | boolean> {
+        // const extension = this.format === "mapbox" ? "json" : this.format;
 
-        const file = files[0];
-        if (file !== undefined && getFileExtension(file?.name)?.toLowerCase() !== extension) {
-            return ctx.createError({ message: "unaccepted_extension" });
+        // const file = files[0];
+        // if (file !== undefined && getFileExtension(file?.name)?.toLowerCase() !== extension) {
+        //     return ctx.createError({ message: "unaccepted_extension" });
+        // }
+
+        if (typeof value !== "string" || !value) {
+            return ctx.createError({ message: "no_file_provided" });
         }
 
         return true;

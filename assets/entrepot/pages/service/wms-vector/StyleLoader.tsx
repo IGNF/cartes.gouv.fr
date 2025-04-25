@@ -1,15 +1,15 @@
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect } from "react";
 import { Controller, type UseFormReturn } from "react-hook-form";
-import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 
 import { type StoredDataRelation } from "../../../../@types/app";
 import { useTranslation } from "../../../../i18n/i18n";
 import { WmsVectorServiceFormValuesType } from "./WmsVectorServiceForm";
-import UploadStyleFile from "./UploadStyleFile";
 import { StaticFileListResponseDto } from "@/@types/entrepot";
 import { useQuery } from "@tanstack/react-query";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import api from "@/entrepot/api";
+import UploadStyleFiles from "@/components/Utils/Geostyler/UploadStyleFiles";
+import { useMapStyle } from "@/contexts/mapStyle";
 
 type UploadStyleFileProps = {
     configId?: string;
@@ -21,19 +21,12 @@ type UploadStyleFileProps = {
     form: UseFormReturn<WmsVectorServiceFormValuesType>;
 };
 
-const UploadStyleFiles: FC<UploadStyleFileProps> = (props) => {
+const StyleLoader: FC<UploadStyleFileProps> = (props) => {
     const { configId, datastoreId, editMode, files, tables = [], typeConfig, form } = props;
     const { t: tCommon } = useTranslation("Common");
     const { t } = useTranslation("UploadStyleFile");
-    const [selectedTable, setSelectedTable] = useState(tables[0].name);
-    const options = tables.map((table) => ({
-        label: table.name,
-        nativeInputProps: {
-            value: table.name,
-            checked: table.name === selectedTable,
-            onChange: () => setSelectedTable(table.name),
-        },
-    }));
+    const { selectedTable } = useMapStyle();
+    const tableNames = tables.map((table) => table.name);
     const { control, getValues, setValue } = form;
     const filename = `config_${configId}_style_${typeConfig}_${selectedTable}`;
     const fileId = files?.find((file) => file.name === filename)?._id;
@@ -48,7 +41,8 @@ const UploadStyleFiles: FC<UploadStyleFileProps> = (props) => {
 
     useEffect(() => {
         if (data) {
-            setValue(`style_files.${selectedTable}`, data);
+            const formData = getValues("style_files");
+            setValue("style_files", { ...formData, [selectedTable]: data });
         }
     }, [data, filename, getValues, selectedTable, setValue]);
 
@@ -56,17 +50,15 @@ const UploadStyleFiles: FC<UploadStyleFileProps> = (props) => {
         <div>
             <h3>{t("title")}</h3>
             <p>{tCommon("mandatory_fields")}</p>
-            <RadioButtons legend="Tables" name="radio" options={options} orientation="horizontal" state="default" stateRelatedMessage="State description" />
             <Controller
-                key={selectedTable}
-                name={`style_files.${selectedTable}`}
+                name="style_files"
                 control={control}
                 render={({ field: { value, onChange }, formState: { errors } }) => (
-                    <UploadStyleFile error={errors?.style_files?.[selectedTable]?.message} onChange={onChange} table={selectedTable} value={value} />
+                    <UploadStyleFiles errors={errors?.style_files} onChange={onChange} tables={tableNames} value={value} />
                 )}
             />
         </div>
     );
 };
 
-export default UploadStyleFiles;
+export default StyleLoader;

@@ -5,7 +5,7 @@ import { Style as GsStyle, StyleParser } from "geostyler-style";
 import { FC } from "react";
 import { tss } from "tss-react";
 
-import DsfrAntdConfig from "../Provider/DsfrAntdConfig";
+import DsfrAntdConfig from "../../Provider/DsfrAntdConfig";
 import { mbParser, qgisParser, sldParser } from "@/utils/geostyler";
 
 const ctx: GeoStylerContextInterface = {
@@ -18,9 +18,9 @@ const ctx: GeoStylerContextInterface = {
 };
 
 type GeostylerEditorProps = {
-    defaultParser?: StyleParser<string>;
+    defaultParser?: StyleParser;
     onChange?: (style: GsStyle) => void;
-    parsers?: StyleParser<string>[];
+    parsers?: StyleParser[];
     value: GsStyle;
 };
 

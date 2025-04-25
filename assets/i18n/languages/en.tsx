@@ -27,7 +27,6 @@ import { WfsServiceFormEnTranslations } from "../../entrepot/pages/service/wfs/W
 import { PyramidRasterGenerateFormEnTranslations } from "../../entrepot/pages/service/wms-raster-wmts/PyramidRasterGenerateForm/PyramidRasterGenerateForm.locale";
 import { PyramidRasterWmsRasterServiceFormEnTranslations } from "../../entrepot/pages/service/wms-raster-wmts/PyramidRasterWmsRasterServiceForm/PyramidRasterWmsRasterServiceForm.locale";
 import { PyramidRasterWmtsServiceFormEnTranslations } from "../../entrepot/pages/service/wms-raster-wmts/PyramidRasterWmtsServiceForm/PyramidRasterWmtsServiceForm.locale";
-import { UploadStyleFileEnTranslations } from "../../entrepot/pages/service/wms-vector/UploadStyleFile.locale";
 import { WmsVectorServiceFormEnTranslations } from "../../entrepot/pages/service/wms-vector/WmsVectorServiceForm.locale";
 import { MyAccessKeysEnTranslations } from "../../entrepot/pages/users/access-keys/MyAccessKeys.locale";
 import { UserKeyEnTranslations } from "../../entrepot/pages/users/keys/UserKey.locale";
@@ -43,6 +42,7 @@ import { mapboxStyleValidationEnTranslations } from "../../validations/mapbox/Ma
 import { SldStyleValidationErrorsEnTranslations } from "../../validations/sld/SldStyleValidation.locale";
 import { commonEnTranslations } from "../Common.locale";
 import { AlertsEnTranslations } from "../../entrepot/pages/config/Alerts.locale";
+import { UploadStyleFileEnTranslations } from "../../components/Utils/Geostyler/UploadStyleFile.locale";
 import type { Translations } from "../types";
 
 export const translations: Translations<"en"> = {

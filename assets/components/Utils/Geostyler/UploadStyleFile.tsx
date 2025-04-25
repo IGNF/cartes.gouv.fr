@@ -1,23 +1,24 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { Upload } from "@codegouvfr/react-dsfr/Upload";
 import { FC, useEffect, useState } from "react";
-import { StyleParser, type Style } from "geostyler-style";
+import { Style, StyleParser } from "geostyler-style";
 
-import GeostylerEditor from "@/components/Utils/GeostylerEditor";
+import GeostylerEditor from "@/components/Utils/Geostyler/GeostylerEditor";
 import { sldParser } from "@/utils/geostyler";
-import { useTranslation } from "../../../../i18n/i18n";
+import { useTranslation } from "../../../i18n/i18n";
 
 type UploadStyleFileProps = {
     error?: string;
     onChange: (value?: string) => void;
-    parser?: StyleParser<string>;
+    parser?: StyleParser;
     table: string;
-    value: string;
+    value?: string;
 };
 
 const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
     const { error, onChange, parser = sldParser, table, value } = props;
     const { t } = useTranslation("UploadStyleFile");
+
     const [gsStyle, setGsStyle] = useState<Style>({
         name: table,
         rules: [],
@@ -26,7 +27,15 @@ const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
 
     useEffect(() => {
         if (value !== file) {
-            convertContent(value);
+            if (value) {
+                convertContent(value);
+            } else {
+                setGsStyle({
+                    name: table,
+                    rules: [],
+                });
+                setFile("");
+            }
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [value]);

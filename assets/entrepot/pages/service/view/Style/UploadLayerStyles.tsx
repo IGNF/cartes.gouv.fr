@@ -1,27 +1,26 @@
-import { fr } from "@codegouvfr/react-dsfr";
-import { Upload } from "@codegouvfr/react-dsfr/Upload";
 import { FC } from "react";
-import { UseFormReturn } from "react-hook-form";
+import { Controller, UseFormReturn } from "react-hook-form";
 import { getTranslation } from "../../../../../i18n/i18n";
+import UploadStyleFiles from "@/components/Utils/Geostyler/UploadStyleFiles";
+import { MapStyleProvider } from "@/contexts/mapStyle";
+import { StyleParser } from "geostyler-style";
 
 type UploadLayerStylesProps = {
     form: UseFormReturn;
     format: "mapbox" | "sld" | "qml";
-    layers: Record<string, string>;
+    names: string[];
+    parser?: StyleParser;
 };
 
 const { t } = getTranslation("Style");
 
-const UploadLayerStyles: FC<UploadLayerStylesProps> = ({ form, format, layers }) => {
-    const {
-        register,
-        formState: { errors },
-    } = form;
+const UploadLayerStyles: FC<UploadLayerStylesProps> = ({ form, format, names, parser }) => {
+    const { control } = form;
 
     return (
         <>
             <p>{t("add_file", { format: format })}</p>
-            {Object.keys(layers).map((uid) => {
+            {/* {Object.keys(layers).map((uid) => {
                 return (
                     <div key={uid} className={fr.cx("fr-grid-row", "fr-mb-3w")}>
                         <Upload
@@ -33,11 +32,22 @@ const UploadLayerStyles: FC<UploadLayerStylesProps> = ({ form, format, layers })
                             nativeInputProps={{
                                 ...register(`style_files.${uid}`),
                                 accept: `.${format}`,
+                                // onChange: onUpload,
                             }}
                         />
                     </div>
                 );
-            })}
+            })} */}
+            <MapStyleProvider defaultTable={names[0]}>
+                <Controller
+                    name="style_files"
+                    control={control}
+                    render={({ field: { value, onChange }, formState: { errors } }) => (
+                        // @ts-expect-error ignore for now
+                        <UploadStyleFiles errors={errors?.style_files} onChange={onChange} parser={parser} tables={names} value={value} />
+                    )}
+                />
+            </MapStyleProvider>
         </>
     );
 };
