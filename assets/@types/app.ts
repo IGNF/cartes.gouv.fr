@@ -34,6 +34,7 @@ import {
     BoundingBox,
     CheckingExecutionDetailResponseDtoStatusEnum,
 } from "./entrepot";
+import { MbStyle } from "geostyler-mapbox-parser";
 
 /** user */
 export type CartesUser = {
@@ -171,10 +172,18 @@ export type CartesStyle = {
 
 export type StyleForm = {
     style_name: string;
-    style_files: Record<string, FileList>;
+    style_files: Record<string, string>;
 };
 
 export type StyleFormat = "mapbox" | "sld" | "qml";
+
+export interface GeostylerStyle {
+    name: string;
+    style: string | MbStyle;
+    format: StyleFormat;
+}
+
+export type GeostylerStyles = GeostylerStyle[];
 
 /** metadata pour TMS */
 export type TmsMetadata = {

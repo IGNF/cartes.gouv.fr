@@ -1,21 +1,35 @@
-import { FC } from "react";
+import { Dispatch, FC, SetStateAction, useEffect } from "react";
 import { Controller, UseFormReturn } from "react-hook-form";
 import { getTranslation } from "../../../../../i18n/i18n";
 import UploadStyleFiles from "@/components/Utils/Geostyler/UploadStyleFiles";
 import { MapStyleProvider } from "@/contexts/mapStyle";
 import { StyleParser } from "geostyler-style";
+import { MapInitial } from "@/components/Utils/RMap";
+import { StyleFormat } from "@/@types/app";
 
 type UploadLayerStylesProps = {
     form: UseFormReturn;
-    format: "mapbox" | "sld" | "qml";
+    format: StyleFormat;
     names: string[];
     parser?: StyleParser;
+    setInitialValues: Dispatch<SetStateAction<MapInitial | undefined>>;
 };
 
 const { t } = getTranslation("Style");
 
-const UploadLayerStyles: FC<UploadLayerStylesProps> = ({ form, format, names, parser }) => {
-    const { control } = form;
+const UploadLayerStyles: FC<UploadLayerStylesProps> = (props) => {
+    const { form, format, names, parser, setInitialValues } = props;
+    const { control, watch } = form;
+
+    const styleFiles = watch("style_files");
+    useEffect(() => {
+        setInitialValues((initial) => {
+            if (initial) {
+                return { ...initial, currentStyle: Object.entries(styleFiles).map(([name, style]) => ({ name, style: style as string, format })) };
+            }
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [setInitialValues, styleFiles]);
 
     return (
         <>

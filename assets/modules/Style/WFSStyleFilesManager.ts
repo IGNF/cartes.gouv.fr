@@ -14,9 +14,11 @@ export default class WFSStyleFilesManager implements BaseStyleFilesManager {
         const formData = new FormData();
 
         formData.append("style_name", values.style_name);
-        for (const [uuid, files] of Object.entries(values.style_files)) {
-            if (0 !== files.length) {
-                formData.append(`style_files[${layersMapping[uuid]}]`, files[0]);
+        for (const [uuid, style] of Object.entries(values.style_files)) {
+            if (style) {
+                const blob = new Blob([style]);
+                const file = new File([blob], uuid);
+                formData.append(`style_files[${layersMapping[uuid]}]`, file);
             }
         }
         return formData;

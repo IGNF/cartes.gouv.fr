@@ -51,7 +51,7 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
 
         const styles = serviceQuery.data.configuration.styles;
         const currentStyle = styles?.find((style) => style.current === true);
-        initial = { ...initial, currentStyle: currentStyle };
+        initial = { ...initial, currentStyle };
 
         getWebService(serviceQuery.data)
             .getLayers()
@@ -155,6 +155,7 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
                                     offeringId={offeringId}
                                     datastoreId={datastoreId}
                                     datasheetName={datasheetName}
+                                    setInitialValues={setInitialValues}
                                 />
                             )}
                         </div>

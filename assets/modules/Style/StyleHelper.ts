@@ -1,15 +1,17 @@
-import MapboxStyleParser from "geostyler-mapbox-parser";
+import MapboxStyleParser, { MbStyle } from "geostyler-mapbox-parser";
 import OpenLayersParser from "geostyler-openlayers-parser";
 import QGISStyleParser from "geostyler-qgis-parser";
 import SldStyleParser from "geostyler-sld-parser";
+import { ReadStyleResult } from "geostyler-style";
 import { Feature } from "ol";
 import { Geometry } from "ol/geom";
 import BaseLayer from "ol/layer/Base";
 import VectorLayer from "ol/layer/Vector";
 import VectorTileLayer from "ol/layer/VectorTile";
 import VectorSource from "ol/source/Vector";
-import { CartesStyle } from "../../@types/app";
+import { CartesStyle, GeostylerStyles } from "../../@types/app";
 import { getFileExtension } from "../../utils";
+import { isCarteStyle, mbParser, qgisParser, sldParser } from "@/utils/geostyler";
 
 type AddStyleFormType = {
     style_name: string;
@@ -48,19 +50,52 @@ class StyleHelper {
         return style;
     }
 
-    static async applyStyle(layer: BaseLayer, currentStyle: CartesStyle | undefined) {
+    static async applyStyle(layer: BaseLayer, currentStyle: CartesStyle | GeostylerStyles | undefined) {
         if (!currentStyle) return;
 
         if (layer instanceof VectorLayer || layer instanceof VectorTileLayer) {
             const nameMandatory = layer instanceof VectorLayer ? true : false;
-            const style = await StyleHelper.#getOlStyle(layer, currentStyle, nameMandatory);
-            if (style) {
-                layer.setStyle(style);
+            let readStyle: ReadStyleResult | undefined;
+            if (isCarteStyle(currentStyle)) {
+                readStyle = await StyleHelper.#getCarteReadStyle(layer, currentStyle, nameMandatory);
+            } else {
+                readStyle = await StyleHelper.#getGeoReadStyle(layer, currentStyle, nameMandatory);
+            }
+            if (readStyle) {
+                const style = await StyleHelper.#getOlStyle(readStyle);
+                if (style) {
+                    layer.setStyle(style);
+                }
             }
         }
     }
 
-    static async #getOlStyle(layer: VectorLayer<VectorSource<Feature<Geometry>>> | VectorTileLayer, currentStyle: CartesStyle, nameMandatory = true) {
+    static async #getGeoReadStyle(
+        layer: VectorLayer<VectorSource<Feature<Geometry>>> | VectorTileLayer,
+        currentStyle: GeostylerStyles,
+        nameMandatory = true
+    ): Promise<ReadStyleResult | undefined> {
+        for (const { name, style, format } of currentStyle) {
+            if (nameMandatory && layer.get("name") === name) {
+                switch (format) {
+                    case "sld":
+                        return sldParser.readStyle(style as string);
+                    case "qml":
+                        return qgisParser.readStyle(style as string);
+                    case "mapbox":
+                        return mbParser.readStyle(style as MbStyle);
+                }
+            } else {
+                // TODO: What should we do in that case ?
+            }
+        }
+    }
+
+    static async #getCarteReadStyle(
+        layer: VectorLayer<VectorSource<Feature<Geometry>>> | VectorTileLayer,
+        currentStyle: CartesStyle,
+        nameMandatory = true
+    ): Promise<ReadStyleResult | undefined> {
         let styleUrl;
         if (nameMandatory) {
             // Le nom est obligatoire pour les flux WFS
@@ -69,8 +104,6 @@ class StyleHelper {
             if (s.length) styleUrl = s[0].url;
             else return undefined;
         } else styleUrl = currentStyle.layers[0].url;
-
-        const olParser = new OpenLayersParser();
 
         // Lecture du fichier
         const response = await fetch(styleUrl);
@@ -98,11 +131,14 @@ class StyleHelper {
 
         if (!parser) return undefined;
 
-        let style;
         if (["sld", "qml"].includes(extension!)) {
-            style = await parser.readStyle(styleString);
-        } else style = await parser.readStyle(JSON.parse(styleString));
+            return parser.readStyle(styleString);
+        }
+        return parser.readStyle(JSON.parse(styleString));
+    }
 
+    static async #getOlStyle(style: ReadStyleResult) {
+        const olParser = new OpenLayersParser();
         const { output } = style;
         if (output) {
             const parsed = await olParser.writeStyle(output);

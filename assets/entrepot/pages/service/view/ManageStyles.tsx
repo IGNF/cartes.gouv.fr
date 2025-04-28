@@ -2,7 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { FC, useMemo, useState } from "react";
+import { Dispatch, FC, SetStateAction, useMemo, useState } from "react";
 
 import { CartesStyle, Service } from "../../../../@types/app";
 import ConfirmDialog, { ConfirmDialogModal } from "../../../../components/Utils/ConfirmDialog";
@@ -14,18 +14,21 @@ import api from "../../../api";
 import StyleManager, { StyleForm } from "./Style/StyleManager";
 
 import "../../../../sass/components/style-tab.scss";
+import { MapInitial } from "@/components/Utils/RMap";
 
 type ManageStylesProps = {
     datastoreId: string;
     datasheetName: string;
     offeringId: string;
     service?: Service;
+    setInitialValues: Dispatch<SetStateAction<MapInitial | undefined>>;
 };
 
-const ManageStyles: FC<ManageStylesProps> = ({ service, offeringId, datastoreId, datasheetName }) => {
+const ManageStyles: FC<ManageStylesProps> = (props) => {
+    const { service, offeringId, datastoreId, datasheetName, setInitialValues } = props;
     const { t: tStyle } = useTranslation("Style");
     const { t: tCommon } = useTranslation("Common");
-    const [styleToAdd, setStyleToAdd] = useState<StyleForm>();
+    const [styleToAddOrEdit, setStyleToAddOrEdit] = useState<StyleForm>();
     const [styleToRemove, setStyleToRemove] = useState<string>();
 
     // Recherche des services (offerings) contenant le tag datasheet_name a datasheetName
@@ -68,6 +71,7 @@ const ManageStyles: FC<ManageStylesProps> = ({ service, offeringId, datastoreId,
             return Promise.resolve([]);
         },
         onSuccess(styles) {
+            setStyleToAddOrEdit(undefined);
             if (service) {
                 queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName) });
                 queryClient.setQueryData<Service>(RQKeys.datastore_offering(datastoreId, offeringId), (oldService) => {
@@ -146,11 +150,19 @@ const ManageStyles: FC<ManageStylesProps> = ({ service, offeringId, datastoreId,
                     />
                 )}
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
-                    <Button onClick={() => setStyleToAdd({ style_name: "", style_files: {} })}>{tStyle("add_style")}</Button>
+                    <Button onClick={() => setStyleToAddOrEdit({ style_name: "", style_files: {} })}>{tStyle("add_style")}</Button>
                 </div>
             </div>
-            {service !== undefined && styleToAdd && (
-                <StyleManager datastoreId={datastoreId} datasheetName={datasheetName} service={service} style={styleToAdd} styleNames={styleNames} />
+            {service !== undefined && styleToAddOrEdit && (
+                <StyleManager
+                    datastoreId={datastoreId}
+                    datasheetName={datasheetName}
+                    service={service}
+                    setInitialValues={setInitialValues}
+                    setStyleToAddOrEdit={setStyleToAddOrEdit}
+                    style={styleToAddOrEdit}
+                    styleNames={styleNames}
+                />
             )}
 
             {(isPendingChangeCurrentStyle || isRemovePending) && (

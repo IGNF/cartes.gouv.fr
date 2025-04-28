@@ -1,6 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { CartesStyle, Service, StyleFormat } from "../../../../../@types/app";
-import { FC, useEffect, useState } from "react";
+import { Dispatch, FC, SetStateAction, useEffect, useState } from "react";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import Input from "@codegouvfr/react-dsfr/Input";
 import Alert, { AlertProps } from "@codegouvfr/react-dsfr/Alert";
@@ -22,6 +22,7 @@ import { getTranslation } from "../../../../../i18n/i18n";
 import { mbParser, qgisParser, sldParser } from "@/utils/geostyler";
 import { StyleParser } from "geostyler-style";
 import Button from "@codegouvfr/react-dsfr/Button";
+import { MapInitial } from "@/components/Utils/RMap";
 
 export interface StyleForm {
     style_name: string;
@@ -37,13 +38,17 @@ type StyleManagerProps = {
     datastoreId: string;
     datasheetName: string;
     service: Service;
+    setInitialValues: Dispatch<SetStateAction<MapInitial | undefined>>;
+    setStyleToAddOrEdit: Dispatch<SetStateAction<StyleForm | undefined>>;
     style: StyleForm;
     styleNames: string[];
 };
 
 const { t: tCommon } = getTranslation("Common");
 
-const StyleManager: FC<StyleManagerProps> = ({ datastoreId, datasheetName, service, style, styleNames }) => {
+const StyleManager: FC<StyleManagerProps> = (props) => {
+    const { datastoreId, datasheetName, service, setInitialValues, setStyleToAddOrEdit, style, styleNames } = props;
+
     const schema = () => {
         const style_name = yup
             .string()
@@ -185,6 +190,7 @@ const StyleManager: FC<StyleManagerProps> = ({ datastoreId, datasheetName, servi
         },
         onSuccess: () => {
             setError(undefined);
+            setStyleToAddOrEdit(undefined);
             if (service !== undefined) {
                 queryClient.refetchQueries({ queryKey: RQKeys.datastore_offering(datastoreId, service._id) });
                 queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName) });
@@ -226,7 +232,7 @@ const StyleManager: FC<StyleManagerProps> = ({ datastoreId, datasheetName, servi
         });
     }
 
-    const layerNames = format === "mapbox" ? ["no_layer"] : Object.keys(layers);
+    const layerNames = format === "mapbox" ? ["no_layer"] : Object.values(layers);
 
     return (
         <form className={fr.cx("fr-grid-row")} onSubmit={handleSubmit(onSubmit)}>
@@ -261,7 +267,7 @@ const StyleManager: FC<StyleManagerProps> = ({ datastoreId, datasheetName, servi
                 )}
                 {Object.keys(layers).length > 0 && hasStyles && (
                     /* @ts-expect-error Problème d'inférence du type */
-                    <UploadLayerStyles form={form} format={format} names={layerNames} parser={parser} />
+                    <UploadLayerStyles form={form} format={format} names={layerNames} parser={parser} setInitialValues={setInitialValues} />
                 )}
             </div>
             <Button type="submit">Sauvegarder</Button>

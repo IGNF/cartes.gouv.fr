@@ -60,9 +60,7 @@ export default class TMSStyleFilesManager implements BaseStyleFilesManager {
             throw new Error(t("metadata_not_defined"));
         }
 
-        const files = values.style_files["no_layer"];
-
-        const styleString = await files[0].text();
+        const styleString = values.style_files["no_layer"];
         const mapboxStyle = JSON.parse(styleString);
 
         mapboxStyle.sources = {

@@ -14,7 +14,7 @@ import { fromLonLat, transformExtent } from "ol/proj";
 import WMTS, { optionsFromCapabilities } from "ol/source/WMTS";
 import { FC, useCallback, useEffect, useMemo, useRef } from "react";
 
-import type { CartesStyle } from "../../@types/app";
+import type { CartesStyle, GeostylerStyles } from "../../@types/app";
 import { OfferingDetailResponseDtoTypeEnum } from "../../@types/entrepot";
 import olDefaults from "../../data/ol-defaults.json";
 import useCapabilities from "../../hooks/useCapabilities";
@@ -35,7 +35,7 @@ export interface MapInitial {
         east: number;
         north: number;
     };
-    currentStyle?: CartesStyle;
+    currentStyle?: CartesStyle | GeostylerStyles;
     layers: BaseLayer[];
 }
 
