@@ -34,24 +34,6 @@ const UploadLayerStyles: FC<UploadLayerStylesProps> = (props) => {
     return (
         <>
             <p>{t("add_file", { format: format })}</p>
-            {/* {Object.keys(layers).map((uid) => {
-                return (
-                    <div key={uid} className={fr.cx("fr-grid-row", "fr-mb-3w")}>
-                        <Upload
-                            className={fr.cx("fr-input-group")}
-                            label={layers[uid]}
-                            hint={t("select_file", { format: format })}
-                            state={errors?.style_files?.[uid]?.message ? "error" : "default"}
-                            stateRelatedMessage={errors?.style_files?.[uid]?.message}
-                            nativeInputProps={{
-                                ...register(`style_files.${uid}`),
-                                accept: `.${format}`,
-                                // onChange: onUpload,
-                            }}
-                        />
-                    </div>
-                );
-            })} */}
             <MapStyleProvider defaultTable={names[0]}>
                 <Controller
                     name="style_files"

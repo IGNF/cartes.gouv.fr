@@ -40,25 +40,22 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
     const [initialValues, setInitialValues] = useState<MapInitial>();
 
     useEffect(() => {
-        if (!serviceQuery.data || serviceQuery.data?.open === false) return;
+        (async function () {
+            if (!serviceQuery.data || serviceQuery.data?.open === false) return;
 
-        let initial: MapInitial = { type: serviceQuery.data.type, bbox: undefined, layers: [] };
+            let initial: MapInitial = { type: serviceQuery.data.type, bbox: undefined, layers: [] };
 
-        const infos = serviceQuery.data.configuration.type_infos as TypeInfosWithBbox;
-        if (infos.bbox) {
-            initial = { ...initial, bbox: infos.bbox };
-        }
+            const infos = serviceQuery.data.configuration.type_infos as TypeInfosWithBbox;
+            if (infos.bbox) {
+                initial = { ...initial, bbox: infos.bbox };
+            }
 
-        const styles = serviceQuery.data.configuration.styles;
-        const currentStyle = styles?.find((style) => style.current === true);
-        initial = { ...initial, currentStyle };
-
-        getWebService(serviceQuery.data)
-            .getLayers()
-            .then((layers) => {
-                initial = { ...initial, layers: layers ?? [] };
-                setInitialValues(initial);
-            });
+            const styles = serviceQuery.data.configuration.styles;
+            const currentStyle = styles?.find((style) => style.current === true);
+            const layers = await getWebService(serviceQuery.data).getLayers();
+            initial = { ...initial, currentStyle, layers: layers ?? [] };
+            setInitialValues(initial);
+        })();
     }, [serviceQuery.data]);
 
     const canManageStyles =
@@ -149,8 +146,9 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
                             <div className={fr.cx("fr-col-12", "fr-col-md-4", "fr-p-1w", "fr-px-2w")}>
                                 <Tabs tabs={tabs} />
                             </div>
-                            {canManageStyles && (
+                            {initialValues && canManageStyles && (
                                 <ManageStyles
+                                    initial={initialValues}
                                     service={serviceQuery.data}
                                     offeringId={offeringId}
                                     datastoreId={datastoreId}

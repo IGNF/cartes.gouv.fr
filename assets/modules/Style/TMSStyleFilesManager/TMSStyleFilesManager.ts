@@ -21,7 +21,7 @@ export default class TMSStyleFilesManager implements BaseStyleFilesManager {
         this.#metadata = service.tms_metadata;
     }
 
-    async prepare(values: StyleForm, layersMapping: Record<string, string>): Promise<FormData> {
+    async prepare(values: StyleForm): Promise<FormData> {
         if (!this.#metadata) {
             throw new Error(t("metadata_not_defined"));
         }
@@ -29,18 +29,18 @@ export default class TMSStyleFilesManager implements BaseStyleFilesManager {
         switch (this.inputFormat) {
             case "sld":
             case "qml":
-                return this.#merge(values, layersMapping);
+                return this.#merge(values);
             case "mapbox":
                 return this.#buildMapbox(values);
         }
     }
 
-    async #merge(values: StyleForm, layersMapping: Record<string, string>): Promise<FormData> {
+    async #merge(values: StyleForm): Promise<FormData> {
         const style: mapboxgl.Style = this.#buildEmptyStyle();
 
         for (const [uuid, files] of Object.entries(values.style_files)) {
             if (0 !== files.length) {
-                const layers = await this.#toMapboxLayer(layersMapping[uuid], files[0]);
+                const layers = await this.#toMapboxLayer(uuid, files);
                 style.layers = [...style.layers, ...layers];
             }
         }
@@ -87,9 +87,7 @@ export default class TMSStyleFilesManager implements BaseStyleFilesManager {
         return formData;
     }
 
-    async #toMapboxLayer(layerName, file) {
-        const styleString = await file.text();
-
+    async #toMapboxLayer(layerName, styleString: string) {
         const parser = this.inputFormat === "sld" ? new SldStyleParser({ locale: "fr" }) : new QGISStyleParser();
 
         const { output } = await parser.readStyle(styleString);
