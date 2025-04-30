@@ -126,8 +126,10 @@ const StyleManager: FC<StyleManagerProps> = (props) => {
     });
 
     let parser: StyleParser = sldParser;
+    let parsers: StyleParser[] = [sldParser, qgisParser];
     if (format === "mapbox") {
         parser = mbParser;
+        parsers = [mbParser];
     } else if (format === "qml") {
         parser = qgisParser;
     }
@@ -329,7 +331,7 @@ const StyleManager: FC<StyleManagerProps> = (props) => {
                 )}
                 {Object.keys(layers).length > 0 && hasStyles && (
                     /* @ts-expect-error Problème d'inférence du type */
-                    <UploadLayerStyles form={form} format={format} names={layerNames} parser={parser} setInitialValues={setInitialValues} />
+                    <UploadLayerStyles form={form} format={format} names={layerNames} parser={parser} parsers={parsers} setInitialValues={setInitialValues} />
                 )}
             </div>
             <Button type="submit">Sauvegarder</Button>

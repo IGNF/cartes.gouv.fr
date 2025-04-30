@@ -10,6 +10,7 @@ import RQKeys from "@/modules/entrepot/RQKeys";
 import api from "@/entrepot/api";
 import UploadStyleFiles from "@/components/Utils/Geostyler/UploadStyleFiles";
 import { useMapStyle } from "@/contexts/mapStyle";
+import { sldParser } from "@/utils/geostyler";
 
 type UploadStyleFileProps = {
     configId?: string;
@@ -54,7 +55,7 @@ const StyleLoader: FC<UploadStyleFileProps> = (props) => {
                 name="style_files"
                 control={control}
                 render={({ field: { value, onChange }, formState: { errors } }) => (
-                    <UploadStyleFiles errors={errors?.style_files} onChange={onChange} tables={tableNames} value={value} />
+                    <UploadStyleFiles errors={errors?.style_files} onChange={onChange} parsers={[sldParser]} tables={tableNames} value={value} />
                 )}
             />
         </div>

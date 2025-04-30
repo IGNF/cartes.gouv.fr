@@ -9,12 +9,13 @@ type UploadStyleFileProps = {
     errors?: Record<string, { message?: string } | undefined>;
     onChange: (value: Record<string, string | undefined>) => void;
     parser?: StyleParser;
+    parsers?: StyleParser[];
     tables: string[];
     value?: Record<string, string>;
 };
 
 const UploadStyleFiles: FC<UploadStyleFileProps> = (props) => {
-    const { errors, onChange, parser, tables = [], value } = props;
+    const { errors, onChange, parser, parsers, tables = [], value } = props;
     const { selectedTable, setSelectedTable } = useMapStyle();
     const options = tables.map((table) => ({
         label: table,
@@ -36,6 +37,7 @@ const UploadStyleFiles: FC<UploadStyleFileProps> = (props) => {
                 error={errors?.[selectedTable]?.message}
                 onChange={handleChange}
                 parser={parser}
+                parsers={parsers}
                 table={selectedTable}
                 value={value?.[selectedTable]}
             />

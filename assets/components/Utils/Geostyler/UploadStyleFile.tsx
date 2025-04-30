@@ -11,12 +11,13 @@ type UploadStyleFileProps = {
     error?: string;
     onChange: (value?: string) => void;
     parser?: StyleParser;
+    parsers?: StyleParser[];
     table: string;
     value?: string;
 };
 
 const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
-    const { error, onChange, parser = sldParser, table, value } = props;
+    const { error, onChange, parser = sldParser, parsers, table, value } = props;
     const { t } = useTranslation("UploadStyleFile");
 
     const [gsStyle, setGsStyle] = useState<Style>({
@@ -93,7 +94,7 @@ const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
                     onChange: handleUpload,
                 }}
             />
-            <GeostylerEditor onChange={handleStyleChange} value={gsStyle} />
+            <GeostylerEditor defaultParser={parser} onChange={handleStyleChange} parsers={parsers} value={gsStyle} />
         </div>
     );
 };

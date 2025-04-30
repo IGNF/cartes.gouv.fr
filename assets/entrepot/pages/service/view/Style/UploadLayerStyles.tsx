@@ -12,13 +12,14 @@ type UploadLayerStylesProps = {
     format: StyleFormat;
     names: string[];
     parser?: StyleParser;
+    parsers?: StyleParser[];
     setInitialValues: Dispatch<SetStateAction<MapInitial | undefined>>;
 };
 
 const { t } = getTranslation("Style");
 
 const UploadLayerStyles: FC<UploadLayerStylesProps> = (props) => {
-    const { form, format, names, parser, setInitialValues } = props;
+    const { form, format, names, parser, parsers, setInitialValues } = props;
     const { control, watch } = form;
 
     const styleFiles = watch("style_files");
@@ -40,7 +41,7 @@ const UploadLayerStyles: FC<UploadLayerStylesProps> = (props) => {
                     control={control}
                     render={({ field: { value, onChange }, formState: { errors } }) => (
                         // @ts-expect-error ignore for now
-                        <UploadStyleFiles errors={errors?.style_files} onChange={onChange} parser={parser} tables={names} value={value} />
+                        <UploadStyleFiles errors={errors?.style_files} onChange={onChange} parser={parser} parsers={parsers} tables={names} value={value} />
                     )}
                 />
             </MapStyleProvider>
