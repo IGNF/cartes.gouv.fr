@@ -253,7 +253,7 @@
                         {# https://cnig.gouv.fr/IMG/pdf/guide_recherche_inspire.pdf #}
                         {# Le champ linkage précise l’adresse du service, le champ « protocol » précise de quel type de service il s’agit (OGC:WMS, OGC:WFS, OGC:WMTS, OGC:CSW) et le champ « name » contient le nom de la couche. #}
                         {% for layer in layers %}
-                            <gmd:onLine type="offering" offeringId="{{ layer.offering_id }}">
+                            <gmd:onLine type="offering" offeringId="{{ layer.offering_id }}" offeringOpen="{{ layer.open }}">
                                 <gmd:CI_OnlineResource>
                                     <gmd:linkage>
                                         <gmd:URL>{{ layer.gmd_online_resource_url }}</gmd:URL>
@@ -264,6 +264,14 @@
                                     <gmd:name>
                                         <gco:CharacterString>{{ layer.name }}</gco:CharacterString>
                                     </gmd:name>
+                                    {% if layer.open == false %}
+                                        <gmd:applicationProfile>
+                                            <gmx:Anchor xlink:href="http://inspire.ec.europa.eu/metadata-codelist/SpatialDataServiceType/other">other</gmx:Anchor>
+                                        </gmd:applicationProfile>
+                                        <gmd:description>
+                                            <gmx:Anchor xlink:href="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_RestrictionCode_restricted">Le service associé à cette donnée est en accès restreint, veuillez contacter le producteur de la donnée pour en obtenir l'accès</gmx:Anchor>
+                                        </gmd:description>
+                                    {% endif %}
                                 </gmd:CI_OnlineResource>
                             </gmd:onLine>
                         {% endfor %}
