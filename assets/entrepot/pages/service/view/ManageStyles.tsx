@@ -2,30 +2,35 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { FC, useMemo, useState } from "react";
+import { Dispatch, FC, SetStateAction, useMemo, useState } from "react";
 
-import { CartesStyle, Service } from "../../../../@types/app";
+import { CartesStyle, GeostylerStyle, GeostylerStyles, Service } from "../../../../@types/app";
 import ConfirmDialog, { ConfirmDialogModal } from "../../../../components/Utils/ConfirmDialog";
 import Wait from "../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import api from "../../../api";
-import { StyleManager, addStyleModal } from "./Style/StyleManager";
+import StyleManager, { StyleForm } from "./Style/StyleManager";
 
 import "../../../../sass/components/style-tab.scss";
+import { getWorkingLayers, MapInitial } from "@/components/Utils/RMap";
+import StyleHelper from "@/modules/Style/StyleHelper";
 
-type ManageStylesTabProps = {
+type ManageStylesProps = {
+    initial: MapInitial;
     datastoreId: string;
     datasheetName: string;
     offeringId: string;
     service?: Service;
+    setInitialValues: Dispatch<SetStateAction<MapInitial | undefined>>;
 };
 
-const ManageStylesTab: FC<ManageStylesTabProps> = ({ service, offeringId, datastoreId, datasheetName }) => {
+const ManageStyles: FC<ManageStylesProps> = (props) => {
+    const { initial, service, offeringId, datastoreId, datasheetName, setInitialValues } = props;
     const { t: tStyle } = useTranslation("Style");
     const { t: tCommon } = useTranslation("Common");
-
+    const [styleToAddOrEdit, setStyleToAddOrEdit] = useState<StyleForm>();
     const [styleToRemove, setStyleToRemove] = useState<string>();
 
     // Recherche des services (offerings) contenant le tag datasheet_name a datasheetName
@@ -68,6 +73,7 @@ const ManageStylesTab: FC<ManageStylesTabProps> = ({ service, offeringId, datast
             return Promise.resolve([]);
         },
         onSuccess(styles) {
+            setStyleToAddOrEdit(undefined);
             if (service) {
                 queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName) });
                 queryClient.setQueryData<Service>(RQKeys.datastore_offering(datastoreId, offeringId), (oldService) => {
@@ -128,15 +134,41 @@ const ManageStylesTab: FC<ManageStylesTabProps> = ({ service, offeringId, datast
                         options={styles.map((style) => ({
                             label: style.name,
                             illustration: (
-                                <Button
-                                    title={tStyle("remove_style", { styleName: style.name })}
-                                    priority={"tertiary no outline"}
-                                    iconId={"fr-icon-delete-line"}
-                                    onClick={() => {
-                                        setStyleToRemove(style.name);
-                                        ConfirmDialogModal.open();
-                                    }}
-                                />
+                                <>
+                                    <Button
+                                        title={tStyle("edit_style")}
+                                        priority={"tertiary no outline"}
+                                        iconId={"fr-icon-edit-line"}
+                                        onClick={async () => {
+                                            const styleFiles: GeostylerStyles = [];
+                                            const promises: Promise<GeostylerStyle | undefined>[] = [];
+                                            for (const layer of getWorkingLayers(initial.layers)) {
+                                                if (StyleHelper.filterLayer(layer)) {
+                                                    promises.push(StyleHelper.getStyleFromUrl(layer, style));
+                                                }
+                                            }
+                                            for (const style of await Promise.all(promises)) {
+                                                if (style) {
+                                                    styleFiles.push(style);
+                                                }
+                                            }
+                                            setStyleToAddOrEdit({
+                                                style_name: style.name,
+                                                style_files: styleFiles,
+                                                style_format: styleFiles[0].format,
+                                            });
+                                        }}
+                                    />
+                                    <Button
+                                        title={tStyle("remove_style", { styleName: style.name })}
+                                        priority={"tertiary no outline"}
+                                        iconId={"fr-icon-delete-line"}
+                                        onClick={() => {
+                                            setStyleToRemove(style.name);
+                                            ConfirmDialogModal.open();
+                                        }}
+                                    />
+                                </>
                             ),
                             nativeInputProps: {
                                 checked: style?.current === true,
@@ -146,10 +178,22 @@ const ManageStylesTab: FC<ManageStylesTabProps> = ({ service, offeringId, datast
                     />
                 )}
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
-                    <Button onClick={() => addStyleModal.open()}>{tStyle("add_style")}</Button>
+                    <Button onClick={() => setStyleToAddOrEdit({ style_name: "", style_files: [] })}>{tStyle("add_style")}</Button>
                 </div>
             </div>
-            {service !== undefined && <StyleManager datastoreId={datastoreId} datasheetName={datasheetName} service={service} styleNames={styleNames} />}
+            {service !== undefined && styleToAddOrEdit && (
+                <StyleManager
+                    key={styleToAddOrEdit.style_name || "add"}
+                    datastoreId={datastoreId}
+                    datasheetName={datasheetName}
+                    editMode={Boolean(styleToAddOrEdit.style_name)}
+                    service={service}
+                    setInitialValues={setInitialValues}
+                    setStyleToAddOrEdit={setStyleToAddOrEdit}
+                    style={styleToAddOrEdit}
+                    styleNames={styleNames}
+                />
+            )}
 
             {(isPendingChangeCurrentStyle || isRemovePending) && (
                 <Wait>
@@ -173,4 +217,4 @@ const ManageStylesTab: FC<ManageStylesTabProps> = ({ service, offeringId, datast
     );
 };
 
-export default ManageStylesTab;
+export default ManageStyles;

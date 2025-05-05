@@ -1,3 +1,4 @@
+import { getStyleExtension } from "@/utils";
 import { Service, StyleForm, StyleFormat } from "../../@types/app";
 import BaseStyleFilesManager from "./BaseStyleFilesManager";
 
@@ -10,13 +11,16 @@ export default class WFSStyleFilesManager implements BaseStyleFilesManager {
         this.inputFormat = inputFormat;
     }
 
-    async prepare(values: StyleForm, layersMapping: Record<string, string>): Promise<FormData> {
+    async prepare(values: StyleForm): Promise<FormData> {
         const formData = new FormData();
 
         formData.append("style_name", values.style_name);
-        for (const [uuid, files] of Object.entries(values.style_files)) {
-            if (0 !== files.length) {
-                formData.append(`style_files[${layersMapping[uuid]}]`, files[0]);
+        for (const [uuid, style] of Object.entries(values.style_files)) {
+            if (style) {
+                const blob = new Blob([style]);
+                const extension = getStyleExtension(this.inputFormat);
+                const file = new File([blob], `${uuid}.${extension}`);
+                formData.append(`style_files[${uuid}]`, file);
             }
         }
         return formData;
