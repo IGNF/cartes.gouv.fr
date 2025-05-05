@@ -13,7 +13,7 @@ import { useEffect } from "react";
 
 import { catalogueUrl } from "@/env";
 import SymfonyRouting from "@/modules/Routing";
-import { routes, useRoute } from "@/router/router";
+import { appRoot, routes, useRoute } from "@/router/router";
 import { useAuthStore } from "@/stores/AuthStore";
 import homeImgUrl from "@/img/home/home.png";
 import Main from "@/components/Layout/Main";
@@ -90,7 +90,7 @@ const Home = () => {
                                     {
                                         iconId: "fr-icon-file-download-line",
                                         linkProps: {
-                                            href: "./catalogue",
+                                            href: catalogueUrl ?? appRoot + "/catalogue",
                                         },
                                         children: "J’accède au catalogue",
                                         priority: "secondary",
