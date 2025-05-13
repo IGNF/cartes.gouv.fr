@@ -19,7 +19,7 @@ class BaseEspaceCoApiService extends AbstractApiService
         ParameterBagInterface $parameters,
         Filesystem $filesystem,
         RequestStack $requestStack,
-        LoggerInterface $logger
+        LoggerInterface $logger,
     ) {
         parent::__construct($httpClient, $parameters, $filesystem, $requestStack, $logger, 'api_espaceco_url');
     }

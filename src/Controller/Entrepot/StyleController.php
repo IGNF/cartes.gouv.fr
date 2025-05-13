@@ -10,7 +10,7 @@ use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\EntrepotApi\AnnexeApiService;
 use App\Services\EntrepotApi\CartesMetadataApiService;
-use App\Services\EntrepotApi\CartesServiceApiService;
+use App\Services\EntrepotApi\CartesStylesApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -33,7 +33,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
         private ConfigurationApiService $configurationApiService,
         private AnnexeApiService $annexeApiService,
         private CartesMetadataApiService $cartesMetadataApiService,
-        private CartesServiceApiService $cartesServiceApiService,
+        private CartesStylesApiService $cartesStylesApiService,
     ) {
     }
 
@@ -54,7 +54,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             $datasheetName = $configuration['tags'][CommonTags::DATASHEET_NAME];
 
             // Recuperation des styles de la configuration
-            $styles = $this->cartesServiceApiService->getStyles($datastoreId, $configuration);
+            $styles = $this->cartesStylesApiService->getStyles($datastoreId, $configuration);
 
             // Suppression du style courant
             $this->cleanStyleTags($styles);
@@ -108,7 +108,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             $datasheetName = $configuration['tags'][CommonTags::DATASHEET_NAME];
 
             // Recuperation des styles de la configuration
-            $styles = $this->cartesServiceApiService->getStyles($datastoreId, $configuration);
+            $styles = $this->cartesStylesApiService->getStyles($datastoreId, $configuration);
 
             // Recuperation du style
             $style = array_values(array_filter($styles, static function ($style) use ($styleName) {
@@ -170,7 +170,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             $configuration = $this->configurationApiService->get($datastoreId, $configId);
 
             // Recuperation des styles de la configuration
-            $styles = $this->cartesServiceApiService->getStyles($datastoreId, $configuration);
+            $styles = $this->cartesStylesApiService->getStyles($datastoreId, $configuration);
 
             // Recuperation du style
             $style = array_filter($styles, static function ($style) use ($styleName) {

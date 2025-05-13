@@ -2,7 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import React, { FC, useCallback, useMemo, useState } from "react";
+import { FC, useMemo, useState } from "react";
 
 import { CartesStyle, Service } from "../../../../@types/app";
 import ConfirmDialog, { ConfirmDialogModal } from "../../../../components/Utils/ConfirmDialog";
@@ -20,10 +20,9 @@ type ManageStylesTabProps = {
     datasheetName: string;
     offeringId: string;
     service?: Service;
-    setCurrentStyle: React.Dispatch<React.SetStateAction<CartesStyle | undefined>>;
 };
 
-const ManageStylesTab: FC<ManageStylesTabProps> = ({ service, offeringId, datastoreId, datasheetName, setCurrentStyle }) => {
+const ManageStylesTab: FC<ManageStylesTabProps> = ({ service, offeringId, datastoreId, datasheetName }) => {
     const { t: tStyle } = useTranslation("Style");
     const { t: tCommon } = useTranslation("Common");
 
@@ -60,12 +59,6 @@ const ManageStylesTab: FC<ManageStylesTabProps> = ({ service, offeringId, datast
 
     const queryClient = useQueryClient();
 
-    const getCurrentStyle = useCallback(() => {
-        if (service?.configuration.styles) {
-            return service?.configuration.styles.find((style) => style.current === true);
-        }
-    }, [service?.configuration.styles]);
-
     // Suppression d'un style
     const { isPending: isRemovePending, mutate: mutateRemove } = useMutation<CartesStyle[], CartesApiException, string>({
         mutationFn: (name: string) => {
@@ -79,10 +72,13 @@ const ManageStylesTab: FC<ManageStylesTabProps> = ({ service, offeringId, datast
                 queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName) });
                 queryClient.setQueryData<Service>(RQKeys.datastore_offering(datastoreId, offeringId), (oldService) => {
                     if (oldService) {
-                        const newService = { ...oldService } as Service;
-                        newService.configuration.styles = styles;
-                        setCurrentStyle(getCurrentStyle());
-                        return newService;
+                        return {
+                            ...oldService,
+                            configuration: {
+                                ...oldService.configuration,
+                                styles,
+                            },
+                        } as Service;
                     }
                 });
             }
@@ -101,10 +97,13 @@ const ManageStylesTab: FC<ManageStylesTabProps> = ({ service, offeringId, datast
             if (service) {
                 queryClient.setQueryData<Service>(RQKeys.datastore_offering(datastoreId, offeringId), (oldService) => {
                     if (oldService) {
-                        const newService = { ...oldService } as Service;
-                        newService.configuration.styles = styles;
-                        setCurrentStyle(getCurrentStyle());
-                        return newService;
+                        return {
+                            ...oldService,
+                            configuration: {
+                                ...oldService.configuration,
+                                styles,
+                            },
+                        } as Service;
                     }
                 });
             }

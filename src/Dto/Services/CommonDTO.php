@@ -30,14 +30,14 @@ class CommonDTO
 
     /** @var array<string> */
     #[Assert\Count(min: 1, minMessage: 'common.category_min_error')]
-    public array $category;
+    public array $category = [];
 
     /** @var array<string> */
-    public array $keywords;
+    public array $keywords = [];
 
     /** @var array<string> */
     #[SerializedName('free_keywords')]
-    public array $free_keywords;
+    public array $free_keywords = [];
 
     #[Assert\NotBlank(['message' => 'common.email_contact_error'])]
     #[Assert\Email(message: 'email_contact {{ value }} n\'est pas une adresse email valide')]

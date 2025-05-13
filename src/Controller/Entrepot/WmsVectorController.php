@@ -2,7 +2,6 @@
 
 namespace App\Controller\Entrepot;
 
-use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Constants\EntrepotApi\Sandbox;
 use App\Constants\EntrepotApi\StaticFileTypes;
@@ -16,7 +15,6 @@ use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\StaticApiService;
-use App\Services\EntrepotApi\StoredDataApiService;
 use App\Services\SandboxService;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -35,14 +33,13 @@ use Symfony\Component\Uid\Uuid;
 class WmsVectorController extends ServiceController implements ApiControllerInterface
 {
     public function __construct(
-        private DatastoreApiService $datastoreApiService,
+        DatastoreApiService $datastoreApiService,
         private ConfigurationApiService $configurationApiService,
-        private StoredDataApiService $storedDataApiService,
-        CartesServiceApiService $cartesServiceApiService,
+        private CartesServiceApiService $cartesServiceApiService,
         private StaticApiService $staticApiService,
-        private CapabilitiesService $capabilitiesService,
+        CapabilitiesService $capabilitiesService,
         protected Filesystem $filesystem,
-        private CartesMetadataApiService $cartesMetadataApiService,
+        CartesMetadataApiService $cartesMetadataApiService,
         SandboxService $sandboxService,
     ) {
         parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $capabilitiesService, $cartesMetadataApiService, $sandboxService);
@@ -66,16 +63,8 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
             // création de requête pour la config
             $configRequestBody = $this->getConfigRequestBody($dto, $tablesNamesList, $styleFilesByTable, $storedDataId, false, $datastoreId);
 
-            $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId);
-            $datasheetName = $storedData['tags'][CommonTags::DATASHEET_NAME];
-
-            $endpoint = $this->getEndpointByShareType($datastoreId, ConfigurationTypes::WMSVECTOR, $dto->share_with);
-
-            // Ajout de la configuration
-            $configuration = $this->configurationApiService->add($datastoreId, $configRequestBody);
-            $configuration = $this->configurationApiService->addTags($datastoreId, $configuration['_id'], [
-                CommonTags::DATASHEET_NAME => $storedData['tags'][CommonTags::DATASHEET_NAME],
-            ]);
+            $offering = $this->cartesServiceApiService->saveService($datastoreId, $storedDataId, $dto, ConfigurationTypes::WMSVECTOR, $configRequestBody);
+            $configuration = $offering['configuration'];
 
             // remplace nom temporaire des fichiers statiques
             foreach ($styleFilesByTable as $tableName => $staticFileId) {
@@ -83,40 +72,6 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
                     'name' => sprintf('config_%s_style_wmsv_%s', $configuration['_id'], $tableName),
                 ]);
             }
-
-            // Creation d'une offering
-            try {
-                $offering = $this->configurationApiService->addOffering($datastoreId, $configuration['_id'], $endpoint['_id'], $endpoint['open']);
-                $offering['configuration'] = $configuration;
-            } catch (\Throwable $th) {
-                // si la création de l'offering plante, on défait la création de la config
-                $this->configurationApiService->remove($datastoreId, $configuration['_id']);
-                throw $th;
-            }
-
-            // création d'une permission pour la communauté actuelle
-            if ('your_community' === $dto->share_with) {
-                $this->addPermissionForCurrentCommunity($datastoreId, $offering);
-            }
-
-            // création d'une permission pour la communauté config
-            if (true === filter_var($dto->allow_view_data, FILTER_VALIDATE_BOOLEAN)) {
-                $communityId = $this->getParameter('config')['community_id'];
-                $this->addPermissionForCommunity($datastoreId, $communityId, $offering);
-            }
-
-            // Création ou mise à jour du capabilities
-            try {
-                $this->capabilitiesService->createOrUpdate($datastoreId, $endpoint, $offering['urls'][0]['url']);
-            } catch (\Exception $e) {
-            }
-
-            // création ou mise à jour de metadata
-            $formData = json_decode(json_encode($dto), true);
-            if ($this->sandboxService->isSandboxDatastore($datastoreId)) {
-                $formData['identifier'] = Sandbox::LAYERNAME_PREFIX.$formData['identifier'];
-            }
-            $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $formData);
 
             return $this->json($offering);
         } catch (ApiException $ex) {
@@ -143,7 +98,7 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
             // récup config et offering existants
             $oldOffering = $this->configurationApiService->getOffering($datastoreId, $offeringId);
             $oldConfiguration = $this->configurationApiService->get($datastoreId, $oldOffering['configuration']['_id']);
-            $datasheetName = $oldConfiguration['tags'][CommonTags::DATASHEET_NAME];
+            $oldOffering['configuration'] = $oldConfiguration;
 
             // ajout ou mise à jour des fichiers de styles SLD
             $styleFilesByTable = $this->sendStyleFiles($datastoreId, $tablesNamesList, $files, $oldConfiguration);
@@ -151,61 +106,9 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
             // création de requête pour la config
             $configRequestBody = $this->getConfigRequestBody($dto, $tablesNamesList, $styleFilesByTable, $storedDataId, true);
 
-            $endpoint = $this->getEndpointByShareType($datastoreId, ConfigurationTypes::WMSVECTOR, $dto->share_with);
-
-            // Mise à jour de la configuration
-            $configuration = $this->configurationApiService->replace($datastoreId, $oldConfiguration['_id'], $configRequestBody);
-
-            // on recrée l'offering si changement d'endpoint, sinon demande la synchronisation
-            if ($oldOffering['open'] !== $endpoint['open']) {
-                $this->configurationApiService->removeOffering($datastoreId, $oldOffering['_id']);
-
-                $offering = $this->configurationApiService->addOffering($datastoreId, $oldConfiguration['_id'], $endpoint['_id'], $endpoint['open']);
-            } else {
-                $offering = $this->configurationApiService->syncOffering($datastoreId, $offeringId);
-            }
-
-            if (false === $offering['open']) {
-                // création d'une permission pour la communauté config
-                if (true === filter_var($dto->allow_view_data, FILTER_VALIDATE_BOOLEAN)) {
-                    $communityId = $this->getParameter('config')['community_id'];
-                    $this->addPermissionForCommunity($datastoreId, $communityId, $offering);
-                } else {
-                    $communityId = $this->getParameter('config')['community_id'];
-                    $permissions = $this->datastoreApiService->getPermissions($datastoreId);
-
-                    $targetPermission = array_filter($permissions, function ($permission) use ($offering, $communityId) {
-                        return isset($permission['offerings'])
-                            && in_array($offering['_id'], array_column($permission['offerings'], '_id'))
-                            && isset($permission['beneficiary']['_id'])
-                            && $permission['beneficiary']['_id'] === $communityId;
-                    });
-
-                    if (!empty($targetPermission)) {
-                        $permissionId = reset($targetPermission)['_id'];
-                        $this->datastoreApiService->removePermission($datastoreId, $permissionId);
-                    }
-                }
-                // création d'une permission pour la communauté actuelle
-                $this->addPermissionForCurrentCommunity($datastoreId, $offering);
-            }
-
-            $offering['configuration'] = $configuration;
-
-            // Création ou mise à jour du capabilities
-            try {
-                $this->capabilitiesService->createOrUpdate($datastoreId, $endpoint, $offering['urls'][0]['url']);
-            } catch (\Exception $e) {
-            }
+            $offering = $this->cartesServiceApiService->saveService($datastoreId, $storedDataId, $dto, ConfigurationTypes::WMSVECTOR, $configRequestBody, $oldOffering);
 
             $this->cleanUnusedStyleFiles($datastoreId, $oldConfiguration, $styleFilesByTable);
-
-            // création ou mise à jour de metadata
-            $formData = json_decode(json_encode($dto), true);
-            if ($this->sandboxService->isSandboxDatastore($datastoreId)) {
-                $formData['identifier'] = Sandbox::LAYERNAME_PREFIX.$formData['identifier'];
-            }
-            $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $formData);
 
             return $this->json($offering);
         } catch (ApiException $ex) {
@@ -235,7 +138,7 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
             'type_infos' => [
                 'title' => $dto->service_name,
                 'abstract' => $dto->description,
-                'keywords' => $dto->category,
+                'keywords' => [...$dto->category, ...$dto->keywords, ...$dto->free_keywords],
                 'used_data' => [
                     [
                         'relations' => $relations,

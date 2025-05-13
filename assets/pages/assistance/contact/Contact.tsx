@@ -44,7 +44,7 @@ const schema = (t: TranslationFunction<"Contact", ComponentKey>) =>
 const Contact = () => {
     const { t } = useTranslation({ Contact });
     const { user } = useAuthStore();
-    const alert = useAlertStore(({ alerts }) => alerts.find((alert) => alert.visibility.homepage));
+    const alert = useAlertStore(({ alerts }) => alerts.find((alert) => alert.visibility.contact));
     const alertProps = useAlert(alert);
 
     const [isSending, setIsSending] = useState(false);

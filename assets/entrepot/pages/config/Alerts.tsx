@@ -89,18 +89,17 @@ const Alerts: FC = () => {
 
     // Update alerts mutation
     const { mutate, isPending } = useMutation<Annexe | undefined, CartesApiException, IAlert[]>({
-        mutationFn: async (alerts) => {
+        mutationFn: (alerts) => {
+            const data = alerts.map((alert) => ({ ...alert, date: alert.date.toISOString() }));
+            const blob = new Blob([JSON.stringify(data)], {
+                type: "application/json",
+            });
+            const file = new File([blob], fileName);
+            queryClient.setQueryData(RQKeys.alerts(), () => data);
             if (annexe?._id) {
-                const data = alerts.map((alert) => ({ ...alert, date: alert.date.toISOString() }));
-                const blob = new Blob([JSON.stringify(data)], {
-                    type: "application/json",
-                });
-                const file = new File([blob], fileName);
-                queryClient.setQueryData(RQKeys.alerts(), () => data);
-                const response = await api.annexe.replaceFile(datastore?._id, annexe?._id, file);
-                return response;
+                return api.annexe.replaceFile(datastore?._id, annexe?._id, file);
             }
-            return Promise.resolve(undefined);
+            return api.annexe.add(datastore?._id, annexePath, file);
         },
         onError: (error) => {
             setNotification({ severity: "error", title: t("alerts_update_error") });
@@ -307,7 +306,7 @@ const Alerts: FC = () => {
                         {...(closable ? { onClose: () => setNotification(null), closable: true } : { closable: false })}
                     />
                 )}
-                <Button disabled={!annexe || isPending} iconId={"fr-icon-add-line"} type="submit">
+                <Button disabled={isPending} iconId={"fr-icon-add-line"} type="submit">
                     {t("save")}
                 </Button>
             </form>
@@ -323,12 +322,3 @@ const Alerts: FC = () => {
 Alerts.displayName = symToStr({ Alerts });
 
 export default Alerts;
-
-/**
- * TODO
- * - RSS
- * - check user rights
- * - make const id configurable (CONFIG_COMMUNITY_ID)
- * - problem with browser cache (use `cache: "no-store"` temporary)
- * - menu integration?
- */

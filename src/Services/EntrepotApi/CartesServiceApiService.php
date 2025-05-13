@@ -2,9 +2,16 @@
 
 namespace App\Services\EntrepotApi;
 
+use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationStatuses;
 use App\Constants\EntrepotApi\OfferingTypes;
+use App\Constants\EntrepotApi\PermissionTypes;
+use App\Constants\EntrepotApi\Sandbox;
 use App\Constants\EntrepotApi\StoredDataTypes;
+use App\Dto\Services\CommonDTO;
+use App\Exception\CartesApiException;
+use App\Services\CapabilitiesService;
+use App\Services\SandboxService;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -23,6 +30,10 @@ class CartesServiceApiService
         private DatastoreApiService $datastoreApiService,
         private StaticApiService $staticApiService,
         private StoredDataApiService $storedDataApiService,
+        private CapabilitiesService $capabilitiesService,
+        private CartesMetadataApiService $cartesMetadataApiService,
+        private SandboxService $sandboxService,
+        private CartesStylesApiService $cartesStylesApiService,
         HttpClientInterface $httpClient,
     ) {
         $this->httpClient = $httpClient->withOptions([
@@ -62,7 +73,7 @@ class CartesServiceApiService
 
         $styles = [];
         if (OfferingTypes::WFS === $offering['type'] || OfferingTypes::WMTSTMS === $offering['type']) {
-            $styles = $this->getStyles($datastoreId, $offering['configuration']);
+            $styles = $this->cartesStylesApiService->getStyles($datastoreId, $offering['configuration']);
         }
         $offering['configuration']['styles'] = $styles;
 
@@ -70,43 +81,6 @@ class CartesServiceApiService
         $offering['share_url'] = $this->getShareUrl($datastoreId, $offering);
 
         return $offering;
-    }
-
-    /**
-     * Recherche des styles et ajout de l'url. Les styles sont désormais stockés dans extra. Cette fonction est prévue pour migrer les styles stockés dans les annexes vers extra.
-     *
-     * @param array<mixed> $configuration
-     *
-     * @return array<mixed>
-     */
-    public function getStyles(string $datastoreId, array $configuration): array
-    {
-        $styles = null;
-
-        // vérifier si styles est présent dans extra
-        if (isset($configuration['extra']['styles'])) {
-            $styles = $configuration['extra']['styles'];
-        }
-
-        // vérifier si styles est présent dans une annexe
-        $path = "/configuration/{$configuration['_id']}/styles.json";
-        $styleAnnexes = $this->annexeApiService->getAll($datastoreId, null, $path);
-
-        // si styles est présent dans une annexe et non dans extra, on le stocke dans extra et on supprime l'annexe
-        if (count($styleAnnexes)) {
-            // on ne lit l'annexe styles que si elle n'est pas déjà dans extra
-            if (null === $styles) {
-                $content = $this->annexeApiService->download($datastoreId, $styleAnnexes[0]['_id']);
-                $styles = json_decode($content, true);
-
-                $extra = ['styles' => $styles];
-                $this->configurationApiService->modify($datastoreId, $configuration['_id'], ['extra' => $extra]);
-            }
-
-            $this->annexeApiService->remove($datastoreId, $styleAnnexes[0]['_id']);
-        }
-
-        return $styles ?? [];
     }
 
     /**
@@ -277,7 +251,7 @@ class CartesServiceApiService
      */
     private function removeStyleFiles(string $datastoreId, array $configuration): void
     {
-        $styles = $this->getStyles($datastoreId, $configuration);
+        $styles = $this->cartesStylesApiService->getStyles($datastoreId, $configuration);
 
         foreach ($styles as $style) {
             if (array_key_exists('layers', $style)) {
@@ -286,5 +260,193 @@ class CartesServiceApiService
                 }
             }
         }
+    }
+
+    /**
+     * Crée ou modifie un service (offering/configuration).
+     *
+     * @param array<mixed>  $configRequestBody
+     * @param ?array<mixed> $oldOffering
+     */
+    public function saveService(
+        string $datastoreId,
+        string $storedDataId,
+        CommonDTO $dto,
+        string $type,
+        array $configRequestBody,
+        ?array $oldOffering = null,
+    ): array {
+        $datasheetName = null;
+        $endpoint = $this->getEndpointByShareType($datastoreId, $type, $dto->share_with);
+
+        if ($oldOffering) {
+            // Modification d'un service existant
+            $oldConfiguration = $oldOffering['configuration'];
+            $datasheetName = $oldConfiguration['tags'][CommonTags::DATASHEET_NAME];
+
+            // Mise à jour de la configuration
+            $configuration = $this->configurationApiService->replace($datastoreId, $oldConfiguration['_id'], $configRequestBody);
+
+            // On recrée l'offering si changement d'endpoint, sinon demande la synchronisation
+            if ($oldOffering['open'] !== $endpoint['open']) {
+                $this->configurationApiService->removeOffering($datastoreId, $oldOffering['_id']);
+
+                $offering = $this->configurationApiService->addOffering($datastoreId, $oldConfiguration['_id'], $endpoint['_id'], $endpoint['open']);
+            } else {
+                $offering = $this->configurationApiService->syncOffering($datastoreId, $oldOffering['_id']);
+            }
+        } else {
+            // Ajout d'un nouveau service
+            $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId);
+            $datasheetName = $storedData['tags'][CommonTags::DATASHEET_NAME];
+
+            // Ajout de la configuration
+            $configuration = $this->configurationApiService->add($datastoreId, $configRequestBody);
+            $configuration = $this->configurationApiService->addTags($datastoreId, $configuration['_id'], [
+                CommonTags::DATASHEET_NAME => $datasheetName,
+            ]);
+
+            // Création d'une offering
+            try {
+                $offering = $this->configurationApiService->addOffering($datastoreId, $configuration['_id'], $endpoint['_id'], $endpoint['open']);
+                $offering['configuration'] = $configuration;
+            } catch (\Throwable $th) {
+                // si la création de l'offering plante, on défait la création de la config
+                $this->configurationApiService->remove($datastoreId, $configuration['_id']);
+                throw $th;
+            }
+        }
+
+        $offering['configuration'] = $configuration;
+
+        // Création ou modification des permissions de la communauté actuelle ou de config
+        $this->handlePermissions($datastoreId, $offering, $dto);
+
+        // Création ou mise à jour du capabilities
+        try {
+            $this->capabilitiesService->createOrUpdate($datastoreId, $endpoint, $offering['urls'][0]['url']);
+        } catch (\Exception $e) {
+        }
+
+        // Création ou mise à jour de metadata
+        $formData = json_decode(json_encode($dto), true);
+        if ($this->sandboxService->isSandboxDatastore($datastoreId)) {
+            $formData['identifier'] = Sandbox::LAYERNAME_PREFIX.$formData['identifier'];
+        }
+        $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $formData);
+
+        return $offering;
+    }
+
+    /**
+     * Crée, modifie ou supprime des permissions de la communauté actuelle ou de config.
+     *
+     * @param array<mixed> $offering
+     */
+    private function handlePermissions(string $datastoreId, array $offering, CommonDTO $dto): void
+    {
+        // création d'une permission pour la communauté actuelle
+        if ('your_community' === $dto->share_with) {
+            $this->addPermissionForCurrentCommunity($datastoreId, $offering);
+        }
+
+        if (false === $offering['open']) {
+            // création d'une permission pour la communauté config si demandée
+            $configCommunityId = $this->params->get('config')['community_id'];
+            if ($dto->allow_view_data) {
+                $this->addPermissionForCommunity($datastoreId, $configCommunityId, $offering);
+            } else {
+                // sinon suppression de la permission pour la communauté config si elle existe déjà (elle a été créée lors de la création ou d'une modification précédente de l'offering)
+                $this->removeExistingConfigPermission($datastoreId, $offering);
+            }
+        }
+    }
+
+    /**
+     * @param array<mixed> $offering
+     */
+    private function removeExistingConfigPermission(string $datastoreId, array $offering): void
+    {
+        $configCommunityId = $this->params->get('config')['community_id'];
+        $permissions = $this->datastoreApiService->getPermissions($datastoreId);
+
+        $existingPermission = array_filter($permissions, function ($permission) use ($offering, $configCommunityId) {
+            return isset($permission['offerings'])
+                && in_array($offering['_id'], array_column($permission['offerings'], '_id'))
+                && isset($permission['beneficiary']['_id'])
+                && $permission['beneficiary']['_id'] === $configCommunityId;
+        });
+
+        if (!empty($existingPermission)) {
+            $permissionId = reset($existingPermission)['_id'];
+            $this->datastoreApiService->removePermission($datastoreId, $permissionId);
+        }
+    }
+
+    private function getEndpointByShareType(string $datastoreId, string $configType, string $shareWith): array
+    {
+        if ('all_public' === $shareWith) {
+            $open = true;
+        } elseif ('your_community' === $shareWith) {
+            $open = false;
+        } else {
+            throw new CartesApiException('Valeur du champ [share_with] est invalide', Response::HTTP_BAD_REQUEST, ['share_with' => $shareWith]);
+        }
+
+        $endpoints = $this->datastoreApiService->getEndpointsList($datastoreId, [
+            'type' => $configType,
+            'open' => $open,
+        ]);
+
+        if (0 === count($endpoints)) {
+            throw new CartesApiException("Aucun point d'accès (endpoint) du datastore ne peut convenir à la demande", Response::HTTP_BAD_REQUEST, ['share_with' => $shareWith]);
+        }
+
+        return $endpoints[0]['endpoint'];
+    }
+
+    /**
+     * @param array<mixed> $offering
+     */
+    private function addPermissionForCurrentCommunity(string $datastoreId, array $offering): void
+    {
+        $datastore = $this->datastoreApiService->get($datastoreId);
+        $this->addPermissionForCommunity($datastoreId, $datastore['community']['_id'], $offering);
+    }
+
+    /**
+     * @param array<mixed> $offering
+     */
+    private function addPermissionForCommunity(string $producerDatastoreId, string $consumerCommunityId, array $offering): void
+    {
+        $permissions = $this->datastoreApiService->getPermissions($producerDatastoreId);
+        $offeringId = $offering['_id'];
+
+        $offeringPermissions = array_filter($permissions, function ($permission) use ($offeringId) {
+            return isset($permission['offerings']) && in_array($offeringId, array_column($permission['offerings'], '_id'));
+        });
+
+        $permissionExists = array_reduce($offeringPermissions, function ($carry, $permission) use ($consumerCommunityId) {
+            return $carry || (isset($permission['beneficiary']['_id']) && $permission['beneficiary']['_id'] === $consumerCommunityId);
+        }, false);
+
+        if ($permissionExists) {
+            return;
+        }
+
+        $endDate = new \DateTime();
+        $endDate->add(new \DateInterval('P6M')); // date du jour + 6 mois
+        $endDate->setTime(23, 59, 0);
+
+        $permissionRequestBody = [
+            'end_date' => $endDate->format(\DateTime::ATOM),
+            'licence' => sprintf('Utilisation de %s', $offering['layer_name']),
+            'offerings' => [$offering['_id']],
+            'type' => PermissionTypes::COMMUNITY,
+            'only_oauth' => false,
+            'communities' => [$consumerCommunityId],
+        ];
+
+        $this->datastoreApiService->addPermission($producerDatastoreId, $permissionRequestBody);
     }
 }

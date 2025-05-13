@@ -7,10 +7,13 @@ use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\EntrepotApi\UserDocumentsApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Uid\Uuid;
 
 #[Route(
     '/api/users/me/documents',
@@ -52,13 +55,21 @@ class UserDocumentsController extends AbstractController implements ApiControlle
     public function add(Request $request): Response
     {
         try {
+            /** @var UploadedFile */
             $file = $request->files->get('file');
             $name = $request->request->get('name');
             $description = $request->request->get('description');
             $labels = $request->request->get('labels') ? explode(',', $request->request->get('labels')) : null;
 
+            $filePath = implode(DIRECTORY_SEPARATOR, [(string) $this->getParameter('var_data_path'), 'documents', Uuid::v4(), $file->getClientOriginalName()]);
+            $fileDir = dirname($filePath);
+
+            $fs = new Filesystem();
+            $fs->mkdir($fileDir);
+            $file->move($fileDir, $file->getClientOriginalName());
+
             return $this->json($this->userDocumentsApiService->add(
-                $file->getRealPath(),
+                $filePath,
                 $name,
                 $description,
                 $labels
@@ -93,9 +104,16 @@ class UserDocumentsController extends AbstractController implements ApiControlle
         try {
             $file = $request->files->get('file');
 
+            $filePath = implode(DIRECTORY_SEPARATOR, [(string) $this->getParameter('var_data_path'), 'documents', Uuid::v4(), $file->getClientOriginalName()]);
+            $fileDir = dirname($filePath);
+
+            $fs = new Filesystem();
+            $fs->mkdir($fileDir);
+            $file->move($fileDir, $file->getClientOriginalName());
+
             return $this->json($this->userDocumentsApiService->replaceFile(
                 $documentId,
-                $file->getRealPath()
+                $filePath
             ));
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());

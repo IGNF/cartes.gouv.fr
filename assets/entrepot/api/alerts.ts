@@ -1,10 +1,10 @@
-import { annexesUrl, communityId } from "@/env";
+import { annexesUrl, configCommunityId, configTechnicalName } from "@/env";
 import { IApiAlert } from "../../@types/alert";
 import { jsonFetch } from "../../modules/jsonFetch";
 
 const annexePath = "/public/alerts.json";
 const fileName = annexePath.substring(annexePath.lastIndexOf("/") + 1);
-const baseUrl = `${annexesUrl}/cartes.gouv.fr-config`;
+const baseUrl = `${annexesUrl}/${configTechnicalName}`;
 
 const get = (otherOptions: RequestInit = {}) => {
     return jsonFetch<IApiAlert[]>(`${baseUrl}${annexePath}`, {
@@ -14,7 +14,7 @@ const get = (otherOptions: RequestInit = {}) => {
 
 export default {
     annexePath,
-    communityId,
+    communityId: configCommunityId,
     fileName,
     get,
 };

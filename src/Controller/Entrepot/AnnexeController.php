@@ -11,6 +11,7 @@ use App\Services\EntrepotApi\AnnexeApiService;
 use App\Services\EntrepotApi\CartesMetadataApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\MetadataApiService;
+use App\Services\RSSFeed\RSSFeed;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -34,6 +35,7 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
         private CartesMetadataApiService $cartesMetadataApiService,
         private CswMetadataHelper $metadataHelper,
         private ParameterBagInterface $parameterBag,
+        private RSSFeed $rssFeed,
     ) {
     }
 
@@ -76,11 +78,36 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
         }
     }
 
+    #[Route('/add', name: 'add', methods: ['POST'])]
+    public function add(string $datastoreId, Request $request): JsonResponse
+    {
+        try {
+            $file = $request->files->get('file');
+            $name = $file->getClientOriginalName();
+            $path = $request->request->get('path');
+
+            // Clear RSSFeed cache
+            if (str_contains($name, 'alerts.json')) {
+                $this->rssFeed->clearCache();
+            }
+
+            return new JsonResponse($this->annexeApiService->add($datastoreId, $file->getRealPath(), [$path]));
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
     #[Route('/{annexeId}', name: 'replace_file', methods: ['POST'])]
     public function replaceFile(string $datastoreId, string $annexeId, Request $request): JsonResponse
     {
         try {
             $file = $request->files->get('file');
+            $name = $file->getClientOriginalName();
+
+            // Clear RSSFeed cache
+            if (str_contains($name, 'alerts.json')) {
+                $this->rssFeed->clearCache();
+            }
 
             return $this->json(
                 $this->annexeApiService->replaceFile($datastoreId, $annexeId, $file->getRealPath())

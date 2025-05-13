@@ -34,6 +34,7 @@ const AccessRestrictions: FC<AccessRestrictionProps> = ({ datastoreId, endpointT
     const { data: permissions } = useQuery<DatastorePermissionResponseDto[]>({
         queryKey: RQKeys.datastore_permission_offering(datastoreId, service?._id ?? ""),
         queryFn: ({ signal }) => api.datastore.getPermissions(datastoreId, { offering: service?._id }, { signal }),
+        enabled: Boolean(service?._id),
     });
 
     const offeringPermissions = permissions?.filter((permission) => permission.offerings.map((offering) => offering._id).includes(service?._id ?? ""));

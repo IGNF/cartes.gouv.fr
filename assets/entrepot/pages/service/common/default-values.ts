@@ -104,6 +104,7 @@ export const getWfsServiceFormDefaultValues = (
             service_name: metadata?.csw_metadata?.title ?? storedDataName,
             creation_date: now,
             resource_genealogy: "",
+            allow_view_data: false,
         };
     }
 
@@ -137,6 +138,7 @@ export const getWmsVectorServiceFormDefaultValues = (
             share_with,
             attribution_text: offering?.configuration.attribution?.title,
             attribution_url: offering?.configuration.attribution?.url,
+            allow_view_data: false,
         };
     } else {
         const suffix = getEndpointSuffix(EndpointTypeEnum.WMSVECTOR);
@@ -150,6 +152,7 @@ export const getWmsVectorServiceFormDefaultValues = (
             service_name: metadata?.csw_metadata?.title ?? storedDataName,
             creation_date: now,
             resource_genealogy: "",
+            allow_view_data: false,
         };
     }
 
@@ -181,6 +184,7 @@ export const getPyramidVectorTmsServiceFormDefaultValues = (
             share_with,
             attribution_text: offering?.configuration.attribution?.title,
             attribution_url: offering?.configuration.attribution?.url,
+            allow_view_data: false,
         };
     } else {
         const suffix = getEndpointSuffix("tms");
@@ -193,6 +197,7 @@ export const getPyramidVectorTmsServiceFormDefaultValues = (
             service_name: metadata?.csw_metadata?.title ?? storedDataName,
             creation_date: now,
             resource_genealogy: "",
+            allow_view_data: false,
         };
     }
 

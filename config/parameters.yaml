@@ -24,6 +24,7 @@ parameters:
 
     config:
         community_id: "%env(resolve:CONFIG_COMMUNITY_ID)%"
+        technical_name: "%env(resolve:CONFIG_TECHNICAL_NAME)%"
 
     api_entrepot_url: "%env(resolve:API_ENTREPOT_URL)%"
     annexes_url: "%env(resolve:ANNEXES_URL)%"
