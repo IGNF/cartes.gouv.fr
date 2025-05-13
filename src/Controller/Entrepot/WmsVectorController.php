@@ -18,6 +18,7 @@ use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\StaticApiService;
 use App\Services\EntrepotApi\StoredDataApiService;
 use App\Services\SandboxService;
+use OpenApi\Attributes as OA;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -32,6 +33,7 @@ use Symfony\Component\Uid\Uuid;
     options: ['expose' => true],
     condition: 'request.isXmlHttpRequest()'
 )]
+#[OA\Tag(name: '[cartes.gouv.fr] WMS-VECTOR', description: 'Création/modification des services WMS-VECTOR')]
 class WmsVectorController extends ServiceController implements ApiControllerInterface
 {
     public function __construct(

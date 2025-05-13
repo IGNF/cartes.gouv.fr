@@ -81,7 +81,11 @@ class CswMetadataHelper
     public function fromXml(string $metadataXml): CswMetadata
     {
         $doc = new \DOMDocument();
-        $loaded = $doc->loadXML($metadataXml);
+        try {
+            $loaded = $doc->loadXML($metadataXml);
+        } catch (\Throwable $th) {
+            throw new AppException('Load XML failed');
+        }
 
         $xpath = new \DOMXPath($doc);
 

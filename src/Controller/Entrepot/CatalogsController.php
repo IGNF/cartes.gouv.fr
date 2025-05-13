@@ -17,7 +17,7 @@ use Symfony\Component\Routing\Attribute\Route;
     options: ['expose' => true],
     condition: 'request.isXmlHttpRequest()'
 )]
-#[OA\Tag(name: 'Catalogs')]
+#[OA\Tag(name: '[entrepot] catalogs')]
 class CatalogsController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(

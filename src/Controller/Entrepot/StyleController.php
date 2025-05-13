@@ -13,6 +13,7 @@ use App\Services\EntrepotApi\CartesMetadataApiService;
 use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -26,6 +27,7 @@ use Symfony\Component\Uid\Uuid;
     options: ['expose' => true],
     condition: 'request.isXmlHttpRequest()'
 )]
+#[OA\Tag(name: '[cartes.gouv.fr] styles', description: 'Stockage des fichiers de styles en tant qu\'annexes')]
 class StyleController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
@@ -37,9 +39,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
     ) {
     }
 
-    #[Route('/{offeringId}/add', name: 'add', methods: ['POST'],
-        options: ['expose' => true],
-        condition: 'request.isXmlHttpRequest()')
+    #[Route('/{offeringId}/add', name: 'add', methods: ['POST'])
     ]
     public function add(string $datastoreId, string $offeringId, Request $request): JsonResponse
     {
@@ -90,9 +90,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
         }
     }
 
-    #[Route('/{offeringId}/remove', name: 'remove', methods: ['POST'],
-        options: ['expose' => true],
-        condition: 'request.isXmlHttpRequest()')
+    #[Route('/{offeringId}/remove', name: 'remove', methods: ['POST'])
     ]
     public function remove(string $datastoreId, string $offeringId, Request $request): JsonResponse
     {
@@ -154,9 +152,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
         }
     }
 
-    #[Route('/{offeringId}/setcurrent', name: 'setcurrent', methods: ['POST'],
-        options: ['expose' => true],
-        condition: 'request.isXmlHttpRequest()')
+    #[Route('/{offeringId}/setcurrent', name: 'setcurrent', methods: ['POST'])
     ]
     public function setCurrentStyle(string $datastoreId, string $offeringId, Request $request): JsonResponse
     {

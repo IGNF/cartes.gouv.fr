@@ -3,8 +3,23 @@ when@dev:
         documentation:
             info:
                 title: API interne de cartes.gouv.fr
-                # description:
+                description: >
+                    Documentation des routes internes du site cartes.gouv.fr qui s'appuie sur l'API Entrepôt et l'API Collaborative.
+
+
+                    Pour tester les routes à travers le swagger, vous devez être connecté sur le site. Ensuite, en cliquant sur le bouton "Authorize", vous devez renseigner le champ `X-Requested-With` avec la valeur exacte `XMLHttpRequest` pour que l'API interne accepte la requête.
                 # version: 1.0.0
+
+            components:
+                securitySchemes:
+                    XMLHttpRequest:
+                        type: apiKey
+                        in: header
+                        name: X-Requested-With
+                        description: >
+                            Saisir la valeur exacte : `XMLHttpRequest`
+            security:
+                - XMLHttpRequest:
 
         areas: # to filter documented areas
             path_patterns:
