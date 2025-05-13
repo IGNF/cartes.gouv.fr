@@ -10,7 +10,6 @@
         "cweagans/composer-patches": "^1.7",
         "friendsofsymfony/jsrouting-bundle": "^3.2",
         "knpuniversity/oauth2-client-bundle": "^2.14",
-        "nelmio/api-doc-bundle": "^5.0",
         "pentatrion/vite-bundle": "^8.0",
         "phpdocumentor/reflection-docblock": "^5.3",
         "phpdocumentor/type-resolver": "^1.10",
@@ -49,6 +48,7 @@
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.18",
+        "nelmio/api-doc-bundle": "^5.0",
         "phpmd/phpmd": "^2.13",
         "phpstan/phpstan": "^2.0",
         "symfony/browser-kit": "6.4.*",
@@ -57,7 +57,8 @@
         "symfony/maker-bundle": "^1.0",
         "symfony/stopwatch": "6.4.*",
         "symfony/web-profiler-bundle": "6.4.*",
-        "vincentlanglet/twig-cs-fixer": "^3.0"
+        "vincentlanglet/twig-cs-fixer": "^3.0",
+        "zircote/swagger-php": "^5.1"
     },
     "config": {
         "allow-plugins": {

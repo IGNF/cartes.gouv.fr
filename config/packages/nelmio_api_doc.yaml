@@ -1,23 +1,11 @@
-nelmio_api_doc:
-    documentation:
-        info:
-            title: API interne de cartes.gouv.fr
-            # description:
-            # version: 1.0.0
-        # components:
-        #     securitySchemes:
-        #         ApiKeyAuth:
-        #             type: apiKey
-        #             name: X-Requested-With
-        #             in: header
-        #             value: "XMLHttpRequest"
-        #         Bearer:
-        #             type: http
-        #             scheme: bearer
-        #             bearerFormat: JWT
-        # # security:
-        # #     - Bearer: []
+when@dev:
+    nelmio_api_doc:
+        documentation:
+            info:
+                title: API interne de cartes.gouv.fr
+                # description:
+                # version: 1.0.0
 
-    areas: # to filter documented areas
-        path_patterns:
-            - ^/api(?!/doc$) # Accepts routes under /api except /api/doc
+        areas: # to filter documented areas
+            path_patterns:
+                - ^/api(?!/doc$) # Accepts routes under /api except /api/doc
