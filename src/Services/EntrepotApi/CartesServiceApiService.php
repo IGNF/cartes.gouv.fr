@@ -3,6 +3,7 @@
 namespace App\Services\EntrepotApi;
 
 use App\Constants\EntrepotApi\CommonTags;
+use App\Constants\EntrepotApi\ConfigurationMetadataTypes;
 use App\Constants\EntrepotApi\ConfigurationStatuses;
 use App\Constants\EntrepotApi\OfferingTypes;
 use App\Constants\EntrepotApi\PermissionTypes;
@@ -11,6 +12,8 @@ use App\Constants\EntrepotApi\StoredDataTypes;
 use App\Dto\Services\CommonDTO;
 use App\Exception\CartesApiException;
 use App\Services\CapabilitiesService;
+use App\Services\CswTopicCategories;
+use App\Services\GeonetworkApiService;
 use App\Services\SandboxService;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -34,6 +37,8 @@ class CartesServiceApiService
         private CartesMetadataApiService $cartesMetadataApiService,
         private SandboxService $sandboxService,
         private CartesStylesApiService $cartesStylesApiService,
+        private CswTopicCategories $cswTopicCategories,
+        private GeonetworkApiService $geonetworkApiService,
         HttpClientInterface $httpClient,
     ) {
         $this->httpClient = $httpClient->withOptions([
@@ -279,13 +284,22 @@ class CartesServiceApiService
         $datasheetName = null;
         $endpoint = $this->getEndpointByShareType($datastoreId, $type, $dto->share_with);
 
+        // Mise à jour des métadonnées de la configuration
+        $configRequestBody['metadata'] = $this->getNewConfigMetadata($dto->identifier, $configRequestBody['metadata'] ?? []);
+
         if ($oldOffering) {
             // Modification d'un service existant
             $oldConfiguration = $oldOffering['configuration'];
             $datasheetName = $oldConfiguration['tags'][CommonTags::DATASHEET_NAME];
 
+            $configTags = [
+                CommonTags::DATASHEET_NAME => $datasheetName,
+                CommonTags::CONFIG_THEME => implode(',', $this->cswTopicCategories->toFrench($dto->category)),
+            ];
+
             // Mise à jour de la configuration
             $configuration = $this->configurationApiService->replace($datastoreId, $oldConfiguration['_id'], $configRequestBody);
+            $configuration = $this->configurationApiService->addTags($datastoreId, $configuration['_id'], $configTags);
 
             // On recrée l'offering si changement d'endpoint, sinon demande la synchronisation
             if ($oldOffering['open'] !== $endpoint['open']) {
@@ -300,16 +314,18 @@ class CartesServiceApiService
             $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId);
             $datasheetName = $storedData['tags'][CommonTags::DATASHEET_NAME];
 
+            $configTags = [
+                CommonTags::DATASHEET_NAME => $datasheetName,
+                CommonTags::CONFIG_THEME => implode(',', $this->cswTopicCategories->toFrench($dto->category)),
+            ];
+
             // Ajout de la configuration
             $configuration = $this->configurationApiService->add($datastoreId, $configRequestBody);
-            $configuration = $this->configurationApiService->addTags($datastoreId, $configuration['_id'], [
-                CommonTags::DATASHEET_NAME => $datasheetName,
-            ]);
+            $configuration = $this->configurationApiService->addTags($datastoreId, $configuration['_id'], $configTags);
 
             // Création d'une offering
             try {
                 $offering = $this->configurationApiService->addOffering($datastoreId, $configuration['_id'], $endpoint['_id'], $endpoint['open']);
-                $offering['configuration'] = $configuration;
             } catch (\Throwable $th) {
                 // si la création de l'offering plante, on défait la création de la config
                 $this->configurationApiService->remove($datastoreId, $configuration['_id']);
@@ -336,6 +352,36 @@ class CartesServiceApiService
         $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $formData);
 
         return $offering;
+    }
+
+    /**
+     * @param array<mixed> $configMetadata
+     */
+    public function getNewConfigMetadata(string $fileIdentifier, array $configMetadata = []): array
+    {
+        $geonetworkBaseUrl = $this->geonetworkApiService->getBaseUrl();
+        $catalogueBaseUrl = (string) $this->params->get('catalogue_url');
+
+        // supprimer les anciennes métadonnées si elles existent déjà
+        $configMetadata = array_filter($configMetadata, function ($md) use ($geonetworkBaseUrl, $catalogueBaseUrl) {
+            return !(
+                ('application/xml' === $md['format'] && ConfigurationMetadataTypes::ISO19115_2003 === $md['type'] && str_starts_with($md['url'], $geonetworkBaseUrl))
+                || ('text/html' === $md['format'] && ConfigurationMetadataTypes::OTHER === $md['type'] && str_starts_with($md['url'], $catalogueBaseUrl))
+            );
+        });
+
+        $configMetadata[] = [
+            'format' => 'application/xml',
+            'url' => $geonetworkBaseUrl.$this->geonetworkApiService->getUrl($fileIdentifier),
+            'type' => ConfigurationMetadataTypes::ISO19115_2003,
+        ];
+        $configMetadata[] = [
+            'format' => 'text/html',
+            'url' => implode('/', [$catalogueBaseUrl, 'dataset', $fileIdentifier]),
+            'type' => ConfigurationMetadataTypes::OTHER,
+        ];
+
+        return $configMetadata;
     }
 
     /**
