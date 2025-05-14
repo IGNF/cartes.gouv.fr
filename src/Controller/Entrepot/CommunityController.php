@@ -8,6 +8,7 @@ use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\EntrepotApi\CommunityApiService;
 use App\Services\EntrepotApi\UserApiService;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,8 +16,11 @@ use Symfony\Component\Routing\Attribute\Route;
 
 #[Route(
     '/api/community/{communityId}',
-    name: 'cartesgouvfr_api_community_'
+    name: 'cartesgouvfr_api_community_',
+    options: ['expose' => true],
+    condition: 'request.isXmlHttpRequest()'
 )]
+#[OA\Tag(name: '[entrepot] community')]
 class CommunityController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
@@ -25,9 +29,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
     ) {
     }
 
-    #[Route('/get', name: 'get', methods: ['GET'],
-        options: ['expose' => true],
-        condition: 'request.isXmlHttpRequest()')
+    #[Route('/get', name: 'get', methods: ['GET'])
     ]
     public function get(string $communityId): JsonResponse
     {
@@ -40,9 +42,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
         }
     }
 
-    #[Route('/members', name: 'members', methods: ['GET'],
-        options: ['expose' => true],
-        condition: 'request.isXmlHttpRequest()')
+    #[Route('/members', name: 'members', methods: ['GET'])
     ]
     public function getMembers(string $communityId): JsonResponse
     {
@@ -55,9 +55,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
         }
     }
 
-    #[Route('/update_member', name: 'add_member', methods: ['PUT'],
-        options: ['expose' => true],
-        condition: 'request.isXmlHttpRequest()')
+    #[Route('/update_member', name: 'add_member', methods: ['PUT'])
     ]
     public function updateMember(string $communityId, Request $request): JsonResponse
     {
@@ -105,9 +103,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
         }
     }
 
-    #[Route('/remove_member', name: 'remove_member', methods: ['DELETE'],
-        options: ['expose' => true],
-        condition: 'request.isXmlHttpRequest()')
+    #[Route('/remove_member', name: 'remove_member', methods: ['DELETE'])
     ]
     public function removeMember(string $communityId, Request $request): JsonResponse
     {
