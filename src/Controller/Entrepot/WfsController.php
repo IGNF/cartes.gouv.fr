@@ -3,7 +3,6 @@
 namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\ConfigurationTypes;
-use App\Constants\EntrepotApi\Sandbox;
 use App\Controller\ApiControllerInterface;
 use App\Dto\Services\Wfs\WfsServiceDTO;
 use App\Dto\Services\Wfs\WfsTableDTO;
@@ -48,7 +47,8 @@ class WfsController extends ServiceController implements ApiControllerInterface
     ): JsonResponse {
         try {
             // création de requête pour la config
-            $configRequestBody = $this->getConfigRequestBody($dto, $storedDataId, false, $datastoreId);
+            $typeInfos = $this->getConfigTypeInfos($dto, $storedDataId);
+            $configRequestBody = $this->getConfigRequestBody($datastoreId, ConfigurationTypes::WFS, $dto, $typeInfos);
 
             $offering = $this->cartesServiceApiService->saveService($datastoreId, $storedDataId, $dto, ConfigurationTypes::WFS, $configRequestBody);
 
@@ -75,7 +75,8 @@ class WfsController extends ServiceController implements ApiControllerInterface
             $oldOffering['configuration'] = $oldConfiguration;
 
             // création de requête pour la config
-            $configRequestBody = $this->getConfigRequestBody($dto, $storedDataId, true);
+            $typeInfos = $this->getConfigTypeInfos($dto, $storedDataId);
+            $configRequestBody = $this->getConfigRequestBody($datastoreId, ConfigurationTypes::WFS, $dto, $typeInfos, $oldConfiguration);
 
             $offering = $this->cartesServiceApiService->saveService($datastoreId, $storedDataId, $dto, ConfigurationTypes::WFS, $configRequestBody, $oldOffering);
 
@@ -85,7 +86,7 @@ class WfsController extends ServiceController implements ApiControllerInterface
         }
     }
 
-    private function getConfigRequestBody(WfsServiceDTO $dto, string $storedDataId, bool $editMode = false, ?string $datastoreId = null): array
+    private function getConfigTypeInfos(WfsServiceDTO $dto, string $storedDataId): array
     {
         $relations = [];
 
@@ -106,33 +107,11 @@ class WfsController extends ServiceController implements ApiControllerInterface
             $relations[] = $relation;
         }
 
-        $body = [
-            'type' => ConfigurationTypes::WFS,
-            'name' => $dto->service_name,
-            'type_infos' => [
-                'used_data' => [[
-                    'relations' => $relations,
-                    'stored_data' => $storedDataId,
-                ]],
-            ],
+        return [
+            'used_data' => [[
+                'relations' => $relations,
+                'stored_data' => $storedDataId,
+            ]],
         ];
-
-        if (false === $editMode) {
-            $body['layer_name'] = $dto->technical_name;
-
-            // rajoute le préfixe "sandbox." si c'est la communauté bac à sable
-            if ($this->sandboxService->isSandboxDatastore($datastoreId)) {
-                $body['layer_name'] = Sandbox::LAYERNAME_PREFIX.$body['layer_name'];
-            }
-        }
-
-        if ('' !== $dto->attribution_text && '' !== $dto->attribution_url) {
-            $body['attribution'] = [
-                'title' => $dto->attribution_text,
-                'url' => $dto->attribution_url,
-            ];
-        }
-
-        return $body;
     }
 }

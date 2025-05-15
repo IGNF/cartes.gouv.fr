@@ -14,17 +14,18 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
 class GeonetworkApiService
 {
     private HttpClientInterface $geonetworkClient;
+    private string $baseUrl;
 
     public function __construct(
         ParameterBagInterface $parameterBag,
         HttpClientInterface $httpClient,
     ) {
         $parsedUrl = parse_url($parameterBag->get('api_entrepot_url'));
-        $baseUrl = sprintf('%s://%s', $parsedUrl['scheme'], $parsedUrl['host']);
+        $this->baseUrl = sprintf('%s://%s', $parsedUrl['scheme'], $parsedUrl['host']);
 
         $this->geonetworkClient = $httpClient->withOptions(
             (new HttpOptions())
-                ->setBaseUri($baseUrl)
+                ->setBaseUri($this->baseUrl)
                 ->setProxy($parameterBag->get('http_proxy'))
                 ->verifyHost(false)
                 ->verifyPeer(false)
@@ -32,7 +33,12 @@ class GeonetworkApiService
         );
     }
 
-    public function getMetadataXml(string $fileIdentifier): string
+    public function getBaseUrl(): string
+    {
+        return $this->baseUrl;
+    }
+
+    public function getUrl(string $fileIdentifier): string
     {
         $query = [
             'REQUEST' => 'GetRecordById',
@@ -49,7 +55,16 @@ class GeonetworkApiService
             $url = '/sandbox/csw';
         }
 
-        $response = $this->geonetworkClient->request('GET', $url, ['query' => $query]);
+        $url .= '?'.http_build_query($query);
+
+        return $url;
+    }
+
+    public function getMetadataXml(string $fileIdentifier): string
+    {
+        $url = $this->getUrl($fileIdentifier);
+
+        $response = $this->geonetworkClient->request('GET', $url);
 
         return $this->handleResponse($response);
     }
