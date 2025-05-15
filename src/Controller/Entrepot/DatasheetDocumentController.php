@@ -8,6 +8,7 @@ use App\Exception\CartesApiException;
 use App\Services\EntrepotApi\AnnexeApiService;
 use App\Services\EntrepotApi\CartesMetadataApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
@@ -24,6 +25,7 @@ use Symfony\Component\Uid\Uuid;
     options: ['expose' => true],
     condition: 'request.isXmlHttpRequest()'
 )]
+#[OA\Tag(name: '[cartes.gouv.fr] datasheet-document', description: 'Des documents liés à une fiche de données sur cartes.gouv.fr')]
 class DatasheetDocumentController extends AbstractController implements ApiControllerInterface
 {
     private string $varDataPath;
