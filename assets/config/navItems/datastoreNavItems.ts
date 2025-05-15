@@ -54,6 +54,11 @@ export const datastoreNavItems = (currentDatastore?: Datastore): MainNavigationP
         });
     }
 
+    navItems.push({
+        text: t("espaceco"),
+        linkProps: routes.espaceco_community_list().link,
+    });
+
     navItems.push(assistanceNavItems(tNavItems));
 
     return navItems;

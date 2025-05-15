@@ -58,8 +58,35 @@ export type ComponentKey =
     | import("../entrepot/pages/service/common/TableSelection/TableSelection.locale").I18n
     | import("../entrepot/pages/service/common/AccessRestrictions/AccessRestrictions.locale").I18n
     | import("../entrepot/pages/service/wms-vector/UploadStyleFile.locale").I18n
+    | import("../pages/LoginDisabled/LoginDisabled.locale").I18n
+    | import("../espaceco/pages/communities/CommunityList.locale").I18n
+    | import("../espaceco/pages/communities/SearchCommunity.locale").I18n
+    | import("../espaceco/pages/communities/CreateCommunityDialog.locale").I18n
+    | import("../espaceco/pages/communities/CreateCommunity.locale").I18n
+    | import("../espaceco/pages/communities/ManageCommunity.locale").I18n
+    | import("../espaceco/pages/communities/ReuseCommunityConfig.locale").I18n
+    | import("../espaceco/pages/communities/management/ManageCommunityValidations.locale").I18n
+    | import("../espaceco/pages/communities/management/Search.locale").I18n
+    | import("../espaceco/pages/communities/management/tools/Functionalities.locale").I18n
+    | import("../espaceco/pages/communities/management/tools/Layers.locale").I18n
+    | import("../espaceco/pages/communities/management/Reports.locale").I18n
+    | import("../espaceco/pages/communities/management/reports/Theme.locale").I18n
+    | import("../espaceco/pages/communities/management/reports/ReportStatuses.locale").I18n
+    | import("../espaceco/pages/communities/management/reports/SharedThemes.locale").I18n
+    | import("../espaceco/pages/communities/management/reports/EmailPlanners").I18n
+    | import("../espaceco/pages/communities/management/reports/emailplanners/AddOrEditEmailPlanner.locale").I18n
+    | import("../espaceco/pages/communities/management/reports/emailplanners/EmailPlannerKeywords.locale").I18n
+    | import("../espaceco/pages/communities/management/Members.locale").I18n
+    | import("../espaceco/pages/communities/management/member/AddMembersDialog.locale").I18n
+    | import("../espaceco/pages/communities/management/member/ManageGridsDialog.locale").I18n
+    | import("../espaceco/pages/communities/management/reports/AutofillKeywords.locale").I18n
+    | import("../espaceco/pages/communities/management/reports/AutofillDialog.locale").I18n
+    | import("../espaceco/pages/communities/management/databases/Databases.locale").I18n
+    | import("../espaceco/pages/communities/MemberInvitation.locale").I18n
+    | import("../components/Input/InputCollection").I18n
     | import("../entrepot/pages/config/Alerts.locale").I18n
-    | import("../espaceco/pages/communities/EspaceCoCommunities.locale").I18n
-    | import("../pages/LoginDisabled/LoginDisabled.locale").I18n;
+    | import("../espaceco/pages/communities/CommunityList.locale").I18n
+    | import("../pages/LoginDisabled/LoginDisabled.locale").I18n
+    | import("../components/Input/KeyValueList.locale").I18n;
 
 export type Translations<L extends Language> = GenericTranslations<ComponentKey, Language, typeof fallbackLanguage, L>;

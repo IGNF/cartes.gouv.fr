@@ -275,9 +275,30 @@ const espacecoRoutes = {
     espaceco_community_list: defineRoute(
         {
             page: param.query.optional.number.default(1),
-            filter: param.query.optional.string.default("public"),
+            filter: param.query.optional.string.default("listed"),
         },
-        () => `${appRoot}/espaceco/community`
+        () => `${appRoot}/espace-collaboratif`
+    ),
+
+    espaceco_create_community: defineRoute(
+        {
+            communityId: param.path.number,
+        },
+        (p) => `${appRoot}/espace-collaboratif/${p.communityId}/creer-un-guichet`
+    ),
+
+    espaceco_manage_community: defineRoute(
+        {
+            communityId: param.path.number,
+        },
+        (p) => `${appRoot}/espace-collaboratif/${p.communityId}/gerer-le-guichet`
+    ),
+
+    espaceco_member_invitation: defineRoute(
+        {
+            communityId: param.path.number,
+        },
+        (p) => `${appRoot}/espace-collaboratif/${p.communityId}/invitation`
     ),
 };
 

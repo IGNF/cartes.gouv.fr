@@ -55,8 +55,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
         }
     }
 
-    #[Route('/update_member', name: 'add_member', methods: ['PUT'])
-    ]
+    #[Route('/update_member', name: 'update_member', methods: ['PUT'])]
     public function updateMember(string $communityId, Request $request): JsonResponse
     {
         try {
