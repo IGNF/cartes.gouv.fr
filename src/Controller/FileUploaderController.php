@@ -185,10 +185,11 @@ class FileUploaderController extends AbstractController
             throw new \Exception('Ce fichier contient des données dans des systèmes de projection différents', Response::HTTP_BAD_REQUEST);
         }
 
+        // NOTE : le format csv n'est plus supporté comme format d'upload
         // Si c'est un fichier csv, on le zippe
-        if ('csv' == $extension) {
-            $this->zip($file);
-        }
+        // if ('csv' == $extension) {
+        //     $this->zip($file);
+        // }
 
         return new JsonResponse([
             'srid' => (1 == count($unicity)) ? $unicity[0] : '',
@@ -302,29 +303,29 @@ class FileUploaderController extends AbstractController
         }
     }
 
-    private function zip(\SplFileInfo $file): void
-    {
-        $fs = new Filesystem();
+    // private function zip(\SplFileInfo $file): void
+    // {
+    //     $fs = new Filesystem();
 
-        // Creation de l'archive
-        $folder = $file->getPath();
+    //     // Creation de l'archive
+    //     $folder = $file->getPath();
 
-        $extension = $file->getExtension();
-        $filename = $file->getBasename(".$extension");
-        $zipFile = join(DIRECTORY_SEPARATOR, [$folder, "$filename.zip"]);
+    //     $extension = $file->getExtension();
+    //     $filename = $file->getBasename(".$extension");
+    //     $zipFile = join(DIRECTORY_SEPARATOR, [$folder, "$filename.zip"]);
 
-        $zip = new \ZipArchive();
-        $res = $zip->open($zipFile, \ZipArchive::CREATE);
-        if (true === $res) {
-            $zip->addFile($file->getRealPath(), $filename);
-            $zip->close();
-        }
+    //     $zip = new \ZipArchive();
+    //     $res = $zip->open($zipFile, \ZipArchive::CREATE);
+    //     if (true === $res) {
+    //         $zip->addFile($file->getRealPath(), $filename);
+    //         $zip->close();
+    //     }
 
-        $fs->remove($filename);
-        if (false == $res) {
-            throw new \Exception("La création de l'archive a échoué.", Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-    }
+    //     $fs->remove($filename);
+    //     if (false == $res) {
+    //         throw new \Exception("La création de l'archive a échoué.", Response::HTTP_INTERNAL_SERVER_ERROR);
+    //     }
+    // }
 
     /**
      * Recuperation des srids a partir des fichiers.
