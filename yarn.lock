@@ -3078,9 +3078,9 @@ geostyler-mapbox-parser@^6.0.0:
     geostyler-style "^10.0.0"
 
 geostyler-openlayers-parser@^5.0.0:
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/geostyler-openlayers-parser/-/geostyler-openlayers-parser-5.1.0.tgz#794b4907fc841ee19a85d54422ae78a206665c30"
-  integrity sha512-ulOK8klptZyUQAoefX81jlAm5PHv3N86WNyvBU1rWwuzubU64SWyhyhUBTGqdQZFxub/q2O4aSqXYf4I2KXQgA==
+  version "5.1.1"
+  resolved "https://registry.yarnpkg.com/geostyler-openlayers-parser/-/geostyler-openlayers-parser-5.1.1.tgz#da3a10ccdaf5b87c00fcbe88713792658c9eef0e"
+  integrity sha512-obhJanQwyr8ciZg5kmqed7vunLiGofHn6+rve7pw70XZuQemJ5xr/5c5P5DwaYAyUT+vJquz1grvmDkGzB4oqg==
   dependencies:
     css-font-parser "^2.0.0"
     geostyler-style "^10.0.0"
