@@ -17,6 +17,7 @@ import Description from "./management/Description";
 import Reports from "./management/Reports";
 import Tools from "./management/Tools";
 import ZoomAndCentering from "./management/ZoomAndCentering";
+import Layers from "./management/Layers";
 
 const CreateCommunity: FC = () => {
     const { data: me, isLoading: isMeLoading, isError: isMeError, error: meError } = useUserMe();
@@ -111,6 +112,8 @@ const CreateCommunity: FC = () => {
                                     <Description isAdmin={isAdmin} />
                                 ) : currentStep === COMMUNITY_FORM_STEPS.DATABASE ? (
                                     <Databases />
+                                ) : currentStep === COMMUNITY_FORM_STEPS.LAYERS ? (
+                                    <Layers />
                                 ) : currentStep === COMMUNITY_FORM_STEPS.ZOOM_AND_CENTERING ? (
                                     <ZoomAndCentering />
                                 ) : currentStep === COMMUNITY_FORM_STEPS.TOOLS ? (

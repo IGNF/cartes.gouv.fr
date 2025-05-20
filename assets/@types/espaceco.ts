@@ -251,6 +251,8 @@ export interface TableDetailedDTO extends TableDTO {
     full_name: string;
     id_name: string;
     geometry_name: string;
+    crs?: string | null; // TODO enlever le ?
+    extent?: number[] | null; // TODO enlever le ?
     min_zoom_level: number;
     max_zoom_level: number;
     tile_zoom_level: number | null;

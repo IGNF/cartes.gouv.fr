@@ -12,9 +12,10 @@
 enum COMMUNITY_FORM_STEPS {
     DESCRIPTION = 1,
     DATABASE = 2,
-    ZOOM_AND_CENTERING = 3,
-    TOOLS = 4,
-    REPORTS = 5,
+    LAYERS = 3,
+    ZOOM_AND_CENTERING = 4,
+    TOOLS = 5,
+    REPORTS = 6,
 }
 
 export { COMMUNITY_FORM_STEPS };

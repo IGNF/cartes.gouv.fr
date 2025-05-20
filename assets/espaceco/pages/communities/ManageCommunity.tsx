@@ -12,8 +12,8 @@ import { useTranslation } from "../../../i18n/i18n";
 import { routes } from "../../../router/router";
 import Databases from "./management/Databases";
 import Description from "./management/Description";
-import Grid from "./management/Grid";
-import Layer from "./management/Layer";
+import Grids from "./management/Grids";
+import Layers from "./management/Layers";
 import Members from "./management/Members";
 import Reports from "./management/Reports";
 import Tools from "./management/Tools";
@@ -103,8 +103,8 @@ const ManageCommunity: FC = () => {
                             tabs={[
                                 { tabId: "tab1", label: t("tab1") }, // Description
                                 { tabId: "tab2", label: t("tab2") }, // Bases de données
-                                { tabId: "tab3", label: t("tab3") }, // Zoom, centrage
-                                { tabId: "tab4", label: t("tab4") }, // Couches de la carte
+                                { tabId: "tab3", label: t("tab3") }, // Couches de la carte
+                                { tabId: "tab4", label: t("tab4") }, // Zoom, centrage
                                 { tabId: "tab5", label: t("tab5") }, // Outils
                                 { tabId: "tab6", label: t("tab6") }, // Signalements
                                 { tabId: "tab7", label: t("tab7") }, // Emprises
@@ -120,15 +120,15 @@ const ManageCommunity: FC = () => {
                                         case "tab2":
                                             return <Databases />;
                                         case "tab3":
-                                            return <ZoomAndCentering />;
+                                            return <Layers />;
                                         case "tab4":
-                                            return <Layer />;
+                                            return <ZoomAndCentering />;
                                         case "tab5":
                                             return <Tools />;
                                         case "tab6":
                                             return <Reports />;
                                         case "tab7":
-                                            return <Grid />;
+                                            return <Grids />;
                                         case "tab8":
                                             return <Members />;
                                         default:

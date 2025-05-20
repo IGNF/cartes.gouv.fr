@@ -13,7 +13,7 @@ type GridForm = {
     grids: string[];
 };
 
-const Grid: FC = () => {
+const Grids: FC = () => {
     const { t: tCommon } = useTranslation("Common");
     const { t: tmc } = useTranslation("ManageCommunity");
 
@@ -67,4 +67,4 @@ const Grid: FC = () => {
     );
 };
 
-export default Grid;
+export default Grids;

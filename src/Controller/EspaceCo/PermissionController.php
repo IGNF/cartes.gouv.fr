@@ -16,7 +16,7 @@ use Symfony\Component\Routing\Attribute\Route;
     '/api/espaceco/permission',
     name: 'cartesgouvfr_api_espaceco_permission_',
     options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()'
+    // condition: 'request.isXmlHttpRequest()'
 )]
 class PermissionController extends AbstractController implements ApiControllerInterface
 {
@@ -32,6 +32,53 @@ class PermissionController extends AbstractController implements ApiControllerIn
         private PermissionApiService $permissionApiService,
         private DatabaseApiService $databaseApiService,
     ) {
+    }
+
+    #[Route('/get_viewable_tables/{communityId}', name: 'get_viewable_tables_by_community', methods: ['GET'])]
+    public function getViewableTables(int $communityId): JsonResponse
+    {
+        try {
+            $tables = [];
+            $tablesToremove = [];
+
+            $permissions = $this->permissionApiService->getAllByCommunity($communityId);
+            foreach ($permissions as $permission) {
+                $tableId = $permission['table'];
+
+                // On doit avoir au moins une permission en lecture et non ADMIN
+                $isOK = 'NONE' !== $permission['level'] && 'ADMIN' !== $permission['level'];
+
+                if (is_null($tableId) && $isOK) {	// Permission sur une base de données
+                    // Ajout de toutes les tables
+                    $allTables = $this->databaseApiService->getAllTables($permission['database']);
+                    foreach ($allTables as $table) {
+                        $tables[$table['full_name']] = $table;
+                    }
+                    continue;
+                }
+
+                if ($tableId) {
+                    $table = $this->databaseApiService->getTable($permission['database'], $tableId);
+                    if ($isOK) {
+                        if (!array_key_exists($table['full_name'], $tables)) {
+                            $tables[$table['full_name']] = $table;
+                        }
+                    } elseif ('NONE' == $permission['level']) {
+                        $tablesToremove[] = $table['full_name'];
+                    }
+                }
+            }
+
+            $tables = array_filter($tables, function ($fullName) use ($tablesToremove) {
+                return !in_array($fullName, $tablesToremove);
+            }, ARRAY_FILTER_USE_KEY);
+
+            ksort($tables);
+
+            return new JsonResponse($tables);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
     }
 
     /**
@@ -58,7 +105,8 @@ class PermissionController extends AbstractController implements ApiControllerIn
                         $tables[] = $table['full_name'];
                     }
                 } elseif (!is_null($tableId) && !$isOK) { // Permission sur une table non désirée
-                    $fullName = $this->databaseApiService->getTableFullName($permission['database'], $tableId);
+                    $table = $this->databaseApiService->getTable($permission['database'], $tableId, ['full_name']);
+                    $fullName = $table['full_name'];
                     if (!in_array($fullName, $tablesToremove)) {
                         $tablesToremove[] = $fullName;
                     }

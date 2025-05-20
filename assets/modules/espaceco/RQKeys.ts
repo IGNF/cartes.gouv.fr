@@ -40,6 +40,7 @@ const RQKeys = {
     table: (databaseId: number, tableId: number) => ["databases", databaseId.toString(), tableId.toString()],
     searchDatabases: (field: string, search: string, fields: string[]): string[] => ["searchDatabases", field, search, fields.join(",")],
     permissions: (communityId: number) => ["permissions", communityId.toString()],
+    viewableTables: (communityId: number) => ["permissions", "viewableTables", communityId.toString()],
     permissionsOnDB: (communityId: number, databaseIds: number[]) => ["permissions", communityId.toString(), databaseIds.map((id) => id.toString()).join(",")],
     tables: (communityId: number): string[] => ["feature_types", communityId.toString()],
     emailPlanners: (communityId: number): string[] => ["emailplanners", communityId.toString()],

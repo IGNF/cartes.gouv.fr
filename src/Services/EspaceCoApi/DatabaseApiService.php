@@ -57,9 +57,17 @@ class DatabaseApiService extends BaseEspaceCoApiService
         return $this->request('GET', "databases/$databaseId/tables/$tableId/columns/$columnId", [], $query);
     }
 
-    public function getTableFullName(int $databaseId, int $tableId): string
+    /**
+     * @param array<string> $fields
+     */
+    public function getColumnByName(int $databaseId, int $tableId, string $column, ?array $fields = []): array
     {
-        return $this->request('GET', "databases/$databaseId/tables/$tableId", [], ['fields' => 'full_name']);
+        $query = ['name' => $column];
+        if (!empty($fields)) {
+            $query['fields'] = $fields;
+        }
+
+        return $this->request('GET', "databases/$databaseId/tables/$tableId/columns", [], $query);
     }
 
     /**
