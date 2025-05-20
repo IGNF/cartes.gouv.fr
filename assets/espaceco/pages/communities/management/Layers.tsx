@@ -7,7 +7,7 @@ import { useTranslation } from "../../../../i18n/i18n";
 
 const baseMaps = ["GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2", "GEOGRAPHICALGRIDSYSTEMS.MAPS.BDUNI.J1", "ORTHOIMAGERY.ORTHOPHOTOS", "CADASTRALPARCELS.PARCELS"];
 
-const Layer: FC = () => {
+const Layers: FC = () => {
     const { t } = useTranslation("ManageCommunity");
     const { data: capabilities } = useCapabilities();
 
@@ -68,4 +68,4 @@ const Layer: FC = () => {
     );
 };
 
-export default Layer;
+export default Layers;
