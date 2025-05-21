@@ -1,14 +1,16 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import MuiDsfrThemeProvider from "@codegouvfr/react-dsfr/mui";
 import { Autocomplete, AutocompleteFreeSoloValueMapping, AutocompleteValue, CreateFilterOptionsConfig, TextField, createFilterOptions } from "@mui/material";
-import { CSSProperties, useId } from "react";
+import { CSSProperties, ReactNode, useId } from "react";
 import { ControllerRenderProps } from "react-hook-form";
 import { symToStr } from "tsafe/symToStr";
+
+import "../../../assets/sass/components/autocomplete.scss";
 
 interface AutocompleteSelectProps<T> {
     id?: string;
     label: string;
-    hintText: string;
+    hintText?: ReactNode;
     state?: "default" | "error" | "success";
     stateRelatedMessage?: string;
     defaultValue?: T[];
@@ -76,7 +78,6 @@ const AutocompleteSelect = <T,>(props: AutocompleteSelectProps<T>) => {
                     {label}
                     {hintText && <span className="fr-hint-text">{hintText}</span>}
                 </label>
-
                 <Autocomplete
                     {...controllerField}
                     id={inputId}
@@ -91,7 +92,7 @@ const AutocompleteSelect = <T,>(props: AutocompleteSelectProps<T>) => {
                     onChange={onChange}
                     filterOptions={createFilterOptions(searchFilter)}
                     options={options}
-                    renderInput={(params) => <TextField {...params} />}
+                    renderInput={(params) => <TextField {...params} variant={"filled"} size={"small"} />}
                     getOptionLabel={getOptionLabel}
                     isOptionEqualToValue={isOptionEqualToValue}
                     disabled={disabled}

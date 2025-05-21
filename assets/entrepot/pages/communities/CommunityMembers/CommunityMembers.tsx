@@ -13,22 +13,22 @@ import Wait from "../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
-import { routes } from "../../../../router/router";
+import { routes, useRoute } from "../../../../router/router";
 import { useAuthStore } from "../../../../stores/AuthStore";
 import api from "../../../api";
 import { AddMember, addMemberModal } from "../AddMember/AddMember";
 import { complete, getTranslatedRightTypes, UserRights } from "../UserRights";
 
-import "../../../../sass/pages/community_members.scss";
-import { useCommunity } from "../../../../contexts/community";
-import Main from "../../../../components/Layout/Main";
-import { useDatastore } from "../../../../contexts/datastore";
-import Pagination from "@codegouvfr/react-dsfr/Pagination";
-import { usePagination } from "@/hooks/usePagination";
-import SearchBar from "@codegouvfr/react-dsfr/SearchBar";
-import PageTitle from "@/components/Layout/PageTitle";
-import { useSearch } from "@/hooks/useSearch";
 import { ListHeader } from "@/components/Layout/ListHeader";
+import PageTitle from "@/components/Layout/PageTitle";
+import { usePagination } from "@/hooks/usePagination";
+import { useSearch } from "@/hooks/useSearch";
+import Pagination from "@codegouvfr/react-dsfr/Pagination";
+import SearchBar from "@codegouvfr/react-dsfr/SearchBar";
+import Main from "../../../../components/Layout/Main";
+import { useCommunity } from "../../../../contexts/community";
+import { useDatastore } from "../../../../contexts/datastore";
+import "../../../../sass/pages/community_members.scss";
 
 type CommunityMembersProps = {
     userId?: string;
@@ -109,8 +109,12 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
         return members;
     }, [communityMembers, communitySupervisor, user?.id]);
 
+    const { params } = useRoute();
+    const page = params["page"] ? parseInt(params["page"]) : 1;
+    const limit = params["limit"] ? parseInt(params["limit"]) : 20;
+
     const { search, searchedItems } = useSearch(members);
-    const { limit, page, paginatedItems, totalPages } = usePagination(searchedItems);
+    const { paginatedItems, totalPages } = usePagination(searchedItems, page, limit);
 
     useEffect(() => {
         if (userId && !isLoading && !communityMemberIds.includes(userId)) {

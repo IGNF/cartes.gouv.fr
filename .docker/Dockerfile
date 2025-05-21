@@ -82,6 +82,17 @@ RUN apt-get -qq update \
     php${php_version}-intl \
     php${php_version}-xsl \
     php${php_version}-sqlite3 \
+    ### APCu
+    php${php_version}-dev \
+    php-pear \
+    gcc make \
+    && pecl install apcu \
+    && echo "extension=apcu.so" > /etc/php/${php_version}/mods-available/apcu.ini \
+    && ln -s /etc/php/${php_version}/mods-available/apcu.ini /etc/php/${php_version}/apache2/conf.d/20-apcu.ini \
+    && ln -s /etc/php/${php_version}/mods-available/apcu.ini /etc/php/${php_version}/cli/conf.d/20-apcu.ini \
+    && apt-get -qq purge -y php-pear php${php_version}-dev gcc make \
+    ### APCu
+    && apt-get -qq autoremove -y \
     && apt-get -qq clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 #------------------------------------------------------------------------

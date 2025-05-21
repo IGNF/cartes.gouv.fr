@@ -43,7 +43,14 @@ jobs:
                       type=ref,event=branch
                       type=ref,event=pr
                       type=semver,pattern={{version}}
-                  # type=semver,pattern={{major}}.{{minor}}
+
+            - name: Extract tag for trivy scan
+              id: trivy_tag
+              run: |
+                  first_tag=$(echo '${{ steps.meta.outputs.tags }}' | tr ',' '\n' | grep -v ':latest' | head -n1)
+                  echo "tag<<EOF" >> $GITHUB_OUTPUT
+                  echo "${first_tag}" >> $GITHUB_OUTPUT
+                  echo "EOF" >> $GITHUB_OUTPUT
 
             # https://github.com/docker/build-push-action
             - name: Build Docker image
@@ -64,7 +71,7 @@ jobs:
             - name: Run Trivy vulnerability scanner
               uses: aquasecurity/trivy-action@0.30.0
               with:
-                  image-ref: ${{ steps.meta.outputs.tags }}
+                  image-ref: ${{ steps.trivy_tag.outputs.tag }}
                   format: "sarif"
                   output: "trivy-results.sarif"
 
@@ -106,6 +113,7 @@ jobs:
                   tags: |
                       type=ref,event=branch
                       type=ref,event=pr
+                      type=sha
                       type=semver,pattern={{version}}
                       type=semver,pattern={{major}}.{{minor}}
 

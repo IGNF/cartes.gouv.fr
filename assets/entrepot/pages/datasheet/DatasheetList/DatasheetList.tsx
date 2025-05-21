@@ -8,6 +8,12 @@ import SelectNext from "@codegouvfr/react-dsfr/SelectNext";
 import { useQuery } from "@tanstack/react-query";
 import { FC, useMemo } from "react";
 
+import { ListHeader } from "@/components/Layout/ListHeader";
+import PageTitle from "@/components/Layout/PageTitle";
+import { FilterEnum, useFilters } from "@/hooks/useFilters";
+import { usePagination } from "@/hooks/usePagination";
+import { useSearch } from "@/hooks/useSearch";
+import { SortOrderEnum, useSort } from "@/hooks/useSort";
 import { Datasheet, EndpointTypeEnum } from "../../../../@types/app";
 import Main from "../../../../components/Layout/Main";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
@@ -15,16 +21,10 @@ import Skeleton from "../../../../components/Utils/Skeleton";
 import { useDatastore } from "../../../../contexts/datastore";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
-import { routes } from "../../../../router/router";
+import { routes, useRoute } from "../../../../router/router";
 import api from "../../../api";
-import DatasheetListItem from "./DatasheetListItem";
-import { usePagination } from "@/hooks/usePagination";
-import PageTitle from "@/components/Layout/PageTitle";
-import { useSearch } from "@/hooks/useSearch";
-import { FilterEnum, useFilters } from "@/hooks/useFilters";
-import { SortOrderEnum, useSort } from "@/hooks/useSort";
 import { SortByEnum } from "./DatasheetList.types";
-import { ListHeader } from "@/components/Layout/ListHeader";
+import DatasheetListItem from "./DatasheetListItem";
 
 const filterTests = {
     [FilterEnum.ENABLED]: (d: Datasheet) => d.nb_publications > 0,
@@ -56,11 +56,15 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
         metadataEndpoint && metadataEndpoint?.quota && metadataEndpoint?.use && metadataEndpoint?.quota <= metadataEndpoint?.use
     );
 
+    const { params } = useRoute();
+    const page = params["page"] ? parseInt(params["page"]) : 1;
+    const limit = params["limit"] ? parseInt(params["limit"]) : 20;
+
     // filtre et tri
     const { search, searchedItems } = useSearch(data ?? []);
     const { filteredItems, filters } = useFilters(searchedItems, ["published"], filterTests);
     const { sortBy, sortOrder, sortedItems } = useSort(filteredItems, ["name", "nb_publications"]);
-    const { limit, page, paginatedItems, totalPages } = usePagination(sortedItems);
+    const { paginatedItems, totalPages } = usePagination(sortedItems, page, limit);
 
     return (
         <Main title={t("title", { datastoreName: datastore?.name })}>

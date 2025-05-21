@@ -196,7 +196,7 @@ const AddPermissionForm: FC<AddPermissionFormProps> = ({ datastoreId }) => {
                     <Controller
                         control={control}
                         name="beneficiaries"
-                        render={({ field: { onChange } }) =>
+                        render={({ field: { value, onChange } }) =>
                             type === "COMMUNITY" ? (
                                 <CommunityListForm
                                     communities={communities}
@@ -208,6 +208,7 @@ const AddPermissionForm: FC<AddPermissionFormProps> = ({ datastoreId }) => {
                                 <InputCollection
                                     state={errors.beneficiaries ? "error" : "default"}
                                     stateRelatedMessage={errors.beneficiaries?.message?.toString()}
+                                    value={value}
                                     onChange={onChange}
                                 />
                             )

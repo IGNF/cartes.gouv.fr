@@ -79,7 +79,7 @@ npm install --global yarn
 > [!TIP]
 >
 > **Aide mémoire options docker compose**
-> 
+>
 > `docker compose up ...`
 >
 > `-f` permet de spécifier le fichier compose.yml à utiliser (il y a plusieurs fichiers, chaque fichier correspondant à un environnement)

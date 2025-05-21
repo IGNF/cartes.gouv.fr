@@ -6,6 +6,7 @@ use App\Controller\ApiControllerInterface;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\EntrepotApi\UserDocumentsApiService;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -21,6 +22,7 @@ use Symfony\Component\Uid\Uuid;
     options: ['expose' => true],
     condition: 'request.isXmlHttpRequest()'
 )]
+#[OA\Tag(name: '[entrepot] user documents')]
 class UserDocumentsController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(

@@ -1,0 +1,7 @@
+{% extends 'Mailer/base.html.twig' %}
+{% trans_default_domain 'cartesgouvfr' %}
+
+{% block body %}
+    <p>{{ 'mailer.espaceco.member_invitation'|trans({'%name%': community.name, '%link%': link})|raw }}</p>
+    </div>
+{% endblock %}

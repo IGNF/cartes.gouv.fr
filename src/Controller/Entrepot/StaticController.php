@@ -6,6 +6,7 @@ use App\Controller\ApiControllerInterface;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\EntrepotApi\StaticApiService;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,6 +19,7 @@ use Symfony\Component\Routing\Attribute\Route;
     options: ['expose' => true],
     condition: 'request.isXmlHttpRequest()'
 )]
+#[OA\Tag(name: '[entrepot] statics')]
 class StaticController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
