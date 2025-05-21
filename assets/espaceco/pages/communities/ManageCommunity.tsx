@@ -32,7 +32,6 @@ const ManageCommunity: FC = () => {
     const activeTab: ManageCommunityActiveTabEnum = Object.values(ManageCommunityActiveTabEnum).includes(route.params?.["activeTab"])
         ? route.params?.["activeTab"]
         : ManageCommunityActiveTabEnum.Description;
-    console.log("ACTIVETAB : ", activeTab);
 
     const isAdmin = useMemo(() => {
         return me?.administrator === true;
