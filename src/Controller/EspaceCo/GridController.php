@@ -6,6 +6,7 @@ use App\Controller\ApiControllerInterface;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\EspaceCoApi\GridApiService;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
@@ -17,6 +18,7 @@ use Symfony\Component\Routing\Attribute\Route;
     options: ['expose' => true],
     condition: 'request.isXmlHttpRequest()'
 )]
+#[OA\Tag(name: '[espaceco] grids', description: 'Emprises (entités administratives et autres)')]
 class GridController extends AbstractController implements ApiControllerInterface
 {
     public const SEARCH_LIMIT = 20;

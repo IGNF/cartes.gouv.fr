@@ -10,6 +10,7 @@ use App\Services\EspaceCoApi\CommunityApiService;
 use App\Services\EspaceCoApi\GridApiService;
 use App\Services\EspaceCoApi\UserApiService;
 use App\Services\MailerService;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
@@ -28,6 +29,7 @@ use Symfony\Component\Uid\Uuid;
     options: ['expose' => true],
     condition: 'request.isXmlHttpRequest()'
 )]
+#[OA\Tag(name: '[espaceco] community', description: "Communauté ou groupe d'utilisateurs")]
 class CommunityController extends AbstractController implements ApiControllerInterface
 {
     public const SEARCH_LIMIT = 20;

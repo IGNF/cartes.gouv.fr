@@ -6,6 +6,7 @@ use App\Controller\ApiControllerInterface;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\EspaceCoApi\ReportApiService;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,8 +18,9 @@ use Symfony\Component\Routing\Requirement\Requirement;
     '/api/espaceco',
     name: 'cartesgouvfr_api_espaceco_report_',
     options: ['expose' => true],
-    // condition: 'request.isXmlHttpRequest()' // TODO : à enlever après les tests
+    condition: 'request.isXmlHttpRequest()'
 )]
+#[OA\Tag(name: '[espaceco] reports', description: 'Signalements géolocalisés')]
 class ReportController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(

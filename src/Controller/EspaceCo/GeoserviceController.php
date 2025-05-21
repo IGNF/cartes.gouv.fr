@@ -6,6 +6,7 @@ use App\Controller\ApiControllerInterface;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\EspaceCoApi\GeoserviceApiService;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
@@ -17,6 +18,7 @@ use Symfony\Component\Routing\Attribute\Route;
     options: ['expose' => true],
     condition: 'request.isXmlHttpRequest()'
 )]
+#[OA\Tag(name: '[espaceco] geoservice', description: 'Service de données géographiques')]
 class GeoserviceController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
