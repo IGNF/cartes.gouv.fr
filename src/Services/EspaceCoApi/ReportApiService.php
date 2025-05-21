@@ -2,8 +2,6 @@
 
 namespace App\Services\EspaceCoApi;
 
-use Symfony\Component\HttpFoundation\File\UploadedFile;
-
 class ReportApiService extends BaseEspaceCoApiService
 {
     /**
@@ -68,13 +66,11 @@ class ReportApiService extends BaseEspaceCoApiService
     }
 
     /**
-     * // TODO : sûrement non fonctionnel.
-     *
-     * @param array<string,UploadedFile> $files
+     * @param array<string,string> $files
      */
     public function addAttachments(string $reportId, array $files): array
     {
-        return $this->request('POST', "reports/$reportId/attachments", [], [], $files);
+        return $this->sendFiles('POST', "reports/$reportId/attachments", $files);
     }
 
     public function deleteAttachment(string $reportId, string $attachmentId): array
