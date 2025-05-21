@@ -323,7 +323,10 @@ const Members: FC = () => {
                                 nativeInputProps={{
                                     placeholder: t("filter_placeholder"),
                                     value: search,
-                                    onChange: (e) => setSearch(e.currentTarget.value),
+                                    onChange: (e) => {
+                                        setSearch(e.currentTarget.value);
+                                        setCurrentPage(1);
+                                    },
                                 }}
                             />
                         </div>
