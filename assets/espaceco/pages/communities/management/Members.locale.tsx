@@ -13,6 +13,7 @@ const { i18n } = declareComponentKeys<
     | "loading_members"
     | "loading_membership_requests"
     | { K: "membership_requests"; P: { count: number }; R: string }
+    | "filter_placeholder"
     | "adding_members"
     | "username_header"
     | "name_header"
@@ -45,6 +46,7 @@ export const EscoCommunityMembersFrTranslations: Translations<"fr">["EscoCommuni
     loading_members: "Chargement des membres du guichet ...",
     loading_membership_requests: "Chargement des demandes d’affiliation ...",
     membership_requests: ({ count }) => `Demandes d’affiliation (${count})`,
+    filter_placeholder: "Recherche des membres par le nom utilisateur, nom ou prénom",
     adding_members: "Ajout de nouveaux membres en cours ...",
     username_header: "Nom de l'utilisateur",
     name_header: "Nom, prénom",
@@ -96,6 +98,7 @@ export const EscoCommunityMembersEnTranslations: Translations<"en">["EscoCommuni
     loading_members: undefined,
     loading_membership_requests: undefined,
     membership_requests: ({ count }) => `Membership requests (${count})`,
+    filter_placeholder: undefined,
     adding_members: "Adding new members ...",
     username_header: "username",
     name_header: undefined,

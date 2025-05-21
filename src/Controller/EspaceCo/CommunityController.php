@@ -160,11 +160,9 @@ class CommunityController extends AbstractController implements ApiControllerInt
     public function getMembers(
         int $communityId,
         #[MapQueryParameter(filter: \FILTER_VALIDATE_REGEXP, options: ['regexp' => '/^admin|member|pending$/'])] array $roles = [],
-        #[MapQueryParameter] ?int $page = 1,
-        #[MapQueryParameter(options: ['min_range' => 1, 'max_range' => 50])] ?int $limit = 10,
     ): JsonResponse {
         try {
-            $response = $this->communityApiService->getCommunityMembers($communityId, $roles, $page, $limit);
+            $response = $this->communityApiService->getCommunityMembers($communityId, $roles);
 
             return new JsonResponse($response);
         } catch (ApiException $ex) {

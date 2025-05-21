@@ -12,13 +12,7 @@ const RQKeys = {
     communitiesName: (): string[] => ["communities_names"],
     community: (communityId: number): string[] => ["community", communityId.toString()],
     communityMembershipRequests: (communityId: number): string[] => ["community", "members", "pending", communityId.toString()],
-    communityMembers: (communityId: number, page: number, limit: number): string[] => [
-        "community",
-        "members",
-        communityId.toString(),
-        page.toString(),
-        limit.toString(),
-    ],
+    communityMembers: (communityId: number): string[] => ["community", "members", communityId.toString()],
     searchCommunities: (search: string, filter: CommunityListFilter): string[] => {
         return ["searchCommunities", filter, search];
     },

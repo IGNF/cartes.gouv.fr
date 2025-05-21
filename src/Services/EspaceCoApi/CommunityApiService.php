@@ -90,21 +90,14 @@ class CommunityApiService extends BaseEspaceCoApiService
      *
      * @return array<mixed>
      */
-    public function getCommunityMembers(int $communityId, array $roles, int $page, int $limit): array
+    public function getCommunityMembers(int $communityId, array $roles): array
     {
-        $query = ['fields' => 'user_id, grids, role, active, date', 'page' => $page, 'limit' => $limit];
+        $query = ['fields' => 'user_id, grids, role, active, date'];
         $query['roles'] = count($roles) ? $roles : ['member', 'admin'];
 
-        $response = $this->request('GET', "communities/$communityId/members", [], $query, [], false, true, true);
+        $members = $this->requestAll("communities/$communityId/members", $query);
 
-        $contentRange = $response['headers']['content-range'][0];
-        $totalPages = $this->getResultsPageCount($contentRange, $limit);
-        $previousPage = 1 === $page ? null : $page - 1;
-        $nextPage = $page + 1 > $totalPages ? null : $page + 1;
-
-        $members = $response['content'];
         $gridsRequested = [];
-
         foreach ($members as &$member) {
             $user = $this->userApiService->getUser($member['user_id'], ['fields' => ['username', 'firstname', 'surname']]);
             $member = array_merge($member, $user);
@@ -121,12 +114,7 @@ class CommunityApiService extends BaseEspaceCoApiService
             return (mb_strtolower($mb1['username'], 'UTF-8') < mb_strtolower($mb2['username'], 'UTF-8')) ? -1 : 1;
         });
 
-        return [
-            'content' => $members,
-            'totalPages' => $totalPages,
-            'previousPage' => $previousPage,
-            'nextPage' => $nextPage,
-        ];
+        return $members;
     }
 
     public function addMember(int $communityId, int $userId): array

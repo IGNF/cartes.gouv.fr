@@ -1,10 +1,15 @@
+import { useCommunityContext } from "@/espaceco/contexts/CommunityContext";
+import { useSearchMember } from "@/espaceco/hooks/useSearchMember";
+import { usePagination } from "@/hooks/usePagination";
 import { fr } from "@codegouvfr/react-dsfr";
 import Accordion from "@codegouvfr/react-dsfr/Accordion";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
+import Input from "@codegouvfr/react-dsfr/Input";
 import MuiDsfrThemeProvider from "@codegouvfr/react-dsfr/mui";
 import Select from "@codegouvfr/react-dsfr/Select";
 import Table from "@codegouvfr/react-dsfr/Table";
+import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import Pagination from "@mui/material/Pagination";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, ReactNode, useCallback, useMemo, useState } from "react";
@@ -18,23 +23,16 @@ import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/espaceco/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import { routes } from "../../../../router/router";
+import "../../../../sass/pages/espaceco/member.scss";
 import api from "../../../api";
 import { AddMembersDialog, AddMembersDialogModal } from "./member/AddMembersDialog";
 import { ManageGridsDialog, ManageGridsDialogModal } from "./member/ManageGridsDialog";
-
-import { useCommunityContext } from "@/espaceco/contexts/CommunityContext";
-import { cx } from "@codegouvfr/react-dsfr/tools/cx";
-import "../../../../sass/pages/espaceco/member.scss";
-
-export type membersQueryParams = {
-    page: number;
-    limit: number;
-};
 
 const maxFetchedMembers = 10;
 const getName = (firstname: string | null, surname: string | null) => `${firstname ? firstname : ""} ${surname ? surname : ""}`;
 
 const Members: FC = () => {
+    const { t: tCommon } = useTranslation("Common");
     const { t } = useTranslation("EscoCommunityMembers");
 
     const context = useCommunityContext();
@@ -47,17 +45,19 @@ const Members: FC = () => {
     const [action, setAction] = useState<"remove" | "reject" | undefined>(undefined);
     const [currentMember, setCurrentMember] = useState<CommunityMember | undefined>(undefined);
 
+    const [search, setSearch] = useState<string>("");
+
     // Les demandes d'affiliation
-    const membershipRequestsQuery = useQuery<GetResponse<CommunityMember>, CartesApiException>({
+    const membershipRequestsQuery = useQuery<CommunityMember[], CartesApiException>({
         queryKey: RQKeys.communityMembershipRequests(community.id),
         queryFn: ({ signal }) => api.community.getCommunityMembershipRequests(community.id, signal),
         staleTime: 60000,
     });
 
     // Les membres non en demande d'affiliation
-    const membersQuery = useQuery<GetResponse<CommunityMember>, CartesApiException>({
-        queryKey: RQKeys.communityMembers(community.id, currentPage, maxFetchedMembers),
-        queryFn: ({ signal }) => api.community.getCommunityMembers(community.id, currentPage, maxFetchedMembers, signal),
+    const membersQuery = useQuery<CommunityMember[], CartesApiException>({
+        queryKey: RQKeys.communityMembers(community.id),
+        queryFn: ({ signal }) => api.community.getCommunityMembers(community.id, signal),
         staleTime: 60000,
     });
 
@@ -68,7 +68,7 @@ const Members: FC = () => {
         },
         onSuccess(response) {
             /* Mise à jour des données de la requête membersQuery */
-            queryClient.setQueryData<GetResponse<CommunityMember>>(RQKeys.communityMembers(community.id, currentPage, maxFetchedMembers), (datas) => {
+            queryClient.setQueryData<GetResponse<CommunityMember>>(RQKeys.communityMembers(community.id), (datas) => {
                 if (datas) {
                     datas.content.forEach((member) => {
                         if (member.user_id === response.user_id) {
@@ -96,7 +96,7 @@ const Members: FC = () => {
         },
         onSuccess(response) {
             /* Mise à jour des données de la requête membersQuery */
-            queryClient.setQueryData<GetResponse<CommunityMember>>(RQKeys.communityMembers(community.id, currentPage, maxFetchedMembers), (datas) => {
+            queryClient.setQueryData<GetResponse<CommunityMember>>(RQKeys.communityMembers(community.id), (datas) => {
                 if (datas) {
                     datas.content.forEach((member) => {
                         if (member.user_id === response.user_id) {
@@ -116,7 +116,7 @@ const Members: FC = () => {
         },
         onSuccess(response) {
             /* Mise à jour des données de la requête membersQuery */
-            queryClient.setQueryData<GetResponse<CommunityMember>>(RQKeys.communityMembers(community.id, currentPage, maxFetchedMembers), (datas) => {
+            queryClient.setQueryData<GetResponse<CommunityMember>>(RQKeys.communityMembers(community.id), (datas) => {
                 if (datas) {
                     datas.content = datas.content.filter((member) => member.user_id !== response.user_id);
                 }
@@ -141,7 +141,7 @@ const Members: FC = () => {
             return api.community.addMembers(communityId, members);
         },
         onSuccess() {
-            queryClient.refetchQueries({ queryKey: RQKeys.communityMembers(community.id, currentPage, maxFetchedMembers) });
+            queryClient.refetchQueries({ queryKey: RQKeys.communityMembers(community.id) });
         },
     });
 
@@ -170,8 +170,11 @@ const Members: FC = () => {
     const headers = useMemo(() => [t("username_header"), t("name_header"), t("status_header"), t("grids_header"), ""], [t]);
     const pendingHeaders = useMemo(() => [t("username_header"), t("name_header"), t("date_header"), ""], [t]);
 
+    const { searchedItems } = useSearchMember(membersQuery.data ?? [], search);
+    const { paginatedItems, totalPages } = usePagination(searchedItems, currentPage, maxFetchedMembers);
+
     const memberData: ReactNode[][] = useMemo(() => {
-        const datas = membersQuery.data?.content ?? [];
+        const datas = paginatedItems ?? [];
         return (
             datas.map((m) => {
                 const grids = m.grids.map((grid) => grid.name).join(", ");
@@ -241,10 +244,10 @@ const Members: FC = () => {
                 ];
             }) ?? []
         );
-    }, [community, t, membersQuery.data, updateRoleMutation]);
+    }, [community, t, paginatedItems, updateRoleMutation]);
 
     const pendingData: ReactNode[][] = useMemo(() => {
-        const datas = membershipRequestsQuery.data?.content ?? [];
+        const datas = membershipRequestsQuery.data ?? [];
         return (
             datas.map((m) => [
                 m.username,
@@ -298,32 +301,50 @@ const Members: FC = () => {
             {removeMemberMutation.isError && alert(t("remove_member_failed"), removeMemberMutation.error.message)}
 
             {/* LES ACTIONS EN COURS */}
-            {(membershipRequestsQuery.isLoading || membersQuery.isLoading) && <LoadingText as={"h6"} />}
+            {membersQuery.isLoading && <LoadingText as={"h6"} message={t("loading_members")} />}
+            {membershipRequestsQuery.isLoading && <LoadingText as={"h6"} message={t("loading_membership_requests")} />}
             {updateRoleMutation.isPending && displayWait(t("updating_role"))}
             {updateGridsMutation.isPending && displayWait(t("updating_grids"))}
             {addMembersMutation.isPending && displayWait(t("adding_members"))}
             {removeMemberMutation.isPending && displayWait(t("removing_action", { action: action }))}
 
-            {membershipRequestsQuery.data?.content && membershipRequestsQuery.data.content.length > 0 && (
-                <Accordion label={t("membership_requests", { count: membershipRequestsQuery.data.content.length })} defaultExpanded={true}>
+            {membershipRequestsQuery.data && membershipRequestsQuery.data.length > 0 && (
+                <Accordion label={t("membership_requests", { count: membershipRequestsQuery.data.length })} defaultExpanded={true}>
                     <Table headers={pendingHeaders} data={pendingData} fixed />
                 </Accordion>
             )}
-            {membersQuery.data?.content && membersQuery.data.content.length > 0 && (
+            {membersQuery.data && membersQuery.data.length > 0 && (
                 <div>
-                    <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-mb-2v")}>
-                        <Button iconId="fr-icon-add-circle-line" onClick={() => AddMembersDialogModal.open()}>
-                            {t("invite")}
-                        </Button>
+                    <div className={fr.cx("fr-grid-row", "fr-mb-2v")}>
+                        <div className={fr.cx("fr-col-7")}>
+                            <Input
+                                label={null}
+                                addon={<Button title={tCommon("clear")} iconId={"fr-icon-close-line"} priority={"tertiary"} onClick={() => setSearch("")} />}
+                                nativeInputProps={{
+                                    placeholder: t("filter_placeholder"),
+                                    value: search,
+                                    onChange: (e) => setSearch(e.currentTarget.value),
+                                }}
+                            />
+                        </div>
+                        <div className={fr.cx("fr-col-5")}>
+                            <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-mb-2v")}>
+                                <Button iconId="fr-icon-add-circle-line" onClick={() => AddMembersDialogModal.open()}>
+                                    {t("invite")}
+                                </Button>
+                            </div>
+                        </div>
                     </div>
                     <Table headers={headers} data={memberData} fixed />
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--center", "fr-mt-2v")}>
                         <MuiDsfrThemeProvider>
                             <Pagination
-                                count={membersQuery.data.totalPages}
+                                count={totalPages}
                                 page={currentPage}
                                 variant="outlined"
                                 shape="rounded"
+                                showFirstButton
+                                showLastButton
                                 onChange={(_, v) => setCurrentPage(v)}
                             />
                         </MuiDsfrThemeProvider>

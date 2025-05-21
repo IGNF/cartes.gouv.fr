@@ -65,21 +65,19 @@ const getCommunity = (communityId: number) => {
     return jsonFetch<CommunityResponseDTO>(url);
 };
 
-const getCommunityMembers = (communityId: number, page: number, limit: number = 10, signal: AbortSignal) => {
+const getCommunityMembers = (communityId: number, signal: AbortSignal) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_espaceco_community_get_members", {
         communityId,
-        page: page,
-        limit: limit,
         roles: ["member", "admin"],
     });
-    return jsonFetch<GetResponse<CommunityMember>>(url, {
+    return jsonFetch<CommunityMember[]>(url, {
         signal: signal,
     });
 };
 
 const getCommunityMembershipRequests = (communityId: number, signal: AbortSignal) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_espaceco_community_get_members", { communityId, page: 1, limit: 50, roles: ["pending"] });
-    return jsonFetch<GetResponse<CommunityMember>>(url, {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_espaceco_community_get_members", { communityId, roles: ["pending"] });
+    return jsonFetch<CommunityMember[]>(url, {
         signal: signal,
     });
 };
