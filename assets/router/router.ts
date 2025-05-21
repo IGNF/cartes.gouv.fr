@@ -290,6 +290,7 @@ const espacecoRoutes = {
     espaceco_manage_community: defineRoute(
         {
             communityId: param.path.number,
+            activeTab: param.query.optional.string.default("description"),
         },
         (p) => `${appRoot}/espace-collaboratif/${p.communityId}/gerer-le-guichet`
     ),

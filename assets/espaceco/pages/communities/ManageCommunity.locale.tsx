@@ -1,3 +1,4 @@
+import { ManageCommunityActiveTabEnum } from "@/@types/app_espaceco";
 import { declareComponentKeys } from "../../../i18n/i18n";
 import { Translations } from "../../../i18n/types";
 
@@ -17,14 +18,7 @@ const { i18n } = declareComponentKeys<
     | "updating_success"
     | "updating_failed"
     | "create_now"
-    | "tab1"
-    | "tab2"
-    | "tab3"
-    | "tab4"
-    | "tab5"
-    | "tab6"
-    | "tab7"
-    | "tab8"
+    | { K: "tab"; P: { tab: ManageCommunityActiveTabEnum }; R: string }
     | "desc.reuse_label"
     | "desc.reuse_description"
     | "desc.reuse_confirmation"
@@ -150,14 +144,26 @@ export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"
     updating_success: "La mise à jour du guichet s'est bien passée.",
     updating_failed: "La mise à jour du guichet a échoué.",
     create_now: "Créer le guichet maintenant",
-    tab1: "Description",
-    tab2: "Bases de données",
-    tab3: "Couches de la carte",
-    tab4: "Zoom, centrage",
-    tab5: "Outils",
-    tab6: "Signalements",
-    tab7: "Emprises",
-    tab8: "Membres",
+    tab: ({ tab }) => {
+        switch (tab) {
+            case ManageCommunityActiveTabEnum.Description:
+                return "Description";
+            case ManageCommunityActiveTabEnum.Databases:
+                return "Bases de données";
+            case ManageCommunityActiveTabEnum.Layers:
+                return "Couches de la carte";
+            case ManageCommunityActiveTabEnum.Zoom:
+                return "Zoom, centrage";
+            case ManageCommunityActiveTabEnum.Tools:
+                return "Outils";
+            case ManageCommunityActiveTabEnum.Reports:
+                return "Signalements";
+            case ManageCommunityActiveTabEnum.Grids:
+                return "Emprises";
+            case ManageCommunityActiveTabEnum.Members:
+                return "Membres";
+        }
+    },
     "desc.reuse_label": "Utiliser la description d’un autre guichet (optionnel)",
     "desc.reuse_description": "Si vous choisissez un guichet existant, la description de ce guichet sera récupérée et pourra être modifiée ci-dessous",
     "desc.reuse_confirmation": "Je veux réutiliser la description d'un guichet existant",
@@ -329,14 +335,7 @@ export const ManageCommunityEnTranslations: Translations<"en">["ManageCommunity"
     updating_success: undefined,
     updating_failed: undefined,
     create_now: undefined,
-    tab1: undefined,
-    tab2: undefined,
-    tab3: undefined,
-    tab4: undefined,
-    tab5: undefined,
-    tab6: undefined,
-    tab7: undefined,
-    tab8: undefined,
+    tab: ({ tab }) => `${tab}`,
     "desc.tab.title": undefined,
     "desc.reuse_label": undefined,
     "desc.reuse_description": undefined,

@@ -2,14 +2,15 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Tabs from "@codegouvfr/react-dsfr/Tabs";
-import { FC, useMemo, useState } from "react";
+import { FC, useMemo } from "react";
 
+import { ManageCommunityActiveTabEnum } from "@/@types/app_espaceco";
 import Main from "@/components/Layout/Main";
 import { useCommunityContext } from "@/espaceco/contexts/CommunityContext";
 import useUserMe from "@/espaceco/hooks/useUserMe";
 import LoadingText from "../../../components/Utils/LoadingText";
 import { useTranslation } from "../../../i18n/i18n";
-import { routes } from "../../../router/router";
+import { routes, useRoute } from "../../../router/router";
 import Databases from "./management/Databases";
 import Description from "./management/Description";
 import Grids from "./management/Grids";
@@ -27,6 +28,12 @@ const ManageCommunity: FC = () => {
 
     const { community, isCommunityLoading, isCommunityError, communityError } = useCommunityContext();
 
+    const route = useRoute();
+    const activeTab: ManageCommunityActiveTabEnum = Object.values(ManageCommunityActiveTabEnum).includes(route.params?.["activeTab"])
+        ? route.params?.["activeTab"]
+        : ManageCommunityActiveTabEnum.Description;
+    console.log("ACTIVETAB : ", activeTab);
+
     const isAdmin = useMemo(() => {
         return me?.administrator === true;
     }, [me]);
@@ -39,8 +46,6 @@ const ManageCommunity: FC = () => {
         const f = me?.communities_member.filter((cm) => cm.role === "admin") || [];
         return f.length > 0;
     }, [me]);
-
-    const [selectedTabId, setSelectedTabId] = useState("tab1");
 
     // S'il est active === false, il est toujours en cours de création
     const forbidden = useMemo(() => {
@@ -99,40 +104,34 @@ const ManageCommunity: FC = () => {
                 community && (
                     <div className={fr.cx("fr-container", "fr-py-2w")}>
                         <Tabs
-                            selectedTabId={selectedTabId}
-                            tabs={[
-                                { tabId: "tab1", label: t("tab1") }, // Description
-                                { tabId: "tab2", label: t("tab2") }, // Bases de données
-                                { tabId: "tab3", label: t("tab3") }, // Couches de la carte
-                                { tabId: "tab4", label: t("tab4") }, // Zoom, centrage
-                                { tabId: "tab5", label: t("tab5") }, // Outils
-                                { tabId: "tab6", label: t("tab6") }, // Signalements
-                                { tabId: "tab7", label: t("tab7") }, // Emprises
-                                { tabId: "tab8", label: t("tab8") }, // Membres
-                            ]}
-                            onTabChange={setSelectedTabId}
+                            tabs={Object.values(ManageCommunityActiveTabEnum).map((v) => ({
+                                tabId: v,
+                                label: t("tab", { tab: v }),
+                            }))}
+                            selectedTabId={activeTab}
+                            onTabChange={(activeTab) => {
+                                routes.espaceco_manage_community({ communityId: community.id, activeTab }).replace();
+                            }}
                         >
                             <>
                                 {(() => {
-                                    switch (selectedTabId) {
-                                        case "tab1":
+                                    switch (activeTab) {
+                                        case ManageCommunityActiveTabEnum.Description:
                                             return <Description isAdmin={isAdmin} />;
-                                        case "tab2":
+                                        case ManageCommunityActiveTabEnum.Databases:
                                             return <Databases />;
-                                        case "tab3":
+                                        case ManageCommunityActiveTabEnum.Layers:
                                             return <Layers />;
-                                        case "tab4":
+                                        case ManageCommunityActiveTabEnum.Zoom:
                                             return <ZoomAndCentering />;
-                                        case "tab5":
+                                        case ManageCommunityActiveTabEnum.Tools:
                                             return <Tools />;
-                                        case "tab6":
+                                        case ManageCommunityActiveTabEnum.Reports:
                                             return <Reports />;
-                                        case "tab7":
+                                        case ManageCommunityActiveTabEnum.Grids:
                                             return <Grids />;
-                                        case "tab8":
+                                        case ManageCommunityActiveTabEnum.Members:
                                             return <Members />;
-                                        default:
-                                            return <p>`Content of ${selectedTabId}`</p>;
                                     }
                                 })()}
                             </>

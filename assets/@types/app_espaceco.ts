@@ -94,6 +94,17 @@ export type CommunityMemberDetailed = {
     date: string;
 };
 
+export enum ManageCommunityActiveTabEnum {
+    Description = "description",
+    Databases = "databases",
+    Layers = "layers",
+    Zoom = "zoom",
+    Tools = "tools",
+    Reports = "reports",
+    Grids = "grids",
+    Members = "members",
+}
+
 export type Profile = {
     community_id: number;
     themes: ThemeDTO[];
