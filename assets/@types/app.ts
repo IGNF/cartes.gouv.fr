@@ -329,6 +329,7 @@ export type CswMetadataLayer = {
     gmd_online_resource_protocol?: string;
     gmd_online_resource_url?: string;
     offering_id?: string;
+    open?: boolean;
 };
 
 export type CswStyleFile = {
