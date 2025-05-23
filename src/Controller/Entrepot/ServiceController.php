@@ -6,6 +6,7 @@ use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\Sandbox;
 use App\Constants\EntrepotApi\ZoomLevels;
 use App\Controller\ApiControllerInterface;
+use App\Dto\Services\CommonDTO;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\CapabilitiesService;
@@ -143,5 +144,41 @@ class ServiceController extends AbstractController implements ApiControllerInter
         });
 
         return ['bottom_level' => end($levels), 'top_level' => reset($levels)];
+    }
+
+    /**
+     * @param array<mixed>  $typeInfos
+     * @param ?array<mixed> $oldConfiguration
+     */
+    protected function getConfigRequestBody(string $datastoreId, string $type, CommonDTO $dto, array $typeInfos, ?array $oldConfiguration = null): array
+    {
+        $body = [
+            'name' => $dto->service_name,
+            'type' => $type,
+            'type_infos' => $typeInfos,
+        ];
+
+        // seulement pour la création d'une nouvelle publication
+        if (null === $oldConfiguration) {
+            $body['layer_name'] = $dto->technical_name;
+
+            // rajoute le préfixe "sandbox." si c'est la communauté bac à sable
+            if ($this->sandboxService->isSandboxDatastore($datastoreId)) {
+                $body['layer_name'] = Sandbox::LAYERNAME_PREFIX.$body['layer_name'];
+            }
+        }
+
+        if (!empty($dto->attribution_text) && !empty($dto->attribution_url)) {
+            $body['attribution'] = [
+                'title' => $dto->attribution_text,
+                'url' => $dto->attribution_url,
+            ];
+        }
+
+        if (isset($oldConfiguration['metadata'])) {
+            $body['metadata'] = $oldConfiguration['metadata'];
+        }
+
+        return $body;
     }
 }

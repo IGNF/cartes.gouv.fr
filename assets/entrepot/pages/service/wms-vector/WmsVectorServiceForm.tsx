@@ -199,7 +199,7 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
         queryKey: RQKeys.datastore_layernames_list(datastoreId, ConfigurationTypeEnum.WMSVECTOR),
         queryFn: ({ signal }) => api.service.getExistingLayerNames(datastoreId, ConfigurationTypeEnum.WMSVECTOR, { signal }),
         refetchInterval: 30000,
-        enabled: !(createServiceMutation.isPending || editServiceMutation.isPending),
+        enabled: currentStep === STEPS.METADATAS_DESCRIPTION && !(createServiceMutation.isPending || editServiceMutation.isPending),
     });
 
     const offeringQuery = useQuery<Service | null, CartesApiException>({

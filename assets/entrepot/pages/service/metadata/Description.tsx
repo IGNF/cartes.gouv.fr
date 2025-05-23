@@ -9,11 +9,11 @@ import { type ServiceFormValuesBaseType } from "../../../../@types/app";
 import AutocompleteSelect from "../../../../components/Input/AutocompleteSelect";
 import MarkdownEditor from "../../../../components/Input/MarkdownEditor";
 import frequencyCodes from "../../../../data/maintenance_frequency.json";
-import categories from "../../../../data/topic_categories.json";
 import { getTranslation } from "../../../../i18n/i18n";
-import { getInspireKeywords, regex } from "../../../../utils";
+import { getInspireKeywords, getThematicCategories, regex } from "../../../../utils";
 
 const keywords = getInspireKeywords();
+const thematicCategories = getThematicCategories();
 
 type DescriptionProps = {
     visible: boolean;
@@ -72,6 +72,9 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
 
         return () => unsubscribe();
     }, [watch, setFormValue, dirtyFields.service_name]);
+
+    console.log(form.getValues());
+    console.log(form.formState.errors);
 
     return (
         <div className={fr.cx(!visible && "fr-hidden")}>
@@ -139,7 +142,8 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
                     <AutocompleteSelect
                         label={t("metadata.description_form.category")}
                         hintText={t("metadata.description_form.hint_category")}
-                        options={Object.values(categories).sort((a, b) => a.localeCompare(b))}
+                        options={thematicCategories.map((c) => c.code)}
+                        getOptionLabel={(option) => thematicCategories.find((c) => c.code === option)?.text ?? option}
                         searchFilter={{ limit: 40 }}
                         state={errors.category ? "error" : "default"}
                         stateRelatedMessage={errors?.category?.message?.toString()}

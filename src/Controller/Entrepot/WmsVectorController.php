@@ -3,7 +3,6 @@
 namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\ConfigurationTypes;
-use App\Constants\EntrepotApi\Sandbox;
 use App\Constants\EntrepotApi\StaticFileTypes;
 use App\Controller\ApiControllerInterface;
 use App\Dto\Services\WmsVector\WmsVectorServiceDTO;
@@ -63,7 +62,8 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
             $styleFilesByTable = $this->sendStyleFiles($datastoreId, $tablesNamesList, $files);
 
             // création de requête pour la config
-            $configRequestBody = $this->getConfigRequestBody($dto, $tablesNamesList, $styleFilesByTable, $storedDataId, false, $datastoreId);
+            $typeInfos = $this->getConfigTypeInfos($dto, $tablesNamesList, $styleFilesByTable, $storedDataId);
+            $configRequestBody = $this->getConfigRequestBody($datastoreId, ConfigurationTypes::WMSVECTOR, $dto, $typeInfos);
 
             $offering = $this->cartesServiceApiService->saveService($datastoreId, $storedDataId, $dto, ConfigurationTypes::WMSVECTOR, $configRequestBody);
             $configuration = $offering['configuration'];
@@ -106,7 +106,8 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
             $styleFilesByTable = $this->sendStyleFiles($datastoreId, $tablesNamesList, $files, $oldConfiguration);
 
             // création de requête pour la config
-            $configRequestBody = $this->getConfigRequestBody($dto, $tablesNamesList, $styleFilesByTable, $storedDataId, true);
+            $typeInfos = $this->getConfigTypeInfos($dto, $tablesNamesList, $styleFilesByTable, $storedDataId);
+            $configRequestBody = $this->getConfigRequestBody($datastoreId, ConfigurationTypes::WMSVECTOR, $dto, $typeInfos, $oldConfiguration);
 
             $offering = $this->cartesServiceApiService->saveService($datastoreId, $storedDataId, $dto, ConfigurationTypes::WMSVECTOR, $configRequestBody, $oldOffering);
 
@@ -124,7 +125,7 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
      *
      * @return array<mixed>
      */
-    private function getConfigRequestBody(WmsVectorServiceDTO $dto, array $tablesNamesList, array $tables, string $storedDataId, bool $editMode = false, ?string $datastoreId = null): array
+    private function getConfigTypeInfos(WmsVectorServiceDTO $dto, array $tablesNamesList, array $tables, string $storedDataId): array
     {
         $relations = [];
         foreach ($tablesNamesList as $tableName) {
@@ -134,39 +135,17 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
             ];
         }
 
-        $body = [
-            'type' => ConfigurationTypes::WMSVECTOR,
-            'name' => $dto->service_name,
-            'type_infos' => [
-                'title' => $dto->service_name,
-                'abstract' => $dto->description,
-                'keywords' => [...$dto->category, ...$dto->keywords, ...$dto->free_keywords],
-                'used_data' => [
-                    [
-                        'relations' => $relations,
-                        'stored_data' => $storedDataId,
-                    ],
+        return [
+            'title' => $dto->service_name,
+            'abstract' => $dto->description,
+            'keywords' => [...$dto->category, ...$dto->keywords, ...$dto->free_keywords],
+            'used_data' => [
+                [
+                    'relations' => $relations,
+                    'stored_data' => $storedDataId,
                 ],
             ],
         ];
-
-        if (false === $editMode) {
-            $body['layer_name'] = $dto->technical_name;
-
-            // rajoute le préfixe "sandbox." si c'est la communauté bac à sable
-            if ($this->sandboxService->isSandboxDatastore($datastoreId)) {
-                $body['layer_name'] = Sandbox::LAYERNAME_PREFIX.$body['layer_name'];
-            }
-        }
-
-        if ('' !== $dto->attribution_text && '' !== $dto->attribution_url) {
-            $body['attribution'] = [
-                'title' => $dto->attribution_text,
-                'url' => $dto->attribution_url,
-            ];
-        }
-
-        return $body;
     }
 
     /**
