@@ -57,20 +57,11 @@ const ServiceDesc: FC<ServiceDescProps> = ({ service, datastoreId }) => {
     });
 
     return (
-        <>
-            <Desc
-                isFetching={pyramidUsedQuery.isFetching || vectorDbUsedQuery.isFetching}
-                databaseUsed={vectorDbUsedQuery.data?.name}
-                pyramidUsed={pyramidUsedQuery.data}
-            />
-            <pre
-                style={{
-                    whiteSpace: "pre-wrap",
-                }}
-            >
-                <code>{JSON.stringify(service.configuration.metadata, null, 4)}</code>
-            </pre>
-        </>
+        <Desc
+            isFetching={pyramidUsedQuery.isFetching || vectorDbUsedQuery.isFetching}
+            databaseUsed={vectorDbUsedQuery.data?.name}
+            pyramidUsed={pyramidUsedQuery.data}
+        />
     );
 };
 
