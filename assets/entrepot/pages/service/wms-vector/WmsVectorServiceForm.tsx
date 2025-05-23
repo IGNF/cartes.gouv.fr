@@ -67,8 +67,13 @@ const createFormData = async (formValues: WmsVectorServiceFormValuesType) => {
     formValues.keywords?.forEach((c) => fd.append("keywords[]", c));
     formValues.free_keywords?.forEach((c) => fd.append("free_keywords[]", c));
 
-    fd.set("attribution_text", formValues.attribution_text!);
-    fd.set("attribution_url", formValues.attribution_url!);
+    if (formValues.attribution_text) {
+        fd.set("attribution_text", formValues.attribution_text!);
+    }
+    if (formValues.attribution_url) {
+        fd.set("attribution_url", formValues.attribution_url!);
+    }
+
     fd.set("charset", formValues.charset!);
     fd.set("creation_date", formValues.creation_date!);
     fd.set("description", formValues.description!);
