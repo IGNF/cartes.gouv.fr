@@ -12,7 +12,6 @@ use App\Constants\EntrepotApi\StoredDataTypes;
 use App\Dto\Services\CommonDTO;
 use App\Exception\CartesApiException;
 use App\Services\CapabilitiesService;
-use App\Services\CswTopicCategories;
 use App\Services\GeonetworkApiService;
 use App\Services\SandboxService;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -37,7 +36,6 @@ class CartesServiceApiService
         private CartesMetadataApiService $cartesMetadataApiService,
         private SandboxService $sandboxService,
         private CartesStylesApiService $cartesStylesApiService,
-        private CswTopicCategories $cswTopicCategories,
         private GeonetworkApiService $geonetworkApiService,
         HttpClientInterface $httpClient,
     ) {
@@ -286,6 +284,7 @@ class CartesServiceApiService
 
         // Mise à jour des métadonnées de la configuration
         $configRequestBody['metadata'] = $this->getNewConfigMetadata($dto->identifier, $configRequestBody['metadata'] ?? []);
+        $configTheme = implode(', ', $dto->category);
 
         if ($oldOffering) {
             // Modification d'un service existant
@@ -294,7 +293,7 @@ class CartesServiceApiService
 
             $configTags = [
                 CommonTags::DATASHEET_NAME => $datasheetName,
-                CommonTags::CONFIG_THEME => implode(',', $this->cswTopicCategories->toFrench($dto->category)),
+                CommonTags::CONFIG_THEME => $configTheme,
             ];
 
             // Mise à jour de la configuration
@@ -316,7 +315,7 @@ class CartesServiceApiService
 
             $configTags = [
                 CommonTags::DATASHEET_NAME => $datasheetName,
-                CommonTags::CONFIG_THEME => implode(',', $this->cswTopicCategories->toFrench($dto->category)),
+                CommonTags::CONFIG_THEME => $configTheme,
             ];
 
             // Ajout de la configuration

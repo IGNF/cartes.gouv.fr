@@ -168,14 +168,14 @@ class ServiceController extends AbstractController implements ApiControllerInter
             }
         }
 
-        if ('' !== $dto->attribution_text && '' !== $dto->attribution_url) {
+        if (!empty($dto->attribution_text) && !empty($dto->attribution_url)) {
             $body['attribution'] = [
                 'title' => $dto->attribution_text,
                 'url' => $dto->attribution_url,
             ];
         }
 
-        if (null !== $oldConfiguration['metadata']) {
+        if (isset($oldConfiguration['metadata'])) {
             $body['metadata'] = $oldConfiguration['metadata'];
         }
 
