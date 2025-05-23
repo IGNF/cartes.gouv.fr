@@ -8,13 +8,13 @@ export type CartesApiException = {
     details: unknown[];
 };
 
-export async function jsonFetch<T>(
+export async function apiFetch(
     url: RequestInfo | URL,
     config: Omit<RequestInit, "body"> = {},
     body: FormData | object | null = null,
     isFileUpload: boolean = false,
     isXMLHttpRequest: boolean = true
-): Promise<T> {
+): Promise<Response> {
     return new Promise((resolve, reject) => {
         (async function () {
             const defaultHeaders: HeadersInit = {};
@@ -44,17 +44,11 @@ export async function jsonFetch<T>(
             try {
                 const response = await fetch(request);
 
-                // retourner un objet vide si la réponse n'a pas de body (dans un cas de 204 par exemple)
-                const data = await response.json().catch(() => ({}));
-
                 if (response.ok) {
                     useAuthStore.getState().setSessionExpired(false);
-                    resolve(data);
+                    resolve(response);
                 } else {
-                    if (hasSessionExpired(data)) {
-                        useAuthStore.getState().setSessionExpired(true);
-                    }
-                    reject(data);
+                    reject(response);
                 }
             } catch (error) {
                 if (error instanceof DOMException && error?.name === "AbortError") {
@@ -65,6 +59,21 @@ export async function jsonFetch<T>(
             }
         })();
     });
+}
+
+export async function jsonFetch<T>(
+    url: RequestInfo | URL,
+    config: Omit<RequestInit, "body"> = {},
+    body: FormData | object | null = null,
+    isFileUpload: boolean = false,
+    isXMLHttpRequest: boolean = true
+): Promise<T> {
+    const data = (await apiFetch(url, config, body, isFileUpload, isXMLHttpRequest)).json().catch(() => ({}));
+    if (hasSessionExpired(data)) {
+        useAuthStore.getState().setSessionExpired(true);
+        throw new Error("Session expirée");
+    }
+    return data;
 }
 
 const hasSessionExpired = (error) => {
