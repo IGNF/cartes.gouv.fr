@@ -110,8 +110,12 @@ const downloadAllDownloadableFiles = async (document) => {
     const downloadLinks = [...document.querySelectorAll("a.fr-link--download")];
     await Promise.all(
         downloadLinks.map(async (downLink) => {
-            const newUrl = await downloadFile(downLink.href);
-            downLink.href = ARTICLES_S3_GATEWAY_BASE_PATH + newUrl.replace(OUTPUT_DIR, "");
+            try {
+                const newUrl = await downloadFile(downLink.href);
+                downLink.href = ARTICLES_S3_GATEWAY_BASE_PATH + newUrl.replace(OUTPUT_DIR, "");
+            } catch (err) {
+                warn(`Failed to download file for link ${downLink.href}:`, err);
+            }
         })
     );
 };
@@ -185,11 +189,15 @@ const getPageNumbers = async () => {
     // Lecture du contenu du main
     const $main = document.querySelector("main");
 
-    const $navPaginationUl = $main.querySelector("nav.fr-pagination>.fr-pagination__list");
-    const navPagLastChild = $navPaginationUl.lastElementChild.querySelector("a");
-
     const firstPage = 0;
-    const lastPage = new URL(ARTICLES_CMS_BASE_URL + navPagLastChild.href).searchParams.get("page");
+    let lastPage = 0;
+    try {
+        const $navPaginationUl = $main.querySelector("nav.fr-pagination>.fr-pagination__list");
+        const navPagLastChild = $navPaginationUl.lastElementChild.querySelector("a");
+        lastPage = new URL(ARTICLES_CMS_BASE_URL + navPagLastChild.href).searchParams.get("page");
+    } catch (error) {
+        // Si la pagination n'existe pas, on considère qu'il n'y a qu'une seule page
+    }
 
     log(`First page : ${firstPage}, last page : ${lastPage}`);
 
@@ -210,7 +218,7 @@ const processArticlesIndex = async (page = 0) => {
     // Lecture du contenu du main
     const $main = document.querySelector("main");
 
-    removeElementsWithClasses($main, ["visually-hidden", "hidden"]);
+    removeElementsWithClasses($main, ["visually-hidden", "hidden", "js-hide"]);
 
     await downloadAllImages($main);
 
@@ -248,7 +256,7 @@ const processSingleArticle = async (slug) => {
     // Lecture du contenu du main
     const $article = document.querySelector("article");
 
-    removeElementsWithClasses($article, ["visually-hidden", "hidden"]);
+    removeElementsWithClasses($article, ["visually-hidden", "hidden", "js-hide"]);
 
     await downloadAllImages($article);
 
