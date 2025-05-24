@@ -56,6 +56,7 @@ RUN apt-get -qq update \
     && apt-get -qq install --no-install-recommends -y \
     unzip zip \
     curl wget \
+    rclone \
     && apt-get -qq clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 #------------------------------------------------------------------------

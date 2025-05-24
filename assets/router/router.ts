@@ -18,7 +18,12 @@ const publicRoutes = {
     documentation: defineRoute(`${appRoot}/documentation`),
     contact: defineRoute(`${appRoot}/nous-ecrire`),
     contact_confirmation: defineRoute(`${appRoot}/nous-ecrire/demande-envoyee`),
-    news_list: defineRoute(`${appRoot}/actualites`),
+    news_list: defineRoute(
+        {
+            page: param.query.optional.number.default(0),
+        },
+        () => `${appRoot}/actualites`
+    ),
     news_article: defineRoute(
         {
             slug: param.path.string,
