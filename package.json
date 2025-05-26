@@ -63,6 +63,7 @@
         "vite": "^6.0",
         "vite-plugin-run": "^0.6",
         "vite-plugin-symfony": "^8.0",
+        "yoctocolors": "^2.1.1",
         "yup": "^1.2.0",
         "zustand": "^5.0.0"
     },

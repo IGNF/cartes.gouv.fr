@@ -11,12 +11,13 @@ import { format, resolveConfig } from "prettier";
 import { pipeline } from "stream/promises";
 import { fileURLToPath } from "url";
 import { promisify } from "util";
+import colors from "yoctocolors";
 
 const execAsync = promisify(exec);
 
 const ARTICLES_CMS_BASE_URL = process.env.ARTICLES_CMS_BASE_URL;
-const ARTICLES_CMS_USERNAME = process.env.ARTICLES_CMS_USERNAME;
-const ARTICLES_CMS_PASSWORD = process.env.ARTICLES_CMS_PASSWORD;
+// const ARTICLES_CMS_USERNAME = process.env.ARTICLES_CMS_USERNAME;
+// const ARTICLES_CMS_PASSWORD = process.env.ARTICLES_CMS_PASSWORD;
 
 const ARTICLES_S3_GATEWAY_BASE_PATH = "/_cartes_s3_gateway/articles";
 const ARTICLES_SITE_BASE_PATH = "/actualites";
@@ -31,7 +32,16 @@ const OUTPUT_DIR = resolve(join(__dirname, "..", "var", "data", "articles"));
 
 const HTTP_PROXY = process.env.HTTP_PROXY;
 
-const { log, warn, error } = console;
+const logger = {
+    log: console.log,
+    info: (...args) => console.info(colors.blue(...args)),
+    warn: (...args) => console.warn(colors.yellow(...args)),
+    error: (...args) => console.error(colors.red(...args)),
+    success: (...args) => console.log(colors.green(...args)),
+};
+
+let nbDownloadedFiles = 0;
+let nbDownloadedFilesFailed = 0;
 
 /**
  * Binary to ASCII
@@ -45,7 +55,7 @@ async function ensureDirectoryExists(filePath) {
     try {
         await mkdir(dir, { recursive: true });
     } catch (err) {
-        error("An error occurred while creating the directory: ", err);
+        logger.error("An error occurred while creating the directory: ", err);
         throw err;
     }
 }
@@ -108,9 +118,7 @@ const downloadAllImages = async (document) => {
                 const newSrcSet = await Promise.all(
                     srcSet.map(async (src) => {
                         // split pour séparer l'URL et le descriptor, voir : https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#srcset
-                        const srcSplit = src.split(" ");
-                        const originalImgPath = srcSplit?.[0] ?? src;
-                        const descriptor = srcSplit?.[1] ?? null;
+                        const [originalImgPath, descriptor] = src.split(" ");
 
                         const newSrc = await downloadFile(originalImgPath);
 
@@ -139,7 +147,7 @@ const downloadAllDownloadableFiles = async (document) => {
                 const newUrl = await downloadFile(downLink.href);
                 downLink.href = ARTICLES_S3_GATEWAY_BASE_PATH + newUrl.replace(OUTPUT_DIR, "");
             } catch (err) {
-                warn(`Failed to download file for link ${downLink.href}:`, err);
+                downLink.removeAttribute("href");
             }
         })
     );
@@ -154,21 +162,22 @@ const downloadFile = async (originalImgPath) => {
     let mediaPath = normalize(join(OUTPUT_DIR, "media", url.pathname.replace("/sites/default/files", "")));
     mediaPath = decodeURI(mediaPath);
 
-    log(`Downloading file from ${url.href}`);
+    logger.log(`Downloading file from ${url.href}`);
     const response = await fetch(url.href, getFetchOptions());
 
-    if (response.status !== 200) {
-        const msg = `File download failed (code: ${response.status}) : ${url.href}`;
-        warn(msg);
-        warn("XXXXXXXXXXXXXX content-type - ", response.headers.get("content-type"), url.href);
-        return Promise.reject(msg);
+    if (!response.ok) {
+        const msg = `File download failed (code: ${response.status}, content-type: ${response.headers.get("content-type")}) : ${url.href}`;
+        logger.warn(msg);
+        nbDownloadedFilesFailed++;
+        throw new Error(msg);
     }
 
     await ensureDirectoryExists(mediaPath);
 
     await pipeline(response.body, createWriteStream(mediaPath));
 
-    log(`File saved to ${mediaPath}`);
+    logger.log(`File saved to ${mediaPath}`);
+    nbDownloadedFiles++;
     return mediaPath;
 };
 
@@ -178,9 +187,9 @@ const getFetchOptions = () => {
 
     return {
         agent: proxyAgent,
-        headers: {
-            Authorization: `Basic ${btoa(ARTICLES_CMS_USERNAME, ARTICLES_CMS_PASSWORD)}`,
-        },
+        // headers: {
+        //     Authorization: `Basic ${btoa(ARTICLES_CMS_USERNAME, ARTICLES_CMS_PASSWORD)}`,
+        // },
     };
 };
 
@@ -194,12 +203,12 @@ const prettify = async (string) => {
 
 const syncS3 = async () => {
     await execAsync(`rclone sync ${OUTPUT_DIR} ${RCLONE_S3_REMOTE}:${S3_BUCKET_NAME}/articles`);
-    log(`Synchronised ${OUTPUT_DIR} with S3`);
+    logger.info(`Synchronised ${OUTPUT_DIR} with S3`);
 };
 
 const cleanOutputDir = async () => {
     await rm(OUTPUT_DIR, { force: true, recursive: true });
-    log(`Output dir ${OUTPUT_DIR} cleared`);
+    logger.info(`Output dir ${OUTPUT_DIR} cleared`);
 };
 
 /**
@@ -224,7 +233,7 @@ const getPageNumbers = async () => {
         // Si la pagination n'existe pas, on considère qu'il n'y a qu'une seule page
     }
 
-    log(`First page : ${firstPage}, last page : ${lastPage}`);
+    logger.info(`First page : ${firstPage}, last page : ${lastPage}`);
 
     return {
         firstPage: parseInt(firstPage),
@@ -234,7 +243,7 @@ const getPageNumbers = async () => {
 
 const processArticlesIndex = async (page = 0) => {
     const url = `${ARTICLES_CMS_BASE_URL}/?page=${page}`;
-    log(`Fetching articles index from url ${url}`);
+    logger.log(`Fetching articles index from url ${url}`);
     const response = await fetch(url, getFetchOptions());
 
     const content = await response.text();
@@ -263,7 +272,7 @@ const processArticlesIndex = async (page = 0) => {
 
     await ensureDirectoryExists(outputFilePath);
     await writeFile(outputFilePath, mainContent, { flag: "w" });
-    log(`Saved main HTML file to ${outputFilePath}`);
+    logger.log(`Saved main HTML file to ${outputFilePath}`);
 
     // Retoune la liste des slugs des articles
     return articleSlugsList;
@@ -303,14 +312,14 @@ const processSingleArticle = async (slug) => {
 
     await ensureDirectoryExists(outputFilePath);
     await writeFile(outputFilePath, articleContent, { flag: "w" });
-    log(`Saved article ${slug} HTML file to ${outputFilePath}`);
+    logger.log(`Saved article ${slug} HTML file to ${outputFilePath}`);
 };
 
 (async () => {
     await cleanOutputDir();
 
-    log(`Fetching URL ${ARTICLES_CMS_BASE_URL}`);
-    log(`With proxy ${HTTP_PROXY}`);
+    logger.info(`Fetching URL ${ARTICLES_CMS_BASE_URL}`);
+    logger.info(`With proxy ${HTTP_PROXY}`);
 
     // la liste paginée des articles
     const { firstPage, lastPage } = await getPageNumbers();
@@ -324,5 +333,12 @@ const processSingleArticle = async (slug) => {
 
     if (process.env.APP_ENV === "prod") {
         await cleanOutputDir();
+    }
+
+    logger.info(`Downloaded ${nbDownloadedFiles} file(s) successfully.`);
+    if (nbDownloadedFilesFailed > 0) {
+        logger.warn(`Failed to download ${nbDownloadedFilesFailed} file(s).`);
+    } else {
+        logger.success("All files downloaded successfully.");
     }
 })();
