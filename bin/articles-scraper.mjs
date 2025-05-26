@@ -64,6 +64,31 @@ const removeElementsWithClasses = (document, classes = []) => {
 };
 
 /**
+ * @param {HTMLElement} el
+ */
+const removeElementKeepChildren = (el) => {
+    if (el && el.parentNode) {
+        // Insérer tous les enfants de l'élément avant l'élément lui-même
+        while (el.firstChild) {
+            el.parentNode.insertBefore(el.firstChild, el);
+        }
+        // Supprimer l'élément original
+        el.parentNode.removeChild(el);
+    }
+};
+
+/**
+ * Supprimer les enfants des éléments avec les classes spécifiées
+ *
+ * @param {HTMLElement} document
+ * @param {string[]} classes
+ */
+const removeElementsWithClassesKeepChildren = (document, classes = []) => {
+    const elements = classes.map((cls) => [...document.querySelectorAll(`.${cls}`)]).flat();
+    elements.forEach((el) => removeElementKeepChildren(el));
+};
+
+/**
  * Télécharger les img et réécrire l'URL des img
  *
  * @param {HTMLElement} document
@@ -219,6 +244,7 @@ const processArticlesIndex = async (page = 0) => {
     const $main = document.querySelector("main");
 
     removeElementsWithClasses($main, ["visually-hidden", "hidden", "js-hide"]);
+    removeElementsWithClassesKeepChildren($main, ["fr-container"]);
 
     await downloadAllImages($main);
 
