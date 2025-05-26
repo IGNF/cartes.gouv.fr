@@ -16,8 +16,8 @@ import colors from "yoctocolors";
 const execAsync = promisify(exec);
 
 const ARTICLES_CMS_BASE_URL = process.env.ARTICLES_CMS_BASE_URL;
-// const ARTICLES_CMS_USERNAME = process.env.ARTICLES_CMS_USERNAME;
-// const ARTICLES_CMS_PASSWORD = process.env.ARTICLES_CMS_PASSWORD;
+const ARTICLES_CMS_USERNAME = process.env.ARTICLES_CMS_USERNAME;
+const ARTICLES_CMS_PASSWORD = process.env.ARTICLES_CMS_PASSWORD;
 
 const ARTICLES_S3_GATEWAY_BASE_PATH = "/_cartes_s3_gateway/articles";
 const ARTICLES_SITE_BASE_PATH = "/actualites";
@@ -182,15 +182,20 @@ const downloadFile = async (originalImgPath) => {
 };
 
 const getFetchOptions = () => {
-    const proxyUrl = HTTP_PROXY;
-    const proxyAgent = new HttpsProxyAgent(proxyUrl);
+    const options = {};
 
-    return {
-        agent: proxyAgent,
-        // headers: {
-        //     Authorization: `Basic ${btoa(ARTICLES_CMS_USERNAME, ARTICLES_CMS_PASSWORD)}`,
-        // },
-    };
+    if (HTTP_PROXY) {
+        options.agent = new HttpsProxyAgent(HTTP_PROXY);
+    }
+
+    if (ARTICLES_CMS_USERNAME && ARTICLES_CMS_PASSWORD) {
+        options.headers = {
+            ...options?.headers,
+            Authorization: `Basic ${btoa(ARTICLES_CMS_USERNAME, ARTICLES_CMS_PASSWORD)}`,
+        };
+    }
+
+    return options;
 };
 
 const prettify = async (string) => {
