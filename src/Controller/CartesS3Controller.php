@@ -10,7 +10,7 @@ use Symfony\Component\HttpKernel\Attribute\Cache;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route(
-    '/_cartes_s3_gateway',
+    '/files',
     name: 'cartesgouvfr_s3_gateway_',
     options: ['expose' => true],
 )]

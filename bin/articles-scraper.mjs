@@ -19,7 +19,9 @@ const ARTICLES_CMS_BASE_URL = process.env.ARTICLES_CMS_BASE_URL;
 const ARTICLES_CMS_USERNAME = process.env.ARTICLES_CMS_USERNAME;
 const ARTICLES_CMS_PASSWORD = process.env.ARTICLES_CMS_PASSWORD;
 
-const ARTICLES_S3_GATEWAY_BASE_PATH = "/_cartes_s3_gateway/articles";
+const ARTICLES_S3_GATEWAY_PATH_BASE = "/files";
+const ARTICLES_S3_GATEWAY_PATH_ARTICLES = join(ARTICLES_S3_GATEWAY_PATH_BASE, "/articles");
+
 const ARTICLES_SITE_BASE_PATH = "/actualites";
 
 const RCLONE_S3_REMOTE = "cartes_s3";
@@ -88,7 +90,7 @@ const removeElementKeepChildren = (el) => {
 };
 
 /**
- * Supprimer les enfants des éléments avec les classes spécifiées
+ * Supprimer les éléments avec les classes spécifiées sans supprimer les enfants
  *
  * @param {HTMLElement} document
  * @param {string[]} classes
@@ -109,7 +111,7 @@ const downloadAllImages = async (document) => {
         imgList.map(async (img) => {
             // src
             const newSrc = await downloadFile(img.src);
-            img.src = ARTICLES_S3_GATEWAY_BASE_PATH + newSrc.replace(OUTPUT_DIR, "");
+            img.src = ARTICLES_S3_GATEWAY_PATH_ARTICLES + newSrc.replace(OUTPUT_DIR, "");
 
             // srcset
             if (img.srcset && img.srcset.length > 0) {
@@ -123,7 +125,7 @@ const downloadAllImages = async (document) => {
                         const newSrc = await downloadFile(originalImgPath);
 
                         // reconstitution de l'URL
-                        return ARTICLES_S3_GATEWAY_BASE_PATH + newSrc.replace(OUTPUT_DIR, "") + (descriptor !== null ? " " + descriptor : "");
+                        return ARTICLES_S3_GATEWAY_PATH_ARTICLES + newSrc.replace(OUTPUT_DIR, "") + (descriptor !== null ? " " + descriptor : "");
                     })
                 );
 
@@ -145,7 +147,7 @@ const downloadAllDownloadableFiles = async (document) => {
         downloadLinks.map(async (downLink) => {
             try {
                 const newUrl = await downloadFile(downLink.href);
-                downLink.href = ARTICLES_S3_GATEWAY_BASE_PATH + newUrl.replace(OUTPUT_DIR, "");
+                downLink.href = ARTICLES_S3_GATEWAY_PATH_ARTICLES + newUrl.replace(OUTPUT_DIR, "");
             } catch (err) {
                 downLink.removeAttribute("href");
             }
@@ -155,10 +157,10 @@ const downloadAllDownloadableFiles = async (document) => {
 
 /**
  *
- * @param {?string} originalImgPath
+ * @param {string} originalFilePath
  */
-const downloadFile = async (originalImgPath) => {
-    const url = new URL(ARTICLES_CMS_BASE_URL + originalImgPath);
+const downloadFile = async (originalFilePath) => {
+    const url = new URL(ARTICLES_CMS_BASE_URL + originalFilePath);
     let mediaPath = normalize(join(OUTPUT_DIR, "media", url.pathname.replace("/sites/default/files", "")));
     mediaPath = decodeURI(mediaPath);
 
@@ -238,7 +240,7 @@ const getPageNumbers = async () => {
         // Si la pagination n'existe pas, on considère qu'il n'y a qu'une seule page
     }
 
-    logger.info(`First page : ${firstPage}, last page : ${lastPage}`);
+    logger.info(`First page: ${firstPage}, last page: ${lastPage}`);
 
     return {
         firstPage: parseInt(firstPage),
@@ -277,7 +279,7 @@ const processArticlesIndex = async (page = 0) => {
 
     await ensureDirectoryExists(outputFilePath);
     await writeFile(outputFilePath, mainContent, { flag: "w" });
-    logger.log(`Saved main HTML file to ${outputFilePath}`);
+    logger.log(`Saved articles index HTML file to ${outputFilePath}`);
 
     // Retoune la liste des slugs des articles
     return articleSlugsList;
@@ -303,10 +305,10 @@ const processSingleArticle = async (slug) => {
     await downloadAllDownloadableFiles($article);
 
     /**
-     * Réécrire l'URL des liens internes qui commencent par '/', sauf ceux qui commencent par '/_cartes_s3_gateway'
+     * Réécrire l'URL des liens internes qui commencent par '/', sauf ceux qui commencent par ARTICLES_S3_GATEWAY_PATH_BASE
      * parce que ce sont des documents qu'on a téléchargés et mis sur le S3
      */
-    const internalLinks = [...$article.querySelectorAll("a[href^='/']:not([href^='/_cartes_s3_gateway'])")];
+    const internalLinks = [...$article.querySelectorAll(`a[href^='/']:not([href^='${ARTICLES_S3_GATEWAY_PATH_BASE}'])`)];
     internalLinks.forEach((el) => {
         el.href = ARTICLES_SITE_BASE_PATH + el.href;
     });
