@@ -19,7 +19,7 @@ RUN APP_ENV=prod composer install --prefer-dist --no-dev --no-cache --optimize-a
 #----------------------------------------------------------------------
 # Installer les dépendances JavaScript/nodejs dans une couche dédiée
 #----------------------------------------------------------------------
-FROM ${registry}/library/node:20-alpine AS deps_nodejs
+FROM ${registry}/library/node:20-alpine AS deps_nodejs_build
 ARG project_dir
 RUN mkdir -p ${project_dir}
 WORKDIR ${project_dir}
@@ -27,9 +27,17 @@ WORKDIR ${project_dir}
 RUN apk add --no-cache git
 
 COPY --from=deps_php ${project_dir} .
-RUN yarn install --production --frozen-lockfile \
+RUN yarn install --production=false --frozen-lockfile \
     && yarn build \
     && yarn cache clean
+
+FROM ${registry}/library/node:20-alpine AS deps_nodejs_runtime
+ARG project_dir
+RUN mkdir -p ${project_dir}
+WORKDIR ${project_dir}
+
+COPY --from=deps_php ${project_dir} .
+RUN yarn install --production=true --frozen-lockfile --ignore-scripts
 
 #----------------------------------------------------------------------
 # Créer l'image de base de l'application
@@ -56,6 +64,7 @@ RUN apt-get -qq update \
     && apt-get -qq install --no-install-recommends -y \
     unzip zip \
     curl wget \
+    rclone \
     && apt-get -qq clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 #------------------------------------------------------------------------
@@ -143,7 +152,10 @@ WORKDIR ${project_dir}
 COPY --exclude=.git --exclude=var . .
 COPY --from=deps_php ${project_dir}/vendor vendor
 COPY --from=deps_php ${project_dir}/public/bundles public/bundles
-COPY --from=deps_nodejs ${project_dir}/public/build public/build
+COPY --from=deps_nodejs_build ${project_dir}/public/build public/build
+COPY --from=deps_nodejs_runtime ${project_dir}/node_modules node_modules
+COPY --from=node:20-slim /usr/local/lib/node_modules /usr/local/lib/node_modules
+COPY --from=node:20-slim /usr/local/bin/node /usr/local/bin/node
 
 RUN mkdir -p ${project_dir}/var \
     && chown -R www-data:www-data ${project_dir}/var/
