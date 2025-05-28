@@ -46,6 +46,74 @@ const logger = {
 let nbDownloadedFiles = 0;
 let nbDownloadedFilesFailed = 0;
 
+const CONCURRENCY_LIMIT = 1;
+const CONCURRENCY_DELAY = 200;
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 1000;
+
+/**
+ * @param {Function} fn
+ * @param {Object} options.maxRetries
+ * @param {Object} options.retryDelay
+ * @returns {Promise<any>}
+ */
+const withRetry = async (fn, options = {}) => {
+    const { maxRetries = MAX_RETRIES, retryDelay = RETRY_DELAY } = options;
+    let lastError;
+
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+        try {
+            return await fn();
+        } catch (error) {
+            lastError = error;
+            const delay = retryDelay * Math.pow(2, attempt);
+            logger.warn(`Attempt ${attempt + 1}/${maxRetries} failed. Retrying in ${delay}ms...`);
+            await new Promise((resolve) => setTimeout(resolve, delay));
+        }
+    }
+
+    throw lastError;
+};
+
+/**
+ * Effectue une opération asynchrone sur chaque élément d'un tableau avec une limite de concurrence, avec une option de délai entre les opérations
+ *
+ * @param {Array} items
+ * @param {Function} fn
+ * @param {number} options.concurrency
+ * @param {number} options.delay
+ * @returns {Promise<Array>}
+ */
+const withConcurrency = async (items, fn, options = {}) => {
+    const { concurrency = CONCURRENCY_LIMIT, delay = CONCURRENCY_DELAY } = options;
+
+    const results = [];
+    const pending = new Set();
+
+    for (const item of items) {
+        if (delay > 0 && results.length > 0) {
+            await new Promise((resolve) => setTimeout(resolve, delay));
+        }
+
+        const promise = (async () => {
+            try {
+                return await fn(item);
+            } finally {
+                pending.delete(promise);
+            }
+        })();
+
+        pending.add(promise);
+        results.push(promise);
+
+        if (pending.size >= concurrency) {
+            await Promise.race(pending);
+        }
+    }
+
+    return Promise.all(results);
+};
+
 /**
  * Binary to ASCII
  * @param {string} username
@@ -108,33 +176,29 @@ const removeElementsWithClassesKeepChildren = (document, classes = []) => {
  */
 const downloadAllImages = async (document) => {
     const imgList = [...(document?.querySelectorAll("img") ?? [])];
-    await Promise.all(
-        imgList.map(async (img) => {
-            // src
-            const newSrc = await downloadFile(img.src);
-            img.src = ARTICLES_S3_GATEWAY_PATH_ARTICLES + newSrc.replace(OUTPUT_DIR, "");
+    await withConcurrency(imgList, async (img) => {
+        // src
+        const newSrc = await downloadFile(img.src);
+        img.src = ARTICLES_S3_GATEWAY_PATH_ARTICLES + newSrc.replace(OUTPUT_DIR, "");
 
-            // srcset
-            if (img.srcset && img.srcset.length > 0) {
-                const srcSet = img.srcset.split(", ");
+        // srcset
+        if (img.srcset && img.srcset.length > 0) {
+            const srcSet = img.srcset.split(", ");
 
-                const newSrcSet = await Promise.all(
-                    srcSet.map(async (src) => {
-                        // split pour séparer l'URL et le descriptor, voir : https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#srcset
-                        const [originalImgPath, descriptor] = src.split(" ");
+            const newSrcSet = await withConcurrency(srcSet, async (src) => {
+                // split pour séparer l'URL et le descriptor, voir : https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#srcset
+                const [originalImgPath, descriptor] = src.split(" ");
 
-                        const newSrc = await downloadFile(originalImgPath);
+                const newSrc = await downloadFile(originalImgPath);
 
-                        // reconstitution de l'URL
-                        return ARTICLES_S3_GATEWAY_PATH_ARTICLES + newSrc.replace(OUTPUT_DIR, "") + (descriptor !== null ? " " + descriptor : "");
-                    })
-                );
+                // reconstitution de l'URL
+                return ARTICLES_S3_GATEWAY_PATH_ARTICLES + newSrc.replace(OUTPUT_DIR, "") + (descriptor !== null ? " " + descriptor : "");
+            });
 
-                const newSrcSetString = newSrcSet.join(", ");
-                img.srcset = newSrcSetString;
-            }
-        })
-    );
+            const newSrcSetString = newSrcSet.join(", ");
+            img.srcset = newSrcSetString;
+        }
+    });
 };
 
 /**
@@ -144,16 +208,14 @@ const downloadAllImages = async (document) => {
  */
 const downloadAllDownloadableFiles = async (document) => {
     const downloadLinks = [...(document?.querySelectorAll("a.fr-link--download") ?? [])];
-    await Promise.all(
-        downloadLinks.map(async (downLink) => {
-            try {
-                const newUrl = await downloadFile(downLink.href);
-                downLink.href = ARTICLES_S3_GATEWAY_PATH_ARTICLES + newUrl.replace(OUTPUT_DIR, "");
-            } catch (err) {
-                downLink.removeAttribute("href");
-            }
-        })
-    );
+    await withConcurrency(downloadLinks, async (downLink) => {
+        try {
+            const newUrl = await downloadFile(downLink.href);
+            downLink.href = ARTICLES_S3_GATEWAY_PATH_ARTICLES + newUrl.replace(OUTPUT_DIR, "");
+        } catch (err) {
+            downLink.removeAttribute("href");
+        }
+    });
 };
 
 /**
@@ -166,22 +228,27 @@ const downloadFile = async (originalFilePath) => {
     newFilePath = decodeURI(newFilePath);
 
     logger.log(`Downloading file from ${url.href}`);
-    const response = await fetch(url.href, getFetchOptions());
 
-    if (!response.ok) {
-        const msg = `File download failed (code: ${response.status}, content-type: ${response.headers.get("content-type")}) : ${url.href}`;
-        logger.warn(msg);
+    const response = await withRetry(async () => {
+        const res = await fetch(url.href, getFetchOptions());
+        if (!res.ok) {
+            throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
+        return res;
+    });
+
+    try {
+        await ensureDirectoryExists(newFilePath);
+        await pipeline(response.body, createWriteStream(newFilePath));
+
+        logger.log(`File saved to ${newFilePath}`);
+        nbDownloadedFiles++;
+        return newFilePath;
+    } catch (error) {
+        logger.error(`Failed to download ${url.href}: ${error.message}`);
         nbDownloadedFilesFailed++;
-        throw new Error(msg);
+        throw error;
     }
-
-    await ensureDirectoryExists(newFilePath);
-
-    await pipeline(response.body, createWriteStream(newFilePath));
-
-    logger.log(`File saved to ${newFilePath}`);
-    nbDownloadedFiles++;
-    return newFilePath;
 };
 
 const getFetchOptions = () => {
@@ -344,41 +411,42 @@ const processSingleArticle = async (slug) => {
 };
 
 (async () => {
-    // await cleanOutputDir();
+    try {
+        await cleanOutputDir();
 
-    logger.info(`Fetching URL ${ARTICLES_CMS_BASE_URL}`);
-    logger.info(`With proxy ${HTTP_PROXY}`);
+        logger.info(`Fetching URL ${ARTICLES_CMS_BASE_URL}`);
+        logger.info(`With proxy ${HTTP_PROXY}`);
 
-    // la liste paginée des articles (index général)
-    const { firstPage, lastPage } = await getPageNumbers(ARTICLES_CMS_BASE_URL);
-    const pagesRange = getArrayRange(firstPage, lastPage); // [0,1,2,3,...,n]
-    const articleSlugsList = (await Promise.all(pagesRange.map((page) => processArticlesIndex(ARTICLES_CMS_BASE_URL, page)))).flat();
+        // la liste paginée des articles (index général)
+        const { firstPage, lastPage } = await getPageNumbers(ARTICLES_CMS_BASE_URL);
+        const pagesRange = getArrayRange(firstPage, lastPage); // [0,1,2,3,...,n]
+        const articleSlugsList = (await withConcurrency(pagesRange, (page) => processArticlesIndex(ARTICLES_CMS_BASE_URL, page))).flat();
 
-    //  la liste paginée des articles par tag (index pour chaque tag)
-    const response = await fetch(ARTICLES_CMS_BASE_URL, getFetchOptions());
+        //  la liste paginée des articles par tag (index pour chaque tag)
+        const response = await fetch(ARTICLES_CMS_BASE_URL, getFetchOptions());
 
-    const content = await response.text();
-    const { document } = new JSDOM(content).window;
+        const content = await response.text();
+        const { document } = new JSDOM(content).window;
 
-    const tags = await processTagsInDocument(document);
+        const tags = await processTagsInDocument(document);
 
-    await Promise.all(
-        tags.map(async (tag) => {
+        await withConcurrency(tags, async (tag) => {
             const { firstPage, lastPage } = await getPageNumbers(ARTICLES_CMS_BASE_URL);
-
             const pagesRange = getArrayRange(firstPage, lastPage); // [0,1,2,3,...,n]
-            await Promise.all(pagesRange.map((page) => processArticlesIndex(tag.originalUrl, page, "list/tags/" + tag.tag)));
-        })
-    );
+            await withConcurrency(pagesRange, (page) => processArticlesIndex(tag.originalUrl, page, "list/tags/" + tag.tag));
+        });
 
-    // les articles individuels
-    await Promise.all(articleSlugsList.map((slug) => processSingleArticle(slug)));
+        // les articles individuels
+        await withConcurrency(articleSlugsList, (slug) => processSingleArticle(slug));
 
-    logger.info(`Downloaded ${nbDownloadedFiles} file(s) successfully.`);
-    if (nbDownloadedFilesFailed > 0) {
-        logger.warn(`Failed to download ${nbDownloadedFilesFailed} file(s).`);
-    } else {
-        logger.success("All files downloaded successfully.");
+        logger.info(`Downloaded ${nbDownloadedFiles} file(s) successfully.`);
+        if (nbDownloadedFilesFailed > 0) {
+            logger.warn(`Failed to download ${nbDownloadedFilesFailed} file(s).`);
+        } else {
+            logger.success("All files downloaded successfully.");
+        }
+    } catch (error) {
+        logger.error("Script failed:", error);
     }
 
     await syncS3();
