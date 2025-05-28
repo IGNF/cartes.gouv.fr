@@ -33,6 +33,7 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): Brea
             defaultProps.segments.push({ label: t("contact"), linkProps: routes.contact().link });
             return { ...defaultProps, currentPageLabel: t(route.name) };
         case "news_list":
+        case "news_list_by_tag":
             return { ...defaultProps, currentPageLabel: t("news") };
         case "news_article":
             // géré dans le composant NewsArticle

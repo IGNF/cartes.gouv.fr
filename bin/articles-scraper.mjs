@@ -22,7 +22,8 @@ const ARTICLES_CMS_PASSWORD = process.env.ARTICLES_CMS_PASSWORD;
 const ARTICLES_S3_GATEWAY_PATH_BASE = "/files";
 const ARTICLES_S3_GATEWAY_PATH_ARTICLES = join(ARTICLES_S3_GATEWAY_PATH_BASE, "/articles");
 
-const ARTICLES_SITE_BASE_PATH = "/actualites";
+const ARTICLES_SITE_PATH_BASE = "/actualites";
+const ARTICLES_SITE_PATH_TAGS = "/actualites/liste";
 
 const RCLONE_S3_REMOTE = "cartes_s3";
 const S3_BUCKET_NAME = process.env.S3_BUCKET_NAME;
@@ -36,10 +37,10 @@ const HTTP_PROXY = process.env.HTTP_PROXY;
 
 const logger = {
     log: console.log,
-    info: (...args) => console.info(colors.blue(...args)),
-    warn: (...args) => console.warn(colors.yellow(...args)),
-    error: (...args) => console.error(colors.red(...args)),
-    success: (...args) => console.log(colors.green(...args)),
+    info: (...args) => console.info(colors.bgBlue(...args)),
+    warn: (...args) => console.warn(colors.bgYellow(...args)),
+    error: (...args) => console.error(colors.bgRed(...args)),
+    success: (...args) => console.log(colors.bgGreen(...args)),
 };
 
 let nbDownloadedFiles = 0;
@@ -71,7 +72,7 @@ const getArrayRange = (start, stop, step = 1) => Array.from({ length: (stop - st
  * @param {string[]} classes
  */
 const removeElementsWithClasses = (document, classes = []) => {
-    const elements = classes.map((cls) => [...document.querySelectorAll(`.${cls}`)]).flat();
+    const elements = classes.map((cls) => [...(document?.querySelectorAll(`.${cls}`) ?? [])]).flat();
     elements.forEach((el) => el.remove());
 };
 
@@ -96,7 +97,7 @@ const removeElementKeepChildren = (el) => {
  * @param {string[]} classes
  */
 const removeElementsWithClassesKeepChildren = (document, classes = []) => {
-    const elements = classes.map((cls) => [...document.querySelectorAll(`.${cls}`)]).flat();
+    const elements = classes.map((cls) => [...(document?.querySelectorAll(`.${cls}`) ?? [])]).flat();
     elements.forEach((el) => removeElementKeepChildren(el));
 };
 
@@ -106,7 +107,7 @@ const removeElementsWithClassesKeepChildren = (document, classes = []) => {
  * @param {HTMLElement} document
  */
 const downloadAllImages = async (document) => {
-    const imgList = [...document.querySelectorAll("img")];
+    const imgList = [...(document?.querySelectorAll("img") ?? [])];
     await Promise.all(
         imgList.map(async (img) => {
             // src
@@ -142,7 +143,7 @@ const downloadAllImages = async (document) => {
  * @param {HTMLElement} document
  */
 const downloadAllDownloadableFiles = async (document) => {
-    const downloadLinks = [...document.querySelectorAll("a.fr-link--download")];
+    const downloadLinks = [...(document?.querySelectorAll("a.fr-link--download") ?? [])];
     await Promise.all(
         downloadLinks.map(async (downLink) => {
             try {
@@ -161,8 +162,8 @@ const downloadAllDownloadableFiles = async (document) => {
  */
 const downloadFile = async (originalFilePath) => {
     const url = new URL(ARTICLES_CMS_BASE_URL + originalFilePath);
-    let mediaPath = normalize(join(OUTPUT_DIR, "media", url.pathname.replace("/sites/default/files", "")));
-    mediaPath = decodeURI(mediaPath);
+    let newFilePath = normalize(join(OUTPUT_DIR, "media", url.pathname.replace("/sites/default/files", "")));
+    newFilePath = decodeURI(newFilePath);
 
     logger.log(`Downloading file from ${url.href}`);
     const response = await fetch(url.href, getFetchOptions());
@@ -174,13 +175,13 @@ const downloadFile = async (originalFilePath) => {
         throw new Error(msg);
     }
 
-    await ensureDirectoryExists(mediaPath);
+    await ensureDirectoryExists(newFilePath);
 
-    await pipeline(response.body, createWriteStream(mediaPath));
+    await pipeline(response.body, createWriteStream(newFilePath));
 
-    logger.log(`File saved to ${mediaPath}`);
+    logger.log(`File saved to ${newFilePath}`);
     nbDownloadedFiles++;
-    return mediaPath;
+    return newFilePath;
 };
 
 const getFetchOptions = () => {
@@ -221,8 +222,8 @@ const cleanOutputDir = async () => {
 /**
  * Renvoie les numéros de page de début et de fin. La pagination commence à 0.
  */
-const getPageNumbers = async () => {
-    const response = await fetch(ARTICLES_CMS_BASE_URL, getFetchOptions());
+const getPageNumbers = async (url) => {
+    const response = await fetch(url, getFetchOptions());
 
     const content = await response.text();
     const { document } = new JSDOM(content).window;
@@ -235,7 +236,7 @@ const getPageNumbers = async () => {
     try {
         const $navPaginationUl = $main.querySelector("nav.fr-pagination>.fr-pagination__list");
         const navPagLastChild = $navPaginationUl.lastElementChild.querySelector("a");
-        lastPage = new URL(ARTICLES_CMS_BASE_URL + navPagLastChild.href).searchParams.get("page");
+        lastPage = new URL(url + navPagLastChild.href).searchParams.get("page");
     } catch (error) {
         // Si la pagination n'existe pas, on considère qu'il n'y a qu'une seule page
     }
@@ -248,8 +249,25 @@ const getPageNumbers = async () => {
     };
 };
 
-const processArticlesIndex = async (page = 0) => {
-    const url = `${ARTICLES_CMS_BASE_URL}/?page=${page}`;
+const processTagsInDocument = async (document) => {
+    const $tagsGroup = document?.querySelector("ul.fr-tags-group");
+    const $tagsList = [...($tagsGroup?.querySelectorAll("a.fr-tag") ?? [])];
+
+    const tags = [];
+    $tagsList.forEach((el) => {
+        tags.push({
+            tag: el.href.split("/").pop(), // le tag est la dernière partie de l'URL,
+            originalUrl: el.href,
+        });
+
+        el.href = join(ARTICLES_SITE_PATH_TAGS, el.href.split("/")?.[5] ?? "");
+    });
+
+    return tags;
+};
+
+const processArticlesIndex = async (baseUrl, page = 0, outputSubDir = "list") => {
+    const url = `${baseUrl}/?page=${page}`;
     logger.log(`Fetching articles index from url ${url}`);
     const response = await fetch(url, getFetchOptions());
 
@@ -265,17 +283,20 @@ const processArticlesIndex = async (page = 0) => {
     await downloadAllImages($main);
 
     // Réécrire l'URL des actus
-    const articleLinks = [...$main.querySelectorAll(".fr-card__title>a[href^='/']")];
+    const articleLinks = [...($main?.querySelectorAll(".fr-card__title>a[href^='/']") ?? [])];
     const articleSlugsList = [];
     articleLinks.forEach((el) => {
         articleSlugsList.push(el.href.replace("/", ""));
-        el.href = ARTICLES_SITE_BASE_PATH + el.href;
+        el.href = ARTICLES_SITE_PATH_BASE + el.href;
     });
 
+    // Réécrire l'URL des pages de tags
+    processTagsInDocument($main);
+
     // Sauvegarde du HTML final dans un fichier
-    let mainContent = $main.innerHTML;
+    let mainContent = $main?.innerHTML ?? "";
     mainContent = await prettify(mainContent);
-    const outputFilePath = join(OUTPUT_DIR, "list", `${page}.html`);
+    const outputFilePath = join(OUTPUT_DIR, outputSubDir, `${page}.html`);
 
     await ensureDirectoryExists(outputFilePath);
     await writeFile(outputFilePath, mainContent, { flag: "w" });
@@ -308,12 +329,12 @@ const processSingleArticle = async (slug) => {
      * Réécrire l'URL des liens internes qui commencent par '/', sauf ceux qui commencent par ARTICLES_S3_GATEWAY_PATH_BASE
      * parce que ce sont des documents qu'on a téléchargés et mis sur le S3
      */
-    const internalLinks = [...$article.querySelectorAll(`a[href^='/']:not([href^='${ARTICLES_S3_GATEWAY_PATH_BASE}'])`)];
+    const internalLinks = [...($article?.querySelectorAll(`a[href^='/']:not([href^='${ARTICLES_S3_GATEWAY_PATH_BASE}'])`) ?? [])];
     internalLinks.forEach((el) => {
-        el.href = ARTICLES_SITE_BASE_PATH + el.href;
+        el.href = ARTICLES_SITE_PATH_BASE + el.href;
     });
 
-    let articleContent = $article.innerHTML;
+    let articleContent = $article?.innerHTML ?? "";
     articleContent = await prettify(articleContent);
     const outputFilePath = join(OUTPUT_DIR, `${slug}.html`);
 
@@ -323,20 +344,35 @@ const processSingleArticle = async (slug) => {
 };
 
 (async () => {
-    await cleanOutputDir();
+    // await cleanOutputDir();
 
     logger.info(`Fetching URL ${ARTICLES_CMS_BASE_URL}`);
     logger.info(`With proxy ${HTTP_PROXY}`);
 
-    // la liste paginée des articles
-    const { firstPage, lastPage } = await getPageNumbers();
+    // la liste paginée des articles (index général)
+    const { firstPage, lastPage } = await getPageNumbers(ARTICLES_CMS_BASE_URL);
     const pagesRange = getArrayRange(firstPage, lastPage); // [0,1,2,3,...,n]
-    const articleSlugsList = (await Promise.all(pagesRange.map((page) => processArticlesIndex(page)))).flat();
+    const articleSlugsList = (await Promise.all(pagesRange.map((page) => processArticlesIndex(ARTICLES_CMS_BASE_URL, page)))).flat();
+
+    //  la liste paginée des articles par tag (index pour chaque tag)
+    const response = await fetch(ARTICLES_CMS_BASE_URL, getFetchOptions());
+
+    const content = await response.text();
+    const { document } = new JSDOM(content).window;
+
+    const tags = await processTagsInDocument(document);
+
+    await Promise.all(
+        tags.map(async (tag) => {
+            const { firstPage, lastPage } = await getPageNumbers(ARTICLES_CMS_BASE_URL);
+
+            const pagesRange = getArrayRange(firstPage, lastPage); // [0,1,2,3,...,n]
+            await Promise.all(pagesRange.map((page) => processArticlesIndex(tag.originalUrl, page, "list/tags/" + tag.tag)));
+        })
+    );
 
     // les articles individuels
     await Promise.all(articleSlugsList.map((slug) => processSingleArticle(slug)));
-
-    await syncS3();
 
     if (process.env.APP_ENV === "prod") {
         await cleanOutputDir();
@@ -348,4 +384,6 @@ const processSingleArticle = async (slug) => {
     } else {
         logger.success("All files downloaded successfully.");
     }
+
+    await syncS3();
 })();

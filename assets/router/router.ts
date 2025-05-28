@@ -24,6 +24,13 @@ const publicRoutes = {
         },
         () => `${appRoot}/actualites`
     ),
+    news_list_by_tag: defineRoute(
+        {
+            tag: param.path.optional.string,
+            page: param.query.optional.number.default(0),
+        },
+        (p) => `${appRoot}/actualites/liste/${p.tag}`
+    ),
     news_article: defineRoute(
         {
             slug: param.path.string,

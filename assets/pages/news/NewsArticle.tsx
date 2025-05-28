@@ -63,16 +63,10 @@ const NewsArticle: FC<NewsArticleProps> = ({ slug }) => {
             }}
             title={documentTitle}
         >
-            {articleQuery.isLoading && (
-                <div className={fr.cx("fr-container")}>
-                    <LoadingText message="Actualités" as="h1" withSpinnerIcon={true} />
-                </div>
-            )}
+            {articleQuery.isLoading && <LoadingText message="Actualités" as="h1" withSpinnerIcon={true} />}
 
             {articleQuery.error && (
-                <div className={fr.cx("fr-container")}>
-                    <Alert severity={"error"} title={tCommon("error")} description={articleQuery.error?.message} className={fr.cx("fr-my-3w")} />
-                </div>
+                <Alert severity={"error"} title={tCommon("error")} description={articleQuery.error?.message} className={fr.cx("fr-my-3w")} />
             )}
 
             {articleQuery.data && (
