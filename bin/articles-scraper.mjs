@@ -374,10 +374,6 @@ const processSingleArticle = async (slug) => {
     // les articles individuels
     await Promise.all(articleSlugsList.map((slug) => processSingleArticle(slug)));
 
-    if (process.env.APP_ENV === "prod") {
-        await cleanOutputDir();
-    }
-
     logger.info(`Downloaded ${nbDownloadedFiles} file(s) successfully.`);
     if (nbDownloadedFilesFailed > 0) {
         logger.warn(`Failed to download ${nbDownloadedFilesFailed} file(s).`);
@@ -386,4 +382,8 @@ const processSingleArticle = async (slug) => {
     }
 
     await syncS3();
+
+    if (process.env.APP_ENV === "prod") {
+        await cleanOutputDir();
+    }
 })();
