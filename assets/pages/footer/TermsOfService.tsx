@@ -1,11 +1,74 @@
 import { fr } from "@codegouvfr/react-dsfr";
 
-import { routes } from "../../router/router";
 import Main from "../../components/Layout/Main";
+import { routes } from "../../router/router";
+
+import { SummaryLink } from "@/@types/app";
+import { Summary } from "@codegouvfr/react-dsfr/Summary";
 
 import "../../sass/components/summary.scss";
 
 const TermsOfService = () => {
+    const links: SummaryLink[] = [
+        {
+            text: "Accès aux API par les Utilisateurs Géoplateforme",
+            linkProps: { href: "#anchor-1" },
+            subLinks: [
+                { text: "Accès aux API et à leur documentation par l’Utilisateur Géoplateforme", linkProps: { href: "#anchor-1.1" } },
+                { text: "Création d’un compte par l’Utilisateur Géoplateforme", linkProps: { href: "#anchor-1.2" } },
+                {
+                    text: "Suppression du compte",
+                    linkProps: { href: "#anchor-1.3" },
+                    subLinks: [
+                        { text: "Suppression à la demande de l’Utilisateur Géoplateforme", linkProps: { href: "#anchor-1.3.1" } },
+                        { text: "Suppression à l’initiative de l’IGN", linkProps: { href: "#anchor-1.3.2" } },
+                    ],
+                },
+                {
+                    text: "Accès et utilisation de certaines API après authentification de l’Utilisateur Géoplateforme auprès d’un fournisseur d’identité",
+                    linkProps: { href: "#anchor-1.4" },
+                },
+                { text: "Aucun transfert de droit ou licence en accédant à l’API", linkProps: { href: "#anchor-1.5" } },
+            ],
+        },
+        {
+            text: "Utilisation des API",
+            linkProps: { href: "#anchor-2" },
+            subLinks: [
+                { text: "Utilisation conforme des API par l’Utilisateur Géoplateforme", linkProps: { href: "#anchor-2.1" } },
+                { text: "Droits des Fournisseurs d’API", linkProps: { href: "#anchor-2.2" } },
+                { text: "Droits des Fournisseurs de données", linkProps: { href: "#anchor-2.3" } },
+                { text: "Droits concédés par le Fournisseur de données et par le Fournisseur d’API", linkProps: { href: "#anchor-2.4" } },
+                { text: "Blocage d’accès et d’utilisation", linkProps: { href: "#anchor-2.5" } },
+            ],
+        },
+        {
+            text: "ENGAGEMENTS DE L’IGN",
+            linkProps: { href: "#anchor-3" },
+            subLinks: [
+                { text: "Obligations de l’IGN en tant qu’opérateur de la Géoplateforme", linkProps: { href: "#anchor-3.1" } },
+                { text: "Hébergement des jeux de données et suppression des jeux de données hébergées", linkProps: { href: "#anchor-3.2" } },
+                { text: "Niveau de service", linkProps: { href: "#anchor-3.3" } },
+                {
+                    text: "Obligation d’information et de suivi en cas d’incident lors de l’utilisation de la Géoplateforme",
+                    linkProps: { href: "#anchor-3.4" },
+                },
+            ],
+        },
+        {
+            text: "Clauses diverses",
+            linkProps: { href: "#anchor-4" },
+            subLinks: [
+                { text: "Notification par l’Utilisateur Géoplateforme de la Géoplateforme", linkProps: { href: "#anchor-4.1" } },
+                { text: "Loi applicable – litiges", linkProps: { href: "#anchor-4.2" } },
+                { text: "Divisibilité", linkProps: { href: "#anchor-4.3" } },
+            ],
+        },
+        { text: "Annexe 1 : Liste des API de la Géoplateforme", linkProps: { href: "#anchor-annexe-1", className: "frx-nonumber" } },
+        { text: "Annexe 2 : Offre Géoplateforme", linkProps: { href: "#anchor-annexe-2", className: "frx-nonumber" } },
+        { text: "Annexe 3 : Accord de niveau de service", linkProps: { href: "#anchor-annexe-3", className: "frx-nonumber" } },
+    ];
+
     return (
         <Main title="Conditions générales d’utilisation">
             <div className={fr.cx("fr-grid-row")}>
@@ -16,154 +79,7 @@ const TermsOfService = () => {
                         <em>Version du 15 octobre 2024 – Institut national de l’information géographique et forestière (IGN)</em>
                     </p>
 
-                    <nav className={fr.cx("fr-summary", "fr-mb-4w")} role="navigation" aria-labelledby="fr-summary-title">
-                        <h2 className={fr.cx("fr-summary__title")} id="fr-summary-title">
-                            Sommaire
-                        </h2>
-                        <ol>
-                            <li>
-                                <a className={fr.cx("fr-summary__link")} id="summary-link-1" href="#anchor-1">
-                                    Accès aux API par les Utilisateurs Géoplateforme
-                                </a>
-                                <ol>
-                                    <li>
-                                        <a className={fr.cx("fr-summary__link")} id="summary-link-1-1" href="#anchor-1.1">
-                                            Accès aux API et à leur documentation par l’Utilisateur Géoplateforme
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a className={fr.cx("fr-summary__link")} id="summary-link-1-2" href="#anchor-1.2">
-                                            Création d’un compte par l’Utilisateur Géoplateforme
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a className={fr.cx("fr-summary__link")} id="summary-link-1-3" href="#anchor-1.3">
-                                            Suppression du compte
-                                        </a>
-                                        <ol>
-                                            <li>
-                                                <a className={fr.cx("fr-summary__link")} id="summary-link-1-3-1" href="#anchor-1.3.1">
-                                                    Suppression à la demande de l’Utilisateur Géoplateforme
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a className={fr.cx("fr-summary__link")} id="summary-link-1-3-2" href="#anchor-1.3.2">
-                                                    Suppression à l’initiative de l’IGN
-                                                </a>
-                                            </li>
-                                        </ol>
-                                    </li>
-                                    <li>
-                                        <a className={fr.cx("fr-summary__link")} id="summary-link-1-4" href="#anchor-1.4">
-                                            Accès et utilisation de certaines API après authentification de l’Utilisateur Géoplateforme auprès d’un fournisseur
-                                            d’identité
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a className={fr.cx("fr-summary__link")} id="summary-link-1-5" href="#anchor-1.5">
-                                            Aucun transfert de droit ou licence en accédant à l’API
-                                        </a>
-                                    </li>
-                                </ol>
-                            </li>
-                            <li>
-                                <a className={fr.cx("fr-summary__link")} id="summary-link-2" href="#anchor-2">
-                                    Utilisation des API
-                                </a>
-                                <ol>
-                                    <li>
-                                        <a className={fr.cx("fr-summary__link")} id="summary-link-2-1" href="#anchor-2.1">
-                                            Utilisation conforme des API par l’Utilisateur Géoplateforme
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a className={fr.cx("fr-summary__link")} id="summary-link-2-2" href="#anchor-2.2">
-                                            Droits des Fournisseurs d’API
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a className={fr.cx("fr-summary__link")} id="summary-link-2-3" href="#anchor-2.3">
-                                            Droits des Fournisseurs de données
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a className={fr.cx("fr-summary__link")} id="summary-link-2-4" href="#anchor-2.4">
-                                            Droits concédés par le Fournisseur de données et par le Fournisseur d’API
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a className={fr.cx("fr-summary__link")} id="summary-link-2-5" href="#anchor-2.5">
-                                            Blocage d’accès et d’utilisation
-                                        </a>
-                                    </li>
-                                </ol>
-                            </li>
-                            <li>
-                                <a className={fr.cx("fr-summary__link")} id="summary-link-3" href="#anchor-3">
-                                    ENGAGEMENTS DE L’IGN
-                                </a>
-                                <ol>
-                                    <li>
-                                        <a className={fr.cx("fr-summary__link")} id="summary-link-3-1" href="#anchor-3.1">
-                                            Obligations de l’IGN en tant qu’opérateur de la Géoplateforme
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a className={fr.cx("fr-summary__link")} id="summary-link-3-2" href="#anchor-3.2">
-                                            Hébergement des jeux de données et suppression des jeux de données hébergées
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a className={fr.cx("fr-summary__link")} id="summary-link-3-3" href="#anchor-3.3">
-                                            Niveau de service
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a className={fr.cx("fr-summary__link")} id="summary-link-3-4" href="#anchor-3.4">
-                                            Obligation d’information et de suivi en cas d’incident lors de l’utilisation de la Géoplateforme
-                                        </a>
-                                    </li>
-                                </ol>
-                            </li>
-                            <li>
-                                <a className={fr.cx("fr-summary__link")} id="summary-link-4" href="#anchor-4">
-                                    Clauses diverses
-                                </a>
-                                <ol>
-                                    <li>
-                                        <a className={fr.cx("fr-summary__link")} id="summary-link-4-1" href="#anchor-4.1">
-                                            Notification par l’Utilisateur Géoplateforme de la Géoplateforme
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a className={fr.cx("fr-summary__link")} id="summary-link-4-2" href="#anchor-4.2">
-                                            Loi applicable – litiges
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a className={fr.cx("fr-summary__link")} id="summary-link-4-3" href="#anchor-4.3">
-                                            Divisibilité
-                                        </a>
-                                    </li>
-                                </ol>
-                            </li>
-                            <li>
-                                <a className={fr.cx("fr-summary__link") + " frx-nonumber"} id="summary-link-annexe-1" href="#anchor-annexe-1">
-                                    Annexe 1&nbsp;: Liste des API de la Géoplateforme
-                                </a>
-                            </li>
-                            <li>
-                                <a className={fr.cx("fr-summary__link") + " frx-nonumber"} id="summary-link-annexe-2" href="#anchor-annexe-2">
-                                    Annexe 2&nbsp;: Offre Géoplateforme
-                                </a>
-                            </li>
-                            <li>
-                                <a className={fr.cx("fr-summary__link") + " frx-nonumber"} id="summary-link-annexe-3" href="#anchor-annexe-3">
-                                    Annexe 3&nbsp;: Accord de niveau de service
-                                </a>
-                            </li>
-                        </ol>
-                    </nav>
+                    <Summary className={fr.cx("fr-mb-4w")} title={"Sommaire"} as={"h2"} links={links} />
 
                     <p>
                         La Géoplateforme est une plateforme ouverte et mutualisée de géodonnées hébergeant et exposant des API, accessibles depuis une
