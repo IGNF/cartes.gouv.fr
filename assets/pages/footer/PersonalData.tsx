@@ -16,12 +16,15 @@ const PersonalData = () => {
 
     return (
         <Main title="Données à caractère personnel">
-            <Summary className={fr.cx("fr-mb-4w")} title={"Sommaire"} as={"h2"} links={links} />
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
                     <h1>Données à caractère personnel</h1>
 
-                    <h2 id={"anchor-1"}>Inscriptions aux événements</h2>
+                    <Summary className={fr.cx("fr-mb-4w")} title={"Sommaire"} as={"h2"} links={links} />
+
+                    <h2 id={"anchor-1"} tabIndex={-1}>
+                        Inscriptions aux événements
+                    </h2>
 
                     <p>
                         L’inscription aux événements (physique ou en ligne) sur le site cartes.gouv.fr donne lieu à la collecte, au stockage et au traitement de
@@ -43,7 +46,9 @@ const PersonalData = () => {
                         sur le site du partenaire organisateur de cet événement.
                     </p>
 
-                    <h2 id={"anchor-2"}>Accès à certaines API par un fournisseur d’identité</h2>
+                    <h2 id={"anchor-2"} tabIndex={-1}>
+                        Accès à certaines API par un fournisseur d’identité
+                    </h2>
 
                     <p>Certaines API sont accessibles et utilisables après authentification auprès de l’un des fournisseurs d’identité suivants&nbsp;:</p>
                     <ul>
@@ -53,7 +58,9 @@ const PersonalData = () => {
 
                     <p>Nous vous invitons à lire les politiques de protection des données personnelles de ces fournisseurs d’identité.</p>
 
-                    <h2 id={"anchor-3"}>Création d’un compte personnel</h2>
+                    <h2 id={"anchor-3"} tabIndex={-1}>
+                        Création d’un compte personnel
+                    </h2>
 
                     <p>
                         Le site cartes.gouv.fr offre aux utilisateurs la possibilité de créer un compte personnel pour accéder à des fonctions particulières et
@@ -117,7 +124,9 @@ const PersonalData = () => {
 
                     <p>2 ans à compter de la date de dernière connexion ou de la suppression du compte personnel ou du service</p>
 
-                    <h2 id={"anchor-4"}>Prise de contact via le formulaire de contact</h2>
+                    <h2 id={"anchor-4"} tabIndex={-1}>
+                        Prise de contact via le formulaire de contact
+                    </h2>
 
                     <p>
                         La prise de contact via le formulaire de contact donne lieu à la collecte, au stockage et au traitement de données à caractère personnel
@@ -159,7 +168,9 @@ const PersonalData = () => {
 
                     <p>La durée de conservation des données à caractère personnel est fixée par l’IGN à trois ans à compter de la dernière sollicitation</p>
 
-                    <h2 id={"anchor-5"}>Participation à une enquête utilisateur</h2>
+                    <h2 id={"anchor-5"} tabIndex={-1}>
+                        Participation à une enquête utilisateur
+                    </h2>
 
                     <p>
                         La participation à une enquête utilisateur donne lieu à la collecte, au stockage et au traitement de données à caractère personnel par
@@ -206,7 +217,9 @@ const PersonalData = () => {
 
                     <p>La durée de conservation des données est fixée à 5 ans à compter de la date de participation à une enquête utilisateur.</p>
 
-                    <h2 id={"anchor-6"}>Inscription aux communautés d’utilisateurs</h2>
+                    <h2 id={"anchor-6"} tabIndex={-1}>
+                        Inscription aux communautés d’utilisateurs
+                    </h2>
 
                     <p>
                         L’inscription aux communautés d’utilisateurs IGN donne lieu à la collecte, au stockage et au traitement de données à caractère personnel
