@@ -19,6 +19,8 @@ contact:
         user_email: "Adresse mail de l’utilisateur"
         last_name: "Nom de l’utilisateur"
         first_name: "Prénom de l’utilisateur"
+        category: "Catégorie"
+        organization: "Organisme"
         date: "Date d’envoi"
         message: "Corps du message"
         not_specified: "Non renseigné"

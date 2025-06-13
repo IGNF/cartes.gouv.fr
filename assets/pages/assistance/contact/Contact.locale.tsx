@@ -1,6 +1,7 @@
 import { RegisteredLinkProps } from "@codegouvfr/react-dsfr/link";
 import { declareComponentKeys } from "i18nifty";
 
+import { UserCategory } from "@/@types/app";
 import { Translations } from "../../../i18n/types";
 
 const { i18n } = declareComponentKeys<
@@ -13,10 +14,16 @@ const { i18n } = declareComponentKeys<
     | "form.email_contact_mandatory_error"
     | "form.email_contact_error"
     | "form.lastName"
+    | "form.message_lastName_mandatory"
     | "form.firstName"
+    | "form.message_firstName_mandatory"
+    | "form.category"
+    | { K: "form.category_option"; P: { option: UserCategory }; R: string }
     | "form.organization"
+    | "form.message_organization_mandatory"
     | "form.message"
     | "form.message_placeholder"
+    | "form.message.trimmed_error"
     | { K: "form.message_minlength_error"; P: { min: number }; R: string }
     | { K: "form.message_maxlength_error"; P: { max: number }; R: string }
     | { K: "remaining_characters"; P: { num: number }; R: string }
@@ -45,11 +52,24 @@ export const ContactFrTranslations: Translations<"fr">["Contact"] = {
     "form.email_contact_hint": "Format attendu : nom@domaine.fr",
     "form.email_contact_mandatory_error": "Veuillez saisir une adresse email",
     "form.email_contact_error": "Veuillez saisir une adresse email valide",
-    "form.lastName": "Votre nom (optionnel)",
-    "form.firstName": "Votre prénom (optionnel)",
-    "form.organization": "Votre organisme (optionnel)",
+    "form.lastName": "Votre nom",
+    "form.message_lastName_mandatory": "Le nom est obligatoire",
+    "form.firstName": "Votre prénom",
+    "form.message_firstName_mandatory": "Le prénom est obligatoire",
+    "form.category": "Vous êtes ?",
+    "form.category_option": ({ option }) => {
+        switch (option) {
+            case "Individual":
+                return "Particulier";
+            case "Professional":
+                return "Professionnel";
+        }
+    },
+    "form.organization": "Votre organisme",
+    "form.message_organization_mandatory": "L'organisme est obligatoire",
     "form.message": "Votre demande",
     "form.message_placeholder": "Décrivez votre demande en quelques lignes",
+    "form.message.trimmed_error": "La chaîne de caractères ne doit contenir aucun espace en début et fin",
     "form.message_minlength_error": ({ min }) => `Veuillez saisir une demande d’au moins ${min} caractères.`,
     "form.message_maxlength_error": ({ max }) => `Votre demande ne peut contenir que ${max} caractères.`,
     remaining_characters: ({ num }) => `${num} caractères restants`,
@@ -89,11 +109,17 @@ export const ContactEnTranslations: Translations<"en">["Contact"] = {
     "form.email_contact_hint": "Expected format: name@domain.fr",
     "form.email_contact_mandatory_error": "Enter an email address",
     "form.email_contact_error": "Enter a valid email address",
-    "form.lastName": "Last name (optional)",
-    "form.firstName": "First name (optional)",
-    "form.organization": "Organization (optional)",
+    "form.lastName": "Last name",
+    "form.message_lastName_mandatory": "Last name is mandatory",
+    "form.firstName": "First name",
+    "form.message_firstName_mandatory": "First name is mandatory",
+    "form.category": "You are ?",
+    "form.category_option": ({ option }) => `${option}`,
+    "form.organization": "Organization",
+    "form.message_organization_mandatory": "Organization is mandatory",
     "form.message": "Message",
     "form.message_placeholder": "Describe your request in a few lines",
+    "form.message.trimmed_error": "The character string must not contain any spaces at the beginning and end",
     "form.message_minlength_error": ({ min }) => `Message must be at least ${min} characters.`,
     "form.message_maxlength_error": ({ max }) => `Message cannot exceed ${max} characters.`,
     remaining_characters: ({ num }) => `${num} characters remaining`,
