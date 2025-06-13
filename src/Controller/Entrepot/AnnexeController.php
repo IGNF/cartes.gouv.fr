@@ -19,6 +19,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Requirement\Requirement;
 use Symfony\Component\Uid\Uuid;
 
 #[Route(
@@ -99,7 +100,10 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
         }
     }
 
-    #[Route('/{annexeId}', name: 'replace_file', methods: ['POST'])]
+    /**
+     * Ajout de Requirement::UUID_V4 sinon cette route est appelée pour thumbnail_add.
+     */
+    #[Route('/{annexeId}', name: 'replace_file', methods: ['POST'], requirements: ['annexeId' => Requirement::UUID_V4])]
     public function replaceFile(string $datastoreId, string $annexeId, Request $request): JsonResponse
     {
         try {
