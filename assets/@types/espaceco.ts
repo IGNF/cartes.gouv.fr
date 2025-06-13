@@ -192,7 +192,7 @@ export interface CommunityPatchDTO extends Partial<Omit<CommunityResponseDTO, "l
 
 export const arrPermissionLevel = ["NONE", "VIEW", "EDIT"] as const;
 export type PermissionLevel = (typeof arrPermissionLevel)[number];
-7;
+
 export type PermissionResponseDTO = {
     id: number;
     database: number;

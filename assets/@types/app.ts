@@ -392,3 +392,6 @@ export type GeonetworkMetadataResponse = {
 
 /* Liens dans les composants de type Summary */
 export type SummaryLink = SummaryProps["links"][number];
+
+export const arrUserCategories = ["Individual", "Professional"] as const;
+export type UserCategory = (typeof arrUserCategories)[number];
