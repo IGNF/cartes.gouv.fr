@@ -135,7 +135,7 @@ class PyramidRasterController extends ServiceController implements ApiController
 
             // création de requête pour la config
             $typeInfos = $this->getConfigTypeInfos($dto, $pyramid);
-            $configRequestBody = $this->getConfigRequestBody($datastoreId, ConfigurationTypes::WMSVECTOR, $dto, $typeInfos);
+            $configRequestBody = $this->getConfigRequestBody($datastoreId, $type, $dto, $typeInfos);
 
             $offering = $this->cartesServiceApiService->saveService($datastoreId, $pyramidId, $dto, $type, $configRequestBody);
 
