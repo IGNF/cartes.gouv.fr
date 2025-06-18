@@ -8,6 +8,7 @@ use App\Exception\CartesApiException;
 use App\Services\EspaceCoApi\CommunityLayerApiService;
 use App\Services\EspaceCoApi\DatabaseApiService;
 use App\Services\EspaceCoApi\LayerApiService;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,6 +21,7 @@ use Symfony\Component\Routing\Attribute\Route;
     options: ['expose' => true],
     condition: 'request.isXmlHttpRequest()'
 )]
+#[OA\Tag(name: '[espaceco] community-layers', description: 'Couches cartographiques associées à une communauté')]
 class CommunityLayerController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(

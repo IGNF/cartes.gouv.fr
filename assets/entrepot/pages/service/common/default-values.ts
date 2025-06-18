@@ -6,6 +6,7 @@ import { getProjectionCode, removeDiacritics } from "../../../../utils";
 import { PyramidVectorTmsServiceFormValuesType } from "../tms/PyramidVectorTmsServiceForm/PyramidVectorTmsServiceForm";
 import { WfsServiceFormValuesType, WfsTableInfos } from "../wfs/WfsServiceForm";
 import { WmsVectorServiceFormValuesType } from "../wms-vector/WmsVectorServiceForm";
+// import { thematicCategories } from "../metadata/Description";
 
 const DEFAULT_CHARSET = "utf8";
 const DEFAULT_LANGUAGE = { language: "français", code: "fre" };
@@ -37,6 +38,10 @@ const getMetadataFormDefaultValues = (metadata?: Metadata): MetadataFormValuesTy
         organization: metadata?.csw_metadata?.organisation_name,
         organization_email: metadata?.csw_metadata?.organisation_email,
         category: metadata?.csw_metadata?.topic_categories ?? [],
+        // category: (metadata?.csw_metadata?.topic_categories ?? []).map((cat) => {
+        //     const thematicCategory = thematicCategories.find((c) => c.code === cat || c.text === cat);
+        //     return thematicCategory?.code ?? cat;
+        // }),
         keywords: metadata?.csw_metadata?.inspire_keywords ?? [],
         free_keywords: metadata?.csw_metadata?.free_keywords ?? [],
         public_name: metadata?.csw_metadata?.title,

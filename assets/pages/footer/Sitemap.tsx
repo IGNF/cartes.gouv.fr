@@ -1,6 +1,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 
-import { routes } from "../../router/router";
+import { catalogueUrl } from "@/env";
+import { appRoot, routes } from "../../router/router";
 import Main from "../../components/Layout/Main";
 
 const SiteMap = () => {
@@ -30,12 +31,10 @@ const SiteMap = () => {
                                 </ul>
                             </li>
                             <li>
-                                {/* TODO, insérer URL du catalogue */}
-                                <a href="#">Catalogue</a>
+                                <a href={catalogueUrl ?? appRoot + "/catalogue"}>Catalogue</a>
                             </li>
                             <li>
-                                {/* TODO, insérer URL de l'entrée cartographique */}
-                                <a href="#">Cartes</a>
+                                <a href={appRoot + "/cartes"}>Cartes</a>
                             </li>
                             <li>
                                 <a {...routes.news_list().link}>Actualités</a>

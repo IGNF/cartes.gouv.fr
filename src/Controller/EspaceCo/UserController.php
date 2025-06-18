@@ -6,6 +6,7 @@ use App\Controller\ApiControllerInterface;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\EspaceCoApi\UserApiService;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
@@ -17,6 +18,7 @@ use Symfony\Component\Routing\Attribute\Route;
     options: ['expose' => true],
     condition: 'request.isXmlHttpRequest()'
 )]
+#[OA\Tag(name: '[espaceco] user', description: "Informations des utilisateurs de l'espaceco")]
 class UserController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
@@ -24,7 +26,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
     ) {
     }
 
-    #[Route('/me', name: 'me')]
+    #[Route('/me', name: 'me', methods: ['GET'])]
     public function getMe(): JsonResponse
     {
         try {
@@ -36,7 +38,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
         }
     }
 
-    #[Route('/search', name: 'search')]
+    #[Route('/search', name: 'search', methods: ['GET'])]
     public function search(
         #[MapQueryParameter] string $search,
     ): JsonResponse {
@@ -49,7 +51,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
         }
     }
 
-    #[Route('/me/shared_themes', name: 'shared_themes')]
+    #[Route('/me/shared_themes', name: 'shared_themes', methods: ['GET'])]
     public function getSharedThemes(): JsonResponse
     {
         try {

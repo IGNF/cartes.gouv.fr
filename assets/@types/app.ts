@@ -1,10 +1,13 @@
 import { LanguageType } from "@/utils";
+import { SummaryProps } from "@codegouvfr/react-dsfr/Summary";
 import {
     AccessCreateDto,
     AccessDetailsResponseDto,
     AnnexDetailResponseDto,
     BasicInfoDto,
+    BoundingBox,
     CheckingExecutionDetailResponseDto,
+    CheckingExecutionDetailResponseDtoStatusEnum,
     CommunityMemberDto,
     CommunityUserResponseDtoRightsEnum,
     ConfigurationAltimetryDetailsContent,
@@ -18,6 +21,7 @@ import {
     DatastoreEndpointResponseDto,
     EndpointDetailResponseDtoTypeEnum,
     HashInfoDto,
+    MetadataResponseDto,
     OAuth2InfoDto,
     OfferingDetailResponseDto,
     ProcessingExecutionDetailResponseDto,
@@ -30,9 +34,6 @@ import {
     UserDetailsResponseDto,
     UserKeyDetailsResponseDtoUserKeyInfoDto,
     UserKeyResponseDto,
-    MetadataResponseDto,
-    BoundingBox,
-    CheckingExecutionDetailResponseDtoStatusEnum,
 } from "./entrepot";
 
 /** user */
@@ -146,11 +147,13 @@ export type Upload = UploadPrivateDetailResponseDto & {
 export {
     ConfigurationDetailResponseDtoStatusEnum as ConfigurationStatusEnum,
     ConfigurationDetailResponseDtoTypeEnum as ConfigurationTypeEnum,
+    OfferingStatusEnum,
     OfferingDetailResponseDtoTypeEnum as OfferingTypeEnum,
     UploadPrivateDetailResponseDtoStatusEnum as UploadStatusEnum,
     UploadPrivateDetailResponseDtoTypeEnum as UploadTypeEnum,
     UploadPrivateDetailResponseDtoVisibilityEnum as UploadVisibilityEnum,
 } from "./entrepot";
+export { EndpointDetailResponseDtoTypeEnum as EndpointTypeEnum };
 export type UploadTree = UploadTreeElementResponseDto[];
 
 /** user, objet représentant l'utilisateur de l'API Entrepot */
@@ -209,7 +212,6 @@ export type Configuration = ConfigurationDetailResponseDto & {
 };
 
 export type Offering = OfferingDetailResponseDto;
-export { OfferingStatusEnum } from "./entrepot";
 
 export type Service = Offering & {
     configuration: Configuration;
@@ -269,7 +271,6 @@ export type ServiceFormValuesBaseType = {
 
 /** endpoints */
 export type DatastoreEndpoint = DatastoreEndpointResponseDto;
-export { EndpointDetailResponseDtoTypeEnum as EndpointTypeEnum };
 
 export type CheckOrProcessingExecutionLogs = [string];
 export type CheckDetailed = CheckingExecutionDetailResponseDto & {
@@ -338,6 +339,7 @@ export type CswMetadataLayer = {
     gmd_online_resource_protocol?: string;
     gmd_online_resource_url?: string;
     offering_id?: string;
+    open?: boolean;
 };
 
 export type CswStyleFile = {
@@ -396,3 +398,9 @@ export type GeonetworkMetadataResponse = {
     contact_email: string;
     private_layers: GeonetworkMetadataLayers[];
 };
+
+/* Liens dans les composants de type Summary */
+export type SummaryLink = SummaryProps["links"][number];
+
+export const arrUserCategories = ["Individual", "Professional"] as const;
+export type UserCategory = (typeof arrUserCategories)[number];

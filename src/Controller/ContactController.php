@@ -67,6 +67,8 @@ class ContactController extends AbstractController
                 'userEmail' => $userEmail,
                 'firstName' => $data['first_name'],
                 'lastName' => $data['last_name'],
+                'category' => $data['category'],
+                'organization' => $data['organization'],
                 'sendDate' => $now,
                 'message' => $message,
             ];

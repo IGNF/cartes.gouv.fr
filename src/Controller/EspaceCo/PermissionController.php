@@ -7,6 +7,7 @@ use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\EspaceCoApi\DatabaseApiService;
 use App\Services\EspaceCoApi\PermissionApiService;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,8 +17,9 @@ use Symfony\Component\Routing\Attribute\Route;
     '/api/espaceco/permission',
     name: 'cartesgouvfr_api_espaceco_permission_',
     options: ['expose' => true],
-    // condition: 'request.isXmlHttpRequest()'
+    condition: 'request.isXmlHttpRequest()'
 )]
+#[OA\Tag(name: '[espaceco] permissions', description: "Permissions d'accès")]
 class PermissionController extends AbstractController implements ApiControllerInterface
 {
     public const LEVELS = [

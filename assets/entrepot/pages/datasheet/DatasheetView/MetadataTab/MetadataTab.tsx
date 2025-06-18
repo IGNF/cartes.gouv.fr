@@ -7,6 +7,7 @@ import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import { FC, useMemo } from "react";
 
 import { catalogueUrl } from "@/env";
+import { getThematicCategories } from "@/utils";
 import { MetadataHierarchyLevel, type Metadata } from "../../../../../@types/app";
 import ExtentMap from "../../../../../components/Utils/ExtentMap";
 import LoadingText from "../../../../../components/Utils/LoadingText";
@@ -18,6 +19,8 @@ import api from "../../../../api";
 import MetadataField from "./MetadataField";
 
 import frequencyCodes from "../../../../../data/maintenance_frequency.json";
+
+const thematicCategories = getThematicCategories();
 
 type MetadataTabProps = {
     datastoreId: string;
@@ -136,7 +139,9 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, metadataQuery }) => {
                                 title={"Catégories thématiques"}
                                 content={
                                     <div className={fr.cx("fr-tags-group")}>
-                                        {metadata.csw_metadata?.topic_categories?.map((keyword) => <Tag key={keyword}>{keyword}</Tag>)}
+                                        {metadata.csw_metadata?.topic_categories?.map((keyword) => (
+                                            <Tag key={keyword}>{thematicCategories.find((c) => c.code === keyword)?.text ?? keyword}</Tag>
+                                        ))}
                                     </div>
                                 }
                             />
@@ -148,16 +153,14 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, metadataQuery }) => {
                                     </div>
                                 }
                             />
-                            {metadata.csw_metadata?.free_keywords?.length && (
-                                <MetadataField
-                                    title={"Mots clés libres"}
-                                    content={
-                                        <div className={fr.cx("fr-tags-group")}>
-                                            {metadata.csw_metadata?.free_keywords?.map((keyword) => <Tag key={keyword}>{keyword}</Tag>)}
-                                        </div>
-                                    }
-                                />
-                            )}
+                            <MetadataField
+                                title={"Mots clés libres"}
+                                content={
+                                    <div className={fr.cx("fr-tags-group")}>
+                                        {metadata.csw_metadata?.free_keywords?.map((keyword) => <Tag key={keyword}>{keyword}</Tag>)}
+                                    </div>
+                                }
+                            />
                         </Accordion>
 
                         <Accordion titleAs="h2" defaultExpanded={true} label={"Délimitation géographique (localisation physique de la donnée)"}>

@@ -4,7 +4,6 @@ namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationTypes;
-use App\Constants\EntrepotApi\Sandbox;
 use App\Constants\EntrepotApi\StoredDataTypes;
 use App\Controller\ApiControllerInterface;
 use App\Dto\Services\CommonDTO;
@@ -135,7 +134,8 @@ class PyramidRasterController extends ServiceController implements ApiController
             $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId);
 
             // création de requête pour la config
-            $configRequestBody = $this->getConfigRequestBody($dto, $pyramid, $type, false, $datastoreId);
+            $typeInfos = $this->getConfigTypeInfos($dto, $pyramid);
+            $configRequestBody = $this->getConfigRequestBody($datastoreId, $type, $dto, $typeInfos);
 
             $offering = $this->cartesServiceApiService->saveService($datastoreId, $pyramidId, $dto, $type, $configRequestBody);
 
@@ -167,7 +167,8 @@ class PyramidRasterController extends ServiceController implements ApiController
             $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId);
 
             // création de requête pour la config
-            $configRequestBody = $this->getConfigRequestBody($dto, $pyramid, $type, true);
+            $typeInfos = $this->getConfigTypeInfos($dto, $pyramid);
+            $configRequestBody = $this->getConfigRequestBody($datastoreId, $type, $dto, $typeInfos, $oldConfiguration);
 
             $offering = $this->cartesServiceApiService->saveService($datastoreId, $pyramidId, $dto, $type, $configRequestBody, $oldOffering);
 
@@ -180,41 +181,19 @@ class PyramidRasterController extends ServiceController implements ApiController
     /**
      * @param array<mixed> $pyramid
      */
-    private function getConfigRequestBody(CommonDTO $dto, array $pyramid, string $type, bool $editMode = false, ?string $datastoreId = null): array
+    private function getConfigTypeInfos(CommonDTO $dto, array $pyramid): array
     {
         $levels = $this->getPyramidZoomLevels($pyramid);
 
-        $requestBody = [
-            'type' => $type,
-            'name' => $dto->service_name,
-            'type_infos' => [
-                'title' => $dto->service_name,
-                'abstract' => json_encode($dto->description),
-                'keywords' => [...$dto->category, ...$dto->keywords, ...$dto->free_keywords],
-                'used_data' => [[
-                    'bottom_level' => $levels['bottom_level'],
-                    'top_level' => $levels['top_level'],
-                    'stored_data' => $pyramid['_id'],
-                ]],
-            ],
+        return [
+            'title' => $dto->service_name,
+            'abstract' => json_encode($dto->description),
+            'keywords' => [...$dto->category, ...$dto->keywords, ...$dto->free_keywords],
+            'used_data' => [[
+                'bottom_level' => $levels['bottom_level'],
+                'top_level' => $levels['top_level'],
+                'stored_data' => $pyramid['_id'],
+            ]],
         ];
-
-        if (false === $editMode) {
-            $requestBody['layer_name'] = $dto->technical_name;
-
-            // rajoute le préfixe "sandbox." si c'est la communauté bac à sable
-            if ($this->sandboxService->isSandboxDatastore($datastoreId)) {
-                $requestBody['layer_name'] = Sandbox::LAYERNAME_PREFIX.$requestBody['layer_name'];
-            }
-        }
-
-        if ('' !== $dto->attribution_text && '' !== $dto->attribution_url) {
-            $requestBody['attribution'] = [
-                'title' => $dto->attribution_text,
-                'url' => $dto->attribution_url,
-            ];
-        }
-
-        return $requestBody;
     }
 }

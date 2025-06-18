@@ -5,7 +5,7 @@ interface IUseSearchMembersResult {
 }
 
 export function useSearchMember(members: CommunityMember[], searchTerm): IUseSearchMembersResult {
-    if (!searchTerm) {
+    if (searchTerm.length < 3) {
         return {
             searchedItems: members,
         };
