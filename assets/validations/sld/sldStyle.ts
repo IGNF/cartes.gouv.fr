@@ -1,8 +1,6 @@
 import SldStyleParser from "geostyler-sld-parser";
 import { TestContext } from "yup";
 
-import { Service } from "../../@types/app";
-import { ConfigurationWmsVectorDetailsContent } from "../../@types/entrepot";
 import { getTranslation } from "../../i18n/i18n";
 
 const { t: tSld } = getTranslation("SldStyleValidationErrors");
@@ -14,34 +12,36 @@ export default class SldStyleWmsVectorValidator {
      *
      * En gros, un fichier de style pour toutes les tables est obligatoire en mode création. En édition, le fichier de style est obligatoire seulement pour une nouvelle table.
      */
-    async validate(tableName: string, value: string | undefined, ctx: TestContext, offering: Service | undefined | null) {
-        const exists = this.#exists(tableName, value, ctx);
-        const isValid = exists && (await this.#isValid(tableName, value!, ctx));
+    async validate(tableName: string, value: string | undefined, ctx: TestContext /*, offering: Service | undefined | null*/) {
+        return await this.#isValid(tableName, value!, ctx);
 
-        const typeInfos = offering?.configuration?.type_infos as ConfigurationWmsVectorDetailsContent | undefined;
-        const oldTables = typeInfos?.used_data[0].relations.map((rel) => rel.name);
+        // const exists = this.#exists(tableName, value, ctx);
+        // const isValid = exists && (await this.#isValid(tableName, value!, ctx));
 
-        if (oldTables?.includes(tableName)) {
-            if (exists === true) {
-                return isValid;
-            }
-        } else {
-            if (exists !== true) {
-                return exists;
-            }
-            return isValid;
-        }
+        // const typeInfos = offering?.configuration?.type_infos as ConfigurationWmsVectorDetailsContent | undefined;
+        // const oldTables = typeInfos?.used_data[0].relations.map((rel) => rel.name);
 
-        return true;
+        // if (oldTables?.includes(tableName)) {
+        //     if (exists === true) {
+        //         return isValid;
+        //     }
+        // } else {
+        //     if (exists !== true) {
+        //         return exists;
+        //     }
+        //     return isValid;
+        // }
+
+        // return true;
     }
 
-    #exists(tableName: string, value: string | undefined, ctx: TestContext) {
-        if (typeof value !== "string" || !value) {
-            return ctx.createError({ message: tSld("no_file_provided", { tableName }) });
-        }
+    // #exists(tableName: string, value: string | undefined, ctx: TestContext) {
+    //     if (typeof value !== "string" || !value) {
+    //         return ctx.createError({ message: tSld("no_file_provided", { tableName }) });
+    //     }
 
-        return true;
-    }
+    //     return true;
+    // }
 
     async #isValid(tableName: string, value: string, ctx: TestContext) {
         const sldParser = new SldStyleParser({ locale: "fr" });

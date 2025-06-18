@@ -1,47 +1,19 @@
-import { FC, useEffect } from "react";
+import { FC } from "react";
 import { Controller, type UseFormReturn } from "react-hook-form";
 
-import { StaticFileListResponseDto } from "@/@types/entrepot";
-import api from "@/entrepot/api";
-import RQKeys from "@/modules/entrepot/RQKeys";
-import { useQuery } from "@tanstack/react-query";
-import { type StoredDataRelation } from "../../../../@types/app";
-import { WmsVectorServiceFormValuesType } from "./WmsVectorServiceForm";
 import UploadStyleFiles from "@/components/Utils/Geostyler/UploadStyleFiles";
-import { useMapStyle } from "@/contexts/mapStyle";
 import { sldParser } from "@/utils/geostyler";
+import { WmsVectorServiceFormValuesType } from "./WmsVectorServiceForm";
 
 type UploadStyleFileProps = {
-    configId?: string;
-    datastoreId: string;
-    files?: StaticFileListResponseDto[];
-    tables: StoredDataRelation[];
-    typeConfig: string;
+    tableNames: string[];
     form: UseFormReturn<WmsVectorServiceFormValuesType>;
 };
 
 const StyleLoader: FC<UploadStyleFileProps> = (props) => {
-    const { configId, datastoreId, files, tables = [], typeConfig, form } = props;
-    const { editMode, selectedTable } = useMapStyle();
-    const tableNames = tables.map((table) => table.name);
-    const { control, getValues, setValue } = form;
-    const filename = `config_${configId}_style_${typeConfig}_${selectedTable}`;
-    const fileId = files?.find((file) => file.name === filename)?._id;
+    const { tableNames = [], form } = props;
 
-    const { data } = useQuery({
-        queryKey: RQKeys.datastore_statics_download(datastoreId, fileId ?? ""),
-        queryFn: () => api.statics.download(datastoreId, fileId!),
-        enabled: Boolean(fileId && editMode),
-        refetchOnReconnect: false,
-        refetchOnWindowFocus: false,
-    });
-
-    useEffect(() => {
-        if (data) {
-            const formData = getValues("style_files");
-            setValue("style_files", { ...formData, [selectedTable]: data });
-        }
-    }, [data, filename, getValues, selectedTable, setValue]);
+    const { control } = form;
 
     return (
         <div>

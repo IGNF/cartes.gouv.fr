@@ -1,10 +1,10 @@
-import { StoredDataRelation } from "@/@types/app";
+import { useQueries, UseQueryOptions } from "@tanstack/react-query";
+import { useMemo } from "react";
+
 import { StaticFileListResponseDto } from "@/@types/entrepot";
 import api from "@/entrepot/api";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
-import { useQueries, UseQueryOptions } from "@tanstack/react-query";
-import { useMemo } from "react";
 
 export type useTableStylesReturn = {
     data?: Record<string, string>;
@@ -13,30 +13,15 @@ export type useTableStylesReturn = {
     errors: string[];
 };
 
-export const useTableStyles = (
-    editMode: boolean,
-    datastoreId: string,
-    selectedTables: StoredDataRelation[],
-    staticFiles?: StaticFileListResponseDto[],
-    configId?: string
-): useTableStylesReturn => {
-    const queries = useMemo(() => {
-        const enabled = configId && selectedTables.length && staticFiles;
-        return (
-            selectedTables.map<UseQueryOptions<string, CartesApiException>>((sdRel) => {
-                const filename = `config_${configId}_style_wmsv_${sdRel.name}`;
-                const fileId = staticFiles?.find((file) => file.name === filename)?._id;
-                return {
-                    queryKey: RQKeys.datastore_statics_download(datastoreId, fileId ?? ""),
-                    queryFn: () => api.statics.download(datastoreId, fileId!),
-                    enabled: Boolean(enabled && fileId && editMode),
-                };
-            }) || []
-        );
-    }, [editMode, datastoreId, configId, staticFiles, selectedTables]);
-
+export const useTableStyles = (editMode: boolean, datastoreId: string, staticFiles: StaticFileListResponseDto[] = []): useTableStylesReturn => {
+    const enabled = Boolean(staticFiles && editMode);
     const styleQueries = useQueries({
-        queries: queries,
+        queries: staticFiles.map<UseQueryOptions<string, CartesApiException>>((staticFile) => ({
+            queryKey: RQKeys.datastore_statics_download(datastoreId, staticFile._id),
+            queryFn: () => api.statics.download(datastoreId, staticFile._id),
+            enabled,
+            staleTime: 60000,
+        })),
     });
 
     const isLoading = styleQueries.some((q) => q.isLoading);
@@ -46,7 +31,16 @@ export const useTableStyles = (
     }, [styleQueries]);
 
     const data = styleQueries.length
-        ? selectedTables.reduce((accumulator, srRel, index) => ({ ...accumulator, [srRel.name]: styleQueries[index].data }), {})
+        ? staticFiles.reduce((accumulator, staticFile, index) => {
+              const filename = staticFile.name;
+              const regex = /config_[a-z0-9-]+_style_wmsv_(\w+)/;
+              const tableName = regex.exec(filename)?.[1]; // Extract table name from filename
+
+              if (tableName) {
+                  accumulator[tableName] = styleQueries[index].data;
+              }
+              return accumulator;
+          }, {})
         : undefined;
 
     return {
