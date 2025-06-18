@@ -1,13 +1,12 @@
 import { FC, useEffect } from "react";
 import { Controller, type UseFormReturn } from "react-hook-form";
 
-import { type StoredDataRelation } from "../../../../@types/app";
-import { useTranslation } from "../../../../i18n/i18n";
-import { WmsVectorServiceFormValuesType } from "./WmsVectorServiceForm";
 import { StaticFileListResponseDto } from "@/@types/entrepot";
-import { useQuery } from "@tanstack/react-query";
-import RQKeys from "@/modules/entrepot/RQKeys";
 import api from "@/entrepot/api";
+import RQKeys from "@/modules/entrepot/RQKeys";
+import { useQuery } from "@tanstack/react-query";
+import { type StoredDataRelation } from "../../../../@types/app";
+import { WmsVectorServiceFormValuesType } from "./WmsVectorServiceForm";
 import UploadStyleFiles from "@/components/Utils/Geostyler/UploadStyleFiles";
 import { useMapStyle } from "@/contexts/mapStyle";
 import { sldParser } from "@/utils/geostyler";
@@ -15,7 +14,6 @@ import { sldParser } from "@/utils/geostyler";
 type UploadStyleFileProps = {
     configId?: string;
     datastoreId: string;
-    editMode: boolean;
     files?: StaticFileListResponseDto[];
     tables: StoredDataRelation[];
     typeConfig: string;
@@ -23,10 +21,8 @@ type UploadStyleFileProps = {
 };
 
 const StyleLoader: FC<UploadStyleFileProps> = (props) => {
-    const { configId, datastoreId, editMode, files, tables = [], typeConfig, form } = props;
-    const { t: tCommon } = useTranslation("Common");
-    const { t } = useTranslation("UploadStyleFile");
-    const { selectedTable } = useMapStyle();
+    const { configId, datastoreId, files, tables = [], typeConfig, form } = props;
+    const { editMode, selectedTable } = useMapStyle();
     const tableNames = tables.map((table) => table.name);
     const { control, getValues, setValue } = form;
     const filename = `config_${configId}_style_${typeConfig}_${selectedTable}`;
@@ -49,8 +45,6 @@ const StyleLoader: FC<UploadStyleFileProps> = (props) => {
 
     return (
         <div>
-            <h3>{t("title")}</h3>
-            <p>{tCommon("mandatory_fields")}</p>
             <Controller
                 name="style_files"
                 control={control}

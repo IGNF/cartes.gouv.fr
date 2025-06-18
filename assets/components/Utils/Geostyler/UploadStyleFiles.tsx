@@ -1,9 +1,10 @@
-import { FC } from "react";
-import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { StyleParser } from "geostyler-style";
+import { CSSProperties, FC } from "react";
 
-import UploadStyleFile from "./UploadStyleFile";
 import { useMapStyle } from "@/contexts/mapStyle";
+import { fr } from "@codegouvfr/react-dsfr";
+import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
+import UploadStyleFile from "./UploadStyleFile";
 
 type UploadStyleFileProps = {
     errors?: Record<string, { message?: string } | undefined>;
@@ -17,6 +18,7 @@ type UploadStyleFileProps = {
 const UploadStyleFiles: FC<UploadStyleFileProps> = (props) => {
     const { errors, onChange, parser, parsers, tables = [], value } = props;
     const { selectedTable, setSelectedTable } = useMapStyle();
+
     const options = tables.map((table) => ({
         label: table,
         nativeInputProps: {
@@ -30,18 +32,33 @@ const UploadStyleFiles: FC<UploadStyleFileProps> = (props) => {
         onChange({ ...value, [selectedTable]: style });
     }
 
+    const customStyle: CSSProperties = {
+        backgroundColor: fr.colors.decisions.background.contrast.grey.default,
+    };
+
     return (
-        <>
-            <RadioButtons legend="Tables" name="radio" options={options} orientation="horizontal" state="default" stateRelatedMessage="State description" />
-            <UploadStyleFile
-                error={errors?.[selectedTable]?.message}
-                onChange={handleChange}
-                parser={parser}
-                parsers={parsers}
-                table={selectedTable}
-                value={value?.[selectedTable]}
-            />
-        </>
+        <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
+            <div className={fr.cx("fr-col-3")}>
+                <div className={fr.cx("fr-h6", "fr-p-1v")} style={customStyle}>
+                    <i className="ri-stack-line" />
+                    &nbsp;Couches
+                </div>
+                <RadioButtons options={options} small />
+            </div>
+            <div className={fr.cx("fr-col-9")}>
+                <div className={fr.cx("fr-h6", "fr-p-1v")} style={customStyle}>
+                    <i className="fr-icon-eye-line" />
+                    &nbsp;Aperçu du style
+                </div>
+                <UploadStyleFile
+                    error={errors?.[selectedTable]?.message}
+                    onChange={handleChange}
+                    parser={parser}
+                    parsers={parsers}
+                    value={value?.[selectedTable]}
+                />
+            </div>
+        </div>
     );
 };
 

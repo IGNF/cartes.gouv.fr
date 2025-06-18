@@ -6,46 +6,56 @@ import { Style, StyleParser } from "geostyler-style";
 import GeostylerEditor from "@/components/Utils/Geostyler/GeostylerEditor";
 import { sldParser } from "@/utils/geostyler";
 import { useTranslation } from "../../../i18n/i18n";
+import { useMapStyle } from "@/contexts/mapStyle";
+import Button from "@codegouvfr/react-dsfr/Button";
+import { Divider } from "@mui/material";
 
 type UploadStyleFileProps = {
     error?: string;
     onChange: (value?: string) => void;
     parser?: StyleParser;
     parsers?: StyleParser[];
-    table: string;
     value?: string;
 };
 
 const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
-    const { error, onChange, parser = sldParser, parsers, table, value } = props;
+    const { error, onChange, parser = sldParser, parsers, value } = props;
     const { t } = useTranslation("UploadStyleFile");
 
-    const [gsStyle, setGsStyle] = useState<Style>({
-        name: table,
+    const { selectedTable } = useMapStyle();
+
+    const defaultStyle: Style = {
+        name: selectedTable,
         rules: [],
-    });
-    const [file, setFile] = useState<string>();
+    };
+
+    const [gsStyle, setGsStyle] = useState<Style>();
+    const [strStyle, setStrStyle] = useState<string>();
 
     useEffect(() => {
-        if (value !== file) {
+        if (value !== strStyle) {
             if (value) {
                 convertContent(value);
             } else {
-                setGsStyle({
-                    name: table,
-                    rules: [],
-                });
-                setFile("");
+                setGsStyle(undefined);
+                setStrStyle("");
             }
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [value]);
 
+    useEffect(() => {
+        if (error) {
+            setGsStyle(undefined);
+            setStrStyle("");
+        }
+    }, [error]);
+
     async function convertContent(content: string) {
         const result = await parser.readStyle(content);
         if (result.output) {
             setGsStyle(result.output);
-            setFile(content);
+            setStrStyle(content);
         }
     }
 
@@ -74,17 +84,37 @@ const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
         try {
             const convertedStyle = await parser.writeStyle(style);
             setGsStyle(style);
-            setFile(convertedStyle.output);
+            setStrStyle(convertedStyle.output);
             onChange(convertedStyle.output);
         } catch (error) {
             console.error("Erreur lors de la conversion du style", error);
         }
     }
 
-    return (
+    const handleCreate = () => {
+        setGsStyle(defaultStyle);
+        setStrStyle("");
+    };
+
+    const handleRemove = () => {
+        /* setGsStyle(undefined);
+        setStrStyle(""); */
+        onChange(undefined);
+    };
+
+    return gsStyle ? (
         <div>
+            <div className={fr.cx("fr-grid-row", "fr-grid-row--right")}>
+                <Button priority={"tertiary"} iconId="fr-icon-delete-line" onClick={handleRemove}>
+                    {t("remove_style")}
+                </Button>
+            </div>
+            <GeostylerEditor defaultParser={parser} onChange={handleStyleChange} parsers={parsers} value={gsStyle} />
+        </div>
+    ) : (
+        <div className={fr.cx("fr-my-2w")}>
             <Upload
-                label={table}
+                label={t("file_input_title")}
                 className={fr.cx("fr-input-group", "fr-mb-2w")}
                 hint={t("file_input_hint")}
                 state={error ? "error" : "default"}
@@ -94,7 +124,10 @@ const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
                     onChange: handleUpload,
                 }}
             />
-            <GeostylerEditor defaultParser={parser} onChange={handleStyleChange} parsers={parsers} value={gsStyle} />
+            <Divider>{t("or")}</Divider>
+            <Button priority={"tertiary"} onClick={handleCreate}>
+                {t("create_style")}
+            </Button>
         </div>
     );
 };

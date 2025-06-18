@@ -1,6 +1,7 @@
 import { createContext, ReactNode, useContext, useMemo, useState } from "react";
 
 export interface IMapStyleContext {
+    editMode: boolean;
     selectedTable: string;
     setSelectedTable: (table: string) => void;
 }
@@ -8,21 +9,22 @@ export interface IMapStyleContext {
 export const mapStyleContext = createContext<IMapStyleContext | null>(null);
 
 export function useMapStyle() {
-    const datastore = useContext(mapStyleContext);
-    if (!datastore) {
+    const context = useContext(mapStyleContext);
+    if (!context) {
         throw new Error("useMapStyle must be used within a MapStyleProvider");
     }
-    return datastore as Required<IMapStyleContext>;
+    return context as Required<IMapStyleContext>;
 }
 
 interface IMapStyleProviderProps {
     children: ReactNode;
+    editMode: boolean;
     defaultTable: string;
 }
 
 export function MapStyleProvider(props: IMapStyleProviderProps) {
-    const { children, defaultTable } = props;
+    const { children, editMode, defaultTable } = props;
     const [selectedTable, setSelectedTable] = useState(defaultTable);
-    const context = useMemo(() => ({ selectedTable, setSelectedTable }), [selectedTable]);
+    const context = useMemo(() => ({ editMode, selectedTable, setSelectedTable }), [editMode, selectedTable]);
     return <mapStyleContext.Provider value={context}>{children}</mapStyleContext.Provider>;
 }

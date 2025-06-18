@@ -10,6 +10,8 @@ import { useForm } from "react-hook-form";
 import { symToStr } from "tsafe/symToStr";
 import * as yup from "yup";
 
+import { MapStyleProvider } from "@/contexts/mapStyle";
+import { useTableStyles } from "@/hooks/useTableStyles";
 import {
     ConfigurationTypeEnum,
     EndpointTypeEnum,
@@ -37,7 +39,6 @@ import AdditionalInfo from "../metadata/AdditionalInfo";
 import Description from "../metadata/Description";
 import UploadMDFile from "../metadata/UploadMDFile";
 import StyleLoader from "./StyleLoader";
-import { MapStyleProvider } from "@/contexts/mapStyle";
 
 const createFormData = async (formValues: WmsVectorServiceFormValuesType) => {
     const fd = new FormData();
@@ -267,6 +268,14 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
         return [];
     }, [selectedTableNamesList, vectorDbQuery.data]);
 
+    /* On recupere les styles des tables s'ils existent */
+    const {
+        data: styles,
+        isLoading: stylesIsLoading,
+        isError: stylesIsError,
+        errors: stylesErrors,
+    } = useTableStyles(editMode, datastoreId, selectedTables, staticFilesQuery.data, configId);
+
     useScrollToTopEffect(currentStep);
 
     const previousStep = useCallback(() => setCurrentStep((currentStep) => currentStep - 1), []);
@@ -295,8 +304,10 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
         <Main title={t("title", { editMode })}>
             <h1>{t("title", { editMode })}</h1>
 
-            {vectorDbQuery.isLoading || offeringQuery.isLoading || metadataQuery.isLoading ? (
+            {vectorDbQuery.isLoading || offeringQuery.isLoading || metadataQuery.isLoading || stylesIsLoading ? (
                 <LoadingText as="h2" message={editMode ? t("stored_data_and_offering.loading") : t("stored_data.loading")} />
+            ) : stylesIsError ? (
+                <Alert title={tCommon("error")} severity="error" closable={false} description={stylesErrors.join(",")} />
             ) : vectorDbQuery.data === undefined ? (
                 <Alert
                     severity="error"
@@ -336,11 +347,10 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
 
                     <TableSelection visible={currentStep === STEPS.TABLES_INFOS} vectorDb={vectorDbQuery.data} form={form} />
                     {currentStep === STEPS.STYLE_FILE && (
-                        <MapStyleProvider defaultTable={selectedTables[0].name}>
+                        <MapStyleProvider editMode={editMode} defaultTable={selectedTables[0].name}>
                             <StyleLoader
                                 configId={configId}
                                 datastoreId={datastoreId}
-                                editMode={editMode}
                                 files={staticFilesQuery.data}
                                 tables={selectedTables}
                                 typeConfig="wmsv"
