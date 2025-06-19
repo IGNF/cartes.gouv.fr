@@ -13,6 +13,21 @@ const ctx: GeoStylerContextInterface = {
         Renderer: {
             rendererType: "OpenLayers",
         },
+        Rule: {
+            actionsField: {
+                visibility: true,
+            },
+            duplicateField: {
+                visibility: false,
+            },
+            amountField: {
+                visibility: false,
+            },
+        },
+        Style: {
+            disableClassification: true,
+            disableMultiEdit: true,
+        },
     },
     locale: locale.fr_FR,
 };
@@ -39,7 +54,7 @@ const GeostylerEditor: FC<GeostylerEditorProps> = (props) => {
                             content: (
                                 <div className={fr.cx("fr-grid-row", "fr-my-2w")}>
                                     <div className={fr.cx("fr-col")}>
-                                        <Style style={value} onStyleChange={onChange} />
+                                        <Style style={value} onStyleChange={onChange} disableMultiEdit={true} />
                                     </div>
                                 </div>
                             ),

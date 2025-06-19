@@ -18,12 +18,12 @@ export function useMapStyle() {
 
 interface IMapStyleProviderProps {
     children: ReactNode;
-    editMode: boolean;
+    editMode?: boolean;
     defaultTable: string;
 }
 
 export function MapStyleProvider(props: IMapStyleProviderProps) {
-    const { children, editMode, defaultTable } = props;
+    const { children, editMode = false, defaultTable } = props;
     const [selectedTable, setSelectedTable] = useState(defaultTable);
     const context = useMemo(() => ({ editMode, selectedTable, setSelectedTable }), [editMode, selectedTable]);
     return <mapStyleContext.Provider value={context}>{children}</mapStyleContext.Provider>;
