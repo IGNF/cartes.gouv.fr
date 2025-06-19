@@ -8,6 +8,8 @@ import { tss } from "tss-react";
 import DsfrAntdConfig from "../../Provider/DsfrAntdConfig";
 import { mbParser, qgisParser, sldParser } from "@/utils/geostyler";
 
+import "geostyler/dist/index.css";
+
 const ctx: GeoStylerContextInterface = {
     composition: {
         Renderer: {
