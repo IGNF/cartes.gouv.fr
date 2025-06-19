@@ -29,7 +29,7 @@ use Symfony\Component\Routing\Attribute\Route;
     '/api/datastores/{datastoreId}/upload',
     name: 'cartesgouvfr_api_upload_',
     options: ['expose' => true],
-    condition: 'request.isXmlHttpRequest()'
+    // condition: 'request.isXmlHttpRequest()'
 )]
 #[OA\Tag(name: '[entrepot] upload')]
 class UploadController extends AbstractController implements ApiControllerInterface
@@ -98,12 +98,99 @@ class UploadController extends AbstractController implements ApiControllerInterf
     public function get(string $datastoreId, string $uploadId): JsonResponse
     {
         try {
-            return $this->json($this->uploadApiService->get($datastoreId, $uploadId));
+            $upload = $this->uploadApiService->get($datastoreId, $uploadId);
+            $guessedProgress = $this->guessIntegrationProgressTags($datastoreId, $upload);
+            $upload['tags'] = [
+                ...$upload['tags'],
+                ...$guessedProgress,
+            ];
+
+            return $this->json($upload);
+
+            $realProgression = [];
+            if (isset($upload['tags'][UploadTags::INTEGRATION_PROGRESS])) {
+                $realProgression = $upload['tags'][UploadTags::INTEGRATION_PROGRESS];
+
+                unset($upload['tags'][UploadTags::INTEGRATION_CURRENT_STEP]);
+                unset($upload['tags'][UploadTags::INTEGRATION_PROGRESS]);
+            }
+
+            $guessedProgress = $this->guessIntegrationProgressTags($datastoreId, $upload);
+
+            $upload['tags']['real_progression'] = $realProgression;
+            $upload['tags']['guessed_progression'] = json_encode($guessedProgress[UploadTags::INTEGRATION_PROGRESS]);
+
+            return $this->json($upload);
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         } catch (\Exception $ex) {
             throw new CartesApiException($ex->getMessage(), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    /**
+     * Guess the progression of an upload based on its status and related data.
+     *
+     * @param array<mixed> $upload
+     *
+     * @return array<string,mixed>
+     */
+    private function guessIntegrationProgressTags(string $datastoreId, array $upload): array
+    {
+        $initialIntegProgress = [
+            UploadTags::INT_STEP_SEND_FILES_API => JobStatuses::WAITING,
+            UploadTags::INT_STEP_WAIT_CHECKS => JobStatuses::WAITING,
+            UploadTags::INT_STEP_PROCESSING => JobStatuses::WAITING,
+        ];
+        $guessedProgress = $initialIntegProgress;
+        $guessedProgressionStep = 0;
+
+        $tags = [];
+
+        // A la création de l'upload, le status est à "OPEN"
+        // Si le statut est "CLOSED" ou "CHECKING", on considère que l'étape d'envoi des fichiers a été réalisée
+        if (in_array($upload['status'], [UploadStatuses::CLOSED, UploadStatuses::CHECKING])) {
+            $guessedProgress[UploadTags::INT_STEP_SEND_FILES_API] = JobStatuses::SUCCESSFUL;
+            $guessedProgressionStep = 1;
+        }
+
+        if (JobStatuses::SUCCESSFUL === $guessedProgress[UploadTags::INT_STEP_SEND_FILES_API]) {
+            $uploadChecks = $this->uploadApiService->getCheckExecutions($datastoreId, $upload['_id']);
+
+            if (0 === count($uploadChecks[UploadCheckTypes::ASKED]) && 0 === count($uploadChecks[UploadCheckTypes::IN_PROGRESS])) {
+                // il ne reste plus de check dans les catégories "asked" ou "in_progress"
+                if (0 === count($uploadChecks[UploadCheckTypes::FAILED])) {
+                    // aucune check a échoué
+                    $guessedProgress[UploadTags::INT_STEP_WAIT_CHECKS] = JobStatuses::SUCCESSFUL;
+                    $guessedProgressionStep = 2;
+                } else {
+                    $guessedProgress[UploadTags::INT_STEP_WAIT_CHECKS] = JobStatuses::FAILED;
+                }
+            } elseif (count($uploadChecks[UploadCheckTypes::ASKED]) > 0 || count($uploadChecks[UploadCheckTypes::IN_PROGRESS]) > 0) {
+                $guessedProgress[UploadTags::INT_STEP_WAIT_CHECKS] = JobStatuses::IN_PROGRESS;
+            }
+        }
+
+        if (JobStatuses::SUCCESSFUL === $guessedProgress[UploadTags::INT_STEP_WAIT_CHECKS]) {
+            if (isset($upload['tags']['proc_int_id']) && isset($upload['tags']['vectordb_id'])) {
+                $processingExec = $this->processingApiService->getExecution($datastoreId, $upload['tags']['proc_int_id']);
+                $vectordb = $this->storedDataApiService->get($datastoreId, $upload['tags']['vectordb_id']);
+
+                if (!in_array($processingExec['status'], [ProcessingStatuses::CREATED, ProcessingStatuses::WAITING, ProcessingStatuses::PROGRESS])) {
+                    if (ProcessingStatuses::SUCCESS == $processingExec['status'] && StoredDataStatuses::GENERATED == $vectordb['status']) {
+                        $guessedProgress[UploadTags::INT_STEP_PROCESSING] = JobStatuses::SUCCESSFUL;
+                        $guessedProgressionStep = 3;
+                    } else {
+                        $guessedProgress[UploadTags::INT_STEP_PROCESSING] = JobStatuses::FAILED;
+                    }
+                }
+            }
+        }
+
+        return [
+            UploadTags::INTEGRATION_PROGRESS => $guessedProgress,
+            UploadTags::INTEGRATION_CURRENT_STEP => $guessedProgressionStep,
+        ];
     }
 
     #[Route('/{uploadId}/file_tree', name: 'get_file_tree', methods: ['GET'])]
