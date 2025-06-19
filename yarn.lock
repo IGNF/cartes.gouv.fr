@@ -2030,9 +2030,9 @@ convert-source-map@^2.0.0:
   integrity sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg==
 
 core-js@^3.26.1:
-  version "3.42.0"
-  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.42.0.tgz#edbe91f78ac8cfb6df8d997e74d368a68082fe37"
-  integrity sha512-Sz4PP4ZA+Rq4II21qkNqOEDTDrCvcANId3xpIgB34NDkWc3UduWj2dqEtN9yZIq8Dk3HyPI33x9sqqU5C8sr0g==
+  version "3.43.0"
+  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.43.0.tgz#f7258b156523208167df35dea0cfd6b6ecd4ee88"
+  integrity sha512-N6wEbTTZSYOY2rYAn85CuvWWkCK6QweMn7/4Nr3w+gDBeBhk/x4EJeY6FPo4QzDoJZxVTv8U7CMvgWk6pOHHqA==
 
 core-util-is@1.0.2:
   version "1.0.2"
@@ -3063,9 +3063,9 @@ geoportal-access-lib@3.4.6:
     node-fetch "^2.6.1"
 
 geostyler-cql-parser@^4.0.0:
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/geostyler-cql-parser/-/geostyler-cql-parser-4.0.2.tgz#05de9c0c01bc16d30c66fb38d7c2cc6d21597d36"
-  integrity sha512-5vLbayLDTIb1OsURV2aZklbL7I7T4DTESuYoDD51Q+c39JX6ezv9CdtTFBRYPQmCEBCC85u5LXoCtLDl5MOxnw==
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/geostyler-cql-parser/-/geostyler-cql-parser-4.1.0.tgz#5ad0d1ea7d854f41d70282996e94b0657f85b4c9"
+  integrity sha512-fhjkl9UzTSlZjVpfECFujaaMfY6weNIN+BPWAcKC6sgzrCNcbcFdJ2TNRw5vOZEP4Ioli4QpddltqtKD6p9Wow==
   dependencies:
     geostyler-style "^10.0.0"
 
@@ -3078,12 +3078,12 @@ geostyler-mapbox-parser@^6.0.0:
     geostyler-style "^10.0.0"
 
 geostyler-openlayers-parser@^5.0.0:
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/geostyler-openlayers-parser/-/geostyler-openlayers-parser-5.1.0.tgz#794b4907fc841ee19a85d54422ae78a206665c30"
-  integrity sha512-ulOK8klptZyUQAoefX81jlAm5PHv3N86WNyvBU1rWwuzubU64SWyhyhUBTGqdQZFxub/q2O4aSqXYf4I2KXQgA==
+  version "5.1.2"
+  resolved "https://registry.yarnpkg.com/geostyler-openlayers-parser/-/geostyler-openlayers-parser-5.1.2.tgz#f6ada558b27b397cbb66f1f591ae26449913f130"
+  integrity sha512-iwzP1qMPTw0vz91RTCiOXsm0r58EHAkHrbUXD4rk8xtPqI0mc33k27SmpNdVYI1dIQZjzO72ZlVBuvtXAlbnKQ==
   dependencies:
     css-font-parser "^2.0.0"
-    geostyler-style "^10.0.0"
+    geostyler-style "^10.3.0"
     lodash "^4.17.21"
 
 geostyler-qgis-parser@^4.0.0:
@@ -3109,7 +3109,7 @@ geostyler-sld-parser@^7.0.0:
     geostyler-style "^10.0.0"
     lodash "^4.17.21"
 
-geostyler-style@10.0.0, geostyler-style@^10.0.0:
+geostyler-style@10.0.0, geostyler-style@^10.0.0, geostyler-style@^10.3.0:
   version "10.0.0"
   resolved "https://registry.yarnpkg.com/geostyler-style/-/geostyler-style-10.0.0.tgz#2d88c9b49d8f56e63ca305b4248709b941e4d99e"
   integrity sha512-Gafn436MLApVvE1hsKrJ40KuH+6IUWM9V88IOuFxvZzsosn4a56ZJCXHXznN3usK/6ZZtmD0M5gO8ZhbB1wcwQ==
