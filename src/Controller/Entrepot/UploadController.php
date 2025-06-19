@@ -98,29 +98,7 @@ class UploadController extends AbstractController implements ApiControllerInterf
     public function get(string $datastoreId, string $uploadId): JsonResponse
     {
         try {
-            $upload = $this->uploadApiService->get($datastoreId, $uploadId);
-            $guessedProgress = $this->guessIntegrationProgressTags($datastoreId, $upload);
-            $upload['tags'] = [
-                ...$upload['tags'],
-                ...$guessedProgress,
-            ];
-
-            return $this->json($upload);
-
-            $realProgression = [];
-            if (isset($upload['tags'][UploadTags::INTEGRATION_PROGRESS])) {
-                $realProgression = $upload['tags'][UploadTags::INTEGRATION_PROGRESS];
-
-                unset($upload['tags'][UploadTags::INTEGRATION_CURRENT_STEP]);
-                unset($upload['tags'][UploadTags::INTEGRATION_PROGRESS]);
-            }
-
-            $guessedProgress = $this->guessIntegrationProgressTags($datastoreId, $upload);
-
-            $upload['tags']['real_progression'] = $realProgression;
-            $upload['tags']['guessed_progression'] = json_encode($guessedProgress[UploadTags::INTEGRATION_PROGRESS]);
-
-            return $this->json($upload);
+            return $this->json($this->uploadApiService->get($datastoreId, $uploadId));
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         } catch (\Exception $ex) {
@@ -128,8 +106,74 @@ class UploadController extends AbstractController implements ApiControllerInterf
         }
     }
 
+    #[Route('/{uploadId}/file_tree', name: 'get_file_tree', methods: ['GET'])]
+    public function getFileTree(string $datastoreId, string $uploadId): JsonResponse
+    {
+        try {
+            $fileTree = $this->uploadApiService->getFileTree($datastoreId, $uploadId);
+
+            return $this->json($fileTree);
+        } catch (AppException $ex) {
+            return $this->json($ex->getDetails(), $ex->getCode());
+        } catch (\Exception $ex) {
+            return $this->json(['message' => $ex->getMessage()], $ex->getCode());
+        }
+    }
+
+    #[Route('/{uploadId}/integration_progress', name: 'integration_progress', methods: ['GET'])]
+    public function integrationProgress(
+        string $datastoreId,
+        string $uploadId,
+        #[MapQueryParameter] bool $getOnlyProgress = false,
+    ): JsonResponse {
+        $upload = $this->uploadApiService->get($datastoreId, $uploadId);
+
+        // construction de progress initial
+        $initialIntegProgress = [
+            UploadTags::INT_STEP_SEND_FILES_API => JobStatuses::WAITING,
+            UploadTags::INT_STEP_WAIT_CHECKS => JobStatuses::WAITING,
+            UploadTags::INT_STEP_PROCESSING => JobStatuses::WAITING,
+        ];
+
+        if (!isset($upload['tags'][UploadTags::INTEGRATION_CURRENT_STEP]) && !isset($upload['tags'][UploadTags::INTEGRATION_PROGRESS])) {
+            $guessedProgress = $this->guessIntegrationProgressTags($datastoreId, $upload);
+            $integCurrentStep = $guessedProgress[UploadTags::INTEGRATION_CURRENT_STEP];
+            $integProgress = json_decode($guessedProgress[UploadTags::INTEGRATION_PROGRESS], true);
+        } else {
+            // lecture de progress si existe déjà dans les tags de l'upload, sinon on part du progress initial
+            $integCurrentStep = isset($upload['tags'][UploadTags::INTEGRATION_CURRENT_STEP]) ? intval($upload['tags'][UploadTags::INTEGRATION_CURRENT_STEP]) : 0;
+            $integProgress = isset($upload['tags'][UploadTags::INTEGRATION_PROGRESS]) ? json_decode($upload['tags'][UploadTags::INTEGRATION_PROGRESS], true) : $initialIntegProgress;
+        }
+
+        // clone de progress
+        $integCurrStepClone = $integCurrentStep;
+        $integProgressClone = $integProgress;
+
+        try {
+            // on exécute les étapes de l'intégration si getOnlyProgress est à false
+            if (false === $getOnlyProgress && $integCurrentStep < count($integProgress)) {
+                [$integCurrentStep, $integProgress] = $this->runIntegrationStep($datastoreId, $upload, $integProgress, $integCurrentStep);
+            }
+
+            $uploadTags = [
+                UploadTags::INTEGRATION_CURRENT_STEP => $integCurrentStep,
+                UploadTags::INTEGRATION_PROGRESS => json_encode($integProgress),
+            ];
+
+            // mise à jour état des étapes de l'intégration uniquement si changement
+            if ($integCurrStepClone !== $integCurrentStep || $integProgressClone !== $integProgress) {
+                $upload = $this->uploadApiService->addTags($datastoreId, $uploadId, $uploadTags);
+            }
+
+            return $this->json($uploadTags);
+        } catch (ApiException $ex) {
+            return $this->json($ex->getDetails(), $ex->getCode());
+        }
+    }
+
     /**
-     * Guess the progression of an upload based on its status and related data.
+     * Essayer de deviner la progression de l'intégration d'un upload si le fichier n'a pas été déposé via cartes.gouv.fr (le plugin qgis par exemple).
+     * // TODO : je sais pas encore si cette méthode est infaillible. Si on est sûr que ça couvre tous les cas, on peut essayer de supprimer les tags.
      *
      * @param array<mixed> $upload
      *
@@ -144,8 +188,6 @@ class UploadController extends AbstractController implements ApiControllerInterf
         ];
         $guessedProgress = $initialIntegProgress;
         $guessedProgressionStep = 0;
-
-        $tags = [];
 
         // A la création de l'upload, le status est à "OPEN"
         // Si le statut est "CLOSED" ou "CHECKING", on considère que l'étape d'envoi des fichiers a été réalisée
@@ -188,75 +230,16 @@ class UploadController extends AbstractController implements ApiControllerInterf
         }
 
         return [
-            UploadTags::INTEGRATION_PROGRESS => $guessedProgress,
+            UploadTags::INTEGRATION_PROGRESS => json_encode($guessedProgress),
             UploadTags::INTEGRATION_CURRENT_STEP => $guessedProgressionStep,
         ];
-    }
-
-    #[Route('/{uploadId}/file_tree', name: 'get_file_tree', methods: ['GET'])]
-    public function getFileTree(string $datastoreId, string $uploadId): JsonResponse
-    {
-        try {
-            $fileTree = $this->uploadApiService->getFileTree($datastoreId, $uploadId);
-
-            return $this->json($fileTree);
-        } catch (AppException $ex) {
-            return $this->json($ex->getDetails(), $ex->getCode());
-        } catch (\Exception $ex) {
-            return $this->json(['message' => $ex->getMessage()], $ex->getCode());
-        }
-    }
-
-    #[Route('/{uploadId}/integration_progress', name: 'integration_progress', methods: ['GET'])]
-    public function integrationProgress(
-        string $datastoreId,
-        string $uploadId,
-        #[MapQueryParameter] bool $getOnlyProgress = false,
-    ): JsonResponse {
-        $upload = $this->uploadApiService->get($datastoreId, $uploadId);
-
-        // construction de progress initial
-        $initialIntegProgress = [
-            UploadTags::INT_STEP_SEND_FILES_API => JobStatuses::WAITING,
-            UploadTags::INT_STEP_WAIT_CHECKS => JobStatuses::WAITING,
-            UploadTags::INT_STEP_PROCESSING => JobStatuses::WAITING,
-        ];
-
-        // lecture de progress si existe déjà dans les tags de l'upload, sinon on part du progress initial
-        $integCurrentStep = isset($upload['tags'][UploadTags::INTEGRATION_CURRENT_STEP]) ? intval($upload['tags'][UploadTags::INTEGRATION_CURRENT_STEP]) : 0;
-        $integProgress = isset($upload['tags'][UploadTags::INTEGRATION_PROGRESS]) ? json_decode($upload['tags'][UploadTags::INTEGRATION_PROGRESS], true) : $initialIntegProgress;
-
-        // clone de progress
-        $integCurrStepClone = $integCurrentStep;
-        $integProgressClone = $integProgress;
-
-        try {
-            // on exécute les étapes de l'intégration si getOnlyProgress est à false
-            if (false === $getOnlyProgress && $integCurrentStep < count($integProgress)) {
-                [$integCurrentStep, $integProgress] = $this->runIntegrationStep($datastoreId, $upload, $integProgress, $integCurrentStep);
-            }
-
-            $uploadTags = [
-                UploadTags::INTEGRATION_CURRENT_STEP => $integCurrentStep,
-                UploadTags::INTEGRATION_PROGRESS => json_encode($integProgress),
-            ];
-
-            // mise à jour état des étapes de l'intégration uniquement si changement
-            if ($integCurrStepClone !== $integCurrentStep || $integProgressClone !== $integProgress) {
-                $upload = $this->uploadApiService->addTags($datastoreId, $uploadId, $uploadTags);
-            }
-
-            return $this->json($uploadTags);
-        } catch (ApiException $ex) {
-            return $this->json($ex->getDetails(), $ex->getCode());
-        }
     }
 
     /**
      * @param array<mixed> $upload
      * @param array<mixed> $progress
      */
-    public function runIntegrationStep(string $datastoreId, array $upload, array $progress, int $currentStep): array
+    private function runIntegrationStep(string $datastoreId, array $upload, array $progress, int $currentStep): array
     {
         $currentStepName = array_keys($progress)[$currentStep];
         $currentStepStatus = isset($progress[$currentStepName]) ? $progress[$currentStepName] : JobStatuses::WAITING;
