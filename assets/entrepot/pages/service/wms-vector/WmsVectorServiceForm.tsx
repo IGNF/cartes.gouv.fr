@@ -279,7 +279,6 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
             setCurrentStep((currentStep) => currentStep + 1);
         } else {
             // on est à la dernière étape du formulaire donc on envoie la sauce
-
             if (editMode) {
                 editServiceMutation.mutate();
             } else {

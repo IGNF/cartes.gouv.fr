@@ -138,7 +138,7 @@ export const getWmsVectorServiceFormDefaultValues = (
 
         // valeurs récupérées depuis anciens config et offering existants
         defValues = {
-            selected_tables: typeInfos?.used_data?.[0].relations?.map((rel) => rel.name) ?? [],
+            selected_tables: typeInfos?.used_data?.[0].relations?.map((rel) => rel.name).sort() ?? [],
             technical_name: offering?.configuration.layer_name,
             service_name: offering?.configuration.name,
             share_with,

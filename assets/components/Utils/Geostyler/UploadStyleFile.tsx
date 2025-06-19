@@ -97,38 +97,61 @@ const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
     };
 
     const handleRemove = () => {
-        /* setGsStyle(undefined);
-        setStrStyle(""); */
         onChange(undefined);
     };
 
-    return gsStyle ? (
-        <div>
-            <div className={fr.cx("fr-grid-row", "fr-grid-row--right")}>
-                <Button priority={"tertiary"} iconId="fr-icon-delete-line" onClick={handleRemove}>
-                    {t("remove_style")}
-                </Button>
+    return (
+        <>
+            <div
+                className={fr.cx(
+                    "fr-input-group",
+                    "fr-my-2w",
+                    (() => {
+                        if (error) {
+                            return "fr-input-group--error";
+                        }
+                    })()
+                )}
+            >
+                <p
+                    className={fr.cx(
+                        (() => {
+                            if (error) {
+                                return "fr-error-text";
+                            }
+                        })()
+                    )}
+                >
+                    {error}
+                </p>
             </div>
-            <GeostylerEditor defaultParser={parser} onChange={handleStyleChange} parsers={parsers} value={gsStyle} />
-        </div>
-    ) : (
-        <div className={fr.cx("fr-my-2w")}>
-            <Upload
-                label={t("file_input_title")}
-                className={fr.cx("fr-input-group", "fr-mb-2w")}
-                hint={t("file_input_hint")}
-                state={error ? "error" : "default"}
-                stateRelatedMessage={error}
-                nativeInputProps={{
-                    accept: ".sld",
-                    onChange: handleUpload,
-                }}
-            />
-            <Divider>{t("or")}</Divider>
-            <Button priority={"tertiary"} onClick={handleCreate}>
-                {t("create_style")}
-            </Button>
-        </div>
+            {gsStyle ? (
+                <div>
+                    <div className={fr.cx("fr-grid-row", "fr-grid-row--right")}>
+                        <Button priority={"tertiary"} iconId="fr-icon-delete-line" onClick={handleRemove}>
+                            {t("remove_style")}
+                        </Button>
+                    </div>
+                    <GeostylerEditor defaultParser={parser} onChange={handleStyleChange} parsers={parsers} value={gsStyle} />
+                </div>
+            ) : (
+                <div className={fr.cx("fr-my-2w")}>
+                    <Upload
+                        label={t("file_input_title")}
+                        className={fr.cx("fr-input-group", "fr-mb-2w")}
+                        hint={t("file_input_hint")}
+                        nativeInputProps={{
+                            accept: ".sld",
+                            onChange: handleUpload,
+                        }}
+                    />
+                    <Divider>{t("or")}</Divider>
+                    <Button priority={"tertiary"} onClick={handleCreate}>
+                        {t("create_style")}
+                    </Button>
+                </div>
+            )}
+        </>
     );
 };
 

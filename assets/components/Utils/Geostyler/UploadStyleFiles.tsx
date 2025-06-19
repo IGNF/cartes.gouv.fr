@@ -5,6 +5,8 @@ import { useMapStyle } from "@/contexts/mapStyle";
 import { fr } from "@codegouvfr/react-dsfr";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import UploadStyleFile from "./UploadStyleFile";
+import { useTranslation } from "@/i18n";
+import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 
 type UploadStyleFileProps = {
     errors?: Record<string, { message?: string } | undefined>;
@@ -18,6 +20,8 @@ type UploadStyleFileProps = {
 const UploadStyleFiles: FC<UploadStyleFileProps> = (props) => {
     const { errors, onChange, parser, parsers, tables = [], value } = props;
     const { selectedTable, setSelectedTable } = useMapStyle();
+
+    const { t } = useTranslation("UploadStyleFile");
 
     const options = tables.map((table) => ({
         label: table,
@@ -40,15 +44,15 @@ const UploadStyleFiles: FC<UploadStyleFileProps> = (props) => {
         <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
             <div className={fr.cx("fr-col-3")}>
                 <div className={fr.cx("fr-h6", "fr-p-1v")} style={customStyle}>
-                    <i className="ri-stack-line" />
-                    &nbsp;Couches
+                    <i className={cx(fr.cx("fr-mr-1v"), "ri-stack-line")} />
+                    {t("layers")}
                 </div>
                 <RadioButtons options={options} small />
             </div>
             <div className={fr.cx("fr-col-9")}>
                 <div className={fr.cx("fr-h6", "fr-p-1v")} style={customStyle}>
-                    <i className="fr-icon-eye-line" />
-                    &nbsp;Aperçu du style
+                    <i className={cx(fr.cx("fr-mr-1v"), "fr-icon-eye-line")} />
+                    {t("style_overview")}
                 </div>
                 <UploadStyleFile
                     error={errors?.[selectedTable]?.message}

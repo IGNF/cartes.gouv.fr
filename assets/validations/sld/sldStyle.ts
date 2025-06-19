@@ -44,6 +44,10 @@ export default class SldStyleWmsVectorValidator {
     // }
 
     async #isValid(tableName: string, value: string, ctx: TestContext) {
+        if (!value) {
+            return ctx.createError({ message: tSld("no_style_declared") });
+        }
+
         const sldParser = new SldStyleParser({ locale: "fr" });
         const result = await sldParser.readStyle(value);
 
