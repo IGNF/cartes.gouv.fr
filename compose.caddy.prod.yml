@@ -1,0 +1,33 @@
+networks:
+    web_dev:
+        external: true
+
+services:
+    app:
+        image: ignf/cartes.gouv.fr:latest-caddy
+        build:
+            context: .
+            dockerfile: .docker/Dockerfile.caddy
+            target: prod
+            args:
+                - HTTP_PROXY
+                - HTTPS_PROXY
+        env_file:
+            - .env.local
+        environment:
+            - HTTP_PROXY=${HTTP_PROXY}
+            - HTTPS_PROXY=${HTTPS_PROXY}
+            - http_proxy=${HTTP_PROXY}
+            - https_proxy=${HTTPS_PROXY}
+            - APP_ENV=prod
+            - APP_ROOT_URL=https://cartesgouvfr-prod.docker.localhost
+        ports:
+            - "9090:8000"
+        networks:
+            - web_dev
+        restart: unless-stopped
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.cartesgouvfr-prod-caddy.rule=Host(`cartesgouvfr-prod.docker.localhost`)"
+            - "traefik.http.routers.cartesgouvfr-prod-caddy.entrypoints=websecure"
+            - "traefik.http.services.cartesgouvfr-prod-caddy.loadbalancer.server.port=8000"

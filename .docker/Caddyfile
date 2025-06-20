@@ -1,0 +1,52 @@
+{
+    # Disable admin API on port 2019 for security
+    admin off
+}
+
+:8000 {
+    # Set document root
+    root * /opt/cartesgouvfr-site/public
+
+    # Enable file server for static files
+    file_server
+
+    # PHP-FPM configuration
+    php_fastcgi unix//run/php/php8.2-fpm.sock
+
+    # Handle Symfony routes - try files first, then index.php
+    try_files {path} /index.php?{query}
+
+    # Security headers
+    header {
+        # Remove server information
+        -Server
+        # Security headers
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+
+    # Logs to stdout for Docker
+    log {
+        output stdout
+        format json
+    }
+
+    # Handle specific Symfony paths
+    @notStatic {
+        not path *.css *.js *.png *.jpg *.jpeg *.gif *.ico *.svg *.woff *.woff2 *.ttf *.eot *.pdf
+    }
+
+    # Gzip compression
+    encode gzip
+
+    # Cache static assets
+    @static {
+        path *.css *.js *.png *.jpg *.jpeg *.gif *.ico *.svg *.woff *.woff2 *.ttf *.eot *.pdf
+    }
+    header @static {
+        Cache-Control "public, max-age=31536000"
+    }
+} 

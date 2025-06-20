@@ -1,0 +1,43 @@
+networks:
+    web_dev:
+        external: true
+
+services:
+    app_dev:
+        image: ignf/cartes.gouv.fr:dev-caddy
+        build:
+            context: .
+            dockerfile: .docker/Dockerfile.caddy
+            target: dev
+            args:
+                - HTTP_PROXY
+                - HTTPS_PROXY
+        env_file:
+            - .env.local
+        environment:
+            - HTTP_PROXY=${HTTP_PROXY}
+            - HTTPS_PROXY=${HTTPS_PROXY}
+            - http_proxy=${HTTP_PROXY}
+            - https_proxy=${HTTPS_PROXY}
+            - APP_ROOT_URL=https://cartesgouvfr-dev.docker.localhost
+            - XDEBUG_MODE=debug
+            - XDEBUG_CONFIG=client_host=host.docker.internal client_port=9003
+        working_dir: /opt/cartesgouvfr-site
+        volumes:
+            - .:/opt/cartesgouvfr-site
+        extra_hosts:
+            - host.docker.internal:host-gateway
+        ports:
+            - "9092:8000"
+            - "5173:5173"
+        networks:
+            - web_dev
+        restart: unless-stopped
+        user: "1000:1000" # à ajuster en fonction de votre installation
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.cartesgouvfr-caddy.rule=Host(`cartesgouvfr-dev.docker.localhost`)"
+            - "traefik.http.routers.cartesgouvfr-caddy.entrypoints=websecure"
+            - "traefik.http.services.cartesgouvfr-caddy.loadbalancer.server.port=8000"
+#
+# alias trivy="docker run -v trivy-cache:/root/.cache/ -v /var/run/docker.sock:/var/run/docker.sock -e HTTP_PROXY=$HTTP_PROXY -e HTTPS_PROXY=$HTTP_PROXY aquasec/trivy"

@@ -1,0 +1,198 @@
+# syntax=docker/dockerfile:1-labs
+#----------------------------------------------------------------------
+# Installer les dépendances PHP dans une couche dédiée
+#----------------------------------------------------------------------
+ARG project_dir=/opt/cartesgouvfr-site
+ARG registry=docker.io
+FROM ${registry}/library/composer:latest AS deps_php
+
+ARG project_dir
+RUN mkdir -p ${project_dir}
+WORKDIR ${project_dir}
+COPY . .
+ENV APP_ENV=prod
+RUN APP_ENV=prod composer install --prefer-dist --no-dev --no-cache --optimize-autoloader --no-progress \
+    && APP_ENV=prod APP_DEBUG=0 php bin/console cache:clear \
+    && php bin/console assets:install \
+    && composer symfony-routing-dump
+
+#----------------------------------------------------------------------
+# Installer les dépendances JavaScript/nodejs dans une couche dédiée
+#----------------------------------------------------------------------
+FROM ${registry}/library/node:20-alpine AS deps_nodejs
+ARG project_dir
+RUN mkdir -p ${project_dir}
+WORKDIR ${project_dir}
+
+RUN apk add --no-cache git
+
+COPY --from=deps_php ${project_dir} .
+RUN yarn install --production --frozen-lockfile \
+    && yarn build \
+    && yarn cache clean
+
+#----------------------------------------------------------------------
+# Créer l'image de base de l'application avec Caddy + PHP-FPM
+#----------------------------------------------------------------------
+FROM ${registry}/library/ubuntu:24.04 AS base_app
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV LANG=fr_FR.UTF-8
+
+#----------------------------------------------------------------------
+# Configurer "fr_FR.UTF-8" comme locale
+# en savoir plus : https://stackoverflow.com/a/41797247
+#----------------------------------------------------------------------
+RUN apt-get -qq update && DEBIAN_FRONTEND=noninteractive apt-get -qq install --no-install-recommends -y locales \
+    && sed -i -e 's/# en_US.UTF-8 UTF-8/fr_FR.UTF-8 UTF-8/' /etc/locale.gen \
+    && dpkg-reconfigure --frontend=noninteractive locales \
+    && update-locale LANG=fr_FR.UTF-8 \
+    && apt-get -qq clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+#----------------------------------------------------------------------
+# Installer les outils communs et Caddy
+#----------------------------------------------------------------------
+RUN apt-get -qq update \
+    && apt-get -qq install --no-install-recommends -y \
+    ca-certificates gnupg2 debian-keyring debian-archive-keyring apt-transport-https curl \
+    && curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg \
+    && curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | tee /etc/apt/sources.list.d/caddy-stable.list \
+    && apt-get -qq update \
+    && apt-get -qq install --no-install-recommends -y caddy \
+    && apt-get -qq clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+#------------------------------------------------------------------------
+# Configurer le dépôt APT de PHP : https://packages.sury.org/php/
+#------------------------------------------------------------------------
+RUN apt-get -qq update \
+    && apt-get -qq install --no-install-recommends -y gnupg2 software-properties-common \
+    && add-apt-repository -y ppa:ondrej/php \
+    && apt-get remove -y software-properties-common \
+    && apt-get -qq clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+#----------------------------------------------------------------------
+# Installer PHP-FPM et ses extensions
+#----------------------------------------------------------------------
+ARG php_version=8.2
+RUN apt-get -qq update \
+    && apt-get -qq install --no-install-recommends -y \
+    php${php_version}-fpm \
+    php${php_version}-cli \
+    php${php_version}-opcache \
+    php${php_version}-xml \
+    php${php_version}-zip \
+    php${php_version}-curl \
+    php${php_version}-intl \
+    php${php_version}-xsl \
+    php${php_version}-sqlite3 \
+    supervisor \
+    ### APCu
+    php${php_version}-dev \
+    php-pear \
+    gcc make \
+    && pecl install apcu \
+    && echo "extension=apcu.so" > /etc/php/${php_version}/mods-available/apcu.ini \
+    && ln -s /etc/php/${php_version}/mods-available/apcu.ini /etc/php/${php_version}/fpm/conf.d/20-apcu.ini \
+    && ln -s /etc/php/${php_version}/mods-available/apcu.ini /etc/php/${php_version}/cli/conf.d/20-apcu.ini \
+    && apt-get -qq purge -y php-pear php${php_version}-dev gcc make \
+    ### APCu
+    && apt-get -qq autoremove -y \
+    && apt-get -qq clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+#----------------------------------------------------------------------
+# Configurer PHP-FPM
+#----------------------------------------------------------------------
+ARG php_version=8.2
+COPY .docker/php.ini /etc/php/${php_version}/fpm/conf.d/99-app.ini
+COPY .docker/php.ini /etc/php/${php_version}/cli/conf.d/99-app.ini
+COPY .docker/php-fpm.conf /etc/php/${php_version}/fpm/pool.d/www.conf
+
+# Create necessary directories and set permissions for non-root operation
+RUN mkdir -p /run/php /tmp /var/log/caddy \
+    && chmod 777 /run/php /tmp /var/log /var/log/caddy
+
+#----------------------------------------------------------------------
+# Configurer Caddy
+#----------------------------------------------------------------------
+COPY .docker/Caddyfile /etc/caddy/Caddyfile
+
+#----------------------------------------------------------------------
+# Configurer Supervisor pour gérer Caddy et PHP-FPM
+#----------------------------------------------------------------------
+COPY .docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+#----------------------------------------------------------------------
+# Installer l'application pour production
+#----------------------------------------------------------------------
+FROM base_app AS prod
+ARG project_dir
+WORKDIR ${project_dir}
+COPY --exclude=.git --exclude=var . .
+COPY --from=deps_php ${project_dir}/vendor vendor
+COPY --from=deps_php ${project_dir}/public/bundles public/bundles
+COPY --from=deps_nodejs ${project_dir}/public/build public/build
+
+RUN mkdir -p ${project_dir}/var \
+    && chmod -R 777 ${project_dir}/var/ \
+    && chmod -R 755 ${project_dir}/ \
+    && chmod -R 777 ${project_dir}/var/
+
+VOLUME ${project_dir}/var
+
+ENV APP_ENV=prod
+ENV APP_DEBUG=0
+
+# Copy and make executable the startup script
+COPY .docker/application-caddy.sh /usr/local/bin/application-caddy.sh
+RUN chmod +x /usr/local/bin/application-caddy.sh
+
+# Vérifier que le fichier de cache de vite est généré (par le cache:clear dans application.sh), sinon le site n'a pas de style
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD test -s var/cache/prod/pentatrion_vite.cache.php || exit 1
+
+EXPOSE 8000
+CMD ["/usr/local/bin/application-caddy.sh"]
+
+#----------------------------------------------------------------------
+# Installer l'application pour développement
+#----------------------------------------------------------------------
+FROM base_app AS dev
+
+COPY --from=composer /usr/bin/composer /usr/bin/composer
+
+ARG project_dir
+WORKDIR ${project_dir}
+VOLUME ${project_dir}
+
+# Installer xdebug
+ARG php_version=8.2
+RUN apt-get -qq update && apt-get -qq install -y \
+    php${php_version}-dev \
+    php-pear \
+    php-xml \
+    zlib1g-dev \
+    git \
+    && apt-get -qq clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+COPY .docker/php-xdebug.ini /etc/php/${php_version}/fpm/conf.d/20-xdebug.ini
+COPY .docker/php-xdebug.ini /etc/php/${php_version}/cli/conf.d/20-xdebug.ini
+RUN pear config-set php_ini /etc/php/${php_version}/cli/conf.d/99-app.ini \
+    && pecl install xdebug \
+    && echo "\nzend_extension=$(find /usr/lib/php/ -name xdebug.so)" >> /etc/php/${php_version}/fpm/conf.d/20-xdebug.ini \
+    && echo "\nzend_extension=$(find /usr/lib/php/ -name xdebug.so)" >> /etc/php/${php_version}/cli/conf.d/20-xdebug.ini
+
+COPY .docker/php.ini /etc/php/${php_version}/fpm/conf.d/99-app.ini
+COPY .docker/php.ini /etc/php/${php_version}/cli/conf.d/99-app.ini
+
+#----------------------------------------------------------------------
+# Installation de nodejs depuis l'image officielle
+# https://github.com/nodejs/docker-node/blob/main/18/bullseye/Dockerfile
+# https://stackoverflow.com/a/63108753
+#----------------------------------------------------------------------
+COPY --from=node:20-slim /usr/local/lib/node_modules /usr/local/lib/node_modules
+COPY --from=node:20-slim /usr/local/bin/node /usr/local/bin/node
+RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
+    && npm i -g npm yarn pnpm
+
+EXPOSE 8000
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"] 
