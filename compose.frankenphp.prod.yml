@@ -1,0 +1,40 @@
+networks:
+    web_dev:
+        external: true
+
+services:
+    app_prod:
+        image: ignf/cartes.gouv.fr:prod-frankenphp
+        build:
+            context: .
+            dockerfile: .docker/Dockerfile.frankenphp
+            target: prod
+            args:
+                - HTTP_PROXY
+                - HTTPS_PROXY
+        environment:
+            HTTP_PROXY: ${HTTP_PROXY}
+            HTTPS_PROXY: ${HTTPS_PROXY}
+            http_proxy: ${HTTP_PROXY}
+            https_proxy: ${HTTPS_PROXY}
+            APP_ENV: prod
+            APP_DEBUG: 0
+            APP_ROOT_URL: https://cartesgouvfr-prod.docker.localhost
+            FRANKENPHP_CONFIG: "worker ./public/index.php"
+            APP_RUNTIME: "Runtime\\FrankenPhpSymfony\\Runtime"
+        working_dir: /opt/cartesgouvfr-site
+        volumes:
+            - app_var:/opt/cartesgouvfr-site/var
+        ports:
+            - "9090:8000"
+        networks:
+            - web_dev
+        restart: unless-stopped
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.cartesgouvfr-frankenphp-prod.rule=Host(`cartesgouvfr-prod.docker.localhost`)"
+            - "traefik.http.routers.cartesgouvfr-frankenphp-prod.entrypoints=websecure"
+            - "traefik.http.services.cartesgouvfr-frankenphp-prod.loadbalancer.server.port=8000"
+
+volumes:
+    app_var:

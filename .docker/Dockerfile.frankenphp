@@ -12,6 +12,8 @@ WORKDIR ${project_dir}
 COPY . .
 ENV APP_ENV=prod
 RUN APP_ENV=prod composer install --prefer-dist --no-dev --no-cache --optimize-autoloader --no-progress \
+    && composer require runtime/frankenphp-symfony \
+    && composer dump-autoload --optimize --no-dev --classmap-authoritative \
     && APP_ENV=prod APP_DEBUG=0 php bin/console cache:clear \
     && php bin/console assets:install \
     && composer symfony-routing-dump
@@ -32,7 +34,7 @@ RUN yarn install --production --frozen-lockfile \
     && yarn cache clean
 
 #----------------------------------------------------------------------
-# Créer l'image de base de l'application avec Caddy + PHP-FPM
+# Créer l'image de base de l'application avec FrankenPHP
 #----------------------------------------------------------------------
 FROM ${registry}/library/ubuntu:24.04 AS base_app
 
@@ -41,7 +43,6 @@ ENV LANG=fr_FR.UTF-8
 
 #----------------------------------------------------------------------
 # Configurer "fr_FR.UTF-8" comme locale
-# en savoir plus : https://stackoverflow.com/a/41797247
 #----------------------------------------------------------------------
 RUN apt-get -qq update && DEBIAN_FRONTEND=noninteractive apt-get -qq install --no-install-recommends -y locales \
     && sed -i -e 's/# en_US.UTF-8 UTF-8/fr_FR.UTF-8 UTF-8/' /etc/locale.gen \
@@ -50,19 +51,27 @@ RUN apt-get -qq update && DEBIAN_FRONTEND=noninteractive apt-get -qq install --n
     && apt-get -qq clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 #----------------------------------------------------------------------
-# Installer les outils communs et Caddy
+# Installer les outils communs et dépendances pour FrankenPHP
 #----------------------------------------------------------------------
 RUN apt-get -qq update \
     && apt-get -qq install --no-install-recommends -y \
     ca-certificates gnupg2 debian-keyring debian-archive-keyring apt-transport-https curl \
-    && curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg \
-    && curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | tee /etc/apt/sources.list.d/caddy-stable.list \
-    && apt-get -qq update \
-    && apt-get -qq install --no-install-recommends -y caddy \
+    libxml2 libssl3 zlib1g \
     && apt-get -qq clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+#----------------------------------------------------------------------
+# Installer FrankenPHP avec PHP 8.2
+#----------------------------------------------------------------------
+RUN curl -1sLf 'https://dl.cloudsmith.io/public/caddy/xcaddy/gpg.key' | gpg --dearmor -o /usr/share/keyrings/caddy-xcaddy-archive-keyring.gpg \
+    && curl -1sLf 'https://dl.cloudsmith.io/public/caddy/xcaddy/debian.deb.txt' | tee /etc/apt/sources.list.d/caddy-xcaddy.list \
+    && apt-get -qq update
+
+# Download and install FrankenPHP
+RUN curl -fsSL https://github.com/dunglas/frankenphp/releases/latest/download/frankenphp-linux-x86_64 -o /usr/local/bin/frankenphp \
+    && chmod +x /usr/local/bin/frankenphp
+
 #------------------------------------------------------------------------
-# Configurer le dépôt APT de PHP : https://packages.sury.org/php/
+# Configurer le dépôt APT de PHP pour les extensions supplémentaires
 #------------------------------------------------------------------------
 RUN apt-get -qq update \
     && apt-get -qq install --no-install-recommends -y gnupg2 software-properties-common \
@@ -71,55 +80,50 @@ RUN apt-get -qq update \
     && apt-get -qq clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 #----------------------------------------------------------------------
-# Installer PHP-FPM et ses extensions
+# Créer les répertoires de configuration FrankenPHP
+#----------------------------------------------------------------------
+RUN mkdir -p /etc/frankenphp/conf.d /var/log/frankenphp /tmp \
+    && chmod 777 /tmp /var/log /var/log/frankenphp
+
+#----------------------------------------------------------------------
+# Installer les extensions PHP supplémentaires si nécessaires
+# FrankenPHP inclut déjà les extensions de base
 #----------------------------------------------------------------------
 ARG php_version=8.2
 RUN apt-get -qq update \
     && apt-get -qq install --no-install-recommends -y \
-    php${php_version}-fpm \
     php${php_version}-cli \
-    php${php_version}-opcache \
+    php${php_version}-dev \
     php${php_version}-xml \
-    php${php_version}-zip \
     php${php_version}-curl \
     php${php_version}-intl \
-    php${php_version}-xsl \
+    php${php_version}-zip \
     php${php_version}-sqlite3 \
-    ### APCu
-    php${php_version}-dev \
+    php${php_version}-opcache \
+    php${php_version}-mbstring \
     php-pear \
     gcc make \
+    autoconf \
+    pkg-config \
+    && php -m | grep -i xml \
+    && php --version \
     && pecl install apcu \
-    && echo "extension=apcu.so" > /etc/php/${php_version}/mods-available/apcu.ini \
-    && ln -s /etc/php/${php_version}/mods-available/apcu.ini /etc/php/${php_version}/fpm/conf.d/20-apcu.ini \
-    && ln -s /etc/php/${php_version}/mods-available/apcu.ini /etc/php/${php_version}/cli/conf.d/20-apcu.ini \
-    && apt-get -qq purge -y php-pear php${php_version}-dev gcc make \
-    ### APCu
+    && echo "extension=apcu.so" > /etc/frankenphp/conf.d/20-apcu.ini \
+    && apt-get -qq purge -y php-pear php${php_version}-dev gcc make autoconf pkg-config \
     && apt-get -qq autoremove -y \
     && apt-get -qq clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 #----------------------------------------------------------------------
-# Configurer PHP-FPM
+# Configurer PHP pour FrankenPHP
 #----------------------------------------------------------------------
-ARG php_version=8.2
-COPY .docker/php.ini /etc/php/${php_version}/fpm/conf.d/99-app.ini
-COPY .docker/php.ini /etc/php/${php_version}/cli/conf.d/99-app.ini
-COPY .docker/php-fpm.conf /etc/php/${php_version}/fpm/pool.d/www.conf
-
-# Create necessary directories and set permissions for non-root operation
-RUN mkdir -p /run/php /tmp /var/log/caddy \
-    && chmod 777 /run/php /tmp /var/log /var/log/caddy
-
-#----------------------------------------------------------------------
-# Configurer Caddy
-#----------------------------------------------------------------------
-COPY .docker/Caddyfile /etc/caddy/Caddyfile
+COPY .docker/php.ini /etc/frankenphp/php.ini
+COPY .docker/Caddyfile.frankenphp /etc/frankenphp/Caddyfile
 
 #----------------------------------------------------------------------
 # Copy startup script
 #----------------------------------------------------------------------
-COPY .docker/start-services.sh /usr/local/bin/start-services.sh
-RUN chmod +x /usr/local/bin/start-services.sh
+COPY .docker/start-frankenphp.sh /usr/local/bin/start-frankenphp.sh
+RUN chmod +x /usr/local/bin/start-frankenphp.sh
 
 #----------------------------------------------------------------------
 # Installer l'application pour production
@@ -142,12 +146,12 @@ VOLUME ${project_dir}/var
 ENV APP_ENV=prod
 ENV APP_DEBUG=0
 
-# Vérifier que le fichier de cache de vite est généré (par le cache:clear dans start-services.sh), sinon le site n'a pas de style
+# Vérifier que le fichier de cache de vite est généré
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD test -s var/cache/prod/pentatrion_vite.cache.php || exit 1
 
 EXPOSE 8000
-CMD ["/usr/local/bin/start-services.sh"]
+CMD ["/usr/local/bin/start-frankenphp.sh"]
 
 #----------------------------------------------------------------------
 # Installer l'application pour développement
@@ -164,26 +168,21 @@ VOLUME ${project_dir}
 ARG php_version=8.2
 RUN apt-get -qq update && apt-get -qq install -y \
     php${php_version}-dev \
+    php${php_version}-xml \
     php-pear \
-    php-xml \
     zlib1g-dev \
     git \
     && apt-get -qq clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-COPY .docker/php-xdebug.ini /etc/php/${php_version}/fpm/conf.d/20-xdebug.ini
-COPY .docker/php-xdebug.ini /etc/php/${php_version}/cli/conf.d/20-xdebug.ini
-RUN pear config-set php_ini /etc/php/${php_version}/cli/conf.d/99-app.ini \
+COPY .docker/php-xdebug.ini /etc/frankenphp/conf.d/20-xdebug.ini
+RUN pear config-set php_ini /etc/frankenphp/php.ini \
     && pecl install xdebug \
-    && echo "\nzend_extension=$(find /usr/lib/php/ -name xdebug.so)" >> /etc/php/${php_version}/fpm/conf.d/20-xdebug.ini \
-    && echo "\nzend_extension=$(find /usr/lib/php/ -name xdebug.so)" >> /etc/php/${php_version}/cli/conf.d/20-xdebug.ini
+    && echo "\nzend_extension=$(find /usr/lib/php/ -name xdebug.so)" >> /etc/frankenphp/conf.d/20-xdebug.ini
 
-COPY .docker/php.ini /etc/php/${php_version}/fpm/conf.d/99-app.ini
-COPY .docker/php.ini /etc/php/${php_version}/cli/conf.d/99-app.ini
+COPY .docker/php.ini /etc/frankenphp/php.ini
 
 #----------------------------------------------------------------------
 # Installation de nodejs depuis l'image officielle
-# https://github.com/nodejs/docker-node/blob/main/18/bullseye/Dockerfile
-# https://stackoverflow.com/a/63108753
 #----------------------------------------------------------------------
 COPY --from=node:20-slim /usr/local/lib/node_modules /usr/local/lib/node_modules
 COPY --from=node:20-slim /usr/local/bin/node /usr/local/bin/node
@@ -191,4 +190,6 @@ RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
     && npm i -g npm yarn pnpm
 
 EXPOSE 8000
-CMD ["/usr/local/bin/start-services.sh"] 
+# CMD ["/usr/local/bin/start-frankenphp.sh"] 
+# exec /usr/local/bin/frankenphp run --config /etc/frankenphp/Caddyfile
+CMD ["/usr/local/bin/frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile"]
