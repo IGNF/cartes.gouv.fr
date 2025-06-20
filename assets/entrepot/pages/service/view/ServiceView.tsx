@@ -17,7 +17,7 @@ import { type CartesApiException } from "../../../../modules/jsonFetch";
 import { routes, useRoute } from "../../../../router/router";
 import api from "../../../api";
 import DiffuseServiceTab from "./DiffuseServiceTab";
-import ManageStylesTab from "./ManageStylesTab";
+import ManageStyles from "./ManageStyles";
 import PrivateServiceExplanation from "./PrivateServiceExplanation";
 
 import "../../../../sass/pages/service_view.scss";
@@ -40,33 +40,30 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
     const [initialValues, setInitialValues] = useState<MapInitial>();
 
     useEffect(() => {
-        if (!serviceQuery.data || serviceQuery.data?.open === false) return;
+        (async function () {
+            if (!serviceQuery.data || serviceQuery.data?.open === false) return;
 
-        let initial: MapInitial = { type: serviceQuery.data.type, bbox: undefined, layers: [] };
+            let initial: MapInitial = { type: serviceQuery.data.type, bbox: undefined, layers: [] };
 
-        const infos = serviceQuery.data.configuration.type_infos as TypeInfosWithBbox;
-        if (infos.bbox) {
-            initial = { ...initial, bbox: infos.bbox };
-        }
+            const infos = serviceQuery.data.configuration.type_infos as TypeInfosWithBbox;
+            if (infos.bbox) {
+                initial = { ...initial, bbox: infos.bbox };
+            }
 
-        const styles = serviceQuery.data.configuration.styles;
-        const currentStyle = styles?.find((style) => style.current === true);
-        initial = { ...initial, currentStyle: currentStyle };
-
-        getWebService(serviceQuery.data)
-            .getLayers()
-            .then((layers) => {
-                initial = { ...initial, layers: layers ?? [] };
-                setInitialValues(initial);
-            });
+            const styles = serviceQuery.data.configuration.styles;
+            const currentStyle = styles?.find((style) => style.current === true);
+            const layers = await getWebService(serviceQuery.data).getLayers();
+            initial = { ...initial, currentStyle, layers: layers ?? [] };
+            setInitialValues(initial);
+        })();
     }, [serviceQuery.data]);
+
+    const canManageStyles =
+        serviceQuery.data?.type === OfferingTypeEnum.WFS ||
+        (serviceQuery.data?.type === OfferingTypeEnum.WMTSTMS && serviceQuery.data.configuration.pyramid?.type === StoredDataTypeEnum.ROK4PYRAMIDVECTOR);
 
     // ONGLETS
     const tabs: TabsProps["tabs"] = useMemo(() => {
-        const canManageStyles =
-            serviceQuery.data?.type === OfferingTypeEnum.WFS ||
-            (serviceQuery.data?.type === OfferingTypeEnum.WMTSTMS && serviceQuery.data.configuration.pyramid?.type === StoredDataTypeEnum.ROK4PYRAMIDVECTOR);
-
         const _tabs: TabsProps["tabs"] = [
             {
                 label: "Diffuser le service",
@@ -76,16 +73,16 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
         ];
 
         // Pas de gestion des styles pour les autres services
-        if (canManageStyles) {
-            _tabs.push({
-                label: "Gérer les styles",
-                content: <ManageStylesTab service={serviceQuery.data} offeringId={offeringId} datastoreId={datastoreId} datasheetName={datasheetName} />,
-                isDefault: route.params["activeTab"] === "styles",
-            });
-        }
+        // if (canManageStyles) {
+        //     _tabs.push({
+        //         label: "Gérer les styles",
+        //         content: <ManageStylesTab service={serviceQuery.data} offeringId={offeringId} datastoreId={datastoreId} datasheetName={datasheetName} />,
+        //         isDefault: route.params["activeTab"] === "styles",
+        //     });
+        // }
 
         return _tabs;
-    }, [datasheetName, datastoreId, offeringId, serviceQuery.data, route.params]);
+    }, [serviceQuery.data, route.params]);
 
     return (
         <Main title={`Visualisation données ${datasheetName ?? serviceQuery.data?.layer_name}`}>
@@ -149,6 +146,16 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
                             <div className={fr.cx("fr-col-12", "fr-col-md-4", "fr-p-1w", "fr-px-2w")}>
                                 <Tabs tabs={tabs} />
                             </div>
+                            {initialValues && canManageStyles && (
+                                <ManageStyles
+                                    initial={initialValues}
+                                    service={serviceQuery.data}
+                                    offeringId={offeringId}
+                                    datastoreId={datastoreId}
+                                    datasheetName={datasheetName}
+                                    setInitialValues={setInitialValues}
+                                />
+                            )}
                         </div>
                     ) : (
                         <div className={fr.cx("fr-grid-row", "fr-mb-4w")}>

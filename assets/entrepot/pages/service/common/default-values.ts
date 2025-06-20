@@ -126,7 +126,8 @@ export const getWmsVectorServiceFormDefaultValues = (
     offering?: Service | null,
     editMode?: boolean,
     vectorDb?: StoredData,
-    metadata?: Metadata
+    metadata?: Metadata,
+    styles?: Record<string, string>
 ): WmsVectorServiceFormValuesType => {
     let defValues: WmsVectorServiceFormValuesType;
     const now = datefnsFormat(new Date(), "yyyy-MM-dd");
@@ -137,13 +138,14 @@ export const getWmsVectorServiceFormDefaultValues = (
 
         // valeurs récupérées depuis anciens config et offering existants
         defValues = {
-            selected_tables: typeInfos?.used_data?.[0].relations?.map((rel) => rel.name) ?? [],
+            selected_tables: typeInfos?.used_data?.[0].relations?.map((rel) => rel.name).sort() ?? [],
             technical_name: offering?.configuration.layer_name,
             service_name: offering?.configuration.name,
             share_with,
             attribution_text: offering?.configuration.attribution?.title,
             attribution_url: offering?.configuration.attribution?.url,
             allow_view_data: false,
+            style_files: styles,
         };
     } else {
         const suffix = getEndpointSuffix(EndpointTypeEnum.WMSVECTOR);

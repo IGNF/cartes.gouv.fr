@@ -15,18 +15,15 @@ export default class MapboxStyleValidator extends StyleValidator {
         this.#layerNames = getWebService(service).getLayerNames();
     }
 
-    async validate(files: FileList, ctx: TestContext): Promise<ValidationError | boolean> {
-        const validation = await super.validate(files, ctx);
+    async validate(value: string | undefined, ctx: TestContext): Promise<ValidationError | boolean> {
+        const validation = await super.validate(value, ctx);
         if (validation instanceof ValidationError) {
             return validation;
         }
 
-        const file = files[0];
-        const styleString = await file.text();
-
         let mapboxStyle;
         try {
-            mapboxStyle = JSON.parse(styleString);
+            mapboxStyle = JSON.parse(value as string);
         } catch (e) {
             const error = e as SyntaxError;
             return ctx.createError({ message: error.message });
