@@ -52,7 +52,12 @@ const GeostylerEditor: FC<GeostylerEditorProps> = (props) => {
                     label="Editeur de style"
                     tabs={[
                         {
-                            label: "Tableau",
+                            label: (
+                                <div>
+                                    <i className="ri-table-line" />
+                                    <span className={fr.cx("fr-ml-1w")}>Tableau</span>
+                                </div>
+                            ),
                             content: (
                                 <div className={fr.cx("fr-grid-row", "fr-my-2w")}>
                                     <div className={fr.cx("fr-col")}>
@@ -62,7 +67,12 @@ const GeostylerEditor: FC<GeostylerEditorProps> = (props) => {
                             ),
                         },
                         {
-                            label: "Editeur de code",
+                            label: (
+                                <div>
+                                    <i className="ri-code-line" />
+                                    <span className={fr.cx("fr-ml-1w")}>Editeur de code</span>
+                                </div>
+                            ),
                             content: (
                                 <div className={fr.cx("fr-grid-row", "fr-my-2w")}>
                                     <div className={fr.cx("fr-col")}>

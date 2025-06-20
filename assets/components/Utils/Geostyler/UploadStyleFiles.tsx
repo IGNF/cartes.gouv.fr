@@ -54,6 +54,43 @@ const UploadStyleFiles: FC<UploadStyleFileProps> = (props) => {
                     <i className={cx(fr.cx("fr-mr-1v"), "fr-icon-eye-line")} />
                     {t("style_overview")}
                 </div>
+                <div
+                    className={fr.cx(
+                        "fr-input-group",
+                        "fr-my-2w",
+                        (() => {
+                            if (Object.keys(errors ?? {}).length) {
+                                // if (errors?.[selectedTable]?.message) {
+                                return "fr-input-group--error";
+                            }
+                        })()
+                    )}
+                >
+                    <div
+                        className={fr.cx(
+                            (() => {
+                                if (Object.keys(errors ?? {}).length) {
+                                    // if (errors?.[selectedTable]?.message) {
+                                    return "fr-error-text";
+                                }
+                            })()
+                        )}
+                    >
+                        <ul className={fr.cx("fr-raw-list")}>
+                            {Object.entries(errors ?? {}).map(([table, error]) => {
+                                if (error?.message) {
+                                    return (
+                                        <li key={table}>
+                                            <span className={fr.cx("fr-mr-1v")}>{table} : </span>
+                                            {error?.message}
+                                        </li>
+                                    );
+                                }
+                                return null;
+                            })}
+                        </ul>
+                    </div>
+                </div>
                 <UploadStyleFile
                     error={errors?.[selectedTable]?.message}
                     onChange={handleChange}

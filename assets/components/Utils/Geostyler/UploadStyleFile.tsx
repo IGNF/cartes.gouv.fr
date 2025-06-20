@@ -51,21 +51,26 @@ const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
         }
     }, [error]);
 
-    async function convertContent(content: string) {
+    async function convertContent(content: string): Promise<string> {
         const result = await parser.readStyle(content);
+
         if (result.output) {
-            setGsStyle(result.output);
-            setStrStyle(content);
+            const style = { ...result.output, name: selectedTable };
+            setGsStyle(style);
+
+            const writeResult = await parser.writeStyle(style);
+            setStrStyle(writeResult.output);
+            return writeResult.output;
         }
+        return content;
     }
 
-    function convertFile(file: File): Promise<string> {
+    async function convertFile(file: File): Promise<string> {
         return new Promise((resolve) => {
             const reader = new FileReader();
             reader.onload = async (e) => {
                 if (typeof e.target?.result === "string") {
-                    const content = e.target.result;
-                    convertContent(content);
+                    const content = await convertContent(e.target.result);
                     resolve(content);
                 }
             };
@@ -102,7 +107,7 @@ const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
 
     return (
         <>
-            <div
+            {/* <div
                 className={fr.cx(
                     "fr-input-group",
                     "fr-my-2w",
@@ -124,7 +129,7 @@ const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
                 >
                     {error}
                 </p>
-            </div>
+            </div> */}
             {gsStyle ? (
                 <div>
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--right")}>
