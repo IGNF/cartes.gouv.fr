@@ -1,4 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -7,17 +8,18 @@ import { createPortal } from "react-dom";
 import { symToStr } from "tsafe/symToStr";
 import { useToggle } from "usehooks-ts";
 
-import { OfferingStatusEnum, OfferingTypeEnum, StoredDataTypeEnum, type Service } from "../../../../../@types/app";
+import { TextCopyToClipboardDialog, TextCopyToClipboardModal } from "@/components/Utils/TextCopyToClipboardDialog";
+import { CartesApiException } from "@/modules/jsonFetch";
+import { useSnackbarStore } from "@/stores/SnackbarStore";
+import { DatasheetDetailed, OfferingStatusEnum, OfferingTypeEnum, StoredDataTypeEnum, type Service } from "../../../../../@types/app";
 import OfferingStatusBadge from "../../../../../components/Utils/Badges/OfferingStatusBadge";
 import Wait from "../../../../../components/Utils/Wait";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import { routes } from "../../../../../router/router";
 import { offeringTypeDisplayName } from "../../../../../utils";
 import api from "../../../../api";
-import ServiceDesc from "./ServiceDesc";
 import ListItem from "../ListItem";
-import { useSnackbarStore } from "@/stores/SnackbarStore";
-import { TextCopyToClipboardDialog, TextCopyToClipboardModal } from "@/components/Utils/TextCopyToClipboardDialog";
+import ServiceDesc from "./ServiceDesc";
 
 type ServicesListItemProps = {
     service: Service;
@@ -33,7 +35,7 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
         isOpenedByDefault: false,
     });
 
-    const unpublishServiceMutation = useMutation({
+    const unpublishServiceMutation = useMutation<null, CartesApiException, Service>({
         mutationFn: (service: Service) => {
             if (![OfferingTypeEnum.WFS, OfferingTypeEnum.WMSVECTOR, OfferingTypeEnum.WMSRASTER, OfferingTypeEnum.WMTSTMS].includes(service.type)) {
                 console.warn(`Dépublication de service ${service.type} n'a pas encore été implémentée`);
@@ -42,7 +44,16 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
 
             return api.service.unpublishService(datastoreId, service._id);
         },
-        onSettled() {
+        onSuccess() {
+            queryClient.setQueryData(RQKeys.datastore_datasheet(datastoreId, datasheetName), (oldDatasheet: DatasheetDetailed): DatasheetDetailed => {
+                if (!oldDatasheet) return oldDatasheet;
+
+                return {
+                    ...oldDatasheet,
+                    service_list: oldDatasheet.service_list?.filter((s) => s._id !== service._id),
+                };
+            });
+
             queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
             queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet_metadata(datastoreId, datasheetName) });
         },
@@ -212,6 +223,8 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                     </div>
                 </Wait>
             )}
+
+            {unpublishServiceMutation.error && <Alert severity="error" closable title={unpublishServiceMutation.error.message} />}
 
             {service.share_url && <TextCopyToClipboardDialog title="Copier l'URL" label="URL de diffusion" text={service.share_url} />}
         </>
