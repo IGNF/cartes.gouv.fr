@@ -75,7 +75,11 @@ class KeycloakUserProvider implements UserProviderInterface
 
         try {
             /** @var KeycloakResourceOwner */
-            $keycloakUser = $keycloakClient->fetchUserFromToken($accessToken);
+            $keycloakUser = $this->cache->get('keycloak-user-'.sha1((string) $accessToken), function (ItemInterface $item) use ($accessToken, $keycloakClient) {
+                $item->expiresAfter(60);
+
+                return $keycloakClient->fetchUserFromToken($accessToken);
+            });
         } catch (\Throwable $th) {
             $this->logger->debug('{class}: Failed to fetch user from token', ['class' => self::class]);
             throw new AuthenticationExpiredException('Failed to fetch user from token', Response::HTTP_UNAUTHORIZED, $th);
