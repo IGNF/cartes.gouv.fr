@@ -29,6 +29,8 @@ const ctx: GeoStylerContextInterface = {
         Style: {
             disableClassification: true,
             disableMultiEdit: true,
+            /* TODO Enlever le commentaire à ce qui suit */
+            // disableName: true TODO
         },
     },
     locale: locale.fr_FR,
