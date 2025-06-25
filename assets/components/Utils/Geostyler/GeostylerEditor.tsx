@@ -27,10 +27,12 @@ const ctx: GeoStylerContextInterface = {
             },
         },
         Style: {
+            /* TODO Enlever le commentaire à ce qui suit */
+            /* nameField: {
+                visibility: false
+            }, */
             disableClassification: true,
             disableMultiEdit: true,
-            /* TODO Enlever le commentaire à ce qui suit */
-            // disableName: true TODO
         },
     },
     locale: locale.fr_FR,
