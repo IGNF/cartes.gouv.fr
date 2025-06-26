@@ -1,62 +1,103 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import { Card } from "@codegouvfr/react-dsfr/Card";
-import { Tag } from "@codegouvfr/react-dsfr/Tag";
-import { FC } from "react";
+import Alert from "@codegouvfr/react-dsfr/Alert";
+import { useQuery } from "@tanstack/react-query";
+import { FC, useEffect } from "react";
 import { symToStr } from "tsafe/symToStr";
 
-import articles from "../../data/actualites.json";
-import { appRoot, routes } from "../../router/router";
-import { type NewsArticle } from "../../@types/newsArticle";
-import { formatDateFromISO } from "../../utils";
 import Main from "../../components/Layout/Main";
+import LoadingText from "../../components/Utils/LoadingText";
+import { useTranslation } from "../../i18n/i18n";
+import SymfonyRouting from "../../modules/Routing";
+import { routes } from "../../router/router";
 
-type NewsListItemProps = {
-    slug: string;
-    newsArticle: NewsArticle;
+// NOTE pour que la commande "react-dsfr update-icons" inclue l'icone article dans les assets qui est utilisée dans les articles
+// fr-icon-article-line
+
+type NewsListProps = {
+    page: number;
+    tag?: string;
 };
+const NewsList: FC<NewsListProps> = ({ page = 0, tag }) => {
+    const { t: tCommon } = useTranslation("Common");
 
-const NewsListItem: FC<NewsListItemProps> = ({ slug, newsArticle }) => {
-    const SHORT_DESC_MAX_CHAR = 120;
+    const articlesListQuery = useQuery({
+        queryKey: ["articles", "list", tag, page],
+        queryFn: async ({ signal }) => {
+            const url = SymfonyRouting.generate("cartesgouvfr_s3_gateway_get_content", {
+                path: tag ? `articles/list/tags/${tag}/${page}.html` : `articles/list/${page}.html`,
+            });
+            const response = await fetch(url, { signal });
 
-    const tags = newsArticle?.tags?.map((tag, i) => <Tag key={`${slug}_tag_${i}`}>{tag}</Tag>);
+            if (!response.ok) {
+                return Promise.reject({
+                    message: "Fetching articles failed",
+                    code: response.status,
+                });
+            }
 
-    return (
-        <div className={fr.cx("fr-col-sm-12", "fr-col-md-4", "fr-col-lg-4")}>
-            <Card
-                start={<div className={fr.cx("fr-tags-group")}>{tags}</div>}
-                desc={
-                    <span
-                        dangerouslySetInnerHTML={{
-                            __html:
-                                newsArticle?.short_description && newsArticle?.short_description.length > SHORT_DESC_MAX_CHAR
-                                    ? newsArticle?.short_description.substring(0, 100) + "..."
-                                    : (newsArticle?.short_description ?? ""),
-                        }}
-                    />
+            const text = await response.text();
+            return text;
+        },
+    });
+
+    // @ts-expect-error fausse alerte
+    if (articlesListQuery.error?.code === 404) {
+        routes.news_list({ page: 0 }).push();
+    }
+
+    // gestion des liens de navigation côté client pour les tags et les cartes d'articles
+    useEffect(() => {
+        const handleTagClick = (event: MouseEvent) => {
+            const target = event.target as HTMLElement;
+            if (target.tagName === "A" && target.classList?.contains("fr-tag")) {
+                event.preventDefault();
+                const href = (target as HTMLAnchorElement).href;
+                const tag = href.split("/")?.[5];
+                if (tag) {
+                    routes.news_list_by_tag({ page: 0, tag }).push();
+                } else {
+                    routes.news_list({ page: 0 }).push();
                 }
-                detail={newsArticle?.date && formatDateFromISO(newsArticle?.date)}
-                enlargeLink
-                imageAlt={newsArticle?.thumbnail_alt ?? "Vignette de l’article"}
-                imageUrl={`${appRoot}/${newsArticle.thumbnail_url}`}
-                linkProps={routes.news_article({ slug }).link}
-                title={<span dangerouslySetInnerHTML={{ __html: newsArticle?.title ?? "" }} />}
-                titleAs="h2"
-            />
-        </div>
-    );
-};
-NewsListItem.displayName = symToStr({ NewsListItem });
+            }
+        };
 
-const NewsList = () => {
+        const handleCardClick = (event: MouseEvent) => {
+            const target = event.target as HTMLElement;
+            if (target.tagName === "A" && target.parentElement?.className.includes("fr-card")) {
+                event.preventDefault();
+                const href = (target as HTMLAnchorElement).href;
+                const slug = href.split("/")?.[4];
+                if (slug) {
+                    routes.news_article({ slug }).push();
+                }
+            }
+        };
+
+        document.addEventListener("click", handleTagClick);
+        document.addEventListener("click", handleCardClick);
+
+        return () => {
+            document.removeEventListener("click", handleTagClick);
+            document.removeEventListener("click", handleCardClick);
+        };
+    }, []);
+
     return (
         <Main title="Actualités">
-            <div className={fr.cx("fr-container")}>
-                <h1>Actualités</h1>
+            {articlesListQuery.isLoading && <LoadingText message="Actualités" as="h1" withSpinnerIcon={true} />}
 
-                <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
-                    {Object.entries(articles)?.map(([slug, article]) => <NewsListItem key={slug} slug={slug} newsArticle={article} />)}
-                </div>
-            </div>
+            {articlesListQuery.error && (
+                <Alert severity={"error"} title={tCommon("error")} description={articlesListQuery.error?.message} className={fr.cx("fr-my-3w")} />
+            )}
+
+            {articlesListQuery.data && (
+                <div
+                    tabIndex={-1}
+                    dangerouslySetInnerHTML={{
+                        __html: articlesListQuery.data,
+                    }}
+                />
+            )}
         </Main>
     );
 };

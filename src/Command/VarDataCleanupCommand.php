@@ -18,6 +18,13 @@ use Symfony\Component\Finder\SplFileInfo;
 )]
 class VarDataCleanupCommand extends Command
 {
+    /**
+     * Le nom du dossier contenant les articles dans /var/data, pour éviter de supprimer les articles moissonnés.
+     *
+     * /var/data/articles
+     */
+    public const ARTICLES_DIR_NAME = 'articles';
+
     private string $directory;
     private Filesystem $fs;
 
@@ -58,7 +65,12 @@ class VarDataCleanupCommand extends Command
     {
         $finder = new Finder();
 
-        $finder->date('before 1 day ago')->in($this->directory)->files();
+        $finder
+            ->date('before 1 day ago')
+            ->in($this->directory)
+            ->exclude(self::ARTICLES_DIR_NAME)
+            ->files()
+        ;
 
         /** @var array<SplFileInfo> */
         $files = iterator_to_array($finder, true);
@@ -72,14 +84,19 @@ class VarDataCleanupCommand extends Command
     {
         $finder = new Finder();
 
-        $finder->in($this->directory)->directories()->filter(function (SplFileInfo $directory) {
-            $tmpFinder = new Finder();
-            $tmpFinder->in($directory->getRealPath());
+        $finder
+            ->in($this->directory)
+            ->exclude(self::ARTICLES_DIR_NAME)
+            ->directories()
+            ->filter(function (SplFileInfo $directory) {
+                $tmpFinder = new Finder();
+                $tmpFinder->in($directory->getRealPath());
 
-            $tmpFilesArray = iterator_to_array($tmpFinder, true);
+                $tmpFilesArray = iterator_to_array($tmpFinder, true);
 
-            return 0 === count($tmpFilesArray);
-        });
+                return 0 === count($tmpFilesArray);
+            })
+        ;
 
         /** @var array<SplFileInfo> */
         $files = iterator_to_array($finder, true);
