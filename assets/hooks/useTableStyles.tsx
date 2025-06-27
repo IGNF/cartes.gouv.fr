@@ -14,9 +14,12 @@ export type useTableStylesReturn = {
 };
 
 export const useTableStyles = (editMode: boolean, datastoreId: string, staticFiles: StaticFileListResponseDto[] = []): useTableStylesReturn => {
+    // TODO A SUPPRIMER PEUT-ETRE - staticFiles est parfois un objet ???
+    const sFiles = Array.isArray(staticFiles) ? [...staticFiles] : [];
+
     const enabled = Boolean(staticFiles && editMode);
     const styleQueries = useQueries({
-        queries: staticFiles.map<UseQueryOptions<string, CartesApiException>>((staticFile) => ({
+        queries: sFiles.map<UseQueryOptions<string, CartesApiException>>((staticFile) => ({
             queryKey: RQKeys.datastore_statics_download(datastoreId, staticFile._id),
             queryFn: () => api.statics.download(datastoreId, staticFile._id),
             enabled,

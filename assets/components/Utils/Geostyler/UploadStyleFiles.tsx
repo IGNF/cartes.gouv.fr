@@ -1,5 +1,5 @@
 import { StyleParser } from "geostyler-style";
-import { CSSProperties, FC } from "react";
+import { CSSProperties, FC, useMemo } from "react";
 
 import { useMapStyle } from "@/contexts/mapStyle";
 import { fr } from "@codegouvfr/react-dsfr";
@@ -7,6 +7,8 @@ import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import UploadStyleFile from "./UploadStyleFile";
 import { useTranslation } from "@/i18n";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
+
+import "../../../sass/components/upload-style-files.scss";
 
 type UploadStyleFileProps = {
     errors?: Record<string, { message?: string } | undefined>;
@@ -23,14 +25,17 @@ const UploadStyleFiles: FC<UploadStyleFileProps> = (props) => {
 
     const { t } = useTranslation("UploadStyleFile");
 
-    const options = tables.map((table) => ({
-        label: table,
-        nativeInputProps: {
-            value: table,
-            checked: table === selectedTable,
-            onChange: () => setSelectedTable(table),
-        },
-    }));
+    const options = useMemo(() => {
+        return tables.sort().map((table) => ({
+            label: table,
+            hintText: errors?.[table]?.message ? <span className={fr.cx("fr-error-text", "fr-mt-1v")}>{errors?.[table]?.message}</span> : null,
+            nativeInputProps: {
+                value: table,
+                checked: table === selectedTable,
+                onChange: () => setSelectedTable(table),
+            },
+        }));
+    }, [tables, selectedTable, setSelectedTable, errors]);
 
     function handleChange(style?: string) {
         onChange({ ...value, [selectedTable]: style });
@@ -47,49 +52,12 @@ const UploadStyleFiles: FC<UploadStyleFileProps> = (props) => {
                     <i className={cx(fr.cx("fr-mr-1v"), "ri-stack-line")} />
                     {t("layers")}
                 </div>
-                <RadioButtons options={options} small />
+                <RadioButtons classes={{ inputGroup: cx(fr.cx("fr-my-1v"), "frx-rb-layer") }} options={options} small />
             </div>
             <div className={fr.cx("fr-col-9")}>
                 <div className={fr.cx("fr-h6", "fr-p-1v")} style={customStyle}>
                     <i className={cx(fr.cx("fr-mr-1v"), "fr-icon-eye-line")} />
                     {t("style_overview")}
-                </div>
-                <div
-                    className={fr.cx(
-                        "fr-input-group",
-                        "fr-my-2w",
-                        (() => {
-                            if (Object.keys(errors ?? {}).length) {
-                                // if (errors?.[selectedTable]?.message) {
-                                return "fr-input-group--error";
-                            }
-                        })()
-                    )}
-                >
-                    <div
-                        className={fr.cx(
-                            (() => {
-                                if (Object.keys(errors ?? {}).length) {
-                                    // if (errors?.[selectedTable]?.message) {
-                                    return "fr-error-text";
-                                }
-                            })()
-                        )}
-                    >
-                        <ul className={fr.cx("fr-raw-list")}>
-                            {Object.entries(errors ?? {}).map(([table, error]) => {
-                                if (error?.message) {
-                                    return (
-                                        <li key={table}>
-                                            <span className={fr.cx("fr-mr-1v")}>{table} : </span>
-                                            {error?.message}
-                                        </li>
-                                    );
-                                }
-                                return null;
-                            })}
-                        </ul>
-                    </div>
                 </div>
                 <UploadStyleFile
                     error={errors?.[selectedTable]?.message}

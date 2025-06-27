@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { getTranslation } from "../../i18n/i18n";
@@ -8,6 +8,7 @@ const { t: tCommon } = getTranslation("Common");
 
 type ConfirmDialogProps = {
     title: string;
+    children?: ReactNode;
     yesTitle?: string;
     noTitle?: string;
     onConfirm: () => void;
@@ -18,7 +19,7 @@ const ConfirmDialogModal = createModal({
     isOpenedByDefault: false,
 });
 
-const ConfirmDialog: FC<ConfirmDialogProps> = ({ title, onConfirm, noTitle = tCommon("no"), yesTitle = tCommon("yes") }) => {
+const ConfirmDialog: FC<ConfirmDialogProps> = ({ title, children, onConfirm, noTitle = tCommon("no"), yesTitle = tCommon("yes") }) => {
     return (
         <>
             {createPortal(
@@ -36,7 +37,7 @@ const ConfirmDialog: FC<ConfirmDialogProps> = ({ title, onConfirm, noTitle = tCo
                         },
                     ]}
                 >
-                    <div />
+                    {children || <div />}
                 </ConfirmDialogModal.Component>,
                 document.body
             )}
