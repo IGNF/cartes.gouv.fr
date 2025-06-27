@@ -5,20 +5,14 @@ import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import SldStyleParser from "geostyler-sld-parser";
 import { FC, useCallback, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { symToStr } from "tsafe/symToStr";
 import * as yup from "yup";
 
-import {
-    ConfigurationTypeEnum,
-    EndpointTypeEnum,
-    type Service,
-    type ServiceFormValuesBaseType,
-    type StoredDataRelation,
-    type VectorDb,
-} from "../../../../@types/app";
+import { MapStyleProvider } from "@/contexts/mapStyle";
+import { useTableStyles } from "@/hooks/useTableStyles";
+import { ConfigurationTypeEnum, EndpointTypeEnum, type Service, type ServiceFormValuesBaseType, type VectorDb } from "../../../../@types/app";
 import Main from "../../../../components/Layout/Main";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../components/Utils/LoadingText";
@@ -37,28 +31,7 @@ import { getWmsVectorServiceFormDefaultValues } from "../common/default-values";
 import AdditionalInfo from "../metadata/AdditionalInfo";
 import Description from "../metadata/Description";
 import UploadMDFile from "../metadata/UploadMDFile";
-import UploadStyleFile from "./UploadStyleFile";
-
-/**
- * Convertir en v1.0.0 si l'utilisateur a déposé un sld en v1.1.0
- */
-const getSld100 = async (originalFile: File): Promise<File> => {
-    const fileContent = await originalFile.text();
-
-    const sldParser = new SldStyleParser({ locale: "fr" });
-
-    const result = await sldParser.readStyle(fileContent);
-    if (sldParser.readingSldVersion === "1.1.0") {
-        sldParser.sldVersion = "1.0.0";
-        const convertedStyle = await sldParser.writeStyle(result.output!);
-
-        const blob = new Blob([convertedStyle.output!]);
-        const newFile = new File([blob], originalFile.name);
-        return newFile;
-    } else {
-        return originalFile;
-    }
-};
+import StyleLoader from "./StyleLoader";
 
 const createFormData = async (formValues: WmsVectorServiceFormValuesType) => {
     const fd = new FormData();
@@ -101,8 +74,11 @@ const createFormData = async (formValues: WmsVectorServiceFormValuesType) => {
 
     // filtrer en fonction des tables sélectionnées
     for (const tableName of formValues.selected_tables!) {
-        if (formValues?.style_files?.[tableName]?.[0] !== undefined) {
-            fd.set(`style_${tableName}`, await getSld100(formValues?.style_files?.[tableName]?.[0]));
+        if (formValues?.style_files?.[tableName] !== undefined) {
+            const fileContent = formValues?.style_files?.[tableName];
+            const blob = new Blob([fileContent]);
+            const file = new File([blob], tableName);
+            fd.set(`style_${tableName}`, file);
         }
     }
 
@@ -122,7 +98,7 @@ const STEPS = {
 
 export type WmsVectorServiceFormValuesType = ServiceFormValuesBaseType & {
     selected_tables?: string[];
-    style_files?: Record<string, FileList>;
+    style_files?: Record<string, string>;
 };
 
 type WmsVectorServiceFormProps = {
@@ -220,6 +196,16 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
         enabled: !!vectorDbQuery.data?.tags?.datasheet_name,
     });
 
+    const configId = offeringQuery.data?.configuration._id;
+    const staticFilesParams = {
+        name: `config_${configId}_style_wmsv%`,
+    };
+    const staticFilesQuery = useQuery({
+        queryKey: RQKeys.datastore_statics_list(datastoreId, staticFilesParams),
+        queryFn: () => api.statics.getList(datastoreId, staticFilesParams),
+        enabled: !!configId,
+    });
+
     // Definition du schema
     const schemas = {};
     schemas[STEPS.TABLES_INFOS] = yup.object({
@@ -231,16 +217,16 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
     });
     schemas[STEPS.STYLE_FILE] = yup.object({
         style_files: yup.lazy(() => {
-            if (!selectedTables || selectedTables.length === 0) {
+            if (!selectedTableNamesList || selectedTableNamesList.length === 0) {
                 return yup.mixed().nullable().notRequired();
             }
 
             const styleFiles = {};
-            selectedTables.forEach((table) => {
-                styleFiles[table.name] = yup.mixed().test({
+            selectedTableNamesList.forEach((tableName) => {
+                styleFiles[tableName] = yup.string().test({
                     name: "is-valid-sld",
                     async test(value, ctx) {
-                        return new SldStyleWmsVectorValidator().validate(table.name, value as FileList, ctx, offeringQuery.data);
+                        return new SldStyleWmsVectorValidator().validate(tableName, value, ctx /*, offeringQuery.data*/);
                     },
                 });
             });
@@ -256,9 +242,17 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
     schemas[STEPS.METADATAS_ADDITIONALINFORMATIONS] = commonValidation.getMDAdditionalInfoSchema();
     schemas[STEPS.ACCESSRESTRICTIONS] = commonValidation.getAccessRestrictionSchema();
 
+    /* On recupere les styles des tables s'ils existent */
+    const {
+        data: styles,
+        isLoading: stylesIsLoading,
+        isError: stylesIsError,
+        errors: stylesErrors,
+    } = useTableStyles(editMode, datastoreId, staticFilesQuery.data);
+
     const defaultValues: WmsVectorServiceFormValuesType = useMemo(
-        () => getWmsVectorServiceFormDefaultValues(offeringQuery.data, editMode, vectorDbQuery.data, metadataQuery.data),
-        [editMode, offeringQuery.data, vectorDbQuery.data, metadataQuery.data]
+        () => getWmsVectorServiceFormDefaultValues(offeringQuery.data, editMode, vectorDbQuery.data, metadataQuery.data, styles),
+        [editMode, offeringQuery.data, vectorDbQuery.data, metadataQuery.data, styles]
     );
 
     const form = useForm<WmsVectorServiceFormValuesType>({
@@ -269,16 +263,6 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
     const { getValues: getFormValues, trigger, watch } = form;
 
     const selectedTableNamesList: string[] | undefined = watch("selected_tables", []);
-
-    const selectedTables: StoredDataRelation[] = useMemo(() => {
-        if (selectedTableNamesList && vectorDbQuery.data) {
-            const relations = vectorDbQuery.data.type_infos?.relations ?? [];
-            const tables = relations.filter((rel) => rel.type && rel.type === "TABLE");
-            const selectedTables = tables.filter((table) => selectedTableNamesList.includes(table.name));
-            return selectedTables;
-        }
-        return [];
-    }, [selectedTableNamesList, vectorDbQuery.data]);
 
     useScrollToTopEffect(currentStep);
 
@@ -295,7 +279,6 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
             setCurrentStep((currentStep) => currentStep + 1);
         } else {
             // on est à la dernière étape du formulaire donc on envoie la sauce
-
             if (editMode) {
                 editServiceMutation.mutate();
             } else {
@@ -308,8 +291,10 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
         <Main title={t("title", { editMode })}>
             <h1>{t("title", { editMode })}</h1>
 
-            {vectorDbQuery.isLoading || offeringQuery.isLoading || metadataQuery.isLoading ? (
+            {vectorDbQuery.isLoading || offeringQuery.isLoading || metadataQuery.isLoading || stylesIsLoading ? (
                 <LoadingText as="h2" message={editMode ? t("stored_data_and_offering.loading") : t("stored_data.loading")} />
+            ) : stylesIsError ? (
+                <Alert title={tCommon("error")} severity="error" closable={false} description={stylesErrors.join(",")} />
             ) : vectorDbQuery.data === undefined ? (
                 <Alert
                     severity="error"
@@ -348,7 +333,11 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
                     {editServiceMutation.error && <Alert closable description={editServiceMutation.error.message} severity="error" title={tCommon("error")} />}
 
                     <TableSelection visible={currentStep === STEPS.TABLES_INFOS} vectorDb={vectorDbQuery.data} form={form} />
-                    <UploadStyleFile visible={currentStep === STEPS.STYLE_FILE} selectedTables={selectedTables} form={form} />
+                    {currentStep === STEPS.STYLE_FILE && (
+                        <MapStyleProvider editMode={editMode} defaultTable={selectedTableNamesList?.[0] ?? ""}>
+                            <StyleLoader tableNames={selectedTableNamesList ?? []} form={form} />
+                        </MapStyleProvider>
+                    )}
                     <UploadMDFile visible={currentStep === STEPS.METADATAS_UPLOAD} form={form} />
                     <Description visible={currentStep === STEPS.METADATAS_DESCRIPTION} form={form} editMode={editMode} />
                     <AdditionalInfo
