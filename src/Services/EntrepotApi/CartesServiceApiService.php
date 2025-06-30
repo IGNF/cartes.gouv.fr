@@ -5,17 +5,24 @@ namespace App\Services\EntrepotApi;
 use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationMetadataTypes;
 use App\Constants\EntrepotApi\ConfigurationStatuses;
+use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Constants\EntrepotApi\OfferingTypes;
 use App\Constants\EntrepotApi\PermissionTypes;
 use App\Constants\EntrepotApi\Sandbox;
 use App\Constants\EntrepotApi\StoredDataTypes;
 use App\Dto\Services\CommonDTO;
+use App\Entity\CswMetadata\CswMetadata;
+use App\Entity\CswMetadata\CswMetadataLayer;
 use App\Exception\CartesApiException;
 use App\Services\CapabilitiesService;
 use App\Services\GeonetworkApiService;
 use App\Services\SandboxService;
+use App\Utils;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
@@ -37,6 +44,8 @@ class CartesServiceApiService
         private SandboxService $sandboxService,
         private CartesStylesApiService $cartesStylesApiService,
         private GeonetworkApiService $geonetworkApiService,
+        private CacheInterface $cache,
+        private LoggerInterface $logger,
         HttpClientInterface $httpClient,
     ) {
         $this->httpClient = $httpClient->withOptions([
@@ -284,17 +293,16 @@ class CartesServiceApiService
 
         // Mise à jour des métadonnées de la configuration
         $configRequestBody['metadata'] = $this->getNewConfigMetadata($dto->identifier, $configRequestBody['metadata'] ?? []);
-        $configTheme = implode(', ', $dto->category);
+        $configTags = [
+            CommonTags::CONFIG_THEME => implode(', ', $dto->category),
+        ];
 
         if ($oldOffering) {
             // Modification d'un service existant
             $oldConfiguration = $oldOffering['configuration'];
             $datasheetName = $oldConfiguration['tags'][CommonTags::DATASHEET_NAME];
 
-            $configTags = [
-                CommonTags::DATASHEET_NAME => $datasheetName,
-                CommonTags::CONFIG_THEME => $configTheme,
-            ];
+            $configTags[CommonTags::DATASHEET_NAME] = $datasheetName;
 
             // Mise à jour de la configuration
             $configuration = $this->configurationApiService->replace($datastoreId, $oldConfiguration['_id'], $configRequestBody);
@@ -313,10 +321,7 @@ class CartesServiceApiService
             $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId);
             $datasheetName = $storedData['tags'][CommonTags::DATASHEET_NAME];
 
-            $configTags = [
-                CommonTags::DATASHEET_NAME => $datasheetName,
-                CommonTags::CONFIG_THEME => $configTheme,
-            ];
+            $configTags[CommonTags::DATASHEET_NAME] = $datasheetName;
 
             // Ajout de la configuration
             $configuration = $this->configurationApiService->add($datastoreId, $configRequestBody);
@@ -341,6 +346,14 @@ class CartesServiceApiService
         try {
             $this->capabilitiesService->createOrUpdate($datastoreId, $endpoint, $offering['urls'][0]['url']);
         } catch (\Exception $e) {
+            $this->logger->warning('{class}: Failed to create or update capabilities for endpoint {endpointName} ({endpoint}) after the creation/modification of offering {offeringId}: {error}', [
+                'class' => self::class,
+                'endpoint' => $endpoint['_id'],
+                'endpointName' => $endpoint['technical_name'],
+                'offeringId' => $offering['_id'],
+                'exception' => $e,
+                'error' => $e->getMessage(),
+            ]);
         }
 
         // Création ou mise à jour de metadata
@@ -348,9 +361,103 @@ class CartesServiceApiService
         if ($this->sandboxService->isSandboxDatastore($datastoreId)) {
             $formData['identifier'] = Sandbox::LAYERNAME_PREFIX.$formData['identifier'];
         }
-        $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $formData);
+        $apiMetadata = $this->cartesMetadataApiService->createOrUpdate($datastoreId, $datasheetName, $formData);
+
+        // Synchronisation des autres services de la même fiche de données
+        /** @var CswMetadata */
+        $cswMetadata = $apiMetadata['csw_metadata'];
+
+        $this->synchroniseSiblingServices($datastoreId, $offering, $configTags[CommonTags::CONFIG_THEME], $cswMetadata, $dto);
 
         return $offering;
+    }
+
+    /**
+     * @param array<mixed> $offering
+     */
+    private function synchroniseSiblingServices(string $datastoreId, array $offering, string $configTheme, CswMetadata $cswMetadata, CommonDTO $dto): void
+    {
+        $siblingServices = array_map(fn (CswMetadataLayer $layer) => $layer->offeringId, $cswMetadata->layers ?? []);
+        $siblingServices = array_filter($siblingServices, fn (string $serviceId) => $serviceId !== $offering['_id']);
+        $keywords = [...$dto->category, ...$dto->keywords, ...$dto->free_keywords];
+
+        $capabilitiesUpdateArgs = [];
+
+        foreach ($siblingServices as $siblingServiceId) {
+            try {
+                $offering = $this->configurationApiService->getOffering($datastoreId, $siblingServiceId);
+                $configuration = $this->configurationApiService->get($datastoreId, $offering['configuration']['_id']);
+
+                // Mise à jour des tags seulement si nécessaire
+                if ($configTheme !== ($configuration['tags'][CommonTags::CONFIG_THEME] ?? '')) {
+                    $configuration = $this->configurationApiService->addTags($datastoreId, $configuration['_id'], [
+                        CommonTags::CONFIG_THEME => $configTheme,
+                    ]);
+                }
+
+                $configMetadata = $this->getNewConfigMetadata($dto->identifier, $configuration['metadata'] ?? []);
+                $currentKeywords = $configuration['type_infos']['keywords'] ?? [];
+
+                $needsMetadataUpdate = !Utils::deep_array_equals($configMetadata, $configuration['metadata'] ?? []);
+                $needsKeywordsUpdate = !Utils::deep_array_equals($keywords, $currentKeywords);
+
+                if ($needsMetadataUpdate || $needsKeywordsUpdate) {
+                    $configRequestBody = [
+                        'type' => $configuration['type'],
+                        'name' => $configuration['name'],
+                        'type_infos' => $configuration['type_infos'],
+                        'metadata' => $configMetadata,
+                    ];
+
+                    // Les services WFS n'ont pas de keywords globaux au niveau de type_infos, mais des keywords pour chaque relation de used_data
+                    if (ConfigurationTypes::WFS !== $configuration['type']) {
+                        $configRequestBody['type_infos']['keywords'] = $keywords;
+                    }
+
+                    if (isset($configuration['attribution']['title']) && isset($configuration['attribution']['url'])) {
+                        $configRequestBody['attribution'] = [
+                            'title' => $configuration['attribution']['title'],
+                            'url' => $configuration['attribution']['url'],
+                        ];
+                    }
+
+                    $configuration = $this->configurationApiService->replace($datastoreId, $configuration['_id'], $configRequestBody);
+                    $offering = $this->configurationApiService->syncOffering($datastoreId, $offering['_id']);
+
+                    $endpoint = $this->getEndpointByShareType($datastoreId, $configuration['type'], 'all_public');
+                    if (!in_array($endpoint['_id'], array_map(fn (array $endpoint) => $endpoint['endpoint']['_id'], $capabilitiesUpdateArgs))) {
+                        $capabilitiesUpdateArgs[] = [
+                            'datastore_id' => $datastoreId,
+                            'endpoint' => $endpoint,
+                            'offering' => $offering,
+                        ];
+                    }
+                }
+            } catch (\Throwable $e) {
+                $this->logger->warning('{class}: Failed to synchronise sibling service {serviceId}: {error}', [
+                    'class' => self::class,
+                    'serviceId' => $siblingServiceId,
+                    'exception' => $e,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        // Mise à jour des capabilities pour les services synchronisés
+        foreach ($capabilitiesUpdateArgs as $args) {
+            try {
+                $this->capabilitiesService->createOrUpdate($args['datastore_id'], $args['endpoint'], $args['offering']['urls'][0]['url']);
+            } catch (\Exception $e) {
+                $this->logger->warning('{class}: Failed to create or update capabilities for endpoint {endpointName} ({endpoint}) after the creation/modification of offering {offeringId}: {error}', [
+                    'class' => self::class,
+                    'endpoint' => $args['endpoint']['_id'],
+                    'endpointName' => $args['endpoint']['technical_name'],
+                    'offeringId' => $args['offering']['_id'],
+                    'exception' => $e,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
     }
 
     /**
@@ -368,6 +475,7 @@ class CartesServiceApiService
                 || ('text/html' === $md['format'] && ConfigurationMetadataTypes::OTHER === $md['type'] && str_starts_with($md['url'], $catalogueBaseUrl))
             );
         });
+        $configMetadata = array_values($configMetadata);
 
         $configMetadata[] = [
             'format' => 'application/xml',
@@ -430,24 +538,28 @@ class CartesServiceApiService
 
     private function getEndpointByShareType(string $datastoreId, string $configType, string $shareWith): array
     {
-        if ('all_public' === $shareWith) {
-            $open = true;
-        } elseif ('your_community' === $shareWith) {
-            $open = false;
-        } else {
-            throw new CartesApiException('Valeur du champ [share_with] est invalide', Response::HTTP_BAD_REQUEST, ['share_with' => $shareWith]);
-        }
+        return $this->cache->get("datastore-{$datastoreId}-endpoint-{$configType}-{$shareWith}", function (ItemInterface $item) use ($datastoreId, $configType, $shareWith) {
+            $item->expiresAfter(3600);
 
-        $endpoints = $this->datastoreApiService->getEndpointsList($datastoreId, [
-            'type' => $configType,
-            'open' => $open,
-        ]);
+            if ('all_public' === $shareWith) {
+                $open = true;
+            } elseif ('your_community' === $shareWith) {
+                $open = false;
+            } else {
+                throw new CartesApiException('Valeur du champ [share_with] est invalide', Response::HTTP_BAD_REQUEST, ['share_with' => $shareWith]);
+            }
 
-        if (0 === count($endpoints)) {
-            throw new CartesApiException("Aucun point d'accès (endpoint) du datastore ne peut convenir à la demande", Response::HTTP_BAD_REQUEST, ['share_with' => $shareWith]);
-        }
+            $endpoints = $this->datastoreApiService->getEndpointsList($datastoreId, [
+                'type' => $configType,
+                'open' => $open,
+            ]);
 
-        return $endpoints[0]['endpoint'];
+            if (0 === count($endpoints)) {
+                throw new CartesApiException("Aucun point d'accès (endpoint) du datastore ne peut convenir à la demande", Response::HTTP_BAD_REQUEST, ['share_with' => $shareWith]);
+            }
+
+            return $endpoints[0]['endpoint'];
+        });
     }
 
     /**

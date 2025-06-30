@@ -140,7 +140,7 @@ class CartesMetadataApiService
      *
      * @param array<mixed> $formData
      */
-    public function createOrUpdate(string $datastoreId, string $datasheetName, ?array $formData = null): void
+    public function createOrUpdate(string $datastoreId, string $datasheetName, ?array $formData = null): array
     {
         $apiMetadata = $this->getMetadataByDatasheetName($datastoreId, $datasheetName);
 
@@ -151,18 +151,18 @@ class CartesMetadataApiService
                 throw new AppException('formData doit être non null si création de la métadonnée', Response::HTTP_INTERNAL_SERVER_ERROR);
             }
 
-            $this->createMetadata($datastoreId, $datasheetName, $formData);
+            return $this->createMetadata($datastoreId, $datasheetName, $formData);
         } else {
             // une métadonnée existe déjà qu'on va mettre à jour
 
-            $this->updateMetadata($datastoreId, $datasheetName, $apiMetadata, $formData);
+            return $this->updateMetadata($datastoreId, $datasheetName, $apiMetadata, $formData);
         }
     }
 
     /**
      * @param array<mixed> $formData
      */
-    private function createMetadata(string $datastoreId, string $datasheetName, array $formData): void
+    private function createMetadata(string $datastoreId, string $datasheetName, array $formData): array
     {
         $metadataEndpoint = $this->getMetadataEndpoint($datastoreId);
 
@@ -182,13 +182,17 @@ class CartesMetadataApiService
         ]);
 
         $this->metadataApiService->publish($datastoreId, $newCswMetadata->fileIdentifier, $metadataEndpoint['_id']);
+
+        $newApiMetadata['csw_metadata'] = $newCswMetadata;
+
+        return $newApiMetadata;
     }
 
     /**
      * @param array<mixed> $oldApiMetadata
      * @param array<mixed> $formData
      */
-    private function updateMetadata(string $datastoreId, string $datasheetName, array $oldApiMetadata, ?array $formData = null): void
+    private function updateMetadata(string $datastoreId, string $datasheetName, array $oldApiMetadata, ?array $formData = null): array
     {
         $metadataEndpoint = $this->getMetadataEndpoint($datastoreId);
 
@@ -219,6 +223,10 @@ class CartesMetadataApiService
         if (0 === count($newApiMetadata['endpoints'])) { // la métadonnée n'est pas déjà publiée
             $this->metadataApiService->publish($datastoreId, $newCswMetadata->fileIdentifier, $metadataEndpoint['_id']);
         }
+
+        $newApiMetadata['csw_metadata'] = $newCswMetadata;
+
+        return $newApiMetadata;
     }
 
     /**
@@ -392,6 +400,7 @@ class CartesMetadataApiService
 
         $configStyles = array_map(fn ($config) => $this->cartesStylesApiService->getStyles($datastoreId, $config), $configurationsList);
         $configStyles = array_filter($configStyles, fn ($stylesList) => count($stylesList) > 0);
+        $configStyles = array_values($configStyles);
         $configStyles = array_merge([], ...$configStyles);
 
         foreach ($configStyles as $style) {
