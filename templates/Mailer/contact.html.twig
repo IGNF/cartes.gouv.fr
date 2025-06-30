@@ -19,6 +19,14 @@
             <p><strong>{{ 'contact.email_support.user_id'|trans }} : </strong>{{ userId }}</p>
         {% endif %}
 
+        <p>
+            <strong>{{ 'contact.email_support.category'|trans }} : </strong>{{ category }}
+        </p>
+
+        <p>
+            <strong>{{ 'contact.email_support.organization'|trans }} : </strong>{{ organization }}
+        </p>
+
         <p><strong>{{ 'contact.email_support.date'|trans }} : </strong>{{ sendDate|date('d-m-Y H:i', 'Europe/Paris') }}</p>
 
         <p>

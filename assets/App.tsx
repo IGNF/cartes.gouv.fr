@@ -17,9 +17,11 @@ const persister = createSyncStoragePersister({
     storage: window.localStorage,
 });
 
+const maxAge = 1000 * 60 * 60 * 24; // 24h
+
 const App: FC = () => {
     return (
-        <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
+        <PersistQueryClientProvider client={queryClient} persistOptions={{ persister, buster: __GIT_COMMIT__ ?? "buster-react-query", maxAge: maxAge }}>
             <ReactQueryDevtools initialIsOpen={false} />
 
             <RouteProvider>

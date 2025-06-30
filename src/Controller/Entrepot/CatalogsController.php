@@ -6,9 +6,10 @@ use App\Controller\ApiControllerInterface;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\EntrepotApi\CatalogsApiService;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 #[Route(
     '/api/catalogs',
@@ -16,6 +17,7 @@ use Symfony\Component\Routing\Annotation\Route;
     options: ['expose' => true],
     condition: 'request.isXmlHttpRequest()'
 )]
+#[OA\Tag(name: '[entrepot] catalogs')]
 class CatalogsController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(

@@ -11,12 +11,15 @@ use App\Services\EntrepotApi\AnnexeApiService;
 use App\Services\EntrepotApi\CartesMetadataApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\MetadataApiService;
+use App\Services\RSSFeed\RSSFeed;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Requirement\Requirement;
 use Symfony\Component\Uid\Uuid;
 
 #[Route(
@@ -25,6 +28,7 @@ use Symfony\Component\Uid\Uuid;
     options: ['expose' => true],
     condition: 'request.isXmlHttpRequest()'
 )]
+#[OA\Tag(name: '[entrepot] annexes')]
 class AnnexeController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
@@ -34,6 +38,7 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
         private CartesMetadataApiService $cartesMetadataApiService,
         private CswMetadataHelper $metadataHelper,
         private ParameterBagInterface $parameterBag,
+        private RSSFeed $rssFeed,
     ) {
     }
 
@@ -76,11 +81,39 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
         }
     }
 
-    #[Route('/{annexeId}', name: 'replace_file', methods: ['POST'])]
+    #[Route('/add', name: 'add', methods: ['POST'])]
+    public function add(string $datastoreId, Request $request): JsonResponse
+    {
+        try {
+            $file = $request->files->get('file');
+            $name = $file->getClientOriginalName();
+            $path = $request->request->get('path');
+
+            // Clear RSSFeed cache
+            if (str_contains($name, 'alerts.json')) {
+                $this->rssFeed->clearCache();
+            }
+
+            return new JsonResponse($this->annexeApiService->add($datastoreId, $file->getRealPath(), [$path]));
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
+    /**
+     * Ajout de Requirement::UUID_V4 sinon cette route est appelée pour thumbnail_add.
+     */
+    #[Route('/{annexeId}', name: 'replace_file', methods: ['POST'], requirements: ['annexeId' => Requirement::UUID_V4])]
     public function replaceFile(string $datastoreId, string $annexeId, Request $request): JsonResponse
     {
         try {
             $file = $request->files->get('file');
+            $name = $file->getClientOriginalName();
+
+            // Clear RSSFeed cache
+            if (str_contains($name, 'alerts.json')) {
+                $this->rssFeed->clearCache();
+            }
 
             return $this->json(
                 $this->annexeApiService->replaceFile($datastoreId, $annexeId, $file->getRealPath())

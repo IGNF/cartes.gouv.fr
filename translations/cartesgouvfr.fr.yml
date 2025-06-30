@@ -8,6 +8,8 @@ mailer:
     first_name: "Prénom"
     user_id: "Identifiant"
     date: "Date de la demande"
+    espaceco:
+        member_invitation: "Vous avez été invité à rejoindre la communauté %name%.<br/>Vous pouvez accepter ou rejeter cette invitation en cliquant sur ce lien %link%."
 
 # pages:
 contact:
@@ -17,6 +19,8 @@ contact:
         user_email: "Adresse mail de l’utilisateur"
         last_name: "Nom de l’utilisateur"
         first_name: "Prénom de l’utilisateur"
+        category: "Catégorie"
+        organization: "Organisme"
         date: "Date d’envoi"
         message: "Corps du message"
         not_specified: "Non renseigné"

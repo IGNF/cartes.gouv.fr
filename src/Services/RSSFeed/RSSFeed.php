@@ -12,15 +12,14 @@ use Twig\Environment as TwigEnvironment;
 
 class RSSFeed
 {
-    private const ALERTS_JSON_URL = 'https://data.geopf.fr/annexes/cartes.gouv.fr-config/public/alerts.json';
-
+    private string $alertsJsonUrl;
     private HttpClientInterface $httpClient;
 
     public function __construct(
         private RouterInterface $router,
         private TwigEnvironment $twig,
         private CacheInterface $cache,
-        ParameterBagInterface $parameters,
+        private ParameterBagInterface $parameters,
         HttpClientInterface $httpClient,
     ) {
         $this->httpClient = $httpClient->withOptions([
@@ -28,6 +27,7 @@ class RSSFeed
             'verify_peer' => false,
             'verify_host' => false,
         ]);
+        $this->alertsJsonUrl = $parameters->get('annexes_url').'/'.$parameters->get('config')['technical_name'].'/public/alerts.json';
     }
 
     public function renderRssAlerts(): string
@@ -58,15 +58,25 @@ class RSSFeed
 
     private function getAlerts(): array
     {
-        return $this->cache->get('alerts', function (ItemInterface $item) {
+        return $this->cache->get($this->getCacheKey(), function (ItemInterface $item) {
             $item->expiresAfter(3600);
 
-            $response = $this->httpClient->request('GET', self::ALERTS_JSON_URL);
+            $response = $this->httpClient->request('GET', $this->alertsJsonUrl);
             if (Response::HTTP_OK !== $response->getStatusCode()) {
                 throw new \Exception('Une erreur est survenue, veuillez réessayer ultérieurement');
             }
 
             return $response->toArray();
         });
+    }
+
+    public function clearCache(): void
+    {
+        $this->cache->delete($this->getCacheKey());
+    }
+
+    private function getCacheKey(): string
+    {
+        return 'alerts-'.$this->parameters->get('config')['technical_name'];
     }
 }

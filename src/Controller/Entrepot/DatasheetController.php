@@ -15,10 +15,11 @@ use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\MetadataApiService;
 use App\Services\EntrepotApi\StoredDataApiService;
 use App\Services\EntrepotApi\UploadApiService;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 #[Route(
     '/api/datastores/{datastoreId}/datasheet',
@@ -26,6 +27,7 @@ use Symfony\Component\Routing\Annotation\Route;
     options: ['expose' => true],
     condition: 'request.isXmlHttpRequest()'
 )]
+#[OA\Tag(name: '[cartes.gouv.fr] datasheet', description: 'Une fiche de données sur cartes.gouv.fr')]
 class DatasheetController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(

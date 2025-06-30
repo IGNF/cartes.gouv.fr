@@ -12,11 +12,12 @@ use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\ProcessingApiService;
 use App\Services\EntrepotApi\StoredDataApiService;
 use App\Services\EntrepotApi\UploadApiService;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 #[Route(
     '/api/datastores/{datastoreId}/stored_data',
@@ -24,6 +25,7 @@ use Symfony\Component\Routing\Annotation\Route;
     options: ['expose' => true],
     condition: 'request.isXmlHttpRequest()'
 )]
+#[OA\Tag(name: '[entrepot] stored_data')]
 class StoredDataController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(

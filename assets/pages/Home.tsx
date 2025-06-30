@@ -11,8 +11,9 @@ import mapSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/map/map.sv
 import systemSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/system/system.svg?no-inline";
 import { useEffect } from "react";
 
+import { catalogueUrl } from "@/env";
 import SymfonyRouting from "@/modules/Routing";
-import { catalogueUrl, routes, useRoute } from "@/router/router";
+import { appRoot, routes, useRoute } from "@/router/router";
 import { useAuthStore } from "@/stores/AuthStore";
 import homeImgUrl from "@/img/home/home.png";
 import Main from "@/components/Layout/Main";
@@ -89,7 +90,7 @@ const Home = () => {
                                     {
                                         iconId: "fr-icon-file-download-line",
                                         linkProps: {
-                                            href: "./catalogue",
+                                            href: catalogueUrl ?? appRoot + "/catalogue",
                                         },
                                         children: "J’accède au catalogue",
                                         priority: "secondary",

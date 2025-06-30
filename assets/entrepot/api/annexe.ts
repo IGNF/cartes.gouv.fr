@@ -9,6 +9,15 @@ const getList = (datastoreId: string, otherOptions: RequestInit = {}) => {
     });
 };
 
+const add = (datastoreId: string, path: string, file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("path", path);
+
+    const url = SymfonyRouting.generate("cartesgouvfr_api_annexe_add", { datastoreId });
+    return jsonFetch<Annexe>(url, { method: "POST" }, formData, true, true);
+};
+
 const modify = (datastoreId: string, annexeId: string, data: object) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_annexe_modify", { datastoreId, annexeId });
     return jsonFetch<Annexe>(url, { method: "PATCH" }, data);
@@ -22,7 +31,7 @@ const replaceFile = (datastoreId: string, annexeId: string, file: File) => {
     return jsonFetch<Annexe>(url, { method: "POST" }, formData, true, true);
 };
 
-const addThumbnail = (datastoreId: string, data: object) => {
+const addThumbnail = (datastoreId: string, data: FormData) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_annexe_thumbnail_add", { datastoreId });
     return jsonFetch<DatasheetThumbnailAnnexe>(
         url,
@@ -46,6 +55,7 @@ const remove = (datastoreId: string, annexeId: string) => {
 
 export default {
     getList,
+    add,
     modify,
     replaceFile,
     addThumbnail,

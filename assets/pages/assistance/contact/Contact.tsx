@@ -5,34 +5,51 @@ import Input from "@codegouvfr/react-dsfr/Input";
 import Select from "@codegouvfr/react-dsfr/Select";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
+import { arrUserCategories } from "@/@types/app";
+import Main from "../../../components/Layout/Main";
 import LoadingIcon from "../../../components/Utils/LoadingIcon";
 import Wait from "../../../components/Utils/Wait";
+import { useAlert } from "../../../hooks/useAlert";
 import { useTranslation } from "../../../i18n/i18n";
 import { ComponentKey } from "../../../i18n/types";
 import SymfonyRouting from "../../../modules/Routing";
 import { jsonFetch } from "../../../modules/jsonFetch";
 import { routes } from "../../../router/router";
+import { useAlertStore } from "../../../stores/AlertStore";
 import { useAuthStore } from "../../../stores/AuthStore";
 import { regex } from "../../../utils";
-import Main from "../../../components/Layout/Main";
-import { useAlertStore } from "../../../stores/AlertStore";
-import { useAlert } from "../../../hooks/useAlert";
 
+import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import "../../../sass/pages/nous_ecrire.scss";
 
 const charRange = [10, 8000];
+const noOrganization = "SO";
+
+type ContactForm = {
+    email_contact: string;
+    last_name: string;
+    first_name: string;
+    category: string;
+    organization: string;
+    importance?: number;
+    message?: string;
+};
 
 const schema = (t: TranslationFunction<"Contact", ComponentKey>) =>
     yup
         .object({
             email_contact: yup.string().matches(regex.email, t("form.email_contact_error")).required(t("form.email_contact_mandatory_error")),
-            last_name: yup.string(),
-            first_name: yup.string(),
-            organization: yup.string(),
+            last_name: yup.string().trim(t("form.message.trimmed_error")).strict(true).required(t("form.message_lastName_mandatory")),
+            first_name: yup.string().trim(t("form.message.trimmed_error")).strict(true).required(t("form.message_firstName_mandatory")),
+            category: yup
+                .string()
+                .oneOf(arrUserCategories.map((c) => t("form.category_option", { option: c })))
+                .required(),
+            organization: yup.string().trim(t("form.message.trimmed_error")).strict(true).required(t("form.message_organization_mandatory")),
             importance: yup.number(),
             message: yup
                 .string()
@@ -44,29 +61,52 @@ const schema = (t: TranslationFunction<"Contact", ComponentKey>) =>
 const Contact = () => {
     const { t } = useTranslation({ Contact });
     const { user } = useAuthStore();
-    const alert = useAlertStore(({ alerts }) => alerts.find((alert) => alert.visibility.homepage));
+    const alert = useAlertStore(({ alerts }) => alerts.find((alert) => alert.visibility.contact));
     const alertProps = useAlert(alert);
 
     const [isSending, setIsSending] = useState(false);
     const [error, setError] = useState(null);
+
+    const defaultCategory = t("form.category_option", { option: "Professional" });
 
     const {
         register,
         handleSubmit,
         formState: { errors },
         getValues: getFormValues,
+        setValue: setFormValue,
         watch,
-    } = useForm({ resolver: yupResolver(schema(t)) });
+    } = useForm<ContactForm>({
+        defaultValues: {
+            email_contact: user?.email,
+            last_name: user?.last_name ?? "",
+            first_name: user?.first_name ?? "",
+            category: defaultCategory,
+            organization: "",
+        },
+        resolver: yupResolver(schema(t)),
+    });
 
     const message = watch("message") ?? "";
+    const category = watch("category");
+
+    useEffect(() => {
+        if (category !== defaultCategory) {
+            setFormValue("organization", noOrganization);
+        } else setFormValue("organization", "");
+    }, [category, defaultCategory, setFormValue]);
 
     const onSubmit = () => {
         setError(null);
         setIsSending(true);
 
         const url = SymfonyRouting.generate("cartesgouvfr_contact_contact_us");
+        const values = getFormValues();
+        if (values.category !== defaultCategory) {
+            values.organization = "SO";
+        }
 
-        jsonFetch<{ success: boolean }>(url, { method: "POST" }, getFormValues())
+        jsonFetch<{ success: boolean }>(url, { method: "POST" }, values)
             .then((response) => {
                 if (response?.success === true) {
                     routes.contact_confirmation().push();
@@ -97,7 +137,6 @@ const Contact = () => {
                         hintText={t("form.email_contact_hint")}
                         nativeInputProps={{
                             ...register("email_contact"),
-                            defaultValue: user?.email,
                             readOnly: user ? true : false,
                             autoComplete: "email",
                         }}
@@ -106,7 +145,6 @@ const Contact = () => {
                         label={t("form.lastName")}
                         nativeInputProps={{
                             ...register("last_name"),
-                            defaultValue: user?.last_name ?? "",
                             readOnly: user?.last_name ? true : false,
                             autoComplete: "family-name",
                         }}
@@ -115,13 +153,26 @@ const Contact = () => {
                         label={t("form.firstName")}
                         nativeInputProps={{
                             ...register("first_name"),
-                            defaultValue: user?.first_name ?? "",
                             readOnly: user?.first_name ? true : false,
                             autoComplete: "given-name",
                         }}
                     />
+                    <RadioButtons
+                        legend={t("form.category")}
+                        options={arrUserCategories.map((c) => ({
+                            label: t("form.category_option", { option: c }),
+                            nativeInputProps: {
+                                ...register("category"),
+                                value: t("form.category_option", { option: c }),
+                            },
+                        }))}
+                        orientation={"horizontal"}
+                    />
                     <Input
+                        className={category !== defaultCategory ? fr.cx("fr-hidden") : ""}
                         label={t("form.organization")}
+                        state={errors.organization ? "error" : "default"}
+                        stateRelatedMessage={errors?.organization?.message}
                         nativeInputProps={{
                             ...register("organization"),
                             autoComplete: "organization",

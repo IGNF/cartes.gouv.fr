@@ -7,6 +7,12 @@
             "port": 9003
         },
         {
+            "name": "Listen for Xdebug 2 (Legacy)",
+            "type": "php",
+            "request": "launch",
+            "port": 9000
+        },
+        {
             "name": "Listen for Xdebug (in docker)",
             "type": "php",
             "request": "launch",

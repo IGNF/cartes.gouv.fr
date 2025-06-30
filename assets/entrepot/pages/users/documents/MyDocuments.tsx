@@ -91,9 +91,11 @@ const MyDocuments: FC = () => {
         }
 
         const data = Object.fromEntries(formData);
-        if (data["extra"] && data["extra"] !== "") {
+        try {
             // @ts-expect-error // TODO à corriger plus tard, c'est pas très grave
             data["extra"] = JSON.parse(data["extra"]);
+        } catch (error) {
+            // ne rien faire
         }
 
         // remove keys from data whose value is empty or nullish

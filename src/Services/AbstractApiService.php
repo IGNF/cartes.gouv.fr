@@ -36,6 +36,25 @@ abstract class AbstractApiService
     }
 
     /**
+     * @param array<string,string> $filepaths  (k: nom du champ, v: chemin vers le fichier)
+     * @param array<mixed>         $formFields correspond à "Request Body" dans le swagger
+     * @param array<mixed>         $query      correspond aux paramètes "Query" dans le swagger
+     */
+    protected function sendFiles(string $method, string $url, array $filepaths, array $formFields = [], array $query = []): array
+    {
+        foreach ($filepaths as $fileFieldName => $filepath) {
+            $formFields[$fileFieldName] = DataPart::fromPath($filepath); // ajout du fichier dans $formFields
+        }
+
+        $formData = new FormDataPart($formFields);
+
+        $body = $formData->bodyToIterable();
+        $headers = $formData->getPreparedHeaders()->toArray();
+
+        return $this->request($method, $url, $body, $query, $headers, true);
+    }
+
+    /**
      * @param array<mixed> $formFields correspond à "Request Body" dans le swagger
      * @param array<mixed> $query      correspond aux paramètes "Query" dans le swagger
      */

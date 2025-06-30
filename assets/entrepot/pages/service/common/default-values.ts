@@ -1,11 +1,12 @@
 import { format as datefnsFormat } from "date-fns";
 
 import { EndpointTypeEnum, Metadata, MetadataFormValuesType, MetadataHierarchyLevel, Service, StoredData } from "../../../../@types/app";
-import { ConfigurationWfsDetailsContent, ConfigurationWmsVectorDetailsContent, ConfigurationWmtsTmsDetailsContent } from "../../../../@types/entrepot";
+import { ConfigurationWfsDetailsContent, ConfigurationWmsVectorDetailsContent } from "../../../../@types/entrepot";
 import { getProjectionCode, removeDiacritics } from "../../../../utils";
 import { PyramidVectorTmsServiceFormValuesType } from "../tms/PyramidVectorTmsServiceForm/PyramidVectorTmsServiceForm";
 import { WfsServiceFormValuesType, WfsTableInfos } from "../wfs/WfsServiceForm";
 import { WmsVectorServiceFormValuesType } from "../wms-vector/WmsVectorServiceForm";
+// import { thematicCategories } from "../metadata/Description";
 
 const DEFAULT_CHARSET = "utf8";
 const DEFAULT_LANGUAGE = { language: "français", code: "fre" };
@@ -29,7 +30,7 @@ export const getEndpointSuffix = (endpointType: EndpointTypeEnum | string) => {
 
 const getMetadataFormDefaultValues = (metadata?: Metadata): MetadataFormValuesType => {
     return {
-        languages: metadata?.csw_metadata?.language ? [metadata?.csw_metadata?.language] : [DEFAULT_LANGUAGE],
+        language: metadata?.csw_metadata?.language ? metadata?.csw_metadata?.language : DEFAULT_LANGUAGE,
         creation_date: metadata?.csw_metadata?.creation_date,
         resource_genealogy: metadata?.csw_metadata?.resource_genealogy ?? "",
         hierarchy_level: metadata?.csw_metadata?.hierarchy_level ?? MetadataHierarchyLevel.Dataset,
@@ -37,6 +38,10 @@ const getMetadataFormDefaultValues = (metadata?: Metadata): MetadataFormValuesTy
         organization: metadata?.csw_metadata?.organisation_name,
         organization_email: metadata?.csw_metadata?.organisation_email,
         category: metadata?.csw_metadata?.topic_categories ?? [],
+        // category: (metadata?.csw_metadata?.topic_categories ?? []).map((cat) => {
+        //     const thematicCategory = thematicCategories.find((c) => c.code === cat || c.text === cat);
+        //     return thematicCategory?.code ?? cat;
+        // }),
         keywords: metadata?.csw_metadata?.inspire_keywords ?? [],
         free_keywords: metadata?.csw_metadata?.free_keywords ?? [],
         public_name: metadata?.csw_metadata?.title,
@@ -86,7 +91,7 @@ export const getWfsServiceFormDefaultValues = (
             selected_tables: typeInfos?.used_data?.[0].relations?.map((rel) => rel.native_name) ?? [],
             table_infos: tableInfos,
             technical_name: offering?.configuration.layer_name,
-            public_name: offering?.configuration.name,
+            service_name: offering?.configuration.name,
             share_with,
             attribution_text: offering?.configuration.attribution?.title,
             attribution_url: offering?.configuration.attribution?.url,
@@ -101,9 +106,10 @@ export const getWfsServiceFormDefaultValues = (
             selected_tables: [],
             table_infos: {},
             technical_name: `${nice}_${suffix}`,
-            public_name: storedDataName,
+            service_name: metadata?.csw_metadata?.title ?? storedDataName,
             creation_date: now,
             resource_genealogy: "",
+            allow_view_data: false,
         };
     }
 
@@ -133,10 +139,11 @@ export const getWmsVectorServiceFormDefaultValues = (
         defValues = {
             selected_tables: typeInfos?.used_data?.[0].relations?.map((rel) => rel.name) ?? [],
             technical_name: offering?.configuration.layer_name,
-            public_name: typeInfos?.title,
+            service_name: offering?.configuration.name,
             share_with,
             attribution_text: offering?.configuration.attribution?.title,
             attribution_url: offering?.configuration.attribution?.url,
+            allow_view_data: false,
         };
     } else {
         const suffix = getEndpointSuffix(EndpointTypeEnum.WMSVECTOR);
@@ -147,9 +154,10 @@ export const getWmsVectorServiceFormDefaultValues = (
         defValues = {
             selected_tables: [],
             technical_name: `${nice}_${suffix}`,
-            public_name: storedDataName,
+            service_name: metadata?.csw_metadata?.title ?? storedDataName,
             creation_date: now,
             resource_genealogy: "",
+            allow_view_data: false,
         };
     }
 
@@ -173,15 +181,15 @@ export const getPyramidVectorTmsServiceFormDefaultValues = (
 
     if (editMode) {
         const share_with = offering?.open === true ? "all_public" : "your_community";
-        const typeInfos = offering?.configuration?.type_infos as ConfigurationWmtsTmsDetailsContent | undefined;
 
         // valeurs récupérées depuis anciens config et offering existants
         defValues = {
             technical_name: offering?.configuration.layer_name,
-            public_name: typeInfos?.title,
+            service_name: offering?.configuration.name,
             share_with,
             attribution_text: offering?.configuration.attribution?.title,
             attribution_url: offering?.configuration.attribution?.url,
+            allow_view_data: false,
         };
     } else {
         const suffix = getEndpointSuffix("tms");
@@ -191,9 +199,10 @@ export const getPyramidVectorTmsServiceFormDefaultValues = (
         // valeurs par défaut lors de la création de nouveaux config et offering
         defValues = {
             technical_name: `${nice}_${suffix}`,
-            public_name: storedDataName,
+            service_name: metadata?.csw_metadata?.title ?? storedDataName,
             creation_date: now,
             resource_genealogy: "",
+            allow_view_data: false,
         };
     }
 

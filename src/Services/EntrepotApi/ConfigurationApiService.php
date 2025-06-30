@@ -9,6 +9,10 @@ class ConfigurationApiService extends BaseEntrepotApiService
      */
     public function getAll(string $datastoreId, $query = []): array
     {
+        if (array_key_exists('fields', $query) && is_array($query['fields']) && !empty($query['fields'])) {
+            $query['fields'] = implode(',', $query['fields']);
+        }
+
         return $this->requestAll("datastores/$datastoreId/configurations", $query);
     }
 

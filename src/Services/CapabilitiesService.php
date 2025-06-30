@@ -35,7 +35,7 @@ class CapabilitiesService
      *
      * @param array<mixed> $endpoint
      */
-    public function createOrUpdate(string $datastoreId, array $endpoint, string $url): ?array
+    public function createOrUpdate(string $datastoreId, array $endpoint, string $offeringUrl): ?array
     {
         $capsPath = $this->parameterBag->get('capabilities_path');
         if (!$this->fs->exists($capsPath)) {
@@ -50,15 +50,15 @@ class CapabilitiesService
         $xmlStr = null;
         switch ($endpoint['type']) {
             case ConfigurationTypes::WFS:
-                $xmlStr = $this->filterWFSCapabilities($datastoreId, $endpoint, $url);
+                $xmlStr = $this->filterWFSCapabilities($datastoreId, $endpoint, $offeringUrl);
                 break;
             case ConfigurationTypes::WMSVECTOR:
             case ConfigurationTypes::WMSRASTER:
-                $xmlStr = $this->filterWMSCapabilities($datastoreId, $endpoint, $url);
+                $xmlStr = $this->filterWMSCapabilities($datastoreId, $endpoint, $offeringUrl);
                 break;
             case ConfigurationTypes::WMTSTMS:
                 // uniquement pour le WMTS
-                $xmlStr = $this->filterWMTSCapabilities($datastoreId, $endpoint, $url);
+                $xmlStr = $this->filterWMTSCapabilities($datastoreId, $endpoint, $offeringUrl);
                 break;
             default:
                 return null;
@@ -91,7 +91,7 @@ class CapabilitiesService
         return sprintf('%s?SERVICE=%s&VERSION=%s&request=GetCapabilities', $endpointUrl, $serviceType, $version);
     }
 
-    private function filterWFSCapabilities(string $datastoreId, mixed $endpoint, string $url): string
+    private function filterWFSCapabilities(string $datastoreId, mixed $endpoint, string $offeringUrl): string
     {
         $allOfferings = $this->configurationApiService->getAllOfferings($datastoreId, ['endpoint' => $endpoint['_id']]);
 
@@ -101,7 +101,7 @@ class CapabilitiesService
             $layerNames[] = $offering['layer_name'];
         }
 
-        $getCapUrl = $this->getGetCapUrl($endpoint['urls'][0]['url'], $url, 'WFS');
+        $getCapUrl = $this->getGetCapUrl($endpoint['urls'][0]['url'], $offeringUrl, 'WFS');
 
         $response = $this->httpClient->request('GET', $getCapUrl);
         if (JsonResponse::HTTP_OK != $response->getStatusCode()) {

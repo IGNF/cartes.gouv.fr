@@ -7,7 +7,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import SldStyleParser from "geostyler-sld-parser";
 import { FC, useCallback, useMemo, useState } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { symToStr } from "tsafe/symToStr";
 import * as yup from "yup";
 
@@ -19,6 +19,7 @@ import {
     type StoredDataRelation,
     type VectorDb,
 } from "../../../../@types/app";
+import Main from "../../../../components/Layout/Main";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
@@ -37,7 +38,6 @@ import AdditionalInfo from "../metadata/AdditionalInfo";
 import Description from "../metadata/Description";
 import UploadMDFile from "../metadata/UploadMDFile";
 import UploadStyleFile from "./UploadStyleFile";
-import Main from "../../../../components/Layout/Main";
 
 /**
  * Convertir en v1.0.0 si l'utilisateur a déposé un sld en v1.1.0
@@ -63,23 +63,34 @@ const getSld100 = async (originalFile: File): Promise<File> => {
 const createFormData = async (formValues: WmsVectorServiceFormValuesType) => {
     const fd = new FormData();
 
-    fd.set("category", JSON.stringify(formValues.category!));
-    fd.set("keywords", JSON.stringify(formValues.keywords!));
-    fd.set("free_keywords", JSON.stringify(formValues.free_keywords!));
-    fd.set("attribution_text", formValues.attribution_text!);
-    fd.set("attribution_url", formValues.attribution_url!);
+    formValues.category?.forEach((c) => fd.append("category[]", c));
+    formValues.keywords?.forEach((c) => fd.append("keywords[]", c));
+    formValues.free_keywords?.forEach((c) => fd.append("free_keywords[]", c));
+
+    if (formValues.attribution_text) {
+        fd.set("attribution_text", formValues.attribution_text!);
+    }
+    if (formValues.attribution_url) {
+        fd.set("attribution_url", formValues.attribution_url!);
+    }
+
     fd.set("charset", formValues.charset!);
     fd.set("creation_date", formValues.creation_date!);
     fd.set("description", formValues.description!);
     fd.set("email_contact", formValues.email_contact!);
     // fd.set("encoding", formValues.encoding!);
     fd.set("identifier", formValues.identifier!);
-    fd.set("languages", JSON.stringify(formValues.languages!));
-    fd.set("selected_tables", JSON.stringify(formValues.selected_tables!));
+
+    fd.set("language[language]", formValues.language!.language);
+    fd.set("language[code]", formValues.language!.code);
+
+    formValues.selected_tables?.forEach((c) => fd.append("selected_tables[]", c));
+
     fd.set("organization", formValues.organization!);
     fd.set("organization_email", formValues.organization_email!);
     fd.set("projection", formValues.projection!);
     fd.set("public_name", formValues.public_name!);
+    fd.set("service_name", formValues.service_name!);
     fd.set("resolution", formValues.resolution!);
     fd.set("resource_genealogy", formValues.resource_genealogy!);
     fd.set("hierarchy_level", formValues.hierarchy_level!);
@@ -188,7 +199,7 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
         queryKey: RQKeys.datastore_layernames_list(datastoreId, ConfigurationTypeEnum.WMSVECTOR),
         queryFn: ({ signal }) => api.service.getExistingLayerNames(datastoreId, ConfigurationTypeEnum.WMSVECTOR, { signal }),
         refetchInterval: 30000,
-        enabled: !(createServiceMutation.isPending || editServiceMutation.isPending),
+        enabled: currentStep === STEPS.METADATAS_DESCRIPTION && !(createServiceMutation.isPending || editServiceMutation.isPending),
     });
 
     const offeringQuery = useQuery<Service | null, CartesApiException>({
@@ -255,13 +266,9 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
         mode: "onChange",
         values: defaultValues,
     });
-    const { getValues: getFormValues, trigger } = form;
+    const { getValues: getFormValues, trigger, watch } = form;
 
-    const selectedTableNamesList: string[] | undefined = useWatch({
-        control: form.control,
-        name: "selected_tables",
-        defaultValue: [],
-    });
+    const selectedTableNamesList: string[] | undefined = watch("selected_tables", []);
 
     const selectedTables: StoredDataRelation[] = useMemo(() => {
         if (selectedTableNamesList && vectorDbQuery.data) {

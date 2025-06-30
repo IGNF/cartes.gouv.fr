@@ -10,10 +10,11 @@ use App\Exception\CartesApiException;
 use App\Security\User;
 use App\Services\EntrepotApi\ServiceAccount;
 use App\Services\EntrepotApi\UserApiService;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 #[Route(
     '/api/users',
@@ -21,6 +22,7 @@ use Symfony\Component\Routing\Annotation\Route;
     options: ['expose' => true],
     condition: 'request.isXmlHttpRequest()'
 )]
+#[OA\Tag(name: '[cartes.gouv.fr] user')]
 class UserController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
@@ -28,7 +30,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
     ) {
     }
 
-    #[Route('/me', name: 'me')]
+    #[Route('/me', name: 'me', methods: ['GET'])]
     public function getCurrentUser(): JsonResponse
     {
         /** @var User */
@@ -43,7 +45,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
         return $this->json($user);
     }
 
-    #[Route('/me/keys', name: 'keys')]
+    #[Route('/me/keys', name: 'keys', methods: ['GET'])]
     public function getUserKeys(): JsonResponse
     {
         $keys = $this->userApiService->getMyKeys();
@@ -51,7 +53,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
         return $this->json($keys);
     }
 
-    #[Route('/me/keys_with_accesses', name: 'keys_detailed_with_accesses')]
+    #[Route('/me/keys_with_accesses', name: 'keys_detailed_with_accesses', methods: ['GET'])]
     public function getUserKeysDetailedWithAccesses(): JsonResponse
     {
         $myKeys = $this->userApiService->getMyKeys();
@@ -64,7 +66,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
         return $this->json($keys);
     }
 
-    #[Route('/me/key_with_accesses/{keyId}', name: 'key_with_accesses')]
+    #[Route('/me/key_with_accesses/{keyId}', name: 'key_with_accesses', methods: ['GET'])]
     public function getUserKeyWithAccesses(string $keyId): JsonResponse
     {
         $keyWithAccesses = $this->_getUserKeyWithAccesses($keyId);
@@ -72,7 +74,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
         return $this->json($keyWithAccesses);
     }
 
-    #[Route('/me/permissions', name: 'permissions')]
+    #[Route('/me/permissions', name: 'permissions', methods: ['GET'])]
     public function getUserPermissions(): JsonResponse
     {
         $permissions = $this->userApiService->getMyPermissions();
@@ -80,7 +82,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
         return $this->json($permissions);
     }
 
-    #[Route('/me/permissions/{permissionId}', name: 'permission')]
+    #[Route('/me/permissions/{permissionId}', name: 'permission', methods: ['GET'])]
     public function getPermission(string $permissionId): JsonResponse
     {
         $permission = $this->userApiService->getPermission($permissionId);
@@ -88,10 +90,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
         return $this->json($permission);
     }
 
-    #[Route('/add_key', name: 'add_key', methods: ['POST'],
-        options: ['expose' => true],
-        condition: 'request.isXmlHttpRequest()')
-    ]
+    #[Route('/add_key', name: 'add_key', methods: ['POST'])]
     public function addKey(#[MapRequestPayload] UserKeyDTO $dto): JsonResponse
     {
         try {
@@ -127,10 +126,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
         }
     }
 
-    #[Route('/update_key/{keyId}', name: 'update_key', methods: ['PATCH'],
-        options: ['expose' => true],
-        condition: 'request.isXmlHttpRequest()')
-    ]
+    #[Route('/update_key/{keyId}', name: 'update_key', methods: ['PATCH'])]
     public function updateKey(string $keyId, #[MapRequestPayload] UserKeyDTO $dto): JsonResponse
     {
         $filter = ['type', 'type_infos', 'accesses', 'ip_list_name', 'ip_list_addresses'];
@@ -177,10 +173,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
         }
     }
 
-    #[Route('/remove_key/{keyId}', name: 'remove_key', methods: ['DELETE'],
-        options: ['expose' => true],
-        condition: 'request.isXmlHttpRequest()')
-    ]
+    #[Route('/remove_key/{keyId}', name: 'remove_key', methods: ['DELETE'])]
     public function removeKey(string $keyId): JsonResponse
     {
         try {
@@ -192,7 +185,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
         }
     }
 
-    #[Route('/me/datastores', name: 'datastores_list')]
+    #[Route('/me/datastores', name: 'datastores_list', methods: ['GET'])]
     public function getUserDatastores(ServiceAccount $serviceAccount): JsonResponse
     {
         try {
@@ -217,7 +210,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
         }
     }
 
-    #[Route('me/add_to_sandbox', name: 'add_to_sandbox', methods: ['PUT'])]
+    #[Route('/me/add_to_sandbox', name: 'add_to_sandbox', methods: ['PUT'])]
     public function addMemberToSandbox(ServiceAccount $serviceAccount): JsonResponse
     {
         $serviceAccount->addCurrentUserToSandbox();

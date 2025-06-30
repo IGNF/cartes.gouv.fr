@@ -1,5 +1,6 @@
 import { type MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation/MainNavigation";
 
+import { useApiEspaceCoStore } from "@/espaceco/stores/ApiEspaceCoStore";
 import { Datastore } from "../../@types/app";
 import { getTranslation } from "../../i18n/i18n";
 import { routes } from "../../router/router";
@@ -11,6 +12,7 @@ const { t: tNavItems } = getTranslation("navItems");
 
 export const datastoreNavItems = (currentDatastore?: Datastore): MainNavigationProps.Item[] => {
     const user = useAuthStore.getState().user;
+    const isApiEspaceCoDefined = useApiEspaceCoStore.getState().isUrlDefined;
 
     const navItems: MainNavigationProps.Item[] = [
         {
@@ -51,6 +53,13 @@ export const datastoreNavItems = (currentDatastore?: Datastore): MainNavigationP
         navItems.push({
             text: t("my_access_keys"),
             linkProps: routes.my_access_keys().link,
+        });
+    }
+
+    if (isApiEspaceCoDefined()) {
+        navItems.push({
+            text: t("espaceco"),
+            linkProps: routes.espaceco_community_list().link,
         });
     }
 

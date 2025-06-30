@@ -3,7 +3,6 @@ import { createGroup, createRouter, defineRoute, param } from "type-route";
 import SymfonyRouting from "../modules/Routing";
 
 export const appRoot = SymfonyRouting.getBaseUrl();
-export const catalogueUrl = (document.getElementById("root") as HTMLDivElement)?.dataset?.["catalogueUrl"] ?? "/catalogue";
 
 // Routes non protégées
 const publicRoutes = {
@@ -276,9 +275,31 @@ const espacecoRoutes = {
     espaceco_community_list: defineRoute(
         {
             page: param.query.optional.number.default(1),
-            filter: param.query.optional.string.default("public"),
+            filter: param.query.optional.string.default("listed"),
         },
-        () => `${appRoot}/espaceco/community`
+        () => `${appRoot}/espace-collaboratif`
+    ),
+
+    espaceco_create_community: defineRoute(
+        {
+            communityId: param.path.number,
+        },
+        (p) => `${appRoot}/espace-collaboratif/${p.communityId}/creer-un-guichet`
+    ),
+
+    espaceco_manage_community: defineRoute(
+        {
+            communityId: param.path.number,
+            activeTab: param.query.optional.string.default("description"),
+        },
+        (p) => `${appRoot}/espace-collaboratif/${p.communityId}/gerer-le-guichet`
+    ),
+
+    espaceco_member_invitation: defineRoute(
+        {
+            communityId: param.path.number,
+        },
+        (p) => `${appRoot}/espace-collaboratif/${p.communityId}/invitation`
     ),
 };
 

@@ -8,11 +8,12 @@ use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\CswMetadataHelper;
 use App\Services\EntrepotApi\MetadataApiService;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
 
 #[Route(
@@ -21,6 +22,7 @@ use Symfony\Component\Routing\Requirement\Requirement;
     options: ['expose' => true],
     condition: 'request.isXmlHttpRequest()'
 )]
+#[OA\Tag(name: '[entrepot] metadata')]
 class MetadataController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(

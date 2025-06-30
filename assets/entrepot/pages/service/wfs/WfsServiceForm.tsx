@@ -6,11 +6,13 @@ import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useCallback, useMemo, useState } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { symToStr } from "tsafe/symToStr";
 import * as yup from "yup";
 
+import ServiceFormErrors from "@/components/Utils/ServiceFormErrors";
 import { ConfigurationTypeEnum, EndpointTypeEnum, Service, ServiceFormValuesBaseType, StoredDataRelation, VectorDb } from "../../../../@types/app";
+import Main from "../../../../components/Layout/Main";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
@@ -20,7 +22,7 @@ import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import { routes } from "../../../../router/router";
-import { trimObject } from "../../../../utils";
+import { regex, trimObject } from "../../../../utils";
 import api from "../../../api";
 import AccessRestrictions from "../common/AccessRestrictions/AccessRestrictions";
 import { CommonSchemasValidation } from "../common/common-schemas-validation";
@@ -29,8 +31,6 @@ import AdditionalInfo from "../metadata/AdditionalInfo";
 import Description from "../metadata/Description";
 import UploadMDFile from "../metadata/UploadMDFile";
 import TableInfosForm from "./TablesInfoForm";
-import { regex } from "../../../../utils";
-import Main from "../../../../components/Layout/Main";
 
 type TableInfoType = Record<string, WfsTableInfos>;
 
@@ -193,41 +193,46 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
     });
 
     // Definition du schema
-    const schemas = {};
-    schemas[STEPS.TABLES_INFOS] = yup.object().shape({
-        selected_tables: yup.array(yup.string()).min(1, t("tables_info_form.error.required")).required(t("tables_info_form.error.required")),
-        table_infos: yup.lazy(() => {
-            if (!selectedTableNamesList || selectedTableNamesList.length === 0) {
-                return yup.mixed().nullable().notRequired();
-            }
-            const table_schemas = {};
-            selectedTableNamesList.forEach((table) => {
-                table_schemas[table] = yup.object({
-                    public_name: yup
-                        .string()
-                        .default(table)
-                        .test("matches", t("public_name_regex"), (value) => {
-                            if (!value || value.trim() === "") {
-                                return true;
-                            }
-                            return regex.public_name.test(value);
-                        }),
-                    title: yup.string().trim(t("trimmed_error")).strict(true).required(t("tables_info_form.title.error.required", { table })),
-                    description: yup.string().trim(t("trimmed_error")).strict(true).required(t("tables_info_form.description.error.required", { table })),
-                    keywords: yup.array().of(yup.string()),
+    const schemas = useMemo(() => {
+        const schemas = {};
+        schemas[STEPS.TABLES_INFOS] = yup.object().shape({
+            selected_tables: yup.array(yup.string()).min(1, t("tables_info_form.error.required")).required(t("tables_info_form.error.required")),
+            table_infos: yup.lazy((_, options) => {
+                const selectedTableNamesList: string[] = options.parent.selected_tables;
+
+                if (!selectedTableNamesList || selectedTableNamesList.length === 0) {
+                    return yup.mixed().nullable().notRequired();
+                }
+                const table_schemas = {};
+                selectedTableNamesList.forEach((table) => {
+                    table_schemas[table] = yup.object({
+                        public_name: yup
+                            .string()
+                            .default(table)
+                            .test("matches", t("public_name_regex"), (value) => {
+                                if (!value || value.trim() === "") {
+                                    return true;
+                                }
+                                return regex.public_name.test(value);
+                            }),
+                        title: yup.string().trim(t("trimmed_error")).strict(true).required(t("tables_info_form.title.error.required", { table })),
+                        description: yup.string().trim(t("trimmed_error")).strict(true).required(t("tables_info_form.description.error.required", { table })),
+                        keywords: yup.array().of(yup.string()),
+                    });
                 });
-            });
-            return yup.object().shape(table_schemas);
-        }),
-    });
-    schemas[STEPS.METADATAS_UPLOAD] = commonValidation.getMDUploadFileSchema();
-    schemas[STEPS.METADATAS_DESCRIPTION] = commonValidation.getMDDescriptionSchema(
-        existingLayerNamesQuery.data,
-        editMode,
-        offeringQuery.data?.configuration.layer_name
-    );
-    schemas[STEPS.METADATAS_ADDITIONALINFORMATIONS] = commonValidation.getMDAdditionalInfoSchema();
-    schemas[STEPS.ACCESSRESTRICTIONS] = commonValidation.getAccessRestrictionSchema();
+                return yup.object().shape(table_schemas);
+            }),
+        });
+        schemas[STEPS.METADATAS_UPLOAD] = commonValidation.getMDUploadFileSchema();
+        schemas[STEPS.METADATAS_DESCRIPTION] = commonValidation.getMDDescriptionSchema(
+            existingLayerNamesQuery.data,
+            editMode,
+            offeringQuery.data?.configuration.layer_name
+        );
+        schemas[STEPS.METADATAS_ADDITIONALINFORMATIONS] = commonValidation.getMDAdditionalInfoSchema();
+        schemas[STEPS.ACCESSRESTRICTIONS] = commonValidation.getAccessRestrictionSchema();
+        return schemas;
+    }, [editMode, existingLayerNamesQuery.data, offeringQuery.data?.configuration.layer_name, t]);
 
     const defaultValues: WfsServiceFormValuesType = useMemo(
         () => getWfsServiceFormDefaultValues(offeringQuery.data, editMode, vectorDbQuery.data, metadataQuery.data),
@@ -251,12 +256,6 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
         getValues: getFormValues,
         trigger,
     } = form;
-
-    const selectedTableNamesList: string[] | undefined = useWatch({
-        control: form.control,
-        name: "selected_tables",
-        defaultValue: [],
-    });
 
     useScrollToTopEffect(currentStep);
 
@@ -321,9 +320,21 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
                         title={t("step.title", { stepNumber: currentStep })}
                     />
                     {createServiceMutation.error && (
-                        <Alert closable description={createServiceMutation.error.message} severity="error" title={tCommon("error")} />
+                        <Alert
+                            closable
+                            description={<ServiceFormErrors message={createServiceMutation.error.message} />}
+                            severity="error"
+                            title={tCommon("error")}
+                        />
                     )}
-                    {editServiceMutation.error && <Alert closable description={editServiceMutation.error.message} severity="error" title={tCommon("error")} />}
+                    {editServiceMutation.error && (
+                        <Alert
+                            closable
+                            description={<ServiceFormErrors message={editServiceMutation.error.message} />}
+                            severity="error"
+                            title={tCommon("error")}
+                        />
+                    )}
 
                     <TableInfosForm
                         visible={currentStep === STEPS.TABLES_INFOS}

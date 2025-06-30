@@ -1,4 +1,11 @@
 #!/bin/sh
 # . "$(dirname "$0")/_/husky.sh"
 
+# synchronise ./docs/README.md with README.md
+cp README.md docs/README.md
+sed -i.bak -E 's#\((\./)?docs/#(#g' docs/README.md
+sed -i.bak -E 's#\(\.\./#\(./#g' docs/README.md
+rm -f docs/README.md.bak
+git add docs/README.md
+
 yarn lint-staged

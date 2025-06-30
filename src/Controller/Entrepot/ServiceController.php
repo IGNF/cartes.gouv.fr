@@ -3,10 +3,10 @@
 namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\CommonTags;
-use App\Constants\EntrepotApi\PermissionTypes;
 use App\Constants\EntrepotApi\Sandbox;
 use App\Constants\EntrepotApi\ZoomLevels;
 use App\Controller\ApiControllerInterface;
+use App\Dto\Services\CommonDTO;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\CapabilitiesService;
@@ -15,11 +15,12 @@ use App\Services\EntrepotApi\CartesServiceApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\SandboxService;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
 
 #[Route(
@@ -28,6 +29,7 @@ use Symfony\Component\Routing\Requirement\Requirement;
     options: ['expose' => true],
     condition: 'request.isXmlHttpRequest()'
 )]
+#[OA\Tag(name: '[cartes.gouv.fr] services', description: 'Actions génériques sur les services')]
 class ServiceController extends AbstractController implements ApiControllerInterface
 {
     public function __construct(
@@ -127,79 +129,10 @@ class ServiceController extends AbstractController implements ApiControllerInter
         }
     }
 
-    protected function getEndpointByShareType(string $datastoreId, string $configType, string $shareWith): array
-    {
-        if ('all_public' === $shareWith) {
-            $open = true;
-        } elseif ('your_community' === $shareWith) {
-            $open = false;
-        } else {
-            throw new CartesApiException('Valeur du champ [share_with] est invalide', Response::HTTP_BAD_REQUEST, ['share_with' => $shareWith]);
-        }
-
-        $endpoints = $this->datastoreApiService->getEndpointsList($datastoreId, [
-            'type' => $configType,
-            'open' => $open,
-        ]);
-
-        if (0 === count($endpoints)) {
-            throw new CartesApiException("Aucun point d'accès (endpoint) du datastore ne peut convenir à la demande", Response::HTTP_BAD_REQUEST, ['share_with' => $shareWith]);
-        }
-
-        return $endpoints[0]['endpoint'];
-    }
-
-    /**
-     * @param array<mixed> $offering
-     */
-    protected function addPermissionForCurrentCommunity(string $datastoreId, array $offering): void
-    {
-        $datastore = $this->datastoreApiService->get($datastoreId);
-        $this->addPermissionForCommunity($datastoreId, $datastore['community']['_id'], $offering);
-    }
-
-    /**
-     * @param array<mixed> $offering
-     */
-    protected function addPermissionForCommunity(string $producerDatastoreId, string $consumerCommunityId, array $offering): void
-    {
-        $permissions = $this->datastoreApiService->getPermissions($producerDatastoreId);
-        $offeringId = $offering['_id'];
-
-        $offeringPermissions = array_filter($permissions, function ($permission) use ($offeringId) {
-            return isset($permission['offerings']) && in_array($offeringId, array_column($permission['offerings'], '_id'));
-        });
-
-        $isPermission = array_reduce($offeringPermissions, function ($carry, $permission) use ($consumerCommunityId) {
-            return $carry || (isset($permission['beneficiary']['_id']) && $permission['beneficiary']['_id'] === $consumerCommunityId);
-        }, false);
-
-        if ($isPermission) {
-            return;
-        }
-
-        $endDate = new \DateTime();
-        $endDate->add(new \DateInterval('P3M')); // date du jour + 3 mois
-        $endDate->setTime(23, 59, 0);
-
-        $permissionRequestBody = [
-            'end_date' => $endDate->format(\DateTime::ATOM),
-            'licence' => sprintf('Utilisation de %s', $offering['layer_name']),
-            'offerings' => [$offering['_id']],
-            'type' => PermissionTypes::COMMUNITY,
-            'only_oauth' => false,
-            'communities' => [$consumerCommunityId],
-        ];
-
-        $this->datastoreApiService->addPermission($producerDatastoreId, $permissionRequestBody);
-    }
-
     /**
      * @param array<mixed> $pyramid
-     *
-     * @return array
      */
-    protected function getPyramidZoomLevels(array $pyramid)
+    protected function getPyramidZoomLevels(array $pyramid): array
     {
         if (!isset($pyramid['type_infos']) || !isset($pyramid['type_infos']['levels'])) {
             return ['bottom_level' => strval(ZoomLevels::BOTTOM_LEVEL_DEFAULT), 'top_level' => strval(ZoomLevels::TOP_LEVEL_DEFAULT)];
@@ -211,5 +144,41 @@ class ServiceController extends AbstractController implements ApiControllerInter
         });
 
         return ['bottom_level' => end($levels), 'top_level' => reset($levels)];
+    }
+
+    /**
+     * @param array<mixed>  $typeInfos
+     * @param ?array<mixed> $oldConfiguration
+     */
+    protected function getConfigRequestBody(string $datastoreId, string $type, CommonDTO $dto, array $typeInfos, ?array $oldConfiguration = null): array
+    {
+        $body = [
+            'name' => $dto->service_name,
+            'type' => $type,
+            'type_infos' => $typeInfos,
+        ];
+
+        // seulement pour la création d'une nouvelle publication
+        if (null === $oldConfiguration) {
+            $body['layer_name'] = $dto->technical_name;
+
+            // rajoute le préfixe "sandbox." si c'est la communauté bac à sable
+            if ($this->sandboxService->isSandboxDatastore($datastoreId)) {
+                $body['layer_name'] = Sandbox::LAYERNAME_PREFIX.$body['layer_name'];
+            }
+        }
+
+        if (!empty($dto->attribution_text) && !empty($dto->attribution_url)) {
+            $body['attribution'] = [
+                'title' => $dto->attribution_text,
+                'url' => $dto->attribution_url,
+            ];
+        }
+
+        if (isset($oldConfiguration['metadata'])) {
+            $body['metadata'] = $oldConfiguration['metadata'];
+        }
+
+        return $body;
     }
 }

@@ -39,7 +39,7 @@ Les autres briques de cartes.gouv.fr sont :
 - Mise à jour des données diffusées
 - Interface de configuration de style
 
-## :warning: Point d'attention
+## ⚠ Point d'attention
 
 cartes.gouv.fr n'utilise pas de stockage propre. Toutes les informations visibles proviennent de l'[API Entrepôt](https://data.geopf.fr/api/swagger-ui/index.html). Mais pour obtenir un affichage cohérent, cartes.gouv.fr utilise des étiquettes (`tags`) sur les entités de l'entrepôt.
 

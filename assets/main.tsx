@@ -30,3 +30,5 @@ root.render(
         <App />
     </React.StrictMode>
 );
+
+console.info(`cartes.gouv.fr: ${__GIT_TAG__}`);
