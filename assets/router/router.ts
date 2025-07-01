@@ -50,7 +50,7 @@ const privateRoutes = {
         },
         (p) => `${appRoot}/mes-cles/${p.keyId}/modification`
     ),
-    // my_documents: defineRoute(`${appRoot}/mes-documents`),
+    my_documents: defineRoute(`${appRoot}/mes-documents`), // TODO : page uniquement créée pour tester les routes /users/me/documents
 
     dashboard_pro: defineRoute(`${appRoot}/tableau-de-bord`),
 
