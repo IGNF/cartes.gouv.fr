@@ -240,6 +240,16 @@ const MyDocuments: FC = () => {
                                 required: true,
                             }}
                         />
+                        <Checkbox
+                            options={[
+                                {
+                                    label: "Accessible via une URL publique",
+                                    nativeInputProps: {
+                                        name: "public_url",
+                                    },
+                                },
+                            ]}
+                        />
                         <ButtonsGroup
                             buttons={[
                                 {

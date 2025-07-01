@@ -33,7 +33,7 @@ class UserDocumentsApiService extends BaseEntrepotApiService
     /**
      * @param array<string> $labels
      */
-    public function add(string $filePath, string $name, ?string $description = null, ?array $labels = null): array
+    public function add(string $filePath, string $name, ?string $description = null, ?array $labels = null, ?bool $publicUrl = null): array
     {
         $formFields = [
             'name' => $name,
@@ -44,6 +44,10 @@ class UserDocumentsApiService extends BaseEntrepotApiService
 
         if (null !== $labels) {
             $formFields['labels'] = join(',', $labels);
+        }
+
+        if (null !== $publicUrl) {
+            $formFields['public_url'] = true === $publicUrl ? 'true' : 'false';
         }
 
         $response = $this->sendFile('POST', 'users/me/documents', $filePath, $formFields);
