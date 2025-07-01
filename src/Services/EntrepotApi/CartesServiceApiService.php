@@ -100,18 +100,25 @@ class CartesServiceApiService
      */
     public function getShareUrl(string $datastoreId, array $offering): ?string
     {
+        $isSandboxDatastore = $this->sandboxService->isSandboxDatastore($datastoreId);
+
         $datastore = $this->datastoreApiService->get($datastoreId);
         $endpointId = $offering['endpoint']['_id'];
 
         $endpoint = $this->datastoreApiService->getEndpoint($datastoreId, $endpointId);
-        $shareUrl = null;
 
+        $shareUrl = null;
         switch ($offering['type']) {
             case OfferingTypes::WFS:
             case OfferingTypes::WMSVECTOR:
             case OfferingTypes::WMSRASTER:
-                $annexeUrl = $this->params->get('annexes_url');
-                $shareUrl = join('/', [$annexeUrl, $datastore['technical_name'],  $endpoint['endpoint']['technical_name'], 'capabilities.xml']);
+                if ($isSandboxDatastore) {
+                    $serviceType = $this->getServiceType($offering);
+                    $shareUrl = $this->capabilitiesService->getGetCapUrl($endpoint['endpoint']['urls'][0]['url'], $offering['urls'][0]['url'], $serviceType);
+                } else {
+                    $annexeUrl = $this->params->get('annexes_url');
+                    $shareUrl = join('/', [$annexeUrl, $datastore['technical_name'],  $endpoint['endpoint']['technical_name'], 'capabilities.xml']);
+                }
                 break;
 
             case OfferingTypes::WMTSTMS:
@@ -120,10 +127,13 @@ class CartesServiceApiService
                 }
 
                 if (isset($offering['configuration']['pyramid']['type']) && StoredDataTypes::ROK4_PYRAMID_RASTER === $offering['configuration']['pyramid']['type']) {
-                    $annexeUrl = $this->params->get('annexes_url');
-                    $shareUrl = join('/', [$annexeUrl, $datastore['technical_name'],  $endpoint['endpoint']['technical_name'], 'capabilities.xml']);
+                    if ($isSandboxDatastore) {
+                        $shareUrl = $this->capabilitiesService->getGetCapUrl($endpoint['endpoint']['urls'][0]['url'], $offering['urls'][0]['url'], 'WMTS');
+                    } else {
+                        $annexeUrl = $this->params->get('annexes_url');
+                        $shareUrl = join('/', [$annexeUrl, $datastore['technical_name'],  $endpoint['endpoint']['technical_name'], 'capabilities.xml']);
+                    }
                 }
-
                 break;
 
             default:
@@ -342,9 +352,11 @@ class CartesServiceApiService
         // Création ou modification des permissions de la communauté actuelle ou de config
         $this->handlePermissions($datastoreId, $offering, $dto);
 
-        // Création ou mise à jour du capabilities
+        // Création ou mise à jour du capabilities dans le cas ou l'on est pas dans l'espace découverte (sandbox)
         try {
-            $this->capabilitiesService->createOrUpdate($datastoreId, $endpoint, $offering['urls'][0]['url']);
+            if (!$this->sandboxService->isSandboxDatastore($datastoreId)) {
+                $this->capabilitiesService->createOrUpdate($datastoreId, $endpoint, $offering['urls'][0]['url']);
+            }
         } catch (\Exception $e) {
             $this->logger->warning('{class}: Failed to create or update capabilities for endpoint {endpointName} ({endpoint}) after the creation/modification of offering {offeringId}: {error}', [
                 'class' => self::class,
@@ -605,5 +617,26 @@ class CartesServiceApiService
         ];
 
         $this->datastoreApiService->addPermission($producerDatastoreId, $permissionRequestBody);
+    }
+
+    /**
+     * @param array<mixed> $offering
+     */
+    private function getServiceType(array $offering): ?string
+    {
+        switch ($offering['type']) {
+            case OfferingTypes::WFS:
+                return 'WFS';
+            case OfferingTypes::WMSVECTOR:
+            case OfferingTypes::WMSRASTER:
+                return 'WMS';
+            case OfferingTypes::WMTSTMS:
+                if (isset($offering['tms_metadata']['tiles'][0])) {
+                    return null;
+                }
+
+                return 'WMTS';
+            default: return null;
+        }
     }
 }
