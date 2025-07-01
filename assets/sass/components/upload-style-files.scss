@@ -4,4 +4,7 @@
     border-color: --border-default-blue-france;
     padding-left: 0.5rem;
     min-width: 100%;
+    label {
+        word-wrap: anywhere;
+    }
 }
