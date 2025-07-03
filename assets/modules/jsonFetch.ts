@@ -48,6 +48,10 @@ export async function apiFetch(
                     useAuthStore.getState().setSessionExpired(false);
                     resolve(response);
                 } else {
+                    const data = await response.json().catch(() => ({}));
+                    if (hasSessionExpired(data)) {
+                        useAuthStore.getState().setSessionExpired(true);
+                    }
                     reject(response);
                 }
             } catch (error) {
@@ -68,12 +72,7 @@ export async function jsonFetch<T>(
     isFileUpload: boolean = false,
     isXMLHttpRequest: boolean = true
 ): Promise<T> {
-    const data = (await apiFetch(url, config, body, isFileUpload, isXMLHttpRequest)).json().catch(() => ({}));
-    if (hasSessionExpired(data)) {
-        useAuthStore.getState().setSessionExpired(true);
-        throw new Error("Session expirée");
-    }
-    return data;
+    return (await apiFetch(url, config, body, isFileUpload, isXMLHttpRequest)).json().catch(() => ({}));
 }
 
 const hasSessionExpired = (error) => {
