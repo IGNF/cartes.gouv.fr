@@ -8,11 +8,14 @@ use App\Exception\CartesApiException;
 use App\Services\EspaceCoApi\ReportApiService;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
+use Symfony\Component\Uid\Uuid;
 
 #[Route(
     '/api/espaceco',
@@ -112,16 +115,52 @@ class ReportController extends AbstractController implements ApiControllerInterf
     }
 
     #[Route('/reports/{reportId}/attachments', name: 'add_attachments', methods: ['POST'])]
-    public function addAttachments(/* string $reportId, Request $request */): JsonResponse
+    #[OA\Post(
+        summary: 'Ajouter un ou plusieurs fichiers à un signalement',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'multipart/form-data',
+                schema: new OA\Schema(
+                    type: 'object',
+                    properties: [
+                        new OA\Property(
+                            property: 'file1',
+                            type: 'string',
+                            format: 'binary',
+                        ),
+                        new OA\Property(
+                            property: 'file2',
+                            type: 'string',
+                            format: 'binary',
+                        ),
+                    ],
+                )
+            )
+        ),
+    )]
+    public function addAttachments(string $reportId, Request $request): JsonResponse
     {
-        throw new CartesApiException('Route non implémentée', Response::HTTP_NOT_IMPLEMENTED);
-        // try {
-        //     $files = $request->files->all();
+        try {
+            /** @var array<string,UploadedFile> $uploadedFiles */
+            $uploadedFiles = $request->files->all();
 
-        //     return $this->json($this->reportApiService->addAttachments($reportId, $files));
-        // } catch (ApiException $ex) {
-        //     throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        // }
+            $fs = new Filesystem();
+            $fileDir = implode(DIRECTORY_SEPARATOR, [(string) $this->getParameter('var_data_path'), 'documents', Uuid::v4()]);
+            $fs->mkdir($fileDir);
+
+            $files = [];
+            foreach ($uploadedFiles as $fieldName => $file) {
+                $filepath = implode(DIRECTORY_SEPARATOR, [$fileDir, $file->getClientOriginalName()]);
+
+                $file->move($fileDir, $filepath);
+                $files[$fieldName] = $filepath;
+            }
+
+            return $this->json($this->reportApiService->addAttachments($reportId, $files));
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
     }
 
     #[Route('/reports/{reportId}/attachments/{attachmentId}', name: 'delete_attachment', methods: ['DELETE'])]

@@ -75,7 +75,6 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
         queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName),
         queryFn: ({ signal }) => api.datasheet.get(datastoreId, datasheetName, { signal }),
         staleTime: 60000,
-        refetchInterval: 60000,
         retry: false,
         enabled: !datasheetDeleteMutation.isPending,
     });

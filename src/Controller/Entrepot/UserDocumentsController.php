@@ -62,6 +62,7 @@ class UserDocumentsController extends AbstractController implements ApiControlle
             $name = $request->request->get('name');
             $description = $request->request->get('description');
             $labels = $request->request->get('labels') ? explode(',', $request->request->get('labels')) : null;
+            $publicUrl = $request->request->get('public_url', false);
 
             $filePath = implode(DIRECTORY_SEPARATOR, [(string) $this->getParameter('var_data_path'), 'documents', Uuid::v4(), $file->getClientOriginalName()]);
             $fileDir = dirname($filePath);
@@ -74,7 +75,8 @@ class UserDocumentsController extends AbstractController implements ApiControlle
                 $filePath,
                 $name,
                 $description,
-                $labels
+                $labels,
+                $publicUrl
             ));
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());

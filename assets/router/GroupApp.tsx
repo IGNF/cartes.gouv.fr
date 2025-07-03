@@ -27,7 +27,7 @@ const LoginDisabled = lazy(() => import("../pages/LoginDisabled/LoginDisabled"))
 const Me = lazy(() => import("../entrepot/pages/users/me/Me"));
 const MyAccessKeys = lazy(() => import("../entrepot/pages/users/access-keys/MyAccessKeys"));
 const UserKeyForm = lazy(() => import("../entrepot/pages/users/keys/UserKeyForm"));
-const MyDocuments = lazy(() => import("../entrepot/pages/users/documents/MyDocuments"));
+// const MyDocuments = lazy(() => import("../entrepot/pages/users/documents/MyDocuments"));
 
 const AccessesRequest = lazy(() => import("../entrepot/pages/accesses-request/AccessesRequest"));
 
@@ -97,8 +97,8 @@ function GroupApp(props: IGroupAppProps) {
                     layoutProps: { navItems: baseDatastoreNavItems },
                     render: <UserKeyForm keyId={route.params.keyId} />,
                 };
-            case "my_documents":
-                return { render: <MyDocuments /> };
+            // case "my_documents":
+            //     return { render: <MyDocuments /> };
             case "accesses_request":
                 return { render: <AccessesRequest fileIdentifier={route.params.fileIdentifier} /> };
             case "datastore_create_request":
