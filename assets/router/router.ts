@@ -261,7 +261,6 @@ const datastoreRoutes = {
         {
             offeringId: param.path.string,
             datasheetName: param.query.string,
-            activeTab: param.query.optional.string.default("diffuse"),
         },
         (p) => `/service/${p.offeringId}/visualisation`
     ),

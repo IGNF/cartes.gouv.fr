@@ -12,7 +12,7 @@ const { i18n } = declareComponentKeys<
 export type I18n = typeof i18n;
 
 export const StyleFrTranslations: Translations<"fr">["Style"] = {
-    my_styles: "Mes styles :",
+    my_styles: "Styles",
     add_style: "Ajouter un style",
     edit_style: "Editer le style",
     add_file: ({ format }) => `Ajouter un fichier ${format} par couche présente dans votre service`,
@@ -22,7 +22,7 @@ export const StyleFrTranslations: Translations<"fr">["Style"] = {
 };
 
 export const StyleEnTranslations: Translations<"en">["Style"] = {
-    my_styles: "My styles :",
+    my_styles: "Styles",
     add_style: "Add style",
     edit_style: "Edit style",
     add_file: ({ format }) => `Add ${format} file per layer present in your service`,

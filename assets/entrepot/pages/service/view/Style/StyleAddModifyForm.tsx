@@ -1,29 +1,30 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import { CartesStyle, GeostylerStyles, Service, StyleFormat } from "../../../../../@types/app";
-import { Dispatch, FC, SetStateAction, useEffect, useState } from "react";
-import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
-import Input from "@codegouvfr/react-dsfr/Input";
 import Alert, { AlertProps } from "@codegouvfr/react-dsfr/Alert";
-import * as yup from "yup";
-import { v4 as uuidv4 } from "uuid";
+import Button from "@codegouvfr/react-dsfr/Button";
+import Input from "@codegouvfr/react-dsfr/Input";
+import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { StyleParser } from "geostyler-style";
+import { FC, useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { v4 as uuidv4 } from "uuid";
+import * as yup from "yup";
+
+import { useManageStyle } from "@/contexts/ManageStyleContext";
+import { getStyleExtension } from "@/utils";
+import { mbParser, qgisParser, sldParser } from "@/utils/geostyler";
+import { CartesStyle, GeostylerStyles, Service, StyleFormat } from "../../../../../@types/app";
+import { AnnexDetailResponseDto, OfferingDetailResponseDtoTypeEnum } from "../../../../../@types/entrepot";
+import { getTranslation } from "../../../../../i18n/i18n";
+import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../../modules/jsonFetch";
+import getStyleFilesManager from "../../../../../modules/Style/StyleFilesManager";
 import StyleHelper from "../../../../../modules/Style/StyleHelper";
+import getWebService from "../../../../../modules/WebServices/WebServices";
 import validations from "../../../../../validations";
 import api from "../../../../api";
-import { AnnexDetailResponseDto, OfferingDetailResponseDtoTypeEnum } from "../../../../../@types/entrepot";
-import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import UploadLayerStyles from "./UploadLayerStyles";
-import getWebService from "../../../../../modules/WebServices/WebServices";
-import getStyleFilesManager from "../../../../../modules/Style/StyleFilesManager";
-import { getTranslation } from "../../../../../i18n/i18n";
-import { mbParser, qgisParser, sldParser } from "@/utils/geostyler";
-import { StyleParser } from "geostyler-style";
-import Button from "@codegouvfr/react-dsfr/Button";
-import { MapInitial } from "@/components/Utils/RMap";
-import { getStyleExtension } from "@/utils";
 
 export interface StyleForm {
     style_format?: StyleFormat;
@@ -43,21 +44,21 @@ type ErrorType = {
     severity: AlertProps.Severity;
 };
 
-type StyleManagerProps = {
+type StyleAddModifyFormProps = {
     datastoreId: string;
     datasheetName: string;
     editMode: boolean;
     service: Service;
-    setInitialValues: Dispatch<SetStateAction<MapInitial | undefined>>;
-    setStyleToAddOrEdit: Dispatch<SetStateAction<StyleForm | undefined>>;
     style: StyleForm;
     styleNames: string[];
 };
 
 const { t: tCommon } = getTranslation("Common");
 
-const StyleManager: FC<StyleManagerProps> = (props) => {
-    const { datastoreId, datasheetName, editMode, service, setInitialValues, setStyleToAddOrEdit, style, styleNames } = props;
+const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
+    const { datastoreId, datasheetName, editMode, service, style, styleNames } = props;
+
+    const { setStyleToAddOrEdit } = useManageStyle();
 
     const schema = () => {
         const style_name = yup
@@ -268,33 +269,6 @@ const StyleManager: FC<StyleManagerProps> = (props) => {
         },
     });
 
-    const radioOptions = [
-        {
-            label: "sld",
-            nativeInputProps: {
-                checked: format === "sld",
-                onChange: () => onChangeFormat("sld"),
-            },
-        },
-        {
-            label: "qml",
-            nativeInputProps: {
-                checked: format === "qml",
-                onChange: () => onChangeFormat("qml"),
-            },
-        },
-    ];
-
-    if (service?.type === OfferingDetailResponseDtoTypeEnum.WMTSTMS) {
-        radioOptions.unshift({
-            label: "mapbox",
-            nativeInputProps: {
-                checked: format === "mapbox",
-                onChange: () => onChangeFormat("mapbox"),
-            },
-        });
-    }
-
     const layerNames = format === "mapbox" ? ["no_layer"] : Object.values(layers);
 
     return (
@@ -326,12 +300,44 @@ const StyleManager: FC<StyleManagerProps> = (props) => {
                                 readOnly: editMode,
                             }}
                         />
-                        <RadioButtons legend={"Format du style :"} options={radioOptions} orientation="horizontal" />
+                        <RadioButtons
+                            legend={"Format du style :"}
+                            options={[
+                                {
+                                    label: "sld",
+                                    nativeInputProps: {
+                                        checked: format === "sld",
+                                        onChange: () => onChangeFormat("sld"),
+                                    },
+                                },
+                                {
+                                    label: "qml",
+                                    nativeInputProps: {
+                                        checked: format === "qml",
+                                        onChange: () => onChangeFormat("qml"),
+                                    },
+                                },
+                                service?.type === OfferingDetailResponseDtoTypeEnum.WMTSTMS && {
+                                    label: "mapbox",
+                                    nativeInputProps: {
+                                        checked: format === "mapbox",
+                                        onChange: () => onChangeFormat("mapbox"),
+                                    },
+                                },
+                            ].filter((o) => o !== false)}
+                            orientation="horizontal"
+                        />
                     </>
                 )}
-                {Object.keys(layers).length > 0 && hasStyles && (
-                    /* @ts-expect-error Problème d'inférence du type */
-                    <UploadLayerStyles form={form} format={format} names={layerNames} parser={parser} parsers={parsers} setInitialValues={setInitialValues} />
+                {Object.keys(layers).length > 0 && hasStyles && format && (
+                    <UploadLayerStyles
+                        /* @ts-expect-error Problème d'inférence du type de form */
+                        form={form}
+                        format={format}
+                        names={layerNames}
+                        parser={parser}
+                        parsers={parsers}
+                    />
                 )}
             </div>
             <Button type="submit">Sauvegarder</Button>
@@ -339,4 +345,4 @@ const StyleManager: FC<StyleManagerProps> = (props) => {
     );
 };
 
-export default StyleManager;
+export default StyleAddModifyForm;

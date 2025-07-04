@@ -1,9 +1,15 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
+import ButtonsGroup, { ButtonsGroupProps } from "@codegouvfr/react-dsfr/ButtonsGroup";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
+import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Dispatch, FC, SetStateAction, useMemo, useState } from "react";
+import { FC } from "react";
 
+import { getWorkingLayers, MapInitial } from "@/components/Utils/RMap";
+import { useManageStyle } from "@/contexts/ManageStyleContext";
+import StyleHelper from "@/modules/Style/StyleHelper";
 import { CartesStyle, GeostylerStyle, GeostylerStyles, Service } from "../../../../@types/app";
 import ConfirmDialog, { ConfirmDialogModal } from "../../../../components/Utils/ConfirmDialog";
 import Wait from "../../../../components/Utils/Wait";
@@ -11,11 +17,8 @@ import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import api from "../../../api";
-import StyleManager, { StyleForm } from "./Style/StyleManager";
 
-import "../../../../sass/components/style-tab.scss";
-import { getWorkingLayers, MapInitial } from "@/components/Utils/RMap";
-import StyleHelper from "@/modules/Style/StyleHelper";
+import "@/sass/components/upload-style-files.css";
 
 type ManageStylesProps = {
     initial: MapInitial;
@@ -23,15 +26,14 @@ type ManageStylesProps = {
     datasheetName: string;
     offeringId: string;
     service?: Service;
-    setInitialValues: Dispatch<SetStateAction<MapInitial | undefined>>;
 };
 
 const ManageStyles: FC<ManageStylesProps> = (props) => {
-    const { initial, service, offeringId, datastoreId, datasheetName, setInitialValues } = props;
+    const { initial, service, offeringId, datastoreId, datasheetName } = props;
     const { t: tStyle } = useTranslation("Style");
     const { t: tCommon } = useTranslation("Common");
-    const [styleToAddOrEdit, setStyleToAddOrEdit] = useState<StyleForm>();
-    const [styleToRemove, setStyleToRemove] = useState<string>();
+
+    const { styleToAddOrEdit, setStyleToAddOrEdit, styleToRemove, setStyleToRemove } = useManageStyle();
 
     // Recherche des services (offerings) contenant le tag datasheet_name a datasheetName
     /*const serviceListQuery = useQuery<Service[], CartesApiException>({
@@ -42,9 +44,7 @@ const ManageStyles: FC<ManageStylesProps> = (props) => {
     }); */
 
     // Les styles
-    const styles: CartesStyle[] = useMemo(() => {
-        return service?.configuration.styles ?? [];
-    }, [service?.configuration.styles]);
+    const styles: CartesStyle[] = service?.configuration.styles ?? [];
 
     // Recherche du nom des styles dans tous les services de la fiche de donnees datasheetName
     /* const styleNames = useMemo<string[]>(() => {
@@ -57,10 +57,6 @@ const ManageStyles: FC<ManageStylesProps> = (props) => {
         });
         return styles.map((style) => style.name);
     }, [serviceListQuery.data]); */
-
-    const styleNames = useMemo<string[]>(() => {
-        return Array.from(styles, (s) => s.name);
-    }, [styles]);
 
     const queryClient = useQueryClient();
 
@@ -119,81 +115,88 @@ const ManageStyles: FC<ManageStylesProps> = (props) => {
     return (
         <>
             <div className={fr.cx("fr-col-12")}>
-                {/* TODO: quand documentation disponible
-                <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
-                    <p>
-                        <a href="#" target="_blank" rel="noreferrer">
-                            Comment créer un style
-                        </a>
-                    </p>
-                </div> */}
-                {styles && styles.length !== 0 && (
-                    <RadioButtons
-                        classes={{ content: "style" }}
-                        legend={tStyle("my_styles")}
-                        options={styles.map((style) => ({
-                            label: style.name,
-                            illustration: (
-                                <>
-                                    <Button
-                                        title={tStyle("edit_style")}
-                                        priority={"tertiary no outline"}
-                                        iconId={"fr-icon-edit-line"}
-                                        onClick={async () => {
-                                            const styleFiles: GeostylerStyles = [];
-                                            const promises: Promise<GeostylerStyle | undefined>[] = [];
-                                            for (const layer of getWorkingLayers(initial.layers)) {
-                                                if (StyleHelper.filterLayer(layer)) {
-                                                    promises.push(StyleHelper.getStyleFromUrl(layer, style));
-                                                }
+                <RadioButtons
+                    className={fr.cx("fr-mt-4v")}
+                    classes={{ inputGroup: cx(fr.cx("fr-radio-rich"), "frx-rb-style-layer") }}
+                    legend={
+                        <>
+                            <strong>{tStyle("my_styles")}</strong>{" "}
+                            <Badge severity="info" noIcon>
+                                {styles.length}
+                            </Badge>
+                        </>
+                    }
+                    options={styles.map((style) => ({
+                        label: style.name,
+                        illustration: (
+                            <>
+                                <Button
+                                    title={tStyle("edit_style")}
+                                    priority={"tertiary no outline"}
+                                    iconId={"fr-icon-edit-line"}
+                                    onClick={async () => {
+                                        const styleFiles: GeostylerStyles = [];
+                                        const promises: Promise<GeostylerStyle | undefined>[] = [];
+                                        for (const layer of getWorkingLayers(initial.layers)) {
+                                            if (StyleHelper.filterLayer(layer)) {
+                                                promises.push(StyleHelper.getStyleFromUrl(layer, style));
                                             }
-                                            for (const style of await Promise.all(promises)) {
-                                                if (style) {
-                                                    styleFiles.push(style);
-                                                }
+                                        }
+                                        for (const style of await Promise.all(promises)) {
+                                            if (style) {
+                                                styleFiles.push(style);
                                             }
-                                            setStyleToAddOrEdit({
-                                                style_name: style.name,
-                                                style_files: styleFiles,
-                                                style_format: styleFiles[0].format,
-                                            });
-                                        }}
-                                    />
-                                    <Button
-                                        title={tStyle("remove_style", { styleName: style.name })}
-                                        priority={"tertiary no outline"}
-                                        iconId={"fr-icon-delete-line"}
-                                        onClick={() => {
-                                            setStyleToRemove(style.name);
-                                            ConfirmDialogModal.open();
-                                        }}
-                                    />
-                                </>
-                            ),
-                            nativeInputProps: {
-                                checked: style?.current === true,
-                                onChange: () => mutateChangeCurrentStyle(style.name),
+                                        }
+                                        setStyleToAddOrEdit({
+                                            style_name: style.name,
+                                            style_files: styleFiles,
+                                            style_format: styleFiles[0].format,
+                                        });
+                                    }}
+                                />
+                                <Button
+                                    title={tStyle("remove_style", { styleName: style.name })}
+                                    priority={"tertiary no outline"}
+                                    iconId={"fr-icon-delete-line"}
+                                    onClick={() => {
+                                        setStyleToRemove(style.name);
+                                        ConfirmDialogModal.open();
+                                    }}
+                                />
+                            </>
+                        ),
+                        nativeInputProps: {
+                            checked: style?.current === true,
+                            onChange: () => {
+                                mutateChangeCurrentStyle(style.name);
+                                setStyleToAddOrEdit(undefined);
+                                setStyleToRemove(undefined);
                             },
-                        }))}
-                    />
-                )}
-                <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
-                    <Button onClick={() => setStyleToAddOrEdit({ style_name: "", style_files: [] })}>{tStyle("add_style")}</Button>
-                </div>
-            </div>
-            {service !== undefined && styleToAddOrEdit && (
-                <StyleManager
-                    key={styleToAddOrEdit.style_name || "add"}
-                    datastoreId={datastoreId}
-                    datasheetName={datasheetName}
-                    editMode={Boolean(styleToAddOrEdit.style_name)}
-                    service={service}
-                    setInitialValues={setInitialValues}
-                    setStyleToAddOrEdit={setStyleToAddOrEdit}
-                    style={styleToAddOrEdit}
-                    styleNames={styleNames}
+                        },
+                    }))}
                 />
-            )}
+
+                <ButtonsGroup
+                    buttons={(() => {
+                        const buttons: ButtonsGroupProps["buttons"] = [
+                            {
+                                children: tStyle("add_style"),
+                                priority: "secondary",
+                                onClick: () => setStyleToAddOrEdit({ style_name: "", style_files: [] }),
+                            },
+                        ];
+                        if (styleToAddOrEdit !== undefined) {
+                            buttons.push({
+                                children: tCommon("cancel"),
+                                priority: "secondary",
+                                onClick: () => setStyleToAddOrEdit(undefined),
+                            });
+                        }
+                        return buttons;
+                    })()}
+                    inlineLayoutWhen="never"
+                />
+            </div>
 
             {(isPendingChangeCurrentStyle || isRemovePending) && (
                 <Wait>

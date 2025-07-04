@@ -1,14 +1,14 @@
-import { StyleParser } from "geostyler-style";
-import { CSSProperties, FC, useMemo } from "react";
-
-import { useMapStyle } from "@/contexts/mapStyle";
 import { fr } from "@codegouvfr/react-dsfr";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
-import UploadStyleFile from "./UploadStyleFile";
-import { useTranslation } from "@/i18n";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
+import { StyleParser } from "geostyler-style";
+import { CSSProperties, FC } from "react";
 
-import "../../../sass/components/upload-style-files.scss";
+import { useMapStyle } from "@/contexts/mapStyle";
+import { useTranslation } from "@/i18n";
+import UploadStyleFile from "./UploadStyleFile";
+
+import "@/sass/components/upload-style-files.css";
 
 type UploadStyleFileProps = {
     errors?: Record<string, { message?: string } | undefined>;
@@ -25,18 +25,6 @@ const UploadStyleFiles: FC<UploadStyleFileProps> = (props) => {
 
     const { t } = useTranslation("UploadStyleFile");
 
-    const options = useMemo(() => {
-        return tables.sort().map((table) => ({
-            label: table,
-            hintText: errors?.[table]?.message ? <span className={fr.cx("fr-error-text", "fr-mt-1v")}>{errors?.[table]?.message}</span> : null,
-            nativeInputProps: {
-                value: table,
-                checked: table === selectedTable,
-                onChange: () => setSelectedTable(table),
-            },
-        }));
-    }, [tables, selectedTable, setSelectedTable, errors]);
-
     function handleChange(style?: string) {
         onChange({ ...value, [selectedTable]: style });
     }
@@ -48,15 +36,26 @@ const UploadStyleFiles: FC<UploadStyleFileProps> = (props) => {
     return (
         <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
             <div className={fr.cx("fr-col-3")}>
-                <div className={fr.cx("fr-h6", "fr-p-1v")} style={customStyle}>
+                <div className={fr.cx("fr-h6", "fr-p-2v")} style={customStyle}>
                     <i className={cx(fr.cx("fr-mr-1v"), "ri-stack-line")} />
                     {t("layers")}
                 </div>
-                <RadioButtons classes={{ inputGroup: cx(fr.cx("fr-my-1v"), "frx-rb-layer") }} options={options} small />
+                <RadioButtons
+                    classes={{ inputGroup: cx(fr.cx("fr-radio-rich"), "frx-rb-style-layer") }}
+                    options={tables.sort().map((table) => ({
+                        label: table,
+                        hintText: errors?.[table]?.message ? <span className={fr.cx("fr-error-text", "fr-mt-1v")}>{errors?.[table]?.message}</span> : null,
+                        nativeInputProps: {
+                            value: table,
+                            checked: table === selectedTable,
+                            onChange: () => setSelectedTable(table),
+                        },
+                    }))}
+                />
             </div>
             <div className={fr.cx("fr-col-9")}>
-                <div className={fr.cx("fr-h6", "fr-p-1v")} style={customStyle}>
-                    <i className={cx(fr.cx("fr-mr-1v"), "fr-icon-eye-line")} />
+                <div className={fr.cx("fr-h6", "fr-p-2v")} style={customStyle}>
+                    <i className={cx(fr.cx("fr-mr-1v"), "ri-palette-line")} />
                     {t("style_overview")}
                 </div>
                 <UploadStyleFile
