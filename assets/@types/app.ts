@@ -223,6 +223,12 @@ export enum MetadataHierarchyLevel {
     Series = "series",
 }
 
+type Constraint = {
+    code: string;
+    name: string;
+    link: string;
+};
+
 export type MetadataFormValuesType = {
     metadata_file_content?: FileList;
     identifier?: string;
@@ -243,6 +249,17 @@ export type MetadataFormValuesType = {
     resolution?: string;
     language?: LanguageType;
     frequency_code?: string;
+    restriction?: string;
+    open_license_name?: string;
+    open_license_link?: string;
+    access_restriction_code?: string;
+    access_constraint_name?: string;
+    access_constraint_link?: string;
+    use_restriction_code?: string;
+    use_constraint_name?: string;
+    use_constraint_link?: string;
+    accessConstraints?: Constraint[];
+    useConstraints?: Constraint[];
 };
 
 export type AttributionFormValuesType = {
@@ -369,6 +386,13 @@ export type CswMetadata = {
     style_files?: CswStyleFile[];
     capabilities_files?: CswCapabilitiesFile[];
     documents?: CswDocument[];
+    restriction?: string;
+    open_license_name?: string;
+    open_license_link?: string;
+    access_constraint_name?: string;
+    access_constraint_link?: string;
+    use_constraint_name?: string;
+    use_constraint_link?: string;
 };
 
 export type Metadata = MetadataResponseDto & {
