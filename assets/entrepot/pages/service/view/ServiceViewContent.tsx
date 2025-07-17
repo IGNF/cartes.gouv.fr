@@ -1,7 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { useQuery } from "@tanstack/react-query";
-import { CSSProperties, useEffect } from "react";
+import { useEffect } from "react";
 
 import { CartesStyle, OfferingTypeEnum, Service, StoredDataTypeEnum, TypeInfosWithBbox } from "@/@types/app";
 import RMap, { MapInitial } from "@/components/Utils/RMap";
@@ -10,6 +9,7 @@ import api from "@/entrepot/api";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
 import getWebService from "@/modules/WebServices/WebServices";
+import { tss } from "tss-react";
 import ManageStyles from "./ManageStyles";
 import ServiceAndStylesShare from "./ServiceAndStylesShare";
 import StyleAddModifyForm from "./Style/StyleAddModifyForm";
@@ -59,37 +59,37 @@ function ServiceViewContent(props: ServiceViewContent) {
     const styles: CartesStyle[] = service?.configuration.styles ?? [];
     const styleNames = Array.from(styles, (s) => s.name);
 
-    const customStyle: CSSProperties = {
-        backgroundColor: fr.colors.decisions.background.contrast.grey.default,
-    };
+    const { classes, cx } = useStyles();
 
     return (
         <>
-            <div className={fr.cx("fr-grid-row", "fr-mb-4w")}>
-                <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
-                    <div className={fr.cx("fr-grid-row", "fr-text--lg", "fr-p-2v", "fr-mb-6v")} style={customStyle}>
+            <div className={cx(fr.cx("fr-grid-row"), classes.root)}>
+                <div className={cx(fr.cx("fr-col-12", "fr-col-md-8"), classes.column)}>
+                    <div className={cx(fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-text--lg"), classes.heading)}>
                         <i className={cx(fr.cx("fr-mr-1v"), "ri-eye-line")} />
                         <h2 className={fr.cx("fr-text--lg", "fr-m-0")}>{"Aperçu du style"}</h2>
                     </div>
 
-                    {initialValues && <RMap initial={initialValues} />}
+                    <div className={classes.content}>{initialValues && <RMap initial={initialValues} />}</div>
                 </div>
-                <div className={fr.cx("fr-col-12", "fr-col-md-4", "fr-px-2w")}>
-                    <div className={fr.cx("fr-grid-row", "fr-text--lg", "fr-p-2v", "fr-mb-6v")} style={customStyle}>
+                <div className={cx(fr.cx("fr-col-12", "fr-col-md-4"), classes.column)}>
+                    <div className={cx(fr.cx("fr-grid-row", "fr-text--lg"), classes.heading)}>
                         <i className={cx(fr.cx("fr-mr-1v"), "ri-palette-line")} />
                         <h2 className={fr.cx("fr-text--lg", "fr-m-0")}>{"Styles"}</h2>
                     </div>
 
-                    <ServiceAndStylesShare service={serviceQuery.data} />
-                    {canManageStyles && initialValues && (
-                        <ManageStyles
-                            initial={initialValues}
-                            service={serviceQuery.data}
-                            offeringId={offeringId}
-                            datastoreId={datastoreId}
-                            datasheetName={datasheetName}
-                        />
-                    )}
+                    <div className={classes.content}>
+                        <ServiceAndStylesShare service={serviceQuery.data} />
+                        {canManageStyles && initialValues && (
+                            <ManageStyles
+                                initial={initialValues}
+                                service={serviceQuery.data}
+                                offeringId={offeringId}
+                                datastoreId={datastoreId}
+                                datasheetName={datasheetName}
+                            />
+                        )}
+                    </div>
                 </div>
             </div>
             <div className={fr.cx("fr-grid-row", "fr-mb-4w")}>
@@ -110,3 +110,20 @@ function ServiceViewContent(props: ServiceViewContent) {
 }
 
 export default ServiceViewContent;
+
+const useStyles = tss.create(() => ({
+    root: {
+        borderRadius: "2px",
+        // border: `1px solid ${fr.colors.decisions.border.default.grey.default}`,
+    },
+    column: {
+        border: `1px solid ${fr.colors.decisions.border.default.grey.default}`,
+    },
+    heading: {
+        backgroundColor: fr.colors.decisions.background.contrast.grey.default,
+        padding: fr.spacing("2v"),
+    },
+    content: {
+        padding: fr.spacing("4v"),
+    },
+}));

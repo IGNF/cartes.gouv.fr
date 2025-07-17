@@ -5,7 +5,7 @@ import ButtonsGroup, { ButtonsGroupProps } from "@codegouvfr/react-dsfr/ButtonsG
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { FC } from "react";
+import { FC, useState } from "react";
 
 import { getWorkingLayers, MapInitial } from "@/components/Utils/RMap";
 import { useManageStyle } from "@/contexts/ManageStyleContext";
@@ -33,6 +33,7 @@ const ManageStyles: FC<ManageStylesProps> = (props) => {
     const { t: tStyle } = useTranslation("Style");
     const { t: tCommon } = useTranslation("Common");
 
+    const [editMode, setEditMode] = useState(false);
     const { styleToAddOrEdit, setStyleToAddOrEdit, styleToRemove, setStyleToRemove } = useManageStyle();
 
     // Recherche des services (offerings) contenant le tag datasheet_name a datasheetName
@@ -119,12 +120,21 @@ const ManageStyles: FC<ManageStylesProps> = (props) => {
                     className={fr.cx("fr-mt-4v")}
                     classes={{ inputGroup: cx(fr.cx("fr-radio-rich"), "frx-rb-style-layer") }}
                     legend={
-                        <h3 className={fr.cx("fr-text--md", "fr-m-0", "fr-mb-2v")}>
-                            <strong>{tStyle("my_styles")}</strong>{" "}
-                            <Badge severity="info" noIcon>
-                                {styles.length}
-                            </Badge>
-                        </h3>
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
+                            <div className={fr.cx("fr-col")}>
+                                <h3 className={fr.cx("fr-text--md", "fr-m-0")}>
+                                    <strong>{tStyle("my_styles")}</strong>{" "}
+                                    <Badge severity="info" noIcon>
+                                        {styles.length}
+                                    </Badge>
+                                </h3>
+                            </div>
+                            <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-grid-row--right")}>
+                                <Button size="small" onClick={() => setEditMode(true)} disabled={editMode}>
+                                    {tStyle("modify")}
+                                </Button>
+                            </div>
+                        </div>
                     }
                     options={styles.map((style) => ({
                         label: style.name,
@@ -174,8 +184,10 @@ const ManageStyles: FC<ManageStylesProps> = (props) => {
                             },
                         },
                     }))}
+                    disabled={!editMode}
                 />
 
+                {/* {editMode && ( */}
                 <ButtonsGroup
                     buttons={(() => {
                         const buttons: ButtonsGroupProps["buttons"] = [
@@ -196,6 +208,7 @@ const ManageStyles: FC<ManageStylesProps> = (props) => {
                     })()}
                     inlineLayoutWhen="never"
                 />
+                {/* )} */}
             </div>
 
             {(isPendingChangeCurrentStyle || isRemovePending) && (

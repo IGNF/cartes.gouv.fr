@@ -3,6 +3,7 @@ import { type Translations } from "../../../../../i18n/types";
 
 const { i18n } = declareComponentKeys<
     | "my_styles"
+    | "modify"
     | "add_style"
     | "edit_style"
     | { K: "add_file"; P: { format: string }; R: string }
@@ -13,6 +14,7 @@ export type I18n = typeof i18n;
 
 export const StyleFrTranslations: Translations<"fr">["Style"] = {
     my_styles: "Styles",
+    modify: "Modifier",
     add_style: "Ajouter un style",
     edit_style: "Editer le style",
     add_file: ({ format }) => `Ajouter un fichier ${format} par couche présente dans votre service`,
@@ -23,6 +25,7 @@ export const StyleFrTranslations: Translations<"fr">["Style"] = {
 
 export const StyleEnTranslations: Translations<"en">["Style"] = {
     my_styles: "Styles",
+    modify: "Modify",
     add_style: "Add style",
     edit_style: "Edit style",
     add_file: ({ format }) => `Add ${format} file per layer present in your service`,
