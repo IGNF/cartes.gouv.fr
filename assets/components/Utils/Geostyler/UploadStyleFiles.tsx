@@ -36,10 +36,11 @@ const UploadStyleFiles: FC<UploadStyleFileProps> = (props) => {
     return (
         <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
             <div className={fr.cx("fr-col-3")}>
-                <div className={fr.cx("fr-h6", "fr-p-2v")} style={customStyle}>
+                <div className={fr.cx("fr-grid-row", "fr-text--lg", "fr-p-2v", "fr-mb-6v")} style={customStyle}>
                     <i className={cx(fr.cx("fr-mr-1v"), "ri-stack-line")} />
-                    {t("layers")}
+                    <h3 className={fr.cx("fr-text--lg", "fr-m-0")}>{t("layers")}</h3>
                 </div>
+
                 <RadioButtons
                     classes={{ inputGroup: cx(fr.cx("fr-radio-rich"), "frx-rb-style-layer") }}
                     options={tables.sort().map((table) => ({
@@ -54,10 +55,11 @@ const UploadStyleFiles: FC<UploadStyleFileProps> = (props) => {
                 />
             </div>
             <div className={fr.cx("fr-col-9")}>
-                <div className={fr.cx("fr-h6", "fr-p-2v")} style={customStyle}>
+                <div className={fr.cx("fr-grid-row", "fr-text--lg", "fr-p-2v", "fr-mb-6v")} style={customStyle}>
                     <i className={cx(fr.cx("fr-mr-1v"), "ri-palette-line")} />
-                    {t("style_overview")}
+                    <h3 className={fr.cx("fr-text--lg", "fr-m-0")}>{t("style_overview")}</h3>
                 </div>
+
                 <UploadStyleFile
                     error={errors?.[selectedTable]?.message}
                     onChange={handleChange}

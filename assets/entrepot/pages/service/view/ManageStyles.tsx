@@ -119,12 +119,12 @@ const ManageStyles: FC<ManageStylesProps> = (props) => {
                     className={fr.cx("fr-mt-4v")}
                     classes={{ inputGroup: cx(fr.cx("fr-radio-rich"), "frx-rb-style-layer") }}
                     legend={
-                        <>
+                        <h3 className={fr.cx("fr-text--md", "fr-m-0", "fr-mb-2v")}>
                             <strong>{tStyle("my_styles")}</strong>{" "}
                             <Badge severity="info" noIcon>
                                 {styles.length}
                             </Badge>
-                        </>
+                        </h3>
                     }
                     options={styles.map((style) => ({
                         label: style.name,

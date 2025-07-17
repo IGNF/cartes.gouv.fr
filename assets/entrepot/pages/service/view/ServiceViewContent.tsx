@@ -67,17 +67,17 @@ function ServiceViewContent(props: ServiceViewContent) {
         <>
             <div className={fr.cx("fr-grid-row", "fr-mb-4w")}>
                 <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
-                    <div className={fr.cx("fr-h6", "fr-p-2v")} style={customStyle}>
+                    <div className={fr.cx("fr-grid-row", "fr-text--lg", "fr-p-2v", "fr-mb-6v")} style={customStyle}>
                         <i className={cx(fr.cx("fr-mr-1v"), "ri-eye-line")} />
-                        {"Aperçu du style"}
+                        <h2 className={fr.cx("fr-text--lg", "fr-m-0")}>{"Aperçu du style"}</h2>
                     </div>
 
                     {initialValues && <RMap initial={initialValues} />}
                 </div>
                 <div className={fr.cx("fr-col-12", "fr-col-md-4", "fr-px-2w")}>
-                    <div className={fr.cx("fr-h6", "fr-p-2v")} style={customStyle}>
+                    <div className={fr.cx("fr-grid-row", "fr-text--lg", "fr-p-2v", "fr-mb-6v")} style={customStyle}>
                         <i className={cx(fr.cx("fr-mr-1v"), "ri-palette-line")} />
-                        {"Styles"}
+                        <h2 className={fr.cx("fr-text--lg", "fr-m-0")}>{"Styles"}</h2>
                     </div>
 
                     <ServiceAndStylesShare service={serviceQuery.data} />

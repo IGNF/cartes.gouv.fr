@@ -13,16 +13,18 @@ const ServiceAndStylesShare: FC<ServiceAndStylesShareProps> = ({ service }) => {
     return (
         <div className={fr.cx("fr-col-12")}>
             <div className={fr.cx("fr-grid-row")}>
-                <strong>URL de diffusion</strong>
+                <h3 className={fr.cx("fr-text--md", "fr-m-0")}>URL de diffusion</h3>
             </div>
 
             {/* Adresse du service de données */}
-            <TextCopyToClipboard label="Service de données" text={service?.share_url ?? "Indisponible"} disabled={!service?.share_url} className="fr-mb-1w" />
+            <TextCopyToClipboard label={"Service de données"} text={service?.share_url ?? "Indisponible"} disabled={!service?.share_url} className="fr-mb-1w" />
 
             {currentStyleLayers && (
                 <>
                     <div className={fr.cx("fr-grid-row", "fr-mt-4v")}>
-                        <strong>Fichiers de style courant</strong>
+                        <h3 className={fr.cx("fr-text--md", "fr-m-0")}>
+                            <strong>Fichiers de style courant</strong>
+                        </h3>
                     </div>
                     {currentStyleLayers?.map((layer) => (
                         <div key={layer.annexe_id} className={fr.cx("fr-mt-2v")}>
