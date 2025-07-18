@@ -48,6 +48,7 @@
         "react-error-boundary": "^5.0.0",
         "react-hook-form": "^7.45.1",
         "simple-zustand-devtools": "^1.1.0",
+        "stream": "^0.0.3",
         "tiptap-markdown": "^0.8.10",
         "tsafe": "^1.6.5",
         "tss-react": "^4.9.12",
