@@ -10,6 +10,9 @@ import { WmsVectorServiceFormValuesType } from "../wms-vector/WmsVectorServiceFo
 
 const DEFAULT_CHARSET = "utf8";
 const DEFAULT_LANGUAGE = { language: "français", code: "fre" };
+const DEFAULT_RESTRICTION = "no_restriction";
+const DEFAULT_OPEN_LICENSE_NAME = "Licence Ouverte / Open License (compatible ODC-BY, CC-BY 2.0)";
+const DEFAULT_OPEN_LICENSE_LINK = "https://www.etalab.gouv.fr/wp-content/uploads/2018/11/open-licence.pdf";
 
 export const getEndpointSuffix = (endpointType: EndpointTypeEnum | string) => {
     switch (endpointType) {
@@ -50,6 +53,9 @@ const getMetadataFormDefaultValues = (metadata?: Metadata): MetadataFormValuesTy
         charset: metadata?.csw_metadata?.charset ?? DEFAULT_CHARSET,
         resolution: metadata?.csw_metadata?.resolution ?? "",
         frequency_code: metadata?.csw_metadata?.frequency_code ?? "unknown",
+        restriction: metadata?.csw_metadata?.restriction ?? DEFAULT_RESTRICTION,
+        open_license_name: metadata?.csw_metadata?.open_license_name ?? DEFAULT_OPEN_LICENSE_NAME,
+        open_license_link: metadata?.csw_metadata?.open_license_link ?? DEFAULT_OPEN_LICENSE_LINK,
     };
 };
 
