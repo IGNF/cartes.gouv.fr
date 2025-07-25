@@ -27,8 +27,8 @@ class StoredDataApiService extends BaseEntrepotApiService
      */
     public function getAll(string $datastoreId, array $query = []): array
     {
-        if (!array_key_exists('sort', $query)) { // par défaut, trier par la date de création décroissante
-            $query['sort'] = 'lastEvent,desc';
+        if (!array_key_exists('sort', $query)) { // par défaut, trier par la date du dernier évènement décroissante
+            $query['sort'] = 'last_event,desc';
         }
 
         if (array_key_exists('fields', $query) && is_array($query['fields']) && !empty($query['fields'])) {
