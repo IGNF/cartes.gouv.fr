@@ -14,7 +14,7 @@ import { fromLonLat, transformExtent } from "ol/proj";
 import WMTS, { optionsFromCapabilities } from "ol/source/WMTS";
 import { FC, useCallback, useEffect, useMemo, useRef } from "react";
 
-import type { CartesStyle } from "../../@types/app";
+import type { CartesStyle, GeostylerStyles } from "../../@types/app";
 import { OfferingDetailResponseDtoTypeEnum } from "../../@types/entrepot";
 import olDefaults from "../../data/ol-defaults.json";
 import useCapabilities from "../../hooks/useCapabilities";
@@ -27,6 +27,10 @@ import "geopf-extensions-openlayers/css/Dsfr.css";
 import "../../sass/components/geopf-ext-ol-custom.scss";
 import "../../sass/components/map-view.scss";
 
+export function getWorkingLayers(layers: BaseLayer[]): BaseLayer[] {
+    return layers.filter((l) => l.get("name") !== olDefaults.default_background_layer);
+}
+
 export interface MapInitial {
     type: OfferingDetailResponseDtoTypeEnum;
     bbox?: {
@@ -35,7 +39,7 @@ export interface MapInitial {
         east: number;
         north: number;
     };
-    currentStyle?: CartesStyle;
+    currentStyle?: CartesStyle | GeostylerStyles;
     layers: BaseLayer[];
 }
 
@@ -98,14 +102,6 @@ const RMap: FC<RMapProps> = ({ initial }) => {
         }
         return extent;
     }, [initial.bbox]);
-
-    const getWorkingLayers = useCallback((): BaseLayer[] => {
-        const workingLayers = mapRef.current
-            ?.getLayers()
-            .getArray()
-            .filter((l) => l.get("name") !== olDefaults.default_background_layer);
-        return workingLayers ?? [];
-    }, []);
 
     /**
      * Ajout de la couche dans la carte (+ dans le layerSwitcher)
@@ -195,8 +191,9 @@ const RMap: FC<RMapProps> = ({ initial }) => {
     }, [capabilities]);
 
     useEffect(() => {
-        getWorkingLayers().forEach((layer) => StyleHelper.applyStyle(layer, initial.currentStyle));
-    }, [initial.currentStyle, getWorkingLayers]);
+        const layers = mapRef.current?.getLayers().getArray() ?? [];
+        getWorkingLayers(layers).forEach((layer) => StyleHelper.applyStyle(layer, initial.currentStyle));
+    }, [initial.currentStyle]);
 
     return <div className={"map-view"} ref={mapTargetRef} />;
 };

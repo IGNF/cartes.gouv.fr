@@ -1,8 +1,11 @@
 import { KeyValueListEnTranslations } from "@/components/Input/KeyValueList.locale";
 import { EspaceCoCommunityListEnTranslations } from "@/espaceco/pages/communities/CommunityList.locale";
+import { ReuseCommunityConfigEnTranslations } from "@/espaceco/pages/communities/ReuseCommunityConfig.locale";
 import { SearchCommunityEnTranslations } from "@/espaceco/pages/communities/SearchCommunity.locale";
 import { DatabasesEnTranslations } from "@/espaceco/pages/communities/management/databases/Databases.locale";
 import { LayerToolsEnTranslations } from "@/espaceco/pages/communities/management/tools/Layers.locale";
+import { InputCollectionEnTranslations } from "../../components/Input/InputCollection";
+import { UploadStyleFileEnTranslations } from "../../components/Utils/Geostyler/UploadStyleFile.locale";
 import { datastoreNavItemsEnTranslations } from "../../config/navItems/datastoreNavItems.locale";
 import { navItemsEnTranslations } from "../../config/navItems/navItems.locale";
 import { AccessesRequestEnTranslations } from "../../entrepot/pages/accesses-request/AccessesRequest.locale";
@@ -33,7 +36,6 @@ import { WfsServiceFormEnTranslations } from "../../entrepot/pages/service/wfs/W
 import { PyramidRasterGenerateFormEnTranslations } from "../../entrepot/pages/service/wms-raster-wmts/PyramidRasterGenerateForm/PyramidRasterGenerateForm.locale";
 import { PyramidRasterWmsRasterServiceFormEnTranslations } from "../../entrepot/pages/service/wms-raster-wmts/PyramidRasterWmsRasterServiceForm/PyramidRasterWmsRasterServiceForm.locale";
 import { PyramidRasterWmtsServiceFormEnTranslations } from "../../entrepot/pages/service/wms-raster-wmts/PyramidRasterWmtsServiceForm/PyramidRasterWmtsServiceForm.locale";
-import { UploadStyleFileEnTranslations } from "../../entrepot/pages/service/wms-vector/UploadStyleFile.locale";
 import { WmsVectorServiceFormEnTranslations } from "../../entrepot/pages/service/wms-vector/WmsVectorServiceForm.locale";
 import { MyAccessKeysEnTranslations } from "../../entrepot/pages/users/access-keys/MyAccessKeys.locale";
 import { UserKeyEnTranslations } from "../../entrepot/pages/users/keys/UserKey.locale";
@@ -67,9 +69,6 @@ import { mapboxStyleValidationEnTranslations } from "../../validations/mapbox/Ma
 import { SldStyleValidationErrorsEnTranslations } from "../../validations/sld/SldStyleValidation.locale";
 import { commonEnTranslations } from "../Common.locale";
 import type { Translations } from "../types";
-
-import { ReuseCommunityConfigEnTranslations } from "@/espaceco/pages/communities/ReuseCommunityConfig.locale";
-import { InputCollectionEnTranslations } from "../../components/Input/InputCollection";
 
 export const translations: Translations<"en"> = {
     Common: commonEnTranslations,

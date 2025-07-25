@@ -1,43 +1,56 @@
-import { fr } from "@codegouvfr/react-dsfr";
-import { Upload } from "@codegouvfr/react-dsfr/Upload";
-import { FC } from "react";
-import { UseFormReturn } from "react-hook-form";
+import { StyleFormat } from "@/@types/app";
+import UploadStyleFiles from "@/components/Utils/Geostyler/UploadStyleFiles";
+import { useManageStyle } from "@/contexts/ManageStyleContext";
+import { MapStyleProvider } from "@/contexts/mapStyle";
+import { StyleParser } from "geostyler-style";
+import { FC, useEffect } from "react";
+import { Controller, UseFormReturn } from "react-hook-form";
 import { getTranslation } from "../../../../../i18n/i18n";
 
 type UploadLayerStylesProps = {
     form: UseFormReturn;
-    format: "mapbox" | "sld" | "qml";
-    layers: Record<string, string>;
+    format: StyleFormat;
+    names: string[];
+    parser?: StyleParser;
+    parsers?: StyleParser[];
 };
 
 const { t } = getTranslation("Style");
 
-const UploadLayerStyles: FC<UploadLayerStylesProps> = ({ form, format, layers }) => {
-    const {
-        register,
-        formState: { errors },
-    } = form;
+const UploadLayerStyles: FC<UploadLayerStylesProps> = (props) => {
+    const { form, format, names, parser, parsers } = props;
+    const { control, watch } = form;
+    const { setInitialValues } = useManageStyle();
+
+    const styleFiles = watch("style_files");
+    useEffect(() => {
+        setInitialValues((initial) => {
+            if (initial) {
+                return { ...initial, currentStyle: Object.entries(styleFiles).map(([name, style]) => ({ name, style: style as string, format })) };
+            }
+        });
+    }, [setInitialValues, styleFiles, format]);
 
     return (
         <>
             <p>{t("add_file", { format: format })}</p>
-            {Object.keys(layers).map((uid) => {
-                return (
-                    <div key={uid} className={fr.cx("fr-grid-row", "fr-mb-3w")}>
-                        <Upload
-                            className={fr.cx("fr-input-group")}
-                            label={layers[uid]}
-                            hint={t("select_file", { format: format })}
-                            state={errors?.style_files?.[uid]?.message ? "error" : "default"}
-                            stateRelatedMessage={errors?.style_files?.[uid]?.message}
-                            nativeInputProps={{
-                                ...register(`style_files.${uid}`),
-                                accept: `.${format}`,
-                            }}
+            <MapStyleProvider defaultTable={names[0]}>
+                <Controller
+                    name="style_files"
+                    control={control}
+                    render={({ field: { value, onChange }, formState: { errors } }) => (
+                        <UploadStyleFiles
+                            // @ts-expect-error ignore for now
+                            errors={errors?.style_files}
+                            onChange={onChange}
+                            parser={parser}
+                            parsers={parsers}
+                            tables={names}
+                            value={value}
                         />
-                    </div>
-                );
-            })}
+                    )}
+                />
+            </MapStyleProvider>
         </>
     );
 };
