@@ -252,14 +252,17 @@ export type MetadataFormValuesType = {
     restriction?: string;
     open_license_name?: string;
     open_license_link?: string;
+    inspire_license_id?: string;
     access_restriction_code?: string;
     access_constraint_name?: string;
     access_constraint_link?: string;
     use_restriction_code?: string;
     use_constraint_name?: string;
     use_constraint_link?: string;
-    accessConstraints?: Constraint[];
-    useConstraints?: Constraint[];
+    inspire_access_constraints?: Constraint[];
+    inspire_use_constraints?: Constraint[];
+    other_access_constraints?: Constraint[];
+    other_use_constraints?: Constraint[];
 };
 
 export type AttributionFormValuesType = {
@@ -393,6 +396,10 @@ export type CswMetadata = {
     access_constraint_link?: string;
     use_constraint_name?: string;
     use_constraint_link?: string;
+    inspire_access_constraints?: Constraint[];
+    inspire_use_constraints?: Constraint[];
+    other_access_constraints?: Constraint[];
+    other_use_constraints?: Constraint[];
 };
 
 export type Metadata = MetadataResponseDto & {
