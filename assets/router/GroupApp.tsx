@@ -65,7 +65,9 @@ function GroupApp(props: IGroupAppProps) {
             case "contact_confirmation":
                 return { render: <ContactConfirmation /> };
             case "news_list":
-                return { render: <NewsList /> };
+                return { render: <NewsList page={route.params.page} /> };
+            case "news_list_by_tag":
+                return { render: <NewsList page={route.params.page} tag={route.params.tag} /> };
             case "news_article":
                 return { render: <NewsArticle slug={route.params.slug} /> };
             case "faq":
