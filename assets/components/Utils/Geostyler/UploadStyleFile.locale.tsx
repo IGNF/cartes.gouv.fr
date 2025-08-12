@@ -6,7 +6,7 @@ const { i18n } = declareComponentKeys<
     | "layers"
     | "style_overview"
     | "file_input_title"
-    | "file_input_hint"
+    | { K: "file_input_hint"; P: { acceptedFileExtensions: string[] | undefined }; R: string }
     | "or"
     | "create_style"
     | "remove_style"
@@ -18,7 +18,8 @@ export const UploadStyleFileFrTranslations: Translations<"fr">["UploadStyleFile"
     layers: "Couches",
     style_overview: "Aperçu du style",
     file_input_title: "Ajouter un fichier de style",
-    file_input_hint: "Glissez-déposez votre fichier SLD ici. Formats de fichiers autorisés : .sld",
+    file_input_hint: ({ acceptedFileExtensions = [] }) =>
+        `Glissez-déposez votre fichier de style ici. Formats de fichiers autorisés : ${acceptedFileExtensions.join(", ")}`,
     or: "OU",
     create_style: "Créer un style",
     remove_style: "Supprimer le style",

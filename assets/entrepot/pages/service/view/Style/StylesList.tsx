@@ -9,7 +9,6 @@ import { CartesStyle, Service } from "@/@types/app";
 import ConfirmDialog, { ConfirmDialogModal } from "@/components/Utils/ConfirmDialog";
 import TextCopyToClipboard from "@/components/Utils/TextCopyToClipboard";
 import Wait from "@/components/Utils/Wait";
-import { useManageStyle } from "@/contexts/ManageStyleContext";
 import api from "@/entrepot/api";
 import { useTranslation } from "@/i18n";
 import RQKeys from "@/modules/entrepot/RQKeys";
@@ -33,7 +32,7 @@ function StylesList(props: StylesListProps) {
 
     const styles: CartesStyle[] = service?.configuration.styles ?? [];
 
-    const { styleToRemove, setStyleToRemove } = useManageStyle();
+    const [styleToRemove, setStyleToRemove] = useState<string | undefined>();
 
     const queryClient = useQueryClient();
 

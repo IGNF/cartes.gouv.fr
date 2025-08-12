@@ -47,16 +47,22 @@ class StyleHelper {
         if (!currentStyle) return;
         if (!StyleHelper.filterLayer(layer)) return;
 
+        // console.log("currentStyle", currentStyle);
+
         let style: GeostylerStyle | undefined;
         if (isCarteStyle(currentStyle)) {
             style = await StyleHelper.getStyleFromUrl(layer, currentStyle);
         } else {
             style = await StyleHelper.#getGeoReadStyle(layer, currentStyle);
+            // console.log("here", style);
         }
         if (style) {
             const readStyle = await StyleHelper.#getReadStyle(style);
+            // console.log("readStyle", readStyle);
+
             if (readStyle) {
                 const olStyle = await StyleHelper.#getOlStyle(readStyle);
+                // console.log("olStyle", olStyle);
                 if (olStyle) {
                     layer.setStyle(olStyle);
                 }
@@ -90,6 +96,7 @@ class StyleHelper {
                 return { name, style, format };
             } else {
                 // TODO: What should we do in that case ?
+                return { style, format };
             }
         }
     }

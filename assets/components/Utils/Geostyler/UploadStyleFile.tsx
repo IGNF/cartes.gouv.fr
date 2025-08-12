@@ -1,86 +1,98 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import Button from "@codegouvfr/react-dsfr/Button";
 import { Upload } from "@codegouvfr/react-dsfr/Upload";
+import { Divider } from "@mui/material";
+import { type Style as GsStyle, ReadStyleResult, StyleParser } from "geostyler-style";
 import { FC, useEffect, useState } from "react";
-import { Style, StyleParser } from "geostyler-style";
 
 import GeostylerEditor from "@/components/Utils/Geostyler/GeostylerEditor";
-import { sldParser } from "@/utils/geostyler";
-import { useTranslation } from "../../../i18n/i18n";
-import { useMapStyle } from "@/contexts/mapStyle";
-import Button from "@codegouvfr/react-dsfr/Button";
-import { Divider } from "@mui/material";
-import { ConfirmDialogModal, ConfirmDialog } from "../ConfirmDialog";
+import { useStyleForm } from "@/contexts/StyleFormContext";
+import { useTranslation } from "@/i18n";
+import { getFileExtension } from "@/utils";
+import { getParserForExtension, sldParser } from "@/utils/geostyler";
+import ConfirmDialog, { ConfirmDialogModal } from "../ConfirmDialog";
+import { StyleFormatEnum } from "@/@types/app";
 
 type UploadStyleFileProps = {
-    error?: string;
     onChange: (value?: string) => void;
+    onFormatChange?: (format: string) => void;
     parser?: StyleParser;
     parsers?: StyleParser[];
     value?: string;
+    acceptedFileExtensions?: string[];
 };
 
+function propertyNamesToLowerCase(sldContent: string) {
+    return sldContent.replace(/<(ogc:)?PropertyName>(.*?)<\/(ogc:)?PropertyName>/g, (_, p1, p2) => {
+        return `<${p1 ?? ""}PropertyName>${p2.toLowerCase()}</${p1 ?? ""}PropertyName>`;
+    });
+}
+
+function getDefaultStyle(currentTable: string): GsStyle {
+    return {
+        name: currentTable,
+        rules: [
+            {
+                name: `rule_${Math.floor(Math.random() * 10000)
+                    .toString()
+                    .padStart(4, "0")}`,
+                symbolizers: [
+                    {
+                        kind: "Mark",
+                        wellKnownName: "circle",
+                        color: "#0E1058",
+                    },
+                ],
+            },
+        ],
+    };
+}
+
 const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
-    const { error, onChange, parser = sldParser, parsers, value } = props;
+    const { onChange, onFormatChange, parser = sldParser, parsers, value, acceptedFileExtensions = ["sld"] } = props;
     const { t: tCommon } = useTranslation("Common");
     const { t } = useTranslation("UploadStyleFile");
 
-    const { selectedTable } = useMapStyle();
+    const { currentTable, styleFormats } = useStyleForm();
 
-    const defaultStyle: Style = {
-        name: selectedTable,
-        rules: [],
-    };
-
-    const [gsStyle, setGsStyle] = useState<Style>();
+    // état interne au composant
+    const [gsStyle, setGsStyle] = useState<GsStyle>();
     const [strStyle, setStrStyle] = useState<string>();
 
     useEffect(() => {
+        onChange(strStyle);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [strStyle]);
+
+    async function handleValueChange(value: string | undefined) {
         if (value !== strStyle) {
             if (value) {
-                convertContent(value);
+                const result = await parser.readStyle(value);
+
+                if (result.output) {
+                    const style = { ...result.output, name: currentTable };
+                    setGsStyle(style);
+                    const writeResult = await parser.writeStyle(style);
+                    setStrStyle(styleFormats[currentTable] === StyleFormatEnum.Mapbox ? JSON.stringify(writeResult.output) : writeResult.output);
+                }
             } else {
                 setGsStyle(undefined);
                 setStrStyle("");
             }
         }
+    }
+
+    useEffect(() => {
+        handleValueChange(value);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [value]);
 
-    useEffect(() => {
-        if (error) {
-            // setGsStyle(undefined);
-            setStrStyle("");
-        }
-    }, [error]);
-
-    async function propertyNamesToLowerCase(sldContent: string): Promise<string> {
-        return sldContent.replace(/<(ogc:)?PropertyName>(.*?)<\/(ogc:)?PropertyName>/g, (_, p1, p2) => {
-            return `<${p1 ?? ""}PropertyName>${p2.toLowerCase()}</${p1 ?? ""}PropertyName>`;
-        });
-    }
-
-    async function convertContent(content: string): Promise<string> {
-        const result = await parser.readStyle(content);
-
-        if (result.output) {
-            const style = { ...result.output, name: selectedTable };
-            setGsStyle(style);
-
-            const writeResult = await parser.writeStyle(style);
-            setStrStyle(writeResult.output);
-            return writeResult.output;
-        }
-        return content;
-    }
-
-    async function convertFile(file: File): Promise<string> {
+    async function readFileContent(file: File): Promise<string> {
         return new Promise((resolve) => {
             const reader = new FileReader();
             reader.onload = async (e) => {
                 if (typeof e.target?.result === "string") {
-                    const content = await propertyNamesToLowerCase(e.target.result);
-                    const converted = await convertContent(content);
-                    resolve(converted);
+                    resolve(e.target.result);
                 }
             };
             reader.readAsText(file);
@@ -89,46 +101,72 @@ const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
 
     async function handleUpload(event: React.ChangeEvent<HTMLInputElement>) {
         if (event.target.files?.[0]) {
-            const content = await convertFile(event.target.files[0]);
-            onChange(content);
+            // lecture du contenu du fichier
+            const file = event.target.files[0];
+            const extension = getFileExtension(file.name)?.toLowerCase() ?? "";
+            if (!acceptedFileExtensions.includes(extension)) {
+                console.warn("Unsupported file extension:", extension);
+                return;
+            }
+
+            let content = await readFileContent(file);
+            content = propertyNamesToLowerCase(content);
+
+            const parser = getParserForExtension(extension);
+            let gsStyleResult: ReadStyleResult | undefined;
+
+            if (extension === "json") {
+                onFormatChange?.("mapbox");
+                gsStyleResult = await parser.readStyle(JSON.parse(content));
+            } else {
+                onFormatChange?.(extension);
+                gsStyleResult = await parser.readStyle(content);
+            }
+
+            let gsStyle = gsStyleResult.output;
+            if (gsStyle) {
+                gsStyle = { ...gsStyle, name: currentTable };
+                setGsStyle(gsStyle);
+
+                content = (await parser.writeStyle(gsStyle)).output;
+                setStrStyle(extension === "json" ? JSON.stringify(content) : content);
+            } else {
+                console.error("Failed to parse style:", gsStyleResult.errors);
+            }
         }
     }
 
-    async function handleStyleChange(style: Style) {
-        try {
-            const convertedStyle = await parser.writeStyle(style);
-            const content = await propertyNamesToLowerCase(convertedStyle.output);
-            setStrStyle(content);
-
-            // On relit le style (PropertyName mis en minuscule)
-            const result = await parser.readStyle(content);
-            setGsStyle(result.output);
-
-            onChange(content);
-        } catch (error) {
-            console.error("Erreur lors de la conversion du style", error);
-        }
+    async function handleStyleChange(style: GsStyle) {
+        const content = (await parser.writeStyle(style)).output;
+        setStrStyle(styleFormats[currentTable] === StyleFormatEnum.Mapbox ? JSON.stringify(content) : content);
+        setGsStyle(style);
     }
 
-    const handleCreate = () => {
+    const handleCreateEmptyStyle = () => {
+        const defaultStyle = getDefaultStyle(currentTable);
+
         setGsStyle(defaultStyle);
-        setStrStyle("");
+        parser
+            .writeStyle(defaultStyle)
+            .then((result) => (typeof result.output === "object" ? JSON.stringify(result.output) : result.output))
+            .then((content) => setStrStyle(styleFormats[currentTable] === StyleFormatEnum.Mapbox ? JSON.stringify(content) : content));
     };
 
-    const handleRemove = () => {
-        onChange(undefined);
+    const handleRemoveStyle = () => {
+        setGsStyle(undefined);
+        setStrStyle(undefined);
     };
 
     return gsStyle ? (
         <div>
             <div className={fr.cx("fr-grid-row", "fr-grid-row--right")}>
-                <Button priority={"tertiary"} iconId="fr-icon-delete-line" disabled={gsStyle.rules.length === 0} onClick={ConfirmDialogModal.open}>
+                <Button priority={"tertiary"} iconId="fr-icon-delete-line" onClick={ConfirmDialogModal.open}>
                     {t("remove_style")}
                 </Button>
             </div>
             <GeostylerEditor defaultParser={parser} onChange={handleStyleChange} parsers={parsers} value={gsStyle} />
-            <ConfirmDialog title={t("remove_style")} noTitle={tCommon("cancel")} yesTitle={tCommon("delete")} onConfirm={handleRemove}>
-                {<p>{t("remove_style_confirm_message", { layer: selectedTable })}</p>}
+            <ConfirmDialog title={t("remove_style")} noTitle={tCommon("cancel")} yesTitle={tCommon("delete")} onConfirm={handleRemoveStyle}>
+                {<p>{t("remove_style_confirm_message", { layer: currentTable })}</p>}
             </ConfirmDialog>
         </div>
     ) : (
@@ -136,14 +174,14 @@ const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
             <Upload
                 label={t("file_input_title")}
                 className={fr.cx("fr-input-group", "fr-mb-2w")}
-                hint={t("file_input_hint")}
+                hint={t("file_input_hint", { acceptedFileExtensions })}
                 nativeInputProps={{
-                    accept: ".sld",
+                    accept: acceptedFileExtensions.map((ext) => "." + ext).join(","),
                     onChange: handleUpload,
                 }}
             />
             <Divider>{t("or")}</Divider>
-            <Button priority={"tertiary"} onClick={handleCreate}>
+            <Button priority={"tertiary"} onClick={handleCreateEmptyStyle}>
                 {t("create_style")}
             </Button>
         </div>

@@ -1,74 +1,117 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
+import ToggleSwitch from "@codegouvfr/react-dsfr/ToggleSwitch";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
-import { StyleParser } from "geostyler-style";
-import { CSSProperties, FC } from "react";
+import type { StyleParser } from "geostyler-style";
+import { type FC } from "react";
+import type { FieldErrors } from "react-hook-form";
 
-import { useMapStyle } from "@/contexts/mapStyle";
+import type { StyleFormat } from "@/@types/app";
+import { StyleFormatEnum } from "@/@types/app";
+import Panels from "@/components/Layout/Panels";
+import { useStyleForm } from "@/contexts/StyleFormContext";
 import { useTranslation } from "@/i18n";
+import { encodeKey } from "@/utils";
+import { getParserForFormat, getParsersForExtensions } from "@/utils/geostyler";
 import UploadStyleFile from "./UploadStyleFile";
 
 import "@/sass/components/upload-style-files.css";
 
 type UploadStyleFileProps = {
-    errors?: Record<string, { message?: string } | undefined>;
-    onChange: (value: Record<string, string | undefined>) => void;
-    parser?: StyleParser;
-    parsers?: StyleParser[];
+    errors?: FieldErrors;
+    onChange: (value?: Record<string, string | undefined>) => void;
     tables: string[];
     value?: Record<string, string>;
+    acceptedFileExtensions?: string[];
 };
 
 const UploadStyleFiles: FC<UploadStyleFileProps> = (props) => {
-    const { errors, onChange, parser, parsers, tables = [], value } = props;
-    const { selectedTable, setSelectedTable } = useMapStyle();
+    const { errors, onChange, tables = [], value, acceptedFileExtensions } = props;
+
+    const {
+        editMode,
+        isMapbox,
+        setIsMapbox,
+        isTms,
+
+        currentTable,
+        setCurrentTable,
+        setFormat,
+        styleFormats,
+    } = useStyleForm();
 
     const { t } = useTranslation("UploadStyleFile");
 
     function handleChange(style?: string) {
-        onChange({ ...value, [selectedTable]: style });
+        if (currentTable !== undefined) {
+            onChange({ ...value, [encodeKey(currentTable)]: style });
+        }
     }
 
-    const customStyle: CSSProperties = {
-        backgroundColor: fr.colors.decisions.background.contrast.grey.default,
-    };
+    function handleFormatChange(format: string) {
+        if (currentTable !== undefined) {
+            setFormat(currentTable, format as StyleFormatEnum);
+        }
+    }
+
+    const format: StyleFormat | undefined = styleFormats[currentTable] ?? StyleFormatEnum.SLD;
+    const parser: StyleParser = getParserForFormat(format as StyleFormatEnum);
+    const parsers: StyleParser[] = getParsersForExtensions(acceptedFileExtensions);
 
     return (
-        <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
-            <div className={fr.cx("fr-col-3")}>
-                <div className={fr.cx("fr-grid-row", "fr-text--lg", "fr-p-2v", "fr-mb-6v")} style={customStyle}>
-                    <i className={cx(fr.cx("fr-mr-1v"), "ri-stack-line")} />
-                    <h3 className={fr.cx("fr-text--lg", "fr-m-0")}>{t("layers")}</h3>
-                </div>
-
-                <RadioButtons
-                    classes={{ inputGroup: cx(fr.cx("fr-radio-rich"), "frx-rb-style-layer") }}
-                    options={tables.sort().map((table) => ({
-                        label: table,
-                        hintText: errors?.[table]?.message ? <span className={fr.cx("fr-error-text", "fr-mt-1v")}>{errors?.[table]?.message}</span> : null,
-                        nativeInputProps: {
-                            value: table,
-                            checked: table === selectedTable,
-                            onChange: () => setSelectedTable(table),
-                        },
-                    }))}
-                />
-            </div>
-            <div className={fr.cx("fr-col-9")}>
-                <div className={fr.cx("fr-grid-row", "fr-text--lg", "fr-p-2v", "fr-mb-6v")} style={customStyle}>
-                    <i className={cx(fr.cx("fr-mr-1v"), "ri-palette-line")} />
-                    <h3 className={fr.cx("fr-text--lg", "fr-m-0")}>{t("style_overview")}</h3>
-                </div>
-
-                <UploadStyleFile
-                    error={errors?.[selectedTable]?.message}
-                    onChange={handleChange}
-                    parser={parser}
-                    parsers={parsers}
-                    value={value?.[selectedTable]}
-                />
-            </div>
-        </div>
+        <Panels
+            panels={[
+                {
+                    title: t("layers"),
+                    titleAs: "h3",
+                    iconId: "ri-stack-line",
+                    children: (
+                        <>
+                            {editMode === false && isTms === true && (
+                                <ToggleSwitch
+                                    label={"Utiliser des fichiers sld ou qml par couche"}
+                                    checked={!isMapbox}
+                                    onChange={(checked) => setIsMapbox(!checked)}
+                                />
+                            )}
+                            <RadioButtons
+                                legend=""
+                                classes={{ inputGroup: cx(fr.cx("fr-radio-rich"), "frx-rb-style-layer") }}
+                                options={tables.sort().map((table) => ({
+                                    label: table,
+                                    hintText: errors?.style_files?.[encodeKey(table)]?.message ? (
+                                        <span className={fr.cx("fr-error-text", "fr-mt-1v")}>{errors?.style_files?.[encodeKey(table)]?.message}</span>
+                                    ) : null,
+                                    nativeInputProps: {
+                                        value: table,
+                                        checked: table === currentTable,
+                                        onChange: () => setCurrentTable(table),
+                                    },
+                                }))}
+                                disabled={isTms && isMapbox}
+                            />
+                        </>
+                    ),
+                    className: fr.cx("fr-col-md-3"),
+                },
+                {
+                    title: t("style_overview"),
+                    titleAs: "h3",
+                    iconId: "ri-palette-line",
+                    children: (
+                        <UploadStyleFile
+                            onChange={handleChange}
+                            onFormatChange={handleFormatChange}
+                            parser={parser}
+                            parsers={parsers}
+                            value={value?.[encodeKey(currentTable)]}
+                            acceptedFileExtensions={acceptedFileExtensions}
+                        />
+                    ),
+                    className: fr.cx("fr-col-md-9"),
+                },
+            ]}
+        />
     );
 };
 

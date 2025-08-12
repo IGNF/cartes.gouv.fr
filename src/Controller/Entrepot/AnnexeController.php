@@ -17,7 +17,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
+use Symfony\Component\Mime\MimeTypes;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
 use Symfony\Component\Uid\Uuid;
@@ -97,6 +99,24 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
             return new JsonResponse($this->annexeApiService->add($datastoreId, $file->getRealPath(), [$path]));
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
+    #[Route('/{annexeId}/file', name: 'get_file_content', methods: ['GET'], requirements: ['annexeId' => Requirement::UUID_V4])]
+    public function getFileContent(string $datastoreId, string $annexeId, Request $request): Response
+    {
+        try {
+            $fileContent = $this->annexeApiService->download($datastoreId, $annexeId);
+            $mimeTypes = new MimeTypes();
+            $mimeType = $mimeTypes->guessMimeType($fileContent);
+            $response = new Response($fileContent);
+            $response->headers->set('Content-Type', $mimeType);
+            // $response->headers->set('Content-Disposition', 'inline; filename="'.$annexeId.'"');
+            $response->headers->set('Content-Length', ''.strlen($fileContent));
+
+            return $response;
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
         }
     }
 

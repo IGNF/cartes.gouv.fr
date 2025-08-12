@@ -25,6 +25,7 @@ const PyramidRasterWmsRasterServiceForm = lazy(
 );
 const PyramidRasterWmtsServiceForm = lazy(() => import("../entrepot/pages/service/wms-raster-wmts/PyramidRasterWmtsServiceForm/PyramidRasterWmtsServiceForm"));
 const ServiceView = lazy(() => import("../entrepot/pages/service/view/ServiceView"));
+const StyleAddModifyForm = lazy(() => import("@/entrepot/pages/service/view/Style/StyleAddModifyForm"));
 
 interface IGroupDatastoreProps {
     route: Route<typeof groups.datastore>;
@@ -181,6 +182,27 @@ function GroupDatastore(props: IGroupDatastoreProps) {
                 return {
                     render: (
                         <ServiceView datastoreId={route.params.datastoreId} offeringId={route.params.offeringId} datasheetName={route.params.datasheetName} />
+                    ),
+                };
+            case "datastore_service_style_add":
+                return {
+                    render: (
+                        <StyleAddModifyForm
+                            datastoreId={route.params.datastoreId}
+                            offeringId={route.params.offeringId}
+                            datasheetName={route.params.datasheetName}
+                        />
+                    ),
+                };
+            case "datastore_service_style_edit":
+                return {
+                    render: (
+                        <StyleAddModifyForm
+                            datastoreId={route.params.datastoreId}
+                            offeringId={route.params.offeringId}
+                            datasheetName={route.params.datasheetName}
+                            styleName={route.params.styleName}
+                        />
                     ),
                 };
         }

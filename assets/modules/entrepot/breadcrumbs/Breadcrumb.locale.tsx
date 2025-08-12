@@ -48,6 +48,8 @@ const { i18n } = declareComponentKeys<
     | "datastore_pyramid_raster_wmts_service_new"
     | "datastore_pyramid_raster_wmts_service_edit"
     | "datastore_service_view"
+    | "datastore_service_style_add"
+    | "datastore_service_style_edit"
     | "espaceco_community_list"
     | "espaceco_member_invitation"
     | "espaceco_create_community"
@@ -102,6 +104,8 @@ export const BreadcrumbFrTranslations: Translations<"fr">["Breadcrumb"] = {
     datastore_pyramid_raster_wmts_service_new: "Création d'un service WMTS",
     datastore_pyramid_raster_wmts_service_edit: "Modification d'un service WMTS",
     datastore_service_view: "Prévisualisation d'un service",
+    datastore_service_style_add: "Ajouter un style",
+    datastore_service_style_edit: "Modifier le style",
     espaceco_community_list: "Espace collaboratif",
     espaceco_create_community: "Création d'un guichet",
     espaceco_manage_community: ({ communityName }) => `Gérer le guichet ${communityName ?? ""}`,
@@ -155,6 +159,8 @@ export const BreadcrumbEnTranslations: Translations<"en">["Breadcrumb"] = {
     datastore_pyramid_raster_wmts_service_new: "Create a WMTS service",
     datastore_pyramid_raster_wmts_service_edit: "Modify a WMTS service",
     datastore_service_view: "Preview a service",
+    datastore_service_style_add: "Add a style",
+    datastore_service_style_edit: "Modify style",
     espaceco_community_list: "Collaborative space",
     espaceco_create_community: "Create community",
     espaceco_manage_community: ({ communityName }) => `Manage community ${communityName ?? ""}`,

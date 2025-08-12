@@ -39,8 +39,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
     ) {
     }
 
-    #[Route('/{offeringId}/add', name: 'add', methods: ['POST'])
-    ]
+    #[Route('/{offeringId}/add', name: 'add', methods: ['POST'])]
     public function add(string $datastoreId, string $offeringId, Request $request): JsonResponse
     {
         try {
@@ -90,8 +89,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
         }
     }
 
-    #[Route('/{offeringId}/remove', name: 'remove', methods: ['POST'])
-    ]
+    #[Route('/{offeringId}/remove', name: 'remove', methods: ['POST'])]
     public function remove(string $datastoreId, string $offeringId, Request $request): JsonResponse
     {
         try {
@@ -152,8 +150,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
         }
     }
 
-    #[Route('/{offeringId}/setcurrent', name: 'setcurrent', methods: ['POST'])
-    ]
+    #[Route('/{offeringId}/setcurrent', name: 'setcurrent', methods: ['POST'])]
     public function setCurrentStyle(string $datastoreId, string $offeringId, Request $request): JsonResponse
     {
         try {

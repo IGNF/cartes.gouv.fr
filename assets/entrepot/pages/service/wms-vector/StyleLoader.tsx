@@ -2,7 +2,7 @@ import { FC } from "react";
 import { Controller, type UseFormReturn } from "react-hook-form";
 
 import UploadStyleFiles from "@/components/Utils/Geostyler/UploadStyleFiles";
-import { sldParser } from "@/utils/geostyler";
+import { decodeKey } from "@/utils";
 import { WmsVectorServiceFormValuesType } from "./WmsVectorServiceForm";
 
 type UploadStyleFileProps = {
@@ -10,20 +10,50 @@ type UploadStyleFileProps = {
     form: UseFormReturn<WmsVectorServiceFormValuesType>;
 };
 
+const acceptedFileExtensions = ["sld"];
+
 const StyleLoader: FC<UploadStyleFileProps> = (props) => {
     const { tableNames = [], form } = props;
 
-    const { control } = form;
+    const { control, watch } = form;
 
     return (
         <div>
             <Controller
-                name="style_files"
+                name={"style_files"}
                 control={control}
                 render={({ field: { value, onChange }, formState: { errors } }) => (
-                    <UploadStyleFiles errors={errors?.style_files} onChange={onChange} parsers={[sldParser]} tables={tableNames} value={value} />
+                    <UploadStyleFiles
+                        errors={errors}
+                        onChange={onChange}
+                        // parsers={[sldParser]}
+                        // parser={sldParser}
+                        tables={tableNames}
+                        value={value}
+                        acceptedFileExtensions={acceptedFileExtensions}
+                    />
                 )}
             />
+
+            {/* <pre>
+                <code>{JSON.stringify(watch("style_files"), null, 4)}</code>
+            </pre> */}
+
+            <pre>
+                <code>
+                    {JSON.stringify(
+                        Object.entries(watch("style_files") ?? {}).reduce(
+                            (acc, [key, value]) => ({
+                                ...acc,
+                                [decodeKey(key)]: value,
+                            }),
+                            {}
+                        ),
+                        null,
+                        4
+                    )}
+                </code>
+            </pre>
         </div>
     );
 };

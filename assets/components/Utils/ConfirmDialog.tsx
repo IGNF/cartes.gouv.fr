@@ -36,6 +36,9 @@ const ConfirmDialog: FC<ConfirmDialogProps> = ({ title, children, onConfirm, noT
                             priority: "primary",
                         },
                     ]}
+                    style={{
+                        zIndex: 10000,
+                    }}
                 >
                     {children || <div />}
                 </ConfirmDialogModal.Component>,

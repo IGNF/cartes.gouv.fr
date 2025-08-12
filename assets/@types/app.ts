@@ -177,11 +177,16 @@ export type StyleForm = {
     style_files: Record<string, string>;
 };
 
-export type StyleFormat = "mapbox" | "sld" | "qml";
+export enum StyleFormatEnum {
+    Mapbox = "mapbox",
+    SLD = "sld",
+    QML = "qml",
+}
+export type StyleFormat = `${StyleFormatEnum}`;
 
 export interface GeostylerStyle {
     annexeId?: string;
-    name: string;
+    name?: string;
     style: string;
     format: StyleFormat;
 }

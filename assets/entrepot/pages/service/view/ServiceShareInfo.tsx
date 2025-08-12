@@ -1,14 +1,14 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import { FC, useMemo } from "react";
+import { FC } from "react";
 
 import { Service } from "@/@types/app";
 import TextCopyToClipboard from "@/components/Utils/TextCopyToClipboard";
 
-type ServiceAndStylesShareProps = {
-    service?: Service;
+type ServiceShareInfoProps = {
+    service: Service;
 };
-const ServiceAndStylesShare: FC<ServiceAndStylesShareProps> = ({ service }) => {
-    const currentStyleLayers = useMemo(() => service?.configuration.styles?.find((style) => style.current === true)?.layers, [service?.configuration.styles]);
+const ServiceShareInfo: FC<ServiceShareInfoProps> = ({ service }) => {
+    // const currentStyleLayers = useMemo(() => service?.configuration.styles?.find((style) => style.current === true)?.layers, [service?.configuration.styles]);
 
     return (
         <div className={fr.cx("fr-col-12")}>
@@ -19,7 +19,7 @@ const ServiceAndStylesShare: FC<ServiceAndStylesShareProps> = ({ service }) => {
             {/* Adresse du service de données */}
             <TextCopyToClipboard label={"Service de données"} text={service?.share_url ?? "Indisponible"} disabled={!service?.share_url} className="fr-mb-1w" />
 
-            {currentStyleLayers && (
+            {/* {currentStyleLayers && (
                 <>
                     <div className={fr.cx("fr-grid-row", "fr-mt-4v")}>
                         <h3 className={fr.cx("fr-text--md", "fr-m-0")}>
@@ -38,9 +38,9 @@ const ServiceAndStylesShare: FC<ServiceAndStylesShareProps> = ({ service }) => {
                         </div>
                     ))}
                 </>
-            )}
+            )} */}
         </div>
     );
 };
 
-export default ServiceAndStylesShare;
+export default ServiceShareInfo;

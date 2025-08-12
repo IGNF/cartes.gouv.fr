@@ -219,6 +219,33 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): Brea
             ];
             return { ...defaultProps, currentPageLabel: t(route.name) };
 
+        case "datastore_service_style_add":
+        case "datastore_service_style_edit":
+            defaultProps.segments = [
+                ...defaultProps.segments,
+                ...[
+                    { label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link },
+                    { label: datastore?.name, linkProps: routes.datasheet_list({ datastoreId: route.params.datastoreId }).link },
+                    {
+                        label: route.params.datasheetName,
+                        linkProps: routes.datastore_datasheet_view({
+                            datastoreId: route.params.datastoreId,
+                            datasheetName: route.params.datasheetName,
+                            activeTab: "offeringId" in route.params ? "services" : "dataset",
+                        }).link,
+                    },
+                    {
+                        label: t("datastore_service_view"),
+                        linkProps: routes.datastore_service_view({
+                            datastoreId: route.params.datastoreId,
+                            datasheetName: route.params.datasheetName,
+                            offeringId: route.params.offeringId,
+                        }).link,
+                    },
+                ],
+            ];
+            return { ...defaultProps, currentPageLabel: t(route.name) };
+
         case "home":
         default:
             return undefined;

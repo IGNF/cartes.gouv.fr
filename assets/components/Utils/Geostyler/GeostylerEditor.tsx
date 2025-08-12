@@ -9,6 +9,7 @@ import DsfrAntdConfig from "../../Provider/DsfrAntdConfig";
 import { mbParser, qgisParser, sldParser } from "@/utils/geostyler";
 
 import "geostyler/dist/index.css";
+import "@/sass/components/geostyler.css";
 
 const ctx: GeoStylerContextInterface = {
     composition: {
@@ -27,10 +28,9 @@ const ctx: GeoStylerContextInterface = {
             },
         },
         Style: {
-            /* TODO Enlever le commentaire à ce qui suit */
-            /* nameField: {
-                visibility: false
-            }, */
+            nameField: {
+                visibility: false,
+            },
             disableClassification: true,
             disableMultiEdit: true,
         },
@@ -74,7 +74,7 @@ const GeostylerEditor: FC<GeostylerEditorProps> = (props) => {
                             label: (
                                 <div>
                                     <i className="ri-code-line" />
-                                    <span className={fr.cx("fr-ml-1w")}>Editeur de code</span>
+                                    <span className={fr.cx("fr-ml-1w")}>Code</span>
                                 </div>
                             ),
                             content: (

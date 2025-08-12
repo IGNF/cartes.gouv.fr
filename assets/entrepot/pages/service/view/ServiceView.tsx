@@ -5,7 +5,6 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { useQuery } from "@tanstack/react-query";
 import { FC } from "react";
 
-import { ManageStyleProvider } from "@/contexts/ManageStyleContext";
 import { OfferingStatusEnum, OfferingTypeEnum, type Service } from "../../../../@types/app";
 import Main from "../../../../components/Layout/Main";
 import LoadingText from "../../../../components/Utils/LoadingText";
@@ -42,7 +41,7 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
                     title={serviceQuery.error.message}
                     description={<Button linkProps={routes.datasheet_list({ datastoreId }).link}>Retour à mes données</Button>}
                 />
-            ) : (
+            ) : serviceQuery.data ? (
                 <>
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-4w")}>
                         <Button
@@ -88,9 +87,7 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
                     )}
 
                     {serviceQuery.data?.open === true ? (
-                        <ManageStyleProvider>
-                            <ServiceViewContent datastoreId={datastoreId} offeringId={offeringId} datasheetName={datasheetName} />
-                        </ManageStyleProvider>
+                        <ServiceViewContent datastoreId={datastoreId} offeringId={offeringId} datasheetName={datasheetName} />
                     ) : (
                         <div className={fr.cx("fr-grid-row", "fr-mb-4w")}>
                             <div className={fr.cx("fr-col")}>
@@ -99,7 +96,7 @@ const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetN
                         </div>
                     )}
                 </>
-            )}
+            ) : null}
         </Main>
     );
 };

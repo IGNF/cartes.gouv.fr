@@ -5,14 +5,23 @@ import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FC, useCallback, useMemo, useState } from "react";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { symToStr } from "tsafe/symToStr";
 import * as yup from "yup";
 
-import { MapStyleProvider } from "@/contexts/mapStyle";
+import { StyleFormProvider } from "@/contexts/StyleFormContext";
 import { useTableStyles } from "@/hooks/useTableStyles";
-import { ConfigurationTypeEnum, EndpointTypeEnum, type Service, type ServiceFormValuesBaseType, type VectorDb } from "../../../../@types/app";
+import { encodeKey, encodeKeys } from "@/utils";
+import {
+    ConfigurationTypeEnum,
+    EndpointTypeEnum,
+    OfferingTypeEnum,
+    StyleFormatEnum,
+    type Service,
+    type ServiceFormValuesBaseType,
+    type VectorDb,
+} from "../../../../@types/app";
 import Main from "../../../../components/Layout/Main";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../components/Utils/LoadingText";
@@ -33,7 +42,7 @@ import Description from "../metadata/Description";
 import UploadMDFile from "../metadata/UploadMDFile";
 import StyleLoader from "./StyleLoader";
 
-const createFormData = async (formValues: WmsVectorServiceFormValuesType) => {
+const createFormData = (formValues: WmsVectorServiceFormValuesType) => {
     const fd = new FormData();
 
     formValues.category?.forEach((c) => fd.append("category[]", c));
@@ -74,8 +83,10 @@ const createFormData = async (formValues: WmsVectorServiceFormValuesType) => {
 
     // filtrer en fonction des tables sélectionnées
     for (const tableName of formValues.selected_tables!) {
-        if (formValues?.style_files?.[tableName] !== undefined) {
-            const fileContent = formValues?.style_files?.[tableName];
+        const encodedTableName = encodeKey(tableName);
+        const fileContent = formValues?.style_files?.[encodedTableName];
+
+        if (fileContent !== undefined) {
             const blob = new Blob([fileContent]);
             const file = new File([blob], tableName);
             fd.set(`style_${tableName}`, file);
@@ -106,6 +117,7 @@ type WmsVectorServiceFormProps = {
     vectorDbId: string;
     offeringId?: string;
 };
+
 const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vectorDbId, offeringId }) => {
     const { t } = useTranslation("WmsVectorServiceForm");
     const { t: tCommon } = useTranslation("Common");
@@ -116,9 +128,9 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
     const queryClient = useQueryClient();
 
     const createServiceMutation = useMutation<Service, CartesApiException>({
-        mutationFn: async () => {
+        mutationFn: () => {
             const formValues = getFormValues();
-            const formData = await createFormData(formValues);
+            const formData = createFormData(formValues);
 
             return api.wmsVector.add(datastoreId, vectorDbId, formData);
         },
@@ -135,13 +147,13 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
     });
 
     const editServiceMutation = useMutation<Service, CartesApiException>({
-        mutationFn: async () => {
+        mutationFn: () => {
             if (offeringId === undefined) {
                 return Promise.reject();
             }
 
             const formValues = getFormValues();
-            const formData = await createFormData(formValues);
+            const formData = createFormData(formValues);
 
             return api.wmsVector.edit(datastoreId, vectorDbId, offeringId, formData);
         },
@@ -223,7 +235,8 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
 
             const styleFiles = {};
             selectedTableNamesList.forEach((tableName) => {
-                styleFiles[tableName] = yup.string().test({
+                const encodedKey = encodeKey(tableName);
+                styleFiles[encodedKey] = yup.string().test({
                     name: "is-valid-sld",
                     async test(value, ctx) {
                         return new SldStyleWmsVectorValidator().validate(tableName, value, ctx /*, offeringQuery.data*/);
@@ -251,7 +264,7 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
     } = useTableStyles(editMode, datastoreId, staticFilesQuery.data);
 
     const defaultValues: WmsVectorServiceFormValuesType = useMemo(
-        () => getWmsVectorServiceFormDefaultValues(offeringQuery.data, editMode, vectorDbQuery.data, metadataQuery.data, styles),
+        () => getWmsVectorServiceFormDefaultValues(offeringQuery.data, editMode, vectorDbQuery.data, metadataQuery.data, encodeKeys(styles ?? {})),
         [editMode, offeringQuery.data, vectorDbQuery.data, metadataQuery.data, styles]
     );
 
@@ -263,6 +276,18 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
     const { getValues: getFormValues, trigger, watch } = form;
 
     const selectedTableNamesList: string[] | undefined = watch("selected_tables", []);
+
+    const [styleFormats, setStyleFormats] = useState<Record<string, StyleFormatEnum>>({});
+    useEffect(() => {
+        // toujours SLD pour WMS Vector
+        if (selectedTableNamesList) {
+            const formats: Record<string, StyleFormatEnum> = {};
+            selectedTableNamesList.forEach((tableName) => {
+                formats[tableName] = StyleFormatEnum.SLD;
+            });
+            setStyleFormats(formats);
+        }
+    }, [selectedTableNamesList]);
 
     useScrollToTopEffect(currentStep);
 
@@ -334,9 +359,16 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
 
                     <TableSelection visible={currentStep === STEPS.TABLES_INFOS} vectorDb={vectorDbQuery.data} form={form} />
                     {currentStep === STEPS.STYLE_FILE && (
-                        <MapStyleProvider editMode={editMode} defaultTable={selectedTableNamesList?.[0] ?? ""}>
+                        <StyleFormProvider
+                            editMode={editMode}
+                            defaultTable={selectedTableNamesList?.sort()[0]}
+                            serviceType={OfferingTypeEnum.WMSVECTOR}
+                            isMapbox={false}
+                            styleFormats={styleFormats}
+                            setStyleFormats={setStyleFormats}
+                        >
                             <StyleLoader tableNames={selectedTableNamesList ?? []} form={form} />
-                        </MapStyleProvider>
+                        </StyleFormProvider>
                     )}
                     <UploadMDFile visible={currentStep === STEPS.METADATAS_UPLOAD} form={form} />
                     <Description visible={currentStep === STEPS.METADATAS_DESCRIPTION} form={form} editMode={editMode} />

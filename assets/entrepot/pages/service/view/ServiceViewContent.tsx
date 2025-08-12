@@ -1,18 +1,17 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import Tabs from "@codegouvfr/react-dsfr/Tabs";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { CartesStyle, OfferingTypeEnum, Service, StoredDataTypeEnum, TypeInfosWithBbox } from "@/@types/app";
-import RMap, { MapInitial } from "@/components/Utils/RMap";
-import { useManageStyle } from "@/contexts/ManageStyleContext";
+import RMap from "@/components/Utils/RMap";
 import api from "@/entrepot/api";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
 import getWebService from "@/modules/WebServices/WebServices";
-import { tss } from "tss-react";
-import ManageStyles from "./ManageStyles";
-import ServiceAndStylesShare from "./ServiceAndStylesShare";
-import StyleAddModifyForm from "./Style/StyleAddModifyForm";
+import BaseLayer from "ol/layer/Base";
+import ServiceShareInfo from "./ServiceShareInfo";
+import StylesList from "./Style/StylesList";
 
 type ServiceViewContent = {
     datastoreId: string;
@@ -31,99 +30,70 @@ function ServiceViewContent(props: ServiceViewContent) {
 
     const { data: service } = serviceQuery;
 
-    const { initialValues, setInitialValues, styleToAddOrEdit } = useManageStyle();
-
-    useEffect(() => {
-        (async function () {
-            if (!serviceQuery.data || serviceQuery.data?.open === false) return;
-
-            let initial: MapInitial = { type: serviceQuery.data.type, bbox: undefined, layers: [] };
-
-            const infos = serviceQuery.data.configuration.type_infos as TypeInfosWithBbox;
-            if (infos.bbox) {
-                initial = { ...initial, bbox: infos.bbox };
-            }
-
-            const styles = serviceQuery.data.configuration.styles;
-            const currentStyle = styles?.find((style) => style.current === true);
-            const layers = await getWebService(serviceQuery.data).getLayers();
-            initial = { ...initial, currentStyle, layers: layers ?? [] };
-            setInitialValues(initial);
-        })();
-    }, [serviceQuery.data, setInitialValues]);
-
     const canManageStyles =
         serviceQuery.data?.type === OfferingTypeEnum.WFS ||
         (serviceQuery.data?.type === OfferingTypeEnum.WMTSTMS && serviceQuery.data.configuration.pyramid?.type === StoredDataTypeEnum.ROK4PYRAMIDVECTOR);
 
-    const styles: CartesStyle[] = service?.configuration.styles ?? [];
-    const styleNames = Array.from(styles, (s) => s.name);
+    const [olLayers, setOlLayers] = useState<BaseLayer[]>([]);
+    useEffect(() => {
+        if (!service) return;
+        getWebService(service).getLayers().then(setOlLayers);
+    }, [service]);
 
-    const { classes, cx } = useStyles();
+    const currentStyle: CartesStyle | undefined = (service?.configuration.styles ?? []).find((style) => style.current);
 
     return (
         <>
-            <div className={cx(fr.cx("fr-grid-row"), classes.root)}>
-                <div className={cx(fr.cx("fr-col-12", "fr-col-md-8"), classes.column)}>
-                    <div className={cx(fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-text--lg"), classes.heading)}>
-                        <i className={cx(fr.cx("fr-mr-1v"), "ri-eye-line")} />
-                        <h2 className={fr.cx("fr-text--lg", "fr-m-0")}>{"Aperçu du style"}</h2>
-                    </div>
-
-                    <div className={classes.content}>{initialValues && <RMap initial={initialValues} />}</div>
+            <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
+                <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
+                    {serviceQuery.data && (
+                        <Tabs
+                            tabs={[
+                                {
+                                    label: "Service",
+                                    content: <ServiceShareInfo service={serviceQuery.data} />,
+                                },
+                                {
+                                    label: "Styles",
+                                    disabled: !canManageStyles,
+                                    content: canManageStyles && (
+                                        <StylesList
+                                            service={serviceQuery.data}
+                                            offeringId={offeringId}
+                                            datastoreId={datastoreId}
+                                            datasheetName={datasheetName}
+                                        />
+                                    ),
+                                },
+                            ]}
+                        />
+                    )}
                 </div>
-                <div className={cx(fr.cx("fr-col-12", "fr-col-md-4"), classes.column)}>
-                    <div className={cx(fr.cx("fr-grid-row", "fr-text--lg"), classes.heading)}>
-                        <i className={cx(fr.cx("fr-mr-1v"), "ri-palette-line")} />
-                        <h2 className={fr.cx("fr-text--lg", "fr-m-0")}>{"Styles"}</h2>
-                    </div>
-
-                    <div className={classes.content}>
-                        <ServiceAndStylesShare service={serviceQuery.data} />
-                        {canManageStyles && initialValues && (
-                            <ManageStyles
-                                initial={initialValues}
-                                service={serviceQuery.data}
-                                offeringId={offeringId}
-                                datastoreId={datastoreId}
-                                datasheetName={datasheetName}
-                            />
-                        )}
-                    </div>
+                <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
+                    {service && currentStyle && (
+                        <RMap
+                            layers={olLayers}
+                            currentStyle={currentStyle}
+                            type={service?.type}
+                            bbox={(service.configuration.type_infos as TypeInfosWithBbox).bbox}
+                        />
+                    )}
                 </div>
             </div>
-            <div className={fr.cx("fr-grid-row", "fr-mb-4w")}>
-                {service !== undefined && styleToAddOrEdit && (
-                    <StyleAddModifyForm
-                        key={styleToAddOrEdit.style_name || "add"}
-                        datastoreId={datastoreId}
-                        datasheetName={datasheetName}
-                        editMode={Boolean(styleToAddOrEdit.style_name)}
-                        service={service}
-                        style={styleToAddOrEdit}
-                        styleNames={styleNames}
-                    />
-                )}
-            </div>
+            {/* 
+            {service !== undefined && styleToAddOrEdit && (
+                <StyleAddModifyForm
+                    key={styleToAddOrEdit.style_name || "add"}
+                    datastoreId={datastoreId}
+                    datasheetName={datasheetName}
+                    editMode={Boolean(styleToAddOrEdit.style_name)}
+                    service={service}
+                    style={styleToAddOrEdit}
+                    styleNames={styleNames}
+                />
+            )} */}
         </>
     );
 }
 
 export default ServiceViewContent;
-
-const useStyles = tss.create(() => ({
-    root: {
-        borderRadius: "2px",
-        // border: `1px solid ${fr.colors.decisions.border.default.grey.default}`,
-    },
-    column: {
-        border: `1px solid ${fr.colors.decisions.border.default.grey.default}`,
-    },
-    heading: {
-        backgroundColor: fr.colors.decisions.background.contrast.grey.default,
-        padding: fr.spacing("2v"),
-    },
-    content: {
-        padding: fr.spacing("4v"),
-    },
-}));
