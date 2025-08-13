@@ -103,7 +103,7 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
     }
 
     #[Route('/{annexeId}/file', name: 'get_file_content', methods: ['GET'], requirements: ['annexeId' => Requirement::UUID_V4])]
-    public function getFileContent(string $datastoreId, string $annexeId, Request $request): Response
+    public function getFileContent(string $datastoreId, string $annexeId): Response
     {
         try {
             $fileContent = $this->annexeApiService->download($datastoreId, $annexeId);
