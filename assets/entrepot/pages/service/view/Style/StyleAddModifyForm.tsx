@@ -85,12 +85,16 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
     });
     const { data: service } = serviceQuery;
 
-    const styles: CartesStyle[] = service?.configuration.styles ?? [];
-    const styleNames = Array.from(styles, (s) => s.name);
-    const style: CartesStyle = styles.find((s) => s.name === styleName) ?? {
-        name: "",
-        layers: [],
-    };
+    const styles: CartesStyle[] = useMemo(() => service?.configuration.styles ?? [], [service]);
+    const styleNames = useMemo(() => Array.from(styles, (s) => s.name), [styles]);
+    const style: CartesStyle = useMemo(
+        () =>
+            styles.find((s) => s.name === styleName) ?? {
+                name: "",
+                layers: [],
+            },
+        [styles, styleName]
+    );
 
     const styleFilesQuery = useQueries({
         queries: style.layers.map<UseQueryOptions<string, CartesApiException>>((layer) => ({
@@ -130,6 +134,10 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
     useEffect(() => {
         setStyleFormats((prevFormats) => {
             return layerNames.reduce((acc, layerName) => {
+                if (acc[layerName] !== undefined) {
+                    return acc; // déjà défini
+                }
+
                 // recherche si le style existe déjà pour cette couche, sinon SLD comme format par défaut
                 const existingStyle = style.layers.find((l) => l.name === layerName);
                 const extension = getFileExtension(existingStyle?.url ?? "");
@@ -165,7 +173,7 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
 
     return (
         <Main title={editMode ? `Modifier le style ${style.name}` : "Ajouter un style"}>
-            {serviceQuery.isLoading ? (
+            {serviceQuery.isLoading || styleFilesQuery.loading ? (
                 <LoadingText />
             ) : serviceQuery.error ? (
                 <Alert

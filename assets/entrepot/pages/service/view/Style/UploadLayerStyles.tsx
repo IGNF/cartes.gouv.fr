@@ -117,7 +117,6 @@ const UploadLayerStyles: FC<UploadLayerStylesProps> = (props) => {
                     if (!cancelled) {
                         setCurrentStyle([
                             {
-                                // name: "mapbox",
                                 format: StyleFormatEnum.Mapbox,
                                 style: styleFiles?.["mapbox"],
                             },
@@ -128,7 +127,6 @@ const UploadLayerStyles: FC<UploadLayerStylesProps> = (props) => {
                     if (!cancelled) {
                         setCurrentStyle([
                             {
-                                // name: "mapbox",
                                 format: StyleFormatEnum.Mapbox,
                                 style: JSON.stringify(mbStyle),
                             },
@@ -214,6 +212,8 @@ const UploadLayerStyles: FC<UploadLayerStylesProps> = (props) => {
                     )}
 
                     {/* {JSON.stringify(currentStyle, null, 4).replace(/\\(.)/g, "$1")} */}
+
+                    {JSON.stringify(styleFormats, null, 4)}
                 </code>
             </pre>
         </>
