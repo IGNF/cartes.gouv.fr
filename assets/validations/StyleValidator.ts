@@ -10,11 +10,8 @@ class StyleValidator {
         this.service = service;
         this.format = format;
     }
-    async validate(value: string | undefined, ctx: TestContext): Promise<ValidationError | boolean> {
-        if (typeof value !== "string" || !value) {
-            return ctx.createError({ message: "no_file_provided" });
-        }
-
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async validate(_value: string | undefined, _ctx: TestContext): Promise<ValidationError | boolean> {
         return true;
     }
 }

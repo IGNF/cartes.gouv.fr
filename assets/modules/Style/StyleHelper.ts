@@ -7,62 +7,27 @@ import BaseLayer from "ol/layer/Base";
 import VectorLayer from "ol/layer/Vector";
 import VectorTileLayer from "ol/layer/VectorTile";
 import VectorSource from "ol/source/Vector";
-import { CartesStyle, GeostylerStyle, GeostylerStyles, StyleForm, StyleLayer } from "../../@types/app";
-import { getFileExtension } from "../../utils";
+
 import { isCarteStyle, mbParser, qgisParser, sldParser } from "@/utils/geostyler";
+import { CartesStyle, GeostylerStyle, GeostylerStyles, StyleLayer } from "../../@types/app";
+import { getFileExtension } from "../../utils";
 
 class StyleHelper {
-    // On verifie qu'il y a au moins un fichier de style a ajouter
-    static check(values: StyleForm): boolean {
-        let numFiles = 0;
-        for (const uuid in values.style_files) {
-            if (values.style_files[uuid].length) {
-                numFiles++;
-            }
-        }
-        return numFiles !== 0;
-    }
-
-    /**
-     * Retourne le style courant s'il existe
-     * @param Style[] styles
-     * @returns
-     */
-    static getCurrentStyle(styles: CartesStyle[] | undefined): CartesStyle | undefined {
-        if (styles === undefined) {
-            return undefined;
-        }
-
-        let style;
-        for (const s of styles) {
-            if ("current" in s || s.current === true) {
-                style = s;
-                break;
-            }
-        }
-        return style;
-    }
-
     static async applyStyle(layer: BaseLayer, currentStyle: CartesStyle | GeostylerStyles | undefined) {
         if (!currentStyle) return;
-        if (!StyleHelper.filterLayer(layer)) return;
-
-        // console.log("currentStyle", currentStyle);
+        if (!StyleHelper.#filterLayer(layer)) return;
 
         let style: GeostylerStyle | undefined;
         if (isCarteStyle(currentStyle)) {
-            style = await StyleHelper.getStyleFromUrl(layer, currentStyle);
+            style = await StyleHelper.#getStyleFromUrl(layer, currentStyle);
         } else {
-            style = await StyleHelper.#getGeoReadStyle(layer, currentStyle);
-            // console.log("here", style);
+            style = StyleHelper.#getGeoReadStyle(layer, currentStyle);
         }
-        if (style) {
+        if (style?.style) {
             const readStyle = await StyleHelper.#getReadStyle(style);
-            // console.log("readStyle", readStyle);
 
             if (readStyle) {
                 const olStyle = await StyleHelper.#getOlStyle(readStyle);
-                // console.log("olStyle", olStyle);
                 if (olStyle) {
                     layer.setStyle(olStyle);
                 }
@@ -70,7 +35,7 @@ class StyleHelper {
         }
     }
 
-    static filterLayer(layer: BaseLayer): layer is VectorLayer<VectorSource<Feature<Geometry>>> | VectorTileLayer {
+    static #filterLayer(layer: BaseLayer): layer is VectorLayer<VectorSource<Feature<Geometry>>> | VectorTileLayer {
         return layer instanceof VectorLayer || layer instanceof VectorTileLayer;
     }
 
@@ -86,22 +51,19 @@ class StyleHelper {
         }
     }
 
-    static async #getGeoReadStyle(
-        layer: VectorLayer<VectorSource<Feature<Geometry>>> | VectorTileLayer,
-        currentStyle: GeostylerStyles
-    ): Promise<GeostylerStyle | undefined> {
+    static #getGeoReadStyle(layer: VectorLayer<VectorSource<Feature<Geometry>>> | VectorTileLayer, currentStyle: GeostylerStyles): GeostylerStyle | undefined {
         const nameMandatory = layer instanceof VectorLayer ? true : false;
-        for (const { name, style, format } of currentStyle) {
-            if (nameMandatory && layer.get("name") === name) {
-                return { name, style, format };
-            } else {
-                // TODO: What should we do in that case ?
-                return { style, format };
-            }
+
+        if (nameMandatory) {
+            const style = currentStyle.find((s) => s.name === (layer.get("name") as string));
+            return style ? { name: style.name, style: style.style, format: style.format } : undefined;
+        } else {
+            const style = currentStyle[0];
+            return style ? { style: style.style, format: style.format } : undefined;
         }
     }
 
-    static async getStyleFromUrl(
+    static async #getStyleFromUrl(
         layer: VectorLayer<VectorSource<Feature<Geometry>>> | VectorTileLayer,
         currentStyle: CartesStyle
     ): Promise<GeostylerStyle | undefined> {

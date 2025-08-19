@@ -56,6 +56,7 @@ class TMSService extends BaseService {
             properties: {
                 title: infos.title,
                 abstract: metadatas.description,
+                name: metadatas.name,
             },
         });
         layers.push(layer);

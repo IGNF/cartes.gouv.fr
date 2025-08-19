@@ -15,7 +15,8 @@ use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
@@ -30,20 +31,30 @@ use Symfony\Component\Uid\Uuid;
 #[OA\Tag(name: '[cartes.gouv.fr] styles', description: 'Stockage des fichiers de styles en tant qu\'annexes')]
 class StyleController extends AbstractController implements ApiControllerInterface
 {
+    private string $varDataPath;
+
     public function __construct(
         private DatastoreApiService $datastoreApiService,
         private ConfigurationApiService $configurationApiService,
         private AnnexeApiService $annexeApiService,
         private CartesMetadataApiService $cartesMetadataApiService,
         private CartesStylesApiService $cartesStylesApiService,
+        private Filesystem $fs,
+        ParameterBagInterface $parameters,
     ) {
+        $this->varDataPath = $parameters->get('style_files_path');
     }
 
     #[Route('/{offeringId}/add', name: 'add', methods: ['POST'])]
     public function add(string $datastoreId, string $offeringId, Request $request): JsonResponse
     {
         try {
-            $styleName = $request->request->get('style_name');
+            $data = json_decode($request->getContent(), true);
+
+            $styleName = $data['style_name'];
+
+            /** @var array<string,mixed> */
+            $styleFiles = $data['style_files'];
 
             $datastore = $this->datastoreApiService->get($datastoreId);
             $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId);
@@ -61,18 +72,19 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             // Creation du nouveau style
             $newStyle = ['name' => $styleName, 'current' => true, 'layers' => []];
 
-            $files = $request->files->all();
-            foreach ($files['style_files'] as $layer => $file) {
-                $annexe = $this->_addFile($datastoreId, $datasheetName, $file);
-                if ('no_layer' === $layer) {
-                    $newStyle['layers'][] = ['annexe_id' => $annexe['_id']];
+            foreach ($styleFiles as $layerName => $layer) {
+                $annexe = $this->addStyleAnnexe($datastoreId, $datasheetName, $layer['style'], $layer['format']);
+                $annexeUrl = $this->getAnnexeUrl($datastore, $annexe);
+
+                if ('mapbox' === $layerName) {
+                    $newStyle['layers'][] = ['annexe_id' => $annexe['_id'], 'url' => $annexeUrl];
                 } else {
-                    $newStyle['layers'][] = ['name' => $layer, 'annexe_id' => $annexe['_id']];
+                    $newStyle['layers'][] = ['name' => $layerName, 'annexe_id' => $annexe['_id'], 'url' => $annexeUrl];
                 }
             }
 
             $styles[] = $newStyle;
-            $this->_addUrls($datastore, $styles);
+            // $this->addAbsoluteUrls($datastore, $styles);
 
             $this->updateStyles($datastoreId, $configuration['_id'], $styles);
             $this->updateStylesTmsMetadata($datastoreId, $configuration, $offeringId, $styles);
@@ -88,6 +100,11 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
     }
+
+    // #[Route('/{offeringId}/modify', name: 'modify', methods: ['POST'])]
+    // public function modify(string $datastoreId, string $offeringId, Request $request): JsonResponse {
+
+    // }
 
     #[Route('/{offeringId}/remove', name: 'remove', methods: ['POST'])]
     public function remove(string $datastoreId, string $offeringId, Request $request): JsonResponse
@@ -186,46 +203,54 @@ class StyleController extends AbstractController implements ApiControllerInterfa
         }
     }
 
-    /**
-     * Ajout des urls des annexes.
-     *
-     * @param array<mixed> $datastore
-     * @param array<mixed> $styles
-     *
-     * @return void
-     */
-    private function _addUrls($datastore, &$styles)
-    {
-        $annexeUrl = $this->getParameter('annexes_url');
+    // /**
+    //  * Ajout des urls des annexes.
+    //  *
+    //  * @param array<mixed> $datastore
+    //  * @param array<mixed> $styles
+    //  *
+    //  * @return void
+    //  */
+    // private function addAbsoluteUrls($datastore, &$styles)
+    // {
+    //     $annexeUrl = $this->getParameter('annexes_url');
 
-        foreach ($styles as &$style) {
-            foreach ($style['layers'] as &$layer) {
-                $annexe = $this->annexeApiService->get($datastore['_id'], $layer['annexe_id']);
-                $layer['url'] = $annexeUrl.'/'.$datastore['technical_name'].$annexe['paths'][0];
-            }
-        }
+    //     foreach ($styles as &$style) {
+    //         foreach ($style['layers'] as &$layer) {
+    //             $annexe = $this->annexeApiService->get($datastore['_id'], $layer['annexe_id']);
+    //             $layer['url'] = $annexeUrl.'/'.$datastore['technical_name'].$annexe['paths'][0];
+    //         }
+    //     }
+    // }
+
+    /**
+     * @param array<mixed> $datastore
+     * @param array<mixed> $annexe
+     */
+    private function getAnnexeUrl(array $datastore, array $annexe): string
+    {
+        return $this->getParameter('annexes_url').'/'.$datastore['technical_name'].$annexe['paths'][0];
     }
 
     /**
      * Ajout d'un fichier de style sous forme d'annexe.
-     *
-     * @param string       $datastoreId
-     * @param string       $datasheetName
-     * @param UploadedFile $file
      */
-    private function _addFile($datastoreId, $datasheetName, $file): array
+    private function addStyleAnnexe(string $datastoreId, string $datasheetName, string $content, string $extension): array
     {
         $uuid = Uuid::v4();
 
-        $extension = $file->getClientOriginalExtension();
-        $path = join('/', ['style', "$uuid.$extension"]);
+        $filePath = join('/', [$this->varDataPath, $uuid, "$uuid.$extension"]);
+        $this->fs->mkdir(dirname($filePath));
+        $this->fs->dumpFile($filePath, $content);
+
+        $annexePath = join('/', ['style', "$uuid.$extension"]);
 
         $labels = [
             CommonTags::DATASHEET_NAME.'='.$datasheetName,
             'type=style',
         ];
 
-        return $this->annexeApiService->add($datastoreId, $file->getRealPath(), [$path], $labels);
+        return $this->annexeApiService->add($datastoreId, $filePath, [$annexePath], $labels);
     }
 
     /**

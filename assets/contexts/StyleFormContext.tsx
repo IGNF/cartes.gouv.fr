@@ -1,14 +1,6 @@
-import { createContext, Dispatch, PropsWithChildren, SetStateAction, useContext, useState } from "react";
+import { createContext, Dispatch, PropsWithChildren, SetStateAction, useContext, useEffect, useState } from "react";
 
-import { OfferingTypeEnum, StyleFormat, StyleFormatEnum } from "@/@types/app";
-
-export type StyleFormLayerType = {
-    realName: string;
-    uuid: string;
-    uploadFormat?: StyleFormat;
-};
-
-export type StyleFormLayers = Record<string, StyleFormLayerType>;
+import { OfferingTypeEnum, StyleFormatEnum } from "@/@types/app";
 
 export interface StyleFormContext {
     editMode: boolean;
@@ -63,6 +55,12 @@ export function StyleFormProvider(props: PropsWithChildren<StyleFormProviderProp
     } = props;
 
     const [currentTable, setCurrentTable] = useState(defaultTable);
+
+    useEffect(() => {
+        if (defaultTable) {
+            setCurrentTable(defaultTable);
+        }
+    }, [defaultTable]);
 
     const isTms = serviceType === OfferingTypeEnum.WMTSTMS;
 

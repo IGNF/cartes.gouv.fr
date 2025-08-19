@@ -4,26 +4,47 @@ import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useQueries, useQuery, UseQueryOptions } from "@tanstack/react-query";
+import { useMutation, useQueries, useQuery, UseQueryOptions } from "@tanstack/react-query";
 import { StyleParser } from "geostyler-style";
 import { FC, useEffect, useMemo, useState } from "react";
 import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
 import * as yup from "yup";
 
 import Main from "@/components/Layout/Main";
+import LoadingIcon from "@/components/Utils/LoadingIcon";
 import LoadingText from "@/components/Utils/LoadingText";
+import Wait from "@/components/Utils/Wait";
 import { StyleFormProvider } from "@/contexts/StyleFormContext";
+import TMSStyleTools from "@/modules/Style/TMSStyleFilesManager/TMSStyleTools";
 import { routes } from "@/router/router";
-import { encodeKey, encodeKeys, getFileExtension } from "@/utils";
+import { decodeKeys, encodeKey, encodeKeys, getFileExtension } from "@/utils";
 import { mbParser, qgisParser, sldParser } from "@/utils/geostyler";
 import { CartesStyle, OfferingTypeEnum, Service, StyleFormatEnum } from "../../../../../@types/app";
-// import { useTranslation } from "../../../../../i18n/i18n";
+import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../../modules/jsonFetch";
 import getWebService from "../../../../../modules/WebServices/WebServices";
 import validations from "../../../../../validations";
 import api from "../../../../api";
 import UploadLayerStyles from "./UploadLayerStyles";
+
+const tmsStyleTools = new TMSStyleTools();
+
+type StyleAddModifyFormType = {
+    style_name: string;
+    style_files: Record<string, string>;
+};
+
+type StyleAddModifyPostDataType = {
+    style_name: string;
+    style_files: Record<
+        keyof StyleAddModifyFormType["style_files"],
+        {
+            style: string;
+            format: StyleFormatEnum;
+        }
+    >;
+};
 
 type StyleAddModifyFormProps = {
     datastoreId: string;
@@ -36,9 +57,9 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
     const { datastoreId, datasheetName, offeringId, styleName } = props;
 
     // const { t } = useTranslation("Style");
-    // const { t: tCommon } = useTranslation("Common");
+    const { t: tCommon } = useTranslation("Common");
 
-    const schema = yup.object().shape({
+    const schema: yup.ObjectSchema<StyleAddModifyFormType> = yup.object().shape({
         style_name: yup
             .string()
             .required("Le nom du style est obligatoire.")
@@ -52,6 +73,7 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
                     acc[encodedKey] = yup
                         .string()
                         .transform((value) => value.trim())
+                        .required(`Aucun style n'est renseigné pour la couche ${layerName}`)
                         .test({
                             name: "is-valid",
                             async test(value, ctx) {
@@ -66,15 +88,16 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
                                 return validations.getValidator(service, format).validate(value, ctx);
                             },
                         });
+
+                    if (layerName === "mapbox") {
+                        acc[encodedKey] = acc[encodedKey].required("Le fichier de style Mapbox est obligatoire");
+                    }
+
                     return acc;
                 }, {})
             )
         ),
     });
-    type StyleAddModifyFormType = yup.InferType<typeof schema>;
-    // & {
-    //     style_files: Record<string, string>;
-    // };
 
     const editMode: boolean = Boolean(styleName);
 
@@ -167,9 +190,67 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
         handleSubmit,
     } = form;
 
-    const onValid: SubmitHandler<StyleAddModifyFormType> = (data) => {
-        console.log(data);
+    const onValid: SubmitHandler<StyleAddModifyFormType> = async (data) => {
+        if (!service) return;
+
+        data["style_files"] = decodeKeys(data.style_files);
+
+        const values: StyleAddModifyPostDataType = {
+            style_name: data.style_name,
+            style_files: {},
+        };
+
+        switch (service.type) {
+            case OfferingTypeEnum.WMTSTMS:
+                if (isMapbox) {
+                    const mbStyle = tmsStyleTools.buildMbStyle(service, data["style_files"]["mapbox"]);
+                    values.style_files["mapbox"] = {
+                        style: JSON.stringify(mbStyle),
+                        format: StyleFormatEnum.Mapbox,
+                    };
+                } else {
+                    const mbStyle = await tmsStyleTools.getMbStyleFromSLDQML(service, layerNames, data["style_files"] ?? {}, styleFormats ?? {});
+                    values.style_files["mapbox"] = {
+                        style: JSON.stringify(mbStyle),
+                        format: StyleFormatEnum.Mapbox,
+                    };
+                }
+                break;
+
+            case OfferingTypeEnum.WFS:
+                values.style_files = Object.fromEntries(
+                    Object.entries(data.style_files)
+                        .filter(([, value]) => value !== "")
+                        .map(([key, value]) => [
+                            key,
+                            {
+                                style: value,
+                                format: styleFormats[key] ?? StyleFormatEnum.SLD,
+                            },
+                        ])
+                );
+                break;
+            default:
+                throw new Error(`Type de service non-supporté : ${service.type}`);
+        }
+        console.log("data", data);
+        console.log("values", values);
+
+        addModifyMutation.mutate(values);
     };
+
+    const addModifyMutation = useMutation({
+        mutationFn: (data: StyleAddModifyPostDataType) => {
+            if (!service) return Promise.reject(null);
+
+            return api.style.add(datastoreId, offeringId, data);
+        },
+        onSuccess: () => {
+            // routes.datastore_service_view({ datastoreId, datasheetName, offeringId }).push();
+            // TODO invalidate queries if needed
+            // TODO set query data
+        },
+    });
 
     return (
         <Main title={editMode ? `Modifier le style ${style.name}` : "Ajouter un style"}>
@@ -200,14 +281,10 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
                         )}
                     </div>
 
+                    {addModifyMutation.error && <Alert closable description={addModifyMutation.error.message} severity="error" title={tCommon("error")} />}
+
                     <div className={fr.cx("fr-grid-row")}>
                         <div className={fr.cx("fr-col-12")}>
-                            {/* {(isPending || updateIsPending) && (
-                                    <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-2w")}>
-                                        <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " frx-icon-spin"} />
-                                        <h6 className={fr.cx("fr-m-0")}>{isPending ? tCommon("adding") : tCommon("modifying")}</h6>
-                                    </div>
-                                )} */}
                             <h2 className={fr.cx("fr-m-0")}>Nom du style</h2>
                             <Input
                                 label={"Nom"}
@@ -232,15 +309,6 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
                                     </FormProvider>
                                 )}
                             </StyleFormProvider>
-
-                            <div>
-                                layerNames:
-                                <ul>
-                                    {layerNames.map((name) => (
-                                        <li key={name}>{name}</li>
-                                    ))}
-                                </ul>
-                            </div>
                         </div>
 
                         <Button
@@ -256,6 +324,21 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
                     </div>
                 </>
             ) : null}
+
+            {addModifyMutation.isPending && (
+                <Wait>
+                    <div className={fr.cx("fr-container")}>
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
+                            <div className={fr.cx("fr-col-2")}>
+                                <LoadingIcon largeIcon={true} />
+                            </div>
+                            <div className={fr.cx("fr-col-10")}>
+                                <h6 className={fr.cx("fr-h6", "fr-m-0")}>{editMode ? tCommon("modifying") : tCommon("adding")}</h6>
+                            </div>
+                        </div>
+                    </div>
+                </Wait>
+            )}
         </Main>
     );
 };

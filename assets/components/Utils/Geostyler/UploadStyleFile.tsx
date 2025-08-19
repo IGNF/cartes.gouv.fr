@@ -1,17 +1,18 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { Upload } from "@codegouvfr/react-dsfr/Upload";
 import { Divider } from "@mui/material";
 import { type Style as GsStyle, ReadStyleResult, StyleParser } from "geostyler-style";
 import { FC, useEffect, useState } from "react";
 
+import { StyleFormatEnum } from "@/@types/app";
 import GeostylerEditor from "@/components/Utils/Geostyler/GeostylerEditor";
 import { useStyleForm } from "@/contexts/StyleFormContext";
 import { useTranslation } from "@/i18n";
 import { getFileExtension } from "@/utils";
 import { getParserForExtension, sldParser } from "@/utils/geostyler";
 import ConfirmDialog, { ConfirmDialogModal } from "../ConfirmDialog";
-import { StyleFormatEnum } from "@/@types/app";
 
 type UploadStyleFileProps = {
     onChange: (value?: string) => void;
@@ -59,6 +60,8 @@ const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
     const [gsStyle, setGsStyle] = useState<GsStyle>();
     const [strStyle, setStrStyle] = useState<string>();
 
+    const [uploadError, setUploadError] = useState<string | undefined>(undefined);
+
     useEffect(() => {
         onChange(strStyle);
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -100,12 +103,14 @@ const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
     }
 
     async function handleUpload(event: React.ChangeEvent<HTMLInputElement>) {
+        setUploadError(undefined);
+
         if (event.target.files?.[0]) {
             // lecture du contenu du fichier
             const file = event.target.files[0];
             const extension = getFileExtension(file.name)?.toLowerCase() ?? "";
             if (!acceptedFileExtensions.includes(extension)) {
-                console.warn("Unsupported file extension:", extension);
+                setUploadError("Extension de fichier non supportée : " + extension);
                 return;
             }
 
@@ -131,7 +136,7 @@ const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
                 content = (await parser.writeStyle(gsStyle)).output;
                 setStrStyle(extension === "json" ? JSON.stringify(content) : content);
             } else {
-                console.error("Failed to parse style:", gsStyleResult.errors);
+                setUploadError("Lecture du fichier de style échouée : " + gsStyleResult.errors?.join(", "));
             }
         }
     }
@@ -149,42 +154,52 @@ const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
         parser
             .writeStyle(defaultStyle)
             .then((result) => (typeof result.output === "object" ? JSON.stringify(result.output) : result.output))
-            .then((content) => setStrStyle(styleFormats[currentTable] === StyleFormatEnum.Mapbox ? JSON.stringify(content) : content));
+            .then((content) => setStrStyle(content));
+
+        setUploadError(undefined);
     };
 
     const handleRemoveStyle = () => {
         setGsStyle(undefined);
         setStrStyle(undefined);
+        setUploadError(undefined);
     };
 
-    return gsStyle ? (
-        <div>
-            <div className={fr.cx("fr-grid-row", "fr-grid-row--right")}>
-                <Button priority={"tertiary"} iconId="fr-icon-delete-line" onClick={ConfirmDialogModal.open}>
-                    {t("remove_style")}
-                </Button>
-            </div>
-            <GeostylerEditor defaultParser={parser} onChange={handleStyleChange} parsers={parsers} value={gsStyle} />
-            <ConfirmDialog title={t("remove_style")} noTitle={tCommon("cancel")} yesTitle={tCommon("delete")} onConfirm={handleRemoveStyle}>
-                {<p>{t("remove_style_confirm_message", { layer: currentTable })}</p>}
-            </ConfirmDialog>
-        </div>
-    ) : (
-        <div className={fr.cx("fr-my-2w")}>
-            <Upload
-                label={t("file_input_title")}
-                className={fr.cx("fr-input-group", "fr-mb-2w")}
-                hint={t("file_input_hint", { acceptedFileExtensions })}
-                nativeInputProps={{
-                    accept: acceptedFileExtensions.map((ext) => "." + ext).join(","),
-                    onChange: handleUpload,
-                }}
-            />
-            <Divider>{t("or")}</Divider>
-            <Button priority={"tertiary"} onClick={handleCreateEmptyStyle}>
-                {t("create_style")}
-            </Button>
-        </div>
+    return (
+        <>
+            {uploadError && (
+                <Alert severity="error" title={"Erreur de chargement de style"} description={uploadError} onClose={() => setUploadError(undefined)} />
+            )}
+            {gsStyle ? (
+                <div>
+                    <div className={fr.cx("fr-grid-row", "fr-grid-row--right")}>
+                        <Button priority={"tertiary"} iconId="fr-icon-delete-line" onClick={ConfirmDialogModal.open}>
+                            {t("remove_style")}
+                        </Button>
+                    </div>
+                    <GeostylerEditor defaultParser={parser} onChange={handleStyleChange} parsers={parsers} value={gsStyle} />
+                    <ConfirmDialog title={t("remove_style")} noTitle={tCommon("cancel")} yesTitle={tCommon("delete")} onConfirm={handleRemoveStyle}>
+                        {<p>{t("remove_style_confirm_message", { layer: currentTable })}</p>}
+                    </ConfirmDialog>
+                </div>
+            ) : (
+                <div className={fr.cx("fr-my-2w")}>
+                    <Upload
+                        label={t("file_input_title")}
+                        className={fr.cx("fr-input-group", "fr-mb-2w")}
+                        hint={t("file_input_hint", { acceptedFileExtensions })}
+                        nativeInputProps={{
+                            accept: acceptedFileExtensions.map((ext) => "." + ext).join(","),
+                            onChange: handleUpload,
+                        }}
+                    />
+                    <Divider>{t("or")}</Divider>
+                    <Button priority={"tertiary"} onClick={handleCreateEmptyStyle}>
+                        {t("create_style")}
+                    </Button>
+                </div>
+            )}
+        </>
     );
 };
 

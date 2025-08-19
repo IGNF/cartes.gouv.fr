@@ -27,7 +27,7 @@ import "geopf-extensions-openlayers/css/Dsfr.css";
 import "../../sass/components/geopf-ext-ol-custom.scss";
 import "../../sass/components/map-view.scss";
 
-export function getWorkingLayers(layers: BaseLayer[]): BaseLayer[] {
+function getWorkingLayers(layers: BaseLayer[]): BaseLayer[] {
     return layers.filter((l) => l.get("name") !== olDefaults.default_background_layer);
 }
 
