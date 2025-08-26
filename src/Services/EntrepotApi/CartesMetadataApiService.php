@@ -341,7 +341,13 @@ class CartesMetadataApiService
                         $endpoints = array_values($endpoints);
 
                         if (count($endpoints) > 0) {
-                            $layers[] = new CswMetadataLayer($layerName, $gmdOnlineResourceProtocol, $endpoints[0]['url'], $offering['_id'], $offering['open']);
+                            $endpointUrl = $endpoints[0]['url'];
+                            if ('TMS' === $actualType) {
+                                $endpointUrl = $endpointUrl.'/1.0.0';
+                                // la version 1.0.0 du TMS est aussi écrite en dur
+                                // dans le composant UserKeyLink pour créer une URL de 'capabilities'
+                            }
+                            $layers[] = new CswMetadataLayer($layerName, $gmdOnlineResourceProtocol, $endpointUrl, $offering['_id'], $offering['open']);
                         }
 
                         break;
