@@ -13,7 +13,6 @@ const DEFAULT_LANGUAGE = { language: "français", code: "fre" };
 const DEFAULT_RESTRICTION = "no_restriction";
 const DEFAULT_OPEN_LICENSE_NAME = "Licence Ouverte / Open License (compatible ODC-BY, CC-BY 2.0)";
 const DEFAULT_OPEN_LICENSE_LINK = "https://www.etalab.gouv.fr/wp-content/uploads/2018/11/open-licence.pdf";
-const DEFAULT_CONSTRAINT = [{ code: "otherRestrictions", name: "", link: "" }];
 
 export const getEndpointSuffix = (endpointType: EndpointTypeEnum | string) => {
     switch (endpointType) {
@@ -57,10 +56,11 @@ const getMetadataFormDefaultValues = (metadata?: Metadata): MetadataFormValuesTy
         restriction: metadata?.csw_metadata?.restriction ?? DEFAULT_RESTRICTION,
         open_license_name: metadata?.csw_metadata?.open_license_name ?? DEFAULT_OPEN_LICENSE_NAME,
         open_license_link: metadata?.csw_metadata?.open_license_link ?? DEFAULT_OPEN_LICENSE_LINK,
-        inspire_access_constraints: metadata?.csw_metadata?.inspire_access_constraints ?? DEFAULT_CONSTRAINT,
-        inspire_use_constraints: metadata?.csw_metadata?.inspire_use_constraints ?? DEFAULT_CONSTRAINT,
-        other_access_constraints: metadata?.csw_metadata?.other_access_constraints ?? DEFAULT_CONSTRAINT,
-        other_use_constraints: metadata?.csw_metadata?.other_use_constraints ?? DEFAULT_CONSTRAINT,
+        inspire_license: metadata?.csw_metadata?.inspire_license ?? null,
+        inspire_access_constraints: metadata?.csw_metadata?.inspire_access_constraints,
+        inspire_use_constraints: metadata?.csw_metadata?.inspire_use_constraints,
+        other_access_constraints: metadata?.csw_metadata?.other_access_constraints,
+        other_use_constraints: metadata?.csw_metadata?.other_use_constraints,
     };
 };
 

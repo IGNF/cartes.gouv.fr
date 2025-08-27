@@ -10,6 +10,7 @@ import AutocompleteSelect from "../../../../components/Input/AutocompleteSelect"
 import MarkdownEditor from "../../../../components/Input/MarkdownEditor";
 import frequencyCodes from "../../../../data/maintenance_frequency.json";
 import inspireLicense from "../../../../data/inspire_license.json";
+import restrictionCodes from "../../../../data/restriction_code.json";
 import { useTranslation } from "../../../../i18n/i18n";
 import { getInspireKeywords, getThematicCategories, regex } from "../../../../utils";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
@@ -78,51 +79,18 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
 
     const restrictionValue = watch("restriction");
 
-    const {
-        fields: inspireAccessConstraints,
-        append: appendInspireAccessConstraint,
-        remove: removeInspireAccessConstraint,
-    } = useFieldArray({ control, name: "inspire_access_constraints" });
+    function useFieldArrayConstraint(control, name: string) {
+        const { fields, append, remove } = useFieldArray({ control, name });
 
-    const {
-        fields: otherAccessConstraints,
-        append: appendOtherAccessConstraint,
-        remove: removeOtherAccessConstraint,
-    } = useFieldArray({ control, name: "inspire_use_constraints" });
+        const add = () => append({ code: "otherRestrictions", name: "", link: "" });
 
-    const {
-        fields: inspireUseConstraints,
-        append: appendInspireUseConstraint,
-        remove: removeInspireUseConstraint,
-    } = useFieldArray({ control, name: "other_access_constraints" });
+        return { fields, add, remove };
+    }
 
-    const {
-        fields: otherUseConstraints,
-        append: appendOtherUseConstraint,
-        remove: removeOtherUseConstraint,
-    } = useFieldArray({ control, name: "other_use_constraints" });
-
-    const addInspireAccessConstraint = () => {
-        appendInspireAccessConstraint({ code: "", name: "", link: "" });
-    };
-
-    const addOtherAccessConstraint = () => {
-        appendOtherAccessConstraint({ code: "", name: "", link: "" });
-    };
-
-    const addInspireUseConstraint = () => {
-        appendInspireUseConstraint({ code: "", name: "", link: "" });
-    };
-
-    const addOtherUseConstraint = () => {
-        appendOtherUseConstraint({ code: "", name: "", link: "" });
-    };
-
-    const inspireOptions = Object.entries(inspireLicense).map(([id, { text, link }]) => ({
-        id,
-        text,
-        link,
-    }));
+    const inspireAccess = useFieldArrayConstraint(control, "inspire_access_constraints");
+    const otherAccess = useFieldArrayConstraint(control, "other_access_constraints");
+    const inspireUse = useFieldArrayConstraint(control, "inspire_use_constraints");
+    const otherUse = useFieldArrayConstraint(control, "other_use_constraints");
 
     console.log(form.getValues());
     console.log(form.formState.errors);
@@ -337,34 +305,56 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
                 </>
             ) : restrictionValue === "inspire_directive" ? (
                 <>
-                    <p>{t("metadata.description_form.inspire_restriction_type")}</p>
-                    <RadioButtons
-                        options={inspireOptions.map((license) => ({
+                    <Controller
+                        name="inspire_license"
+                        control={control}
+                        render={({ field }) => (
+                            <RadioButtons
+                                legend={t("metadata.description_form.inspire_restriction_type")}
+                                options={inspireLicense.map((license) => ({
+                                    hintText: license.id,
+                                    label: license.text,
+                                    nativeInputProps: {
+                                        checked: field.value?.id === license.id,
+                                        onChange: () => field.onChange(license),
+                                        name: field.name,
+                                    },
+                                }))}
+                                orientation="horizontal"
+                                state={errors.inspire_license ? "error" : "default"}
+                                stateRelatedMessage={errors?.inspire_license?.message?.toString()}
+                            />
+                        )}
+                    />
+                    {/* <RadioButtons
+                        legend={t("metadata.description_form.inspire_restriction_type")}
+                        options={inspireLicense.map((license) => ({
+                            
                             label: license.text,
                             nativeInputProps: {
-                                ...register("inspire_license_id"),
-                                value: license.id,
+                                ...register("inspire_license"),
+                                value: JSON.stringify({ id: license.id, link: license.link }),
                             },
                         }))}
-                    />
+                        orientation="horizontal"
+                        state={errors.inspire_license ? "error" : "default"}
+                        stateRelatedMessage={errors?.inspire_license?.message?.toString()}
+                    /> */}
                     <p>{t("metadata.description_form.additional_access_constraints")}</p>
-                    {inspireAccessConstraints.map((_, index) => (
+                    {inspireAccess.fields.map((_, index) => (
                         <div key={`access-${index}`} className={fr.cx("fr-mb-3v")} style={{ border: "1px solid grey", padding: "1rem" }}>
-                            <Button className={fr.cx("fr-btn--close", "fr-btn")} onClick={() => removeInspireAccessConstraint(index)}>
+                            <Button className={fr.cx("fr-btn--close", "fr-btn")} onClick={() => inspireAccess.remove(index)}>
                                 Supprimer
                             </Button>
                             <Select
                                 label={t("metadata.description_form.access_restriction_code")}
                                 nativeSelectProps={register(`inspire_access_constraints.${index}.code`)}
                             >
-                                <option value="otherRestrictions">otherRestrictions</option>
-                                <option value="copyright">copyright</option>
-                                <option value="patent">patent</option>
-                                <option value="patentPending">patentPending</option>
-                                <option value="trademark">trademark</option>
-                                <option value="license">license</option>
-                                <option value="intellectualPropertyRights">intellectualPropertyRights</option>
-                                <option value="restricted">restricted</option>
+                                {restrictionCodes.map((option) => (
+                                    <option key={option} value={option}>
+                                        {option}
+                                    </option>
+                                ))}
                             </Select>
                             <Input
                                 label={t("metadata.description_form.access_constraint_name")}
@@ -376,27 +366,24 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
                             />
                         </div>
                     ))}
-                    <Button iconId={"fr-icon-add-line"} priority="secondary" onClick={addInspireAccessConstraint} className={fr.cx("fr-mb-6v")}>
+                    <Button iconId={"fr-icon-add-line"} priority="secondary" onClick={inspireAccess.add} className={fr.cx("fr-mb-6v")}>
                         {t("metadata.description_form.add_access_constraint")}
                     </Button>
                     <p>{t("metadata.description_form.additional_use_constraints")}</p>
-                    {inspireUseConstraints.map((_, index) => (
+                    {inspireUse.fields.map((_, index) => (
                         <div key={`use-${index}`} className={fr.cx("fr-mb-3v")} style={{ border: "1px solid grey", padding: "1rem" }}>
-                            <Button className={fr.cx("fr-btn--close", "fr-btn")} onClick={() => removeInspireUseConstraint(index)}>
+                            <Button className={fr.cx("fr-btn--close", "fr-btn")} onClick={() => inspireUse.remove(index)}>
                                 Supprimer
                             </Button>
                             <Select
                                 label={t("metadata.description_form.use_restriction_code")}
                                 nativeSelectProps={register(`inspire_use_constraints.${index}.code`)}
                             >
-                                <option value="otherRestrictions">otherRestrictions</option>
-                                <option value="copyright">copyright</option>
-                                <option value="patent">patent</option>
-                                <option value="patentPending">patentPending</option>
-                                <option value="trademark">trademark</option>
-                                <option value="license">license</option>
-                                <option value="intellectualPropertyRights">intellectualPropertyRights</option>
-                                <option value="restricted">restricted</option>
+                                {restrictionCodes.map((option) => (
+                                    <option key={option} value={option}>
+                                        {option}
+                                    </option>
+                                ))}
                             </Select>
                             <Input
                                 label={t("metadata.description_form.use_constraint_name")}
@@ -408,30 +395,27 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
                             />
                         </div>
                     ))}
-                    <Button iconId={"fr-icon-add-line"} priority="secondary" onClick={addInspireUseConstraint} className={fr.cx("fr-mb-6v")}>
+                    <Button iconId={"fr-icon-add-line"} priority="secondary" onClick={inspireUse.add} className={fr.cx("fr-mb-6v")}>
                         {t("metadata.description_form.add_use_constraint")}
                     </Button>
                 </>
             ) : restrictionValue === "other_conditions" ? (
                 <>
                     <p>{t("metadata.description_form.additional_access_constraints")}</p>
-                    {otherAccessConstraints.map((_, index) => (
+                    {otherAccess.fields.map((_, index) => (
                         <div key={`access-${index}`} className={fr.cx("fr-mb-3v")} style={{ border: "1px solid grey", padding: "1rem" }}>
-                            <Button className={fr.cx("fr-btn--close", "fr-btn")} onClick={() => removeOtherAccessConstraint(index)}>
+                            <Button className={fr.cx("fr-btn--close", "fr-btn")} onClick={() => otherAccess.remove(index)}>
                                 Supprimer
                             </Button>
                             <Select
                                 label={t("metadata.description_form.access_restriction_code")}
                                 nativeSelectProps={register(`other_access_constraints.${index}.code`)}
                             >
-                                <option value="otherRestrictions">otherRestrictions</option>
-                                <option value="copyright">copyright</option>
-                                <option value="patent">patent</option>
-                                <option value="patentPending">patentPending</option>
-                                <option value="trademark">trademark</option>
-                                <option value="license">license</option>
-                                <option value="intellectualPropertyRights">intellectualPropertyRights</option>
-                                <option value="restricted">restricted</option>
+                                {restrictionCodes.map((option) => (
+                                    <option key={option} value={option}>
+                                        {option}
+                                    </option>
+                                ))}
                             </Select>
                             <Input
                                 label={t("metadata.description_form.access_constraint_name")}
@@ -443,27 +427,24 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
                             />
                         </div>
                     ))}
-                    <Button iconId={"fr-icon-add-line"} priority="secondary" onClick={addOtherAccessConstraint} className={fr.cx("fr-mb-6v")}>
+                    <Button iconId={"fr-icon-add-line"} priority="secondary" onClick={otherAccess.add} className={fr.cx("fr-mb-6v")}>
                         {t("metadata.description_form.add_access_constraint")}
                     </Button>
                     <p>{t("metadata.description_form.additional_use_constraints")}</p>
-                    {otherUseConstraints.map((_, index) => (
+                    {otherUse.fields.map((_, index) => (
                         <div key={`use-${index}`} className={fr.cx("fr-mb-3v")} style={{ border: "1px solid grey", padding: "1rem" }}>
-                            <Button className={fr.cx("fr-btn--close", "fr-btn")} onClick={() => removeOtherUseConstraint(index)}>
+                            <Button className={fr.cx("fr-btn--close", "fr-btn")} onClick={() => otherUse.remove(index)}>
                                 Supprimer
                             </Button>
                             <Select
                                 label={t("metadata.description_form.use_restriction_code")}
                                 nativeSelectProps={register(`other_use_constraints.${index}.code`)}
                             >
-                                <option value="otherRestrictions">otherRestrictions</option>
-                                <option value="copyright">copyright</option>
-                                <option value="patent">patent</option>
-                                <option value="patentPending">patentPending</option>
-                                <option value="trademark">trademark</option>
-                                <option value="license">license</option>
-                                <option value="intellectualPropertyRights">intellectualPropertyRights</option>
-                                <option value="restricted">restricted</option>
+                                {restrictionCodes.map((option) => (
+                                    <option key={option} value={option}>
+                                        {option}
+                                    </option>
+                                ))}
                             </Select>
                             <Input
                                 label={t("metadata.description_form.use_constraint_name")}
@@ -475,7 +456,7 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
                             />
                         </div>
                     ))}
-                    <Button iconId={"fr-icon-add-line"} priority="secondary" onClick={addOtherUseConstraint} className={fr.cx("fr-mb-6v")}>
+                    <Button iconId={"fr-icon-add-line"} priority="secondary" onClick={otherUse.add} className={fr.cx("fr-mb-6v")}>
                         {t("metadata.description_form.add_use_constraint")}
                     </Button>
                 </>

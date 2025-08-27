@@ -32,6 +32,23 @@ class CswMetadata
     public ?string $contactEmail;
     public ?string $organisationName;
     public ?string $organisationEmail;
+    public ?string $restriction;
+    public ?string $openLicenseName;
+    public ?string $openLicenseLink;
+
+    public ?CswInspireLicense $inspireLicense;
+
+    /** @var CswConstraint[] */
+    public ?array $inspireAccessConstraints = [];
+
+    /** @var CswConstraint[] */
+    public ?array $inspireUseConstraints = [];
+
+    /** @var CswConstraint[] */
+    public ?array $otherAccessConstraints = [];
+
+    /** @var CswConstraint[] */
+    public ?array $otherUseConstraints = [];
 
     public ?string $resolution;
 

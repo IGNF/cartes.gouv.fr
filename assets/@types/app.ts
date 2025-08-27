@@ -229,6 +229,12 @@ type Constraint = {
     link: string;
 };
 
+export type InspireLicense = {
+    id: string;
+    text: string;
+    link: string;
+};
+
 export type MetadataFormValuesType = {
     metadata_file_content?: FileList;
     identifier?: string;
@@ -252,13 +258,7 @@ export type MetadataFormValuesType = {
     restriction?: string;
     open_license_name?: string;
     open_license_link?: string;
-    inspire_license_id?: string;
-    access_restriction_code?: string;
-    access_constraint_name?: string;
-    access_constraint_link?: string;
-    use_restriction_code?: string;
-    use_constraint_name?: string;
-    use_constraint_link?: string;
+    inspire_license?: InspireLicense | null;
     inspire_access_constraints?: Constraint[];
     inspire_use_constraints?: Constraint[];
     other_access_constraints?: Constraint[];
@@ -392,10 +392,7 @@ export type CswMetadata = {
     restriction?: string;
     open_license_name?: string;
     open_license_link?: string;
-    access_constraint_name?: string;
-    access_constraint_link?: string;
-    use_constraint_name?: string;
-    use_constraint_link?: string;
+    inspire_license?: InspireLicense | null;
     inspire_access_constraints?: Constraint[];
     inspire_use_constraints?: Constraint[];
     other_access_constraints?: Constraint[];
