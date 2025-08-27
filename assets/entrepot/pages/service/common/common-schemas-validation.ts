@@ -5,6 +5,12 @@ import { regex } from "../../../../utils";
 import validations from "../../../../validations";
 
 const { t: tValidMD } = getTranslation("ValidationMetadatas");
+
+const InspireLicenseSchema = yup.object({
+    id: yup.string().required(),
+    text: yup.string().required(),
+    link: yup.string().required(),
+});
 export class CommonSchemasValidation {
     getMDUploadFileSchema() {
         return yup.object().shape({
@@ -70,6 +76,14 @@ export class CommonSchemasValidation {
                     .string()
                     .required(tValidMD("metadatas.organization_email_required_error"))
                     .matches(regex.email, tValidMD("metadatas.organization_email_error")),
+                inspire_license: yup
+                    .mixed()
+                    .nullable()
+                    .when("restriction", {
+                        is: "inspire_directive",
+                        then: () => InspireLicenseSchema.required(tValidMD("metadatas.inspire_license_error")),
+                        otherwise: () => yup.mixed().nullable(),
+                    }),
             })
             .required();
     }
