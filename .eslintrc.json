@@ -46,6 +46,12 @@
             "rules": {
                 "react/jsx-uses-react": "error" // import React from 'react' est nécessaire seulement dans les fichiers javascript (non-typescript)
             }
+        },
+        {
+            "files": ["bin/**"],
+            "env": {
+                "node": true
+            }
         }
     ],
     "settings": {
