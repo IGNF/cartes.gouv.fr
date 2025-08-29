@@ -80,7 +80,7 @@ class DatabaseController extends AbstractController implements ApiControllerInte
     /**
      * @param array<string> $fields
      */
-    #[Route('/{databaseId}/{tableId}', name: 'get_table', requirements: ['databaseId' => '\d+', 'tableId' => '\d+'], methods: ['GET'])]
+    #[Route('/{databaseId}/tables/{tableId}', name: 'get_table', requirements: ['databaseId' => '\d+', 'tableId' => '\d+'], methods: ['GET'])]
     public function getTable(
         int $databaseId,
         int $tableId,
