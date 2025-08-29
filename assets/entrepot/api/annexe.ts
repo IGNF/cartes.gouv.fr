@@ -9,6 +9,13 @@ const getList = (datastoreId: string, otherOptions: RequestInit = {}) => {
     });
 };
 
+const getFileContent = async (datastoreId: string, annexeId: string) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_annexe_get_file_content", { datastoreId, annexeId });
+
+    const response = await fetch(url);
+    return await response.text();
+};
+
 const add = (datastoreId: string, path: string, file: File) => {
     const formData = new FormData();
     formData.append("file", file);
@@ -55,6 +62,7 @@ const remove = (datastoreId: string, annexeId: string) => {
 
 export default {
     getList,
+    getFileContent,
     add,
     modify,
     replaceFile,
