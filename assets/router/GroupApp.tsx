@@ -8,7 +8,6 @@ import PageNotFoundWithLayout from "../pages/error/PageNotFoundWithLayout";
 import { datastoreNavItems } from "../config/navItems/datastoreNavItems";
 
 const About = lazy(() => import("../pages/About"));
-const Documentation = lazy(() => import("../pages/Documentation"));
 const Offer = lazy(() => import("../pages/Offer"));
 const Join = lazy(() => import("../pages/Join"));
 const Faq = lazy(() => import("../pages/assistance/Faq"));
@@ -54,8 +53,6 @@ function GroupApp(props: IGroupAppProps) {
                 };
             case "about":
                 return { render: <About /> };
-            case "documentation":
-                return { render: <Documentation /> };
             case "offer":
                 return { render: <Offer /> };
             case "join":
