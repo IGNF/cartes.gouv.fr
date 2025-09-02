@@ -9,6 +9,8 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
+import { appRoot } from "./../../../router/router";
+
 import { arrUserCategories } from "@/@types/app";
 import Main from "../../../components/Layout/Main";
 import LoadingIcon from "../../../components/Utils/LoadingIcon";
@@ -124,7 +126,7 @@ const Contact = () => {
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
                     <h1>{t("title")}</h1>
-                    <p>{t("form.explanation", { docsLinkProps: routes.documentation().link })}</p>
+                    <p>{t("form.explanation", { docsLinkProps: { href: appRoot + "/documentation/" } })}</p>
 
                     <p>{t("mandatory_fields")}</p>
 
