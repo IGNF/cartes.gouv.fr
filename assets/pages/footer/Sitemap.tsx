@@ -20,7 +20,7 @@ const SiteMap = () => {
                                 <span>Commencer avec cartes.gouv</span>
                                 <ul>
                                     <li>
-                                        <a {...routes.documentation().link}>Documentation</a>
+                                        <a href={appRoot + "/documentation/"}>Documentation</a>
                                     </li>
                                     <li>
                                         <a {...routes.offer().link}>Offre cartes.gouv.fr/Géoplateforme</a>
