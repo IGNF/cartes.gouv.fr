@@ -92,8 +92,8 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
     const inspireUse = useFieldArrayConstraint(control, "inspire_use_constraints");
     const otherUse = useFieldArrayConstraint(control, "other_use_constraints");
 
-    console.log(form.getValues());
-    console.log(form.formState.errors);
+    // console.log(form.getValues());
+    // console.log(form.formState.errors);
 
     return (
         <div className={fr.cx(!visible && "fr-hidden")}>

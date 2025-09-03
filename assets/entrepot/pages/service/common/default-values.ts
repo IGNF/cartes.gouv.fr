@@ -130,6 +130,11 @@ export const getWfsServiceFormDefaultValues = (
         ...getMetadataFormDefaultValues(metadata),
     };
 
+    console.log("WFS defaults", {
+        restriction: metadata?.csw_metadata?.restriction,
+        inspire_license: metadata?.csw_metadata?.inspire_license,
+    });
+
     return defValues;
 };
 
@@ -177,6 +182,11 @@ export const getWmsVectorServiceFormDefaultValues = (
         projection: getProjUrl(vectorDb?.srs),
         ...getMetadataFormDefaultValues(metadata),
     };
+
+    console.log("WMS defaults", {
+        restriction: metadata?.csw_metadata?.restriction,
+        inspire_license: metadata?.csw_metadata?.inspire_license,
+    });
 
     return defValues;
 };

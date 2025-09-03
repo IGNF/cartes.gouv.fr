@@ -77,13 +77,14 @@ export class CommonSchemasValidation {
                     .required(tValidMD("metadatas.organization_email_required_error"))
                     .matches(regex.email, tValidMD("metadatas.organization_email_error")),
                 inspire_license: yup
-                    .mixed()
+                    .object()
                     .nullable()
                     .when("restriction", {
                         is: "inspire_directive",
                         then: () => InspireLicenseSchema.required(tValidMD("metadatas.inspire_license_error")),
-                        otherwise: () => yup.mixed().nullable(),
+                        otherwise: () => yup.object().nullable(),
                     }),
+                open_license_link: yup.string().url(tValidMD("attribution.url_error")),
             })
             .required();
     }

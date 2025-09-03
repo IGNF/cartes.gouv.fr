@@ -214,7 +214,7 @@
                             </gmd:otherConstraints>
                         </gmd:MD_LegalConstraints>
                     </gmd:resourceConstraints>
-                    <gmd:resourceConstraints type="{{ restriction }}2">
+                    <gmd:resourceConstraints>
                         <gmd:MD_LegalConstraints>
                             <gmd:accessConstraints>
                                 <gmd:MD_RestrictionCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/Codelist/gmxCodelists.xml#MD_RestrictionCode" codeListValue="otherRestrictions">otherRestrictions</gmd:MD_RestrictionCode>
@@ -226,7 +226,7 @@
                     </gmd:resourceConstraints>
 
                 {% elseif restriction == 'open_license' %}
-                    <gmd:resourceConstraints type="{{ restriction }}">
+                    <gmd:resourceConstraints>
                         <gmd:MD_LegalConstraints>
                             <gmd:accessConstraints>
                                 <gmd:MD_RestrictionCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/Codelist/gmxCodelists.xml#MD_RestrictionCode" codeListValue="otherRestrictions">otherRestrictions</gmd:MD_RestrictionCode>
@@ -236,7 +236,7 @@
                             </gmd:otherConstraints>
                         </gmd:MD_LegalConstraints>
                     </gmd:resourceConstraints>
-                    <gmd:resourceConstraints type="{{ restriction }}2">
+                    <gmd:resourceConstraints type="{{ restriction }}">
                         <gmd:MD_LegalConstraints>
                             <gmd:accessConstraints>
                                 <gmd:MD_RestrictionCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/Codelist/gmxCodelists.xml#MD_RestrictionCode" codeListValue="otherRestrictions">otherRestrictions</gmd:MD_RestrictionCode>
@@ -257,18 +257,18 @@
                                 <gmx:Anchor type="{{ inspire_license.id }}" xlink:href="{{ inspire_license.link }}">{{ inspire_license.id }}</gmx:Anchor>
                             </gmd:otherConstraints>
                             {% for constraint in inspire_access_constraints %}
-                                <gmd:accessConstraints type="{{ restriction }}">
+                                <gmd:accessConstraints type="access_constraint">
                                     <gmd:MD_RestrictionCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/Codelist/gmxCodelists.xml#MD_RestrictionCode" codeListValue="{{ constraint.code }}">{{ constraint.code }}</gmd:MD_RestrictionCode>
                                 </gmd:accessConstraints>
                                 {% if constraint.name or constraint.link %}
-                                    <gmd:otherConstraints type="{{ restriction }}">
+                                    <gmd:otherConstraints type="access_constraint">
                                         <gmx:Anchor xlink:href="{{ constraint.link }}">{{ constraint.name }}</gmx:Anchor>
                                     </gmd:otherConstraints>
                                 {% endif %}
                             {% endfor %}
                         </gmd:MD_LegalConstraints>
                     </gmd:resourceConstraints>
-                    <gmd:resourceConstraints type="{{ restriction }}2">
+                    <gmd:resourceConstraints type="{{ restriction }}_use">
                         <gmd:MD_LegalConstraints>
                             <gmd:useConstraints>
                                 <gmd:MD_RestrictionCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/Codelist/gmxCodelists.xml#MD_RestrictionCode" codeListValue="license">license</gmd:MD_RestrictionCode>
@@ -277,11 +277,11 @@
                                 <gmd:MD_RestrictionCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/Codelist/gmxCodelists.xml#MD_RestrictionCode" codeListValue="otherRestrictions">otherRestrictions</gmd:MD_RestrictionCode>
                             </gmd:useConstraints>
                             {% for constraint in inspire_use_constraints %}
-                                <gmd:useConstraints type="{{ restriction }}">
+                                <gmd:useConstraints type="use_constraint">
                                     <gmd:MD_RestrictionCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/Codelist/gmxCodelists.xml#MD_RestrictionCode" codeListValue="{{ constraint.code }}">{{ constraint.code }}</gmd:MD_RestrictionCode>
                                 </gmd:useConstraints>
                                 {% if constraint.name or constraint.link %}
-                                    <gmd:otherConstraints type="{{ restriction }}">
+                                    <gmd:otherConstraints type="use_constraint">
                                         <gmx:Anchor xlink:href="{{ constraint.link }}">{{ constraint.name }}</gmx:Anchor>
                                     </gmd:otherConstraints>
                                 {% endif %}
@@ -296,28 +296,28 @@
                                 <gmd:MD_RestrictionCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/Codelist/gmxCodelists.xml#MD_RestrictionCode" codeListValue="otherRestrictions">otherRestrictions</gmd:MD_RestrictionCode>
                             </gmd:accessConstraints>
                             {% for constraint in other_access_constraints %}
-                                <gmd:accessConstraints type="{{ restriction }}">
+                                <gmd:accessConstraints type="access_constraint">
                                     <gmd:MD_RestrictionCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/Codelist/gmxCodelists.xml#MD_RestrictionCode" codeListValue="{{ constraint.code }}">{{ constraint.code }}</gmd:MD_RestrictionCode>
                                 </gmd:accessConstraints>
                                 {% if constraint.name or constraint.link %}
-                                    <gmd:otherConstraints type="{{ restriction }}">
+                                    <gmd:otherConstraints type="access_constraint">
                                         <gmx:Anchor xlink:href="{{ constraint.link }}">{{ constraint.name }}</gmx:Anchor>
                                     </gmd:otherConstraints>
                                 {% endif %}
                             {% endfor %}
                         </gmd:MD_LegalConstraints>
                     </gmd:resourceConstraints>
-                    <gmd:resourceConstraints type="{{ restriction }}2">
+                    <gmd:resourceConstraints type="{{ restriction }}_use">
                         <gmd:MD_LegalConstraints>
                             <gmd:useConstraints>
                                 <gmd:MD_RestrictionCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/Codelist/gmxCodelists.xml#MD_RestrictionCode" codeListValue="otherRestrictions">otherRestrictions</gmd:MD_RestrictionCode>
                             </gmd:useConstraints>
                             {% for constraint in other_use_constraints %}
-                                <gmd:useConstraints type="{{ restriction }}">
+                                <gmd:useConstraints type="use_constraint">
                                     <gmd:MD_RestrictionCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/Codelist/gmxCodelists.xml#MD_RestrictionCode" codeListValue="{{ constraint.code }}">{{ constraint.code }}</gmd:MD_RestrictionCode>
                                 </gmd:useConstraints>
                                 {% if constraint.name or constraint.link %}
-                                    <gmd:otherConstraints type="{{ restriction }}">
+                                    <gmd:otherConstraints type="use_constraint">
                                         <gmx:Anchor xlink:href="{{ constraint.link }}">{{ constraint.name }}</gmx:Anchor>
                                     </gmd:otherConstraints>
                                 {% endif %}

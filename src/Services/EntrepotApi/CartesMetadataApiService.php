@@ -265,7 +265,7 @@ class CartesMetadataApiService
             $newCswMetadata->contactEmail = $formData['email_contact'];
             $newCswMetadata->organisationName = $formData['organization'];
             $newCswMetadata->organisationEmail = $formData['organization_email'];
-            $newCswMetadata->restriction = $formData['restriction'];
+            $newCswMetadata->restriction = $formData['restriction'] ?? null;
             $newCswMetadata->openLicenseName = $formData['open_license_name'] ?? null;
             $newCswMetadata->openLicenseLink = $formData['open_license_link'] ?? null;
             $newCswMetadata->inspireLicense = CswInspireLicense::fromArray($formData['inspire_license'] ?? null);
