@@ -34,7 +34,7 @@ function getWorkingLayers(layers: BaseLayer[]): BaseLayer[] {
 export interface RMapProps {
     type: OfferingDetailResponseDtoTypeEnum;
     bbox?: BoundingBox;
-    currentStyle: CartesStyle | GeostylerStyles;
+    currentStyle?: CartesStyle | GeostylerStyles;
     layers: BaseLayer[];
 }
 

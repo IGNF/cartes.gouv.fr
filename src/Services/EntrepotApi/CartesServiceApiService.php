@@ -410,8 +410,8 @@ class CartesServiceApiService
                 $configMetadata = $this->getNewConfigMetadata($dto->identifier, $configuration['metadata'] ?? []);
                 $currentKeywords = $configuration['type_infos']['keywords'] ?? [];
 
-                $needsMetadataUpdate = !Utils::deep_array_equals($configMetadata, $configuration['metadata'] ?? []);
-                $needsKeywordsUpdate = !Utils::deep_array_equals($keywords, $currentKeywords);
+                $needsMetadataUpdate = !Utils::array_deep_equals($configMetadata, $configuration['metadata'] ?? []);
+                $needsKeywordsUpdate = !Utils::array_deep_equals($keywords, $currentKeywords);
 
                 if ($needsMetadataUpdate || $needsKeywordsUpdate) {
                     $configRequestBody = [

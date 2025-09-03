@@ -70,7 +70,7 @@ function ServiceViewContent(props: ServiceViewContent) {
                     )}
                 </div>
                 <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
-                    {service && currentStyle && (
+                    {service && (
                         <RMap
                             layers={olLayers}
                             currentStyle={currentStyle}

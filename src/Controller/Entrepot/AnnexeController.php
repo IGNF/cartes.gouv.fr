@@ -12,6 +12,7 @@ use App\Services\EntrepotApi\CartesMetadataApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\MetadataApiService;
 use App\Services\RSSFeed\RSSFeed;
+use App\Utils;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -19,7 +20,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
-use Symfony\Component\Mime\MimeTypes;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
 use Symfony\Component\Uid\Uuid;
@@ -107,10 +107,9 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
     {
         try {
             $fileContent = $this->annexeApiService->download($datastoreId, $annexeId);
-            $mimeTypes = new MimeTypes();
-            $mimeType = $mimeTypes->guessMimeType($fileContent);
+
             $response = new Response($fileContent);
-            $response->headers->set('Content-Type', $mimeType);
+            $response->headers->set('Content-Type', Utils::guess_content_type($fileContent));
             // $response->headers->set('Content-Disposition', 'inline; filename="'.$annexeId.'"');
             $response->headers->set('Content-Length', ''.strlen($fileContent));
 

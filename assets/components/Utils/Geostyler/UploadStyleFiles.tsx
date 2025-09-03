@@ -54,8 +54,11 @@ const UploadStyleFiles: FC<UploadStyleFileProps> = (props) => {
         }
     }
 
-    const format: StyleFormat | undefined = styleFormats[currentTable] ?? StyleFormatEnum.SLD;
-    const parser: StyleParser = getParserForFormat(format as StyleFormatEnum);
+    const format: StyleFormat | undefined = styleFormats[currentTable];
+    let parser: StyleParser | undefined;
+    if (format) {
+        parser = getParserForFormat(format as StyleFormatEnum);
+    }
     const parsers: StyleParser[] = getParsersForExtensions(acceptedFileExtensions);
 
     return (

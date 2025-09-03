@@ -70,10 +70,10 @@ const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
     async function handleValueChange(value: string | undefined) {
         if (value !== strStyle) {
             if (value) {
-                const result = await parser.readStyle(value);
+                const readResult = await parser.readStyle(styleFormats[currentTable] === StyleFormatEnum.Mapbox ? JSON.parse(value) : value);
 
-                if (result.output) {
-                    const style = { ...result.output, name: currentTable };
+                if (readResult.output) {
+                    const style = { ...readResult.output, name: currentTable };
                     setGsStyle(style);
                     const writeResult = await parser.writeStyle(style);
                     setStrStyle(styleFormats[currentTable] === StyleFormatEnum.Mapbox ? JSON.stringify(writeResult.output) : writeResult.output);
@@ -88,7 +88,7 @@ const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
     useEffect(() => {
         handleValueChange(value);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [value]);
+    }, [value, parser]);
 
     async function readFileContent(file: File): Promise<string> {
         return new Promise((resolve) => {

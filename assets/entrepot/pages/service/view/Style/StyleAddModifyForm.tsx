@@ -4,7 +4,7 @@ import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useMutation, useQueries, useQuery, UseQueryOptions } from "@tanstack/react-query";
+import { useMutation, useQueries, useQuery, useQueryClient, UseQueryOptions } from "@tanstack/react-query";
 import { StyleParser } from "geostyler-style";
 import { FC, useEffect, useMemo, useState } from "react";
 import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
@@ -27,6 +27,7 @@ import getWebService from "../../../../../modules/WebServices/WebServices";
 import validations from "../../../../../validations";
 import api from "../../../../api";
 import UploadLayerStyles from "./UploadLayerStyles";
+import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 
 const tmsStyleTools = new TMSStyleTools();
 
@@ -101,6 +102,8 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
 
     const editMode: boolean = Boolean(styleName);
 
+    const queryClient = useQueryClient();
+
     const serviceQuery = useQuery<Service, CartesApiException>({
         queryKey: RQKeys.datastore_offering(datastoreId, offeringId),
         queryFn: ({ signal }) => api.service.getService(datastoreId, offeringId, { signal }),
@@ -123,28 +126,30 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
         queries: style.layers.map<UseQueryOptions<string, CartesApiException>>((layer) => ({
             queryKey: RQKeys.datastore_annexe(datastoreId, layer.annexe_id),
             queryFn: async ({ signal }) => {
+                // return api.annexe.getFileContent(datastoreId, layer.annexe_id, { signal, cache: "no-store" });
                 const response = await fetch(layer.url, {
                     signal,
+                    cache: "no-store",
                 });
                 const text = await response.text();
                 return text;
             },
-            staleTime: 600000,
         })),
         combine: (results) => ({
             array: results.map((result) => result.data).filter(Boolean),
             data: results.reduce(
                 (acc, result, index) => {
                     const layerName = style.layers[index].name;
-                    if (layerName !== undefined && result.data) {
-                        acc[layerName] = result.data;
+                    if (result.data) {
+                        acc[layerName ?? "mapbox"] = result.data;
                     }
                     return acc;
                 },
                 {} as Record<string, string>
             ),
-            loading: results.some((result) => result.isLoading),
-            pending: results.some((result) => result.isPending),
+            isLoading: results.some((result) => result.isLoading),
+            isPending: results.some((result) => result.isPending),
+            isFetching: results.some((result) => result.isFetching),
             isError: results.some((result) => result.isError),
             errors: results.map((result) => result.error).filter(Boolean),
         }),
@@ -190,6 +195,12 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
         handleSubmit,
     } = form;
 
+    // useEffect(() => {
+    //     if (styleFilesQuery.data) {
+    //         form.setValue("style_files", encodeKeys(styleFilesQuery.data));
+    //     }
+    // }, [form, styleFilesQuery.data]);
+
     const onValid: SubmitHandler<StyleAddModifyFormType> = async (data) => {
         if (!service) return;
 
@@ -233,8 +244,6 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
             default:
                 throw new Error(`Type de service non-supporté : ${service.type}`);
         }
-        console.log("data", data);
-        console.log("values", values);
 
         addModifyMutation.mutate(values);
     };
@@ -243,18 +252,35 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
         mutationFn: (data: StyleAddModifyPostDataType) => {
             if (!service) return Promise.reject(null);
 
-            return api.style.add(datastoreId, offeringId, data);
+            return editMode ? api.style.modify(datastoreId, offeringId, data) : api.style.add(datastoreId, offeringId, data);
         },
-        onSuccess: () => {
-            // routes.datastore_service_view({ datastoreId, datasheetName, offeringId }).push();
-            // TODO invalidate queries if needed
-            // TODO set query data
+        onSuccess: (data: CartesStyle[]) => {
+            queryClient.setQueryData(RQKeys.datastore_offering(datastoreId, offeringId), (oldService: Service | undefined) => {
+                if (!oldService) return oldService;
+                return {
+                    ...oldService,
+                    configuration: {
+                        ...oldService.configuration,
+                        styles: [...data],
+                    },
+                };
+            });
+
+            data
+                ?.map((style) => style.layers.map((layer) => layer.annexe_id))
+                .flat()
+                .forEach((annexeId) => {
+                    queryClient.removeQueries({ queryKey: RQKeys.datastore_annexe(datastoreId, annexeId) });
+                });
+
+            queryClient.invalidateQueries({ queryKey: RQKeys.datastore_offering(datastoreId, offeringId) });
+            routes.datastore_service_view({ datastoreId, datasheetName, offeringId }).push();
         },
     });
 
     return (
         <Main title={editMode ? `Modifier le style ${style.name}` : "Ajouter un style"}>
-            {serviceQuery.isLoading || styleFilesQuery.loading ? (
+            {serviceQuery.isPending || styleFilesQuery.isPending ? (
                 <LoadingText />
             ) : serviceQuery.error ? (
                 <Alert
@@ -311,16 +337,24 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
                             </StyleFormProvider>
                         </div>
 
-                        <Button
-                            type="submit"
+                        <ButtonsGroup
+                            buttons={[
+                                {
+                                    children: "Annuler",
+                                    priority: "secondary",
+                                    linkProps: routes.datastore_service_view({ datastoreId, datasheetName, offeringId }).link,
+                                },
+                                {
+                                    type: "submit",
+                                    children: "Sauvegarder",
+                                    onClick: handleSubmit(onValid),
+                                },
+                            ]}
+                            inlineLayoutWhen="always"
                             className={fr.cx("fr-mt-2v")}
-                            style={{
-                                marginLeft: "auto",
-                            }}
-                            onClick={handleSubmit(onValid)}
-                        >
-                            Sauvegarder
-                        </Button>
+                            style={{ marginLeft: "auto" }}
+                            buttonsEquisized={true}
+                        />
                     </div>
                 </>
             ) : null}

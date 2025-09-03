@@ -49,7 +49,7 @@ const UploadLayerStyles: FC<UploadLayerStylesProps> = (props) => {
         async function computeCurrentStyle() {
             if (isTms) {
                 if (isMapbox) {
-                    if (!cancelled) {
+                    if (!cancelled && styleFiles?.["mapbox"]) {
                         const mbStyle = tmsStyleTools.buildMbStyle(service, styleFiles?.["mapbox"]);
                         setCurrentStyle([
                             {
@@ -123,6 +123,7 @@ const UploadLayerStyles: FC<UploadLayerStylesProps> = (props) => {
             <Controller
                 name="style_files"
                 control={control}
+                shouldUnregister={true}
                 render={({ field: { value, onChange }, formState: { errors } }) => (
                     <UploadStyleFiles
                         errors={errors}
