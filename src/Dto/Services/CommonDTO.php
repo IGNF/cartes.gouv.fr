@@ -2,6 +2,7 @@
 
 namespace App\Dto\Services;
 
+use App\Entity\CswMetadata\CswInspireLicense;
 use App\Entity\CswMetadata\CswLanguage;
 use Symfony\Component\Serializer\Attribute\SerializedName;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -55,6 +56,29 @@ class CommonDTO
     #[Assert\Email(message: 'organization_email {{ value }} n\est pas une adresse email valide')]
     #[SerializedName('organization_email')]
     public string $organization_email;
+
+    public string $restriction;
+
+    #[SerializedName('open_license_name')]
+    public ?string $open_license_name;
+
+    #[SerializedName('open_license_link')]
+    public ?string $open_license_link;
+
+    #[SerializedName('inspire_license')]
+    public ?CswInspireLicense $inspire_license;
+
+    #[SerializedName('inspire_access_constraints')]
+    public ?array $inspire_access_constraints;
+
+    #[SerializedName('inspire_use_constraints')]
+    public ?array $inspire_use_constraints;
+
+    #[SerializedName('other_access_constraints')]
+    public ?array $other_access_constraints;
+
+    #[SerializedName('other_use_constraints')]
+    public ?array $other_use_constraints;
 
     #[Assert\NotBlank(['message' => 'common.projection_error'])]
     public string $projection;
