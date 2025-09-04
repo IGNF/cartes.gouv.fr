@@ -1327,9 +1327,9 @@
     undici-types "~6.21.0"
 
 "@types/node@^22.13.4":
-  version "22.15.18"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-22.15.18.tgz#2f8240f7e932f571c2d45f555ba0b6c3f7a75963"
-  integrity sha512-v1DKRfUdyW+jJhZNEI1PYy29S2YRxMV5AOO/x/SjKmW0acCIOqmbj6Haf9eHAhsPmrhlHSxEhv/1WszcLWV4cg==
+  version "22.18.1"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-22.18.1.tgz#cc85ee6999b2a2928739281d2f56ff410a140c52"
+  integrity sha512-rzSDyhn4cYznVG+PCzGe1lwuMYJrcBS1fc3JqSa2PvtABwWo+dZ1ij5OVok3tqfpEBCBoaR4d7upFJk73HRJDw==
   dependencies:
     undici-types "~6.21.0"
 
