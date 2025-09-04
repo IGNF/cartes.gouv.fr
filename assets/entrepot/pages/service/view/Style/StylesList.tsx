@@ -183,9 +183,12 @@ function StylesList(props: StylesListProps) {
                             </div>
 
                             {stylesShowDetails?.[style.name] === true && (
-                                <section key={style.name} className={fr.cx("fr-my-2v")}>
+                                <section className={fr.cx("fr-my-2v")}>
                                     {style.layers.map((layer) => (
-                                        <div key={style.name} className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-grid-row--gutters")}>
+                                        <div
+                                            key={`${style.name}_${layer.name ?? "mapbox"}`}
+                                            className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-grid-row--gutters")}
+                                        >
                                             <div className={fr.cx("fr-col", "fr-col-12")}>
                                                 <TextCopyToClipboard
                                                     key={layer.name}

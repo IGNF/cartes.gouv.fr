@@ -164,6 +164,14 @@ const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox }) => {
         //     mapRef.current?.getView().fit(extent);
         // }
         // addLayer
+        if (bbox === undefined) return;
+
+        let extent = createOrUpdate(bbox.west, bbox.south, bbox.east, bbox.north);
+        extent = transformExtent(extent, "EPSG:4326", olDefaults.projection);
+
+        if (extent) {
+            mapRef.current?.getView().fit(extent);
+        }
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [layers]);

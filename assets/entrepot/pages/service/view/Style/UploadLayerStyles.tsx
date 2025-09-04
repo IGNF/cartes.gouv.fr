@@ -4,7 +4,7 @@ import BaseLayer from "ol/layer/Base";
 import { FC, useEffect, useState } from "react";
 import { Controller, useFormContext, useWatch } from "react-hook-form";
 
-import { GeostylerStyles, OfferingTypeEnum, Service, StyleFormatEnum, TypeInfosWithBbox } from "@/@types/app";
+import { GeostylerStyles, OfferingTypeEnum, Service, StyleFormatEnum } from "@/@types/app";
 import UploadStyleFiles from "@/components/Utils/Geostyler/UploadStyleFiles";
 import RMap from "@/components/Utils/RMap";
 import { useStyleForm } from "@/contexts/StyleFormContext";
@@ -20,8 +20,6 @@ type UploadLayerStylesProps = {
 };
 
 const tmsStyleTools = new TMSStyleTools();
-
-let renderCounter = 0;
 
 const UploadLayerStyles: FC<UploadLayerStylesProps> = (props) => {
     const { service, names } = props;
@@ -89,20 +87,15 @@ const UploadLayerStyles: FC<UploadLayerStylesProps> = (props) => {
 
     return (
         <>
-            {renderCounter++}
-
             {service !== undefined && (
                 <>
                     <div className={fr.cx("fr-grid-row", "fr-mb-4v")}>
                         <h2 className={fr.cx("fr-m-0")}>Aperçu</h2>
                     </div>
                     <div className={fr.cx("fr-grid-row", "fr-mb-4v")}>
-                        <RMap
-                            layers={olLayers}
-                            type={service.type}
-                            currentStyle={currentStyle}
-                            bbox={(service.configuration.type_infos as TypeInfosWithBbox).bbox}
-                        />
+                        {"bbox" in service.configuration.type_infos && service.configuration.type_infos.bbox !== undefined && (
+                            <RMap layers={olLayers} type={service.type} currentStyle={currentStyle} bbox={service.configuration.type_infos.bbox} />
+                        )}
                     </div>
                 </>
             )}

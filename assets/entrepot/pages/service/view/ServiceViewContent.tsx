@@ -3,7 +3,7 @@ import Tabs from "@codegouvfr/react-dsfr/Tabs";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
-import { CartesStyle, OfferingTypeEnum, Service, StoredDataTypeEnum, TypeInfosWithBbox } from "@/@types/app";
+import { CartesStyle, OfferingTypeEnum, Service, StoredDataTypeEnum } from "@/@types/app";
 import RMap from "@/components/Utils/RMap";
 import api from "@/entrepot/api";
 import RQKeys from "@/modules/entrepot/RQKeys";
@@ -43,56 +43,32 @@ function ServiceViewContent(props: ServiceViewContent) {
     const currentStyle: CartesStyle | undefined = (service?.configuration.styles ?? []).find((style) => style.current);
 
     return (
-        <>
-            <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
-                <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
-                    {serviceQuery.data && (
-                        <Tabs
-                            tabs={[
-                                {
-                                    label: "Service",
-                                    content: <ServiceShareInfo service={serviceQuery.data} />,
-                                },
-                                {
-                                    label: "Styles",
-                                    disabled: !canManageStyles,
-                                    content: canManageStyles && (
-                                        <StylesList
-                                            service={serviceQuery.data}
-                                            offeringId={offeringId}
-                                            datastoreId={datastoreId}
-                                            datasheetName={datasheetName}
-                                        />
-                                    ),
-                                },
-                            ]}
-                        />
-                    )}
-                </div>
-                <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
-                    {service && (
-                        <RMap
-                            layers={olLayers}
-                            currentStyle={currentStyle}
-                            type={service?.type}
-                            bbox={(service.configuration.type_infos as TypeInfosWithBbox).bbox}
-                        />
-                    )}
-                </div>
+        <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
+            <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
+                {serviceQuery.data && (
+                    <Tabs
+                        tabs={[
+                            {
+                                label: "Service",
+                                content: <ServiceShareInfo service={serviceQuery.data} />,
+                            },
+                            {
+                                label: "Styles",
+                                disabled: !canManageStyles,
+                                content: canManageStyles && (
+                                    <StylesList service={serviceQuery.data} offeringId={offeringId} datastoreId={datastoreId} datasheetName={datasheetName} />
+                                ),
+                            },
+                        ]}
+                    />
+                )}
             </div>
-            {/* 
-            {service !== undefined && styleToAddOrEdit && (
-                <StyleAddModifyForm
-                    key={styleToAddOrEdit.style_name || "add"}
-                    datastoreId={datastoreId}
-                    datasheetName={datasheetName}
-                    editMode={Boolean(styleToAddOrEdit.style_name)}
-                    service={service}
-                    style={styleToAddOrEdit}
-                    styleNames={styleNames}
-                />
-            )} */}
-        </>
+            <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
+                {service !== undefined && "bbox" in service.configuration.type_infos && service.configuration.type_infos.bbox !== undefined && (
+                    <RMap layers={olLayers} currentStyle={currentStyle} type={service?.type} bbox={service.configuration.type_infos.bbox} />
+                )}
+            </div>
+        </div>
     );
 }
 
