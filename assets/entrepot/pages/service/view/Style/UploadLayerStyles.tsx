@@ -134,25 +134,6 @@ const UploadLayerStyles: FC<UploadLayerStylesProps> = (props) => {
                     />
                 )}
             />
-            <pre>
-                <code>
-                    {JSON.stringify(
-                        Object.entries(styleFiles ?? {}).reduce(
-                            (acc, [key, value]) => ({
-                                ...acc,
-                                [key]: value,
-                            }),
-                            {}
-                        ),
-                        null,
-                        4
-                    )}
-
-                    {/* {JSON.stringify(currentStyle, null, 4).replace(/\\(.)/g, "$1")} */}
-
-                    {JSON.stringify(styleFormats, null, 4)}
-                </code>
-            </pre>
         </>
     );
 };
