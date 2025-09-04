@@ -12,10 +12,10 @@ import BaseLayer from "ol/layer/Base";
 import TileLayer from "ol/layer/Tile";
 import { fromLonLat, transformExtent } from "ol/proj";
 import WMTS, { optionsFromCapabilities } from "ol/source/WMTS";
-import { FC, useCallback, useEffect, useMemo, useRef } from "react";
+import { FC, useEffect, useRef } from "react";
 
-import type { CartesStyle } from "../../@types/app";
-import { OfferingDetailResponseDtoTypeEnum } from "../../@types/entrepot";
+import type { CartesStyle, GeostylerStyles } from "../../@types/app";
+import { BoundingBox, OfferingDetailResponseDtoTypeEnum } from "../../@types/entrepot";
 import olDefaults from "../../data/ol-defaults.json";
 import useCapabilities from "../../hooks/useCapabilities";
 import StyleHelper from "../../modules/Style/StyleHelper";
@@ -27,23 +27,18 @@ import "geopf-extensions-openlayers/css/Dsfr.css";
 import "../../sass/components/geopf-ext-ol-custom.scss";
 import "../../sass/components/map-view.scss";
 
-export interface MapInitial {
+function getWorkingLayers(layers: BaseLayer[]): BaseLayer[] {
+    return layers.filter((l) => l.get("name") !== olDefaults.default_background_layer);
+}
+
+export interface RMapProps {
     type: OfferingDetailResponseDtoTypeEnum;
-    bbox?: {
-        west: number;
-        south: number;
-        east: number;
-        north: number;
-    };
-    currentStyle?: CartesStyle;
+    bbox?: BoundingBox;
+    currentStyle?: CartesStyle | GeostylerStyles;
     layers: BaseLayer[];
 }
 
-type RMapProps = {
-    initial: MapInitial;
-};
-
-const RMap: FC<RMapProps> = ({ initial }) => {
+const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox }) => {
     // const gfinfo = useMemo(() => {
     //     return [OfferingDetailResponseDtoTypeEnum.WFS, OfferingDetailResponseDtoTypeEnum.WMSVECTOR, OfferingDetailResponseDtoTypeEnum.WMTSTMS].includes(
     //         initial.type
@@ -87,43 +82,31 @@ const RMap: FC<RMapProps> = ({ initial }) => {
 
     const { data: capabilities } = useCapabilities();
 
-    // Extent dans la configuration
-    const extent = useMemo(() => {
-        let extent;
+    useEffect(() => {
+        if (bbox === undefined) return;
 
-        const bbox = initial.bbox;
-        if (bbox) {
-            extent = createOrUpdate(bbox.west, bbox.south, bbox.east, bbox.north);
-            extent = transformExtent(extent, "EPSG:4326", olDefaults.projection);
+        let extent = createOrUpdate(bbox.west, bbox.south, bbox.east, bbox.north);
+        extent = transformExtent(extent, "EPSG:4326", olDefaults.projection);
+
+        if (extent) {
+            mapRef.current?.getView().fit(extent);
         }
-        return extent;
-    }, [initial.bbox]);
-
-    const getWorkingLayers = useCallback((): BaseLayer[] => {
-        const workingLayers = mapRef.current
-            ?.getLayers()
-            .getArray()
-            .filter((l) => l.get("name") !== olDefaults.default_background_layer);
-        return workingLayers ?? [];
-    }, []);
+    }, [bbox]);
 
     /**
      * Ajout de la couche dans la carte (+ dans le layerSwitcher)
      */
-    const addLayer = useCallback(
-        (layer: BaseLayer): void => {
-            if (initial.currentStyle) {
-                StyleHelper.applyStyle(layer, initial.currentStyle);
-            }
-            // Ajout du layer dans la carte et dans le LayerSwitcher
-            mapRef.current?.addLayer(layer);
-            layerSwitcherControl.current.addLayer(layer, {
-                title: layer.get("title"),
-                description: layer.get("abstract"),
-            });
-        },
-        [initial.currentStyle]
-    );
+    const addLayer = (layer: BaseLayer): void => {
+        if (currentStyle) {
+            StyleHelper.applyStyle(layer, currentStyle);
+        }
+        // Ajout du layer dans la carte et dans le LayerSwitcher
+        mapRef.current?.addLayer(layer);
+        layerSwitcherControl.current.addLayer(layer, {
+            title: layer.get("title"),
+            description: layer.get("abstract"),
+        });
+    };
 
     useEffect(() => {
         // Creation de la carte
@@ -137,6 +120,12 @@ const RMap: FC<RMapProps> = ({ initial }) => {
                 interactions: defaultInteractions(),
                 controls: controls.current,
             });
+            mapRef.current?.on("loadstart", function () {
+                mapRef.current?.getTargetElement().classList.add("spinner");
+            });
+            mapRef.current?.on("loadend", function () {
+                mapRef.current?.getTargetElement().classList.remove("spinner");
+            });
         }
         mapRef.current.setTarget(mapTargetRef.current || "");
 
@@ -149,32 +138,43 @@ const RMap: FC<RMapProps> = ({ initial }) => {
     }, []);
 
     useEffect(() => {
-        (async () => {
-            // Suppression de tous les layers
-            mapRef.current?.getLayers().clear();
+        if (mapRef.current === undefined) return;
 
-            // Ajout de la couche de fond PlanIgnV2
-            addLayer(bkLayer.current);
+        // Suppression de tous les layers
+        mapRef.current.getLayers().clear();
 
-            // Ajout des autres couches
-            const layers = initial.layers;
+        // Ajout de la couche de fond PlanIgnV2
+        addLayer(bkLayer.current);
 
-            // const gfiLayers: object[] = [];
-            layers.forEach((layer) => {
+        // Ajout des autres couches
+        // const gfiLayers: object[] = [];
+        layers.forEach((layer) => {
+            if (mapRef.current !== undefined) {
                 addLayer(layer);
-                // if (gfinfo) {
-                //     gfiLayers.push({ obj: layer });
-                // }
-            });
-            // NOTE : il me semble que ce n'est plus nécessaire et plus possible sur geopf-ext-ol, à vérifier
-            // getControl("GetFeatureInfo")?.setLayers(gfiLayers);
-
-            // On zoom sur l'extent de la couche au premier rendu
-            if (extent) {
-                mapRef.current?.getView().fit(extent);
             }
-        })();
-    }, [extent, initial.layers, addLayer]);
+            // if (gfinfo) {
+            //     gfiLayers.push({ obj: layer });
+            // }
+        });
+        // NOTE : il me semble que ce n'est plus nécessaire et plus possible sur geopf-ext-ol, à vérifier
+        // getControl("GetFeatureInfo")?.setLayers(gfiLayers);
+
+        // On zoom sur l'extent de la couche au premier rendu
+        // if (extent) {
+        //     mapRef.current?.getView().fit(extent);
+        // }
+        // addLayer
+        if (bbox === undefined) return;
+
+        let extent = createOrUpdate(bbox.west, bbox.south, bbox.east, bbox.north);
+        extent = transformExtent(extent, "EPSG:4326", olDefaults.projection);
+
+        if (extent) {
+            mapRef.current?.getView().fit(extent);
+        }
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [layers]);
 
     useEffect(() => {
         if (!capabilities) return;
@@ -195,8 +195,9 @@ const RMap: FC<RMapProps> = ({ initial }) => {
     }, [capabilities]);
 
     useEffect(() => {
-        getWorkingLayers().forEach((layer) => StyleHelper.applyStyle(layer, initial.currentStyle));
-    }, [initial.currentStyle, getWorkingLayers]);
+        const layers = mapRef.current?.getLayers().getArray() ?? [];
+        getWorkingLayers(layers).forEach((layer) => StyleHelper.applyStyle(layer, currentStyle));
+    }, [currentStyle]);
 
     return <div className={"map-view"} ref={mapTargetRef} />;
 };

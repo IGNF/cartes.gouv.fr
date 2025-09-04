@@ -1,5 +1,5 @@
 import SymfonyRouting from "../../modules/Routing";
-import { jsonFetch } from "../../modules/jsonFetch";
+import { apiFetch, jsonFetch } from "../../modules/jsonFetch";
 import { Annexe, DatasheetThumbnailAnnexe } from "../../@types/app";
 
 const getList = (datastoreId: string, otherOptions: RequestInit = {}) => {
@@ -7,6 +7,15 @@ const getList = (datastoreId: string, otherOptions: RequestInit = {}) => {
     return jsonFetch<Annexe[]>(url, {
         ...otherOptions,
     });
+};
+
+const getFileContent = async (datastoreId: string, annexeId: string, otherOptions: RequestInit = {}) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_annexe_get_file_content", { datastoreId, annexeId });
+
+    const response = await apiFetch(url, {
+        ...otherOptions,
+    });
+    return await response.text();
 };
 
 const add = (datastoreId: string, path: string, file: File) => {
@@ -55,6 +64,7 @@ const remove = (datastoreId: string, annexeId: string) => {
 
 export default {
     getList,
+    getFileContent,
     add,
     modify,
     replaceFile,

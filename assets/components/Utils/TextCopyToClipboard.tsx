@@ -73,8 +73,11 @@ const useStyles = tss.withName(TextCopyToClipboard.displayName).create(() => ({
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
+        gap: fr.spacing("1v"),
+        lineBreak: "anywhere",
     },
     button: {
+        minWidth: "max-content",
         [fr.breakpoints.down("lg")]: {
             maxWidth: "2.5rem",
             paddingLeft: "0.5rem",
