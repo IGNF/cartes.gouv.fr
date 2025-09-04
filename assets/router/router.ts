@@ -15,7 +15,6 @@ const publicRoutes = {
     ),
     page_not_found: defineRoute(`${appRoot}/404`),
     about: defineRoute(`${appRoot}/a-propos`),
-    documentation: defineRoute(`${appRoot}/documentation`),
     contact: defineRoute(`${appRoot}/nous-ecrire`),
     contact_confirmation: defineRoute(`${appRoot}/nous-ecrire/demande-envoyee`),
     news_list: defineRoute(

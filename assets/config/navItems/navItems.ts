@@ -12,7 +12,7 @@ export const defaultNavItems = (t: TranslationFunction<"navItems", ComponentKey>
         {
             menuLinks: [
                 {
-                    linkProps: routes.documentation().link,
+                    linkProps: { href: appRoot + "/documentation/" },
                     text: t("documentation"),
                 },
                 {

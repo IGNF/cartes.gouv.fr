@@ -173,9 +173,11 @@ abstract class AbstractApiService
             ];
         } else {
             $options = [
-                'json' => $body,
                 'headers' => array_merge($defaultHeaders, $headers),
             ];
+            if (!empty($body)) {
+                $options['json'] = $body;
+            }
         }
 
         /** @var AccessToken */
