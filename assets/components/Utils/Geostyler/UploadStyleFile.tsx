@@ -4,15 +4,17 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { Upload } from "@codegouvfr/react-dsfr/Upload";
 import { Divider } from "@mui/material";
 import { type Style as GsStyle, ReadStyleResult, StyleParser } from "geostyler-style";
-import { FC, useEffect, useState } from "react";
+import { FC, lazy, Suspense, useEffect, useState } from "react";
 
 import { StyleFormatEnum } from "@/@types/app";
-import GeostylerEditor from "@/components/Utils/Geostyler/GeostylerEditor";
 import { useStyleForm } from "@/contexts/StyleFormContext";
 import { useTranslation } from "@/i18n";
 import { getFileExtension } from "@/utils";
 import { getParserForExtension, sldParser } from "@/utils/geostyler";
 import ConfirmDialog, { ConfirmDialogModal } from "../ConfirmDialog";
+import LoadingIcon from "../LoadingIcon";
+
+const GeostylerEditor = lazy(() => import("./GeostylerEditor"));
 
 type UploadStyleFileProps = {
     onChange: (value?: string) => void;
@@ -177,7 +179,9 @@ const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
                             {t("remove_style")}
                         </Button>
                     </div>
-                    <GeostylerEditor defaultParser={parser} onChange={handleStyleChange} parsers={parsers} value={gsStyle} />
+                    <Suspense fallback={<LoadingIcon />}>
+                        <GeostylerEditor defaultParser={parser} onChange={handleStyleChange} parsers={parsers} value={gsStyle} />
+                    </Suspense>
                     <ConfirmDialog title={t("remove_style")} noTitle={tCommon("cancel")} yesTitle={tCommon("delete")} onConfirm={handleRemoveStyle}>
                         {<p>{t("remove_style_confirm_message", { layer: currentTable })}</p>}
                     </ConfirmDialog>
