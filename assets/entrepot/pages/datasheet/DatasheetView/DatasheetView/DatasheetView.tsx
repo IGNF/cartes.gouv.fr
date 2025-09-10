@@ -10,7 +10,19 @@ import { FC } from "react";
 import { createPortal } from "react-dom";
 import { symToStr } from "tsafe/symToStr";
 
-import { type Datasheet, type DatasheetDetailed, type Metadata } from "../../../../../@types/app";
+import {
+    type Datasheet,
+    type DatasheetDetailed,
+    type Metadata,
+    type PyramidRaster,
+    type PyramidVector,
+    type Service,
+    type StoredData,
+    StoredDataTypeEnum,
+    type Upload,
+    type VectorDb,
+} from "../../../../../@types/app";
+import Main from "../../../../../components/Layout/Main";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import Wait from "../../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../../i18n/i18n";
@@ -23,7 +35,6 @@ import DatasheetThumbnail from "../DatasheetThumbnail";
 import DocumentsTab from "../DocumentsTab/DocumentsTab";
 import MetadataTab from "../MetadataTab/MetadataTab";
 import ServicesListTab from "../ServiceListTab/ServicesListTab";
-import Main from "../../../../../components/Layout/Main";
 
 const deleteDataConfirmModal = createModal({
     id: "delete-data-confirm-modal",
@@ -46,6 +57,58 @@ type DatasheetViewProps = {
     datastoreId: string;
     datasheetName: string;
 };
+
+function useDatasheetDetailed(datastoreId: string, datasheetName: string) {
+    const basicQuery = useQuery<Datasheet, CartesApiException>({
+        queryKey: RQKeys.datastore_datasheet_basic(datastoreId, datasheetName),
+        queryFn: ({ signal }) => api.datasheet.getBasic(datastoreId, datasheetName, { signal }),
+        staleTime: 60000,
+    });
+
+    const serviceListQuery = useQuery<Service[], CartesApiException>({
+        queryKey: RQKeys.datastore_datasheet_service_list(datastoreId, datasheetName),
+        queryFn: ({ signal }) => api.datasheet.getServices(datastoreId, datasheetName, { signal }),
+        staleTime: 60000,
+        enabled: basicQuery.data && basicQuery.data?.nb_publications > 0,
+    });
+
+    const uploadsListQuery = useQuery<Upload[], CartesApiException>({
+        queryKey: RQKeys.datastore_datasheet_uploads(datastoreId, datasheetName),
+        queryFn: ({ signal }) => api.datasheet.getUploads(datastoreId, datasheetName, { signal }),
+        staleTime: 60000,
+        enabled: Boolean(basicQuery.data),
+    });
+
+    const storedDataListQuery = useQuery<StoredData[], CartesApiException>({
+        queryKey: RQKeys.datastore_datasheet_stored_data(datastoreId, datasheetName),
+        queryFn: ({ signal }) => api.datasheet.getStoredData(datastoreId, datasheetName, { signal }),
+        staleTime: 60000,
+        enabled: Boolean(basicQuery.data),
+    });
+
+    return {
+        data:
+            basicQuery.data &&
+            ({
+                ...basicQuery.data,
+                service_list: serviceListQuery.data,
+                upload_list: uploadsListQuery.data,
+                vector_db_list: storedDataListQuery.data?.filter((sd) => sd.type === StoredDataTypeEnum.VECTORDB) as VectorDb[],
+                pyramid_vector_list: storedDataListQuery.data?.filter((sd) => sd.type === StoredDataTypeEnum.ROK4PYRAMIDVECTOR) as PyramidVector[],
+                pyramid_raster_list: storedDataListQuery.data?.filter((sd) => sd.type === StoredDataTypeEnum.ROK4PYRAMIDRASTER) as PyramidRaster[],
+            } satisfies DatasheetDetailed),
+        isLoading: basicQuery.isLoading || serviceListQuery.isLoading || uploadsListQuery.isLoading || storedDataListQuery.isLoading,
+        isFetching: basicQuery.isFetching || serviceListQuery.isFetching || uploadsListQuery.isFetching || storedDataListQuery.isFetching,
+        isPending: basicQuery.isPending || serviceListQuery.isPending || uploadsListQuery.isPending || storedDataListQuery.isPending,
+        error: basicQuery.error || serviceListQuery.error || uploadsListQuery.error || storedDataListQuery.error,
+        refetch: () => {
+            basicQuery.refetch();
+            serviceListQuery.refetch();
+            uploadsListQuery.refetch();
+            storedDataListQuery.refetch();
+        },
+    };
+}
 
 const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) => {
     const { t: tCommon } = useTranslation("Common");
@@ -71,13 +134,14 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
         },
     });
 
-    const datasheetQuery = useQuery<DatasheetDetailed, CartesApiException>({
-        queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName),
-        queryFn: ({ signal }) => api.datasheet.get(datastoreId, datasheetName, { signal }),
-        staleTime: 60000,
-        retry: false,
-        enabled: !datasheetDeleteMutation.isPending,
-    });
+    // const datasheetQuery = useQuery<DatasheetDetailed, CartesApiException>({
+    //     queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName),
+    //     queryFn: ({ signal }) => api.datasheet.get(datastoreId, datasheetName, { signal }),
+    //     staleTime: 60000,
+    //     retry: false,
+    //     enabled: !datasheetDeleteMutation.isPending,
+    // });
+    const datasheetQuery = useDatasheetDetailed(datastoreId, datasheetName);
 
     const metadataQuery = useQuery<Metadata, CartesApiException>({
         queryKey: RQKeys.datastore_datasheet_metadata(datastoreId, datasheetName),

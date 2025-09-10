@@ -25,6 +25,15 @@ const RQKeys = {
 
     datastore_datasheet_list: (datastoreId: string): string[] => ["datastore", datastoreId, "datasheet"],
     datastore_datasheet: (datastoreId: string, datasheetName: string): string[] => ["datastore", datastoreId, "datasheet", datasheetName],
+    datastore_datasheet_basic: (datastoreId: string, datasheetName: string): string[] => ["datastore", datastoreId, "datasheet", datasheetName, "basic"],
+    datastore_datasheet_uploads: (datastoreId: string, datasheetName: string): string[] => ["datastore", datastoreId, "datasheet", datasheetName, "uploads"],
+    datastore_datasheet_stored_data: (datastoreId: string, datasheetName: string): string[] => [
+        "datastore",
+        datastoreId,
+        "datasheet",
+        datasheetName,
+        "stored_data",
+    ],
     datastore_datasheet_metadata: (datastoreId: string, datasheetName: string): string[] => ["datastore", datastoreId, "datasheet", datasheetName, "metadata"],
     datastore_datasheet_service_list: (datastoreId: string, datasheetName: string) => ["datastore", datastoreId, "datasheet", datasheetName, "services"],
 

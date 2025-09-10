@@ -160,6 +160,38 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         ]);
     }
 
+    #[Route('/{datasheetName}/basic', name: 'get_basic', methods: ['GET'])]
+    public function getBasic(string $datastoreId, string $datasheetName): JsonResponse
+    {
+        return $this->json(
+            $this->getBasicInfo($this->datastoreApiService->get($datastoreId), $datasheetName)
+        );
+    }
+
+    #[Route('/{datasheetName}/uploads', name: 'get_uploads', methods: ['GET'])]
+    public function getUploads(string $datastoreId, string $datasheetName): JsonResponse
+    {
+        $uploadList = $this->uploadApiService->getAllDetailed($datastoreId, [
+            'tags' => [
+                CommonTags::DATASHEET_NAME => $datasheetName,
+            ],
+        ]);
+
+        return $this->json($uploadList);
+    }
+
+    #[Route('/{datasheetName}/stored_data', name: 'get_stored_data', methods: ['GET'])]
+    public function getStoredDataList(string $datastoreId, string $datasheetName): JsonResponse
+    {
+        $storedDataList = $this->storedDataApiService->getAllDetailed($datastoreId, [
+            'tags' => [
+                CommonTags::DATASHEET_NAME => $datasheetName,
+            ],
+        ]);
+
+        return $this->json($storedDataList);
+    }
+
     #[Route('/{datasheetName}/services', name: 'get_services', methods: ['GET'])]
     public function getServices(string $datastoreId, string $datasheetName): JsonResponse
     {
