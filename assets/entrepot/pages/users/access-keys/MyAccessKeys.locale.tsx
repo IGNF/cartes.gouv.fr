@@ -4,12 +4,20 @@ import { declareComponentKeys } from "i18nifty";
 import { Translations } from "../../../../i18n/types";
 
 const { i18n } = declareComponentKeys<
-    "my_access_keys" | "my_permissions" | { K: "explain_my_keys"; R: JSX.Element } | { K: "explain_my_permissions"; R: JSX.Element } | "burger_menu"
+    | "title"
+    | "my_access_keys"
+    | "add_access_keys"
+    | "my_permissions"
+    | { K: "explain_my_keys"; R: JSX.Element }
+    | { K: "explain_my_permissions"; R: JSX.Element }
+    | "burger_menu"
 >()("MyAccessKeys");
 export type I18n = typeof i18n;
 
 export const MyAccessKeysFrTranslations: Translations<"fr">["MyAccessKeys"] = {
+    title: "Clés d’accès",
     my_access_keys: "Mes clés d’accès",
+    add_access_keys: "Créer une clé d’accès",
     my_permissions: "Mes permissions",
     explain_my_keys: (
         <>
@@ -35,7 +43,9 @@ export const MyAccessKeysFrTranslations: Translations<"fr">["MyAccessKeys"] = {
 };
 
 export const MyAccessKeysEnTranslations: Translations<"en">["MyAccessKeys"] = {
+    title: "Access keys",
     my_access_keys: "My keys",
+    add_access_keys: "Create access key",
     my_permissions: "My permissions",
     explain_my_keys: undefined,
     explain_my_permissions: undefined,

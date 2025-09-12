@@ -43,3 +43,10 @@
         height: 100%;
     }
 }
+
+@media (min-width: 576px) {
+    .frx-btns-group--right-sm {
+        display: flex;
+        justify-content: flex-end;
+    }
+}

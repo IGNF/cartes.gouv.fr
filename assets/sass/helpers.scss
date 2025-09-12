@@ -3,3 +3,13 @@
         text-align: right !important;
     }
 }
+
+@media (min-width: 576px) {
+    .frx-mt-sm-0 {
+        margin-top: 0 !important;
+    }
+    .frx-flex-end-sm {
+        display: flex !important;
+        justify-content: flex-end !important;
+    }
+}
