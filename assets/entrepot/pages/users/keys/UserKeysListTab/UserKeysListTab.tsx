@@ -117,7 +117,7 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
                     />
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-grid-row--gutters")}>
                         <Tooltip title="Le nombre maximal de clés par utilisateur est de 10" />
-                        <h6 className={fr.cx("fr-mt-6v", "fr-mx-1w")}>{t("active_keys")}</h6>
+                        <h3 className={fr.cx("fr-mt-6v", "fr-mx-1w")}>{t("active_keys")}</h3>
                         <Badge noIcon={true} severity={"info"}>
                             {keys.length}/10
                         </Badge>
@@ -158,75 +158,65 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
                                     className={fr.cx("fr-mb-5v", "fr-px-6v", "fr-py-3w")}
                                     style={{ border: "1px solid", borderColor: fr.colors.decisions.border.default.grey.default }}
                                 >
+                                    <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-grid-row--gutters")}>
+                                        <div className={fr.cx("fr-col-12", "fr-col-sm-9", "fr-grid-row", "fr-grid-row--middle")}>
+                                            <h4
+                                                style={{
+                                                    overflow: "hidden",
+                                                    textOverflow: "ellipsis",
+                                                    whiteSpace: "nowrap",
+                                                    display: "inline-block",
+                                                    maxWidth: "calc(100% - 5.5rem)",
+                                                }}
+                                                className={fr.cx("fr-mr-1w")}
+                                            >
+                                                {accessKey.name}
+                                            </h4>
+                                            {accessKey.type && (
+                                                <Badge className={fr.cx("fr-mb-6v")} noIcon={true} severity={"info"}>
+                                                    {accessKey.type}
+                                                </Badge>
+                                            )}
+                                        </div>
+
+                                        <div className={`frx-flex-end-sm ${fr.cx("fr-col-12", "fr-col-sm-3", "fr-mb-6v")}`}>
+                                            <Button
+                                                title={tCommon("modify")}
+                                                priority="primary"
+                                                iconId="fr-icon-edit-line"
+                                                size="small"
+                                                onClick={() => {
+                                                    routes.user_key_edit({ keyId: accessKey._id }).push();
+                                                }}
+                                            />
+                                            <Button
+                                                title={tCommon("delete")}
+                                                className={fr.cx("fr-ml-4v")}
+                                                priority="secondary"
+                                                iconId="fr-icon-delete-line"
+                                                size="small"
+                                                onClick={() => {
+                                                    setCurrentKey(accessKey._id);
+                                                    ConfirmDialogModal.open();
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+
                                     {accessKey.accesses !== undefined && accessKey.accesses.length !== 0 ? (
                                         <>
-                                            <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-grid-row--gutters")}>
-                                                <div className={fr.cx("fr-col-12", "fr-col-sm-9", "fr-grid-row", "fr-grid-row--middle")}>
-                                                    <h6
-                                                        style={{
-                                                            overflow: "hidden",
-                                                            textOverflow: "ellipsis",
-                                                            whiteSpace: "nowrap",
-                                                            display: "inline-block",
-                                                            maxWidth: "calc(100% - 5.5rem)",
-                                                        }}
-                                                        className={fr.cx("fr-mr-1w")}
-                                                    >
-                                                        {accessKey.name}
-                                                    </h6>
-                                                    {accessKey.type && (
-                                                        <Badge className={fr.cx("fr-mb-6v")} noIcon={true} severity={"info"}>
-                                                            {accessKey.type}
-                                                        </Badge>
-                                                    )}
-                                                </div>
-
-                                                <div className={`frx-flex-end-sm ${fr.cx("fr-col-12", "fr-col-sm-3", "fr-mb-6v")}`}>
-                                                    <Button
-                                                        title={tCommon("modify")}
-                                                        priority="primary"
-                                                        iconId="fr-icon-edit-line"
-                                                        size="small"
-                                                        onClick={() => {
-                                                            routes.user_key_edit({ keyId: accessKey._id }).push();
-                                                        }}
-                                                    />
-                                                    <Button
-                                                        title={tCommon("delete")}
-                                                        className={fr.cx("fr-ml-4v")}
-                                                        priority="secondary"
-                                                        iconId="fr-icon-delete-line"
-                                                        size="small"
-                                                        onClick={() => {
-                                                            setCurrentKey(accessKey._id);
-                                                            ConfirmDialogModal.open();
-                                                        }}
-                                                    />
-                                                </div>
-                                            </div>
-                                            {Object.entries(groupedServices).map(([type, services]) => {
+                                            {Object.entries(groupedServices).map(([type, services], typeIndex) => {
                                                 return (
                                                     <div key={type} className={fr.cx("fr-mb-5v")}>
-                                                        {accessKey.type_infos && (accessKey.type_infos as HashInfoDto).hash && (
-                                                            <div className={fr.cx("fr-col-12", "fr-col-lg-10")}>
-                                                                <UserKeyLink
-                                                                    permissionId={services[0].permission._id}
-                                                                    offeringId={services[0].offering._id}
-                                                                    hash={(accessKey.type_infos as HashInfoDto).hash}
-                                                                />
-                                                            </div>
-                                                        )}
-                                                        <div className={fr.cx("fr-mb-1v")}>
-                                                            {type === "WFS"
-                                                                ? t("wfs_services")
-                                                                : type === "WMS-RASTER"
-                                                                  ? t("wms_raster_services")
-                                                                  : type === "WMS-VECTOR"
-                                                                    ? t("wms_vector_services")
-                                                                    : type === "WMTS-TMS"
-                                                                      ? t("wmts_tms_services")
-                                                                      : null}
+                                                        {typeIndex >= 1 ? <hr /> : null}
+                                                        <div className={fr.cx("fr-col-12", "fr-col-lg-10")}>
+                                                            <UserKeyLink
+                                                                permissionId={services[0].permission._id}
+                                                                offeringId={services[0].offering._id}
+                                                                hash={accessKey.type_infos && (accessKey.type_infos as HashInfoDto).hash}
+                                                            />
                                                         </div>
+                                                        <div className={fr.cx("fr-mb-1v")}>{t("available_services")}</div>
                                                         <ul>
                                                             {services.map((service) => (
                                                                 <div key={service.offering._id}>
@@ -270,51 +260,10 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
                                         </>
                                     ) : (
                                         <>
-                                            <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-grid-row--gutters")}>
-                                                <div className={fr.cx("fr-col-12", "fr-col-sm-9", "fr-grid-row", "fr-grid-row--middle")}>
-                                                    <h6
-                                                        style={{
-                                                            overflow: "hidden",
-                                                            textOverflow: "ellipsis",
-                                                            whiteSpace: "nowrap",
-                                                            display: "inline-block",
-                                                            maxWidth: "calc(100% - 5.5rem)",
-                                                        }}
-                                                        className={fr.cx("fr-mr-1w")}
-                                                    >
-                                                        {accessKey.name}
-                                                    </h6>
-                                                    {accessKey.type && (
-                                                        <Badge className={fr.cx("fr-mb-6v")} noIcon={true} severity={"info"}>
-                                                            {accessKey.type}
-                                                        </Badge>
-                                                    )}
-                                                </div>
-
-                                                <div className={`frx-flex-end-sm ${fr.cx("fr-col-12", "fr-col-sm-3", "fr-mb-6v")}`}>
-                                                    <Button
-                                                        title={tCommon("modify")}
-                                                        priority="primary"
-                                                        iconId="fr-icon-edit-line"
-                                                        size="small"
-                                                        onClick={() => {
-                                                            routes.user_key_edit({ keyId: accessKey._id }).push();
-                                                        }}
-                                                    />
-                                                    <Button
-                                                        title={tCommon("delete")}
-                                                        className={fr.cx("fr-ml-4v")}
-                                                        priority="secondary"
-                                                        iconId="fr-icon-delete-line"
-                                                        size="small"
-                                                        onClick={() => {
-                                                            setCurrentKey(accessKey._id);
-                                                            ConfirmDialogModal.open();
-                                                        }}
-                                                    />
-                                                </div>
-                                            </div>
-                                            <div className={fr.cx("fr-mb-1v")}>{t("no_services")}</div>
+                                            <Badge className={fr.cx("fr-mb-1v")} severity={"error"}>
+                                                {t("no_services_status")}
+                                            </Badge>
+                                            <div className={fr.cx("fr-mb-1v")}>{t("no_services_hint")}</div>
                                         </>
                                     )}
                                 </div>

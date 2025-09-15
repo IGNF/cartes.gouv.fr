@@ -15,11 +15,9 @@ const { i18n } = declareComponentKeys<
     | "hash"
     | "unavailable"
     | "hash_value_copied"
-    | "wfs_services"
-    | "wms_raster_services"
-    | "wms_vector_services"
-    | "wmts_tms_services"
-    | "no_services"
+    | "available_services"
+    | "no_services_status"
+    | "no_services_hint"
     | "add"
     | "modify"
     | "remove"
@@ -48,11 +46,10 @@ export const UserKeysListTabFrTranslations: Translations<"fr">["UserKeysListTab"
     hash: "Hash",
     unavailable: "Indisponible",
     hash_value_copied: "Valeur du hash copiée",
-    wfs_services: "Services WFS",
-    wms_raster_services: "Services WMS-Raster",
-    wms_vector_services: "Services WMS-Vecteur",
-    wmts_tms_services: "Services WMTS-TMS",
-    no_services: "Cette clé n'a accès à aucun service",
+    available_services: "Services disponibles",
+    no_services_status: "Indisponible",
+    no_services_hint:
+        "Les services associés à cette clé ont été supprimés ou la permission qui vous y donnait accès n'est plus valable. Vous pouvez supprimer cette clé ou la modifier pour l'associer à d'autres services.",
     add: "Créer une clé d’accès",
     modify: "Modifier la clé",
     remove: "Supprimer la clé",
@@ -76,11 +73,10 @@ export const UserKeysListTabEnTranslations: Translations<"en">["UserKeysListTab"
     hash: "Hash",
     unavailable: "Unavailable",
     hash_value_copied: "Hash value copied",
-    wfs_services: "WFS services",
-    wms_raster_services: "WMS-Raster services",
-    wms_vector_services: "WMS-Vector services",
-    wmts_tms_services: "WMTS-TMS services",
-    no_services: "This key does not have access to any services",
+    available_services: "Available services",
+    no_services_status: "Unavailable",
+    no_services_hint:
+        "The services associated with this key have been deleted or the permission that gave you access to them is no longer valid. You can delete this key or modify it to associate it with other services.",
     add: "Create access key",
     modify: "Modify key",
     remove: "Remove key",

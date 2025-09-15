@@ -15,11 +15,24 @@ export interface TextCopyToClipboardProps extends InputProps.Common {
     text: string;
     textArea?: boolean;
     title?: string;
+    copyLabel?: string;
+    copiedLabel?: string;
 }
 
 const TextCopyToClipboard: FC<TextCopyToClipboardProps> = (props) => {
     const { t } = useTranslation("Common");
-    const { disabled = false, label, nativeInputProps, nativeTextAreaProps, text, textArea, title = t("copy_to_clipboard"), ...inputProps } = props;
+    const {
+        disabled = false,
+        label,
+        nativeInputProps,
+        nativeTextAreaProps,
+        text,
+        textArea,
+        title = t("copy_to_clipboard"),
+        copyLabel = t("copy"),
+        copiedLabel = t("alert_copied"),
+        ...inputProps
+    } = props;
     const { classes } = useStyles({ disabled });
     const { copied, copy } = useCopyToClipboard();
 
@@ -55,7 +68,7 @@ const TextCopyToClipboard: FC<TextCopyToClipboardProps> = (props) => {
                         title={title}
                         onClick={() => copy(text)}
                     >
-                        <span>{copied ? t("alert_copied") : t("copy")}</span>
+                        <span>{copied ? copiedLabel : copyLabel}</span>
                     </Button>
                 </div>
             }
