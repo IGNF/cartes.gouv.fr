@@ -73,6 +73,7 @@ const MyAccessKeys: FC<MyAccessKeysProps> = ({ activeTab }) => {
                         <SideMenu
                             align="left"
                             burgerMenuButtonText={t("burger_menu")}
+                            className={fr.cx("fr-sidemenu--sticky-full-height")}
                             items={[
                                 {
                                     isActive: tab === "keys",
