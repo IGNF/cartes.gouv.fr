@@ -143,9 +143,8 @@ const PyramidVectorGenerateForm: FC<PyramidVectorNewProps> = ({ datastoreId, vec
             .add(datastoreId, formatted)
             .then(() => {
                 if (vectorDbQuery.data?.tags?.datasheet_name) {
-                    queryClient.invalidateQueries({
-                        queryKey: RQKeys.datastore_datasheet(datastoreId, vectorDbQuery.data?.tags.datasheet_name),
-                    });
+                    queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, vectorDbQuery.data?.tags.datasheet_name) });
+                    queryClient.invalidateQueries({ queryKey: RQKeys.datastore_processing_execution_list(datastoreId) });
                     routes.datastore_datasheet_view({ datastoreId, datasheetName: vectorDbQuery.data?.tags.datasheet_name, activeTab: "dataset" }).push();
                 } else {
                     routes.datasheet_list({ datastoreId }).push();

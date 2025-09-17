@@ -7,7 +7,7 @@ use App\Constants\EntrepotApi\StoredDataStatuses;
 use App\Controller\ApiControllerInterface;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
-use App\Services\EntrepotApi\CartesServiceApiService;
+use App\Services\EntrepotApi\CartesStoredDataApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\ProcessingApiService;
 use App\Services\EntrepotApi\StoredDataApiService;
@@ -33,7 +33,7 @@ class StoredDataController extends AbstractController implements ApiControllerIn
         private ConfigurationApiService $configurationApiService,
         private ProcessingApiService $processingApiService,
         private UploadApiService $uploadApiService,
-        private CartesServiceApiService $cartesServiceApiService,
+        private CartesStoredDataApiService $cartesStoredDataApiService,
     ) {
     }
 
@@ -170,14 +170,7 @@ class StoredDataController extends AbstractController implements ApiControllerIn
     public function delete(string $datastoreId, string $storedDataId): JsonResponse
     {
         try {
-            // Suppression des offerings et configurations associees
-            $offerings = $this->configurationApiService->getAllOfferings($datastoreId, ['stored_data' => $storedDataId]);
-            foreach ($offerings as $offering) {
-                $this->cartesServiceApiService->unpublish($datastoreId, $offering['_id']);
-            }
-
-            // Suppression de la donnee stockee
-            $this->storedDataApiService->remove($datastoreId, $storedDataId);
+            $this->cartesStoredDataApiService->delete($datastoreId, $storedDataId);
 
             return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
         } catch (ApiException $ex) {

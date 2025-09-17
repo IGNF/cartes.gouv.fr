@@ -1,4 +1,5 @@
 import { declareComponentKeys } from "i18nifty";
+
 import { Translations } from "../../../../../../i18n/types";
 
 const { i18n } = declareComponentKeys<
@@ -17,9 +18,6 @@ const { i18n } = declareComponentKeys<
     | "tile_technical_name"
     | "tile_technical_name_hint_text"
     | "technical_name_is_mandatory"
-    | { K: "confirm_delete_modal.title"; P: { dbname: string }; R: string }
-    | "following_services_deleted"
-    | { K: "error_deleting"; P: { dbname: string }; R: string }
 >()("VectorDbList");
 export type I18n = typeof i18n;
 
@@ -40,11 +38,8 @@ export const VectorDbListFrTranslations: Translations<"fr">["VectorDbList"] = {
     wmsv_hint_text: "Création puis publication d’images à partir de données vectorielles. Ce service s'appuie sur le protocole WMS en version 1.3.0",
     tile_technical_name: "Nom technique de la pyramide de tuiles vectorielles",
     tile_technical_name_hint_text:
-        "II s'agit du nom technique du service qui apparaitra dans votre espace de travail, il ne sera pas publié en ligne. Si vous le renommez, choisissez un nom explicite.",
+        "Il s'agit du nom technique du service qui apparaitra dans votre espace de travail, il ne sera pas publié en ligne. Si vous le renommez, choisissez un nom explicite.",
     technical_name_is_mandatory: "Le nom technique est obligatoire",
-    "confirm_delete_modal.title": ({ dbname }) => `Êtes-vous sûr de vouloir supprimer la base de données ${dbname} ?`,
-    following_services_deleted: "Les services suivants seront aussi supprimés :",
-    error_deleting: ({ dbname }) => `La suppression de la base de données ${dbname} a échoué`,
 };
 
 export const VectorDbListEnTranslations: Translations<"en">["VectorDbList"] = {
@@ -64,7 +59,4 @@ export const VectorDbListEnTranslations: Translations<"en">["VectorDbList"] = {
     tile_technical_name_hint_text:
         "This is the technical name of the service which will appear in your workspace, it will not be published online. If you rename it, choose a meaningful name. [TODO]",
     technical_name_is_mandatory: "Technical name is mandatory",
-    "confirm_delete_modal.title": ({ dbname }) => `Are you sure you want to delete database ${dbname} ?`,
-    following_services_deleted: "The following services will be deleted :",
-    error_deleting: ({ dbname }) => `Deleting ${dbname} database failed`,
 };

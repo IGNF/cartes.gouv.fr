@@ -96,9 +96,8 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
             return api.pyramidRaster.add(datastoreId, formData);
         },
         onSuccess() {
-            queryClient.invalidateQueries({
-                queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName),
-            });
+            queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
+            queryClient.invalidateQueries({ queryKey: RQKeys.datastore_processing_execution_list(datastoreId) });
             routes.datastore_datasheet_view({ datastoreId, datasheetName: datasheetName, activeTab: "dataset" }).push();
         },
     });

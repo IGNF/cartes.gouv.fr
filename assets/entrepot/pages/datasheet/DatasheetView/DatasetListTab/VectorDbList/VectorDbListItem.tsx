@@ -1,31 +1,28 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import Alert from "@codegouvfr/react-dsfr/Alert";
-import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
+import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
+import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
 import { FC, Fragment, ReactNode, memo, useCallback, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { symToStr } from "tsafe/symToStr";
 
-import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
+import useDataUsesQuery from "@/hooks/queries/useDataUsesQuery";
 import { DatastoreEndpoint, StoredDataStatusEnum, VectorDb } from "../../../../../../@types/app";
 import { EndpointDetailResponseDtoTypeEnum } from "../../../../../../@types/entrepot";
 import StoredDataStatusBadge from "../../../../../../components/Utils/Badges/StoredDataStatusBadge";
-import LoadingIcon from "../../../../../../components/Utils/LoadingIcon";
-import LoadingText from "../../../../../../components/Utils/LoadingText";
-import Wait from "../../../../../../components/Utils/Wait";
 import useToggle from "../../../../../../hooks/useToggle";
 import { getTranslation, useTranslation } from "../../../../../../i18n/i18n";
 import { ComponentKey } from "../../../../../../i18n/types";
 import RQKeys from "../../../../../../modules/entrepot/RQKeys";
 import { routes } from "../../../../../../router/router";
-import { offeringTypeDisplayName } from "../../../../../../utils";
 import api from "../../../../../api";
-import VectorDbDesc from "./VectorDbDesc";
 import ListItem from "../../ListItem";
+import StoredDataDeleteConfirmDialog from "../StoredDataDeleteConfirmDialog";
+import VectorDbDesc from "./VectorDbDesc";
 
 type ServiceTypes = "tms" | "wfs" | "wms-vector" | "pre-paquet";
 
@@ -116,11 +113,18 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
         staleTime: 3600000,
     });
 
-    const dataUsesQuery = useQuery({
-        queryKey: RQKeys.datastore_stored_data_uses(datastoreId, vectorDb._id),
-        queryFn: ({ signal }) => api.storedData.getUses(datastoreId, vectorDb._id, { signal }),
-        staleTime: 600000,
-        enabled: showDescription,
+    const confirmRemoveVectorDbModal = useMemo(
+        () =>
+            createModal({
+                id: `confirm-delete-vectordb-${vectorDb._id}`,
+                isOpenedByDefault: false,
+            }),
+        [vectorDb._id]
+    );
+
+    const isOpenConfirmRemoveVectorDbModal = useIsModalOpen(confirmRemoveVectorDbModal);
+    const dataUsesQuery = useDataUsesQuery(datastoreId, vectorDb._id, {
+        enabled: showDescription || isOpenConfirmRemoveVectorDbModal,
     });
 
     const { wfsEndpoints, wmsVectorEndpoints, tmsEndpoints } = useMemo(() => {
@@ -162,18 +166,6 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
         [quotas]
     );
 
-    /* Suppression de la base de donnees */
-    const queryClient = useQueryClient();
-
-    const deleteVectorDbMutation = useMutation({
-        mutationFn: () => api.storedData.remove(datastoreId, vectorDb._id),
-        onSuccess() {
-            if (datasheetName) {
-                queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
-            }
-        },
-    });
-
     const handleCreateService = () => {
         switch (serviceType) {
             case "wfs":
@@ -201,15 +193,6 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
         () =>
             createModal({
                 id: `service-type-choice-modal-vectordb-${vectorDb._id}`,
-                isOpenedByDefault: false,
-            }),
-        [vectorDb._id]
-    );
-
-    const confirmRemoveVectorDbModal = useMemo(
-        () =>
-            createModal({
-                id: `confirm-delete-vectordb-${vectorDb._id}`,
                 isOpenedByDefault: false,
             }),
         [vectorDb._id]
@@ -259,25 +242,8 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
                 <VectorDbDesc dataUsesQuery={dataUsesQuery} />
             </ListItem>
 
-            {deleteVectorDbMutation.error && (
-                <Alert
-                    title={t("error_deleting", { dbname: vectorDb.name })}
-                    closable
-                    description={deleteVectorDbMutation.error.message}
-                    as="h2"
-                    severity="error"
-                />
-            )}
-            {deleteVectorDbMutation.isPending && (
-                <Wait>
-                    <div className={fr.cx("fr-container")}>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <LoadingIcon className={fr.cx("fr-mr-2v")} />
-                            <h6 className={fr.cx("fr-m-0")}>{tCommon("removing")}</h6>
-                        </div>
-                    </div>
-                </Wait>
-            )}
+            <StoredDataDeleteConfirmDialog datastoreId={datastoreId} storedData={vectorDb} datasheetName={datasheetName} modal={confirmRemoveVectorDbModal} />
+
             {createPortal(
                 <serviceTypeChoiceModal.Component
                     title={t("define_service")}
@@ -346,43 +312,48 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
                 </serviceTypeChoiceModal.Component>,
                 document.body
             )}
-            {createPortal(
+
+            {/* {createPortal(
                 <confirmRemoveVectorDbModal.Component
                     title={t("confirm_delete_modal.title", { dbname: vectorDb.name })}
                     buttons={[
                         {
-                            children: tCommon("no"),
+                            children: tCommon("cancel"),
                             priority: "secondary",
                         },
                         {
-                            children: tCommon("yes"),
+                            children: tCommon("delete"),
                             onClick: () => deleteVectorDbMutation.mutate(),
                             priority: "primary",
+                            disabled: dataUsesQuery.isFetching || processingExecutionsQuery.isFetching,
                         },
                     ]}
                 >
-                    {dataUsesQuery.isFetching && <LoadingText withSpinnerIcon={true} />}
+                    {(dataUsesQuery.isFetching || processingExecutionsQuery.isFetching) && <LoadingText withSpinnerIcon={true} as="p" />}
+
+                    {processingExecutionsQuery?.data && processingExecutionsQuery?.data?.length > 0 && (
+                        <div className={fr.cx("fr-grid-row")}>
+                            <p>{t("processing_in_progress_deletion_warning")}</p>
+                        </div>
+                    )}
+
                     {dataUsesQuery.data?.offerings_list && dataUsesQuery.data?.offerings_list?.length > 0 && (
-                        <div className={fr.cx("fr-grid-row", "fr-mt-2v", "fr-p-2v")}>
-                            <p className={fr.cx("fr-h6")}>{t("following_services_deleted")}</p>
-                            <div className={fr.cx("fr-col")}>
-                                <ul className={fr.cx("fr-raw-list")}>
-                                    {dataUsesQuery.data?.offerings_list.map((offering, i) => (
-                                        <li
-                                            key={offering._id}
-                                            className={fr.cx(i + 1 !== dataUsesQuery.data?.offerings_list.length && "fr-mb-2v", "fr-text--xs")}
-                                        >
-                                            {offering.layer_name}
-                                            <Badge className={fr.cx("fr-ml-1v", "fr-text--xs")}>{offeringTypeDisplayName(offering.type)}</Badge>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
+                        <div className={fr.cx("fr-grid-row")}>
+                            <p className={fr.cx("fr-mb-1v")}>{t("following_services_deleted")}</p>
+
+                            <ul className={fr.cx("fr-text--sm")}>
+                                {dataUsesQuery.data?.offerings_list.map((offering) => (
+                                    <li key={offering._id}>
+                                        {offering.layer_name}
+                                        <Badge>{offeringTypeDisplayName(offering.type)}</Badge>
+                                    </li>
+                                ))}
+                            </ul>
                         </div>
                     )}
                 </confirmRemoveVectorDbModal.Component>,
                 document.body
-            )}
+            )} */}
         </>
     );
 };

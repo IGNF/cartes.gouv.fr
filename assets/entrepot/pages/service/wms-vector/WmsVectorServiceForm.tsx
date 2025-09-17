@@ -148,9 +148,8 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
         },
         onSuccess() {
             if (vectorDbQuery.data?.tags?.datasheet_name) {
-                queryClient.invalidateQueries({
-                    queryKey: RQKeys.datastore_datasheet(datastoreId, vectorDbQuery.data?.tags.datasheet_name),
-                });
+                queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, vectorDbQuery.data?.tags.datasheet_name) });
+                queryClient.invalidateQueries({ queryKey: RQKeys.datastore_stored_data_uses(datastoreId, vectorDbId) });
                 routes.datastore_datasheet_view({ datastoreId, datasheetName: vectorDbQuery.data?.tags.datasheet_name, activeTab: "services" }).push();
             } else {
                 routes.datasheet_list({ datastoreId }).push();
@@ -177,9 +176,8 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
             }
 
             if (vectorDbQuery.data?.tags?.datasheet_name) {
-                queryClient.invalidateQueries({
-                    queryKey: RQKeys.datastore_datasheet(datastoreId, vectorDbQuery.data?.tags.datasheet_name),
-                });
+                queryClient.invalidateQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, vectorDbQuery.data?.tags.datasheet_name) });
+                queryClient.invalidateQueries({ queryKey: RQKeys.datastore_stored_data_uses(datastoreId, vectorDbId) });
                 routes.datastore_datasheet_view({ datastoreId, datasheetName: vectorDbQuery.data?.tags.datasheet_name, activeTab: "services" }).push();
                 queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet_metadata(datastoreId, vectorDbQuery.data?.tags?.datasheet_name) });
             } else {

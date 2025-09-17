@@ -39,6 +39,7 @@ export type ComponentKey =
     | import("../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadForm/DatasheetUploadForm.locale").I18n
     | import("../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadIntegration/DatasheetUploadIntegration.locale").I18n
     | import("../entrepot/pages/datasheet/DatasheetList/DatasheetList.locale").I18n
+    | import("../entrepot/pages/datasheet/DatasheetView/DatasetListTab/StoredDataDeleteConfirmDialog.locale").I18n
     | import("../entrepot/pages/datasheet/DatasheetView/DatasetListTab/VectorDbList/VectorDbList.locale").I18n
     | import("../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidVectorList/PyramidVectorList.locale").I18n
     | import("../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidRasterList/PyramidRasterList.locale").I18n

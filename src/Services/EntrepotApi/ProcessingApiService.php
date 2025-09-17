@@ -9,7 +9,7 @@ class ProcessingApiService extends BaseEntrepotApiService
      */
     public function getAll(string $datastoreId, array $query = []): array
     {
-        return $this->request('GET', "datastores/$datastoreId/processings", [], $query);
+        return $this->requestAll("datastores/$datastoreId/processings", $query);
     }
 
     public function get(string $datastoreId, string $processingId): array
@@ -30,12 +30,31 @@ class ProcessingApiService extends BaseEntrepotApiService
         $this->request('POST', "datastores/$datastoreId/processings/executions/$executionId/launch");
     }
 
+    public function abortExecution(string $datastoreId, string $executionId): void
+    {
+        $this->request('POST', "datastores/$datastoreId/processings/executions/$executionId/abort");
+    }
+
     /**
      * @param array<mixed> $query
      */
     public function getAllExecutions(string $datastoreId, array $query = []): array
     {
-        return $this->request('GET', "datastores/$datastoreId/processings/executions", [], $query);
+        return $this->requestAll("datastores/$datastoreId/processings/executions", $query);
+    }
+
+    /**
+     * @param array<mixed> $query
+     */
+    public function getAllExecutionsDetailed(string $datastoreId, array $query = []): array
+    {
+        $processingExecutions = $this->getAllExecutions($datastoreId, $query);
+
+        foreach ($processingExecutions as &$procExec) {
+            $procExec = $this->getExecution($datastoreId, $procExec['_id']);
+        }
+
+        return $processingExecutions;
     }
 
     public function getExecution(string $datastoreId, string $processingExecutionId): array
