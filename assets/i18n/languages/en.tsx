@@ -70,6 +70,7 @@ import type { Translations } from "../types";
 
 import { ReuseCommunityConfigEnTranslations } from "@/espaceco/pages/communities/ReuseCommunityConfig.locale";
 import { InputCollectionEnTranslations } from "../../components/Input/InputCollection";
+import { StoredDataDeleteConfirmDialogEnTranslations } from "@/entrepot/pages/datasheet/DatasheetView/DatasetListTab/StoredDataDeleteConfirmDialog.locale";
 
 export const translations: Translations<"en"> = {
     Common: commonEnTranslations,
@@ -94,6 +95,7 @@ export const translations: Translations<"en"> = {
     AccessesRequest: AccessesRequestEnTranslations,
     navItems: navItemsEnTranslations,
     datastoreNavItems: datastoreNavItemsEnTranslations,
+    StoredDataDeleteConfirmDialog: StoredDataDeleteConfirmDialogEnTranslations,
     VectorDbList: VectorDbListEnTranslations,
     PyramidVectorList: PyramidVectorListEnTranslations,
     PyramidRasterList: PyramidRasterListEnTranslations,

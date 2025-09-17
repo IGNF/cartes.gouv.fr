@@ -23,6 +23,12 @@ const RQKeys = {
     datastore_stored_data_uses: (datastoreId: string, storedDataId: string): string[] => ["datastore", datastoreId, "stored_data", storedDataId, "uses"],
     datastore_stored_data_report: (datastoreId: string, storedDataId: string): string[] => ["datastore", datastoreId, "stored_data", storedDataId, "report"],
 
+    datastore_processing_execution_list: (datastoreId: string, queryParams: object | null = null): string[] => {
+        const keys = ["datastore", datastoreId, "processing", "executions"];
+        if (queryParams) keys.push(JSON.stringify(queryParams));
+        return keys;
+    },
+
     datastore_datasheet_list: (datastoreId: string): string[] => ["datastore", datastoreId, "datasheet"],
     datastore_datasheet: (datastoreId: string, datasheetName: string): string[] => ["datastore", datastoreId, "datasheet", datasheetName],
     datastore_datasheet_metadata: (datastoreId: string, datasheetName: string): string[] => ["datastore", datastoreId, "datasheet", datasheetName, "metadata"],

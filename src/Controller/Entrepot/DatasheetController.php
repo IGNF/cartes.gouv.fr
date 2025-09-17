@@ -10,6 +10,7 @@ use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\EntrepotApi\AnnexeApiService;
 use App\Services\EntrepotApi\CartesServiceApiService;
+use App\Services\EntrepotApi\CartesStoredDataApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\MetadataApiService;
@@ -38,6 +39,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         private AnnexeApiService $annexeApiService,
         private CartesServiceApiService $cartesServiceApiService,
         private MetadataApiService $metadataApiService,
+        private CartesStoredDataApiService $cartesStoredDataApiService,
     ) {
     }
 
@@ -283,7 +285,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             }
 
             foreach ($storedDataList as $storedData) {
-                $this->storedDataApiService->remove($datastoreId, $storedData['_id']);
+                $this->cartesStoredDataApiService->delete($datastoreId, $storedData['_id']);
             }
 
             // suppr des métadonnées

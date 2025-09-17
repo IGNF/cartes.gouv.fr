@@ -9,7 +9,7 @@ import { formatDateFromISO } from "../../../../utils";
 
 import "../../../../sass/components/item-list.scss";
 
-interface ListItemProps {
+export interface ListItemProps {
     actionButton?: ReactNode;
     badge?: ReactNode;
     buttonTitle: string;
