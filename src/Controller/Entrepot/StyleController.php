@@ -67,7 +67,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
 
             $layers = [];
             foreach ($styleFiles as $layerName => $layer) {
-                $annexe = $this->saveStyleInAnnexe($datastoreId, $datasheetName, $layer['style'], $layer['format']);
+                $annexe = $this->saveStyleInAnnexe($datastoreId, $datasheetName, $layer['style'], 'mapbox' === $layerName ? 'json' : $layer['format']);
                 $layerData = [
                     'annexe_id' => $annexe['_id'],
                     'url' => $this->getAnnexeUrl($datastore, $annexe),
