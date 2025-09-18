@@ -36,7 +36,14 @@ const ctx: GeoStylerContextInterface = {
             disableMultiEdit: true,
         },
     },
-    locale: locale.fr_FR,
+    locale: {
+        ...locale.fr_FR,
+        CodeEditor: {
+            ...locale.fr_FR.CodeEditor,
+            copyButtonLabel: "Copier",
+            downloadButtonLabel: "Exporter",
+        },
+    },
 };
 
 type GeostylerEditorProps = {
