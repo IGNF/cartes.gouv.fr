@@ -1,14 +1,15 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
+import { SegmentedControl } from "@codegouvfr/react-dsfr/SegmentedControl";
 import { CodeEditor, GeoStylerContext, GeoStylerContextInterface, Style, locale } from "geostyler";
 import { Style as GsStyle, StyleParser } from "geostyler-style";
-import { FC } from "react";
+import { FC, useState } from "react";
 import { tss } from "tss-react";
 
-import DsfrAntdConfig from "../../Provider/DsfrAntdConfig";
+import DsfrAntdConfig from "@/components/Provider/DsfrAntdConfig";
 import { mbParser, qgisParser, sldParser } from "@/utils/geostyler";
 
 import "geostyler/dist/index.css";
+
 import "@/sass/components/geostyler.css";
 
 const ctx: GeoStylerContextInterface = {
@@ -45,57 +46,61 @@ type GeostylerEditorProps = {
     value: GsStyle;
 };
 
+type ViewMode = "table" | "code";
+
 const GeostylerEditor: FC<GeostylerEditorProps> = (props) => {
     const { defaultParser = sldParser, onChange, parsers = [sldParser, qgisParser, mbParser], value } = props;
     const { classes } = useStyles();
 
+    const [view, setView] = useState<ViewMode>("table");
+
     return (
         <GeoStylerContext.Provider value={ctx}>
             <DsfrAntdConfig>
-                <Tabs
-                    label="Editeur de style"
-                    tabs={[
+                <SegmentedControl
+                    legend={"Editeur de style"}
+                    hideLegend={true}
+                    segments={[
                         {
-                            label: (
-                                <div>
-                                    <i className="ri-table-line" />
-                                    <span className={fr.cx("fr-ml-1w")}>Tableau</span>
-                                </div>
-                            ),
-                            content: (
-                                <div className={fr.cx("fr-grid-row", "fr-my-2w")}>
-                                    <div className={fr.cx("fr-col")}>
-                                        <Style style={value} onStyleChange={onChange} disableMultiEdit={true} />
-                                    </div>
-                                </div>
-                            ),
+                            label: "Tableau",
+                            iconId: "ri-table-line",
+                            nativeInputProps: {
+                                checked: view === "table",
+                                onChange: () => setView("table"),
+                            },
                         },
                         {
-                            label: (
-                                <div>
-                                    <i className="ri-code-line" />
-                                    <span className={fr.cx("fr-ml-1w")}>Code</span>
-                                </div>
-                            ),
-                            content: (
-                                <div className={fr.cx("fr-grid-row", "fr-my-2w")}>
-                                    <div className={fr.cx("fr-col")}>
-                                        <div className={classes.editor}>
-                                            <CodeEditor
-                                                style={value}
-                                                onStyleChange={onChange}
-                                                defaultParser={defaultParser}
-                                                showCopyButton={true}
-                                                showSaveButton={true}
-                                                parsers={parsers}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                            ),
+                            label: "Code",
+                            iconId: "ri-code-line",
+                            nativeInputProps: {
+                                checked: view === "code",
+                                onChange: () => setView("code"),
+                            },
                         },
                     ]}
                 />
+                {view === "table" ? (
+                    <div className={fr.cx("fr-grid-row", "fr-my-2w")}>
+                        <div className={fr.cx("fr-col")}>
+                            <Style style={value} onStyleChange={onChange} disableMultiEdit={true} />
+                        </div>
+                    </div>
+                ) : view === "code" ? (
+                    <div className={fr.cx("fr-grid-row", "fr-my-2w")}>
+                        <div className={fr.cx("fr-col")}>
+                            <div className={classes.editor}>
+                                <CodeEditor
+                                    style={value}
+                                    onStyleChange={onChange}
+                                    defaultParser={defaultParser}
+                                    showCopyButton={true}
+                                    showSaveButton={true}
+                                    parsers={parsers}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                ) : null}
             </DsfrAntdConfig>
         </GeoStylerContext.Provider>
     );
