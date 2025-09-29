@@ -52,10 +52,10 @@ export async function apiFetch(
                     if (hasSessionExpired(data)) {
                         useAuthStore.getState().setSessionExpired(true);
                     }
-                    reject(response);
+                    reject(data);
                 }
             } catch (error) {
-                if (error instanceof DOMException && error?.name === "AbortError") {
+                if (error instanceof DOMException && (error?.name === "AbortError" || error?.name === "NetworkError")) {
                     // NOTE : ne rien faire, requête annulée par react-query parce que requête en doublon (en mode strict de react)
                 } else {
                     reject(error);
