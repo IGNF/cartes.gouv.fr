@@ -6,7 +6,7 @@ import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import { symToStr } from "tsafe/symToStr";
 import * as yup from "yup";
 
@@ -367,7 +367,9 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
                             styleFormats={styleFormats}
                             setStyleFormats={setStyleFormats}
                         >
-                            <StyleLoader tableNames={selectedTableNamesList ?? []} form={form} />
+                            <FormProvider {...form}>
+                                <StyleLoader tableNames={selectedTableNamesList ?? []} form={form} />
+                            </FormProvider>
                         </StyleFormProvider>
                     )}
                     <UploadMDFile visible={currentStep === STEPS.METADATAS_UPLOAD} form={form} />
