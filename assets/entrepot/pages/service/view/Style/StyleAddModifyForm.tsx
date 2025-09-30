@@ -7,6 +7,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQueries, useQuery, useQueryClient, UseQueryOptions } from "@tanstack/react-query";
 import { StyleParser } from "geostyler-style";
 import { FC, useEffect, useMemo, useState } from "react";
+import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
 import * as yup from "yup";
 
@@ -27,7 +28,6 @@ import getWebService from "../../../../../modules/WebServices/WebServices";
 import validations from "../../../../../validations";
 import api from "../../../../api";
 import UploadLayerStyles from "./UploadLayerStyles";
-import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 
 const tmsStyleTools = new TMSStyleTools();
 
@@ -68,35 +68,48 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
                 return editMode || !styleNames.includes(name);
             }),
         style_files: yup.lazy(() =>
-            yup.object().shape(
-                layerNames.reduce((acc, layerName) => {
-                    const encodedKey = encodeKey(layerName);
-                    acc[encodedKey] = yup
-                        .string()
-                        .transform((value) => value.trim())
-                        .required(`Aucun style n'est renseigné pour la couche ${layerName}`)
-                        .test({
-                            name: "is-valid",
-                            async test(value, ctx) {
-                                // if (value === undefined || value === "") {
-                                //     return true;
-                                // }
-                                if (!service) {
-                                    return true;
-                                }
+            yup
+                .object()
+                .shape(
+                    layerNames.reduce((acc, layerName) => {
+                        const encodedKey = encodeKey(layerName);
+                        acc[encodedKey] = yup
+                            .string()
+                            .transform((value) => value.trim())
+                            .test({
+                                name: "is-valid",
+                                async test(value, ctx) {
+                                    if (value === undefined || value === "") {
+                                        return true;
+                                    }
+                                    if (!service) {
+                                        return true;
+                                    }
 
-                                const format = styleFormats[layerName] ?? StyleFormatEnum.SLD;
-                                return validations.getValidator(service, format).validate(value, ctx);
-                            },
-                        });
+                                    const format = styleFormats[layerName] ?? StyleFormatEnum.SLD;
+                                    return validations.getValidator(service, format).validate(value, ctx);
+                                },
+                            });
 
-                    if (layerName === "mapbox") {
-                        acc[encodedKey] = acc[encodedKey].required("Le fichier de style Mapbox est obligatoire");
-                    }
+                        if (layerName === "mapbox") {
+                            acc[encodedKey] = acc[encodedKey].required("Le fichier de style Mapbox est obligatoire");
+                        }
 
-                    return acc;
-                }, {})
-            )
+                        return acc;
+                    }, {})
+                )
+                .test({
+                    name: "at-least-one",
+                    message() {
+                        if (layerNames.length === 1 && layerNames[0] === "mapbox") {
+                            return "Le fichier de style Mapbox est obligatoire";
+                        }
+                        return "Au moins un fichier de style doit être renseigné.";
+                    },
+                    test(value) {
+                        return Object.values(value).some((v) => v !== undefined && v !== "");
+                    },
+                })
         ),
     });
 

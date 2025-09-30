@@ -26,9 +26,9 @@ export const encodeKey = (key: string): string => btoa(encodeURIComponent(key));
 export const decodeKey = (encodedKey: string): string => decodeURIComponent(atob(encodedKey));
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const encodeKeys = (obj: Record<string, any>): Record<string, any> =>
+export const encodeKeys = (obj: Record<string, any> = {}): Record<string, any> =>
     Object.fromEntries(Object.entries(obj).map(([key, value]) => [encodeKey(key), value]));
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const decodeKeys = (obj: Record<string, any>): Record<string, any> =>
+export const decodeKeys = (obj: Record<string, any> = {}): Record<string, any> =>
     Object.fromEntries(Object.entries(obj).map(([key, value]) => [decodeKey(key), value]));

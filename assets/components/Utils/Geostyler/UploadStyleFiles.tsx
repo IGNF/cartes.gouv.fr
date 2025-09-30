@@ -4,7 +4,7 @@ import ToggleSwitch from "@codegouvfr/react-dsfr/ToggleSwitch";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import type { StyleParser } from "geostyler-style";
 import { type FC } from "react";
-import type { FieldErrors } from "react-hook-form";
+import { useFormContext, type FieldErrors } from "react-hook-form";
 
 import type { StyleFormat } from "@/@types/app";
 import { StyleFormatEnum } from "@/@types/app";
@@ -40,6 +40,8 @@ const UploadStyleFiles: FC<UploadStyleFileProps> = (props) => {
         styleFormats,
     } = useStyleForm();
 
+    const { resetField } = useFormContext();
+
     const { t } = useTranslation("UploadStyleFile");
 
     function handleChange(style?: string) {
@@ -74,7 +76,10 @@ const UploadStyleFiles: FC<UploadStyleFileProps> = (props) => {
                                 <ToggleSwitch
                                     label={"Utiliser des fichiers sld ou qml par couche"}
                                     checked={!isMapbox}
-                                    onChange={(checked) => setIsMapbox(!checked)}
+                                    onChange={(checked) => {
+                                        setIsMapbox(!checked);
+                                        resetField("style_files");
+                                    }}
                                 />
                             )}
                             <RadioButtons
@@ -92,6 +97,8 @@ const UploadStyleFiles: FC<UploadStyleFileProps> = (props) => {
                                     },
                                 }))}
                                 disabled={isTms && isMapbox}
+                                state={errors?.style_files?.message ? "error" : undefined}
+                                stateRelatedMessage={typeof errors?.style_files?.message === "string" && errors?.style_files?.message}
                             />
                         </>
                     ),
