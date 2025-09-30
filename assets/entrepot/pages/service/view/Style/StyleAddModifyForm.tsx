@@ -319,6 +319,7 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
                                 nativeInputProps={{
                                     ...register("style_name"),
                                 }}
+                                disabled={editMode === true}
                             />
                             <StyleFormProvider
                                 editMode={editMode}
