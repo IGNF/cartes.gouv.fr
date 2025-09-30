@@ -1,4 +1,4 @@
-import { AnyLayer, Sources as MbSources, Style as MbStyle } from "mapbox-gl";
+import { AnyLayer, Sources as MbSources, Style as MbStyle, VectorSource } from "mapbox-gl";
 
 import { Service, StyleFormatEnum } from "@/@types/app";
 import { getParserForFormat, mbParser } from "@/utils/geostyler";
@@ -63,6 +63,7 @@ export default class TMSStyleTools {
             throw new Error("Métadonnées du service TMS manquantes");
         }
 
+        const serviceUrl = service.urls?.find((url) => url.type === "TMS")?.url;
         const sources: MbSources = {
             [service.tms_metadata.name]: {
                 type: "vector",
@@ -71,6 +72,9 @@ export default class TMSStyleTools {
                 maxzoom: service.tms_metadata.maxzoom,
             },
         };
+        if (serviceUrl !== undefined) {
+            (sources[service.tms_metadata.name] as VectorSource).url = serviceUrl + "/metadata.json";
+        }
 
         return {
             version: 8,
