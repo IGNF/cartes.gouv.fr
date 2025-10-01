@@ -15,6 +15,7 @@ import { routes } from "../../../../router/router";
 import Main from "../../../../components/Layout/Main";
 import Button from "@codegouvfr/react-dsfr/Button";
 import "../../../../sass/components/buttons.scss";
+import { useAuthStore } from "@/stores/AuthStore";
 
 type MyAccessKeysProps = {
     activeTab: string;
@@ -23,6 +24,8 @@ type MyAccessKeysProps = {
 const { t } = getTranslation("MyAccessKeys");
 
 const MyAccessKeys: FC<MyAccessKeysProps> = ({ activeTab }) => {
+    const user = useAuthStore((state) => state.user);
+
     const tab = activeTab;
 
     const documentTitle = tab === "keys" ? t("my_access_keys") : t("my_permissions");
@@ -59,8 +62,9 @@ const MyAccessKeys: FC<MyAccessKeysProps> = ({ activeTab }) => {
     }, [permissions]);
 
     const canAdd = useMemo(() => {
-        return hasPermissions && !(hasOauth2 && permissionsAreAllOnlyOauth);
-    }, [hasPermissions, hasOauth2, permissionsAreAllOnlyOauth]);
+        const hasReachedQuota = (user?.keys_use ?? 0) >= (user?.keys_quota ?? Infinity);
+        return hasPermissions && !(hasOauth2 && permissionsAreAllOnlyOauth) && !hasReachedQuota;
+    }, [hasPermissions, hasOauth2, permissionsAreAllOnlyOauth, user?.keys_use, user?.keys_quota]);
 
     return (
         <Main title={documentTitle}>
@@ -111,7 +115,6 @@ const MyAccessKeys: FC<MyAccessKeysProps> = ({ activeTab }) => {
                         ) : (
                             <>
                                 <h2>{t("my_permissions")}</h2>
-                                {t("explain_my_permissions")}
                                 <PermissionsListTab permissions={permissions} />
                             </>
                         )}

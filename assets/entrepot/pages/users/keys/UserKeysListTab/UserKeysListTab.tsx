@@ -15,7 +15,6 @@ import { CartesApiException } from "../../../../../modules/jsonFetch";
 import { appRoot, routes } from "../../../../../router/router";
 import api from "../../../../api";
 import UserKeyLink from "./UserKeyLink";
-import SearchBar from "@codegouvfr/react-dsfr/SearchBar";
 import Tooltip from "@codegouvfr/react-dsfr/Tooltip";
 import TagsGroup from "@codegouvfr/react-dsfr/TagsGroup";
 import { TagProps } from "@codegouvfr/react-dsfr/Tag";
@@ -23,6 +22,8 @@ import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 
 import ovoidSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/background/ovoid.svg?no-inline";
 import padlock from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/system/padlock.svg?no-inline";
+import Select from "@codegouvfr/react-dsfr/Select";
+import { useAuthStore } from "@/stores/AuthStore";
 
 type UserKeysListTabProps = {
     keys: UserKeyDetailedWithAccessesResponseDto[] | undefined;
@@ -32,6 +33,8 @@ type UserKeysListTabProps = {
 const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
     const { t: tCommon } = useTranslation("Common");
     const { t } = useTranslation("UserKeysListTab");
+
+    const user = useAuthStore((state) => state.user);
 
     const [currentKey, setCurrentKey] = useState<string | undefined>(undefined);
 
@@ -58,6 +61,42 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
 
     const { copy } = useCopyToClipboard();
     const [copiedText, setCopiedText] = useState<string | null>(null);
+    const [showFilters, setShowFilters] = useState(false);
+    const [sortValue, setSortValue] = useState("");
+    const [fluxValue, setFluxValue] = useState("");
+    const toggleFilters = () => {
+        if (showFilters) {
+            setSortValue("");
+            setFluxValue("");
+        }
+        setShowFilters((prev) => !prev);
+    };
+
+    if (!keys) return null;
+
+    const normalizeType = (type: string) => {
+        if (type.startsWith("WMS")) return "WMS";
+        if (type === "WMTS-TMS") return "WMTS_TMS";
+        if (type === "WFS") return "WFS";
+        return type;
+    };
+
+    const filteredAndSortedKeys = [...(keys ?? [])]
+        .filter((key) => {
+            if (!fluxValue) return true;
+            const services = key.accesses ?? [];
+            return services.some((access) => normalizeType(access.offering.type) === fluxValue);
+        })
+        .sort((a, b) => {
+            switch (sortValue) {
+                case "alphabetical_order":
+                    return a.name.localeCompare(b.name, "fr", { sensitivity: "base" });
+                case "reverse_alphabetical_order":
+                    return b.name.localeCompare(a.name, "fr", { sensitivity: "base" });
+                default:
+                    return 0;
+            }
+        });
 
     return (
         <>
@@ -66,7 +105,7 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
                 <Wait>
                     <div className={fr.cx("fr-container")}>
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                            <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + " frx-icon-spin"} />
+                            <i className={fr.cx("fr-icon-refresh-line", "fr-icon--lg", "fr-mr-2v") + "frx-icon-spin"} />
                             <h6 className={fr.cx("fr-m-0")}>{tCommon("removing")}</h6>
                         </div>
                     </div>
@@ -95,35 +134,70 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
                     <div className={fr.cx("fr-col-sm-7", "fr-col-md-8", "fr-pl-md-6w")}>
                         <h6>{t("no_keys")}</h6>
                         {t("explain_no_keys")}
-                        <Button
-                            linkProps={{
-                                href: appRoot + "/documentation/",
-                                target: "_blank",
-                                rel: "noreferrer",
-                                title: t("consult_documentation") + " - " + tCommon("new_window"),
-                            }}
-                            priority="secondary"
+                        <a
+                            className={fr.cx("fr-link")}
+                            href={appRoot + "/documentation/"}
+                            target="_blank"
+                            rel="noreferrer"
+                            title={t("consult_documentation") + " - " + tCommon("new_window")}
                         >
                             {t("consult_documentation")}
-                        </Button>
+                        </a>
                     </div>
                 </div>
             ) : (
                 <>
-                    <SearchBar
-                        className={fr.cx("fr-col-12", "fr-col-sm-7", "fr-col-lg-5", "fr-mt-10v", "fr-mb-5v")}
-                        label={tCommon("search")}
-                        allowEmptySearch={true}
-                    />
+                    <div className={fr.cx("fr-mt-10v", "fr-mb-5v", "fr-grid-row", "fr-grid-row--middle", "fr-grid-row--gutters")}>
+                        <Button
+                            className={fr.cx("fr-ml-2w")}
+                            priority="tertiary"
+                            title={showFilters ? tCommon("remove_filters") : tCommon("filter")}
+                            iconId={showFilters ? "fr-icon-filter-fill" : "fr-icon-filter-line"}
+                            onClick={toggleFilters}
+                        />
+                    </div>
+                    {showFilters && (
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mb-5v")}>
+                            <Select
+                                className={fr.cx("fr-col-6", "fr-col-sm-5")}
+                                label={t("sorting")}
+                                nativeSelectProps={{
+                                    value: sortValue,
+                                    onChange: (e) => setSortValue(e.target.value),
+                                }}
+                            >
+                                <option value="" disabled hidden>
+                                    {tCommon("select_option")}
+                                </option>
+                                <option value="alphabetical_order">{t("alphabetical_order")}</option>
+                                <option value="reverse_alphabetical_order">{t("reverse_alphabetical_order")}</option>
+                            </Select>
+                            <Select
+                                className={fr.cx("fr-col-6", "fr-col-sm-5")}
+                                label={t("type_sorting")}
+                                nativeSelectProps={{
+                                    value: fluxValue,
+                                    onChange: (e) => setFluxValue(e.target.value),
+                                }}
+                            >
+                                <option value="" disabled hidden>
+                                    {tCommon("select_option")}
+                                </option>
+                                <option value="WMS">WMS</option>
+                                <option value="WMTS_TMS">WMTS / TMS</option>
+                                <option value="WFS">WFS</option>
+                            </Select>
+                        </div>
+                    )}
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-grid-row--gutters")}>
-                        <Tooltip title="Le nombre maximal de clés par utilisateur est de 10" />
+                        <Tooltip title={t("key_limit") + user?.keys_quota} />
                         <h3 className={fr.cx("fr-mt-6v", "fr-mx-1w")}>{t("active_keys")}</h3>
                         <Badge noIcon={true} severity={"info"}>
-                            {keys.length}/10
+                            {user?.keys_use}/{user?.keys_quota}
                         </Badge>
                     </div>
 
-                    {keys.map((accessKey) => {
+                    {filteredAndSortedKeys.map((accessKey) => {
                         const groupedServices = (accessKey.accesses ?? []).reduce(
                             (acc, access) => {
                                 const type = access.offering.type;
@@ -136,12 +210,10 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
                             {} as Record<string, typeof accessKey.accesses>
                         );
 
-                        console.log("ACCESSKEY", accessKey);
-
                         const tags: TagProps[] = [];
 
                         if (accessKey.blacklist?.length || accessKey.whitelist?.length) {
-                            tags.push({ children: "Filtrage par IP", iconId: "fr-icon-check-line" });
+                            tags.push({ children: t("ip_filtering"), iconId: "fr-icon-check-line" });
                         }
 
                         if (accessKey.user_agent?.trim()) {
@@ -160,28 +232,20 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
                                 >
                                     <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-grid-row--gutters")}>
                                         <div className={fr.cx("fr-col-12", "fr-col-sm-9", "fr-grid-row", "fr-grid-row--middle")}>
-                                            <h4
-                                                style={{
-                                                    overflow: "hidden",
-                                                    textOverflow: "ellipsis",
-                                                    whiteSpace: "nowrap",
-                                                    display: "inline-block",
-                                                    maxWidth: "calc(100% - 5.5rem)",
-                                                }}
-                                                className={fr.cx("fr-mr-1w")}
-                                            >
-                                                {accessKey.name}
-                                            </h4>
+                                            <div className={`frx-col-sm-auto + ${fr.cx("fr-mr-1w")}`}>
+                                                <h4>{accessKey.name}</h4>
+                                            </div>
                                             {accessKey.type && (
-                                                <Badge className={fr.cx("fr-mb-6v")} noIcon={true} severity={"info"}>
+                                                <Badge className={`frx-col-sm-auto ${fr.cx("fr-mb-6v")}`} noIcon={true} severity={"info"}>
                                                     {accessKey.type}
                                                 </Badge>
                                             )}
                                         </div>
 
-                                        <div className={`frx-flex-end-sm ${fr.cx("fr-col-12", "fr-col-sm-3", "fr-mb-6v")}`}>
+                                        <div className={`frx-flex-end-sm frx-col-sm-auto ${fr.cx("fr-mb-6v", "fr-mr-1w")}`}>
                                             <Button
                                                 title={tCommon("modify")}
+                                                className={fr.cx("fr-ml-1w")}
                                                 priority="primary"
                                                 iconId="fr-icon-edit-line"
                                                 size="small"
@@ -191,7 +255,7 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
                                             />
                                             <Button
                                                 title={tCommon("delete")}
-                                                className={fr.cx("fr-ml-4v")}
+                                                className={fr.cx("fr-ml-2w")}
                                                 priority="secondary"
                                                 iconId="fr-icon-delete-line"
                                                 size="small"
@@ -206,6 +270,7 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
                                     {accessKey.accesses !== undefined && accessKey.accesses.length !== 0 ? (
                                         <>
                                             {Object.entries(groupedServices).map(([type, services], typeIndex) => {
+                                                console.log(type);
                                                 return (
                                                     <div key={type} className={fr.cx("fr-mb-5v")}>
                                                         {typeIndex >= 1 ? <hr /> : null}

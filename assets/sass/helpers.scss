@@ -9,7 +9,30 @@
         margin-top: 0 !important;
     }
     .frx-flex-end-sm {
+        margin-left: auto;
         display: flex !important;
         justify-content: flex-end !important;
+    }
+
+    .frx-col-sm-auto {
+        flex: 0 1 auto !important;
+        width: auto !important;
+        max-width: none !important;
+        min-width: 0 !important;
+    }
+}
+
+@media (min-width: 768px) {
+    .frx-flex-end-md {
+        margin-left: auto;
+        display: flex !important;
+        justify-content: flex-end !important;
+    }
+
+    .frx-col-md-auto {
+        flex: 0 1 auto !important;
+        width: auto !important;
+        max-width: none !important;
+        min-width: 0 !important;
     }
 }

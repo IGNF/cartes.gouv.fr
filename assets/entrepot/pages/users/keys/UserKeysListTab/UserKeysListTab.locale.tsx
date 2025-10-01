@@ -7,6 +7,11 @@ const { i18n } = declareComponentKeys<
     | "no_keys"
     | { K: "explain_no_keys"; R: JSX.Element }
     | "consult_documentation"
+    | "sorting"
+    | "type_sorting"
+    | "key_limit"
+    | "alphabetical_order"
+    | "reverse_alphabetical_order"
     | "active_keys"
     | "ip_filtering"
     | "user_agent"
@@ -34,10 +39,15 @@ export const UserKeysListTabFrTranslations: Translations<"fr">["UserKeysListTab"
                     "Créer vos clés d’accès et utiliser-les dans vos outils (SIG, site internet, etc.) pour exploiter les permissions qui vous ont été accordées par les producteurs de données."
                 }
             </p>
-            <p className={fr.cx("fr-mb-6v")}>{"* Les données publiques sont disponibles sans création de clé d'accès."}</p>
+            <p>{"* Les données publiques sont disponibles sans création de clé d’accès."}</p>
         </>
     ),
     consult_documentation: "Consulter la documentation",
+    sorting: "Tri",
+    type_sorting: "Filtrer par flux",
+    key_limit: "Le nombre maximal de clés est de ",
+    alphabetical_order: "Ordre alphabétique de A à Z",
+    reverse_alphabetical_order: "Ordre alphabétique de Z à A",
     active_keys: "Clés actives",
     ip_filtering: "Filtrage par IP",
     user_agent: "User agent",
@@ -65,6 +75,11 @@ export const UserKeysListTabEnTranslations: Translations<"en">["UserKeysListTab"
         </>
     ),
     consult_documentation: "Consult the documentation",
+    sorting: "Sorting",
+    type_sorting: undefined,
+    key_limit: "The maximum number of keys is ",
+    alphabetical_order: "Alphabetical order from A to Z",
+    reverse_alphabetical_order: "Alphabetical order from Z to A",
     active_keys: "Active keys",
     ip_filtering: "IP filtering",
     user_agent: "User agent",
