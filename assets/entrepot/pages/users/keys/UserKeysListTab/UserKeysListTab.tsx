@@ -75,7 +75,8 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
     if (!keys) return null;
 
     const normalizeType = (type: string) => {
-        if (type.startsWith("WMS")) return "WMS";
+        if (type === "WMTS-RASTER") return "WMTS-RASTER";
+        if (type === "WMTS-VECTOR") return "WMTS-VECTOR";
         if (type === "WMTS-TMS") return "WMTS_TMS";
         if (type === "WFS") return "WFS";
         return type;
@@ -183,7 +184,8 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
                                 <option value="" disabled hidden>
                                     {tCommon("select_option")}
                                 </option>
-                                <option value="WMS">WMS</option>
+                                <option value="WMS-RASTER">WMS-RASTER</option>
+                                <option value="WMS-VECTOR">WMS-VECTOR</option>
                                 <option value="WMTS_TMS">WMTS / TMS</option>
                                 <option value="WFS">WFS</option>
                             </Select>
