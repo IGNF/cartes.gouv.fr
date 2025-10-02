@@ -44,7 +44,7 @@ export const UserKeysListTabFrTranslations: Translations<"fr">["UserKeysListTab"
     ),
     consult_documentation: "Consulter la documentation",
     sorting: "Tri",
-    type_sorting: "Filtrer par flux",
+    type_sorting: "Filtrer par type",
     key_limit: "Le nombre maximal de clés est de ",
     alphabetical_order: "Ordre alphabétique de A à Z",
     reverse_alphabetical_order: "Ordre alphabétique de Z à A",

@@ -41,7 +41,7 @@ export const PermissionsFrTranslations: Translations<"fr">["Permissions"] = {
     explain_permissions:
         "Consulter les permissions qui vous ont été octroyées par les producteurs de données, leurs services associés et leur date d'expiration.",
     sorting: "Tri",
-    type_sorting: "Filtrer par flux",
+    type_sorting: "Filtrer par type",
     alphabetical_order: "Ordre alphabétique de A à Z",
     reverse_alphabetical_order: "Ordre alphabétique de Z à A",
     latest_date: "Date d'expiration la plus récente",
