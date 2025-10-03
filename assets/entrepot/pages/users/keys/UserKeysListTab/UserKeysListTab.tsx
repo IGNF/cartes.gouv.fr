@@ -269,7 +269,6 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
                                     {accessKey.accesses !== undefined && accessKey.accesses.length !== 0 ? (
                                         <>
                                             {Object.entries(groupedServices).map(([type, services], typeIndex) => {
-                                                console.log(type);
                                                 return (
                                                     <div key={type} className={fr.cx("fr-mb-5v")}>
                                                         {typeIndex >= 1 ? <hr /> : null}
