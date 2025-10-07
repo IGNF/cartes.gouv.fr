@@ -73,6 +73,7 @@ common:
     email_contact_error: "L’email de contact n’est pas une adresse email valide"
     organization_email_mandatory_error: "L’email de l’organisme est obligatoire"
     organization_email_error: "L’email de l’organisme n’est pas une adresse email valide"
+    inspire_license_error: "Veuillez sélectionner un type de restriction"
     projection_error: "La projection est obligatoire"
     charset_error: "Le jeux de caractères est obligatoire"
     encoding_error: "L’encodage de la ressource est obligatoire"
