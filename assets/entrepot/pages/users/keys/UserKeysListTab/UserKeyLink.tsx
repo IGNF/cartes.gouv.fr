@@ -29,9 +29,11 @@ const UserKeyLink: FC<UserKeyLinkProps> = ({ permissionId, hash, offeringId }) =
         const wmtsUrl = offering.urls?.find((urlObj) => urlObj.type === "WMTS")?.url;
         const tmsUrl = offering.urls?.find((urlObj) => urlObj.type === "TMS")?.url;
 
-        const wmtsCapabilitiesUrl = wmtsUrl ? `${wmtsUrl.split("?")[0]}?service=WMTS&version=1.0.0&request=GetCapabilities&apikey=${hash}` : null;
+        const wmtsCapabilitiesUrl = wmtsUrl
+            ? `${wmtsUrl.split("?")[0]}?service=WMTS&version=1.0.0&request=GetCapabilities${hash ? `&apikey=${hash}` : ""}`
+            : null;
 
-        const tmsCapabilitiesUrl = tmsUrl ? `${tmsUrl.split("/1.0.0/")[0]}/1.0.0/?apikey=${hash}` : null;
+        const tmsCapabilitiesUrl = tmsUrl ? `${tmsUrl.split("/1.0.0/")[0]}/1.0.0/${hash ? `?apikey=${hash}` : ""}` : null;
 
         return (
             <div className={fr.cx("fr-mb-3v")}>
@@ -48,6 +50,7 @@ const UserKeyLink: FC<UserKeyLinkProps> = ({ permissionId, hash, offeringId }) =
                         className={fr.cx("fr-mb-4v")}
                         label="WMTS"
                         text={wmtsCapabilitiesUrl}
+                        copyLabel={"Copier l'URL"}
                     />
                 )}
                 {tmsCapabilitiesUrl && (
@@ -62,6 +65,7 @@ const UserKeyLink: FC<UserKeyLinkProps> = ({ permissionId, hash, offeringId }) =
                         }
                         label="TMS"
                         text={tmsCapabilitiesUrl}
+                        copyLabel={"Copier l'URL"}
                     />
                 )}
             </div>
@@ -91,6 +95,7 @@ const UserKeyLink: FC<UserKeyLinkProps> = ({ permissionId, hash, offeringId }) =
                 className={fr.cx("fr-mb-4v")}
                 label={offering?.type}
                 text={capabilitiesUrl}
+                copyLabel={"Copier l'URL"}
             />
         );
     }

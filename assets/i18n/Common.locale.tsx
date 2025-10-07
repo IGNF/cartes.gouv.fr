@@ -47,6 +47,9 @@ const { i18n } = declareComponentKeys<
     | "search"
     | "clear"
     | "refresh"
+    | "filter"
+    | "remove_filters"
+    | "select_option"
     | { K: "last_refresh_date"; P: { dataUpdatedAt: number }; R: string }
     | { K: "nb_results"; P: { nb: number }; R: string }
 >()("Common");
@@ -97,6 +100,9 @@ export const commonFrTranslations: Translations<"fr">["Common"] = {
     search: "Rechercher",
     clear: "Effacer",
     refresh: "Rafraîchir",
+    filter: "Filtrer",
+    remove_filters: "Retirer les filtres",
+    select_option: "Sélectionnez une option",
     last_refresh_date: ({ dataUpdatedAt }) => `Données mises à jour le ${formatDateFromISO(new Date(dataUpdatedAt).toISOString())}`,
     nb_results: ({ nb }) => (nb > 1 ? `${nb} résultats` : `${nb} résultat`),
 };
@@ -146,6 +152,9 @@ export const commonEnTranslations: Translations<"en">["Common"] = {
     search: "Search",
     clear: "Clear",
     refresh: undefined,
+    filter: "Filter",
+    remove_filters: "Remove the filters",
+    select_option: "Select an option",
     last_refresh_date: undefined,
     nb_results: undefined,
 };
