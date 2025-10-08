@@ -5,12 +5,17 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FC } from "react";
+import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
+import { FC, lazy, Suspense, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { symToStr } from "tsafe/symToStr";
 
-import { type Datasheet, type DatasheetDetailed, type Metadata } from "../../../../../@types/app";
+import LoadingText from "@/components/Utils/LoadingText";
+import { blockingProcessingStatuses } from "@/hooks/queries/useStoredDataUseProcessings";
+import { delta } from "@/utils";
+import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
+import type { Datasheet, DatasheetDetailed, Metadata } from "../../../../../@types/app";
+import Main from "../../../../../components/Layout/Main";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import Wait from "../../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../../i18n/i18n";
@@ -18,12 +23,12 @@ import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import { type CartesApiException } from "../../../../../modules/jsonFetch";
 import { routes, useRoute } from "../../../../../router/router";
 import api from "../../../../api";
-import DatasetListTab from "../DatasetListTab/DatasetListTab";
 import DatasheetThumbnail from "../DatasheetThumbnail";
-import DocumentsTab from "../DocumentsTab/DocumentsTab";
-import MetadataTab from "../MetadataTab/MetadataTab";
-import ServicesListTab from "../ServiceListTab/ServicesListTab";
-import Main from "../../../../../components/Layout/Main";
+
+const DatasetListTab = lazy(() => import("../DatasetListTab/DatasetListTab"));
+const DocumentsTab = lazy(() => import("../DocumentsTab/DocumentsTab"));
+const MetadataTab = lazy(() => import("../MetadataTab/MetadataTab"));
+const ServicesListTab = lazy(() => import("../ServiceListTab/ServicesListTab"));
 
 const deleteDataConfirmModal = createModal({
     id: "delete-data-confirm-modal",
@@ -92,6 +97,33 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
         queryFn: ({ signal }) => api.datasheetDocument.getList(datastoreId, datasheetName, { signal }),
         staleTime: 120000,
         enabled: !datasheetDeleteMutation.isPending,
+    });
+
+    // const queryParams = useMemo(() => ({ input_stored_data: vectorDb._id }), [vectorDb._id]);
+
+    const storedDataIds = useMemo(
+        () => [
+            ...(datasheetQuery.data?.vector_db_list?.map((vectorDb) => vectorDb._id) ?? []),
+            // ...(datasheetQuery.data?.pyramid_vector_list?.map((pyramid) => pyramid._id) ?? []),
+            // ...(datasheetQuery.data?.pyramid_raster_list?.map((pyramid) => pyramid._id) ?? []),
+        ],
+        [datasheetQuery.data]
+    );
+
+    const isOpenDeleteDataConfirmModal = useIsModalOpen(deleteDataConfirmModal);
+    const processingExecutionsQuery = useQueries({
+        queries: storedDataIds.map((storedDataId) => {
+            const queryParams = { input_stored_data: storedDataId };
+            return {
+                queryKey: RQKeys.datastore_processing_execution_list(datastoreId, { ...queryParams, statuses: blockingProcessingStatuses }),
+                queryFn: async ({ signal }) => {
+                    const executions = await api.processing.getExecutionList(datastoreId, queryParams, { signal });
+                    return executions.filter((execution) => blockingProcessingStatuses.includes(execution.status));
+                },
+                staleTime: delta.minutes(10),
+                enabled: isOpenDeleteDataConfirmModal,
+            };
+        }),
     });
 
     return (
@@ -191,27 +223,29 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                                     routes.datastore_datasheet_view({ datastoreId, datasheetName, activeTab }).replace();
                                 }}
                             >
-                                {(() => {
-                                    switch (activeTab) {
-                                        case DatasheetViewActiveTabEnum.Metadata:
-                                            return <MetadataTab datastoreId={datastoreId} metadataQuery={metadataQuery} />;
+                                <Suspense fallback={<LoadingText withSpinnerIcon={true} as="p" />}>
+                                    {(() => {
+                                        switch (activeTab) {
+                                            case DatasheetViewActiveTabEnum.Metadata:
+                                                return <MetadataTab datastoreId={datastoreId} metadataQuery={metadataQuery} />;
 
-                                        case DatasheetViewActiveTabEnum.Dataset:
-                                            return <DatasetListTab datastoreId={datastoreId} datasheet={datasheetQuery.data} />;
+                                            case DatasheetViewActiveTabEnum.Dataset:
+                                                return <DatasetListTab datastoreId={datastoreId} datasheet={datasheetQuery.data} />;
 
-                                        case DatasheetViewActiveTabEnum.Services:
-                                            return (
-                                                <ServicesListTab
-                                                    datastoreId={datastoreId}
-                                                    datasheet={datasheetQuery.data}
-                                                    datasheet_services_list={datasheetQuery.data.service_list ?? []}
-                                                />
-                                            );
+                                            case DatasheetViewActiveTabEnum.Services:
+                                                return (
+                                                    <ServicesListTab
+                                                        datastoreId={datastoreId}
+                                                        datasheet={datasheetQuery.data}
+                                                        datasheet_services_list={datasheetQuery.data.service_list ?? []}
+                                                    />
+                                                );
 
-                                        case DatasheetViewActiveTabEnum.Documents:
-                                            return <DocumentsTab datastoreId={datastoreId} datasheetName={datasheetName} />;
-                                    }
-                                })()}
+                                            case DatasheetViewActiveTabEnum.Documents:
+                                                return <DocumentsTab datastoreId={datastoreId} datasheetName={datasheetName} />;
+                                        }
+                                    })()}
+                                </Suspense>
                             </Tabs>
                         </div>
                     </div>
@@ -234,39 +268,59 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                         title={t("datasheet_confirm_delete_modal.title", { datasheetName: datasheetName })}
                         buttons={[
                             {
-                                children: tCommon("no"),
+                                children: tCommon("cancel"),
                                 doClosesModal: true,
                                 priority: "secondary",
                             },
                             {
-                                children: tCommon("yes"),
+                                children: tCommon("delete"),
                                 onClick: () => datasheetDeleteMutation.mutate(),
                                 priority: "primary",
+                                disabled:
+                                    datasheetQuery.isFetching ||
+                                    metadataQuery.isFetching ||
+                                    documentsListQuery.isFetching ||
+                                    processingExecutionsQuery.some((q) => q.isFetching),
                             },
                         ]}
                     >
-                        <strong>{t("datasheet_confirm_delete_modal.text")}</strong>
-                        <ul>
-                            {datasheetQuery?.data?.vector_db_list?.length && datasheetQuery?.data?.vector_db_list.length > 0 ? (
-                                <li>{datasheetQuery?.data?.vector_db_list.length} base(s) de données</li>
-                            ) : null}
-                            {datasheetQuery?.data?.pyramid_vector_list?.length && datasheetQuery?.data?.pyramid_vector_list.length > 0 ? (
-                                <li>{datasheetQuery?.data?.pyramid_vector_list.length} pyramide(s) de tuiles vectorielles</li>
-                            ) : null}
-                            {datasheetQuery?.data?.pyramid_raster_list?.length && datasheetQuery?.data?.pyramid_raster_list.length > 0 ? (
-                                <li>{datasheetQuery?.data?.pyramid_raster_list.length} pyramide(s) de tuiles raster</li>
-                            ) : null}
-                            {datasheetQuery.data?.service_list?.length && datasheetQuery.data.service_list.length > 0 ? (
-                                <li>{datasheetQuery.data?.service_list.length} service(s) publié(s)</li>
-                            ) : null}
-                            {datasheetQuery?.data?.upload_list?.length && datasheetQuery?.data?.upload_list.length > 0 ? (
-                                <li>{datasheetQuery?.data?.upload_list.length} livraison(s)</li>
-                            ) : null}
+                        {datasheetQuery.isFetching ||
+                        metadataQuery.isFetching ||
+                        documentsListQuery.isFetching ||
+                        processingExecutionsQuery.some((q) => q.isFetching) ? (
+                            <LoadingText withSpinnerIcon={true} as="p" />
+                        ) : (
+                            <>
+                                <p className={fr.cx("fr-mb-1v")}>{t("datasheet_confirm_delete_modal.text")}</p>
+                                <ul>
+                                    {datasheetQuery?.data?.vector_db_list?.length && datasheetQuery?.data?.vector_db_list.length > 0 ? (
+                                        <li>{datasheetQuery?.data?.vector_db_list.length} base(s) de données</li>
+                                    ) : null}
+                                    {datasheetQuery?.data?.pyramid_vector_list?.length && datasheetQuery?.data?.pyramid_vector_list.length > 0 ? (
+                                        <li>{datasheetQuery?.data?.pyramid_vector_list.length} pyramide(s) de tuiles vectorielles</li>
+                                    ) : null}
+                                    {datasheetQuery?.data?.pyramid_raster_list?.length && datasheetQuery?.data?.pyramid_raster_list.length > 0 ? (
+                                        <li>{datasheetQuery?.data?.pyramid_raster_list.length} pyramide(s) de tuiles raster</li>
+                                    ) : null}
+                                    {datasheetQuery.data?.service_list?.length && datasheetQuery.data.service_list.length > 0 ? (
+                                        <li>{datasheetQuery.data?.service_list.length} service(s) publié(s)</li>
+                                    ) : null}
+                                    {datasheetQuery?.data?.upload_list?.length && datasheetQuery?.data?.upload_list.length > 0 ? (
+                                        <li>{datasheetQuery?.data?.upload_list.length} livraison(s)</li>
+                                    ) : null}
 
-                            {metadataQuery.data && <li>La métadonnée associée ({metadataQuery.data.file_identifier})</li>}
+                                    {metadataQuery.data && <li>La métadonnée associée ({metadataQuery.data.file_identifier})</li>}
 
-                            {/* TODO : pyramides tuiles raster, documents etc... */}
-                        </ul>
+                                    {documentsListQuery?.data && documentsListQuery?.data?.length > 0 && (
+                                        <li>{documentsListQuery.data.length} document(s) associé(s)</li>
+                                    )}
+                                </ul>
+
+                                {processingExecutionsQuery.filter((q) => q.data !== undefined && q.data?.length > 0).flatMap((q) => q.data).length > 0 && (
+                                    <p>{t("processing_in_progress_deletion_warning")}</p>
+                                )}
+                            </>
+                        )}
                     </deleteDataConfirmModal.Component>,
                     document.body
                 )}
@@ -275,12 +329,12 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                         title={`Voulez-vous supprimer la fiche de données ${datasheetName} ?`}
                         buttons={[
                             {
-                                children: tCommon("no"),
+                                children: tCommon("cancel"),
                                 doClosesModal: true,
                                 priority: "secondary",
                             },
                             {
-                                children: tCommon("yes"),
+                                children: tCommon("delete"),
                                 onClick: () => datasheetDeleteMutation.mutate(),
                                 priority: "primary",
                             },

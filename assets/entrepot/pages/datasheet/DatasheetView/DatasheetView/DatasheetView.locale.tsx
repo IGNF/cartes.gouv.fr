@@ -23,6 +23,7 @@ const { i18n } = declareComponentKeys<
     | "thumbnail_confirm_delete_modal.title"
     | { K: "datasheet_confirm_delete_modal.title"; P: { datasheetName: string }; R: string }
     | "datasheet_confirm_delete_modal.text"
+    | "processing_in_progress_deletion_warning"
     | "metadata_tab.metadata.absent"
     | "metadata_tab.metadata.is_loading"
     | "services_tab.no_service"
@@ -89,6 +90,7 @@ export const DatasheetViewFrTranslations: Translations<"fr">["DatasheetView"] = 
     "thumbnail_confirm_delete_modal.title": "Êtes-vous sûr de vouloir supprimer la vignette de cette fiche de données ?",
     "datasheet_confirm_delete_modal.title": ({ datasheetName }) => `Êtes-vous sûr de supprimer la fiche de données ${datasheetName} ?`,
     "datasheet_confirm_delete_modal.text": "Les éléments suivants seront supprimés :",
+    processing_in_progress_deletion_warning: "Un ou plusieurs traitements avec au moins un de ces jeux de données en entrée sont en cours et seront annulés.",
     "metadata_tab.metadata.absent":
         "Les métadonnées de cette fiche ne sont pas encore disponibles. Créez un premier service à partir d’un de vos jeux de données pour les compléter.",
     "metadata_tab.metadata.is_loading": "Les métadonnées sont en cours de chargement",
@@ -200,6 +202,7 @@ export const DatasheetViewEnTranslations: Translations<"en">["DatasheetView"] = 
     "thumbnail_confirm_delete_modal.title": "Are you sure you want to remove the thumbnail from this data sheet",
     "datasheet_confirm_delete_modal.title": ({ datasheetName }) => `Are you sure you want to delete datasheet ${datasheetName} ?`,
     "datasheet_confirm_delete_modal.text": "The following items will be deleted :",
+    processing_in_progress_deletion_warning: undefined,
     "metadata_tab.metadata.absent": undefined,
     "metadata_tab.metadata.is_loading": undefined,
     "services_tab.no_service": undefined,

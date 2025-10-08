@@ -1,4 +1,5 @@
 import { KeyValueListFrTranslations } from "@/components/Input/KeyValueList.locale";
+import { StoredDataDeleteConfirmDialogFrTranslations } from "@/entrepot/pages/datasheet/DatasheetView/DatasetListTab/StoredDataDeleteConfirmDialog.locale";
 import { EspaceCoCommunityListFrTranslations } from "@/espaceco/pages/communities/CommunityList.locale";
 import { ReuseCommunityConfigFrTranslations } from "@/espaceco/pages/communities/ReuseCommunityConfig.locale";
 import { SearchCommunityFrTranslations } from "@/espaceco/pages/communities/SearchCommunity.locale";
@@ -93,6 +94,7 @@ export const translations: Translations<"fr"> = {
     AccessesRequest: AccessesRequestFrTranslations,
     navItems: navItemsFrTranslations,
     datastoreNavItems: datastoreNavItemsFrTranslations,
+    StoredDataDeleteConfirmDialog: StoredDataDeleteConfirmDialogFrTranslations,
     VectorDbList: VectorDbListFrTranslations,
     PyramidVectorList: PyramidVectorListFrTranslations,
     PyramidRasterList: PyramidRasterListFrTranslations,

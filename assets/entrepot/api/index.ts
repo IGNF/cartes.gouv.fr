@@ -16,6 +16,7 @@ import epsg from "./epsg";
 import annexe from "./annexe";
 import style from "./style";
 import metadata from "./metadata";
+import processing from "./processing";
 import statics from "./statics";
 import geonetwork from "./geonetwork";
 import alerts from "./alerts";
@@ -39,6 +40,7 @@ const api = {
     annexe,
     style,
     metadata,
+    processing,
     statics,
     alerts,
     // epsg.io
