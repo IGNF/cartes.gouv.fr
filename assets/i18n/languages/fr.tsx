@@ -1,5 +1,7 @@
 import { KeyValueListFrTranslations } from "@/components/Input/KeyValueList.locale";
+import { StoredDataDeleteConfirmDialogFrTranslations } from "@/entrepot/pages/datasheet/DatasheetView/DatasetListTab/StoredDataDeleteConfirmDialog.locale";
 import { EspaceCoCommunityListFrTranslations } from "@/espaceco/pages/communities/CommunityList.locale";
+import { ReuseCommunityConfigFrTranslations } from "@/espaceco/pages/communities/ReuseCommunityConfig.locale";
 import { SearchCommunityFrTranslations } from "@/espaceco/pages/communities/SearchCommunity.locale";
 import { DatabasesFrTranslations } from "@/espaceco/pages/communities/management/databases/Databases.locale";
 import { InputCollectionFrTranslations } from "../../components/Input/InputCollection";
@@ -67,10 +69,7 @@ import { ContactFrTranslations } from "../../pages/assistance/contact/Contact.lo
 import { mapboxStyleValidationFrTranslations } from "../../validations/mapbox/MapboxStyleValidator.locale";
 import { SldStyleValidationErrorsFrTranslations } from "../../validations/sld/SldStyleValidation.locale";
 import { commonFrTranslations } from "../Common.locale";
-
-import { ReuseCommunityConfigFrTranslations } from "@/espaceco/pages/communities/ReuseCommunityConfig.locale";
 import type { Translations } from "../types";
-import { StoredDataDeleteConfirmDialogFrTranslations } from "@/entrepot/pages/datasheet/DatasheetView/DatasetListTab/StoredDataDeleteConfirmDialog.locale";
 
 export const translations: Translations<"fr"> = {
     Common: commonFrTranslations,

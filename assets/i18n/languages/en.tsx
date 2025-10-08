@@ -1,8 +1,11 @@
 import { KeyValueListEnTranslations } from "@/components/Input/KeyValueList.locale";
+import { StoredDataDeleteConfirmDialogEnTranslations } from "@/entrepot/pages/datasheet/DatasheetView/DatasetListTab/StoredDataDeleteConfirmDialog.locale";
 import { EspaceCoCommunityListEnTranslations } from "@/espaceco/pages/communities/CommunityList.locale";
+import { ReuseCommunityConfigEnTranslations } from "@/espaceco/pages/communities/ReuseCommunityConfig.locale";
 import { SearchCommunityEnTranslations } from "@/espaceco/pages/communities/SearchCommunity.locale";
 import { DatabasesEnTranslations } from "@/espaceco/pages/communities/management/databases/Databases.locale";
 import { LayerToolsEnTranslations } from "@/espaceco/pages/communities/management/tools/Layers.locale";
+import { InputCollectionEnTranslations } from "../../components/Input/InputCollection";
 import { datastoreNavItemsEnTranslations } from "../../config/navItems/datastoreNavItems.locale";
 import { navItemsEnTranslations } from "../../config/navItems/navItems.locale";
 import { AccessesRequestEnTranslations } from "../../entrepot/pages/accesses-request/AccessesRequest.locale";
@@ -67,10 +70,6 @@ import { mapboxStyleValidationEnTranslations } from "../../validations/mapbox/Ma
 import { SldStyleValidationErrorsEnTranslations } from "../../validations/sld/SldStyleValidation.locale";
 import { commonEnTranslations } from "../Common.locale";
 import type { Translations } from "../types";
-
-import { ReuseCommunityConfigEnTranslations } from "@/espaceco/pages/communities/ReuseCommunityConfig.locale";
-import { InputCollectionEnTranslations } from "../../components/Input/InputCollection";
-import { StoredDataDeleteConfirmDialogEnTranslations } from "@/entrepot/pages/datasheet/DatasheetView/DatasetListTab/StoredDataDeleteConfirmDialog.locale";
 
 export const translations: Translations<"en"> = {
     Common: commonEnTranslations,
