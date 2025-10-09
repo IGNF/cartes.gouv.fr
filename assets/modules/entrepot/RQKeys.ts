@@ -47,11 +47,13 @@ const RQKeys = {
     datastore_offering: (datastoreId: string, offeringId: string): string[] => ["datastore", datastoreId, "offering", offeringId],
 
     datastore_annexe_list: (datastoreId: string): string[] => ["datastore", datastoreId, "annexe"],
+    datastore_annexe: (datastoreId: string, annexeId: string): string[] => ["datastore", datastoreId, "annexe", annexeId],
 
     datastore_metadata_list: (datastoreId: string): string[] => ["datastore", datastoreId, "metadata"],
     datastore_metadata_by_id: (datastoreId: string, metadataId: string): string[] => ["datastore", datastoreId, "metadata", metadataId],
 
-    datastore_statics_list: (datastoreId: string): string[] => ["datastore", datastoreId, "statics"],
+    datastore_statics_list: (datastoreId: string, query?: unknown): string[] => ["datastore", datastoreId, "statics", JSON.stringify(query)],
+    datastore_statics_download: (datastoreId: string, fileId: string): string[] => ["datastore", datastoreId, "statics", fileId, "download"],
 
     community: (communityId: string): string[] => ["community", communityId],
     community_members: (communityId: string): string[] => ["community", communityId, "members"],

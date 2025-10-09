@@ -12,11 +12,13 @@ use App\Services\EntrepotApi\CartesMetadataApiService;
 use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\MetadataApiService;
 use App\Services\RSSFeed\RSSFeed;
+use App\Utils;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
@@ -97,6 +99,23 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
             return new JsonResponse($this->annexeApiService->add($datastoreId, $file->getRealPath(), [$path]));
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
+    #[Route('/{annexeId}/file', name: 'get_file_content', methods: ['GET'], requirements: ['annexeId' => Requirement::UUID_V4])]
+    public function getFileContent(string $datastoreId, string $annexeId): Response
+    {
+        try {
+            $fileContent = $this->annexeApiService->download($datastoreId, $annexeId);
+
+            $response = new Response($fileContent);
+            $response->headers->set('Content-Type', Utils::guess_content_type($fileContent));
+            // $response->headers->set('Content-Disposition', 'inline; filename="'.$annexeId.'"');
+            $response->headers->set('Content-Length', ''.strlen($fileContent));
+
+            return $response;
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
         }
     }
 

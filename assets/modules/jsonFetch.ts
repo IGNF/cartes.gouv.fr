@@ -8,13 +8,13 @@ export type CartesApiException = {
     details: unknown[];
 };
 
-export async function jsonFetch<T>(
+export async function apiFetch(
     url: RequestInfo | URL,
     config: Omit<RequestInit, "body"> = {},
     body: FormData | object | null = null,
     isFileUpload: boolean = false,
     isXMLHttpRequest: boolean = true
-): Promise<T> {
+): Promise<Response> {
     return new Promise((resolve, reject) => {
         (async function () {
             const defaultHeaders: HeadersInit = {};
@@ -44,20 +44,18 @@ export async function jsonFetch<T>(
             try {
                 const response = await fetch(request);
 
-                // retourner un objet vide si la réponse n'a pas de body (dans un cas de 204 par exemple)
-                const data = await response.json().catch(() => ({}));
-
                 if (response.ok) {
                     useAuthStore.getState().setSessionExpired(false);
-                    resolve(data);
+                    resolve(response);
                 } else {
+                    const data = await response.json().catch(() => ({}));
                     if (hasSessionExpired(data)) {
                         useAuthStore.getState().setSessionExpired(true);
                     }
                     reject(data);
                 }
             } catch (error) {
-                if (error instanceof DOMException && error?.name === "AbortError") {
+                if (error instanceof DOMException && (error?.name === "AbortError" || error?.name === "NetworkError")) {
                     // NOTE : ne rien faire, requête annulée par react-query parce que requête en doublon (en mode strict de react)
                 } else {
                     reject(error);
@@ -65,6 +63,16 @@ export async function jsonFetch<T>(
             }
         })();
     });
+}
+
+export async function jsonFetch<T>(
+    url: RequestInfo | URL,
+    config: Omit<RequestInit, "body"> = {},
+    body: FormData | object | null = null,
+    isFileUpload: boolean = false,
+    isXMLHttpRequest: boolean = true
+): Promise<T> {
+    return (await apiFetch(url, config, body, isFileUpload, isXMLHttpRequest)).json().catch(() => ({}));
 }
 
 const hasSessionExpired = (error) => {

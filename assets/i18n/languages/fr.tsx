@@ -5,6 +5,7 @@ import { ReuseCommunityConfigFrTranslations } from "@/espaceco/pages/communities
 import { SearchCommunityFrTranslations } from "@/espaceco/pages/communities/SearchCommunity.locale";
 import { DatabasesFrTranslations } from "@/espaceco/pages/communities/management/databases/Databases.locale";
 import { InputCollectionFrTranslations } from "../../components/Input/InputCollection";
+import { UploadStyleFileFrTranslations } from "../../components/Utils/Geostyler/UploadStyleFile.locale";
 import { datastoreNavItemsFrTranslations } from "../../config/navItems/datastoreNavItems.locale";
 import { navItemsFrTranslations } from "../../config/navItems/navItems.locale";
 import { AccessesRequestFrTranslations } from "../../entrepot/pages/accesses-request/AccessesRequest.locale";
@@ -35,7 +36,6 @@ import { WfsServiceFormFrTranslations } from "../../entrepot/pages/service/wfs/W
 import { PyramidRasterGenerateFormFrTranslations } from "../../entrepot/pages/service/wms-raster-wmts/PyramidRasterGenerateForm/PyramidRasterGenerateForm.locale";
 import { PyramidRasterWmsRasterServiceFormFrTranslations } from "../../entrepot/pages/service/wms-raster-wmts/PyramidRasterWmsRasterServiceForm/PyramidRasterWmsRasterServiceForm.locale";
 import { PyramidRasterWmtsServiceFormFrTranslations } from "../../entrepot/pages/service/wms-raster-wmts/PyramidRasterWmtsServiceForm/PyramidRasterWmtsServiceForm.locale";
-import { UploadStyleFileFrTranslations } from "../../entrepot/pages/service/wms-vector/UploadStyleFile.locale";
 import { WmsVectorServiceFormFrTranslations } from "../../entrepot/pages/service/wms-vector/WmsVectorServiceForm.locale";
 import { MyAccessKeysFrTranslations } from "../../entrepot/pages/users/access-keys/MyAccessKeys.locale";
 import { UserKeyFrTranslations } from "../../entrepot/pages/users/keys/UserKey.locale";
