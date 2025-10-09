@@ -99,16 +99,6 @@ const UploadLayerStyles: FC<UploadLayerStylesProps> = (props) => {
                 </>
             )}
 
-            {service.type === OfferingTypeEnum.WMTSTMS ? (
-                editMode ? (
-                    <p>{"Ajouter un fichier mapbox pour votre service"}</p>
-                ) : (
-                    <p>{"Ajoutez un fichier mapbox pour votre service ou un fichier sld ou qml par couche"}</p>
-                )
-            ) : (
-                <p>{"Ajoutez un fichier sld ou qml par couche présente dans votre service"}</p>
-            )}
-
             <div className={fr.cx("fr-grid-row", "fr-mb-4v")}>
                 <h2 className={fr.cx("fr-m-0")}>Couches</h2>
             </div>

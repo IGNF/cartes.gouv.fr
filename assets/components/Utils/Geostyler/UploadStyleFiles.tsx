@@ -99,6 +99,15 @@ const UploadStyleFiles: FC<UploadStyleFileProps> = (props) => {
                                     }}
                                 />
                             )}
+
+                            <p className={fr.cx("fr-my-2v", "fr-text--sm")}>
+                                {isTms
+                                    ? editMode
+                                        ? "Ajouter un style mapbox pour votre service"
+                                        : "Ajoutez un style mapbox pour votre service ou un style sld ou qml par couche"
+                                    : "Ajoutez un style sld ou qml par couche présente dans votre service"}
+                            </p>
+
                             <RadioButtons
                                 legend=""
                                 classes={{ inputGroup: cx(fr.cx("fr-radio-rich"), "frx-rb-style-layer") }}
