@@ -3,7 +3,7 @@ import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import ToggleSwitch from "@codegouvfr/react-dsfr/ToggleSwitch";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import type { StyleParser } from "geostyler-style";
-import { type FC } from "react";
+import { useCallback, useEffect, useMemo, useRef, type FC } from "react";
 import { useFormContext, type FieldErrors } from "react-hook-form";
 
 import type { StyleFormat } from "@/@types/app";
@@ -44,24 +44,41 @@ const UploadStyleFiles: FC<UploadStyleFileProps> = (props) => {
 
     const { t } = useTranslation("UploadStyleFile");
 
-    function handleChange(style?: string) {
-        if (currentTable !== undefined) {
-            onChange({ ...value, [encodeKey(currentTable)]: style });
-        }
-    }
+    const onChangeRef = useRef(onChange);
 
-    function handleFormatChange(format: string) {
-        if (currentTable !== undefined) {
-            setFormat(currentTable, format as StyleFormatEnum);
-        }
-    }
+    useEffect(() => {
+        onChangeRef.current = onChange;
+    }, [onChange]);
+
+    const handleChange = useCallback(
+        (style?: string) => {
+            if (currentTable !== undefined) {
+                onChangeRef.current({ ...value, [encodeKey(currentTable)]: style });
+            }
+        },
+        [currentTable, value]
+    );
+
+    const handleFormatChange = useCallback(
+        (format: string) => {
+            if (currentTable === undefined) return;
+            const next = format as StyleFormatEnum;
+            // éviter les mises à jour sans effet si le format est inchangé
+            if (styleFormats[currentTable] === next) return;
+            setFormat(currentTable, next);
+        },
+        [currentTable, setFormat, styleFormats]
+    );
 
     const format: StyleFormat | undefined = styleFormats[currentTable];
-    let parser: StyleParser | undefined;
-    if (format) {
-        parser = getParserForFormat(format as StyleFormatEnum);
-    }
-    const parsers: StyleParser[] = getParsersForExtensions(acceptedFileExtensions);
+
+    const parser: StyleParser | undefined = useMemo(() => {
+        return format ? getParserForFormat(format as StyleFormatEnum) : undefined;
+    }, [format]);
+
+    const parsers: StyleParser[] = useMemo(() => getParsersForExtensions(acceptedFileExtensions), [acceptedFileExtensions]);
+
+    const sortedTables = useMemo(() => [...tables].sort(), [tables]);
 
     return (
         <Panels
@@ -85,7 +102,7 @@ const UploadStyleFiles: FC<UploadStyleFileProps> = (props) => {
                             <RadioButtons
                                 legend=""
                                 classes={{ inputGroup: cx(fr.cx("fr-radio-rich"), "frx-rb-style-layer") }}
-                                options={tables.sort().map((table) => ({
+                                options={sortedTables.map((table) => ({
                                     label: table,
                                     hintText: errors?.style_files?.[encodeKey(table)]?.message ? (
                                         <span className={fr.cx("fr-error-text", "fr-mt-1v")}>{errors?.style_files?.[encodeKey(table)]?.message}</span>

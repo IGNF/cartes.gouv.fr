@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { memo, ReactNode } from "react";
 
 import LoadingIcon from "./LoadingIcon";
 
@@ -17,4 +17,4 @@ const LoadingText = ({ message, className = "", as: HtmlTag = "h1", withSpinnerI
     );
 };
 
-export default LoadingText;
+export default memo(LoadingText);

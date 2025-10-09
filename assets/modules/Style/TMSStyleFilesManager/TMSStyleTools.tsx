@@ -4,9 +4,9 @@ import { Service, StyleFormatEnum } from "@/@types/app";
 import { getParserForFormat, mbParser } from "@/utils/geostyler";
 
 export default class TMSStyleTools {
-    buildMbStyle(service: Service, styleString: string): MbStyle {
+    buildMbStyle(service: Service, style: string | MbStyle): MbStyle {
         const emptyStyle = this.#getEmptyStyle(service);
-        const mapboxStyle = JSON.parse(styleString) as MbStyle;
+        const mapboxStyle = typeof style === "string" ? (JSON.parse(style) as MbStyle) : style;
 
         const layers = mapboxStyle.layers.map((layer) => ({
             ...layer,

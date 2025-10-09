@@ -4,7 +4,7 @@ import BaseLayer from "ol/layer/Base";
 import { FC, useEffect, useState } from "react";
 import { Controller, useFormContext, useWatch } from "react-hook-form";
 
-import { GeostylerStyles, OfferingTypeEnum, Service, StyleFormatEnum } from "@/@types/app";
+import { GeostylerStyles, OfferingTypeEnum, StyleFormatEnum } from "@/@types/app";
 import UploadStyleFiles from "@/components/Utils/Geostyler/UploadStyleFiles";
 import RMap from "@/components/Utils/RMap";
 import { useStyleForm } from "@/contexts/StyleFormContext";
@@ -13,7 +13,6 @@ import getWebService from "@/modules/WebServices/WebServices";
 import { decodeKeys } from "@/utils";
 
 type UploadLayerStylesProps = {
-    service: Service;
     names: string[];
     parser?: StyleParser;
     parsers?: StyleParser[];
@@ -22,10 +21,10 @@ type UploadLayerStylesProps = {
 const tmsStyleTools = new TMSStyleTools();
 
 const UploadLayerStyles: FC<UploadLayerStylesProps> = (props) => {
-    const { service, names } = props;
+    const { names } = props;
     const { control } = useFormContext();
 
-    const { editMode, isMapbox, isTms, styleFormats } = useStyleForm();
+    const { editMode, service, isMapbox, isTms, styleFormats } = useStyleForm();
 
     const [olLayers, setOlLayers] = useState<BaseLayer[]>([]);
 

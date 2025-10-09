@@ -3,16 +3,18 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { Upload } from "@codegouvfr/react-dsfr/Upload";
 import { Divider } from "@mui/material";
-import { type Style as GsStyle, ReadStyleResult, StyleParser } from "geostyler-style";
-import { FC, lazy, Suspense, useEffect, useState } from "react";
+import { type Style as GsStyle, ReadStyleResult, Rule, StyleParser } from "geostyler-style";
+import { FC, lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useFormContext } from "react-hook-form";
 
 import { StyleFormatEnum } from "@/@types/app";
 import { useStyleForm } from "@/contexts/StyleFormContext";
 import { useTranslation } from "@/i18n";
-import { getFileExtension } from "@/utils";
+import { encodeKey, getFileExtension } from "@/utils";
 import { getParserForExtension, sldParser } from "@/utils/geostyler";
 import ConfirmDialog, { ConfirmDialogModal } from "../ConfirmDialog";
-import LoadingIcon from "../LoadingIcon";
+import LoadingText from "../LoadingText";
+import useStylesHandler from "./useStylesHandler";
 
 const GeostylerEditor = lazy(() => import("./GeostylerEditor"));
 
@@ -57,52 +59,55 @@ const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
     const { t } = useTranslation("UploadStyleFile");
 
     const { currentTable, styleFormats } = useStyleForm();
+    const { setError, trigger } = useFormContext();
 
-    // état interne au composant
-    const [gsStyle, setGsStyle] = useState<GsStyle>();
-    const [strStyle, setStrStyle] = useState<string>();
+    const { gsStyle, setGsStyle, strStyle } = useStylesHandler({
+        parser,
+        format: styleFormats[currentTable] ?? StyleFormatEnum.SLD,
+        initialStrStyle: value,
+        setError: (error) => {
+            setError(`style_files.${encodeKey(currentTable)}`, { message: error });
+        },
+    });
 
     const [uploadError, setUploadError] = useState<string | undefined>(undefined);
 
+    const onChangeRef = useRef(onChange);
+    const triggerRef = useRef(trigger);
+
     useEffect(() => {
-        onChange(strStyle);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [strStyle]);
+        onChangeRef.current = onChange;
+        triggerRef.current = trigger;
+    }, [trigger, onChange]);
 
-    async function handleValueChange(value: string | undefined) {
-        if (value !== strStyle) {
-            if (value) {
-                const readResult = await parser.readStyle(styleFormats[currentTable] === StyleFormatEnum.Mapbox ? JSON.parse(value) : value);
+    // notifier le parent uniquement lorsque le style sérialisé change réellement
+    const encodedFieldName = useMemo(() => (currentTable ? `style_files.${encodeKey(currentTable)}` : undefined), [currentTable]);
+    const lastSentRef = useRef<string | undefined>(undefined);
 
-                if (readResult.output) {
-                    const style = { ...readResult.output, name: currentTable };
-                    setGsStyle(style);
-                    const writeResult = await parser.writeStyle(style);
-                    setStrStyle(styleFormats[currentTable] === StyleFormatEnum.Mapbox ? JSON.stringify(writeResult.output) : writeResult.output);
-                }
-            } else {
-                setGsStyle(undefined);
-                setStrStyle("");
-            }
+    useEffect(() => {
+        if (!encodedFieldName) return;
+        if (lastSentRef.current !== strStyle) {
+            lastSentRef.current = strStyle;
+            onChangeRef.current(strStyle);
+            triggerRef.current(encodedFieldName);
         }
-    }
+    }, [strStyle, encodedFieldName]);
 
-    useEffect(() => {
-        handleValueChange(value);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [value, parser]);
-
-    async function readFileContent(file: File): Promise<string> {
-        return new Promise((resolve) => {
+    const readFileContent = async (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
             const reader = new FileReader();
-            reader.onload = async (e) => {
+            reader.onerror = () => reject(new Error("Impossible de lire le fichier sélectionné"));
+            reader.onabort = () => reject(new Error("Lecture du fichier annulée"));
+            reader.onload = (e) => {
                 if (typeof e.target?.result === "string") {
                     resolve(e.target.result);
+                } else {
+                    reject(new Error("Format de fichier non supporté"));
                 }
             };
             reader.readAsText(file);
         });
-    }
+    };
 
     async function handleUpload(event: React.ChangeEvent<HTMLInputElement>) {
         setUploadError(undefined);
@@ -120,52 +125,53 @@ const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
             content = propertyNamesToLowerCase(content);
 
             const parser = getParserForExtension(extension);
-            let gsStyleResult: ReadStyleResult | undefined;
 
-            if (extension === "json") {
-                onFormatChange?.("mapbox");
-                gsStyleResult = await parser.readStyle(JSON.parse(content));
-            } else {
-                onFormatChange?.(extension);
-                gsStyleResult = await parser.readStyle(content);
-            }
+            const targetFormat: StyleFormatEnum = extension === "json" ? StyleFormatEnum.Mapbox : (extension as StyleFormatEnum);
+            onFormatChange?.(targetFormat);
+
+            const gsStyleResult: ReadStyleResult | undefined = await parser.readStyle(extension === "json" ? JSON.parse(content) : content);
+
+            // debug
+            if (gsStyleResult.unsupportedProperties) console.warn("unsupported", gsStyleResult.unsupportedProperties);
+            if (gsStyleResult.warnings) console.warn("warnings", gsStyleResult.warnings);
+            if (gsStyleResult.errors) console.error("errors", gsStyleResult.errors);
 
             let gsStyle = gsStyleResult.output;
             if (gsStyle) {
-                gsStyle = { ...gsStyle, name: currentTable };
-                setGsStyle(gsStyle);
+                const validRules: Rule[] = gsStyle.rules?.filter((rule) => rule.symbolizers && rule.symbolizers.length > 0) ?? [];
+                gsStyle = { ...gsStyle, name: currentTable, rules: validRules };
 
-                content = (await parser.writeStyle(gsStyle)).output;
-                setStrStyle(extension === "json" ? JSON.stringify(content) : content);
+                try {
+                    const currentStr = strStyle;
+                    const writeRes = await parser.writeStyle(gsStyle);
+                    const newStr = typeof writeRes.output === "object" ? JSON.stringify(writeRes.output) : (writeRes.output as string);
+
+                    // mettre à jour uniquement si le style a changé
+                    if (currentStr !== newStr) {
+                        setGsStyle(gsStyle);
+                    }
+                } catch {
+                    setGsStyle(gsStyle);
+                }
             } else {
                 setUploadError("Lecture du fichier de style échouée : " + gsStyleResult.errors?.join(", "));
             }
         }
     }
 
-    async function handleStyleChange(style: GsStyle) {
-        const content = (await parser.writeStyle(style)).output;
-        setStrStyle(styleFormats[currentTable] === StyleFormatEnum.Mapbox ? JSON.stringify(content) : content);
-        setGsStyle(style);
-    }
-
-    const handleCreateEmptyStyle = () => {
+    const handleCreateEmptyStyle = useCallback(() => {
         const defaultStyle = getDefaultStyle(currentTable);
 
         setGsStyle(defaultStyle);
-        parser
-            .writeStyle(defaultStyle)
-            .then((result) => (typeof result.output === "object" ? JSON.stringify(result.output) : result.output))
-            .then((content) => setStrStyle(content));
-
         setUploadError(undefined);
-    };
+    }, [currentTable, setGsStyle]);
 
     const handleRemoveStyle = () => {
         setGsStyle(undefined);
-        setStrStyle(undefined);
         setUploadError(undefined);
     };
+
+    const acceptAttr = useMemo(() => acceptedFileExtensions.map((ext) => "." + ext).join(","), [acceptedFileExtensions]);
 
     return (
         <>
@@ -179,8 +185,8 @@ const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
                             {t("remove_style")}
                         </Button>
                     </div>
-                    <Suspense fallback={<LoadingIcon />}>
-                        <GeostylerEditor defaultParser={parser} onChange={handleStyleChange} parsers={parsers} value={gsStyle} />
+                    <Suspense fallback={<LoadingText as="p" withSpinnerIcon={true} />}>
+                        <GeostylerEditor defaultParser={parser} onChange={setGsStyle} parsers={parsers} value={gsStyle} />
                     </Suspense>
                     <ConfirmDialog title={t("remove_style")} noTitle={tCommon("cancel")} yesTitle={tCommon("delete")} onConfirm={handleRemoveStyle}>
                         {<p>{t("remove_style_confirm_message", { layer: currentTable })}</p>}
@@ -193,7 +199,7 @@ const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
                         className={fr.cx("fr-input-group", "fr-mb-2w")}
                         hint={t("file_input_hint", { acceptedFileExtensions })}
                         nativeInputProps={{
-                            accept: acceptedFileExtensions.map((ext) => "." + ext).join(","),
+                            accept: acceptAttr,
                             onChange: handleUpload,
                         }}
                     />

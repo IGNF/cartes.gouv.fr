@@ -2,7 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { SegmentedControl } from "@codegouvfr/react-dsfr/SegmentedControl";
 import { CodeEditor, GeoStylerContext, GeoStylerContextInterface, Style, locale } from "geostyler";
 import { Style as GsStyle, StyleParser } from "geostyler-style";
-import { FC, useState } from "react";
+import { FC, memo, useState } from "react";
 import { tss } from "tss-react";
 
 import DsfrAntdConfig from "@/components/Provider/DsfrAntdConfig";
@@ -113,7 +113,7 @@ const GeostylerEditor: FC<GeostylerEditorProps> = (props) => {
     );
 };
 
-export default GeostylerEditor;
+export default memo(GeostylerEditor);
 
 const useStyles = tss.create(() => ({
     editor: {
