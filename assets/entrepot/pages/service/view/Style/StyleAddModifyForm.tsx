@@ -336,7 +336,6 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
                             />
                             <StyleFormProvider
                                 editMode={editMode}
-                                service={service}
                                 serviceType={service?.type}
                                 isMapbox={isMapbox}
                                 setIsMapbox={setIsMapbox}
@@ -346,7 +345,7 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
                             >
                                 {layerNames.length > 0 && service !== undefined && (
                                     <FormProvider {...form}>
-                                        <UploadLayerStyles parser={parser} parsers={parsers} names={layerNames} />
+                                        <UploadLayerStyles service={service} parser={parser} parsers={parsers} names={layerNames} />
                                     </FormProvider>
                                 )}
                             </StyleFormProvider>

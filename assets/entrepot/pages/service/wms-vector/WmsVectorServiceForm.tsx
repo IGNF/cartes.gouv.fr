@@ -6,7 +6,7 @@ import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { symToStr } from "tsafe/symToStr";
 import * as yup from "yup";
 
@@ -271,9 +271,13 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
         mode: "onChange",
         values: defaultValues,
     });
-    const { getValues: getFormValues, trigger, watch } = form;
+    const { getValues: getFormValues, trigger } = form;
 
-    const selectedTableNamesList: string[] | undefined = watch("selected_tables", []);
+    const selectedTableNamesList: string[] | undefined = useWatch({
+        name: "selected_tables",
+        control: form.control,
+        compute: (value) => value?.sort(),
+    });
 
     const [styleFormats, setStyleFormats] = useState<Record<string, StyleFormatEnum>>({});
     useEffect(() => {
@@ -359,7 +363,7 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
                     {currentStep === STEPS.STYLE_FILE && (
                         <StyleFormProvider
                             editMode={editMode}
-                            defaultTable={selectedTableNamesList?.sort()[0]}
+                            defaultTable={selectedTableNamesList?.[0]}
                             serviceType={OfferingTypeEnum.WMSVECTOR}
                             isMapbox={false}
                             styleFormats={styleFormats}
