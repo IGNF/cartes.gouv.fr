@@ -6,12 +6,14 @@ import { Divider } from "@mui/material";
 import { type Style as GsStyle, ReadStyleResult, Rule, StyleParser } from "geostyler-style";
 import { FC, lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
+import { tss } from "tss-react";
 
 import { StyleFormatEnum } from "@/@types/app";
 import { useStyleForm } from "@/contexts/StyleFormContext";
 import { useTranslation } from "@/i18n";
+import TMSStyleTools from "@/modules/Style/TMSStyleFilesManager/TMSStyleTools";
 import { encodeKey, getFileExtension } from "@/utils";
-import { getParserForExtension, sldParser } from "@/utils/geostyler";
+import { getParserForExtension, mbParser, sldParser } from "@/utils/geostyler";
 import ConfirmDialog, { ConfirmDialogModal } from "../ConfirmDialog";
 import LoadingText from "../LoadingText";
 import useStylesHandler from "./useStylesHandler";
@@ -53,12 +55,14 @@ function getDefaultStyle(currentTable: string): GsStyle {
     };
 }
 
+const tmsStyleTools = new TMSStyleTools();
+
 const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
     const { onChange, onFormatChange, parser = sldParser, parsers, value, acceptedFileExtensions = ["sld"] } = props;
     const { t: tCommon } = useTranslation("Common");
     const { t } = useTranslation("UploadStyleFile");
 
-    const { currentTable, styleFormats } = useStyleForm();
+    const { currentTable, styleFormats, service, isMapbox } = useStyleForm();
     const { setError, trigger } = useFormContext();
 
     const { gsStyle, setGsStyle, strStyle } = useStylesHandler({
@@ -159,12 +163,20 @@ const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
         }
     }
 
-    const handleCreateEmptyStyle = useCallback(() => {
-        const defaultStyle = getDefaultStyle(currentTable);
+    const handleCreateEmptyStyle = useCallback(async () => {
+        let defaultStyle = getDefaultStyle(currentTable);
+
+        if (service && isMapbox) {
+            const output = (await mbParser.writeStyle(defaultStyle)).output;
+            if (output) {
+                const finalMbStyle = tmsStyleTools.buildMbStyle(service, output);
+                defaultStyle = (await mbParser.readStyle(finalMbStyle)).output as GsStyle;
+            }
+        }
 
         setGsStyle(defaultStyle);
         setUploadError(undefined);
-    }, [currentTable, setGsStyle]);
+    }, [currentTable, setGsStyle, isMapbox, service]);
 
     const handleRemoveStyle = () => {
         setGsStyle(undefined);

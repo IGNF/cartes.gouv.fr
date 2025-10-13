@@ -1,12 +1,12 @@
 import { createContext, Dispatch, PropsWithChildren, SetStateAction, useContext, useEffect, useState } from "react";
 
-import { OfferingTypeEnum, StyleFormatEnum } from "@/@types/app";
+import { OfferingTypeEnum, Service, StyleFormatEnum } from "@/@types/app";
 
 export interface StyleFormContext {
     editMode: boolean;
 
+    service?: Service;
     isTms?: boolean;
-
     isMapbox?: boolean;
     setIsMapbox?: Dispatch<SetStateAction<boolean>>;
 
@@ -31,6 +31,7 @@ export function useStyleForm() {
 interface StyleFormProviderProps {
     editMode: boolean;
 
+    service?: Service;
     serviceType?: OfferingTypeEnum;
     defaultTable?: string;
 
@@ -48,6 +49,7 @@ export function StyleFormProvider(props: PropsWithChildren<StyleFormProviderProp
         editMode,
         defaultTable,
         serviceType,
+        service,
         isMapbox,
         setIsMapbox,
         styleFormats,
@@ -75,6 +77,7 @@ export function StyleFormProvider(props: PropsWithChildren<StyleFormProviderProp
                 isTms,
                 isMapbox,
                 setIsMapbox,
+                service,
 
                 currentTable,
                 setCurrentTable,

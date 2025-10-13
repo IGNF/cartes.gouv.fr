@@ -204,7 +204,8 @@ export type TmsMetadata = {
     bounds: number[];
     format: string;
     tiles: string[];
-    vector_layers: unknown[];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    vector_layers: any[];
 };
 
 /** configuration & offerings */
