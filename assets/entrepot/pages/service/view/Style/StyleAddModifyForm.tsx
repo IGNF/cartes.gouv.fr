@@ -2,12 +2,12 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
+import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQueries, useQuery, useQueryClient, UseQueryOptions } from "@tanstack/react-query";
 import { StyleParser } from "geostyler-style";
 import { FC, useEffect, useMemo, useState } from "react";
-import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
 import * as yup from "yup";
 
@@ -197,9 +197,9 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
 
     const form = useForm<StyleAddModifyFormType>({
         resolver: yupResolver(schema),
-        values: {
+        defaultValues: {
             style_name: style.name,
-            style_files: encodeKeys(styleFilesQuery.data),
+            style_files: {},
         },
     });
     const {
@@ -208,11 +208,11 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
         handleSubmit,
     } = form;
 
-    // useEffect(() => {
-    //     if (styleFilesQuery.data) {
-    //         form.setValue("style_files", encodeKeys(styleFilesQuery.data));
-    //     }
-    // }, [form, styleFilesQuery.data]);
+    useEffect(() => {
+        if (styleFilesQuery?.data) {
+            form.setValue("style_files", encodeKeys(styleFilesQuery.data), { shouldDirty: false, shouldTouch: false });
+        }
+    }, [form, styleFilesQuery?.data]);
 
     const onValid: SubmitHandler<StyleAddModifyFormType> = async (data) => {
         if (!service) return;

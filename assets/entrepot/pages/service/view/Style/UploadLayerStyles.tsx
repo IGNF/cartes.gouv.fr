@@ -106,7 +106,7 @@ const UploadLayerStyles: FC<UploadLayerStylesProps> = (props) => {
             <Controller
                 name="style_files"
                 control={control}
-                shouldUnregister={true}
+                shouldUnregister={false}
                 render={({ field: { value, onChange }, formState: { errors } }) => (
                     <UploadStyleFiles
                         errors={errors}
