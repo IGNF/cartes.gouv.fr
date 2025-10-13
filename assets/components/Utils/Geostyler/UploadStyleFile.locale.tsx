@@ -18,8 +18,7 @@ export const UploadStyleFileFrTranslations: Translations<"fr">["UploadStyleFile"
     layers: "Couches",
     style_overview: "Aperçu du style",
     file_input_title: "Ajouter un fichier de style",
-    file_input_hint: ({ acceptedFileExtensions = [] }) =>
-        `Glissez-déposez votre fichier de style ici. Formats de fichiers autorisés : ${acceptedFileExtensions.join(", ")}`,
+    file_input_hint: ({ acceptedFileExtensions = [] }) => `Formats supportés : ${acceptedFileExtensions.join(", ")}`,
     or: "OU",
     create_style: "Créer un style",
     remove_style: "Supprimer le style",

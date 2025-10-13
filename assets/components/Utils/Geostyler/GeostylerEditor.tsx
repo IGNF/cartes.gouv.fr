@@ -117,6 +117,6 @@ export default memo(GeostylerEditor);
 
 const useStyles = tss.create(() => ({
     editor: {
-        height: "400px",
+        height: "600px",
     },
 }));

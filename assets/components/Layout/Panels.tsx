@@ -71,10 +71,14 @@ export default Panels;
 const useStyles = tss.create(() => ({
     root: {
         borderRadius: "2px",
-        // border: `1px solid ${fr.colors.decisions.border.default.grey.default}`,
     },
     panel: {
         border: `1px solid ${fr.colors.decisions.border.default.grey.default}`,
+        display: "flex",
+        flexDirection: "column",
+        "& + &": {
+            borderLeft: 0,
+        },
     },
     panelEnlarged: {
         flex: 1,
@@ -90,5 +94,9 @@ const useStyles = tss.create(() => ({
     },
     content: {
         padding: fr.spacing("4v"),
+        display: "flex",
+        flex: 1,
+        flexDirection: "column",
+        overflowX: "auto",
     },
 }));

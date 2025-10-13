@@ -304,7 +304,7 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
                 />
             ) : serviceQuery.data ? (
                 <>
-                    <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-4w")}>
+                    <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-16v")}>
                         <Button
                             iconId="fr-icon-arrow-left-s-line"
                             priority="tertiary no outline"
@@ -323,8 +323,8 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
                     {addModifyMutation.error && <Alert closable description={addModifyMutation.error.message} severity="error" title={tCommon("error")} />}
 
                     <div className={fr.cx("fr-grid-row")}>
-                        <div className={fr.cx("fr-col-12")}>
-                            <h2 className={fr.cx("fr-m-0")}>Nom du style</h2>
+                        <div className={fr.cx("fr-col-4")}>
+                            <h2 className={fr.cx("fr-mb-4v")}>Nom du style</h2>
                             <Input
                                 label={"Nom"}
                                 state={errors.style_name ? "error" : "default"}
@@ -334,38 +334,36 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
                                 }}
                                 disabled={editMode === true}
                             />
-                            <StyleFormProvider
-                                editMode={editMode}
-                                serviceType={service?.type}
-                                isMapbox={isMapbox}
-                                setIsMapbox={setIsMapbox}
-                                defaultTable={layerNames[0]}
-                                styleFormats={styleFormats}
-                                setStyleFormats={setStyleFormats}
-                            >
-                                {layerNames.length > 0 && service !== undefined && (
-                                    <FormProvider {...form}>
-                                        <UploadLayerStyles service={service} parser={parser} parsers={parsers} names={layerNames} />
-                                    </FormProvider>
-                                )}
-                            </StyleFormProvider>
                         </div>
+                    </div>
 
+                    <StyleFormProvider
+                        editMode={editMode}
+                        service={service}
+                        serviceType={service?.type}
+                        isMapbox={isMapbox}
+                        setIsMapbox={setIsMapbox}
+                        defaultTable={layerNames[0]}
+                        styleFormats={styleFormats}
+                        setStyleFormats={setStyleFormats}
+                    >
+                        {layerNames.length > 0 && service !== undefined && (
+                            <FormProvider {...form}>
+                                <UploadLayerStyles service={service} parser={parser} parsers={parsers} names={layerNames} />
+                            </FormProvider>
+                        )}
+                    </StyleFormProvider>
+
+                    <div className={fr.cx("fr-grid-row", "fr-mt-16v", "fr-mb-20v")}>
                         <ButtonsGroup
                             buttons={[
                                 {
-                                    children: "Annuler",
-                                    priority: "secondary",
-                                    linkProps: routes.datastore_service_view({ datastoreId, datasheetName, offeringId }).link,
-                                },
-                                {
                                     type: "submit",
-                                    children: "Sauvegarder",
+                                    children: "Ajouter le style",
                                     onClick: handleSubmit(onValid),
                                 },
                             ]}
                             inlineLayoutWhen="always"
-                            className={fr.cx("fr-mt-2v")}
                             style={{ marginLeft: "auto" }}
                             buttonsEquisized={true}
                         />

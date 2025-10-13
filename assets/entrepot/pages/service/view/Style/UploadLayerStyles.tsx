@@ -89,8 +89,8 @@ const UploadLayerStyles: FC<UploadLayerStylesProps> = (props) => {
         <>
             {service !== undefined && (
                 <>
-                    <div className={fr.cx("fr-grid-row", "fr-mb-4v")}>
-                        <h2 className={fr.cx("fr-m-0")}>Aperçu</h2>
+                    <div className={fr.cx("fr-grid-row", "fr-mt-10v")}>
+                        <h2 className={fr.cx("fr-mb-4v")}>Aperçu</h2>
                     </div>
                     <div className={fr.cx("fr-grid-row", "fr-mb-4v")}>
                         {"bbox" in service.configuration.type_infos && service.configuration.type_infos.bbox !== undefined && (
@@ -100,8 +100,8 @@ const UploadLayerStyles: FC<UploadLayerStylesProps> = (props) => {
                 </>
             )}
 
-            <div className={fr.cx("fr-grid-row", "fr-mb-4v")}>
-                <h2 className={fr.cx("fr-m-0")}>Couches</h2>
+            <div className={fr.cx("fr-grid-row", "fr-mt-10v")}>
+                <h2 className={fr.cx("fr-mb-4v")}>Couches</h2>
             </div>
             <Controller
                 name="style_files"

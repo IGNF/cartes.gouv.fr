@@ -173,6 +173,8 @@ const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
 
     const acceptAttr = useMemo(() => acceptedFileExtensions.map((ext) => "." + ext).join(","), [acceptedFileExtensions]);
 
+    const { classes, cx } = useStyles();
+
     return (
         <>
             {uploadError && (
@@ -193,18 +195,21 @@ const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
                     </ConfirmDialog>
                 </div>
             ) : (
-                <div className={fr.cx("fr-my-2w")}>
+                <div className={cx(fr.cx("fr-col-12", "fr-col-sm-6", "fr-py-2v"), classes.uploadContainer)}>
                     <Upload
                         label={t("file_input_title")}
-                        className={fr.cx("fr-input-group", "fr-mb-2w")}
+                        className={cx(fr.cx("fr-input-group", "fr-mb-2w"), classes.upload)}
                         hint={t("file_input_hint", { acceptedFileExtensions })}
                         nativeInputProps={{
                             accept: acceptAttr,
                             onChange: handleUpload,
                         }}
                     />
-                    <Divider>{t("or")}</Divider>
-                    <Button priority={"tertiary"} onClick={handleCreateEmptyStyle}>
+                    <div className={classes.divider}>
+                        <Divider>{t("or")}</Divider>
+                    </div>
+
+                    <Button priority={"secondary"} onClick={handleCreateEmptyStyle} className={classes.btnCreateStyle}>
                         {t("create_style")}
                     </Button>
                 </div>
@@ -214,3 +219,29 @@ const UploadStyleFile: FC<UploadStyleFileProps> = (props) => {
 };
 
 export default UploadStyleFile;
+
+const useStyles = tss.withName({ UploadStyleFile }).create({
+    uploadContainer: {
+        // width: "100%",
+        // height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: fr.spacing("4v"),
+        margin: "auto",
+    },
+    upload: {
+        height: "100%",
+        width: "100%",
+        border: `1px solid ${fr.colors.decisions.border.default.grey.default}`,
+        padding: `${fr.spacing("2v")} ${fr.spacing("4v")}`,
+    },
+    divider: {
+        width: "100%",
+    },
+    btnCreateStyle: {
+        width: "100%",
+        justifyContent: "center",
+    },
+});

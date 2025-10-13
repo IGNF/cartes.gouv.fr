@@ -100,7 +100,12 @@ const UploadStyleFiles: FC<UploadStyleFileProps> = (props) => {
                                 />
                             )}
 
-                            <p className={fr.cx("fr-my-2v", "fr-text--sm")}>
+                            <p
+                                className={fr.cx("fr-my-2v", "fr-text--xs")}
+                                style={{
+                                    color: fr.colors.decisions.text.mention.grey.default,
+                                }}
+                            >
                                 {isTms
                                     ? editMode
                                         ? "Ajouter un style mapbox pour votre service"
