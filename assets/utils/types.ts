@@ -1,3 +1,14 @@
+import { StyleFormat } from "@/@types/app";
+
+export const getStyleExtension = (format: StyleFormat) => {
+    switch (format) {
+        case "mapbox":
+            return "json";
+        default:
+            return format;
+    }
+};
+
 export const getFileExtension = (filename: string) => {
     if (!filename) return "";
     return filename.split(".").pop()?.toLowerCase();

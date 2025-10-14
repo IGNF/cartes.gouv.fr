@@ -160,7 +160,7 @@ export type UploadTree = UploadTreeElementResponseDto[];
 export type EntrepotUser = UserDetailsResponseDto;
 
 /** les styles */
-type StyleLayer = {
+export type StyleLayer = {
     name?: string;
     annexe_id: string;
     url: string;
@@ -174,10 +174,24 @@ export type CartesStyle = {
 
 export type StyleForm = {
     style_name: string;
-    style_files: Record<string, FileList>;
+    style_files: Record<string, string>;
 };
 
-export type StyleFormat = "mapbox" | "sld" | "qml";
+export enum StyleFormatEnum {
+    Mapbox = "mapbox",
+    SLD = "sld",
+    QML = "qml",
+}
+export type StyleFormat = `${StyleFormatEnum}`;
+
+export interface GeostylerStyle {
+    annexeId?: string;
+    name?: string;
+    style: string;
+    format: StyleFormat;
+}
+
+export type GeostylerStyles = GeostylerStyle[];
 
 /** metadata pour TMS */
 export type TmsMetadata = {
@@ -190,7 +204,8 @@ export type TmsMetadata = {
     bounds: number[];
     format: string;
     tiles: string[];
-    vector_layers: unknown[];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    vector_layers: any[];
 };
 
 /** configuration & offerings */

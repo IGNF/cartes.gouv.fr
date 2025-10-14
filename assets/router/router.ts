@@ -272,9 +272,23 @@ const datastoreRoutes = {
         {
             offeringId: param.path.string,
             datasheetName: param.query.string,
-            activeTab: param.query.optional.string.default("diffuse"),
         },
         (p) => `/service/${p.offeringId}/visualisation`
+    ),
+    datastore_service_style_add: datastoreRoute.extend(
+        {
+            offeringId: param.path.string,
+            datasheetName: param.query.string,
+        },
+        (p) => `/service/${p.offeringId}/style/ajout`
+    ),
+    datastore_service_style_edit: datastoreRoute.extend(
+        {
+            offeringId: param.path.string,
+            styleName: param.path.string,
+            datasheetName: param.query.string,
+        },
+        (p) => `/service/${p.offeringId}/style/${p.styleName}/modification`
     ),
 };
 

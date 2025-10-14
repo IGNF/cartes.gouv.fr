@@ -92,7 +92,7 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                     [OfferingTypeEnum.WFS, OfferingTypeEnum.WMTSTMS].includes(service.type) && {
                         text: "Gérer les styles",
                         iconId: "ri-flashlight-line",
-                        linkProps: routes.datastore_service_view({ datastoreId, datasheetName, offeringId: service._id, activeTab: "styles" }).link,
+                        linkProps: routes.datastore_service_view({ datastoreId, datasheetName, offeringId: service._id }).link,
                     },
                     // {
                     //     text: "Mettre à jour la légende",

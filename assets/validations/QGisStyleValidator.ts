@@ -8,18 +8,15 @@ export default class QGisStyleValidator extends StyleValidator {
         super(service, format);
     }
 
-    async validate(files: FileList, ctx: TestContext): Promise<ValidationError | boolean> {
-        const validation = await super.validate(files, ctx);
+    async validate(value: string | undefined, ctx: TestContext): Promise<ValidationError | boolean> {
+        const validation = await super.validate(value, ctx);
         if (validation instanceof ValidationError) {
             return validation;
         }
 
-        const file = files[0];
-        const styleString = await file.text();
-
         const qgisParser = new QGISStyleParser();
 
-        const result = await qgisParser.readStyle(styleString);
+        const result = await qgisParser.readStyle(value as string);
 
         const { warnings, errors, unsupportedProperties } = result;
 

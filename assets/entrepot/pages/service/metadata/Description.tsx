@@ -73,9 +73,6 @@ const Description: FC<DescriptionProps> = ({ visible, form, editMode }) => {
         return () => unsubscribe();
     }, [watch, setFormValue, dirtyFields.service_name]);
 
-    console.log(form.getValues());
-    console.log(form.formState.errors);
-
     return (
         <div className={fr.cx(!visible && "fr-hidden")}>
             <p>{tCommon("mandatory_fields")}</p>

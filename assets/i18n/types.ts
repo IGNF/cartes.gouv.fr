@@ -58,7 +58,7 @@ export type ComponentKey =
     | import("../entrepot/pages/service/wms-raster-wmts/PyramidRasterWmtsServiceForm/PyramidRasterWmtsServiceForm.locale").I18n
     | import("../entrepot/pages/service/common/TableSelection/TableSelection.locale").I18n
     | import("../entrepot/pages/service/common/AccessRestrictions/AccessRestrictions.locale").I18n
-    | import("../entrepot/pages/service/wms-vector/UploadStyleFile.locale").I18n
+    | import("../components/Utils/Geostyler/UploadStyleFile.locale").I18n
     | import("../pages/LoginDisabled/LoginDisabled.locale").I18n
     | import("../espaceco/pages/communities/CommunityList.locale").I18n
     | import("../espaceco/pages/communities/SearchCommunity.locale").I18n
@@ -88,6 +88,7 @@ export type ComponentKey =
     | import("../entrepot/pages/config/Alerts.locale").I18n
     | import("../espaceco/pages/communities/CommunityList.locale").I18n
     | import("../pages/LoginDisabled/LoginDisabled.locale").I18n
-    | import("../components/Input/KeyValueList.locale").I18n;
+    | import("../components/Input/KeyValueList.locale").I18n
+    | import("../components/Utils/Geostyler/UploadStyleFile.locale").I18n;
 
 export type Translations<L extends Language> = GenericTranslations<ComponentKey, Language, typeof fallbackLanguage, L>;

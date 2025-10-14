@@ -1,43 +1,119 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import { Upload } from "@codegouvfr/react-dsfr/Upload";
-import { FC } from "react";
-import { UseFormReturn } from "react-hook-form";
-import { getTranslation } from "../../../../../i18n/i18n";
+import BaseLayer from "ol/layer/Base";
+import { FC, useEffect, useState } from "react";
+import { Controller, useFormContext, useWatch } from "react-hook-form";
+
+import { GeostylerStyles, Service, StyleFormatEnum } from "@/@types/app";
+import UploadStyleFiles from "@/components/Utils/Geostyler/UploadStyleFiles";
+import RMap from "@/components/Utils/RMap";
+import { useStyleForm } from "@/contexts/StyleFormContext";
+import TMSStyleTools from "@/modules/Style/TMSStyleFilesManager/TMSStyleTools";
+import getWebService from "@/modules/WebServices/WebServices";
+import { decodeKeys } from "@/utils";
 
 type UploadLayerStylesProps = {
-    form: UseFormReturn;
-    format: "mapbox" | "sld" | "qml";
-    layers: Record<string, string>;
+    service: Service;
+    names: string[];
 };
 
-const { t } = getTranslation("Style");
+const tmsStyleTools = new TMSStyleTools();
 
-const UploadLayerStyles: FC<UploadLayerStylesProps> = ({ form, format, layers }) => {
-    const {
-        register,
-        formState: { errors },
-    } = form;
+const UploadLayerStyles: FC<UploadLayerStylesProps> = (props) => {
+    const { names, service } = props;
+    const { control } = useFormContext();
+
+    const { isMapbox, isTms, styleFormats } = useStyleForm();
+
+    const [olLayers, setOlLayers] = useState<BaseLayer[]>([]);
+
+    useEffect(() => {
+        if (!service) return;
+        getWebService(service).getLayers().then(setOlLayers);
+    }, [service]);
+
+    const styleFiles = useWatch({
+        name: "style_files",
+        control,
+        compute: (value) => decodeKeys(value),
+    });
+
+    const [currentStyle, setCurrentStyle] = useState<GeostylerStyles>([]);
+    // TODO refactor
+    useEffect(() => {
+        let cancelled = false;
+        async function computeCurrentStyle() {
+            if (isTms) {
+                if (isMapbox) {
+                    if (!cancelled && styleFiles?.["mapbox"]) {
+                        const mbStyle = tmsStyleTools.buildMbStyle(service, styleFiles?.["mapbox"]);
+                        setCurrentStyle([
+                            {
+                                format: StyleFormatEnum.Mapbox,
+                                style: JSON.stringify(mbStyle),
+                            },
+                        ]);
+                    }
+                } else {
+                    const mbStyle = await tmsStyleTools.getMbStyleFromSLDQML(service, names, styleFiles ?? {}, styleFormats ?? {});
+                    if (!cancelled) {
+                        setCurrentStyle([
+                            {
+                                format: StyleFormatEnum.Mapbox,
+                                style: JSON.stringify(mbStyle),
+                            },
+                        ]);
+                    }
+                }
+            } else {
+                if (!cancelled) {
+                    setCurrentStyle(
+                        Object.entries(styleFiles ?? {}).map(([name, style]) => ({
+                            name: name,
+                            style: style as string,
+                            format: styleFormats[name],
+                        }))
+                    );
+                }
+            }
+        }
+        computeCurrentStyle();
+        return () => {
+            cancelled = true;
+        };
+    }, [isTms, isMapbox, service, names, styleFiles, styleFormats]);
 
     return (
         <>
-            <p>{t("add_file", { format: format })}</p>
-            {Object.keys(layers).map((uid) => {
-                return (
-                    <div key={uid} className={fr.cx("fr-grid-row", "fr-mb-3w")}>
-                        <Upload
-                            className={fr.cx("fr-input-group")}
-                            label={layers[uid]}
-                            hint={t("select_file", { format: format })}
-                            state={errors?.style_files?.[uid]?.message ? "error" : "default"}
-                            stateRelatedMessage={errors?.style_files?.[uid]?.message}
-                            nativeInputProps={{
-                                ...register(`style_files.${uid}`),
-                                accept: `.${format}`,
-                            }}
-                        />
+            {service !== undefined && (
+                <>
+                    <div className={fr.cx("fr-grid-row", "fr-mt-10v")}>
+                        <h2 className={fr.cx("fr-mb-4v")}>Aperçu</h2>
                     </div>
-                );
-            })}
+                    <div className={fr.cx("fr-grid-row", "fr-mb-4v")}>
+                        {"bbox" in service.configuration.type_infos && service.configuration.type_infos.bbox !== undefined && (
+                            <RMap layers={olLayers} type={service.type} currentStyle={currentStyle} bbox={service.configuration.type_infos.bbox} />
+                        )}
+                    </div>
+                </>
+            )}
+
+            <div className={fr.cx("fr-grid-row", "fr-mt-10v")}>
+                <h2 className={fr.cx("fr-mb-4v")}>Couches</h2>
+            </div>
+            <Controller
+                name="style_files"
+                control={control}
+                shouldUnregister={false}
+                render={({ field: { value, onChange }, formState: { errors } }) => (
+                    <UploadStyleFiles
+                        errors={errors}
+                        onChange={onChange}
+                        tables={names}
+                        value={value}
+                        acceptedFileExtensions={isMapbox ? ["json"] : ["sld", "qml"]}
+                    />
+                )}
+            />
         </>
     );
 };
