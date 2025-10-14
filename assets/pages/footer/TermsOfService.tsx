@@ -1178,7 +1178,7 @@ const TermsOfService = () => {
                                             </tr>
                                             <tr>
                                                 <td>API Géoplateforme - Téléchargement</td>
-                                                <td rowSpan={3}>10 requêtes/s</td>
+                                                <td rowSpan={3}>5 requêtes/5s avec bannissement de 5 minutes</td>
                                             </tr>
                                             <tr>
                                                 <td>API Géoplateforme - Téléchargement - Privé</td>
