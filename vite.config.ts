@@ -36,7 +36,7 @@ export default defineConfig({
         cors: true,
     },
     plugins: [
-        react(), // if you're using React
+        react(),
         symfonyPlugin({
             viteDevServerHostname: "localhost",
             refresh: true,
@@ -54,6 +54,7 @@ export default defineConfig({
     ],
     base: process.env.ENCORE_PUBLIC_PATH ?? "/build/",
     build: {
+        emptyOutDir: true,
         outDir: resolve(join(__dirname, "public", "build")),
         rollupOptions: {
             input: {

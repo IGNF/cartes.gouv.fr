@@ -19,7 +19,7 @@ RUN APP_ENV=prod composer install --prefer-dist --no-dev --no-cache --optimize-a
 #----------------------------------------------------------------------
 # Installer les dépendances JavaScript/nodejs dans une couche dédiée
 #----------------------------------------------------------------------
-FROM ${registry}/library/node:20-alpine AS deps_nodejs_build
+FROM ${registry}/library/node:24-alpine AS deps_nodejs_build
 ARG project_dir
 RUN mkdir -p ${project_dir}
 WORKDIR ${project_dir}
@@ -27,17 +27,17 @@ WORKDIR ${project_dir}
 RUN apk add --no-cache git
 
 COPY --from=deps_php ${project_dir} .
-RUN yarn install --production=false --frozen-lockfile \
-    && yarn build \
-    && yarn cache clean
+RUN npm ci \
+    && npm run build \
+    && npm cache clean --force
 
-FROM ${registry}/library/node:20-alpine AS deps_nodejs_runtime
+FROM ${registry}/library/node:24-alpine AS deps_nodejs_runtime
 ARG project_dir
 RUN mkdir -p ${project_dir}
 WORKDIR ${project_dir}
 
 COPY --from=deps_php ${project_dir} .
-RUN yarn install --production=true --frozen-lockfile --ignore-scripts
+RUN npm ci --omit=dev --ignore-scripts
 
 #----------------------------------------------------------------------
 # Créer l'image de base de l'application
@@ -154,8 +154,8 @@ COPY --from=deps_php ${project_dir}/vendor vendor
 COPY --from=deps_php ${project_dir}/public/bundles public/bundles
 COPY --from=deps_nodejs_build ${project_dir}/public/build public/build
 COPY --from=deps_nodejs_runtime ${project_dir}/node_modules node_modules
-COPY --from=node:20-slim /usr/local/lib/node_modules /usr/local/lib/node_modules
-COPY --from=node:20-slim /usr/local/bin/node /usr/local/bin/node
+COPY --from=node:24-slim /usr/local/lib/node_modules /usr/local/lib/node_modules
+COPY --from=node:24-slim /usr/local/bin/node /usr/local/bin/node
 
 RUN mkdir -p ${project_dir}/var \
     && chown -R www-data:www-data ${project_dir}/var/
@@ -210,10 +210,15 @@ COPY .docker/php.ini /etc/php/${php_version}/cli/conf.d/99-app.ini
 # https://github.com/nodejs/docker-node/blob/main/18/bullseye/Dockerfile
 # https://stackoverflow.com/a/63108753
 #----------------------------------------------------------------------
-COPY --from=node:20-slim /usr/local/lib/node_modules /usr/local/lib/node_modules
-COPY --from=node:20-slim /usr/local/bin/node /usr/local/bin/node
+COPY --from=node:24-slim /usr/local/lib/node_modules /usr/local/lib/node_modules
+COPY --from=node:24-slim /usr/local/bin/node /usr/local/bin/node
 RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
     && npm i -g npm yarn pnpm
+
+ENV NPM_CONFIG_CACHE="${project_dir}/var/.npm"
+RUN mkdir -p "$NPM_CONFIG_CACHE"
+ENV COMPOSER_HOME="${project_dir}/var/composer"
+RUN mkdir -p "$COMPOSER_HOME"
 
 EXPOSE 8000
 CMD [ "/bin/bash", "apache2-foreground" ]

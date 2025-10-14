@@ -8,4 +8,4 @@ sed -i.bak -E 's#\(\.\./#\(./#g' docs/README.md
 rm -f docs/README.md.bak
 git add docs/README.md
 
-yarn lint-staged
+npx lint-staged
