@@ -176,17 +176,18 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
                             {
                                 children: "Consulter la fiche de données",
                                 onClick: () => {
-                                    uploadQuery.data?.tags.datasheet_name &&
-                                        (queryClient.refetchQueries({
+                                    if (uploadQuery.data?.tags.datasheet_name) {
+                                        queryClient.refetchQueries({
                                             queryKey: RQKeys.datastore_datasheet(datastoreId, uploadQuery.data?.tags.datasheet_name),
-                                        }),
+                                        });
                                         routes
                                             .datastore_datasheet_view({
                                                 datastoreId,
                                                 datasheetName: uploadQuery.data?.tags.datasheet_name,
                                                 activeTab: DatasheetViewActiveTabEnum.Dataset,
                                             })
-                                            .push());
+                                            .push();
+                                    }
                                 },
                             },
                         ]}
@@ -202,17 +203,18 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
                             {
                                 children: t("view_datasheet"),
                                 onClick: () => {
-                                    uploadQuery.data?.tags.datasheet_name &&
-                                        (queryClient.refetchQueries({
+                                    if (uploadQuery.data?.tags.datasheet_name) {
+                                        queryClient.refetchQueries({
                                             queryKey: RQKeys.datastore_datasheet(datastoreId, uploadQuery.data?.tags.datasheet_name),
-                                        }),
+                                        });
                                         routes
                                             .datastore_datasheet_view({
                                                 datastoreId,
                                                 datasheetName: uploadQuery.data?.tags.datasheet_name,
                                                 activeTab: DatasheetViewActiveTabEnum.Dataset,
                                             })
-                                            .push());
+                                            .push();
+                                    }
                                 },
                             },
                         ]}

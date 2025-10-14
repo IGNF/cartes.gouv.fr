@@ -12,7 +12,7 @@ import { Controller, useForm } from "react-hook-form";
 import "../../../../sass/pages/permission.scss";
 import api from "../../../api";
 import DatePicker from "../../../../components/Input/DatePicker";
-import InputCollection from "../../../../components/Input/InputCollection";
+import InputCollection from "../../../../components/Input/InputCollection/InputCollection";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../i18n/i18n";

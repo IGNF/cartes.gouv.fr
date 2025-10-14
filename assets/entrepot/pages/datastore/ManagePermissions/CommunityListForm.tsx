@@ -3,7 +3,7 @@ import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { FC, useState } from "react";
 import "../../../../sass/pages/permission.scss";
-import InputCollection from "../../../../components/Input/InputCollection";
+import InputCollection from "../../../../components/Input/InputCollection/InputCollection";
 import { useTranslation } from "../../../../i18n/i18n";
 
 type CommunityListFormProps = {
