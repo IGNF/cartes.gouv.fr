@@ -1,5 +1,4 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import { StyleParser } from "geostyler-style";
 import BaseLayer from "ol/layer/Base";
 import { FC, useEffect, useState } from "react";
 import { Controller, useFormContext, useWatch } from "react-hook-form";
@@ -15,8 +14,6 @@ import { decodeKeys } from "@/utils";
 type UploadLayerStylesProps = {
     service: Service;
     names: string[];
-    parser?: StyleParser;
-    parsers?: StyleParser[];
 };
 
 const tmsStyleTools = new TMSStyleTools();

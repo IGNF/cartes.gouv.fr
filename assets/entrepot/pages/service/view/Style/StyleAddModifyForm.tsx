@@ -2,13 +2,14 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
-import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Input from "@codegouvfr/react-dsfr/Input";
+import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQueries, useQuery, useQueryClient, UseQueryOptions } from "@tanstack/react-query";
-import { StyleParser } from "geostyler-style";
 import { FC, useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
+import { v4 as uuidv4 } from "uuid";
 import * as yup from "yup";
 
 import Main from "@/components/Layout/Main";
@@ -19,7 +20,6 @@ import { StyleFormProvider } from "@/contexts/StyleFormContext";
 import TMSStyleTools from "@/modules/Style/TMSStyleFilesManager/TMSStyleTools";
 import { routes } from "@/router/router";
 import { decodeKeys, encodeKey, encodeKeys, getFileExtension } from "@/utils";
-import { mbParser, qgisParser, sldParser } from "@/utils/geostyler";
 import { CartesStyle, OfferingTypeEnum, Service, StyleFormatEnum } from "../../../../../@types/app";
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
@@ -30,6 +30,11 @@ import api from "../../../../api";
 import UploadLayerStyles from "./UploadLayerStyles";
 
 const tmsStyleTools = new TMSStyleTools();
+
+const confirmReturnModal = createModal({
+    id: `confirm-return-modal-${uuidv4()}`,
+    isOpenedByDefault: false,
+});
 
 type StyleAddModifyFormType = {
     style_name: string;
@@ -192,9 +197,6 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
         });
     }, [layerNames, isMapbox, style.layers]);
 
-    const parser: StyleParser = isMapbox ? mbParser : sldParser;
-    const parsers: StyleParser[] = isMapbox ? [mbParser] : [sldParser, qgisParser];
-
     const form = useForm<StyleAddModifyFormType>({
         resolver: yupResolver(schema),
         defaultValues: {
@@ -204,15 +206,18 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
     });
     const {
         register,
-        formState: { errors },
+        formState: { errors, isDirty },
         handleSubmit,
+        resetField,
+        trigger,
+        getValues: getFormValues,
     } = form;
 
     useEffect(() => {
         if (styleFilesQuery?.data) {
-            form.setValue("style_files", encodeKeys(styleFilesQuery.data), { shouldDirty: false, shouldTouch: false });
+            resetField("style_files", { defaultValue: encodeKeys(styleFilesQuery.data), keepDirty: false, keepTouched: false });
         }
-    }, [form, styleFilesQuery?.data]);
+    }, [resetField, styleFilesQuery?.data]);
 
     const onValid: SubmitHandler<StyleAddModifyFormType> = async (data) => {
         if (!service) return;
@@ -308,9 +313,11 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
                         <Button
                             iconId="fr-icon-arrow-left-s-line"
                             priority="tertiary no outline"
-                            linkProps={routes.datastore_service_view({ datastoreId, datasheetName, offeringId }).link}
                             title="Retour à la fiche de donnée"
                             size="large"
+                            {...(isDirty
+                                ? { onClick: confirmReturnModal.open }
+                                : { linkProps: routes.datastore_service_view({ datastoreId, datasheetName, offeringId }).link })}
                         />
                         <h1 className={fr.cx("fr-m-0")}>{editMode ? `Modifier le style "${style.name}"` : "Ajouter un style"}</h1>
                         {serviceQuery?.data?.type && (
@@ -349,24 +356,15 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
                     >
                         {layerNames.length > 0 && service !== undefined && (
                             <FormProvider {...form}>
-                                <UploadLayerStyles service={service} parser={parser} parsers={parsers} names={layerNames} />
+                                <UploadLayerStyles service={service} names={layerNames} />
                             </FormProvider>
                         )}
                     </StyleFormProvider>
 
                     <div className={fr.cx("fr-grid-row", "fr-mt-16v", "fr-mb-20v")}>
-                        <ButtonsGroup
-                            buttons={[
-                                {
-                                    type: "submit",
-                                    children: "Ajouter le style",
-                                    onClick: handleSubmit(onValid),
-                                },
-                            ]}
-                            inlineLayoutWhen="always"
-                            style={{ marginLeft: "auto" }}
-                            buttonsEquisized={true}
-                        />
+                        <Button type="submit" onClick={handleSubmit(onValid)} style={{ marginLeft: "auto" }}>
+                            {editMode ? "Modifier le style" : "Ajouter le style"}
+                        </Button>
                     </div>
                 </>
             ) : null}
@@ -384,6 +382,35 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
                         </div>
                     </div>
                 </Wait>
+            )}
+
+            {createPortal(
+                <confirmReturnModal.Component
+                    title="Enregistrer les modifications"
+                    buttons={[
+                        {
+                            children: "Annuler",
+                            priority: "secondary",
+                            onClick: routes.datastore_service_view({ datastoreId, datasheetName, offeringId }).push,
+                        },
+                        {
+                            children: "Enregistrer les modifications",
+                            onClick: async () => {
+                                const isValid = await trigger(undefined);
+                                if (isValid) {
+                                    const data = getFormValues();
+                                    onValid(data);
+                                } else {
+                                    confirmReturnModal.close();
+                                }
+                            },
+                            priority: "primary",
+                        },
+                    ]}
+                >
+                    Êtes vous sûr de vouloir quitter sans enregistrer vos modifications ?
+                </confirmReturnModal.Component>,
+                document.body
             )}
         </Main>
     );
