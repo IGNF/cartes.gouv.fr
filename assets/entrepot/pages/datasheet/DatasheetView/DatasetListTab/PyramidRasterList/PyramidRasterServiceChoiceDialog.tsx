@@ -1,15 +1,13 @@
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
-import { FC, ReactNode, useEffect, useId, useMemo, useState } from "react";
+import { FC, ReactNode, useEffect, useId, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { useTranslation } from "../../../../../../i18n/i18n";
 
 export type PyramidRasterServiceChoiceDialogProps = {
-    actions: {
-        open?: (params: PyramidRasterServiceChoiceDialogParams) => Promise<PyramidRasterServiceChoiceDialogResponse>;
-    };
+    onRegister: (api: { open: (params: PyramidRasterServiceChoiceDialogParams) => Promise<PyramidRasterServiceChoiceDialogResponse> }) => void;
 };
 
 export type DialogOptionType = {
@@ -29,10 +27,12 @@ export type PyramidRasterServiceChoiceDialogResponse = {
     response?: string;
 };
 
+export type PyramidRasterServiceChoiceDialogOpenFn = (params: PyramidRasterServiceChoiceDialogParams) => Promise<PyramidRasterServiceChoiceDialogResponse>;
+
 /**
  * @see https://github.com/codegouvfr/react-dsfr/blob/main/test/integration/cra/src/MyDialog.tsx
  */
-export const PyramidRasterServiceChoiceDialog: FC<PyramidRasterServiceChoiceDialogProps> = ({ actions }) => {
+export const PyramidRasterServiceChoiceDialog: FC<PyramidRasterServiceChoiceDialogProps> = ({ onRegister }) => {
     const { t } = useTranslation("Common");
 
     const id = useId();
@@ -54,16 +54,21 @@ export const PyramidRasterServiceChoiceDialog: FC<PyramidRasterServiceChoiceDial
         | undefined
     >(undefined);
 
+    const isRegisteredRef = useRef(false);
     useEffect(() => {
-        actions.open = (dialogParams) =>
-            new Promise<PyramidRasterServiceChoiceDialogResponse>((resolve) => {
-                setOpenState({
-                    dialogParams,
-                    resolve,
-                });
-                modal.open();
-            });
-    }, [actions, modal]);
+        if (isRegisteredRef.current) return; // empêche les ré-enregistrements
+        isRegisteredRef.current = true;
+        onRegister({
+            open: (dialogParams) =>
+                new Promise<PyramidRasterServiceChoiceDialogResponse>((resolve) => {
+                    setOpenState({
+                        dialogParams,
+                        resolve,
+                    });
+                    modal.open();
+                }),
+        });
+    }, [modal, onRegister]);
 
     useIsModalOpen(modal, {
         onConceal: async () => {

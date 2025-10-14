@@ -218,13 +218,20 @@ const Reports: FC = () => {
     } = form;
 
     /* Suppression de description s'il est null */
-    const cleanReportStatuses = useCallback((statuses: ReportStatusesDTO) => {
-        return Object.keys(statuses).reduce((acc, s) => {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const params = Object.fromEntries(Object.entries(statuses[s]).filter(([_, v]) => v !== null));
-            acc[s] = params;
-            return acc;
-        }, {});
+    const cleanReportStatuses = useCallback((statuses: ReportStatusesDTO): ReportStatusesDTO => {
+        const cleaned: ReportStatusesDTO = {};
+        for (const key of Object.keys(statuses)) {
+            const current = statuses[key];
+            // current est de type ReportStatusParams (title, active, description?)
+            const { title, active, description } = current;
+            // On ne garde que les champs requis + description si non null
+            cleaned[key] = {
+                title,
+                active,
+                ...(description !== null && description !== undefined ? { description } : {}),
+            };
+        }
+        return cleaned;
     }, []);
 
     const onSubmitForm = (saveOnly: boolean) => {
