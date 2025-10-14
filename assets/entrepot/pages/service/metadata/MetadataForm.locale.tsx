@@ -36,6 +36,25 @@ const { i18n } = declareComponentKeys<
     | "metadata.description_form.hint_organization"
     | "metadata.description_form.organization_email"
     | "metadata.description_form.hint_organization_email"
+    | "metadata.description_form.public_access_limits_title"
+    | "metadata.description_form.restriction"
+    | "metadata.description_form.no_restriction"
+    | "metadata.description_form.open_license"
+    | "metadata.description_form.inspire_directive"
+    | "metadata.description_form.other_conditions"
+    | "metadata.description_form.open_license_name"
+    | "metadata.description_form.open_license_link"
+    | "metadata.description_form.inspire_restriction_type"
+    | "metadata.description_form.additional_access_constraints"
+    | "metadata.description_form.additional_use_constraints"
+    | "metadata.description_form.add_access_constraint"
+    | "metadata.description_form.access_restriction_code"
+    | "metadata.description_form.access_constraint_name"
+    | "metadata.description_form.access_constraint_link"
+    | "metadata.description_form.add_use_constraint"
+    | "metadata.description_form.use_restriction_code"
+    | "metadata.description_form.use_constraint_name"
+    | "metadata.description_form.use_constraint_link"
     | "attribution.title"
     | "attribution.explain"
     | "attribution_form.text"
@@ -102,6 +121,25 @@ export const MetadatasFormFrTranslations: Translations<"fr">["MetadatasForm"] = 
         "Nom de l’organisme responsable de la ressource  qui prend la responsabilité de la diffuser ou  qui est légitime pour rendre celle-ci visible et décider de son mode de diffusion",
     "metadata.description_form.organization_email": "Email",
     "metadata.description_form.hint_organization_email": "Email de contact de l’organisme",
+    "metadata.description_form.public_access_limits_title": "Limitations d'accès public",
+    "metadata.description_form.restriction": "Restrictions",
+    "metadata.description_form.no_restriction": "Pas de restriction",
+    "metadata.description_form.open_license": "Licence ouverte ou assimilée",
+    "metadata.description_form.inspire_directive": "Accès limité au titre de la directive INSPIRE",
+    "metadata.description_form.other_conditions": "Autres conditions d'accès ou d'usage",
+    "metadata.description_form.open_license_name": "Intitulé de la licence",
+    "metadata.description_form.open_license_link": "Lien de la licence (optionnel)",
+    "metadata.description_form.inspire_restriction_type": "Type de retriction INSPIRE",
+    "metadata.description_form.additional_access_constraints": "Contraintes d'accès",
+    "metadata.description_form.additional_use_constraints": "Contraintes d'usage",
+    "metadata.description_form.add_access_constraint": "Ajouter une contrainte d'accès",
+    "metadata.description_form.access_restriction_code": "Code de restriction de la contrainte d'accès",
+    "metadata.description_form.access_constraint_name": "Intitulé de la contrainte d'accès (optionnel)",
+    "metadata.description_form.access_constraint_link": "Lien de la contrainte d'accès (optionnel)",
+    "metadata.description_form.add_use_constraint": "Ajouter une contrainte d'usage",
+    "metadata.description_form.use_restriction_code": "Code de restriction de la contrainte d'usage",
+    "metadata.description_form.use_constraint_name": "Intitulé de la contrainte d'usage (optionnel)",
+    "metadata.description_form.use_constraint_link": "Lien de la contrainte d'usage (optionnel)",
     "metadata.additionnal_infos_form.metadata_information_title": "Informations sur les métadonnées",
     "metadata.additionnal_infos_form.hierarchy_level": "Type de ressource",
     "metadata.additionnal_infos_form.hierarchy_level_dataset": "Jeu de données",
@@ -174,6 +212,25 @@ export const MetadatasFormEnTranslations: Translations<"en">["MetadatasForm"] = 
         "Name of the organization responsible for the resource which takes responsibility for disseminating it or which is legitimate to make it visible and decide on its method of dissemination",
     "metadata.description_form.organization_email": "Email",
     "metadata.description_form.hint_organization_email": "Contact email of the organization",
+    "metadata.description_form.public_access_limits_title": undefined,
+    "metadata.description_form.restriction": undefined,
+    "metadata.description_form.no_restriction": undefined,
+    "metadata.description_form.open_license": undefined,
+    "metadata.description_form.inspire_directive": undefined,
+    "metadata.description_form.other_conditions": undefined,
+    "metadata.description_form.open_license_name": undefined,
+    "metadata.description_form.open_license_link": undefined,
+    "metadata.description_form.inspire_restriction_type": undefined,
+    "metadata.description_form.additional_access_constraints": undefined,
+    "metadata.description_form.additional_use_constraints": undefined,
+    "metadata.description_form.add_access_constraint": undefined,
+    "metadata.description_form.access_restriction_code": undefined,
+    "metadata.description_form.access_constraint_name": undefined,
+    "metadata.description_form.access_constraint_link": undefined,
+    "metadata.description_form.add_use_constraint": undefined,
+    "metadata.description_form.use_restriction_code": undefined,
+    "metadata.description_form.use_constraint_name": undefined,
+    "metadata.description_form.use_constraint_link": undefined,
     "metadata.additionnal_infos_form.metadata_information_title": "Metadata informations",
     "metadata.additionnal_infos_form.hierarchy_level": undefined,
     "metadata.additionnal_infos_form.hierarchy_level_dataset": undefined,

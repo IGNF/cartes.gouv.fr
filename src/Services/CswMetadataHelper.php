@@ -3,8 +3,10 @@
 namespace App\Services;
 
 use App\Entity\CswMetadata\CswCapabilitiesFile;
+use App\Entity\CswMetadata\CswConstraint;
 use App\Entity\CswMetadata\CswDocument;
 use App\Entity\CswMetadata\CswHierarchyLevel;
+use App\Entity\CswMetadata\CswInspireLicense;
 use App\Entity\CswMetadata\CswLanguage;
 use App\Entity\CswMetadata\CswMetadata;
 use App\Entity\CswMetadata\CswMetadataLayer;
@@ -184,6 +186,86 @@ class CswMetadataHelper
         $cswMetadata->organisationEmail = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:pointOfContact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress/gco:CharacterString')->item(0)?->textContent;
         $cswMetadata->organisationName = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:pointOfContact/gmd:CI_ResponsibleParty/gmd:organisationName/gco:CharacterString')->item(0)?->textContent;
         $cswMetadata->contactEmail = $xpath->query('/gmd:MD_Metadata/gmd:contact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress/gco:CharacterString')->item(0)?->textContent;
+
+        $cswMetadata->restriction = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:resourceConstraints/@type')->item(0)?->textContent;
+        $cswMetadata->openLicenseName = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:resourceConstraints[@type="open_license"]/gmd:MD_LegalConstraints/gmd:otherConstraints/gmx:Anchor')->item(0)?->textContent;
+        $cswMetadata->openLicenseLink = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:resourceConstraints[@type="open_license"]/gmd:MD_LegalConstraints/gmd:otherConstraints/gmx:Anchor/@xlink:href')->item(0)?->nodeValue;
+
+        $licenseEl = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:resourceConstraints[@type="inspire_directive"]/gmd:MD_LegalConstraints/gmd:otherConstraints/gmx:Anchor')[0];
+        $cswMetadata->inspireLicense = new CswInspireLicense(
+            $licenseEl?->getAttribute('type'),
+            $licenseEl?->textContent,
+            $licenseEl?->getAttribute('xlink:href')
+        );
+
+        $accessNodes = $xpath->query(
+            '/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:resourceConstraints[@type="inspire_directive"]/gmd:MD_LegalConstraints/gmd:accessConstraints[@type="access_constraint"]'
+        );
+        $inspireAccessConstraints = [];
+        foreach ($accessNodes as $i => $node) {
+            $codeNode = $xpath->query('gmd:MD_RestrictionCode', $node)[0] ?? null;
+            $code = $codeNode?->getAttribute('codeListValue');
+            $anchors = $xpath->query('gmd:otherConstraints[@type="access_constraint"]/gmx:Anchor', $node->parentNode);
+            $anchorNode = $anchors[$i] ?? null;
+            $inspireAccessConstraints[] = new CswConstraint(
+                $code,
+                $anchorNode?->textContent,
+                $anchorNode?->getAttribute('xlink:href')
+            );
+        }
+
+        $useNodes = $xpath->query(
+            '/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:resourceConstraints[@type="inspire_directive_use"]/gmd:MD_LegalConstraints/gmd:useConstraints[@type="use_constraint"]'
+        );
+        $inspireUseConstraints = [];
+        foreach ($useNodes as $i => $node) {
+            $codeNode = $xpath->query('gmd:MD_RestrictionCode', $node)[0] ?? null;
+            $code = $codeNode?->getAttribute('codeListValue');
+            $anchors = $xpath->query('gmd:otherConstraints[@type="use_constraint"]/gmx:Anchor', $node->parentNode);
+            $anchorNode = $anchors[$i] ?? null;
+            $inspireUseConstraints[] = new CswConstraint(
+                $code,
+                $anchorNode?->textContent,
+                $anchorNode?->getAttribute('xlink:href')
+            );
+        }
+
+        $otherAccessNodes = $xpath->query(
+            '/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:resourceConstraints[@type="other_conditions"]/gmd:MD_LegalConstraints/gmd:accessConstraints[@type="access_constraint"]'
+        );
+        $otherAccessConstraints = [];
+        foreach ($otherAccessNodes as $i => $node) {
+            $codeNode = $xpath->query('gmd:MD_RestrictionCode', $node)[0] ?? null;
+            $code = $codeNode?->getAttribute('codeListValue');
+            $anchors = $xpath->query('gmd:otherConstraints[@type="access_constraint"]/gmx:Anchor', $node->parentNode);
+            $anchorNode = $anchors[$i] ?? null;
+            $otherAccessConstraints[] = new CswConstraint(
+                $code,
+                $anchorNode?->textContent,
+                $anchorNode?->getAttribute('xlink:href')
+            );
+        }
+
+        $otherUseNodes = $xpath->query(
+            '/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:resourceConstraints[@type="other_conditions_use"]/gmd:MD_LegalConstraints/gmd:useConstraints[@type="use_constraint"]'
+        );
+        $otherUseConstraints = [];
+        foreach ($otherUseNodes as $i => $node) {
+            $codeNode = $xpath->query('gmd:MD_RestrictionCode', $node)[0] ?? null;
+            $code = $codeNode?->getAttribute('codeListValue');
+            $anchors = $xpath->query('gmd:otherConstraints[@type="use_constraint"]/gmx:Anchor', $node->parentNode);
+            $anchorNode = $anchors[$i] ?? null;
+            $otherUseConstraints[] = new CswConstraint(
+                $code,
+                $anchorNode?->textContent,
+                $anchorNode?->getAttribute('xlink:href')
+            );
+        }
+
+        $cswMetadata->inspireAccessConstraints = $inspireAccessConstraints;
+        $cswMetadata->inspireUseConstraints = $inspireUseConstraints;
+        $cswMetadata->otherAccessConstraints = $otherAccessConstraints;
+        $cswMetadata->otherUseConstraints = $otherUseConstraints;
 
         $cswMetadata->resolution = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:spatialResolution/gmd:MD_Resolution/gmd:equivalentScale/gmd:MD_RepresentativeFraction/gmd:denominator/gco:Integer')->item(0)?->textContent;
 

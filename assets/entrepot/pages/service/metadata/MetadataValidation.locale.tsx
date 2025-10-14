@@ -17,6 +17,7 @@ const { i18n } = declareComponentKeys<
     | "metadatas.organization_error"
     | "metadatas.organization_email_required_error"
     | "metadatas.organization_email_error"
+    | "metadatas.inspire_license_error"
     | "metadatas.hierarchy_level_error"
     | "metadatas.language_error"
     | "metadatas.charset_error"
@@ -47,6 +48,7 @@ export const ValidationMetadatasFrTranslations: Translations<"fr">["ValidationMe
     "metadatas.organization_error": "l’organisme est obligatoire",
     "metadatas.organization_email_required_error": "l’email de l’organisme est obligatoire",
     "metadatas.organization_email_error": "l’email de l’organisme n'est pas correct",
+    "metadatas.inspire_license_error": "Veuillez sélectionner un type de restriction",
     "metadatas.hierarchy_level_error": "Le type de ressource doit être [dataset] ou [series]",
     "metadatas.language_error": "La langue est obligatoire",
     "metadatas.charset_error": "Le jeu de caractères est obligatoire",
@@ -75,6 +77,7 @@ export const ValidationMetadatasEnTranslations: Translations<"en">["ValidationMe
     "metadatas.organization_error": "Organization is required",
     "metadatas.organization_email_required_error": "Organization email is required",
     "metadatas.organization_email_error": "Organization email is not correct",
+    "metadatas.inspire_license_error": undefined,
     "metadatas.hierarchy_level_error": undefined,
     "metadatas.language_error": "La langue est obligatoire",
     "metadatas.charset_error": "Dataset is required",
