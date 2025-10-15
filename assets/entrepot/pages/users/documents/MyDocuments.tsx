@@ -94,7 +94,7 @@ const MyDocuments: FC = () => {
         try {
             // @ts-expect-error // TODO à corriger plus tard, c'est pas très grave
             data["extra"] = JSON.parse(data["extra"]);
-        } catch (error) {
+        } catch (_) {
             // ne rien faire
         }
 
