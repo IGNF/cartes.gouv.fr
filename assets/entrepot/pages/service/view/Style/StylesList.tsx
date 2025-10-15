@@ -1,4 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
+import Alert from "@codegouvfr/react-dsfr/Alert";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
@@ -91,6 +92,13 @@ function StylesList(props: StylesListProps) {
 
     return (
         <>
+            <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-4v")}>
+                <Alert
+                    severity="info"
+                    small={true}
+                    description={"La gestion des styles est en cours d'amélioration, veuillez nous excuser pour la gêne occasionnée."}
+                />
+            </div>
             <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-2v")}>
                 <div className={fr.cx("fr-col")}>
                     <h3 className={fr.cx("fr-text--md", "fr-m-0")}>
