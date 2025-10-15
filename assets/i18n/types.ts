@@ -74,7 +74,7 @@ export type ComponentKey =
     | import("../espaceco/pages/communities/management/reports/Theme.locale").I18n
     | import("../espaceco/pages/communities/management/reports/ReportStatuses.locale").I18n
     | import("../espaceco/pages/communities/management/reports/SharedThemes.locale").I18n
-    | import("../espaceco/pages/communities/management/reports/EmailPlanners").I18n
+    | import("../espaceco/pages/communities/management/reports/EmailPlanners.locale").I18n
     | import("../espaceco/pages/communities/management/reports/emailplanners/AddOrEditEmailPlanner.locale").I18n
     | import("../espaceco/pages/communities/management/reports/emailplanners/EmailPlannerKeywords.locale").I18n
     | import("../espaceco/pages/communities/management/Members.locale").I18n

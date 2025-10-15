@@ -141,7 +141,11 @@ const ExtentDialog: FC<ExtentDialogProps> = ({ onCancel, onApply }) => {
     }, [resetField]);
 
     useEffect(() => {
-        choice === "autocomplete" ? clear() : resetField("extent", undefined);
+        if (choice === "autocomplete") {
+            clear();
+        } else {
+            resetField("extent", undefined);
+        }
     }, [choice, clear, resetField]);
 
     const onSubmit = () => {
@@ -152,12 +156,16 @@ const ExtentDialog: FC<ExtentDialogProps> = ({ onCancel, onApply }) => {
         let extent;
         if (choice === "manual") {
             extent = [values.xmin, values.ymin, values.xmax, values.ymax].map((c) => Number(c));
-        } else extent = values.extent;
+        } else {
+            extent = values.extent;
+        }
         onApply(extent);
 
         if (choice !== "manual") {
             setChoice("manual");
-        } else clear();
+        } else {
+            clear();
+        }
     };
 
     return (

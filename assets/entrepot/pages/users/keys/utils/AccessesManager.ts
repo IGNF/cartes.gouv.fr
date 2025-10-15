@@ -8,7 +8,11 @@ const add = (accesses: AccessCreateDto[], permissionId: string, offeringId: stri
     const result = [...accesses];
 
     const index = getIndex(accesses, permissionId);
-    index === -1 ? result.push({ permission: permissionId, offerings: [offeringId] }) : result[index].offerings.push(offeringId);
+    if (index === -1) {
+        result.push({ permission: permissionId, offerings: [offeringId] });
+    } else {
+        result[index].offerings.push(offeringId);
+    }
     return result;
 };
 

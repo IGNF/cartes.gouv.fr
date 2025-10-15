@@ -5,18 +5,18 @@ import Table from "@codegouvfr/react-dsfr/Table";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FC, ReactNode, useMemo, useState } from "react";
 import { UseFormReturn, useWatch } from "react-hook-form";
+
 import { EmailPlannerAddType, ReportFormType } from "../../../../../@types/app_espaceco";
 import { EmailPlannerDTO, ReportStatusesDTO, ThemeDTO } from "../../../../../@types/espaceco";
 import { ConfirmDialog, ConfirmDialogModal } from "../../../../../components/Utils/ConfirmDialog";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import Wait from "../../../../../components/Utils/Wait";
-import { declareComponentKeys, useTranslation } from "../../../../../i18n/i18n";
+import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/espaceco/RQKeys";
 import { CartesApiException } from "../../../../../modules/jsonFetch";
 import api from "../../../../api";
 import { AddEmailPlannerDialog, AddEmailPlannerDialogModal } from "./emailplanners/AddEmailPlannerDialog";
 import { EditEmailPlannerDialog, EditEmailPlannerDialogModal } from "./emailplanners/EditEmailPlannerDialog";
-import { Translations } from "../../../../../i18n/types";
 
 type EmailPlannersProps = {
     communityId: number;
@@ -252,59 +252,3 @@ const EmailPlanners: FC<EmailPlannersProps> = ({ communityId, form, emailPlanner
 };
 
 export default EmailPlanners;
-
-// traductions
-const { i18n } = declareComponentKeys<
-    | "warning_no_themes"
-    | "event_header"
-    | "subject_header"
-    | "body_header"
-    | "delay_header"
-    | "recipients_header"
-    | "cancel_event_header"
-    | "repeat_header"
-    | "add"
-    | "adding"
-    | "modify"
-    | "modifying"
-    | "remove"
-    | "removing"
-    | "confirm_remove_title"
->()("EmailPlanners");
-export type I18n = typeof i18n;
-
-export const EmailPlannersFrTranslations: Translations<"fr">["EmailPlanners"] = {
-    warning_no_themes: "Aucun thème personnalisé pour ce guichet",
-    event_header: "Evénement déclencheur",
-    subject_header: "Sujet de l’email",
-    body_header: "Corps de l’email",
-    delay_header: "Délai en jours (aprés l’évènement déclencheur)",
-    recipients_header: "Destinataires",
-    cancel_event_header: "Evénement annulateur",
-    repeat_header: "Répétition",
-    add: "Ajouter un email de suivi",
-    adding: "Ajout de l'email de suivi en cours ...",
-    modify: "Modifier l'email de suivi",
-    modifying: "Modification de l'email de suivi en cours ...",
-    remove: "Supprimer l'email de suivi",
-    removing: "Suppression de l'email de suivi en cours ...",
-    confirm_remove_title: "Êtes-vous sûr de vouloir supprimer cet email de suivi ?",
-};
-
-export const EmailPlannersEnTranslations: Translations<"en">["EmailPlanners"] = {
-    warning_no_themes: undefined,
-    event_header: undefined,
-    subject_header: undefined,
-    body_header: undefined,
-    delay_header: undefined,
-    recipients_header: undefined,
-    cancel_event_header: undefined,
-    repeat_header: undefined,
-    add: undefined,
-    adding: undefined,
-    modify: undefined,
-    modifying: undefined,
-    remove: undefined,
-    removing: undefined,
-    confirm_remove_title: undefined,
-};
