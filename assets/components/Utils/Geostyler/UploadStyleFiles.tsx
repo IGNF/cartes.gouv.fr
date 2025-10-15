@@ -108,9 +108,9 @@ const UploadStyleFiles: FC<UploadStyleFileProps> = (props) => {
                             >
                                 {isTms
                                     ? editMode
-                                        ? "Ajouter un style mapbox pour votre service"
+                                        ? "Personnalisez le style existant ou importez un style mapbox"
                                         : "Ajoutez un style mapbox pour votre service ou un style sld ou qml par couche"
-                                    : "Ajoutez un style sld ou qml par couche présente dans votre service"}
+                                    : "Personnalisez un style par couche présente dans votre service"}
                             </p>
 
                             <RadioButtons

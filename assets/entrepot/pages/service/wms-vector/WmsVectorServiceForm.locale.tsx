@@ -28,7 +28,7 @@ export const WmsVectorServiceFormFrTranslations: Translations<"fr">["WmsVectorSe
             case 1:
                 return "Tables";
             case 2:
-                return "Fichier de style SLD";
+                return "Personnalisez le style de votre service";
             case 3:
                 return "Source des métadonnées";
             case 4:
