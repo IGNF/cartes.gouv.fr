@@ -114,6 +114,8 @@ const CommunityLogo: FC = () => {
         },
     });
 
+    const { mutate: updateLogo, reset: resetUpdateLogo } = updateLogoMutation;
+
     // Suppression de la vignette
     const removeLogoMutation = useMutation<null, CartesApiException>({
         mutationFn: () => api.community.removeLogo(community.id),
@@ -155,9 +157,9 @@ const CommunityLogo: FC = () => {
     const onSubmit = useCallback(async () => {
         if (upload) {
             // Ajout du logo
-            updateLogoMutation.mutate();
+            updateLogo();
         }
-    }, [updateLogoMutation, upload]);
+    }, [updateLogo, upload]);
 
     // Boutons de la boite de dialogue
     const AddModalButtons: [ModalProps.ActionAreaButtonProps, ...ModalProps.ActionAreaButtonProps[]] = useMemo(() => {
@@ -166,7 +168,7 @@ const CommunityLogo: FC = () => {
                 children: tCommon("cancel"),
                 onClick: () => {
                     reset();
-                    updateLogoMutation.reset();
+                    resetUpdateLogo();
                 },
                 doClosesModal: true,
                 priority: "secondary",
@@ -180,7 +182,7 @@ const CommunityLogo: FC = () => {
         ];
 
         return btns;
-    }, [action, updateLogoMutation, handleSubmit, onSubmit, reset, t, tCommon]);
+    }, [action, resetUpdateLogo, handleSubmit, onSubmit, reset, t, tCommon]);
 
     return (
         <div className={fr.cx("fr-input-group")}>

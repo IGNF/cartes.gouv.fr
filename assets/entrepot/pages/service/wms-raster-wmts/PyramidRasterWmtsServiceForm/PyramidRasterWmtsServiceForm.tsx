@@ -64,6 +64,8 @@ const PyramidRasterWmtsServiceForm: FC<PyramidRasterWmtsServiceFormProps> = ({ d
         },
     });
 
+    const { mutate: createServiceMutate } = createServiceMutation;
+
     const editServiceMutation = useMutation<Service, CartesApiException>({
         mutationFn: () => {
             if (offeringId === undefined) {
@@ -83,6 +85,8 @@ const PyramidRasterWmtsServiceForm: FC<PyramidRasterWmtsServiceFormProps> = ({ d
             queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet_metadata(datastoreId, datasheetName) });
         },
     });
+
+    const { mutate: editServiceMutate } = editServiceMutation;
 
     const pyramidQuery = useQuery<PyramidRaster, CartesApiException>({
         queryKey: RQKeys.datastore_stored_data(datastoreId, pyramidId),
@@ -155,12 +159,12 @@ const PyramidRasterWmtsServiceForm: FC<PyramidRasterWmtsServiceFormProps> = ({ d
         } else {
             // on est à la dernière étape du formulaire donc on envoie la sauce
             if (editMode) {
-                editServiceMutation.mutate();
+                editServiceMutate();
             } else {
-                createServiceMutation.mutate();
+                createServiceMutate();
             }
         }
-    }, [createServiceMutation, editServiceMutation, currentStep, trigger, editMode]);
+    }, [createServiceMutate, editServiceMutate, currentStep, trigger, editMode]);
 
     return (
         <Main title={t("title", { editMode })}>

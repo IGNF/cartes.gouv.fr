@@ -43,7 +43,6 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
     });
 
     const catalogueDatasheetUrl = useMemo(() => `${catalogueUrl}/dataset/${fileIdentifier}`, [fileIdentifier]);
-    const emailContact = useMemo(() => query.data?.contact_email, [query]);
     const myCommunities = useMemo(() => {
         return Array.from(user?.communities_member ?? [], (member) => member.community);
     }, [user]);
@@ -91,7 +90,7 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
         const layers = query.data?.private_layers.filter((layer) => values["layers"].includes(layer.name));
 
         const body = {
-            emailContact: emailContact,
+            emailContact: query.data?.contact_email,
             catalogueDatasheetUrl: catalogueDatasheetUrl,
             layers: layers,
         };

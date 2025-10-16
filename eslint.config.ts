@@ -1,5 +1,5 @@
 import js from "@eslint/js";
-// Désactive les règles stylistiques susceptibles de confliter avec Prettier (on laisse Prettier faire le formatage)
+import pluginQuery from "@tanstack/eslint-plugin-query";
 import prettier from "eslint-config-prettier";
 import pluginReact from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
@@ -47,11 +47,25 @@ export default defineConfig([
             ],
         },
     },
+    // TODO Activer l'analyse typée pour TypeScript: nécessaire pour recommendedTypeChecked
+    // {
+    //     files: ["**/*.ts", "**/*.tsx"],
+    //     languageOptions: {
+    //         parser: tseslint.parser,
+    //         parserOptions: {
+    //             // Utilise automatiquement les tsconfig.* (monorepo-friendly)
+    //             projectService: true,
+    //             tsconfigRootDir: import.meta.dirname,
+    //         },
+    //     },
+    // },
+    // tseslint.configs.recommendedTypeChecked,
     tseslint.configs.recommended,
     pluginReact.configs.flat.recommended,
     pluginReact.configs.flat["jsx-runtime"],
     reactHooks.configs.flat.recommended,
     reactRefresh.configs.recommended,
+    ...pluginQuery.configs["flat/recommended"],
     prettier,
 
     // Enfin, une dernière couche de règles pour tout le projet
@@ -59,11 +73,10 @@ export default defineConfig([
     {
         rules: {
             "react/hook-use-state": "error",
-            "react-hooks/preserve-manual-memoization": "off",
-            "react-hooks/incompatible-library": "off",
-            "react-hooks/use-memo": "off",
             "react-hooks/set-state-in-effect": "off",
             "react-refresh/only-export-components": "off",
+            "react-hooks/preserve-manual-memoization": "off",
+            "react-hooks/incompatible-library": "off",
         },
     },
 ]);

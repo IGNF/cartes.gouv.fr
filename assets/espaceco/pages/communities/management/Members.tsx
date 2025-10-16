@@ -89,6 +89,8 @@ const Members: FC = () => {
         },
     });
 
+    const { mutate: updateRole } = updateRoleMutation;
+
     /* Mise a jour des grids  de l'utilisateur */
     const updateGridsMutation = useMutation<CommunityMember, CartesApiException, { communityId: number; userId: number; grids: string[] }>({
         mutationFn: (params) => {
@@ -135,6 +137,8 @@ const Members: FC = () => {
             setAction(undefined);
         },
     });
+
+    const { mutate: removeMember } = removeMemberMutation;
 
     const addMembersMutation = useMutation<CommunityMember[], CartesApiException, { communityId: number; members: (number | string)[] }>({
         mutationFn: ({ communityId, members }) => {
@@ -189,7 +193,7 @@ const Members: FC = () => {
                             name: `role-${uuidv4()}`,
                             onChange: (e) => {
                                 const value = e.currentTarget.value;
-                                updateRoleMutation.mutate({ communityId: community.id, userId: m.user_id, role: value as Role });
+                                updateRole({ communityId: community.id, userId: m.user_id, role: value as Role });
                             },
                             value: m.role,
                         }}
@@ -244,7 +248,7 @@ const Members: FC = () => {
                 ];
             }) ?? []
         );
-    }, [community, t, paginatedItems, updateRoleMutation]);
+    }, [community, t, paginatedItems, updateRole]);
 
     const pendingData: ReactNode[][] = useMemo(() => {
         const datas = membershipRequestsQuery.data ?? [];
@@ -259,7 +263,7 @@ const Members: FC = () => {
                         priority={"tertiary no outline"}
                         onClick={() => {
                             setAction("reject");
-                            removeMemberMutation.mutate({ communityId: community.id, userId: m.user_id });
+                            removeMember({ communityId: community.id, userId: m.user_id });
                         }}
                     >
                         {t("reject")}
@@ -267,14 +271,14 @@ const Members: FC = () => {
                     <Button
                         title={t("accept_title")}
                         priority={"tertiary no outline"}
-                        onClick={() => updateRoleMutation.mutate({ communityId: community.id, userId: m.user_id, role: "member" })}
+                        onClick={() => updateRole({ communityId: community.id, userId: m.user_id, role: "member" })}
                     >
                         {t("accept")}
                     </Button>
                 </div>,
             ]) ?? []
         );
-    }, [community, membershipRequestsQuery.data, updateRoleMutation, removeMemberMutation, t]);
+    }, [community, membershipRequestsQuery.data, updateRole, removeMember, t]);
 
     return (
         <div>

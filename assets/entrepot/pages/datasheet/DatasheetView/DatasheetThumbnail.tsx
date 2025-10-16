@@ -115,6 +115,8 @@ const DatasheetThumbnail: FC<DatasheetThumbnailProps> = ({ datastoreId, datashee
         },
     });
 
+    const { mutate: addThumbnailMutate, reset: addThumbnailReset } = addThumbnailMutation;
+
     // Suppression de la vignette
     const deleteThumbnailMutation = useMutation<null, CartesApiException>({
         mutationFn: () => {
@@ -174,9 +176,9 @@ const DatasheetThumbnail: FC<DatasheetThumbnailProps> = ({ datastoreId, datashee
     const onSubmit = useCallback(async () => {
         if (upload) {
             // Ajout dans les annexes
-            addThumbnailMutation.mutate();
+            addThumbnailMutate();
         }
-    }, [addThumbnailMutation, upload]);
+    }, [addThumbnailMutate, upload]);
 
     const action: ThumbnailAction = useMemo(() => (datasheet?.thumbnail?.url ? "modify" : "add"), [datasheet?.thumbnail?.url]);
 
@@ -187,7 +189,7 @@ const DatasheetThumbnail: FC<DatasheetThumbnailProps> = ({ datastoreId, datashee
                 children: tCommon("cancel"),
                 onClick: () => {
                     reset();
-                    addThumbnailMutation.reset();
+                    addThumbnailReset();
                 },
                 doClosesModal: true,
                 priority: "secondary",
@@ -201,7 +203,7 @@ const DatasheetThumbnail: FC<DatasheetThumbnailProps> = ({ datastoreId, datashee
         ];
 
         return btns;
-    }, [action, addThumbnailMutation, handleSubmit, onSubmit, reset, t, tCommon]);
+    }, [action, addThumbnailReset, handleSubmit, onSubmit, reset, t, tCommon]);
 
     return (
         <>

@@ -76,11 +76,13 @@ const AddMember: FC<AddMemberProps> = ({ communityId, communityMemberIds, userId
         },
     });
 
+    const { reset: resetMutation } = addMemberMutation;
+
     const resetAll = useCallback(() => {
-        addMemberMutation.reset();
+        resetMutation();
         reset({ user_id: "", user_rights: getRights() });
         addMemberModal.close();
-    }, [reset, addMemberMutation]);
+    }, [reset, resetMutation]);
 
     // Annulation
     const handleOnCancel = () => {

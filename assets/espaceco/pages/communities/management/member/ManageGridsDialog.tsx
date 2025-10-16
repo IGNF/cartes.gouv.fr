@@ -3,7 +3,7 @@ import Accordion from "@codegouvfr/react-dsfr/Accordion";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import Table from "@codegouvfr/react-dsfr/Table";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import { FC, useCallback, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
@@ -31,10 +31,7 @@ const ManageGridsDialog: FC<ManageGridsDialogProps> = ({ communityGrids, userGri
         return communityGrids.map((g) => [g.name, g.title, g.type.title]);
     }, [communityGrids]);
 
-    const [grids, setGrids] = useState<GridDTO[]>([]);
-    useEffect(() => {
-        setGrids([...userGrids]);
-    }, [userGrids]);
+    const userGridNames = useMemo(() => userGrids.map((g) => g.name), [userGrids]);
 
     const schema = yup.object({
         user_grids: yup.array().of(yup.string().required()),
@@ -49,7 +46,7 @@ const ManageGridsDialog: FC<ManageGridsDialogProps> = ({ communityGrids, userGri
         mode: "onSubmit",
         resolver: yupResolver(schema),
         values: {
-            user_grids: Array.from(grids, (g) => g.name),
+            user_grids: userGridNames,
         },
     });
 
@@ -124,7 +121,7 @@ const ManageGridsDialog: FC<ManageGridsDialogProps> = ({ communityGrids, userGri
                         <div className={fr.cx("fr-mt-2w")}>
                             <label className={fr.cx("fr-label")}>{t("user_grids")}</label>
                             <GridList
-                                grids={grids}
+                                grids={userGrids}
                                 onChange={(grids) => {
                                     const names = Array.from(grids, (g) => g.name);
                                     setFormValue("user_grids", names);

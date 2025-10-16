@@ -130,6 +130,8 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
         },
     });
 
+    const { mutate: createServiceMutate } = createServiceMutation;
+
     const editServiceMutation = useMutation<Service, CartesApiException>({
         mutationFn: () => {
             if (offeringId === undefined) {
@@ -159,6 +161,8 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
             }
         },
     });
+
+    const { mutate: editServiceMutate } = editServiceMutation;
 
     const vectorDbQuery = useQuery({
         queryKey: RQKeys.datastore_stored_data(datastoreId, vectorDbId),
@@ -274,12 +278,12 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
             // on est à la dernière étape du formulaire donc on envoie la sauce
 
             if (editMode) {
-                editServiceMutation.mutate();
+                editServiceMutate();
             } else {
-                createServiceMutation.mutate();
+                createServiceMutate();
             }
         }
-    }, [createServiceMutation, editServiceMutation, currentStep, trigger, editMode]);
+    }, [createServiceMutate, editServiceMutate, currentStep, trigger, editMode]);
 
     return (
         <Main title={t("title", { editMode })}>

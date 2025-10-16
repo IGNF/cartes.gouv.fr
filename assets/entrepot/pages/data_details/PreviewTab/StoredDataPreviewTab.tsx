@@ -18,11 +18,12 @@ type StoredDataPreviewTabProps = {
 };
 const StoredDataPreviewTab: FC<StoredDataPreviewTabProps> = ({ datastoreId, reportQuery }) => {
     const storedData = useMemo(() => reportQuery.data?.stored_data, [reportQuery.data?.stored_data]);
+    const vectordbId = (storedData as PyramidVector | undefined)?.tags?.vectordb_id;
 
     const vectorDbQuery = useQuery<VectorDb, CartesApiException>({
-        queryKey: RQKeys.datastore_stored_data(datastoreId, (storedData as PyramidVector).tags.vectordb_id!),
-        queryFn: ({ signal }) => api.storedData.get(datastoreId, (storedData as PyramidVector).tags.vectordb_id!, { signal }),
-        enabled: !!(storedData as PyramidVector).tags.vectordb_id,
+        queryKey: RQKeys.datastore_stored_data(datastoreId, vectordbId ?? ""),
+        queryFn: ({ signal }) => api.storedData.get(datastoreId, vectordbId!, { signal }),
+        enabled: Boolean(vectordbId),
         staleTime: 3600000,
     });
 

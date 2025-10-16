@@ -3,7 +3,7 @@ import Input from "@codegouvfr/react-dsfr/Input";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import Select from "@codegouvfr/react-dsfr/Select";
 import { Select as SelectNext } from "@codegouvfr/react-dsfr/SelectNext";
-import { FC, useMemo } from "react";
+import { FC } from "react";
 import { Controller, UseFormReturn } from "react-hook-form";
 
 import type { PyramidRaster, PyramidVector } from "../../../../@types/app";
@@ -30,6 +30,8 @@ import { LanguageType, charsets, getLanguages } from "../../../../utils";
 //     return fileType;
 // };
 
+const languagesOptions: LanguageType[] = getLanguages();
+
 type AdditionalInfoProps = {
     storedData: VectorDb | PyramidVector | PyramidRaster;
     visible: boolean;
@@ -47,8 +49,6 @@ const AdditionalInfo: FC<AdditionalInfoProps> = ({ /*storedData, datastoreId,*/ 
         control,
         // setValue: setFormValue,
     } = form;
-
-    const languagesOptions: LanguageType[] = useMemo(getLanguages, []);
 
     // const fileTreeQuery = useQuery<UploadTree, CartesApiException>({
     //     queryKey: RQKeys.datastore_upload_file_tree(datastoreId, storedData.tags.upload_id),

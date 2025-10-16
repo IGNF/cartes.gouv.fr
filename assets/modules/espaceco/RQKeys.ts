@@ -1,7 +1,7 @@
 import { CommunityListFilter } from "../../@types/app_espaceco";
 
 const RQKeys = {
-    communityList: (page: number, limit: number): string[] => ["communities", page.toString(), limit.toString()],
+    communityList: (queryParams: Record<string, unknown> = {}): string[] => ["communities", JSON.stringify(queryParams)],
     communities: (fields: string | null = null): string[] => {
         const key = ["all_communities"];
         if (fields) {
@@ -16,17 +16,12 @@ const RQKeys = {
     searchCommunities: (search: string, filter: CommunityListFilter): string[] => {
         return ["searchCommunities", filter, search];
     },
-    communitiesAsMember: (pending: boolean, page: number, limit: number): string[] => [
-        "communities_as_member",
-        new Boolean(pending).toString(),
-        page.toString(),
-        limit.toString(),
-    ],
+    communitiesAsMember: (queryParams: Record<string, unknown> = {}): string[] => ["communities_as_member", JSON.stringify(queryParams)],
     communityDocuments: (communityId?: number): string[] => ["community", "documents", communityId ? communityId.toString() : ""],
     communityLayers: (communityId: number): string[] => ["community", "layers", communityId.toString()],
     userSharedThemes: (): string[] => ["user", "shared_themes"],
-    searchAddress: (search: string): string[] => ["searchAddress", search],
-    searchGrids: (text: string): string[] => ["searchGrids", text],
+    searchAddress: (search: string, filters: Record<string, unknown>): string[] => ["searchAddress", search, JSON.stringify(filters)],
+    searchGrids: (text: string, filters: Record<string, unknown>): string[] => ["searchGrids", text, JSON.stringify(filters)],
     getMe: (): string[] => ["espaceco", "users", "me"],
     searchUsers: (text: string): string[] => ["searchUsers", text],
     databases: (fields: string[]) => ["databases", fields.join(",")],
