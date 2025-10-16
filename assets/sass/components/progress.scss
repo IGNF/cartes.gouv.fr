@@ -35,6 +35,7 @@
     white-space: nowrap;
     background-color: #007bff;
     transition: width 0.6s ease;
+    min-width: max-content;
 }
 
 .progress-bar-animated {
