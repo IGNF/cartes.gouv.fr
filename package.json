@@ -6,8 +6,7 @@
     "dependencies": {
         "jsdom": "^26.1.0",
         "node-fetch": "^3.3.2",
-        "prettier": "^3.0.0",
-        "yoctocolors": "^2.1.1"
+        "prettier": "^3.0.0"
     },
     "devDependencies": {
         "@codegouvfr/react-dsfr": "^1.17.0",
