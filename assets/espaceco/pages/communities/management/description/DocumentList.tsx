@@ -96,14 +96,9 @@ const DocumentList: FC<DocumentListProps> = ({ communityId, documents }) => {
 
     const datas: ReactNode[][] = useMemo(() => {
         return documents.map((d) => {
-            const element = d.uri ? (
-                <img className={"frx-document-image"} src={d.uri} />
-            ) : (
-                <img className={"frx-document-image"} src={getThumbnailFromFileName(d.short_fileName)} />
-            );
             return [
                 <div key={d.id} className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>
-                    {element}
+                    <img className={"frx-document-image"} src={d.uri ? d.uri : getThumbnailFromFileName(d.short_fileName)} alt="Icône du type de document" />
                     <span className={fr.cx("fr-ml-1v")}>{d.title}</span>
                 </div>,
                 <div key={d.id} className={fr.cx("fr-grid-row")}>

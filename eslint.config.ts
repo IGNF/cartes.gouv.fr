@@ -7,6 +7,7 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import { defineConfig, globalIgnores } from "eslint/config";
 import globals from "globals";
 import tseslint from "typescript-eslint";
+import jsxA11y from "eslint-plugin-jsx-a11y";
 
 export default defineConfig([
     globalIgnores([
@@ -20,10 +21,17 @@ export default defineConfig([
     // Config de base pour tous les fichiers (plugins, globals, règles génériques)
     {
         files: ["**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
+        ...jsxA11y.flatConfigs.recommended,
         settings: { react: { version: "detect" } },
         plugins: { js, pluginReact, reactHooks, tseslint },
         extends: ["js/recommended"],
-        languageOptions: { globals: { ...globals.browser, ...globals.node } },
+        languageOptions: {
+            ...jsxA11y.flatConfigs.recommended.languageOptions,
+            globals: {
+                ...globals.browser,
+                ...globals.node,
+            },
+        },
         rules: {
             // Cohérence logique
             eqeqeq: "warn",
@@ -66,6 +74,7 @@ export default defineConfig([
     reactHooks.configs.flat.recommended,
     reactRefresh.configs.recommended,
     ...pluginQuery.configs["flat/recommended"],
+    jsxA11y.flatConfigs.strict,
     prettier,
 
     // Enfin, une dernière couche de règles pour tout le projet

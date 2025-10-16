@@ -9,7 +9,7 @@ const RichLabel: FC<RichLabelProps> = ({ label, image }) => {
     return (
         <>
             {label}
-            <img className={"frx-radio__image"} src={image} />
+            <img className={"frx-radio__image"} src={image} alt={`Illustration pour ${label}`} />
         </>
     );
 };

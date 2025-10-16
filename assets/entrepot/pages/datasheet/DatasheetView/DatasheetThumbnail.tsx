@@ -212,6 +212,7 @@ const DatasheetThumbnail: FC<DatasheetThumbnailProps> = ({ datastoreId, datashee
                     className={thumbnailIsHovered ? "frx-btn--transparent fr-img--transparent-transition" : ""}
                     loading="lazy"
                     src={datasheet?.thumbnail?.url === undefined ? placeholder1x1 : datasheet?.thumbnail?.url}
+                    alt={`Vignette de la fiche de données ${datasheetName}`}
                 />
                 {(datasheet?.thumbnail?._id === undefined || thumbnailIsHovered) && (
                     <div className="frx-btn--hover-icon">
@@ -276,7 +277,7 @@ const DatasheetThumbnail: FC<DatasheetThumbnailProps> = ({ datastoreId, datashee
                             />
                         </div>
                         <div className={cx(fr.cx("fr-col-3"), "frx-thumbnail-modal")}>
-                            <img src={modalImageUrl === "" ? placeholder1x1 : modalImageUrl} width="128px" />
+                            <img src={modalImageUrl === "" ? placeholder1x1 : modalImageUrl} width="128px" alt={"Aperçu de la vignette"} />
                         </div>
                     </div>
                     {addThumbnailMutation.isPending && (

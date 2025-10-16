@@ -196,6 +196,7 @@ const CommunityLogo: FC = () => {
                         currentTarget.onerror = null; // prevents looping
                         currentTarget.src = placeholder1x1;
                     }}
+                    alt={`Logo de la communauté ${community.name}`}
                 />
                 {logoIsHovered && (
                     <div className="frx-btn--hover-icon">
@@ -250,7 +251,7 @@ const CommunityLogo: FC = () => {
                             />
                         </div>
                         <div className={cx(fr.cx("fr-col-3"), "frx-thumbnail-modal")}>
-                            <img src={modalImageUrl === "" ? placeholder1x1 : modalImageUrl} width="128px" />
+                            <img src={modalImageUrl === "" ? placeholder1x1 : modalImageUrl} width="128px" alt="Aperçu du logo" />
                         </div>
                     </div>
                     {updateLogoMutation.isPending && (
