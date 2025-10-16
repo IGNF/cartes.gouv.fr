@@ -1430,16 +1430,16 @@
         },
         {
             "name": "pentatrion/vite-bundle",
-            "version": "v8.1.0",
+            "version": "v8.2.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/lhapaipai/vite-bundle.git",
-                "reference": "8921330e02825c84b154108a7d70c21c54a18146"
+                "reference": "3d8bc20bf9561b876e6645ac12d4682135f26623"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/lhapaipai/vite-bundle/zipball/8921330e02825c84b154108a7d70c21c54a18146",
-                "reference": "8921330e02825c84b154108a7d70c21c54a18146",
+                "url": "https://api.github.com/repos/lhapaipai/vite-bundle/zipball/3d8bc20bf9561b876e6645ac12d4682135f26623",
+                "reference": "3d8bc20bf9561b876e6645ac12d4682135f26623",
                 "shasum": ""
             },
             "require": {
@@ -1485,9 +1485,9 @@
             ],
             "support": {
                 "issues": "https://github.com/lhapaipai/vite-bundle/issues",
-                "source": "https://github.com/lhapaipai/vite-bundle/tree/v8.1.0"
+                "source": "https://github.com/lhapaipai/vite-bundle/tree/v8.2.2"
             },
-            "time": "2025-05-14T21:22:46+00:00"
+            "time": "2025-09-20T17:12:07+00:00"
         },
         {
             "name": "phpdocumentor/reflection-common",
