@@ -1,6 +1,6 @@
 # Installation et configuration
 
-Le portail est construit sur le framework PHP Symfony. Il nécessite l'installation d'un moteur php >=8.2, nodejs >=20, composer et yarn.
+Le portail est construit sur le framework PHP Symfony. Il nécessite l'installation d'un moteur php >=8.2, nodejs >=24, npm et composer.
 
 Ci-dessous, les instructions d'installation pour les 2 environnements testés.
 
@@ -21,10 +21,10 @@ Alias /cartes.gouv.fr "C:/xampp/htdocs/cartes.gouv.fr/public"
 3. Installer les extensions PHP requises : `cli`, `opcache`, `xml`, `zip`, `curl`, `intl`, `xsl` et `sqlite3`
 4. Installer [composer](https://getcomposer.org)
 5. Installer nodejs avec [nvm-windows](https://github.com/coreybutler/nvm-windows) ou volta
-6. Installer yarn :
+6. Mettre à jour npm :
 
 ```bash
-npm install --global yarn
+npm install --global npm
 ```
 
 ### Installation
@@ -37,13 +37,13 @@ npm install --global yarn
 
 4. Installer les dépendances php (`composer install`)
 
-5. Installer les dépendances Javascript (`yarn install`)
+5. Installer les dépendances Javascript (`npm clean-install`)
 
 6. Compiler les assets (voir détails des commandes suivantes dans le fichier [package.json](./../../package.json)) :
 
-    - `yarn dev` : lancer le serveur de développement vite avec hot-reload, pour le développement en local
-    - `yarn build` : générer les assets en mode production
-    - `yarn build:dev` : générer les assets en mode développement
+    - `npm run dev` : lancer le serveur de développement vite avec hot-reload, pour le développement en local
+    - `npm run build` : générer les assets en mode production
+    - `npm run build:dev` : générer les assets en mode développement
 
 7. Réinitialiser le cache symfony : `php bin/console cache:clear`
 
@@ -64,8 +64,8 @@ npm install --global yarn
 3. Lancer les conteneurs docker : `docker compose up -d --build`
 4. Ensuite, en se rendant dans le conteneur `php` : `docker exec -it cartesgouvfr-app-1 bash` (ajuster le nom du conteneur si besoin) :
     - `composer install`
-    - `yarn install`
-    - `yarn dev`, `yarn build` ou `yarn build:dev`
+    - `npm clean-install`
+    - `npm run dev`, `npm run build` ou `npm run build:dev`
 5. Réinitialiser le cache symfony : `php bin/console cache:clear`
 6. Consulter le site au http://localhost:9092 ou https://cartesgouvfr-dev.docker.localhost (si traefik est configuré)
 

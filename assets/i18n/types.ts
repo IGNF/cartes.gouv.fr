@@ -74,7 +74,7 @@ export type ComponentKey =
     | import("../espaceco/pages/communities/management/reports/Theme.locale").I18n
     | import("../espaceco/pages/communities/management/reports/ReportStatuses.locale").I18n
     | import("../espaceco/pages/communities/management/reports/SharedThemes.locale").I18n
-    | import("../espaceco/pages/communities/management/reports/EmailPlanners").I18n
+    | import("../espaceco/pages/communities/management/reports/EmailPlanners.locale").I18n
     | import("../espaceco/pages/communities/management/reports/emailplanners/AddOrEditEmailPlanner.locale").I18n
     | import("../espaceco/pages/communities/management/reports/emailplanners/EmailPlannerKeywords.locale").I18n
     | import("../espaceco/pages/communities/management/Members.locale").I18n
@@ -84,7 +84,7 @@ export type ComponentKey =
     | import("../espaceco/pages/communities/management/reports/AutofillDialog.locale").I18n
     | import("../espaceco/pages/communities/management/databases/Databases.locale").I18n
     | import("../espaceco/pages/communities/MemberInvitation.locale").I18n
-    | import("../components/Input/InputCollection").I18n
+    | import("../components/Input/InputCollection/InputCollection.locale").I18n
     | import("../entrepot/pages/config/Alerts.locale").I18n
     | import("../espaceco/pages/communities/CommunityList.locale").I18n
     | import("../pages/LoginDisabled/LoginDisabled.locale").I18n

@@ -59,14 +59,14 @@ const Communities: FC = () => {
     const [community, setCommunity] = useState<CommunityResponseDTO | null>(null);
 
     const communityQuery = useQuery<GetResponse<CommunityResponseDTO>, CartesApiException>({
-        queryKey: RQKeys.communityList(queryParams.page, queryParams.limit),
+        queryKey: RQKeys.communityList(queryParams),
         queryFn: ({ signal }) => api.community.get(queryParams, signal),
         staleTime: 3600000,
         enabled: filter === "listed",
     });
 
     const communitiesAsMemberQuery = useQuery<GetResponse<CommunityResponseDTO>, CartesApiException>({
-        queryKey: RQKeys.communitiesAsMember(queryParams.pending ?? false, queryParams.page, queryParams.limit),
+        queryKey: RQKeys.communitiesAsMember(queryParams),
         queryFn: ({ signal }) => api.community.getAsMember(queryParams, signal),
         staleTime: 3600000,
         enabled: filter === "iam_member" || filter === "affiliation",

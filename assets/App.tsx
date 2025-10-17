@@ -1,19 +1,19 @@
-import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
+import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
 import { QueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { FC } from "react";
 
+import AlertProvider from "./components/Provider/AlertProvider";
 import ErrorBoundary from "./components/Utils/ErrorBoundary";
 import RouterRenderer from "./router/RouterRenderer";
 import { RouteProvider } from "./router/router";
-import AlertProvider from "./components/Provider/AlertProvider";
 
 import "./sass/helpers.scss";
 
 const queryClient = new QueryClient();
 
-const persister = createSyncStoragePersister({
+const persister = createAsyncStoragePersister({
     storage: window.localStorage,
 });
 

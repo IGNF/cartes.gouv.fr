@@ -11,7 +11,7 @@ import { format, resolveConfig } from "prettier";
 import { pipeline } from "stream/promises";
 import { fileURLToPath } from "url";
 import { promisify } from "util";
-import colors from "yoctocolors";
+import { styleText, format as utilFormat } from "node:util";
 
 const execAsync = promisify(exec);
 
@@ -35,12 +35,14 @@ const OUTPUT_DIR = resolve(join(__dirname, "..", "var", "data", "articles"));
 
 const HTTP_PROXY = process.env.HTTP_PROXY;
 
+const formatArgs = (args) => (args.length === 1 ? String(args[0]) : utilFormat(...args));
+
 const logger = {
     log: console.log,
-    info: (...args) => console.info(colors.bgBlue(...args)),
-    warn: (...args) => console.warn(colors.bgYellow(...args)),
-    error: (...args) => console.error(colors.bgRed(...args)),
-    success: (...args) => console.log(colors.bgGreen(...args)),
+    info: (...args) => console.info(styleText("bgBlue", formatArgs(args))),
+    warn: (...args) => console.warn(styleText("bgYellow", formatArgs(args))),
+    error: (...args) => console.error(styleText("bgRed", formatArgs(args))),
+    success: (...args) => console.log(styleText("bgGreen", formatArgs(args))),
 };
 
 let nbDownloadedFiles = 0;
@@ -212,7 +214,7 @@ const downloadAllDownloadableFiles = async (document) => {
         try {
             const newUrl = await downloadFile(downLink.href);
             downLink.href = ARTICLES_S3_GATEWAY_PATH_ARTICLES + newUrl.replace(OUTPUT_DIR, "");
-        } catch (err) {
+        } catch (_) {
             downLink.removeAttribute("href");
         }
     });
@@ -304,7 +306,7 @@ const getPageNumbers = async (url) => {
         const $navPaginationUl = $main.querySelector("nav.fr-pagination>.fr-pagination__list");
         const navPagLastChild = $navPaginationUl.lastElementChild.querySelector("a");
         lastPage = new URL(url + navPagLastChild.href).searchParams.get("page");
-    } catch (error) {
+    } catch (_) {
         // Si la pagination n'existe pas, on considère qu'il n'y a qu'une seule page
     }
 

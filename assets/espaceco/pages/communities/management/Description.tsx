@@ -63,7 +63,7 @@ const Description: FC<DescriptionProps> = ({ isAdmin }) => {
     const communityNames = useMemo(() => {
         const name = community?.name;
         return communityNamesQuery.data?.filter((n) => n !== name) ?? [];
-    }, [community, communityNamesQuery]);
+    }, [community, communityNamesQuery.data]);
 
     const communityDocumentsQuery = useQuery<DocumentDTO[] | null, CartesApiException>({
         queryKey: RQKeys.communityDocuments(community?.id),

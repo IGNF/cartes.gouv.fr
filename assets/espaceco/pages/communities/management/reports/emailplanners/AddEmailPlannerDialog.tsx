@@ -54,7 +54,11 @@ const AddEmailPlannerDialog: FC<AddEmailPlannerDialogProps> = ({ themes, statuse
     const resetForm = useCallback(() => {
         /* si type est déjà basic, setType ne déclenchera pas le useEffect précédent 
         et ne fera donc pas un reset du formulaire avec les valeurs par défaut */
-        type === "basic" ? reset(getAddDefaultValues(type)) : setType("basic");
+        if (type === "basic") {
+            reset(getAddDefaultValues(type));
+        } else {
+            setType("basic");
+        }
     }, [type, reset]);
 
     const onSubmit = () => {

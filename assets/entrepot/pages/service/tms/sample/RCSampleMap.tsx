@@ -11,7 +11,8 @@ import { UseFormReturn } from "react-hook-form";
 
 import useCapabilities from "../../../../../hooks/useCapabilities";
 import { useTranslation } from "../../../../../i18n";
-import SampleMap from "./SampleMap";
+import { ChangeExtentEvent } from "./CustomEvents";
+import SampleMap, { EXTENT_CHANGED_EVENT } from "./SampleMap";
 
 import "ol/ol.css";
 
@@ -61,9 +62,12 @@ const RCSampleMap: FC<RCSampleMapProps> = ({ form, center, bottomZoomLevel, onCh
                 controls: controls,
             });
 
-            mapRef.current.on("extentchanged", (e) => {
-                onChange?.(e.center, e.area);
-            });
+            (mapRef.current as unknown as { on: (type: string, listener: (e: ChangeExtentEvent) => void) => void }).on(
+                EXTENT_CHANGED_EVENT,
+                (e: ChangeExtentEvent) => {
+                    onChange?.(e.center, e.area);
+                }
+            );
         }
 
         mapRef.current.setTarget(mapTargetRef.current || "");

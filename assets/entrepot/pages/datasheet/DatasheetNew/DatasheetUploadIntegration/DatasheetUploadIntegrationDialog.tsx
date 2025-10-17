@@ -48,6 +48,7 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
     // définition des query
     // query qui "ping" ou "poll" et récupère le progress en boucle (query désactivé au départ)
     const pingIntProgQuery = useQuery({
+        // eslint-disable-next-line @tanstack/query/exhaustive-deps
         queryKey: RQKeys.datastore_upload_integration(datastoreId, uploadId),
         queryFn: ({ signal }) =>
             pingIntProgQuery.data === undefined
@@ -176,17 +177,18 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
                             {
                                 children: "Consulter la fiche de données",
                                 onClick: () => {
-                                    uploadQuery.data?.tags.datasheet_name &&
-                                        (queryClient.refetchQueries({
+                                    if (uploadQuery.data?.tags.datasheet_name) {
+                                        queryClient.refetchQueries({
                                             queryKey: RQKeys.datastore_datasheet(datastoreId, uploadQuery.data?.tags.datasheet_name),
-                                        }),
+                                        });
                                         routes
                                             .datastore_datasheet_view({
                                                 datastoreId,
                                                 datasheetName: uploadQuery.data?.tags.datasheet_name,
                                                 activeTab: DatasheetViewActiveTabEnum.Dataset,
                                             })
-                                            .push());
+                                            .push();
+                                    }
                                 },
                             },
                         ]}
@@ -202,17 +204,18 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
                             {
                                 children: t("view_datasheet"),
                                 onClick: () => {
-                                    uploadQuery.data?.tags.datasheet_name &&
-                                        (queryClient.refetchQueries({
+                                    if (uploadQuery.data?.tags.datasheet_name) {
+                                        queryClient.refetchQueries({
                                             queryKey: RQKeys.datastore_datasheet(datastoreId, uploadQuery.data?.tags.datasheet_name),
-                                        }),
+                                        });
                                         routes
                                             .datastore_datasheet_view({
                                                 datastoreId,
                                                 datasheetName: uploadQuery.data?.tags.datasheet_name,
                                                 activeTab: DatasheetViewActiveTabEnum.Dataset,
                                             })
-                                            .push());
+                                            .push();
+                                    }
                                 },
                             },
                         ]}

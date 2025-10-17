@@ -72,6 +72,8 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
         },
     });
 
+    const { mutate: createServiceMutate } = createServiceMutation;
+
     const editServiceMutation = useMutation<Service, CartesApiException>({
         mutationFn: () => {
             if (offeringId === undefined) {
@@ -99,6 +101,8 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
             }
         },
     });
+
+    const { mutate: editServiceMutate } = editServiceMutation;
 
     const pyramidQuery = useQuery({
         queryKey: RQKeys.datastore_stored_data(datastoreId, pyramidId),
@@ -175,12 +179,12 @@ const PyramidVectorTmsServiceForm: FC<PyramidVectorTmsServiceFormProps> = ({ dat
             // on est à la dernière étape du formulaire donc on envoie la sauce
 
             if (editMode) {
-                editServiceMutation.mutate();
+                editServiceMutate();
             } else {
-                createServiceMutation.mutate();
+                createServiceMutate();
             }
         }
-    }, [createServiceMutation, editServiceMutation, currentStep, trigger, editMode]);
+    }, [createServiceMutate, editServiceMutate, currentStep, trigger, editMode]);
 
     return (
         <Main title={t("title", { editMode })}>

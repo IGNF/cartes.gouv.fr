@@ -1,5 +1,8 @@
 # Tests avec Cypress
 
+> [!WARNING]
+> Cypress n'est plus installé dans le projet.
+
 ### Prérequis
 
 Activer l'environnement de test :
@@ -22,7 +25,7 @@ baseUrl: "https://cartesgouvfr-dev.docker.localhost",
 Lancer si première utilisation de cypress :
 
 ```sh
-yarn cypress install
+npx cypress install
 ```
 
 > Configuration supplémentaire pour Linux sous WSL2 : https://nickymeuleman.netlify.app/blog/gui-on-wsl2-cypress
@@ -34,20 +37,20 @@ yarn cypress install
 Ouvrir l'interface de pilotage de cypress :
 
 ```sh
-yarn cypress open
+npx cypress open
 ```
 
 Lancer les tests (mode `headless`, sans visuel) :
 
 ```sh
 # le mode headless (--headless) est activé par défaut
-yarn cypress run --browser firefox
+npx cypress run --browser firefox
 ```
 
 Lancer les tests (mode `headed`, avec visuel) :
 
 ```sh
-yarn cypress run --browser firefox --headed
+npx cypress run --browser firefox --headed
 ```
 
 > Le navigateur sur lequel on souhaite exécuter les tests doit être installé sur votre machine.

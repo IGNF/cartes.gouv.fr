@@ -31,7 +31,7 @@ class DisplayCenterControl extends Control {
                 olColor.fromString(color) as olColor.Color;
                 c = color;
             }
-        } catch (e) {
+        } catch (_) {
             c = "#000";
         }
 

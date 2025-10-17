@@ -1,7 +1,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Table from "@codegouvfr/react-dsfr/Table";
-import { FC, ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { FC, ReactNode, useCallback, useMemo } from "react";
 import { GridDTO } from "../../../../@types/espaceco";
 import SearchGrids from "./SearchGrids";
 
@@ -12,34 +12,26 @@ type GridListProps = {
 };
 
 const GridList: FC<GridListProps> = ({ grids = [], displayType = false, onChange }) => {
-    const [internal, setInternal] = useState<GridDTO[]>([]);
-
-    useEffect(() => {
-        setInternal([...grids]);
-    }, [grids]);
-
     const handleRemove = useCallback(
         (gridName: string) => {
-            const grids = internal.filter((grid) => grid.name !== gridName);
-            setInternal(grids);
-            onChange(grids);
+            const next = grids.filter((grid) => grid.name !== gridName);
+            onChange(next);
         },
-        [internal, onChange]
+        [grids, onChange]
     );
 
     const handleAdd = (grid: GridDTO | null) => {
         if (!grid) return;
 
-        const found = internal.find((g) => g.name === grid.name);
+        const found = grids.find((g) => g.name === grid.name);
         if (!found) {
-            const grids = [...internal, grid];
-            setInternal(grids);
-            onChange(grids);
+            const next = [...grids, grid];
+            onChange(next);
         }
     };
 
     const data: ReactNode[][] = useMemo(() => {
-        return Array.from(internal, (grid) => {
+        return Array.from(grids, (grid) => {
             const node: ReactNode[] = [grid.name, grid.title];
             if (displayType) {
                 node.push(grid.type.title);
@@ -51,7 +43,7 @@ const GridList: FC<GridListProps> = ({ grids = [], displayType = false, onChange
             );
             return node;
         });
-    }, [internal, displayType, handleRemove]);
+    }, [grids, displayType, handleRemove]);
 
     return (
         <div>

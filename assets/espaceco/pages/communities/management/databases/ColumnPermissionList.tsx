@@ -74,7 +74,7 @@ const ColumnPermissionList: FC<ColumnPermissionListProps> = ({ databaseId, table
                 if (!result.error && result.data) {
                     t = result.data;
                 }
-            } catch (e) {
+            } catch (_) {
                 /* */
             }
         }

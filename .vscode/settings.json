@@ -2,6 +2,10 @@
     "prettier.requireConfig": true,
     "php-cs-fixer.executablePath": "${workspaceFolder}/vendor/bin/php-cs-fixer",
     "phpmd.rules": "${workspaceFolder}/phpmd.xml",
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "eslint.useFlatConfig": true,
+    "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
+    "eslint.workingDirectories": [{ "mode": "auto" }],
     "todo-tree.general.showActivityBarBadge": true,
     "todo-tree.general.tags": ["NOTE", "TODO", "FIXME", "MARK", "[ ]", "[x]"],
     "todo-tree.highlights.defaultHighlight": {
@@ -42,6 +46,5 @@
             "icon": "square-fill"
         }
     },
-    "todo-tree.regex.regex": "(//|#|<!--|;|/\\*|^|^\\s*(-|\\d+.))\\s*($TAGS)",
-    "typescript.tsdk": "node_modules/typescript/lib"
+    "todo-tree.regex.regex": "(//|#|<!--|;|/\\*|^|^\\s*(-|\\d+.))\\s*($TAGS)"
 }

@@ -167,7 +167,7 @@ const AddDocumentDialog: FC<AddDocumentDialogProps> = ({ onAdd }) => {
                             </div>
                             <div className={cx(fr.cx("fr-col-3"), "frx-image-modal")}>
                                 <div className={fr.cx("fr-grid-row", "fr-grid-row--right")}>
-                                    <img src={modalImageUrl === "" ? placeholder1x1 : modalImageUrl} />
+                                    <img src={modalImageUrl === "" ? placeholder1x1 : modalImageUrl} alt="Icône du type de document" />
                                 </div>
                             </div>
                         </div>

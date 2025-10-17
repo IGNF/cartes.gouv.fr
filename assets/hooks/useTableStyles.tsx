@@ -1,5 +1,4 @@
 import { useQueries, UseQueryOptions } from "@tanstack/react-query";
-import { useMemo } from "react";
 
 import { StaticFileListResponseDto } from "@/@types/entrepot";
 import api from "@/entrepot/api";
@@ -29,9 +28,10 @@ export const useTableStyles = (editMode: boolean, datastoreId: string, staticFil
 
     const isLoading = styleQueries.some((q) => q.isLoading);
     const isError = styleQueries.some((q) => q.isError);
-    const errors = useMemo(() => {
-        return styleQueries.filter((q) => q.isError).map((q) => q.error.message);
-    }, [styleQueries]);
+    const errors = styleQueries.reduce<string[]>((acc, q) => {
+        if (q.isError && q.error?.message) acc.push(q.error.message);
+        return acc;
+    }, []);
 
     const data = styleQueries.length
         ? staticFiles.reduce((accumulator, staticFile, index) => {

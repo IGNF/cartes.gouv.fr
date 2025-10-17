@@ -26,7 +26,7 @@ const Search: FC<SearchProps> = ({ label, hintText, filter, onChange }) => {
     const [text, setText] = useDebounceValue("", 500);
 
     const searchQuery = useQuery<SearchResult>({
-        queryKey: RQKeys.searchAddress(text),
+        queryKey: RQKeys.searchAddress(text, filter),
         queryFn: async ({ signal }) => {
             const qParams = new URLSearchParams({ text: text, ...filter }).toString();
             return jsonFetch<SearchResult>(`${autocompleteUrl}?${qParams}`, { signal });

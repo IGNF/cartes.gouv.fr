@@ -4,7 +4,7 @@ import { EspaceCoCommunityListFrTranslations } from "@/espaceco/pages/communitie
 import { ReuseCommunityConfigFrTranslations } from "@/espaceco/pages/communities/ReuseCommunityConfig.locale";
 import { SearchCommunityFrTranslations } from "@/espaceco/pages/communities/SearchCommunity.locale";
 import { DatabasesFrTranslations } from "@/espaceco/pages/communities/management/databases/Databases.locale";
-import { InputCollectionFrTranslations } from "../../components/Input/InputCollection";
+import { InputCollectionFrTranslations } from "../../components/Input/InputCollection/InputCollection.locale";
 import { UploadStyleFileFrTranslations } from "../../components/Utils/Geostyler/UploadStyleFile.locale";
 import { datastoreNavItemsFrTranslations } from "../../config/navItems/datastoreNavItems.locale";
 import { navItemsFrTranslations } from "../../config/navItems/navItems.locale";

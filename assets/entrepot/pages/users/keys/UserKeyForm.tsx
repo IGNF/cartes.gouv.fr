@@ -169,7 +169,11 @@ const UserKeyForm: FC<UserKeyFormProps> = ({ keyId }) => {
         }
 
         const values = createRequestBody(editMode, getFormValues());
-        editMode ? mutateUpdate(values) : mutateAdd(values);
+        if (editMode) {
+            mutateUpdate(values);
+        } else {
+            mutateAdd(values);
+        }
     };
 
     const queryClient = useQueryClient();

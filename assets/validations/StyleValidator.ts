@@ -10,7 +10,7 @@ class StyleValidator {
         this.service = service;
         this.format = format;
     }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
     async validate(_value: string | undefined, _ctx: TestContext): Promise<ValidationError | boolean> {
         return true;
     }

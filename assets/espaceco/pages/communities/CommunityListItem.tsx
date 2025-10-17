@@ -48,6 +48,7 @@ const CommunityListItem: FC<CommunityListItemProps> = ({ className, community })
                                 currentTarget.onerror = null; // prevents looping
                                 currentTarget.src = placeholder1x1;
                             }}
+                            alt={`Logo de la communauté ${community.name}`}
                         />
                         <span className={fr.cx("fr-ml-2v")}>{community.name}</span>
                     </div>

@@ -74,7 +74,7 @@ const TablePermissionList: FC<TablePermissionListProps> = ({ databaseId }) => {
                 if (!result.error && result.data) {
                     db = result.data;
                 }
-            } catch (e) {
+            } catch (_) {
                 /* */
             }
         }

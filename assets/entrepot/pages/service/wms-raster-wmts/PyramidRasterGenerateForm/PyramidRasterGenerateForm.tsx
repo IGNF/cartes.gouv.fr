@@ -102,6 +102,8 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
         },
     });
 
+    const { mutate: generatePyramidRaster } = generatePyramidRasterMutation;
+
     useScrollToTopEffect(currentStep);
 
     const previousStep = useCallback(() => setCurrentStep((currentStep) => currentStep - 1), []);
@@ -115,9 +117,9 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
             setCurrentStep((currentStep) => currentStep + 1);
         } else {
             // on est à la dernière étape du formulaire donc on envoie la sauce
-            generatePyramidRasterMutation.mutate();
+            generatePyramidRaster();
         }
-    }, [currentStep, generatePyramidRasterMutation, trigger]);
+    }, [currentStep, generatePyramidRaster, trigger]);
 
     return (
         <Main title={t("title")}>

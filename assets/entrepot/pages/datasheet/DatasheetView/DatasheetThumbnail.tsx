@@ -115,6 +115,8 @@ const DatasheetThumbnail: FC<DatasheetThumbnailProps> = ({ datastoreId, datashee
         },
     });
 
+    const { mutate: addThumbnailMutate, reset: addThumbnailReset } = addThumbnailMutation;
+
     // Suppression de la vignette
     const deleteThumbnailMutation = useMutation<null, CartesApiException>({
         mutationFn: () => {
@@ -174,9 +176,9 @@ const DatasheetThumbnail: FC<DatasheetThumbnailProps> = ({ datastoreId, datashee
     const onSubmit = useCallback(async () => {
         if (upload) {
             // Ajout dans les annexes
-            addThumbnailMutation.mutate();
+            addThumbnailMutate();
         }
-    }, [addThumbnailMutation, upload]);
+    }, [addThumbnailMutate, upload]);
 
     const action: ThumbnailAction = useMemo(() => (datasheet?.thumbnail?.url ? "modify" : "add"), [datasheet?.thumbnail?.url]);
 
@@ -187,7 +189,7 @@ const DatasheetThumbnail: FC<DatasheetThumbnailProps> = ({ datastoreId, datashee
                 children: tCommon("cancel"),
                 onClick: () => {
                     reset();
-                    addThumbnailMutation.reset();
+                    addThumbnailReset();
                 },
                 doClosesModal: true,
                 priority: "secondary",
@@ -201,7 +203,7 @@ const DatasheetThumbnail: FC<DatasheetThumbnailProps> = ({ datastoreId, datashee
         ];
 
         return btns;
-    }, [action, addThumbnailMutation, handleSubmit, onSubmit, reset, t, tCommon]);
+    }, [action, addThumbnailReset, handleSubmit, onSubmit, reset, t, tCommon]);
 
     return (
         <>
@@ -210,6 +212,7 @@ const DatasheetThumbnail: FC<DatasheetThumbnailProps> = ({ datastoreId, datashee
                     className={thumbnailIsHovered ? "frx-btn--transparent fr-img--transparent-transition" : ""}
                     loading="lazy"
                     src={datasheet?.thumbnail?.url === undefined ? placeholder1x1 : datasheet?.thumbnail?.url}
+                    alt={`Vignette de la fiche de données ${datasheetName}`}
                 />
                 {(datasheet?.thumbnail?._id === undefined || thumbnailIsHovered) && (
                     <div className="frx-btn--hover-icon">
@@ -274,7 +277,7 @@ const DatasheetThumbnail: FC<DatasheetThumbnailProps> = ({ datastoreId, datashee
                             />
                         </div>
                         <div className={cx(fr.cx("fr-col-3"), "frx-thumbnail-modal")}>
-                            <img src={modalImageUrl === "" ? placeholder1x1 : modalImageUrl} width="128px" />
+                            <img src={modalImageUrl === "" ? placeholder1x1 : modalImageUrl} width="128px" alt={"Aperçu de la vignette"} />
                         </div>
                     </div>
                     {addThumbnailMutation.isPending && (

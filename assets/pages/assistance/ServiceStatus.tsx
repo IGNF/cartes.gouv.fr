@@ -69,7 +69,13 @@ const ServiceStatus = () => {
             </p>
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-12")}>
-                    <iframe src="https://status.uptrends.com/aa35b49e519e4f90866dc6bfc0a797a9" height="800px" width="100%" onLoad={() => setLoading(false)} />
+                    <iframe
+                        src="https://status.uptrends.com/aa35b49e519e4f90866dc6bfc0a797a9"
+                        height="800px"
+                        width="100%"
+                        onLoad={() => setLoading(false)}
+                        title="Disponibilité des services"
+                    />
                 </div>
             </div>
         </Main>

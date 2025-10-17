@@ -16,7 +16,7 @@ import api from "../../../../../api";
 import ListItem from "../../ListItem";
 import PyramidStoredDataDesc from "../PyramidStoredDataDesc";
 import StoredDataDeleteConfirmDialog from "../StoredDataDeleteConfirmDialog";
-import { PyramidRasterServiceChoiceDialog, type PyramidRasterServiceChoiceDialogProps } from "./PyramidRasterServiceChoiceDialog";
+import { PyramidRasterServiceChoiceDialog, type PyramidRasterServiceChoiceDialogOpenFn } from "./PyramidRasterServiceChoiceDialog";
 
 const getHintText = (endpoints: DatastoreEndpoint[]): ReactNode => (
     <ul className={fr.cx("fr-raw-list")}>
@@ -80,7 +80,7 @@ const PyramidRasterListItem: FC<PyramidRasterListItemProps> = ({ datasheetName, 
         return { wmsRasterEndpoints, wmtsEndpoints };
     }, [endpointsQuery.data]);
 
-    const serviceChoiceDialogActions = useRef<PyramidRasterServiceChoiceDialogProps["actions"]>({});
+    const serviceChoiceDialogApiRef = useRef<{ open?: PyramidRasterServiceChoiceDialogOpenFn }>({});
 
     return (
         <>
@@ -88,9 +88,10 @@ const PyramidRasterListItem: FC<PyramidRasterListItemProps> = ({ datasheetName, 
                 actionButton={
                     <Button
                         onClick={async () => {
-                            if (serviceChoiceDialogActions.current.open === undefined) return;
+                            const openFn = serviceChoiceDialogApiRef.current.open;
+                            if (openFn === undefined) return;
 
-                            const { response: serviceType } = await serviceChoiceDialogActions.current.open({
+                            const { response: serviceType } = await openFn({
                                 title: t("choose_service_type"),
                                 options: [
                                     {
@@ -160,7 +161,11 @@ const PyramidRasterListItem: FC<PyramidRasterListItemProps> = ({ datasheetName, 
                 <PyramidStoredDataDesc datastoreId={datastoreId} pyramid={pyramid} dataUsesQuery={dataUsesQuery} />
             </ListItem>
 
-            <PyramidRasterServiceChoiceDialog actions={serviceChoiceDialogActions.current} />
+            <PyramidRasterServiceChoiceDialog
+                onRegister={({ open }) => {
+                    serviceChoiceDialogApiRef.current.open = open;
+                }}
+            />
 
             <StoredDataDeleteConfirmDialog datastoreId={datastoreId} storedData={pyramid} datasheetName={datasheetName} modal={confirmRemovePyramidModal} />
         </>

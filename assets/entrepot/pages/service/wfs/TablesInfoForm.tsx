@@ -51,7 +51,11 @@ const TableInfosForm: FC<TablesInfoFormProps> = ({ visible, tables, state, state
     const toggleTable = (tableName: string) => {
         const tableSet = new Set(selectedTables);
         const exists = selectedTables.includes(tableName);
-        exists ? tableSet.delete(tableName) : tableSet.add(tableName);
+        if (exists) {
+            tableSet.delete(tableName);
+        } else {
+            tableSet.add(tableName);
+        }
 
         setFormValue("selected_tables", Array.from(tableSet), { shouldValidate: true });
     };

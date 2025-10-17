@@ -44,11 +44,11 @@ jobs:
             - name: Checkout repository
               uses: actions/checkout@v4
 
-            - name: Use Node.js 20.x
-              uses: actions/setup-node@v4
+            - name: Use Node.js
+              uses: actions/setup-node@v6
               with:
-                  node-version: 20.x
-                  cache: yarn
+                  node-version-file: .nvmrc
+                  cache: npm
 
             - name: Get PHP composer packages
               uses: actions/cache@v4
@@ -60,10 +60,10 @@ jobs:
                       ${{ runner.os }}-php-
 
             - name: Install JavaScript dependencies
-              run: yarn install
+              run: npm ci
 
             - name: Lint
-              run: yarn lint
+              run: npm run lint
 
             - name: Format
-              run: yarn format
+              run: npm run format
