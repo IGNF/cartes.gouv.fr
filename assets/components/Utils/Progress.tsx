@@ -10,7 +10,8 @@ type ProgressProps = {
 };
 const Progress: FC<ProgressProps> = ({ label, value, max = 100 }) => {
     const percent = useMemo(() => {
-        const percentage = Math.floor((value / max) * 100);
+        const raw = (value / max) * 100;
+        const percentage = Number.isFinite(raw) ? Math.floor(raw) : 0;
 
         return `${percentage}%`;
     }, [max, value]);
