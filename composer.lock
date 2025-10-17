@@ -136,16 +136,16 @@
         },
         {
             "name": "async-aws/simple-s3",
-            "version": "2.1.0",
+            "version": "2.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/async-aws/simple-s3.git",
-                "reference": "c68edb5fb92971cf2ac18770a842159ca4ac8ac4"
+                "reference": "3edb3676244960a36b801c0141401d2f58b5f617"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/async-aws/simple-s3/zipball/c68edb5fb92971cf2ac18770a842159ca4ac8ac4",
-                "reference": "c68edb5fb92971cf2ac18770a842159ca4ac8ac4",
+                "url": "https://api.github.com/repos/async-aws/simple-s3/zipball/3edb3676244960a36b801c0141401d2f58b5f617",
+                "reference": "3edb3676244960a36b801c0141401d2f58b5f617",
                 "shasum": ""
             },
             "require": {
@@ -177,7 +177,7 @@
                 "sdk"
             ],
             "support": {
-                "source": "https://github.com/async-aws/simple-s3/tree/2.1.0"
+                "source": "https://github.com/async-aws/simple-s3/tree/2.1.1"
             },
             "funding": [
                 {
@@ -189,7 +189,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-01-09T08:38:58+00:00"
+            "time": "2024-10-09T08:09:09+00:00"
         },
         {
             "name": "cweagans/composer-patches",
