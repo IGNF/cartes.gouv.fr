@@ -10,7 +10,7 @@ const { i18n } = declareComponentKeys<
 export type I18n = typeof i18n;
 
 export const InputCollectionFrTranslations: Translations<"fr">["InputCollection"] = {
-    min_length_error: ({ min }) => `La chaîne doit faire au mois ${min} caractères `,
+    min_length_error: ({ min }) => `La chaîne doit faire au minimum ${min} caractères `,
     validator_error: ({ type, value }) => {
         switch (type) {
             case "none":
