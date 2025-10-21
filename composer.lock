@@ -8444,16 +8444,11 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "2.1.15",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "402d11c1aa40ae2e1c3a512e6a4edb957527b20b"
-            },
+            "version": "2.1.31",
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/402d11c1aa40ae2e1c3a512e6a4edb957527b20b",
-                "reference": "402d11c1aa40ae2e1c3a512e6a4edb957527b20b",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/ead89849d879fe203ce9292c6ef5e7e76f867b96",
+                "reference": "ead89849d879fe203ce9292c6ef5e7e76f867b96",
                 "shasum": ""
             },
             "require": {
@@ -8498,7 +8493,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-05-14T11:16:08+00:00"
+            "time": "2025-10-10T14:14:11+00:00"
         },
         {
             "name": "react/cache",
