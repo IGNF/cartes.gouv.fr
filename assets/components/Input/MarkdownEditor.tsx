@@ -7,8 +7,9 @@ import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
-import { Markdown } from "tiptap-markdown";
+import { Markdown } from "@tiptap/markdown";
 
+import "react-dsfr-tiptap/index.css";
 import "../../sass/components/tiptap.scss";
 
 type MarkdownEditorProps = {

@@ -4,6 +4,8 @@ import { FC, LazyExoticComponent, ReactNode } from "react";
 import { Control, ControlComponent, RichTextEditor } from "react-dsfr-tiptap";
 import { ControlImage, ControlLink, ControlUnlink, ControlYoutube } from "react-dsfr-tiptap/dialog";
 
+import "react-dsfr-tiptap/index.css";
+
 type HtmlEditorEditorProps = {
     controlMap?: Partial<Record<Control, ControlComponent>>;
     label?: string;
@@ -20,7 +22,7 @@ const extensionLoader = {
     color: () =>
         Promise.all([
             import("@tiptap/extension-color").then((module) => module.default),
-            import("@tiptap/extension-text-style").then((module) => module.default),
+            import("@tiptap/extension-text-style").then(({ TextStyle }) => TextStyle),
         ]),
     highlight: () => import("@tiptap/extension-highlight").then((module) => module.default),
     image: () => import("@tiptap/extension-image").then((module) => module.default),
