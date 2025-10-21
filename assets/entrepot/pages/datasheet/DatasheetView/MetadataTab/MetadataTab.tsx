@@ -149,7 +149,9 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, metadataQuery }) => {
                                 title={"Mots clés INSPIRE"}
                                 content={
                                     <div className={fr.cx("fr-tags-group")}>
-                                        {metadata.csw_metadata?.inspire_keywords?.map((keyword) => <Tag key={keyword}>{keyword}</Tag>)}
+                                        {metadata.csw_metadata?.inspire_keywords?.map((keyword) => (
+                                            <Tag key={keyword}>{keyword}</Tag>
+                                        ))}
                                     </div>
                                 }
                             />
@@ -157,7 +159,9 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, metadataQuery }) => {
                                 title={"Mots clés libres"}
                                 content={
                                     <div className={fr.cx("fr-tags-group")}>
-                                        {metadata.csw_metadata?.free_keywords?.map((keyword) => <Tag key={keyword}>{keyword}</Tag>)}
+                                        {metadata.csw_metadata?.free_keywords?.map((keyword) => (
+                                            <Tag key={keyword}>{keyword}</Tag>
+                                        ))}
                                     </div>
                                 }
                             />

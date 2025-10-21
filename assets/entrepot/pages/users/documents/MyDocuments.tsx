@@ -159,7 +159,9 @@ const MyDocuments: FC = () => {
                         doc.name,
                         doc.description,
                         <ul key={`labels-${doc._id}`} className={fr.cx("fr-tags-group")}>
-                            {doc.labels?.map((label) => <Tag key={`doc-${doc._id}-label-${label}`}>{label}</Tag>)}
+                            {doc.labels?.map((label) => (
+                                <Tag key={`doc-${doc._id}-label-${label}`}>{label}</Tag>
+                            ))}
                         </ul>,
                         niceBytes(doc.size.toString()),
                         doc.mime_type,

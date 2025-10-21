@@ -284,8 +284,7 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
                 };
             });
 
-            data
-                ?.map((style) => style.layers.map((layer) => layer.annexe_id))
+            data?.map((style) => style.layers.map((layer) => layer.annexe_id))
                 .flat()
                 .forEach((annexeId) => {
                     queryClient.removeQueries({ queryKey: RQKeys.datastore_annexe(datastoreId, annexeId) });
