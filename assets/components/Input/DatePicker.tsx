@@ -1,9 +1,9 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import MuiDsfrThemeProvider from "@codegouvfr/react-dsfr/mui";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DatePicker as MuiDatePicker, DatePickerProps as MuiDatePickerProps } from "@mui/x-date-pickers/DatePicker";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider/LocalizationProvider";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { enGB as enGBLocale, fr as frLocale } from "date-fns/locale";
 import { useId } from "react";
 import { symToStr } from "tsafe/symToStr";
@@ -12,7 +12,7 @@ import { useLang } from "../../i18n/i18n";
 
 const locales = { en: enGBLocale, fr: frLocale };
 
-interface DatePickerProps extends Omit<MuiDatePickerProps<Date, false>, "onChange"> {
+interface DatePickerProps extends Omit<MuiDatePickerProps<false>, "onChange"> {
     id?: string;
     label: string;
     hintText?: string;

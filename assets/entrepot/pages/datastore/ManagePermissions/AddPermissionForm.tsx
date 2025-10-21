@@ -26,6 +26,9 @@ import { getAddSchema } from "./ValidationSchemas";
 import createRequestBody, { type AddPermissionFormType } from "./utils";
 import Main from "../../../../components/Layout/Main";
 
+const defaultDate = new Date(new Date().setFullYear(new Date().getFullYear() + 2));
+const defaultOnlyOauth = false;
+
 type AddPermissionFormProps = {
     datastoreId: string;
 };
@@ -34,13 +37,7 @@ const AddPermissionForm: FC<AddPermissionFormProps> = ({ datastoreId }) => {
     const { t } = useTranslation("DatastorePermissions");
     const { t: tCommon } = useTranslation("Common");
 
-    const user = useAuthStore.getState().user;
-
-    const defaultDate = useMemo(() => {
-        return new Date(new Date().setFullYear(new Date().getFullYear() + 2));
-    }, []);
-
-    const defaultOnlyOauth = false;
+    const user = useAuthStore((state) => state.user);
 
     const queryClient = useQueryClient();
 
@@ -217,10 +214,11 @@ const AddPermissionForm: FC<AddPermissionFormProps> = ({ datastoreId }) => {
                     <Controller
                         control={control}
                         name="end_date"
-                        render={({ field: { onChange } }) => (
+                        render={({ field: { value, onChange } }) => (
                             <DatePicker
                                 label={t("add_form.expiration_date")}
-                                value={defaultDate}
+                                defaultValue={defaultDate}
+                                value={value}
                                 minDate={new Date()}
                                 onChange={onChange}
                                 state={errors.end_date?.message ? "error" : "default"}
