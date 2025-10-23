@@ -66,6 +66,7 @@ export default defineConfig({
     resolve: {
         alias: {
             "@": resolve(join(__dirname, "assets")),
+            "ign-dsfr-header/dist/ign-dsfr-header.js": resolve(join(__dirname, "node_modules", "ign-dsfr-header", "dist", "ign-dsfr-header.js")),
         },
     },
     css: {
