@@ -46,7 +46,7 @@ const RCSampleMap: FC<RCSampleMapProps> = ({ form, center, bottomZoomLevel, onCh
                 new ScaleLine(),
                 new SearchEngine({
                     collapsed: false,
-                    displayAdvancedSearch: false,
+                    displayButtonAdvancedSearch: false,
                     displayMarker: false,
                     apiKey: "essentiels",
                     zoomTo: "auto",

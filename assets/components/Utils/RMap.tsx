@@ -2,23 +2,24 @@
 import LayerSwitcher from "geopf-extensions-openlayers/src/packages/Controls/LayerSwitcher/LayerSwitcher";
 import SearchEngine from "geopf-extensions-openlayers/src/packages/Controls/SearchEngine/SearchEngine";
 import GeoportalZoom from "geopf-extensions-openlayers/src/packages/Controls/Zoom/GeoportalZoom";
-import Map from "ol/Map";
-import View from "ol/View";
 import { ScaleLine } from "ol/control";
 import Attribution from "ol/control/Attribution";
-import { createOrUpdate } from "ol/extent";
-import { defaults as defaultInteractions } from "ol/interaction";
 import BaseLayer from "ol/layer/Base";
-import TileLayer from "ol/layer/Tile";
-import { fromLonLat, transformExtent } from "ol/proj";
-import WMTS, { optionsFromCapabilities } from "ol/source/WMTS";
-import { FC, useEffect, useRef } from "react";
+import type OlLayer from "ol/layer/Layer";
+import { fromLonLat } from "ol/proj";
+import { FC, useEffect, useMemo } from "react";
 
 import type { CartesStyle, GeostylerStyles } from "../../@types/app";
 import { BoundingBox, OfferingDetailResponseDtoTypeEnum } from "../../@types/entrepot";
 import olDefaults from "../../data/ol-defaults.json";
 import useCapabilities from "../../hooks/useCapabilities";
 import StyleHelper from "../../modules/Style/StyleHelper";
+import useOlMap from "../../hooks/useOlMap";
+import useBackgroundWmts from "../../hooks/useBackgroundWmts";
+import useBboxFit from "../../hooks/useBboxFit";
+import { MapProvider } from "../../contexts/MapContext";
+import MapViewLogger from "./MapViewLogger";
+import TempButtonControl from "./TempButtonControl";
 
 import "ol/ol.css";
 
@@ -45,161 +46,93 @@ const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox }) => {
     //     );
     // }, [initial.type]);
 
-    const mapTargetRef = useRef<HTMLDivElement>(null);
-    const mapRef = useRef<Map>();
-    const layerSwitcherControl = useRef(
-        new LayerSwitcher({
-            options: {
-                position: "top-right",
-                collapsed: true,
-                panel: true,
-                counter: true,
-            },
-        })
+    const layerSwitcherControl = useMemo(
+        () =>
+            new LayerSwitcher({
+                options: {
+                    position: "top-right",
+                    collapsed: true,
+                    panel: true,
+                    counter: true,
+                },
+            }),
+        []
     );
-    const controls = useRef([
-        new GeoportalZoom({ position: "top-left" }),
-        new Attribution({ collapsible: true, collapsed: true }),
-        layerSwitcherControl.current,
-        new ScaleLine(),
-        new SearchEngine({
-            collapsed: false,
-            displayAdvancedSearch: false,
-            apiKey: "essentiels",
-            zoomTo: "auto",
-        }),
-        // gfinfo
-        //     ? new GetFeatureInfo({
-        //           options: {
-        //               active: true,
-        //               hidden: true,
-        //           },
-        //           position: "top-right",
-        //       })
-        //     : undefined,
-    ]);
-    const bkLayer = useRef(new TileLayer({ properties: { title: null, description: null } }));
+    const controls = useMemo(
+        () => [
+            new GeoportalZoom({ position: "top-left" }),
+            new Attribution({ collapsible: true, collapsed: true }),
+            layerSwitcherControl,
+            new ScaleLine(),
+            new SearchEngine({
+                collapsed: false,
+                apiKey: "essentiels",
+                zoomTo: "auto",
+            }),
+        ],
+        [layerSwitcherControl]
+    );
 
     const { data: capabilities } = useCapabilities();
 
-    useEffect(() => {
-        if (bbox === undefined) return;
-
-        let extent = createOrUpdate(bbox.west, bbox.south, bbox.east, bbox.north);
-        extent = transformExtent(extent, "EPSG:4326", olDefaults.projection);
-
-        if (extent) {
-            mapRef.current?.getView().fit(extent);
-        }
-    }, [bbox]);
+    const { map, targetRef } = useOlMap({
+        view: {
+            projection: olDefaults.projection,
+            center: fromLonLat(olDefaults.center),
+            zoom: olDefaults.zoom,
+        },
+        controls,
+    });
 
     /**
-     * Ajout de la couche dans la carte (+ dans le layerSwitcher)
+     * Ajout et suppression des couches + synchronisation LayerSwitcher
      */
-    const addLayer = (layer: BaseLayer): void => {
-        if (currentStyle) {
-            StyleHelper.applyStyle(layer, currentStyle);
-        }
-        // Ajout du layer dans la carte et dans le LayerSwitcher
-        mapRef.current?.addLayer(layer);
-        layerSwitcherControl.current.addLayer(layer, {
-            title: layer.get("title"),
-            description: layer.get("abstract"),
+
+    // Bind bbox fit
+    useBboxFit(map, bbox);
+
+    useEffect(() => {
+        if (!map) return;
+        // Supprimer toutes les couches sauf le fond de carte, puis ajouter les nouvelles couches
+        const existing = map.getLayers().getArray();
+        getWorkingLayers(existing).forEach((l) => {
+            map.removeLayer(l);
+
+            // TODO : peut-être inutile ?
+            (layerSwitcherControl as unknown as { removeLayer?: (layer: OlLayer) => void })?.removeLayer?.(l as unknown as OlLayer);
         });
-    };
 
-    useEffect(() => {
-        // Creation de la carte
-        if (!mapRef.current) {
-            mapRef.current = new Map({
-                view: new View({
-                    projection: olDefaults.projection,
-                    center: fromLonLat(olDefaults.center),
-                    zoom: olDefaults.zoom,
-                }),
-                interactions: defaultInteractions(),
-                controls: controls.current,
-            });
-            mapRef.current?.on("loadstart", function () {
-                mapRef.current?.getTargetElement().classList.add("spinner");
-            });
-            mapRef.current?.on("loadend", function () {
-                mapRef.current?.getTargetElement().classList.remove("spinner");
-            });
-        }
-        mapRef.current.setTarget(mapTargetRef.current || "");
-
-        /* We set map target to undefined to represent a
-         * nonexistent HTML element ID, when the React component is unmounted.
-         * This prevents multiple maps being added to the map container on a
-         * re-render.
-         */
-        return () => mapRef.current?.setTarget(undefined);
-    }, []);
-
-    useEffect(() => {
-        if (mapRef.current === undefined) return;
-
-        // Suppression de tous les layers
-        mapRef.current.getLayers().clear();
-
-        // Ajout de la couche de fond PlanIgnV2
-        addLayer(bkLayer.current);
-
-        // Ajout des autres couches
-        // const gfiLayers: object[] = [];
         layers.forEach((layer) => {
-            if (mapRef.current !== undefined) {
-                addLayer(layer);
+            if (currentStyle) {
+                StyleHelper.applyStyle(layer, currentStyle);
             }
-            // if (gfinfo) {
-            //     gfiLayers.push({ obj: layer });
-            // }
-        });
-        // NOTE : il me semble que ce n'est plus nécessaire et plus possible sur geopf-ext-ol, à vérifier
-        // getControl("GetFeatureInfo")?.setLayers(gfiLayers);
-
-        // On zoom sur l'extent de la couche au premier rendu
-        // if (extent) {
-        //     mapRef.current?.getView().fit(extent);
-        // }
-        // addLayer
-        if (bbox === undefined) return;
-
-        let extent = createOrUpdate(bbox.west, bbox.south, bbox.east, bbox.north);
-        extent = transformExtent(extent, "EPSG:4326", olDefaults.projection);
-
-        if (extent) {
-            mapRef.current?.getView().fit(extent);
-        }
-
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [layers]);
-
-    useEffect(() => {
-        if (!capabilities) return;
-
-        const wmtsOptions = optionsFromCapabilities(capabilities, {
-            layer: olDefaults.default_background_layer,
-        });
-
-        if (wmtsOptions) {
-            const capLayer = capabilities?.Contents.Layer?.find((l) => {
-                return l.Identifier === olDefaults.default_background_layer;
+            map.addLayer(layer);
+            layerSwitcherControl?.addLayer(layer as unknown as OlLayer, {
+                title: layer.get("title"),
+                description: layer.get("abstract"),
             });
+        });
+    }, [map, layers, currentStyle, layerSwitcherControl]);
 
-            bkLayer.current.setSource(new WMTS(wmtsOptions));
-            bkLayer.current.set("name", capLayer?.Identifier);
-            bkLayer.current.set("title", capLayer?.Title);
-        }
-    }, [capabilities]);
+    useBackgroundWmts(map, capabilities, olDefaults.default_background_layer);
 
     useEffect(() => {
-        const layers = mapRef.current?.getLayers().getArray() ?? [];
-        getWorkingLayers(layers).forEach((layer) => StyleHelper.applyStyle(layer, currentStyle));
-    }, [currentStyle]);
+        if (!map) return;
+        const arr: BaseLayer[] = map.getLayers().getArray();
+        getWorkingLayers(arr).forEach((layer) => StyleHelper.applyStyle(layer, currentStyle));
+    }, [map, currentStyle]);
 
-    return <div className={"map-view"} ref={mapTargetRef} />;
+    return (
+        <MapProvider map={map}>
+            {import.meta.env.MODE === "development" && (
+                <>
+                    <MapViewLogger />
+                    <TempButtonControl />
+                </>
+            )}
+            <div className={"map-view"} ref={targetRef} role="region" aria-label="Map" />
+        </MapProvider>
+    );
 };
 
 export default RMap;
