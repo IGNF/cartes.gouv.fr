@@ -5,11 +5,6 @@ import { memo } from "react";
 import { FooterConsentManagementItem, FooterPersonalDataPolicyItem } from "../../config/consentManagement";
 import { routes } from "../../router/router";
 
-import logoIgn from "../../img/partners-logos/logo-ign.png";
-import logoMinistereTransformation from "../../img/partners-logos/logo-ministere-transformation.jpg";
-import logoMinistereEcologie from "../../img/partners-logos/logo-ministere-ecologie.jpg";
-import logoCnig from "../../img/partners-logos/logo-rf-cnig.jpg";
-
 const AppFooter = () => {
     return (
         <Footer
@@ -52,22 +47,22 @@ const AppFooter = () => {
                     {
                         alt: "IGN",
                         href: "https://www.ign.fr",
-                        imgUrl: logoIgn,
+                        imgUrl: "https://data.geopf.fr/annexes/ressources/footer/ign.png",
                     },
                     {
                         alt: "MINISTÈRE DE LA TRANSFORMATION ET DE LA FONCTION PUBLIQUES",
                         href: "https://www.transformation.gouv.fr/",
-                        imgUrl: logoMinistereTransformation,
+                        imgUrl: "https://data.geopf.fr/annexes/ressources/footer/min_fp.jpg",
                     },
                     {
                         alt: "MINISTÈRE DE LA TRANSITION ÉCOLOGIQUE ET DE LA COHÉSION DES TERRITOIRES",
                         href: "https://www.ecologie.gouv.fr/",
-                        imgUrl: logoMinistereEcologie,
+                        imgUrl: "https://data.geopf.fr/annexes/ressources/footer/min_ecologie.jpg",
                     },
                     {
                         alt: "Conseil National de l’Information Géolocalisée",
                         href: "https://cnig.gouv.fr/",
-                        imgUrl: logoCnig,
+                        imgUrl: "https://data.geopf.fr/annexes/ressources/footer/rf_cnig.jpg",
                     },
                 ],
             }}
