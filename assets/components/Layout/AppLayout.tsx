@@ -9,6 +9,7 @@ import { useTranslation } from "../../i18n/i18n";
 import SnackbarMessage from "../Utils/SnackbarMessage";
 import AppFooter from "./AppFooter";
 import AppHeader from "./AppHeader";
+import IgnfDsfrHeader from "./IgnfDsfrHeader";
 
 const HiddenElements: FC = () => {
     const { t } = useTranslation("Common");
@@ -44,6 +45,27 @@ const AppLayout: FC<PropsWithChildren<AppLayoutProps>> = ({ children, navItems }
         <>
             <HiddenElementsMemoized />
             <AppHeader navItems={nav} />
+            <IgnfDsfrHeader
+                menuItems={[
+                    {
+                        label: "Mon espace",
+                        icon: "fr-icon-user-line",
+                        connectionMenu: true,
+                        links: [
+                            { label: "Mon profil", href: "/profil", icon: "fr-icon-user-line" },
+                            { label: "Mes organisations", href: "/organisations", icon: "fr-icon-group-line" },
+                        ],
+                    },
+                    {
+                        label: "Aide",
+                        icon: "fr-icon-question-line",
+                        links: [
+                            { label: "Documentation", href: "/docs", icon: "fr-icon-book-2-line" },
+                            { label: "Contact", href: "/contact", icon: "fr-icon-mail-line" },
+                        ],
+                    },
+                ]}
+            />
             {children}
             <AppFooter />
             <SnackbarMessage />
