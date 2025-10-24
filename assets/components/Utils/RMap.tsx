@@ -94,12 +94,20 @@ const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox }) => {
     useEffect(() => {
         if (!map) return;
         // Supprimer toutes les couches sauf le fond de carte, puis ajouter les nouvelles couches
-        const existing = map.getLayers().getArray();
+        const layersCollection = map.getLayers?.();
+        if (!layersCollection) return;
+        const existing = layersCollection.getArray();
         getWorkingLayers(existing).forEach((l) => {
             map.removeLayer(l);
 
             // TODO : peut-être inutile ?
-            (layerSwitcherControl as unknown as { removeLayer?: (layer: OlLayer) => void })?.removeLayer?.(l as unknown as OlLayer);
+            const ls = layerSwitcherControl as unknown as {
+                removeLayer?: (layer: OlLayer) => void;
+                getMap?: () => unknown;
+            };
+            if (ls.getMap?.()) {
+                ls.removeLayer?.(l as unknown as OlLayer);
+            }
         });
 
         layers.forEach((layer) => {
@@ -107,10 +115,16 @@ const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox }) => {
                 StyleHelper.applyStyle(layer, currentStyle);
             }
             map.addLayer(layer);
-            layerSwitcherControl?.addLayer(layer as unknown as OlLayer, {
-                title: layer.get("title"),
-                description: layer.get("abstract"),
-            });
+            const ls = layerSwitcherControl as unknown as {
+                addLayer?: (layer: OlLayer, options?: { title?: string; description?: string }) => void;
+                getMap?: () => unknown;
+            };
+            if (ls.getMap?.()) {
+                ls.addLayer?.(layer as unknown as OlLayer, {
+                    title: layer.get("title"),
+                    description: layer.get("abstract"),
+                });
+            }
         });
     }, [map, layers, currentStyle, layerSwitcherControl]);
 
@@ -118,7 +132,9 @@ const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox }) => {
 
     useEffect(() => {
         if (!map) return;
-        const arr: BaseLayer[] = map.getLayers().getArray();
+        const layersCollection = map.getLayers?.();
+        if (!layersCollection) return;
+        const arr: BaseLayer[] = layersCollection.getArray();
         getWorkingLayers(arr).forEach((layer) => StyleHelper.applyStyle(layer, currentStyle));
     }, [map, currentStyle]);
 
