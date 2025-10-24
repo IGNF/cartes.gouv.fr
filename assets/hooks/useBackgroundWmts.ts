@@ -10,7 +10,8 @@ export function useBackgroundWmts(map: Map | undefined, capabilities: Capabiliti
     // S'assurer que le fond de carte est bien présent dans la carte une fois
     useEffect(() => {
         if (!map) return;
-        const layers = map.getLayers();
+        const layers = map.getLayers?.();
+        if (!layers) return;
         if (!layers.getArray().includes(bkLayerRef.current)) {
             map.addLayer(bkLayerRef.current);
         }
