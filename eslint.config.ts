@@ -88,6 +88,7 @@ export default defineConfig([
             "react-refresh/only-export-components": "off",
             "react-hooks/preserve-manual-memoization": "off",
             "react-hooks/incompatible-library": "off",
+            "react/jsx-no-useless-fragment": "error",
         },
     },
 ]);
