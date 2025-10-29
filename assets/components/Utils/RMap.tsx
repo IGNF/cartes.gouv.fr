@@ -11,15 +11,18 @@ import { FC, useEffect, useMemo } from "react";
 
 import type { CartesStyle, GeostylerStyles } from "../../@types/app";
 import { BoundingBox, OfferingDetailResponseDtoTypeEnum } from "../../@types/entrepot";
+import { MapProvider } from "../../contexts/MapContext";
 import olDefaults from "../../data/ol-defaults.json";
-import useCapabilities from "../../hooks/useCapabilities";
-import StyleHelper from "../../modules/Style/StyleHelper";
-import useOlMap from "../../hooks/useOlMap";
 import useBackgroundWmts from "../../hooks/useBackgroundWmts";
 import useBboxFit from "../../hooks/useBboxFit";
-import { MapProvider } from "../../contexts/MapContext";
+import useCapabilities from "../../hooks/useCapabilities";
+import useOlMap from "../../hooks/useOlMap";
+import StyleHelper from "../../modules/Style/StyleHelper";
 import MapViewLogger from "./MapViewLogger";
+import OlControl from "./OlControl";
+import OlControlFactory from "./OlControlFactory";
 import TempButtonControl from "./TempButtonControl";
+import TempDragRotateInteraction from "./TempDragRotateInteraction";
 
 import "ol/ol.css";
 
@@ -58,20 +61,6 @@ const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox }) => {
             }),
         []
     );
-    const controls = useMemo(
-        () => [
-            new GeoportalZoom({ position: "top-left" }),
-            new Attribution({ collapsible: true, collapsed: true }),
-            layerSwitcherControl,
-            new ScaleLine(),
-            new SearchEngine({
-                collapsed: false,
-                apiKey: "essentiels",
-                zoomTo: "auto",
-            }),
-        ],
-        [layerSwitcherControl]
-    );
 
     const { data: capabilities } = useCapabilities();
 
@@ -81,7 +70,6 @@ const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox }) => {
             center: fromLonLat(olDefaults.center),
             zoom: olDefaults.zoom,
         },
-        controls,
     });
 
     /**
@@ -99,15 +87,6 @@ const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox }) => {
         const existing = layersCollection.getArray();
         getWorkingLayers(existing).forEach((l) => {
             map.removeLayer(l);
-
-            // TODO : peut-être inutile ?
-            const ls = layerSwitcherControl as unknown as {
-                removeLayer?: (layer: OlLayer) => void;
-                getMap?: () => unknown;
-            };
-            if (ls.getMap?.()) {
-                ls.removeLayer?.(l as unknown as OlLayer);
-            }
         });
 
         layers.forEach((layer) => {
@@ -115,12 +94,8 @@ const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox }) => {
                 StyleHelper.applyStyle(layer, currentStyle);
             }
             map.addLayer(layer);
-            const ls = layerSwitcherControl as unknown as {
-                addLayer?: (layer: OlLayer, options?: { title?: string; description?: string }) => void;
-                getMap?: () => unknown;
-            };
-            if (ls.getMap?.()) {
-                ls.addLayer?.(layer as unknown as OlLayer, {
+            if (layerSwitcherControl.getMap()) {
+                layerSwitcherControl.addLayer(layer as unknown as OlLayer, {
                     title: layer.get("title"),
                     description: layer.get("abstract"),
                 });
@@ -144,9 +119,24 @@ const RMap: FC<RMapProps> = ({ layers, currentStyle, bbox }) => {
                 <>
                     <MapViewLogger />
                     <TempButtonControl />
+                    <TempDragRotateInteraction />
                 </>
             )}
-            <div className={"map-view"} ref={targetRef} role="region" aria-label="Map" />
+
+            <OlControlFactory factory={() => new GeoportalZoom({ position: "top-left" })} />
+            <OlControlFactory factory={() => new Attribution({ collapsible: true, collapsed: true })} />
+            <OlControl control={layerSwitcherControl} />
+            <OlControlFactory factory={() => new ScaleLine()} />
+            <OlControlFactory
+                factory={() =>
+                    new SearchEngine({
+                        collapsed: false,
+                        apiKey: "essentiels",
+                        zoomTo: "auto",
+                    })
+                }
+            />
+            <div className={"map-view"} ref={targetRef} />
         </MapProvider>
     );
 };
