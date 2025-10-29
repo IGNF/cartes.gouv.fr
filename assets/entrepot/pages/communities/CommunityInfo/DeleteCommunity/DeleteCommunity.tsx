@@ -245,34 +245,31 @@ export default function DeleteCommunity() {
                     <LoadingText message="Récupération du contenu de l’entrepôt..." as="p" withSpinnerIcon className={fr.cx("fr-mt-4v")} />
                 ) : (
                     <>
-                        {state === "confirm" && (
-                            <>
-                                {hasContent ? (
-                                    <>
-                                        <Alert
-                                            severity="warning"
-                                            title="L’entrepôt contient des données"
-                                            description="Le contenu doit être supprimé avant de pouvoir supprimer l’entrepôt. Cette action est irréversible."
-                                            small
-                                            className={fr.cx("fr-mb-2v")}
-                                        />
-                                        <ul className={fr.cx("fr-raw-list")}>
-                                            {ENTITY_ORDER.map((entityType) => {
-                                                const total = cleanupProgress[entityType]?.currentCount ?? 0;
-                                                const name = ENTITY_LABELS[entityType] ?? entityType;
-                                                return (
-                                                    <li key={entityType} className={fr.cx("fr-my-2v")}>
-                                                        <strong>{name}</strong> : {total}
-                                                    </li>
-                                                );
-                                            })}
-                                        </ul>
-                                    </>
-                                ) : (
-                                    <p className={fr.cx("fr-m-0")}>Êtes-vous sûr·e de vouloir supprimer cet entrepôt ?</p>
-                                )}
-                            </>
-                        )}
+                        {state === "confirm" &&
+                            (hasContent ? (
+                                <>
+                                    <Alert
+                                        severity="warning"
+                                        title="L’entrepôt contient des données"
+                                        description="Le contenu doit être supprimé avant de pouvoir supprimer l’entrepôt. Cette action est irréversible."
+                                        small
+                                        className={fr.cx("fr-mb-2v")}
+                                    />
+                                    <ul className={fr.cx("fr-raw-list")}>
+                                        {ENTITY_ORDER.map((entityType) => {
+                                            const total = cleanupProgress[entityType]?.currentCount ?? 0;
+                                            const name = ENTITY_LABELS[entityType] ?? entityType;
+                                            return (
+                                                <li key={entityType} className={fr.cx("fr-my-2v")}>
+                                                    <strong>{name}</strong> : {total}
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
+                                </>
+                            ) : (
+                                <p className={fr.cx("fr-m-0")}>Êtes-vous sûr·e de vouloir supprimer cet entrepôt ?</p>
+                            ))}
 
                         {state === "connecting" && <LoadingText message="En cours de préparation..." as="p" withSpinnerIcon className={fr.cx("fr-mt-4v")} />}
 

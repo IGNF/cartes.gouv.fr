@@ -250,46 +250,41 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
 
             {isLoading ? (
                 <Skeleton count={6} rectangleHeight={200} />
-            ) : (
+            ) : datasheetList && datasheetList.length > 0 ? (
                 <>
-                    {datasheetList && datasheetList.length > 0 ? (
-                        <>
-                            <ListHeader
-                                nbResults={{
-                                    displayed: paginatedItems.length,
-                                    total: filteredItems.length,
-                                }}
-                                dataUpdatedAt={dataUpdatedAt}
-                                isFetching={isFetching}
-                                refetch={refetch}
-                            />
+                    <ListHeader
+                        nbResults={{
+                            displayed: paginatedItems.length,
+                            total: filteredItems.length,
+                        }}
+                        dataUpdatedAt={dataUpdatedAt}
+                        isFetching={isFetching}
+                        refetch={refetch}
+                    />
 
-                            <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
-                                {paginatedItems.map((datasheet: Datasheet) => (
-                                    <div className={fr.cx("fr-col-12")} key={datasheet.name}>
-                                        <DatasheetListItem datastoreId={datastoreId} datasheet={datasheet} />
-                                    </div>
-                                ))}
+                    <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
+                        {paginatedItems.map((datasheet: Datasheet) => (
+                            <div className={fr.cx("fr-col-12")} key={datasheet.name}>
+                                <DatasheetListItem datastoreId={datastoreId} datasheet={datasheet} />
                             </div>
+                        ))}
+                    </div>
 
-                            {totalPages > 1 && (
-                                <div className={fr.cx("fr-grid-row", "fr-grid-row--center", "fr-mt-6v")}>
-                                    <Pagination
-                                        count={totalPages}
-                                        showFirstLast={true}
-                                        getPageLinkProps={(pageNumber) => ({
-                                            ...routes.datasheet_list({ ...filters, datastoreId, page: pageNumber, limit: limit, search, sortBy, sortOrder })
-                                                .link,
-                                        })}
-                                        defaultPage={page}
-                                    />
-                                </div>
-                            )}
-                        </>
-                    ) : (
-                        <NoData datastoreId={datastoreId} />
+                    {totalPages > 1 && (
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--center", "fr-mt-6v")}>
+                            <Pagination
+                                count={totalPages}
+                                showFirstLast={true}
+                                getPageLinkProps={(pageNumber) => ({
+                                    ...routes.datasheet_list({ ...filters, datastoreId, page: pageNumber, limit: limit, search, sortBy, sortOrder }).link,
+                                })}
+                                defaultPage={page}
+                            />
+                        </div>
                     )}
                 </>
+            ) : (
+                <NoData datastoreId={datastoreId} />
             )}
         </DatastoreMain>
     );
