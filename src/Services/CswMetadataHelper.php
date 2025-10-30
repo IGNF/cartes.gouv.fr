@@ -72,6 +72,8 @@ class CswMetadataHelper
         }
 
         $xpath = new \DOMXPath($doc);
+        $xpath->registerNamespace('gmd', 'http://www.isotc211.org/2005/gmd');
+        $xpath->registerNamespace('gco', 'http://www.isotc211.org/2005/gco');
 
         if (!$loaded) {
             throw new AppException('Load XML failed');
@@ -81,7 +83,9 @@ class CswMetadataHelper
 
         /** @var \DOMNodeList<\DOMElement> $keywordsNodesList */
         $keywordsNodesList = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:descriptiveKeywords/gmd:MD_Keywords');
-        $this->getKeywords($cswMetadata, $keywordsNodesList);
+        $keywords = $this->getKeywords($keywordsNodesList);
+        $cswMetadata->inspireKeywords = $keywords['inspire_keywords'];
+        $cswMetadata->freeKeywords = $keywords['free_keywords'];
 
         /** @var \DOMNodeList<\DOMElement> $topicsNodesList */
         $topicsNodesList = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:topicCategory/gmd:MD_TopicCategoryCode');
@@ -90,22 +94,7 @@ class CswMetadataHelper
             iterator_to_array($topicsNodesList)
         );
 
-        /** @var \DOMNodeList<\DOMElement> $layersNodesList */
-        $layersNodesList = $xpath->query('/gmd:MD_Metadata/gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine[@type="offering"]');
-
-        $layersList = array_map(function (\DOMElement $layer) {
-            /** @var \DOMElement $onlineEl */
-            $onlineEl = $layer->getElementsByTagName('CI_OnlineResource')[0];
-
-            return new CswMetadataLayer(
-                $onlineEl->getElementsByTagName('name')[0]?->getElementsByTagName('CharacterString')[0]?->textContent,
-                $onlineEl->getElementsByTagName('protocol')[0]?->getElementsByTagName('CharacterString')[0]?->textContent,
-                $onlineEl->getElementsByTagName('linkage')[0]?->getElementsByTagName('URL')[0]?->textContent,
-                $layer->getAttribute('offeringId'),
-                filter_var($layer->getAttribute('offeringOpen'), FILTER_VALIDATE_BOOLEAN),
-            );
-        }, iterator_to_array($layersNodesList));
-        $cswMetadata->layers = $layersList;
+        $cswMetadata->layers = $this->getLayers($xpath);
 
         /** @var ?\DOMElement $exBboxEl */
         $exBboxEl = $xpath->query('/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox')->item(0);
@@ -235,10 +224,51 @@ class CswMetadataHelper
     }
 
     /**
+     * @return array<CswMetadataLayer>
+     */
+    private function getLayers(\DOMXPath $xpath): array
+    {
+        /** @var \DOMNodeList<\DOMElement> $gmdOnlineList */
+        $gmdOnlineList = $xpath->query('/gmd:MD_Metadata/gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource');
+
+        /** @var array<CswMetadataLayer> */
+        $layersList = [];
+        foreach ($gmdOnlineList as $onlineResource) {
+            /** @var \DOMElement $onlineResource */
+
+            // layers
+            if (!empty(trim($xpath->evaluate('string(gmd:protocol)', $onlineResource)))) {
+                // Détecter si la couche est privée en vérifiant la présence d'une description d'accès restreint
+                $offeringOpen = true;
+                $privateApplicationProfile = 'http://inspire.ec.europa.eu/metadata-codelist/SpatialDataServiceType/other';
+                $applicationProfile = $xpath->evaluate('string(gmd:applicationProfile/gmx:Anchor/@xlink:href)', $onlineResource);
+                $descriptionHref = $xpath->evaluate('string(gmd:description/gmx:Anchor/@xlink:href)', $onlineResource);
+
+                if ($privateApplicationProfile === $applicationProfile && str_contains($descriptionHref ?? '', 'MD_RestrictionCode_restricted')) {
+                    $offeringOpen = false;
+                }
+
+                $layersList[] = new CswMetadataLayer(
+                    trim($xpath->evaluate('string(gmd:name)', $onlineResource)),
+                    trim($xpath->evaluate('string(gmd:protocol)', $onlineResource)),
+                    trim($xpath->evaluate('string(gmd:linkage)', $onlineResource)),
+                    trim($xpath->evaluate('string(../@offeringId)', $onlineResource)),
+                    $offeringOpen
+                );
+            }
+        }
+
+        return $layersList;
+    }
+
+    /**
      * @param \DOMNodeList<\DOMElement> $keywordsNodesList
      */
-    private function getKeywords(CswMetadata $cswMetadata, $keywordsNodesList): void
+    private function getKeywords($keywordsNodesList): array
     {
+        $inspireKeywords = [];
+        $freeKeywords = [];
+
         foreach ($keywordsNodesList as $list) {
             $hasThesaurus = false;
 
@@ -252,10 +282,15 @@ class CswMetadataHelper
             }
 
             if ($hasThesaurus) {
-                $cswMetadata->inspireKeywords = array_merge($cswMetadata->inspireKeywords, $keywords);
+                $inspireKeywords = array_merge($inspireKeywords, $keywords);
             } else {
-                $cswMetadata->freeKeywords = array_merge($cswMetadata->freeKeywords, $keywords);
+                $freeKeywords = array_merge($freeKeywords, $keywords);
             }
         }
+
+        return [
+            'inspire_keywords' => $inspireKeywords,
+            'free_keywords' => $freeKeywords,
+        ];
     }
 }
