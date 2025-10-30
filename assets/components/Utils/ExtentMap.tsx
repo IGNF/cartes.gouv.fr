@@ -119,7 +119,7 @@ const ExtentMap: FC<ExtentMapProps> = ({ extents, bbox }) => {
             layerSwitcher,
             new SearchEngine({
                 collapsed: false,
-                displayAdvancedSearch: false,
+                displayButtonAdvancedSearch: false,
                 apiKey: "essentiels",
                 zoomTo: "auto",
             }),
