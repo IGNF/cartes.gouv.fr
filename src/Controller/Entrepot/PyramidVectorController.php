@@ -104,6 +104,12 @@ class PyramidVectorController extends ServiceController implements ApiController
                 'proc_pyr_creat_id' => $processingExecution['_id'],
                 'is_sample' => is_null($dto->area) ? 'false' : 'true',
             ];
+            if (isset($vectordb['tags'][CommonTags::PRODUCER])) {
+                $pyramidTags[CommonTags::PRODUCER] = $vectordb['tags'][CommonTags::PRODUCER];
+            }
+            if (isset($vectordb['tags'][CommonTags::PRODUCTION_YEAR])) {
+                $pyramidTags[CommonTags::PRODUCTION_YEAR] = $vectordb['tags'][CommonTags::PRODUCTION_YEAR];
+            }
 
             $this->storedDataApiService->addTags($datastoreId, $pyramidId, $pyramidTags);
             $this->processingApiService->launchExecution($datastoreId, $processingExecution['_id']);

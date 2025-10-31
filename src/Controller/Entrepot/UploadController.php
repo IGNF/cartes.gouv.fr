@@ -80,7 +80,8 @@ class UploadController extends AbstractController implements ApiControllerInterf
             $tags = [
                 UploadTags::DATA_UPLOAD_PATH => $content['data_upload_path'],
                 CommonTags::DATASHEET_NAME => $content['data_name'],
-                // statut des checks et du processing intégration
+                CommonTags::PRODUCER => $content['producer'],
+                CommonTags::PRODUCTION_YEAR => $content['production_year'],
             ];
             $upload = $this->uploadApiService->addTags($datastoreId, $upload['_id'], $tags);
 
@@ -256,11 +257,18 @@ class UploadController extends AbstractController implements ApiControllerInterf
                             ]);
 
                             // ajout tags sur la stored_data
-                            $this->storedDataApiService->addTags($datastoreId, $vectorDb['_id'], [
+                            $tags = [
                                 'upload_id' => $upload['_id'],
                                 'proc_int_id' => $processingExec['_id'],
                                 CommonTags::DATASHEET_NAME => $upload['tags'][CommonTags::DATASHEET_NAME],
-                            ]);
+                            ];
+                            if (isset($upload['tags'][CommonTags::PRODUCER])) {
+                                $tags[CommonTags::PRODUCER] = $upload['tags'][CommonTags::PRODUCER];
+                            }
+                            if (isset($upload['tags'][CommonTags::PRODUCTION_YEAR])) {
+                                $tags[CommonTags::PRODUCTION_YEAR] = $upload['tags'][CommonTags::PRODUCTION_YEAR];
+                            }
+                            $this->storedDataApiService->addTags($datastoreId, $vectorDb['_id'], $tags);
 
                             // // TODO : mise à jour ?
 

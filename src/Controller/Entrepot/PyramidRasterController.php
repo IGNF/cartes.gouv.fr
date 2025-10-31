@@ -108,6 +108,12 @@ class PyramidRasterController extends ServiceController implements ApiController
                 'vectordb_id' => $vectorDbId,
                 'proc_pyr_creat_id' => $processingExecution['_id'],
             ];
+            if (isset($vectordb['tags'][CommonTags::PRODUCER])) {
+                $pyramidTags[CommonTags::PRODUCER] = $vectordb['tags'][CommonTags::PRODUCER];
+            }
+            if (isset($vectordb['tags'][CommonTags::PRODUCTION_YEAR])) {
+                $pyramidTags[CommonTags::PRODUCTION_YEAR] = $vectordb['tags'][CommonTags::PRODUCTION_YEAR];
+            }
 
             $this->storedDataApiService->addTags($datastoreId, $pyramidId, $pyramidTags);
             $this->processingApiService->launchExecution($datastoreId, $processingExecution['_id']);

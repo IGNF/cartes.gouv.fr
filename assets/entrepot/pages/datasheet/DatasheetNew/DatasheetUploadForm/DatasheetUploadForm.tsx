@@ -13,6 +13,7 @@ import { symToStr } from "tsafe/symToStr";
 import { v4 as uuidv4 } from "uuid";
 import * as yup from "yup";
 
+import Main from "../../../../../components/Layout/Main";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import Progress from "../../../../../components/Utils/Progress";
@@ -26,7 +27,6 @@ import { routes, useRoute } from "../../../../../router/router";
 import { getFileExtension, regex } from "../../../../../utils";
 import api from "../../../../api";
 import DatasheetUploadIntegrationDialog from "../DatasheetUploadIntegration/DatasheetUploadIntegrationDialog";
-import Main from "../../../../../components/Layout/Main";
 
 const maxFileSize = 2000000000; // 2 GB
 const fileExtensions = ["gpkg", "zip"];
@@ -110,6 +110,17 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                     },
                 }),
             data_upload_path: yup.string(),
+            producer: yup
+                .string()
+                .required(t("producer_mandatory_error"))
+                .min(2, t("producer_length_error"))
+                .max(99, t("producer_length_error"))
+                .transform((value) => value.trim()),
+            production_year: yup
+                .number()
+                .required(t("production_year_mandatory_error"))
+                .typeError(t("production_year_mandatory_error"))
+                .max(new Date().getFullYear(), t("production_year_max_error")),
         })
         .required();
 
@@ -129,9 +140,14 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
         handleSubmit,
         formState: { errors, isValid, isValidating },
         setValue: setFormValue,
-        trigger,
         watch,
-    } = useForm({ resolver: yupResolver(schema) });
+    } = useForm({
+        resolver: yupResolver(schema),
+        defaultValues: {
+            data_srid: "EPSG:2154",
+            production_year: new Date().getFullYear(),
+        },
+    });
 
     const selectedSrid = watch("data_srid");
 
@@ -214,7 +230,6 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                         setFormValue("data_srid", srid, { shouldValidate: true });
                         setFormValue("data_technical_name", getDataTechNameSuggestion(file.name), { shouldValidate: true });
                         setFormValue("data_upload_path", data?.filename, { shouldValidate: true });
-                        trigger();
 
                         setShowDataInfos(true);
                         setFileUploadInProgress(false);
@@ -300,6 +315,26 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                             label: name,
                             value: code,
                         }))}
+                    />
+
+                    <Input
+                        label={t("producer")}
+                        hintText={t("producer_hint")}
+                        state={errors.producer ? "error" : "default"}
+                        stateRelatedMessage={errors?.producer?.message}
+                        nativeInputProps={{
+                            ...register("producer"),
+                        }}
+                    />
+
+                    <Input
+                        label={t("production_year")}
+                        state={errors.production_year ? "error" : "default"}
+                        stateRelatedMessage={errors?.production_year?.message}
+                        nativeInputProps={{
+                            type: "number",
+                            ...register("production_year"),
+                        }}
                     />
 
                     <input type="hidden" {...register("data_upload_path")} />
