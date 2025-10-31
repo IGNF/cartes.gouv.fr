@@ -30,6 +30,9 @@ interface AutocompleteSelectProps<T> {
     value?: T[] | T;
 }
 
+/**
+ * @deprecated Utiliser AutocompleteSelectNew à la place
+ */
 const AutocompleteSelect = <T,>(props: AutocompleteSelectProps<T>) => {
     const {
         id,
