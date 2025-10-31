@@ -8,12 +8,13 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { format as datefnsFormat } from "date-fns";
 import { FC, useEffect, useMemo, useRef, useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { symToStr } from "tsafe/symToStr";
 import { v4 as uuidv4 } from "uuid";
 import * as yup from "yup";
 
-import Main from "../../../../../components/Layout/Main";
+import AutocompleteSelectNew from "@/components/Input/AutocompleteSelectNew";
+import Main from "@/components/Layout/Main";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import Progress from "../../../../../components/Utils/Progress";
@@ -24,7 +25,7 @@ import { useTranslation } from "../../../../../i18n/i18n";
 import FileUploader from "../../../../../modules/FileUploader";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import { routes, useRoute } from "../../../../../router/router";
-import { getFileExtension, regex } from "../../../../../utils";
+import { delta, getFileExtension, regex } from "../../../../../utils";
 import api from "../../../../api";
 import DatasheetUploadIntegrationDialog from "../DatasheetUploadIntegration/DatasheetUploadIntegrationDialog";
 
@@ -115,7 +116,7 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                 .required(t("producer_mandatory_error"))
                 .min(2, t("producer_length_error"))
                 .max(99, t("producer_length_error"))
-                .transform((value) => value.trim()),
+                .transform((value) => (value ? value.trim() : value)),
             production_year: yup
                 .number()
                 .required(t("production_year_mandatory_error"))
@@ -141,10 +142,12 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
         formState: { errors, isValid, isValidating },
         setValue: setFormValue,
         watch,
+        control,
     } = useForm({
         resolver: yupResolver(schema),
         defaultValues: {
             data_srid: "EPSG:2154",
+            producer: "",
             production_year: new Date().getFullYear(),
         },
     });
@@ -247,6 +250,12 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
             });
     };
 
+    const { data: organizations } = useQuery({
+        queryKey: RQKeys.catalogs_organizations(),
+        queryFn: ({ signal }) => api.catalogs.getAllOrganizations({ signal }),
+        staleTime: delta.hours(10),
+    });
+
     return (
         <Main title={t("title", { datasheetName })}>
             <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-4w")}>
@@ -263,9 +272,7 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                 />
                 <h1 className={fr.cx("fr-m-0")}>{t("title", { datasheetName: datasheetName })}</h1>
             </div>
-
             <p>{tCommon("mandatory_fields")}</p>
-
             <Input
                 label={t("datasheet.name")}
                 hintText={t("datasheet.name_hint")}
@@ -287,7 +294,6 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                 className={fr.cx("fr-input-group")}
             />
             {fileUploadInProgress && <Progress label={t("upload_running")} value={progressValue} max={progressMax} />}
-
             {showDataInfos && (
                 <div className={fr.cx("fr-mt-2v")}>
                     <h5>{t("data_infos_title")}</h5>
@@ -317,7 +323,7 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                         }))}
                     />
 
-                    <Input
+                    {/* <Input
                         label={t("producer")}
                         hintText={t("producer_hint")}
                         state={errors.producer ? "error" : "default"}
@@ -325,7 +331,7 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                         nativeInputProps={{
                             ...register("producer"),
                         }}
-                    />
+                    /> */}
 
                     <Input
                         label={t("production_year")}
@@ -340,6 +346,29 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                     <input type="hidden" {...register("data_upload_path")} />
                 </div>
             )}
+            <Controller
+                control={control}
+                name="producer"
+                render={({ field, fieldState: { error } }) => (
+                    <AutocompleteSelectNew
+                        label={t("producer")}
+                        hintText={t("producer_hint")}
+                        options={organizations?.map((org) => org.name.trim()).sort() ?? []}
+                        state={error ? "error" : "default"}
+                        stateRelatedMessage={error?.message?.toString()}
+                        multiple={false}
+                        freeSolo={true}
+                        getOptionLabel={(option) => option.toString()}
+                        searchFilter={{
+                            limit: undefined,
+                        }}
+                        value={field.value}
+                        onChange={(_, value) => field.onChange(value)}
+                        onInputChange={(_, value) => field.onChange(value)}
+                        onBlur={field.onBlur}
+                    />
+                )}
+            />
 
             <ButtonsGroup
                 buttons={[
@@ -361,13 +390,11 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                 alignment="right"
                 className={fr.cx("fr-mt-2w")}
             />
-
             {isValidating && (
                 <Wait>
                     <LoadingIcon largeIcon={true} />
                 </Wait>
             )}
-
             {addUploadMutation.isPending && (
                 <Wait>
                     <div className={fr.cx("fr-grid-row")}>
@@ -375,7 +402,6 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                     </div>
                 </Wait>
             )}
-
             {addUploadMutation.isSuccess && addUploadMutation.data?._id !== undefined && (
                 <Wait>
                     <DatasheetUploadIntegrationDialog datastoreId={datastoreId} uploadId={addUploadMutation.data?._id} datasheetName={datasheetName} />

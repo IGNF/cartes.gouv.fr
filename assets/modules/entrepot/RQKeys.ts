@@ -59,6 +59,7 @@ const RQKeys = {
     community_members: (communityId: string): string[] => ["community", communityId, "members"],
 
     catalogs_communities: (): string[] => ["catalogs", "communities"],
+    catalogs_organizations: (): string[] => ["catalogs", "organizations"],
 
     user_me: (): string[] => ["user", "me"],
     my_keys: (): string[] => ["user", "me", "keys"],

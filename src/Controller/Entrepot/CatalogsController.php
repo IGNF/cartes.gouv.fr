@@ -29,9 +29,23 @@ class CatalogsController extends AbstractController implements ApiControllerInte
     public function communities(): JsonResponse
     {
         try {
-            $response = $this->catalogsApiService->getAllPublicCommunities();
+            $response = $this->catalogsApiService->getAllCommunities();
 
             return $this->json($response);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        } catch (\Exception $ex) {
+            return $this->json(['message' => $ex->getMessage()], $ex->getCode());
+        }
+    }
+
+    #[Route('/organizations', name: 'organizations', methods: ['GET'])]
+    public function organizations(): JsonResponse
+    {
+        try {
+            $organizations = $this->catalogsApiService->getAllOrganizations();
+
+            return $this->json($organizations);
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         } catch (\Exception $ex) {
