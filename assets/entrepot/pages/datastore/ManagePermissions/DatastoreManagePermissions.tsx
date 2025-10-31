@@ -11,12 +11,12 @@ import LoadingText from "../../../../components/Utils/LoadingText";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { routes } from "../../../../router/router";
-import { DatastorePermissionResponseDto } from "../../../../@types/entrepot";
 import ConfirmDialog, { ConfirmDialogModal } from "../../../../components/Utils/ConfirmDialog";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import Wait from "../../../../components/Utils/Wait";
 import { useDatastore } from "../../../../contexts/datastore";
 import Main from "../../../../components/Layout/Main";
+import { DatastorePermission } from "@/@types/app";
 
 type DatastoreManagePermissionsProps = {
     datastoreId: string;
@@ -32,7 +32,7 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
     const { datastore, status: datastoreStatus } = useDatastore();
 
     // Les permissions
-    const { data: permissions, status: permissionStatus } = useQuery<DatastorePermissionResponseDto[]>({
+    const { data: permissions, status: permissionStatus } = useQuery<DatastorePermission[]>({
         queryKey: RQKeys.datastore_permissions(datastoreId),
         queryFn: ({ signal }) => api.datastore.getPermissions(datastoreId, {}, { signal }),
         staleTime: 30000,
@@ -47,7 +47,7 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
     } = useMutation<null, CartesApiException, string>({
         mutationFn: (permissionId) => api.datastore.removePermission(datastoreId, permissionId),
         onSuccess() {
-            queryClient.setQueryData<DatastorePermissionResponseDto[]>(RQKeys.datastore_permissions(datastoreId), (permissions) => {
+            queryClient.setQueryData<DatastorePermission[]>(RQKeys.datastore_permissions(datastoreId), (permissions) => {
                 return permissions?.filter((permission) => permission._id !== currentPermission);
             });
         },

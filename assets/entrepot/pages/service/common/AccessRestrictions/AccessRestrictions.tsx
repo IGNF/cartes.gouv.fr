@@ -5,12 +5,11 @@ import { useQuery } from "@tanstack/react-query";
 import { FC, useEffect, useMemo } from "react";
 import { UseFormReturn } from "react-hook-form";
 
-import { DatastoreEndpoint, EndpointTypeEnum, Service, ServiceFormValuesBaseType } from "../../../../../@types/app";
+import { DatastoreEndpoint, DatastorePermission, EndpointTypeEnum, Service, ServiceFormValuesBaseType } from "../../../../../@types/app";
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import api from "../../../../api";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
-import { DatastorePermissionResponseDto } from "../../../../../@types/entrepot";
 
 type AccessRestrictionProps = {
     datastoreId: string;
@@ -31,7 +30,7 @@ const AccessRestrictions: FC<AccessRestrictionProps> = ({ datastoreId, endpointT
         watch,
     } = form;
 
-    const { data: permissions } = useQuery<DatastorePermissionResponseDto[]>({
+    const { data: permissions } = useQuery<DatastorePermission[]>({
         queryKey: RQKeys.datastore_permission_offering(datastoreId, service?._id ?? ""),
         queryFn: ({ signal }) => api.datastore.getPermissions(datastoreId, { offering: service?._id }, { signal }),
         enabled: Boolean(service?._id),

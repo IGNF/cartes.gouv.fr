@@ -7,8 +7,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useState } from "react";
 import { createPortal } from "react-dom";
 
-import { Datastore } from "../../../../../@types/app";
-import { StaticFileListResponseDto } from "../../../../../@types/entrepot";
+import type { Datastore, StaticFile } from "../../../../../@types/app";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import Wait from "../../../../../components/Utils/Wait";
@@ -41,7 +40,7 @@ const StaticsUsage: FC<StaticsUsageProps> = ({ datastore }) => {
     const deleteStaticMutation = useMutation({
         mutationFn: (staticId: string) => api.statics.remove(datastore._id, staticId),
         onSuccess() {
-            queryClient.setQueryData(RQKeys.datastore_statics_list(datastore._id), (staticsList: StaticFileListResponseDto[]) => {
+            queryClient.setQueryData(RQKeys.datastore_statics_list(datastore._id), (staticsList: StaticFile[]) => {
                 return staticsList.filter((staticFile) => staticFile._id !== currentStaticId);
             });
 

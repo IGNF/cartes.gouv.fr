@@ -1,7 +1,8 @@
 import { compareAsc } from "date-fns";
 import { declareComponentKeys } from "i18nifty";
 
-import { DatastorePermissionResponseDto, PermissionBeneficiaryDto } from "../../../../@types/entrepot";
+import { DatastorePermission } from "@/@types/app";
+import { PermissionBeneficiaryDto } from "../../../../@types/entrepot";
 import type { Translations } from "../../../../i18n/types";
 import { formatDateFromISO } from "../../../../utils";
 
@@ -34,7 +35,7 @@ const { i18n } = declareComponentKeys<
     | "add_form.only_oath"
     | "add_form.hint_only_oath"
     | { K: "edit_form.document_title"; P: { id: string }; R: string }
-    | { K: "edit_form.title"; P: { permission?: DatastorePermissionResponseDto }; R: string }
+    | { K: "edit_form.title"; P: { permission?: DatastorePermission }; R: string }
     | "edit_form.licence"
     | "edit_form.hint_licence"
     | "edit_form.expiration_date"
@@ -72,7 +73,7 @@ const getGrantedTo = (lang: "fr" | "en", beneficiary?: PermissionBeneficiaryDto)
     }
 };
 
-const getTitle = (lang: "fr" | "en", permission?: DatastorePermissionResponseDto) => {
+const getTitle = (lang: "fr" | "en", permission?: DatastorePermission) => {
     if (permission === undefined) return "";
     if (permission.beneficiary === undefined) return "";
 

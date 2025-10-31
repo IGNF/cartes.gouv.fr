@@ -70,9 +70,9 @@ const StoredDataPreviewTab: FC<StoredDataPreviewTabProps> = ({ datastoreId, repo
                 </ul>
             </Accordion>
 
-            {(storedData?.type_infos?.relations ?? vectorDbQuery.data?.type_infos?.relations) && (
+            {((storedData as VectorDb)?.type_infos?.relations ?? vectorDbQuery.data?.type_infos?.relations) && (
                 <Accordion titleAs="h2" label="Structure" defaultExpanded={true}>
-                    {(storedData?.type_infos?.relations ?? vectorDbQuery.data?.type_infos?.relations ?? [])
+                    {((storedData as VectorDb)?.type_infos?.relations ?? vectorDbQuery.data?.type_infos?.relations ?? [])
                         .sort((a, b) => (a.name === b.name ? 0 : a.name < b.name ? -1 : 1))
                         .map((rel) => (
                             <Fragment key={rel.name}>

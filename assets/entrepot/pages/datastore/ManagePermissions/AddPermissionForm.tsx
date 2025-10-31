@@ -19,12 +19,13 @@ import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { routes } from "../../../../router/router";
 import { useAuthStore } from "../../../../stores/AuthStore";
-import { DatastorePermissionResponseDto, PermissionCreateDtoTypeEnum } from "../../../../@types/entrepot";
+import { PermissionCreateDtoTypeEnum } from "../../../../@types/entrepot";
 import CommunityListForm from "./CommunityListForm";
 import ScrollOfferingList from "./ScrollOfferingList";
 import { getAddSchema } from "./ValidationSchemas";
 import createRequestBody, { type AddPermissionFormType } from "./utils";
 import Main from "../../../../components/Layout/Main";
+import { DatastorePermission } from "@/@types/app";
 
 const defaultDate = new Date(new Date().setFullYear(new Date().getFullYear() + 2));
 const defaultOnlyOauth = false;
@@ -69,8 +70,8 @@ const AddPermissionForm: FC<AddPermissionFormProps> = ({ datastoreId }) => {
         mutate: mutateAdd,
     } = useMutation({
         mutationFn: (values: object) => api.datastore.addPermission(datastoreId, values),
-        onSuccess(permissions: DatastorePermissionResponseDto[]) {
-            queryClient.setQueryData<DatastorePermissionResponseDto[]>(RQKeys.datastore_permissions(datastoreId), (oldPermissions) => {
+        onSuccess(permissions: DatastorePermission[]) {
+            queryClient.setQueryData<DatastorePermission[]>(RQKeys.datastore_permissions(datastoreId), (oldPermissions) => {
                 if (oldPermissions) {
                     return [...oldPermissions, ...permissions];
                 }

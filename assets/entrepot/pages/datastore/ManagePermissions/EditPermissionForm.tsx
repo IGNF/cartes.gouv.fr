@@ -14,11 +14,11 @@ import Wait from "../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { routes } from "../../../../router/router";
-import { DatastorePermissionResponseDto } from "../../../../@types/entrepot";
 import ScrollOfferingList from "./ScrollOfferingList";
 import { getEditSchema } from "./ValidationSchemas";
 import createRequestBody, { EditPermissionFormType } from "./utils";
 import Main from "../../../../components/Layout/Main";
+import { DatastorePermission } from "@/@types/app";
 
 type EditPermissionFormProps = {
     datastoreId: string;
@@ -47,8 +47,8 @@ const EditPermissionForm: FC<EditPermissionFormProps> = ({ datastoreId, permissi
 
     const updateMutation = useMutation({
         mutationFn: (values: object) => api.datastore.updatePermission(datastoreId, permissionId, values),
-        onSuccess(permission: DatastorePermissionResponseDto) {
-            queryClient.setQueryData<DatastorePermissionResponseDto[]>(RQKeys.datastore_permissions(datastoreId), (oldPermissions) => {
+        onSuccess(permission: DatastorePermission) {
+            queryClient.setQueryData<DatastorePermission[]>(RQKeys.datastore_permissions(datastoreId), (oldPermissions) => {
                 const newPermissions = oldPermissions?.filter((p) => p._id !== permissionId) || [];
                 return [...newPermissions, ...[permission]];
             });

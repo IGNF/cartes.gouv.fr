@@ -1,7 +1,7 @@
-import { AccessCreateDto, AccessDetailsResponseDto } from "../../../../../@types/entrepot";
+import { AccessCreateDto, AccessDetailResponseDto } from "../../../../../@types/entrepot";
 
 export default class AccessesTransformer {
-    static transformToArray(accesses: AccessDetailsResponseDto[]): AccessCreateDto[] {
+    static transformToArray(accesses: AccessDetailResponseDto[]): AccessCreateDto[] {
         const map = this.toMap(accesses);
         return Array.from(map, ([k, v]) => ({ permission: k, offerings: v }));
     }
@@ -14,7 +14,7 @@ export default class AccessesTransformer {
         return result;
     }
 
-    private static toMap(accesses: AccessDetailsResponseDto[]): Map<string, string[]> {
+    private static toMap(accesses: AccessDetailResponseDto[]): Map<string, string[]> {
         const map = new Map();
         accesses.forEach((access) => {
             const collection = map.get(access.permission._id) as string[] | undefined;

@@ -3,16 +3,15 @@ import Badge from "@codegouvfr/react-dsfr/Badge";
 import { FC } from "react";
 import { symToStr } from "tsafe/symToStr";
 
+import { OfferingTypeEnum, StoredDataTypeEnum } from "../../../../@types/app";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import { offeringTypeDisplayName } from "../../../../utils";
-import { StoredDataTypeEnum } from "../../../../@types/app";
-import { OfferingDetailResponseDtoTypeEnum } from "../../../../@types/entrepot";
 
 interface DescProps {
     databaseNotUsed?: boolean;
     databaseUsed?: string;
     isFetching: boolean;
-    publishedServices?: { _id: string; layer_name: string; type: OfferingDetailResponseDtoTypeEnum }[];
+    publishedServices?: { _id: string; layer_name: string; type: OfferingTypeEnum }[];
     pyramidCreated?: { _id: string; name: string }[];
     pyramidUsed?: { type: string; name: string };
 }

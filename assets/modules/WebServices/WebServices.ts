@@ -1,5 +1,4 @@
-import { StoredDataTypeEnum, type Service } from "../../@types/app";
-import { OfferingDetailResponseDtoTypeEnum } from "../../@types/entrepot";
+import { OfferingTypeEnum, StoredDataTypeEnum, type Service } from "../../@types/app";
 import TMSService from "./TMSService";
 import WFSService from "./WFSService";
 import WMSService from "./WMSService";
@@ -7,10 +6,10 @@ import WMTSService from "./WMTSService";
 
 const getWebService = (service: Service) => {
     switch (service.type) {
-        case OfferingDetailResponseDtoTypeEnum.WFS: {
+        case OfferingTypeEnum.WFS: {
             return new WFSService(service);
         }
-        case OfferingDetailResponseDtoTypeEnum.WMTSTMS: {
+        case OfferingTypeEnum.WMTSTMS: {
             switch (service.configuration.pyramid?.type) {
                 case StoredDataTypeEnum.ROK4PYRAMIDRASTER:
                     return new WMTSService(service);
@@ -20,8 +19,8 @@ const getWebService = (service: Service) => {
                     throw Error(`L'affichage du flux du type ${service.type} n'est pas encore implémenté`);
             }
         }
-        case OfferingDetailResponseDtoTypeEnum.WMSVECTOR:
-        case OfferingDetailResponseDtoTypeEnum.WMSRASTER: {
+        case OfferingTypeEnum.WMSVECTOR:
+        case OfferingTypeEnum.WMSRASTER: {
             return new WMSService(service);
         }
         default:

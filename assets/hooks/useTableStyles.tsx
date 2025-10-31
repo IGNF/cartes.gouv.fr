@@ -1,6 +1,6 @@
 import { useQueries, UseQueryOptions } from "@tanstack/react-query";
 
-import { StaticFileListResponseDto } from "@/@types/entrepot";
+import { StaticFile } from "@/@types/app";
 import api from "@/entrepot/api";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { CartesApiException } from "@/modules/jsonFetch";
@@ -12,7 +12,7 @@ export type useTableStylesReturn = {
     errors: string[];
 };
 
-export const useTableStyles = (editMode: boolean, datastoreId: string, staticFiles: StaticFileListResponseDto[] = []): useTableStylesReturn => {
+export const useTableStyles = (editMode: boolean, datastoreId: string, staticFiles: StaticFile[] = []): useTableStylesReturn => {
     // TODO A SUPPRIMER PEUT-ETRE - staticFiles est parfois un objet ???
     const sFiles = Array.isArray(staticFiles) ? [...staticFiles] : [];
 

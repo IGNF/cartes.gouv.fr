@@ -1,8 +1,6 @@
+import type { Datastore, DatastoreEndpoint, DatastorePermission } from "../../@types/app";
 import SymfonyRouting from "../../modules/Routing";
-
 import { jsonFetch } from "../../modules/jsonFetch";
-import { type Datastore, type DatastoreEndpoint } from "../../@types/app";
-import { DatastorePermissionResponseDto } from "../../@types/entrepot";
 
 const get = (datastoreId: string, otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_datastore_get", { datastoreId });
@@ -27,21 +25,21 @@ const getEndpoints = (datastoreId: string, query: { type?: string; open?: boolea
 
 const getPermission = (datastoreId: string, permissionId: string, otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_datastore_get_permission", { datastoreId, permissionId });
-    return jsonFetch<DatastorePermissionResponseDto>(url, {
+    return jsonFetch<DatastorePermission>(url, {
         ...otherOptions,
     });
 };
 
 const getPermissions = (datastoreId: string, query: object, otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_datastore_get_permissions", { datastoreId, ...query });
-    return jsonFetch<DatastorePermissionResponseDto[]>(url, {
+    return jsonFetch<DatastorePermission[]>(url, {
         ...otherOptions,
     });
 };
 
 const addPermission = (datastoreId: string, formData: object) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_datastore_add_permission", { datastoreId: datastoreId });
-    return jsonFetch<DatastorePermissionResponseDto[]>(
+    return jsonFetch<DatastorePermission[]>(
         url,
         {
             method: "POST",
@@ -56,7 +54,7 @@ const addPermission = (datastoreId: string, formData: object) => {
 
 const updatePermission = (datastoreId: string, permissionId: string, formData: object) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_datastore_update_permission", { datastoreId: datastoreId, permissionId: permissionId });
-    return jsonFetch<DatastorePermissionResponseDto>(
+    return jsonFetch<DatastorePermission>(
         url,
         {
             method: "PATCH",

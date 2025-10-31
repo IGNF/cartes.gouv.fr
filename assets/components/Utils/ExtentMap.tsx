@@ -15,7 +15,7 @@ import VectorSource from "ol/source/Vector";
 import WMTS, { optionsFromCapabilities } from "ol/source/WMTS";
 import { FC, useEffect, useMemo, useRef } from "react";
 
-import type { BoundingBox, Geometry as EntrepotGeometry } from "../../@types/entrepot";
+import type { BoundingBox, JsonNode } from "../../@types/entrepot";
 import olDefaults from "../../data/ol-defaults.json";
 import useCapabilities from "../../hooks/useCapabilities";
 
@@ -27,7 +27,7 @@ import "../../sass/components/geopf-ext-ol-custom.scss";
 import "../../sass/components/map-view.scss";
 
 type ExtentMapProps = {
-    extents?: EntrepotGeometry | EntrepotGeometry[];
+    extents?: JsonNode | JsonNode[];
     bbox?: BoundingBox;
 };
 

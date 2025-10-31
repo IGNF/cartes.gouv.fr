@@ -1,10 +1,10 @@
-import { StaticFileListResponseDto } from "../../@types/entrepot";
+import { StaticFile } from "@/@types/app";
 import SymfonyRouting from "../../modules/Routing";
 import { apiFetch, jsonFetch } from "../../modules/jsonFetch";
 
 const getList = (datastoreId: string, queryParams: object = {}, otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_statics_get_list", { datastoreId, ...queryParams });
-    return jsonFetch<StaticFileListResponseDto[]>(url, {
+    return jsonFetch<StaticFile[]>(url, {
         method: "GET",
         ...otherOptions,
     });

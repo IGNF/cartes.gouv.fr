@@ -165,7 +165,6 @@ const MyDocuments: FC = () => {
                         </ul>,
                         niceBytes(doc.size.toString()),
                         doc.mime_type,
-                        // @ts-expect-error // TODO il faut faire regénérer les types parce que l'API a changé
                         JSON.stringify(doc.extra),
                         <ButtonsGroup
                             key={doc._id}

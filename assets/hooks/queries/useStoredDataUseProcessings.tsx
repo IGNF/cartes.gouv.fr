@@ -1,19 +1,19 @@
-import { ProcessingExecutionDetailResponseDto, ProcessingExecutionDetailResponseDtoStatusEnum } from "@/@types/entrepot";
+import { type ProcessingExecution, ProcessingExecutionStatusEnum } from "@/@types/app";
 import api from "@/entrepot/api";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { delta } from "@/utils";
 import { UndefinedInitialDataOptions, useQuery } from "@tanstack/react-query";
 
 export const blockingProcessingStatuses = [
-    ProcessingExecutionDetailResponseDtoStatusEnum.CREATED,
-    ProcessingExecutionDetailResponseDtoStatusEnum.WAITING,
-    ProcessingExecutionDetailResponseDtoStatusEnum.PROGRESS,
+    ProcessingExecutionStatusEnum.CREATED,
+    ProcessingExecutionStatusEnum.WAITING,
+    ProcessingExecutionStatusEnum.PROGRESS,
 ];
 
 export default function useStoredDataUseProcessings(
     datastoreId?: string,
     storedDataId?: string,
-    otherOptions?: Partial<UndefinedInitialDataOptions<ProcessingExecutionDetailResponseDto[] | undefined>>
+    otherOptions?: Partial<UndefinedInitialDataOptions<ProcessingExecution[] | undefined>>
 ) {
     return useQuery({
         queryKey: RQKeys.datastore_processing_execution_list(datastoreId ?? "XXX", { input_stored_data: storedDataId, statuses: blockingProcessingStatuses }),

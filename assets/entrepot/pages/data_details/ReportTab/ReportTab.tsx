@@ -4,8 +4,7 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import { UseQueryResult } from "@tanstack/react-query";
 import { FC, useMemo } from "react";
 
-import { StoredDataReport, UploadReport } from "../../../../@types/app";
-import { CheckingExecutionDetailResponseDtoStatusEnum, ProcessingExecutionDetailResponseDtoStatusEnum } from "../../../../@types/entrepot";
+import { CheckStatusEnum, ProcessingExecutionStatusEnum, type StoredDataReport, type UploadReport } from "../../../../@types/app";
 import { CartesApiException } from "../../../../modules/jsonFetch";
 import { niceBytes } from "../../../../utils";
 import ProcessingExecutionReport from "./ProcessingExecutionReport";
@@ -88,7 +87,7 @@ const ReportTab: FC<ReportTabProps> = ({ datastoreName, reportQuery }) => {
                                             <ReportStatusBadge status={check.status} className={fr.cx("fr-ml-2w")} />
                                         </>
                                     }
-                                    defaultExpanded={check.status === CheckingExecutionDetailResponseDtoStatusEnum.FAILURE}
+                                    defaultExpanded={check.status === CheckStatusEnum.FAILURE}
                                 >
                                     <UploadCheckExecutionReport check={check} datastoreName={datastoreName} />
                                 </Accordion>
@@ -108,10 +107,7 @@ const ReportTab: FC<ReportTabProps> = ({ datastoreName, reportQuery }) => {
                                     <ReportStatusBadge status={procExec.status} className={fr.cx("fr-ml-2w")} />
                                 </>
                             }
-                            defaultExpanded={[
-                                ProcessingExecutionDetailResponseDtoStatusEnum.FAILURE,
-                                ProcessingExecutionDetailResponseDtoStatusEnum.ABORTED,
-                            ].includes(procExec.status)}
+                            defaultExpanded={[ProcessingExecutionStatusEnum.FAILURE, ProcessingExecutionStatusEnum.ABORTED].includes(procExec.status)}
                         >
                             <ProcessingExecutionReport datastoreName={datastoreName} processingExecution={procExec} />
                         </Accordion>

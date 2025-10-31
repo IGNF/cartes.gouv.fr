@@ -1,15 +1,15 @@
 import { UseQueryResult } from "@tanstack/react-query";
 import { FC, memo, useMemo } from "react";
 
-import { StoredDataStatusEnum, StoredDataTypeEnum } from "../../../../../../@types/app";
-import { OfferingListResponseDto, ProcessingExecutionStoredDataDto } from "../../../../../../@types/entrepot";
+import { Offering, StoredDataStatusEnum, StoredDataTypeEnum } from "../../../../../../@types/app";
+import { ProcessingExecutionStoredDataDto } from "../../../../../../@types/entrepot";
 import Desc from "../../Desc";
 
 type VectorDbDescProps = {
     dataUsesQuery: UseQueryResult<
         {
             stored_data_list: ProcessingExecutionStoredDataDto[];
-            offerings_list: OfferingListResponseDto[];
+            offerings_list: Offering[];
         },
         Error
     >;

@@ -2,33 +2,38 @@ import { LanguageType } from "@/utils";
 import { SummaryProps } from "@codegouvfr/react-dsfr/Summary";
 import {
     AccessCreateDto,
-    AccessDetailsResponseDto,
-    AnnexDetailResponseDto,
+    AccessDetailResponseDto,
+    AnnexStandardDetailResponseDto,
     BasicInfoDto,
     BoundingBox,
-    CheckingExecutionDetailResponseDto,
-    CheckingExecutionDetailResponseDtoStatusEnum,
+    CheckingExecutionStandardDetailResponseDto,
+    CheckingExecutionStandardDetailResponseDtoStatusEnum,
     CommunityMemberDto,
     CommunityUserResponseDtoRightsEnum,
     ConfigurationAltimetryDetailsContent,
-    ConfigurationDetailResponseDto,
     ConfigurationItineraryIsocurveDetailsContent,
+    ConfigurationStandardDetailResponseDto,
     ConfigurationWfsDetailsContent,
     ConfigurationWmsRasterDetailsContent,
     ConfigurationWmsVectorDetailsContent,
     ConfigurationWmtsTmsDetailsContent,
     DatastoreDetailResponseDto,
-    DatastoreEndpointResponseDto,
+    DatastoreEndpointStandardResponseDto,
     EndpointDetailResponseDtoTypeEnum,
     HashInfoDto,
-    MetadataResponseDto,
+    MetadataStandardResponseDto,
     OAuth2InfoDto,
-    OfferingDetailResponseDto,
-    ProcessingExecutionDetailResponseDto,
+    OfferingStandardDetailResponseDto,
+    PermissionStandardListResponseDto,
     ProcessingExecutionOutputStoredDataDto,
+    ProcessingExecutionStandardDetailResponseDto,
+    StaticFileStandardDetailResponseDto,
     StoredDataDetailsRelationDto,
     StoredDataPrivateDetailResponseDto,
     StoredDataPrivateDetailResponseDtoTypeEnum,
+    StoredDataRok4PyramidRasterDetailsDto,
+    StoredDataRok4PyramidVectorDetailsDto,
+    StoredDataVectorDbDetailsDto,
     UploadPrivateDetailResponseDto,
     UploadTreeElementResponseDto,
     UserDetailsResponseDto,
@@ -89,48 +94,53 @@ export type DatasheetDetailed = Datasheet & {
 };
 
 /** stored_data (donnée stockée) */
-export type StoredData = StoredDataPrivateDetailResponseDto;
+export interface StoredData extends StoredDataPrivateDetailResponseDto {
+    tags: {
+        datasheet_name?: string;
+        producer?: string;
+        production_year?: string;
+    };
+}
 export {
     StoredDataPrivateDetailResponseDtoStatusEnum as StoredDataStatusEnum,
     StoredDataPrivateDetailResponseDtoTypeEnum as StoredDataTypeEnum,
-    StoredDataPrivateDetailResponseDtoVisibilityEnum as StoredDataVisibilityEnum,
 } from "./entrepot";
 export type StoredDataRelation = StoredDataDetailsRelationDto;
 
 /** stored_data (donnée stockée) du type VECTOR-DB */
-export type VectorDb = StoredData & {
+export interface VectorDb extends StoredData {
     type: StoredDataPrivateDetailResponseDtoTypeEnum.VECTORDB;
-    tags: {
+    tags: StoredData["tags"] & {
         proc_int_id?: string;
         upload_id?: string;
-        datasheet_name?: string;
     };
-};
+    type_infos?: StoredDataVectorDbDetailsDto;
+}
 
 /** stored_data (donnée stockée) du type ROK4-PYRAMID-VECTOR */
-export type PyramidVector = StoredData & {
+export interface PyramidVector extends StoredData {
     type: StoredDataPrivateDetailResponseDtoTypeEnum.ROK4PYRAMIDVECTOR;
-    tags: {
-        datasheet_name?: string;
+    tags: StoredData["tags"] & {
         upload_id?: string;
         vectordb_id?: string;
         proc_int_id?: string;
         proc_pyr_creat_id?: string;
         is_sample?: "true" | "false";
     };
-};
+    type_infos?: StoredDataRok4PyramidVectorDetailsDto;
+}
 
 /** stored_data (donnée stockée) du type ROK4-PYRAMID-VECTOR */
-export type PyramidRaster = StoredData & {
+export interface PyramidRaster extends StoredData {
     type: StoredDataPrivateDetailResponseDtoTypeEnum.ROK4PYRAMIDRASTER;
-    tags: {
-        datasheet_name?: string;
+    tags: StoredData["tags"] & {
         upload_id?: string;
         proc_int_id?: string;
         vectordb_id?: string;
         proc_pyr_creat_id?: string;
     };
-};
+    type_infos?: StoredDataRok4PyramidRasterDetailsDto;
+}
 
 /** upload (livraison) */
 export type Upload = UploadPrivateDetailResponseDto & {
@@ -141,17 +151,18 @@ export type Upload = UploadPrivateDetailResponseDto & {
         data_upload_path?: string;
         integration_progress?: string;
         integration_current_step?: string;
+        producer?: string;
+        production_year?: string;
     };
 };
 
 export {
-    ConfigurationDetailResponseDtoStatusEnum as ConfigurationStatusEnum,
-    ConfigurationDetailResponseDtoTypeEnum as ConfigurationTypeEnum,
-    OfferingStatusEnum,
-    OfferingDetailResponseDtoTypeEnum as OfferingTypeEnum,
+    ConfigurationStandardDetailResponseDtoStatusEnum as ConfigurationStatusEnum,
+    ConfigurationStandardDetailResponseDtoTypeEnum as ConfigurationTypeEnum,
+    OfferingStandardDetailResponseDtoStatusEnum as OfferingStatusEnum,
+    OfferingStandardDetailResponseDtoTypeEnum as OfferingTypeEnum,
     UploadPrivateDetailResponseDtoStatusEnum as UploadStatusEnum,
     UploadPrivateDetailResponseDtoTypeEnum as UploadTypeEnum,
-    UploadPrivateDetailResponseDtoVisibilityEnum as UploadVisibilityEnum,
 } from "./entrepot";
 export { EndpointDetailResponseDtoTypeEnum as EndpointTypeEnum };
 export type UploadTree = UploadTreeElementResponseDto[];
@@ -209,7 +220,7 @@ export type TmsMetadata = {
 };
 
 /** configuration & offerings */
-export type Configuration = ConfigurationDetailResponseDto & {
+export type Configuration = ConfigurationStandardDetailResponseDto & {
     styles?: CartesStyle[];
     tags: {
         datasheet_name?: string;
@@ -217,13 +228,14 @@ export type Configuration = ConfigurationDetailResponseDto & {
     pyramid?: PyramidVector | PyramidRaster;
 };
 
-export type Offering = OfferingDetailResponseDto;
+export type Offering = OfferingStandardDetailResponseDto;
 
-export type Service = Offering & {
+/** service est un offering avec des informations supplémentaires (configuration complète, métadonnées TMS ou l'URL de diffusion) */
+export interface Service extends Offering {
     configuration: Configuration;
     tms_metadata?: TmsMetadata;
     share_url?: string;
-};
+}
 
 export type TypeInfosWithBbox =
     | ConfigurationAltimetryDetailsContent
@@ -276,18 +288,19 @@ export type ServiceFormValuesBaseType = {
     AttributionFormValuesType;
 
 /** endpoints */
-export type DatastoreEndpoint = DatastoreEndpointResponseDto;
+export type DatastoreEndpoint = DatastoreEndpointStandardResponseDto;
 
 export type CheckOrProcessingExecutionLogs = [string];
-export type CheckDetailed = CheckingExecutionDetailResponseDto & {
+export type CheckDetailed = CheckingExecutionStandardDetailResponseDto & {
     logs?: CheckOrProcessingExecutionLogs;
 };
-export { CheckingExecutionDetailResponseDtoStatusEnum as CheckStatusEnum };
+export { CheckingExecutionStandardDetailResponseDtoStatusEnum as CheckStatusEnum };
 
-export type ProcessingExecution = ProcessingExecutionDetailResponseDto;
+export type ProcessingExecution = ProcessingExecutionStandardDetailResponseDto;
+export { ProcessingExecutionStandardDetailResponseDtoStatusEnum as ProcessingExecutionStatusEnum } from "./entrepot";
 
 export type StoredDataReport = {
-    stored_data: StoredData;
+    stored_data: VectorDb | PyramidVector | PyramidRaster;
     input_upload:
         | (Upload & {
               file_tree: UploadTree;
@@ -314,10 +327,14 @@ export type UserRightsResponseDto = {
     rights: CommunityUserResponseDtoRightsEnum[];
 };
 
-export type UserKeyWithAccessesResponseDto = UserKeyResponseDto & { accesses: AccessDetailsResponseDto[] };
-export type UserKeyDetailedWithAccessesResponseDto = UserKeyDetailsResponseDtoUserKeyInfoDto & { accesses: AccessDetailsResponseDto[] };
+export type DatastorePermission = PermissionStandardListResponseDto;
 
-export type Annexe = AnnexDetailResponseDto;
+export type UserKeyWithAccessesResponseDto = UserKeyResponseDto & { accesses: AccessDetailResponseDto[] };
+export type UserKeyDetailedWithAccessesResponseDto = UserKeyDetailsResponseDtoUserKeyInfoDto & { accesses: AccessDetailResponseDto[] };
+
+export type Annexe = AnnexStandardDetailResponseDto;
+
+export type StaticFile = StaticFileStandardDetailResponseDto;
 
 /* Pour le formulaire d'ajout d'une cle d'acces */
 export type IPListName = "none" | "whitelist" | "blacklist";
@@ -386,7 +403,7 @@ export type CswMetadata = {
     documents?: CswDocument[];
 };
 
-export type Metadata = MetadataResponseDto & {
+export type Metadata = MetadataStandardResponseDto & {
     csw_metadata?: CswMetadata;
     tags: {
         datasheet_name?: string;

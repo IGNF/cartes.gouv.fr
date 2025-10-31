@@ -14,8 +14,8 @@ import { fromLonLat, transformExtent } from "ol/proj";
 import WMTS, { optionsFromCapabilities } from "ol/source/WMTS";
 import { FC, useEffect, useRef } from "react";
 
-import type { CartesStyle, GeostylerStyles } from "../../@types/app";
-import { BoundingBox, OfferingDetailResponseDtoTypeEnum } from "../../@types/entrepot";
+import type { CartesStyle, GeostylerStyles, OfferingTypeEnum } from "../../@types/app";
+import { BoundingBox } from "../../@types/entrepot";
 import olDefaults from "../../data/ol-defaults.json";
 import useCapabilities from "../../hooks/useCapabilities";
 import StyleHelper from "../../modules/Style/StyleHelper";
@@ -32,7 +32,7 @@ function getWorkingLayers(layers: BaseLayer[]): BaseLayer[] {
 }
 
 export interface RMapProps {
-    type: OfferingDetailResponseDtoTypeEnum;
+    type: OfferingTypeEnum;
     bbox?: BoundingBox;
     currentStyle?: CartesStyle | GeostylerStyles;
     layers: BaseLayer[];

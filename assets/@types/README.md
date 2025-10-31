@@ -5,7 +5,7 @@ Grâce à l'outil en ligne de commande [swagger-typescript-api](https://github.c
 1. Générer les déclarations typescript dans un fichier temporaire `entrepot-generated.ts`
 
 ```bash
-npx swagger-typescript-api@latest -p <chemin/vers/fichier/openapi> -o assets/@types -n entrepot-generated.ts --extract-enums --no-client
+npx swagger-typescript-api@latest generate -p <chemin/vers/fichier/openapi> -o assets/@types -n entrepot-generated.ts --extract-enums --no-client
 ```
 
 2. Corriger le fichier auto-généré et ensuite sauvegarder dans un autre fichier `entrepot.ts`
@@ -21,10 +21,7 @@ npx swagger-typescript-api@latest -p <chemin/vers/fichier/openapi> -o assets/@ty
 - Supprimer les références circulaires
 - `StoredDataDetailsDto` :
 
-remplacer
-
 ```ts
-/** Détails sur une donnée stockée */
 export type StoredDataDetailsDto =
     | StoredDataRok4PyramidRasterDetailsDto
     | StoredDataRok4PyramidVectorDetailsDto
@@ -35,17 +32,27 @@ export type StoredDataDetailsDto =
     | StoredDataIndexDetailsDto;
 ```
 
-par
-
-```ts
-/** Détails sur une donnée stockée */
-export type StoredDataDetailsDto = StoredDataRok4PyramidRasterDetailsDto &
-    StoredDataRok4PyramidVectorDetailsDto &
-    StoredDataVectorDbDetailsDto &
-    StoredDataArchiveDetailsDto &
-    StoredDataGraphDbDetailsDto &
-    StoredDataGraphDetailsDto &
-    StoredDataIndexDetailsDto;
+```diff
+-export type StoredDataArchiveDetailsDto = StoredDataDetailsDto & {
++export type StoredDataArchiveDetailsDto = {
+...
+-export type StoredDataGraphDbDetailsDto = StoredDataDetailsDto & {
++export type StoredDataGraphDbDetailsDto = {
+...
+-export type StoredDataGraphDetailsDto = StoredDataDetailsDto & {
++export type StoredDataGraphDetailsDto =  {
+...
+-export type StoredDataIndexDetailsDto = StoredDataDetailsDto & {
++export type StoredDataIndexDetailsDto = {
+...
+-export type StoredDataRok4PyramidRasterDetailsDto = StoredDataDetailsDto & {
++export type StoredDataRok4PyramidRasterDetailsDto = {
+...
+-export type StoredDataRok4PyramidVectorDetailsDto = StoredDataDetailsDto & {
++export type StoredDataRok4PyramidVectorDetailsDto = {
+...
+-export type StoredDataVectorDbDetailsDto = StoredDataDetailsDto & {
++export type StoredDataVectorDbDetailsDto = {
 ```
 
-- `ConfigurationDetailResponseDtoStatusEnum` : supprimer `ConfigurationResponseDtoStatusEnum` et ne garder que `ConfigurationDetailResponseDtoStatusEnum`
+- `ConfigurationStandardDetailResponseDtoStatusEnum` : supprimer `ConfigurationResponseDtoStatusEnum` et ne garder que `ConfigurationStandardDetailResponseDtoStatusEnum`

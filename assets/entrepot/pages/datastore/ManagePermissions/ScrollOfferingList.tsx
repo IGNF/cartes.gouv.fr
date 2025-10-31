@@ -2,8 +2,9 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import { FC, useCallback, useMemo, useState } from "react";
+import { OfferingStandardListResponseDto } from "../../../../@types/entrepot";
+
 import "../../../../sass/pages/permission.scss";
-import { OfferingListResponseDto } from "../../../../@types/entrepot";
 
 type ScrollOfferingListProps = {
     label: string;
@@ -12,7 +13,7 @@ type ScrollOfferingListProps = {
     stateRelatedMessage?: string;
     onChange: (value: string[]) => void;
     value?: string[];
-    offerings: OfferingListResponseDto[];
+    offerings: OfferingStandardListResponseDto[];
 };
 
 const ScrollOfferingList: FC<ScrollOfferingListProps> = (props) => {
