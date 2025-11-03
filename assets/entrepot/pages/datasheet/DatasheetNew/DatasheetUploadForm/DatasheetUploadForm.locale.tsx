@@ -30,6 +30,7 @@ const { i18n } = declareComponentKeys<
     | "production_year"
     | "production_year_mandatory_error"
     | "production_year_max_error"
+    | "production_year_invalid_error"
     | "upload_file"
     | "data_infos_title"
 >()("DatasheetUploadForm");
@@ -60,13 +61,14 @@ export const DatasheetUploadFormFrTranslations: Translations<"fr">["DatasheetUpl
     projection_mandatory_error: "La projection (srid) est obligatoire",
     select_projection: "Selectionnez une projection",
     producer: "Producteur de votre donnée",
-    producer_hint: "Quel est le nom du producteur de la donnée que vous vous apprêtez à déposer ?",
-    // TODO : quand l'auto-complétion sera implémentée : Utilisez l’autocomplétion si des données de ce producteur existent déjà sur cartes.gouv.fr.
+    producer_hint:
+        "Quel est le nom du producteur de la donnée que vous vous apprêtez à déposer ? Utilisez l’autocomplétion si des données de ce producteur existent déjà sur cartes.gouv.fr.",
     producer_mandatory_error: "Le producteur de la donnée est obligatoire",
     producer_length_error: "Le nom du producteur doit contenir entre 2 et 99 caractères",
     production_year: "Année de production de votre donnée",
     production_year_mandatory_error: "L’année de production de la donnée est obligatoire",
     production_year_max_error: "L’année de production doit être inférieure ou égale à l’année courante",
+    production_year_invalid_error: "L’année de production est invalide",
     upload_file: "Déposer votre fichier",
     data_infos_title: "Les données suivantes ont été détectées. Modifiez les si besoin",
 };
@@ -100,6 +102,7 @@ export const DatasheetUploadFormEnTranslations: Translations<"en">["DatasheetUpl
     production_year: undefined,
     production_year_mandatory_error: undefined,
     production_year_max_error: undefined,
+    production_year_invalid_error: undefined,
     upload_file: undefined,
     data_infos_title: undefined,
 };

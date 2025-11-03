@@ -121,7 +121,9 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                 .number()
                 .required(t("production_year_mandatory_error"))
                 .typeError(t("production_year_mandatory_error"))
-                .max(new Date().getFullYear(), t("production_year_max_error")),
+                .max(new Date().getFullYear(), t("production_year_max_error"))
+                .positive(t("production_year_invalid_error"))
+                .integer(t("production_year_invalid_error")),
         })
         .required();
 
@@ -323,15 +325,29 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                         }))}
                     />
 
-                    {/* <Input
-                        label={t("producer")}
-                        hintText={t("producer_hint")}
-                        state={errors.producer ? "error" : "default"}
-                        stateRelatedMessage={errors?.producer?.message}
-                        nativeInputProps={{
-                            ...register("producer"),
-                        }}
-                    /> */}
+                    <Controller
+                        control={control}
+                        name="producer"
+                        render={({ field, fieldState: { error } }) => (
+                            <AutocompleteSelectNew
+                                label={t("producer")}
+                                hintText={t("producer_hint")}
+                                options={organizations?.map((org) => org.name.trim()).sort() ?? []}
+                                state={error ? "error" : "default"}
+                                stateRelatedMessage={error?.message?.toString()}
+                                multiple={false}
+                                freeSolo={true}
+                                getOptionLabel={(option) => option.toString()}
+                                searchFilter={{
+                                    limit: undefined,
+                                }}
+                                value={field.value}
+                                onChange={(_, value) => field.onChange(value)}
+                                onInputChange={(_, value) => field.onChange(value)}
+                                onBlur={field.onBlur}
+                            />
+                        )}
+                    />
 
                     <Input
                         label={t("production_year")}
@@ -346,29 +362,6 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                     <input type="hidden" {...register("data_upload_path")} />
                 </div>
             )}
-            <Controller
-                control={control}
-                name="producer"
-                render={({ field, fieldState: { error } }) => (
-                    <AutocompleteSelectNew
-                        label={t("producer")}
-                        hintText={t("producer_hint")}
-                        options={organizations?.map((org) => org.name.trim()).sort() ?? []}
-                        state={error ? "error" : "default"}
-                        stateRelatedMessage={error?.message?.toString()}
-                        multiple={false}
-                        freeSolo={true}
-                        getOptionLabel={(option) => option.toString()}
-                        searchFilter={{
-                            limit: undefined,
-                        }}
-                        value={field.value}
-                        onChange={(_, value) => field.onChange(value)}
-                        onInputChange={(_, value) => field.onChange(value)}
-                        onBlur={field.onBlur}
-                    />
-                )}
-            />
 
             <ButtonsGroup
                 buttons={[
