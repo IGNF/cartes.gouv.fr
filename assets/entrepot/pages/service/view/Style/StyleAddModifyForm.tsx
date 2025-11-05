@@ -36,7 +36,7 @@ const confirmReturnModal = createModal({
     isOpenedByDefault: false,
 });
 
-type StyleAddModifyFormType = {
+export type StyleAddModifyFormType = {
     style_name: string;
     style_files: Record<string, string>;
 };
@@ -145,10 +145,7 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
             queryKey: RQKeys.datastore_annexe(datastoreId, layer.annexe_id),
             queryFn: async ({ signal }) => {
                 // return api.annexe.getFileContent(datastoreId, layer.annexe_id, { signal, cache: "no-store" });
-                const response = await fetch(layer.url, {
-                    signal,
-                    cache: "no-store",
-                });
+                const response = await fetch(layer.url, { signal, cache: "no-store" });
                 const text = await response.text();
                 return text;
             },
