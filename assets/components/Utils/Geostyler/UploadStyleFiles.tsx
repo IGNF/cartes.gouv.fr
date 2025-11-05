@@ -119,7 +119,9 @@ const UploadStyleFiles: FC<UploadStyleFileProps> = (props) => {
                                 options={sortedTables.map((table) => ({
                                     label: table,
                                     hintText: errors?.style_files?.[encodeKey(table)]?.message ? (
-                                        <span className={fr.cx("fr-error-text", "fr-mt-1v")}>{errors?.style_files?.[encodeKey(table)]?.message}</span>
+                                        <span className={fr.cx("fr-error-text", "fr-mt-1v")} style={{ whiteSpace: "pre-wrap" }}>
+                                            {errors?.style_files?.[encodeKey(table)]?.message}
+                                        </span>
                                     ) : null,
                                     nativeInputProps: {
                                         value: table,
@@ -131,6 +133,12 @@ const UploadStyleFiles: FC<UploadStyleFileProps> = (props) => {
                                 state={errors?.style_files?.message ? "error" : undefined}
                                 stateRelatedMessage={typeof errors?.style_files?.message === "string" && errors?.style_files?.message}
                             />
+
+                            {errors?.style_files?.[encodeKey("mapbox")]?.message && (
+                                <span className={fr.cx("fr-error-text", "fr-mt-1v")} style={{ whiteSpace: "pre-wrap" }}>
+                                    {errors?.style_files?.[encodeKey("mapbox")]?.message}
+                                </span>
+                            )}
                         </>
                     ),
                     className: fr.cx("fr-col-md-3"),
