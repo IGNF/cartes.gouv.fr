@@ -165,7 +165,14 @@ function StylesList(props: StylesListProps) {
                                         title={tStyle("edit_style")}
                                         priority={"tertiary no outline"}
                                         iconId={"fr-icon-edit-line"}
-                                        linkProps={routes.datastore_service_style_edit({ datastoreId, datasheetName, offeringId, styleName: style.name }).link}
+                                        linkProps={
+                                            routes.datastore_service_style_edit({
+                                                datastoreId,
+                                                datasheetName,
+                                                offeringId,
+                                                styleTechnicalName: style.technical_name,
+                                            }).link
+                                        }
                                     />
                                     <Button
                                         title={tStyle("remove_style")}
