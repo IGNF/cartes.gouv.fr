@@ -78,27 +78,11 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
         style_name: yup
             .string()
             .required("Le nom du style est obligatoire.")
-            .transform((value) => (value ? value.trim() : value)),
-        // .test("is-unique", "Le nom du style existe déjà", (name) => {
-        //     return editMode || !styleNames.includes(name);
-        // }),
-        style_technical_name: yup
-            .string()
-            .required("Le nom technique du style est obligatoire.")
-            // .transform((value: string) => (value ? value.trim().toLowerCase() : value))
-            .test("is-unique", "Le nom technique du style existe déjà", (name) => {
-                return editMode || !styleTechnicalNames.includes(name);
-            })
-            .test(
-                "is-valid-format",
-                "Le nom technique ne peut contenir que des lettres minuscules, des chiffres, des underscores (_) et des tirets (-).",
-                (value) => {
-                    if (!value) return false;
-                    const regex = /^[a-z0-9_-]+$/;
-                    return regex.test(value);
-                }
-            ),
-
+            .transform((value) => (value ? value.trim() : value))
+            .test("is-unique", "Le nom du style existe déjà", (_, ctx) => {
+                return editMode || !styleTechnicalNames.includes(ctx.parent.style_technical_name);
+            }),
+        style_technical_name: yup.string().required(),
         style_files: yup.lazy(() =>
             yup
                 .object()
@@ -157,7 +141,6 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
     const { data: service } = serviceQuery;
 
     const styles: CartesStyle[] = useMemo(() => service?.configuration.styles ?? [], [service]);
-    const styleNames = useMemo(() => Array.from(styles, (s) => s.name), [styles]);
     const styleTechnicalNames = useMemo(() => Array.from(styles, (s) => s.technical_name), [styles]);
     const style: CartesStyle = useMemo(
         () =>
@@ -252,14 +235,9 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
     }, [resetField, styleFilesQuery?.data]);
 
     useEffect(() => {
-        if (editMode) return;
+        if (editMode || dirtyFields.style_technical_name) return;
 
         const { unsubscribe } = watch(({ style_name, style_technical_name }, { name }) => {
-            // si l'utilisateur n'a pas modifié la valeur de style_technical_name
-            if (dirtyFields.style_technical_name === true) {
-                return;
-            }
-
             // si le champ style_name a été modifié, on synchronise avec le champ style_technical_name
             if (name === "style_name" && style_name !== undefined) {
                 const suggestedTechName = suggestTechnicalName(style_name);
@@ -270,7 +248,7 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
         });
 
         return () => unsubscribe();
-    }, [watch, setFormValue, dirtyFields.style_technical_name, styleNames, editMode]);
+    }, [watch, setFormValue, dirtyFields.style_technical_name, editMode]);
 
     const onValid: SubmitHandler<StyleAddModifyFormType> = async (data) => {
         if (!service) return;
@@ -392,21 +370,12 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
                                 nativeInputProps={{
                                     ...register("style_name"),
                                 }}
-                            />
-                            <Input
-                                label={"Nom technique"}
-                                hintText={
-                                    "// TODO : nom technique unique pour ce service, ça sert à quoi ? autocomplété à partir du nom, donc pas obligé de saisir à la main"
-                                }
-                                state={errors.style_technical_name ? "error" : "default"}
-                                stateRelatedMessage={errors?.style_technical_name?.message}
-                                nativeInputProps={{
-                                    ...register("style_technical_name"),
-                                }}
                                 disabled={editMode === true}
                             />
                         </div>
                     </div>
+
+                    <input className={fr.cx("fr-hidden")} type="hidden" {...register("style_technical_name")} />
 
                     <StyleFormProvider
                         editMode={editMode}
