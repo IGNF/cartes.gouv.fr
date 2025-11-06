@@ -316,10 +316,10 @@ const datastoreRoutes = {
     datastore_service_style_edit: datastoreRoute.extend(
         {
             offeringId: param.path.string,
-            styleName: param.path.string,
+            styleTechnicalName: param.path.string,
             datasheetName: param.query.string,
         },
-        (p) => `/service/${p.offeringId}/style/${p.styleName}/modification`
+        (p) => `/service/${p.offeringId}/style/${p.styleTechnicalName}/modification`
     ),
 };
 
