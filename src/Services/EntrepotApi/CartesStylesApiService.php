@@ -48,24 +48,55 @@ class CartesStylesApiService
             $this->annexeApiService->remove($datastoreId, $styleAnnexes[0]['_id']);
         }
 
-        // changement de structure des styles : ajout de technical_name
-        // on génère un technical_name à partir de style_name si absent
-        if (is_array($styles)) {
-            $changed = false;
-            foreach ($styles as $index => $style) {
-                if (!isset($style['technical_name']) || empty($style['technical_name'])) {
-                    $suggestedTechName = $this->suggestTechnicalName($style['name'] ?? '');
-                    $styles[$index]['technical_name'] = $suggestedTechName;
-                    $changed = true;
-                }
-            }
-            // mise à jour de la configuration si des technical_name ont été ajoutés
-            if ($changed) {
-                $this->updateStyles($datastoreId, $configuration['_id'], $styles);
-            }
-        }
+        // migration des styles pour ajout de technical_name si absent
+        $styles = $this->migrateStylesTechnicalName($datastoreId, $configuration['_id'], $styles);
 
         return $styles ?? [];
+    }
+
+    /**
+     * Ajout de technical_name aux styles si absent.
+     *
+     * @param array<mixed>|null $styles
+     *
+     * @return array<mixed>|null
+     */
+    private function migrateStylesTechnicalName(string $datastoreId, string $configurationId, ?array $styles): ?array
+    {
+        if (!is_array($styles)) {
+            return $styles;
+        }
+
+        $changed = false;
+        foreach ($styles as &$style) {
+            if (!isset($style['technical_name']) || empty($style['technical_name'])) {
+                $suggestedTechName = $this->suggestTechnicalName($style['name']);
+                $style['technical_name'] = $suggestedTechName;
+                $changed = true;
+
+                foreach ($style['layers'] as &$layer) {
+                    $urlParts = pathinfo($layer['url']);
+                    $originalFilename = $urlParts['basename'];
+                    $newFilename = $urlParts['filename'].'_'.$suggestedTechName.'.'.$urlParts['extension'];
+
+                    $layer['url'] = str_replace($originalFilename, $newFilename, $layer['url']);
+
+                    if (isset($layer['annexe_id'])) {
+                        $annexe = $this->annexeApiService->get($datastoreId, $layer['annexe_id']);
+                        $newAnnexePath = str_replace($originalFilename, $newFilename, $annexe['paths'][0]);
+                        $this->annexeApiService->modify($datastoreId, $layer['annexe_id'], [$newAnnexePath]);
+                    }
+                }
+                unset($layer);
+            }
+        }
+        unset($style);
+
+        if ($changed) {
+            $this->updateStyles($datastoreId, $configurationId, $styles);
+        }
+
+        return $styles;
     }
 
     /**
@@ -141,6 +172,10 @@ class CartesStylesApiService
         $name = strtolower($name);
         $name = preg_replace('/\s+/', '_', $name);
         $name = preg_replace('/[^a-z0-9_-]/', '', $name);
+
+        if (empty($name)) {
+            $name = 'style_'.bin2hex(random_bytes(2));
+        }
 
         return $name;
     }
