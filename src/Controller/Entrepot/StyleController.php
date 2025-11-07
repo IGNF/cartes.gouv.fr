@@ -14,12 +14,9 @@ use App\Services\EntrepotApi\DatastoreApiService;
 use App\Utils;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Uid\Uuid;
 
 #[Route(
     '/api/datastores/{datastoreId}/style',
@@ -30,18 +27,13 @@ use Symfony\Component\Uid\Uuid;
 #[OA\Tag(name: '[cartes.gouv.fr] styles', description: 'Stockage des fichiers de styles en tant qu\'annexes')]
 class StyleController extends AbstractController implements ApiControllerInterface
 {
-    private string $varDataPath;
-
     public function __construct(
         private DatastoreApiService $datastoreApiService,
         private ConfigurationApiService $configurationApiService,
         private AnnexeApiService $annexeApiService,
         private CartesMetadataApiService $cartesMetadataApiService,
         private CartesStylesApiService $cartesStylesApiService,
-        private Filesystem $fs,
-        ParameterBagInterface $parameters,
     ) {
-        $this->varDataPath = $parameters->get('style_files_path');
     }
 
     #[Route('/{offeringId}/add', name: 'add', methods: ['POST'])]
@@ -66,10 +58,10 @@ class StyleController extends AbstractController implements ApiControllerInterfa
 
             $layers = [];
             foreach ($styleFiles as $layerName => $layer) {
-                $annexe = $this->saveStyleInAnnexe($datastoreId, $datasheetName, $styleTechnicalName, $layer['style'], 'mapbox' === $layerName ? 'json' : $layer['format']);
+                $annexe = $this->cartesStylesApiService->saveStyleInAnnexe($datastoreId, $datasheetName, $styleTechnicalName, $layer['style'], 'mapbox' === $layerName ? 'json' : $layer['format']);
                 $layerData = [
                     'annexe_id' => $annexe['_id'],
-                    'url' => $this->getAnnexeUrl($datastore, $annexe),
+                    'url' => $this->cartesStylesApiService->getAnnexeAbsoluteUrl($datastore, $annexe),
                 ];
 
                 if ('mapbox' !== $layerName) {
@@ -133,23 +125,23 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             // Mapbox : donc une seule couche et elle existe forcément
             if ('mapbox' === array_key_first($styleFiles)) {
                 $mapboxLayer = &$existingStyle['layers'][0];
-                $annexe = $this->saveStyleInAnnexe($datastoreId, $datasheetName, $styleTechnicalName, $styleFiles['mapbox']['style'], 'json', $mapboxLayer['annexe_id']);
-                $mapboxLayer['url'] = $this->getAnnexeUrl($datastore, $annexe);
+                $annexe = $this->cartesStylesApiService->saveStyleInAnnexe($datastoreId, $datasheetName, $styleTechnicalName, $styleFiles['mapbox']['style'], 'json', $mapboxLayer['annexe_id']);
+                $mapboxLayer['url'] = $this->cartesStylesApiService->getAnnexeAbsoluteUrl($datastore, $annexe);
             } else {
                 foreach ($styleFiles as $layerName => $layer) {
                     $existingStyleLayerKey = Utils::array_find_key($existingStyle['layers'], fn ($l) => $l['name'] === $layerName);
                     if (null !== $existingStyleLayerKey) {
                         // Si le layer existe, on met à jour son contenu
                         $existingStyleLayer = &$existingStyle['layers'][$existingStyleLayerKey];
-                        $annexe = $this->saveStyleInAnnexe($datastoreId, $datasheetName, $styleTechnicalName, $layer['style'], $layer['format'], $existingStyleLayer['annexe_id']);
-                        $existingStyleLayer['url'] = $this->getAnnexeUrl($datastore, $annexe);
+                        $annexe = $this->cartesStylesApiService->saveStyleInAnnexe($datastoreId, $datasheetName, $styleTechnicalName, $layer['style'], $layer['format'], $existingStyleLayer['annexe_id']);
+                        $existingStyleLayer['url'] = $this->cartesStylesApiService->getAnnexeAbsoluteUrl($datastore, $annexe);
                     } else {
                         // Si le layer n'existe pas, on l'ajoute
-                        $annexe = $this->saveStyleInAnnexe($datastoreId, $datasheetName, $styleTechnicalName, $layer['style'], $layer['format']);
+                        $annexe = $this->cartesStylesApiService->saveStyleInAnnexe($datastoreId, $datasheetName, $styleTechnicalName, $layer['style'], $layer['format']);
 
                         $layerData = [
                             'annexe_id' => $annexe['_id'],
-                            'url' => $this->getAnnexeUrl($datastore, $annexe),
+                            'url' => $this->cartesStylesApiService->getAnnexeAbsoluteUrl($datastore, $annexe),
                             'name' => $layerName,
                         ];
 
@@ -268,44 +260,6 @@ class StyleController extends AbstractController implements ApiControllerInterfa
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }
-    }
-
-    /**
-     * @param array<mixed> $datastore
-     * @param array<mixed> $annexe
-     */
-    private function getAnnexeUrl(array $datastore, array $annexe): string
-    {
-        return $this->getParameter('annexes_url').'/'.$datastore['technical_name'].$annexe['paths'][0];
-    }
-
-    /**
-     * Ajout d'un fichier de style sous forme d'annexe.
-     */
-    private function saveStyleInAnnexe(string $datastoreId, string $datasheetName, string $styleTechnicalName, string $content, string $extension, ?string $existingAnnexeId = null): array
-    {
-        $uuid = Uuid::v4();
-
-        $filename = sprintf('%s_%s.%s', $uuid, $styleTechnicalName, $extension);
-        $filePath = join('/', [$this->varDataPath, $uuid, $filename]);
-        $this->fs->mkdir(dirname($filePath));
-        $this->fs->dumpFile($filePath, $content);
-
-        $annexePath = join('/', ['style', $filename]);
-
-        $labels = [
-            CommonTags::DATASHEET_NAME.'='.$datasheetName,
-            'type=style',
-        ];
-
-        if (null !== $existingAnnexeId) {
-            $this->annexeApiService->replaceFile($datastoreId, $existingAnnexeId, $filePath);
-
-            return $this->annexeApiService->modify($datastoreId, $existingAnnexeId, [$annexePath]);
-        }
-
-        // on crée une nouvelle annexe parce qu'il n'y avait pas d'annexe existante
-        return $this->annexeApiService->add($datastoreId, $filePath, [$annexePath], $labels);
     }
 
     /**

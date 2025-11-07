@@ -2,15 +2,24 @@
 
 namespace App\Services\EntrepotApi;
 
+use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\ConfigurationMetadataTypes;
 use App\Constants\EntrepotApi\ConfigurationTypes;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Uid\Uuid;
 
 class CartesStylesApiService
 {
+    private string $varDataPath;
+
     public function __construct(
         private ConfigurationApiService $configurationApiService,
         private AnnexeApiService $annexeApiService,
+        private Filesystem $fs,
+        private ParameterBagInterface $parameters,
     ) {
+        $this->varDataPath = $this->parameters->get('style_files_path');
     }
 
     /**
@@ -77,14 +86,23 @@ class CartesStylesApiService
                 foreach ($style['layers'] as &$layer) {
                     $urlParts = pathinfo($layer['url']);
                     $originalFilename = $urlParts['basename'];
-                    $newFilename = $urlParts['filename'].'_'.$suggestedTechName.'.'.$urlParts['extension'];
 
-                    $layer['url'] = str_replace($originalFilename, $newFilename, $layer['url']);
+                    // extraire l'UUID du nom de fichier
+                    preg_match('/^([0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12})/', $urlParts['filename'], $matches);
+                    $uuid = $matches[0] ?? null;
 
-                    if (isset($layer['annexe_id'])) {
-                        $annexe = $this->annexeApiService->get($datastoreId, $layer['annexe_id']);
-                        $newAnnexePath = str_replace($originalFilename, $newFilename, $annexe['paths'][0]);
-                        $this->annexeApiService->modify($datastoreId, $layer['annexe_id'], [$newAnnexePath]);
+                    if ($uuid) {
+                        $newFilename = $this->getAnnexeFilename($uuid, $suggestedTechName, $urlParts['extension']);
+
+                        if ($originalFilename !== $newFilename) {
+                            $layer['url'] = str_replace($originalFilename, $newFilename, $layer['url']);
+
+                            if (isset($layer['annexe_id'])) {
+                                $annexe = $this->annexeApiService->get($datastoreId, $layer['annexe_id']);
+                                $newAnnexePath = str_replace($originalFilename, $newFilename, $annexe['paths'][0]);
+                                $this->annexeApiService->modify($datastoreId, $layer['annexe_id'], [$newAnnexePath]);
+                            }
+                        }
                     }
                 }
                 unset($layer);
@@ -163,6 +181,57 @@ class CartesStylesApiService
 
         $this->configurationApiService->replace($datastoreId, $configuration['_id'], $requestBody);
         $this->configurationApiService->syncOffering($datastoreId, $offeringId);
+    }
+
+    /**
+     * @param array<mixed> $datastore
+     * @param array<mixed> $annexe
+     */
+    public function getAnnexeAbsoluteUrl(array $datastore, array $annexe): string
+    {
+        return $this->parameters->get('annexes_url').'/'.$datastore['technical_name'].$annexe['paths'][0];
+    }
+
+    /**
+     * Ajout d'un fichier de style sous forme d'annexe.
+     */
+    public function saveStyleInAnnexe(string $datastoreId, string $datasheetName, string $styleTechnicalName, string $content, string $extension, ?string $existingAnnexeId = null): array
+    {
+        $uuid = Uuid::v4();
+
+        $filename = $this->getAnnexeFilename($uuid, $styleTechnicalName, $extension);
+        $filePath = join('/', [$this->varDataPath, $uuid, $filename]);
+        $this->fs->mkdir(dirname($filePath));
+        $this->fs->dumpFile($filePath, $content);
+
+        $annexePath = $this->getAnnexePath($uuid, $styleTechnicalName, $extension);
+
+        $labels = [
+            CommonTags::DATASHEET_NAME.'='.$datasheetName,
+            'type=style',
+        ];
+
+        if (null !== $existingAnnexeId) {
+            $this->annexeApiService->replaceFile($datastoreId, $existingAnnexeId, $filePath);
+
+            return $this->annexeApiService->modify($datastoreId, $existingAnnexeId, [$annexePath]);
+        }
+
+        // on crée une nouvelle annexe parce qu'il n'y avait pas d'annexe existante
+        return $this->annexeApiService->add($datastoreId, $filePath, [$annexePath], $labels);
+    }
+
+    private function getAnnexePath(string $uuid, string $styleTechnicalName, string $extension): string
+    {
+        $filename = $this->getAnnexeFilename($uuid, $styleTechnicalName, $extension);
+        $annexePath = join('/', ['style', $filename]);
+
+        return $annexePath;
+    }
+
+    private function getAnnexeFilename(string $uuid, string $styleTechnicalName, string $extension): string
+    {
+        return sprintf('%s_%s.%s', $uuid, $styleTechnicalName, $extension);
     }
 
     private function suggestTechnicalName(string $name): string
