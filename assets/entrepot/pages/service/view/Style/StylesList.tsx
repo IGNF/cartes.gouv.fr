@@ -41,7 +41,7 @@ function StylesList(props: StylesListProps) {
     const { isPending: isRemovePending, mutate: mutateRemove } = useMutation<CartesStyle[], CartesApiException, string>({
         mutationFn: (name: string) => {
             if (service) {
-                return api.style.remove(datastoreId, service._id, { style_name: name });
+                return api.style.remove(datastoreId, service._id, { style_technical_name: name });
             }
             return Promise.resolve([]);
         },
@@ -67,7 +67,7 @@ function StylesList(props: StylesListProps) {
     const { isPending: isPendingChangeCurrentStyle, mutate: mutateChangeCurrentStyle } = useMutation<CartesStyle[], CartesApiException, string>({
         mutationFn: (name: string) => {
             if (service) {
-                return api.style.setCurrent(datastoreId, service._id, { style_name: name });
+                return api.style.setCurrent(datastoreId, service._id, { style_technical_name: name });
             }
             return Promise.resolve([]);
         },
@@ -153,7 +153,7 @@ function StylesList(props: StylesListProps) {
                                     checked={style?.current === true}
                                     value={style.name}
                                     onChange={() => {
-                                        mutateChangeCurrentStyle(style.name);
+                                        mutateChangeCurrentStyle(style.technical_name);
                                         setStyleToRemove(undefined);
                                     }}
                                 />
@@ -179,7 +179,7 @@ function StylesList(props: StylesListProps) {
                                         priority={"tertiary no outline"}
                                         iconId={"fr-icon-delete-line"}
                                         onClick={() => {
-                                            setStyleToRemove(style.name);
+                                            setStyleToRemove(style.technical_name);
                                             ConfirmDialogModal.open();
                                         }}
                                     />
