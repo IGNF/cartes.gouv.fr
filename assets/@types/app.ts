@@ -179,6 +179,7 @@ export type StyleLayer = {
 
 export type CartesStyle = {
     name: string;
+    technical_name: string;
     current?: boolean;
     layers: StyleLayer[];
 };
