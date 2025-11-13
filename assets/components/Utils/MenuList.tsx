@@ -77,8 +77,10 @@ const MenuList: FC<MenuListProps> = ({ menuOpenButtonProps, items = [], disabled
             <MuiDsfrThemeProvider>
                 <Menu
                     id={otherActionsMenuId}
-                    MenuListProps={{
-                        "aria-labelledby": otherActionsBtnId,
+                    slotProps={{
+                        list: {
+                            "aria-labelledby": otherActionsBtnId,
+                        },
                     }}
                     anchorEl={anchorEl}
                     open={isMenuOpen}
