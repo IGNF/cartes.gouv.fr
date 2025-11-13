@@ -1,4 +1,5 @@
 import Badge from "@codegouvfr/react-dsfr/Badge";
+import { fr } from "@codegouvfr/react-dsfr";
 import Header, { HeaderProps } from "@codegouvfr/react-dsfr/Header";
 import { MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation/MainNavigation";
 import { FC, memo } from "react";
@@ -7,6 +8,7 @@ import { catalogueUrl } from "@/env";
 // import { useLang } from "../../i18n/i18n";
 import SymfonyRouting from "../../modules/Routing";
 import { groups, routes, useRoute } from "../../router/router";
+import HeaderMenu from "./HeaderMenu";
 import { useAuthStore } from "../../stores/AuthStore";
 // import LanguageSelector from "../Utils/LanguageSelector";
 
@@ -84,6 +86,79 @@ const AppHeader: FC<AppHeaderProps> = ({ navItems = [] }) => {
             },
             text: "Se déconnecter",
         });
+        quickAccessItems.push(
+            <HeaderMenu
+                openButtonProps={{
+                    children: "Services",
+                    iconId: "fr-icon-grid-fill",
+                }}
+                actionButtonProps={{
+                    children: "Découvrir cartes.gouv",
+                    linkProps: {
+                        target: "_blank",
+                        rel: "noreferrer",
+                        href: "https://www.cartes.gouv.fr",
+                    },
+                }}
+                items={[
+                    {
+                        children: (
+                            <div
+                                style={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                }}
+                            >
+                                <strong>Nom utilisateur</strong>
+                                <span
+                                    className={fr.cx("fr-text--xs", "fr-m-0")}
+                                    style={{
+                                        color: fr.colors.decisions.text.mention.grey.default,
+                                    }}
+                                >
+                                    adresseutilisateur@email.com
+                                </span>
+                            </div>
+                        ),
+                    },
+                    {
+                        iconId: "fr-icon-road-map-line",
+                        children: "Explorer les cartes",
+                        linkProps: {
+                            href: "#",
+                        },
+                    },
+                    {
+                        iconId: "fr-icon-search-line",
+                        children: "Rechercher une donnée",
+                        linkProps: {
+                            href: "#",
+                        },
+                    },
+                    {
+                        iconId: "fr-icon-database-line",
+                        children: "Publier une donnée",
+                        linkProps: {
+                            href: "#",
+                        },
+                    },
+                    {
+                        iconId: "fr-icon-brush-line",
+                        children: (
+                            <>
+                                Créer une carte{" "}
+                                <Badge severity="success" className={"fr-ml-auto"}>
+                                    Bêta
+                                </Badge>
+                            </>
+                        ),
+                        linkProps: {
+                            href: "#",
+                        },
+                    },
+                ]}
+            />
+        );
     }
 
     // quickAccessItems.push(<LanguageSelector lang={lang} setLang={setLang} />);
