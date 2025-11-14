@@ -65,10 +65,11 @@ export default function HeaderMenu({ openButtonProps: openButtonProps, actionBut
                 id={openBtnId}
                 onClick={handleBtnOpenClick}
                 type="button"
+                size="small"
                 disabled={disabled}
             >
                 {openButtonProps.children}
-                <span className={fr.cx(isMenuOpen ? "ri-arrow-up-s-line" : "ri-arrow-down-s-line", "fr-ml-2v")} aria-hidden="true" />
+                <span className={fr.cx("fr-icon--sm", "ri-arrow-down-s-line", "fr-ml-2v")} aria-hidden="true" />
             </Button>
             <MuiDsfrThemeProvider>
                 <Menu
@@ -175,9 +176,15 @@ const useStyles = tss.withName({ HeaderMenu }).create({
         '&[aria-expanded="true"]': {
             backgroundColor: fr.colors.decisions.background.open.blueFrance.default,
         },
+        "& span": {
+            transition: "transform 0.2s",
+        },
+        '&[aria-expanded="true"] span': {
+            transform: "rotate(180deg)",
+        },
     },
     actionButton: {
-        width: "100%",
+        width: "auto",
         display: "flex",
         justifyContent: "center",
     },
