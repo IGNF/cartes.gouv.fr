@@ -8,7 +8,7 @@ import { catalogueUrl } from "@/env";
 // import { useLang } from "../../i18n/i18n";
 import SymfonyRouting from "../../modules/Routing";
 import { groups, routes, useRoute } from "../../router/router";
-import HeaderMenu from "./HeaderMenu";
+import HeaderMenu from "./Header/HeaderMenu";
 import { useAuthStore } from "../../stores/AuthStore";
 // import LanguageSelector from "../Utils/LanguageSelector";
 
