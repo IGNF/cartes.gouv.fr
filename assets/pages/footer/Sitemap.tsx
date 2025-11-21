@@ -1,8 +1,8 @@
 import { fr } from "@codegouvfr/react-dsfr";
 
-import { catalogueUrl } from "@/env";
-import { appRoot, routes } from "../../router/router";
+import { externalUrls } from "@/router/externalUrls";
 import Main from "../../components/Layout/Main";
+import { routes } from "../../router/router";
 
 const SiteMap = () => {
     return (
@@ -20,7 +20,7 @@ const SiteMap = () => {
                                 <span>Commencer avec cartes.gouv</span>
                                 <ul>
                                     <li>
-                                        <a href={appRoot + "/documentation/"}>Documentation</a>
+                                        <a href={externalUrls.documentation}>Documentation</a>
                                     </li>
                                     <li>
                                         <a {...routes.offer().link}>Offre cartes.gouv.fr/Géoplateforme</a>
@@ -31,10 +31,10 @@ const SiteMap = () => {
                                 </ul>
                             </li>
                             <li>
-                                <a href={catalogueUrl ?? appRoot + "/catalogue"}>Catalogue</a>
+                                <a href={externalUrls.catalogue}>Catalogue</a>
                             </li>
                             <li>
-                                <a href={appRoot + "/cartes"}>Cartes</a>
+                                <a href={externalUrls.maps}>Cartes</a>
                             </li>
                             <li>
                                 <a {...routes.news_list().link}>Actualités</a>

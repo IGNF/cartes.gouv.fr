@@ -11,14 +11,14 @@ import mapSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/map/map.sv
 import systemSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/system/system.svg?no-inline";
 import { useEffect } from "react";
 
-import { catalogueUrl } from "@/env";
-import SymfonyRouting from "@/modules/Routing";
-import { appRoot, routes, useRoute } from "@/router/router";
-import { useAuthStore } from "@/stores/AuthStore";
-import homeImgUrl from "@/img/home/home.png";
 import Main from "@/components/Layout/Main";
-import { useAlertStore } from "@/stores/AlertStore";
 import { useAlert } from "@/hooks/useAlert";
+import homeImgUrl from "@/img/home/home.png";
+import SymfonyRouting from "@/modules/Routing";
+import { externalUrls } from "@/router/externalUrls";
+import { routes, useRoute } from "@/router/router";
+import { useAlertStore } from "@/stores/AlertStore";
+import { useAuthStore } from "@/stores/AuthStore";
 
 import "@/sass/pages/home.scss";
 
@@ -90,7 +90,7 @@ const Home = () => {
                                     {
                                         iconId: "fr-icon-file-download-line",
                                         linkProps: {
-                                            href: catalogueUrl ?? appRoot + "/catalogue",
+                                            href: externalUrls.catalogue,
                                         },
                                         children: "J’accède au catalogue",
                                         priority: "secondary",
@@ -183,7 +183,7 @@ const Home = () => {
                                 </Badge>
                             }
                             linkProps={{
-                                href: catalogueUrl,
+                                href: externalUrls.catalogue,
                             }}
                             enlargeLinkOrButton={true}
                             imageUrl={mapSvgUrl}

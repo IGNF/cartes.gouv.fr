@@ -2,6 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
+import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import Select from "@codegouvfr/react-dsfr/Select";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
@@ -9,9 +10,8 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
-import { appRoot } from "./../../../router/router";
-
 import { arrUserCategories } from "@/@types/app";
+import { externalUrls } from "@/router/externalUrls";
 import Main from "../../../components/Layout/Main";
 import LoadingIcon from "../../../components/Utils/LoadingIcon";
 import Wait from "../../../components/Utils/Wait";
@@ -25,7 +25,6 @@ import { useAlertStore } from "../../../stores/AlertStore";
 import { useAuthStore } from "../../../stores/AuthStore";
 import { regex } from "../../../utils";
 
-import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import "../../../sass/pages/nous_ecrire.scss";
 
 const charRange = [10, 8000];
@@ -126,7 +125,7 @@ const Contact = () => {
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
                     <h1>{t("title")}</h1>
-                    <p>{t("form.explanation", { docsLinkProps: { href: appRoot + "/documentation/" } })}</p>
+                    <p>{t("form.explanation", { docsLinkProps: { href: externalUrls.documentation } })}</p>
 
                     <p>{t("mandatory_fields")}</p>
 

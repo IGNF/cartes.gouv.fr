@@ -6,7 +6,8 @@ import { FC, useState } from "react";
 import { PermissionWithOfferingsDetailsResponseDto } from "../../../../@types/entrepot";
 import { useTranslation } from "../../../../i18n/i18n";
 import { formatDateWithoutTimeFromISO } from "../../../../utils";
-import { appRoot } from "../../../../router/router";
+import { routes } from "../../../../router/router";
+import { externalUrls } from "@/router/externalUrls";
 
 import "../../../../sass/pages/my_keys.scss";
 import ovoidSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/background/ovoid.svg?no-inline";
@@ -105,7 +106,7 @@ const PermissionsListTab: FC<PermissionsListTabProps> = ({ permissions }) => {
                 <div>
                     <a
                         className={fr.cx("fr-link")}
-                        href={appRoot + "/documentation/"}
+                        href={externalUrls.documentation}
                         target="_blank"
                         rel="noreferrer"
                         title={t("consult_documentation") + " - " + tCommon("new_window")}
@@ -115,9 +116,8 @@ const PermissionsListTab: FC<PermissionsListTabProps> = ({ permissions }) => {
                 </div>
                 <div className={fr.cx("fr-mt-2v")}>
                     <a
+                        {...routes.dashboard_pro().link}
                         className={fr.cx("fr-link", "fr-icon-arrow-right-line", "fr-link--icon-right")}
-                        href={appRoot + "/tableau-de-bord/"}
-                        rel="noreferrer"
                         title={t("discover_workspaces") + " - " + tCommon("new_window")}
                     >
                         {t("discover_workspaces")}

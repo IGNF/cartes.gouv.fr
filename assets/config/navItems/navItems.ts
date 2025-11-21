@@ -1,9 +1,9 @@
 import { MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation";
 import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
 
-import { catalogueUrl } from "@/env";
+import { externalUrls } from "@/router/externalUrls";
 import { ComponentKey } from "../../i18n/types";
-import { appRoot, routes } from "../../router/router";
+import { routes } from "../../router/router";
 import { assistanceNavItems } from "./assistanceNavItems";
 
 // dans ce cas précise, getTranslation ne marche pas parce que les traductions sont pas encore chargées, on est donc obglié de passer la fonction t en paramètre
@@ -12,7 +12,7 @@ export const defaultNavItems = (t: TranslationFunction<"navItems", ComponentKey>
         {
             menuLinks: [
                 {
-                    linkProps: { href: appRoot + "/documentation/" },
+                    linkProps: { href: externalUrls.documentation },
                     text: t("documentation"),
                 },
                 {
@@ -28,11 +28,11 @@ export const defaultNavItems = (t: TranslationFunction<"navItems", ComponentKey>
         },
         {
             text: t("catalog"),
-            linkProps: { href: catalogueUrl ?? appRoot + "/catalogue" },
+            linkProps: { href: externalUrls.catalogue },
         },
         {
             text: t("maps"),
-            linkProps: { href: appRoot + "/cartes" },
+            linkProps: { href: externalUrls.maps },
         },
         {
             text: t("news"),

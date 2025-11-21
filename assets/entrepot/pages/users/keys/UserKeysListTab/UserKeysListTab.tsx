@@ -12,7 +12,7 @@ import Wait from "../../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../../modules/jsonFetch";
-import { appRoot, routes } from "../../../../../router/router";
+import { routes } from "../../../../../router/router";
 import api from "../../../../api";
 import UserKeyLink from "./UserKeyLink";
 import Tooltip from "@codegouvfr/react-dsfr/Tooltip";
@@ -24,6 +24,7 @@ import ovoidSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/background/ovoid.sv
 import padlock from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/system/padlock.svg?no-inline";
 import Select from "@codegouvfr/react-dsfr/Select";
 import { useAuthStore } from "@/stores/AuthStore";
+import { externalUrls } from "@/router/externalUrls";
 
 type UserKeysListTabProps = {
     keys: UserKeyDetailedWithAccessesResponseDto[] | undefined;
@@ -133,7 +134,7 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
                         {t("explain_no_keys")}
                         <a
                             className={fr.cx("fr-link")}
-                            href={appRoot + "/documentation/"}
+                            href={externalUrls.documentation}
                             target="_blank"
                             rel="noreferrer"
                             title={t("consult_documentation") + " - " + tCommon("new_window")}
