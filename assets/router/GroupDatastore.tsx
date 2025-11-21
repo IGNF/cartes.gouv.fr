@@ -201,7 +201,7 @@ function GroupDatastore(props: IGroupDatastoreProps) {
                             datastoreId={route.params.datastoreId}
                             offeringId={route.params.offeringId}
                             datasheetName={route.params.datasheetName}
-                            styleName={route.params.styleName}
+                            styleTechnicalName={route.params.styleTechnicalName}
                         />
                     ),
                 };
