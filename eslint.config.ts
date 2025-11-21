@@ -8,6 +8,7 @@ import { defineConfig, globalIgnores } from "eslint/config";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 import jsxA11y from "eslint-plugin-jsx-a11y";
+import tssUnusedClasses from "eslint-plugin-tss-unused-classes";
 
 export default defineConfig([
     globalIgnores([
@@ -23,7 +24,7 @@ export default defineConfig([
         files: ["**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
         ...jsxA11y.flatConfigs.recommended,
         settings: { react: { version: "detect" } },
-        plugins: { js, pluginReact, reactHooks, tseslint },
+        plugins: { js, pluginReact, reactHooks, tseslint, "tss-unused-classes": tssUnusedClasses },
         extends: ["js/recommended"],
         languageOptions: {
             ...jsxA11y.flatConfigs.recommended.languageOptions,
@@ -38,6 +39,7 @@ export default defineConfig([
             "array-callback-return": "error",
             // Placeholders autorisés via underscore
             "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_" }],
+            "tss-unused-classes/unused-classes": "warn",
         },
     },
     // Surcharge de règles spécifique aux fichiers de traduction i18n (fichiers *.locale.ts/tsx)
