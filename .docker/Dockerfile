@@ -4,7 +4,10 @@
 #----------------------------------------------------------------------
 ARG project_dir=/opt/cartesgouvfr-site
 ARG registry=docker.io
-FROM ${registry}/library/composer:latest AS deps_php
+ARG php_version=8.2
+FROM ${registry}/library/php:${php_version}-cli AS deps_php
+COPY --from=composer/composer:2-bin /composer /usr/bin/composer
+RUN apt-get -qq update && apt-get -qq install -y git unzip
 
 ARG project_dir
 RUN mkdir -p ${project_dir}
@@ -188,7 +191,7 @@ VOLUME ${project_dir}
 RUN chmod -R 777 /var/run/apache2 /var/log/apache2
 
 # Installer xdebug
-ARG php_version=8.2
+ARG php_version
 RUN apt-get -qq update && apt-get -qq install -y \
     php${php_version}-dev \
     php-pear \
