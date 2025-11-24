@@ -8,6 +8,8 @@ import { HeaderMenuHelp, HeaderMenuServices, HeaderMenuUser } from "./Header/Hea
 
 import "../../sass/components/header.scss";
 
+import placeholder16x9 from "@/img/placeholder.16x9.png";
+
 type AppHeaderProps = {
     navItems?: MainNavigationProps.Item[];
 };
@@ -25,15 +27,24 @@ const AppHeader: FC<AppHeaderProps> = ({ navItems = [] }) => {
                 ...routes.home().link,
                 title: "Accueil - cartes.gouv.fr",
             }}
+            operatorLogo={{
+                imgUrl: placeholder16x9,
+                orientation: "horizontal",
+                linkProps: {
+                    ...routes.home().link,
+                    title: "Accueil - cartes.gouv.fr",
+                },
+                alt: "",
+            }}
             serviceTitle={
                 <>
-                    cartes.gouv.fr{" "}
+                    Cartes.gouv.fr{" "}
                     <Badge severity="success" noIcon={true} as="span">
                         Bêta
                     </Badge>
                 </>
             }
-            serviceTagline="Le service public des cartes et données du territoire"
+            serviceTagline="Le service public des cartes et des données du territoire"
             quickAccessItems={[
                 <HeaderMenuHelp key="header-menu-help" />,
                 <HeaderMenuServices key="header-menu-services" />,
