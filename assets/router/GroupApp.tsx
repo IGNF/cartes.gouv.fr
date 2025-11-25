@@ -47,7 +47,7 @@ function GroupApp(props: IGroupAppProps) {
     const content: { render: JSX.Element; layoutProps?: AppLayoutProps } | undefined = useMemo(() => {
         const baseDatastoreNavItems = datastoreNavItems();
         switch (route.name) {
-            case "home":
+            case "discover":
                 return {
                     render: <Home />,
                 };

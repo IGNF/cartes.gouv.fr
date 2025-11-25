@@ -9,7 +9,7 @@ const { t } = getTranslation("Breadcrumb");
 
 const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): BreadcrumbProps | undefined => {
     const defaultProps: BreadcrumbProps = {
-        homeLinkProps: routes.home().link,
+        homeLinkProps: routes.discover().link,
         segments: [],
         currentPageLabel: null,
     };
@@ -246,7 +246,7 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): Brea
             ];
             return { ...defaultProps, currentPageLabel: t(route.name) };
 
-        case "home":
+        case "discover":
         default:
             return undefined;
     }
