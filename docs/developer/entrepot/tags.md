@@ -31,9 +31,11 @@ Certaines entités portent une propriété `tags`, qui est un dictionnaire clé/
 > [!IMPORTANT]
 > Ces tags sont présents sur tous les stored_data
 
-| tag              | description                             |        |
-| ---------------- | --------------------------------------- | ------ |
-| `datasheet_name` | pareil que `datasheet_name` de `upload` | string |
+| tag               | description                             |         |
+| ----------------- | --------------------------------------- | ------- |
+| `datasheet_name`  | pareil que `datasheet_name` de `upload` | string  |
+| `producer`        | tag pour l'index de recherche           | string  |
+| `production_year` | tag pour l'index de recherche           | integer |
 
 ### tags spécifiques aux stored_data du type `VECTOR-DB`
 
@@ -69,3 +71,4 @@ Certaines entités portent une propriété `tags`, qui est un dictionnaire clé/
 | tag              | description                             |        |
 | ---------------- | --------------------------------------- | ------ |
 | `datasheet_name` | pareil que `datasheet_name` de `upload` | string |
+| `theme`          | tag pour l'index de recherche           | string |
