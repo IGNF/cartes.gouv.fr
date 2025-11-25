@@ -39,7 +39,7 @@ const AppHeader: FC<AppHeaderProps> = ({ navItems = [] }) => {
             serviceTitle={
                 <>
                     Cartes.gouv.fr{" "}
-                    <Badge severity="success" noIcon={true} as="span">
+                    <Badge severity="success" noIcon={true} as="span" small={true}>
                         Bêta
                     </Badge>
                 </>
