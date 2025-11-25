@@ -14,7 +14,7 @@ const DatastoreCreationRequestConfirmation = () => {
             <h1>{t("request_confirmation.title")}</h1>
             <Alert
                 title={t("request_confirmation.success.title")}
-                description={t("request_confirmation.success.description", { homeLink: routes.home().link })}
+                description={t("request_confirmation.success.description", { homeLink: routes.discover().link })}
                 severity="success"
             />
             <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-mt-1w")}>

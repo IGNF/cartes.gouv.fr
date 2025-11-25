@@ -14,11 +14,11 @@ const ContactConfirmation = () => {
             <h1>{t("contact_confirmation.title")}</h1>
             <Alert
                 title={t("contact_confirmation.success.title")}
-                description={t("contact_confirmation.success.description", { homeLink: routes.home().link })}
+                description={t("contact_confirmation.success.description", { homeLink: routes.discover().link })}
                 severity="success"
             />
             <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-mt-1w")}>
-                <Button linkProps={routes.home().link}>{t("contact_confirmation.continue")}</Button>
+                <Button linkProps={routes.discover().link}>{t("contact_confirmation.continue")}</Button>
             </div>
         </Main>
     );

@@ -9,7 +9,7 @@ export const externalUrls = {
     catalogue: catalogueUrl ?? appRoot + "/catalogue",
     maps: appRoot + "/cartes",
     contact_us: routes.contact().link.href,
-    discover_cartesgouvfr: routes.home().link.href,
+    discover_cartesgouvfr: routes.discover().link.href,
 } as const;
 
 export function externalLink(route: keyof typeof externalUrls, title?: string): RegisteredLinkProps {

@@ -14,7 +14,7 @@ const SiteMap = () => {
                     <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
                         <ul>
                             <li>
-                                <a href={routes.home().href}>Accueil</a>
+                                <a {...routes.discover().link}>Accueil</a>
                             </li>
                             <li>
                                 <span>Commencer avec cartes.gouv</span>

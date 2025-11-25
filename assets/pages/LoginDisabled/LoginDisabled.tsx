@@ -14,7 +14,7 @@ const LoginDisabled = () => {
 
             <Alert severity="warning" description={t("description")} closable={false} small />
 
-            <Button linkProps={routes.home().link} className={fr.cx("fr-mt-2v")}>
+            <Button linkProps={routes.discover().link} className={fr.cx("fr-mt-2v")}>
                 {t("back_to_home")}
             </Button>
         </Main>

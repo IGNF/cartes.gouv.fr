@@ -3,12 +3,12 @@ import Header from "@codegouvfr/react-dsfr/Header";
 import { MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation/MainNavigation";
 import { FC, memo } from "react";
 
-import { routes } from "../../router/router";
 import { HeaderMenuHelp, HeaderMenuServices, HeaderMenuUser } from "./Header/HeaderMenus";
 
 import "../../sass/components/header.scss";
 
 import placeholder16x9 from "@/img/placeholder.16x9.png";
+import { externalUrls } from "@/router/externalUrls";
 
 type AppHeaderProps = {
     navItems?: MainNavigationProps.Item[];
@@ -24,14 +24,14 @@ const AppHeader: FC<AppHeaderProps> = ({ navItems = [] }) => {
                 </>
             }
             homeLinkProps={{
-                ...routes.home().link,
+                href: externalUrls.maps,
                 title: "Accueil - cartes.gouv.fr",
             }}
             operatorLogo={{
                 imgUrl: placeholder16x9,
                 orientation: "horizontal",
                 linkProps: {
-                    ...routes.home().link,
+                    href: externalUrls.maps,
                     title: "Accueil - cartes.gouv.fr",
                 },
                 alt: "",

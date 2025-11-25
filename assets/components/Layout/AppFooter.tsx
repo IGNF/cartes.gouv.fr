@@ -33,7 +33,7 @@ const AppFooter = () => {
                 headerFooterDisplayItem,
             ]}
             homeLinkProps={{
-                ...routes.home().link,
+                ...routes.discover().link,
                 title: "Accueil - cartes.gouv.fr",
             }}
             termsLinkProps={{

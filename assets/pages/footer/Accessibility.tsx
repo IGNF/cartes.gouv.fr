@@ -95,7 +95,7 @@ const Accessibility = () => {
 
                     <ol>
                         <li>
-                            <a {...routes.home().link}>Accueil</a>
+                            <a {...routes.discover().link}>Accueil</a>
                         </li>
                         <li>
                             <a {...routes.legal_notice().link}>Mentions légales</a>
