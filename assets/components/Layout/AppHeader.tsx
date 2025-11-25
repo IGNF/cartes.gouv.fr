@@ -30,10 +30,6 @@ const AppHeader: FC<AppHeaderProps> = ({ navItems = [] }) => {
             operatorLogo={{
                 imgUrl: placeholder16x9,
                 orientation: "horizontal",
-                linkProps: {
-                    href: externalUrls.maps,
-                    title: "Accueil - cartes.gouv.fr",
-                },
                 alt: "",
             }}
             serviceTitle={
