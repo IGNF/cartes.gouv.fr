@@ -8,7 +8,7 @@ export type I18n = typeof i18n;
 export const ReportsFrTranslations: Translations<"fr">["Reports"] = {
     loading_tables: "Recherche des tables pour la configuration des thèmes ...",
     loading_shared_themes: "Recherche des thèmes partagés ...",
-    loading_email_planners: "Recherche des emails de suivi ...",
+    loading_email_planners: "Recherche des courriels de suivi ...",
 };
 
 export const ReportsEnTranslations: Translations<"en">["Reports"] = {
