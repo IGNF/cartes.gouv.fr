@@ -73,7 +73,7 @@
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "react-dsfr-tiptap": "^2.0.0",
-        "react-error-boundary": "^5.0.0",
+        "react-error-boundary": "^6.0.0",
         "react-hook-form": "^7.45.1",
         "sass-embedded": "^1.83.4",
         "simple-zustand-devtools": "^1.1.0",
