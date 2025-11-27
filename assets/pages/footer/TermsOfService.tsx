@@ -644,15 +644,15 @@ const TermsOfService = () => {
 
                     <p>
                         L’offre Découverte permet au Fournisseur de données d’éprouver le fonctionnement du système. Cette offre est gratuite et accessible
-                        depuis <a {...routes.dashboard_pro().link}>Tableau de bord | cartes.gouv.fr</a> (authentification nécessaire). Elle donne accès à un
-                        espace de type bac à sable, non personnel, partagé avec l’ensemble des Fournisseurs de données de la Géoplateforme et sur lequel les
-                        données ne sont pas pérennes (suppression trimestrielle des données). Il ne s’agit donc pas d’un espace pour accueillir des données de
-                        production et l’IGN ne peut être tenu pour responsable des effets provoqués par ladite suppression trimestrielle des données.
+                        depuis <a {...routes.dashboard().link}>Tableau de bord | cartes.gouv.fr</a> (authentification nécessaire). Elle donne accès à un espace
+                        de type bac à sable, non personnel, partagé avec l’ensemble des Fournisseurs de données de la Géoplateforme et sur lequel les données ne
+                        sont pas pérennes (suppression trimestrielle des données). Il ne s’agit donc pas d’un espace pour accueillir des données de production
+                        et l’IGN ne peut être tenu pour responsable des effets provoqués par ladite suppression trimestrielle des données.
                     </p>
 
                     <p>
                         L’offre Essentiel permet au Fournisseur de données un usage standard en production. Cette offre est gratuite et accessible via un
-                        formulaire disponible sur <a {...routes.dashboard_pro().link}>Tableau de bord | cartes.gouv.fr</a> (authentification nécessaire). Cette
+                        formulaire disponible sur <a {...routes.dashboard().link}>Tableau de bord | cartes.gouv.fr</a> (authentification nécessaire). Cette
                         offre est limitée à une instance par organisme, attribuée au premier Fournisseur de données qui en fait la demande en se réclamant de
                         cet organisme et qui se voit attribué l’espace de données offre Essentiel pour l’organisme. Les éventuels autres Fournisseurs de données
                         du même organisme effectuant la même demande sont rattachés à l’unique espace déjà créé pour l’organisme. L’IGN se réserve un droit de

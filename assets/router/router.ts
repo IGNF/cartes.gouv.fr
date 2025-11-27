@@ -70,11 +70,19 @@ const privateRoutes = {
     ),
     my_documents: defineRoute(`${appRoot}/mes-documents`), // TODO : page uniquement créée pour tester les routes /users/me/documents
 
-    dashboard_pro: defineRoute(`${appRoot}/tableau-de-bord`),
+    dashboard: defineRoute(`${appRoot}/tableau-de-bord`),
+    datastore_selection: defineRoute(
+        {
+            page: param.query.optional.number.default(1),
+            limit: param.query.optional.number.default(20),
+            search: param.query.optional.string.default(""),
+        },
+        () => `${appRoot}/tableau-de-bord/entrepots`
+    ),
 
     // Demande de creation d'un datastore
-    datastore_create_request: defineRoute(`${appRoot}/entrepot/demande-de-creation`),
-    datastore_create_request_confirm: defineRoute(`${appRoot}/entrepot/demande-de-creation/demande-envoyee`),
+    datastore_create_request: defineRoute(`${appRoot}/tableau-de-bord/entrepots/demande-de-creation`),
+    datastore_create_request_confirm: defineRoute(`${appRoot}/tableau-de-bord/entrepots/demande-de-creation/demande-envoyee`),
 
     // Demande pour rejoindre une communaute
     join_community: defineRoute(`${appRoot}/rejoindre-des-communautes`),
@@ -110,7 +118,7 @@ const datastoreRoute = defineRoute(
     {
         datastoreId: param.path.string,
     },
-    (p) => `${appRoot}/entrepot/${p.datastoreId}`
+    (p) => `${appRoot}/tableau-de-bord/entrepots/${p.datastoreId}`
 );
 const datastoreRoutes = {
     datastore_manage_storage: datastoreRoute.extend("/consommation"),

@@ -72,7 +72,13 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
     const { datastore } = useDatastore();
 
     // Les membres de cette communauté
-    const { data: communityMembers, isLoading } = useQuery({
+    const {
+        data: communityMembers,
+        isLoading,
+        isFetching,
+        refetch,
+        dataUpdatedAt,
+    } = useQuery({
         queryKey: RQKeys.community_members(community._id),
         queryFn: ({ signal }) => api.community.getMembers(community._id, { signal }),
         staleTime: 20000,
@@ -178,7 +184,7 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
             customBreadcrumbProps={{
                 homeLinkProps: routes.discover().link,
                 segments: [
-                    { label: tBreadcrumb("dashboard_pro"), linkProps: routes.dashboard_pro().link },
+                    { label: tBreadcrumb("dashboard"), linkProps: routes.dashboard().link },
                     { label: datastore?.name, linkProps: routes.datasheet_list({ datastoreId: datastore?._id ?? "XXXX" }).link },
                 ],
                 currentPageLabel: tBreadcrumb("members_list"),
@@ -228,7 +234,15 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
                         </div>
                     </div>
 
-                    <ListHeader nbResults={searchedItems.length} />
+                    <ListHeader
+                        nbResults={{
+                            displayed: paginatedItems.length,
+                            total: searchedItems.length,
+                        }}
+                        refetch={refetch}
+                        dataUpdatedAt={dataUpdatedAt}
+                        isFetching={isFetching}
+                    />
 
                     <div className={tableContainerClassName}>
                         <table>

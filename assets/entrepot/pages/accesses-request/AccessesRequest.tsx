@@ -111,7 +111,7 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
         jsonFetch<{ state: string; message?: string }>(url, { method: "POST" }, body)
             .then((response) => {
                 if (response.state === "success") {
-                    routes.dashboard_pro().push();
+                    routes.dashboard().push();
                 } else setSendError(response.message);
             })
             .catch((error) => {
@@ -127,7 +127,7 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
                     severity="error"
                     closable={false}
                     title={query.error.message}
-                    description={<Button linkProps={routes.dashboard_pro().link}>{t("back_to_dashboard")}</Button>}
+                    description={<Button linkProps={routes.dashboard().link}>{t("back_to_dashboard")}</Button>}
                 />
             ) : (
                 <>
@@ -184,7 +184,7 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
                             <ButtonsGroup
                                 buttons={[
                                     {
-                                        linkProps: routes.dashboard_pro().link,
+                                        linkProps: routes.dashboard().link,
                                         children: t("back_to_dashboard"),
                                         priority: "secondary",
                                     },
@@ -201,7 +201,7 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
                     ) : (
                         <div>
                             <p>{t("explain_no_access")}</p>
-                            <Button linkProps={routes.dashboard_pro().link}>{t("back_to_dashboard")}</Button>
+                            <Button linkProps={routes.dashboard().link}>{t("back_to_dashboard")}</Button>
                         </div>
                     )}
                 </>

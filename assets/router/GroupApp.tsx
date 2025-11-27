@@ -35,7 +35,9 @@ const DatastoreCreationRequestConfirmation = lazy(() => import("../entrepot/page
 
 const CommunityList = lazy(() => import("../entrepot/pages/communities/CommunityList/CommunityList"));
 
-const DashboardPro = lazy(() => import("../entrepot/pages/dashboard/DashboardPro"));
+// const DashboardPro = lazy(() => import("../entrepot/pages/dashboard/DashboardPro"));
+const Dashboard = lazy(() => import("../entrepot/pages/dashboard/Dashboard"));
+const DatastoreSelection = lazy(() => import("../entrepot/pages/datastore/DatastoreSelection/DatastoreSelection"));
 
 interface IGroupAppProps {
     route: Route<typeof routes>;
@@ -114,12 +116,19 @@ function GroupApp(props: IGroupAppProps) {
                 };
             case "join_community":
                 return { layoutProps: { navItems: baseDatastoreNavItems }, render: <CommunityList /> };
-            case "dashboard_pro":
+            case "dashboard":
                 return {
                     layoutProps: {
                         navItems: baseDatastoreNavItems,
                     },
-                    render: <DashboardPro />,
+                    render: <Dashboard />,
+                };
+            case "datastore_selection":
+                return {
+                    layoutProps: {
+                        navItems: baseDatastoreNavItems,
+                    },
+                    render: <DatastoreSelection />,
                 };
         }
     }, [route]);

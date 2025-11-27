@@ -1,13 +1,17 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
+import Badge from "@codegouvfr/react-dsfr/Badge";
+import Button from "@codegouvfr/react-dsfr/Button";
 import Highlight from "@codegouvfr/react-dsfr/Highlight";
 import Pagination from "@codegouvfr/react-dsfr/Pagination";
-import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import SearchBar from "@codegouvfr/react-dsfr/SearchBar";
 import SelectNext from "@codegouvfr/react-dsfr/SelectNext";
 import { useQuery } from "@tanstack/react-query";
 import { FC, useMemo } from "react";
+import { useToggle } from "usehooks-ts";
 
+import DatastoreMain from "@/components/Layout/DatastoreMain";
+import DatastoreTertiaryNavigation from "@/components/Layout/DatastoreTertiaryNavigation";
 import { ListHeader } from "@/components/Layout/ListHeader";
 import PageTitle from "@/components/Layout/PageTitle";
 import { FilterEnum, useFilters } from "@/hooks/useFilters";
@@ -15,7 +19,6 @@ import { usePagination } from "@/hooks/usePagination";
 import { useSearch } from "@/hooks/useSearch";
 import { SortOrderEnum, useSort } from "@/hooks/useSort";
 import { Datasheet, EndpointTypeEnum } from "../../../../@types/app";
-import Main from "../../../../components/Layout/Main";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import Skeleton from "../../../../components/Utils/Skeleton";
 import { useDatastore } from "../../../../contexts/datastore";
@@ -60,6 +63,8 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
     const page = params["page"] ? parseInt(params["page"]) : 1;
     const limit = params["limit"] ? parseInt(params["limit"]) : 20;
 
+    const [showFilters, toggleShowFilters] = useToggle(false);
+
     // filtre et tri
     const { search, searchedItems } = useSearch(data ?? []);
     const { filteredItems, filters } = useFilters(searchedItems, ["published"], filterTests);
@@ -67,18 +72,18 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
     const { paginatedItems, totalPages } = usePagination(sortedItems, page, limit);
 
     return (
-        <Main title={t("title", { datastoreName: datastore?.name })}>
+        <DatastoreMain title={t("title", { datastoreName: datastore?.name })} fluidContainer={false}>
             <PageTitle
-                buttons={[
-                    {
-                        children: t("create_datasheet"),
-                        linkProps: datasheetCreationImpossible
-                            ? { href: undefined, "aria-hidden": true }
-                            : routes.datastore_datasheet_upload({ datastoreId: datastoreId }).link,
-                        iconId: "fr-icon-add-line",
-                        className: fr.cx(datasheetCreationImpossible && "fr-hidden"),
-                    },
-                ]}
+                // buttons={[
+                //     {
+                //         children: t("create_datasheet"),
+                //         linkProps: datasheetCreationImpossible
+                //             ? { href: undefined, "aria-hidden": true }
+                //             : routes.datastore_datasheet_upload({ datastoreId: datastoreId }).link,
+                //         iconId: "fr-icon-add-line",
+                //         className: fr.cx(datasheetCreationImpossible && "fr-hidden"),
+                //     },
+                // ]}
                 showButtons={metadataEndpoint && !datasheetCreationImpossible}
                 title={
                     <>
@@ -90,6 +95,35 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                 {datastore?.is_sandbox === true && <Highlight>{t("sandbox_datastore_explanation") ?? ""}</Highlight>}
             </PageTitle>
 
+            <DatastoreTertiaryNavigation datastoreId={datastoreId} communityId={datastore.community._id} />
+
+            <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mt-2v")}>
+                <div
+                    className={fr.cx("fr-col-12")}
+                    style={{
+                        display: "flex",
+                        alignItems: "center",
+                    }}
+                >
+                    <strong className={fr.cx("fr-text--xl", "fr-m-0", "fr-mr-2v")}>Fiches de données</strong>
+                    <Badge severity="info" noIcon={true}>
+                        {data?.length ?? 0}
+                    </Badge>
+                    <Button
+                        linkProps={
+                            datasheetCreationImpossible
+                                ? { href: undefined, "aria-hidden": true }
+                                : routes.datastore_datasheet_upload({ datastoreId: datastoreId }).link
+                        }
+                        iconId="fr-icon-add-line"
+                        iconPosition="right"
+                        className={fr.cx("fr-ml-auto", datasheetCreationImpossible && "fr-hidden")}
+                    >
+                        {t("create_datasheet")}
+                    </Button>
+                </div>
+            </div>
+
             {metadataEndpoint && datasheetCreationImpossible && (
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
                     <div className={fr.cx("fr-col")}>
@@ -99,7 +133,14 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
             )}
 
             <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mt-2v")}>
-                <div className={fr.cx("fr-col-12", "fr-col-md-8", "fr-col-offset-md-2")}>
+                <div
+                    className={fr.cx("fr-col-12")}
+                    style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: fr.spacing("4v"),
+                    }}
+                >
                     <SearchBar
                         label={tCommon("search")}
                         onButtonClick={(text) => {
@@ -108,96 +149,114 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                             }
                         }}
                         allowEmptySearch={true}
-                        big
                         renderInput={(props) => <input {...props} disabled={isLoading} />}
                         defaultValue={search}
                     />
+                    <Button priority="secondary" iconId="fr-icon-equalizer-line" onClick={toggleShowFilters}>
+                        Filtres
+                    </Button>
                 </div>
             </div>
 
-            <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mt-2v")}>
-                <div className={fr.cx("fr-col-12", "fr-col-sm")}>
-                    <RadioButtons
-                        legend={<h2 className={fr.cx("fr-h5")}>{t("filter_label")}</h2>}
-                        options={[
-                            {
-                                label: t("filter_option", { filter: FilterEnum.ALL }),
-                                nativeInputProps: {
+            {showFilters && (
+                <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mt-2v")}>
+                    <div className={fr.cx("fr-col-12", "fr-col-sm")}>
+                        <SelectNext
+                            label={t("filter_label")}
+                            options={[
+                                {
+                                    label: t("filter_option", { filter: FilterEnum.ALL }),
                                     value: FilterEnum.ALL.toString(),
-                                    checked: filters.published === FilterEnum.ALL,
-                                    onChange: () => {
-                                        routes.datasheet_list({ datastoreId, search, sortBy, sortOrder }).replace();
-                                    },
                                 },
-                            },
-                            {
-                                label: t("filter_option", { filter: FilterEnum.ENABLED }),
-                                nativeInputProps: {
+                                {
+                                    label: t("filter_option", { filter: FilterEnum.ENABLED }),
                                     value: FilterEnum.ENABLED.toString(),
-                                    checked: filters.published === FilterEnum.ENABLED,
-                                    onChange: () => {
-                                        routes.datasheet_list({ ...filters, datastoreId, search, sortBy, sortOrder, published: FilterEnum.ENABLED }).replace();
-                                    },
                                 },
-                            },
-                            {
-                                label: t("filter_option", { filter: FilterEnum.DISABLED }),
-                                nativeInputProps: {
+                                {
+                                    label: t("filter_option", { filter: FilterEnum.DISABLED }),
                                     value: FilterEnum.DISABLED.toString(),
-                                    checked: filters.published === FilterEnum.DISABLED,
-                                    onChange: () => {
-                                        routes.datasheet_list({ ...filters, datastoreId, search, sortBy, sortOrder, published: FilterEnum.DISABLED }).replace();
-                                    },
                                 },
-                            },
-                        ]}
-                        orientation="horizontal"
-                        disabled={isLoading}
-                    />
+                            ]}
+                            nativeSelectProps={{
+                                value: filters.published?.toString() ?? FilterEnum.ALL.toString(),
+                                onChange: (event) => {
+                                    const value = event.target.value;
+                                    if (value === FilterEnum.ALL.toString()) {
+                                        routes.datasheet_list({ datastoreId, search, sortBy, sortOrder }).replace();
+                                    } else {
+                                        const published = value === FilterEnum.ENABLED.toString() ? FilterEnum.ENABLED : FilterEnum.DISABLED;
+                                        routes
+                                            .datasheet_list({
+                                                ...filters,
+                                                datastoreId,
+                                                search,
+                                                sortBy,
+                                                sortOrder,
+                                                published,
+                                            })
+                                            .replace();
+                                    }
+                                },
+                            }}
+                            placeholder={t("filter_placeholder")}
+                            disabled={isLoading}
+                        />
+                    </div>
+                    <div className={fr.cx("fr-col-12", "fr-col-sm")}>
+                        <SelectNext
+                            label={t("sort_label")}
+                            options={[
+                                {
+                                    label: t("sort_option", { sort: SortByEnum.NAME, sortOrder: SortOrderEnum.ASCENDING }),
+                                    value: `name|${SortOrderEnum.ASCENDING}`,
+                                },
+                                {
+                                    label: t("sort_option", { sort: SortByEnum.NAME, sortOrder: SortOrderEnum.DESCENDING }),
+                                    value: `name|${SortOrderEnum.DESCENDING}`,
+                                },
+                                {
+                                    label: t("sort_option", { sort: SortByEnum.NB_SERVICES, sortOrder: SortOrderEnum.ASCENDING }),
+                                    value: `nb_publications|${SortOrderEnum.ASCENDING}`,
+                                },
+                                {
+                                    label: t("sort_option", { sort: SortByEnum.NB_SERVICES, sortOrder: SortOrderEnum.DESCENDING }),
+                                    value: `nb_publications|${SortOrderEnum.DESCENDING}`,
+                                },
+                            ]}
+                            nativeSelectProps={{
+                                "aria-label": t("sort_label"),
+                                value: `${sortBy}|${sortOrder}`,
+                                onChange: (e) => {
+                                    const selectedSort = e.currentTarget.value?.split("|");
+                                    const selectedSortBy = selectedSort?.[0];
+                                    const selectedSortOrder = Number(selectedSort?.[1]);
+                                    if (!selectedSortBy || isNaN(selectedSortOrder) || selectedSortOrder === 0) return;
+                                    routes.datasheet_list({ ...filters, datastoreId, search, sortBy: selectedSortBy, sortOrder: selectedSortOrder }).replace();
+                                },
+                            }}
+                            placeholder={t("sort_placeholder")}
+                            disabled={isLoading}
+                        />
+                    </div>
+                    <div className={fr.cx("fr-col-12", "fr-col-sm")}>
+                        <Button>Valider</Button>
+                    </div>
                 </div>
-                <div className={fr.cx("fr-col-12", "fr-col-sm")}>
-                    <SelectNext
-                        label={<h2 className={fr.cx("fr-h5")}>{t("sort_label")}</h2>}
-                        options={[
-                            {
-                                label: t("sort_option", { sort: SortByEnum.NAME, sortOrder: SortOrderEnum.ASCENDING }),
-                                value: `name|${SortOrderEnum.ASCENDING}`,
-                            },
-                            {
-                                label: t("sort_option", { sort: SortByEnum.NAME, sortOrder: SortOrderEnum.DESCENDING }),
-                                value: `name|${SortOrderEnum.DESCENDING}`,
-                            },
-                            {
-                                label: t("sort_option", { sort: SortByEnum.NB_SERVICES, sortOrder: SortOrderEnum.ASCENDING }),
-                                value: `nb_publications|${SortOrderEnum.ASCENDING}`,
-                            },
-                            {
-                                label: t("sort_option", { sort: SortByEnum.NB_SERVICES, sortOrder: SortOrderEnum.DESCENDING }),
-                                value: `nb_publications|${SortOrderEnum.DESCENDING}`,
-                            },
-                        ]}
-                        nativeSelectProps={{
-                            "aria-label": t("sort_label"),
-                            value: `${sortBy}|${sortOrder}`,
-                            onChange: (e) => {
-                                const selectedSort = e.currentTarget.value?.split("|");
-                                const selectedSortBy = selectedSort?.[0];
-                                const selectedSortOrder = Number(selectedSort?.[1]);
-                                if (!selectedSortBy || isNaN(selectedSortOrder) || selectedSortOrder === 0) return;
-                                routes.datasheet_list({ ...filters, datastoreId, search, sortBy: selectedSortBy, sortOrder: selectedSortOrder }).replace();
-                            },
-                        }}
-                        placeholder={t("sort_placeholder")}
-                        disabled={isLoading}
-                    />
-                </div>
-            </div>
+            )}
 
             {isLoading ? (
                 <Skeleton count={12} rectangleHeight={100} />
             ) : (
                 <>
-                    <ListHeader nbResults={filteredItems.length} dataUpdatedAt={dataUpdatedAt} isFetching={isFetching} refetch={refetch} />
+                    <ListHeader
+                        nbResults={{
+                            displayed: paginatedItems.length,
+                            total: filteredItems.length,
+                        }}
+                        dataUpdatedAt={dataUpdatedAt}
+                        isFetching={isFetching}
+                        refetch={refetch}
+                    />
 
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mt-4v")}>
                         <div className={fr.cx("fr-col")}>
@@ -219,7 +278,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                     </div>
                 </>
             )}
-        </Main>
+        </DatastoreMain>
     );
 };
 
