@@ -38,7 +38,7 @@ const AppHeader: FC<AppHeaderProps> = ({ navItems = [] }) => {
             }}
             serviceTitle={
                 <>
-                    Cartes.gouv.fr{" "}
+                    cartes.gouv.fr{" "}
                     <Badge className={fr.cx("fr-badge--green-archipel")} noIcon={true} as="span" small={true}>
                         <span className={fr.cx("fr-icon--sm", "fr-icon-database-line", "fr-mr-1v")} />
                         Publier
