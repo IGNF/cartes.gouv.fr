@@ -65,7 +65,7 @@ const RouterRenderer: FC = () => {
                 fallback={
                     // fallback permet d'afficher LoadingText pendant que les textes de traductions se chargent
                     // par contre, traitement particulier pour la page d'accueil, on affiche tout de suite le contenu de la page d'accueil. Le contenu sera mis à jour une fois les textes de traductions seront chargés
-                    route.name === routes.home().name ? (
+                    route.name === routes.discover().name ? (
                         <AppLayout>
                             <Home />
                         </AppLayout>

@@ -39,7 +39,7 @@ const PageNotFound: FC = () => {
                         buttons={[
                             {
                                 children: "Page d’accueil",
-                                linkProps: routes.home().link,
+                                linkProps: routes.discover().link,
                             },
                             {
                                 children: "Nous écrire",

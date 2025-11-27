@@ -30,7 +30,7 @@ const Home = () => {
 
     useEffect(() => {
         if (user !== null && params?.["authentication_failed"] !== undefined) {
-            routes.home().replace();
+            routes.discover().replace();
         }
 
         if (user !== null && params?.["session_expired_login_success"] === 1) {

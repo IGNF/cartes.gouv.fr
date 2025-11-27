@@ -6,12 +6,12 @@ export const appRoot = SymfonyRouting.getBaseUrl();
 
 // Routes non protégées
 const publicRoutes = {
-    home: defineRoute(
+    discover: defineRoute(
         {
             authentication_failed: param.query.optional.number,
             session_expired_login_success: param.query.optional.number,
         },
-        () => (appRoot === "" ? "/" : appRoot)
+        () => `${appRoot}/decouvrir`
     ),
     page_not_found: defineRoute(`${appRoot}/404`),
     about: defineRoute(`${appRoot}/a-propos`),

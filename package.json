@@ -53,6 +53,7 @@
         "eslint-plugin-react": "^7.37.5",
         "eslint-plugin-react-hooks": "^7.0.0",
         "eslint-plugin-react-refresh": "^0.4.23",
+        "eslint-plugin-tss-unused-classes": "^1.0.3",
         "events": "^3.3.0",
         "geopf-extensions-openlayers": "^1.0.0-beta.0",
         "geostyler": "^18.1.2",

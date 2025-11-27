@@ -101,7 +101,7 @@ const MemberInvitation: FC<MemberInvitationProps> = ({ communityId }) => {
     return (
         <Main
             customBreadcrumbProps={{
-                homeLinkProps: routes.home().link,
+                homeLinkProps: routes.discover().link,
                 segments: [],
                 currentPageLabel: tBreadcrumb("espaceco_member_invitation"),
             }}

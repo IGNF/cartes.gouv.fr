@@ -176,7 +176,7 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
     return (
         <Main
             customBreadcrumbProps={{
-                homeLinkProps: routes.home().link,
+                homeLinkProps: routes.discover().link,
                 segments: [
                     { label: tBreadcrumb("dashboard_pro"), linkProps: routes.dashboard_pro().link },
                     { label: datastore?.name, linkProps: routes.datasheet_list({ datastoreId: datastore?._id ?? "XXXX" }).link },

@@ -5,14 +5,11 @@ import { appRoot, routes } from "./router";
 
 export const externalUrls = {
     documentation: appRoot + "/aide/",
-    documentationProducerGuide: appRoot + "/aide/fr/guide-producteur/",
+    documentationProducerGuide: appRoot + "/aide/fr/guides-producteur/",
     catalogue: catalogueUrl ?? appRoot + "/catalogue",
     maps: appRoot + "/cartes",
     contact_us: routes.contact().link.href,
-    search_data: appRoot + "/recherche-une-donnee",
-    publish_data: appRoot + "/publier-une-donnee",
-    create_map: appRoot + "/creer-une-carte",
-    discover_cartesgouvfr: routes.home().link.href,
+    discover_cartesgouvfr: routes.discover().link.href,
 } as const;
 
 export function externalLink(route: keyof typeof externalUrls, title?: string): RegisteredLinkProps {

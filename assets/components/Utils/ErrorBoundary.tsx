@@ -16,7 +16,7 @@ const Fallback: FC<FallbackProps> = ({ error, resetErrorBoundary }) => {
                 <Button
                     onClick={() => {
                         resetErrorBoundary();
-                        routes.home().push();
+                        routes.discover().push();
                     }}
                 >
                     {"Retour à l'accueil"}

@@ -57,7 +57,7 @@ const ManageCommunity: FC = () => {
     return (
         <Main
             customBreadcrumbProps={{
-                homeLinkProps: routes.home().link,
+                homeLinkProps: routes.discover().link,
                 segments: [
                     { label: tBreadcrumb("dashboard_pro"), linkProps: routes.dashboard_pro().link },
                     { label: tBreadcrumb("espaceco_community_list"), linkProps: routes.espaceco_community_list().link },
