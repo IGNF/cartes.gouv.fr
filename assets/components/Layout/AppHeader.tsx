@@ -1,19 +1,21 @@
+import { fr } from "@codegouvfr/react-dsfr";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import Header from "@codegouvfr/react-dsfr/Header";
 import { MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation/MainNavigation";
+import { useIsDark } from "@codegouvfr/react-dsfr/useIsDark";
 import { FC, memo } from "react";
 
+import { externalUrls } from "@/router/externalUrls";
 import { HeaderMenuHelp, HeaderMenuServices, HeaderMenuUser } from "./Header/HeaderMenus";
 
 import "../../sass/components/header.scss";
-
-import placeholder16x9 from "@/img/placeholder.16x9.png";
-import { externalUrls } from "@/router/externalUrls";
 
 type AppHeaderProps = {
     navItems?: MainNavigationProps.Item[];
 };
 const AppHeader: FC<AppHeaderProps> = ({ navItems = [] }) => {
+    const { isDark } = useIsDark();
+
     return (
         <Header
             brandTop={
@@ -28,19 +30,22 @@ const AppHeader: FC<AppHeaderProps> = ({ navItems = [] }) => {
                 title: "Accueil - cartes.gouv.fr",
             }}
             operatorLogo={{
-                imgUrl: placeholder16x9,
+                imgUrl: isDark
+                    ? "https://data.geopf.fr/annexes/ressources/header/cartes-gouv-logo-dark.svg"
+                    : "https://data.geopf.fr/annexes/ressources/header/cartes-gouv-logo.svg",
                 orientation: "horizontal",
                 alt: "",
             }}
             serviceTitle={
                 <>
                     Cartes.gouv.fr{" "}
-                    <Badge severity="success" noIcon={true} as="span" small={true}>
-                        Bêta
+                    <Badge className={fr.cx("fr-badge--green-archipel")} noIcon={true} as="span" small={true}>
+                        <span className={fr.cx("fr-icon--sm", "fr-icon-database-line", "fr-mr-1v")} />
+                        Publier
                     </Badge>
                 </>
             }
-            serviceTagline="Le service public des cartes et des données du territoire"
+            serviceTagline="Le service public des cartes et données du territoire"
             quickAccessItems={[
                 <HeaderMenuHelp key="header-menu-help" />,
                 <HeaderMenuServices key="header-menu-services" />,
