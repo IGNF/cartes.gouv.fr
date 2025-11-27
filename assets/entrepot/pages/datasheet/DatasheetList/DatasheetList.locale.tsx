@@ -7,7 +7,7 @@ import { SortOrderEnum } from "@/hooks/useSort";
 import { SortByEnum } from "./DatasheetList.types";
 
 const { i18n } = declareComponentKeys<
-    | { K: "title"; P: { datastoreName?: string }; R: string }
+    | { K: "title"; P: { datastoreName?: string }; R: string | undefined }
     | "create_datasheet"
     | "datasheet_creation_impossible"
     | "metadata_endpoint_quota_reached"
@@ -15,6 +15,7 @@ const { i18n } = declareComponentKeys<
     | "no_services_published"
     | { K: "sandbox_datastore_explanation"; R: ReactNode }
     | "filter_label"
+    | "filter_placeholder"
     | { K: "filter_option"; P: { filter: FilterEnum }; R: string }
     | "sort_label"
     | "sort_placeholder"
@@ -24,7 +25,7 @@ const { i18n } = declareComponentKeys<
 export type I18n = typeof i18n;
 
 export const DatasheetListFrTranslations: Translations<"fr">["DatasheetList"] = {
-    title: ({ datastoreName }) => `Données ${datastoreName ?? ""}`,
+    title: ({ datastoreName }) => datastoreName,
     create_datasheet: "Créer une fiche de données",
     datasheet_creation_impossible: "Création d’une nouvelle fiche de données impossible",
     metadata_endpoint_quota_reached: "Quota du point d’accès de métadonnées atteint",
@@ -32,7 +33,8 @@ export const DatasheetListFrTranslations: Translations<"fr">["DatasheetList"] = 
     no_services_published: "Non publié",
     sandbox_datastore_explanation:
         "Cet espace permet de tester les fonctions d’alimentation et de diffusion de la Géoplateforme. Les services publiés dans cet espace ne sont pas visibles sur le catalogue.",
-    filter_label: "Filtrer",
+    filter_label: "Filtrer par",
+    filter_placeholder: "Filtrer par",
     filter_option: ({ filter }) => {
         switch (filter) {
             case FilterEnum.ALL:
@@ -45,7 +47,7 @@ export const DatasheetListFrTranslations: Translations<"fr">["DatasheetList"] = 
                 return "Filtre inconnu";
         }
     },
-    sort_label: "Trier",
+    sort_label: "Trier par",
     sort_placeholder: "Trier par",
     sort_option: ({ sort, sortOrder }) => {
         switch (sort) {
@@ -69,6 +71,7 @@ export const DatasheetListEnTranslations: Translations<"en">["DatasheetList"] = 
     no_services_published: undefined,
     sandbox_datastore_explanation: undefined,
     filter_label: undefined,
+    filter_placeholder: undefined,
     filter_option: undefined,
     sort_label: undefined,
     sort_placeholder: undefined,

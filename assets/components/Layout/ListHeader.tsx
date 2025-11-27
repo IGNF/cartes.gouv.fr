@@ -5,8 +5,11 @@ import Button from "@codegouvfr/react-dsfr/Button";
 interface IListHeaderProps {
     dataUpdatedAt?: number;
     isFetching?: boolean;
-    nbResults: number;
-    refetch?: () => void;
+    nbResults: {
+        displayed: number;
+        total: number;
+    };
+    refetch: () => void;
 }
 
 export function ListHeader(props: IListHeaderProps) {
@@ -14,7 +17,7 @@ export function ListHeader(props: IListHeaderProps) {
     const { t } = useTranslation("Common");
 
     return (
-        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mt-2v")}>
+        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-my-2v")}>
             <div
                 className={fr.cx("fr-col")}
                 style={{
@@ -22,30 +25,20 @@ export function ListHeader(props: IListHeaderProps) {
                     alignItems: "center",
                 }}
             >
-                <h2 className={fr.cx("fr-text--sm", "fr-mb-0")}>{t("nb_results", { nb: nbResults })}</h2>
-                {dataUpdatedAt && (
-                    <span
-                        className={fr.cx("fr-text--sm", "fr-mb-0", "fr-mr-2v")}
-                        style={{
-                            marginLeft: "auto",
-                        }}
-                    >
-                        {t("last_refresh_date", { dataUpdatedAt })}
-                    </span>
-                )}
-                {refetch && (
-                    <Button
-                        title={t("refresh")}
-                        onClick={() => refetch()}
-                        iconId="ri-refresh-line"
-                        nativeButtonProps={{
-                            "aria-disabled": isFetching,
-                        }}
-                        disabled={isFetching}
-                        size="small"
-                        className={isFetching ? "frx-icon-spin" : ""}
-                    />
-                )}
+                <Button
+                    title={t("refresh")}
+                    onClick={() => refetch()}
+                    iconId="ri-refresh-line"
+                    nativeButtonProps={{
+                        "aria-disabled": isFetching,
+                    }}
+                    disabled={isFetching}
+                    size="small"
+                    className={isFetching ? "frx-icon-spin" : ""}
+                    priority="tertiary no outline"
+                />
+                {dataUpdatedAt && <span className={fr.cx("fr-text--xs", "fr-mb-0", "fr-mr-2v")}>{t("last_refresh_date", { dataUpdatedAt })}</span>}
+                <p className={fr.cx("fr-text--xs", "fr-mb-0", "fr-ml-auto")}>{t("nb_results", { displayed: nbResults.displayed, total: nbResults.total })}</p>
             </div>
         </div>
     );

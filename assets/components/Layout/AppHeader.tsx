@@ -74,7 +74,7 @@ const AppHeader: FC<AppHeaderProps> = ({ navItems = [] }) => {
 
         quickAccessItems.push({
             iconId: "fr-icon-account-fill",
-            linkProps: routes.dashboard_pro().link,
+            linkProps: routes.dashboard().link,
             text: btnMyAccountText.trim(),
         });
         quickAccessItems.push({
