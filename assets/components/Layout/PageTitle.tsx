@@ -16,7 +16,7 @@ function PageTitle(props: IPageTitleProps) {
 
     return (
         <div className={fr.cx("fr-grid-row")}>
-            <div className={fr.cx("fr-col-12", "fr-col-lg-8")}>
+            <div className={fr.cx("fr-col-12", buttons && "fr-col-lg-8")}>
                 <h1
                     className={css({
                         color: fr.colors.decisions.text.title.blueFrance.default,

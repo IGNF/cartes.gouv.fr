@@ -137,7 +137,7 @@ const datastoreRoutes = {
     datasheet_list: datastoreRoute.extend(
         {
             page: param.query.optional.number.default(1),
-            limit: param.query.optional.number.default(20),
+            limit: param.query.optional.number.default(10),
             search: param.query.optional.string,
             sortBy: param.query.optional.string,
             sortOrder: param.query.optional.number.default(1),

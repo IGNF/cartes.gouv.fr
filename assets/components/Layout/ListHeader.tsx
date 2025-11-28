@@ -17,9 +17,9 @@ export function ListHeader(props: IListHeaderProps) {
     const { t } = useTranslation("Common");
 
     return (
-        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-my-2v")}>
+        <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mt-6v", "fr-mb-2v")}>
             <div
-                className={fr.cx("fr-col")}
+                className={fr.cx("fr-col", "fr-p-0")}
                 style={{
                     display: "flex",
                     alignItems: "center",
