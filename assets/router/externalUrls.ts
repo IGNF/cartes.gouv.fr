@@ -5,7 +5,8 @@ import { appRoot, routes } from "./router";
 
 export const externalUrls = {
     documentation: appRoot + "/aide/",
-    documentationProducerGuide: appRoot + "/aide/fr/guide-producteur/",
+    documentationProducerGuide: appRoot + "/aide/fr/guides-producteur/",
+    documentationCreateDatasheet: appRoot + "/aide/fr/guides-producteur/publier-des-donnees-via-cartes-gouv/deposer-donnees-sur-cartes-gouv/",
     catalogue: catalogueUrl ?? appRoot + "/catalogue",
     maps: appRoot + "/cartes",
     contact_us: routes.contact().link.href,

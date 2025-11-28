@@ -15,7 +15,7 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): Brea
     };
 
     switch (route.name) {
-        case "dashboard_pro":
+        case "dashboard":
         case "about":
         case "contact":
         case "faq":
@@ -27,6 +27,10 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): Brea
         case "join":
         case "terms_of_service":
         case "service_status":
+            return { ...defaultProps, currentPageLabel: t(route.name) };
+
+        case "datastore_selection":
+            defaultProps.segments.push({ label: t("dashboard"), linkProps: routes.dashboard().link });
             return { ...defaultProps, currentPageLabel: t(route.name) };
 
         case "contact_confirmation":
@@ -41,20 +45,20 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): Brea
 
         // case "accesses_request":
         case "my_account":
-            defaultProps.segments.push({ label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link });
+            defaultProps.segments.push({ label: t("dashboard"), linkProps: routes.dashboard().link });
             return { ...defaultProps, currentPageLabel: t("my_account") };
         case "my_access_keys":
-            defaultProps.segments.push({ label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link });
+            defaultProps.segments.push({ label: t("dashboard"), linkProps: routes.dashboard().link });
             return { ...defaultProps, currentPageLabel: t("my_access_keys") };
         case "my_permissions":
-            defaultProps.segments.push({ label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link });
+            defaultProps.segments.push({ label: t("dashboard"), linkProps: routes.dashboard().link });
             return { ...defaultProps, currentPageLabel: t("my_permissions") };
 
         case "user_key_add":
             defaultProps.segments = [
                 ...defaultProps.segments,
                 ...[
-                    { label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link },
+                    { label: t("dashboard"), linkProps: routes.dashboard().link },
                     { label: t("my_access_keys"), linkProps: routes.my_access_keys().link },
                 ],
             ];
@@ -63,27 +67,27 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): Brea
             defaultProps.segments = [
                 ...defaultProps.segments,
                 ...[
-                    { label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link },
+                    { label: t("dashboard"), linkProps: routes.dashboard().link },
                     { label: t("my_access_keys"), linkProps: routes.my_access_keys().link },
                 ],
             ];
             return { ...defaultProps, currentPageLabel: t(route.name) };
 
         case "datastore_create_request":
-            defaultProps.segments.push({ label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link });
+            defaultProps.segments.push({ label: t("dashboard"), linkProps: routes.dashboard().link });
             return { ...defaultProps, currentPageLabel: t(route.name) };
         case "datastore_create_request_confirm":
             defaultProps.segments = [
                 ...defaultProps.segments,
                 ...[
-                    { label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link },
+                    { label: t("dashboard"), linkProps: routes.dashboard().link },
                     { label: t("datastore_create_request"), linkProps: routes.datastore_create_request().link },
                 ],
             ];
             return { ...defaultProps, currentPageLabel: t(route.name) };
 
         case "join_community":
-            defaultProps.segments.push({ label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link });
+            defaultProps.segments.push({ label: t("dashboard"), linkProps: routes.dashboard().link });
             return { ...defaultProps, currentPageLabel: t(route.name) };
         case "members_list":
             // géré dans le composant CommunityMembers
@@ -94,7 +98,7 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): Brea
             defaultProps.segments = [
                 ...defaultProps.segments,
                 ...[
-                    { label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link },
+                    { label: t("dashboard"), linkProps: routes.dashboard().link },
                     { label: datastore?.name, linkProps: routes.datasheet_list({ datastoreId: route.params.datastoreId }).link },
                 ],
             ];
@@ -104,7 +108,7 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): Brea
             defaultProps.segments = [
                 ...defaultProps.segments,
                 ...[
-                    { label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link },
+                    { label: t("dashboard"), linkProps: routes.dashboard().link },
                     { label: datastore?.name, linkProps: routes.datasheet_list({ datastoreId: route.params.datastoreId }).link },
                     {
                         label: t("datastore_manage_permissions"),
@@ -114,13 +118,19 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): Brea
             ];
             return { ...defaultProps, currentPageLabel: t(route.name) };
         case "datasheet_list":
-            defaultProps.segments = [...defaultProps.segments, ...[{ label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link }]];
+            defaultProps.segments = [
+                ...defaultProps.segments,
+                ...[
+                    { label: t("dashboard"), linkProps: routes.dashboard().link },
+                    { label: t("datastore_selection"), linkProps: routes.datastore_selection().link },
+                ],
+            ];
             return { ...defaultProps, currentPageLabel: datastore?.name };
         case "datastore_datasheet_upload":
             defaultProps.segments = [
                 ...defaultProps.segments,
                 ...[
-                    { label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link },
+                    { label: t("dashboard"), linkProps: routes.dashboard().link },
                     { label: datastore?.name, linkProps: routes.datasheet_list({ datastoreId: route.params.datastoreId }).link },
                 ],
             ];
@@ -138,7 +148,7 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): Brea
             defaultProps.segments = [
                 ...defaultProps.segments,
                 ...[
-                    { label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link },
+                    { label: t("dashboard"), linkProps: routes.dashboard().link },
                     { label: datastore?.name, linkProps: routes.datasheet_list({ datastoreId: route.params.datastoreId }).link },
                 ],
             ];
@@ -153,7 +163,7 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): Brea
             defaultProps.segments = [
                 ...defaultProps.segments,
                 ...[
-                    { label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link },
+                    { label: t("dashboard"), linkProps: routes.dashboard().link },
                     { label: datastore?.name, linkProps: routes.datasheet_list({ datastoreId: route.params.datastoreId }).link },
                 ],
             ];
@@ -162,7 +172,7 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): Brea
             defaultProps.segments = [
                 ...defaultProps.segments,
                 ...[
-                    { label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link },
+                    { label: t("dashboard"), linkProps: routes.dashboard().link },
                     { label: datastore?.name, linkProps: routes.datasheet_list({ datastoreId: route.params.datastoreId }).link },
                 ],
             ];
@@ -177,7 +187,7 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): Brea
             defaultProps.segments = [
                 ...defaultProps.segments,
                 ...[
-                    { label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link },
+                    { label: t("dashboard"), linkProps: routes.dashboard().link },
                     { label: datastore?.name, linkProps: routes.datasheet_list({ datastoreId: route.params.datastoreId }).link },
                 ],
             ];
@@ -205,7 +215,7 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): Brea
             defaultProps.segments = [
                 ...defaultProps.segments,
                 ...[
-                    { label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link },
+                    { label: t("dashboard"), linkProps: routes.dashboard().link },
                     { label: datastore?.name, linkProps: routes.datasheet_list({ datastoreId: route.params.datastoreId }).link },
                     {
                         label: route.params.datasheetName,
@@ -224,7 +234,7 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): Brea
             defaultProps.segments = [
                 ...defaultProps.segments,
                 ...[
-                    { label: t("dashboard_pro"), linkProps: routes.dashboard_pro().link },
+                    { label: t("dashboard"), linkProps: routes.dashboard().link },
                     { label: datastore?.name, linkProps: routes.datasheet_list({ datastoreId: route.params.datastoreId }).link },
                     {
                         label: route.params.datasheetName,

@@ -17,7 +17,7 @@ export const datastoreNavItems = (currentDatastore?: Datastore): MainNavigationP
     const navItems: MainNavigationProps.Item[] = [
         {
             text: t("dashboard"),
-            linkProps: routes.dashboard_pro().link,
+            linkProps: routes.dashboard().link,
         },
     ];
 

@@ -51,7 +51,7 @@ const { i18n } = declareComponentKeys<
     | "remove_filters"
     | "select_option"
     | { K: "last_refresh_date"; P: { dataUpdatedAt: number }; R: string }
-    | { K: "nb_results"; P: { nb: number }; R: string }
+    | { K: "nb_results"; P: { displayed: number; total: number }; R: string }
 >()("Common");
 export type I18n = typeof i18n;
 
@@ -103,8 +103,12 @@ export const commonFrTranslations: Translations<"fr">["Common"] = {
     filter: "Filtrer",
     remove_filters: "Retirer les filtres",
     select_option: "Sélectionnez une option",
-    last_refresh_date: ({ dataUpdatedAt }) => `Données mises à jour le ${formatDateFromISO(new Date(dataUpdatedAt).toISOString())}`,
-    nb_results: ({ nb }) => (nb > 1 ? `${nb} résultats` : `${nb} résultat`),
+    last_refresh_date: ({ dataUpdatedAt }) => `Mise à jour le ${formatDateFromISO(new Date(dataUpdatedAt).toISOString())}`,
+    nb_results: ({ displayed, total }) => {
+        if (total === 0) return "Aucun résultat";
+        if (total === 1) return "1 résultat affiché sur 1";
+        return `${displayed} résultats affichés sur ${total}`;
+    },
 };
 
 export const commonEnTranslations: Translations<"en">["Common"] = {

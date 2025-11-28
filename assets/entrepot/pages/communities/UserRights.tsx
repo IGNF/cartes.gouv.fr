@@ -1,6 +1,8 @@
 import { FC } from "react";
 import { getTranslation } from "../../../i18n/i18n";
 import { CommunityUserResponseDtoRightsEnum } from "../../../@types/entrepot";
+import { fr } from "@codegouvfr/react-dsfr";
+import Tooltip from "@codegouvfr/react-dsfr/Tooltip";
 
 const { t } = getTranslation("Rights");
 
@@ -30,13 +32,24 @@ const complete = (rights: CommunityUserResponseDtoRightsEnum[] | undefined): Rec
 
 const UserRights: FC = () => {
     return (
-        <ul>
-            {rightTypes.map((type) => {
-                const trans = t(type);
-                const explain = t(`${type}_explain`);
-                return <li key={type} dangerouslySetInnerHTML={{ __html: `<strong>${trans}</strong>&nbsp;:&nbsp;${explain}` }} />;
-            })}
-        </ul>
+        <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
+            <div
+                className={fr.cx("fr-col-12", "fr-text--xs")}
+                style={{
+                    display: "flex",
+                    alignItems: "center",
+                }}
+            >
+                <strong className={fr.cx("fr-mr-2v")}>Droits</strong>
+
+                {rightTypes.map((type) => (
+                    <>
+                        <Tooltip kind="click" title={t(`${type}_explain`)} />
+                        <span className={fr.cx("fr-mr-2v")}> {t(type)}</span>
+                    </>
+                ))}
+            </div>
+        </div>
     );
 };
 
