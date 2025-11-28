@@ -19,6 +19,8 @@ export default function NoData({ datastoreId }: NoDataProps) {
             <div className={classes.rightSection}>
                 <h6 className={fr.cx("fr-mb-4v")}>{"Vous n'avez pas de fiches de données"}</h6>
 
+                <p className={fr.cx("fr-mb-8v")}>{"Créez des cartes personnalisées et interactives en quelques clics et partagez-les autour de vous."}</p>
+
                 <ButtonsGroup
                     buttons={[
                         {

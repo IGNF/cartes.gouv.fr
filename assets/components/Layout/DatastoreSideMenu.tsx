@@ -5,7 +5,11 @@ import { tss } from "tss-react";
 import useDatastoreSelection from "@/hooks/useDatastoreSelection";
 import { routes, useRoute } from "@/router/router";
 
-export default function DatastoreSideMenu() {
+type DatastoreSideMenuProps = {
+    datastoreId?: string;
+    communityId?: string;
+};
+export default function DatastoreSideMenu({ datastoreId, communityId }: DatastoreSideMenuProps) {
     const route = useRoute();
     const { css, cx } = useStyles();
 
@@ -58,7 +62,7 @@ export default function DatastoreSideMenu() {
                         datastore.is_sandbox === true && !userMemberOfSandbox
                             ? { ...routes.datasheet_list({ datastoreId: sandboxDatastore!._id }).link, onClick: () => addUserToSandbox() }
                             : routes.datasheet_list({ datastoreId: datastore._id }).link,
-                    isActive: route.name === routes.datasheet_list({ datastoreId: datastore._id }).name && route.params.datastoreId === datastore._id,
+                    isActive: datastoreId === datastore._id || communityId === datastore.community_id,
                 })),
             ]}
         />
