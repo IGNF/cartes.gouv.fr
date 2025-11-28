@@ -56,7 +56,7 @@ export function HeaderMenuServices() {
                 {
                     iconId: "fr-icon-database-line",
                     children: "Publier une donnée",
-                    linkProps: routes.dashboard_pro().link,
+                    linkProps: routes.dashboard().link,
                 },
                 // {
                 //     iconId: "fr-icon-brush-line",
@@ -130,7 +130,7 @@ export function HeaderMenuUser() {
                 {
                     children: "Tableau de bord",
                     iconId: "fr-icon-dashboard-3-line",
-                    linkProps: routes.dashboard_pro().link,
+                    linkProps: routes.dashboard().link,
                 },
                 {
                     children: "Mon compte",

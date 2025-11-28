@@ -44,7 +44,7 @@ export default function Dashboard() {
                     <Tile
                         linkProps={routes.datastore_selection().link}
                         imageUrl={uploaderSvgUrl}
-                        title="Mes données géographiques"
+                        title="Mes données"
                         desc="Gérer mes entrepôts et mes fiches de données"
                         orientation="vertical"
                         classes={{

@@ -5,7 +5,11 @@ import { tss } from "tss-react";
 import useDatastoreSelection from "@/hooks/useDatastoreSelection";
 import { routes, useRoute } from "@/router/router";
 
-export default function DatastoreSideMenu() {
+type DatastoreSideMenuProps = {
+    datastoreId?: string;
+    communityId?: string;
+};
+export default function DatastoreSideMenu({ datastoreId, communityId }: DatastoreSideMenuProps) {
     const route = useRoute();
     const { css, cx } = useStyles();
 
@@ -30,7 +34,7 @@ export default function DatastoreSideMenu() {
                         })}
                     >
                         <span className={fr.cx("fr-icon-database-line", "fr-icon--md")} />
-                        <h1 className={fr.cx("fr-text--xl", "fr-m-0")}>Données</h1>
+                        <h1 className={fr.cx("fr-text--xl", "fr-m-0")}>Mes données</h1>
                     </div>
                     <p
                         className={cx(
@@ -40,7 +44,7 @@ export default function DatastoreSideMenu() {
                             })
                         )}
                     >
-                        Gérer vos entrepôts et vos fiches de données
+                        Gérer mes entrepôts et mes fiches de données
                     </p>
                 </div>
             }
@@ -58,7 +62,7 @@ export default function DatastoreSideMenu() {
                         datastore.is_sandbox === true && !userMemberOfSandbox
                             ? { ...routes.datasheet_list({ datastoreId: sandboxDatastore!._id }).link, onClick: () => addUserToSandbox() }
                             : routes.datasheet_list({ datastoreId: datastore._id }).link,
-                    isActive: route.name === routes.datasheet_list({ datastoreId: datastore._id }).name && route.params.datastoreId === datastore._id,
+                    isActive: datastoreId === datastore._id || communityId === datastore.community_id,
                 })),
             ]}
         />

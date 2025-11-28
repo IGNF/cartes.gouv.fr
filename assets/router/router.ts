@@ -99,7 +99,7 @@ const communityRoute = defineRoute(
     {
         communityId: param.path.string,
     },
-    (p) => `${appRoot}/communaute/${p.communityId}`
+    (p) => `${appRoot}/tableau-de-bord/communaute/${p.communityId}`
 );
 const communityRoutes = {
     // Liste des membres d'une communaute

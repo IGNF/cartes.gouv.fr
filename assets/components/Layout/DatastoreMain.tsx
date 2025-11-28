@@ -6,16 +6,32 @@ import { PropsWithChildren } from "react";
 
 import DatastoreSideMenu from "@/components/Layout/DatastoreSideMenu";
 import useBreadcrumb from "@/hooks/useBreadcrumb";
+import useDatastoreSelection from "@/hooks/useDatastoreSelection";
 import useDocumentTitle from "@/hooks/useDocumentTitle";
+import LoadingText from "../Utils/LoadingText";
 import SessionExpiredAlert from "../Utils/SessionExpiredAlert";
-import { MainProps } from "./Main";
+import Main, { type MainProps } from "./Main";
 
-export type DatastoreMainProps = PropsWithChildren<MainProps>;
+export type DatastoreMainProps = PropsWithChildren<
+    MainProps & {
+        datastoreId?: string;
+        communityId?: string;
+    }
+>;
 export default function DatastoreMain(props: DatastoreMainProps) {
-    const { children, customBreadcrumbProps, noticeProps, title, fluidContainer = false } = props;
+    const { datastoreId, communityId, children, customBreadcrumbProps, noticeProps, title, fluidContainer = false } = props;
 
     useDocumentTitle(title);
     const breadcrumbProps = useBreadcrumb(customBreadcrumbProps);
+
+    const { sandboxDatastore } = useDatastoreSelection();
+    if (!sandboxDatastore) {
+        return (
+            <Main>
+                <LoadingText />
+            </Main>
+        );
+    }
 
     return (
         <main id="main" role="main">
@@ -29,7 +45,7 @@ export default function DatastoreMain(props: DatastoreMainProps) {
                             flexDirection: "column",
                         }}
                     >
-                        <DatastoreSideMenu />
+                        <DatastoreSideMenu datastoreId={datastoreId} communityId={communityId} />
 
                         <Button className={fr.cx("fr-mt-md-auto", "fr-mb-md-6v", "fr-mr-md-8v")} priority="secondary">
                             Ajouter un entrepôt

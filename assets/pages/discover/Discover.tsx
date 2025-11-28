@@ -250,7 +250,7 @@ export default function Discover() {
                                         <Link className={fr.cx("fr-link")} href={externalUrls.documentationProducerGuide}>
                                             {"En savoir plus"}
                                         </Link>
-                                        <Button iconId="fr-icon-arrow-right-s-line" iconPosition="right" linkProps={routes.dashboard_pro().link}>
+                                        <Button iconId="fr-icon-arrow-right-s-line" iconPosition="right" linkProps={routes.dashboard().link}>
                                             Publier
                                         </Button>
                                     </>

@@ -12,6 +12,7 @@ type DatastoreSelectionInfo = {
     _id: string;
     technical_name: string;
     name: string;
+    community_id: string;
     is_sandbox?: boolean;
 };
 const useDatastoreSelection = () => {
@@ -47,6 +48,7 @@ const useDatastoreSelection = () => {
             _id: cm.community!.datastore,
             technical_name: cm.community!.technical_name,
             name: cm.community!.name!,
+            community_id: cm.community!._id,
             is_sandbox: cm.community?.datastore === sandboxDatastore?._id,
         }));
 
@@ -58,6 +60,7 @@ const useDatastoreSelection = () => {
             _id: sandboxDatastore._id,
             technical_name: sandboxDatastore.technical_name,
             name: sandboxDatastore.name,
+            community_id: sandboxDatastore.community._id,
             is_sandbox: true,
         });
     }
