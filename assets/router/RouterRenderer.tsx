@@ -3,7 +3,6 @@ import { FC, JSX, Suspense, useMemo } from "react";
 import AppLayout from "../components/Layout/AppLayout";
 import LoadingText from "../components/Utils/LoadingText";
 import { I18nFetchingSuspense } from "../i18n/i18n";
-import Home from "../pages/Home";
 import RedirectToLogin from "../pages/RedirectToLogin";
 import { useAuthStore } from "../stores/AuthStore";
 import { groups, knownRoutes, routes, useRoute } from "./router";
@@ -14,6 +13,7 @@ import PageNotFoundWithLayout from "../pages/error/PageNotFoundWithLayout";
 import Main from "../components/Layout/Main";
 import GroupEspaceCo from "./GroupEspaceCo";
 import GroupConfig from "./GroupConfig";
+import Discover from "@/pages/discover/Discover";
 
 const RouterRenderer: FC = () => {
     const route = useRoute();
@@ -67,7 +67,7 @@ const RouterRenderer: FC = () => {
                     // par contre, traitement particulier pour la page d'accueil, on affiche tout de suite le contenu de la page d'accueil. Le contenu sera mis à jour une fois les textes de traductions seront chargés
                     route.name === routes.discover().name ? (
                         <AppLayout>
-                            <Home />
+                            <Discover />
                         </AppLayout>
                     ) : (
                         <AppLayout>
