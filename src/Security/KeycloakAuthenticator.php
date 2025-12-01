@@ -132,7 +132,7 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
 
         return new RedirectResponse($this->router->generate(self::HOME_ROUTE, [
             'authentication_failed' => true,
-        ]));
+        ]).'/decouvrir');
     }
 
     // TODO : A refactoriser
