@@ -14,10 +14,11 @@ export interface MainProps {
     customBreadcrumbProps?: BreadcrumbProps;
     noticeProps?: IUseAlert;
     title?: string;
+    fluidContainer?: boolean;
 }
 
 function Main(props: PropsWithChildren<MainProps>) {
-    const { children, customBreadcrumbProps, noticeProps, title } = props;
+    const { children, customBreadcrumbProps, noticeProps, title, fluidContainer } = props;
     const route = useRoute();
     useDocumentTitle(title);
     const datastoreValue = useContext(datastoreContext);
@@ -35,7 +36,7 @@ function Main(props: PropsWithChildren<MainProps>) {
             {/* doit être le premier élément atteignable après le lien d'évitement (Accessibilité) : https://www.systeme-de-design.gouv.fr/elements-d-interface/composants/bandeau-d-information-importante */}
             {noticeProps && <Notice isClosable {...noticeProps} />}
 
-            <div className={fr.cx("fr-container", "fr-my-2w")}>
+            <div className={fr.cx(fluidContainer ? "fr-container--fluid" : "fr-container")}>
                 {breadcrumbProps && <Breadcrumb {...breadcrumbProps} />}
 
                 <div className={fr.cx("fr-mb-4v")}>

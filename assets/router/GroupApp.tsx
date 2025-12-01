@@ -3,7 +3,7 @@ import { Route } from "type-route";
 
 import { routes } from "./router";
 import AppLayout, { AppLayoutProps } from "../components/Layout/AppLayout";
-import Home from "../pages/Home";
+import Discover from "@/pages/discover/Discover";
 import PageNotFoundWithLayout from "../pages/error/PageNotFoundWithLayout";
 import { datastoreNavItems } from "../config/navItems/datastoreNavItems";
 
@@ -47,9 +47,14 @@ function GroupApp(props: IGroupAppProps) {
     const content: { render: JSX.Element; layoutProps?: AppLayoutProps } | undefined = useMemo(() => {
         const baseDatastoreNavItems = datastoreNavItems();
         switch (route.name) {
+            case "home":
+                routes.discover().replace();
+                return {
+                    render: <Discover />,
+                };
             case "discover":
                 return {
-                    render: <Home />,
+                    render: <Discover />,
                 };
             case "about":
                 return { render: <About /> };

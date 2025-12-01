@@ -1,0 +1,283 @@
+.heroSection {
+    display: flex;
+    padding: 3rem 0 2.5rem 1rem;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: flex-end;
+    gap: 2.5rem;
+    align-self: stretch;
+    color: var(--light-decisions-text-text-title-grey, #161616);
+
+    & h1 {
+        align-self: stretch;
+
+        font-size: 2.5rem;
+        font-style: normal;
+        font-weight: 400;
+        line-height: 3rem; /* 120% */
+
+        & strong {
+            font-weight: 700;
+        }
+    }
+
+    & p {
+        align-self: stretch;
+        color: var(--light-decisions-text-text-default-grey, #3a3a3a);
+        font-size: 1.125rem;
+        font-style: normal;
+        font-weight: 400;
+        line-height: 1.75rem; /* 155.556% */
+    }
+
+    & img {
+        width: 100vw;
+        height: 23.5rem;
+        /* max-width: none; */
+        border-radius: 0.75rem 0 0 0.75rem;
+        object-fit: cover;
+    }
+}
+
+.featureCardsSection {
+    display: flex;
+    padding: 2.5rem 1rem 3.5rem 1rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2rem;
+    align-self: stretch;
+    background: var(--light-decisions-background-background-default-grey-hover, #f6f6f6);
+}
+
+.featureCardsGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    align-items: flex-start;
+    align-self: stretch;
+}
+
+@media screen and (min-width: 576px) {
+    .heroSection {
+        justify-content: center;
+
+        & h1 {
+            font-size: 3.5rem;
+            font-weight: 400;
+            line-height: 4rem; /* 114.286% */
+
+            & strong {
+                font-size: 3.5rem;
+                font-style: normal;
+                line-height: 4rem;
+            }
+        }
+
+        & img {
+            width: 30rem;
+            height: 23.5rem;
+        }
+    }
+
+    .featureCardsSection {
+        display: flex;
+        padding: 2.5rem 1rem 3.5rem 1rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2rem;
+        align-self: stretch;
+    }
+}
+
+@media screen and (min-width: 768px) {
+    .heroSection {
+        padding: 5.5rem 0 5rem 1rem;
+        align-items: center;
+        gap: 2.5rem;
+        flex-direction: row;
+
+        & h1 {
+            font-size: 3.5rem;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 4rem; /* 114.286% */
+
+            & strong {
+                font-size: 3.5rem;
+                font-style: normal;
+                font-weight: 700;
+                line-height: 4rem;
+            }
+        }
+
+        & img {
+            width: 20rem;
+            height: 23.5rem;
+        }
+    }
+
+    .featureCardsSection {
+        display: flex;
+        padding: 5rem 1rem 6rem 1rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2rem;
+        align-self: stretch;
+    }
+}
+
+@media screen and (min-width: 992px) {
+    .heroSection {
+        padding: 5.5rem 0 5rem 1.5rem;
+        align-items: center;
+        gap: 2.5rem;
+        align-self: stretch;
+
+        & h1 {
+            font-size: 4rem;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 4.5rem; /* 112.5% */
+
+            & strong {
+                font-size: 4rem;
+                font-style: normal;
+                font-weight: 700;
+                line-height: 4.5rem;
+            }
+        }
+
+        & p {
+            font-size: 1.125rem;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 1.75rem; /* 155.556% */
+        }
+
+        & img {
+            width: 25rem;
+            height: 23.5rem;
+        }
+    }
+
+    .featureCardsSection {
+        display: flex;
+        padding: 5rem 1.5rem 6rem 1.5rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4rem;
+        align-self: stretch;
+    }
+
+    .featureCardsGroup {
+        display: flex;
+        flex-direction: row;
+
+        & > div {
+            /* flex: 1; */
+            /* background-color: blue; */
+        }
+    }
+}
+
+@media screen and (min-width: 1248px) {
+    .heroSection {
+        padding: 5.5rem 0 5rem 5rem;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 2.5rem;
+        align-self: stretch;
+
+        & h1 {
+            font-size: 4rem;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 4.5rem; /* 112.5% */
+
+            & strong {
+                font-size: 4rem;
+                font-style: normal;
+                font-weight: 700;
+                line-height: 4.5rem;
+            }
+        }
+
+        & p {
+            color: var(--light-decisions-text-text-default-grey, #3a3a3a);
+            font-size: 1.125rem;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 1.75rem; /* 155.556% */
+        }
+
+        & img {
+            width: 40rem;
+            height: 23.5rem;
+            margin-right: calc(50% - 50vw);
+        }
+    }
+
+    .featureCardsSection {
+        display: flex;
+        padding: 5rem 5rem 6rem 5rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4rem;
+        align-self: stretch;
+    }
+}
+
+@media screen and (min-width: 1440px) {
+    .heroSection {
+        padding: 5.5rem 0 5rem 1.5rem;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 5rem;
+        align-self: stretch;
+
+        & h1 {
+            color: var(--light-decisions-text-text-title-grey, #161616);
+            font-family: Marianne;
+            font-size: 4rem;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 4.5rem; /* 112.5% */
+
+            & strong {
+                color: var(--light-decisions-text-text-title-grey, #161616);
+
+                /* 0.Titres alternatifs/MD/Desktop */
+                font-family: Marianne;
+                font-size: 4rem;
+                font-style: normal;
+                font-weight: 700;
+                line-height: 4.5rem;
+            }
+        }
+
+        & p {
+            color: var(--light-decisions-text-text-default-grey, #3a3a3a);
+
+            /* 2.Corps de texte/LG - Texte article/Desktop & Mobile - Regular */
+            font-family: Marianne;
+            font-size: 1.125rem;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 1.75rem; /* 155.556% */
+        }
+
+        & img {
+            width: 45rem;
+            height: 23.5rem;
+        }
+    }
+
+    .featureCardsSection {
+        display: flex;
+        padding: 5rem 7.5rem 6rem 7.5rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4rem;
+        align-self: stretch;
+    }
+}
