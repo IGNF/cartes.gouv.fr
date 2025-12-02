@@ -1,46 +1,52 @@
-import { useToggle } from "usehooks-ts";
-import Accordion from "@codegouvfr/react-dsfr/Accordion";
-import Card from "@codegouvfr/react-dsfr/Card";
-import Badge from "@codegouvfr/react-dsfr/Badge";
 import { fr } from "@codegouvfr/react-dsfr";
+import Accordion from "@codegouvfr/react-dsfr/Accordion";
 import Alert from "@codegouvfr/react-dsfr/Alert";
+import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
+import Card from "@codegouvfr/react-dsfr/Card";
 import { getLink } from "@codegouvfr/react-dsfr/link";
+import CityHall from "@codegouvfr/react-dsfr/picto/CityHall";
+import Community from "@codegouvfr/react-dsfr/picto/Community";
+import Environment from "@codegouvfr/react-dsfr/picto/Environment";
+import Internet from "@codegouvfr/react-dsfr/picto/Internet";
+import Success from "@codegouvfr/react-dsfr/picto/Success";
+import Tile from "@codegouvfr/react-dsfr/Tile";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { useEffect } from "react";
+import { useToggle } from "usehooks-ts";
 
+import Main from "@/components/Layout/Main";
 import { useAlert } from "@/hooks/useAlert";
 import placeholder16x9 from "@/img/placeholder.16x9.png";
 import SymfonyRouting from "@/modules/Routing";
-import Main from "@/components/Layout/Main";
+import { externalUrls } from "@/router/externalUrls";
 import { routes, useRoute } from "@/router/router";
 import { useAlertStore } from "@/stores/AlertStore";
 import { useAuthStore } from "@/stores/AuthStore";
 import classes from "./Discover.module.css";
-import { externalUrls } from "@/router/externalUrls";
 import FeatureCard from "./FeatureCard";
 
-import illustrationServiceExploreUrl from "@/img/discover/service-explorer.png";
-import illustrationServiceSearchUrl from "@/img/discover/service-rechercher.png";
-import viewerSvgUrl from "@/img/pictograms/viewer.svg";
-import catalogueSvgUrl from "@/img/pictograms/catalogue.svg";
-import uploaderSvgUrl from "@/img/pictograms/uploader.svg";
-import contributorSvgUrl from "@/img/pictograms/contributor.svg";
-import editorSvgUrl from "@/img/pictograms/editor.svg";
 import bdOrthoThumbUrl from "@/img/discover/data-card/bd-ortho.png";
-import scan25ThumbUrl from "@/img/discover/data-card/scan25.png";
 import donneesStatPubThumbUrl from "@/img/discover/data-card/donnees-stats-pub.png";
 import foretsPubThumbUrl from "@/img/discover/data-card/forets-pub.svg";
 import ocsgeThumbUrl from "@/img/discover/data-card/ocsge.svg";
-import rpgThumbUrl from "@/img/discover/data-card/rpg.png";
 import pebThumbUrl from "@/img/discover/data-card/peb.png";
 import projetsZaerThumbUrl from "@/img/discover/data-card/projets-zaer.svg";
+import rpgThumbUrl from "@/img/discover/data-card/rpg.png";
+import scan25ThumbUrl from "@/img/discover/data-card/scan25.png";
 import geocodingThumbUrl from "@/img/discover/key-feature-card/geocoding.svg";
-import lidarhdThumbUrl from "@/img/discover/key-feature-card/lidarhd.svg";
 import geopfApisThumbUrl from "@/img/discover/key-feature-card/geoplateforme-apis.svg";
+import geopfQgisPluginThumbUrl from "@/img/discover/key-feature-card/geoplateforme-qgis-plugin.svg";
 import geoservicesIntegrationThumbUrl from "@/img/discover/key-feature-card/geoservices-integration.svg";
 import hostingSharingThumbUrl from "@/img/discover/key-feature-card/hosting-sharing-sensitive-data.svg";
-import geopfQgisPluginThumbUrl from "@/img/discover/key-feature-card/geoplateforme-qgis-plugin.svg";
+import lidarhdThumbUrl from "@/img/discover/key-feature-card/lidarhd.svg";
+import illustrationServiceExploreUrl from "@/img/discover/service-explorer.png";
+import illustrationServiceSearchUrl from "@/img/discover/service-rechercher.png";
+import catalogueSvgUrl from "@/img/pictograms/catalogue.svg";
+import contributorSvgUrl from "@/img/pictograms/contributor.svg";
+import editorSvgUrl from "@/img/pictograms/editor.svg";
+import uploaderSvgUrl from "@/img/pictograms/uploader.svg";
+import viewerSvgUrl from "@/img/pictograms/viewer.svg";
 
 const dataCards = [
     {
@@ -272,13 +278,7 @@ export default function Discover() {
 
             <div className={classes.section}>
                 <div className={cx(classes.featureCardsWrapper)}>
-                    <h2
-                        style={{
-                            textAlign: "center",
-                        }}
-                    >
-                        Des données utiles, fiables et souveraines sur l’ensemble du territoire
-                    </h2>
+                    <h2 className={classes.sectionTitle}>Des données utiles, fiables et souveraines sur l’ensemble du territoire</h2>
 
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
                         {displayedDataCards.map((card) => (
@@ -292,8 +292,10 @@ export default function Discover() {
                                     detail={card.organisation}
                                     linkProps={{ href: externalUrls.catalogue }}
                                     enlargeLink
-                                    grey
-                                    shadow
+                                    border={false}
+                                    classes={{
+                                        body: classes.bgAltBlueFrance,
+                                    }}
                                 />
                             </div>
                         ))}
@@ -312,13 +314,7 @@ export default function Discover() {
 
             <div className={cx(classes.section, classes.bgAltGrey)}>
                 <div className={cx(classes.featureCardsWrapper)}>
-                    <h2
-                        style={{
-                            textAlign: "center",
-                        }}
-                    >
-                        Des fonctionnalités clés pour cartographier et analyser son territoire
-                    </h2>
+                    <h2 className={classes.sectionTitle}>Des fonctionnalités clés pour cartographier et analyser son territoire</h2>
 
                     <div className={cx(fr.cx("fr-accordions-group"), classes.accordionsGroup, classes.bgGrey)} data-fr-group="false">
                         <Accordion label="Géocoder vos fichiers d'adresse" defaultExpanded={true}>
@@ -452,6 +448,67 @@ export default function Discover() {
                             </div>
                         </Accordion>
                     </div>
+                </div>
+            </div>
+
+            <div className={cx(classes.section, classes.bgOpenBlueFrance)}>
+                <h2 className={classes.sectionTitle}>Des services pour tous et au service de tous</h2>
+
+                <div className={classes.tilesWrapper}>
+                    <Tile
+                        title="De référence"
+                        desc={"Des données produites par des organismes publics reconnus."}
+                        pictogram={<Success />}
+                        classes={{
+                            title: classes.tileNoBorder,
+                        }}
+                        noBorder
+                        className={classes.tile}
+                    />
+
+                    <Tile
+                        title="Souverains"
+                        desc={"Des services conçus et opérés par l’État, garantissant indépendance, sécurité et pérennité."}
+                        pictogram={<CityHall />}
+                        classes={{
+                            title: classes.tileNoBorder,
+                        }}
+                        noBorder
+                        className={classes.tile}
+                    />
+
+                    <Tile
+                        title="Accessible en ligne"
+                        desc={"Des outils utilisables librement et sans installation."}
+                        pictogram={<Internet />}
+                        classes={{
+                            title: classes.tileNoBorder,
+                        }}
+                        noBorder
+                        className={classes.tile}
+                    />
+
+                    <Tile
+                        title="Ouverts et collaboratifs"
+                        desc={"Des données ouvertes et enrichies par la communauté."}
+                        pictogram={<Environment />}
+                        classes={{
+                            title: classes.tileNoBorder,
+                        }}
+                        noBorder
+                        className={classes.tile}
+                    />
+
+                    <Tile
+                        title="À l’écoute des utilisateurs"
+                        desc={"Des évolutions construites avec la communauté d’utilisateurs."}
+                        pictogram={<Community />}
+                        classes={{
+                            title: classes.tileNoBorder,
+                        }}
+                        noBorder
+                        className={classes.tile}
+                    />
                 </div>
             </div>
         </Main>
