@@ -49,12 +49,28 @@
     width: 100%;
 }
 
+.sectionTitle {
+    text-align: center;
+}
+
 .bgGrey {
     background: var(--background-default-grey);
 }
 
 .bgAltGrey {
     background: var(--background-alt-grey);
+}
+
+.bgBlueFrancePrimary {
+    background: var(--light-decisions-background-background-action-high-blue-france, #000091);
+}
+
+.bgAltBlueFrance {
+    background: var(--background-alt-blue-france, #f5f5fe);
+}
+
+.bgOpenBlueFrance {
+    background: var(--background-open-blue-france, #e3e3fd);
 }
 
 .featureCardsWrapper {
@@ -91,6 +107,22 @@
     gap: 1.5rem;
     display: flex;
     align-items: flex-start;
+}
+
+.tilesWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 100vw;
+    max-width: none;
+}
+
+.tile {
+    border-radius: 0.25rem;
+}
+
+.tileNoBorder::before {
+    content: none;
 }
 
 @media screen and (min-width: 576px) {
@@ -224,6 +256,10 @@
     .accordionsGroup {
         padding: 4rem;
     }
+
+    .tilesWrapper {
+        gap: 2.5rem;
+    }
 }
 
 @media screen and (min-width: 1248px) {
@@ -276,6 +312,14 @@
         max-width: 78rem;
         margin-left: auto;
         margin-right: auto;
+    }
+
+    .tilesWrapper {
+        flex-direction: row;
+    }
+
+    .tile {
+        flex: 1;
     }
 }
 
