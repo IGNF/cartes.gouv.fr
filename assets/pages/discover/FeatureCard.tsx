@@ -18,9 +18,6 @@ export default function FeatureCard({ illustration, illustrationPosition = "left
                 [classes.illustrationRight]: illustrationPosition === "right",
                 [classes.noIllustration]: !illustration,
             })}
-            style={{
-                border: "1px solid red",
-            }}
         >
             {illustration && <img src={illustration} alt="" className={classes.illustration} />}
 

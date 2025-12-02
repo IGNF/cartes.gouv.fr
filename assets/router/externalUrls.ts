@@ -7,6 +7,8 @@ import { appRoot, routes } from "./router";
 export const externalUrls = {
     documentation: appRoot + "/aide/",
     documentationProducerGuide: appRoot + "/aide/fr/guides-producteur/",
+    documentationExploreMaps: appRoot + "/aide/fr/guides-utilisateur/visualiseur-cartographique/generalites-visualiseur/",
+    documentationUserGuidCatalogue: appRoot + "/aide/fr/guides-utilisateur/catalogue/",
     catalogue: catalogueUrl ?? appRoot + "/catalogue",
     maps: appRoot + "/cartes",
     contact_us: routes.contact().link.href,

@@ -136,6 +136,14 @@
     content: none;
 }
 
+.createAccountSection {
+    gap: 1.5rem;
+
+    & h3 {
+        margin: 0;
+    }
+}
+
 @media screen and (min-width: 576px) {
     .heroSection {
         justify-content: center;
@@ -210,6 +218,10 @@
         align-items: center;
         gap: 2rem;
         align-self: stretch;
+    }
+
+    .createAccountSection {
+        gap: 2.5rem;
     }
 }
 

@@ -193,7 +193,7 @@ export default function Discover() {
                         }
                         footer={
                             <>
-                                <Link className={fr.cx("fr-link")} href={routes.discover().href}>
+                                <Link className={fr.cx("fr-link")} href={externalUrls.documentationExploreMaps}>
                                     {"En savoir plus"}
                                 </Link>
                                 <Button
@@ -221,7 +221,7 @@ export default function Discover() {
                         }
                         footer={
                             <>
-                                <Link className={fr.cx("fr-link")} href={routes.discover().href}>
+                                <Link className={fr.cx("fr-link")} href={externalUrls.documentationUserGuidCatalogue}>
                                     {"En savoir plus"}
                                 </Link>
                                 <Button
@@ -234,62 +234,70 @@ export default function Discover() {
                             </>
                         }
                     />
-                    <div className={classes.featureCardsRow}>
-                        <FeatureCard
-                            picto={uploaderSvgUrl}
-                            title="Publier une donnée"
-                            desc={
-                                <>
-                                    Grâce à la Géoplateforme, infrastructure ouverte et souveraine,&nbsp;
-                                    <strong>hébergez, actualisez et partagez vos données en toute autonomie.</strong>
-                                </>
-                            }
-                            footer={
-                                <>
-                                    <Link className={fr.cx("fr-link")} href={routes.discover().href}>
-                                        {"En savoir plus"}
-                                    </Link>
-                                    <Button iconId="fr-icon-arrow-right-s-line" iconPosition="right" linkProps={routes.dashboard_pro().link}>
-                                        Publier
-                                    </Button>
-                                </>
-                            }
-                        />
-                        <FeatureCard
-                            picto={contributorSvgUrl}
-                            title="Collaborer sur des données"
-                            desc={
-                                <>
-                                    <strong>Créez des signalements, enrichissez des bases de données</strong>&nbsp;et animez vos communautés de contributeurs.
-                                </>
-                            }
-                            footer={
-                                <>
-                                    {/* <Link className={fr.cx("fr-link")} href={routes.discover().href}>
-                                        {"En savoir plus"}
-                                    </Link> */}
-                                    <Badge severity="new">À venir</Badge>
-                                </>
-                            }
-                        />
-                        <FeatureCard
-                            picto={editorSvgUrl}
-                            title="Créer des cartes"
-                            desc={
-                                <>
-                                    Mobilisez les données de cartes.gouv.fr et&nbsp;
-                                    <strong>transformez vos données en cartes personnalisées</strong>, interactives et prêtes à être partagées.
-                                </>
-                            }
-                            footer={
-                                <>
-                                    {/* <Link className={fr.cx("fr-link")} href={routes.discover().href}>
+                    <div className={cx(fr.cx("fr-grid-row"), classes.featureCardsRow)}>
+                        <div className={fr.cx("fr-col")}>
+                            <FeatureCard
+                                picto={uploaderSvgUrl}
+                                title="Publier une donnée"
+                                desc={
+                                    <>
+                                        Grâce à la Géoplateforme, infrastructure ouverte et souveraine,&nbsp;
+                                        <strong>hébergez, actualisez et partagez vos données en toute autonomie.</strong>
+                                    </>
+                                }
+                                footer={
+                                    <>
+                                        <Link className={fr.cx("fr-link")} href={externalUrls.documentationProducerGuide}>
+                                            {"En savoir plus"}
+                                        </Link>
+                                        <Button iconId="fr-icon-arrow-right-s-line" iconPosition="right" linkProps={routes.dashboard_pro().link}>
+                                            Publier
+                                        </Button>
+                                    </>
+                                }
+                            />
+                        </div>
+                        <div className={fr.cx("fr-col")}>
+                            <FeatureCard
+                                picto={contributorSvgUrl}
+                                title="Collaborer sur des données"
+                                desc={
+                                    <>
+                                        <strong>Créez des signalements, enrichissez des bases de données</strong>&nbsp;et animez vos communautés de
+                                        contributeurs.
+                                    </>
+                                }
+                                footer={
+                                    <>
+                                        {/* <Link className={fr.cx("fr-link")} href={routes.discover().href}>
                                         {"En savoir plus"}
                                     </Link> */}
-                                    <Badge severity="new">À venir</Badge>
-                                </>
-                            }
-                        />
+                                        <Badge severity="new">À venir</Badge>
+                                    </>
+                                }
+                            />
+                        </div>
+
+                        <div className={fr.cx("fr-col")}>
+                            <FeatureCard
+                                picto={editorSvgUrl}
+                                title="Créer des cartes"
+                                desc={
+                                    <>
+                                        Mobilisez les données de cartes.gouv.fr et&nbsp;
+                                        <strong>transformez vos données en cartes personnalisées</strong>, interactives et prêtes à être partagées.
+                                    </>
+                                }
+                                footer={
+                                    <>
+                                        {/* <Link className={fr.cx("fr-link")} href={routes.discover().href}>
+                                        {"En savoir plus"}
+                                    </Link> */}
+                                        <Badge severity="new">À venir</Badge>
+                                    </>
+                                }
+                            />
+                        </div>
                     </div>
                 </div>
             </section>
@@ -531,60 +539,58 @@ export default function Discover() {
             </section>
 
             <section className={cx(classes.section, classes.bgGrey)}>
-                <div className={cx(classes.featureCardsWrapper)}>
-                    <h2 className={classes.sectionTitle}>On vous accompagne</h2>
+                <h2 className={classes.sectionTitle}>On vous accompagne</h2>
 
-                    <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
-                        <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
-                            <Card
-                                title="Des temps forts"
-                                border={false}
-                                desc={
-                                    "Inscrivez-vous à nos prochains événements et ateliers pour découvrir les nouveautés, poser vos questions et partager vos cas d’usages."
-                                }
-                                end={
-                                    <Link className={fr.cx("fr-link")} {...routes.news_list().link}>
-                                        Voir les actualités&nbsp;
-                                        <span className={fr.cx("fr-icon-arrow-right-line")} />
-                                    </Link>
-                                }
-                            />
-                        </div>
-                        <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
-                            <Card
-                                title="Une communauté"
-                                border={false}
-                                desc={
-                                    "Rejoignez une communauté d’utilisateurs et de contributeurs pour échanger, partager vos retours et construire ensemble les services de demain. "
-                                }
-                                end={
-                                    <Link className={fr.cx("fr-link")} {...routes.news_list().link}>
-                                        Rejoindre la communauté&nbsp;
-                                        <span className={fr.cx("fr-icon-arrow-right-line")} />
-                                    </Link>
-                                }
-                            />
-                        </div>
-                        <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
-                            <Card
-                                title="Une aide"
-                                border={false}
-                                desc={
-                                    "Accédez à notre centre d’aide à tout moment pour découvrir nos bonnes pratiques, contacter notre support ou participer à nos webinaires en ligne."
-                                }
-                                end={
-                                    <Link className={fr.cx("fr-link")} href={externalUrls.documentation}>
-                                        Consulter l’aide&nbsp;
-                                        <span className={fr.cx("fr-icon-arrow-right-line")} />
-                                    </Link>
-                                }
-                            />
-                        </div>
+                <div className={cx(fr.cx("fr-grid-row"), classes.featureCardsRow)}>
+                    <div className={fr.cx("fr-col")}>
+                        <Card
+                            title="Des temps forts"
+                            border={false}
+                            desc={
+                                "Inscrivez-vous à nos prochains événements et ateliers pour découvrir les nouveautés, poser vos questions et partager vos cas d’usages."
+                            }
+                            endDetail={
+                                <Link className={fr.cx("fr-link")} {...routes.news_list().link}>
+                                    Voir les actualités&nbsp;
+                                    <span className={fr.cx("fr-icon-arrow-right-line")} />
+                                </Link>
+                            }
+                        />
+                    </div>
+                    <div className={fr.cx("fr-col")}>
+                        <Card
+                            title="Une communauté"
+                            border={false}
+                            desc={
+                                "Rejoignez une communauté d’utilisateurs et de contributeurs pour échanger, partager vos retours et construire ensemble les services de demain. "
+                            }
+                            endDetail={
+                                <Link className={fr.cx("fr-link")} {...routes.news_list().link}>
+                                    Rejoindre la communauté&nbsp;
+                                    <span className={fr.cx("fr-icon-arrow-right-line")} />
+                                </Link>
+                            }
+                        />
+                    </div>
+                    <div className={fr.cx("fr-col")}>
+                        <Card
+                            title="Une aide"
+                            border={false}
+                            desc={
+                                "Accédez à notre centre d’aide à tout moment pour découvrir nos bonnes pratiques, contacter notre support ou participer à nos webinaires en ligne."
+                            }
+                            endDetail={
+                                <Link className={fr.cx("fr-link")} href={externalUrls.documentation}>
+                                    Consulter l’aide&nbsp;
+                                    <span className={fr.cx("fr-icon-arrow-right-line")} />
+                                </Link>
+                            }
+                        />
                     </div>
                 </div>
             </section>
 
-            <section className={cx(classes.section, classes.bgActionHighBlueFrance, classes.textInvertedBlueFrance)}>
+            <section className={cx(classes.section, classes.createAccountSection, classes.bgActionHighBlueFrance, classes.textInvertedBlueFrance)}>
                 <h3 className={classes.sectionTitle}>Créez votre compte pour sauvegarder vos données et vos productions sur cartes.gouv.fr</h3>
 
                 <Button iconId="fr-icon-arrow-right-line" size="large" linkProps={{ href: externalUrls.login }}>
