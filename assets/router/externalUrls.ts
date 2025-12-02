@@ -1,6 +1,7 @@
 import { RegisteredLinkProps } from "@codegouvfr/react-dsfr/link";
 
 import { catalogueUrl } from "@/env";
+import SymfonyRouting from "@/modules/Routing";
 import { appRoot, routes } from "./router";
 
 export const externalUrls = {
@@ -10,6 +11,8 @@ export const externalUrls = {
     maps: appRoot + "/cartes",
     contact_us: routes.contact().link.href,
     discover_cartesgouvfr: routes.discover().link.href,
+    login: SymfonyRouting.generate("cartesgouvfr_security_login"),
+    logout: SymfonyRouting.generate("cartesgouvfr_security_logout"),
 } as const;
 
 export function externalLink(route: keyof typeof externalUrls, title?: string): RegisteredLinkProps {

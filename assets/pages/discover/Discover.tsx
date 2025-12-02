@@ -17,7 +17,6 @@ import { useToggle } from "usehooks-ts";
 
 import Main from "@/components/Layout/Main";
 import { useAlert } from "@/hooks/useAlert";
-import placeholder16x9 from "@/img/placeholder.16x9.png";
 import SymfonyRouting from "@/modules/Routing";
 import { externalUrls } from "@/router/externalUrls";
 import { routes, useRoute } from "@/router/router";
@@ -34,6 +33,7 @@ import pebThumbUrl from "@/img/discover/data-card/peb.png";
 import projetsZaerThumbUrl from "@/img/discover/data-card/projets-zaer.svg";
 import rpgThumbUrl from "@/img/discover/data-card/rpg.png";
 import scan25ThumbUrl from "@/img/discover/data-card/scan25.png";
+import heroImgUrl from "@/img/discover/hero.png";
 import geocodingThumbUrl from "@/img/discover/key-feature-card/geocoding.svg";
 import geopfApisThumbUrl from "@/img/discover/key-feature-card/geoplateforme-apis.svg";
 import geopfQgisPluginThumbUrl from "@/img/discover/key-feature-card/geoplateforme-qgis-plugin.svg";
@@ -53,41 +53,65 @@ const dataCards = [
         title: "Prises de vues aériennes (BD ORTHO)",
         organisation: "IGN",
         thumbnailUrl: bdOrthoThumbUrl,
+        linkProps: {
+            href: "https://cartes.gouv.fr/catalogue/dataset/IGNF_BD-ORTHO",
+        },
     },
     {
         title: "SCAN 25",
         organisation: "IGN",
         thumbnailUrl: scan25ThumbUrl,
+        linkProps: {
+            href: "https://cartes.gouv.fr/catalogue/dataset/IGNF_SCAN-25",
+        },
     },
     {
         title: "Données Statistiques Publiques",
         organisation: "INSEE",
         thumbnailUrl: donneesStatPubThumbUrl,
+        linkProps: {
+            href: "https://cartes.gouv.fr/catalogue/dataset/INSEE_DONNEES",
+        },
     },
     {
         title: "Forêts Publiques",
         organisation: "ONF",
         thumbnailUrl: foretsPubThumbUrl,
+        linkProps: {
+            href: "https://cartes.gouv.fr/catalogue/dataset/ONF_FORETS-PUBLIQUES",
+        },
     },
     {
         title: "Occupation du Sol à grande Échelle (OCS GE)",
         organisation: "DGALN, IGN, MTE",
         thumbnailUrl: ocsgeThumbUrl,
+        linkProps: {
+            href: "https://cartes.gouv.fr/catalogue/dataset/IGNF_INPE",
+        },
     },
     {
         title: "Registre Parcellaire Graphique (RPG)",
         organisation: "IGN",
         thumbnailUrl: rpgThumbUrl,
+        linkProps: {
+            href: "https://cartes.gouv.fr/catalogue/dataset/IGNF_RPG",
+        },
     },
     {
         title: "Plan d'Exposition au Bruit (PEB)",
         organisation: "DGAC",
         thumbnailUrl: pebThumbUrl,
+        linkProps: {
+            href: "https://cartes.gouv.fr/catalogue/dataset/DGAC_Plan_d_Exposition_au_Bruit_PEB",
+        },
     },
     {
         title: "Projets de zones d'accélération des énergies renouvelables",
         organisation: "DTT 51",
         thumbnailUrl: projetsZaerThumbUrl,
+        linkProps: {
+            href: "https://cartes.gouv.fr/catalogue/dataset/f1a74532-5e5a-4756-b100-b6524f9a1805",
+        },
     },
 ] as const;
 
@@ -139,7 +163,7 @@ export default function Discover() {
                 />
             )}
 
-            <div className={cx(fr.cx("fr-container"), classes.heroSection)}>
+            <section className={cx(fr.cx("fr-container"), classes.heroSection)}>
                 <div>
                     <h1>
                         Découvrir
@@ -152,16 +176,10 @@ export default function Discover() {
                     </p>
                 </div>
 
-                <img
-                    src={placeholder16x9}
-                    alt=""
-                    style={{
-                        border: "1px solid red",
-                    }}
-                />
-            </div>
+                <img src={heroImgUrl} alt="" />
+            </section>
 
-            <div className={cx(classes.section, classes.bgAltGrey)}>
+            <section className={cx(classes.section, classes.bgAltGrey)}>
                 <div className={cx(classes.featureCardsWrapper)}>
                     <FeatureCard
                         illustration={illustrationServiceExploreUrl}
@@ -274,9 +292,9 @@ export default function Discover() {
                         />
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <div className={classes.section}>
+            <section className={classes.section}>
                 <div className={cx(classes.featureCardsWrapper)}>
                     <h2 className={classes.sectionTitle}>Des données utiles, fiables et souveraines sur l’ensemble du territoire</h2>
 
@@ -290,7 +308,7 @@ export default function Discover() {
                                     imageAlt=""
                                     title={card.title}
                                     detail={card.organisation}
-                                    linkProps={{ href: externalUrls.catalogue }}
+                                    linkProps={card.linkProps}
                                     enlargeLink
                                     border={false}
                                     classes={{
@@ -310,9 +328,9 @@ export default function Discover() {
                         Afficher {showAllDataCards ? "moins" : "plus"}
                     </Button>
                 </div>
-            </div>
+            </section>
 
-            <div className={cx(classes.section, classes.bgAltGrey)}>
+            <section className={cx(classes.section, classes.bgAltGrey)}>
                 <div className={cx(classes.featureCardsWrapper)}>
                     <h2 className={classes.sectionTitle}>Des fonctionnalités clés pour cartographier et analyser son territoire</h2>
 
@@ -449,9 +467,9 @@ export default function Discover() {
                         </Accordion>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <div className={cx(classes.section, classes.bgOpenBlueFrance)}>
+            <section className={cx(classes.section, classes.bgOpenBlueFrance)}>
                 <h2 className={classes.sectionTitle}>Des services pour tous et au service de tous</h2>
 
                 <div className={classes.tilesWrapper}>
@@ -510,7 +528,69 @@ export default function Discover() {
                         className={classes.tile}
                     />
                 </div>
-            </div>
+            </section>
+
+            <section className={cx(classes.section, classes.bgGrey)}>
+                <div className={cx(classes.featureCardsWrapper)}>
+                    <h2 className={classes.sectionTitle}>On vous accompagne</h2>
+
+                    <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
+                        <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
+                            <Card
+                                title="Des temps forts"
+                                border={false}
+                                desc={
+                                    "Inscrivez-vous à nos prochains événements et ateliers pour découvrir les nouveautés, poser vos questions et partager vos cas d’usages."
+                                }
+                                end={
+                                    <Link className={fr.cx("fr-link")} {...routes.news_list().link}>
+                                        Voir les actualités&nbsp;
+                                        <span className={fr.cx("fr-icon-arrow-right-line")} />
+                                    </Link>
+                                }
+                            />
+                        </div>
+                        <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
+                            <Card
+                                title="Une communauté"
+                                border={false}
+                                desc={
+                                    "Rejoignez une communauté d’utilisateurs et de contributeurs pour échanger, partager vos retours et construire ensemble les services de demain. "
+                                }
+                                end={
+                                    <Link className={fr.cx("fr-link")} {...routes.news_list().link}>
+                                        Rejoindre la communauté&nbsp;
+                                        <span className={fr.cx("fr-icon-arrow-right-line")} />
+                                    </Link>
+                                }
+                            />
+                        </div>
+                        <div className={fr.cx("fr-col-12", "fr-col-md-4")}>
+                            <Card
+                                title="Une aide"
+                                border={false}
+                                desc={
+                                    "Accédez à notre centre d’aide à tout moment pour découvrir nos bonnes pratiques, contacter notre support ou participer à nos webinaires en ligne."
+                                }
+                                end={
+                                    <Link className={fr.cx("fr-link")} href={externalUrls.documentation}>
+                                        Consulter l’aide&nbsp;
+                                        <span className={fr.cx("fr-icon-arrow-right-line")} />
+                                    </Link>
+                                }
+                            />
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section className={cx(classes.section, classes.bgActionHighBlueFrance, classes.textInvertedBlueFrance)}>
+                <h3 className={classes.sectionTitle}>Créez votre compte pour sauvegarder vos données et vos productions sur cartes.gouv.fr</h3>
+
+                <Button iconId="fr-icon-arrow-right-line" size="large" linkProps={{ href: externalUrls.login }}>
+                    Créer mon compte
+                </Button>
+            </section>
         </Main>
     );
 }
