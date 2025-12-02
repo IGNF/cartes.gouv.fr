@@ -6,7 +6,7 @@
     /* align-items: center; */
     gap: 1.5rem;
     align-self: stretch;
-    background: var(--light-decisions-background-background-default-grey, #fff);
+    background: var(--background-default-grey, #fff);
 
     & .body {
         display: flex;
@@ -28,7 +28,7 @@
 
     & .title {
         align-self: stretch;
-        color: var(--light-decisions-text-text-title-grey, #161616);
+        color: var(--text-title-grey, #161616);
         font-size: 1.75rem;
         font-style: normal;
         font-weight: 700;
@@ -39,7 +39,7 @@
     }
 
     & .desc {
-        color: var(--light-decisions-text-text-default-grey, #3a3a3a);
+        color: var(--text-default-grey, #3a3a3a);
 
         font-size: 1.125rem;
         font-style: normal;
@@ -49,7 +49,7 @@
         margin: 0;
 
         & strong {
-            color: var(--light-decisions-text-text-default-grey, #3a3a3a);
+            color: var(--text-default-grey, #3a3a3a);
 
             font-size: 1.125rem;
             font-style: normal;
