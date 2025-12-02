@@ -39,13 +39,17 @@
     }
 }
 
-.featureCardsSection {
+.section {
     display: flex;
     padding: 2.5rem 1rem 3.5rem 1rem;
     flex-direction: column;
     align-items: center;
     gap: 2rem;
     align-self: stretch;
+    width: 100%;
+}
+
+.bgGrey {
     background: var(--light-decisions-background-background-default-grey-hover, #f6f6f6);
 }
 
@@ -64,10 +68,6 @@
     gap: 2rem;
     width: 100%;
     align-items: stretch;
-}
-
-.featureCardsRow > * {
-    flex: 1;
 }
 
 @media screen and (min-width: 576px) {
@@ -92,7 +92,7 @@
         }
     }
 
-    .featureCardsSection {
+    .section {
         display: flex;
         padding: 2.5rem 1rem 3.5rem 1rem;
         flex-direction: column;
@@ -129,7 +129,7 @@
         }
     }
 
-    .featureCardsSection {
+    .section {
         display: flex;
         padding: 5rem 1rem 6rem 1rem;
         flex-direction: column;
@@ -173,7 +173,7 @@
         }
     }
 
-    .featureCardsSection {
+    .section {
         display: flex;
         padding: 5rem 1.5rem 6rem 1.5rem;
         flex-direction: column;
@@ -228,7 +228,7 @@
         }
     }
 
-    .featureCardsSection {
+    .section {
         display: flex;
         padding: 5rem 5rem 6rem 5rem;
         flex-direction: column;
@@ -289,7 +289,7 @@
         }
     }
 
-    .featureCardsSection {
+    .section {
         display: flex;
         padding: 5rem 7.5rem 6rem 7.5rem;
         flex-direction: column;
