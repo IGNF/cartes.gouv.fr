@@ -6,7 +6,7 @@
     align-items: flex-end;
     gap: 2.5rem;
     align-self: stretch;
-    color: var(--light-decisions-text-text-title-grey, #161616);
+    color: var(--text-title-grey, #161616);
 
     & h1 {
         align-self: stretch;
@@ -23,7 +23,7 @@
 
     & p {
         align-self: stretch;
-        color: var(--light-decisions-text-text-default-grey, #3a3a3a);
+        color: var(--text-default-grey, #3a3a3a);
         font-size: 1.125rem;
         font-style: normal;
         font-weight: 400;
@@ -50,13 +50,17 @@
 }
 
 .bgGrey {
-    background: var(--light-decisions-background-background-default-grey-hover, #f6f6f6);
+    background: var(--background-default-grey);
+}
+
+.bgAltGrey {
+    background: var(--background-alt-grey);
 }
 
 .featureCardsWrapper {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     gap: 2rem;
     align-self: stretch;
     width: 100%;
@@ -68,6 +72,25 @@
     gap: 2rem;
     width: 100%;
     align-items: stretch;
+}
+
+.accordionsGroup {
+    width: 100%;
+    padding: 1rem 0.5rem;
+}
+
+.accordionBody {
+    padding: 0.75rem;
+    display: flex;
+    gap: 1.5rem;
+}
+
+.accordionButtons {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    display: flex;
+    align-items: flex-start;
 }
 
 @media screen and (min-width: 576px) {
@@ -99,6 +122,14 @@
         align-items: center;
         gap: 2rem;
         align-self: stretch;
+    }
+
+    .accordionsGroup {
+        padding: 1rem;
+    }
+
+    .accordionButtons {
+        flex-direction: row;
     }
 }
 
@@ -189,6 +220,10 @@
     .featureCardsRow {
         flex-direction: row;
     }
+
+    .accordionsGroup {
+        padding: 4rem;
+    }
 }
 
 @media screen and (min-width: 1248px) {
@@ -214,7 +249,7 @@
         }
 
         & p {
-            color: var(--light-decisions-text-text-default-grey, #3a3a3a);
+            color: var(--text-default-grey, #3a3a3a);
             font-size: 1.125rem;
             font-style: normal;
             font-weight: 400;
@@ -253,7 +288,7 @@
         align-self: stretch;
 
         & h1 {
-            color: var(--light-decisions-text-text-title-grey, #161616);
+            color: var(--text-title-grey, #161616);
             font-family: Marianne;
             font-size: 4rem;
             font-style: normal;
@@ -261,7 +296,7 @@
             line-height: 4.5rem; /* 112.5% */
 
             & strong {
-                color: var(--light-decisions-text-text-title-grey, #161616);
+                color: var(--text-title-grey, #161616);
 
                 /* 0.Titres alternatifs/MD/Desktop */
                 font-family: Marianne;
@@ -273,7 +308,7 @@
         }
 
         & p {
-            color: var(--light-decisions-text-text-default-grey, #3a3a3a);
+            color: var(--text-default-grey, #3a3a3a);
 
             /* 2.Corps de texte/LG - Texte article/Desktop & Mobile - Regular */
             font-family: Marianne;
