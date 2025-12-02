@@ -93,67 +93,15 @@ export default function Discover() {
             </div>
 
             <div className={classes.featureCardsSection}>
-                <FeatureCard
-                    illustration={illustrationServiceExploreUrl}
-                    picto={viewerSvgUrl}
-                    title="Explorer les cartes"
-                    desc={
-                        <>
-                            <strong>Découvrez des cartes thématiques et de référence</strong>&nbsp;{"dont les fonds IGN sur l'ensemble du territoire français."}
-                        </>
-                    }
-                    footer={
-                        <>
-                            <Link className={fr.cx("fr-link")} href={routes.discover().href}>
-                                {"En savoir plus"}
-                            </Link>
-                            <Button
-                                iconId="fr-icon-arrow-right-s-line"
-                                iconPosition="right"
-                                linkProps={{
-                                    href: externalUrls.maps,
-                                }}
-                            >
-                                Explorer
-                            </Button>
-                        </>
-                    }
-                />
-                <FeatureCard
-                    illustration={illustrationServiceSearchUrl}
-                    illustrationPosition="right"
-                    picto={catalogueSvgUrl}
-                    title="Rechercher une donnée"
-                    desc={
-                        <>
-                            Accédez rapidement à la donnée dont vous avez besoin,&nbsp;<strong>téléchargez-la, utilisez ses flux et mobilisez des APIs.</strong>
-                        </>
-                    }
-                    footer={
-                        <>
-                            <Link className={fr.cx("fr-link")} href={routes.discover().href}>
-                                {"En savoir plus"}
-                            </Link>
-                            <Button
-                                iconId="fr-icon-arrow-right-s-line"
-                                iconPosition="right"
-                                linkProps={{
-                                    href: externalUrls.catalogue,
-                                }}
-                            >
-                                Explorer
-                            </Button>
-                        </>
-                    }
-                />
-                <div className={classes.featureCardsGroup}>
+                <div className={cx(classes.featureCardsWrapper)}>
                     <FeatureCard
-                        picto={uploaderSvgUrl}
-                        title="Publier une donnée"
+                        illustration={illustrationServiceExploreUrl}
+                        picto={viewerSvgUrl}
+                        title="Explorer les cartes"
                         desc={
                             <>
-                                Grâce à la Géoplateforme, infrastructure ouverte et souveraine,&nbsp;
-                                <strong>hébergez, actualisez et partagez vos données en toute autonomie.</strong>
+                                <strong>Découvrez des cartes thématiques et de référence</strong>&nbsp;
+                                {"dont les fonds IGN sur l'ensemble du territoire français."}
                             </>
                         }
                         footer={
@@ -161,18 +109,27 @@ export default function Discover() {
                                 <Link className={fr.cx("fr-link")} href={routes.discover().href}>
                                     {"En savoir plus"}
                                 </Link>
-                                <Button iconId="fr-icon-arrow-right-s-line" iconPosition="right" linkProps={routes.dashboard_pro().link}>
-                                    Publier
+                                <Button
+                                    iconId="fr-icon-arrow-right-s-line"
+                                    iconPosition="right"
+                                    linkProps={{
+                                        href: externalUrls.maps,
+                                    }}
+                                >
+                                    Explorer
                                 </Button>
                             </>
                         }
                     />
                     <FeatureCard
-                        picto={contributorSvgUrl}
-                        title="Collaborer sur des données"
+                        illustration={illustrationServiceSearchUrl}
+                        illustrationPosition="right"
+                        picto={catalogueSvgUrl}
+                        title="Rechercher une donnée"
                         desc={
                             <>
-                                <strong>Créez des signalements, enrichissez des bases de données</strong>&nbsp;et animez vos communautés de contributeurs.
+                                Accédez rapidement à la donnée dont vous avez besoin,&nbsp;
+                                <strong>téléchargez-la, utilisez ses flux et mobilisez des APIs.</strong>
                             </>
                         }
                         footer={
@@ -180,28 +137,73 @@ export default function Discover() {
                                 <Link className={fr.cx("fr-link")} href={routes.discover().href}>
                                     {"En savoir plus"}
                                 </Link>
-                                <Badge severity="new">À venir</Badge>
+                                <Button
+                                    linkProps={{
+                                        href: externalUrls.catalogue,
+                                    }}
+                                >
+                                    Rechercher
+                                </Button>
                             </>
                         }
                     />
-                    <FeatureCard
-                        picto={editorSvgUrl}
-                        title="Créer des cartes"
-                        desc={
-                            <>
-                                Mobilisez les données de cartes.gouv.fr et&nbsp;
-                                <strong>transformez vos données en cartes personnalisées</strong>, interactives et prêtes à être partagées.
-                            </>
-                        }
-                        footer={
-                            <>
-                                <Link className={fr.cx("fr-link")} href={routes.discover().href}>
-                                    {"En savoir plus"}
-                                </Link>
-                                <Badge severity="new">À venir</Badge>
-                            </>
-                        }
-                    />
+                    <div className={classes.featureCardsRow}>
+                        <FeatureCard
+                            picto={uploaderSvgUrl}
+                            title="Publier une donnée"
+                            desc={
+                                <>
+                                    Grâce à la Géoplateforme, infrastructure ouverte et souveraine,&nbsp;
+                                    <strong>hébergez, actualisez et partagez vos données en toute autonomie.</strong>
+                                </>
+                            }
+                            footer={
+                                <>
+                                    <Link className={fr.cx("fr-link")} href={routes.discover().href}>
+                                        {"En savoir plus"}
+                                    </Link>
+                                    <Button iconId="fr-icon-arrow-right-s-line" iconPosition="right" linkProps={routes.dashboard_pro().link}>
+                                        Publier
+                                    </Button>
+                                </>
+                            }
+                        />
+                        <FeatureCard
+                            picto={contributorSvgUrl}
+                            title="Collaborer sur des données"
+                            desc={
+                                <>
+                                    <strong>Créez des signalements, enrichissez des bases de données</strong>&nbsp;et animez vos communautés de contributeurs.
+                                </>
+                            }
+                            footer={
+                                <>
+                                    <Link className={fr.cx("fr-link")} href={routes.discover().href}>
+                                        {"En savoir plus"}
+                                    </Link>
+                                    <Badge severity="new">À venir</Badge>
+                                </>
+                            }
+                        />
+                        <FeatureCard
+                            picto={editorSvgUrl}
+                            title="Créer des cartes"
+                            desc={
+                                <>
+                                    Mobilisez les données de cartes.gouv.fr et&nbsp;
+                                    <strong>transformez vos données en cartes personnalisées</strong>, interactives et prêtes à être partagées.
+                                </>
+                            }
+                            footer={
+                                <>
+                                    <Link className={fr.cx("fr-link")} href={routes.discover().href}>
+                                        {"En savoir plus"}
+                                    </Link>
+                                    <Badge severity="new">À venir</Badge>
+                                </>
+                            }
+                        />
+                    </div>
                 </div>
             </div>
         </Main>
