@@ -51,6 +51,7 @@
 
 .sectionTitle {
     text-align: center;
+    margin: 1.5rem 0;
 }
 
 .bgGrey {
@@ -61,8 +62,8 @@
     background: var(--background-alt-grey);
 }
 
-.bgBlueFrancePrimary {
-    background: var(--light-decisions-background-background-action-high-blue-france, #000091);
+.bgActionHighBlueFrance {
+    background: var(--background-action-high-blue-france, #000091);
 }
 
 .bgAltBlueFrance {
@@ -71,6 +72,10 @@
 
 .bgOpenBlueFrance {
     background: var(--background-open-blue-france, #e3e3fd);
+}
+
+.textInvertedBlueFrance > * {
+    color: var(--text-inverted-blue-france, #f5f5fe);
 }
 
 .featureCardsWrapper {
@@ -99,6 +104,12 @@
     padding: 0.75rem;
     display: flex;
     gap: 1.5rem;
+
+    & img {
+        width: 7rem;
+        height: 7rem;
+        aspect-ratio: 1/1;
+    }
 }
 
 .accordionButtons {
