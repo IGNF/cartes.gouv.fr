@@ -1,4 +1,6 @@
-import Main from "@/components/Layout/Main";
+import { useToggle } from "usehooks-ts";
+import Accordion from "@codegouvfr/react-dsfr/Accordion";
+import Card from "@codegouvfr/react-dsfr/Card";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
@@ -10,6 +12,7 @@ import { useEffect } from "react";
 import { useAlert } from "@/hooks/useAlert";
 import placeholder16x9 from "@/img/placeholder.16x9.png";
 import SymfonyRouting from "@/modules/Routing";
+import Main from "@/components/Layout/Main";
 import { routes, useRoute } from "@/router/router";
 import { useAlertStore } from "@/stores/AlertStore";
 import { useAuthStore } from "@/stores/AuthStore";
@@ -28,12 +31,16 @@ import bdOrthoThumbUrl from "@/img/discover/data-card/bd-ortho.png";
 import scan25ThumbUrl from "@/img/discover/data-card/scan25.png";
 import donneesStatPubThumbUrl from "@/img/discover/data-card/donnees-stats-pub.png";
 import foretsPubThumbUrl from "@/img/discover/data-card/forets-pub.svg";
-import inpeThumbUrl from "@/img/discover/data-card/inpe.svg";
+import ocsgeThumbUrl from "@/img/discover/data-card/ocsge.svg";
 import rpgThumbUrl from "@/img/discover/data-card/rpg.png";
 import pebThumbUrl from "@/img/discover/data-card/peb.png";
 import projetsZaerThumbUrl from "@/img/discover/data-card/projets-zaer.svg";
-import { useToggle } from "usehooks-ts";
-import Accordion from "@codegouvfr/react-dsfr/Accordion";
+import geocodingThumbUrl from "@/img/discover/key-feature-card/geocoding.svg";
+import lidarhdThumbUrl from "@/img/discover/key-feature-card/lidarhd.svg";
+import geopfApisThumbUrl from "@/img/discover/key-feature-card/geoplateforme-apis.svg";
+import geoservicesIntegrationThumbUrl from "@/img/discover/key-feature-card/geoservices-integration.svg";
+import hostingSharingThumbUrl from "@/img/discover/key-feature-card/hosting-sharing-sensitive-data.svg";
+import geopfQgisPluginThumbUrl from "@/img/discover/key-feature-card/geoplateforme-qgis-plugin.svg";
 
 const dataCards = [
     {
@@ -57,9 +64,9 @@ const dataCards = [
         thumbnailUrl: foretsPubThumbUrl,
     },
     {
-        title: "Inventaire National des Plans d'Eau (INPE)",
-        organisation: "IGEDD, IGN, CNES",
-        thumbnailUrl: inpeThumbUrl,
+        title: "Occupation du Sol à grande Échelle (OCS GE)",
+        organisation: "DGALN, IGN, MTE",
+        thumbnailUrl: ocsgeThumbUrl,
     },
     {
         title: "Registre Parcellaire Graphique (RPG)",
@@ -148,7 +155,7 @@ export default function Discover() {
                 />
             </div>
 
-            <div className={cx(classes.section, classes.bgGrey)}>
+            <div className={cx(classes.section, classes.bgAltGrey)}>
                 <div className={cx(classes.featureCardsWrapper)}>
                     <FeatureCard
                         illustration={illustrationServiceExploreUrl}
@@ -264,41 +271,188 @@ export default function Discover() {
             </div>
 
             <div className={classes.section}>
-                <h2
-                    style={{
-                        textAlign: "center",
-                    }}
-                >
-                    Des données utiles, fiables et souveraines sur l’ensemble du territoire
-                </h2>
+                <div className={cx(classes.featureCardsWrapper)}>
+                    <h2
+                        style={{
+                            textAlign: "center",
+                        }}
+                    >
+                        Des données utiles, fiables et souveraines sur l’ensemble du territoire
+                    </h2>
 
-                <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
-                    {displayedDataCards.map((card) => (
-                        <div key={card.title} className={fr.cx("fr-col-12", "fr-col-md-3")}>
-                            <Card
-                                key={card.title}
-                                size="small"
-                                imageUrl={card.thumbnailUrl}
-                                imageAlt=""
-                                title={card.title}
-                                detail={card.organisation}
-                                linkProps={{ href: externalUrls.catalogue }}
-                                enlargeLink
-                                grey
-                                shadow
-                            />
-                        </div>
-                    ))}
+                    <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
+                        {displayedDataCards.map((card) => (
+                            <div key={card.title} className={fr.cx("fr-col-12", "fr-col-md-3")}>
+                                <Card
+                                    key={card.title}
+                                    size="small"
+                                    imageUrl={card.thumbnailUrl}
+                                    imageAlt=""
+                                    title={card.title}
+                                    detail={card.organisation}
+                                    linkProps={{ href: externalUrls.catalogue }}
+                                    enlargeLink
+                                    grey
+                                    shadow
+                                />
+                            </div>
+                        ))}
+                    </div>
+
+                    <Button
+                        iconId={showAllDataCards ? "fr-icon-subtract-line" : "fr-icon-add-line"}
+                        iconPosition="right"
+                        priority="secondary"
+                        onClick={toggleShowAllDataCards}
+                    >
+                        Afficher {showAllDataCards ? "moins" : "plus"}
+                    </Button>
                 </div>
+            </div>
 
-                <Button
-                    iconId={showAllDataCards ? "fr-icon-subtract-line" : "fr-icon-add-line"}
-                    iconPosition="right"
-                    priority="secondary"
-                    onClick={toggleShowAllDataCards}
-                >
-                    Afficher {showAllDataCards ? "moins" : "plus"}
-                </Button>
+            <div className={cx(classes.section, classes.bgAltGrey)}>
+                <div className={cx(classes.featureCardsWrapper)}>
+                    <h2
+                        style={{
+                            textAlign: "center",
+                        }}
+                    >
+                        Des fonctionnalités clés pour cartographier et analyser son territoire
+                    </h2>
+
+                    <div className={cx(fr.cx("fr-accordions-group"), classes.accordionsGroup, classes.bgGrey)} data-fr-group="false">
+                        <Accordion label="Géocoder vos fichiers d'adresse" defaultExpanded={true}>
+                            <div className={classes.accordionBody}>
+                                <img src={geocodingThumbUrl} alt="" />
+                                <div>
+                                    <p className={fr.cx("fr-m-0", "fr-mb-4v")}>
+                                        Téléversez votre fichier d’adresses, obtenez instantanément leur position géographique et générez des cartes pour
+                                        visualiser vos équipements et services.
+                                    </p>
+                                    <div className={classes.accordionButtons}>
+                                        <Link
+                                            className={fr.cx("fr-link")}
+                                            href="https://cartes.gouv.fr/aide/fr/guides-utilisateur/acceder-aux-geodonnees/geocodage/"
+                                            target="_blank"
+                                        >
+                                            En savoir plus
+                                        </Link>
+                                        <Link className={fr.cx("fr-link")} href="https://cartes.gouv.fr/catalogue/service/GeoPF_Geocodage" target="_blank">
+                                            Géocoder
+                                        </Link>
+                                    </div>
+                                </div>
+                            </div>
+                        </Accordion>
+                        <Accordion label="Télécharger et analyser les données Lidar HD">
+                            <div className={classes.accordionBody}>
+                                <img src={lidarhdThumbUrl} alt="" />
+                                <div>
+                                    <p className={fr.cx("fr-m-0", "fr-mb-4v")}>
+                                        Accédez aux données LiDAR HD produites par l’IGN pour visualiser finement le relief, la végétation ou les
+                                        infrastructures. Téléchargez les données brutes ou parcourez-les directement dans le visualiseur intégré pour faciliter
+                                        l’exploration, les mesures et l’analyse du modèle numérique du territoire.
+                                    </p>
+                                    <div className={classes.accordionButtons}>
+                                        <Link className={fr.cx("fr-link")} href="https://cartes.gouv.fr/telechargement/IGNF_MNT-LIDAR-HD" target="_blank">
+                                            Consulter
+                                        </Link>
+                                        <Link className={fr.cx("fr-link")} href="https://cartes.gouv.fr/catalogue/search?q=LIDAR&_sort=-_score" target="_blank">
+                                            Accéder à la fiche
+                                        </Link>
+                                    </div>
+                                </div>
+                            </div>
+                        </Accordion>
+                        <Accordion label="Mobiliser les APIs de la Géoplateforme">
+                            <div className={classes.accordionBody}>
+                                <img src={geopfApisThumbUrl} alt="" />
+                                <div>
+                                    <p className={fr.cx("fr-m-0", "fr-mb-4v")}>
+                                        Accédez aux APIs mises à disposition par la Géoplateforme : géocodage, calcul d’itinéraires, altimétrie, recherche de
+                                        données, génération de tuiles… Ces APIs sécurisées, opérationnelles et documentées permettent d’intégrer facilement des
+                                        services géographiques dans vos applications, sans dépendre de solutions externes.
+                                    </p>
+                                    <div className={classes.accordionButtons}>
+                                        <Link
+                                            className={fr.cx("fr-link")}
+                                            href="https://cartes.gouv.fr/aide/fr/guides-utilisateur/acceder-aux-geodonnees/"
+                                            target="_blank"
+                                        >
+                                            En savoir plus
+                                        </Link>
+                                    </div>
+                                </div>
+                            </div>
+                        </Accordion>
+                        <Accordion label="Intégrer facilement les flux géographiques dans vos applications">
+                            <div className={classes.accordionBody}>
+                                <img src={geoservicesIntegrationThumbUrl} alt="" />
+                                <div>
+                                    <p className={fr.cx("fr-m-0", "fr-mb-4v")}>
+                                        Exploitez les flux publics (WMS, WMTS, WFS) de cartes.gouv.fr dans vos sites, applications, tableaux de bord ou SIG. Les
+                                        développeurs disposent d’URL directes, de scripts d’intégration et de ressources techniques pour connecter rapidement
+                                        les données officielles du territoire à leurs projets numériques.
+                                    </p>
+                                    <div className={classes.accordionButtons}>
+                                        <Link className={fr.cx("fr-link")} href="https://fab-geocommuns.github.io/carte-facile-site/" target="_blank">
+                                            En savoir plus
+                                        </Link>
+                                    </div>
+                                </div>
+                            </div>
+                        </Accordion>
+                        <Accordion label="Héberger et diffuser des données sensibles en toute sécurité">
+                            <div className={classes.accordionBody}>
+                                <img src={hostingSharingThumbUrl} alt="" />
+                                <div>
+                                    <p className={fr.cx("fr-m-0", "fr-mb-4v")}>
+                                        Stockez vos données sensibles ou stratégiques au sein d’une infrastructure souveraine opérée par l’État. Définissez les
+                                        droits d’accès, créez des flux privés ou restreints et maîtrisez totalement la diffusion de vos données. Une solution
+                                        conçue pour les collectivités, opérateurs publics et services métiers manipulant des données critiques.
+                                    </p>
+                                    <div className={classes.accordionButtons}>
+                                        <Link
+                                            className={fr.cx("fr-link")}
+                                            href="https://cartes.gouv.fr/aide/fr/guides-producteur/publier-des-donnees-via-cartes-gouv/"
+                                            target="_blank"
+                                        >
+                                            En savoir plus
+                                        </Link>
+                                    </div>
+                                </div>
+                            </div>
+                        </Accordion>
+                        <Accordion label="Utiliser le plugin QGIS Géoplateforme ">
+                            <div className={classes.accordionBody}>
+                                <img src={geopfQgisPluginThumbUrl} alt="" />
+                                <div>
+                                    <p className={fr.cx("fr-m-0", "fr-mb-4v")}>
+                                        Accédez facilement aux principales fonctionnalités de la Géoplateforme (accès au catalogue de données, publication de
+                                        données, géocodage...) et retrouvez vos données publiées dans votre compte utilisateur sur cartes.gouv.fr.
+                                    </p>
+                                    <div className={classes.accordionButtons}>
+                                        <Link
+                                            className={fr.cx("fr-link")}
+                                            href="https://github.com/Geoplateforme/plugin-qgis-geoplateforme/blob/main/README.md"
+                                            target="_blank"
+                                        >
+                                            En savoir plus
+                                        </Link>
+                                        <Link
+                                            className={fr.cx("fr-link")}
+                                            href="https://plugins.qgis.org/plugins/geoplateforme/"
+                                            // target="_blank"
+                                        >
+                                            Télécharger le plug-in&nbsp;
+                                            <span className={fr.cx("fr-icon--sm", "fr-icon-download-fill")} />
+                                        </Link>
+                                    </div>
+                                </div>
+                            </div>
+                        </Accordion>
+                    </div>
+                </div>
             </div>
         </Main>
     );
