@@ -24,6 +24,59 @@ import catalogueSvgUrl from "@/img/pictograms/catalogue.svg";
 import uploaderSvgUrl from "@/img/pictograms/uploader.svg";
 import contributorSvgUrl from "@/img/pictograms/contributor.svg";
 import editorSvgUrl from "@/img/pictograms/editor.svg";
+import bdOrthoThumbUrl from "@/img/discover/data-card/bd-ortho.png";
+import scan25ThumbUrl from "@/img/discover/data-card/scan25.png";
+import donneesStatPubThumbUrl from "@/img/discover/data-card/donnees-stats-pub.png";
+import foretsPubThumbUrl from "@/img/discover/data-card/forets-pub.svg";
+import inpeThumbUrl from "@/img/discover/data-card/inpe.svg";
+import rpgThumbUrl from "@/img/discover/data-card/rpg.png";
+import pebThumbUrl from "@/img/discover/data-card/peb.png";
+import projetsZaerThumbUrl from "@/img/discover/data-card/projets-zaer.svg";
+import { useToggle } from "usehooks-ts";
+import Accordion from "@codegouvfr/react-dsfr/Accordion";
+
+const dataCards = [
+    {
+        title: "Prises de vues aériennes (BD ORTHO)",
+        organisation: "IGN",
+        thumbnailUrl: bdOrthoThumbUrl,
+    },
+    {
+        title: "SCAN 25",
+        organisation: "IGN",
+        thumbnailUrl: scan25ThumbUrl,
+    },
+    {
+        title: "Données Statistiques Publiques",
+        organisation: "INSEE",
+        thumbnailUrl: donneesStatPubThumbUrl,
+    },
+    {
+        title: "Forêts Publiques",
+        organisation: "ONF",
+        thumbnailUrl: foretsPubThumbUrl,
+    },
+    {
+        title: "Inventaire National des Plans d'Eau (INPE)",
+        organisation: "IGEDD, IGN, CNES",
+        thumbnailUrl: inpeThumbUrl,
+    },
+    {
+        title: "Registre Parcellaire Graphique (RPG)",
+        organisation: "IGN",
+        thumbnailUrl: rpgThumbUrl,
+    },
+    {
+        title: "Plan d'Exposition au Bruit (PEB)",
+        organisation: "DGAC",
+        thumbnailUrl: pebThumbUrl,
+    },
+    {
+        title: "Projets de zones d'accélération des énergies renouvelables",
+        organisation: "DTT 51",
+        thumbnailUrl: projetsZaerThumbUrl,
+    },
+] as const;
 
 export default function Discover() {
     const { params } = useRoute();
@@ -42,6 +95,9 @@ export default function Discover() {
             window.close();
         }
     }, [params, user]);
+
+    const [showAllDataCards, toggleShowAllDataCards] = useToggle(false);
+    const displayedDataCards = showAllDataCards ? dataCards : dataCards.slice(0, 4);
 
     return (
         <Main noticeProps={alertProps} title="Le service public des cartes et données du territoire" fluidContainer={true}>
@@ -64,7 +120,7 @@ export default function Discover() {
                     closable={true}
                     title={"Reconnexion réussie"}
                     description={
-                        "Reconnexion réussie, cette page devrait se fermer automatiquement. Si ce n'est pas le cas, vous pouvez fermer la page en cliquant sur le bouton fermer."
+                        "Reconnexion réussie, cette page devrait se fermer automatiquement. Si ce n’est pas le cas, vous pouvez fermer la page en cliquant sur le bouton fermer."
                     }
                     onClose={window.close}
                 />
@@ -92,7 +148,7 @@ export default function Discover() {
                 />
             </div>
 
-            <div className={classes.featureCardsSection}>
+            <div className={cx(classes.section, classes.bgGrey)}>
                 <div className={cx(classes.featureCardsWrapper)}>
                     <FeatureCard
                         illustration={illustrationServiceExploreUrl}
@@ -101,7 +157,7 @@ export default function Discover() {
                         desc={
                             <>
                                 <strong>Découvrez des cartes thématiques et de référence</strong>&nbsp;
-                                {"dont les fonds IGN sur l'ensemble du territoire français."}
+                                {"dont les fonds IGN sur l’ensemble du territoire français."}
                             </>
                         }
                         footer={
@@ -178,9 +234,9 @@ export default function Discover() {
                             }
                             footer={
                                 <>
-                                    <Link className={fr.cx("fr-link")} href={routes.discover().href}>
+                                    {/* <Link className={fr.cx("fr-link")} href={routes.discover().href}>
                                         {"En savoir plus"}
-                                    </Link>
+                                    </Link> */}
                                     <Badge severity="new">À venir</Badge>
                                 </>
                             }
@@ -196,15 +252,53 @@ export default function Discover() {
                             }
                             footer={
                                 <>
-                                    <Link className={fr.cx("fr-link")} href={routes.discover().href}>
+                                    {/* <Link className={fr.cx("fr-link")} href={routes.discover().href}>
                                         {"En savoir plus"}
-                                    </Link>
+                                    </Link> */}
                                     <Badge severity="new">À venir</Badge>
                                 </>
                             }
                         />
                     </div>
                 </div>
+            </div>
+
+            <div className={classes.section}>
+                <h2
+                    style={{
+                        textAlign: "center",
+                    }}
+                >
+                    Des données utiles, fiables et souveraines sur l’ensemble du territoire
+                </h2>
+
+                <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
+                    {displayedDataCards.map((card) => (
+                        <div key={card.title} className={fr.cx("fr-col-12", "fr-col-md-3")}>
+                            <Card
+                                key={card.title}
+                                size="small"
+                                imageUrl={card.thumbnailUrl}
+                                imageAlt=""
+                                title={card.title}
+                                detail={card.organisation}
+                                linkProps={{ href: externalUrls.catalogue }}
+                                enlargeLink
+                                grey
+                                shadow
+                            />
+                        </div>
+                    ))}
+                </div>
+
+                <Button
+                    iconId={showAllDataCards ? "fr-icon-subtract-line" : "fr-icon-add-line"}
+                    iconPosition="right"
+                    priority="secondary"
+                    onClick={toggleShowAllDataCards}
+                >
+                    Afficher {showAllDataCards ? "moins" : "plus"}
+                </Button>
             </div>
         </Main>
     );
