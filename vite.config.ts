@@ -4,6 +4,7 @@ import { execSync } from "child_process";
 import { configDotenv } from "dotenv";
 import { join, resolve } from "path";
 import { defineConfig } from "vite";
+import { ViteImageOptimizer } from "vite-plugin-image-optimizer";
 import run from "vite-plugin-run";
 import symfonyPlugin from "vite-plugin-symfony";
 
@@ -44,6 +45,7 @@ export default defineConfig({
             debug: process.env.APP_ENV === "dev",
             exposedEnvVars: ["APP_ENV"],
         }),
+        ViteImageOptimizer(),
         run([
             {
                 name: "fos-routing-js-dump",
