@@ -67,7 +67,7 @@
         "i18nifty": "^3.0.0",
         "intl-messageformat": "^10.5.14",
         "jiti": "^2.6.1",
-        "lint-staged": "^15.2.7",
+        "lint-staged": "^16.0.0",
         "markdown-it": "^14.1.0",
         "ol": "^10.0.0",
         "postcss": "^8.5.1",
