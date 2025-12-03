@@ -239,7 +239,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
             )}
 
             {isLoading ? (
-                <Skeleton count={12} rectangleHeight={100} />
+                <Skeleton count={6} rectangleHeight={200} />
             ) : (
                 <>
                     {datasheetList && datasheetList.length > 0 ? (

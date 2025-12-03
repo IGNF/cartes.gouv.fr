@@ -10,9 +10,13 @@ type SkeletonProps = {
 const Skeleton: FC<SkeletonProps> = ({ count, rectangleHeight = 50 }) => {
     return (
         <MuiDsfrThemeProvider>
-            {[...Array(count).keys()].map((n) => (
-                <MuiSkeleton className={fr.cx("fr-my-2v")} key={n} variant="rectangular" height={rectangleHeight} />
-            ))}
+            <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-my-4v")}>
+                {[...Array(count).keys()].map((n) => (
+                    <div key={n} className={fr.cx("fr-col-12")}>
+                        <MuiSkeleton key={n} variant="rectangular" height={rectangleHeight} />
+                    </div>
+                ))}
+            </div>
         </MuiDsfrThemeProvider>
     );
 };

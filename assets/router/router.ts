@@ -124,7 +124,13 @@ const datastoreRoutes = {
     datastore_manage_storage: datastoreRoute.extend("/consommation"),
 
     // permissions
-    datastore_manage_permissions: datastoreRoute.extend("/permissions"),
+    datastore_manage_permissions: datastoreRoute.extend(
+        {
+            page: param.query.optional.number.default(1),
+            limit: param.query.optional.number.default(4),
+        },
+        () => "/permissions"
+    ),
     datastore_add_permission: datastoreRoute.extend("/permissions/ajout"),
     datastore_edit_permission: datastoreRoute.extend(
         {

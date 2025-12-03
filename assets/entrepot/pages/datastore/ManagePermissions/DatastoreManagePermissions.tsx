@@ -2,21 +2,30 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
-import Table from "@codegouvfr/react-dsfr/Table";
+import Card from "@codegouvfr/react-dsfr/Card";
+import Pagination from "@codegouvfr/react-dsfr/Pagination";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { compareAsc } from "date-fns";
-import { FC, ReactNode, useMemo, useState } from "react";
-import api from "../../../api";
-import LoadingText from "../../../../components/Utils/LoadingText";
-import { useTranslation } from "../../../../i18n/i18n";
-import RQKeys from "../../../../modules/entrepot/RQKeys";
-import { routes } from "../../../../router/router";
+import { FC, useState } from "react";
+import { useStyles } from "tss-react/mui";
+
+import { DatastorePermission } from "@/@types/app";
+import DatastoreMain from "@/components/Layout/DatastoreMain";
+import DatastoreTertiaryNavigation from "@/components/Layout/DatastoreTertiaryNavigation";
+import { ListHeader } from "@/components/Layout/ListHeader";
+import PageTitle from "@/components/Layout/PageTitle";
+import Skeleton from "@/components/Utils/Skeleton";
+import { usePagination } from "@/hooks/usePagination";
+import { formatDateFromISO } from "@/utils";
+import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import ConfirmDialog, { ConfirmDialogModal } from "../../../../components/Utils/ConfirmDialog";
-import { CartesApiException } from "../../../../modules/jsonFetch";
 import Wait from "../../../../components/Utils/Wait";
 import { useDatastore } from "../../../../contexts/datastore";
-import Main from "../../../../components/Layout/Main";
-import { DatastorePermission } from "@/@types/app";
+import { useTranslation } from "../../../../i18n/i18n";
+import RQKeys from "../../../../modules/entrepot/RQKeys";
+import { CartesApiException } from "../../../../modules/jsonFetch";
+import { routes, useRoute } from "../../../../router/router";
+import api from "../../../api";
 
 type DatastoreManagePermissionsProps = {
     datastoreId: string;
@@ -32,7 +41,13 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
     const { datastore, status: datastoreStatus } = useDatastore();
 
     // Les permissions
-    const { data: permissions, status: permissionStatus } = useQuery<DatastorePermission[]>({
+    const {
+        data: permissions,
+        status: permissionStatus,
+        isFetching,
+        refetch,
+        dataUpdatedAt,
+    } = useQuery<DatastorePermission[]>({
         queryKey: RQKeys.datastore_permissions(datastoreId),
         queryFn: ({ signal }) => api.datastore.getPermissions(datastoreId, {}, { signal }),
         staleTime: 30000,
@@ -55,68 +70,20 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
 
     const [currentPermission, setCurrentPermission] = useState<string | undefined>(undefined);
 
-    const headers = useMemo(
-        () => [t("list.licence_header"), t("list.expiration_date_header"), t("list.granted_to_header"), t("list.services_header"), t("list.actions_header")],
-        [t]
-    );
-    const datas = useMemo(() => {
-        const result: ReactNode[][] = [[]];
-        if (permissions === undefined) return result;
+    const { params } = useRoute();
+    const page = params["page"] ? parseInt(params["page"]) : 1;
+    const limit = params["limit"] ? parseInt(params["limit"]) : 4;
 
-        return Array.from(permissions, (permission) => {
-            const expired = permission.end_date !== undefined && compareAsc(new Date(permission.end_date), new Date()) < 0;
-            const expiredNode = (
-                <span style={expired ? { color: fr.colors.decisions.text.default.warning.default } : {}}>
-                    {t("list.expires_on", { endDate: permission.end_date })}
-                </span>
-            );
+    const { paginatedItems, totalPages } = usePagination(permissions ?? [], page, limit);
 
-            const data: ReactNode[] = [permission.licence, expiredNode, t("list.granted_to", { beneficiary: permission.beneficiary })];
-            data.push(
-                <ul /*className={fr.cx("fr-raw-list")}*/>
-                    {permission.offerings.map((offering) => (
-                        <li key={offering._id}>
-                            <span>
-                                {offering.layer_name}
-                                <Badge className={fr.cx("fr-ml-1v")} noIcon severity="info">
-                                    {offering.type}
-                                </Badge>
-                            </span>
-                        </li>
-                    ))}
-                </ul>
-            );
-            data.push(
-                <div className={fr.cx("fr-grid-row", "fr-grid-row--right")}>
-                    <Button
-                        title={tCommon("modify")}
-                        priority="secondary"
-                        iconId="fr-icon-edit-line"
-                        size="small"
-                        onClick={() => {
-                            routes.datastore_edit_permission({ datastoreId: datastoreId, permissionId: permission._id }).push();
-                        }}
-                    />
-                    <Button
-                        title={tCommon("delete")}
-                        className={fr.cx("fr-ml-2v")}
-                        priority="secondary"
-                        iconId="fr-icon-delete-line"
-                        size="small"
-                        onClick={() => {
-                            setCurrentPermission(permission._id);
-                            ConfirmDialogModal.open();
-                        }}
-                    />
-                </div>
-            );
-            return data;
-        });
-    }, [datastoreId, permissions, tCommon, t]);
+    const { css } = useStyles();
 
     return (
-        <Main title={t("list.title", { datastoreName: datastore?.name })}>
-            <h1>{t("list.title", { datastoreName: datastore?.name })}</h1>
+        <DatastoreMain title={t("title", { datastoreName: datastore?.name })} datastoreId={datastoreId}>
+            <PageTitle title={t("title", { datastoreName: datastore?.name })} />
+
+            <DatastoreTertiaryNavigation datastoreId={datastoreId} communityId={datastore.community._id} />
+
             {removeStatus === "error" && <Alert severity={"error"} closable title={tCommon("error")} description={removeError.message} />}
             {removeStatus === "pending" && (
                 <Wait>
@@ -128,14 +95,145 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
                     </div>
                 </Wait>
             )}
+
+            {permissionStatus !== "pending" && (
+                <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mt-6v", "fr-mb-16v")}>
+                    <div
+                        className={fr.cx("fr-col-12", "fr-py-0")}
+                        style={{
+                            display: "flex",
+                            alignItems: "center",
+                        }}
+                    >
+                        <strong className={fr.cx("fr-text--xl", "fr-m-0", "fr-mr-2v")}>Fiches de données</strong>
+                        <Badge severity="info" noIcon={true}>
+                            {permissions?.length ?? 0}
+                        </Badge>
+                        <Button
+                            linkProps={routes.datastore_add_permission({ datastoreId: datastoreId }).link}
+                            iconId="fr-icon-add-line"
+                            iconPosition="right"
+                            className={fr.cx("fr-ml-auto")}
+                        >
+                            {t("list.add_permission")}
+                        </Button>
+                    </div>
+                </div>
+
+                // TODO recherche et filtres ici
+            )}
+
             {datastoreStatus === "pending" || permissionStatus === "pending" ? (
-                <LoadingText />
-            ) : datas.length === 0 ? (
+                <Skeleton count={6} rectangleHeight={200} />
+            ) : permissions?.length === 0 ? (
                 <Alert className={fr.cx("fr-mb-1w")} severity={"info"} title={t("list.no_permissions")} closable />
             ) : (
-                <Table headers={headers} data={datas} />
+                permissions !== undefined && (
+                    <>
+                        <ListHeader
+                            nbResults={{
+                                displayed: paginatedItems.length,
+                                total: permissions.length,
+                            }}
+                            dataUpdatedAt={dataUpdatedAt}
+                            isFetching={isFetching}
+                            refetch={refetch}
+                        />
+
+                        <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
+                            {paginatedItems.map((permission) => {
+                                const expired = permission.end_date !== undefined && compareAsc(new Date(permission.end_date), new Date()) < 0;
+                                const expiringSoon = permission.end_date !== undefined && compareAsc(new Date(permission.end_date), new Date()) <= 30;
+
+                                return (
+                                    <div className={fr.cx("fr-col-12")} key={permission._id}>
+                                        <Card
+                                            title={permission.licence}
+                                            end={
+                                                <div
+                                                    className={css({
+                                                        display: "flex",
+                                                        flexDirection: "column",
+                                                        gap: "0.5rem",
+                                                    })}
+                                                >
+                                                    {expired ? (
+                                                        <Badge severity="warning" as="span">
+                                                            Expiré
+                                                        </Badge>
+                                                    ) : expiringSoon ? (
+                                                        <Badge severity="warning" as="span">
+                                                            Expire bientôt
+                                                        </Badge>
+                                                    ) : null}
+
+                                                    {permission.end_date !== undefined ? (
+                                                        <span>Expire le {formatDateFromISO(permission.end_date)}</span>
+                                                    ) : (
+                                                        <span>{"Aucune date d'expiration"}</span>
+                                                    )}
+
+                                                    <ul>
+                                                        {permission.offerings.map((offering) => (
+                                                            <li key={offering._id}>
+                                                                <span className={fr.cx("fr-mr-3v")}>{offering.layer_name}</span>
+                                                                <Badge noIcon severity="info">
+                                                                    {offering.type}
+                                                                </Badge>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            }
+                                            footer={
+                                                <ButtonsGroup
+                                                    buttons={[
+                                                        {
+                                                            children: tCommon("modify"),
+                                                            size: "small",
+                                                            priority: "secondary",
+                                                            iconId: "fr-icon-edit-line",
+                                                            onClick: routes.datastore_edit_permission({
+                                                                datastoreId: datastoreId,
+                                                                permissionId: permission._id,
+                                                            }).push,
+                                                        },
+                                                        {
+                                                            children: tCommon("delete"),
+                                                            priority: "secondary",
+                                                            size: "small",
+                                                            iconId: "fr-icon-delete-line",
+                                                            onClick: () => {
+                                                                setCurrentPermission(permission._id);
+                                                                ConfirmDialogModal.open();
+                                                            },
+                                                        },
+                                                    ]}
+                                                    inlineLayoutWhen="sm and up"
+                                                />
+                                            }
+                                        />
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        {totalPages > 1 && (
+                            <div className={fr.cx("fr-grid-row", "fr-grid-row--center", "fr-mt-6v")}>
+                                <Pagination
+                                    count={totalPages}
+                                    showFirstLast={true}
+                                    getPageLinkProps={(pageNumber) => ({
+                                        ...routes.datastore_manage_permissions({ datastoreId, page: pageNumber, limit: limit }).link,
+                                    })}
+                                    defaultPage={page}
+                                />
+                            </div>
+                        )}
+                    </>
+                )
             )}
-            <Button linkProps={routes.datastore_add_permission({ datastoreId: datastoreId }).link}>{t("list.add_permission")}</Button>
+
             <ConfirmDialog
                 title={t("list.confirm_remove")}
                 onConfirm={() => {
@@ -144,7 +242,7 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
                     }
                 }}
             />
-        </Main>
+        </DatastoreMain>
     );
 };
 
