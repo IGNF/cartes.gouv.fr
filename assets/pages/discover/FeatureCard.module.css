@@ -1,15 +1,15 @@
 .container {
     display: flex;
-    padding: 1rem;
     flex-direction: column;
-    justify-content: center;
-    /* align-items: center; */
     gap: 1.5rem;
     align-self: stretch;
+    justify-content: center;
+    padding: 1rem;
     background: var(--background-default-grey, #fff);
 
     & .body {
         display: flex;
+        flex: 1;
         flex-direction: column;
         gap: 1.5rem;
         align-self: stretch;
@@ -28,55 +28,59 @@
 
     & .title {
         align-self: stretch;
-        color: var(--text-title-grey, #161616);
+        padding: 0;
+        margin: 0;
+        margin-bottom: 0.75rem;
         font-size: 1.75rem;
         font-style: normal;
         font-weight: 700;
         line-height: 2.25rem; /* 128.571% */
-        padding: 0;
-        margin: 0;
-        margin-bottom: 0.75rem;
+        color: var(--text-title-grey, #161616);
     }
 
     & .desc {
-        color: var(--text-default-grey, #3a3a3a);
-
+        padding: 0;
+        margin: 0;
         font-size: 1.125rem;
         font-style: normal;
         font-weight: 400;
         line-height: 1.75rem;
-        padding: 0;
-        margin: 0;
+        color: var(--text-default-grey, #3a3a3a);
 
         & strong {
-            color: var(--text-default-grey, #3a3a3a);
-
             font-size: 1.125rem;
             font-style: normal;
             font-weight: 700;
             line-height: 1.75rem; /* 155.556% */
+            color: var(--text-default-grey, #3a3a3a);
         }
+    }
+
+    & .content {
+        flex: 1;
     }
 
     & .footer {
         display: flex;
-        gap: 1.5rem;
         flex-direction: column;
+        gap: 1.5rem;
         align-items: flex-start;
+        justify-content: center;
+        min-height: 3rem;
     }
 
     &.noIllustration {
+        display: flex;
         padding: 0;
         margin: 0;
-        display: flex;
 
         & .body {
             display: flex;
-            padding: 1rem;
             flex-direction: column;
-            align-items: flex-start;
             gap: 1.5rem;
+            align-items: flex-start;
             align-self: stretch;
+            padding: 1rem;
         }
 
         & .footer {
@@ -109,12 +113,12 @@
 @media screen and (min-width: 576px) {
     .container {
         display: flex;
-        padding: 1.5rem;
         flex-direction: column;
-        justify-content: center;
-        align-items: flex-start;
         gap: 1.5rem;
+        align-items: flex-start;
         align-self: stretch;
+        justify-content: center;
+        padding: 1.5rem;
 
         & .body {
             padding: 1.5rem 2.5rem;
@@ -141,22 +145,24 @@
 
         & .footer {
             display: flex;
-            gap: 1.5rem;
             flex-direction: row;
+            gap: 1.5rem;
             align-items: center;
         }
 
         &.noIllustration {
             height: 100%;
+
             & .body {
                 display: flex;
-                padding: 1rem;
                 flex-direction: column;
-                align-items: flex-start;
                 gap: 1.5rem;
+                align-items: flex-start;
                 align-self: stretch;
                 height: 100%;
+                padding: 1rem;
             }
+
             & .title {
                 font-size: 1.75rem;
                 font-style: normal;
@@ -180,29 +186,30 @@
         }
     }
 }
+
 @media screen and (min-width: 768px) {
     .container {
         display: flex;
-        padding: 1.5rem;
         flex-direction: column;
-        justify-content: center;
-        align-items: flex-start;
         gap: 1.5rem;
+        align-items: flex-start;
         align-self: stretch;
+        justify-content: center;
+        padding: 1.5rem;
 
         & .body {
             display: flex;
-            padding: 1.5rem 2.5rem;
             flex-direction: column;
-            justify-content: center;
-            align-items: flex-start;
             gap: 1.5rem;
+            align-items: flex-start;
             align-self: stretch;
+            justify-content: center;
+            padding: 1.5rem 2.5rem;
         }
 
         & .illustration {
-            height: 24.1295rem;
             align-self: stretch;
+            height: 24.1295rem;
             aspect-ratio: 688/386.07;
         }
 
@@ -230,12 +237,13 @@
         &.noIllustration {
             & .body {
                 display: flex;
-                padding: 2.5rem;
                 flex-direction: column;
-                align-items: flex-start;
                 gap: 1.5rem;
+                align-items: flex-start;
                 align-self: stretch;
+                padding: 2.5rem;
             }
+
             & .title {
                 font-size: 1.75rem;
                 font-style: normal;
@@ -248,6 +256,7 @@
                 font-style: normal;
                 font-weight: 400;
                 line-height: 1.75rem;
+
                 & strong {
                     font-size: 1.125rem;
                     font-style: normal;
@@ -258,36 +267,37 @@
         }
     }
 }
+
 @media screen and (min-width: 992px) {
     .container {
         display: flex;
-        padding: 1.5rem;
-        align-items: center;
-        justify-content: center;
         flex-direction: row;
         gap: 2.5rem;
+        align-items: center;
         align-self: stretch;
+        justify-content: center;
+        padding: 1.5rem;
 
         &.illustrationRight {
             flex-direction: row-reverse;
         }
 
         & .illustration {
-            height: 15rem;
             flex: 1 0 0;
-            aspect-ratio: 428/240.17;
             align-self: auto;
+            height: 15rem;
+            aspect-ratio: 428/240.17;
         }
 
         & .body {
             display: flex;
-            padding: 1.5rem 2.5rem;
-            flex-direction: column;
-            justify-content: center;
-            align-items: flex-start;
-            gap: 1.5rem;
             flex: 1 0 0;
+            flex-direction: column;
+            gap: 1.5rem;
+            align-items: flex-start;
             align-self: auto;
+            justify-content: center;
+            padding: 1.5rem 2.5rem;
         }
 
         & .title {
@@ -314,12 +324,13 @@
         &.noIllustration {
             & .body {
                 display: flex;
-                padding: 2.5rem;
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 1.5rem;
                 flex: 1 0 0;
+                flex-direction: column;
+                gap: 1.5rem;
+                align-items: flex-start;
+                padding: 2.5rem;
             }
+
             & .title {
                 font-size: 1.75rem;
                 font-style: normal;
@@ -343,29 +354,29 @@
         }
     }
 }
+
 @media screen and (min-width: 1248px) {
     .container {
         display: flex;
-        padding: 1.5rem;
-        align-items: center;
         gap: 2.5rem;
+        align-items: center;
         align-self: stretch;
+        padding: 1.5rem;
 
         & .illustration {
-            height: 17.5rem;
             flex: 1 0 0;
+            height: 17.5rem;
             aspect-ratio: 500/280.58;
         }
 
         & .body {
             display: flex;
-            height: 22rem;
-            padding: 1.5rem 2.5rem;
-            flex-direction: column;
-            justify-content: center;
-            align-items: flex-start;
-            gap: 1.5rem;
             flex: 1 0 0;
+            flex-direction: column;
+            gap: 1.5rem;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 1.5rem 2.5rem;
         }
 
         & .title {
@@ -392,12 +403,13 @@
         &.noIllustration {
             & .body {
                 display: flex;
-                padding: 2.5rem;
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 1.5rem;
                 flex: 1 0 0;
+                flex-direction: column;
+                gap: 1.5rem;
+                align-items: flex-start;
+                padding: 2.5rem;
             }
+
             & .title {
                 font-size: 1.75rem;
                 font-style: normal;
@@ -421,29 +433,29 @@
         }
     }
 }
+
 @media screen and (min-width: 1440px) {
     .container {
         display: flex;
-        padding: 1.5rem;
-        align-items: center;
         gap: 2.5rem;
+        align-items: center;
         align-self: stretch;
+        padding: 1.5rem;
 
         & .illustration {
-            height: 19.5rem;
             flex: 1 0 0;
+            height: 19.5rem;
             aspect-ratio: 139/78;
         }
 
         & .body {
             display: flex;
-            height: 19.5rem;
-            padding: 1.5rem 2.5rem;
-            flex-direction: column;
-            justify-content: center;
-            align-items: flex-start;
-            gap: 1.5rem;
             flex: 1 0 0;
+            flex-direction: column;
+            gap: 1.5rem;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 1.5rem 2.5rem;
         }
 
         & .title {
@@ -470,13 +482,14 @@
         &.noIllustration {
             & .body {
                 display: flex;
-                padding: 2.5rem;
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 1.5rem;
                 flex: 1 0 0;
+                flex-direction: column;
+                gap: 1.5rem;
+                align-items: flex-start;
                 align-self: stretch;
+                padding: 2.5rem;
             }
+
             & .title {
                 font-size: 1.75rem;
                 font-style: normal;

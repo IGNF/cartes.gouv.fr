@@ -164,7 +164,7 @@ export default function Discover() {
             )}
 
             <section className={cx(fr.cx("fr-container"), classes.heroSection)}>
-                <div>
+                <div className={cx(classes.heroHeading)}>
                     <h1>
                         Découvrir
                         <br />
@@ -593,7 +593,7 @@ export default function Discover() {
             <section className={cx(classes.section, classes.createAccountSection, classes.bgActionHighBlueFrance, classes.textInvertedBlueFrance)}>
                 <h3 className={classes.sectionTitle}>Créez votre compte pour sauvegarder vos données et vos productions sur cartes.gouv.fr</h3>
 
-                <Button iconId="fr-icon-arrow-right-line" size="large" linkProps={{ href: externalUrls.login }}>
+                <Button iconId="fr-icon-arrow-right-line" size="large" linkProps={user ? routes.dashboard_pro().link : { href: externalUrls.login }}>
                     Créer mon compte
                 </Button>
             </section>

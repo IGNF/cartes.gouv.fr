@@ -23,7 +23,7 @@ export default function FeatureCard({ illustration, illustrationPosition = "left
 
             <div className={classes.body}>
                 {picto && <img src={picto} alt="" className={classes.picto} />}
-                <div>
+                <div className={classes.content}>
                     <h3 className={classes.title}>{title}</h3>
                     <p className={classes.desc}>{desc}</p>
                 </div>

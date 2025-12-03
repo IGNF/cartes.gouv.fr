@@ -1,16 +1,15 @@
 .heroSection {
     display: flex;
-    padding: 3rem 0 2.5rem 1rem;
     flex-direction: column;
-    justify-content: flex-end;
-    align-items: flex-end;
     gap: 2.5rem;
+    align-items: flex-end;
     align-self: stretch;
+    justify-content: flex-end;
+    padding: 3rem 0 2.5rem 1rem;
     color: var(--text-title-grey, #161616);
 
     & h1 {
         align-self: stretch;
-
         font-size: 2.5rem;
         font-style: normal;
         font-weight: 400;
@@ -23,35 +22,34 @@
 
     & p {
         align-self: stretch;
-        color: var(--text-default-grey, #3a3a3a);
         font-size: 1.125rem;
         font-style: normal;
         font-weight: 400;
         line-height: 1.75rem; /* 155.556% */
+        color: var(--text-default-grey, #3a3a3a);
     }
 
     & img {
-        width: 100vw;
+        /* width: 100vw; */
         height: 23.5rem;
-        /* max-width: none; */
-        border-radius: 0.75rem 0 0 0.75rem;
         object-fit: cover;
+        object-position: right;
     }
 }
 
 .section {
     display: flex;
-    padding: 2.5rem 1rem 3.5rem 1rem;
     flex-direction: column;
-    align-items: center;
     gap: 2rem;
+    align-items: center;
     align-self: stretch;
     width: 100%;
+    padding: 2.5rem 1rem 3.5rem;
 }
 
 .sectionTitle {
-    text-align: center;
     margin: 1.5rem 0;
+    text-align: center;
 }
 
 .bgGrey {
@@ -81,8 +79,8 @@
 .featureCardsWrapper {
     display: flex;
     flex-direction: column;
-    align-items: center;
     gap: 2rem;
+    align-items: center;
     align-self: stretch;
     width: 100%;
 }
@@ -91,8 +89,8 @@
     display: flex;
     flex-direction: column;
     gap: 2rem;
-    width: 100%;
     align-items: stretch;
+    width: 100%;
 }
 
 .accordionsGroup {
@@ -101,11 +99,10 @@
 }
 
 .accordionBody {
-    padding: 0.75rem;
     display: flex;
     flex-direction: column;
-
     gap: 1.5rem;
+    padding: 0.75rem;
 
     & img {
         width: 7rem;
@@ -118,7 +115,6 @@
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-    display: flex;
     align-items: flex-start;
 }
 
@@ -163,18 +159,18 @@
         }
 
         & img {
-            width: 30rem;
+            /* width: 45rem; */
             height: 23.5rem;
         }
     }
 
     .section {
         display: flex;
-        padding: 2.5rem 1rem 3.5rem 1rem;
         flex-direction: column;
-        align-items: center;
         gap: 2rem;
+        align-items: center;
         align-self: stretch;
+        padding: 2.5rem 1rem 3.5rem;
     }
 
     .accordionsGroup {
@@ -192,10 +188,14 @@
 
 @media screen and (min-width: 768px) {
     .heroSection {
-        padding: 5.5rem 0 5rem 1rem;
-        align-items: center;
-        gap: 2.5rem;
         flex-direction: row;
+        gap: 2.5rem;
+        align-items: center;
+        padding: 5.5rem 0 5rem 1rem;
+
+        & .heroHeading {
+            flex: 1;
+        }
 
         & h1 {
             font-size: 3.5rem;
@@ -212,18 +212,19 @@
         }
 
         & img {
-            width: 20rem;
+            /* width: 45rem; */
+            max-width: 50%;
             height: 23.5rem;
         }
     }
 
     .section {
         display: flex;
-        padding: 5rem 1rem 6rem 1rem;
         flex-direction: column;
-        align-items: center;
         gap: 2rem;
+        align-items: center;
         align-self: stretch;
+        padding: 5rem 1rem 6rem;
     }
 
     .createAccountSection {
@@ -233,10 +234,10 @@
 
 @media screen and (min-width: 992px) {
     .heroSection {
-        padding: 5.5rem 0 5rem 1.5rem;
-        align-items: center;
         gap: 2.5rem;
+        align-items: center;
         align-self: stretch;
+        padding: 5.5rem 0 5rem 1.5rem;
 
         & h1 {
             font-size: 4rem;
@@ -260,18 +261,18 @@
         }
 
         & img {
-            width: 25rem;
+            /* width: 25rem; */
             height: 23.5rem;
         }
     }
 
     .section {
         display: flex;
-        padding: 5rem 1.5rem 6rem 1.5rem;
         flex-direction: column;
-        align-items: center;
         gap: 4rem;
+        align-items: center;
         align-self: stretch;
+        padding: 5rem 1.5rem 6rem;
     }
 
     .featureCardsWrapper {
@@ -293,11 +294,11 @@
 
 @media screen and (min-width: 1248px) {
     .heroSection {
-        padding: 5.5rem 0 5rem 5rem;
-        justify-content: flex-end;
-        align-items: center;
         gap: 2.5rem;
+        align-items: center;
         align-self: stretch;
+        justify-content: flex-end;
+        padding: 5.5rem 0 5rem 5rem;
 
         & h1 {
             font-size: 4rem;
@@ -314,15 +315,15 @@
         }
 
         & p {
-            color: var(--text-default-grey, #3a3a3a);
             font-size: 1.125rem;
             font-style: normal;
             font-weight: 400;
             line-height: 1.75rem; /* 155.556% */
+            color: var(--text-default-grey, #3a3a3a);
         }
 
         & img {
-            width: 40rem;
+            /* width: 40rem; */
             height: 23.5rem;
             margin-right: calc(50% - 50vw);
         }
@@ -330,17 +331,17 @@
 
     .section {
         display: flex;
-        padding: 5rem 5rem 6rem 5rem;
         flex-direction: column;
-        align-items: center;
         gap: 4rem;
+        align-items: center;
         align-self: stretch;
+        padding: 5rem 5rem 6rem;
     }
 
     .featureCardsWrapper {
         max-width: 78rem;
-        margin-left: auto;
         margin-right: auto;
+        margin-left: auto;
     }
 
     .tilesWrapper {
@@ -354,55 +355,50 @@
 
 @media screen and (min-width: 1440px) {
     .heroSection {
-        padding: 5.5rem 0 5rem 1.5rem;
-        justify-content: flex-end;
-        align-items: center;
         gap: 5rem;
+        align-items: center;
         align-self: stretch;
+        justify-content: flex-end;
+        padding: 5.5rem 0 5rem 1.5rem;
 
         & h1 {
-            color: var(--text-title-grey, #161616);
-            font-family: Marianne;
             font-size: 4rem;
             font-style: normal;
             font-weight: 400;
             line-height: 4.5rem; /* 112.5% */
+            color: var(--text-title-grey, #161616);
 
             & strong {
-                color: var(--text-title-grey, #161616);
-
                 /* 0.Titres alternatifs/MD/Desktop */
-                font-family: Marianne;
                 font-size: 4rem;
                 font-style: normal;
                 font-weight: 700;
                 line-height: 4.5rem;
+                color: var(--text-title-grey, #161616);
             }
         }
 
         & p {
-            color: var(--text-default-grey, #3a3a3a);
-
             /* 2.Corps de texte/LG - Texte article/Desktop & Mobile - Regular */
-            font-family: Marianne;
             font-size: 1.125rem;
             font-style: normal;
             font-weight: 400;
             line-height: 1.75rem; /* 155.556% */
+            color: var(--text-default-grey, #3a3a3a);
         }
 
         & img {
-            width: 45rem;
+            /* width: 45rem; */
             height: 23.5rem;
         }
     }
 
     .section {
         display: flex;
-        padding: 5rem 7.5rem 6rem 7.5rem;
         flex-direction: column;
-        align-items: center;
         gap: 4rem;
+        align-items: center;
         align-self: stretch;
+        padding: 5rem 7.5rem 6rem;
     }
 }
