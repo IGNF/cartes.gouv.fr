@@ -1,0 +1,11 @@
+{
+    "extends": ["stylelint-config-standard", "stylelint-config-recess-order"],
+    "plugins": ["stylelint-order"],
+    "rules": {
+        "declaration-block-no-duplicate-properties": true,
+        "no-descending-specificity": true,
+        "no-duplicate-selectors": true,
+        "media-feature-range-notation": null,
+        "selector-class-pattern": null
+    }
+}
