@@ -111,7 +111,7 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
             $redirectUrl = str_replace('authentication_failed=1', '', $redirectUrl);
 
             // redirection vers le tableau de bord
-            if ('/' === parse_url($redirectUrl, PHP_URL_PATH)) {
+            if ('/decouvrir' === parse_url($redirectUrl, PHP_URL_PATH)) {
                 $redirectUrl = $this->router->generate(self::SUCCESS_ROUTE, [], RouterInterface::ABSOLUTE_URL);
                 $redirectUrl .= 'tableau-de-bord';
             }
