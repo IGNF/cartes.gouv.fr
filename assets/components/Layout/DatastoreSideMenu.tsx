@@ -65,6 +65,8 @@ export default function DatastoreSideMenu({ datastoreId, communityId }: Datastor
                     isActive: datastoreId === datastore._id || communityId === datastore.community_id,
                 })),
             ]}
+            fullHeight
+            sticky
         />
     );
 }

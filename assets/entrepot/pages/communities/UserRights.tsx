@@ -1,8 +1,9 @@
-import { FC } from "react";
-import { getTranslation } from "../../../i18n/i18n";
-import { CommunityUserResponseDtoRightsEnum } from "../../../@types/entrepot";
 import { fr } from "@codegouvfr/react-dsfr";
 import Tooltip from "@codegouvfr/react-dsfr/Tooltip";
+import { FC, Fragment } from "react";
+
+import { CommunityUserResponseDtoRightsEnum } from "../../../@types/entrepot";
+import { getTranslation } from "../../../i18n/i18n";
 
 const { t } = getTranslation("Rights");
 
@@ -43,14 +44,14 @@ const UserRights: FC = () => {
                 <strong className={fr.cx("fr-mr-2v")}>Droits</strong>
 
                 {rightTypes.map((type) => (
-                    <>
+                    <Fragment key={type}>
                         <Tooltip kind="click" title={t(`${type}_explain`)} />
                         <span className={fr.cx("fr-mr-2v")}> {t(type)}</span>
-                    </>
+                    </Fragment>
                 ))}
             </div>
         </div>
     );
 };
 
-export { rightTypes, getRights, getTranslatedRightTypes, complete, UserRights };
+export { complete, getRights, getTranslatedRightTypes, rightTypes, UserRights };

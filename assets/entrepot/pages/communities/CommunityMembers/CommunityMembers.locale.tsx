@@ -17,14 +17,14 @@ export type I18n = typeof i18n;
 
 export const CommunityMembersFrTranslations: Translations<"fr">["CommunityMembers"] = {
     community_members: ({ communityName }) => communityName,
-    already_member: ({ userId }) => `Le membre ${userId} est déjà membre de cet espace de travail`,
+    already_member: ({ userId }) => `L'utilisateur ${userId} est déjà membre de cet espace de travail`,
     rights: "Permissions du compte",
     name: "Nom",
     me: "moi",
     supervisor: "superviseur",
     add_member: "Ajouter un membre",
     remove_member: "Supprimer ce membre",
-    confirm_remove: "Êtes-vous sûr de vouloir supprimer cet membre ?",
+    confirm_remove: "Êtes-vous sûr de vouloir supprimer ce membre ?",
     add_remove_right_title: ({ right }) => `Ajouter/supprimer le droit ${right}`,
 };
 

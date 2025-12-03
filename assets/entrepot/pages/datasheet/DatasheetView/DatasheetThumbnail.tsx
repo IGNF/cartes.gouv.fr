@@ -23,7 +23,6 @@ import { CartesApiException } from "../../../../modules/jsonFetch";
 import { getFileExtension } from "../../../../utils";
 import api from "../../../api";
 
-import "@/sass/pages/datasheetlist_thumbnail.scss";
 import "../../../../sass/components/buttons.scss";
 
 import placeholder1x1 from "../../../../img/placeholder.1x1.png";

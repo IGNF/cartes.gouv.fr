@@ -4,13 +4,10 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import Card from "@codegouvfr/react-dsfr/Card";
 import { FC } from "react";
 import { symToStr } from "tsafe/symToStr";
-import { tss } from "tss-react";
 
 import { type Datasheet } from "../../../../@types/app";
 import { useTranslation } from "../../../../i18n/i18n";
 import { routes } from "../../../../router/router";
-
-import "@/sass/pages/datasheetlist_thumbnail.scss";
 
 import placeholder16x9 from "@/img/placeholder.16x9.png";
 
@@ -21,8 +18,6 @@ type DatasheetListItemProps = {
 
 const DatasheetListItem: FC<DatasheetListItemProps> = ({ datastoreId, datasheet }) => {
     const { t } = useTranslation("DatasheetList");
-
-    const { classes } = useStyles();
 
     return (
         <Card
@@ -35,7 +30,7 @@ const DatasheetListItem: FC<DatasheetListItemProps> = ({ datastoreId, datasheet 
                     {datasheet?.nb_publications > 0 ? t("services_published", { nbServices: datasheet?.nb_publications }) : t("no_services_published")}
                 </Badge>
             }
-            end={
+            footer={
                 <Button
                     linkProps={routes.datastore_datasheet_view({ datastoreId, datasheetName: datasheet.name }).link}
                     iconId="fr-icon-arrow-right-s-line"
@@ -45,19 +40,9 @@ const DatasheetListItem: FC<DatasheetListItemProps> = ({ datastoreId, datasheet 
                 </Button>
             }
             size="small"
-            classes={{
-                end: classes.end,
-            }}
         />
     );
 };
 
 DatasheetListItem.displayName = symToStr({ DatasheetListItem });
 export default DatasheetListItem;
-
-const useStyles = tss.withName({ DatasheetListItem }).create({
-    end: {
-        display: "flex",
-        justifyContent: "flex-end",
-    },
-});
