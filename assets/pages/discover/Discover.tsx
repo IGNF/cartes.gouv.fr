@@ -342,7 +342,7 @@ export default function Discover() {
                 <div className={cx(classes.featureCardsWrapper)}>
                     <h2 className={classes.sectionTitle}>Des fonctionnalités clés pour cartographier et analyser son territoire</h2>
 
-                    <div className={cx(fr.cx("fr-accordions-group"), classes.accordionsGroup, classes.bgGrey)} data-fr-group="false">
+                    <div className={cx(fr.cx("fr-accordions-group"), classes.accordionsGroup, classes.bgGrey)}>
                         <Accordion label="Géocoder vos fichiers d'adresse" defaultExpanded={true}>
                             <div className={classes.accordionBody}>
                                 <img src={geocodingThumbUrl} alt="" />
