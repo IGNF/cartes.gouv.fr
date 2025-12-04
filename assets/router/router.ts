@@ -20,6 +20,13 @@ const publicRoutes = {
         },
         () => `${appRoot}/decouvrir`
     ),
+    discover_publish: defineRoute(
+        {
+            authentication_failed: param.query.optional.number,
+            session_expired_login_success: param.query.optional.number,
+        },
+        () => `${appRoot}/publier-une-donnee`
+    ),
     page_not_found: defineRoute(`${appRoot}/404`),
     about: defineRoute(`${appRoot}/a-propos`),
     contact: defineRoute(`${appRoot}/nous-ecrire`),

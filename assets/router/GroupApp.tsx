@@ -7,6 +7,7 @@ import Discover from "@/pages/discover/Discover";
 import PageNotFoundWithLayout from "../pages/error/PageNotFoundWithLayout";
 import { datastoreNavItems } from "../config/navItems/datastoreNavItems";
 
+const DiscoverPublish = lazy(() => import("../pages/discover/publish/DiscoverPublish"));
 const About = lazy(() => import("../pages/About"));
 const Offer = lazy(() => import("../pages/Offer"));
 const Join = lazy(() => import("../pages/Join"));
@@ -57,6 +58,10 @@ function GroupApp(props: IGroupAppProps) {
             case "discover":
                 return {
                     render: <Discover />,
+                };
+            case "discover_publish":
+                return {
+                    render: <DiscoverPublish />,
                 };
             case "about":
                 return { render: <About /> };
