@@ -29,7 +29,7 @@ export default function DiscoverPublish() {
         <Main title="Le service public des cartes et données du territoire" fluidContainer={true}>
             <div className={classes.container}>
                 <div className={classes.backgroundWrapper}>
-                    <img src={backgroundImgUrl} alt="" className={classes.backgroundImage} />
+                    <img src={backgroundImgUrl} alt="illustration" className={classes.backgroundImage} />
                 </div>
                 <div className={classes.contentWrapper}>
                     <div className={classes.card}>

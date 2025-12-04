@@ -37,13 +37,13 @@ export default function DatastoreTertiaryNavigation(props: DatastoreTertiaryNavi
                     linkProps: routes.datastore_manage_storage({ datastoreId }).link,
                     isActive: routeName === "datastore_manage_storage",
                 },
-                {
-                    text: "Info",
-                    linkProps: {
-                        href: "",
-                    },
-                    isActive: false,
-                },
+                // {
+                //     text: "Info",
+                //     linkProps: {
+                //         href: "",
+                //     },
+                //     isActive: false,
+                // },
             ]}
             classes={{
                 root: classes.root,

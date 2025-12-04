@@ -10,7 +10,6 @@ import { CommunityDetailResponseDto, CommunityMemberDtoRightsEnum } from "../../
 import Forbidden from "../../pages/error/Forbidden";
 import { CommunityProvider } from "../../contexts/community";
 import { Datastore } from "../../@types/app";
-import { datastoreNavItems } from "../../config/navItems/datastoreNavItems";
 import AppLayout from "./AppLayout";
 import PageNotFoundWithLayout from "../../pages/error/PageNotFoundWithLayout";
 import Main from "./Main";
@@ -42,7 +41,6 @@ const CommunityLayout: FC<PropsWithChildren<CommunityLayoutProps>> = (props) => 
     });
 
     const [community, datastore] = data ?? [];
-    const navItems = useMemo(() => datastoreNavItems(datastore), [datastore]);
 
     const isAuthorized = useMemo(() => {
         if (!user?.id || !user?.communities_member) {
@@ -70,7 +68,7 @@ const CommunityLayout: FC<PropsWithChildren<CommunityLayoutProps>> = (props) => 
     }
 
     return (
-        <AppLayout {...rest} navItems={navItems}>
+        <AppLayout {...rest}>
             <CommunityProvider community={community}>
                 <DatastoreProvider datastore={datastore} isFetching={isFetching} status={status}>
                     {isAuthorized ? children : <Forbidden />}

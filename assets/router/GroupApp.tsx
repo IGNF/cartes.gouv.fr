@@ -5,7 +5,7 @@ import { routes } from "./router";
 import AppLayout, { AppLayoutProps } from "../components/Layout/AppLayout";
 import Discover from "@/pages/discover/Discover";
 import PageNotFoundWithLayout from "../pages/error/PageNotFoundWithLayout";
-import { datastoreNavItems } from "../config/navItems/datastoreNavItems";
+import useNavItems from "@/hooks/useNavItems";
 
 const DiscoverPublish = lazy(() => import("../pages/discover/publish/DiscoverPublish"));
 const About = lazy(() => import("../pages/About"));
@@ -47,8 +47,9 @@ interface IGroupAppProps {
 function GroupApp(props: IGroupAppProps) {
     const { route } = props;
 
+    const navItems = useNavItems();
+
     const content: { render: JSX.Element; layoutProps?: AppLayoutProps } | undefined = useMemo(() => {
-        const baseDatastoreNavItems = datastoreNavItems();
         switch (route.name) {
             case "home":
                 routes.discover().replace();
@@ -96,16 +97,15 @@ function GroupApp(props: IGroupAppProps) {
             case "login_disabled":
                 return { render: <LoginDisabled /> };
             case "my_account":
-                return { layoutProps: { navItems: baseDatastoreNavItems }, render: <Me /> };
+                return { render: <Me /> };
             case "my_access_keys":
-                return { layoutProps: { navItems: baseDatastoreNavItems }, render: <MyAccessKeys activeTab="keys" /> };
+                return { render: <MyAccessKeys activeTab="keys" /> };
             case "my_permissions":
-                return { layoutProps: { navItems: baseDatastoreNavItems }, render: <MyAccessKeys activeTab="permissions" /> };
+                return { render: <MyAccessKeys activeTab="permissions" /> };
             case "user_key_add":
-                return { layoutProps: { navItems: baseDatastoreNavItems }, render: <UserKeyForm /> };
+                return { render: <UserKeyForm /> };
             case "user_key_edit":
                 return {
-                    layoutProps: { navItems: baseDatastoreNavItems },
                     render: <UserKeyForm keyId={route.params.keyId} />,
                 };
             // case "my_documents":
@@ -113,26 +113,19 @@ function GroupApp(props: IGroupAppProps) {
             case "accesses_request":
                 return { render: <AccessesRequest fileIdentifier={route.params.fileIdentifier} /> };
             case "datastore_create_request":
-                return { layoutProps: { navItems: baseDatastoreNavItems }, render: <DatastoreCreationForm /> };
+                return { render: <DatastoreCreationForm /> };
             case "datastore_create_request_confirm":
                 return {
-                    layoutProps: { navItems: baseDatastoreNavItems },
                     render: <DatastoreCreationRequestConfirmation />,
                 };
             case "join_community":
-                return { layoutProps: { navItems: baseDatastoreNavItems }, render: <CommunityList /> };
+                return { render: <CommunityList /> };
             case "dashboard":
                 return {
-                    layoutProps: {
-                        navItems: baseDatastoreNavItems,
-                    },
                     render: <Dashboard />,
                 };
             case "datastore_selection":
                 return {
-                    layoutProps: {
-                        navItems: baseDatastoreNavItems,
-                    },
                     render: <DatastoreSelection />,
                 };
         }
@@ -142,7 +135,11 @@ function GroupApp(props: IGroupAppProps) {
         return <PageNotFoundWithLayout />;
     }
 
-    return <AppLayout {...content?.layoutProps}>{content.render}</AppLayout>;
+    return (
+        <AppLayout navItems={navItems} {...content?.layoutProps}>
+            {content.render}
+        </AppLayout>
+    );
 }
 
 export default GroupApp;
