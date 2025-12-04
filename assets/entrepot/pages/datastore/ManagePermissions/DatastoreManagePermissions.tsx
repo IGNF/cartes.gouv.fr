@@ -2,8 +2,10 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
+import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Card from "@codegouvfr/react-dsfr/Card";
 import Pagination from "@codegouvfr/react-dsfr/Pagination";
+import Tag from "@codegouvfr/react-dsfr/Tag";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { compareAsc } from "date-fns";
 import { FC, useState } from "react";
@@ -17,7 +19,6 @@ import PageTitle from "@/components/Layout/PageTitle";
 import Skeleton from "@/components/Utils/Skeleton";
 import { usePagination } from "@/hooks/usePagination";
 import { formatDateFromISO } from "@/utils";
-import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import ConfirmDialog, { ConfirmDialogModal } from "../../../../components/Utils/ConfirmDialog";
 import Wait from "../../../../components/Utils/Wait";
 import { useDatastore } from "../../../../contexts/datastore";
@@ -173,7 +174,8 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
                                                         <span>{"Aucune date d'expiration"}</span>
                                                     )}
 
-                                                    <ul>
+                                                    <strong className={fr.cx("fr-text--md", "fr-mb-2v")}>Services</strong>
+                                                    <ul className={fr.cx("fr-m-0")}>
                                                         {permission.offerings.map((offering) => (
                                                             <li key={offering._id}>
                                                                 <span className={fr.cx("fr-mr-3v")}>{offering.layer_name}</span>
@@ -183,6 +185,25 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
                                                             </li>
                                                         ))}
                                                     </ul>
+
+                                                    {permission.beneficiary !== undefined && (
+                                                        <>
+                                                            <strong className={fr.cx("fr-text--md", "fr-mb-2v")}>Destinataire</strong>
+                                                            <span>
+                                                                {"name" in permission.beneficiary ? (
+                                                                    <>
+                                                                        {permission.beneficiary.name}
+                                                                        <Tag className={fr.cx("fr-ml-3v")}>Communauté</Tag>
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                        {permission.beneficiary?.first_name} {permission.beneficiary?.last_name}
+                                                                        <Tag className={fr.cx("fr-ml-3v")}>Utilisateur</Tag>
+                                                                    </>
+                                                                )}
+                                                            </span>
+                                                        </>
+                                                    )}
                                                 </div>
                                             }
                                             footer={
@@ -190,8 +211,6 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
                                                     buttons={[
                                                         {
                                                             children: tCommon("modify"),
-                                                            size: "small",
-                                                            priority: "secondary",
                                                             iconId: "fr-icon-edit-line",
                                                             onClick: routes.datastore_edit_permission({
                                                                 datastoreId: datastoreId,
@@ -201,7 +220,6 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
                                                         {
                                                             children: tCommon("delete"),
                                                             priority: "secondary",
-                                                            size: "small",
                                                             iconId: "fr-icon-delete-line",
                                                             onClick: () => {
                                                                 setCurrentPermission(permission._id);
@@ -210,6 +228,7 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
                                                         },
                                                     ]}
                                                     inlineLayoutWhen="sm and up"
+                                                    buttonsSize="small"
                                                 />
                                             }
                                         />
