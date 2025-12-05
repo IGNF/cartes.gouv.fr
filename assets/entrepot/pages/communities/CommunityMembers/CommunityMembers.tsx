@@ -184,6 +184,7 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
                 homeLinkProps: routes.discover().link,
                 segments: [
                     { label: tBreadcrumb("dashboard"), linkProps: routes.dashboard().link },
+                    { label: tBreadcrumb("datastore_selection"), linkProps: routes.datastore_selection().link },
                     { label: datastore?.name, linkProps: routes.datasheet_list({ datastoreId: datastore?._id ?? "XXXX" }).link },
                 ],
                 currentPageLabel: tBreadcrumb("members_list"),
