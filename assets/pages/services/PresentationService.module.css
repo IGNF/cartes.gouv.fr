@@ -58,6 +58,10 @@
     height: auto;
 }
 
+.frx-icon-accroche-option::before {
+    content: url("@/img/icons/accroche-option.svg");
+}
+
 .icon,
 .icon::before {
     width: 2rem;

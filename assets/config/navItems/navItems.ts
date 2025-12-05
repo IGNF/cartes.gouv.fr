@@ -23,12 +23,16 @@ export const defaultNavItems = (routeName: string): MainNavigationProps.Item[] =
                     isActive: routeName === routes.present_service_catalogue().name,
                 },
                 {
-                    linkProps: routes.discover_publish().link,
+                    linkProps: routes.present_service_publish().link,
                     text: "Publier une donnée",
-                    isActive: routeName === routes.discover_publish().name,
+                    isActive: routeName === routes.present_service_publish().name,
                 },
             ],
             text: "Services",
+            isActive:
+                routeName === routes.present_service_maps().name ||
+                routeName === routes.present_service_catalogue().name ||
+                routeName === routes.present_service_publish().name,
         },
         {
             text: "Offres",

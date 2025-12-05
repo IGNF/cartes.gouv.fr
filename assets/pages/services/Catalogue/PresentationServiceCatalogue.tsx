@@ -136,7 +136,7 @@ export default function PresentationServiceCatalogue() {
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
                         <div className={fr.cx("fr-col-12", "fr-col-md")}>
                             <Tile
-                                title=" Un accès centralisé aux des données géographiques publiques"
+                                title="Un accès centralisé aux des données géographiques publiques"
                                 desc={
                                     "Retrouvez en un seul endroit les données, services et réutilisations issues des producteurs institutionnels, sans avoir à multiplier les sources."
                                 }

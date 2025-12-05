@@ -26,7 +26,7 @@ export default function DiscoverPublish() {
     }, [params, user]);
 
     return (
-        <Main title="Le service public des cartes et données du territoire" fluidContainer={true}>
+        <Main title="Publier une donnée" fluidContainer={true}>
             <div className={classes.container}>
                 <div className={classes.backgroundWrapper}>
                     <img srcSet={backgroundImgUrl} alt="illustration" className={classes.backgroundImage} />

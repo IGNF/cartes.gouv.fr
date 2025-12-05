@@ -6,6 +6,7 @@ import Discover from "@/pages/discover/Discover";
 import DiscoverPublish from "@/pages/discover/publish/DiscoverPublish";
 import PresentationServiceCatalogue from "@/pages/services/Catalogue/PresentationServiceCatalogue";
 import PresentationServiceMaps from "@/pages/services/Maps/PresentationServiceMaps";
+import PresentationServicePublish from "@/pages/services/Publish/PresentationServicePublish";
 import AppLayout, { AppLayoutProps } from "../components/Layout/AppLayout";
 import PageNotFoundWithLayout from "../pages/error/PageNotFoundWithLayout";
 import { routes } from "./router";
@@ -70,6 +71,8 @@ function GroupApp(props: IGroupAppProps) {
                 return { render: <PresentationServiceMaps /> };
             case "present_service_catalogue":
                 return { render: <PresentationServiceCatalogue /> };
+            case "present_service_publish":
+                return { render: <PresentationServicePublish /> };
             case "about":
                 return { render: <About /> };
             case "offer":

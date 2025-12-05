@@ -219,7 +219,7 @@ export default function Discover() {
                         }
                         footer={
                             <>
-                                <Link className={fr.cx("fr-link")} href={externalUrls.documentationUserGuideCatalogue}>
+                                <Link className={fr.cx("fr-link")} {...routes.present_service_catalogue().link}>
                                     {"En savoir plus"}
                                 </Link>
                                 <Button
@@ -245,7 +245,7 @@ export default function Discover() {
                                 }
                                 footer={
                                     <>
-                                        <Link className={fr.cx("fr-link")} href={externalUrls.documentationProducerGuide}>
+                                        <Link className={fr.cx("fr-link")} {...routes.present_service_publish().link}>
                                             {"En savoir plus"}
                                         </Link>
                                         <Button iconId="fr-icon-arrow-right-s-line" iconPosition="right" linkProps={routes.discover_publish().link}>
