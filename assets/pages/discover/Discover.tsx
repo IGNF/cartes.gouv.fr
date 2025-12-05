@@ -219,7 +219,7 @@ export default function Discover() {
                         }
                         footer={
                             <>
-                                <Link className={fr.cx("fr-link")} href={externalUrls.documentationUserGuidCatalogue}>
+                                <Link className={fr.cx("fr-link")} href={externalUrls.documentationUserGuideCatalogue}>
                                     {"En savoir plus"}
                                 </Link>
                                 <Button

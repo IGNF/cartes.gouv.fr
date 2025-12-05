@@ -6,16 +6,16 @@ import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import Main from "@/components/Layout/Main";
 import { externalLink, externalUrls } from "@/router/externalUrls";
 import { routes } from "@/router/router";
-import classes from "./Maps.module.css";
+import classes from "../PresentationService.module.css";
 
 import heroImgSrcSet from "@/img/discover/service-explorer.png?w=400;800;1200&format=webp;png&as=srcset";
-import illustrationImgSrcSet from "@/img/services/maps/illustration.png?w=400;800;1200&format=webp;png&as=srcset";
+import illustrationImgSrcSet from "./img/illustration.png?w=400;800;1200&format=webp;png&as=srcset";
 import anticipezAccessImgSrcSet from "./img/anticipez-accessibilite-territoire.png?w=400;600&format=webp;png&as=srcset";
 import carteReunionLocaleImgSrcSet from "./img/carte-reunion-concertation-locale.png?w=400;600&format=webp;png&as=srcset";
 import exploitezDonneesThemImgSrcSet from "./img/exploitez-donnes-thematiques-publiques.png?w=400;600&format=webp;png&as=srcset";
 import projetAmenagementImgSrcSet from "./img/projet-amenagement-mobilite.png?w=400;600&format=webp;png&as=srcset";
 
-export default function Maps() {
+export default function PresentationServiceMaps() {
     return (
         <Main title="Explorer les cartes" fluidContainer={true}>
             <div className={classes.bgContrastInfoGrey}>
@@ -51,7 +51,7 @@ export default function Maps() {
                             Les cartes de l’IGN sont accessibles en quelques clics. Elles forment la référence du territoire français, offrant des informations
                             à jour, homogènes et essentielles pour toute analyse du territoire.
                         </p>
-                        <p className={fr.cx("fr-text--xs", "fr-m-0")}>
+                        <p className={cx(fr.cx("fr-text--xs", "fr-m-0"), classes.textMentionGrey)}>
                             Retrouvez les plans, prises de vues aériennes, les cartes classiques (SCAN 25), cartes topographiques, le cadastre ou encore des
                             cartes historiques.
                         </p>
@@ -72,7 +72,7 @@ export default function Maps() {
                             <br />
                             Vous pouvez afficher plusieurs cartes pour comparer, enrichir et mieux comprendre les enjeux propres à chaque territoire.
                         </p>
-                        <p className={fr.cx("fr-text--xs", "fr-m-0")}>
+                        <p className={cx(fr.cx("fr-text--xs", "fr-m-0"), classes.textMentionGrey)}>
                             Obtenez une lecture exhaustive du territoire en combinant par exemple les prises de vue aériennes (BD ORTHO), le plan IGN, le
                             cadastre (BD Parcellaire) et les données d’occupation du sol (OCS GE).
                         </p>
@@ -99,7 +99,9 @@ export default function Maps() {
                             </li>
                             <li>Obtenir un profil altimétrique (altitude) le long d’un itinéraire</li>
                         </ul>
-                        <p className={fr.cx("fr-text--xs", "fr-m-0")}>Activez vos outils préférés et personnaliser votre interface.</p>
+                        <p className={cx(fr.cx("fr-text--xs", "fr-m-0"), classes.textMentionGrey)}>
+                            Activez vos outils préférés et personnaliser votre interface.
+                        </p>
                     </div>
                 </div>
                 <hr className={fr.cx("fr-mt-6v")} />
@@ -115,7 +117,9 @@ export default function Maps() {
                             Importez vos données métiers (tableurs, fichiers géographiques, flux) et superposez-les aux données de référence pour découvrir de
                             nouvelles corrélations et illustrer des phénomènes.
                         </p>
-                        <p className={fr.cx("fr-text--xs", "fr-m-0")}>Utilisez nos outils pour ajouter des annotations, dessins ou points d’intérêt.</p>
+                        <p className={cx(fr.cx("fr-text--xs", "fr-m-0"), classes.textMentionGrey)}>
+                            Utilisez nos outils pour ajouter des annotations, dessins ou points d’intérêt.
+                        </p>
                     </div>
                 </div>
                 <hr className={fr.cx("fr-mt-6v")} />
@@ -130,7 +134,7 @@ export default function Maps() {
                         <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
                             Partagez simplement vos cartes via un lien direct (url unique) ou en l’intégrant dans vos services via une iframe.
                         </p>
-                        <p className={fr.cx("fr-text--xs", "fr-m-0")}>Et sauvegardez-les en créant votre compte.</p>
+                        <p className={cx(fr.cx("fr-text--xs", "fr-m-0"), classes.textMentionGrey)}>Et sauvegardez-les en créant votre compte.</p>
                     </div>
                 </div>
             </div>
@@ -141,7 +145,7 @@ export default function Maps() {
                         <div className={fr.cx("fr-col-12", "fr-col-md-10", "fr-col-offset-md-1")}>
                             <img srcSet={illustrationImgSrcSet} alt="illustration" className={classes.illustrationImg} />
                             <hr className={fr.cx("fr-mt-6v")} />
-                            <p className={fr.cx("fr-text--lg", "fr-m-0")}>
+                            <p className={cx(fr.cx("fr-text--lg", "fr-m-0"), classes.textCenter)}>
                                 Successeur du <strong>Géoportail</strong>, retrouvez toutes vos fonctionnalités préférées. Accédez désormais à plus de cartes et
                                 construisez avec nous le service publique cartographique de demain.
                             </p>
@@ -152,7 +156,7 @@ export default function Maps() {
 
             <div className={cx(classes.bgOpenBlueFrance)}>
                 <div className={cx(fr.cx("fr-container"), classes.container)}>
-                    <h2 className={fr.cx("fr-m-0")}>Des avantages</h2>
+                    <h2 className={fr.cx("fr-m-0")}>Les avantages</h2>
 
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
                         <div className={fr.cx("fr-col-12", "fr-col-md")}>
@@ -217,7 +221,7 @@ export default function Maps() {
                             <h3 className={fr.cx("fr-h4")}>Préparez un projet d’aménagement ou de mobilité</h3>
 
                             <p className={cx(fr.cx("fr-text--xs"), classes.textMentionGrey)}>Mesurez, analysez et tracez un projet directement sur la carte</p>
-                            <p>Pour préparer un diagnostic avant de lancer votre projet d’aménagement ou d’infrastructure : </p>
+                            <p>Pour préparer un diagnostic avant de lancer votre projet d’aménagement ou d’infrastructure :</p>
                             <p>
                                 → Utilisez les cartes de référence comme le cadastre, les réseau ou les reliefs pour préparer un diagnostic avant de lancer
                                 votre projet d’aménagement ou d’infrastructure

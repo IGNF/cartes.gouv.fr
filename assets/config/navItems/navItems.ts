@@ -1,6 +1,5 @@
 import { MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation";
 
-import { externalUrls } from "@/router/externalUrls";
 import { routes } from "../../router/router";
 
 // dans ce cas précise, getTranslation ne marche pas parce que les traductions sont pas encore chargées, on est donc obglié de passer la fonction t en paramètre
@@ -19,8 +18,9 @@ export const defaultNavItems = (routeName: string): MainNavigationProps.Item[] =
                     isActive: routeName === routes.present_service_maps().name,
                 },
                 {
-                    linkProps: { href: externalUrls.catalogue },
+                    linkProps: routes.present_service_catalogue().link,
                     text: "Rechercher une donnée",
+                    isActive: routeName === routes.present_service_catalogue().name,
                 },
                 {
                     linkProps: routes.discover_publish().link,

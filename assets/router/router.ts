@@ -28,6 +28,7 @@ const publicRoutes = {
         () => `${appRoot}/publier-une-donnee`
     ),
     present_service_maps: defineRoute(`${appRoot}/explorer-les-cartes`),
+    present_service_catalogue: defineRoute(`${appRoot}/rechercher-une-donnee`),
     page_not_found: defineRoute(`${appRoot}/404`),
     about: defineRoute(`${appRoot}/a-propos`),
     contact: defineRoute(`${appRoot}/nous-ecrire`),

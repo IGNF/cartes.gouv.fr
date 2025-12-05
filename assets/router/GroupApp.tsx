@@ -4,7 +4,8 @@ import { Route } from "type-route";
 import useNavItems from "@/hooks/useNavItems";
 import Discover from "@/pages/discover/Discover";
 import DiscoverPublish from "@/pages/discover/publish/DiscoverPublish";
-import Maps from "@/pages/services/Maps/Maps";
+import PresentationServiceCatalogue from "@/pages/services/Catalogue/PresentationServiceCatalogue";
+import PresentationServiceMaps from "@/pages/services/Maps/PresentationServiceMaps";
 import AppLayout, { AppLayoutProps } from "../components/Layout/AppLayout";
 import PageNotFoundWithLayout from "../pages/error/PageNotFoundWithLayout";
 import { routes } from "./router";
@@ -66,7 +67,9 @@ function GroupApp(props: IGroupAppProps) {
                     render: <DiscoverPublish />,
                 };
             case "present_service_maps":
-                return { render: <Maps /> };
+                return { render: <PresentationServiceMaps /> };
+            case "present_service_catalogue":
+                return { render: <PresentationServiceCatalogue /> };
             case "about":
                 return { render: <About /> };
             case "offer":

@@ -32,8 +32,13 @@
     color: var(--text-action-high-blue-france, #000091) !important;
 }
 
-.textMentionGrey {
+.textMentionGrey,
+.textMentionGrey * {
     color: var(--text-mention-grey, #6f6f6f);
+}
+
+.textCenter {
+    text-align: center !important;
 }
 
 .borderDefaultGrey {
