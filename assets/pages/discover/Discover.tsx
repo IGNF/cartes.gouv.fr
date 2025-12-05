@@ -191,7 +191,7 @@ export default function Discover() {
                         }
                         footer={
                             <>
-                                <Link className={fr.cx("fr-link")} href={externalUrls.documentationExploreMaps}>
+                                <Link className={fr.cx("fr-link")} {...routes.present_service_maps().link}>
                                     {"En savoir plus"}
                                 </Link>
                                 <Button

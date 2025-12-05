@@ -1,13 +1,14 @@
 import { lazy, useMemo } from "react";
 import { Route } from "type-route";
 
-import { routes } from "./router";
-import AppLayout, { AppLayoutProps } from "../components/Layout/AppLayout";
-import Discover from "@/pages/discover/Discover";
-import PageNotFoundWithLayout from "../pages/error/PageNotFoundWithLayout";
 import useNavItems from "@/hooks/useNavItems";
+import Discover from "@/pages/discover/Discover";
+import DiscoverPublish from "@/pages/discover/publish/DiscoverPublish";
+import Maps from "@/pages/services/Maps/Maps";
+import AppLayout, { AppLayoutProps } from "../components/Layout/AppLayout";
+import PageNotFoundWithLayout from "../pages/error/PageNotFoundWithLayout";
+import { routes } from "./router";
 
-const DiscoverPublish = lazy(() => import("../pages/discover/publish/DiscoverPublish"));
 const About = lazy(() => import("../pages/About"));
 const Offer = lazy(() => import("../pages/Offer"));
 const Join = lazy(() => import("../pages/Join"));
@@ -64,6 +65,8 @@ function GroupApp(props: IGroupAppProps) {
                 return {
                     render: <DiscoverPublish />,
                 };
+            case "present_service_maps":
+                return { render: <Maps /> };
             case "about":
                 return { render: <About /> };
             case "offer":

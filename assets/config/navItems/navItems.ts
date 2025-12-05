@@ -14,8 +14,9 @@ export const defaultNavItems = (routeName: string): MainNavigationProps.Item[] =
         {
             menuLinks: [
                 {
-                    linkProps: { href: externalUrls.maps },
+                    linkProps: routes.present_service_maps().link,
                     text: "Explorer les cartes",
+                    isActive: routeName === routes.present_service_maps().name,
                 },
                 {
                     linkProps: { href: externalUrls.catalogue },
