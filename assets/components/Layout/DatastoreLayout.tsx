@@ -2,7 +2,6 @@ import { useQuery } from "@tanstack/react-query";
 import { FC, PropsWithChildren, memo, useMemo } from "react";
 
 import { Datastore } from "../../@types/app";
-import { datastoreNavItems } from "../../config/navItems/datastoreNavItems";
 import api from "../../entrepot/api";
 import RQKeys from "../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../modules/jsonFetch";
@@ -30,8 +29,6 @@ const DatastoreLayout: FC<PropsWithChildren<DatastoreLayoutProps>> = (props) => 
         staleTime: 3600000,
     });
 
-    const navItems = useMemo(() => datastoreNavItems(data), [data]);
-
     const isAuthorized = useMemo(() => {
         if (!user?.id || !user?.communities_member) {
             return false;
@@ -58,7 +55,7 @@ const DatastoreLayout: FC<PropsWithChildren<DatastoreLayoutProps>> = (props) => 
     }
 
     return (
-        <AppLayout {...rest} navItems={navItems}>
+        <AppLayout {...rest}>
             <DatastoreProvider datastore={data} isFetching={isFetching} status={status}>
                 {isAuthorized ? children : <Forbidden />}
             </DatastoreProvider>

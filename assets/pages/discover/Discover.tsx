@@ -171,9 +171,7 @@ export default function Discover() {
                         <strong>cartes.gouv.fr</strong>
                     </h1>
 
-                    <p>
-                        Découvrir cartes.gouv.fr : des cartes, des données, des outils pour explorer, comprendre et approfondir la connaissance du territoire.
-                    </p>
+                    <p>Des cartes, des données, des outils pour explorer, comprendre et approfondir la connaissance du territoire.</p>
                 </div>
 
                 <img src={heroImgUrl} alt="" />
@@ -193,7 +191,7 @@ export default function Discover() {
                         }
                         footer={
                             <>
-                                <Link className={fr.cx("fr-link")} href={externalUrls.documentationExploreMaps}>
+                                <Link className={fr.cx("fr-link")} {...routes.present_service_maps().link}>
                                     {"En savoir plus"}
                                 </Link>
                                 <Button
@@ -221,7 +219,7 @@ export default function Discover() {
                         }
                         footer={
                             <>
-                                <Link className={fr.cx("fr-link")} href={externalUrls.documentationUserGuidCatalogue}>
+                                <Link className={fr.cx("fr-link")} {...routes.present_service_catalogue().link}>
                                     {"En savoir plus"}
                                 </Link>
                                 <Button
@@ -247,10 +245,10 @@ export default function Discover() {
                                 }
                                 footer={
                                     <>
-                                        <Link className={fr.cx("fr-link")} href={externalUrls.documentationProducerGuide}>
+                                        <Link className={fr.cx("fr-link")} {...routes.present_service_publish().link}>
                                             {"En savoir plus"}
                                         </Link>
-                                        <Button iconId="fr-icon-arrow-right-s-line" iconPosition="right" linkProps={routes.dashboard_pro().link}>
+                                        <Button iconId="fr-icon-arrow-right-s-line" iconPosition="right" linkProps={routes.discover_publish().link}>
                                             Publier
                                         </Button>
                                     </>
@@ -342,7 +340,7 @@ export default function Discover() {
                 <div className={cx(classes.featureCardsWrapper)}>
                     <h2 className={classes.sectionTitle}>Des fonctionnalités clés pour cartographier et analyser son territoire</h2>
 
-                    <div className={cx(fr.cx("fr-accordions-group"), classes.accordionsGroup, classes.bgGrey)} data-fr-group="false">
+                    <div className={cx(fr.cx("fr-accordions-group"), classes.accordionsGroup, classes.bgGrey)}>
                         <Accordion label="Géocoder vos fichiers d'adresse" defaultExpanded={true}>
                             <div className={classes.accordionBody}>
                                 <img src={geocodingThumbUrl} alt="" />

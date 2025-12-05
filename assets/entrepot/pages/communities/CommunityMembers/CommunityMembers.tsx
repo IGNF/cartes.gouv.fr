@@ -1,15 +1,26 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
+import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { ToggleSwitch } from "@codegouvfr/react-dsfr/ToggleSwitch";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
+import { tss } from "tss-react";
 
+import DatastoreMain from "@/components/Layout/DatastoreMain";
+import DatastoreTertiaryNavigation from "@/components/Layout/DatastoreTertiaryNavigation";
+import PageTitle from "@/components/Layout/PageTitle";
+import { usePagination } from "@/hooks/usePagination";
+import { useSearch } from "@/hooks/useSearch";
+import Pagination from "@codegouvfr/react-dsfr/Pagination";
+import SearchBar from "@codegouvfr/react-dsfr/SearchBar";
 import { UserRightsResponseDto } from "../../../../@types/app";
 import { CommunityUserResponseDto, UserDto } from "../../../../@types/entrepot";
 import ConfirmDialog, { ConfirmDialogModal } from "../../../../components/Utils/ConfirmDialog";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
+import { useCommunity } from "../../../../contexts/community";
+import { useDatastore } from "../../../../contexts/datastore";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
@@ -17,18 +28,7 @@ import { routes, useRoute } from "../../../../router/router";
 import { useAuthStore } from "../../../../stores/AuthStore";
 import api from "../../../api";
 import { AddMember, addMemberModal } from "../AddMember/AddMember";
-import { complete, getTranslatedRightTypes, UserRights } from "../UserRights";
-
-import { ListHeader } from "@/components/Layout/ListHeader";
-import PageTitle from "@/components/Layout/PageTitle";
-import { usePagination } from "@/hooks/usePagination";
-import { useSearch } from "@/hooks/useSearch";
-import Pagination from "@codegouvfr/react-dsfr/Pagination";
-import SearchBar from "@codegouvfr/react-dsfr/SearchBar";
-import Main from "../../../../components/Layout/Main";
-import { useCommunity } from "../../../../contexts/community";
-import { useDatastore } from "../../../../contexts/datastore";
-import "../../../../sass/pages/community_members.scss";
+import { complete, rightTypes, UserRights } from "../UserRights";
 
 type CommunityMembersProps = {
     userId?: string;
@@ -40,14 +40,13 @@ type Member = {
     rights: Record<string, boolean>;
     isSupervisor: boolean;
     isMe: boolean;
+    email: string;
 };
 
 type updateMember = {
     user_id: string;
     user_rights: string[];
 };
-
-const tableContainerClassName = fr.cx("fr-table", "fr-table--bordered", "fr-table--no-caption", "fr-mt-2w") + " frx-table-member";
 
 const getName = (member: UserDto) => {
     const lastName = member.last_name ?? "";
@@ -60,6 +59,7 @@ const getName = (member: UserDto) => {
 function CommunityMembers({ userId }: CommunityMembersProps) {
     // Traductions
     const { t: tCommon } = useTranslation("Common");
+    const { t: tRights } = useTranslation("Rights");
     const { t } = useTranslation({ CommunityMembers });
     const { t: tBreadcrumb } = useTranslation("Breadcrumb");
 
@@ -98,6 +98,7 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
                 rights: complete(member.rights),
                 isSupervisor: member.user._id === communitySupervisor,
                 isMe: member.user._id === user?.id,
+                email: member.user.email,
             });
         });
         members.sort((m1, m2) => {
@@ -173,17 +174,24 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
         mutateModify({ user_id: user_id, user_rights: Object.keys(user.rights) });
     };
 
+    const tableId = useId();
+
+    const { classes, cx } = useStyles();
+
     return (
-        <Main
+        <DatastoreMain
             customBreadcrumbProps={{
                 homeLinkProps: routes.discover().link,
                 segments: [
-                    { label: tBreadcrumb("dashboard_pro"), linkProps: routes.dashboard_pro().link },
+                    { label: tBreadcrumb("dashboard"), linkProps: routes.dashboard().link },
+                    { label: tBreadcrumb("datastore_selection"), linkProps: routes.datastore_selection().link },
                     { label: datastore?.name, linkProps: routes.datasheet_list({ datastoreId: datastore?._id ?? "XXXX" }).link },
                 ],
                 currentPageLabel: tBreadcrumb("members_list"),
             }}
             title="Membres"
+            datastoreId={datastore._id}
+            communityId={community._id}
         >
             {isLoading && <LoadingText />}
             {!isLoading && userId && communityMemberIds.includes(userId) && (
@@ -199,20 +207,39 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
             )}
             {!isLoading && (
                 <>
-                    <PageTitle
-                        buttons={[
-                            {
-                                children: t("add_user"),
-                                iconId: "fr-icon-add-circle-line",
-                                onClick: () => addMemberModal.open(),
-                            },
-                        ]}
-                        showButtons
-                        title={t("community_members", { communityName: community?.name ?? "" })}
-                    />
+                    <PageTitle title={t("community_members", { communityName: community?.name ?? "" })} />
+
+                    <DatastoreTertiaryNavigation datastoreId={datastore._id} communityId={community._id} />
+
+                    <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mt-6v", "fr-mb-2v")}>
+                        <div
+                            className={fr.cx("fr-col-12", "fr-py-0")}
+                            style={{
+                                display: "flex",
+                                alignItems: "center",
+                            }}
+                        >
+                            <strong className={fr.cx("fr-text--xl", "fr-m-0", "fr-mr-2v")}>Membres</strong>
+                            <Badge severity="info" noIcon={true}>
+                                {searchedItems.length ?? 0}
+                            </Badge>
+                            <Button onClick={() => addMemberModal.open()} iconId="fr-icon-add-line" iconPosition="right" className={fr.cx("fr-ml-auto")}>
+                                {t("add_member")}
+                            </Button>
+                        </div>
+                    </div>
+
+                    <UserRights />
 
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mt-2v")}>
-                        <div className={fr.cx("fr-col-12", "fr-col-md-8", "fr-col-offset-md-2")}>
+                        <div
+                            className={fr.cx("fr-col-12")}
+                            style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: fr.spacing("4v"),
+                            }}
+                        >
                             <SearchBar
                                 label={tCommon("search")}
                                 onButtonClick={(text) => {
@@ -221,85 +248,103 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
                                     }
                                 }}
                                 allowEmptySearch={true}
-                                big
                                 renderInput={(props) => <input {...props} disabled={isLoading} />}
                                 defaultValue={search}
                             />
                         </div>
                     </div>
 
-                    <ListHeader nbResults={searchedItems.length} />
-
-                    <div className={tableContainerClassName}>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th />
-                                    <th colSpan={5}>{t("rights")}</th>
-                                    <th />
-                                </tr>
-                                <tr>
-                                    <th>{t("name")}</th>
-                                    {getTranslatedRightTypes().map((right) => (
-                                        <th key={right}>{right}</th>
-                                    ))}
-                                    <th />
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {paginatedItems.map((member) => {
-                                    return (
-                                        <tr key={member.id}>
-                                            <td>
-                                                {member.name} {member.isMe === true ? " (" + t("me") + ")" : ""}{" "}
-                                                {member.isSupervisor === true ? " (" + t("supervisor") + ")" : ""}
-                                            </td>
-                                            {Object.keys(member.rights).map((r) => {
+                    <div
+                        className={fr.cx(
+                            // "fr-table",
+                            "fr-table--lg",
+                            // "fr-table--multiline",
+                            // "fr-table--no-scroll",
+                            "fr-table--layout-fixed",
+                            "fr-table--no-caption",
+                            "fr-mt-2w"
+                        )}
+                        id={`${tableId}-component`}
+                    >
+                        <div className={fr.cx("fr-table__wrapper")}>
+                            <div className={fr.cx("fr-table__container")}>
+                                <div className={cx(fr.cx("fr-table__content"), classes.tableContent)}>
+                                    <table id={tableId}>
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Email</th>
+                                                {rightTypes.map((right) => (
+                                                    <th key={`right-${right}`} scope="col">
+                                                        {tRights(right)}
+                                                    </th>
+                                                ))}
+                                                <th scope="col">
+                                                    <span className={fr.cx("fr-icon-delete-line")} />
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {paginatedItems?.map((member) => {
+                                                const id = `table-${tableId}-row-key-${member.id}`;
                                                 return (
-                                                    <td key={r}>
-                                                        <ToggleSwitch
-                                                            defaultChecked={member.rights[r] === true}
-                                                            disabled={member.isMe === true || member.isSupervisor === true}
-                                                            inputTitle={t("add_remove_right_title", { right: r })}
-                                                            label={" "}
-                                                            showCheckedHint={false}
-                                                            onChange={(checked) => handleToggleChanged(member.id, r, checked)}
-                                                        />
-                                                    </td>
+                                                    <tr key={id} id={id} data-row-key={member.id}>
+                                                        <td>
+                                                            {member.email}{" "}
+                                                            {member.isMe ? (
+                                                                <Badge noIcon className={fr.cx("fr-ml-2v", "fr-badge--purple-glycine")} small>
+                                                                    Moi
+                                                                </Badge>
+                                                            ) : member.isSupervisor ? (
+                                                                <Badge severity="info" noIcon className={fr.cx("fr-ml-2v")} small>
+                                                                    Superviseur
+                                                                </Badge>
+                                                            ) : null}
+                                                        </td>
+                                                        {Object.keys(member.rights).map((r) => (
+                                                            <td key={r}>
+                                                                <ToggleSwitch
+                                                                    defaultChecked={member.rights[r] === true}
+                                                                    disabled={member.isMe === true || member.isSupervisor === true}
+                                                                    inputTitle={t("add_remove_right_title", { right: r })}
+                                                                    label={""}
+                                                                    showCheckedHint={false}
+                                                                    onChange={(checked) => handleToggleChanged(member.id, r, checked)}
+                                                                />
+                                                            </td>
+                                                        ))}
+
+                                                        <td>
+                                                            <Button
+                                                                title={t("remove_member")}
+                                                                priority={"tertiary no outline"}
+                                                                iconId={"fr-icon-delete-line"}
+                                                                onClick={() => {
+                                                                    setCurrentMember(member.id);
+                                                                    ConfirmDialogModal.open();
+                                                                }}
+                                                                disabled={member.isMe === true || member.isSupervisor === true}
+                                                            />
+                                                        </td>
+                                                    </tr>
                                                 );
                                             })}
-                                            {member.isMe === false && member.isSupervisor === false ? (
-                                                <td>
-                                                    <Button
-                                                        title={t("remove_user")}
-                                                        priority={"tertiary no outline"}
-                                                        iconId={"fr-icon-delete-line"}
-                                                        onClick={() => {
-                                                            setCurrentMember(member.id);
-                                                            ConfirmDialogModal.open();
-                                                        }}
-                                                    />
-                                                </td>
-                                            ) : (
-                                                <td />
-                                            )}
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                        <div className={fr.cx("fr-grid-row", "fr-grid-row--center", "fr-mt-6v")}>
-                            <Pagination
-                                count={totalPages}
-                                showFirstLast={true}
-                                getPageLinkProps={(pageNumber) => ({
-                                    ...routes.members_list({ communityId: community._id, userId, page: pageNumber, limit: limit, search }).link,
-                                })}
-                                defaultPage={page}
-                            />
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <UserRights />
+
+                    <div className={fr.cx("fr-grid-row", "fr-grid-row--center", "fr-mt-6v")}>
+                        <Pagination
+                            count={totalPages}
+                            showFirstLast={true}
+                            getPageLinkProps={(pageNumber) => ({
+                                ...routes.members_list({ communityId: community._id, userId, page: pageNumber, limit: limit, search }).link,
+                            })}
+                            defaultPage={page}
+                        />
+                    </div>
                     {(isRemovePending || isModifyPending) && (
                         <Wait>
                             <div className={fr.cx("fr-container")}>
@@ -321,8 +366,20 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
                     }
                 }}
             />
-        </Main>
+        </DatastoreMain>
     );
 }
 
 export default CommunityMembers;
+
+const useStyles = tss.withName({ CommunityMembers }).create({
+    tableContent: {
+        "& table thead th": {
+            backgroundColor: fr.colors.decisions.background.default.grey.default,
+        },
+        "& table thead th, & table tbody td": {
+            backgroundImage: `linear-gradient(0deg, ${fr.colors.decisions.border.default.grey.default}, ${fr.colors.decisions.border.default.grey.default}),linear-gradient(0deg, var(--border-contrast-grey), var(--border-contrast-grey));`,
+            height: "4rem",
+        },
+    },
+});

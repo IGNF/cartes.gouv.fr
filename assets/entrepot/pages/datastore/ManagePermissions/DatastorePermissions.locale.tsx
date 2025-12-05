@@ -8,7 +8,7 @@ import { formatDateFromISO } from "../../../../utils";
 
 // traductions
 const { i18n } = declareComponentKeys<
-    | { K: "list.title"; P: { datastoreName?: string }; R: string }
+    | { K: "title"; P: { datastoreName?: string }; R: string | undefined }
     | "list.licence_header"
     | "list.expiration_date_header"
     | "list.granted_to_header"
@@ -90,7 +90,7 @@ const getTitle = (lang: "fr" | "en", permission?: DatastorePermission) => {
 };
 
 export const DatastorePermissionsFrTranslations: Translations<"fr">["DatastorePermissions"] = {
-    "list.title": ({ datastoreName }) => `Gérer les permissions de l’espace de travail${datastoreName ? " " + datastoreName : ""}`,
+    title: ({ datastoreName }) => datastoreName,
     "list.licence_header": "Licence",
     "list.expiration_date_header": "Date d’expiration",
     "list.granted_to_header": "Accordée à",
@@ -135,7 +135,7 @@ export const DatastorePermissionsFrTranslations: Translations<"fr">["DatastorePe
 };
 
 export const DatastorePermissionsEnTranslations: Translations<"en">["DatastorePermissions"] = {
-    "list.title": ({ datastoreName }) => `Manage workspace permissions${datastoreName ? " " + datastoreName : ""}`,
+    title: ({ datastoreName }) => datastoreName,
     "list.licence_header": "Licence",
     "list.expiration_date_header": "Expiration date",
     "list.granted_to_header": "Granted to",

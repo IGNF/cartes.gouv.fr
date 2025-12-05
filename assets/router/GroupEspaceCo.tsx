@@ -2,7 +2,6 @@ import { lazy, useMemo } from "react";
 import { Route } from "type-route";
 
 import AppLayout from "@/components/Layout/AppLayout";
-import { datastoreNavItems } from "@/config/navItems/datastoreNavItems";
 import { CommunityProvider } from "@/espaceco/contexts/CommunityContext";
 import PageNotFoundWithLayout from "@/pages/error/PageNotFoundWithLayout";
 import { groups } from "./router";
@@ -18,8 +17,6 @@ interface IGroupEspaceCoProps {
 
 function GroupEspaceCo(props: IGroupEspaceCoProps) {
     const { route, ...rest } = props;
-
-    const navItems = datastoreNavItems();
 
     const content: { render: JSX.Element } = useMemo(() => {
         switch (route.name) {
@@ -50,11 +47,7 @@ function GroupEspaceCo(props: IGroupEspaceCoProps) {
         return <PageNotFoundWithLayout />;
     }
 
-    return (
-        <AppLayout {...rest} navItems={navItems}>
-            {content.render}
-        </AppLayout>
-    );
+    return <AppLayout {...rest}>{content.render}</AppLayout>;
 }
 
 export default GroupEspaceCo;

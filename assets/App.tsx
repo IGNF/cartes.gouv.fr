@@ -5,9 +5,10 @@ import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client
 import { FC } from "react";
 
 import AlertProvider from "./components/Provider/AlertProvider";
+import AuthProvider from "./components/Provider/AuthProvider";
 import ErrorBoundary from "./components/Utils/ErrorBoundary";
-import RouterRenderer from "./router/RouterRenderer";
 import { RouteProvider } from "./router/router";
+import RouterRenderer from "./router/RouterRenderer";
 
 import "./sass/helpers.scss";
 
@@ -27,7 +28,9 @@ const App: FC = () => {
             <RouteProvider>
                 <ErrorBoundary>
                     <AlertProvider>
-                        <RouterRenderer />
+                        <AuthProvider>
+                            <RouterRenderer />
+                        </AuthProvider>
                     </AlertProvider>
                 </ErrorBoundary>
             </RouteProvider>
