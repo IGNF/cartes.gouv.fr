@@ -7,7 +7,7 @@ import { routes, useRoute } from "@/router/router";
 import { useAuthStore } from "@/stores/AuthStore";
 import classes from "./DiscoverPublish.module.css";
 
-import backgroundImgUrl from "@/img/discover/publish/background.png";
+import backgroundImgUrl from "@/img/discover/publish/background.png?w=400;800;1200;1400;2160&format=png&as=srcset";
 import uploaderSvgUrl from "@/img/pictograms/uploader.svg";
 import { useEffect } from "react";
 
@@ -29,7 +29,7 @@ export default function DiscoverPublish() {
         <Main title="Le service public des cartes et données du territoire" fluidContainer={true}>
             <div className={classes.container}>
                 <div className={classes.backgroundWrapper}>
-                    <img src={backgroundImgUrl} alt="illustration" className={classes.backgroundImage} />
+                    <img srcSet={backgroundImgUrl} alt="illustration" className={classes.backgroundImage} />
                 </div>
                 <div className={classes.contentWrapper}>
                     <div className={classes.card}>
@@ -40,7 +40,7 @@ export default function DiscoverPublish() {
                             <p className={fr.cx("fr-text--xl", "fr-m-0")}>Héberger, créer des flux, partager</p>
                         </div>
                         <p className={fr.cx("fr-text--lg", "fr-m-0")}>
-                            Un service pour héberger vos données, les diffuser sous forme de flux et les exploiter dans cartes.gouv ou vos propres outils.
+                            Hébergez vos données, diffusez-les sous forme de flux et exploitez-les dans cartes.gouv.fr ou vos propres outils.
                         </p>
 
                         <Button
