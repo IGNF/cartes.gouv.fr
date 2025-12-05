@@ -171,9 +171,7 @@ export default function Discover() {
                         <strong>cartes.gouv.fr</strong>
                     </h1>
 
-                    <p>
-                        Découvrir cartes.gouv.fr : des cartes, des données, des outils pour explorer, comprendre et approfondir la connaissance du territoire.
-                    </p>
+                    <p>Des cartes, des données, des outils pour explorer, comprendre et approfondir la connaissance du territoire.</p>
                 </div>
 
                 <img src={heroImgUrl} alt="" />
