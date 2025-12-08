@@ -4,22 +4,28 @@ import { ReactNode } from "react";
 import classes from "./FeatureCard.module.css";
 
 type FeatureCardProps = {
-    illustration?: string;
-    illustrationPosition?: "left" | "right";
+    illustration?: {
+        src?: string;
+        srcSet?: string;
+        alt?: string;
+        position?: "left" | "right";
+    };
     picto?: string;
     title: string;
     desc: ReactNode;
     footer?: ReactNode;
 };
-export default function FeatureCard({ illustration, illustrationPosition = "left", picto, title, desc, footer }: FeatureCardProps) {
+export default function FeatureCard({ illustration, picto, title, desc, footer }: FeatureCardProps) {
     return (
         <div
             className={cx(classes.container, {
-                [classes.illustrationRight]: illustrationPosition === "right",
+                [classes.illustrationRight]: illustration?.position === "right",
                 [classes.noIllustration]: !illustration,
             })}
         >
-            {illustration && <img src={illustration} alt="" className={classes.illustration} />}
+            {(illustration?.src || illustration?.srcSet) && (
+                <img src={illustration?.src} srcSet={illustration?.srcSet} alt={illustration?.alt} className={classes.illustration} />
+            )}
 
             <div className={classes.body}>
                 {picto && <img src={picto} alt="" className={classes.picto} />}

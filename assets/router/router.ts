@@ -59,7 +59,7 @@ const publicRoutes = {
     legal_notice: defineRoute(`${appRoot}/mentions-legales`),
     personal_data: defineRoute(`${appRoot}/donnees-personnelles`),
     offer: defineRoute(`${appRoot}/offre`),
-    join: defineRoute(`${appRoot}/nous-rejoindre`),
+    join_cartesgouvfr_community: defineRoute(`${appRoot}/nous-rejoindre`),
     terms_of_service: defineRoute(`${appRoot}/cgu`),
     service_status: defineRoute(`${appRoot}/niveau-de-service`),
     login_disabled: defineRoute(`${appRoot}/connexion-desactivee`),

@@ -46,8 +46,8 @@ export const defaultNavItems = (routeName: string): MainNavigationProps.Item[] =
         },
         {
             text: "Communautés",
-            linkProps: routes.join().link,
-            isActive: routeName === routes.join().name,
+            linkProps: routes.join_cartesgouvfr_community().link,
+            isActive: routeName === routes.join_cartesgouvfr_community().name,
         },
         {
             linkProps: routes.service_status().link,

@@ -26,7 +26,7 @@ const SiteMap = () => {
                                         <a {...routes.offer().link}>Offre cartes.gouv.fr/Géoplateforme</a>
                                     </li>
                                     <li>
-                                        <a {...routes.join().link}>Nous rejoindre</a>
+                                        <a {...routes.join_cartesgouvfr_community().link}>Nous rejoindre</a>
                                     </li>
                                 </ul>
                             </li>

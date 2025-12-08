@@ -100,7 +100,7 @@ export default function PresentationServiceMaps() {
                             <li>Obtenir un profil altimétrique (altitude) le long d’un itinéraire</li>
                         </ul>
                         <p className={cx(fr.cx("fr-text--xs", "fr-m-0"), classes.textMentionGrey)}>
-                            Activez vos outils préférés et personnaliser votre interface.
+                            Activez vos outils préférés et personnalisez votre interface.
                         </p>
                     </div>
                 </div>
@@ -114,8 +114,8 @@ export default function PresentationServiceMaps() {
                     </div>
                     <div className={fr.cx("fr-col-12", "fr-col-md-6")}>
                         <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
-                            Importez vos données métiers (tableurs, fichiers géographiques, flux) et superposez-les aux données de référence pour découvrir de
-                            nouvelles corrélations et illustrer des phénomènes.
+                            Importez vos données métiers (fichiers géographiques, flux) et superposez-les aux données de référence pour découvrir de nouvelles
+                            corrélations et illustrer des phénomènes.
                         </p>
                         <p className={cx(fr.cx("fr-text--xs", "fr-m-0"), classes.textMentionGrey)}>
                             Utilisez nos outils pour ajouter des annotations, dessins ou points d’intérêt.
@@ -186,7 +186,7 @@ export default function PresentationServiceMaps() {
                         <div className={fr.cx("fr-col-12", "fr-col-md")}>
                             <Tile
                                 title="Un service gratuit et ouvert à tous"
-                                desc={"L’ensemble des cartes et des outils sont accessibles gratuitement, pour les citoyens comme pour les professionnels."}
+                                desc={"L’ensemble des cartes et des outils est accessible gratuitement, pour les citoyens comme pour les professionnels."}
                                 classes={{
                                     title: classes.tileNoBorder,
                                 }}
@@ -223,14 +223,14 @@ export default function PresentationServiceMaps() {
                             <p className={cx(fr.cx("fr-text--xs"), classes.textMentionGrey)}>Mesurez, analysez et tracez un projet directement sur la carte</p>
                             <p>Pour préparer un diagnostic avant de lancer votre projet d’aménagement ou d’infrastructure :</p>
                             <p>
-                                → Utilisez les cartes de référence comme le cadastre, les réseau ou les reliefs pour préparer un diagnostic avant de lancer
+                                → Utilisez les cartes de référence comme le cadastre, les réseaux ou les reliefs pour préparer un diagnostic avant de lancer
                                 votre projet d’aménagement ou d’infrastructure
                             </p>
                             <p>
                                 → Utilisez les outils de mesure et d’annotation pour estimer la surface d’un espace, tracer un futur cheminement ou étudier la
                                 pente via le profil altimétrique
                             </p>
-                            <p>→ Exporter et imprimer votre carte pour l’intégrer des dans rapports ou l’utiliser sur le terrain</p>
+                            <p>→ Exportez et imprimez votre carte pour l’intégrer dans des rapports ou l’utiliser sur le terrain</p>
                         </div>
                     </div>
 
@@ -242,16 +242,16 @@ export default function PresentationServiceMaps() {
                             <h3 className={fr.cx("fr-h4")}>Anticipez l’accessibilité d’un territoire</h3>
 
                             <p className={cx(fr.cx("fr-text--xs"), classes.textMentionGrey)}>
-                                Calculez des itinéraires, des isochrones ou mesurez l’accessibilité d’un service
+                                Calculez des itinéraires, des isochrones ou évaluez l’accessibilité à un service.
                             </p>
                             <p>
-                                Pour analyser la mobilité d’un territoire, il est important d’examiner l’accessibilité des zones rurales, périurbaines et
-                                urbaines, ainsi que d’évaluer les équipements publics :
+                                Pour comprendre comment un territoire est desservi, il est essentiel d’examiner l’accès aux zones rurales, périurbaines et
+                                urbaines, ainsi que la proximité des équipements publics :
                             </p>
                             <p>→ Mesurez des distances depuis un point donné</p>
-                            <p>→ Calculez des itinéraires piétons ou voitures</p>
-                            <p>→ Visualisez des isochrones (zone que l’on peut atteindre en un temps donné)</p>
-                            <p>→ Visualisez des isodistances (zone que l’on peut atteindre en nombre de kilomètres défini)</p>
+                            <p>→ Calculez des itinéraires piétons ou automobiles</p>
+                            <p>→ Visualisez des isochrones (zones atteignables en un temps donné)</p>
+                            <p>→ Visualisez des isodistances (zones atteignables en un nombre de kilomètres défini)</p>
                         </div>
                     </div>
 
@@ -270,11 +270,11 @@ export default function PresentationServiceMaps() {
                                 publics : limites administratives, zones forestières (ONF), données littorales et maritimes (SHOM), risques naturels,
                                 localisation des sentiers et habitats naturels (INPN)…
                             </p>
-                            <p>→ Sélectionnez et afficher des données</p>
+                            <p>→ Sélectionnez et affichez des données</p>
                             <p>→ Ajustez la transparence des couches pour les comparer</p>
                             <p>→ Éditez leur style si l’option est disponible pour personnaliser leur affichage </p>
                             <p>
-                                → Consultez leur légende, leurs métadonnées ou encore interroger directement les données sur la carte si l’option est disponible
+                                → Consultez leur légende, leurs métadonnées ou encore interrogez directement les données sur la carte si l’option est disponible
                             </p>
                         </div>
                     </div>
@@ -296,7 +296,7 @@ export default function PresentationServiceMaps() {
                             <p>→ Choisissez un ou plusieurs fonds de carte comme le plan IGN ou les prises de vues aériennes</p>
                             <p>→ Importez le tracé prévisionnel du projet (fichier GPX/GeoJSON) </p>
                             <p>
-                                → Ajoutez des annotations et dessinez directement sur votre carte pour montrer les points de conflits, les zones sensibles, les
+                                → Ajoutez des annotations et dessinez directement sur votre carte pour montrer les points de conflit, les zones sensibles, les
                                 axes traversés...
                             </p>
                             <p>→ Partagez votre carte via un lien direct ou intégrez la directement dans la page web du projet</p>
@@ -337,7 +337,7 @@ export default function PresentationServiceMaps() {
                                 Rejoignez une communauté d’utilisateurs et de contributeurs pour échanger, partager vos retours et construire ensemble les
                                 services cartographiques de demain.
                             </p>
-                            <Button linkProps={routes.join().link}>Rejoindre la communauté</Button>
+                            <Button linkProps={routes.join_cartesgouvfr_community().link}>Rejoindre la communauté</Button>
                         </div>
                     </div>
                 </div>

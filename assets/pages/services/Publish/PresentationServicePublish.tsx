@@ -313,7 +313,7 @@ export default function PresentationServicePublish() {
                                 Rejoignez une communauté d’utilisateurs et de contributeurs pour échanger, partager vos retours et construire ensemble les
                                 services cartographiques de demain.
                             </p>
-                            <Button linkProps={routes.join().link}>Rejoindre la communauté</Button>
+                            <Button linkProps={routes.join_cartesgouvfr_community().link}>Rejoindre la communauté</Button>
                         </div>
                     </div>
                 </div>

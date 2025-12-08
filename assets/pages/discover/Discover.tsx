@@ -18,7 +18,7 @@ import { useToggle } from "usehooks-ts";
 import Main from "@/components/Layout/Main";
 import { useAlert } from "@/hooks/useAlert";
 import SymfonyRouting from "@/modules/Routing";
-import { externalUrls } from "@/router/externalUrls";
+import { externalLink, externalUrls } from "@/router/externalUrls";
 import { routes, useRoute } from "@/router/router";
 import { useAlertStore } from "@/stores/AlertStore";
 import { useAuthStore } from "@/stores/AuthStore";
@@ -33,15 +33,15 @@ import pebThumbUrl from "@/img/discover/data-card/peb.png";
 import projetsZaerThumbUrl from "@/img/discover/data-card/projets-zaer.svg";
 import rpgThumbUrl from "@/img/discover/data-card/rpg.png";
 import scan25ThumbUrl from "@/img/discover/data-card/scan25.png";
-import heroImgUrl from "@/img/discover/hero.png";
+import heroImgSrcSet from "@/img/discover/hero.png?w=400;800;1200&format=webp;png&as=srcset";
 import geocodingThumbUrl from "@/img/discover/key-feature-card/geocoding.svg";
 import geopfApisThumbUrl from "@/img/discover/key-feature-card/geoplateforme-apis.svg";
 import geopfQgisPluginThumbUrl from "@/img/discover/key-feature-card/geoplateforme-qgis-plugin.svg";
 import geoservicesIntegrationThumbUrl from "@/img/discover/key-feature-card/geoservices-integration.svg";
 import hostingSharingThumbUrl from "@/img/discover/key-feature-card/hosting-sharing-sensitive-data.svg";
 import lidarhdThumbUrl from "@/img/discover/key-feature-card/lidarhd.svg";
-import illustrationServiceExploreUrl from "@/img/discover/service-explorer.png";
-import illustrationServiceSearchUrl from "@/img/discover/service-rechercher.png";
+import illustrationServiceExploreSrcSet from "@/img/discover/service-explorer.png?w=400;600;800&format=webp;png&as=srcset";
+import illustrationServiceSearchSrcSet from "@/img/discover/service-rechercher.png?w=400;600;800&format=webp;png&as=srcset";
 import catalogueSvgUrl from "@/img/pictograms/catalogue.svg";
 import contributorSvgUrl from "@/img/pictograms/contributor.svg";
 import editorSvgUrl from "@/img/pictograms/editor.svg";
@@ -174,13 +174,15 @@ export default function Discover() {
                     <p>Des cartes, des données, des outils pour explorer, comprendre et approfondir la connaissance du territoire.</p>
                 </div>
 
-                <img src={heroImgUrl} alt="" />
+                <img srcSet={heroImgSrcSet} alt="" />
             </section>
 
             <section className={cx(classes.section, classes.bgAltGrey)}>
                 <div className={cx(classes.featureCardsWrapper)}>
                     <FeatureCard
-                        illustration={illustrationServiceExploreUrl}
+                        illustration={{
+                            srcSet: illustrationServiceExploreSrcSet,
+                        }}
                         picto={viewerSvgUrl}
                         title="Explorer les cartes"
                         desc={
@@ -205,8 +207,10 @@ export default function Discover() {
                         }
                     />
                     <FeatureCard
-                        illustration={illustrationServiceSearchUrl}
-                        illustrationPosition="right"
+                        illustration={{
+                            srcSet: illustrationServiceSearchSrcSet,
+                            position: "right",
+                        }}
                         picto={catalogueSvgUrl}
                         title="Rechercher une donnée"
                         desc={
@@ -337,7 +341,7 @@ export default function Discover() {
                     <h2 className={classes.sectionTitle}>Des fonctionnalités clés pour cartographier et analyser son territoire</h2>
 
                     <div className={cx(fr.cx("fr-accordions-group"), classes.accordionsGroup, classes.bgGrey)}>
-                        <Accordion label="Géocoder vos fichiers d'adresse" defaultExpanded={true}>
+                        <Accordion label="Géocoder des fichiers d'adresse" defaultExpanded={true}>
                             <div className={classes.accordionBody}>
                                 <img src={geocodingThumbUrl} alt="" />
                                 <div>
@@ -353,9 +357,9 @@ export default function Discover() {
                                         >
                                             En savoir plus
                                         </Link>
-                                        <Link className={fr.cx("fr-link")} href="https://cartes.gouv.fr/catalogue/service/GeoPF_Geocodage" target="_blank">
+                                        {/* <Link className={fr.cx("fr-link")} href="https://cartes.gouv.fr/catalogue/service/GeoPF_Geocodage" target="_blank">
                                             Géocoder
-                                        </Link>
+                                        </Link> */}
                                     </div>
                                 </div>
                             </div>
@@ -373,8 +377,8 @@ export default function Discover() {
                                         <Link className={fr.cx("fr-link")} href="https://cartes.gouv.fr/telechargement/IGNF_MNT-LIDAR-HD" target="_blank">
                                             Consulter
                                         </Link>
-                                        <Link className={fr.cx("fr-link")} href="https://cartes.gouv.fr/catalogue/search?q=LIDAR&_sort=-_score" target="_blank">
-                                            Accéder à la fiche
+                                        <Link className={fr.cx("fr-link")} href="https://cartes.gouv.fr/catalogue/dataset/IGNF_MNT-LIDAR-HD" target="_blank">
+                                            Accéder à la fiche du LIDAR HD MNT
                                         </Link>
                                     </div>
                                 </div>
@@ -411,8 +415,11 @@ export default function Discover() {
                                         les données officielles du territoire à leurs projets numériques.
                                     </p>
                                     <div className={classes.accordionButtons}>
-                                        <Link className={fr.cx("fr-link")} href="https://fab-geocommuns.github.io/carte-facile-site/" target="_blank">
+                                        <Link className={fr.cx("fr-link")} {...externalLink("documentationUserGuideGeopfServicesTutorial")}>
                                             En savoir plus
+                                        </Link>
+                                        <Link className={fr.cx("fr-link")} href="https://fab-geocommuns.github.io/carte-facile-site/" target="_blank">
+                                            Intégrer dans un site en maplibre
                                         </Link>
                                     </div>
                                 </div>
@@ -498,7 +505,7 @@ export default function Discover() {
                     />
 
                     <Tile
-                        title="Accessible en ligne"
+                        title="Accessibles en ligne"
                         desc={"Des outils utilisables librement et sans installation."}
                         pictogram={<Internet />}
                         classes={{
@@ -559,7 +566,7 @@ export default function Discover() {
                                 "Rejoignez une communauté d’utilisateurs et de contributeurs pour échanger, partager vos retours et construire ensemble les services de demain. "
                             }
                             endDetail={
-                                <Link className={fr.cx("fr-link")} {...routes.news_list().link}>
+                                <Link className={fr.cx("fr-link")} {...routes.join_cartesgouvfr_community().link}>
                                     Rejoindre la communauté&nbsp;
                                     <span className={fr.cx("fr-icon-arrow-right-line")} />
                                 </Link>

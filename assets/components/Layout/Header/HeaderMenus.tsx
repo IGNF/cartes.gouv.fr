@@ -56,7 +56,7 @@ export function HeaderMenuServices() {
                 {
                     iconId: "fr-icon-database-line",
                     children: "Publier une donnée",
-                    linkProps: routes.dashboard().link,
+                    linkProps: routes.discover_publish().link,
                 },
                 // {
                 //     iconId: "fr-icon-brush-line",

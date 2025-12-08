@@ -14,7 +14,7 @@ const { i18n } = declareComponentKeys<
     | "legal_notice"
     | "personal_data"
     | "offer"
-    | "join"
+    | "join_cartesgouvfr_community"
     | "terms_of_service"
     | "service_status"
     | "accesses_request"
@@ -71,7 +71,7 @@ export const BreadcrumbFrTranslations: Translations<"fr">["Breadcrumb"] = {
     legal_notice: "Mentions légales",
     personal_data: "Données à caractère personnel",
     offer: "Offre",
-    join: "Nous rejoindre",
+    join_cartesgouvfr_community: "Nous rejoindre",
     terms_of_service: "Conditions générales d'utilisation",
     service_status: "Niveau de service",
     accesses_request: "Demande d'accès à un service privé",
@@ -127,7 +127,7 @@ export const BreadcrumbEnTranslations: Translations<"en">["Breadcrumb"] = {
     legal_notice: "Legal notice",
     personal_data: "Personal data",
     offer: "Offer",
-    join: "Join us",
+    join_cartesgouvfr_community: "Join us",
     terms_of_service: "Terms of Service",
     service_status: "TODO",
     accesses_request: "Request to private resources",
