@@ -7,8 +7,9 @@ import { appRoot, routes } from "./router";
 export const externalUrls = {
     documentation: appRoot + "/aide/",
     documentationProducerGuide: appRoot + "/aide/fr/guides-producteur/",
+    documentationProducerGuideGeneral: appRoot + "/aide/fr/guides-producteur/presentation-producteur/generalites-producteur/",
     documentationExploreMaps: appRoot + "/aide/fr/guides-utilisateur/visualiseur-cartographique/generalites-visualiseur/",
-    documentationUserGuideCatalogue: appRoot + "/aide/fr/guides-utilisateur/catalogue/",
+    documentationUserGuideCatalogueGeneral: appRoot + "/aide/fr/guides-utilisateur/rechercher-une-donnee/generalites-catalogue/",
     documentationCreateDatasheet: appRoot + "/aide/fr/guides-producteur/publier-des-donnees-via-cartes-gouv/deposer-donnees-sur-cartes-gouv/",
     catalogue: catalogueUrl ?? appRoot + "/catalogue",
     maps: appRoot + "/cartes",

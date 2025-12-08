@@ -294,7 +294,11 @@ export default function PresentationServicePublish() {
                                 Consulter notre documentation pour apprendre à utiliser notre service, pas à pas, jusqu’à maîtriser les fonctionnalités plus
                                 avancées.
                             </p>
-                            <Button className={classes.textActionHighBlueFrance} priority="secondary" linkProps={externalLink("documentationProducerGuide")}>
+                            <Button
+                                className={classes.textActionHighBlueFrance}
+                                priority="secondary"
+                                linkProps={externalLink("documentationProducerGuideGeneral")}
+                            >
                                 Consulter la documentation
                             </Button>
                         </div>

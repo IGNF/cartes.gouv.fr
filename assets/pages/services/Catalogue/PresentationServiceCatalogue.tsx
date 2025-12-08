@@ -291,7 +291,7 @@ export default function PresentationServiceCatalogue() {
                             <Button
                                 className={classes.textActionHighBlueFrance}
                                 priority="secondary"
-                                linkProps={externalLink("documentationUserGuideCatalogue")}
+                                linkProps={externalLink("documentationUserGuideCatalogueGeneral")}
                             >
                                 Consulter la documentation
                             </Button>
