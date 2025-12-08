@@ -24,7 +24,7 @@ export default function PresentationServiceCatalogue() {
                         <div className={fr.cx("fr-col-12", "fr-col-md-6", "fr-col--middle")}>
                             <span className={cx(fr.cx("ri-search-line"), classes.icon, classes.iconLg)} />
                             <h1 className={fr.cx("fr-mt-4v", "fr-mb-2v")}>Rechercher une donnée</h1>
-                            <p className={fr.cx("fr-text--lead", "fr-mb-6v")}>Filtrer, télécharger et exploitez des données</p>
+                            <p className={fr.cx("fr-text--lead", "fr-mb-6v")}>Filtrez, téléchargez et exploitez des données</p>
                             <Button iconId="fr-icon-arrow-right-s-line" iconPosition="right" linkProps={{ href: externalUrls.catalogue }}>
                                 Accédez au service
                             </Button>
@@ -49,7 +49,7 @@ export default function PresentationServiceCatalogue() {
                     <div className={fr.cx("fr-col-12", "fr-col-md-6")}>
                         <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
                             Le moteur de recherche vous permet d’accéder à toutes les ressources publiques des producteurs et fournisseurs institutionnels comme
-                            l’IGN, la DGFIP, le SHOM, et bien d’autres. Vous pouvez filtrer votre recherche par :
+                            l’IGN, la DGFIP, l’ONF, et bien d’autres. Vous pouvez filtrer votre recherche par&nbsp;:
                         </p>
                         <ul>
                             <li>Type de ressource : donnée, service ou réutilisation</li>
@@ -58,7 +58,7 @@ export default function PresentationServiceCatalogue() {
                             <li>Date de mise à jour</li>
                         </ul>
                         <p className={cx(fr.cx("fr-text--xs", "fr-m-0"), classes.textMentionGrey)}>
-                            Filtrer avec “Plus Récent” pour voir les dernières mises à jour de vos données favorites.
+                            Filtrez avec “Plus Récent” pour voir les dernières mises à jour de vos données favorites.
                         </p>
                     </div>
                 </div>
@@ -71,7 +71,7 @@ export default function PresentationServiceCatalogue() {
                         <h3 className={fr.cx("fr-m-0", "fr-h6")}>Consultez des fiches complètes pour chaque jeu de données</h3>
                     </div>
                     <div className={fr.cx("fr-col-12", "fr-col-md-6")}>
-                        <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>Chaque jeu de données dispose d’une fiche détaillée comprenant :</p>
+                        <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>Chaque jeu de données dispose d’une fiche détaillée comprenant&nbsp;:</p>
                         <ul>
                             <li>Description et contexte</li>
                             <li>Producteur et son contact</li>
@@ -100,15 +100,17 @@ export default function PresentationServiceCatalogue() {
                     <div className={fr.cx("fr-col-12", "fr-col-md-6")}>
                         <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
                             Téléchargez une grande variété de données dans des formats compatibles avec vos outils métiers (SIG, tableurs, traitements
-                            spécialisés)Vous pouvez également exploiter les données sous formes de flux standardisés (WMS, WMTS, WFS, TMS) et, selon les
-                            services, via des APIs, ce qui facilite leur intégration dans vos outils métiers et portails cartographiques.
+                            spécialisés).
+                            <br />
+                            Vous pouvez également exploiter les données sous formes de flux standardisés (WMS, WMTS, WFS, TMS), ce qui facilite leur intégration
+                            dans vos outils métiers et portails cartographiques.
                         </p>
                         <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
                             Lorsque que vous récupérez les données, vous pouvez filtrer par territoire ou via une interface dédiée, afin de ne récupérer que ce
                             qui est essentiel.
                         </p>
                         <p className={cx(fr.cx("fr-text--xs", "fr-m-0"), classes.textMentionGrey)}>
-                            Récupérez les données du Lidar MNT seulement et uniquement sur votre territoire.
+                            Récupérez les données du Lidar MNT en sélectionnant uniquement les dalles sur votre territoire.
                         </p>
                     </div>
                 </div>
@@ -121,7 +123,7 @@ export default function PresentationServiceCatalogue() {
                             <img srcSet={illustrationImgSrcSet} alt="illustration" className={classes.illustrationImg} />
                             <hr className={fr.cx("fr-mt-6v")} />
                             <p className={cx(fr.cx("fr-text--lg", "fr-m-0"), classes.textCenter)}>
-                                Successeur du <strong>Géoservices</strong>, retrouvez toutes vos fonctionnalités préférées. Accédez désormais à plus de données
+                                Successeur des <strong>Géoservices</strong>, retrouvez toutes vos fonctionnalités préférées. Accédez désormais à plus de données
                                 et construisez avec nous le service publique cartographique de demain.
                             </p>
                         </div>
@@ -136,7 +138,7 @@ export default function PresentationServiceCatalogue() {
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
                         <div className={fr.cx("fr-col-12", "fr-col-md")}>
                             <Tile
-                                title="Un accès centralisé aux des données géographiques publiques"
+                                title="Un accès centralisé aux données géographiques publiques"
                                 desc={
                                     "Retrouvez en un seul endroit les données, services et réutilisations issues des producteurs institutionnels, sans avoir à multiplier les sources."
                                 }
@@ -220,11 +222,11 @@ export default function PresentationServiceCatalogue() {
                             <p className={cx(fr.cx("fr-text--xs"), classes.textMentionGrey)}>
                                 Localisez et exploitez les données cadastrales nécessaires à une étude foncière
                             </p>
-                            <p>Pour une mission d’aménagement, un bureau d’étude peut rechercher le Parcellaire Express (PCI) et :</p>
-                            <p>→ Consultez sa fiche (producteur, point de contact, date de mise à jour) </p>
+                            <p>Pour une mission d’aménagement, votre bureau d’étude peut rechercher le Parcellaire Express (PCI)&nbsp;:</p>
+                            <p>→ Consultez sa fiche (producteur, point de contact, date de mise à jour)</p>
                             <p>→ Visualisez la donnée sur fonds cartographiques</p>
                             <p>→ Téléchargez les fichiers cadastraux (emprise départementale)</p>
-                            <p>→ Ou intégrez directement les flux (WMS/WFS/MAPLIBRE...) dans votre projet afin d’en simplifier les mises à jour régulières</p>
+                            <p>→ Intégrez directement les flux (WMS/WFS/TMS/WMTS) dans votre projet afin d’en simplifier les mises à jour régulières</p>
                         </div>
                     </div>
 
@@ -245,7 +247,7 @@ export default function PresentationServiceCatalogue() {
                             <p>→ Les fiches fournissent les métadonnées complètes, les cartes d’aperçu et les conditions d’accès </p>
                             <p>→ Les flux OGC permettent une intégration et visualisation instantanée dans vos outils</p>
                             <p>
-                                →Les téléchargements facilitent des analyses approfondies sur le carbone, les continuités écologiques ou la qualité des milieux
+                                → Les téléchargements facilitent des analyses approfondies sur le carbone, les continuités écologiques ou la qualité des milieux
                                 aquatiques
                             </p>
                         </div>
@@ -285,7 +287,7 @@ export default function PresentationServiceCatalogue() {
                             )}
                         >
                             <p className={fr.cx("fr-text--lg")}>
-                                Consulter notre documentation pour apprendre à utiliser notre service, pas à pas, jusqu’à maîtriser les fonctionnalités plus
+                                Consultez notre documentation pour apprendre à utiliser notre service, pas à pas, jusqu’à maîtriser les fonctionnalités plus
                                 avancées.
                             </p>
                             <Button

@@ -24,7 +24,7 @@ export default function PresentationServiceMaps() {
                         <div className={fr.cx("fr-col-12", "fr-col-md-6", "fr-col--middle")}>
                             <span className={cx(fr.cx("ri-map-2-line"), classes.icon, classes.iconLg)} />
                             <h1 className={fr.cx("fr-mt-4v", "fr-mb-2v")}>Explorer les cartes</h1>
-                            <p className={fr.cx("fr-text--lead", "fr-mb-6v")}>Afficher, analysez et partagez des cartes</p>
+                            <p className={fr.cx("fr-text--lead", "fr-mb-6v")}>Affichez, analysez et partagez des cartes</p>
                             <Button iconId="fr-icon-arrow-right-s-line" iconPosition="right" linkProps={{ href: externalUrls.maps }}>
                                 Accédez au service
                             </Button>
@@ -87,7 +87,7 @@ export default function PresentationServiceMaps() {
                         <h3 className={fr.cx("fr-m-0", "fr-h6")}>Bénéficiez d’une boîte à outils pour analyser votre territoire</h3>
                     </div>
                     <div className={fr.cx("fr-col-12", "fr-col-md-6")}>
-                        <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>Parmi nos outils, vous pouvez :</p>
+                        <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>Parmi nos outils, vous pouvez&nbsp;:</p>
                         <ul>
                             <li>Rechercher une adresse, un toponyme ou une parcelle</li>
                             <li>Rechercher ou afficher des coordonnées</li>
@@ -221,7 +221,7 @@ export default function PresentationServiceMaps() {
                             <h3 className={fr.cx("fr-h4")}>Préparez un projet d’aménagement ou de mobilité</h3>
 
                             <p className={cx(fr.cx("fr-text--xs"), classes.textMentionGrey)}>Mesurez, analysez et tracez un projet directement sur la carte</p>
-                            <p>Pour préparer un diagnostic avant de lancer votre projet d’aménagement ou d’infrastructure :</p>
+                            <p>Pour préparer un diagnostic avant de lancer votre projet d’aménagement ou d’infrastructure&nbsp;:</p>
                             <p>
                                 → Utilisez les cartes de référence comme le cadastre, les réseaux ou les reliefs pour préparer un diagnostic avant de lancer
                                 votre projet d’aménagement ou d’infrastructure
@@ -246,7 +246,7 @@ export default function PresentationServiceMaps() {
                             </p>
                             <p>
                                 Pour comprendre comment un territoire est desservi, il est essentiel d’examiner l’accès aux zones rurales, périurbaines et
-                                urbaines, ainsi que la proximité des équipements publics :
+                                urbaines, ainsi que la proximité des équipements publics&nbsp;:
                             </p>
                             <p>→ Mesurez des distances depuis un point donné</p>
                             <p>→ Calculez des itinéraires piétons ou automobiles</p>
@@ -291,7 +291,7 @@ export default function PresentationServiceMaps() {
                             </p>
                             <p>
                                 Pour préparer une réunion publique sur l’aménagement d’un terrain comme la conception d’une nouvelle piste cyclable, créez votre
-                                carte sur mesure et partagez-la aux décideurs et aux citoyens concernés :
+                                carte sur mesure et partagez-la aux décideurs et aux citoyens concernés&nbsp;:
                             </p>
                             <p>→ Choisissez un ou plusieurs fonds de carte comme le plan IGN ou les prises de vues aériennes</p>
                             <p>→ Importez le tracé prévisionnel du projet (fichier GPX/GeoJSON) </p>
@@ -319,7 +319,7 @@ export default function PresentationServiceMaps() {
                             )}
                         >
                             <p className={fr.cx("fr-text--lg")}>
-                                Consulter notre documentation pour apprendre à utiliser notre service, pas à pas, jusqu’à maîtriser les fonctionnalités plus
+                                Consultez notre documentation pour apprendre à utiliser notre service, pas à pas, jusqu’à maîtriser les fonctionnalités plus
                                 avancées.
                             </p>
                             <Button className={classes.textActionHighBlueFrance} priority="secondary" linkProps={externalLink("documentationExploreMaps")}>

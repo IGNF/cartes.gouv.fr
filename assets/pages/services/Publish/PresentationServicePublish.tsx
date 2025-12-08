@@ -24,7 +24,7 @@ export default function PresentationServicePublish() {
                         <div className={fr.cx("fr-col-12", "fr-col-md-6", "fr-col--middle")}>
                             <span className={cx(fr.cx("fr-icon-database-line"), classes.icon, classes.iconLg)} />
                             <h1 className={fr.cx("fr-mt-4v", "fr-mb-2v")}>Publier une donnée</h1>
-                            <p className={fr.cx("fr-text--lead", "fr-mb-6v")}>Héberger, créer des flux, partager</p>
+                            <p className={fr.cx("fr-text--lead", "fr-mb-6v")}>Hébergez, créez des flux, partagez</p>
                             <Button iconId="fr-icon-arrow-right-s-line" iconPosition="right" linkProps={routes.discover_publish().link}>
                                 Accédez au service
                             </Button>
@@ -44,7 +44,7 @@ export default function PresentationServicePublish() {
                         <span className={cx(fr.cx("fr-icon-database-line"), classes.icon)} />
                     </div>
                     <div className={fr.cx("fr-col-12", "fr-col-md-5")}>
-                        <h3 className={fr.cx("fr-m-0", "fr-h6")}>Collaborer sur un espace dédié</h3>
+                        <h3 className={fr.cx("fr-m-0", "fr-h6")}>Collaborez sur un espace dédié</h3>
                     </div>
                     <div className={fr.cx("fr-col-12", "fr-col-md-6")}>
                         <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
@@ -63,7 +63,7 @@ export default function PresentationServicePublish() {
                     </div>
                     <div className={fr.cx("fr-col-12", "fr-col-md-6")}>
                         <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
-                            Déposez et héberger directement vos donnés via l’interface cartes.gouv.fr sur l’infrastructure prévue, la Géoplateforme. Nul besoin
+                            Déposez et hébergez directement vos donnés via l’interface cartes.gouv.fr sur l’infrastructure prévue, la Géoplateforme. Nul besoin
                             de compétences techniques avancées ou de manipulation d’API, laissez-vous guider pour déposer vos fichiers et remplir les
                             métadonnées.
                         </p>
@@ -84,7 +84,7 @@ export default function PresentationServicePublish() {
                         <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
                             Choisissez un type de service standard (WFS, WMS, TMS, WMTS) pour vos jeux de données et générer votre service en quelques étapes.
                         </p>
-                        <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>Importez ou créer directement vos styles pour personnaliser le rendu de vos flux.</p>
+                        <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>Importez ou créez directement vos styles pour personnaliser le rendu de vos flux.</p>
                         <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
                             Visualisez le résultat dans la fiche catalogue du service “Rechercher une donnée” et dans le service “Explorer les cartes”.
                         </p>
@@ -116,7 +116,7 @@ export default function PresentationServicePublish() {
                         <span className={cx(classes["frx-icon-accroche-option"], classes.icon)} />
                     </div>
                     <div className={fr.cx("fr-col-12", "fr-col-md-5")}>
-                        <h3 className={fr.cx("fr-m-0", "fr-h6")}>Publiez vos données rasters déposées sur la Géoplateforme</h3>
+                        <h3 className={fr.cx("fr-m-0", "fr-h6")}>Publiez vos données raster déposées sur la Géoplateforme</h3>
                     </div>
                     <div className={fr.cx("fr-col-12", "fr-col-md-6")}>
                         <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
@@ -234,8 +234,8 @@ export default function PresentationServicePublish() {
                             <p>→ Déposez la donnée raster (COG, GeoTIFF, etc.) dans l’entrepôt de la Géoplateforme</p>
                             <p>→ Ajoutez un tag “datasheet_name” sur la donnée stockée pour rendre la donnée visible dans cartes.gouv.fr</p>
                             <p>
-                                → Créez les services de diffusion depuis cartes.gouv.fr :en flux WMTS ou WMS et enconfigurant la résolutions les pyramides selon
-                                vos besoins d’affichage.
+                                → Créez les services de diffusion depuis cartes.gouv.fr : en flux WMTS ou WMS et enconfigurant la résolutions les pyramides
+                                selon vos besoins d’affichage.
                             </p>
                         </div>
                     </div>
@@ -266,7 +266,7 @@ export default function PresentationServicePublish() {
                             <p className={cx(fr.cx("fr-text--xs"), classes.textMentionGrey)}>Déposez vos données à travers les services publics</p>
                             <p>
                                 Pour diffuser toutes vos données sur data.gouv.fr tout en bénéficiant de l’infrastructure de cartes.gouv.fr, la Géoplateforme,
-                                et de ses performances :
+                                et de ses performances&nbsp;:
                             </p>
                             <p>→ Déposez votre donnée géographique (vecteur ou raster) et renseignez les métadonnées complètes</p>
                             <p>→ Publiez la ressource sous forme d’un ou plusieurs services de diffusion (WMS, WFS, WMTS, TMS)</p>
@@ -291,7 +291,7 @@ export default function PresentationServicePublish() {
                             )}
                         >
                             <p className={fr.cx("fr-text--lg")}>
-                                Consulter notre documentation pour apprendre à utiliser notre service, pas à pas, jusqu’à maîtriser les fonctionnalités plus
+                                Consultez notre documentation pour apprendre à utiliser notre service, pas à pas, jusqu’à maîtriser les fonctionnalités plus
                                 avancées.
                             </p>
                             <Button
