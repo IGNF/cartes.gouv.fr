@@ -195,8 +195,6 @@ export default function Discover() {
                                     {"En savoir plus"}
                                 </Link>
                                 <Button
-                                    iconId="fr-icon-arrow-right-s-line"
-                                    iconPosition="right"
                                     linkProps={{
                                         href: externalUrls.maps,
                                     }}
@@ -248,9 +246,7 @@ export default function Discover() {
                                         <Link className={fr.cx("fr-link")} {...routes.present_service_publish().link}>
                                             {"En savoir plus"}
                                         </Link>
-                                        <Button iconId="fr-icon-arrow-right-s-line" iconPosition="right" linkProps={routes.discover_publish().link}>
-                                            Publier
-                                        </Button>
+                                        <Button linkProps={routes.discover_publish().link}>Publier</Button>
                                     </>
                                 }
                             />
