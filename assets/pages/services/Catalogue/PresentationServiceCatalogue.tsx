@@ -249,7 +249,7 @@ export default function PresentationServiceCatalogue() {
                                 Intégrez des services de visualisation ou d’interrogation directement dans un portail interne
                             </p>
                             <p>
-                                Intégrez bien plus que des données dans vos outils métiers et portails géographqiues. Enrichissez-les avec d’autres services
+                                Intégrez bien plus que des données dans vos outils métiers et portails géographiques. Enrichissez-les avec d’autres services
                                 tels que ceux de géocodage, de calcul d’itinéraire ou encore d’altimétrie. Simples à configurer, ils s’appuient sur des
                                 ressources mises à jour régulièrement sans intervention manuelle.
                             </p>
