@@ -121,11 +121,6 @@ export default function PresentationServiceCatalogue() {
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
                         <div className={fr.cx("fr-col-12", "fr-col-md-10", "fr-col-offset-md-1")}>
                             <img srcSet={illustrationImgSrcSet} alt="illustration" className={classes.illustrationImg} />
-                            <hr className={fr.cx("fr-mt-6v")} />
-                            <p className={cx(fr.cx("fr-text--lg", "fr-m-0"), classes.textCenter)}>
-                                Successeur des <strong>Géoservices</strong>, retrouvez toutes vos fonctionnalités préférées. Accédez désormais à plus de données
-                                et construisez avec nous le service publique cartographique de demain.
-                            </p>
                         </div>
                     </div>
                 </div>

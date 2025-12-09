@@ -51,6 +51,10 @@ export default function PresentationServicePublish() {
                             Collaborez et organisez vos données dans un entrepôt sécurisé conçu pour le travail en équipe. Vous pouvez gérer vos jeux de données
                             dans un espace unique tout en contrôlant les accès grâce à une authentification et une gestion précise des droits.
                         </p>
+                        <p className={cx(fr.cx("fr-text--xs", "fr-m-0"), classes.textMentionGrey)}>
+                            Testez au préalable les fonctionnalités de dépôt et de publication dans l’espace Découverte pour prendre en main la procédure sans
+                            conséquence sur le catalogue.
+                        </p>
                     </div>
                 </div>
                 <hr className={fr.cx("fr-mt-6v")} />
@@ -66,9 +70,6 @@ export default function PresentationServicePublish() {
                             Déposez et hébergez directement vos donnés via l’interface cartes.gouv.fr sur l’infrastructure prévue, la Géoplateforme. Nul besoin
                             de compétences techniques avancées ou de manipulation d’API, laissez-vous guider pour déposer vos fichiers et remplir les
                             métadonnées.
-                        </p>
-                        <p className={cx(fr.cx("fr-text--xs", "fr-m-0"), classes.textMentionGrey)}>
-                            Données raster ou données vecteur, vous pouvez les hébergez dans votre espace et les publier sous forme de flux.
                         </p>
                     </div>
                 </div>
@@ -88,10 +89,6 @@ export default function PresentationServicePublish() {
                         <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
                             Visualisez le résultat dans la fiche catalogue du service “Rechercher une donnée” et dans le service “Explorer les cartes”.
                         </p>
-                        <p className={cx(fr.cx("fr-text--xs", "fr-m-0"), classes.textMentionGrey)}>
-                            Tester et expérimenter toutes les fonctionnalités sur vos jeux de données dans l’entrepôt Espace Découverte avant de les publier
-                            pour tous les utilisateurs.
-                        </p>
                     </div>
                 </div>
                 <hr className={fr.cx("fr-mt-6v")} />
@@ -104,9 +101,8 @@ export default function PresentationServicePublish() {
                     </div>
                     <div className={fr.cx("fr-col-12", "fr-col-md-6")}>
                         <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
-                            Maîtrisez la diffusion de vos données selon vos besoins. Choisissez de diffuser vos données à travers tous les services de
-                            cartes.gouv ou de les diffuser de façon limitée. Définissez les utilisateurs ou les communautés qui pourront accéder à vos flux
-                            (liste, filtrage par IP...).
+                            Choisissez de publier vos données en accès libre à tous, ou en accès restreint. Contrôlez finement quels utilisateurs ou quelles
+                            communautés pourront consultez vos services.
                         </p>
                     </div>
                 </div>
@@ -120,8 +116,11 @@ export default function PresentationServicePublish() {
                     </div>
                     <div className={fr.cx("fr-col-12", "fr-col-md-6")}>
                         <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
-                            Retrouvez vos données raster déposées sur la Géoplateforme automatiquement sur cartes.gouv.fr. Il vous suffit ensuite de compléter
-                            leur configuration et de créer vos services grâce à l’interface unifiée.
+                            Retrouvez facilement vos données raster déposées sur la Géoplateforme sur cartes.gouv.fr, et finalisez la création des services de
+                            diffusion associés via l’interface, pas à pas.
+                        </p>
+                        <p className={cx(fr.cx("fr-text--xs", "fr-m-0"), classes.textMentionGrey)}>
+                            Publiez en toute cohérence, quel que soit le type de données.
                         </p>
                     </div>
                 </div>
@@ -132,10 +131,6 @@ export default function PresentationServicePublish() {
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
                         <div className={fr.cx("fr-col-12", "fr-col-md-10", "fr-col-offset-md-1")}>
                             <img srcSet={illustrationImgSrcSet} alt="illustration" className={classes.illustrationImg} />
-                            <hr className={fr.cx("fr-mt-6v")} />
-                            <p className={cx(fr.cx("fr-text--lg", "fr-m-0"), classes.textCenter)}>
-                                Extension de <strong>Géoplateforme</strong>, contribuez à enrichir l’offre des données mise à disposition des utilisateurs.
-                            </p>
                         </div>
                     </div>
                 </div>
@@ -227,15 +222,15 @@ export default function PresentationServicePublish() {
                             <img srcSet={donneesRasterSrcSet} alt="" />
                         </div>
                         <div className={cx(fr.cx("fr-col-12", "fr-col-md"), classes.usageCardCol)}>
-                            <h3 className={fr.cx("fr-h4")}>Stockez une donnée raster et rendez-là accessible à tous</h3>
+                            <h3 className={fr.cx("fr-h4")}>Stockez une donnée raster et rendez-la accessible à tous</h3>
 
-                            <p className={cx(fr.cx("fr-text--xs"), classes.textMentionGrey)}>Stocker différents formats de jeux de données</p>
+                            <p className={cx(fr.cx("fr-text--xs"), classes.textMentionGrey)}>Stockez différents formats de jeux de données</p>
                             <p>Parc naturel régional, observatoires, diffusez simplement vos orthophotos locales et cartes thermiques au grand public</p>
                             <p>→ Déposez la donnée raster (COG, GeoTIFF, etc.) dans l’entrepôt de la Géoplateforme</p>
                             <p>→ Ajoutez un tag “datasheet_name” sur la donnée stockée pour rendre la donnée visible dans cartes.gouv.fr</p>
                             <p>
-                                → Créez les services de diffusion depuis cartes.gouv.fr : en flux WMTS ou WMS et enconfigurant la résolutions les pyramides
-                                selon vos besoins d’affichage.
+                                → Créez les services de diffusion depuis cartes.gouv.fr en flux WMTS ou TMS et en configurant la résolution des pyramides selon
+                                vos besoins d’affichage.
                             </p>
                         </div>
                     </div>
