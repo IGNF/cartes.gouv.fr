@@ -106,7 +106,7 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
                             alignItems: "center",
                         }}
                     >
-                        <strong className={fr.cx("fr-text--xl", "fr-m-0", "fr-mr-2v")}>Fiches de données</strong>
+                        <strong className={fr.cx("fr-text--xl", "fr-m-0", "fr-mr-2v")}>Permissions</strong>
                         <Badge severity="info" noIcon={true}>
                             {permissions?.length ?? 0}
                         </Badge>

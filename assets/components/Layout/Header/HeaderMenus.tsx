@@ -72,7 +72,7 @@ export function HeaderMenuServices() {
                 // },
             ]}
             actionButtonProps={{
-                children: "Découvrir cartes.gouv",
+                children: "Découvrir cartes.gouv.fr",
                 linkProps: externalLink("discover_cartesgouvfr", "Découvrir cartes.gouv"),
             }}
         />

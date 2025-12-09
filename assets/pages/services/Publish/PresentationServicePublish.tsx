@@ -228,7 +228,7 @@ export default function PresentationServicePublish() {
                             <h3 className={fr.cx("fr-h4")}>Alimentez votre portail thématique</h3>
 
                             <p className={cx(fr.cx("fr-text--xs"), classes.textMentionGrey)}>Hébergez vos données en un point unique</p>
-                            <p>Opérateur publique, institut de recherche, diffusez vos données dans votre portail pour exposer vos données thématiques.</p>
+                            <p>Opérateur public, institut de recherche, diffusez vos données dans votre portail pour exposer vos données thématiques.</p>
                             <p>→ Déposez votre donnée dans votre entrepôt</p>
                             <p>→ Générez vos flux de diffusion (WMS, WFS, TMS, WMTS) et définissez leur style d’affichage</p>
                             <p>→ Renseignez les métadonnées pour garantir la traçabilité, l’interopérabilité et la réutilisation.</p>
