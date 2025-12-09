@@ -39,89 +39,74 @@ export default function PresentationServicePublish() {
             <div className={cx(fr.cx("fr-container"), classes.container)}>
                 <h2 className={fr.cx("fr-m-0")}>Ce que vous pouvez faire</h2>
 
-                <div className={cx(fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-p-4v"))}>
-                    <div className={fr.cx("fr-col-12", "fr-col-md-1")}>
+                <div className={classes.featureRowWrapper}>
+                    <div className={cx(classes.featureRow)}>
                         <span className={cx(fr.cx("fr-icon-database-line"), classes.icon)} />
-                    </div>
-                    <div className={fr.cx("fr-col-12", "fr-col-md-5")}>
                         <h3 className={fr.cx("fr-m-0", "fr-h6")}>Collaborez sur un espace dédié</h3>
+                        <div>
+                            <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
+                                Collaborez et organisez vos données dans un entrepôt sécurisé conçu pour le travail en équipe. Vous pouvez gérer vos jeux de
+                                données dans un espace unique tout en contrôlant les accès grâce à une authentification et une gestion précise des droits.
+                            </p>
+                            <p className={cx(fr.cx("fr-text--xs", "fr-m-0"), classes.textMentionGrey)}>
+                                Testez au préalable les fonctionnalités de dépôt et de publication dans l’espace Découverte pour prendre en main la procédure
+                                sans conséquence sur le catalogue.
+                            </p>
+                        </div>
                     </div>
-                    <div className={fr.cx("fr-col-12", "fr-col-md-6")}>
-                        <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
-                            Collaborez et organisez vos données dans un entrepôt sécurisé conçu pour le travail en équipe. Vous pouvez gérer vos jeux de données
-                            dans un espace unique tout en contrôlant les accès grâce à une authentification et une gestion précise des droits.
-                        </p>
-                        <p className={cx(fr.cx("fr-text--xs", "fr-m-0"), classes.textMentionGrey)}>
-                            Testez au préalable les fonctionnalités de dépôt et de publication dans l’espace Découverte pour prendre en main la procédure sans
-                            conséquence sur le catalogue.
-                        </p>
-                    </div>
-                </div>
-                <hr className={fr.cx("fr-mt-6v")} />
-                <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-p-4v")}>
-                    <div className={fr.cx("fr-col-12", "fr-col-md-1")}>
+                    <hr />
+                    <div className={cx(classes.featureRow)}>
                         <span className={cx(fr.cx("fr-icon-upload-line"), classes.icon)} />
-                    </div>
-                    <div className={fr.cx("fr-col-12", "fr-col-md-5")}>
                         <h3 className={fr.cx("fr-m-0", "fr-h6")}>Déposez des données</h3>
+                        <div>
+                            <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
+                                Déposez et hébergez directement vos donnés via l’interface cartes.gouv.fr sur l’infrastructure prévue, la Géoplateforme. Nul
+                                besoin de compétences techniques avancées ou de manipulation d’API, laissez-vous guider pour déposer vos fichiers et remplir les
+                                métadonnées.
+                            </p>
+                        </div>
                     </div>
-                    <div className={fr.cx("fr-col-12", "fr-col-md-6")}>
-                        <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
-                            Déposez et hébergez directement vos donnés via l’interface cartes.gouv.fr sur l’infrastructure prévue, la Géoplateforme. Nul besoin
-                            de compétences techniques avancées ou de manipulation d’API, laissez-vous guider pour déposer vos fichiers et remplir les
-                            métadonnées.
-                        </p>
-                    </div>
-                </div>
-                <hr className={fr.cx("fr-mt-6v")} />
-                <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-p-4v")}>
-                    <div className={fr.cx("fr-col-12", "fr-col-md-1")}>
+                    <hr />
+                    <div className={cx(classes.featureRow)}>
                         <span className={cx(fr.cx("fr-icon-global-line"), classes.icon)} />
-                    </div>
-                    <div className={fr.cx("fr-col-12", "fr-col-md-5")}>
                         <h3 className={fr.cx("fr-m-0", "fr-h6")}>Créez des services de diffusion</h3>
+                        <div>
+                            <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
+                                Choisissez un type de service standard (WFS, WMS, TMS, WMTS) pour vos jeux de données et générer votre service en quelques
+                                étapes.
+                            </p>
+                            <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
+                                Importez ou créez directement vos styles pour personnaliser le rendu de vos flux.
+                            </p>
+                            <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
+                                Visualisez le résultat dans la fiche catalogue du service “Rechercher une donnée” et dans le service “Explorer les cartes”.
+                            </p>
+                        </div>
                     </div>
-                    <div className={fr.cx("fr-col-12", "fr-col-md-6")}>
-                        <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
-                            Choisissez un type de service standard (WFS, WMS, TMS, WMTS) pour vos jeux de données et générer votre service en quelques étapes.
-                        </p>
-                        <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>Importez ou créez directement vos styles pour personnaliser le rendu de vos flux.</p>
-                        <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
-                            Visualisez le résultat dans la fiche catalogue du service “Rechercher une donnée” et dans le service “Explorer les cartes”.
-                        </p>
-                    </div>
-                </div>
-                <hr className={fr.cx("fr-mt-6v")} />
-                <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-p-4v")}>
-                    <div className={fr.cx("fr-col-12", "fr-col-md-1")}>
+                    <hr />
+                    <div className={cx(classes.featureRow)}>
                         <span className={cx(fr.cx("fr-icon-lock-line"), classes.icon)} />
-                    </div>
-                    <div className={fr.cx("fr-col-12", "fr-col-md-5")}>
                         <h3 className={fr.cx("fr-m-0", "fr-h6")}>Gérez les droits d’accès à vos ressources</h3>
+                        <div>
+                            <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
+                                Choisissez de publier vos données en accès libre à tous, ou en accès restreint. Contrôlez finement quels utilisateurs ou quelles
+                                communautés pourront consultez vos services.
+                            </p>
+                        </div>
                     </div>
-                    <div className={fr.cx("fr-col-12", "fr-col-md-6")}>
-                        <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
-                            Choisissez de publier vos données en accès libre à tous, ou en accès restreint. Contrôlez finement quels utilisateurs ou quelles
-                            communautés pourront consultez vos services.
-                        </p>
-                    </div>
-                </div>
-                <hr className={fr.cx("fr-mt-6v")} />
-                <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-p-4v")}>
-                    <div className={fr.cx("fr-col-12", "fr-col-md-1")}>
+                    <hr />
+                    <div className={cx(classes.featureRow)}>
                         <span className={cx(classes["frx-icon-accroche-option"], classes.icon)} />
-                    </div>
-                    <div className={fr.cx("fr-col-12", "fr-col-md-5")}>
                         <h3 className={fr.cx("fr-m-0", "fr-h6")}>Publiez vos données raster déposées sur la Géoplateforme</h3>
-                    </div>
-                    <div className={fr.cx("fr-col-12", "fr-col-md-6")}>
-                        <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
-                            Retrouvez facilement vos données raster déposées sur la Géoplateforme sur cartes.gouv.fr, et finalisez la création des services de
-                            diffusion associés via l’interface, pas à pas.
-                        </p>
-                        <p className={cx(fr.cx("fr-text--xs", "fr-m-0"), classes.textMentionGrey)}>
-                            Publiez en toute cohérence, quel que soit le type de données.
-                        </p>
+                        <div>
+                            <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
+                                Retrouvez facilement vos données raster déposées sur la Géoplateforme sur cartes.gouv.fr, et finalisez la création des services
+                                de diffusion associés via l’interface, pas à pas.
+                            </p>
+                            <p className={cx(fr.cx("fr-text--xs", "fr-m-0"), classes.textMentionGrey)}>
+                                Publiez en toute cohérence, quel que soit le type de données.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>

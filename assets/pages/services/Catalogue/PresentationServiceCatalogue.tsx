@@ -39,79 +39,69 @@ export default function PresentationServiceCatalogue() {
             <div className={cx(fr.cx("fr-container"), classes.container)}>
                 <h2 className={fr.cx("fr-m-0")}>Ce que vous pouvez faire</h2>
 
-                <div className={cx(fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-p-4v"))}>
-                    <div className={fr.cx("fr-col-12", "fr-col-md-1")}>
+                <div className={classes.featureRowWrapper}>
+                    <div className={cx(classes.featureRow)}>
                         <span className={cx(fr.cx("ri-search-line"), classes.icon)} />
-                    </div>
-                    <div className={fr.cx("fr-col-12", "fr-col-md-5")}>
                         <h3 className={fr.cx("fr-m-0", "fr-h6")}>Recherchez une ressource</h3>
+                        <div>
+                            <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
+                                Le moteur de recherche vous permet d’accéder à toutes les ressources publiques des producteurs et fournisseurs institutionnels
+                                comme l’IGN, la DGFIP, l’ONF, et bien d’autres. Vous pouvez filtrer votre recherche par&nbsp;:
+                            </p>
+                            <ul>
+                                <li>Type de ressource : donnée, service ou réutilisation</li>
+                                <li>Thème : agriculture, environnement, hydrographie, télécommunications...</li>
+                                <li>Producteur</li>
+                                <li>Date de mise à jour</li>
+                            </ul>
+                            <p className={cx(fr.cx("fr-text--xs", "fr-m-0"), classes.textMentionGrey)}>
+                                Filtrez avec “Plus Récent” pour voir les dernières mises à jour de vos données favorites.
+                            </p>
+                        </div>
                     </div>
-                    <div className={fr.cx("fr-col-12", "fr-col-md-6")}>
-                        <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
-                            Le moteur de recherche vous permet d’accéder à toutes les ressources publiques des producteurs et fournisseurs institutionnels comme
-                            l’IGN, la DGFIP, l’ONF, et bien d’autres. Vous pouvez filtrer votre recherche par&nbsp;:
-                        </p>
-                        <ul>
-                            <li>Type de ressource : donnée, service ou réutilisation</li>
-                            <li>Thème : agriculture, environnement, hydrographie, télécommunications...</li>
-                            <li>Producteur</li>
-                            <li>Date de mise à jour</li>
-                        </ul>
-                        <p className={cx(fr.cx("fr-text--xs", "fr-m-0"), classes.textMentionGrey)}>
-                            Filtrez avec “Plus Récent” pour voir les dernières mises à jour de vos données favorites.
-                        </p>
-                    </div>
-                </div>
-                <hr className={fr.cx("fr-mt-6v")} />
-                <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-p-4v")}>
-                    <div className={fr.cx("fr-col-12", "fr-col-md-1")}>
+                    <hr />
+                    <div className={cx(classes.featureRow)}>
                         <span className={cx(fr.cx("fr-icon-file-text-line"), classes.icon)} />
-                    </div>
-                    <div className={fr.cx("fr-col-12", "fr-col-md-5")}>
                         <h3 className={fr.cx("fr-m-0", "fr-h6")}>Consultez des fiches complètes pour chaque jeu de données</h3>
+                        <div>
+                            <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>Chaque jeu de données dispose d’une fiche détaillée comprenant&nbsp;:</p>
+                            <ul>
+                                <li>Description et contexte</li>
+                                <li>Producteur et son contact</li>
+                                <li>Dates clés de production et de mise à jour</li>
+                                <li>Mots-clés et thématiques</li>
+                                <li>Aperçu de la donnée sur fonds cartographique</li>
+                                <li>Accès aux ressources</li>
+                                <li>Téléchargement (formats SIG, tableurs, etc.)</li>
+                                <li>Flux standardisés (WMS, WMTS, WFS, TMS)</li>
+                                <li>API, lorsque proposées par le producteur</li>
+                                <li>Liens annexes et documents joints</li>
+                            </ul>
+                            <p className={cx(fr.cx("fr-text--xs", "fr-m-0"), classes.textMentionGrey)}>
+                                Évaluez immédiatement la qualité, l’actualité et les modalités d’usage de la donnée.
+                            </p>
+                        </div>
                     </div>
-                    <div className={fr.cx("fr-col-12", "fr-col-md-6")}>
-                        <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>Chaque jeu de données dispose d’une fiche détaillée comprenant&nbsp;:</p>
-                        <ul>
-                            <li>Description et contexte</li>
-                            <li>Producteur et son contact</li>
-                            <li>Dates clés de production et de mise à jour</li>
-                            <li>Mots-clés et thématiques</li>
-                            <li>Aperçu de la donnée sur fonds cartographique</li>
-                            <li>Accès aux ressources</li>
-                            <li>Téléchargement (formats SIG, tableurs, etc.)</li>
-                            <li>Flux standardisés (WMS, WMTS, WFS, TMS)</li>
-                            <li>API, lorsque proposées par le producteur</li>
-                            <li>Liens annexes et documents joints</li>
-                        </ul>
-                        <p className={cx(fr.cx("fr-text--xs", "fr-m-0"), classes.textMentionGrey)}>
-                            Évaluez immédiatement la qualité, l’actualité et les modalités d’usage de la donnée.
-                        </p>
-                    </div>
-                </div>
-                <hr className={fr.cx("fr-mt-6v")} />
-                <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-p-4v")}>
-                    <div className={fr.cx("fr-col-12", "fr-col-md-1")}>
+                    <hr />
+                    <div className={cx(classes.featureRow)}>
                         <span className={cx(fr.cx("fr-icon-download-line"), classes.icon)} />
-                    </div>
-                    <div className={fr.cx("fr-col-12", "fr-col-md-5")}>
                         <h3 className={fr.cx("fr-m-0", "fr-h6")}>Utilisez la donnée en la téléchargeant ou via les flux et APIs</h3>
-                    </div>
-                    <div className={fr.cx("fr-col-12", "fr-col-md-6")}>
-                        <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
-                            Téléchargez une grande variété de données dans des formats compatibles avec vos outils métiers (SIG, tableurs, traitements
-                            spécialisés).
-                            <br />
-                            Vous pouvez également exploiter les données sous formes de flux standardisés (WMS, WMTS, WFS, TMS), ce qui facilite leur intégration
-                            dans vos outils métiers et portails cartographiques.
-                        </p>
-                        <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
-                            Lorsque que vous récupérez les données, vous pouvez filtrer par territoire ou via une interface dédiée, afin de ne récupérer que ce
-                            qui est essentiel.
-                        </p>
-                        <p className={cx(fr.cx("fr-text--xs", "fr-m-0"), classes.textMentionGrey)}>
-                            Récupérez les données du Lidar MNT en sélectionnant uniquement les dalles sur votre territoire.
-                        </p>
+                        <div>
+                            <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
+                                Téléchargez une grande variété de données dans des formats compatibles avec vos outils métiers (SIG, tableurs, traitements
+                                spécialisés).
+                                <br />
+                                Vous pouvez également exploiter les données sous formes de flux standardisés (WMS, WMTS, WFS, TMS), ce qui facilite leur
+                                intégration dans vos outils métiers et portails cartographiques.
+                            </p>
+                            <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
+                                Lorsque que vous récupérez les données, vous pouvez filtrer par territoire ou via une interface dédiée, afin de ne récupérer que
+                                ce qui est essentiel.
+                            </p>
+                            <p className={cx(fr.cx("fr-text--xs", "fr-m-0"), classes.textMentionGrey)}>
+                                Récupérez les données du Lidar MNT en sélectionnant uniquement les dalles sur votre territoire.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>

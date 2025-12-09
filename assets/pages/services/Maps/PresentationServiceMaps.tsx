@@ -39,102 +39,84 @@ export default function PresentationServiceMaps() {
             <div className={cx(fr.cx("fr-container"), classes.container)}>
                 <h2 className={fr.cx("fr-m-0")}>Ce que vous pouvez faire</h2>
 
-                <div className={cx(fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-p-4v"))}>
-                    <div className={fr.cx("fr-col-12", "fr-col-md-1")}>
+                <div className={classes.featureRowWrapper}>
+                    <div className={cx(classes.featureRow)}>
                         <span className={cx(fr.cx("ri-map-2-line"), classes.icon)} />
-                    </div>
-                    <div className={fr.cx("fr-col-12", "fr-col-md-5")}>
                         <h3 className={fr.cx("fr-m-0", "fr-h6")}>Accédez aux fonds de carte IGN</h3>
+                        <div>
+                            <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
+                                Les cartes de l’IGN sont accessibles en quelques clics. Elles forment la référence du territoire français, offrant des
+                                informations à jour, homogènes et essentielles pour toute analyse du territoire.
+                            </p>
+                            <p className={cx(fr.cx("fr-text--xs", "fr-m-0"), classes.textMentionGrey)}>
+                                Retrouvez les plans, prises de vues aériennes, les cartes classiques (SCAN 25), cartes topographiques, le cadastre ou encore des
+                                cartes historiques.
+                            </p>
+                        </div>
                     </div>
-                    <div className={fr.cx("fr-col-12", "fr-col-md-6")}>
-                        <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
-                            Les cartes de l’IGN sont accessibles en quelques clics. Elles forment la référence du territoire français, offrant des informations
-                            à jour, homogènes et essentielles pour toute analyse du territoire.
-                        </p>
-                        <p className={cx(fr.cx("fr-text--xs", "fr-m-0"), classes.textMentionGrey)}>
-                            Retrouvez les plans, prises de vues aériennes, les cartes classiques (SCAN 25), cartes topographiques, le cadastre ou encore des
-                            cartes historiques.
-                        </p>
-                    </div>
-                </div>
-                <hr className={fr.cx("fr-mt-6v")} />
-                <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-p-4v")}>
-                    <div className={fr.cx("fr-col-12", "fr-col-md-1")}>
+                    <hr />
+                    <div className={cx(classes.featureRow)}>
                         <span className={cx(fr.cx("fr-icon-france-line"), classes.icon)} />
-                    </div>
-                    <div className={fr.cx("fr-col-12", "fr-col-md-5")}>
                         <h3 className={fr.cx("fr-m-0", "fr-h6")}>Consultez des cartes thématiques nationales et locales</h3>
+                        <div>
+                            <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
+                                Consultez une large sélection de cartes thématiques sur des sujets variés comme l’environnement, la mobilité, l’urbanisme, les
+                                risques naturels et la biodiversité.
+                                <br />
+                                Vous pouvez afficher plusieurs cartes pour comparer, enrichir et mieux comprendre les enjeux propres à chaque territoire.
+                            </p>
+                            <p className={cx(fr.cx("fr-text--xs", "fr-m-0"), classes.textMentionGrey)}>
+                                Obtenez une lecture exhaustive du territoire en combinant par exemple les prises de vue aériennes (BD ORTHO), le plan IGN, le
+                                cadastre (BD Parcellaire) et les données d’occupation du sol (OCS GE).
+                            </p>
+                        </div>
                     </div>
-                    <div className={fr.cx("fr-col-12", "fr-col-md-6")}>
-                        <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
-                            Consultez une large sélection de cartes thématiques sur des sujets variés comme l’environnement, la mobilité, l’urbanisme, les
-                            risques naturels et la biodiversité.
-                            <br />
-                            Vous pouvez afficher plusieurs cartes pour comparer, enrichir et mieux comprendre les enjeux propres à chaque territoire.
-                        </p>
-                        <p className={cx(fr.cx("fr-text--xs", "fr-m-0"), classes.textMentionGrey)}>
-                            Obtenez une lecture exhaustive du territoire en combinant par exemple les prises de vue aériennes (BD ORTHO), le plan IGN, le
-                            cadastre (BD Parcellaire) et les données d’occupation du sol (OCS GE).
-                        </p>
-                    </div>
-                </div>
-                <hr className={fr.cx("fr-mt-6v")} />
-                <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-p-4v")}>
-                    <div className={fr.cx("fr-col-12", "fr-col-md-1")}>
+                    <hr />
+                    <div className={cx(classes.featureRow)}>
                         <span className={cx(fr.cx("ri-tools-line"), classes.icon)} />
-                    </div>
-                    <div className={fr.cx("fr-col-12", "fr-col-md-5")}>
                         <h3 className={fr.cx("fr-m-0", "fr-h6")}>Bénéficiez d’une boîte à outils pour analyser votre territoire</h3>
+                        <div>
+                            <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>Parmi nos outils, vous pouvez&nbsp;:</p>
+                            <ul>
+                                <li>Rechercher une adresse, un toponyme ou une parcelle</li>
+                                <li>Rechercher ou afficher des coordonnées</li>
+                                <li>Mesurer une distance, une surface ou un angle</li>
+                                <li>Calculer un itinéraire piéton ou voiture</li>
+                                <li>
+                                    Calculer des zones en fonction d’un temps ou d’une distance de trajet (isochrone/isodistance) pour visualiser
+                                    l’accessibilité d’un lieu
+                                </li>
+                                <li>Obtenir un profil altimétrique (altitude) le long d’un itinéraire</li>
+                            </ul>
+                            <p className={cx(fr.cx("fr-text--xs", "fr-m-0"), classes.textMentionGrey)}>
+                                Activez vos outils préférés et personnalisez votre interface.
+                            </p>
+                        </div>
                     </div>
-                    <div className={fr.cx("fr-col-12", "fr-col-md-6")}>
-                        <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>Parmi nos outils, vous pouvez&nbsp;:</p>
-                        <ul>
-                            <li>Rechercher une adresse, un toponyme ou une parcelle</li>
-                            <li>Rechercher ou afficher des coordonnées</li>
-                            <li>Mesurer une distance, une surface ou un angle</li>
-                            <li>Calculer un itinéraire piéton ou voiture</li>
-                            <li>
-                                Calculer des zones en fonction d’un temps ou d’une distance de trajet (isochrone/isodistance) pour visualiser l’accessibilité
-                                d’un lieu
-                            </li>
-                            <li>Obtenir un profil altimétrique (altitude) le long d’un itinéraire</li>
-                        </ul>
-                        <p className={cx(fr.cx("fr-text--xs", "fr-m-0"), classes.textMentionGrey)}>
-                            Activez vos outils préférés et personnalisez votre interface.
-                        </p>
-                    </div>
-                </div>
-                <hr className={fr.cx("fr-mt-6v")} />
-                <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-p-4v")}>
-                    <div className={fr.cx("fr-col-12", "fr-col-md-1")}>
+                    <hr />
+                    <div className={cx(classes.featureRow)}>
                         <span className={cx(fr.cx("ri-pen-nib-line"), classes.icon)} />
-                    </div>
-                    <div className={fr.cx("fr-col-12", "fr-col-md-5")}>
                         <h3 className={fr.cx("fr-m-0", "fr-h6")}>Créez des cartes simples</h3>
+                        <div>
+                            <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
+                                Importez vos données métiers (fichiers géographiques, flux) et superposez-les aux données de référence pour découvrir de
+                                nouvelles corrélations et illustrer des phénomènes.
+                            </p>
+                            <p className={cx(fr.cx("fr-text--xs", "fr-m-0"), classes.textMentionGrey)}>
+                                Utilisez nos outils pour ajouter des annotations, dessins ou points d’intérêt.
+                            </p>
+                        </div>
                     </div>
-                    <div className={fr.cx("fr-col-12", "fr-col-md-6")}>
-                        <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
-                            Importez vos données métiers (fichiers géographiques, flux) et superposez-les aux données de référence pour découvrir de nouvelles
-                            corrélations et illustrer des phénomènes.
-                        </p>
-                        <p className={cx(fr.cx("fr-text--xs", "fr-m-0"), classes.textMentionGrey)}>
-                            Utilisez nos outils pour ajouter des annotations, dessins ou points d’intérêt.
-                        </p>
-                    </div>
-                </div>
-                <hr className={fr.cx("fr-mt-6v")} />
-                <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-p-4v")}>
-                    <div className={fr.cx("fr-col-12", "fr-col-md-1")}>
+                    <hr />
+                    <div className={cx(classes.featureRow)}>
                         <span className={cx(fr.cx("ri-share-2-line"), classes.icon)} />
-                    </div>
-                    <div className={fr.cx("fr-col-12", "fr-col-md-5")}>
                         <h3 className={fr.cx("fr-m-0", "fr-h6")}>Diffusez des cartes instantanément</h3>
-                    </div>
-                    <div className={fr.cx("fr-col-12", "fr-col-md-6")}>
-                        <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
-                            Partagez simplement vos cartes via un lien direct (url unique) ou en l’intégrant dans vos services via une iframe.
-                        </p>
-                        <p className={cx(fr.cx("fr-text--xs", "fr-m-0"), classes.textMentionGrey)}>Et sauvegardez-les en créant votre compte.</p>
+                        <div>
+                            <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
+                                Partagez simplement vos cartes via un lien direct (url unique) ou en l’intégrant dans vos services via une iframe.
+                            </p>
+                            <p className={cx(fr.cx("fr-text--xs", "fr-m-0"), classes.textMentionGrey)}>Et sauvegardez-les en créant votre compte.</p>
+                        </div>
                     </div>
                 </div>
             </div>
