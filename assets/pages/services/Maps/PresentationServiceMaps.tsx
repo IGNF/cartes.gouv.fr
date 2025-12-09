@@ -174,7 +174,7 @@ export default function PresentationServiceMaps() {
                         <div className={fr.cx("fr-col-12", "fr-col-md")}>
                             <Tile
                                 title="Une boîte à outils pour vos premières analyses"
-                                desc={"Mesurez des distances, calculez un itinéraire,  ou analysez un profil altimétrique directement sur la carte."}
+                                desc={"Mesurez des distances, calculez un itinéraire, ou analysez un profil altimétrique directement sur la carte."}
                                 classes={{
                                     title: classes.tileNoBorder,
                                 }}
