@@ -60,7 +60,7 @@ export default function PresentationServicePublish() {
                         <h3 className={fr.cx("fr-m-0", "fr-h6")}>Déposez des données</h3>
                         <div>
                             <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
-                                Déposez et hébergez directement vos donnés via l’interface cartes.gouv.fr sur l’infrastructure prévue, la Géoplateforme. Nul
+                                Déposez et hébergez directement vos données via l’interface cartes.gouv.fr sur l’infrastructure prévue, la Géoplateforme. Nul
                                 besoin de compétences techniques avancées ou de manipulation d’API, laissez-vous guider pour déposer vos fichiers et remplir les
                                 métadonnées.
                             </p>
@@ -72,7 +72,7 @@ export default function PresentationServicePublish() {
                         <h3 className={fr.cx("fr-m-0", "fr-h6")}>Créez des services de diffusion</h3>
                         <div>
                             <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
-                                Choisissez un type de service standard (WFS, WMS, TMS, WMTS) pour vos jeux de données et générer votre service en quelques
+                                Choisissez un type de service standard (WFS, WMS, TMS, WMTS) pour vos jeux de données et générez votre service en quelques
                                 étapes.
                             </p>
                             <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
@@ -90,7 +90,7 @@ export default function PresentationServicePublish() {
                         <div>
                             <p className={fr.cx("fr-text--lg", "fr-mb-3v")}>
                                 Choisissez de publier vos données en accès libre à tous, ou en accès restreint. Contrôlez finement quels utilisateurs ou quelles
-                                communautés pourront consultez vos services.
+                                communautés pourront consulter vos services.
                             </p>
                         </div>
                     </div>

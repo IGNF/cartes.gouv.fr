@@ -37,7 +37,7 @@ export default function DiscoverPublish() {
 
                         <div className={classes.title}>
                             <h1 className={fr.cx("fr-m-0")}>Publier une donnée</h1>
-                            <p className={fr.cx("fr-text--xl", "fr-m-0")}>Héberger, créer des flux, partager</p>
+                            <p className={fr.cx("fr-text--xl", "fr-m-0")}>Hébergez, créez des flux, partagez</p>
                         </div>
                         <p className={fr.cx("fr-text--lg", "fr-m-0")}>
                             Hébergez vos données, diffusez-les sous forme de flux et exploitez-les dans cartes.gouv.fr ou vos propres outils.
