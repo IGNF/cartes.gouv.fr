@@ -18,7 +18,7 @@ const DatastoreCreationRequestConfirmation = () => {
                 severity="success"
             />
             <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-mt-1w")}>
-                <Button linkProps={routes.dashboard_pro().link}>{t("request_confirmation.continue")}</Button>
+                <Button linkProps={routes.dashboard().link}>{t("request_confirmation.continue")}</Button>
             </div>
         </Main>
     );

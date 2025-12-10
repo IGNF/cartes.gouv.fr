@@ -111,7 +111,7 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
             $redirectUrl = str_replace('authentication_failed=1', '', $redirectUrl);
 
             // redirection vers le tableau de bord
-            if ('/decouvrir' === parse_url($redirectUrl, PHP_URL_PATH)) {
+            if (in_array(parse_url($redirectUrl, PHP_URL_PATH), ['/decouvrir', '/publier-une-donnee'])) {
                 $redirectUrl = $this->router->generate(self::SUCCESS_ROUTE, [], RouterInterface::ABSOLUTE_URL);
                 $redirectUrl .= 'tableau-de-bord';
             }
@@ -139,7 +139,7 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
     public function handleEntreeCartoLogin(Request $request, bool $success): Response
     {
         $redirectUrl = $this->router->generate(self::SUCCESS_ROUTE, [], RouterInterface::ABSOLUTE_URL);
-        $redirectUrl .= 'cartes/login?';
+        $redirectUrl .= 'explorer-les-cartes/login?';
 
         if (true === $success) {
             $redirectUrl .= 'success=1';

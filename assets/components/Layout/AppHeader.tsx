@@ -1,5 +1,3 @@
-import { fr } from "@codegouvfr/react-dsfr";
-import Badge from "@codegouvfr/react-dsfr/Badge";
 import Header from "@codegouvfr/react-dsfr/Header";
 import { MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation/MainNavigation";
 import { useIsDark } from "@codegouvfr/react-dsfr/useIsDark";
@@ -7,6 +5,7 @@ import { FC, memo } from "react";
 
 import { externalUrls } from "@/router/externalUrls";
 import { HeaderMenuHelp, HeaderMenuServices, HeaderMenuUser } from "./Header/HeaderMenus";
+import SiteBadge from "./Header/SiteBadge";
 
 import "../../sass/components/header.scss";
 
@@ -38,11 +37,7 @@ const AppHeader: FC<AppHeaderProps> = ({ navItems = [] }) => {
             }}
             serviceTitle={
                 <>
-                    cartes.gouv.fr{" "}
-                    <Badge className={fr.cx("fr-badge--green-archipel")} noIcon={true} as="span" small={true}>
-                        <span className={fr.cx("fr-icon--sm", "fr-icon-database-line", "fr-mr-1v")} />
-                        Publier
-                    </Badge>
+                    cartes.gouv.fr <SiteBadge />
                 </>
             }
             serviceTagline="Le service public des cartes et données du territoire"

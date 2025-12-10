@@ -20,6 +20,16 @@ const publicRoutes = {
         },
         () => `${appRoot}/decouvrir`
     ),
+    discover_publish: defineRoute(
+        {
+            authentication_failed: param.query.optional.number,
+            session_expired_login_success: param.query.optional.number,
+        },
+        () => `${appRoot}/publier-une-donnee`
+    ),
+    present_service_maps: defineRoute(`${appRoot}/decouvrir/explorer-les-cartes`),
+    present_service_catalogue: defineRoute(`${appRoot}/decouvrir/rechercher-une-donnee`),
+    present_service_publish: defineRoute(`${appRoot}/decouvrir/publier-une-donnee`),
     page_not_found: defineRoute(`${appRoot}/404`),
     about: defineRoute(`${appRoot}/a-propos`),
     contact: defineRoute(`${appRoot}/nous-ecrire`),
@@ -48,8 +58,8 @@ const publicRoutes = {
     accessibility: defineRoute(`${appRoot}/accessibilite`),
     legal_notice: defineRoute(`${appRoot}/mentions-legales`),
     personal_data: defineRoute(`${appRoot}/donnees-personnelles`),
-    offer: defineRoute(`${appRoot}/offre`),
-    join: defineRoute(`${appRoot}/nous-rejoindre`),
+    offers: defineRoute(`${appRoot}/offres`),
+    join_cartesgouvfr_community: defineRoute(`${appRoot}/nous-rejoindre`),
     terms_of_service: defineRoute(`${appRoot}/cgu`),
     service_status: defineRoute(`${appRoot}/niveau-de-service`),
     login_disabled: defineRoute(`${appRoot}/connexion-desactivee`),
@@ -70,11 +80,19 @@ const privateRoutes = {
     ),
     my_documents: defineRoute(`${appRoot}/mes-documents`), // TODO : page uniquement créée pour tester les routes /users/me/documents
 
-    dashboard_pro: defineRoute(`${appRoot}/tableau-de-bord`),
+    dashboard: defineRoute(`${appRoot}/tableau-de-bord`),
+    datastore_selection: defineRoute(
+        {
+            page: param.query.optional.number.default(1),
+            limit: param.query.optional.number.default(20),
+            search: param.query.optional.string.default(""),
+        },
+        () => `${appRoot}/tableau-de-bord/entrepots`
+    ),
 
     // Demande de creation d'un datastore
-    datastore_create_request: defineRoute(`${appRoot}/entrepot/demande-de-creation`),
-    datastore_create_request_confirm: defineRoute(`${appRoot}/entrepot/demande-de-creation/demande-envoyee`),
+    datastore_create_request: defineRoute(`${appRoot}/tableau-de-bord/entrepots/demande-de-creation`),
+    datastore_create_request_confirm: defineRoute(`${appRoot}/tableau-de-bord/entrepots/demande-de-creation/demande-envoyee`),
 
     // Demande pour rejoindre une communaute
     join_community: defineRoute(`${appRoot}/rejoindre-des-communautes`),
@@ -91,7 +109,7 @@ const communityRoute = defineRoute(
     {
         communityId: param.path.string,
     },
-    (p) => `${appRoot}/communaute/${p.communityId}`
+    (p) => `${appRoot}/tableau-de-bord/communaute/${p.communityId}`
 );
 const communityRoutes = {
     // Liste des membres d'une communaute
@@ -110,13 +128,19 @@ const datastoreRoute = defineRoute(
     {
         datastoreId: param.path.string,
     },
-    (p) => `${appRoot}/entrepot/${p.datastoreId}`
+    (p) => `${appRoot}/tableau-de-bord/entrepots/${p.datastoreId}`
 );
 const datastoreRoutes = {
     datastore_manage_storage: datastoreRoute.extend("/consommation"),
 
     // permissions
-    datastore_manage_permissions: datastoreRoute.extend("/permissions"),
+    datastore_manage_permissions: datastoreRoute.extend(
+        {
+            page: param.query.optional.number.default(1),
+            limit: param.query.optional.number.default(4),
+        },
+        () => "/permissions"
+    ),
     datastore_add_permission: datastoreRoute.extend("/permissions/ajout"),
     datastore_edit_permission: datastoreRoute.extend(
         {
@@ -129,7 +153,7 @@ const datastoreRoutes = {
     datasheet_list: datastoreRoute.extend(
         {
             page: param.query.optional.number.default(1),
-            limit: param.query.optional.number.default(20),
+            limit: param.query.optional.number.default(10),
             search: param.query.optional.string,
             sortBy: param.query.optional.string,
             sortOrder: param.query.optional.number.default(1),

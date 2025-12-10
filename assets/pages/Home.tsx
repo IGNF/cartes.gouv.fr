@@ -83,7 +83,7 @@ const Home = () => {
                                 buttons={[
                                     {
                                         iconId: "fr-icon-cursor-line",
-                                        linkProps: routes.dashboard_pro().link,
+                                        linkProps: routes.dashboard().link,
                                         children: "Je dépose ma donnée",
                                         priority: "primary",
                                     },
@@ -166,7 +166,7 @@ const Home = () => {
                                     Disponible en bêta
                                 </Badge>
                             }
-                            linkProps={routes.dashboard_pro().link}
+                            linkProps={routes.dashboard().link}
                             enlargeLinkOrButton={true}
                             imageUrl={systemSvgUrl}
                             imageSvg={true}

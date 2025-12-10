@@ -1,14 +1,12 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { Breadcrumb, BreadcrumbProps } from "@codegouvfr/react-dsfr/Breadcrumb";
 import { Notice } from "@codegouvfr/react-dsfr/Notice";
-import { PropsWithChildren, memo, useContext, useMemo } from "react";
+import { PropsWithChildren, memo } from "react";
 
-import getBreadcrumb from "../../modules/entrepot/breadcrumbs/Breadcrumb";
-import { useRoute } from "../../router/router";
-import SessionExpiredAlert from "../Utils/SessionExpiredAlert";
-import useDocumentTitle from "../../hooks/useDocumentTitle";
-import { datastoreContext } from "../../contexts/datastore";
 import { IUseAlert } from "@/hooks/useAlert";
+import useBreadcrumb from "@/hooks/useBreadcrumb";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
+import SessionExpiredAlert from "../Utils/SessionExpiredAlert";
 
 export interface MainProps {
     customBreadcrumbProps?: BreadcrumbProps;
@@ -18,18 +16,10 @@ export interface MainProps {
 }
 
 function Main(props: PropsWithChildren<MainProps>) {
-    const { children, customBreadcrumbProps, noticeProps, title, fluidContainer } = props;
-    const route = useRoute();
+    const { children, customBreadcrumbProps, noticeProps, title, fluidContainer = false } = props;
+
     useDocumentTitle(title);
-    const datastoreValue = useContext(datastoreContext);
-
-    const breadcrumbProps = useMemo(() => {
-        if (customBreadcrumbProps !== undefined) {
-            return customBreadcrumbProps;
-        }
-
-        return getBreadcrumb(route, datastoreValue.datastore);
-    }, [route, datastoreValue.datastore, customBreadcrumbProps]);
+    const breadcrumbProps = useBreadcrumb(customBreadcrumbProps);
 
     return (
         <main id="main" role="main">
@@ -39,9 +29,7 @@ function Main(props: PropsWithChildren<MainProps>) {
             <div className={fr.cx(fluidContainer ? "fr-container--fluid" : "fr-container")}>
                 {breadcrumbProps && <Breadcrumb {...breadcrumbProps} />}
 
-                <div className={fr.cx("fr-mb-4v")}>
-                    <SessionExpiredAlert />
-                </div>
+                <SessionExpiredAlert />
 
                 {children}
             </div>

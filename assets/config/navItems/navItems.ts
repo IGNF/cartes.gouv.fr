@@ -1,47 +1,58 @@
 import { MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation";
-import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
 
-import { externalUrls } from "@/router/externalUrls";
-import { ComponentKey } from "../../i18n/types";
 import { routes } from "../../router/router";
-import { assistanceNavItems } from "./assistanceNavItems";
 
 // dans ce cas précise, getTranslation ne marche pas parce que les traductions sont pas encore chargées, on est donc obglié de passer la fonction t en paramètre
-export const defaultNavItems = (t: TranslationFunction<"navItems", ComponentKey>): MainNavigationProps.Item[] => {
+export const defaultNavItems = (routeName: string): MainNavigationProps.Item[] => {
     const navItems: MainNavigationProps.Item[] = [
+        {
+            text: "Découvrir cartes.gouv.fr",
+            linkProps: routes.discover().link,
+            isActive: routeName === routes.discover().name,
+        },
         {
             menuLinks: [
                 {
-                    linkProps: { href: externalUrls.documentation },
-                    text: t("documentation"),
+                    linkProps: routes.present_service_maps().link,
+                    text: "Explorer les cartes",
+                    isActive: routeName === routes.present_service_maps().name,
                 },
                 {
-                    linkProps: routes.offer().link,
-                    text: t("offer"),
+                    linkProps: routes.present_service_catalogue().link,
+                    text: "Rechercher une donnée",
+                    isActive: routeName === routes.present_service_catalogue().name,
                 },
                 {
-                    linkProps: routes.join().link,
-                    text: t("join"),
+                    linkProps: routes.present_service_publish().link,
+                    text: "Publier une donnée",
+                    isActive: routeName === routes.present_service_publish().name,
                 },
             ],
-            text: t("start"),
+            text: "Services",
+            isActive:
+                routeName === routes.present_service_maps().name ||
+                routeName === routes.present_service_catalogue().name ||
+                routeName === routes.present_service_publish().name,
         },
         {
-            text: t("catalog"),
-            linkProps: { href: externalUrls.catalogue },
+            text: "Offres",
+            linkProps: routes.offers().link,
+            isActive: routeName === routes.offers().name,
         },
         {
-            text: t("maps"),
-            linkProps: { href: externalUrls.maps },
-        },
-        {
-            text: t("news"),
+            text: "Actualités",
             linkProps: routes.news_list().link,
+            isActive: routeName === routes.news_list().name,
         },
-        assistanceNavItems(t),
         {
-            text: t("about"),
-            linkProps: routes.about().link,
+            text: "Communautés",
+            linkProps: routes.join_cartesgouvfr_community().link,
+            isActive: routeName === routes.join_cartesgouvfr_community().name,
+        },
+        {
+            linkProps: routes.service_status().link,
+            text: "Niveau de service",
+            isActive: routeName === routes.service_status().name,
         },
     ];
 

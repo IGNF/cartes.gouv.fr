@@ -6,8 +6,6 @@ import { SearchCommunityFrTranslations } from "@/espaceco/pages/communities/Sear
 import { DatabasesFrTranslations } from "@/espaceco/pages/communities/management/databases/Databases.locale";
 import { InputCollectionFrTranslations } from "../../components/Input/InputCollection/InputCollection.locale";
 import { UploadStyleFileFrTranslations } from "../../components/Utils/Geostyler/UploadStyleFile.locale";
-import { datastoreNavItemsFrTranslations } from "../../config/navItems/datastoreNavItems.locale";
-import { navItemsFrTranslations } from "../../config/navItems/navItems.locale";
 import { AccessesRequestFrTranslations } from "../../entrepot/pages/accesses-request/AccessesRequest.locale";
 import { AddMemberFrTranslations } from "../../entrepot/pages/communities/AddMember/AddMember.locale";
 import { CommunityListFrTranslations } from "../../entrepot/pages/communities/CommunityList/CommunityList.locale";
@@ -92,8 +90,6 @@ export const translations: Translations<"fr"> = {
     ValidationMetadatas: ValidationMetadatasFrTranslations,
     Contact: ContactFrTranslations,
     AccessesRequest: AccessesRequestFrTranslations,
-    navItems: navItemsFrTranslations,
-    datastoreNavItems: datastoreNavItemsFrTranslations,
     StoredDataDeleteConfirmDialog: StoredDataDeleteConfirmDialogFrTranslations,
     VectorDbList: VectorDbListFrTranslations,
     PyramidVectorList: PyramidVectorListFrTranslations,

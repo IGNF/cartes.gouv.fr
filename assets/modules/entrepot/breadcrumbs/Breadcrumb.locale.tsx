@@ -2,7 +2,8 @@ import { declareComponentKeys } from "../../../i18n/i18n";
 import { Translations } from "../../../i18n/types";
 
 const { i18n } = declareComponentKeys<
-    | "dashboard_pro"
+    | "dashboard"
+    | "datastore_selection"
     | "about"
     | "contact"
     | "contact_confirmation"
@@ -12,8 +13,8 @@ const { i18n } = declareComponentKeys<
     | "accessibility"
     | "legal_notice"
     | "personal_data"
-    | "offer"
-    | "join"
+    | "offers"
+    | "join_cartesgouvfr_community"
     | "terms_of_service"
     | "service_status"
     | "accesses_request"
@@ -58,7 +59,8 @@ const { i18n } = declareComponentKeys<
 export type I18n = typeof i18n;
 
 export const BreadcrumbFrTranslations: Translations<"fr">["Breadcrumb"] = {
-    dashboard_pro: "Tableau de bord",
+    dashboard: "Tableau de bord",
+    datastore_selection: "Entrepôts",
     about: "A propos",
     contact: "Nous écrire",
     contact_confirmation: "Demande envoyée",
@@ -68,8 +70,8 @@ export const BreadcrumbFrTranslations: Translations<"fr">["Breadcrumb"] = {
     accessibility: "Accessibilité",
     legal_notice: "Mentions légales",
     personal_data: "Données à caractère personnel",
-    offer: "Offre",
-    join: "Nous rejoindre",
+    offers: "Offres",
+    join_cartesgouvfr_community: "Nous rejoindre",
     terms_of_service: "Conditions générales d'utilisation",
     service_status: "Niveau de service",
     accesses_request: "Demande d'accès à un service privé",
@@ -113,7 +115,8 @@ export const BreadcrumbFrTranslations: Translations<"fr">["Breadcrumb"] = {
 };
 
 export const BreadcrumbEnTranslations: Translations<"en">["Breadcrumb"] = {
-    dashboard_pro: "Dashboard",
+    dashboard: "Dashboard",
+    datastore_selection: "Datastores",
     about: "About",
     contact: "Contact us",
     contact_confirmation: "Request sent",
@@ -123,8 +126,8 @@ export const BreadcrumbEnTranslations: Translations<"en">["Breadcrumb"] = {
     accessibility: "Accessibility",
     legal_notice: "Legal notice",
     personal_data: "Personal data",
-    offer: "Offer",
-    join: "Join us",
+    offers: "Offers",
+    join_cartesgouvfr_community: "Join us",
     terms_of_service: "Terms of Service",
     service_status: "TODO",
     accesses_request: "Request to private resources",

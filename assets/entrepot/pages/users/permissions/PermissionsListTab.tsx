@@ -106,7 +106,7 @@ const PermissionsListTab: FC<PermissionsListTabProps> = ({ permissions }) => {
                 <div>
                     <a
                         className={fr.cx("fr-link")}
-                        href={externalUrls.documentation}
+                        href={externalUrls.help}
                         target="_blank"
                         rel="noreferrer"
                         title={t("consult_documentation") + " - " + tCommon("new_window")}
@@ -116,7 +116,7 @@ const PermissionsListTab: FC<PermissionsListTabProps> = ({ permissions }) => {
                 </div>
                 <div className={fr.cx("fr-mt-2v")}>
                     <a
-                        {...routes.dashboard_pro().link}
+                        {...routes.datastore_selection().link}
                         className={fr.cx("fr-link", "fr-icon-arrow-right-line", "fr-link--icon-right")}
                         title={t("discover_workspaces") + " - " + tCommon("new_window")}
                     >

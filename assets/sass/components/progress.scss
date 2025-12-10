@@ -6,7 +6,8 @@
     line-height: 0;
     font-size: 0.8rem;
     background-color: #e9ecef;
-    border-radius: 0.25rem;
+    border-radius: 6.25rem;
+    // max-width: 18rem;
 }
 
 .progress-bar-striped {
@@ -33,7 +34,9 @@
     color: #fff;
     text-align: center;
     white-space: nowrap;
-    background-color: #007bff;
+    // background-color: #007bff;
+    border-radius: 6.25rem;
+    background-color: var(--border-default-blue-france, #6a6af4);
     transition: width 0.6s ease;
     min-width: max-content;
 }

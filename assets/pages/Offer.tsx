@@ -8,8 +8,8 @@ import "../sass/pages/offer.scss";
 
 const Offer = () => {
     return (
-        <Main title="Offre">
-            <h1>Offre</h1>
+        <Main title="Offres">
+            <h1>Offres</h1>
 
             <div className={fr.cx("fr-grid-row")}>
                 <div className={fr.cx("fr-col-12", "fr-col-lg-8")}>

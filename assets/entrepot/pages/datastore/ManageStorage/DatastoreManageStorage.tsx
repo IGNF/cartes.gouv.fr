@@ -2,7 +2,11 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Tabs, { TabsProps } from "@codegouvfr/react-dsfr/Tabs";
 import { FC, useMemo } from "react";
 
+import DatastoreMain from "@/components/Layout/DatastoreMain";
+import DatastoreTertiaryNavigation from "@/components/Layout/DatastoreTertiaryNavigation";
+import PageTitle from "@/components/Layout/PageTitle";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
+import { useDatastore } from "../../../../contexts/datastore";
 import { useTranslation } from "../../../../i18n/i18n";
 import AnnexeUsage from "./storages/AnnexeUsage";
 import EndpointsUsage from "./storages/EndpointsUsage";
@@ -11,8 +15,6 @@ import PostgresqlUsage from "./storages/PostgresqlUsage";
 import S3Usage from "./storages/S3Usage";
 import StaticsUsage from "./storages/StaticsUsage";
 import UploadUsage from "./storages/UploadUsage";
-import { useDatastore } from "../../../../contexts/datastore";
-import Main from "../../../../components/Layout/Main";
 
 const DatastoreManageStorage: FC = () => {
     const { t } = useTranslation("DatastoreManageStorage");
@@ -64,23 +66,30 @@ const DatastoreManageStorage: FC = () => {
     }, [datastore, t]);
 
     return (
-        <Main title={t("title", { datastoreName: datastore?.name })}>
-            <div className={fr.cx("fr-grid-row")}>
-                <h1>
-                    {t("title", { datastoreName: datastore?.name })}
-                    {isFetching && <LoadingIcon className={fr.cx("fr-ml-2w")} largeIcon />}
-                </h1>
-                <p>{t("explanation")}</p>
-            </div>
+        <DatastoreMain
+            title={t("title", { datastoreName: datastore?.is_sandbox === true ? "Espace Découverte" : datastore?.name })}
+            fluidContainer={false}
+            datastoreId={datastore._id}
+        >
+            <PageTitle
+                title={
+                    <>
+                        {t("title", { datastoreName: datastore?.is_sandbox === true ? "Espace Découverte" : datastore?.name })}
+                        {isFetching && <LoadingIcon className={fr.cx("fr-ml-2w")} largeIcon />}
+                    </>
+                }
+            ></PageTitle>
+
+            <DatastoreTertiaryNavigation datastoreId={datastore._id} communityId={datastore.community._id} />
 
             {datastore && (
-                <div className={fr.cx("fr-grid-row")}>
+                <div className={fr.cx("fr-grid-row", "fr-mt-6v", "fr-mb-16v")}>
                     <div className={fr.cx("fr-col-12")}>
                         <Tabs tabs={tabs} />
                     </div>
                 </div>
             )}
-        </Main>
+        </DatastoreMain>
     );
 };
 

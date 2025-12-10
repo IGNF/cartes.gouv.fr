@@ -7,8 +7,6 @@ import { DatabasesEnTranslations } from "@/espaceco/pages/communities/management
 import { LayerToolsEnTranslations } from "@/espaceco/pages/communities/management/tools/Layers.locale";
 import { InputCollectionEnTranslations } from "../../components/Input/InputCollection/InputCollection.locale";
 import { UploadStyleFileEnTranslations } from "../../components/Utils/Geostyler/UploadStyleFile.locale";
-import { datastoreNavItemsEnTranslations } from "../../config/navItems/datastoreNavItems.locale";
-import { navItemsEnTranslations } from "../../config/navItems/navItems.locale";
 import { AccessesRequestEnTranslations } from "../../entrepot/pages/accesses-request/AccessesRequest.locale";
 import { AddMemberEnTranslations } from "../../entrepot/pages/communities/AddMember/AddMember.locale";
 import { CommunityListEnTranslations } from "../../entrepot/pages/communities/CommunityList/CommunityList.locale";
@@ -92,8 +90,6 @@ export const translations: Translations<"en"> = {
     MetadatasForm: MetadatasFormEnTranslations,
     Contact: ContactEnTranslations,
     AccessesRequest: AccessesRequestEnTranslations,
-    navItems: navItemsEnTranslations,
-    datastoreNavItems: datastoreNavItemsEnTranslations,
     StoredDataDeleteConfirmDialog: StoredDataDeleteConfirmDialogEnTranslations,
     VectorDbList: VectorDbListEnTranslations,
     PyramidVectorList: PyramidVectorListEnTranslations,

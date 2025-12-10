@@ -1,0 +1,201 @@
+.bgContrastInfoGrey {
+    background-color: var(--background-contrast-info, #e8edff);
+}
+
+.bgDefaultGrey {
+    background-color: var(--background-default-grey, #fff);
+}
+
+.bgAltGrey {
+    background-color: var(--background-alt-grey, #f6f6f6);
+}
+
+.bgOpenBlueFrance {
+    background: var(--background-open-blue-france, #e3e3fd);
+}
+
+.bgActionHighBlueFrance {
+    background: var(--background-action-high-blue-france, #000091);
+}
+
+.textInvertedBlueFrance,
+.textInvertedBlueFrance * {
+    color: var(--text-inverted-blue-france, #f5f5fe) !important;
+}
+
+.textDefaultGrey,
+.textDefaultGrey * {
+    color: var(--text-default-grey, #3a3a3a) !important;
+}
+
+.textActionHighBlueFrance {
+    color: var(--text-action-high-blue-france, #000091) !important;
+}
+
+.textMentionGrey,
+.textMentionGrey * {
+    color: var(--text-mention-grey, #6f6f6f);
+}
+
+.textCenter {
+    text-align: center !important;
+}
+
+.borderDefaultGrey {
+    border: 2px solid var(--border-default-grey, #ddd);
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem !important;
+    padding-top: 2.5rem;
+    padding-bottom: 3.5rem;
+}
+
+.heroImage {
+    max-width: 100%;
+    height: auto;
+}
+
+.frx-icon-accroche-option::before {
+    content: url("@/img/icons/accroche-option.svg");
+}
+
+.icon,
+.icon::before {
+    width: 2rem;
+    height: 2rem;
+    aspect-ratio: 1/1;
+    color: var(--text-title-grey, #161616);
+}
+
+.iconLg,
+.iconLg::before {
+    width: 2.5rem;
+    height: 2.5rem;
+}
+
+.illustrationImg {
+    width: 100%;
+    height: auto;
+}
+
+.tileNoBorder::before {
+    content: none;
+}
+
+.equalHeightCol {
+    display: flex;
+    flex-direction: column;
+    align-self: stretch;
+    justify-content: center;
+}
+
+.usageCard {
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: stretch;
+    width: 100%;
+}
+
+.usageCardCol {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    justify-content: flex-start;
+    margin: 1rem !important;
+
+    & * {
+        margin: 0;
+    }
+}
+
+.usageCardImg {
+    display: flex;
+    margin: 1rem !important;
+    overflow: hidden;
+
+    & img {
+        display: block;
+        flex: 1 1 auto;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+}
+
+.featureRowWrapper {
+    --hr-gap: 1rem;
+
+    & > hr {
+        padding: 0;
+        padding-bottom: var(--hr-gap);
+        margin: 0;
+        margin-top: var(--hr-gap);
+    }
+}
+
+.featureRow {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+@media screen and (min-width: 768px) {
+    .container {
+        gap: 2.5rem !important;
+        padding-top: 5rem;
+        padding-bottom: 6rem;
+    }
+
+    .usageCard {
+        flex-direction: row !important;
+    }
+
+    .usageCard:nth-child(odd) {
+        flex-direction: row-reverse !important;
+    }
+
+    .usageCardCol {
+        margin: 1.5rem !important;
+    }
+
+    .usageCardImg {
+        margin: 1.5rem !important;
+    }
+}
+
+@media screen and (min-width: 992px) {
+    .usageCardCol {
+        margin: 2.5rem !important;
+    }
+
+    .usageCardImg {
+        margin: 2.5rem !important;
+    }
+
+    .featureRowWrapper {
+        --hr-gap: 2.5rem;
+    }
+
+    .featureRow {
+        flex-direction: row;
+        gap: 1.5rem;
+
+        & h3 {
+            flex: 0 0 20rem;
+        }
+    }
+}
+
+@media screen and (min-width: 1248px) {
+    .featureRow {
+        gap: 2.5rem;
+
+        & h3 {
+            flex: 0 0 25rem;
+        }
+    }
+}

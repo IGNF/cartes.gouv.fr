@@ -4,6 +4,7 @@ import { execSync } from "child_process";
 import { configDotenv } from "dotenv";
 import { join, resolve } from "path";
 import { defineConfig } from "vite";
+import { imagetools } from "vite-imagetools";
 import { ViteImageOptimizer } from "vite-plugin-image-optimizer";
 import run from "vite-plugin-run";
 import symfonyPlugin from "vite-plugin-symfony";
@@ -37,6 +38,12 @@ export default defineConfig({
         cors: true,
     },
     plugins: [
+        {
+            ...imagetools({
+                removeMetadata: true,
+            }),
+            enforce: "pre",
+        },
         react(),
         symfonyPlugin({
             viteDevServerHostname: "localhost",
@@ -45,7 +52,9 @@ export default defineConfig({
             debug: process.env.APP_ENV === "dev",
             exposedEnvVars: ["APP_ENV"],
         }),
-        ViteImageOptimizer(),
+        ViteImageOptimizer({
+            exclude: /as=srcset/,
+        }),
         run([
             {
                 name: "fos-routing-js-dump",

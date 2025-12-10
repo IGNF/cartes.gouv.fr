@@ -18,12 +18,12 @@ export function HeaderMenuHelp() {
                 {
                     iconId: "fr-icon-question-mark",
                     children: "Questions fréquentes",
-                    linkProps: externalLink("documentation", "Questions fréquentes"),
+                    linkProps: externalLink("help", "Questions fréquentes"),
                 },
                 {
                     iconId: "fr-icon-book-2-line",
                     children: "Guide d'utilisation",
-                    linkProps: externalLink("documentationProducerGuide", "Guide d'utilisation"),
+                    linkProps: externalLink("helpProducerGuide", "Guide d'utilisation"),
                 },
                 {
                     iconId: "fr-icon-mail-line",
@@ -56,7 +56,7 @@ export function HeaderMenuServices() {
                 {
                     iconId: "fr-icon-database-line",
                     children: "Publier une donnée",
-                    linkProps: routes.dashboard_pro().link,
+                    linkProps: routes.discover_publish().link,
                 },
                 // {
                 //     iconId: "fr-icon-brush-line",
@@ -72,7 +72,7 @@ export function HeaderMenuServices() {
                 // },
             ]}
             actionButtonProps={{
-                children: "Découvrir cartes.gouv",
+                children: "Découvrir cartes.gouv.fr",
                 linkProps: externalLink("discover_cartesgouvfr", "Découvrir cartes.gouv"),
             }}
         />
@@ -130,7 +130,7 @@ export function HeaderMenuUser() {
                 {
                     children: "Tableau de bord",
                     iconId: "fr-icon-dashboard-3-line",
-                    linkProps: routes.dashboard_pro().link,
+                    linkProps: routes.dashboard().link,
                 },
                 {
                     children: "Mon compte",

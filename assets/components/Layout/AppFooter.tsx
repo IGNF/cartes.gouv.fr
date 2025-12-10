@@ -43,12 +43,12 @@ const AppFooter = () => {
                 ...routes.sitemap().link,
             }}
             partnersLogos={{
+                main: {
+                    alt: "IGN",
+                    href: "https://www.ign.fr",
+                    imgUrl: "https://data.geopf.fr/annexes/ressources/footer/ign.png",
+                },
                 sub: [
-                    {
-                        alt: "IGN",
-                        href: "https://www.ign.fr",
-                        imgUrl: "https://data.geopf.fr/annexes/ressources/footer/ign.png",
-                    },
                     {
                         alt: "MINISTÈRE DE LA TRANSFORMATION ET DE LA FONCTION PUBLIQUES",
                         href: "https://www.transformation.gouv.fr/",

@@ -44,8 +44,6 @@ export type ComponentKey =
     | import("../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidVectorList/PyramidVectorList.locale").I18n
     | import("../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidRasterList/PyramidRasterList.locale").I18n
     | import("../entrepot/pages/datasheet/DatasheetView/DatasheetView/DatasheetView.locale").I18n
-    | import("../config/navItems/navItems.locale").I18n
-    | import("../config/navItems/datastoreNavItems.locale").I18n
     | import("../validations/sld/SldStyleValidation.locale").I18n
     | import("../validations/mapbox/MapboxStyleValidator.locale").I18n
     | import("../modules/Style/TMSStyleFilesManager/TMSStyleFilesManager.locale").I18n

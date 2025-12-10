@@ -1,10 +1,9 @@
 import { MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation";
 import { addNoticeTranslations } from "@codegouvfr/react-dsfr/Notice";
 import { SkipLinks } from "@codegouvfr/react-dsfr/SkipLinks";
-import { FC, PropsWithChildren, memo, useMemo } from "react";
+import { FC, PropsWithChildren, memo } from "react";
 
 import { ConsentBannerAndConsentManagement } from "../../config/consentManagement";
-import { defaultNavItems } from "../../config/navItems/navItems";
 import { useTranslation } from "../../i18n/i18n";
 import SnackbarMessage from "../Utils/SnackbarMessage";
 import AppFooter from "./AppFooter";
@@ -37,13 +36,10 @@ export interface AppLayoutProps {
 }
 
 const AppLayout: FC<PropsWithChildren<AppLayoutProps>> = ({ children, navItems }) => {
-    const { t } = useTranslation("navItems");
-    const nav = useMemo(() => navItems ?? defaultNavItems(t), [navItems, t]);
-
     return (
         <>
             <HiddenElementsMemoized />
-            <AppHeader navItems={nav} />
+            <AppHeader navItems={navItems} />
             {children}
             <AppFooter />
             <SnackbarMessage />
