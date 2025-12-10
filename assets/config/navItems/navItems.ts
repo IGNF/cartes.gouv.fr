@@ -36,8 +36,8 @@ export const defaultNavItems = (routeName: string): MainNavigationProps.Item[] =
         },
         {
             text: "Offres",
-            linkProps: routes.offer().link,
-            isActive: routeName === routes.offer().name,
+            linkProps: routes.offers().link,
+            isActive: routeName === routes.offers().name,
         },
         {
             text: "Actualités",

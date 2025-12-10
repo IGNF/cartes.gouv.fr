@@ -39,7 +39,7 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): Brea
         case "accessibility":
         case "legal_notice":
         case "personal_data":
-        case "offer":
+        case "offers":
         case "join_cartesgouvfr_community":
         case "terms_of_service":
         case "service_status":

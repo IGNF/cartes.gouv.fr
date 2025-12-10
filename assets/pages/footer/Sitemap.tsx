@@ -37,7 +37,7 @@ const SiteMap = () => {
                                 </ul>
                             </li>
                             <li>
-                                <a {...routes.offer().link}>Offres</a>
+                                <a {...routes.offers().link}>Offres</a>
                             </li>
                             <li>
                                 <a {...routes.news_list().link}>Actualités</a>

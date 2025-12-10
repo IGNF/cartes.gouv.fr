@@ -75,7 +75,7 @@ function GroupApp(props: IGroupAppProps) {
                 return { render: <PresentationServicePublish /> };
             case "about":
                 return { render: <About /> };
-            case "offer":
+            case "offers":
                 return { render: <Offer /> };
             case "join_cartesgouvfr_community":
                 return { render: <Join /> };
