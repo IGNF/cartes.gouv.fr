@@ -75,8 +75,14 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
     const { classes, cx } = useStyles();
 
     return (
-        <DatastoreMain title={t("title", { datastoreName: datastore?.name })} fluidContainer={false} datastoreId={datastoreId}>
-            <PageTitle title={t("title", { datastoreName: datastore?.name })}>{datastore?.is_sandbox === true && <SandboxDatastoreExplanation />}</PageTitle>
+        <DatastoreMain
+            title={t("title", { datastoreName: datastore?.is_sandbox === true ? "Espace Découverte" : datastore?.name })}
+            fluidContainer={false}
+            datastoreId={datastoreId}
+        >
+            <PageTitle title={t("title", { datastoreName: datastore?.is_sandbox === true ? "Espace Découverte" : datastore?.name })}>
+                {datastore?.is_sandbox === true && <SandboxDatastoreExplanation />}
+            </PageTitle>
 
             <DatastoreTertiaryNavigation datastoreId={datastoreId} communityId={datastore.community._id} />
 

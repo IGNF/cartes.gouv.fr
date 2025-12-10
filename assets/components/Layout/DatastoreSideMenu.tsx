@@ -41,6 +41,7 @@ export default function DatastoreSideMenu({ datastoreId, communityId }: Datastor
                             fr.cx("fr-text--xs", "fr-mb-4v"),
                             css({
                                 color: fr.colors.decisions.text.mention.grey.default,
+                                fontWeight: "normal",
                             })
                         )}
                     >
@@ -65,8 +66,6 @@ export default function DatastoreSideMenu({ datastoreId, communityId }: Datastor
                     isActive: datastoreId === datastore._id || communityId === datastore.community_id,
                 })),
             ]}
-            fullHeight
-            sticky
         />
     );
 }

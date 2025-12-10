@@ -44,12 +44,13 @@ export default function DatastoreMain(props: DatastoreMainProps) {
                         style={{
                             display: "flex",
                             flexDirection: "column",
+                            gap: fr.spacing("10v"),
                         }}
                     >
                         <DatastoreSideMenu datastoreId={datastoreId} communityId={communityId} />
 
                         <ButtonsGroup
-                            className={fr.cx("fr-mt-md-auto", "fr-mb-md-6v", "fr-mr-md-8v")}
+                            className={fr.cx("fr-mb-md-6v", "fr-mr-md-8v")}
                             buttons={[
                                 {
                                     children: "Rejoindre un entrepôt",

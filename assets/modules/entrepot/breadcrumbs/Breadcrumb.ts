@@ -25,9 +25,12 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): Brea
         segments: [
             ...dashboardProps.segments,
             { label: t("datastore_selection"), linkProps: routes.datastore_selection().link },
-            "datastoreId" in route.params && { label: datastore?.name, linkProps: routes.datasheet_list({ datastoreId: route.params.datastoreId }).link },
+            "datastoreId" in route.params && {
+                label: datastore?.is_sandbox === true ? "Espace Découverte" : datastore?.name,
+                linkProps: routes.datasheet_list({ datastoreId: route.params.datastoreId }).link,
+            },
         ].filter(Boolean) as BreadcrumbProps["segments"],
-        currentPageLabel: datastore?.name || "",
+        currentPageLabel: datastore?.is_sandbox === true ? "Espace Découverte" : datastore?.name || "",
     };
 
     switch (route.name) {
@@ -104,7 +107,7 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): Brea
             return {
                 ...dashboardProps,
                 segments: [...dashboardProps.segments, { label: t("datastore_selection"), linkProps: routes.datastore_selection().link }],
-                currentPageLabel: datastore?.name,
+                currentPageLabel: datastore?.is_sandbox === true ? "Espace Découverte" : datastore?.name,
             };
 
         case "datastore_datasheet_upload": {

@@ -66,11 +66,15 @@ const DatastoreManageStorage: FC = () => {
     }, [datastore, t]);
 
     return (
-        <DatastoreMain title={t("title", { datastoreName: datastore?.name })} fluidContainer={false} datastoreId={datastore._id}>
+        <DatastoreMain
+            title={t("title", { datastoreName: datastore?.is_sandbox === true ? "Espace Découverte" : datastore?.name })}
+            fluidContainer={false}
+            datastoreId={datastore._id}
+        >
             <PageTitle
                 title={
                     <>
-                        {t("title", { datastoreName: datastore?.name })}
+                        {t("title", { datastoreName: datastore?.is_sandbox === true ? "Espace Découverte" : datastore?.name })}
                         {isFetching && <LoadingIcon className={fr.cx("fr-ml-2w")} largeIcon />}
                     </>
                 }
