@@ -34,7 +34,7 @@ class LogoutSubscriber implements EventSubscriberInterface
 
         $app = $event->getRequest()->query->get('app', null);
         if (!is_null($app) && 'entree-carto' === $app) {
-            $redirectUrl .= 'cartes/logout?success=1';
+            $redirectUrl .= 'explorer-les-cartes/logout?success=1';
         } elseif (!is_null($app) && 'guichet-collaboratif' === $app) {
             $redirectUrl .= 'guichet-collaboratif/logout?success=1';
         } else {

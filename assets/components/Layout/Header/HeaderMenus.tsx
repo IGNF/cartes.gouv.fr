@@ -18,12 +18,12 @@ export function HeaderMenuHelp() {
                 {
                     iconId: "fr-icon-question-mark",
                     children: "Questions fréquentes",
-                    linkProps: externalLink("documentation", "Questions fréquentes"),
+                    linkProps: externalLink("help", "Questions fréquentes"),
                 },
                 {
                     iconId: "fr-icon-book-2-line",
                     children: "Guide d'utilisation",
-                    linkProps: externalLink("documentationProducerGuide", "Guide d'utilisation"),
+                    linkProps: externalLink("helpProducerGuide", "Guide d'utilisation"),
                 },
                 {
                     iconId: "fr-icon-mail-line",

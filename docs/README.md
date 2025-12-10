@@ -11,9 +11,9 @@ Il prend la suite de la préfiguration que constituait le [Géotuileur](https://
 
 Les autres briques de cartes.gouv.fr sont :
 
-- le catalogue [IGNF/geonetwork-ui](https://github.com/IGNF/geonetwork-ui) (déployé depuis le 28 juin 2024)
-- l'entrée cartographique [IGNF/cartes.gouv.fr-entree-carto](https://github.com/IGNF/cartes.gouv.fr-entree-carto) (déployée depuis le 28 juin 2024)
-- la documentation [IGNF/cartes.gouv.fr-documentation](https://github.com/IGNF/cartes.gouv.fr-documentation) (à venir)
+- rechercher une donnée [IGNF/geonetwork-ui](https://github.com/IGNF/geonetwork-ui) (déployé depuis le 28 juin 2024)
+- explorer les données [IGNF/cartes.gouv.fr-entree-carto](https://github.com/IGNF/cartes.gouv.fr-entree-carto) (déployée depuis le 28 juin 2024)
+- l'aide [IGNF/cartes.gouv.fr-documentation](https://github.com/IGNF/cartes.gouv.fr-documentation)
 
 ## Fonctionnalités
 

@@ -299,7 +299,7 @@ export default function PresentationServiceMaps() {
                                 Consultez notre documentation pour apprendre à utiliser notre service, pas à pas, jusqu’à maîtriser les fonctionnalités plus
                                 avancées.
                             </p>
-                            <Button className={classes.textActionHighBlueFrance} priority="secondary" linkProps={externalLink("documentationExploreMaps")}>
+                            <Button className={classes.textActionHighBlueFrance} priority="secondary" linkProps={externalLink("helpUserGuideExploreMaps")}>
                                 Consulter la documentation
                             </Button>
                         </div>

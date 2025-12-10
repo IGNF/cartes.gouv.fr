@@ -139,7 +139,7 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
     public function handleEntreeCartoLogin(Request $request, bool $success): Response
     {
         $redirectUrl = $this->router->generate(self::SUCCESS_ROUTE, [], RouterInterface::ABSOLUTE_URL);
-        $redirectUrl .= 'cartes/login?';
+        $redirectUrl .= 'explorer-les-cartes/login?';
 
         if (true === $success) {
             $redirectUrl .= 'success=1';

@@ -25,7 +25,7 @@ export default function NoData({ datastoreId }: NoDataProps) {
                     buttons={[
                         {
                             children: "Consulter l'aide",
-                            linkProps: externalLink("documentationCreateDatasheet"),
+                            linkProps: externalLink("helpProducerGuideCreateDatasheet"),
                             priority: "secondary",
                         },
                         {

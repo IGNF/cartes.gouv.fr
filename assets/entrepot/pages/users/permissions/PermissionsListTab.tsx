@@ -106,7 +106,7 @@ const PermissionsListTab: FC<PermissionsListTabProps> = ({ permissions }) => {
                 <div>
                     <a
                         className={fr.cx("fr-link")}
-                        href={externalUrls.documentation}
+                        href={externalUrls.help}
                         target="_blank"
                         rel="noreferrer"
                         title={t("consult_documentation") + " - " + tCommon("new_window")}

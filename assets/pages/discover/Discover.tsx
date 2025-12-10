@@ -415,7 +415,7 @@ export default function Discover() {
                                         les données officielles du territoire à leurs projets numériques.
                                     </p>
                                     <div className={classes.accordionButtons}>
-                                        <Link className={fr.cx("fr-link")} {...externalLink("documentationUserGuideGeopfServicesTutorial")}>
+                                        <Link className={fr.cx("fr-link")} {...externalLink("helpUserGuideGeopfServicesTutorial")}>
                                             En savoir plus
                                         </Link>
                                         <Link className={fr.cx("fr-link")} href="https://fab-geocommuns.github.io/carte-facile-site/" target="_blank">
@@ -581,7 +581,7 @@ export default function Discover() {
                                 "Accédez à notre centre d’aide à tout moment pour découvrir nos bonnes pratiques, contacter notre support ou participer à nos webinaires en ligne."
                             }
                             endDetail={
-                                <Link className={fr.cx("fr-link")} href={externalUrls.documentation}>
+                                <Link className={fr.cx("fr-link")} href={externalUrls.help}>
                                     Consulter l’aide&nbsp;
                                     <span className={fr.cx("fr-icon-arrow-right-line")} />
                                 </Link>
