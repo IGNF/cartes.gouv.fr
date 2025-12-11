@@ -43,7 +43,7 @@ const useDatastoreSelection = () => {
 
     // création de la liste des entrepôts
     datastoreList = communitiesMember
-        .filter((cm) => cm.community !== undefined)
+        .filter((cm) => cm.community !== undefined && cm.community.datastore !== undefined)
         .map((cm) => ({
             _id: cm.community!.datastore,
             technical_name: cm.community!.technical_name,
