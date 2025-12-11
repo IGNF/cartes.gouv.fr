@@ -54,7 +54,7 @@ const dataCards = [
         organisation: "IGN",
         thumbnailUrl: bdOrthoThumbUrl,
         linkProps: {
-            href: "https://cartes.gouv.fr/catalogue/dataset/IGNF_BD-ORTHO",
+            href: "https://cartes.gouv.fr/rechercher-une-donnee/dataset/IGNF_BD-ORTHO",
         },
     },
     {
@@ -62,7 +62,7 @@ const dataCards = [
         organisation: "IGN",
         thumbnailUrl: scan25ThumbUrl,
         linkProps: {
-            href: "https://cartes.gouv.fr/catalogue/dataset/IGNF_SCAN-25",
+            href: "https://cartes.gouv.fr/rechercher-une-donnee/dataset/IGNF_SCAN-25",
         },
     },
     {
@@ -70,7 +70,7 @@ const dataCards = [
         organisation: "INSEE",
         thumbnailUrl: donneesStatPubThumbUrl,
         linkProps: {
-            href: "https://cartes.gouv.fr/catalogue/dataset/INSEE_DONNEES",
+            href: "https://cartes.gouv.fr/rechercher-une-donnee/dataset/INSEE_DONNEES",
         },
     },
     {
@@ -78,7 +78,7 @@ const dataCards = [
         organisation: "ONF",
         thumbnailUrl: foretsPubThumbUrl,
         linkProps: {
-            href: "https://cartes.gouv.fr/catalogue/dataset/ONF_FORETS-PUBLIQUES",
+            href: "https://cartes.gouv.fr/rechercher-une-donnee/dataset/ONF_FORETS-PUBLIQUES",
         },
     },
     {
@@ -86,7 +86,7 @@ const dataCards = [
         organisation: "DGALN, IGN, MTE",
         thumbnailUrl: ocsgeThumbUrl,
         linkProps: {
-            href: "https://cartes.gouv.fr/catalogue/dataset/IGNF_INPE",
+            href: "https://cartes.gouv.fr/rechercher-une-donnee/dataset/IGNF_INPE",
         },
     },
     {
@@ -94,7 +94,7 @@ const dataCards = [
         organisation: "IGN",
         thumbnailUrl: rpgThumbUrl,
         linkProps: {
-            href: "https://cartes.gouv.fr/catalogue/dataset/IGNF_RPG",
+            href: "https://cartes.gouv.fr/rechercher-une-donnee/dataset/IGNF_RPG",
         },
     },
     {
@@ -102,7 +102,7 @@ const dataCards = [
         organisation: "DGAC",
         thumbnailUrl: pebThumbUrl,
         linkProps: {
-            href: "https://cartes.gouv.fr/catalogue/dataset/DGAC_Plan_d_Exposition_au_Bruit_PEB",
+            href: "https://cartes.gouv.fr/rechercher-une-donnee/dataset/DGAC_Plan_d_Exposition_au_Bruit_PEB",
         },
     },
     {
@@ -110,7 +110,7 @@ const dataCards = [
         organisation: "DTT 51",
         thumbnailUrl: projetsZaerThumbUrl,
         linkProps: {
-            href: "https://cartes.gouv.fr/catalogue/dataset/f1a74532-5e5a-4756-b100-b6524f9a1805",
+            href: "https://cartes.gouv.fr/rechercher-une-donnee/dataset/f1a74532-5e5a-4756-b100-b6524f9a1805",
         },
     },
 ] as const;
@@ -357,7 +357,7 @@ export default function Discover() {
                                         >
                                             En savoir plus
                                         </Link>
-                                        {/* <Link className={fr.cx("fr-link")} href="https://cartes.gouv.fr/catalogue/service/GeoPF_Geocodage" target="_blank">
+                                        {/* <Link className={fr.cx("fr-link")} href="https://cartes.gouv.fr/rechercher-une-donnee/service/GeoPF_Geocodage" target="_blank">
                                             Géocoder
                                         </Link> */}
                                     </div>
@@ -377,7 +377,11 @@ export default function Discover() {
                                         <Link className={fr.cx("fr-link")} href="https://cartes.gouv.fr/telechargement/IGNF_MNT-LIDAR-HD" target="_blank">
                                             Consulter
                                         </Link>
-                                        <Link className={fr.cx("fr-link")} href="https://cartes.gouv.fr/catalogue/dataset/IGNF_MNT-LIDAR-HD" target="_blank">
+                                        <Link
+                                            className={fr.cx("fr-link")}
+                                            href="https://cartes.gouv.fr/rechercher-une-donnee/dataset/IGNF_MNT-LIDAR-HD"
+                                            target="_blank"
+                                        >
                                             Accéder à la fiche du LIDAR HD MNT
                                         </Link>
                                     </div>
