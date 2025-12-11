@@ -73,7 +73,7 @@ const Description: FC<DescriptionProps> = ({ isAdmin }) => {
         staleTime: 3600000,
     });
 
-    const schema = (t: TranslationFunction<"ManageCommunityValidations", ComponentKey>) => {
+    const schema = (t: TranslationFunction<"ManageCommunityValidations", ComponentKey>): yup.ObjectSchema<DescriptionFormType> => {
         return yup.object({
             name: yup
                 .string()
@@ -89,6 +89,7 @@ const Description: FC<DescriptionProps> = ({ isAdmin }) => {
             description: yup.string().max(1024, t("description.desc.maxlength")),
             editorial: yup.string(),
             keywords: yup.array().of(yup.string().required()),
+            logo: yup.mixed().optional(),
             listed: yup.boolean().required(),
             membershipRequest: yup.string().oneOf(MembershipRequestValues).required(),
             openWithEmail: yup

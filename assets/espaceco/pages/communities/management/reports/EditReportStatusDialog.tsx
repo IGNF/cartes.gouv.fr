@@ -28,7 +28,7 @@ const EditReportStatusDialog: FC<EditReportStatusDialogProps> = ({ status, statu
     const { t: tCommon } = useTranslation("Common");
     const { t } = useTranslation("ReportStatuses");
 
-    const schema = yup.object({
+    const schema: yup.ObjectSchema<{ title: string; description?: string }> = yup.object({
         title: yup.string().trim(tCommon("trimmed_error")).strict(true).required(),
         description: yup.string(),
     });

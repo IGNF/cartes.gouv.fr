@@ -3,6 +3,7 @@ import { isUUID } from "validator";
 import * as yup from "yup";
 import { PermissionCreateDtoTypeEnum } from "../../../../@types/entrepot";
 import type { ComponentKey } from "../../../../i18n/types";
+import { AddPermissionFormType, EditPermissionFormType } from "./utils";
 
 const types: string[] = Object.values(PermissionCreateDtoTypeEnum);
 
@@ -26,14 +27,14 @@ const uuidTest = (t: TranslationFunction<"DatastorePermissions", ComponentKey>) 
     },
 });
 
-const getSchema = (t: TranslationFunction<"DatastorePermissions", ComponentKey>) =>
+const getSchema = (t: TranslationFunction<"DatastorePermissions", ComponentKey>): yup.ObjectSchema<EditPermissionFormType> =>
     yup.object({
         licence: yup.string().required(t("validation.licence_required")),
         end_date: yup.date().typeError(t("validation.end_date.invalid_date")),
         offerings: yup.array(yup.string().required()).min(1, t("validation.min_offerings")).test(uuidTest(t)).required(),
     });
 
-const getAddSchema = (t: TranslationFunction<"DatastorePermissions", ComponentKey>) => {
+const getAddSchema = (t: TranslationFunction<"DatastorePermissions", ComponentKey>): yup.ObjectSchema<AddPermissionFormType> => {
     const schema = getSchema(t);
     return schema.concat(
         yup.object({

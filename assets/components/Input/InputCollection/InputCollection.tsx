@@ -28,7 +28,7 @@ const InputCollection: FC<InputCollectionProps> = (props: InputCollectionProps) 
 
     const _validator: (value) => boolean = validator === "email" ? isEmail : undefined;
 
-    const schema = yup.object({
+    const schema: yup.ObjectSchema<{ text?: string }> = yup.object({
         text: yup
             .string()
             .min(minLength, t("min_length_error", { min: minLength }))

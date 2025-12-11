@@ -38,7 +38,6 @@ const EditDocumentDialog: FC<EditDocumentDialogProps> = ({ editDocument, onModif
     );
 
     const schema = getSchema(tValid);
-    type FormType = yup.InferType<typeof schema>;
 
     const originalValues = useMemo(() => {
         return editDocument
@@ -49,7 +48,7 @@ const EditDocumentDialog: FC<EditDocumentDialogProps> = ({ editDocument, onModif
             : { title: "", description: "" };
     }, [editDocument]);
 
-    const form = useForm<FormType>({
+    const form = useForm({
         mode: "onChange",
         resolver: yupResolver(schema),
         values: originalValues,

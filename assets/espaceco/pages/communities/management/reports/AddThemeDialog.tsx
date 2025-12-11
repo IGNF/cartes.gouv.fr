@@ -72,7 +72,7 @@ const AddThemeDialog: FC<AddThemeDialogProps> = ({ themes, tables, onAdd }) => {
         return a;
     }, [t, tables]);
 
-    const schema = yup.object({
+    const schema: yup.ObjectSchema<AddThemeFormType> = yup.object({
         theme: yup
             .string()
             .trim(t("trimmed_error"))

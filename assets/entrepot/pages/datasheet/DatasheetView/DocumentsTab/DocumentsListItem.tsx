@@ -66,7 +66,7 @@ const DocumentsListItem: FC<DocumentsListItemProps> = ({ document, datastoreId, 
     };
 
     const editDocumentMutation = useMutation({
-        mutationFn: (formData: Record<string, string>) => api.datasheetDocument.edit(datastoreId, datasheetName, document.id, formData),
+        mutationFn: (formData: object) => api.datasheetDocument.edit(datastoreId, datasheetName, document.id, formData),
         onSettled: () => {
             resetForm();
         },

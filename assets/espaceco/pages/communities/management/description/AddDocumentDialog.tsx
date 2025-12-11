@@ -64,9 +64,8 @@ const AddDocumentDialog: FC<AddDocumentDialogProps> = ({ onAdd }) => {
     );
 
     const schema = getSchema(tValid);
-    type FormType = yup.InferType<typeof schema>;
 
-    const form = useForm<FormType>({
+    const form = useForm({
         mode: "onSubmit",
         resolver: yupResolver(schema),
     });

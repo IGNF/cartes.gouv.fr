@@ -1,6 +1,6 @@
 import isEmail from "validator/lib/isEmail";
 import * as yup from "yup";
-import { BasicRecipientsArray } from "../../../../../../@types/app_espaceco";
+import { BasicRecipientsArray, EmailPlannerFormType } from "../../../../../../@types/app_espaceco";
 import { CancelEvents, ReportStatusesDTO, TriggerEvents } from "../../../../../../@types/espaceco";
 import { getTranslation } from "../../../../../../i18n/i18n";
 
@@ -36,9 +36,10 @@ const getBasicSchema = () => {
     return recipientsSchema;
 };
 
-const getPersonalSchema = (themes: string[], statuses: ReportStatusesDTO) => {
+const getPersonalSchema = (themes: string[], statuses: ReportStatusesDTO): yup.ObjectSchema<EmailPlannerFormType> => {
     return recipientsSchema.concat(
         yup.object({
+            id: yup.number(),
             subject: yup.string().required(t("validation.subject.mandatory")),
             body: yup.string().required(t("validation.body.mandatory")),
             delay: yup.number().min(1, t("validation.delay.positive")).required(t("validation.delay.mandatory")),

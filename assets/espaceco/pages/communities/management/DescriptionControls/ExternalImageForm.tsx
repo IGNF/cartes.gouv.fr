@@ -7,7 +7,7 @@ import isURL from "validator/lib/isURL.js";
 import * as yup from "yup";
 import { useTranslation } from "@/i18n";
 
-const schema = yup.object({
+const schema: yup.ObjectSchema<IImageForm> = yup.object({
     src: yup
         .string()
         .test("check-url", "La chaîne doit être une url valide", (value) => isURL(value ?? ""))

@@ -18,7 +18,7 @@ import { formatDateTimeLocal } from "../../../utils";
 import MarkdownEditor from "../../Input/MarkdownEditor";
 
 const date = new Date();
-export const alertSchema = yup.object({
+export const alertSchema: yup.ObjectSchema<IAlert> = yup.object({
     id: yup.string().required(),
     title: yup.string().required("Titre requis"),
     description: yup.string(),

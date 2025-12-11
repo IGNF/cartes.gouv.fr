@@ -25,8 +25,6 @@ import { useAlertStore } from "../../../stores/AlertStore";
 import { useAuthStore } from "../../../stores/AuthStore";
 import { regex } from "../../../utils";
 
-import "../../../sass/pages/nous_ecrire.scss";
-
 const charRange = [10, 8000];
 const noOrganization = "SO";
 
@@ -36,11 +34,11 @@ type ContactForm = {
     first_name: string;
     category: string;
     organization: string;
-    importance?: number;
+    importance?: string;
     message?: string;
 };
 
-const schema = (t: TranslationFunction<"Contact", ComponentKey>) =>
+const schema = (t: TranslationFunction<"Contact", ComponentKey>): yup.ObjectSchema<ContactForm> =>
     yup
         .object({
             email_contact: yup.string().matches(regex.email, t("form.email_contact_error")).required(t("form.email_contact_mandatory_error")),
@@ -51,7 +49,7 @@ const schema = (t: TranslationFunction<"Contact", ComponentKey>) =>
                 .oneOf(arrUserCategories.map((c) => t("form.category_option", { option: c })))
                 .required(),
             organization: yup.string().trim(t("form.message.trimmed_error")).strict(true).required(t("form.message_organization_mandatory")),
-            importance: yup.number(),
+            importance: yup.string(),
             message: yup
                 .string()
                 .min(charRange[0], t("form.message_minlength_error", { min: charRange[0] }))
@@ -200,7 +198,7 @@ const Contact = () => {
                     </div>
                     <Select
                         label={"importance"}
-                        className={"importance"}
+                        className={fr.cx("fr-hidden")}
                         nativeSelectProps={{
                             ...register("importance"),
                             defaultValue: "0",

@@ -34,7 +34,7 @@ const EditAttributeDialog: FC<EditAttributeDialogProps> = ({ modal, theme, attri
         );
     }, [theme, attribute]);
 
-    const schema = yup.object({
+    const schema: yup.ObjectSchema<AddOrEditAttributeFormType> = yup.object({
         name: yup
             .string()
             .trim(t("trimmed_error"))

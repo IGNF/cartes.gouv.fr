@@ -55,7 +55,7 @@ function getIcon(severity?: IAlert["severity"]) {
     }
 }
 
-const schema = yup.object({
+const schema: yup.ObjectSchema<{ alerts?: IAlert[] }> = yup.object({
     alerts: yup.array().of(alertSchema),
 });
 

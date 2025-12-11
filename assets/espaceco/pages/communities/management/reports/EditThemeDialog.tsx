@@ -39,7 +39,7 @@ const EditThemeDialog: FC<EditThemeDialogProps> = ({ themes, currentTheme, onMod
         );
     }, [themes, currentTheme]);
 
-    const schema = yup.object({
+    const schema: yup.ObjectSchema<EditThemeFormType> = yup.object({
         theme: yup
             .string()
             .required(t("dialog.edit_theme.name_mandatory_error"))
