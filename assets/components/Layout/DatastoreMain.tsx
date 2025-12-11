@@ -63,9 +63,6 @@ export default function DatastoreMain(props: DatastoreMainProps) {
                                     priority: "secondary",
                                 },
                             ]}
-                            style={{
-                                zIndex: "16000",
-                            }}
                         />
                     </div>
                     <div className={fr.cx("fr-col-12", "fr-col-md-9")}>
