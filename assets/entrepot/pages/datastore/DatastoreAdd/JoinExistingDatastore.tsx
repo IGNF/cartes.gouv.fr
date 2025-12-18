@@ -10,6 +10,8 @@ import { createPortal } from "react-dom";
 import { useStyles } from "tss-react";
 
 import { CommunityListResponseDto } from "@/@types/entrepot";
+import LoadingIcon from "@/components/Utils/LoadingIcon";
+import Wait from "@/components/Utils/Wait";
 import api from "@/entrepot/api";
 import { useTranslation } from "@/i18n";
 import RQKeys from "@/modules/entrepot/RQKeys";
@@ -19,8 +21,6 @@ import { useAuthStore } from "@/stores/AuthStore";
 import { regex, removeDiacritics } from "@/utils";
 
 import placeholder16x9 from "@/img/placeholder.16x9.png";
-import Wait from "@/components/Utils/Wait";
-import LoadingIcon from "@/components/Utils/LoadingIcon";
 
 const joinModal = createModal({
     id: "datastore-join-modal",
@@ -109,10 +109,9 @@ export default function JoinExistingDatastore() {
                             imageUrl={placeholder16x9}
                             imageAlt=""
                             linkProps={{
-                                href: routes.datastore_add({ type: "existing" }).href, // href inutile mais pour avoir le style "lien étendu"
+                                href: routes.join_community().href, // href inutile mais pour avoir le style "lien étendu"
                                 onClick: (e) => {
                                     e.preventDefault();
-                                    console.log("hello", community.name);
                                     setSelectedCommunity(community);
                                     joinModal.open();
                                 },
