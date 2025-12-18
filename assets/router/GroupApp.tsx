@@ -35,10 +35,6 @@ const UserKeyForm = lazy(() => import("../entrepot/pages/users/keys/UserKeyForm"
 const AccessesRequest = lazy(() => import("../entrepot/pages/accesses-request/AccessesRequest"));
 
 const DatastoreAdd = lazy(() => import("../entrepot/pages/datastore/DatastoreAdd/DatastoreAdd"));
-const DatastoreCreationForm = lazy(() => import("../entrepot/pages/datastore/DatastoreCreationForm/DatastoreCreationForm"));
-const DatastoreCreationRequestConfirmation = lazy(() => import("../entrepot/pages/datastore/DatastoreCreationForm/DatastoreCreationRequestConfirmation"));
-
-const CommunityList = lazy(() => import("../entrepot/pages/communities/CommunityList/CommunityList"));
 
 // const DashboardPro = lazy(() => import("../entrepot/pages/dashboard/DashboardPro"));
 const Dashboard = lazy(() => import("../entrepot/pages/dashboard/Dashboard"));
@@ -122,16 +118,10 @@ function GroupApp(props: IGroupAppProps) {
             //     return { render: <MyDocuments /> };
             case "accesses_request":
                 return { render: <AccessesRequest fileIdentifier={route.params.fileIdentifier} /> };
-            case "datastore_add":
-                return { render: <DatastoreAdd /> };
             case "datastore_create_request":
-                return { render: <DatastoreCreationForm /> };
-            case "datastore_create_request_confirm":
-                return {
-                    render: <DatastoreCreationRequestConfirmation />,
-                };
             case "join_community":
-                return { render: <CommunityList /> };
+                return { render: <DatastoreAdd /> };
+
             case "dashboard":
                 return {
                     render: <Dashboard />,
