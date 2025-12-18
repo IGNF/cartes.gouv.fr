@@ -1,22 +1,30 @@
 {% trans_default_domain 'cartesgouvfr' %}
 
-<p>{{ 'datastore_creation_request.email_support.datastore_name'|trans }} : {{ data.name }}<br>
-{{ 'datastore_creation_request.email_support.datastore_technical_name'|trans }} : {{ data.technical_name }}<br><br>
-{% if supervisor|length != 0 %}
-    {{ 'datastore_creation_request.email_support.is_supervisor'|trans }}
-    <ul>
-    {% for communityName, id in supervisor %}
-        <li>{{ communityName ~ ' (' ~ id ~ ')' }}</li>
-    {% endfor %}
-    </ul>
-    <br>
-{% endif %}
-{% if member|length != 0 %}
-    {{ 'datastore_creation_request.email_support.is_member'|trans }}
-    <ul>
-    {% for communityName, id in member %}
-        <li>{{ communityName ~ ' (' ~ id ~ ')' }}</li>
-    {% endfor %}
-    </ul>
-{% endif %}
+<p>
+    <strong>{{ 'datastore_creation_request.email_support.datastore_name'|trans }}</strong> : {{ data.name }}<br />
+    <strong>{{ 'datastore_creation_request.email_support.datastore_technical_name'|trans }}</strong> : {{ data.technical_name }}<br />
+    <strong>{{ 'datastore_creation_request.email_support.offer'|trans }}</strong> : {{ ('datastore_creation_request.email_support.offer_' ~ data.offer)|trans }}<br />
+    {% if data.information is defined %}
+        <strong>{{ 'datastore_creation_request.email_support.information'|trans }}</strong> :<br />
+        {{ data.information }}<br />
+    {% endif %}
+    <br />
+
+    {% if (supervisor|length) != 0 %}
+        {{ 'datastore_creation_request.email_support.is_supervisor'|trans }}
+        <ul>
+            {% for communityName, id in supervisor %}
+                <li>{{ communityName ~ ' (' ~ id ~ ')' }}</li>
+            {% endfor %}
+        </ul>
+        <br />
+    {% endif %}
+    {% if (member|length) != 0 %}
+        {{ 'datastore_creation_request.email_support.is_member'|trans }}
+        <ul>
+            {% for communityName, id in member %}
+                <li>{{ communityName ~ ' (' ~ id ~ ')' }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
 </p>

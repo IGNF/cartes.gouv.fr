@@ -12,11 +12,11 @@ export interface MainProps {
     customBreadcrumbProps?: BreadcrumbProps;
     noticeProps?: IUseAlert;
     title?: string;
-    fluidContainer?: boolean;
+    classes?: Partial<Record<"container", string>>;
 }
 
 function Main(props: PropsWithChildren<MainProps>) {
-    const { children, customBreadcrumbProps, noticeProps, title, fluidContainer = false } = props;
+    const { children, customBreadcrumbProps, noticeProps, title, classes } = props;
 
     useDocumentTitle(title);
     const breadcrumbProps = useBreadcrumb(customBreadcrumbProps);
@@ -26,7 +26,7 @@ function Main(props: PropsWithChildren<MainProps>) {
             {/* doit être le premier élément atteignable après le lien d'évitement (Accessibilité) : https://www.systeme-de-design.gouv.fr/elements-d-interface/composants/bandeau-d-information-importante */}
             {noticeProps && <Notice isClosable {...noticeProps} />}
 
-            <div className={fr.cx(fluidContainer ? "fr-container--fluid" : "fr-container")}>
+            <div className={classes?.container ?? fr.cx("fr-container")}>
                 {breadcrumbProps && <Breadcrumb {...breadcrumbProps} />}
 
                 <SessionExpiredAlert />

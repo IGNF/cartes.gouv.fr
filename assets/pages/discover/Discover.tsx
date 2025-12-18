@@ -137,7 +137,13 @@ export default function Discover() {
     const displayedDataCards = showAllDataCards ? dataCards : dataCards.slice(0, 4);
 
     return (
-        <Main noticeProps={alertProps} title="Le service public des cartes et données du territoire" fluidContainer={true}>
+        <Main
+            noticeProps={alertProps}
+            title="Le service public des cartes et données du territoire"
+            classes={{
+                container: fr.cx("fr-container--fluid"),
+            }}
+        >
             {params?.["authentication_failed"] === 1 && (
                 <Alert
                     severity="error"

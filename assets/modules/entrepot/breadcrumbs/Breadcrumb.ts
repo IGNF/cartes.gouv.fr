@@ -131,6 +131,8 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore, commu
                 currentPageLabel: t(route.name),
             };
 
+        case "datastore_add":
+            return { ...datastoreBaseProps, currentPageLabel: t(route.name) };
         case "datasheet_list":
             return {
                 ...dashboardProps,
