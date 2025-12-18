@@ -90,6 +90,13 @@ const privateRoutes = {
         () => `${appRoot}/tableau-de-bord/entrepots`
     ),
 
+    datastore_add: defineRoute(
+        {
+            type: param.query.optional.string.default("create"),
+        },
+        () => `${appRoot}/tableau-de-bord/entrepots/ajout`
+    ),
+
     // Demande de creation d'un datastore
     datastore_create_request: defineRoute(`${appRoot}/tableau-de-bord/entrepots/demande-de-creation`),
     datastore_create_request_confirm: defineRoute(`${appRoot}/tableau-de-bord/entrepots/demande-de-creation/demande-envoyee`),

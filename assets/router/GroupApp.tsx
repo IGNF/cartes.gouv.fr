@@ -34,6 +34,7 @@ const UserKeyForm = lazy(() => import("../entrepot/pages/users/keys/UserKeyForm"
 
 const AccessesRequest = lazy(() => import("../entrepot/pages/accesses-request/AccessesRequest"));
 
+const DatastoreAdd = lazy(() => import("../entrepot/pages/datastore/DatastoreAdd/DatastoreAdd"));
 const DatastoreCreationForm = lazy(() => import("../entrepot/pages/datastore/DatastoreCreationForm/DatastoreCreationForm"));
 const DatastoreCreationRequestConfirmation = lazy(() => import("../entrepot/pages/datastore/DatastoreCreationForm/DatastoreCreationRequestConfirmation"));
 
@@ -121,6 +122,8 @@ function GroupApp(props: IGroupAppProps) {
             //     return { render: <MyDocuments /> };
             case "accesses_request":
                 return { render: <AccessesRequest fileIdentifier={route.params.fileIdentifier} /> };
+            case "datastore_add":
+                return { render: <DatastoreAdd /> };
             case "datastore_create_request":
                 return { render: <DatastoreCreationForm /> };
             case "datastore_create_request_confirm":

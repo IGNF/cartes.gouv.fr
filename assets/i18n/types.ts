@@ -25,6 +25,7 @@ export type ComponentKey =
     | import("../entrepot/pages/communities/CommunityMembers/CommunityMembers.locale").I18n
     | import("../entrepot/pages/communities/CommunityList/CommunityList.locale").I18n
     | import("../entrepot/pages/datastore/DatastoreCreationForm/DatastoreCreationForm.locale").I18n
+    | import("../entrepot/pages/datastore/DatastoreAdd/DatastoreAdd.locale").I18n
     | import("../entrepot/pages/dashboard/DashboardPro.locale").I18n
     | import("../entrepot/pages/users/access-keys/MyAccessKeys.locale").I18n
     | import("../entrepot/pages/users/keys/UserKeysListTab/UserKeysListTab.locale").I18n

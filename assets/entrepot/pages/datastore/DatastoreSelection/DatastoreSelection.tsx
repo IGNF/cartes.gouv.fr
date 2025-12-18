@@ -24,7 +24,7 @@ export default function DatastoreSelection() {
     const { paginatedItems, totalPages } = usePagination(datastoreList, page, limit);
 
     return (
-        <DatastoreMain title="Entrepôts" fluidContainer={false}>
+        <DatastoreMain title="Entrepôts">
             <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
                 <div className={fr.cx("fr-col-12", "fr-col-sm-4")}>
                     <SearchBar />
