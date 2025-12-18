@@ -55,18 +55,8 @@ export default function DatastoreMain(props: DatastoreMainProps) {
                             className={fr.cx("fr-mb-md-6v", "fr-mr-md-8v")}
                             buttons={[
                                 {
-                                    children: "Rejoindre un entrepôt",
-                                    linkProps: routes.join_community().link,
-                                    priority: "secondary",
-                                },
-                                {
-                                    children: "Créer un entrepôt",
-                                    linkProps: routes.datastore_create_request().link,
-                                    priority: "secondary",
-                                },
-                                {
                                     children: "Ajouter un entrepôt",
-                                    linkProps: routes.datastore_add().link,
+                                    linkProps: routes.datastore_create_request().link,
                                     priority: "secondary",
                                 },
                             ]}

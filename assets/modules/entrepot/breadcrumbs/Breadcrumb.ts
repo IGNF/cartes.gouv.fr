@@ -83,7 +83,6 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore, commu
         case "my_access_keys":
         case "my_permissions":
         case "datastore_create_request":
-        case "datastore_create_request_confirm":
         case "join_community":
             return { ...dashboardProps, currentPageLabel: t(route.name) };
 
@@ -131,8 +130,6 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore, commu
                 currentPageLabel: t(route.name),
             };
 
-        case "datastore_add":
-            return { ...datastoreBaseProps, currentPageLabel: t(route.name) };
         case "datasheet_list":
             return {
                 ...dashboardProps,
