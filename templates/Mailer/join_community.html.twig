@@ -6,18 +6,26 @@
         <p>{{ 'join_community.email_support.heading'|trans({'%name%': community.name, '%id%': community._id}) }}</p>
         {{ 'mailer.applicant_informations'|trans }}
         <p>
-            <strong>{{ 'mailer.user_email'|trans }} : </strong>{{ app.user.email }}<br>
-            <strong>{{ 'mailer.last_name'|trans }} : </strong>{% if app.user.lastName is not empty %}{{ app.user.lastName }}{% else %}{{ 'contact.email_support.not_specified'|trans }}{% endif %}<br>
-            <strong>{{ 'mailer.first_name'|trans }} : </strong>{% if app.user.firstName is not empty %}{{ app.user.firstName }}{% else %}{{ 'contact.email_support.not_specified'|trans }}{% endif %}<br>
-            <strong>{{ 'mailer.user_id'|trans }} : </strong>{{ app.user.id }}<br>
-            <strong>{{ 'mailer.date'|trans }} : </strong>{{ sendDate|date('d-m-Y H:i', 'Europe/Paris') }}
+            <strong>{{ 'mailer.user_email'|trans }} :</strong>{{ app.user.email }}<br />
+            <strong>{{ 'mailer.last_name'|trans }} :</strong>{% if app.user.lastName is not empty %}
+                {{ app.user.lastName }}
+            {% else %}
+                {{ 'contact.email_support.not_specified'|trans }}
+            {% endif %}<br />
+            <strong>{{ 'mailer.first_name'|trans }} :</strong>{% if app.user.firstName is not empty %}
+                {{ app.user.firstName }}
+            {% else %}
+                {{ 'contact.email_support.not_specified'|trans }}
+            {% endif %}<br />
+            <strong>{{ 'mailer.user_id'|trans }} :</strong>{{ app.user.id }}<br />
+            <strong>{{ 'mailer.date'|trans }} :</strong>{{ sendDate|date('d-m-Y H:i', 'Europe/Paris') }}
         </p>
         {% if message is not empty %}
-            <strong>{{ 'join_community.email_support.message'|trans }}</strong><br>
+            <strong>{{ 'join_community.email_support.message'|trans }}</strong><br />
             {{ message|e }}
         {% endif %}
 
-        {% set action_url = url('cartesgouvfr_app') ~ 'communaute/' ~ community._id ~ '/membres?userId=' ~ app.user.id %}
+        {% set action_url = url('cartesgouvfr_app') ~ 'tableau-de-bord/communaute/' ~ community._id ~ '/membres?userId=' ~ app.user.id %}
         <p>{{ 'join_community.email_support.call_to_action'|trans({'%name%': community.name, '%href%': action_url})|raw }}</p>
     </div>
 {% endblock %}

@@ -68,7 +68,6 @@ const DatastoreManageStorage: FC = () => {
     return (
         <DatastoreMain
             title={t("title", { datastoreName: datastore?.is_sandbox === true ? "Espace Découverte" : datastore?.name })}
-            fluidContainer={false}
             datastoreId={datastore._id}
         >
             <PageTitle

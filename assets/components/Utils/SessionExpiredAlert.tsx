@@ -11,7 +11,6 @@ const SessionExpiredAlert: FC = () => {
     const route = useRoute();
 
     return (
-        !route &&
         !groups.public.has(route) &&
         sessionExpired && (
             <div className={fr.cx("fr-mb-4v")}>

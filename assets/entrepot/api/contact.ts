@@ -2,7 +2,7 @@ import SymfonyRouting from "../../modules/Routing";
 
 import { jsonFetch } from "../../modules/jsonFetch";
 
-const joinCommunity = (formData: FormData | object) => {
+const joinCommunity = (formData: object) => {
     const url = SymfonyRouting.generate("cartesgouvfr_contact_join_community");
     return jsonFetch(
         url,

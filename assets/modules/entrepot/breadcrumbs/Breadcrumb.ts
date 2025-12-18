@@ -103,6 +103,8 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): Brea
                 currentPageLabel: t(route.name),
             };
 
+        case "datastore_add":
+            return { ...datastoreBaseProps, currentPageLabel: t(route.name) };
         case "datasheet_list":
             return {
                 ...dashboardProps,
