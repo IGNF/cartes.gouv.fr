@@ -3,6 +3,7 @@ import SideMenu from "@codegouvfr/react-dsfr/SideMenu";
 import { tss } from "tss-react";
 
 import useDatastoreSelection from "@/hooks/useDatastoreSelection";
+import { useTranslation } from "@/i18n";
 import { routes, useRoute } from "@/router/router";
 
 type DatastoreSideMenuProps = {
@@ -10,6 +11,7 @@ type DatastoreSideMenuProps = {
     communityId?: string;
 };
 export default function DatastoreSideMenu({ datastoreId, communityId }: DatastoreSideMenuProps) {
+    const { t: tCommon } = useTranslation("Common");
     const route = useRoute();
     const { css, cx } = useStyles();
 
@@ -58,7 +60,7 @@ export default function DatastoreSideMenu({ datastoreId, communityId }: Datastor
                     isActive: route.name === routes.datastore_selection().name,
                 },
                 ...datastoreList.map((datastore) => ({
-                    text: datastore._id === sandboxDatastore?._id ? "Espace Découverte" : datastore.name,
+                    text: datastore._id === sandboxDatastore?._id ? tCommon("sandbox") : datastore.name,
                     linkProps:
                         datastore.is_sandbox === true && !userMemberOfSandbox
                             ? { ...routes.datasheet_list({ datastoreId: sandboxDatastore!._id }).link, onClick: () => addUserToSandbox() }

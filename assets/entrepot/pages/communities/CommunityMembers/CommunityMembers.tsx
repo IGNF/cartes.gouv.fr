@@ -61,7 +61,6 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
     const { t: tCommon } = useTranslation("Common");
     const { t: tRights } = useTranslation("Rights");
     const { t } = useTranslation({ CommunityMembers });
-    const { t: tBreadcrumb } = useTranslation("Breadcrumb");
 
     const { user } = useAuthStore();
     // const [members, setMembers] = useState<Member[]>([]);
@@ -179,20 +178,7 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
     const { classes, cx } = useStyles();
 
     return (
-        <DatastoreMain
-            customBreadcrumbProps={{
-                homeLinkProps: routes.discover().link,
-                segments: [
-                    { label: tBreadcrumb("dashboard"), linkProps: routes.dashboard().link },
-                    { label: tBreadcrumb("datastore_selection"), linkProps: routes.datastore_selection().link },
-                    { label: datastore?.name, linkProps: routes.datasheet_list({ datastoreId: datastore?._id ?? "XXXX" }).link },
-                ],
-                currentPageLabel: tBreadcrumb("members_list"),
-            }}
-            title="Membres"
-            datastoreId={datastore._id}
-            communityId={community._id}
-        >
+        <DatastoreMain title="Membres" datastoreId={datastore._id} communityId={community._id}>
             {isLoading && <LoadingText />}
             {!isLoading && userId && communityMemberIds.includes(userId) && (
                 <Alert

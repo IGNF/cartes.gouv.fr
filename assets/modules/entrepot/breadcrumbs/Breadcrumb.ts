@@ -1,21 +1,21 @@
-import { BreadcrumbProps } from "@codegouvfr/react-dsfr/Breadcrumb";
+import { BreadcrumbProps, addBreadcrumbTranslations } from "@codegouvfr/react-dsfr/Breadcrumb";
 import { Route } from "type-route";
 
-import { Datastore } from "../../../@types/app";
+import { Community, Datastore } from "../../../@types/app";
 import { getTranslation } from "../../../i18n/i18n";
 import { routes } from "../../../router/router";
 
 const { t } = getTranslation("Breadcrumb");
+const { t: tCommon } = getTranslation("Common");
 
-const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): BreadcrumbProps | undefined => {
-    const defaultProps: BreadcrumbProps = {
-        homeLinkProps: routes.discover().link,
-        segments: [],
-        currentPageLabel: null,
-    };
+const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore, community?: Community | null): BreadcrumbProps | undefined => {
+    addBreadcrumbTranslations({
+        lang: "fr",
+        messages: { home: "Publier" },
+    });
 
     const dashboardProps: BreadcrumbProps = {
-        ...defaultProps,
+        homeLinkProps: routes.discover_publish().link,
         segments: [{ label: t("dashboard"), linkProps: routes.dashboard().link }],
         currentPageLabel: t("dashboard"),
     };
@@ -26,17 +26,22 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): Brea
             ...dashboardProps.segments,
             { label: t("datastore_selection"), linkProps: routes.datastore_selection().link },
             "datastoreId" in route.params && {
-                label: datastore?.is_sandbox === true ? "Espace Découverte" : datastore?.name,
+                label: datastore?.is_sandbox === true ? tCommon("sandbox") : datastore?.name,
                 linkProps: routes.datasheet_list({ datastoreId: route.params.datastoreId }).link,
             },
         ].filter(Boolean) as BreadcrumbProps["segments"],
-        currentPageLabel: datastore?.is_sandbox === true ? "Espace Découverte" : datastore?.name || "",
+        currentPageLabel: datastore?.is_sandbox === true ? tCommon("sandbox") : datastore?.name || "",
+    };
+
+    const espacecoBaseProps: BreadcrumbProps = {
+        ...dashboardProps,
+        segments: [...dashboardProps.segments, { label: t("espaceco_community_list"), linkProps: routes.espaceco_community_list().link }],
     };
 
     switch (route.name) {
-        case "dashboard":
         case "about":
         case "contact":
+        case "contact_confirmation":
         case "faq":
         case "sitemap":
         case "accessibility":
@@ -46,18 +51,30 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): Brea
         case "join_cartesgouvfr_community":
         case "terms_of_service":
         case "service_status":
-            return { ...defaultProps, currentPageLabel: t(route.name) };
-
-        case "contact_confirmation":
-            defaultProps.segments.push({ label: t("contact"), linkProps: routes.contact().link });
-            return { ...defaultProps, currentPageLabel: t(route.name) };
         case "news_list":
         case "news_list_by_tag":
-            return { ...defaultProps, currentPageLabel: t("news") };
-        case "news_article":
-            // géré dans le composant NewsArticle
-            return { ...defaultProps, currentPageLabel: t("news") };
+            addBreadcrumbTranslations({
+                lang: "fr",
+                messages: { home: "Accueil" },
+            });
+            return { homeLinkProps: routes.discover().link, segments: [], currentPageLabel: t(route.name) };
+        // case "news_article":
+        //     // géré dans le composant NewsArticle
+        // case "service_status":
+        //     return { ...defaultProps, currentPageLabel: t(route.name) };
 
+        // case "contact_confirmation":
+        //     defaultProps.segments.push({ label: t("contact"), linkProps: routes.contact().link });
+        //     return { ...defaultProps, currentPageLabel: t(route.name) };
+        // case "news_list":
+        // case "news_list_by_tag":
+        //     return { ...defaultProps, currentPageLabel: t("news") };
+        // case "news_article":
+        //     // géré dans le composant NewsArticle
+        //     return { ...defaultProps, currentPageLabel: t("news") };
+
+        case "dashboard":
+            return { ...dashboardProps, segments: [], currentPageLabel: t(route.name) };
         case "datastore_selection":
             return { ...dashboardProps, segments: [...dashboardProps.segments], currentPageLabel: t(route.name) };
 
@@ -79,8 +96,19 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): Brea
             };
 
         case "members_list":
-            // géré dans le composant CommunityMembers
-            return { ...defaultProps, currentPageLabel: t(route.name) };
+            return {
+                ...dashboardProps,
+                segments: [
+                    ...dashboardProps.segments,
+                    { label: t("datastore_selection"), linkProps: routes.datastore_selection().link },
+                    "communityId" in route.params &&
+                        community !== undefined && {
+                            label: community?.is_sandbox === true ? tCommon("sandbox") : community?.name,
+                            linkProps: routes.datasheet_list({ datastoreId: datastore?._id ?? "XXXX" }).link,
+                        },
+                ].filter(Boolean) as BreadcrumbProps["segments"],
+                currentPageLabel: t(route.name),
+            };
 
         case "datastore_manage_storage":
         case "datastore_manage_permissions":
@@ -107,7 +135,7 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): Brea
             return {
                 ...dashboardProps,
                 segments: [...dashboardProps.segments, { label: t("datastore_selection"), linkProps: routes.datastore_selection().link }],
-                currentPageLabel: datastore?.is_sandbox === true ? "Espace Découverte" : datastore?.name,
+                currentPageLabel: datastore?.is_sandbox === true ? tCommon("sandbox") : datastore?.name,
             };
 
         case "datastore_datasheet_upload": {
@@ -219,7 +247,14 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore): Brea
             ];
             return { ...datastoreBaseProps, currentPageLabel: t(route.name) };
 
-        case "discover":
+        // espaceco
+        case "espaceco_community_list":
+            return { ...dashboardProps, currentPageLabel: t(route.name) };
+        case "espaceco_create_community":
+        case "espaceco_manage_community":
+        case "espaceco_member_invitation":
+            return { ...espacecoBaseProps, currentPageLabel: t(route.name) };
+
         default:
             return undefined;
     }

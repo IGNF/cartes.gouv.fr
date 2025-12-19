@@ -36,7 +36,7 @@ export default function Dashboard() {
 
     return (
         <Main noticeProps={noticeProps} title={"Tableau de bord"}>
-            <h1>Tableau de bord</h1>
+            <h1 className={fr.cx("fr-mt-4v")}>Tableau de bord</h1>
             <p className={fr.cx("fr-text--xl")}>Bienvenue {user?.first_name ?? user?.user_name}</p>
 
             <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mb-3w")}>

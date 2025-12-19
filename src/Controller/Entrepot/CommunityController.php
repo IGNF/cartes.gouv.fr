@@ -8,6 +8,7 @@ use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\EntrepotApi\CommunityApiService;
 use App\Services\EntrepotApi\UserApiService;
+use App\Services\SandboxService;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -25,6 +26,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
 {
     public function __construct(
         private CommunityApiService $communityApiService,
+        private SandboxService $sandboxService,
         private UserApiService $userApiService,
     ) {
     }
@@ -35,6 +37,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
     {
         try {
             $community = $this->communityApiService->get($communityId);
+            $community['is_sandbox'] = $this->sandboxService->isSandboxCommunity($community['_id']);
 
             return new JsonResponse($community);
         } catch (ApiException $ex) {

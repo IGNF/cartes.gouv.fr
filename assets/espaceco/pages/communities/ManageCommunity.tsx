@@ -24,7 +24,6 @@ const ManageCommunity: FC = () => {
     const { data: me, isLoading: isMeLoading, isError: isMeError, error: meError } = useUserMe();
 
     const { t } = useTranslation("ManageCommunity");
-    const { t: tBreadcrumb } = useTranslation("Breadcrumb");
 
     const { community, isCommunityLoading, isCommunityError, communityError } = useCommunityContext();
 
@@ -55,17 +54,7 @@ const ManageCommunity: FC = () => {
     }, [community]);
 
     return (
-        <Main
-            customBreadcrumbProps={{
-                homeLinkProps: routes.discover().link,
-                segments: [
-                    { label: tBreadcrumb("dashboard"), linkProps: routes.dashboard().link },
-                    { label: tBreadcrumb("espaceco_community_list"), linkProps: routes.espaceco_community_list().link },
-                ],
-                currentPageLabel: tBreadcrumb("espaceco_manage_community", { communityName: community?.name }),
-            }}
-            title={t("title", { name: community?.name })}
-        >
+        <Main title={t("title", { name: community?.name })}>
             <h1>{t("title", { name: community?.name })}</h1>
             {isMeLoading ? (
                 <LoadingText as={"h6"} message={t("loading_me")} />

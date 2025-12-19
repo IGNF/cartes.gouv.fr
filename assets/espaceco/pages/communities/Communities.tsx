@@ -37,7 +37,6 @@ const Communities: FC = () => {
     const { data: me } = meQuery;
 
     const { t: tCommon } = useTranslation("Common");
-    const { t: tBreadcrumb } = useTranslation("Breadcrumb");
     const { t: tValid } = useTranslation("ManageCommunityValidations");
     const { t } = useTranslation("EspaceCoCommunityList");
 
@@ -109,14 +108,7 @@ const Communities: FC = () => {
     });
 
     return (
-        <Main
-            customBreadcrumbProps={{
-                homeLinkProps: routes.discover().link,
-                segments: [{ label: tBreadcrumb("dashboard"), linkProps: routes.dashboard().link }],
-                currentPageLabel: tBreadcrumb("espaceco_community_list"),
-            }}
-            title={t("title")}
-        >
+        <Main title={t("title")}>
             <h1>{t("title")}</h1>
             <div>
                 {isPending && (

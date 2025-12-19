@@ -7,7 +7,9 @@ const { i18n } = declareComponentKeys<
     | "about"
     | "contact"
     | "contact_confirmation"
-    | "news"
+    | "news_list"
+    | "news_list_by_tag"
+    | "news_article"
     | "faq"
     | "sitemap"
     | "accessibility"
@@ -54,7 +56,7 @@ const { i18n } = declareComponentKeys<
     | "espaceco_community_list"
     | "espaceco_member_invitation"
     | "espaceco_create_community"
-    | { K: "espaceco_manage_community"; P: { communityName?: string }; R: string }
+    | "espaceco_manage_community"
 >()("Breadcrumb");
 export type I18n = typeof i18n;
 
@@ -64,7 +66,9 @@ export const BreadcrumbFrTranslations: Translations<"fr">["Breadcrumb"] = {
     about: "A propos",
     contact: "Nous écrire",
     contact_confirmation: "Demande envoyée",
-    news: "Actualités",
+    news_list: "Actualités",
+    news_list_by_tag: "Actualités",
+    news_article: "Actualités",
     faq: "Questions fréquentes",
     sitemap: "Plan du site",
     accessibility: "Accessibilité",
@@ -110,7 +114,7 @@ export const BreadcrumbFrTranslations: Translations<"fr">["Breadcrumb"] = {
     datastore_service_style_edit: "Modifier le style",
     espaceco_community_list: "Espace collaboratif",
     espaceco_create_community: "Création d'un guichet",
-    espaceco_manage_community: ({ communityName }) => `Gérer le guichet ${communityName ?? ""}`,
+    espaceco_manage_community: "Gérer le guichet",
     espaceco_member_invitation: "Invitation",
 };
 
@@ -120,7 +124,9 @@ export const BreadcrumbEnTranslations: Translations<"en">["Breadcrumb"] = {
     about: "About",
     contact: "Contact us",
     contact_confirmation: "Request sent",
-    news: "News",
+    news_list: "News",
+    news_list_by_tag: "News",
+    news_article: "News",
     faq: "frequently asked questions",
     sitemap: "Sitemap",
     accessibility: "Accessibility",
@@ -166,6 +172,6 @@ export const BreadcrumbEnTranslations: Translations<"en">["Breadcrumb"] = {
     datastore_service_style_edit: "Modify style",
     espaceco_community_list: "Collaborative space",
     espaceco_create_community: "Create community",
-    espaceco_manage_community: ({ communityName }) => `Manage community ${communityName ?? ""}`,
+    espaceco_manage_community: "Manage community",
     espaceco_member_invitation: "Invitation",
 };
