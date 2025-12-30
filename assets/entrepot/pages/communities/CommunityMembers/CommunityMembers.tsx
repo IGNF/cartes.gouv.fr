@@ -2,6 +2,8 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
+import Pagination from "@codegouvfr/react-dsfr/Pagination";
+import SearchBar from "@codegouvfr/react-dsfr/SearchBar";
 import { ToggleSwitch } from "@codegouvfr/react-dsfr/ToggleSwitch";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useId, useMemo, useState } from "react";
@@ -12,8 +14,6 @@ import DatastoreTertiaryNavigation from "@/components/Layout/DatastoreTertiaryNa
 import PageTitle from "@/components/Layout/PageTitle";
 import { usePagination } from "@/hooks/usePagination";
 import { useSearch } from "@/hooks/useSearch";
-import Pagination from "@codegouvfr/react-dsfr/Pagination";
-import SearchBar from "@codegouvfr/react-dsfr/SearchBar";
 import { UserRightsResponseDto } from "../../../../@types/app";
 import { CommunityUserResponseDto, UserDto } from "../../../../@types/entrepot";
 import ConfirmDialog, { ConfirmDialogModal } from "../../../../components/Utils/ConfirmDialog";

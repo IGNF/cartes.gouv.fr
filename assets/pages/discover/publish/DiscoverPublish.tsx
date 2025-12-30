@@ -1,7 +1,9 @@
 import Main from "@/components/Layout/Main";
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
+import { useEffect } from "react";
 
+import { useSandboxDatastorePrefetchQuery } from "@/hooks/queries/useSandboxDatastoreQuery";
 import { externalUrls } from "@/router/externalUrls";
 import { routes, useRoute } from "@/router/router";
 import { useAuthStore } from "@/stores/AuthStore";
@@ -9,7 +11,6 @@ import classes from "./DiscoverPublish.module.css";
 
 import backgroundImgUrl from "@/img/discover/publish/background.png?w=400;800;1200;1400;2160&format=png&as=srcset";
 import uploaderSvgUrl from "@/img/pictograms/uploader.svg";
-import { useEffect } from "react";
 
 export default function DiscoverPublish() {
     const { params } = useRoute();
@@ -24,6 +25,8 @@ export default function DiscoverPublish() {
             window.close();
         }
     }, [params, user]);
+
+    useSandboxDatastorePrefetchQuery();
 
     return (
         <Main
