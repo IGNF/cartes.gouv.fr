@@ -1,5 +1,6 @@
 import { KeyValueListFrTranslations } from "@/components/Input/KeyValueList.locale";
 import { StoredDataDeleteConfirmDialogFrTranslations } from "@/entrepot/pages/datasheet/DatasheetView/DatasetListTab/StoredDataDeleteConfirmDialog.locale";
+import { DatastoreAddFrTranslations } from "@/entrepot/pages/datastore/DatastoreAdd/DatastoreAdd.locale";
 import { EspaceCoCommunityListFrTranslations } from "@/espaceco/pages/communities/CommunityList.locale";
 import { ReuseCommunityConfigFrTranslations } from "@/espaceco/pages/communities/ReuseCommunityConfig.locale";
 import { SearchCommunityFrTranslations } from "@/espaceco/pages/communities/SearchCommunity.locale";
@@ -8,7 +9,6 @@ import { InputCollectionFrTranslations } from "../../components/Input/InputColle
 import { UploadStyleFileFrTranslations } from "../../components/Utils/Geostyler/UploadStyleFile.locale";
 import { AccessesRequestFrTranslations } from "../../entrepot/pages/accesses-request/AccessesRequest.locale";
 import { AddMemberFrTranslations } from "../../entrepot/pages/communities/AddMember/AddMember.locale";
-import { CommunityListFrTranslations } from "../../entrepot/pages/communities/CommunityList/CommunityList.locale";
 import { CommunityMembersFrTranslations } from "../../entrepot/pages/communities/CommunityMembers/CommunityMembers.locale";
 import { RightsFrTranslations } from "../../entrepot/pages/communities/Rights.locale";
 import { AlertsFrTranslations } from "../../entrepot/pages/config/Alerts.locale";
@@ -20,7 +20,6 @@ import { PyramidRasterListFrTranslations } from "../../entrepot/pages/datasheet/
 import { PyramidVectorListFrTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidVectorList/PyramidVectorList.locale";
 import { VectorDbListFrTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasetListTab/VectorDbList/VectorDbList.locale";
 import { DatasheetViewFrTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasheetView/DatasheetView.locale";
-import { DatastoreCreationFormFrTranslations } from "../../entrepot/pages/datastore/DatastoreCreationForm/DatastoreCreationForm.locale";
 import { DatastorePermissionsFrTranslations } from "../../entrepot/pages/datastore/ManagePermissions/DatastorePermissions.locale";
 import { DatastoreManageStorageFrTranslations } from "../../entrepot/pages/datastore/ManageStorage/DatastoreManageStorage.locale";
 import { AccessRestrictionsFrTranslations } from "../../entrepot/pages/service/common/AccessRestrictions/AccessRestrictions.locale";
@@ -78,8 +77,7 @@ export const translations: Translations<"fr"> = {
     Me: MeFrTranslations,
     AddMember: AddMemberFrTranslations,
     CommunityMembers: CommunityMembersFrTranslations,
-    CommunityList: CommunityListFrTranslations,
-    DatastoreCreationForm: DatastoreCreationFormFrTranslations,
+    DatastoreAdd: DatastoreAddFrTranslations,
     DatasheetUploadIntegration: DatasheetUploadIntegrationFrTranslations,
     DashboardPro: DashboardProFrTranslations,
     MyAccessKeys: MyAccessKeysFrTranslations,

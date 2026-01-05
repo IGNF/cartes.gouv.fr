@@ -92,7 +92,6 @@ const privateRoutes = {
 
     // Demande de creation d'un datastore
     datastore_create_request: defineRoute(`${appRoot}/tableau-de-bord/entrepots/demande-de-creation`),
-    datastore_create_request_confirm: defineRoute(`${appRoot}/tableau-de-bord/entrepots/demande-de-creation/demande-envoyee`),
 
     // Demande pour rejoindre une communaute
     join_community: defineRoute(`${appRoot}/rejoindre-des-communautes`),

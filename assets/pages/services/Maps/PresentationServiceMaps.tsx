@@ -17,7 +17,12 @@ import projetAmenagementImgSrcSet from "./img/projet-amenagement-mobilite.png?w=
 
 export default function PresentationServiceMaps() {
     return (
-        <Main title="Explorer les cartes" fluidContainer={true}>
+        <Main
+            title="Explorer les cartes"
+            classes={{
+                container: fr.cx("fr-container--fluid"),
+            }}
+        >
             <div className={classes.bgContrastInfoGrey}>
                 <div className={cx(fr.cx("fr-container"), classes.container)}>
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>

@@ -13,7 +13,7 @@ type DatastoreSideMenuProps = {
 export default function DatastoreSideMenu({ datastoreId, communityId }: DatastoreSideMenuProps) {
     const { t: tCommon } = useTranslation("Common");
     const route = useRoute();
-    const { css, cx } = useStyles();
+    const { classes, css, cx } = useStyles();
 
     const { datastoreList, addUserToSandbox, sandboxDatastore, userMemberOfSandbox } = useDatastoreSelection();
 
@@ -68,8 +68,20 @@ export default function DatastoreSideMenu({ datastoreId, communityId }: Datastor
                     isActive: datastoreId === datastore._id || communityId === datastore.community_id,
                 })),
             ]}
+            classes={{
+                root: classes.root,
+                inner: classes.inner,
+            }}
         />
     );
 }
 
-const useStyles = tss.withName({ DatastoreSideMenu }).create({});
+const useStyles = tss.withName({ DatastoreSideMenu }).create({
+    root: {
+        padding: 0,
+    },
+    inner: {
+        padding: 0,
+        boxShadow: "none",
+    },
+});

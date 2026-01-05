@@ -26,7 +26,12 @@ export default function DiscoverPublish() {
     }, [params, user]);
 
     return (
-        <Main title="Publier une donnée" fluidContainer={true}>
+        <Main
+            title="Publier une donnée"
+            classes={{
+                container: fr.cx("fr-container--fluid"),
+            }}
+        >
             <div className={classes.container}>
                 <div className={classes.backgroundWrapper}>
                     <img srcSet={backgroundImgUrl} alt="illustration" className={classes.backgroundImage} />
