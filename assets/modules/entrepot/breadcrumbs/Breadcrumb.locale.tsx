@@ -3,6 +3,7 @@ import { Translations } from "../../../i18n/types";
 
 const { i18n } = declareComponentKeys<
     | "dashboard"
+    | "discover_publish"
     | "datastore_selection"
     | "about"
     | "contact"
@@ -62,6 +63,7 @@ export type I18n = typeof i18n;
 
 export const BreadcrumbFrTranslations: Translations<"fr">["Breadcrumb"] = {
     dashboard: "Tableau de bord",
+    discover_publish: "Publier",
     datastore_selection: "Entrepôts",
     about: "A propos",
     contact: "Nous écrire",
@@ -120,6 +122,7 @@ export const BreadcrumbFrTranslations: Translations<"fr">["Breadcrumb"] = {
 
 export const BreadcrumbEnTranslations: Translations<"en">["Breadcrumb"] = {
     dashboard: "Dashboard",
+    discover_publish: "Publish",
     datastore_selection: "Datastores",
     about: "About",
     contact: "Contact us",

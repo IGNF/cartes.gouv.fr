@@ -11,12 +11,12 @@ const { t: tCommon } = getTranslation("Common");
 const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore, community?: Community | null): BreadcrumbProps | undefined => {
     addBreadcrumbTranslations({
         lang: "fr",
-        messages: { home: "Publier" },
+        messages: { home: t("dashboard") },
     });
 
     const dashboardProps: BreadcrumbProps = {
-        homeLinkProps: routes.discover_publish().link,
-        segments: [{ label: t("dashboard"), linkProps: routes.dashboard().link }],
+        homeLinkProps: routes.dashboard().link,
+        segments: [{ label: t("discover_publish"), linkProps: routes.discover_publish().link }],
         currentPageLabel: t("dashboard"),
     };
 
@@ -73,8 +73,8 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore, commu
         //     // géré dans le composant NewsArticle
         //     return { ...defaultProps, currentPageLabel: t("news") };
 
-        case "dashboard":
-            return { ...dashboardProps, segments: [], currentPageLabel: t(route.name) };
+        // case "dashboard":
+        //     return { ...dashboardProps, segments: [], currentPageLabel: t(route.name) };
         case "datastore_selection":
             return { ...dashboardProps, segments: [...dashboardProps.segments], currentPageLabel: t(route.name) };
 
