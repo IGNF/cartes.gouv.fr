@@ -16,14 +16,20 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore, commu
 
     const dashboardProps: BreadcrumbProps = {
         homeLinkProps: routes.dashboard().link,
+        segments: [],
+        currentPageLabel: t("dashboard"),
+    };
+
+    const publishProps: BreadcrumbProps = {
+        ...dashboardProps,
         segments: [{ label: t("discover_publish"), linkProps: routes.discover_publish().link }],
         currentPageLabel: t("dashboard"),
     };
 
     const datastoreBaseProps: BreadcrumbProps = {
-        ...dashboardProps,
+        ...publishProps,
         segments: [
-            ...dashboardProps.segments,
+            ...publishProps.segments,
             { label: t("datastore_selection"), linkProps: routes.datastore_selection().link },
             "datastoreId" in route.params && {
                 label: datastore?.is_sandbox === true ? tCommon("sandbox") : datastore?.name,
@@ -34,8 +40,8 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore, commu
     };
 
     const espacecoBaseProps: BreadcrumbProps = {
-        ...dashboardProps,
-        segments: [...dashboardProps.segments, { label: t("espaceco_community_list"), linkProps: routes.espaceco_community_list().link }],
+        ...publishProps,
+        segments: [...publishProps.segments, { label: t("espaceco_community_list"), linkProps: routes.espaceco_community_list().link }],
     };
 
     switch (route.name) {
@@ -75,30 +81,31 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore, commu
 
         // case "dashboard":
         //     return { ...dashboardProps, segments: [], currentPageLabel: t(route.name) };
-        case "datastore_selection":
-            return { ...dashboardProps, segments: [...dashboardProps.segments], currentPageLabel: t(route.name) };
 
         // case "accesses_request":
         case "my_account":
         case "my_access_keys":
         case "my_permissions":
+            return { ...dashboardProps, currentPageLabel: t(route.name) };
+
+        case "datastore_selection":
         case "datastore_create_request":
         case "join_community":
-            return { ...dashboardProps, currentPageLabel: t(route.name) };
+            return { ...publishProps, currentPageLabel: t(route.name) };
 
         case "user_key_add":
         case "user_key_edit":
             return {
-                ...dashboardProps,
-                segments: [...dashboardProps.segments, { label: t("my_access_keys"), linkProps: routes.my_access_keys().link }],
+                ...publishProps,
+                segments: [...publishProps.segments, { label: t("my_access_keys"), linkProps: routes.my_access_keys().link }],
                 currentPageLabel: t(route.name),
             };
 
         case "members_list":
             return {
-                ...dashboardProps,
+                ...publishProps,
                 segments: [
-                    ...dashboardProps.segments,
+                    ...publishProps.segments,
                     { label: t("datastore_selection"), linkProps: routes.datastore_selection().link },
                     "communityId" in route.params &&
                         community !== undefined && {
@@ -109,6 +116,7 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore, commu
                 currentPageLabel: t(route.name),
             };
 
+        case "datastore_info":
         case "datastore_manage_storage":
         case "datastore_manage_permissions":
             return {
@@ -132,8 +140,8 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore, commu
 
         case "datasheet_list":
             return {
-                ...dashboardProps,
-                segments: [...dashboardProps.segments, { label: t("datastore_selection"), linkProps: routes.datastore_selection().link }],
+                ...publishProps,
+                segments: [...publishProps.segments, { label: t("datastore_selection"), linkProps: routes.datastore_selection().link }],
                 currentPageLabel: datastore?.is_sandbox === true ? tCommon("sandbox") : datastore?.name,
             };
 
@@ -248,7 +256,7 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore, commu
 
         // espaceco
         case "espaceco_community_list":
-            return { ...dashboardProps, currentPageLabel: t(route.name) };
+            return { ...publishProps, currentPageLabel: t(route.name) };
         case "espaceco_create_community":
         case "espaceco_manage_community":
         case "espaceco_member_invitation":
