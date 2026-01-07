@@ -358,7 +358,7 @@ export default function Discover() {
                                     <div className={classes.accordionButtons}>
                                         <Link
                                             className={fr.cx("fr-link")}
-                                            href="https://cartes.gouv.fr/aide/fr/guides-utilisateur/acceder-aux-geodonnees/geocodage/"
+                                            href="https://cartes.gouv.fr/aide/fr/guides-utilisateur/utiliser-les-services-de-la-geoplateforme/geocodage/"
                                             target="_blank"
                                         >
                                             En savoir plus
@@ -406,7 +406,7 @@ export default function Discover() {
                                     <div className={classes.accordionButtons}>
                                         <Link
                                             className={fr.cx("fr-link")}
-                                            href="https://cartes.gouv.fr/aide/fr/guides-utilisateur/acceder-aux-geodonnees/"
+                                            href="https://cartes.gouv.fr/aide/fr/guides-utilisateur/utiliser-les-services-de-la-geoplateforme/"
                                             target="_blank"
                                         >
                                             En savoir plus
