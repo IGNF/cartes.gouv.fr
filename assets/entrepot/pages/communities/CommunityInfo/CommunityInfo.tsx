@@ -137,7 +137,7 @@ export default function CommunityInfo() {
                 };
             });
 
-            queryClient.invalidateQueries({ queryKey: RQKeys.user_me() });
+            queryClient.refetchQueries({ queryKey: RQKeys.user_me() });
             queryClient.refetchQueries({ queryKey: RQKeys.community(datastore.community._id) });
             queryClient.invalidateQueries({ queryKey: RQKeys.datastore(datastore._id) });
 
