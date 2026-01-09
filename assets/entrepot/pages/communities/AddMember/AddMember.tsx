@@ -1,14 +1,15 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
+import { ToggleSwitchGroup } from "@codegouvfr/react-dsfr/ToggleSwitchGroup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TranslationFunction } from "i18nifty/typeUtils/TranslationFunction";
 import { FC, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
+import { useStyles } from "tss-react";
 import * as yup from "yup";
 
 import type { UserRightsResponseDto } from "../../../../@types/app";
@@ -36,10 +37,10 @@ type AddMemberProps = {
 const AddMember: FC<AddMemberProps> = ({ communityId, communityMemberIds, userId }) => {
     const { t } = useTranslation({ AddMember });
     const { t: tCommon } = useTranslation("Common");
-    const { t: translateRights } = useTranslation("Rights");
+    const { t: tRights } = useTranslation("Rights");
 
-    const schema = (t: TranslationFunction<"AddMember", ComponentKey>) => {
-        return yup.object({
+    const schema = (t: TranslationFunction<"AddMember", ComponentKey>) =>
+        yup.object({
             user_id: yup
                 .string()
                 .matches(regex.uuid, t("id_must_be_uuid"))
@@ -51,10 +52,10 @@ const AddMember: FC<AddMemberProps> = ({ communityId, communityMemberIds, userId
                 ),
             user_rights: yup.array(),
         });
-    };
 
     // Formulaire
     const {
+        control,
         register,
         getValues: getFormValues,
         formState: { errors },
@@ -97,6 +98,8 @@ const AddMember: FC<AddMemberProps> = ({ communityId, communityMemberIds, userId
         addMemberMutation.mutate(values);
     };
 
+    const { css, cx } = useStyles();
+
     return createPortal(
         <addMemberModal.Component
             title={
@@ -128,25 +131,47 @@ const AddMember: FC<AddMemberProps> = ({ communityId, communityMemberIds, userId
                 <Alert severity={"error"} title={tCommon("error")} description={addMemberMutation.error?.message} className={fr.cx("fr-my-3w")} />
             )}
             <Input
-                label={t("user_id")}
+                label={<strong>{t("user_id")}</strong>}
                 state={errors.user_id ? "error" : "default"}
                 stateRelatedMessage={errors.user_id?.message}
                 nativeInputProps={{ ...register("user_id"), defaultValue: userId }}
             />
-            <Checkbox
-                legend={t("rights_granted")}
-                options={rightTypes.map((right) => {
-                    const explain = translateRights(`${right}_explain`);
-                    const upRight = right.toUpperCase();
-                    return {
-                        label: translateRights(right),
-                        hintText: explain,
-                        nativeInputProps: {
-                            ...register("user_rights"),
-                            value: upRight,
-                        },
-                    };
-                })}
+
+            <Controller
+                control={control}
+                name="user_rights"
+                render={({ field }) => (
+                    <div className={fr.cx("fr-input-group")}>
+                        <div className={fr.cx("fr-label")}>
+                            <strong>{t("rights_granted")}</strong>
+                        </div>
+                        <ToggleSwitchGroup
+                            // @ts-expect-error on est sûr qu'il y a toujours au moins un toggle
+                            toggles={rightTypes.map((right) => {
+                                const upRight = right.toUpperCase();
+                                return {
+                                    label: tRights(right),
+                                    checked: field.value?.includes?.(upRight),
+                                    onChange: (checked) => {
+                                        const oldRights = field.value ?? [];
+                                        let newRights: string[] = [];
+                                        if (checked) {
+                                            newRights = Array.from(new Set([...oldRights, upRight]));
+                                        } else {
+                                            newRights = oldRights.filter((r: string) => r !== upRight);
+                                        }
+                                        field.onChange(newRights);
+                                    },
+                                };
+                            })}
+                            showCheckedHint={false}
+                            labelPosition="left"
+                            classes={{
+                                li: cx(fr.cx("fr-m-0", "fr-py-4v"), css({ borderBottom: `1px solid ${fr.colors.decisions.border.default.grey.default}` })),
+                            }}
+                        />
+                    </div>
+                )}
             />
         </addMemberModal.Component>,
         document.body

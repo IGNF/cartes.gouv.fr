@@ -4,7 +4,7 @@ import { routes } from "@/router/router";
 import api from "../entrepot/api";
 import { CartesApiException } from "../modules/jsonFetch";
 import { useAuthStore } from "../stores/AuthStore";
-import useSandboxDatastoreQuery from "./queries/useSandboxDatastoreQuery";
+import { useSandboxDatastoreQuery } from "./queries/useSandboxDatastoreQuery";
 import useUserQuery from "./queries/useUserQuery";
 
 type DatastoreSelectionInfo = {

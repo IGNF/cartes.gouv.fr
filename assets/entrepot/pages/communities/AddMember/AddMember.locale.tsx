@@ -8,9 +8,9 @@ const { i18n } = declareComponentKeys<
 export type I18n = typeof i18n;
 
 export const AddMemberFrTranslations: Translations<"fr">["AddMember"] = {
-    add_user_title: "Ajouter un utilisateur",
+    add_user_title: "Ajouter un membre",
     user_id: "Identifiant de l’utilisateur",
-    rights_granted: "Permissions accordées",
+    rights_granted: "Sélectionner les droits",
     id_mandatory: "L’identifiant est obligatoire",
     id_must_be_uuid: "L’Identifiant doit être un UUID",
     already_member: ({ userId }) => `l’utilisateur ${userId} est déjà membre de cet espace de travail`,
@@ -18,11 +18,11 @@ export const AddMemberFrTranslations: Translations<"fr">["AddMember"] = {
 };
 
 export const AddMemberEnTranslations: Translations<"en">["AddMember"] = {
-    add_user_title: "Add user",
-    user_id: "User identifier",
-    rights_granted: "Rights granted",
-    id_mandatory: "Identifier is mandatory",
-    id_must_be_uuid: "Identifier must be an UUID",
-    already_member: ({ userId }) => `User ${userId} is already a member of this community`,
-    running: "Ajout d’utilisateur running ...",
+    add_user_title: undefined,
+    user_id: undefined,
+    rights_granted: undefined,
+    id_mandatory: undefined,
+    id_must_be_uuid: undefined,
+    already_member: undefined,
+    running: undefined,
 };

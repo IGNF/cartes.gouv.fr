@@ -6,6 +6,7 @@ import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import Main from "@/components/Layout/Main";
 import api from "@/entrepot/api";
 import { useApiEspaceCoStore } from "@/espaceco/stores/ApiEspaceCoStore";
+import { useSandboxDatastorePrefetchQuery } from "@/hooks/queries/useSandboxDatastoreQuery";
 import accountSvgUrl from "@/img/pictograms/account.svg?no-inline";
 import contributorSvgUrl from "@/img/pictograms/contributor.svg?no-inline";
 import keyManagerSvgUrl from "@/img/pictograms/key-manager.svg?no-inline";
@@ -33,6 +34,8 @@ export default function Dashboard() {
             text: "Participer",
         },
     };
+
+    useSandboxDatastorePrefetchQuery();
 
     return (
         <Main noticeProps={noticeProps} title={"Tableau de bord"}>
