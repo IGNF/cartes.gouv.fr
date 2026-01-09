@@ -186,7 +186,7 @@ class ContactController extends AbstractController
                 'message' => $data['message'],
             ];
 
-            $this->mailerLogger->info('User ({userEmail}) : Demande pour rejoindre une communauté', [
+            $this->mailerLogger->info(sprintf('User (%s) : Demande pour rejoindre %s', $userEmail, $data['community']['name']), [
                 'userEmail' => $userEmail,
                 'community' => $data['community'],
                 'message' => $data['message'],
@@ -195,7 +195,7 @@ class ContactController extends AbstractController
             // Envoi du mail à l'adresse de contact de la communauté
             $this->mailerService->sendMail(
                 $data['community']['contact'],
-                '[cartes.gouv.fr] Demande pour rejoindre une communauté',
+                sprintf('[cartes.gouv.fr] Demande pour rejoindre %s', $data['community']['name']),
                 'Mailer/join_community.html.twig',
                 $mailParams
             );
