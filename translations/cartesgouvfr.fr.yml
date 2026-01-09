@@ -71,3 +71,16 @@ accesses_request:
         heading: "Votre demande a été envoyée à l’IGN et une réponse vous sera apportée dans les meilleurs délais."
         date: "Date d’envoi"
         message: "Rappel de votre demande"
+
+datastore_deletion_request:
+    email_support:
+        heading: "Un utilisateur a fait une demande de suppression de l’entrepôt %datastore_name%."
+        details: "Détails de la demande :"
+        datastore_name: "Nom de l’entrepôt :"
+        datastore_id: "Identifiant de l’entrepôt :"
+        community_id: "Identifiant de la communauté :"
+        date: "Date d’envoi :"
+        supervisor_info: "Informations sur le superviseur :"
+    email_acknowledgement:
+        heading: "Votre demande de suppression d’un entrepôt a été envoyée à l’IGN et une réponse vous sera apportée dans les meilleurs délais."
+        message: "Rappel de votre demande"

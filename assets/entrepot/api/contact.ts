@@ -17,6 +17,21 @@ const joinCommunity = (formData: object) => {
     );
 };
 
-const contact = { joinCommunity };
+const requestDatastoreDeletion = (data: object) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_contact_datastore_deletion_request");
+    return jsonFetch(
+        url,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+            },
+        },
+        data
+    );
+};
+
+const contact = { joinCommunity, requestDatastoreDeletion };
 
 export default contact;

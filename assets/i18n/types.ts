@@ -33,6 +33,7 @@ export type ComponentKey =
     | import("../entrepot/pages/service/metadata/MetadataValidation.locale").I18n
     | import("../entrepot/pages/accesses-request/AccessesRequest.locale").I18n
     | import("../pages/assistance/contact/Contact.locale").I18n
+    | import("../entrepot/pages/communities/CommunityInfo/CommunityInfo.locale").I18n
     | import("../entrepot/pages/datastore/ManageStorage/DatastoreManageStorage.locale").I18n
     | import("../entrepot/pages/datastore/ManagePermissions/DatastorePermissions.locale").I18n
     | import("../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadForm/DatasheetUploadForm.locale").I18n

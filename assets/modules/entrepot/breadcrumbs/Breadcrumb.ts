@@ -101,6 +101,7 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore, commu
                 currentPageLabel: t(route.name),
             };
 
+        case "community_info":
         case "members_list":
             return {
                 ...publishProps,
@@ -116,7 +117,6 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore, commu
                 currentPageLabel: t(route.name),
             };
 
-        case "datastore_info":
         case "datastore_manage_storage":
         case "datastore_manage_permissions":
             return {

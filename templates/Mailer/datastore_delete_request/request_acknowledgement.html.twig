@@ -1,0 +1,20 @@
+{% extends 'Mailer/base.html.twig' %}
+{% trans_default_domain 'cartesgouvfr' %}
+
+{% block body %}
+    <div>
+        <p>{{ 'datastore_deletion_request.email_acknowledgement.heading'|trans }}</p>
+        <hr />
+        <p>
+            <strong>{{ 'datastore_deletion_request.email_support.date'|trans }}</strong> {{ sendDate|date('d-m-Y H:i', 'Europe/Paris') }}
+        </p>
+        <p>
+            <strong>{{ 'datastore_deletion_request.email_acknowledgement.message'|trans }} :</strong>
+        </p>
+        <p>
+            <strong>{{ 'datastore_deletion_request.email_support.datastore_name'|trans }}</strong> {{ datastore_name }}<br />
+            <strong>{{ 'datastore_deletion_request.email_support.datastore_id'|trans }}</strong> {{ datastore_id }}<br />
+            <strong>{{ 'datastore_deletion_request.email_support.community_id'|trans }}</strong> {{ community_id }}
+        </p>
+    </div>
+{% endblock %}

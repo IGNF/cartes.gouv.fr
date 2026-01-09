@@ -133,4 +133,9 @@ class UserApiService extends BaseEntrepotApiService
     {
         return $this->request('DELETE', "users/me/keys/$keyId/accesses/$accessId");
     }
+
+    public function leaveCommunity(string $communityId): array
+    {
+        return $this->request('DELETE', "users/me/communities/$communityId");
+    }
 }

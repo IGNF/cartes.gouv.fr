@@ -111,6 +111,7 @@ const communityRoute = defineRoute(
     (p) => `${appRoot}/tableau-de-bord/communaute/${p.communityId}`
 );
 const communityRoutes = {
+    community_info: communityRoute.extend(""),
     // Liste des membres d'une communaute
     members_list: communityRoute.extend(
         {

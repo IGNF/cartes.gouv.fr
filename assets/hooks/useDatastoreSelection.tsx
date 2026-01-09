@@ -30,6 +30,7 @@ const useDatastoreSelection = () => {
             return api.user.addToSandbox();
         },
         onSuccess: () => {
+            userQuery.refetch();
             if (sandboxDatastore?._id) {
                 routes.datasheet_list({ datastoreId: sandboxDatastore._id }).push();
             }

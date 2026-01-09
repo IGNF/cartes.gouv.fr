@@ -28,6 +28,7 @@ const { i18n } = declareComponentKeys<
     | "user_key_edit"
     | "datastore_create_request"
     | "join_community"
+    | "community_info"
     | "members_list"
     | "datastore_manage_storage"
     | "datastore_manage_permissions"
@@ -87,6 +88,7 @@ export const BreadcrumbFrTranslations: Translations<"fr">["Breadcrumb"] = {
     user_key_edit: "Modification d'une clé",
     datastore_create_request: "Créer un nouvel entrepôt",
     join_community: "Rejoindre un entrepôt existant",
+    community_info: "Info",
     members_list: "Membres",
     datastore_manage_storage: "Suivi des consommations",
     datastore_manage_permissions: "Permissions accordées",
@@ -145,6 +147,7 @@ export const BreadcrumbEnTranslations: Translations<"en">["Breadcrumb"] = {
     user_key_edit: "Modify key",
     datastore_create_request: "Request to create a workspace",
     join_community: "Join an existing workspace",
+    community_info: "Info",
     members_list: "Members",
     datastore_manage_storage: "Consumption monitoring",
     datastore_manage_permissions: "Permissions granted",

@@ -51,12 +51,14 @@ export default function DatastoreSelection() {
                             titleAs="h6"
                             linkProps={
                                 datastore.is_sandbox === true && !userMemberOfSandbox
-                                    ? { ...routes.datasheet_list({ datastoreId: sandboxDatastore!._id }).link, onClick: () => addUserToSandbox() }
+                                    ? { href: "#", onClick: () => addUserToSandbox() }
                                     : routes.datasheet_list({ datastoreId: datastore._id }).link
                             }
                             endDetail="Voir"
                             enlargeLink={true}
                             size="small"
+                            data-sandbox={datastore.is_sandbox === true ? "true" : undefined}
+                            data-user-member-of-sandbox={datastore.is_sandbox === true && userMemberOfSandbox}
                         />
                     </div>
                 ))}

@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Exception\AppException;
 use App\Security\User;
+use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\UserApiService;
 use App\Services\MailerService;
 use Psr\Log\LoggerInterface;
@@ -261,6 +262,51 @@ class ContactController extends AbstractController
                 $userEmail,
                 '[cartes.gouv.fr] Accusé de réception de votre demande',
                 'Mailer/accesses_request_acknowledgement.html.twig',
+                $mailParams
+            );
+
+            return new JsonResponse(['state' => 'success']);
+        } catch (BadRequestHttpException|AppException $e) {
+            return new JsonResponse(['state' => 'error', 'message' => $e->getMessage()], $e->getStatusCode());
+        } catch (\Exception $e) {
+            return new JsonResponse(['state' => 'error', 'message' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    #[Route(
+        '/datastore_deletion_request',
+        name: 'datastore_deletion_request',
+        methods: ['POST'],
+    )]
+    public function datastoreDeletionRequest(Request $request, DatastoreApiService $datastoreApiService): JsonResponse
+    {
+        try {
+            $data = json_decode($request->getContent(), true);
+            $datastore = $datastoreApiService->get($data['datastoreId']);
+
+            $supportAddress = $this->getParameter('support_contact_mail');
+            $now = new \DateTime();
+            /** @var User */
+            $user = $this->getUser();
+            $userEmail = $user->getEmail();
+
+            $mailParams = [
+                'sendDate' => $now,
+                'data' => $data,
+                'datastore_name' => $datastore['name'],
+                'datastore_id' => $datastore['_id'],
+                'community_id' => $datastore['community']['_id'],
+            ];
+
+            $this->mailerLogger->info(sprintf("User (%s) : Demande de suppression de l'entrepôt %s", $userEmail, $datastore['name']), [
+                'userEmail' => $userEmail,
+            ]);
+
+            // Envoi du mail à l'adresse du support
+            $this->mailerService->sendMail($supportAddress, sprintf("[cartes.gouv.fr] Demande de suppression de l'entrepôt %s", $datastore['name']), 'Mailer/datastore_delete_request/request.html.twig', $mailParams);
+
+            // Envoi du mail d'accusé de réception à l'utilisateur
+            $this->mailerService->sendMail($userEmail, '[cartes.gouv.fr] Accusé de réception de votre demande', 'Mailer/datastore_delete_request/request_acknowledgement.html.twig',
                 $mailParams
             );
 

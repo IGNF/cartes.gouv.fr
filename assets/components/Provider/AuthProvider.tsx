@@ -15,7 +15,7 @@ export default function AuthProvider({ children }: PropsWithChildren) {
         if (userQuery.data !== undefined) {
             setUser(userQuery.data);
         }
-    }, [setUser, userQuery.data]);
+    }, [setUser, userQuery.data, userQuery.dataUpdatedAt]);
 
     return children;
 }

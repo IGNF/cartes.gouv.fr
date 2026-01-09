@@ -63,7 +63,7 @@ export default function DatastoreSideMenu({ datastoreId, communityId }: Datastor
                     text: datastore._id === sandboxDatastore?._id ? tCommon("sandbox") : datastore.name,
                     linkProps:
                         datastore.is_sandbox === true && !userMemberOfSandbox
-                            ? { ...routes.datasheet_list({ datastoreId: sandboxDatastore!._id }).link, onClick: () => addUserToSandbox() }
+                            ? { href: "#", onClick: () => addUserToSandbox() }
                             : routes.datasheet_list({ datastoreId: datastore._id }).link,
                     isActive: datastoreId === datastore._id || communityId === datastore.community_id,
                 })),

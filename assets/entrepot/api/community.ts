@@ -10,6 +10,17 @@ const get = (communityId: string, otherOptions: RequestInit = {}) => {
     });
 };
 
+const modify = (communityId: string, data: object) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_community_modify", { communityId });
+    return jsonFetch<CommunityDetailResponseDto>(
+        url,
+        {
+            method: "PATCH",
+        },
+        data
+    );
+};
+
 const getMembers = (communityId: string, otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_community_members", { communityId });
     return jsonFetch<CommunityUserResponseDto[]>(url, {
@@ -53,6 +64,6 @@ const removeMember = (communityId: string, userId: string) => {
     );
 };
 
-const community = { get, getMembers, updateMember, removeMember };
+const community = { get, modify, getMembers, updateMember, removeMember };
 
 export default community;

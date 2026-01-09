@@ -1,6 +1,7 @@
 import { KeyValueListEnTranslations } from "@/components/Input/KeyValueList.locale";
 import { StoredDataDeleteConfirmDialogEnTranslations } from "@/entrepot/pages/datasheet/DatasheetView/DatasetListTab/StoredDataDeleteConfirmDialog.locale";
 import { DatastoreAddEnTranslations } from "@/entrepot/pages/datastore/DatastoreAdd/DatastoreAdd.locale";
+import { CommunityInfoEnTranslations } from "@/entrepot/pages/communities/CommunityInfo/CommunityInfo.locale";
 import { EspaceCoCommunityListEnTranslations } from "@/espaceco/pages/communities/CommunityList.locale";
 import { ReuseCommunityConfigEnTranslations } from "@/espaceco/pages/communities/ReuseCommunityConfig.locale";
 import { SearchCommunityEnTranslations } from "@/espaceco/pages/communities/SearchCommunity.locale";
@@ -77,6 +78,7 @@ export const translations: Translations<"en"> = {
     Me: MeEnTranslations,
     AddMember: AddMemberEnTranslations,
     CommunityMembers: CommunityMembersEnTranslations,
+    CommunityInfo: CommunityInfoEnTranslations,
     DatastoreAdd: DatastoreAddEnTranslations,
     DatasheetUploadIntegration: DatasheetUploadIntegrationEnTranslations,
     DashboardPro: DashboardProEnTranslations,
