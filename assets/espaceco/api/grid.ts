@@ -3,7 +3,7 @@ import { GridDTO } from "../../@types/espaceco";
 import { jsonFetch } from "../../modules/jsonFetch";
 import SymfonyRouting from "../../modules/Routing";
 
-const search = (text: string, filters: SearchGridFilters, otherOptions: RequestInit = {}) => {
+const getAll = (text: string, filters: SearchGridFilters, otherOptions: RequestInit = {}) => {
     const queryParams = { text: `${text}%` };
     ["searchBy", "fields"].forEach((p) => {
         if (filters[p] !== undefined) {
@@ -14,19 +14,19 @@ const search = (text: string, filters: SearchGridFilters, otherOptions: RequestI
         queryParams["adm"] = new Boolean(filters.adm).toString();
     }
 
-    const url = SymfonyRouting.generate("cartesgouvfr_api_espaceco_grid_search", queryParams);
+    const url = SymfonyRouting.generate("cartesgouvfr_api_espaceco_grids_get_all", queryParams);
     return jsonFetch<GetResponse<GridDTO>>(url, {
         ...otherOptions,
     });
 };
 
-const fromNames = (names: string[], otherOptions: RequestInit = {}) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_espaceco_grid_get_by_names", { names: names });
+const get = (name: string[], otherOptions: RequestInit = {}) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_espaceco_grids_get", { name });
     return jsonFetch<GetResponse<GridDTO>>(url, {
         ...otherOptions,
     });
 };
 
-const grid = { search, fromNames };
+const grid = { getAll, get };
 
 export default grid;
