@@ -32,7 +32,7 @@ const SearchGrids: FC<SearchGridsProps> = ({ label, hintText, disableClearable, 
     const searchQuery = useQuery<GetResponse<GridDTO>>({
         queryKey: RQKeys.searchGrids(search, filters),
         queryFn: ({ signal }) => {
-            return api.grid.search(search, filters, { signal });
+            return api.grid.getAll(search, filters, { signal });
         },
         staleTime: 1000 * 60,
         enabled: search.length >= 2,

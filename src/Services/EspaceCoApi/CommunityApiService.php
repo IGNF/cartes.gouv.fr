@@ -160,7 +160,7 @@ class CommunityApiService extends BaseEspaceCoApiService
             if (array_key_exists($name, $gridsRequested)) {
                 $grid = $gridsRequested[$name];
             } else {
-                $g = $this->gridApiService->getGrid($name);
+                $g = $this->gridApiService->get($name);
                 if (!$g['deleted']) {
                     $grid = $g;
                 }
