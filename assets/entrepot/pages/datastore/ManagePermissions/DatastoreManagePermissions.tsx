@@ -7,7 +7,7 @@ import Card from "@codegouvfr/react-dsfr/Card";
 import Pagination from "@codegouvfr/react-dsfr/Pagination";
 import Tag from "@codegouvfr/react-dsfr/Tag";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { compareAsc } from "date-fns";
+import { differenceInCalendarDays, parseISO } from "date-fns";
 import { FC, useState } from "react";
 import { useStyles } from "tss-react/mui";
 
@@ -143,8 +143,12 @@ const DatastoreManagePermissions: FC<DatastoreManagePermissionsProps> = ({ datas
 
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
                             {paginatedItems.map((permission) => {
-                                const expired = permission.end_date !== undefined && compareAsc(new Date(permission.end_date), new Date()) < 0;
-                                const expiringSoon = permission.end_date !== undefined && compareAsc(new Date(permission.end_date), new Date()) <= 30;
+                                const now = new Date();
+                                const endDate = permission.end_date !== undefined ? parseISO(permission.end_date) : undefined;
+                                const daysLeft = endDate !== undefined ? differenceInCalendarDays(endDate, now) : undefined;
+
+                                const expired = daysLeft !== undefined && daysLeft < 0;
+                                const expiringSoon = daysLeft !== undefined && daysLeft >= 0 && daysLeft <= 30;
 
                                 return (
                                     <div className={fr.cx("fr-col-12")} key={permission._id}>
