@@ -11,10 +11,8 @@ import AppLayout, { AppLayoutProps } from "../components/Layout/AppLayout";
 import PageNotFoundWithLayout from "../pages/error/PageNotFoundWithLayout";
 import { routes } from "./router";
 
-const About = lazy(() => import("../pages/About"));
 const Offer = lazy(() => import("../pages/Offer"));
 const Join = lazy(() => import("../pages/Join"));
-const Faq = lazy(() => import("../pages/assistance/Faq"));
 const Contact = lazy(() => import("../pages/assistance/contact/Contact"));
 const ContactConfirmation = lazy(() => import("../pages/assistance/contact/ContactConfirmation"));
 const NewsList = lazy(() => import("../pages/news/NewsList"));
@@ -70,8 +68,6 @@ function GroupApp(props: IGroupAppProps) {
                 return { render: <PresentationServiceCatalogue /> };
             case "present_service_publish":
                 return { render: <PresentationServicePublish /> };
-            case "about":
-                return { render: <About /> };
             case "offers":
                 return { render: <Offer /> };
             case "join_cartesgouvfr_community":
@@ -86,8 +82,6 @@ function GroupApp(props: IGroupAppProps) {
                 return { render: <NewsList page={route.params.page} tag={route.params.tag} /> };
             case "news_article":
                 return { render: <NewsArticle slug={route.params.slug} /> };
-            case "faq":
-                return { render: <Faq /> };
             case "sitemap":
                 return { render: <Sitemap /> };
             case "accessibility":

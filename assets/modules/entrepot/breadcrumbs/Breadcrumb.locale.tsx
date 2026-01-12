@@ -5,13 +5,11 @@ const { i18n } = declareComponentKeys<
     | "dashboard"
     | "discover_publish"
     | "datastore_selection"
-    | "about"
     | "contact"
     | "contact_confirmation"
     | "news_list"
     | "news_list_by_tag"
     | "news_article"
-    | "faq"
     | "sitemap"
     | "accessibility"
     | "legal_notice"
@@ -65,13 +63,11 @@ export const BreadcrumbFrTranslations: Translations<"fr">["Breadcrumb"] = {
     dashboard: "Tableau de bord",
     discover_publish: "Publier",
     datastore_selection: "Entrepôts",
-    about: "A propos",
     contact: "Nous écrire",
     contact_confirmation: "Demande envoyée",
     news_list: "Actualités",
     news_list_by_tag: "Actualités",
     news_article: "Actualités",
-    faq: "Questions fréquentes",
     sitemap: "Plan du site",
     accessibility: "Accessibilité",
     legal_notice: "Mentions légales",
@@ -124,13 +120,11 @@ export const BreadcrumbEnTranslations: Translations<"en">["Breadcrumb"] = {
     dashboard: "Dashboard",
     discover_publish: "Publish",
     datastore_selection: "Datastores",
-    about: "About",
     contact: "Contact us",
     contact_confirmation: "Request sent",
     news_list: "News",
     news_list_by_tag: "News",
     news_article: "News",
-    faq: "frequently asked questions",
     sitemap: "Sitemap",
     accessibility: "Accessibility",
     legal_notice: "Legal notice",

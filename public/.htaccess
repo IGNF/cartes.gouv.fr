@@ -30,6 +30,9 @@ DirectoryIndex index.php
     RewriteCond %{REQUEST_URI}::$0 ^(/.+)/(.*)::\2$
     RewriteRule .* - [E=BASE:%1]
 
+    RewriteRule ^faq/?$ %{ENV:BASE}/aide/fr [R=301,L]
+    RewriteRule ^a-propos/?$  %{ENV:BASE}/decouvrir [R=301,L]
+
     # Sets the HTTP_AUTHORIZATION header removed by Apache
     RewriteCond %{HTTP:Authorization} .+
     RewriteRule ^ - [E=HTTP_AUTHORIZATION:%0]

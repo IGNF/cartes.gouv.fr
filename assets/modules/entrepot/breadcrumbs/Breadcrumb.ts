@@ -45,10 +45,8 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore, commu
     };
 
     switch (route.name) {
-        case "about":
         case "contact":
         case "contact_confirmation":
-        case "faq":
         case "sitemap":
         case "accessibility":
         case "legal_notice":

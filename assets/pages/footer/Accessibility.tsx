@@ -101,13 +101,7 @@ const Accessibility = () => {
                             <a {...routes.legal_notice().link}>Mentions légales</a>
                         </li>
                         <li>
-                            <a {...routes.faq().link}>Faq</a>
-                        </li>
-                        <li>
                             <a {...routes.sitemap().link}>Plan du site</a>
-                        </li>
-                        <li>
-                            <a {...routes.about().link}>A propos</a>
                         </li>
                         <li>
                             <a {...routes.news_article({ slug: "premieres-versions-adaptatives-des-api-javascript-geoportail" }).link}>Détail actualité</a>
