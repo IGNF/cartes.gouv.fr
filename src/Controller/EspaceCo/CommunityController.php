@@ -399,7 +399,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
         $allGrids = [];
         foreach ($tmpGrids as $gridName) {
             try {
-                $grid = $this->gridApiService->getGrid($gridName);
+                $grid = $this->gridApiService->get($gridName);
                 if (!$grid['deleted']) {
                     $allGrids[$grid['name']] = $grid;
                 }
