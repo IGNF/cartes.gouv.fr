@@ -79,9 +79,6 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
         mutationFn: (data: object) => {
             return api.contact.requestPrivateServicesAccess(data);
         },
-        onSuccess: (data) => {
-            console.info(data);
-        },
     });
 
     const onSubmit = (data: object) => {
