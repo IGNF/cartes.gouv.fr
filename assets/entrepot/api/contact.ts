@@ -32,6 +32,21 @@ const requestDatastoreDeletion = (data: object) => {
     );
 };
 
-const contact = { joinCommunity, requestDatastoreDeletion };
+const requestPrivateServicesAccess = (data: object) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_contact_accesses_request");
+    return jsonFetch(
+        url,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+            },
+        },
+        data
+    );
+};
+
+const contact = { joinCommunity, requestDatastoreDeletion, requestPrivateServicesAccess };
 
 export default contact;

@@ -243,6 +243,7 @@ class CswMetadataHelper
                 $privateApplicationProfile = 'http://inspire.ec.europa.eu/metadata-codelist/SpatialDataServiceType/other';
                 $applicationProfile = $xpath->evaluate('string(gmd:applicationProfile/gmx:Anchor/@xlink:href)', $onlineResource);
                 $descriptionHref = $xpath->evaluate('string(gmd:description/gmx:Anchor/@xlink:href)', $onlineResource);
+                $description = $xpath->evaluate('string(gmd:description)', $onlineResource);
 
                 if ($privateApplicationProfile === $applicationProfile && str_contains($descriptionHref ?? '', 'MD_RestrictionCode_restricted')) {
                     $offeringOpen = false;
@@ -253,7 +254,8 @@ class CswMetadataHelper
                     trim($xpath->evaluate('string(gmd:protocol)', $onlineResource)),
                     trim($xpath->evaluate('string(gmd:linkage)', $onlineResource)),
                     trim($xpath->evaluate('string(../@offeringId)', $onlineResource)),
-                    $offeringOpen
+                    $offeringOpen,
+                    $description ? trim($description) : null
                 );
             }
         }
