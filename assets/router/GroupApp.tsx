@@ -13,8 +13,6 @@ import { routes } from "./router";
 
 const Offer = lazy(() => import("../pages/Offer"));
 const Join = lazy(() => import("../pages/Join"));
-const Contact = lazy(() => import("../pages/assistance/contact/Contact"));
-const ContactConfirmation = lazy(() => import("../pages/assistance/contact/ContactConfirmation"));
 const NewsList = lazy(() => import("../pages/news/NewsList"));
 const NewsArticle = lazy(() => import("../pages/news/NewsArticle"));
 const Sitemap = lazy(() => import("../pages/footer/Sitemap"));
@@ -72,10 +70,6 @@ function GroupApp(props: IGroupAppProps) {
                 return { render: <Offer /> };
             case "join_cartesgouvfr_community":
                 return { render: <Join /> };
-            case "contact":
-                return { render: <Contact /> };
-            case "contact_confirmation":
-                return { render: <ContactConfirmation /> };
             case "news_list":
                 return { render: <NewsList page={route.params.page} /> };
             case "news_list_by_tag":

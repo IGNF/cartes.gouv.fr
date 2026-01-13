@@ -31,8 +31,6 @@ const publicRoutes = {
     present_service_catalogue: defineRoute(`${appRoot}/decouvrir/rechercher-une-donnee`),
     present_service_publish: defineRoute(`${appRoot}/decouvrir/publier-une-donnee`),
     page_not_found: defineRoute(`${appRoot}/404`),
-    contact: defineRoute(`${appRoot}/nous-ecrire`),
-    contact_confirmation: defineRoute(`${appRoot}/nous-ecrire/demande-envoyee`),
     news_list: defineRoute(
         {
             page: param.query.optional.number.default(0),

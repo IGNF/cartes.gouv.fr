@@ -2,6 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { FC } from "react";
 
+import { externalUrls } from "@/router/externalUrls";
 import Main from "@/components/Layout/Main";
 import { routes } from "@/router/router";
 
@@ -43,7 +44,7 @@ const PageNotFound: FC = () => {
                             },
                             {
                                 children: "Nous écrire",
-                                linkProps: routes.contact().link,
+                                linkProps: { href: externalUrls.contact_us },
                                 priority: "secondary",
                             },
                         ]}

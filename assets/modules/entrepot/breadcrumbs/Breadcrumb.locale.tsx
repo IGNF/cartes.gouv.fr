@@ -5,8 +5,6 @@ const { i18n } = declareComponentKeys<
     | "dashboard"
     | "discover_publish"
     | "datastore_selection"
-    | "contact"
-    | "contact_confirmation"
     | "news_list"
     | "news_list_by_tag"
     | "news_article"
@@ -63,8 +61,6 @@ export const BreadcrumbFrTranslations: Translations<"fr">["Breadcrumb"] = {
     dashboard: "Tableau de bord",
     discover_publish: "Publier",
     datastore_selection: "Entrepôts",
-    contact: "Nous écrire",
-    contact_confirmation: "Demande envoyée",
     news_list: "Actualités",
     news_list_by_tag: "Actualités",
     news_article: "Actualités",
@@ -120,8 +116,6 @@ export const BreadcrumbEnTranslations: Translations<"en">["Breadcrumb"] = {
     dashboard: "Dashboard",
     discover_publish: "Publish",
     datastore_selection: "Datastores",
-    contact: "Contact us",
-    contact_confirmation: "Request sent",
     news_list: "News",
     news_list_by_tag: "News",
     news_article: "News",
