@@ -65,8 +65,8 @@ accesses_request:
         name: "<strong>Nom technique : </strong>&nbsp;%name%"
         type: "<strong>Type : </strong>&nbsp;%type%"
         asking_permission_title: "Le demandeur souhaite des permissions pour :"
-        himself: "Lui-même"
-        community: "La communauté %community% (id=%id%)"
+        himself: "Lui-même (id=%id%)"
+        community: "%community% (id=%id%)"
         rendez_vous: "Rendez-vous dans l’espace de travail à partir duquel vous avez publié ces services pour ajouter les permissions nécessaires."
     email_acknowledgement:
         heading: "Votre demande a été envoyée à l’IGN et une réponse vous sera apportée dans les meilleurs délais."

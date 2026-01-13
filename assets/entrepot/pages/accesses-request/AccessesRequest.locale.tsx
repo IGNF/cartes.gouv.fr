@@ -5,7 +5,6 @@ const { i18n } = declareComponentKeys<
     | "title"
     | "explanation"
     | "explanation_no_private_services"
-    | "back_to_dashboard"
     | "back_to_catalogue"
     | "form.layers.label"
     | "form.layers.error.at_least_one"
@@ -27,7 +26,6 @@ export const AccessesRequestFrTranslations: Translations<"fr">["AccessesRequest"
     explanation: "Demander un accès aux données et aux services de diffusion auprès du producteur",
     explanation_no_private_services:
         "Cette fiche ne décrit aucun service de diffusion dont l’accès est restreint. Vous avez déjà accès à toutes les données décrites.",
-    back_to_dashboard: "Retour au tableau de bord",
     back_to_catalogue: "Retour au catalogue de données",
     "form.layers.label": "Sélectionner les services",
     "form.layers.error.at_least_one": "Sélectionnez une donnée",
@@ -47,7 +45,6 @@ export const AccessesRequestEnTranslations: Translations<"en">["AccessesRequest"
     title: undefined,
     explanation: undefined,
     explanation_no_private_services: undefined,
-    back_to_dashboard: undefined,
     back_to_catalogue: undefined,
     "form.layers.label": undefined,
     "form.layers.error.at_least_one": undefined,

@@ -20,7 +20,6 @@ import Wait from "../../../components/Utils/Wait";
 import { getTranslation, useTranslation } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../modules/jsonFetch";
-import { routes } from "../../../router/router";
 import { useAuthStore } from "../../../stores/AuthStore";
 import api from "../../api";
 
@@ -108,7 +107,8 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
                     severity="error"
                     closable={false}
                     title={metadataQuery.error.message}
-                    description={<Button linkProps={routes.dashboard().link}>{t("back_to_dashboard")}</Button>}
+                    description={<Button linkProps={{ href: catalogueDatasheetUrl }}>{t("back_to_catalogue")}</Button>}
+                    className={fr.cx("fr-mb-6v")}
                 />
             ) : (
                 metadataQuery.data !== undefined && (
@@ -164,7 +164,9 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
                         {privateLayers.length === 0 ? (
                             <div>
                                 <p>{t("explanation_no_private_services")}</p>
-                                <Button linkProps={routes.dashboard().link}>{t("back_to_dashboard")}</Button>
+                                <Button linkProps={{ href: catalogueDatasheetUrl }} className={fr.cx("fr-mb-6v")}>
+                                    {t("back_to_catalogue")}
+                                </Button>
                             </div>
                         ) : requestMutation.isError ? (
                             <Alert

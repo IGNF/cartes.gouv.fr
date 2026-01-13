@@ -15,7 +15,7 @@
     {{ 'accesses_request.email_support.asking_permission_title'|trans }}<br />
     <ul>
         {% if myself is defined %}
-            <li>{{ 'accesses_request.email_support.himself'|trans }}</li>
+            <li>{{ 'accesses_request.email_support.himself'|trans({'%id%': app.user.id}) }}</li>
         {% endif %}
         {% if beneficiaries is defined %}
             {% for beneficiary in beneficiaries %}
