@@ -14,7 +14,7 @@ export const externalUrls = {
     helpProducerGuideCreateDatasheet: appRoot + "/aide/fr/guides-producteur/publier-des-donnees-via-cartes-gouv/deposer-donnees-sur-cartes-gouv/",
     catalogue: catalogueUrl ?? appRoot + "/rechercher-une-donnee",
     maps: appRoot + "/explorer-les-cartes",
-    contact_us: routes.contact().link.href,
+    contact_us: appRoot + "/aide/fr/nous-ecrire",
     discover_cartesgouvfr: routes.discover().link.href,
     login: SymfonyRouting.generate("cartesgouvfr_security_login"),
     logout: SymfonyRouting.generate("cartesgouvfr_security_logout"),

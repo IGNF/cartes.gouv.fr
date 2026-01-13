@@ -1,5 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 
+import { externalUrls } from "@/router/externalUrls";
 import { routes } from "../../router/router";
 import Main from "../../components/Layout/Main";
 
@@ -101,13 +102,7 @@ const Accessibility = () => {
                             <a {...routes.legal_notice().link}>Mentions légales</a>
                         </li>
                         <li>
-                            <a {...routes.faq().link}>Faq</a>
-                        </li>
-                        <li>
                             <a {...routes.sitemap().link}>Plan du site</a>
-                        </li>
-                        <li>
-                            <a {...routes.about().link}>A propos</a>
                         </li>
                         <li>
                             <a {...routes.news_article({ slug: "premieres-versions-adaptatives-des-api-javascript-geoportail" }).link}>Détail actualité</a>
@@ -116,7 +111,7 @@ const Accessibility = () => {
                             <a {...routes.news_list().link}>Actualités</a>
                         </li>
                         <li>
-                            <a {...routes.contact().link}>Contact</a>
+                            <a href={externalUrls.contact_us}>Contact</a>
                         </li>
                         <li>
                             <a {...routes.accessibility().link}>Accessibilité</a>
@@ -132,7 +127,7 @@ const Accessibility = () => {
 
                     <ul>
                         <li>
-                            Envoyer un message par le biais du <a href={routes.contact().href}>formulaire de contact en ligne</a>
+                            Envoyer un message par le biais du <a href={externalUrls.contact_us}>formulaire de contact en ligne</a>
                         </li>
                         <li>
                             ou contacter l’IGN par courrier ou par téléphone&nbsp;:

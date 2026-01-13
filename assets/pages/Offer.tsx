@@ -1,6 +1,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import CallOut from "@codegouvfr/react-dsfr/CallOut";
 
+import { externalUrls } from "@/router/externalUrls";
 import { routes } from "../router/router";
 import Main from "../components/Layout/Main";
 
@@ -98,7 +99,7 @@ const Offer = () => {
                         <a {...routes.terms_of_service().link}>Conditions générales d’utilisation</a>
                     </p>
                     <p>
-                        <a {...routes.contact().link}>Nous contacter.</a>
+                        <a href={externalUrls.contact_us}>Nous contacter.</a>
                     </p>
                 </div>
             </div>

@@ -45,10 +45,6 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore, commu
     };
 
     switch (route.name) {
-        case "about":
-        case "contact":
-        case "contact_confirmation":
-        case "faq":
         case "sitemap":
         case "accessibility":
         case "legal_notice":
@@ -69,9 +65,6 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore, commu
         // case "service_status":
         //     return { ...defaultProps, currentPageLabel: t(route.name) };
 
-        // case "contact_confirmation":
-        //     defaultProps.segments.push({ label: t("contact"), linkProps: routes.contact().link });
-        //     return { ...defaultProps, currentPageLabel: t(route.name) };
         // case "news_list":
         // case "news_list_by_tag":
         //     return { ...defaultProps, currentPageLabel: t("news") };

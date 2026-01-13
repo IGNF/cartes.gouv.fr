@@ -1,5 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 
+import { externalUrls } from "@/router/externalUrls";
 import Main from "../../components/Layout/Main";
 import { routes } from "../../router/router";
 
@@ -531,7 +532,7 @@ const TermsOfService = () => {
 
                     <p>
                         Si vous constatez un incident lors de l’utilisation de la Géoplateforme, vous pouvez adresser un message via la rubrique&nbsp;:{" "}
-                        <a {...routes.contact().link}>Nous écrire | cartes.gouv.fr</a>.
+                        <a href={externalUrls.contact_us}>Nous écrire | Aide | cartes.gouv.fr</a>.
                     </p>
 
                     <p>L’IGN reçoit et instruit cette demande et répond dans un délai maximal d’un mois à compter de la sollicitation.</p>
@@ -551,7 +552,7 @@ const TermsOfService = () => {
 
                     <p>
                         Vous pouvez signaler toute difficulté à tout moment en faisant expressément la demande à l’IGN par écrit au support utilisateur
-                        joignable via la rubrique&nbsp;: <a {...routes.contact().link}>Nous écrire | cartes.gouv.fr</a>.
+                        joignable via la rubrique&nbsp;: <a href={externalUrls.contact_us}>Nous écrire | Aide | cartes.gouv.fr</a>.
                     </p>
 
                     <h3 id="anchor-4.2" tabIndex={-1}>
