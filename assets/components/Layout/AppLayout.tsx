@@ -1,6 +1,7 @@
 import { MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation";
 import { addNoticeTranslations } from "@codegouvfr/react-dsfr/Notice";
 import { SkipLinks } from "@codegouvfr/react-dsfr/SkipLinks";
+import { useSeoMeta } from "@unhead/react";
 import { FC, PropsWithChildren, memo } from "react";
 
 import { ConsentBannerAndConsentManagement } from "../../config/consentManagement";
@@ -36,6 +37,8 @@ export interface AppLayoutProps {
 }
 
 const AppLayout: FC<PropsWithChildren<AppLayoutProps>> = ({ children, navItems }) => {
+    useSeoMeta({ robots: "index,follow" });
+
     return (
         <>
             <HiddenElementsMemoized />
