@@ -2,26 +2,41 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
-import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
+import Input from "@codegouvfr/react-dsfr/Input";
+import Success from "@codegouvfr/react-dsfr/picto/Success";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useQuery } from "@tanstack/react-query";
-import { ComponentProps, FC, ReactNode, useMemo, useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { FC, useMemo } from "react";
 import { useForm } from "react-hook-form";
+import { useStyles } from "tss-react";
 import * as yup from "yup";
 
 import { catalogueUrl } from "@/env";
-import { GeonetworkMetadataResponse } from "../../../@types/app";
+import { CswMetadata } from "../../../@types/app";
+import Main from "../../../components/Layout/Main";
 import LoadingText from "../../../components/Utils/LoadingText";
 import Wait from "../../../components/Utils/Wait";
-import { useTranslation } from "../../../i18n/i18n";
-import SymfonyRouting from "../../../modules/Routing";
+import { getTranslation, useTranslation } from "../../../i18n/i18n";
 import RQKeys from "../../../modules/entrepot/RQKeys";
-import { CartesApiException, jsonFetch } from "../../../modules/jsonFetch";
-import { routes } from "../../../router/router";
+import { CartesApiException } from "../../../modules/jsonFetch";
 import { useAuthStore } from "../../../stores/AuthStore";
 import api from "../../api";
-import Main from "../../../components/Layout/Main";
+
+import placeholder1x1Url from "@/img/placeholder.1x1.png";
+
+const { t } = getTranslation("AccessesRequest");
+
+const MYSELF = "myself";
+const schema = yup.object({
+    layers: yup.array().of(yup.string()).min(1, t("form.layers.error.at_least_one")).required(),
+    beneficiaries: yup.array().of(yup.string()).min(1, t("form.beneficiaries.error.at_least_one")).required(),
+    message: yup.string().optional(),
+});
+
+function gmdProtocolToServiceType(protocol: string): string {
+    return protocol.replaceAll("OGC:", "");
+}
 
 type AskForAccesses = {
     fileIdentifier: string;
@@ -33,180 +48,245 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
 
     const user = useAuthStore((state) => state.user);
 
-    const [isSending, setIsSending] = useState(false);
-    const [sendError, setSendError] = useState<string | undefined>(undefined);
-
-    const query = useQuery<GeonetworkMetadataResponse, CartesApiException>({
+    const metadataQuery = useQuery<CswMetadata, CartesApiException>({
         queryKey: RQKeys.accesses_request(fileIdentifier),
         queryFn: ({ signal }) => api.geonetwork.getMetadataInfos(fileIdentifier, { signal }),
         staleTime: 3600000,
     });
 
+    const privateLayers = useMemo(
+        () => metadataQuery.data?.layers?.filter((l) => !l.open).sort((a, b) => (a.name && b.name ? a.name.localeCompare(b.name) : 0)) ?? [],
+        [metadataQuery.data]
+    );
     const catalogueDatasheetUrl = useMemo(() => `${catalogueUrl}/dataset/${fileIdentifier}`, [fileIdentifier]);
+
     const myCommunities = useMemo(() => {
-        return Array.from(user?.communities_member ?? [], (member) => member.community);
+        return Array.from(user?.communities_member ?? [], (member) => member.community).sort((a, b) => (a?.name && b?.name ? a.name.localeCompare(b.name) : 0));
     }, [user]);
 
-    const schema = yup.object({
-        layers: yup.array().of(yup.string()).min(1, t("min_layers_error")).required(),
-        myself: yup.boolean(),
-        beneficiaries: yup.array().of(yup.string()).required(),
-    });
-
-    // Formulaire
     const {
         register,
-        setValue,
-        getValues: getFormValues,
         formState: { errors },
-        watch,
         handleSubmit,
-    } = useForm({ mode: "onSubmit", defaultValues: { layers: [], myself: true, beneficiaries: [] }, resolver: yupResolver(schema) });
+        reset: resetForm,
+    } = useForm({
+        defaultValues: {
+            layers: [],
+            beneficiaries: [MYSELF],
+        },
+        resolver: yupResolver(schema),
+    });
 
-    const myself = watch("myself");
-    const beneficiaries = watch("beneficiaries"); // Les communautes beneficiaires
+    const requestMutation = useMutation({
+        mutationFn: (data: object) => {
+            return api.contact.requestPrivateServicesAccess(data);
+        },
+    });
 
-    const beneficiariesOptions = useMemo(() => {
-        const options: {
-            label: ReactNode;
-            hintText?: ReactNode;
-            nativeInputProps: ComponentProps<"input">;
-        }[] = [];
-        myCommunities.forEach((community) => {
-            options.push({
-                label: t("community", { name: community?.name ?? "" }),
-                nativeInputProps: {
-                    ...register("beneficiaries"),
-                    checked: beneficiaries.includes(community?._id),
-                    value: community?._id,
-                },
-            });
-        });
-        return options;
-    }, [myCommunities, beneficiaries, t, register]);
-
-    const onSubmit = () => {
-        const values = getFormValues();
-        const layers = query.data?.private_layers.filter((layer) => values["layers"].includes(layer.name));
-
-        const body = {
-            emailContact: query.data?.contact_email,
-            catalogueDatasheetUrl: catalogueDatasheetUrl,
-            layers: layers,
+    const onSubmit = (formData: object) => {
+        const data = {
+            file_identifier: fileIdentifier,
+            email_contact: metadataQuery.data?.contact_email,
+            layers: privateLayers.filter((layer) => formData["layers"].includes(layer.name)),
+            myself: formData["beneficiaries"].includes(MYSELF),
+            beneficiaries: myCommunities.filter((c) => formData["beneficiaries"].includes(c?._id)),
+            message: formData["message"],
         };
 
-        const beneficiaries = [...values["beneficiaries"]];
-        if (!beneficiaries.length) {
-            body["myself"] = true;
-        }
-
-        if (beneficiaries.length > 1) {
-            body["beneficiaries"] = myCommunities.filter((c) => beneficiaries.includes(c?._id));
-        }
-
-        setSendError(undefined);
-        setIsSending(true);
-
-        const url = SymfonyRouting.generate("cartesgouvfr_contact_accesses_request");
-        jsonFetch<{ state: string; message?: string }>(url, { method: "POST" }, body)
-            .then((response) => {
-                if (response.state === "success") {
-                    routes.dashboard().push();
-                } else setSendError(response.message);
-            })
-            .catch((error) => {
-                setSendError(error.message);
-            })
-            .finally(() => setIsSending(false));
+        requestMutation.mutate(data);
     };
 
+    const { css, cx } = useStyles();
+
     return (
-        <Main>
-            {query.error ? (
+        <Main title={t("title")}>
+            <div className={fr.cx("fr-mb-16v")}>
+                <h1 className={fr.cx("fr-mb-2w")}>{t("title")}</h1>
+                <p>{t("explanation")}</p>
+            </div>
+
+            {metadataQuery.isLoading ? (
+                <LoadingText as="h2" />
+            ) : metadataQuery.error ? (
                 <Alert
                     severity="error"
                     closable={false}
-                    title={query.error.message}
-                    description={<Button linkProps={routes.dashboard().link}>{t("back_to_dashboard")}</Button>}
+                    title={metadataQuery.error.message}
+                    description={<Button linkProps={{ href: catalogueDatasheetUrl }}>{t("back_to_catalogue")}</Button>}
+                    className={fr.cx("fr-mb-6v")}
                 />
             ) : (
-                <>
-                    <h1>{t("title")}</h1>
-                    {query.isLoading ? (
-                        <LoadingText />
-                    ) : sendError !== undefined ? (
-                        <Alert severity={"error"} title={tCommon("error")} description={sendError} className={fr.cx("fr-my-3w")} />
-                    ) : query.data?.private_layers.length ? (
-                        <div>
-                            {t("explain", { url: catalogueDatasheetUrl })}
-                            <Checkbox
-                                legend={null}
-                                options={query.data?.private_layers.map((layer) => {
-                                    const label = (
-                                        <span>
-                                            {layer.name}
-                                            {layer.endpointType && (
-                                                <Badge noIcon={true} severity={"info"} className={fr.cx("fr-ml-2v")}>
-                                                    {layer.endpointType}
-                                                </Badge>
-                                            )}
-                                        </span>
-                                    );
-                                    return {
-                                        label: label,
-                                        nativeInputProps: {
-                                            ...register("layers"),
-                                            value: layer.name,
-                                        },
-                                    };
+                metadataQuery.data !== undefined && (
+                    <>
+                        <div className={css({ display: "flex", gap: "2rem", flexDirection: "column", [fr.breakpoints.up("sm")]: { flexDirection: "row" } })}>
+                            <img
+                                src={metadataQuery.data?.thumbnail_url ?? placeholder1x1Url}
+                                alt=""
+                                className={css({
+                                    width: "9rem",
+                                    height: "9rem",
+                                    objectFit: "cover",
                                 })}
-                                state={errors.layers ? "error" : "default"}
-                                stateRelatedMessage={errors?.layers?.message?.toString()}
                             />
-                            <Checkbox
-                                legend={t("beneficiaries")}
-                                hintText={t("beneficiaries_hintext")}
-                                options={[
-                                    {
-                                        label: t("myself"),
-                                        nativeInputProps: {
-                                            onChange: (e) => {
-                                                const checked = e.currentTarget.checked;
-                                                setValue("myself", checked);
+
+                            <div
+                                className={css({
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    overflow: "hidden",
+                                    gap: "0.75rem",
+                                })}
+                            >
+                                <strong>{metadataQuery.data?.title}</strong>
+                                <p
+                                    className={css({
+                                        textOverflow: "ellipsis",
+                                        overflow: "hidden",
+                                        height: "4.5rem",
+                                        margin: 0,
+                                        WebkitLineClamp: 3,
+                                        display: "-webkit-box",
+                                        WebkitBoxOrient: "vertical",
+                                    })}
+                                >
+                                    {metadataQuery.data?.abstract}
+                                </p>
+                                <p
+                                    className={cx(
+                                        fr.cx("fr-text--sm", "fr-icon-bank-line", "fr-icon--sm", "fr-m-0"),
+                                        css({
+                                            color: fr.colors.decisions.text.default.grey.default,
+                                            "::before": { marginRight: "0.5rem" },
+                                        })
+                                    )}
+                                >
+                                    {metadataQuery.data?.organisation_name}
+                                </p>
+                            </div>
+                        </div>
+                        <hr className={fr.cx("fr-mt-10v", "fr-pb-10v")} />
+
+                        {privateLayers.length === 0 ? (
+                            <div>
+                                <p>{t("explanation_no_private_services")}</p>
+                                <Button linkProps={{ href: catalogueDatasheetUrl }} className={fr.cx("fr-mb-6v")}>
+                                    {t("back_to_catalogue")}
+                                </Button>
+                            </div>
+                        ) : requestMutation.isError ? (
+                            <Alert
+                                severity={"error"}
+                                title={tCommon("error")}
+                                description={requestMutation.error.message}
+                                className={fr.cx("fr-my-3w")}
+                                closable
+                                onClose={() => {
+                                    metadataQuery.refetch();
+                                    resetForm();
+                                    requestMutation.reset();
+                                }}
+                            />
+                        ) : requestMutation.isSuccess ? (
+                            <div
+                                className={css({
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    padding: "1rem",
+                                    alignItems: "center",
+                                    alignSelf: "stretch",
+                                    gap: "1rem",
+                                })}
+                            >
+                                <Success color="blue-cumulus" width={"4rem"} height={"4rem"} />
+                                <p>{t("request_sent_successfully")}</p>
+                                <Button linkProps={{ href: catalogueDatasheetUrl }}>{t("back_to_catalogue")}</Button>
+                            </div>
+                        ) : (
+                            <form onSubmit={handleSubmit(onSubmit)}>
+                                <Checkbox
+                                    legend={t("form.layers.label")}
+                                    options={privateLayers.map((layer) => {
+                                        const label = (
+                                            <div
+                                                className={css({
+                                                    display: "flex",
+                                                    flexWrap: "wrap",
+                                                    gap: "0.75rem",
+                                                    flexDirection: "column",
+                                                    [fr.breakpoints.up("md")]: { flexDirection: "row", alignItems: "center" },
+                                                })}
+                                            >
+                                                <span>{layer.description}</span>
+                                                <span
+                                                    className={cx(
+                                                        fr.cx("fr-text--xs", "fr-m-0"),
+                                                        css({ color: fr.colors.decisions.text.mention.grey.default })
+                                                    )}
+                                                >
+                                                    {layer.name}
+                                                </span>
+                                                {layer.gmd_online_resource_protocol && (
+                                                    <Badge noIcon={true} severity={"info"} className={fr.cx("fr-p-1v")} small as="span">
+                                                        {gmdProtocolToServiceType(layer.gmd_online_resource_protocol)}
+                                                    </Badge>
+                                                )}
+                                            </div>
+                                        );
+                                        return {
+                                            label: label,
+                                            nativeInputProps: {
+                                                ...register("layers"),
+                                                value: layer.name,
                                             },
-                                            checked: myself === true,
-                                            value: "myself",
+                                        };
+                                    })}
+                                    state={errors.layers ? "error" : "default"}
+                                    stateRelatedMessage={errors?.layers?.message?.toString()}
+                                />
+                                <hr className={fr.cx("fr-mt-10v", "fr-pb-10v")} />
+                                <Checkbox
+                                    legend={t("form.beneficiaries.label")}
+                                    hintText={t("form.beneficiaries.hint")}
+                                    state={errors.beneficiaries ? "error" : "default"}
+                                    stateRelatedMessage={errors?.beneficiaries?.message?.toString()}
+                                    options={[
+                                        {
+                                            label: t("myself"),
+                                            nativeInputProps: {
+                                                ...register("beneficiaries"),
+                                                value: MYSELF,
+                                            },
                                         },
-                                    },
-                                ]}
-                            />
-                            <Checkbox legend={null} options={beneficiariesOptions} />
-                            <ButtonsGroup
-                                buttons={[
-                                    {
-                                        linkProps: routes.dashboard().link,
-                                        children: t("back_to_dashboard"),
-                                        priority: "secondary",
-                                    },
-                                    {
-                                        children: tCommon("send"),
-                                        onClick: handleSubmit(onSubmit),
-                                    },
-                                ]}
-                                inlineLayoutWhen="always"
-                                alignment="right"
-                                className={fr.cx("fr-mt-2w")}
-                            />
-                        </div>
-                    ) : (
-                        <div>
-                            <p>{t("explain_no_access")}</p>
-                            <Button linkProps={routes.dashboard().link}>{t("back_to_dashboard")}</Button>
-                        </div>
-                    )}
-                </>
+                                        ...myCommunities.map((community) => ({
+                                            label: t("community", { name: community?.name ?? "" }),
+                                            nativeInputProps: {
+                                                ...register("beneficiaries"),
+                                                value: community?._id,
+                                            },
+                                        })),
+                                    ]}
+                                />
+                                <hr className={fr.cx("fr-mt-10v", "fr-pb-10v")} />
+                                <div className={fr.cx("fr-col-12", "fr-col-sm-8")}>
+                                    <Input
+                                        label={t("form.message.label")}
+                                        hintText={t("form.message.hint")}
+                                        textArea
+                                        nativeTextAreaProps={{ ...register("message"), rows: 4 }}
+                                        state={errors.message ? "error" : "default"}
+                                        stateRelatedMessage={errors?.message?.message?.toString()}
+                                    />
+                                </div>
+                                <Button type="submit" className={fr.cx("fr-my-6v")}>
+                                    {t("send_request")}
+                                </Button>
+                            </form>
+                        )}
+                    </>
+                )
             )}
-            {isSending && (
+
+            {requestMutation.isPending && (
                 <Wait>
                     <div className={fr.cx("fr-container")}>
                         <div className={fr.cx("fr-grid-row", "fr-grid-row--middle")}>

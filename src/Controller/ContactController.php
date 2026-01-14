@@ -228,6 +228,8 @@ class ContactController extends AbstractController
         $user = $this->getUser();
 
         $data = json_decode($request->getContent(), true);
+        $catalogueUrl = $this->getParameter('catalogue_url');
+        $catalogueDatasheetUrl = rtrim($catalogueUrl, '/').'/dataset/'.$data['file_identifier'];
 
         try {
             $now = new \DateTime();
@@ -236,7 +238,7 @@ class ContactController extends AbstractController
 
             $mailParams = [
                 'sendDate' => $now,
-                'catalogueDatasheetUrl' => $data['catalogueDatasheetUrl'],
+                'catalogueDatasheetUrl' => $catalogueDatasheetUrl,
                 'layers' => $data['layers'],
             ];
             if (isset($data['myself'])) {
@@ -245,13 +247,16 @@ class ContactController extends AbstractController
             if (isset($data['beneficiaries'])) {
                 $mailParams['beneficiaries'] = $data['beneficiaries'];
             }
+            if (isset($data['message'])) {
+                $mailParams['message'] = $data['message'];
+            }
 
             $context = array_merge(['userEmail' => $userEmail], $mailParams);
             $this->mailerLogger->info('User ({userEmail}) : Demande d\'accès à des services de diffusion de données dont l\'accès est restreint', $context);
 
             // Envoi du mail à l'adresse de contact des données
             $this->mailerService->sendMail(
-                $data['emailContact'],
+                $data['email_contact'],
                 "[cartes.gouv.fr] Demande d'accès à des services de diffusion restreints",
                 'Mailer/accesses_request.html.twig',
                 $mailParams

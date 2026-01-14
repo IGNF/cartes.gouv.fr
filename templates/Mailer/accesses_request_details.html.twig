@@ -1,26 +1,35 @@
 {% trans_default_domain 'cartesgouvfr' %}
 
 <p>
-    {{ 'accesses_request.email_support.services_title'|trans }}<br/>
+    {{ 'accesses_request.email_support.services_title'|trans }}<br />
     {{ 'accesses_request.email_support.datasheet_catalog_url'|trans({'%url%': catalogueDatasheetUrl})|raw }}
 </p>
 {% for layer in layers %}
     <p>
-        {{ 'accesses_request.email_support.name'|trans({'%name%': layer.name})|raw }}<br/>
-        {{ 'accesses_request.email_support.type'|trans({'%type%': layer.endpointType})|raw }}<br/>
+        {{ 'accesses_request.email_support.title'|trans({'%name%': layer.description})|raw }}<br />
+        {{ 'accesses_request.email_support.name'|trans({'%name%': layer.name})|raw }}<br />
+        {{ 'accesses_request.email_support.type'|trans({'%type%': layer.gmd_online_resource_protocol|replace({'OGC:': ''})})|raw }}<br />
     </p>
 {% endfor %}
 <p>
-    {{ 'accesses_request.email_support.asking_permission_title'|trans }}<br/>
-    {% if myself is defined %}
-        {{ 'accesses_request.email_support.himself'|trans }}
-    {% endif %}
-    {% if beneficiaries is defined %}
-        <ul>
-        {% for beneficiary in beneficiaries %}
-            <li>{{ 'accesses_request.email_support.community'|trans({'%community%': beneficiary.name, '%id%': beneficiary._id})|raw }}</li>
-        {% endfor %}
-        </ul>
-    {% endif %}
+    {{ 'accesses_request.email_support.asking_permission_title'|trans }}<br />
+    <ul>
+        {% if myself is defined %}
+            <li>{{ 'accesses_request.email_support.himself'|trans({'%id%': app.user.id}) }}</li>
+        {% endif %}
+        {% if beneficiaries is defined %}
+            {% for beneficiary in beneficiaries %}
+                <li>{{ 'accesses_request.email_support.community'|trans({'%community%': beneficiary.name, '%id%': beneficiary._id})|raw }}</li>
+            {% endfor %}
+        {% endif %}
+    </ul>
 </p>
+{% if message is not empty %}
+    <p>
+        <strong>Message du demandeur :</strong>
+        <br />
+        {{ message }}
+    </p>
+{% endif %}
+
 <p>{{ 'accesses_request.email_support.rendez_vous'|trans }}</p>

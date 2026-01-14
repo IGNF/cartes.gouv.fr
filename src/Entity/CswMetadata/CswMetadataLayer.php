@@ -10,6 +10,7 @@ class CswMetadataLayer
         public string $gmdOnlineResourceUrl,
         public string $offeringId,
         public bool $open,
+        public ?string $description = null,
     ) {
     }
 }

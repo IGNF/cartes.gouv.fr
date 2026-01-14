@@ -47,13 +47,7 @@ class GeonetworkController extends AbstractController
 
         $cswMetadata = $this->cswMetadataHelper->fromXml($xml);
 
-        $privateLayers = array_filter($cswMetadata->layers, fn ($layer) => !$layer->open);
-        $privateLayers = array_values($privateLayers);
-
-        return new JsonResponse([
-            'contact_email' => $cswMetadata->contactEmail,
-            'private_layers' => $privateLayers,
-        ]);
+        return $this->json($cswMetadata);
     }
 
     public function isNotFound(string $xml): bool
