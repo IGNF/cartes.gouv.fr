@@ -35,7 +35,7 @@ export const AccessesRequestFrTranslations: Translations<"fr">["AccessesRequest"
     "form.message.label": "Message (optionnel)",
     "form.message.hint": "Envoyez un message au producteur pour accompagner votre demande",
     myself: "Moi",
-    community: ({ name }) => `La communauté ${name}`,
+    community: ({ name }) => `${name}`,
     send_request: "Envoyer la demande",
     sending_message: "Votre message est en cours d’envoi ...",
     request_sent_successfully: "Votre demande a été envoyée au producteur. Vous avez reçu une confirmation de votre demande par courriel.",

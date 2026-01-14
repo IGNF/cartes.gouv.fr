@@ -54,11 +54,14 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
         staleTime: 3600000,
     });
 
-    const privateLayers = useMemo(() => metadataQuery.data?.layers?.filter((l) => !l.open) ?? [], [metadataQuery.data]);
+    const privateLayers = useMemo(
+        () => metadataQuery.data?.layers?.filter((l) => !l.open).sort((a, b) => (a.name && b.name ? a.name.localeCompare(b.name) : 0)) ?? [],
+        [metadataQuery.data]
+    );
     const catalogueDatasheetUrl = useMemo(() => `${catalogueUrl}/dataset/${fileIdentifier}`, [fileIdentifier]);
 
     const myCommunities = useMemo(() => {
-        return Array.from(user?.communities_member ?? [], (member) => member.community);
+        return Array.from(user?.communities_member ?? [], (member) => member.community).sort((a, b) => (a?.name && b?.name ? a.name.localeCompare(b.name) : 0));
     }, [user]);
 
     const {
@@ -80,13 +83,15 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
         },
     });
 
-    const onSubmit = (data: object) => {
-        data["file_identifier"] = fileIdentifier;
-        data["email_contact"] = metadataQuery.data?.contact_email;
-
-        data["layers"] = privateLayers.filter((layer) => data["layers"].includes(layer.name));
-        data["myself"] = data["beneficiaries"].includes(MYSELF);
-        data["beneficiaries"] = myCommunities.filter((c) => data["beneficiaries"].includes(c?._id));
+    const onSubmit = (formData: object) => {
+        const data = {
+            file_identifier: fileIdentifier,
+            email_contact: metadataQuery.data?.contact_email,
+            layers: privateLayers.filter((layer) => formData["layers"].includes(layer.name)),
+            myself: formData["beneficiaries"].includes(MYSELF),
+            beneficiaries: myCommunities.filter((c) => formData["beneficiaries"].includes(c?._id)),
+            message: formData["message"],
+        };
 
         requestMutation.mutate(data);
     };
