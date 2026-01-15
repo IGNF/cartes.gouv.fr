@@ -3,13 +3,13 @@ import { Breadcrumb } from "@codegouvfr/react-dsfr/Breadcrumb";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { Notice } from "@codegouvfr/react-dsfr/Notice";
 import { cx } from "@codegouvfr/react-dsfr/tools/cx";
+import { useHead } from "@unhead/react";
 import { PropsWithChildren } from "react";
 import { tss } from "tss-react";
 
 import DatastoreSideMenu from "@/components/Layout/DatastoreSideMenu";
 import useBreadcrumb from "@/hooks/useBreadcrumb";
 import useDatastoreSelection from "@/hooks/useDatastoreSelection";
-import useDocumentTitle from "@/hooks/useDocumentTitle";
 import { routes } from "@/router/router";
 import LoadingText from "../Utils/LoadingText";
 import SessionExpiredAlert from "../Utils/SessionExpiredAlert";
@@ -27,7 +27,10 @@ export type DatastoreMainProps = PropsWithChildren<
 export default function DatastoreMain(props: DatastoreMainProps) {
     const { datastoreId, communityId, children, customBreadcrumbProps, noticeProps, title, classes: propsClasses } = props;
 
-    useDocumentTitle(title);
+    useHead({
+        titleTemplate: "%s | cartes.gouv.fr",
+        title: title,
+    });
     const breadcrumbProps = useBreadcrumb(customBreadcrumbProps);
 
     const { classes } = useStyles();

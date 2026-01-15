@@ -1,5 +1,6 @@
 import { startReactDsfr } from "@codegouvfr/react-dsfr/spa";
 import { disableReactDevTools } from "@fvilers/disable-react-devtools";
+import { createHead, UnheadProvider } from "@unhead/react/client";
 import React from "react";
 import ReactDOM from "react-dom/client";
 
@@ -12,10 +13,14 @@ if (import.meta.env?.APP_ENV?.toLowerCase() === "prod") {
 
 startReactDsfr({ defaultColorScheme: "light" });
 
+const head = createHead();
+
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 root.render(
     <React.StrictMode>
-        <App />
+        <UnheadProvider head={head}>
+            <App />
+        </UnheadProvider>
     </React.StrictMode>
 );
 

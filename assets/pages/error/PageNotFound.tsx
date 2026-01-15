@@ -1,15 +1,18 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
+import { useSeoMeta } from "@unhead/react";
 import { FC } from "react";
 
-import { externalUrls } from "@/router/externalUrls";
 import Main from "@/components/Layout/Main";
+import { externalUrls } from "@/router/externalUrls";
 import { routes } from "@/router/router";
 
 import ovoidSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/background/ovoid.svg?no-inline";
 import technicalErrorSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/system/technical-error.svg?no-inline";
 
 const PageNotFound: FC = () => {
+    useSeoMeta({ robots: "noindex" });
+
     return (
         <Main title="Page non trouvée">
             <div
