@@ -30,6 +30,23 @@ const getStepIcon = (status: string) => {
     return icon;
 };
 
+const parseIntegrationProgress = (rawProgress: string | undefined): Record<string, string> | null => {
+    if (!rawProgress) {
+        return null;
+    }
+
+    try {
+        const parsed = JSON.parse(rawProgress);
+        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+            return parsed as Record<string, string>;
+        }
+    } catch {
+        // ignore JSON parse errors
+    }
+
+    return null;
+};
+
 type IntegrationStatus = "at_least_one_failure" | "proc_int_launched" | "all_successful";
 
 type DatasheetUploadIntegrationDialogProps = {
@@ -71,34 +88,39 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
     // mise à jour de integrationProgress et integrationCurrentStep à chaque refetch de pingIntProgQuery
     const {
         integrationProgress,
-        integrationCurrentStep,
     }: {
         integrationProgress: Record<string, string> | null;
-        integrationCurrentStep: number;
     } = useMemo(
         () => ({
-            integrationProgress: pingIntProgQuery?.data?.integration_progress ? JSON.parse(pingIntProgQuery?.data?.integration_progress) : null,
-            integrationCurrentStep: pingIntProgQuery?.data?.integration_current_step ? parseInt(pingIntProgQuery?.data?.integration_current_step) : 0,
+            integrationProgress: parseIntegrationProgress(pingIntProgQuery?.data?.integration_progress),
         }),
         [pingIntProgQuery?.data]
     );
 
     const integrationStatus: IntegrationStatus | undefined = useMemo(() => {
-        if (integrationProgress && Object.values(integrationProgress).includes("failed")) {
+        if (!integrationProgress) {
+            return undefined;
+        }
+
+        const stepStatuses = Object.values(integrationProgress);
+
+        if (stepStatuses.includes("failed")) {
             // au moins une étape a échoué
             return "at_least_one_failure";
         }
 
-        if (integrationProgress && integrationProgress?.["integration_processing"] === "in_progress") {
+        if (integrationProgress["integration_processing"] === "in_progress") {
             // le traitement d'intégration en bd a été lancé
             return "proc_int_launched";
         }
 
-        if (integrationProgress && Object.keys(integrationProgress).length === integrationCurrentStep) {
+        // Le backend garantit 3 étapes au total.
+        const allSuccessful = stepStatuses.length === 3 && stepStatuses.every((s) => s === "successful");
+        if (allSuccessful) {
             // toutes les étapes sont terminées avec succès
             return "all_successful";
         }
-    }, [integrationProgress, integrationCurrentStep]);
+    }, [integrationProgress]);
 
     useEffect(() => {
         switch (integrationStatus) {

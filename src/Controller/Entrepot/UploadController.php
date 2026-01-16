@@ -29,7 +29,7 @@ use Symfony\Component\Routing\Attribute\Route;
     '/api/datastores/{datastoreId}/upload',
     name: 'cartesgouvfr_api_upload_',
     options: ['expose' => true],
-    // condition: 'request.isXmlHttpRequest()'
+    condition: 'request.isXmlHttpRequest()'
 )]
 #[OA\Tag(name: '[entrepot] upload')]
 class UploadController extends AbstractController implements ApiControllerInterface
@@ -126,252 +126,305 @@ class UploadController extends AbstractController implements ApiControllerInterf
         string $uploadId,
         #[MapQueryParameter] bool $getOnlyProgress = false,
     ): JsonResponse {
-        $upload = $this->uploadApiService->get($datastoreId, $uploadId);
-
-        // construction de progress initial
-        $initialIntegProgress = [
-            UploadTags::INT_STEP_SEND_FILES_API => JobStatuses::WAITING,
-            UploadTags::INT_STEP_WAIT_CHECKS => JobStatuses::WAITING,
-            UploadTags::INT_STEP_PROCESSING => JobStatuses::WAITING,
-        ];
-
-        if (!isset($upload['tags'][UploadTags::INTEGRATION_CURRENT_STEP]) && !isset($upload['tags'][UploadTags::INTEGRATION_PROGRESS])) {
-            $guessedProgress = $this->guessIntegrationProgressTags($datastoreId, $upload);
-            $integCurrentStep = $guessedProgress[UploadTags::INTEGRATION_CURRENT_STEP];
-            $integProgress = json_decode($guessedProgress[UploadTags::INTEGRATION_PROGRESS], true);
-        } else {
-            // lecture de progress si existe déjà dans les tags de l'upload, sinon on part du progress initial
-            $integCurrentStep = isset($upload['tags'][UploadTags::INTEGRATION_CURRENT_STEP]) ? intval($upload['tags'][UploadTags::INTEGRATION_CURRENT_STEP]) : 0;
-            $integProgress = isset($upload['tags'][UploadTags::INTEGRATION_PROGRESS]) ? json_decode($upload['tags'][UploadTags::INTEGRATION_PROGRESS], true) : $initialIntegProgress;
-        }
-
-        // clone de progress
-        $integCurrStepClone = $integCurrentStep;
-        $integProgressClone = $integProgress;
-
         try {
-            // on exécute les étapes de l'intégration si getOnlyProgress est à false
-            if (false === $getOnlyProgress && $integCurrentStep < count($integProgress)) {
-                [$integCurrentStep, $integProgress] = $this->runIntegrationStep($datastoreId, $upload, $integProgress, $integCurrentStep);
+            $upload = $this->uploadApiService->get($datastoreId, $uploadId);
+            $progress = $this->computeIntegrationProgress($datastoreId, $upload);
+
+            if (false === $getOnlyProgress) {
+                $this->advanceIntegrationIfPossible($datastoreId, $upload, $progress);
+
+                $upload = $this->uploadApiService->get($datastoreId, $uploadId);
+                $progress = $this->computeIntegrationProgress($datastoreId, $upload);
             }
 
+            $currentStepIndex = $this->getIntegrationCurrentStepIndexFromProgress($progress);
+
+            $progressJson = json_encode($progress);
+            $stepString = (string) $currentStepIndex;
+            $existingProgressJson = $upload['tags'][UploadTags::INTEGRATION_PROGRESS] ?? null;
+            $existingStepString = isset($upload['tags'][UploadTags::INTEGRATION_CURRENT_STEP]) ? (string) $upload['tags'][UploadTags::INTEGRATION_CURRENT_STEP] : null;
+
             $uploadTags = [
-                UploadTags::INTEGRATION_CURRENT_STEP => $integCurrentStep,
-                UploadTags::INTEGRATION_PROGRESS => json_encode($integProgress),
+                UploadTags::INTEGRATION_PROGRESS => $progressJson,
+                UploadTags::INTEGRATION_CURRENT_STEP => $stepString,
             ];
 
             // mise à jour état des étapes de l'intégration uniquement si changement
-            if ($integCurrStepClone !== $integCurrentStep || $integProgressClone !== $integProgress) {
-                $upload = $this->uploadApiService->addTags($datastoreId, $uploadId, $uploadTags);
+            if ($existingProgressJson !== $progressJson || $existingStepString !== $stepString) {
+                $this->uploadApiService->addTags($datastoreId, $uploadId, $uploadTags);
             }
 
             return $this->json($uploadTags);
-        } catch (ApiException $ex) {
-            return $this->json($ex->getDetails(), $ex->getCode());
+        } catch (ApiException|AppException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        } catch (\Exception $ex) {
+            throw new CartesApiException($ex->getMessage(), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
     /**
-     * Essayer de deviner la progression de l'intégration d'un upload si le fichier n'a pas été déposé via cartes.gouv.fr (le plugin qgis par exemple).
-     * // TODO : je sais pas encore si cette méthode est infaillible. Si on est sûr que ça couvre tous les cas, on peut essayer de supprimer les tags.
-     *
+     * @return list<string>
+     */
+    private function getIntegrationStepNames(): array
+    {
+        return [
+            UploadTags::INT_STEP_SEND_FILES_API,
+            UploadTags::INT_STEP_WAIT_CHECKS,
+            UploadTags::INT_STEP_PROCESSING,
+        ];
+    }
+
+    /**
      * @param array<mixed> $upload
      *
-     * @return array<string,mixed>
+     * @return array<string,string>
      */
-    private function guessIntegrationProgressTags(string $datastoreId, array $upload): array
+    private function computeIntegrationProgress(string $datastoreId, array $upload): array
     {
-        $initialIntegProgress = [
+        $progress = [
             UploadTags::INT_STEP_SEND_FILES_API => JobStatuses::WAITING,
             UploadTags::INT_STEP_WAIT_CHECKS => JobStatuses::WAITING,
             UploadTags::INT_STEP_PROCESSING => JobStatuses::WAITING,
         ];
-        $guessedProgress = $initialIntegProgress;
-        $guessedProgressionStep = 0;
 
-        // A la création de l'upload, le status est à "OPEN"
-        // Si le statut est "CLOSED" ou "CHECKING", on considère que l'étape d'envoi des fichiers a été réalisée
-        if (in_array($upload['status'], [UploadStatuses::CLOSED, UploadStatuses::CHECKING])) {
-            $guessedProgress[UploadTags::INT_STEP_SEND_FILES_API] = JobStatuses::SUCCESSFUL;
-            $guessedProgressionStep = 1;
+        $sendFilesStatus = $this->computeSendFilesStatus($upload);
+        $progress[UploadTags::INT_STEP_SEND_FILES_API] = $sendFilesStatus;
+        if (JobStatuses::SUCCESSFUL !== $sendFilesStatus) {
+            return $progress;
         }
 
-        if (JobStatuses::SUCCESSFUL === $guessedProgress[UploadTags::INT_STEP_SEND_FILES_API]) {
-            $uploadChecks = $this->uploadApiService->getCheckExecutions($datastoreId, $upload['_id']);
+        $waitChecksStatus = $this->computeWaitChecksStatus($datastoreId, $upload);
+        $progress[UploadTags::INT_STEP_WAIT_CHECKS] = $waitChecksStatus;
+        if (JobStatuses::SUCCESSFUL !== $waitChecksStatus) {
+            return $progress;
+        }
 
-            if (0 === count($uploadChecks[UploadCheckTypes::ASKED]) && 0 === count($uploadChecks[UploadCheckTypes::IN_PROGRESS])) {
-                // il ne reste plus de check dans les catégories "asked" ou "in_progress"
-                if (0 === count($uploadChecks[UploadCheckTypes::FAILED])) {
-                    // aucune check a échoué
-                    $guessedProgress[UploadTags::INT_STEP_WAIT_CHECKS] = JobStatuses::SUCCESSFUL;
-                    $guessedProgressionStep = 2;
-                } else {
-                    $guessedProgress[UploadTags::INT_STEP_WAIT_CHECKS] = JobStatuses::FAILED;
-                }
-            } elseif (count($uploadChecks[UploadCheckTypes::ASKED]) > 0 || count($uploadChecks[UploadCheckTypes::IN_PROGRESS]) > 0) {
-                $guessedProgress[UploadTags::INT_STEP_WAIT_CHECKS] = JobStatuses::IN_PROGRESS;
+        $processingStatus = $this->computeProcessingStatus($datastoreId, $upload);
+        $progress[UploadTags::INT_STEP_PROCESSING] = $processingStatus;
+
+        return $progress;
+    }
+
+    /**
+     * L'étape est considérée comme (sachant qu'un upload est OPEN à sa création) :
+     * - SUCCESSFUL : si le statut de l'upload est CLOSED ou CHECKING
+     * - WAITING : si le statut de l'upload est OPEN
+     * - FAILED : dans les autres cas
+     *
+     * @param array<mixed> $upload
+     */
+    private function computeSendFilesStatus(array $upload): string
+    {
+        if (in_array($upload['status'], [UploadStatuses::CLOSED, UploadStatuses::CHECKING], true)) {
+            return JobStatuses::SUCCESSFUL;
+        }
+
+        if (UploadStatuses::OPEN === $upload['status']) {
+            return JobStatuses::WAITING;
+        }
+
+        return JobStatuses::FAILED;
+    }
+
+    /**
+     * L'étape est considérée comme :
+     * - FAILED : si au moins un check est à FAILED
+     * - IN_PROGRESS : si au moins un check est à ASKED ou IN_PROGRESS ou si l'upload est en CHECKING
+     * - SUCCESSFUL : si au moins un check est à PASSED et aucun à FAILED
+     * - WAITING : si aucun check n'est encore lancé (upload pas en CHECKING)
+     *
+     * @param array<mixed> $upload
+     */
+    private function computeWaitChecksStatus(string $datastoreId, array $upload): string
+    {
+        $uploadChecks = $this->uploadApiService->getCheckExecutions($datastoreId, $upload['_id']);
+
+        $askedCount = count($uploadChecks[UploadCheckTypes::ASKED] ?? []);
+        $inProgressCount = count($uploadChecks[UploadCheckTypes::IN_PROGRESS] ?? []);
+        $failedCount = count($uploadChecks[UploadCheckTypes::FAILED] ?? []);
+        $passedCount = count($uploadChecks[UploadCheckTypes::PASSED] ?? []);
+
+        if ($failedCount > 0) {
+            return JobStatuses::FAILED;
+        }
+
+        if ($askedCount > 0 || $inProgressCount > 0) {
+            return JobStatuses::IN_PROGRESS;
+        }
+
+        if ($passedCount > 0) {
+            return JobStatuses::SUCCESSFUL;
+        }
+
+        return UploadStatuses::CHECKING === $upload['status'] ? JobStatuses::IN_PROGRESS : JobStatuses::WAITING;
+    }
+
+    /**
+     * L'étape est considérée comme :
+     * - WAITING : si les tags proc_int_id et vectordb_id sont absents
+     * - FAILED : si un seul des deux tags est présent
+     * - IN_PROGRESS : si l'exécution de processing est en CREATED, WAITING ou PROGRESS
+     * - SUCCESSFUL : si l'exécution de processing est en SUCCESS et que la stored_data vectordb est en GENERATED
+     * - IN_PROGRESS : si l'exécution de processing est en SUCCESS et que la stored_data vectordb est en CREATED, GENERATING ou MODIFYING
+     * - FAILED : dans les autres cas
+     *
+     * @param array<mixed> $upload
+     */
+    private function computeProcessingStatus(string $datastoreId, array $upload): string
+    {
+        $hasProcExecId = isset($upload['tags']['proc_int_id']);
+        $hasVectorDbId = isset($upload['tags']['vectordb_id']);
+
+        // Ne devrait pas arriver normalement, mais si c'est le cas, on évite de bloquer l'intégration à l'infini.
+        if ($hasProcExecId xor $hasVectorDbId) {
+            return JobStatuses::FAILED;
+        }
+
+        if (!$hasProcExecId || !$hasVectorDbId) {
+            return JobStatuses::WAITING;
+        }
+
+        $processingExec = $this->processingApiService->getExecution($datastoreId, $upload['tags']['proc_int_id']);
+        $vectordb = $this->storedDataApiService->get($datastoreId, $upload['tags']['vectordb_id']);
+
+        if (in_array($processingExec['status'], [ProcessingStatuses::CREATED, ProcessingStatuses::WAITING, ProcessingStatuses::PROGRESS], true)) {
+            return JobStatuses::IN_PROGRESS;
+        }
+
+        if (ProcessingStatuses::SUCCESS === $processingExec['status']) {
+            if (StoredDataStatuses::GENERATED === $vectordb['status']) {
+                return JobStatuses::SUCCESSFUL;
+            }
+            if (in_array($vectordb['status'], [StoredDataStatuses::CREATED, StoredDataStatuses::GENERATING, StoredDataStatuses::MODIFYING], true)) {
+                return JobStatuses::IN_PROGRESS;
+            }
+
+            return JobStatuses::FAILED;
+        }
+
+        return JobStatuses::FAILED;
+    }
+
+    /**
+     * @param array<string,string> $progress
+     */
+    private function getIntegrationCurrentStepNameFromProgress(array $progress): ?string
+    {
+        foreach ($this->getIntegrationStepNames() as $stepName) {
+            if (($progress[$stepName] ?? JobStatuses::WAITING) !== JobStatuses::SUCCESSFUL) {
+                return $stepName;
             }
         }
 
-        if (JobStatuses::SUCCESSFUL === $guessedProgress[UploadTags::INT_STEP_WAIT_CHECKS]) {
-            if (isset($upload['tags']['proc_int_id']) && isset($upload['tags']['vectordb_id'])) {
-                $processingExec = $this->processingApiService->getExecution($datastoreId, $upload['tags']['proc_int_id']);
-                $vectordb = $this->storedDataApiService->get($datastoreId, $upload['tags']['vectordb_id']);
+        return null;
+    }
 
-                if (!in_array($processingExec['status'], [ProcessingStatuses::CREATED, ProcessingStatuses::WAITING, ProcessingStatuses::PROGRESS])) {
-                    if (ProcessingStatuses::SUCCESS == $processingExec['status'] && StoredDataStatuses::GENERATED == $vectordb['status']) {
-                        $guessedProgress[UploadTags::INT_STEP_PROCESSING] = JobStatuses::SUCCESSFUL;
-                        $guessedProgressionStep = 3;
-                    } else {
-                        $guessedProgress[UploadTags::INT_STEP_PROCESSING] = JobStatuses::FAILED;
-                    }
-                }
+    /**
+     * @param array<string,string> $progress
+     */
+    private function getIntegrationCurrentStepIndexFromProgress(array $progress): int
+    {
+        $steps = $this->getIntegrationStepNames();
+        foreach ($steps as $index => $stepName) {
+            if (($progress[$stepName] ?? JobStatuses::WAITING) !== JobStatuses::SUCCESSFUL) {
+                return $index;
             }
         }
 
-        return [
-            UploadTags::INTEGRATION_PROGRESS => json_encode($guessedProgress),
-            UploadTags::INTEGRATION_CURRENT_STEP => $guessedProgressionStep,
-        ];
+        return count($steps);
+    }
+
+    /**
+     * Exécute au plus une étape à effets de bord (side-effectful), uniquement si c'est l'étape courante et qu'elle est encore en attente.
+     *
+     * @param array<mixed>         $upload
+     * @param array<string,string> $progress
+     */
+    private function advanceIntegrationIfPossible(string $datastoreId, array $upload, array $progress): void
+    {
+        $currentStepName = $this->getIntegrationCurrentStepNameFromProgress($progress);
+        if (null === $currentStepName) {
+            return;
+        }
+
+        $currentStepStatus = $progress[$currentStepName] ?? JobStatuses::WAITING;
+        if (JobStatuses::WAITING !== $currentStepStatus) {
+            return;
+        }
+
+        switch ($currentStepName) {
+            case UploadTags::INT_STEP_SEND_FILES_API:
+                if (!isset($upload['tags'][UploadTags::DATA_UPLOAD_PATH])) {
+                    return;
+                }
+
+                $this->uploadApiService->addFile($datastoreId, $upload['_id'], $upload['tags'][UploadTags::DATA_UPLOAD_PATH]);
+
+                return;
+
+            case UploadTags::INT_STEP_PROCESSING:
+                $this->launchProcessingIntegration($datastoreId, $upload);
+
+                return;
+        }
     }
 
     /**
      * @param array<mixed> $upload
-     * @param array<mixed> $progress
      */
-    private function runIntegrationStep(string $datastoreId, array $upload, array $progress, int $currentStep): array
+    private function launchProcessingIntegration(string $datastoreId, array $upload): void
     {
-        $currentStepName = array_keys($progress)[$currentStep];
-        $currentStepStatus = isset($progress[$currentStepName]) ? $progress[$currentStepName] : JobStatuses::WAITING;
+        $hasProcExecId = isset($upload['tags']['proc_int_id']);
+        $hasVectorDbId = isset($upload['tags']['vectordb_id']);
 
-        try {
-            switch ($currentStepName) {
-                case UploadTags::INT_STEP_SEND_FILES_API:
-                    switch ($currentStepStatus) {
-                        case JobStatuses::WAITING:
-                            // si l'étape est prête et en attente à être exécutée, on lance l'étape
-                            if (UploadStatuses::CLOSED === $upload['status']) {
-                                $this->uploadApiService->open($datastoreId, $upload['_id']);
-                            }
-
-                            $this->uploadApiService->addFile($datastoreId, $upload['_id'], $upload['tags'][UploadTags::DATA_UPLOAD_PATH]);
-
-                            $currentStepStatus = JobStatuses::IN_PROGRESS;
-                            break;
-                        case JobStatuses::IN_PROGRESS:
-                            // vérifier ici si l'étape a terminé && réussi ou échoué ?
-                            if (in_array($upload['status'], [UploadStatuses::CLOSED, UploadStatuses::CHECKING])) {
-                                $currentStepStatus = JobStatuses::SUCCESSFUL;
-                            }
-                            break;
-                        case JobStatuses::SUCCESSFUL:
-                            // action si l'étape a terminé en succès
-                            $currentStep++;
-                            break;
-                    }
-
-                    break;
-                case UploadTags::INT_STEP_WAIT_CHECKS:
-                    switch ($currentStepStatus) {
-                        case JobStatuses::WAITING:
-                            // ne rien faire
-                            if (UploadStatuses::CHECKING === $upload['status']) {
-                                $currentStepStatus = JobStatuses::IN_PROGRESS;
-                            }
-                            break;
-                        case JobStatuses::IN_PROGRESS:
-                            $uploadChecks = $this->uploadApiService->getCheckExecutions($datastoreId, $upload['_id']);
-
-                            if (0 == count($uploadChecks[UploadCheckTypes::ASKED]) && 0 == count($uploadChecks[UploadCheckTypes::IN_PROGRESS])) {
-                                // il ne reste plus de check dans les catégories "asked" ou "in_progress"
-                                if (0 == count($uploadChecks[UploadCheckTypes::FAILED])) {
-                                    // aucune check a échoué
-                                    $currentStepStatus = JobStatuses::SUCCESSFUL;
-                                } else {
-                                    $currentStepStatus = JobStatuses::FAILED;
-                                }
-                            }
-                            break;
-                        case JobStatuses::SUCCESSFUL:
-                            // action si l'étape a terminé en succès
-                            $currentStep++;
-                            break;
-                    }
-
-                    break;
-                case UploadTags::INT_STEP_PROCESSING:
-                    switch ($currentStepStatus) {
-                        case JobStatuses::WAITING:
-                            $processing = $this->datastoreService->getProcIntegrateVectorFilesInBase($datastoreId);
-
-                            $procExecBody = [
-                                'processing' => $processing,
-                                'inputs' => [
-                                    'upload' => [$upload['_id']],
-                                ],
-                                'output' => [
-                                    'stored_data' => [
-                                        'name' => $upload['name'],
-                                        'storage_tags' => ['VECTEUR'], // TODO : choisir VECTEUR ou RASTER en fonction du type de upload
-                                    ],
-                                ],
-                            ];
-
-                            $processingExec = $this->processingApiService->addExecution($datastoreId, $procExecBody);
-                            $vectorDb = $processingExec['output']['stored_data'];
-
-                            // ajout tags sur l'upload
-                            $this->uploadApiService->addTags($datastoreId, $upload['_id'], [
-                                'vectordb_id' => $vectorDb['_id'],
-                                'proc_int_id' => $processingExec['_id'],
-                            ]);
-
-                            // ajout tags sur la stored_data
-                            $tags = [
-                                'upload_id' => $upload['_id'],
-                                'proc_int_id' => $processingExec['_id'],
-                                CommonTags::DATASHEET_NAME => $upload['tags'][CommonTags::DATASHEET_NAME],
-                            ];
-                            if (isset($upload['tags'][CommonTags::PRODUCER])) {
-                                $tags[CommonTags::PRODUCER] = $upload['tags'][CommonTags::PRODUCER];
-                            }
-                            if (isset($upload['tags'][CommonTags::PRODUCTION_YEAR])) {
-                                $tags[CommonTags::PRODUCTION_YEAR] = $upload['tags'][CommonTags::PRODUCTION_YEAR];
-                            }
-                            $this->storedDataApiService->addTags($datastoreId, $vectorDb['_id'], $tags);
-
-                            // // TODO : mise à jour ?
-
-                            $this->processingApiService->launchExecution($datastoreId, $processingExec['_id']);
-                            $currentStepStatus = JobStatuses::IN_PROGRESS;
-                            break;
-
-                        case JobStatuses::IN_PROGRESS:
-                            $processingExec = $this->processingApiService->getExecution($datastoreId, $upload['tags']['proc_int_id']);
-                            $vectordb = $this->storedDataApiService->get($datastoreId, $upload['tags']['vectordb_id']);
-
-                            if (!in_array($processingExec['status'], [ProcessingStatuses::CREATED, ProcessingStatuses::WAITING, ProcessingStatuses::PROGRESS])) {
-                                if (ProcessingStatuses::SUCCESS == $processingExec['status'] && StoredDataStatuses::GENERATED == $vectordb['status']) {
-                                    $currentStepStatus = JobStatuses::SUCCESSFUL;
-                                } else {
-                                    $currentStepStatus = JobStatuses::FAILED;
-                                }
-                            }
-                            break;
-                        case JobStatuses::SUCCESSFUL:
-                            $currentStep++;
-                            break;
-                    }
-                    break;
-            }
-        } catch (\Throwable $th) {
-            $currentStepStatus = JobStatuses::FAILED;
-            throw $th;
+        // ne devrait pas arriver normalement, juste un garde fou
+        if ($hasProcExecId || $hasVectorDbId) {
+            return;
         }
 
-        $progress[$currentStepName] = $currentStepStatus;
+        if (!isset($upload['tags'][CommonTags::DATASHEET_NAME])) {
+            throw new AppException('Missing datasheet_name tag on upload', JsonResponse::HTTP_BAD_REQUEST, ['message' => 'Missing required tag: datasheet_name']);
+        }
 
-        return [$currentStep, $progress];
+        $processing = $this->datastoreService->getProcIntegrateVectorFilesInBase($datastoreId);
+
+        $procExecBody = [
+            'processing' => $processing,
+            'inputs' => [
+                'upload' => [$upload['_id']],
+            ],
+            'output' => [
+                'stored_data' => [
+                    'name' => $upload['name'],
+                    'storage_tags' => ['VECTEUR'], // TODO : choisir VECTEUR ou RASTER en fonction du type de upload
+                ],
+            ],
+        ];
+
+        $processingExec = $this->processingApiService->addExecution($datastoreId, $procExecBody);
+        $vectorDb = $processingExec['output']['stored_data'];
+
+        // ajout tags sur l'upload
+        $this->uploadApiService->addTags($datastoreId, $upload['_id'], [
+            'vectordb_id' => $vectorDb['_id'],
+            'proc_int_id' => $processingExec['_id'],
+        ]);
+
+        // ajout tags sur la stored_data
+        $tags = [
+            'upload_id' => $upload['_id'],
+            'proc_int_id' => $processingExec['_id'],
+            CommonTags::DATASHEET_NAME => $upload['tags'][CommonTags::DATASHEET_NAME],
+        ];
+        if (isset($upload['tags'][CommonTags::PRODUCER])) {
+            $tags[CommonTags::PRODUCER] = $upload['tags'][CommonTags::PRODUCER];
+        }
+        if (isset($upload['tags'][CommonTags::PRODUCTION_YEAR])) {
+            $tags[CommonTags::PRODUCTION_YEAR] = $upload['tags'][CommonTags::PRODUCTION_YEAR];
+        }
+        $this->storedDataApiService->addTags($datastoreId, $vectorDb['_id'], $tags);
+
+        $this->processingApiService->launchExecution($datastoreId, $processingExec['_id']);
     }
 
     #[Route('/{uploadId}', name: 'delete', methods: ['DELETE'])]
