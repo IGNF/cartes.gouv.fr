@@ -6,6 +6,11 @@ const { i18n } = declareComponentKeys<
     | "explanation"
     | "explanation_no_private_services"
     | "back_to_catalogue"
+    | "data_details.producer"
+    | "data_details.contact_email"
+    | "data_details.subject"
+    | "data_details.subject_value"
+    | "data_details.data_name"
     | "form.layers.label"
     | "form.layers.error.at_least_one"
     | "form.beneficiaries.label"
@@ -27,6 +32,11 @@ export const AccessesRequestFrTranslations: Translations<"fr">["AccessesRequest"
     explanation_no_private_services:
         "Cette fiche ne décrit aucun service de diffusion dont l’accès est restreint. Vous avez déjà accès à toutes les données décrites.",
     back_to_catalogue: "Retour au catalogue de données",
+    "data_details.producer": "Producteur",
+    "data_details.contact_email": "Contact",
+    "data_details.subject": "Objet",
+    "data_details.subject_value": "Demande d’accès à des services de diffusion",
+    "data_details.data_name": "Donnée",
     "form.layers.label": "Sélectionner les services",
     "form.layers.error.at_least_one": "Sélectionnez une donnée",
     "form.beneficiaries.label": "Bénéficiaires",
@@ -46,6 +56,11 @@ export const AccessesRequestEnTranslations: Translations<"en">["AccessesRequest"
     explanation: undefined,
     explanation_no_private_services: undefined,
     back_to_catalogue: undefined,
+    "data_details.producer": undefined,
+    "data_details.contact_email": undefined,
+    "data_details.subject": undefined,
+    "data_details.subject_value": undefined,
+    "data_details.data_name": undefined,
     "form.layers.label": undefined,
     "form.layers.error.at_least_one": undefined,
     "form.beneficiaries.label": undefined,
