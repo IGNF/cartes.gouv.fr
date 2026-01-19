@@ -155,7 +155,7 @@ class UploadController extends AbstractController implements ApiControllerInterf
             }
 
             // supprime livraison si intégration terminée
-            if ($uploadIntegrationWorkflow->isIntegrationCompleted($progress)) {
+            if (false === $getOnlyProgress && $uploadIntegrationWorkflow->isIntegrationCompleted($progress)) {
                 $this->uploadApiService->remove($datastoreId, $uploadId);
             }
 
