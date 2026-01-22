@@ -38,7 +38,7 @@ const InputCollection: FC<InputCollectionProps> = (props: InputCollectionProps) 
                     if (!value) return true;
                     if (_validator) {
                         if (!_validator(value)) {
-                            return ctx.createError({ message: `${value} n'est pas une adresse email valide` });
+                            return ctx.createError({ message: `${value} n'est pas une adresse électronique valide` });
                         }
                     }
                     return true;

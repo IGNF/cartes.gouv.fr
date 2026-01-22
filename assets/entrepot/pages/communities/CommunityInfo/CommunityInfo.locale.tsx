@@ -39,8 +39,8 @@ export const CommunityInfoFrTranslations: Translations<"fr">["CommunityInfo"] = 
     "form.desc.info_max_length": "300 caractères maximum",
     "form.contact.label": "Contact",
     "form.contact.hint": "Format attendu : nom@domaine.fr",
-    "form.contact.error.required": "Le courriel de contact est obligatoire.",
-    "form.contact.error.invalid_email": "Le courriel de contact est invalide.",
+    "form.contact.error.required": "L’adresse électronique de contact est obligatoire.",
+    "form.contact.error.invalid_email": "L’adresse électronique de contact est invalide.",
     "form.private.label": "Privé",
     "form.private.hint":
         "Désactiver le mode privé pour que tous les utilisateurs puissent voir votre entrepôt et demander à le rejoindre sur la page Ajouter un entrepôt.",
