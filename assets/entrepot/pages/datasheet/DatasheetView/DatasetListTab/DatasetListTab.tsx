@@ -19,16 +19,25 @@ const DatasetListTab: FC<DataListTabProps> = ({ datastoreId, datasheet }) => {
     // TODO : il y en aura d'autres types de données aussi (pyramid vector, raster, etc)
     // liste des uploads/livraisons dont l'intégration en base de données n'a pas réussi ou n'a pas terminé
     const unfinishedUploads = useMemo(() => {
-        return datasheet.upload_list?.filter((upload) => {
-            if (upload.tags.datasheet_name !== datasheet.name) {
-                return false;
-            }
-            if (upload.tags.integration_progress === undefined) {
-                return true;
-            }
-            const integrationProgress = JSON.parse(upload.tags.integration_progress);
-            return ["waiting"].includes(Object.values(integrationProgress)?.[2] as string);
-        });
+        return (
+            datasheet.upload_list
+                ?.filter((upload) => upload.type === "VECTOR")
+                ?.filter((upload) => {
+                    if (upload.tags.datasheet_name !== datasheet.name) {
+                        return false;
+                    }
+                    if (upload.tags.integration_progress === undefined) {
+                        return true;
+                    }
+
+                    try {
+                        const integrationProgress = JSON.parse(upload.tags.integration_progress) as Record<string, string>;
+                        return "integration_processing" in integrationProgress && integrationProgress["integration_processing"] === "waiting";
+                    } catch {
+                        return false;
+                    }
+                }) ?? []
+        );
     }, [datasheet]);
 
     const nbPublications =
@@ -41,7 +50,7 @@ const DatasetListTab: FC<DataListTabProps> = ({ datastoreId, datasheet }) => {
                     Ajouter un fichier de données
                 </Button>
             </div>
-            {unfinishedUploads && unfinishedUploads.length > 0 && (
+            {unfinishedUploads.length > 0 && (
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--center", "fr-grid-row--middle")}>
                     <div className={fr.cx("fr-col")}>
                         <UnfinishedUploadList
@@ -53,9 +62,7 @@ const DatasetListTab: FC<DataListTabProps> = ({ datastoreId, datasheet }) => {
                     </div>
                 </div>
             )}
-            <div
-                className={fr.cx("fr-grid-row", "fr-grid-row--center", "fr-grid-row--middle", unfinishedUploads && unfinishedUploads.length > 0 && "fr-mt-4w")}
-            >
+            <div className={fr.cx("fr-grid-row", "fr-grid-row--center", "fr-grid-row--middle", unfinishedUploads.length > 0 && "fr-mt-4w")}>
                 <div className={fr.cx("fr-col")}>
                     <VectorDbList datastoreId={datastoreId} datasheetName={datasheet.name} vectorDbList={datasheet.vector_db_list} />
                 </div>
