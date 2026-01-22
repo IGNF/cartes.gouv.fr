@@ -7,7 +7,7 @@ import { PermissionWithOfferingsDetailsResponseDto } from "../../../../@types/en
 import { useTranslation } from "../../../../i18n/i18n";
 import { formatDateWithoutTimeFromISO } from "../../../../utils";
 import { routes } from "../../../../router/router";
-import { externalUrls } from "@/router/externalUrls";
+import { externalLink } from "@/router/externalUrls";
 
 import "../../../../sass/pages/my_keys.scss";
 import ovoidSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/background/ovoid.svg?no-inline";
@@ -104,13 +104,7 @@ const PermissionsListTab: FC<PermissionsListTabProps> = ({ permissions }) => {
                 <h6>{t("no_permissions")}</h6>
                 {t("explain_no_permissions")}
                 <div>
-                    <a
-                        className={fr.cx("fr-link")}
-                        href={externalUrls.help}
-                        target="_blank"
-                        rel="noreferrer"
-                        title={t("consult_documentation") + " - " + tCommon("new_window")}
-                    >
+                    <a {...externalLink("helpUserGuideCreateKeys", t("consult_documentation"))} className={fr.cx("fr-link")}>
                         {t("consult_documentation")}
                     </a>
                 </div>
