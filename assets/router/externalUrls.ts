@@ -12,6 +12,7 @@ export const externalUrls = {
     helpUserGuideCatalogueGeneral: appRoot + "/aide/fr/guides-utilisateur/rechercher-une-donnee/generalites-catalogue/",
     helpUserGuideGeopfServicesTutorial: appRoot + "/aide/fr/guides-utilisateur/utiliser-les-services-de-la-geoplateforme/tutoriels/",
     helpProducerGuideCreateDatasheet: appRoot + "/aide/fr/guides-producteur/publier-des-donnees-via-cartes-gouv/deposer-donnees-sur-cartes-gouv/",
+    helpUserGuideCreateKeys: appRoot + "/aide/fr/guides-utilisateur/creation-des-cles-et-integration-sig/creer-une-cle-d-acces/",
     catalogue: catalogueUrl ?? appRoot + "/rechercher-une-donnee",
     maps: appRoot + "/explorer-les-cartes",
     contact_us: appRoot + "/aide/fr/nous-ecrire",

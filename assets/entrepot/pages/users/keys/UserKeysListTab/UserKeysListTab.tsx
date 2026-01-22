@@ -24,7 +24,7 @@ import ovoidSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/background/ovoid.sv
 import padlock from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/system/padlock.svg?no-inline";
 import Select from "@codegouvfr/react-dsfr/Select";
 import { useAuthStore } from "@/stores/AuthStore";
-import { externalUrls } from "@/router/externalUrls";
+import { externalLink } from "@/router/externalUrls";
 
 type UserKeysListTabProps = {
     keys: UserKeyDetailedWithAccessesResponseDto[] | undefined;
@@ -132,13 +132,7 @@ const UserKeysListTab: FC<UserKeysListTabProps> = ({ keys, permissions }) => {
                     <div className={fr.cx("fr-col-sm-7", "fr-col-md-8", "fr-pl-md-6w")}>
                         <h6>{t("no_keys")}</h6>
                         {t("explain_no_keys")}
-                        <a
-                            className={fr.cx("fr-link")}
-                            href={externalUrls.help}
-                            target="_blank"
-                            rel="noreferrer"
-                            title={t("consult_documentation") + " - " + tCommon("new_window")}
-                        >
+                        <a {...externalLink("helpUserGuideCreateKeys", t("consult_documentation"))} className={fr.cx("fr-link")}>
                             {t("consult_documentation")}
                         </a>
                     </div>
