@@ -181,12 +181,12 @@ const MetadataTab: FC<MetadataTabProps> = ({ datastoreId, metadataQuery }) => {
                         </Accordion>
 
                         <Accordion titleAs="h2" defaultExpanded={true} label={"Contact sur les métadonnées"}>
-                            <MetadataField title={"Email"} content={metadata.csw_metadata?.contact_email} />
+                            <MetadataField title={"Adresse électronique"} content={metadata.csw_metadata?.contact_email} />
                         </Accordion>
 
                         <Accordion titleAs="h2" defaultExpanded={true} label={"Responsable de la ressource"}>
                             <MetadataField title={"Organisme"} content={metadata.csw_metadata?.organisation_name} />
-                            <MetadataField title={"Email"} content={metadata.csw_metadata?.organisation_email} />
+                            <MetadataField title={"Adresse électronique"} content={metadata.csw_metadata?.organisation_email} />
                         </Accordion>
 
                         <Accordion titleAs="h2" defaultExpanded={true} label={"Accès à la ressource"}>

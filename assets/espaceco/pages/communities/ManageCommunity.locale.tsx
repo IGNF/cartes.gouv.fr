@@ -275,10 +275,10 @@ export const ManageCommunityFrTranslations: Translations<"fr">["ManageCommunity"
     "report.configure_statuses": "Paramétrer les status des signalements (optionnel)",
     "report.configure_statuses.explain":
         "Vous pouvez supprimer un maximum de 2 status en les décochant, changer leur nom et ajouter une explication pour améliorer la compréhension de vos utilisateurs.",
-    "report.manage.emailplanners": "Gérer les emails de suivi des nouveaux signalements (optionnel)",
+    "report.manage.emailplanners": "Gérer les courriels de suivi des nouveaux signalements (optionnel)",
     "report.manage.emailplanners_explain":
-        "Générer des emails de suivi des signalements automatiques. Vous pouvez ajouter des adresses email dont les destinataires recevront des emails simples et pré-configurés pour tout nouveau signalement, ou configurer vous même les emails pour un meilleur suivi des signalements.",
-    "report.manage.no_emailplanners": "Aucun email de suivi",
+        "Générer des emails de suivi des signalements automatiques. Vous pouvez ajouter des courriels dont les destinataires recevront des emails simples et pré-configurés pour tout nouveau signalement, ou configurer vous même les emails pour un meilleur suivi des signalements.",
+    "report.manage.no_emailplanners": "Aucun courriel de suivi",
     "report.manage_permissions": "Gérer les permissions (optionnel)",
     "report.manage_permissions.shared_report": "Partage des signalements",
     "report.manage_permissions.shared_report_hint":

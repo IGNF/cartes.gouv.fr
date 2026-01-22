@@ -16,7 +16,7 @@ export const InputCollectionFrTranslations: Translations<"fr">["InputCollection"
             case "none":
                 return "";
             case "email":
-                return `${value} n'est pas un email valide`;
+                return `${value} n'est pas une adresse électronique valide`;
         }
     },
 };

@@ -87,8 +87,8 @@ export const MetadatasFormFrTranslations: Translations<"fr">["MetadatasForm"] = 
         "Thème dont relèvent les données géographiques, conformément aux définitions des annexes I, II ou III de la directive Inspire",
     "metadata.description_form.free_keywords": "Mots clés libres (optionnel)",
     "metadata.description_form.hint_free_keywords": "Saisissez librement des mots clés en appuyant sur Entrée après chaque mot",
-    "metadata.description_form.contact_email": "Email de contact sur les métadonnées",
-    "metadata.description_form.hint_contact_email": "E-mail auprès duquel des compléments d’information peuvent être obtenus",
+    "metadata.description_form.contact_email": "Adresse électronique de contact sur les métadonnées",
+    "metadata.description_form.hint_contact_email": "Adresse électronique auprès de laquelle des compléments d’information peuvent être obtenus",
     "metadata.description_form.quality_title": "Qualité",
     "metadata.description_form.resource_genealogy": "Généalogie de la ressource (optionnelle)",
     "metadata.description_form.hint_resource_genealogy":
@@ -100,8 +100,8 @@ export const MetadatasFormFrTranslations: Translations<"fr">["MetadatasForm"] = 
     "metadata.description_form.organization": "Organisme",
     "metadata.description_form.hint_organization":
         "Nom de l’organisme responsable de la ressource  qui prend la responsabilité de la diffuser ou  qui est légitime pour rendre celle-ci visible et décider de son mode de diffusion",
-    "metadata.description_form.organization_email": "Email",
-    "metadata.description_form.hint_organization_email": "Email de contact de l’organisme",
+    "metadata.description_form.organization_email": "Adresse électronique",
+    "metadata.description_form.hint_organization_email": "Adresse électronique de contact de l’organisme",
     "metadata.additionnal_infos_form.metadata_information_title": "Informations sur les métadonnées",
     "metadata.additionnal_infos_form.hierarchy_level": "Type de ressource",
     "metadata.additionnal_infos_form.hierarchy_level_dataset": "Jeu de données",

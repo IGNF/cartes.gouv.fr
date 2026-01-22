@@ -47,7 +47,7 @@ class ContactController extends AbstractController
             // Validite de l'email
             $userEmail = $data['email_contact'];
             if (!filter_var($userEmail, FILTER_VALIDATE_EMAIL)) {
-                throw new BadRequestHttpException("L'adresse mail n'est pas valide");
+                throw new BadRequestHttpException("L’adresse électronique n'est pas valide");
             }
 
             // utilisateur est un bot si la condtion suivante est vraie

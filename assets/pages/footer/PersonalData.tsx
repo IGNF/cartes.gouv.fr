@@ -149,7 +149,7 @@ const PersonalData = () => {
                     </h3>
                     <ul>
                         <li>
-                            <strong>Adresse courriel</strong>
+                            <strong>Adresse électronique</strong>
                         </li>
                         <li>Nom</li>
                         <li>Prénom</li>
@@ -251,7 +251,7 @@ const PersonalData = () => {
                             <strong>Code postal</strong>
                         </li>
                         <li>
-                            <strong>Adresse courriel professionnelle, universitaire ou personnelle</strong>
+                            <strong>Adresse électronique professionnelle, universitaire ou personnelle</strong>
                         </li>
                         <li>
                             <strong>Organisme</strong>

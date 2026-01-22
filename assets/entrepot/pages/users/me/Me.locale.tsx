@@ -33,7 +33,7 @@ export const MeFrTranslations: Translations<"fr">["Me"] = {
     ),
     email: ({ email }) => (
         <>
-            <strong>Adresse email</strong>&nbsp;: {email}
+            <strong>Adresse électronique</strong>&nbsp;: {email}
         </>
     ),
     registration_date: ({ date }) => (
