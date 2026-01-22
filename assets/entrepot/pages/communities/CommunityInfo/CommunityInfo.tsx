@@ -164,6 +164,7 @@ export default function CommunityInfo() {
     const isSupervisor = community.supervisor._id === user?.id;
     const communityUserRights = user?.communities_member.find((member) => member.community?._id === community._id)?.rights ?? [];
     const hasCommunityRight = communityUserRights.includes(CommunityMemberDtoRightsEnum.COMMUNITY);
+    const canModifyCommunity = isSupervisor || hasCommunityRight;
 
     const leaveCommunityMutation = useMutation({
         mutationFn: () => {
@@ -235,7 +236,7 @@ export default function CommunityInfo() {
                         state={errors.name ? "error" : "default"}
                         stateRelatedMessage={errors.name?.message}
                         nativeInputProps={register("name")}
-                        disabled={!hasCommunityRight}
+                        disabled={!canModifyCommunity}
                     />
 
                     <Input
@@ -245,7 +246,7 @@ export default function CommunityInfo() {
                         stateRelatedMessage={errors.description?.message ?? t("form.desc.info_max_length")}
                         textArea={true}
                         nativeTextAreaProps={{ ...register("description"), rows: 3 }}
-                        disabled={!hasCommunityRight}
+                        disabled={!canModifyCommunity}
                     />
 
                     <Input
@@ -254,7 +255,7 @@ export default function CommunityInfo() {
                         state={errors.contact ? "error" : "default"}
                         stateRelatedMessage={errors.contact?.message}
                         nativeInputProps={register("contact")}
-                        disabled={!hasCommunityRight}
+                        disabled={!canModifyCommunity}
                     />
                     <Controller
                         control={control}
@@ -268,12 +269,12 @@ export default function CommunityInfo() {
                                 className={fr.cx("fr-mb-6v")}
                                 checked={field.value}
                                 onChange={field.onChange}
-                                disabled={!isSupervisor || !hasCommunityRight}
+                                disabled={!isSupervisor} // NOTE : action spéciale qui est réservée au superviseur
                             />
                         )}
                     />
 
-                    {hasCommunityRight && (
+                    {canModifyCommunity && (
                         <Button
                             type="submit"
                             disabled={!isDirty}
