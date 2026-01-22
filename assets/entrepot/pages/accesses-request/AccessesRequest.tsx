@@ -23,8 +23,6 @@ import { CartesApiException } from "../../../modules/jsonFetch";
 import { useAuthStore } from "../../../stores/AuthStore";
 import api from "../../api";
 
-import placeholder1x1Url from "@/img/placeholder.1x1.png";
-
 const { t } = getTranslation("AccessesRequest");
 
 const MYSELF = "myself";
@@ -118,50 +116,33 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
             ) : (
                 metadataQuery.data !== undefined && (
                     <>
-                        <div className={css({ display: "flex", gap: "2rem", flexDirection: "column", [fr.breakpoints.up("sm")]: { flexDirection: "row" } })}>
-                            <img
-                                src={metadataQuery.data?.thumbnail_url ?? placeholder1x1Url}
-                                alt=""
-                                className={css({
-                                    width: "9rem",
-                                    height: "9rem",
-                                    objectFit: "cover",
-                                })}
-                            />
-
-                            <div
-                                className={css({
+                        <div
+                            className={css({
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: "0.75rem",
+                                "& > div": {
                                     display: "flex",
                                     flexDirection: "column",
-                                    overflow: "hidden",
-                                    gap: "0.75rem",
-                                })}
-                            >
-                                <strong>{metadataQuery.data?.title}</strong>
-                                <p
-                                    className={css({
-                                        textOverflow: "ellipsis",
-                                        overflow: "hidden",
-                                        height: "4.5rem",
-                                        margin: 0,
-                                        WebkitLineClamp: 3,
-                                        display: "-webkit-box",
-                                        WebkitBoxOrient: "vertical",
-                                    })}
-                                >
-                                    {metadataQuery.data?.abstract}
-                                </p>
-                                <p
-                                    className={cx(
-                                        fr.cx("fr-text--sm", "fr-icon-bank-line", "fr-icon--sm", "fr-m-0"),
-                                        css({
-                                            color: fr.colors.decisions.text.default.grey.default,
-                                            "::before": { marginRight: "0.5rem" },
-                                        })
-                                    )}
-                                >
-                                    {metadataQuery.data?.organisation_name}
-                                </p>
+                                    [fr.breakpoints.up("sm")]: { flexDirection: "row", gap: "0.75rem" },
+                                },
+                            })}
+                        >
+                            <div>
+                                <strong>{t("data_details.producer")}</strong>
+                                {metadataQuery.data?.organisation_name}
+                            </div>
+                            <div>
+                                <strong>{t("data_details.contact_email")}</strong>
+                                {metadataQuery.data?.contact_email}
+                            </div>
+                            <div>
+                                <strong>{t("data_details.subject")}</strong>
+                                {t("data_details.subject_value")}
+                            </div>
+                            <div>
+                                <strong>{t("data_details.data_name")}</strong>
+                                {metadataQuery.data?.title}
                             </div>
                         </div>
                         <hr className={fr.cx("fr-mt-10v", "fr-pb-10v")} />
@@ -226,7 +207,7 @@ const AccessesRequest: FC<AskForAccesses> = ({ fileIdentifier }) => {
                                                     {layer.name}
                                                 </span>
                                                 {layer.gmd_online_resource_protocol && (
-                                                    <Badge noIcon={true} severity={"info"} className={fr.cx("fr-p-1v")} small as="span">
+                                                    <Badge noIcon={true} severity={"info"} className={fr.cx("fr-py-1v", "fr-px-2v")} small as="span">
                                                         {gmdProtocolToServiceType(layer.gmd_online_resource_protocol)}
                                                     </Badge>
                                                 )}
