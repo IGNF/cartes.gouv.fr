@@ -18,6 +18,7 @@ import Discover from "@/pages/discover/Discover";
 const RouterRenderer: FC = () => {
     const route = useRoute();
     const user = useAuthStore((state) => state.user);
+    const logoutInProgress = useAuthStore((state) => state.logoutInProgress);
 
     const content: JSX.Element = useMemo(() => {
         // vérification si la route demandée est bien connue/enregistrée
@@ -26,7 +27,7 @@ const RouterRenderer: FC = () => {
         }
 
         // vérifier si l'utilisateur est authentifié et éventuellement ses droits à la ressource demandée
-        if (!groups.public.has(route) && user === null) {
+        if (!groups.public.has(route) && user === null && !logoutInProgress) {
             return <RedirectToLogin />;
         }
 
@@ -47,7 +48,7 @@ const RouterRenderer: FC = () => {
         }
 
         return <GroupApp route={route} />;
-    }, [route, user]);
+    }, [route, user, logoutInProgress]);
 
     return (
         <Suspense
