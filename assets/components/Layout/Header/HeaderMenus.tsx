@@ -2,6 +2,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
 
 import SymfonyRouting from "@/modules/Routing";
+import { resetAuth } from "@/modules/authReset";
 import { externalLink, externalUrls } from "@/router/externalUrls";
 import { routes } from "@/router/router";
 import { useAuthStore } from "@/stores/AuthStore";
@@ -143,6 +144,7 @@ export function HeaderMenuUser() {
                 iconId: "fr-icon-logout-box-r-line",
                 linkProps: {
                     href: SymfonyRouting.generate("cartesgouvfr_security_logout"),
+                    onClick: () => resetAuth("logout"),
                 },
             }}
         />

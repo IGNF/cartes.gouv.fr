@@ -7,6 +7,9 @@ interface AuthStore {
 
     isAuthenticated: () => boolean;
 
+    logoutInProgress: boolean;
+    setLogoutInProgress: (logoutInProgress: boolean) => void;
+
     sessionExpired: boolean;
     setSessionExpired: (sessionExpired: boolean) => void;
 }
@@ -20,6 +23,9 @@ export const useAuthStore = create<AuthStore>()((set, get) => ({
 
     /** Vrai si user !== null */
     isAuthenticated: () => get().user !== null,
+
+    logoutInProgress: false,
+    setLogoutInProgress: (logoutInProgress) => set(() => ({ logoutInProgress })),
 
     sessionExpired: false,
     setSessionExpired: (sessionExpired) => set(() => ({ sessionExpired })),

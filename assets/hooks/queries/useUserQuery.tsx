@@ -10,7 +10,7 @@ export default function useUserQuery(options?: Partial<UseQueryOptions<CartesUse
     return useQuery<CartesUser, CartesApiException>({
         queryKey: RQKeys.user_me(),
         queryFn: ({ signal }) => api.user.getMe({ signal }),
-        staleTime: delta.minutes(5),
+        staleTime: delta.minutes(2),
         ...options,
     });
 }

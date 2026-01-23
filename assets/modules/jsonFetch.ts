@@ -1,4 +1,5 @@
 import { useAuthStore } from "../stores/AuthStore";
+import { resetAuth } from "./authReset";
 
 /** doit avoir la même structure que l'erreur renvoyée par CartesApiExceptionSubscriber de Symfony */
 export type CartesApiException = {
@@ -50,7 +51,9 @@ export async function apiFetch(
                 } else {
                     const data = await response.json().catch(() => ({}));
                     if (hasSessionExpired(data)) {
-                        useAuthStore.getState().setSessionExpired(true);
+                        if (!useAuthStore.getState().logoutInProgress) {
+                            resetAuth("session-expired");
+                        }
                     }
                     reject(data);
                 }
