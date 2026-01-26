@@ -7,9 +7,11 @@ import { GeostylerStyles, Service, StyleFormatEnum } from "@/@types/app";
 import UploadStyleFiles from "@/components/Utils/Geostyler/UploadStyleFiles";
 import RMap from "@/components/Utils/RMap";
 import { useStyleForm } from "@/contexts/StyleFormContext";
-import TMSStyleTools from "@/modules/Style/TMSStyleFilesManager/TMSStyleTools";
+import TMSStyleTools, { MbStyleParseError } from "@/modules/Style/TMSStyleFilesManager/TMSStyleTools";
 import getWebService from "@/modules/WebServices/WebServices";
-import { decodeKeys } from "@/utils";
+import { decodeKeys, encodeKey } from "@/utils";
+import { StyleAddModifyFormType } from "./StyleAddModifyForm";
+import Accordion from "@codegouvfr/react-dsfr/Accordion";
 
 type UploadLayerStylesProps = {
     service: Service;
@@ -20,7 +22,7 @@ const tmsStyleTools = new TMSStyleTools();
 
 const UploadLayerStyles: FC<UploadLayerStylesProps> = (props) => {
     const { names, service } = props;
-    const { control } = useFormContext();
+    const { control, setValue: setFormValue, setError: setFormError } = useFormContext<StyleAddModifyFormType>();
 
     const { isMapbox, isTms, styleFormats } = useStyleForm();
 
@@ -38,31 +40,18 @@ const UploadLayerStyles: FC<UploadLayerStylesProps> = (props) => {
     });
 
     const [currentStyle, setCurrentStyle] = useState<GeostylerStyles>([]);
-    // TODO refactor
     useEffect(() => {
         let cancelled = false;
         async function computeCurrentStyle() {
             if (isTms) {
-                if (isMapbox) {
-                    if (!cancelled && styleFiles?.["mapbox"]) {
-                        const mbStyle = tmsStyleTools.buildMbStyle(service, styleFiles?.["mapbox"]);
-                        setCurrentStyle([
-                            {
-                                format: StyleFormatEnum.Mapbox,
-                                style: JSON.stringify(mbStyle),
-                            },
-                        ]);
-                    }
-                } else {
-                    const mbStyle = await tmsStyleTools.getMbStyleFromSLDQML(service, names, styleFiles ?? {}, styleFormats ?? {});
-                    if (!cancelled) {
-                        setCurrentStyle([
-                            {
-                                format: StyleFormatEnum.Mapbox,
-                                style: JSON.stringify(mbStyle),
-                            },
-                        ]);
-                    }
+                if (!cancelled && styleFiles?.["mapbox"]) {
+                    const mbStyle = tmsStyleTools.buildMbStyle(service, styleFiles?.["mapbox"]);
+                    setCurrentStyle([
+                        {
+                            format: StyleFormatEnum.Mapbox,
+                            style: JSON.stringify(mbStyle),
+                        },
+                    ]);
                 }
             } else {
                 if (!cancelled) {
@@ -81,6 +70,42 @@ const UploadLayerStyles: FC<UploadLayerStylesProps> = (props) => {
             cancelled = true;
         };
     }, [isTms, isMapbox, service, names, styleFiles, styleFormats]);
+
+    useEffect(() => {
+        if (!isTms || isMapbox) {
+            return;
+        }
+
+        const decodedStyleFiles: Record<string, string> = Object.entries(styleFiles ?? {}).reduce(
+            (acc, [k, v]) => {
+                if (v !== undefined) {
+                    acc[k] = v;
+                }
+                return acc;
+            },
+            {} as Record<string, string>
+        );
+
+        delete decodedStyleFiles["mapbox"];
+
+        const computeMbStyleFromSLDQML = async () => {
+            try {
+                const mbStyle = await tmsStyleTools.getMbStyleFromSLDQML(service, names, decodedStyleFiles, styleFormats ?? {});
+                const newMbStyleString = JSON.stringify(mbStyle);
+                const currentMbStyle = styleFiles?.["mapbox"];
+                if (currentMbStyle !== newMbStyleString) {
+                    setFormValue(`style_files.${encodeKey("mapbox")}`, newMbStyleString, { shouldValidate: true });
+                }
+            } catch (error) {
+                if (error instanceof MbStyleParseError) {
+                    setFormError(`style_files.${encodeKey(error.layerName ?? "mapbox")}`, { message: error.message });
+                } else if (error instanceof Error) {
+                    setFormError(`style_files.${encodeKey("mapbox")}`, { message: error.message });
+                }
+            }
+        };
+        computeMbStyleFromSLDQML();
+    }, [isTms, isMapbox, service, names, styleFormats, styleFiles, setFormValue, setFormError]);
 
     return (
         <>
@@ -114,6 +139,14 @@ const UploadLayerStyles: FC<UploadLayerStylesProps> = (props) => {
                     />
                 )}
             />
+
+            <Accordion label="Mapbox">
+                <pre>
+                    <code style={{ whiteSpace: "pre" }} className={fr.cx("fr-text--sm")}>
+                        {JSON.stringify(JSON.parse(styleFiles?.["mapbox"] ?? "{}"), null, 4)}
+                    </code>
+                </pre>
+            </Accordion>
         </>
     );
 };
