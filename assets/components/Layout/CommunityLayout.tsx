@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, PropsWithChildren, memo, useMemo } from "react";
 
 import api from "../../entrepot/api";
@@ -26,13 +26,20 @@ const CommunityLayout: FC<PropsWithChildren<CommunityLayoutProps>> = (props) => 
     const { accessRight, children, communityId, ...rest } = props;
 
     const { user } = useAuthStore();
+    const queryClient = useQueryClient();
+
     const { data, error, failureReason, isFetching, isLoading, status } = useQuery<[CommunityDetailResponseDto, Datastore | undefined], CartesApiException>({
         queryKey: RQKeys.community(communityId),
         queryFn: async ({ signal }) => {
             const community = await api.community.get(communityId, { signal });
             let datastore: Datastore | undefined;
-            if (community.datastore?._id) {
-                datastore = await api.datastore.get(community.datastore?._id, { signal });
+            if (community.datastore !== undefined && community.datastore._id) {
+                const datastoreId = community.datastore._id;
+                datastore = await queryClient.ensureQueryData({
+                    queryKey: RQKeys.datastore(datastoreId),
+                    queryFn: () => api.datastore.get(datastoreId, { signal }),
+                    revalidateIfStale: true,
+                });
             }
             return [community, datastore];
         },

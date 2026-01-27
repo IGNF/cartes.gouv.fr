@@ -2,12 +2,14 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { Breadcrumb } from "@codegouvfr/react-dsfr/Breadcrumb";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { Notice } from "@codegouvfr/react-dsfr/Notice";
+import { cx } from "@codegouvfr/react-dsfr/tools/cx";
+import { useHead } from "@unhead/react";
 import { PropsWithChildren } from "react";
+import { tss } from "tss-react";
 
 import DatastoreSideMenu from "@/components/Layout/DatastoreSideMenu";
 import useBreadcrumb from "@/hooks/useBreadcrumb";
 import useDatastoreSelection from "@/hooks/useDatastoreSelection";
-import useDocumentTitle from "@/hooks/useDocumentTitle";
 import { routes } from "@/router/router";
 import LoadingText from "../Utils/LoadingText";
 import SessionExpiredAlert from "../Utils/SessionExpiredAlert";
@@ -18,12 +20,20 @@ export type DatastoreMainProps = PropsWithChildren<
         datastoreId?: string;
         communityId?: string;
     }
->;
-export default function DatastoreMain(props: DatastoreMainProps) {
-    const { datastoreId, communityId, children, customBreadcrumbProps, noticeProps, title, fluidContainer = false } = props;
+> & {
+    classes?: Partial<MainProps["classes"] & Record<"content", string>>;
+};
 
-    useDocumentTitle(title);
+export default function DatastoreMain(props: DatastoreMainProps) {
+    const { datastoreId, communityId, children, customBreadcrumbProps, noticeProps, title, classes: propsClasses } = props;
+
+    useHead({
+        titleTemplate: "%s | cartes.gouv.fr",
+        title: title,
+    });
     const breadcrumbProps = useBreadcrumb(customBreadcrumbProps);
+
+    const { classes } = useStyles();
 
     const { sandboxDatastore } = useDatastoreSelection();
     if (!sandboxDatastore) {
@@ -37,15 +47,10 @@ export default function DatastoreMain(props: DatastoreMainProps) {
     return (
         <main id="main" role="main">
             {noticeProps && <Notice isClosable {...noticeProps} />}
-            <div className={fr.cx(fluidContainer ? "fr-container--fluid" : "fr-container")}>
+            <div className={propsClasses?.container ?? fr.cx("fr-container")}>
                 <div className={fr.cx("fr-grid-row")}>
                     <div
-                        className={fr.cx("fr-col-12", "fr-col-md-3")} // "fr-pl-5w"
-                        style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: fr.spacing("10v"),
-                        }}
+                        className={cx(fr.cx("fr-col-12", "fr-col-md-3"), classes?.sideMenuCol)} // "fr-pl-5w"
                     >
                         <DatastoreSideMenu datastoreId={datastoreId} communityId={communityId} />
 
@@ -53,19 +58,14 @@ export default function DatastoreMain(props: DatastoreMainProps) {
                             className={fr.cx("fr-mb-md-6v", "fr-mr-md-8v")}
                             buttons={[
                                 {
-                                    children: "Rejoindre un entrepôt",
-                                    linkProps: routes.join_community().link,
-                                    priority: "secondary",
-                                },
-                                {
-                                    children: "Créer un entrepôt",
+                                    children: "Ajouter un entrepôt",
                                     linkProps: routes.datastore_create_request().link,
                                     priority: "secondary",
                                 },
                             ]}
                         />
                     </div>
-                    <div className={fr.cx("fr-col-12", "fr-col-md-9")}>
+                    <div className={cx(fr.cx("fr-col-12", "fr-col-md-9"), classes.content, propsClasses?.content)}>
                         {/* // "fr-px-5w" */}
                         {breadcrumbProps && <Breadcrumb {...breadcrumbProps} />}
                         <SessionExpiredAlert />
@@ -76,3 +76,15 @@ export default function DatastoreMain(props: DatastoreMainProps) {
         </main>
     );
 }
+
+const useStyles = tss.withName({ DatastoreMain }).create({
+    sideMenuCol: {
+        display: "flex",
+        flexDirection: "column",
+        gap: fr.spacing("10v"),
+        borderRight: `1px solid ${fr.colors.decisions.border.default.grey.default}`,
+    },
+    content: {
+        padding: "0 1rem",
+    },
+});

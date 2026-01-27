@@ -6,6 +6,7 @@ import CommunityLayout, { CommunityLayoutProps } from "../components/Layout/Comm
 import { CommunityMemberDtoRightsEnum } from "../@types/entrepot";
 import PageNotFoundWithLayout from "../pages/error/PageNotFoundWithLayout";
 
+const CommunityInfo = lazy(() => import("../entrepot/pages/communities/CommunityInfo/CommunityInfo"));
 const CommunityMembers = lazy(() => import("../entrepot/pages/communities/CommunityMembers/CommunityMembers"));
 
 interface IGroupCommunityProps {
@@ -17,6 +18,10 @@ function GroupCommunity(props: IGroupCommunityProps) {
 
     const content: { render: JSX.Element; layoutProps?: Omit<CommunityLayoutProps, "communityId"> } = useMemo(() => {
         switch (route.name) {
+            case "community_info":
+                return {
+                    render: <CommunityInfo />,
+                };
             case "members_list":
                 return {
                     layoutProps: { accessRight: CommunityMemberDtoRightsEnum.COMMUNITY },

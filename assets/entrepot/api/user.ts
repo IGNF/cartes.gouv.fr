@@ -99,6 +99,13 @@ const addToSandbox = () => {
     });
 };
 
+const leaveCommunity = (communityId: string) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_user_leave_community", { communityId });
+    return jsonFetch<null>(url, {
+        method: "DELETE",
+    });
+};
+
 const user = {
     getMe,
     getDatastoresList,
@@ -111,6 +118,7 @@ const user = {
     updateKey,
     removeKey,
     addToSandbox,
+    leaveCommunity,
 };
 
 export default user;

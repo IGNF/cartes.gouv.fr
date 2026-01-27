@@ -17,7 +17,12 @@ import telechargezBdtopoSrcSet from "./img/telechargez-bdtopo.png?w=400;600&form
 
 export default function PresentationServiceCatalogue() {
     return (
-        <Main title="Rechercher une donnée" fluidContainer={true}>
+        <Main
+            title="Rechercher une donnée"
+            classes={{
+                container: fr.cx("fr-container--fluid"),
+            }}
+        >
             <div className={classes.bgContrastInfoGrey}>
                 <div className={cx(fr.cx("fr-container"), classes.container)}>
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>

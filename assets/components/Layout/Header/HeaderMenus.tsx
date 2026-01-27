@@ -22,8 +22,8 @@ export function HeaderMenuHelp() {
                 },
                 {
                     iconId: "fr-icon-book-2-line",
-                    children: "Guide d'utilisation",
-                    linkProps: externalLink("helpProducerGuide", "Guide d'utilisation"),
+                    children: "Guide d’utilisation",
+                    linkProps: externalLink("helpProducerGuide", "Guide d’utilisation"),
                 },
                 {
                     iconId: "fr-icon-mail-line",

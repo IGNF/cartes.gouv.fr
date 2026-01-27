@@ -8,6 +8,7 @@ use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\EntrepotApi\CommunityApiService;
 use App\Services\EntrepotApi\UserApiService;
+use App\Services\SandboxService;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -25,16 +26,17 @@ class CommunityController extends AbstractController implements ApiControllerInt
 {
     public function __construct(
         private CommunityApiService $communityApiService,
+        private SandboxService $sandboxService,
         private UserApiService $userApiService,
     ) {
     }
 
-    #[Route('/get', name: 'get', methods: ['GET'])
-    ]
+    #[Route('/', name: 'get', methods: ['GET'])]
     public function get(string $communityId): JsonResponse
     {
         try {
             $community = $this->communityApiService->get($communityId);
+            $community['is_sandbox'] = $this->sandboxService->isSandboxCommunity($community['_id']);
 
             return new JsonResponse($community);
         } catch (ApiException $ex) {
@@ -42,8 +44,21 @@ class CommunityController extends AbstractController implements ApiControllerInt
         }
     }
 
-    #[Route('/members', name: 'members', methods: ['GET'])
-    ]
+    #[Route('/', name: 'modify', methods: ['PATCH'])]
+    public function modify(string $communityId, Request $request): JsonResponse
+    {
+        try {
+            $data = json_decode($request->getContent(), true);
+            $community = $this->communityApiService->modifyCommunity($communityId, $data);
+            $community['is_sandbox'] = $this->sandboxService->isSandboxCommunity($community['_id']);
+
+            return new JsonResponse($community);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
+    #[Route('/members', name: 'members', methods: ['GET'])]
     public function getMembers(string $communityId): JsonResponse
     {
         try {
@@ -102,8 +117,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
         }
     }
 
-    #[Route('/remove_member', name: 'remove_member', methods: ['DELETE'])
-    ]
+    #[Route('/remove_member', name: 'remove_member', methods: ['DELETE'])]
     public function removeMember(string $communityId, Request $request): JsonResponse
     {
         try {
@@ -117,13 +131,13 @@ class CommunityController extends AbstractController implements ApiControllerInt
                 throw new CartesApiException("Vous n'êtes pas membre de cette communauté", JsonResponse::HTTP_BAD_REQUEST);
             }
 
-            // Ai-je le droit de modifier les membres ?
-            if (!$this->_allowedToModifyMembers($communityMember[0], $me)) {
-                throw new CartesApiException("Vous n'avez pas les droits pour supprimer un membre de cette communauté", JsonResponse::HTTP_BAD_REQUEST);
-            }
-
             $data = json_decode($request->getContent(), true);
             $userId = $data['user_id'];
+
+            // Ai-je le droit de modifier les membres ?
+            if ($me['_id'] !== $userId && !$this->_allowedToModifyMembers($communityMember[0], $me)) {
+                throw new CartesApiException("Vous n'avez pas les droits pour supprimer un membre de cette communauté", JsonResponse::HTTP_BAD_REQUEST);
+            }
 
             $this->communityApiService->removeUserRights($communityId, $userId);
 

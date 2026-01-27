@@ -2497,7 +2497,7 @@ export interface CommunitySupervisorResponseDto {
      * @format date-time
      */
     update: string;
-    /** Courriel du superviseur */
+    /** Adresse électronique du superviseur */
     email?: string;
     /**
      * Identifiant technique

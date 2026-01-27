@@ -75,7 +75,7 @@ const SiteMap = () => {
                                         <a href={externalUrls.help}>Guides d’utilisation</a>
                                     </li>
                                     <li>
-                                        <a {...routes.contact().link}>Nous écrire</a>
+                                        <a href={externalUrls.contact_us}>Nous écrire</a>
                                     </li>
                                 </ul>
                             </li>

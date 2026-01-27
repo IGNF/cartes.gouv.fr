@@ -58,7 +58,7 @@ const NewsArticle: FC<NewsArticleProps> = ({ slug }) => {
         <Main
             customBreadcrumbProps={{
                 homeLinkProps: routes.discover().link,
-                segments: [{ label: tBreadcrumb("news"), linkProps: routes.news_list().link }],
+                segments: [{ label: tBreadcrumb("news_list"), linkProps: routes.news_list().link }],
                 currentPageLabel: documentTitle,
             }}
             title={documentTitle}

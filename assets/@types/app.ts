@@ -8,6 +8,7 @@ import {
     BoundingBox,
     CheckingExecutionStandardDetailResponseDto,
     CheckingExecutionStandardDetailResponseDtoStatusEnum,
+    CommunityDetailResponseDto,
     CommunityMemberDto,
     CommunityUserResponseDtoRightsEnum,
     ConfigurationAltimetryDetailsContent,
@@ -60,6 +61,10 @@ export type CartesUser = {
 
 /** datastore */
 export type Datastore = DatastoreDetailResponseDto & {
+    is_sandbox?: boolean;
+};
+
+export type Community = CommunityDetailResponseDto & {
     is_sandbox?: boolean;
 };
 
@@ -364,6 +369,7 @@ export type CswMetadataLayer = {
     gmd_online_resource_url?: string;
     offering_id?: string;
     open?: boolean;
+    description?: string;
 };
 
 export type CswStyleFile = {
@@ -402,6 +408,7 @@ export type CswMetadata = {
     style_files?: CswStyleFile[];
     capabilities_files?: CswCapabilitiesFile[];
     documents?: CswDocument[];
+    thumbnail_url?: string;
 };
 
 export type Metadata = MetadataStandardResponseDto & {
@@ -409,18 +416,6 @@ export type Metadata = MetadataStandardResponseDto & {
     tags: {
         datasheet_name?: string;
     };
-};
-
-export type GeonetworkMetadataLayers = {
-    name?: string;
-    endpointType?: string;
-    endpointUrl?: string;
-    offeringId?: string;
-};
-
-export type GeonetworkMetadataResponse = {
-    contact_email: string;
-    private_layers: GeonetworkMetadataLayers[];
 };
 
 /* Liens dans les composants de type Summary */

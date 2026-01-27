@@ -218,6 +218,18 @@ class UserController extends AbstractController implements ApiControllerInterfac
         return new JsonResponse();
     }
 
+    #[Route('/me/communities/{communityId}', name: 'leave_community', methods: ['DELETE'])]
+    public function leaveCommunity(string $communityId): JsonResponse
+    {
+        try {
+            $this->userApiService->leaveCommunity($communityId);
+
+            return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
+        } catch (ApiException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        }
+    }
+
     private function _getUserKeyWithAccesses(string $keyId): array
     {
         $key = $this->userApiService->getMyKey($keyId);

@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Exception\AppException;
 use App\Security\User;
+use App\Services\EntrepotApi\DatastoreApiService;
 use App\Services\EntrepotApi\UserApiService;
 use App\Services\MailerService;
 use Psr\Log\LoggerInterface;
@@ -46,7 +47,7 @@ class ContactController extends AbstractController
             // Validite de l'email
             $userEmail = $data['email_contact'];
             if (!filter_var($userEmail, FILTER_VALIDATE_EMAIL)) {
-                throw new BadRequestHttpException("L'adresse mail n'est pas valide");
+                throw new BadRequestHttpException("L’adresse électronique n'est pas valide");
             }
 
             // utilisateur est un bot si la condtion suivante est vraie
@@ -141,12 +142,12 @@ class ContactController extends AbstractController
 
             $userEmail = $user->getEmail();
 
-            $this->mailerLogger->info("User ({userEmail}) : Demande de création d'un espace de travail", [
+            $this->mailerLogger->info("User ({userEmail}) : Demande de création d'un entrepôt", [
                 'userEmail' => $userEmail,
             ]);
 
             // Envoi du mail à l'adresse du support
-            $this->mailerService->sendMail($supportAddress, "[cartes.gouv.fr] Demande de création d'un espace de travail", 'Mailer/datastore_create_request.html.twig', $mailParams);
+            $this->mailerService->sendMail($supportAddress, "[cartes.gouv.fr] Demande de création d'un entrepôt", 'Mailer/datastore_create_request.html.twig', $mailParams);
 
             // Envoi du mail d'accusé de réception à l'utilisateur
             $this->mailerService->sendMail($userEmail, '[cartes.gouv.fr] Accusé de réception de votre demande', 'Mailer/datastore_create_request_acknowledgement.html.twig',
@@ -186,7 +187,7 @@ class ContactController extends AbstractController
                 'message' => $data['message'],
             ];
 
-            $this->mailerLogger->info('User ({userEmail}) : Demande pour rejoindre une communauté', [
+            $this->mailerLogger->info(sprintf('User (%s) : Demande pour rejoindre %s', $userEmail, $data['community']['name']), [
                 'userEmail' => $userEmail,
                 'community' => $data['community'],
                 'message' => $data['message'],
@@ -195,7 +196,7 @@ class ContactController extends AbstractController
             // Envoi du mail à l'adresse de contact de la communauté
             $this->mailerService->sendMail(
                 $data['community']['contact'],
-                '[cartes.gouv.fr] Demande pour rejoindre une communauté',
+                sprintf('[cartes.gouv.fr] Demande pour rejoindre %s', $data['community']['name']),
                 'Mailer/join_community.html.twig',
                 $mailParams
             );
@@ -227,6 +228,8 @@ class ContactController extends AbstractController
         $user = $this->getUser();
 
         $data = json_decode($request->getContent(), true);
+        $catalogueUrl = $this->getParameter('catalogue_url');
+        $catalogueDatasheetUrl = rtrim($catalogueUrl, '/').'/dataset/'.$data['file_identifier'];
 
         try {
             $now = new \DateTime();
@@ -235,7 +238,7 @@ class ContactController extends AbstractController
 
             $mailParams = [
                 'sendDate' => $now,
-                'catalogueDatasheetUrl' => $data['catalogueDatasheetUrl'],
+                'catalogueDatasheetUrl' => $catalogueDatasheetUrl,
                 'layers' => $data['layers'],
             ];
             if (isset($data['myself'])) {
@@ -244,13 +247,16 @@ class ContactController extends AbstractController
             if (isset($data['beneficiaries'])) {
                 $mailParams['beneficiaries'] = $data['beneficiaries'];
             }
+            if (isset($data['message'])) {
+                $mailParams['message'] = $data['message'];
+            }
 
             $context = array_merge(['userEmail' => $userEmail], $mailParams);
             $this->mailerLogger->info('User ({userEmail}) : Demande d\'accès à des services de diffusion de données dont l\'accès est restreint', $context);
 
             // Envoi du mail à l'adresse de contact des données
             $this->mailerService->sendMail(
-                $data['emailContact'],
+                $data['email_contact'],
                 "[cartes.gouv.fr] Demande d'accès à des services de diffusion restreints",
                 'Mailer/accesses_request.html.twig',
                 $mailParams
@@ -261,6 +267,51 @@ class ContactController extends AbstractController
                 $userEmail,
                 '[cartes.gouv.fr] Accusé de réception de votre demande',
                 'Mailer/accesses_request_acknowledgement.html.twig',
+                $mailParams
+            );
+
+            return new JsonResponse(['state' => 'success']);
+        } catch (BadRequestHttpException|AppException $e) {
+            return new JsonResponse(['state' => 'error', 'message' => $e->getMessage()], $e->getStatusCode());
+        } catch (\Exception $e) {
+            return new JsonResponse(['state' => 'error', 'message' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    #[Route(
+        '/datastore_deletion_request',
+        name: 'datastore_deletion_request',
+        methods: ['POST'],
+    )]
+    public function datastoreDeletionRequest(Request $request, DatastoreApiService $datastoreApiService): JsonResponse
+    {
+        try {
+            $data = json_decode($request->getContent(), true);
+            $datastore = $datastoreApiService->get($data['datastoreId']);
+
+            $supportAddress = $this->getParameter('support_contact_mail');
+            $now = new \DateTime();
+            /** @var User */
+            $user = $this->getUser();
+            $userEmail = $user->getEmail();
+
+            $mailParams = [
+                'sendDate' => $now,
+                'data' => $data,
+                'datastore_name' => $datastore['name'],
+                'datastore_id' => $datastore['_id'],
+                'community_id' => $datastore['community']['_id'],
+            ];
+
+            $this->mailerLogger->info(sprintf("User (%s) : Demande de suppression de l'entrepôt %s", $userEmail, $datastore['name']), [
+                'userEmail' => $userEmail,
+            ]);
+
+            // Envoi du mail à l'adresse du support
+            $this->mailerService->sendMail($supportAddress, sprintf("[cartes.gouv.fr] Demande de suppression de l'entrepôt %s", $datastore['name']), 'Mailer/datastore_delete_request/request.html.twig', $mailParams);
+
+            // Envoi du mail d'accusé de réception à l'utilisateur
+            $this->mailerService->sendMail($userEmail, '[cartes.gouv.fr] Accusé de réception de votre demande', 'Mailer/datastore_delete_request/request_acknowledgement.html.twig',
                 $mailParams
             );
 

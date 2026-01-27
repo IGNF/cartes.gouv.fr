@@ -1,11 +1,10 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 
+import { routes } from "@/router/router";
 import api from "../entrepot/api";
-import RQKeys from "../modules/entrepot/RQKeys";
 import { CartesApiException } from "../modules/jsonFetch";
 import { useAuthStore } from "../stores/AuthStore";
-import { Datastore } from "../@types/app";
-import { routes } from "@/router/router";
+import { useSandboxDatastoreQuery } from "./queries/useSandboxDatastoreQuery";
 import useUserQuery from "./queries/useUserQuery";
 
 type DatastoreSelectionInfo = {
@@ -21,11 +20,7 @@ const useDatastoreSelection = () => {
 
     const communitiesMember = user?.communities_member ?? [];
 
-    const sandboxDatastoreQuery = useQuery<Datastore, CartesApiException>({
-        queryKey: RQKeys.datastore("sandbox"),
-        queryFn: ({ signal }) => api.datastore.getSandbox({ signal }),
-        staleTime: 3600000,
-    });
+    const sandboxDatastoreQuery = useSandboxDatastoreQuery();
     const { data: sandboxDatastore } = sandboxDatastoreQuery;
 
     const userQuery = useUserQuery();
@@ -35,6 +30,7 @@ const useDatastoreSelection = () => {
             return api.user.addToSandbox();
         },
         onSuccess: () => {
+            userQuery.refetch();
             if (sandboxDatastore?._id) {
                 routes.datasheet_list({ datastoreId: sandboxDatastore._id }).push();
             }

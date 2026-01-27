@@ -33,7 +33,6 @@ const MemberInvitation: FC<MemberInvitationProps> = ({ communityId }) => {
     const { data: me, isError: isMeError, error: meError } = useUserMe();
 
     const { t } = useTranslation("MemberInvitation");
-    const { t: tBreadcrumb } = useTranslation("Breadcrumb");
 
     const apiEspaceCoUrl = useApiEspaceCoStore((state) => state.api_espaceco_url);
     const espaceCoUrl = useMemo(() => (apiEspaceCoUrl ? apiEspaceCoUrl.replace("/gcms/api", "/login") : undefined), [apiEspaceCoUrl]);
@@ -99,14 +98,7 @@ const MemberInvitation: FC<MemberInvitationProps> = ({ communityId }) => {
     const community = useMemo(() => query.data, [query.data]);
 
     return (
-        <Main
-            customBreadcrumbProps={{
-                homeLinkProps: routes.discover().link,
-                segments: [],
-                currentPageLabel: tBreadcrumb("espaceco_member_invitation"),
-            }}
-            title={t("document_title")}
-        >
+        <Main title={t("document_title")}>
             <h1>{t("document_title")}</h1>
             {query.isLoading && <LoadingText as="h6" message={t("community_loading")} />}
             {query.isError && <Alert severity="error" closable title={t("community_loading_failed")} />}

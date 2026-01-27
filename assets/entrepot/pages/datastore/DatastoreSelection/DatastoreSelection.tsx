@@ -1,17 +1,20 @@
 import DatastoreMain from "@/components/Layout/DatastoreMain";
-import useDatastoreSelection from "@/hooks/useDatastoreSelection";
 import { fr } from "@codegouvfr/react-dsfr";
 import Card from "@codegouvfr/react-dsfr/Card";
+import Pagination from "@codegouvfr/react-dsfr/Pagination";
+import SearchBar from "@codegouvfr/react-dsfr/SearchBar";
+
+import { ListHeader } from "@/components/Layout/ListHeader";
+import useDatastoreSelection from "@/hooks/useDatastoreSelection";
+import { usePagination } from "@/hooks/usePagination";
+import { useTranslation } from "@/i18n";
+import { routes, useRoute } from "@/router/router";
 
 import placeholder16x9 from "@/img/placeholder.16x9.png";
 import sandboxDatastoreThumbnailSvg from "@/img/sandbox-datastore-thumbnail.svg";
-import { routes, useRoute } from "@/router/router";
-import SearchBar from "@codegouvfr/react-dsfr/SearchBar";
-import { ListHeader } from "@/components/Layout/ListHeader";
-import { usePagination } from "@/hooks/usePagination";
-import Pagination from "@codegouvfr/react-dsfr/Pagination";
 
 export default function DatastoreSelection() {
+    const { t: tCommon } = useTranslation("Common");
     const { datastoreList, addUserToSandbox, sandboxDatastore, userMemberOfSandbox, query } = useDatastoreSelection();
 
     const { params } = useRoute();
@@ -21,7 +24,7 @@ export default function DatastoreSelection() {
     const { paginatedItems, totalPages } = usePagination(datastoreList, page, limit);
 
     return (
-        <DatastoreMain title="Entrepôts" fluidContainer={false}>
+        <DatastoreMain title="Entrepôts">
             <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>
                 <div className={fr.cx("fr-col-12", "fr-col-sm-4")}>
                     <SearchBar />
@@ -44,16 +47,18 @@ export default function DatastoreSelection() {
                         <Card
                             imageUrl={datastore.is_sandbox === true ? sandboxDatastoreThumbnailSvg : placeholder16x9}
                             imageAlt=""
-                            title={datastore._id === sandboxDatastore?._id ? "Espace Découverte" : datastore.name}
+                            title={datastore._id === sandboxDatastore?._id ? tCommon("sandbox") : datastore.name}
                             titleAs="h6"
                             linkProps={
                                 datastore.is_sandbox === true && !userMemberOfSandbox
-                                    ? { ...routes.datasheet_list({ datastoreId: sandboxDatastore!._id }).link, onClick: () => addUserToSandbox() }
+                                    ? { href: "#", onClick: () => addUserToSandbox() }
                                     : routes.datasheet_list({ datastoreId: datastore._id }).link
                             }
                             endDetail="Voir"
                             enlargeLink={true}
                             size="small"
+                            data-sandbox={datastore.is_sandbox === true ? "true" : undefined}
+                            data-user-member-of-sandbox={datastore.is_sandbox === true && userMemberOfSandbox}
                         />
                     </div>
                 ))}

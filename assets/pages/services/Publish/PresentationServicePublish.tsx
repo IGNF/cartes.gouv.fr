@@ -17,7 +17,12 @@ import { externalLink } from "@/router/externalUrls";
 
 export default function PresentationServicePublish() {
     return (
-        <Main title="Publier une donnée" fluidContainer={true}>
+        <Main
+            title="Publier une donnée"
+            classes={{
+                container: fr.cx("fr-container--fluid"),
+            }}
+        >
             <div className={classes.bgContrastInfoGrey}>
                 <div className={cx(fr.cx("fr-container"), classes.container)}>
                     <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters")}>

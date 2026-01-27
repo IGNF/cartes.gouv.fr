@@ -24,7 +24,7 @@ const LegalNotice = () => {
 
                     <h2>Hébergeur</h2>
 
-                    <p>Le site {siteName} est hébergé par OVH SAS, 2 rue Kellermann, 59100 Roubaix, Fance.</p>
+                    <p>Le site {siteName} est hébergé par OVH SAS, 2 rue Kellermann, 59100 Roubaix, France.</p>
 
                     <h2>Traitement des données à caractère personnel</h2>
 

@@ -2,6 +2,8 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
+import Pagination from "@codegouvfr/react-dsfr/Pagination";
+import SearchBar from "@codegouvfr/react-dsfr/SearchBar";
 import { ToggleSwitch } from "@codegouvfr/react-dsfr/ToggleSwitch";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useId, useMemo, useState } from "react";
@@ -12,8 +14,6 @@ import DatastoreTertiaryNavigation from "@/components/Layout/DatastoreTertiaryNa
 import PageTitle from "@/components/Layout/PageTitle";
 import { usePagination } from "@/hooks/usePagination";
 import { useSearch } from "@/hooks/useSearch";
-import Pagination from "@codegouvfr/react-dsfr/Pagination";
-import SearchBar from "@codegouvfr/react-dsfr/SearchBar";
 import { UserRightsResponseDto } from "../../../../@types/app";
 import { CommunityUserResponseDto, UserDto } from "../../../../@types/entrepot";
 import ConfirmDialog, { ConfirmDialogModal } from "../../../../components/Utils/ConfirmDialog";
@@ -61,7 +61,6 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
     const { t: tCommon } = useTranslation("Common");
     const { t: tRights } = useTranslation("Rights");
     const { t } = useTranslation({ CommunityMembers });
-    const { t: tBreadcrumb } = useTranslation("Breadcrumb");
 
     const { user } = useAuthStore();
     // const [members, setMembers] = useState<Member[]>([]);
@@ -179,20 +178,7 @@ function CommunityMembers({ userId }: CommunityMembersProps) {
     const { classes, cx } = useStyles();
 
     return (
-        <DatastoreMain
-            customBreadcrumbProps={{
-                homeLinkProps: routes.discover().link,
-                segments: [
-                    { label: tBreadcrumb("dashboard"), linkProps: routes.dashboard().link },
-                    { label: tBreadcrumb("datastore_selection"), linkProps: routes.datastore_selection().link },
-                    { label: datastore?.name, linkProps: routes.datasheet_list({ datastoreId: datastore?._id ?? "XXXX" }).link },
-                ],
-                currentPageLabel: tBreadcrumb("members_list"),
-            }}
-            title="Membres"
-            datastoreId={datastore._id}
-            communityId={community._id}
-        >
+        <DatastoreMain title="Membres" datastoreId={datastore._id} communityId={community._id}>
             {isLoading && <LoadingText />}
             {!isLoading && userId && communityMemberIds.includes(userId) && (
                 <Alert

@@ -31,9 +31,6 @@ const publicRoutes = {
     present_service_catalogue: defineRoute(`${appRoot}/decouvrir/rechercher-une-donnee`),
     present_service_publish: defineRoute(`${appRoot}/decouvrir/publier-une-donnee`),
     page_not_found: defineRoute(`${appRoot}/404`),
-    about: defineRoute(`${appRoot}/a-propos`),
-    contact: defineRoute(`${appRoot}/nous-ecrire`),
-    contact_confirmation: defineRoute(`${appRoot}/nous-ecrire/demande-envoyee`),
     news_list: defineRoute(
         {
             page: param.query.optional.number.default(0),
@@ -53,7 +50,6 @@ const publicRoutes = {
         },
         (p) => `${appRoot}/actualites/${p.slug}`
     ),
-    faq: defineRoute(`${appRoot}/faq`),
     sitemap: defineRoute(`${appRoot}/plan-du-site`),
     accessibility: defineRoute(`${appRoot}/accessibilite`),
     legal_notice: defineRoute(`${appRoot}/mentions-legales`),
@@ -92,7 +88,6 @@ const privateRoutes = {
 
     // Demande de creation d'un datastore
     datastore_create_request: defineRoute(`${appRoot}/tableau-de-bord/entrepots/demande-de-creation`),
-    datastore_create_request_confirm: defineRoute(`${appRoot}/tableau-de-bord/entrepots/demande-de-creation/demande-envoyee`),
 
     // Demande pour rejoindre une communaute
     join_community: defineRoute(`${appRoot}/rejoindre-des-communautes`),
@@ -112,6 +107,7 @@ const communityRoute = defineRoute(
     (p) => `${appRoot}/tableau-de-bord/communaute/${p.communityId}`
 );
 const communityRoutes = {
+    community_info: communityRoute.extend(""),
     // Liste des membres d'une communaute
     members_list: communityRoute.extend(
         {

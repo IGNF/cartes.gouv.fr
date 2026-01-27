@@ -1,5 +1,7 @@
 import { KeyValueListEnTranslations } from "@/components/Input/KeyValueList.locale";
 import { StoredDataDeleteConfirmDialogEnTranslations } from "@/entrepot/pages/datasheet/DatasheetView/DatasetListTab/StoredDataDeleteConfirmDialog.locale";
+import { DatastoreAddEnTranslations } from "@/entrepot/pages/datastore/DatastoreAdd/DatastoreAdd.locale";
+import { CommunityInfoEnTranslations } from "@/entrepot/pages/communities/CommunityInfo/CommunityInfo.locale";
 import { EspaceCoCommunityListEnTranslations } from "@/espaceco/pages/communities/CommunityList.locale";
 import { ReuseCommunityConfigEnTranslations } from "@/espaceco/pages/communities/ReuseCommunityConfig.locale";
 import { SearchCommunityEnTranslations } from "@/espaceco/pages/communities/SearchCommunity.locale";
@@ -9,7 +11,6 @@ import { InputCollectionEnTranslations } from "../../components/Input/InputColle
 import { UploadStyleFileEnTranslations } from "../../components/Utils/Geostyler/UploadStyleFile.locale";
 import { AccessesRequestEnTranslations } from "../../entrepot/pages/accesses-request/AccessesRequest.locale";
 import { AddMemberEnTranslations } from "../../entrepot/pages/communities/AddMember/AddMember.locale";
-import { CommunityListEnTranslations } from "../../entrepot/pages/communities/CommunityList/CommunityList.locale";
 import { CommunityMembersEnTranslations } from "../../entrepot/pages/communities/CommunityMembers/CommunityMembers.locale";
 import { RightsEnTranslations } from "../../entrepot/pages/communities/Rights.locale";
 import { AlertsEnTranslations } from "../../entrepot/pages/config/Alerts.locale";
@@ -21,7 +22,6 @@ import { PyramidRasterListEnTranslations } from "../../entrepot/pages/datasheet/
 import { PyramidVectorListEnTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasetListTab/PyramidVectorList/PyramidVectorList.locale";
 import { VectorDbListEnTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasetListTab/VectorDbList/VectorDbList.locale";
 import { DatasheetViewEnTranslations } from "../../entrepot/pages/datasheet/DatasheetView/DatasheetView/DatasheetView.locale";
-import { DatastoreCreationFormEnTranslations } from "../../entrepot/pages/datastore/DatastoreCreationForm/DatastoreCreationForm.locale";
 import { DatastorePermissionsEnTranslations } from "../../entrepot/pages/datastore/ManagePermissions/DatastorePermissions.locale";
 import { DatastoreManageStorageEnTranslations } from "../../entrepot/pages/datastore/ManageStorage/DatastoreManageStorage.locale";
 import { AccessRestrictionsEnTranslations } from "../../entrepot/pages/service/common/AccessRestrictions/AccessRestrictions.locale";
@@ -63,7 +63,6 @@ import { FunctionalitiesEnTranslations } from "../../espaceco/pages/communities/
 import { TMSStyleFilesManagerEnTranslations } from "../../modules/Style/TMSStyleFilesManager/TMSStyleFilesManager.locale";
 import { BreadcrumbEnTranslations } from "../../modules/entrepot/breadcrumbs/Breadcrumb.locale";
 import { LoginDisabledEnTranslations } from "../../pages/LoginDisabled/LoginDisabled.locale";
-import { ContactEnTranslations } from "../../pages/assistance/contact/Contact.locale";
 import { mapboxStyleValidationEnTranslations } from "../../validations/mapbox/MapboxStyleValidator.locale";
 import { SldStyleValidationErrorsEnTranslations } from "../../validations/sld/SldStyleValidation.locale";
 import { commonEnTranslations } from "../Common.locale";
@@ -78,8 +77,8 @@ export const translations: Translations<"en"> = {
     Me: MeEnTranslations,
     AddMember: AddMemberEnTranslations,
     CommunityMembers: CommunityMembersEnTranslations,
-    CommunityList: CommunityListEnTranslations,
-    DatastoreCreationForm: DatastoreCreationFormEnTranslations,
+    CommunityInfo: CommunityInfoEnTranslations,
+    DatastoreAdd: DatastoreAddEnTranslations,
     DatasheetUploadIntegration: DatasheetUploadIntegrationEnTranslations,
     DashboardPro: DashboardProEnTranslations,
     MyAccessKeys: MyAccessKeysEnTranslations,
@@ -88,7 +87,6 @@ export const translations: Translations<"en"> = {
     Permissions: PermissionsEnTranslations,
     ValidationMetadatas: ValidationMetadatasEnTranslations,
     MetadatasForm: MetadatasFormEnTranslations,
-    Contact: ContactEnTranslations,
     AccessesRequest: AccessesRequestEnTranslations,
     StoredDataDeleteConfirmDialog: StoredDataDeleteConfirmDialogEnTranslations,
     VectorDbList: VectorDbListEnTranslations,

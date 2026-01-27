@@ -6,6 +6,7 @@ import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import Main from "@/components/Layout/Main";
 import api from "@/entrepot/api";
 import { useApiEspaceCoStore } from "@/espaceco/stores/ApiEspaceCoStore";
+import { useSandboxDatastorePrefetchQuery } from "@/hooks/queries/useSandboxDatastoreQuery";
 import accountSvgUrl from "@/img/pictograms/account.svg?no-inline";
 import contributorSvgUrl from "@/img/pictograms/contributor.svg?no-inline";
 import keyManagerSvgUrl from "@/img/pictograms/key-manager.svg?no-inline";
@@ -34,9 +35,11 @@ export default function Dashboard() {
         },
     };
 
+    useSandboxDatastorePrefetchQuery();
+
     return (
         <Main noticeProps={noticeProps} title={"Tableau de bord"}>
-            <h1>Tableau de bord</h1>
+            <h1 className={fr.cx("fr-mt-4v")}>Tableau de bord</h1>
             <p className={fr.cx("fr-text--xl")}>Bienvenue {user?.first_name ?? user?.user_name}</p>
 
             <div className={fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-mb-3w")}>

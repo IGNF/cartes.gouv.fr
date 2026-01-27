@@ -23,8 +23,7 @@ export type ComponentKey =
     | import("../entrepot/pages/users/me/Me.locale").I18n
     | import("../entrepot/pages/communities/AddMember/AddMember.locale").I18n
     | import("../entrepot/pages/communities/CommunityMembers/CommunityMembers.locale").I18n
-    | import("../entrepot/pages/communities/CommunityList/CommunityList.locale").I18n
-    | import("../entrepot/pages/datastore/DatastoreCreationForm/DatastoreCreationForm.locale").I18n
+    | import("../entrepot/pages/datastore/DatastoreAdd/DatastoreAdd.locale").I18n
     | import("../entrepot/pages/dashboard/DashboardPro.locale").I18n
     | import("../entrepot/pages/users/access-keys/MyAccessKeys.locale").I18n
     | import("../entrepot/pages/users/keys/UserKeysListTab/UserKeysListTab.locale").I18n
@@ -33,7 +32,7 @@ export type ComponentKey =
     | import("../entrepot/pages/service/metadata/MetadataForm.locale").I18n
     | import("../entrepot/pages/service/metadata/MetadataValidation.locale").I18n
     | import("../entrepot/pages/accesses-request/AccessesRequest.locale").I18n
-    | import("../pages/assistance/contact/Contact.locale").I18n
+    | import("../entrepot/pages/communities/CommunityInfo/CommunityInfo.locale").I18n
     | import("../entrepot/pages/datastore/ManageStorage/DatastoreManageStorage.locale").I18n
     | import("../entrepot/pages/datastore/ManagePermissions/DatastorePermissions.locale").I18n
     | import("../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadForm/DatasheetUploadForm.locale").I18n

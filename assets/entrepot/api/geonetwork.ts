@@ -1,10 +1,10 @@
-import { GeonetworkMetadataResponse } from "../../@types/app";
+import { CswMetadata } from "../../@types/app";
 import SymfonyRouting from "../../modules/Routing";
 import { jsonFetch } from "../../modules/jsonFetch";
 
 const getMetadataInfos = (fileIdentifier: string, otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_geonetwork_metadata_get", { fileIdentifier });
-    return jsonFetch<GeonetworkMetadataResponse>(url, {
+    return jsonFetch<CswMetadata>(url, {
         ...otherOptions,
     });
 };

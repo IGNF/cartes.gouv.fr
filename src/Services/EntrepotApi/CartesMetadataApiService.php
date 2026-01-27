@@ -314,7 +314,7 @@ class CartesMetadataApiService
                         $gmdOnlineResourceProtocol = 'OGC:WMS';
                         $endpointUrl = $serviceEndpoint['endpoint']['urls'][0]['url'];
 
-                        $layers[] = new CswMetadataLayer($layerName, $gmdOnlineResourceProtocol, $endpointUrl, $offering['_id'], $offering['open']);
+                        $layers[] = new CswMetadataLayer($layerName, $gmdOnlineResourceProtocol, $this->cleanLayerUrl($endpointUrl), $offering['_id'], $offering['open']);
                         break;
 
                     case ConfigurationTypes::WMTSTMS:
@@ -347,7 +347,7 @@ class CartesMetadataApiService
                                 // la version 1.0.0 du TMS est aussi écrite en dur
                                 // dans le composant UserKeyLink pour créer une URL de 'capabilities'
                             }
-                            $layers[] = new CswMetadataLayer($layerName, $gmdOnlineResourceProtocol, $endpointUrl, $offering['_id'], $offering['open']);
+                            $layers[] = new CswMetadataLayer($layerName, $gmdOnlineResourceProtocol, $this->cleanLayerUrl($endpointUrl), $offering['_id'], $offering['open']);
                         }
 
                         break;
@@ -373,10 +373,18 @@ class CartesMetadataApiService
             $layerName = sprintf('%s:%s', $offering['layer_name'], $relation['native_name']);
             $gmdOnlineResourceProtocol = 'OGC:WFS';
 
-            return new CswMetadataLayer($layerName, $gmdOnlineResourceProtocol, $serviceEndpointUrl, $offering['_id'], $offering['open']);
+            return new CswMetadataLayer($layerName, $gmdOnlineResourceProtocol, $this->cleanLayerUrl($serviceEndpointUrl), $offering['_id'], $offering['open']);
         }, $configRelations);
 
         return $relationLayers;
+    }
+
+    /**
+     * Supprime doublons de "/" dans l'url. Préserve la partie protocole.
+     */
+    private function cleanLayerUrl(string $url): string
+    {
+        return preg_replace('#(?<!:)//+#', '/', $url);
     }
 
     /**

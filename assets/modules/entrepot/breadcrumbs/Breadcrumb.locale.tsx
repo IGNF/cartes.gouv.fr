@@ -3,12 +3,11 @@ import { Translations } from "../../../i18n/types";
 
 const { i18n } = declareComponentKeys<
     | "dashboard"
+    | "discover_publish"
     | "datastore_selection"
-    | "about"
-    | "contact"
-    | "contact_confirmation"
-    | "news"
-    | "faq"
+    | "news_list"
+    | "news_list_by_tag"
+    | "news_article"
     | "sitemap"
     | "accessibility"
     | "legal_notice"
@@ -24,8 +23,8 @@ const { i18n } = declareComponentKeys<
     | "user_key_add"
     | "user_key_edit"
     | "datastore_create_request"
-    | "datastore_create_request_confirm"
     | "join_community"
+    | "community_info"
     | "members_list"
     | "datastore_manage_storage"
     | "datastore_manage_permissions"
@@ -54,18 +53,17 @@ const { i18n } = declareComponentKeys<
     | "espaceco_community_list"
     | "espaceco_member_invitation"
     | "espaceco_create_community"
-    | { K: "espaceco_manage_community"; P: { communityName?: string }; R: string }
+    | "espaceco_manage_community"
 >()("Breadcrumb");
 export type I18n = typeof i18n;
 
 export const BreadcrumbFrTranslations: Translations<"fr">["Breadcrumb"] = {
     dashboard: "Tableau de bord",
+    discover_publish: "Publier",
     datastore_selection: "Entrepôts",
-    about: "A propos",
-    contact: "Nous écrire",
-    contact_confirmation: "Demande envoyée",
-    news: "Actualités",
-    faq: "Questions fréquentes",
+    news_list: "Actualités",
+    news_list_by_tag: "Actualités",
+    news_article: "Actualités",
     sitemap: "Plan du site",
     accessibility: "Accessibilité",
     legal_notice: "Mentions légales",
@@ -80,9 +78,9 @@ export const BreadcrumbFrTranslations: Translations<"fr">["Breadcrumb"] = {
     my_permissions: "Mes permissions",
     user_key_add: "Création d'une clé",
     user_key_edit: "Modification d'une clé",
-    datastore_create_request: "Demande de création d'un espace de travail",
-    datastore_create_request_confirm: "Demande envoyée",
-    join_community: "Rejoindre un espace de travail existant",
+    datastore_create_request: "Créer un nouvel entrepôt",
+    join_community: "Rejoindre un entrepôt existant",
+    community_info: "Info",
     members_list: "Membres",
     datastore_manage_storage: "Suivi des consommations",
     datastore_manage_permissions: "Permissions accordées",
@@ -110,18 +108,17 @@ export const BreadcrumbFrTranslations: Translations<"fr">["Breadcrumb"] = {
     datastore_service_style_edit: "Modifier le style",
     espaceco_community_list: "Espace collaboratif",
     espaceco_create_community: "Création d'un guichet",
-    espaceco_manage_community: ({ communityName }) => `Gérer le guichet ${communityName ?? ""}`,
+    espaceco_manage_community: "Gérer le guichet",
     espaceco_member_invitation: "Invitation",
 };
 
 export const BreadcrumbEnTranslations: Translations<"en">["Breadcrumb"] = {
     dashboard: "Dashboard",
+    discover_publish: "Publish",
     datastore_selection: "Datastores",
-    about: "About",
-    contact: "Contact us",
-    contact_confirmation: "Request sent",
-    news: "News",
-    faq: "frequently asked questions",
+    news_list: "News",
+    news_list_by_tag: "News",
+    news_article: "News",
     sitemap: "Sitemap",
     accessibility: "Accessibility",
     legal_notice: "Legal notice",
@@ -137,8 +134,8 @@ export const BreadcrumbEnTranslations: Translations<"en">["Breadcrumb"] = {
     user_key_add: "Create key",
     user_key_edit: "Modify key",
     datastore_create_request: "Request to create a workspace",
-    datastore_create_request_confirm: "Request sent",
     join_community: "Join an existing workspace",
+    community_info: "Info",
     members_list: "Members",
     datastore_manage_storage: "Consumption monitoring",
     datastore_manage_permissions: "Permissions granted",
@@ -166,6 +163,6 @@ export const BreadcrumbEnTranslations: Translations<"en">["Breadcrumb"] = {
     datastore_service_style_edit: "Modify style",
     espaceco_community_list: "Collaborative space",
     espaceco_create_community: "Create community",
-    espaceco_manage_community: ({ communityName }) => `Manage community ${communityName ?? ""}`,
+    espaceco_manage_community: "Manage community",
     espaceco_member_invitation: "Invitation",
 };

@@ -23,7 +23,6 @@ const CreateCommunity: FC = () => {
     const { data: me, isLoading: isMeLoading, isError: isMeError, error: meError } = useUserMe();
 
     const { t: tCommon } = useTranslation("Common");
-    const { t: tBreadcrumb } = useTranslation("Breadcrumb");
     const { t: tmc } = useTranslation("ManageCommunity");
     const { t } = useTranslation("CreateCommunity");
 
@@ -53,17 +52,7 @@ const CreateCommunity: FC = () => {
     }, [community]);
 
     return (
-        <Main
-            customBreadcrumbProps={{
-                homeLinkProps: routes.discover().link,
-                segments: [
-                    { label: tBreadcrumb("dashboard"), linkProps: routes.dashboard().link },
-                    { label: tBreadcrumb("espaceco_community_list"), linkProps: routes.espaceco_community_list().link },
-                ],
-                currentPageLabel: tBreadcrumb("espaceco_create_community"),
-            }}
-            title={t("title")}
-        >
+        <Main title={t("title")}>
             {community?.active ? (
                 <Alert severity="error" closable={false} title={t("forbidden_access")} />
             ) : (

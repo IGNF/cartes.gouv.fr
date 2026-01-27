@@ -137,7 +137,13 @@ export default function Discover() {
     const displayedDataCards = showAllDataCards ? dataCards : dataCards.slice(0, 4);
 
     return (
-        <Main noticeProps={alertProps} title="Le service public des cartes et données du territoire" fluidContainer={true}>
+        <Main
+            noticeProps={alertProps}
+            title="Le service public des cartes et données du territoire"
+            classes={{
+                container: fr.cx("fr-container--fluid"),
+            }}
+        >
             {params?.["authentication_failed"] === 1 && (
                 <Alert
                     severity="error"
@@ -352,7 +358,7 @@ export default function Discover() {
                                     <div className={classes.accordionButtons}>
                                         <Link
                                             className={fr.cx("fr-link")}
-                                            href="https://cartes.gouv.fr/aide/fr/guides-utilisateur/acceder-aux-geodonnees/geocodage/"
+                                            href="https://cartes.gouv.fr/aide/fr/guides-utilisateur/utiliser-les-services-de-la-geoplateforme/geocodage/"
                                             target="_blank"
                                         >
                                             En savoir plus
@@ -400,7 +406,7 @@ export default function Discover() {
                                     <div className={classes.accordionButtons}>
                                         <Link
                                             className={fr.cx("fr-link")}
-                                            href="https://cartes.gouv.fr/aide/fr/guides-utilisateur/acceder-aux-geodonnees/"
+                                            href="https://cartes.gouv.fr/aide/fr/guides-utilisateur/utiliser-les-services-de-la-geoplateforme/"
                                             target="_blank"
                                         >
                                             En savoir plus

@@ -3,6 +3,7 @@ import SideMenu from "@codegouvfr/react-dsfr/SideMenu";
 import { tss } from "tss-react";
 
 import useDatastoreSelection from "@/hooks/useDatastoreSelection";
+import { useTranslation } from "@/i18n";
 import { routes, useRoute } from "@/router/router";
 
 type DatastoreSideMenuProps = {
@@ -10,8 +11,9 @@ type DatastoreSideMenuProps = {
     communityId?: string;
 };
 export default function DatastoreSideMenu({ datastoreId, communityId }: DatastoreSideMenuProps) {
+    const { t: tCommon } = useTranslation("Common");
     const route = useRoute();
-    const { css, cx } = useStyles();
+    const { classes, css, cx } = useStyles();
 
     const { datastoreList, addUserToSandbox, sandboxDatastore, userMemberOfSandbox } = useDatastoreSelection();
 
@@ -58,16 +60,28 @@ export default function DatastoreSideMenu({ datastoreId, communityId }: Datastor
                     isActive: route.name === routes.datastore_selection().name,
                 },
                 ...datastoreList.map((datastore) => ({
-                    text: datastore._id === sandboxDatastore?._id ? "Espace Découverte" : datastore.name,
+                    text: datastore._id === sandboxDatastore?._id ? tCommon("sandbox") : datastore.name,
                     linkProps:
                         datastore.is_sandbox === true && !userMemberOfSandbox
-                            ? { ...routes.datasheet_list({ datastoreId: sandboxDatastore!._id }).link, onClick: () => addUserToSandbox() }
+                            ? { href: "#", onClick: () => addUserToSandbox() }
                             : routes.datasheet_list({ datastoreId: datastore._id }).link,
                     isActive: datastoreId === datastore._id || communityId === datastore.community_id,
                 })),
             ]}
+            classes={{
+                root: classes.root,
+                inner: classes.inner,
+            }}
         />
     );
 }
 
-const useStyles = tss.withName({ DatastoreSideMenu }).create({});
+const useStyles = tss.withName({ DatastoreSideMenu }).create({
+    root: {
+        padding: 0,
+    },
+    inner: {
+        padding: 0,
+        boxShadow: "none",
+    },
+});

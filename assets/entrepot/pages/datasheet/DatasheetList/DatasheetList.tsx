@@ -75,12 +75,8 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
     const { classes, cx } = useStyles();
 
     return (
-        <DatastoreMain
-            title={t("title", { datastoreName: datastore?.is_sandbox === true ? "Espace Découverte" : datastore?.name })}
-            fluidContainer={false}
-            datastoreId={datastoreId}
-        >
-            <PageTitle title={t("title", { datastoreName: datastore?.is_sandbox === true ? "Espace Découverte" : datastore?.name })}>
+        <DatastoreMain title={t("title", { datastoreName: datastore?.is_sandbox === true ? tCommon("sandbox") : datastore?.name })} datastoreId={datastoreId}>
+            <PageTitle title={t("title", { datastoreName: datastore?.is_sandbox === true ? tCommon("sandbox") : datastore?.name })}>
                 {datastore?.is_sandbox === true && <SandboxDatastoreExplanation />}
             </PageTitle>
 
