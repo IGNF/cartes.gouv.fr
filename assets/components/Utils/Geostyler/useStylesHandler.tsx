@@ -1,4 +1,4 @@
-import { type Style as GsStyle, StyleParser } from "geostyler-style";
+import { type Style as GsStyle, ReadStyleResult, StyleParser, WriteStyleResult } from "geostyler-style";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 
 import { StyleFormatEnum } from "@/@types/app";
@@ -13,12 +13,19 @@ type UseStylesHandlerReturn = {
     gsStyle: GsStyle | undefined;
     setGsStyle: Dispatch<SetStateAction<GsStyle | undefined>>;
     strStyle?: string | undefined;
+    readStyleResult?: ReadStyleResult | undefined;
+    setReadStyleResult: Dispatch<SetStateAction<ReadStyleResult | undefined>>;
+    writeStyleResult?: WriteStyleResult | undefined;
+    setWriteStyleResult: Dispatch<SetStateAction<WriteStyleResult | undefined>>;
 };
 export default function useStylesHandler(props: UseStylesHandlerProps): UseStylesHandlerReturn {
     const { parser, format, initialStrStyle, setError } = props;
 
     const [gsStyle, setGsStyle] = useState<GsStyle | undefined>(undefined);
     const [strStyle, setStrStyle] = useState<string | undefined>(undefined);
+
+    const [readStyleResult, setReadStyleResult] = useState<ReadStyleResult | undefined>(undefined);
+    const [writeStyleResult, setWriteStyleResult] = useState<WriteStyleResult | undefined>(undefined);
 
     const setErrorRef = useRef(setError);
     const lastInitStrRef = useRef<string | undefined>(undefined);
@@ -47,6 +54,7 @@ export default function useStylesHandler(props: UseStylesHandlerProps): UseStyle
             try {
                 const input = format === StyleFormatEnum.Mapbox ? JSON.parse(initialStrStyle) : initialStrStyle;
                 const readResult = await parser.readStyle(input);
+                setReadStyleResult(readResult);
                 if (readResult.output) {
                     setGsStyle(readResult.output as GsStyle);
                 }
@@ -86,5 +94,9 @@ export default function useStylesHandler(props: UseStylesHandlerProps): UseStyle
         gsStyle,
         setGsStyle,
         strStyle,
+        readStyleResult,
+        setReadStyleResult,
+        writeStyleResult,
+        setWriteStyleResult,
     };
 }
