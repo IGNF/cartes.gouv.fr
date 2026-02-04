@@ -11,6 +11,16 @@
                 "required": true,
                 "pattern": "^[0-9]{14}$"
             }
+        },
+        {
+            "name": "nb_users",
+            "title": "Nombre d'utilisateurs dans votre organisme",
+            "type": "integer",
+            "constraints": {
+                "required": true,
+                "minimum": 1,
+                "maximum": 100
+            }
         }
     ]
 }
