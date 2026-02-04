@@ -96,7 +96,9 @@ function registerField(
             return true;
         },
         setValueAs(value) {
-            value = value.trim();
+            if (typeof value === "string") {
+                value = value.trim();
+            }
             if (["number", "integer"].includes(field["type"])) {
                 return Number(value);
             }
