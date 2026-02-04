@@ -1,0 +1,18 @@
+{
+    "$schema": "https://specs.frictionlessdata.io/schemas/table-schema.json",
+    "description": "Rejoindre cette communauté vous permet d'accéder aux services de diffusion des Scans OACI.",
+    "fields": [
+        {
+            "name": "siret",
+            "title": "SIRET de votre organisme",
+            "description": "Le SIRET permet de vous identifier comme professionnel ou association. Le contrat de licence ne permet pas aux particuliers de télécharger la donnée Scan OACI. Format attendu : 14 chiffres.",
+            "type": "string",
+            "constraints": {
+                "required": true,
+                "minLength": 14,
+                "maxLength": 14,
+                "pattern": "^[0-9]{14}$"
+            }
+        }
+    ]
+}
