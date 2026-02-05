@@ -9,6 +9,6 @@ Voici les liens de sa documentation en [production](https://geoplateforme.github
     - [tags](./tags.md)
     - [labels](./labels.md)
     - [extra](./extra.md)
-    - [annexes](./annexes.md)
+    - [annexes](./annexes/README.md)
     - [fichiers statiques](./statics.md)
 - [Traitements](./processings/README.md)

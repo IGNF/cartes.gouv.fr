@@ -49,12 +49,11 @@ datastore_creation_request:
 join_community:
     email_support:
         heading: 'Un utilisateur demande à rejoindre "%name%" (id=%id%)'
-        message: "Message :"
+        other_info: "Informations supplémentaires :"
         call_to_action: En tant que superviseur de "%name%", vous pouvez accepter ou rejeter sa demande d'adhésion en allant sur la <a href='%href%'>page suivante</a>.
     email_acknowledgement:
         heading: 'Votre demande pour rejoindre "%name%" a été envoyée à son adresse email de contact.'
         date: "Date d'envoi"
-        message: "Votre message :"
 
 accesses_request:
     email_support:

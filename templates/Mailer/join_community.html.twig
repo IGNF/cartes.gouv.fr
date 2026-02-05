@@ -20,9 +20,13 @@
             <strong>{{ 'mailer.user_id'|trans }} :</strong>{{ app.user.id }}<br />
             <strong>{{ 'mailer.date'|trans }} :</strong>{{ sendDate|date('d-m-Y H:i', 'Europe/Paris') }}
         </p>
-        {% if message is not empty %}
-            <strong>{{ 'join_community.email_support.message'|trans }}</strong><br />
-            {{ message|e }}
+        {% if other_info is defined and other_info is not empty %}
+            <p>
+                <strong>{{ 'join_community.email_support.other_info'|trans }}</strong><br />
+                {% for key, value in other_info %}
+                    <strong>{{ key }}</strong> : {{ value }}<br />
+                {% endfor %}
+            </p>
         {% endif %}
 
         {% set action_url = url('cartesgouvfr_app') ~ 'tableau-de-bord/communaute/' ~ community._id ~ '/membres?userId=' ~ app.user.id %}
