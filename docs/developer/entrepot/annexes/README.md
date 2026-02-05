@@ -125,27 +125,17 @@ Structure de json pris en charge :
 | `fields[n].title`                        | libellé du champ                                                 | SIRET de votre organisme                                                                                                                                                                     |
 | `fields[n].description`                  | texte d'aide                                                     | Le SIRET permet de vous identifier comme professionnel ou association. Le contrat de licence ne permet pas aux particuliers de télécharger la donnée Scan OACI. Format attendu : 14 chiffres |
 | `fields[n].type`                         | type du champ                                                    | string (par défaut), number ou integer                                                                                                                                                       |
-| `fields[n].constraints[constraint_name]` | contraintes (optionnelles)                                       |                                                                                                                                                                                              |
+| `fields[n].constraints[constraint_name]` | contraintes (optionnelles)                                       | voir détail ci-dessous                                                                                                                                                                       |
 
-Contraintes générales :
+Détail des contraintes :
 
-| contrainte | description | commentaire       |
-| ---------- | ----------- | ----------------- |
-| `required` | requis      | `true` ou `false` |
+| contrainte  | description          | types de champs concernés |
+| ----------- | -------------------- | ------------------------- |
+| `required`  | obligatoire          | tout                      |
+| `minLength` | longueur minimale    | string                    |
+| `maxLength` | longueur maximale    | string                    |
+| `pattern`   | expression régulière | string                    |
+| `minimum`   | valeur minimale      | number/integer            |
+| `maximum`   | valeur maximale      | number/integer            |
 
-type : string
-
-| contrainte  | description          | commentaire |
-| ----------- | -------------------- | ----------- |
-| `minLength` | longueur minimale    |             |
-| `maxLength` | longueur maximale    |
-| `pattern`   | expression régulière |             |
-
-type : number/integer
-
-| contrainte | description     | commentaire |
-| ---------- | --------------- | ----------- |
-| `minimum`  | valeur minimale |             |
-| `maximum`  | valeur maximale |
-
-Des messages d'erreurs génériques sont prévus pour les cas requis, inférieur/supérieur à etc. Mais il est conseillé de préciser le format attendu du champ dans le texte d'aide si c'est un format particulier.
+Des messages d'erreurs génériques sont prévus pour les cas obligatoire, inférieur/supérieur à etc. Mais il est conseillé de préciser le format attendu du champ dans le texte d'aide si c'est un format particulier.
