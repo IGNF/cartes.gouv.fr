@@ -12,6 +12,7 @@ import { CommunityListResponseDto } from "@/@types/entrepot";
 import LoadingIcon from "@/components/Utils/LoadingIcon";
 import Wait from "@/components/Utils/Wait";
 import api from "@/entrepot/api";
+import { annexesUrl } from "@/env";
 import { useTranslation } from "@/i18n";
 import RQKeys from "@/modules/entrepot/RQKeys";
 import { routes } from "@/router/router";
@@ -51,7 +52,7 @@ function registerField(
     registerOptionsOverrides?: RegisterOptions<FieldValues>
 ) {
     return register(field["name"], {
-        required: field["constraints"]?.required ? "Ce champ est requis" : false,
+        required: field["constraints"]?.required ? "Ce champ est obligatoire" : false,
         minLength: field["constraints"]?.minLength
             ? {
                   value: field["constraints"]?.minLength,
@@ -125,17 +126,26 @@ export function JoinExistingDatastoreModal({ selectedCommunity }: JoinExistingDa
         },
     });
 
-    const { data: schema } = useQuery({
+    const schemaQuery = useQuery({
         queryKey: RQKeys.catalogs_communities_join_schema(selectedCommunity.technical_name),
-        queryFn: async () => {
+        queryFn: async ({ signal }) => {
             if (selectedCommunity.technical_name) {
-                // TODO : remplacer par un fetch quand le fichier sera hébergé dans les annexes, et supprimer le fichier en local
-                return (await import(`../schema/${selectedCommunity.technical_name}/public/join.json`)).default;
+                const url = `${annexesUrl}/${selectedCommunity.technical_name}/public/join.json`;
+                try {
+                    const response = await fetch(url, { signal, cache: "no-store" });
+                    if (!response.ok) {
+                        return null;
+                    }
+                    return await response.json();
+                } catch {
+                    return null;
+                }
             }
         },
         enabled: !!selectedCommunity.technical_name,
         retry: 1,
     });
+    const { data: schema } = schemaQuery;
 
     const {
         register,
@@ -191,6 +201,7 @@ export function JoinExistingDatastoreModal({ selectedCommunity }: JoinExistingDa
                                 }
                             },
                             doClosesModal: false,
+                            disabled: schemaQuery.isFetching,
                         },
                     ]}
                     concealingBackdrop={false}
