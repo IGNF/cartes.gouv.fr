@@ -9,13 +9,21 @@ Ce dépôt ne concerne pas l'intégralité des fonctionnalités de cartes.gouv.f
 
 Il prend la suite de la préfiguration que constituait le [Géotuileur](https://github.com/IGNF/geotuileur-site/) en étendant ses possibilités d'alimentation aux données vecteur et raster et ses possibilités de diffusion à d'autres flux que les seules tuiles vectorielles.
 
-Les autres briques de cartes.gouv.fr sont :
+Toutes les briques de cartes.gouv.fr :
 
-- rechercher une donnée [IGNF/geonetwork-ui](https://github.com/IGNF/geonetwork-ui) (déployé depuis le 28 juin 2024)
-- explorer les données [IGNF/cartes.gouv.fr-entree-carto](https://github.com/IGNF/cartes.gouv.fr-entree-carto) (déployée depuis le 28 juin 2024)
-- l'aide [IGNF/cartes.gouv.fr-documentation](https://github.com/IGNF/cartes.gouv.fr-documentation)
+| Nom                                     | Dépôt                                                                                                    | Déploiement          |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------- | -------------------- |
+| Espace utilisateur / Publier une donnée | [IGNF/cartes.gouv.fr](https://github.com/IGNF/cartes.gouv.fr)                                            | T2 2024              |
+| Rechercher une donnée / Catalogue       | [IGNF/geonetwork-ui](https://github.com/IGNF/geonetwork-ui)                                              | T2 2024              |
+| Explorer les cartes                     | [IGNF/cartes.gouv.fr-entree-carto](https://github.com/IGNF/cartes.gouv.fr-entree-carto)                  | T2 2024              |
+| Téléchargement                          | [IGNF/cartes.gouv.fr-telechargement](https://github.com/IGNF/cartes.gouv.fr-telechargement)              | T2 2025              |
+| Aide                                    | [IGNF/cartes.gouv.fr-documentation](https://github.com/IGNF/cartes.gouv.fr-documentation)                | T3 2025              |
+| Pages éditoriales                       | [IGNF/cartes.gouv.fr-edito](https://github.com/IGNF/cartes.gouv.fr-edito)                                | à venir T1 2026      |
+| Extraction                              | à ouvrir                                                                                                 | à venir courant 2026 |
+| Guichet collaboratif                    | [IGNF/cartes.gouv.fr-guichet-collaboratif](https://github.com/IGNF/cartes.gouv.fr-guichet-collaboratif/) | à venir courant 2026 |
+| Editeur                                 | [IGNF/cartes.gouv.fr-editeur-carto](https://github.com/IGNF/cartes.gouv.fr-editeur-carto)                | à venir courant 2027 |
 
-## Fonctionnalités
+## Fonctionnalités gérées dans ce dépôt
 
 - Gestion des **clés d'accès** aux services restreints
 - Formulaire de demande pour rejoindre une communauté publique
@@ -23,11 +31,12 @@ Les autres briques de cartes.gouv.fr sont :
 - Processus d'alimentation et diffusion de données vecteur :
     - Livraison de données avec intégration en base de données
     - Publication de services **WFS** puis ajout (optionnel) de **styles** associés
-    - Publication de services **WMS-vecteur** (WMS "à la volée", il s'agit bien d'un flux image mais les images ne sont pas précalculées)
+    - Publication de services **WMS-vecteur** (WMS "à la volée", il s'agit bien d'un flux image mais les images ne sont pas précalculées), avec interface de personnalisation de style
     - Génération de **pyramides de tuiles vectorielles** et publication de services **TMS** puis ajout (optionnel) de styles associés
     - Génération de **pyramides de tuiles d'images** et publications de services **WMS-raster** et **WMTS**
     - Publication de **métadonnées** sur le catalogue, obligatoire dès le premier service publié
     - Ajout de documents associés à une fiche de données
+    - Configuration de styles associés aux services de diffusion vecteur (styles à appliquer côté client)
 - Gestion des entrepôts et communautés :
     - Gestion des membres et de leurs droits
     - Visualisation de l'utilisation des quotas alloués pour chaque service et type de stockage
@@ -36,8 +45,14 @@ Les autres briques de cartes.gouv.fr sont :
 
 À venir :
 
-- Mise à jour des données diffusées
-- Interface de configuration de style
+- Diversification des formats d'entrée
+- Notifications en fin de traitements longs
+- Ajout de légendes sur les services cartographies
+- Amélioration du remplissage des métadonnées et de l'index de recherche
+- Parcours de diffusion en service de téléchargement
+- Parcours de diffusion à partir de livraisons raster
+- Parcours de mise à jour des données et services de diffusion
+- Configuration de guichet collaboratifs, en lien avec les services diffusés.
 
 ## ⚠ Point d'attention
 
