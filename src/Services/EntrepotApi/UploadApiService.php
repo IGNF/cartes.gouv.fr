@@ -79,10 +79,15 @@ class UploadApiService extends BaseEntrepotApiService
 
         $extension = $infos['extension'];
 
+        /** @var array<int, array{pathname: string, relativePath: string}> $files */
         $files = [];
+        $extractedFolder = null;
         try {
             if ('zip' != $extension) {
-                $files[] = $filepath;
+                $files[] = [
+                    'pathname' => $filepath,
+                    'relativePath' => basename($filepath),
+                ];
             } else {
                 // extracting zip file
                 $zip = new \ZipArchive();
@@ -91,6 +96,7 @@ class UploadApiService extends BaseEntrepotApiService
                 }
 
                 $folder = join([$infos['dirname'], DIRECTORY_SEPARATOR, $infos['filename']]);
+                $extractedFolder = $folder;
                 if (!$zip->extractTo($folder)) {
                     throw new AppException('Décompression du fichier zip échouée');
                 }
@@ -103,43 +109,51 @@ class UploadApiService extends BaseEntrepotApiService
 
                 $filename = null;
                 foreach ($iterator as $entry) {
-                    $files[] = $entry->getPathname();
+                    if ('gpkg' !== strtolower($entry->getExtension())) {
+                        continue;
+                    }
+
+                    $entryPathname = $entry->getPathname();
+                    $prefix = rtrim($folder, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR;
+                    $relative = str_starts_with($entryPathname, $prefix) ? substr($entryPathname, strlen($prefix)) : basename($entryPathname);
+                    $relative = str_replace(DIRECTORY_SEPARATOR, '/', $relative);
+
+                    $files[] = [
+                        'pathname' => $entryPathname,
+                        'relativePath' => $relative,
+                    ];
                 }
             }
 
-            foreach ($files as $filepath) {
-                $filename = basename($filepath);
-                $this->uploadFile($datastoreId, $uploadId, $filepath, $filename);
+            foreach ($files as $file) {
+                $this->uploadFile($datastoreId, $uploadId, $file['pathname'], $file['relativePath']);
             }
 
             // close the upload
             $this->close($datastoreId, $uploadId);
         } catch (\Throwable $th) {
             throw $th;
+        } finally {
+            if (is_string($extractedFolder) && '' !== $extractedFolder) {
+                $this->filesystem->remove($extractedFolder);
+            }
         }
     }
 
     /**
      * Adds a file and its md5 checksum to an existing and OPEN upload.
-     *
-     * @param string $datastoreId
-     * @param string $uploadId
-     * @param string $pathname
-     * @param string $filename
-     *
-     * @return void
      */
-    public function uploadFile($datastoreId, $uploadId, $pathname, $filename)
+    public function uploadFile(string $datastoreId, string $uploadId, string $pathname, string $relativePath): void
     {
         // envoi du fichier téléversé par l'utilisateur
         $this->sendFile('POST', "datastores/$datastoreId/uploads/$uploadId/data", $pathname, [], [
-            'path' => "data/{$filename}",
+            'path' => "data/{$relativePath}",
         ]);
 
         // calcul et envoi du md5 du fichier téléversé par l'utilisateur
         $md5 = \md5_file($pathname);
         $md5filePath = "$pathname.md5";
-        file_put_contents($md5filePath, "$md5 data/$filename");
+        file_put_contents($md5filePath, "$md5 data/$relativePath");
 
         $this->sendFile('POST', "datastores/$datastoreId/uploads/$uploadId/md5", $md5filePath);
 
