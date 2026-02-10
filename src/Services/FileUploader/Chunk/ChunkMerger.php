@@ -17,7 +17,7 @@ final class ChunkMerger
     }
 
     /**
-     * @param string[] $files filenames only, in upload directory
+     * @param string[] $files nom des fichiers
      */
     public function merge(string $uuid, string $originalFilename, array $files): string
     {

@@ -1,5 +1,7 @@
 import { declareComponentKeys } from "i18nifty";
-import { Translations } from "../../../../../i18n/types";
+
+import { Translations } from "@/i18n/types";
+import { niceBytes } from "@/utils";
 
 const { i18n } = declareComponentKeys<
     | { K: "title"; P: { datasheetName: string | undefined }; R: string }
@@ -52,7 +54,7 @@ export const DatasheetUploadFormFrTranslations: Translations<"fr">["DatasheetUpl
     upload_hint: "Taille maximale : 2 Go. Formats de fichiers autorisés : Geopackage ou archive zip contenant un Geopackage (recommandé)",
     upload_nofile_error: "Aucun fichier téléversé",
     upload_extension_error: ({ filename }) => `L’extension du fichier ${filename} n'est pas correcte`,
-    upload_max_size_error: ({ maxSize }) => `La taille maximale pour un fichier est de ${maxSize}`,
+    upload_max_size_error: ({ maxSize }) => `La taille maximale pour un fichier est de ${niceBytes(maxSize.toString())}`,
     upload_running: "Téléversement en cours ...",
     technical_name: "Nom technique de votre donnée",
     technical_name_hint: "Ce nom technique est invisible par votre utilisateur final. Il apparaitra uniquement dans votre espace de travail",

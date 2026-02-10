@@ -106,8 +106,14 @@ final class ZipFormatHandler implements UploadFormatHandlerInterface
                 continue;
             }
 
-            // Prevent ZipSlip path traversal (comportement actuel)
-            if (false !== strpos($entryName, '../') || '/' === substr($entryName, 0, 1)) {
+            // Précautions contre le ZipSlip path traversal (ex. https://medium.com/@ibm_ptc_security/zip-slip-attack-e3e63a13413f)
+            if (
+                false !== strpos($entryName, "\0")
+                || false !== strpos($entryName, '\\')
+                || 1 === preg_match('/^[a-zA-Z]:/', $entryName)
+                || 1 === preg_match('#(^|/)\.\.(/|$)#', $entryName)
+                || '/' === substr($entryName, 0, 1)
+            ) {
                 $zip->close();
                 throw new FileUploaderException('Archive corrompu', Response::HTTP_BAD_REQUEST);
             }
@@ -178,7 +184,20 @@ final class ZipFormatHandler implements UploadFormatHandlerInterface
                 new \RecursiveDirectoryIterator($folder, \RecursiveDirectoryIterator::SKIP_DOTS)
             );
 
+            $realFolder = realpath($folder);
+
             foreach ($iterator as $entry) {
+                if ($entry->isLink()) {
+                    throw new FileUploaderException('Archive corrompu', Response::HTTP_BAD_REQUEST);
+                }
+
+                if (false !== $realFolder) {
+                    $realPath = $entry->getRealPath();
+                    if (false === $realPath || 0 !== strpos($realPath, $realFolder.DIRECTORY_SEPARATOR)) {
+                        throw new FileUploaderException('Archive corrompu', Response::HTTP_BAD_REQUEST);
+                    }
+                }
+
                 $extension = strtolower($entry->getExtension());
                 if ('gpkg' !== $extension) {
                     continue;
