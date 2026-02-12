@@ -5,7 +5,7 @@ import { Input } from "@codegouvfr/react-dsfr/Input";
 import { Select as SelectNext } from "@codegouvfr/react-dsfr/SelectNext";
 import { Upload } from "@codegouvfr/react-dsfr/Upload";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format as datefnsFormat } from "date-fns";
 import { FC, useEffect, useMemo, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -156,6 +156,8 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
 
     const selectedSrid = watch("data_srid");
 
+    const queryClient = useQueryClient();
+
     const addUploadMutation = useMutation({
         mutationFn: (formData: object) => {
             return api.upload.add(datastoreId, formData);
@@ -221,6 +223,8 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
 
         const uuid = uuidv4();
         setFileUploadInProgress(true);
+        queryClient.cancelQueries({ queryKey: RQKeys.datastore_datasheet_list(datastoreId) });
+        queryClient.cancelQueries({ queryKey: RQKeys.catalogs_organizations() });
         setProgressMax(file.size);
 
         fileUploader
@@ -256,6 +260,7 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
         queryKey: RQKeys.catalogs_organizations(),
         queryFn: ({ signal }) => api.catalogs.getAllOrganizations({ signal }),
         staleTime: delta.hours(10),
+        enabled: !fileUploadInProgress,
     });
 
     return (
@@ -366,7 +371,10 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
             <ButtonsGroup
                 buttons={[
                     {
-                        linkProps: routes.datasheet_list({ datastoreId }).link,
+                        linkProps:
+                            datasheetName === undefined
+                                ? routes.datasheet_list({ datastoreId }).link
+                                : routes.datastore_datasheet_view({ datastoreId, datasheetName, activeTab: "dataset" }).link,
                         children: tCommon("cancel"),
                         priority: "secondary",
                     },

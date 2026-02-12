@@ -19,6 +19,9 @@ abstract class AbstractApiService
 {
     private HttpClientInterface $apiClient;
 
+    private const FILE_UPLOAD_IDLE_TIMEOUT_SECONDS = 1200;
+    private const FILE_UPLOAD_MAX_DURATION_SECONDS = 7200;
+
     public function __construct(
         HttpClientInterface $httpClient,
         protected ParameterBagInterface $parameters,
@@ -30,6 +33,7 @@ abstract class AbstractApiService
         $this->apiClient = $httpClient->withOptions([
             'base_uri' => $parameters->get($api).'/',
             'proxy' => $parameters->get('http_proxy'),
+            'no_proxy' => $parameters->get('no_proxy'),
             'verify_peer' => false,
             'verify_host' => false,
         ]);
@@ -129,7 +133,9 @@ abstract class AbstractApiService
         $responseInfo = $response->getInfo();
         $finalUrl = array_key_exists('url', $responseInfo) ? $responseInfo['url'] : null;
 
-        $this->logger->debug(self::class, [$method, $url, $body, $query, $response->getContent(false), $finalUrl]);
+        $debugBody = $fileUpload ? '[file upload]' : $body;
+        $debugContent = $fileUpload ? null : $response->getContent(false);
+        $this->logger->debug(self::class, [$method, $url, $debugBody, $query, $debugContent, $finalUrl]);
 
         $responseContent = $this->handleResponse($response, $expectJson);
 
@@ -170,6 +176,12 @@ abstract class AbstractApiService
             $options = [
                 'body' => $body,
                 'headers' => $headers,
+                'timeout' => self::FILE_UPLOAD_IDLE_TIMEOUT_SECONDS,
+                'max_duration' => self::FILE_UPLOAD_MAX_DURATION_SECONDS,
+                'extra' => [
+                    // Avoid dev/profiler issues with streamed bodies (Callable/iterable) and large payloads.
+                    'trace_content' => false,
+                ],
             ];
         } else {
             $options = [

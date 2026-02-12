@@ -88,9 +88,9 @@ class UploadController extends AbstractController implements ApiControllerInterf
             // retourne l'upload au frontend, qui se chargera de lancer l'intégration VECTOR-DB
             return $this->json($upload);
         } catch (AppException $ex) {
-            return $this->json($ex->getDetails(), $ex->getCode());
+            return $this->json($ex->getDetails(), $ex->getStatusCode());
         } catch (\Exception $ex) {
-            return $this->json(['message' => $ex->getMessage()], $ex->getCode());
+            return $this->json(['message' => $ex->getMessage()], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -114,9 +114,9 @@ class UploadController extends AbstractController implements ApiControllerInterf
 
             return $this->json($fileTree);
         } catch (AppException $ex) {
-            return $this->json($ex->getDetails(), $ex->getCode());
+            return $this->json($ex->getDetails(), $ex->getStatusCode());
         } catch (\Exception $ex) {
-            return $this->json(['message' => $ex->getMessage()], $ex->getCode());
+            return $this->json(['message' => $ex->getMessage()], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -161,7 +161,7 @@ class UploadController extends AbstractController implements ApiControllerInterf
 
             return $this->json($uploadTags);
         } catch (ApiException $ex) {
-            return $this->json($ex->getDetails(), $ex->getCode());
+            return $this->json($ex->getDetails(), $ex->getStatusCode());
         }
     }
 

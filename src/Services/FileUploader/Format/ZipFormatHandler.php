@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 final class ZipFormatHandler implements UploadFormatHandlerInterface
 {
     private const MAX_FILES = 10000;
-    private const MAX_ENTRY_SIZE_BYTES = 1000000000; // 1GB par entrée (comportement actuel)
+    private const MAX_ENTRY_SIZE_BYTES = 1000000000; // 1GB par entrée
     private const MAX_RATIO = 20;
 
     public function __construct(
