@@ -30,7 +30,7 @@ import api from "../../../../api";
 import DatasheetUploadIntegrationDialog from "../DatasheetUploadIntegration/DatasheetUploadIntegrationDialog";
 
 const maxFileSize = 2000000000; // 2 GB
-const fileExtensions = ["gpkg", "zip"];
+const fileExtensions = ["gpkg", "zip", "geojson"];
 
 const fileUploader = new FileUploader();
 
@@ -297,7 +297,7 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                 hint={t("upload_hint")}
                 state={dataFileError === undefined ? "default" : "error"}
                 stateRelatedMessage={dataFileError}
-                nativeInputProps={{ onChange: postDataFile, ref: dataFileRef, accept: ".gpkg,.zip" }}
+                nativeInputProps={{ onChange: postDataFile, ref: dataFileRef, accept: fileExtensions.map((ext) => `.${ext}`).join(",") }}
                 className={fr.cx("fr-input-group")}
             />
             {fileUploadInProgress && <Progress label={t("upload_running")} value={progressValue} max={progressMax} />}

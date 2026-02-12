@@ -22,7 +22,7 @@ use Symfony\Component\Routing\Attribute\Route;
 )]
 class FileUploaderController extends AbstractController
 {
-    private const VALID_FILE_EXTENSIONS = ['gpkg'];
+    private const VALID_FILE_EXTENSIONS = ['gpkg', 'geojson'];
 
     public function __construct(
         private readonly ChunkStorage $chunkStorage,

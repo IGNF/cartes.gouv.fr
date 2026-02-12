@@ -51,7 +51,8 @@ export const DatasheetUploadFormFrTranslations: Translations<"fr">["DatasheetUpl
     "datasheet.creation_running": "Création de la fiche en cours ...",
     upload: "Déposez votre fichier de données",
     // NB: la taille maximale doit correspondre à celle effectivement implémentée dans DatasheetUploadForm
-    upload_hint: "Taille maximale : 2 Go. Formats de fichiers autorisés : Geopackage ou archive zip contenant un Geopackage (recommandé)",
+    upload_hint:
+        "Taille maximale : 2 Go. Formats de fichiers autorisés : GeoPackage (.gpkg), GeoJSON (.geojson) ou archive .zip contenant uniquement des fichiers GeoPackage ou uniquement des fichiers GeoJSON",
     upload_nofile_error: "Aucun fichier téléversé",
     upload_extension_error: ({ filename }) => `L’extension du fichier ${filename} n'est pas correcte`,
     upload_max_size_error: ({ maxSize }) => `La taille maximale pour un fichier est de ${niceBytes(maxSize.toString())}`,

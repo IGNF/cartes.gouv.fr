@@ -1,9 +1,11 @@
 <?php
 
-namespace App\Services\FileUploader\Format;
+namespace App\Services\FileUploader\Format\Zip;
 
 use App\Services\FileUploader\Dto\FinalizedUpload;
 use App\Services\FileUploader\Exception\FileUploaderException;
+use App\Services\FileUploader\Format\GeoJsonFormatHandler;
+use App\Services\FileUploader\Format\UploadFormatHandlerInterface;
 use App\Services\FileUploader\Srid\GpkgSridExtractor;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 use Symfony\Component\Filesystem\Filesystem;
@@ -19,6 +21,8 @@ final class ZipFormatHandler implements UploadFormatHandlerInterface
     public function __construct(
         private readonly Filesystem $filesystem,
         private readonly GpkgSridExtractor $gpkgSridExtractor,
+        private readonly GeoJsonFormatHandler $geoJsonFormatHandler,
+        private readonly ZipUploadPolicy $zipUploadPolicy,
     ) {
     }
 
@@ -29,22 +33,30 @@ final class ZipFormatHandler implements UploadFormatHandlerInterface
 
     public function validateAndExtractSrid(FinalizedUpload $upload, array $baseValidExtensions): string
     {
-        if (!in_array('gpkg', $baseValidExtensions, true)) {
+        $allowed = array_map('strtolower', $baseValidExtensions);
+        if (!in_array('gpkg', $allowed, true) && !in_array('geojson', $allowed, true)) {
             throw new FileUploaderException("L'extension du fichier {$upload->originalFilename} n'est pas correcte", Response::HTTP_BAD_REQUEST);
         }
 
         $fileInfo = new \SplFileInfo($upload->absolutePath);
 
-        $this->cleanArchive($fileInfo, $baseValidExtensions);
-        $this->validateArchive($fileInfo);
+        $this->cleanArchive($fileInfo, $allowed);
+        $family = $this->validateArchive($fileInfo);
 
-        $srids = $this->getSridsFromArchive($fileInfo);
-        $unicity = array_values(array_unique($srids));
-        if (!empty($unicity) && 1 !== count($unicity)) {
-            throw new FileUploaderException('Ce fichier contient des données dans des systèmes de projection différents', Response::HTTP_BAD_REQUEST);
+        if ('gpkg' === $family) {
+            $srids = $this->getSridsFromArchive($fileInfo);
+            $unicity = array_values(array_unique($srids));
+            if (!empty($unicity) && 1 !== count($unicity)) {
+                throw new FileUploaderException('Ce fichier contient des données dans des systèmes de projection différents', Response::HTTP_BAD_REQUEST);
+            }
+
+            return (1 === count($unicity)) ? $unicity[0] : '';
         }
 
-        return (1 === count($unicity)) ? $unicity[0] : '';
+        // GeoJSON (RFC 7946) => WGS84
+        $this->validateGeoJsonFromArchive($upload, $fileInfo, $baseValidExtensions);
+
+        return 'EPSG:4326';
     }
 
     /**
@@ -89,8 +101,10 @@ final class ZipFormatHandler implements UploadFormatHandlerInterface
 
     /**
      * Contrôles ZIP existants (ZipSlip, nb max, taille max par entrée, ratio compression, unicité type).
+     *
+     * @return 'gpkg'|'geojson'
      */
-    private function validateArchive(\SplFileInfo $file): void
+    private function validateArchive(\SplFileInfo $file): string
     {
         $zip = new \ZipArchive();
         if (!$zip->open($file->getPathname())) {
@@ -151,9 +165,73 @@ final class ZipFormatHandler implements UploadFormatHandlerInterface
 
         $zip->close();
 
-        $unicity = array_unique($extensions);
-        if (1 !== count($unicity)) {
-            throw new FileUploaderException(sprintf("L'archive ne doit contenir qu'un seul type de fichier (%s)", implode(' ou ', ['gpkg'])), Response::HTTP_BAD_REQUEST);
+        try {
+            return $this->zipUploadPolicy->detectFamilyFromExtensions($extensions);
+        } catch (ZipUploadPolicyException $e) {
+            throw new FileUploaderException($e->getMessage(), Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    /**
+     * @param array<int, string> $baseValidExtensions
+     */
+    private function validateGeoJsonFromArchive(FinalizedUpload $upload, \SplFileInfo $file, array $baseValidExtensions): void
+    {
+        $infos = pathinfo($file->getPathname());
+        $dirname = $infos['dirname'];
+        $tmpFolderName = $infos['filename'].'_tmp';
+
+        $zip = new \ZipArchive();
+        if (!$zip->open($file->getPathname())) {
+            throw new FileUploaderException("l'ouverture du fichier ZIP a échoué", Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        $folder = "$dirname/$tmpFolderName";
+        try {
+            if (!$zip->extractTo($folder)) {
+                throw new FileUploaderException("l'extraction du fichier ZIP a échoué", Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
+        } finally {
+            $zip->close();
+        }
+
+        try {
+            $iterator = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($folder, \RecursiveDirectoryIterator::SKIP_DOTS)
+            );
+
+            $realFolder = realpath($folder);
+
+            $validatedAny = false;
+            foreach ($iterator as $entry) {
+                if ($entry->isLink()) {
+                    throw new FileUploaderException('Archive corrompu', Response::HTTP_BAD_REQUEST);
+                }
+
+                if (false !== $realFolder) {
+                    $realPath = $entry->getRealPath();
+                    if (false === $realPath || 0 !== strpos($realPath, $realFolder.DIRECTORY_SEPARATOR)) {
+                        throw new FileUploaderException('Archive corrompu', Response::HTTP_BAD_REQUEST);
+                    }
+                }
+
+                $extension = strtolower($entry->getExtension());
+                if ('geojson' !== $extension) {
+                    continue;
+                }
+
+                $validatedAny = true;
+                $this->geoJsonFormatHandler->validateAndExtractSrid(
+                    new FinalizedUpload($upload->uuid, $entry->getPathname(), $entry->getFilename()),
+                    $baseValidExtensions
+                );
+            }
+
+            if (!$validatedAny) {
+                throw new FileUploaderException("L'archive ne contient aucun fichier acceptable", Response::HTTP_BAD_REQUEST);
+            }
+        } finally {
+            $this->filesystem->remove($folder);
         }
     }
 

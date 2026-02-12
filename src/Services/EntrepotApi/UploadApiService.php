@@ -6,9 +6,29 @@ use App\Constants\EntrepotApi\UploadStatuses;
 use App\Constants\EntrepotApi\UploadTags;
 use App\Exception\ApiException;
 use App\Exception\AppException;
+use App\Services\FileUploader\Format\Zip\ZipUploadPolicy;
+use App\Services\FileUploader\Format\Zip\ZipUploadPolicyException;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class UploadApiService extends BaseEntrepotApiService
 {
+    public function __construct(
+        HttpClientInterface $httpClient,
+        ParameterBagInterface $parameters,
+        Filesystem $filesystem,
+        RequestStack $requestStack,
+        LoggerInterface $logger,
+        protected CacheInterface $cache,
+        private readonly ZipUploadPolicy $zipUploadPolicy,
+    ) {
+        parent::__construct($httpClient, $parameters, $filesystem, $requestStack, $cache, $logger);
+    }
+
     /**
      * @param array<mixed> $query
      */
@@ -107,22 +127,45 @@ class UploadApiService extends BaseEntrepotApiService
                     new \RecursiveDirectoryIterator($folder, \RecursiveDirectoryIterator::SKIP_DOTS)
                 );
 
-                $filename = null;
+                /** @var array<int, array{pathname: string, relativePath: string}> $gpkgFiles */
+                $gpkgFiles = [];
+                /** @var array<int, array{pathname: string, relativePath: string}> $geoJsonFiles */
+                $geoJsonFiles = [];
+                /** @var array<int, string> $extensionsFound */
+                $extensionsFound = [];
+
                 foreach ($iterator as $entry) {
-                    if ('gpkg' !== strtolower($entry->getExtension())) {
+                    $ext = strtolower($entry->getExtension());
+                    if (!$this->zipUploadPolicy->isAllowedExtension($ext)) {
                         continue;
                     }
+
+                    $extensionsFound[] = $ext;
 
                     $entryPathname = $entry->getPathname();
                     $prefix = rtrim($folder, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR;
                     $relative = str_starts_with($entryPathname, $prefix) ? substr($entryPathname, strlen($prefix)) : basename($entryPathname);
                     $relative = str_replace(DIRECTORY_SEPARATOR, '/', $relative);
 
-                    $files[] = [
+                    $item = [
                         'pathname' => $entryPathname,
                         'relativePath' => $relative,
                     ];
+
+                    if ('gpkg' === $ext) {
+                        $gpkgFiles[] = $item;
+                    } else {
+                        $geoJsonFiles[] = $item;
+                    }
                 }
+
+                try {
+                    $family = $this->zipUploadPolicy->detectFamilyFromExtensions($extensionsFound);
+                } catch (ZipUploadPolicyException $e) {
+                    throw new AppException($e->getMessage());
+                }
+
+                $files = ZipUploadPolicy::FAMILY_GPKG === $family ? $gpkgFiles : $geoJsonFiles;
             }
 
             foreach ($files as $file) {
