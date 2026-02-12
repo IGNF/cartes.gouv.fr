@@ -152,8 +152,15 @@ class UploadApiService extends BaseEntrepotApiService
 
         // calcul et envoi du md5 du fichier téléversé par l'utilisateur
         $md5 = \md5_file($pathname);
+        if (false === $md5) {
+            throw new AppException('Calcul du md5 échoué');
+        }
+
+        $md5Line = sprintf("%s  %s\n", $md5, "data/$relativePath");
         $md5filePath = "$pathname.md5";
-        file_put_contents($md5filePath, "$md5 data/$relativePath");
+        if (false === \file_put_contents($md5filePath, $md5Line, \LOCK_EX)) {
+            throw new AppException('Écriture du fichier md5 échouée');
+        }
 
         $this->sendFile('POST', "datastores/$datastoreId/uploads/$uploadId/md5", $md5filePath);
 
