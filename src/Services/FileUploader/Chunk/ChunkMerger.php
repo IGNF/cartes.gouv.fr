@@ -9,6 +9,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 final class ChunkMerger
 {
+    private const ERR_MERGE_FAILED = 'Merging files failed.';
+
     public function __construct(
         private readonly UploadPathResolver $pathResolver,
         private readonly ChunkFilenameIndexParser $indexParser,
@@ -33,7 +35,7 @@ final class ChunkMerger
 
         $out = fopen($tmpFinalPath, 'wb');
         if (false === $out) {
-            throw new FileUploaderException('Merging files failed.', Response::HTTP_INTERNAL_SERVER_ERROR);
+            throw new FileUploaderException(self::ERR_MERGE_FAILED, Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
         try {
@@ -42,13 +44,13 @@ final class ChunkMerger
 
                 $in = fopen($fullName, 'rb');
                 if (false === $in) {
-                    throw new FileUploaderException('Merging files failed.', Response::HTTP_INTERNAL_SERVER_ERROR);
+                    throw new FileUploaderException(self::ERR_MERGE_FAILED, Response::HTTP_INTERNAL_SERVER_ERROR);
                 }
 
                 try {
                     $copied = stream_copy_to_stream($in, $out);
                     if (false === $copied) {
-                        throw new FileUploaderException('Merging files failed.', Response::HTTP_INTERNAL_SERVER_ERROR);
+                        throw new FileUploaderException(self::ERR_MERGE_FAILED, Response::HTTP_INTERNAL_SERVER_ERROR);
                     }
                 } finally {
                     fclose($in);
@@ -64,9 +66,11 @@ final class ChunkMerger
 
         $this->filesystem->rename($tmpFinalPath, $finalPath);
 
+        $chunkPaths = [];
         foreach ($files as $filename) {
-            $this->filesystem->remove("$directory/$filename");
+            $chunkPaths[] = "$directory/$filename";
         }
+        $this->filesystem->remove($chunkPaths);
 
         return $finalPath;
     }

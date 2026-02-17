@@ -5,8 +5,9 @@ namespace App\Services\FileUploader\Format\Zip;
 use App\Services\FileUploader\Dto\FinalizedUpload;
 use App\Services\FileUploader\Exception\FileUploaderException;
 use App\Services\FileUploader\Format\GeoJsonFormatHandler;
+use App\Services\FileUploader\Format\GpkgFormatHandler;
 use App\Services\FileUploader\Format\UploadFormatHandlerInterface;
-use App\Services\FileUploader\Srid\GpkgSridExtractor;
+use App\Services\FileUploader\Srid\SridCoherenceChecker;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,10 +19,16 @@ final class ZipFormatHandler implements UploadFormatHandlerInterface
     private const MAX_ENTRY_SIZE_BYTES = 1000000000; // 1GB par entrée
     private const MAX_RATIO = 20;
 
+    private const ERR_ARCHIVE_CORRUPT = 'Archive corrompu';
+    private const ERR_NO_ACCEPTABLE_FILES = "L'archive ne contient aucun fichier acceptable";
+    private const ERR_ZIP_OPEN_FAILED = "L'ouverture du fichier ZIP a échoué";
+    private const ERR_ZIP_EXTRACT_FAILED = "L'extraction du fichier ZIP a échoué";
+
     public function __construct(
         private readonly Filesystem $filesystem,
-        private readonly GpkgSridExtractor $gpkgSridExtractor,
+        private readonly GpkgFormatHandler $gpkgFormatHandler,
         private readonly GeoJsonFormatHandler $geoJsonFormatHandler,
+        private readonly SridCoherenceChecker $sridCoherenceChecker,
         private readonly ZipUploadPolicy $zipUploadPolicy,
     ) {
     }
@@ -44,19 +51,57 @@ final class ZipFormatHandler implements UploadFormatHandlerInterface
         $family = $this->validateArchive($fileInfo);
 
         if ('gpkg' === $family) {
-            $srids = $this->getSridsFromArchive($fileInfo);
-            $unicity = array_values(array_unique($srids));
-            if (!empty($unicity) && 1 !== count($unicity)) {
-                throw new FileUploaderException('Ce fichier contient des données dans des systèmes de projection différents', Response::HTTP_BAD_REQUEST);
-            }
-
-            return (1 === count($unicity)) ? $unicity[0] : '';
+            return $this->validateGpkgFromArchive($upload, $fileInfo, $baseValidExtensions);
         }
 
-        // GeoJSON (RFC 7946) => WGS84
         $this->validateGeoJsonFromArchive($upload, $fileInfo, $baseValidExtensions);
 
         return 'EPSG:4326';
+    }
+
+    /**
+     * @param string[] $baseValidExtensions
+     */
+    private function validateGpkgFromArchive(FinalizedUpload $upload, \SplFileInfo $file, array $baseValidExtensions): string
+    {
+        $folder = $this->extractZipToTempFolder($file);
+
+        try {
+            $iterator = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($folder, \RecursiveDirectoryIterator::SKIP_DOTS)
+            );
+
+            $realFolder = realpath($folder) ?: null;
+
+            $validatedAny = false;
+            $srids = [];
+            foreach ($iterator as $entry) {
+                $this->assertSafeExtractedEntry($entry, $realFolder);
+
+                $extension = strtolower($entry->getExtension());
+                if ('gpkg' !== $extension) {
+                    continue;
+                }
+
+                $validatedAny = true;
+                $srid = $this->gpkgFormatHandler->validateAndExtractSrid(
+                    new FinalizedUpload($upload->uuid, $entry->getPathname(), $entry->getFilename()),
+                    $baseValidExtensions
+                );
+
+                if ('' !== $srid) {
+                    $srids[] = $srid;
+                }
+            }
+
+            if (!$validatedAny) {
+                throw new FileUploaderException(self::ERR_NO_ACCEPTABLE_FILES, Response::HTTP_BAD_REQUEST);
+            }
+
+            return $this->sridCoherenceChecker->assertAndGetSingleSrid($srids);
+        } finally {
+            $this->filesystem->remove($folder);
+        }
     }
 
     /**
@@ -95,7 +140,7 @@ final class ZipFormatHandler implements UploadFormatHandlerInterface
         $zip->close();
 
         if ($numDeletedFiles >= $numFilesBefore) {
-            throw new FileUploaderException("L'archive ne contient aucun fichier acceptable", Response::HTTP_BAD_REQUEST);
+            throw new FileUploaderException(self::ERR_NO_ACCEPTABLE_FILES, Response::HTTP_BAD_REQUEST);
         }
     }
 
@@ -129,7 +174,7 @@ final class ZipFormatHandler implements UploadFormatHandlerInterface
                 || '/' === substr($entryName, 0, 1)
             ) {
                 $zip->close();
-                throw new FileUploaderException('Archive corrompu', Response::HTTP_BAD_REQUEST);
+                throw new FileUploaderException(self::ERR_ARCHIVE_CORRUPT, Response::HTTP_BAD_REQUEST);
             }
 
             // dossier
@@ -177,43 +222,18 @@ final class ZipFormatHandler implements UploadFormatHandlerInterface
      */
     private function validateGeoJsonFromArchive(FinalizedUpload $upload, \SplFileInfo $file, array $baseValidExtensions): void
     {
-        $infos = pathinfo($file->getPathname());
-        $dirname = $infos['dirname'];
-        $tmpFolderName = $infos['filename'].'_tmp';
-
-        $zip = new \ZipArchive();
-        if (!$zip->open($file->getPathname())) {
-            throw new FileUploaderException("l'ouverture du fichier ZIP a échoué", Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-
-        $folder = "$dirname/$tmpFolderName";
-        try {
-            if (!$zip->extractTo($folder)) {
-                throw new FileUploaderException("l'extraction du fichier ZIP a échoué", Response::HTTP_INTERNAL_SERVER_ERROR);
-            }
-        } finally {
-            $zip->close();
-        }
+        $folder = $this->extractZipToTempFolder($file);
 
         try {
             $iterator = new \RecursiveIteratorIterator(
                 new \RecursiveDirectoryIterator($folder, \RecursiveDirectoryIterator::SKIP_DOTS)
             );
 
-            $realFolder = realpath($folder);
+            $realFolder = realpath($folder) ?: null;
 
             $validatedAny = false;
             foreach ($iterator as $entry) {
-                if ($entry->isLink()) {
-                    throw new FileUploaderException('Archive corrompu', Response::HTTP_BAD_REQUEST);
-                }
-
-                if (false !== $realFolder) {
-                    $realPath = $entry->getRealPath();
-                    if (false === $realPath || 0 !== strpos($realPath, $realFolder.DIRECTORY_SEPARATOR)) {
-                        throw new FileUploaderException('Archive corrompu', Response::HTTP_BAD_REQUEST);
-                    }
-                }
+                $this->assertSafeExtractedEntry($entry, $realFolder);
 
                 $extension = strtolower($entry->getExtension());
                 if ('geojson' !== $extension) {
@@ -228,65 +248,47 @@ final class ZipFormatHandler implements UploadFormatHandlerInterface
             }
 
             if (!$validatedAny) {
-                throw new FileUploaderException("L'archive ne contient aucun fichier acceptable", Response::HTTP_BAD_REQUEST);
+                throw new FileUploaderException(self::ERR_NO_ACCEPTABLE_FILES, Response::HTTP_BAD_REQUEST);
             }
         } finally {
             $this->filesystem->remove($folder);
         }
     }
 
-    /** @return string[] */
-    private function getSridsFromArchive(\SplFileInfo $file): array
+    private function extractZipToTempFolder(\SplFileInfo $file): string
     {
         $infos = pathinfo($file->getPathname());
         $dirname = $infos['dirname'];
         $tmpFolderName = $infos['filename'].'_tmp';
+        $folder = "$dirname/$tmpFolderName";
 
         $zip = new \ZipArchive();
         if (!$zip->open($file->getPathname())) {
-            throw new FileUploaderException("l'ouverture du fichier ZIP a échoué", Response::HTTP_INTERNAL_SERVER_ERROR);
+            throw new FileUploaderException(self::ERR_ZIP_OPEN_FAILED, Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
-        $folder = "$dirname/$tmpFolderName";
         try {
             if (!$zip->extractTo($folder)) {
-                throw new FileUploaderException("l'extraction du fichier ZIP a échoué", Response::HTTP_INTERNAL_SERVER_ERROR);
+                throw new FileUploaderException(self::ERR_ZIP_EXTRACT_FAILED, Response::HTTP_INTERNAL_SERVER_ERROR);
             }
         } finally {
             $zip->close();
         }
 
-        $srids = [];
-        try {
-            $iterator = new \RecursiveIteratorIterator(
-                new \RecursiveDirectoryIterator($folder, \RecursiveDirectoryIterator::SKIP_DOTS)
-            );
+        return $folder;
+    }
 
-            $realFolder = realpath($folder);
-
-            foreach ($iterator as $entry) {
-                if ($entry->isLink()) {
-                    throw new FileUploaderException('Archive corrompu', Response::HTTP_BAD_REQUEST);
-                }
-
-                if (false !== $realFolder) {
-                    $realPath = $entry->getRealPath();
-                    if (false === $realPath || 0 !== strpos($realPath, $realFolder.DIRECTORY_SEPARATOR)) {
-                        throw new FileUploaderException('Archive corrompu', Response::HTTP_BAD_REQUEST);
-                    }
-                }
-
-                $extension = strtolower($entry->getExtension());
-                if ('gpkg' !== $extension) {
-                    continue;
-                }
-
-                $srids = array_merge($srids, $this->gpkgSridExtractor->extractSrids($entry->getPathname()));
-            }
-        } finally {
-            $this->filesystem->remove($folder);
+    private function assertSafeExtractedEntry(\SplFileInfo $entry, ?string $realFolder): void
+    {
+        if ($entry->isLink()) {
+            throw new FileUploaderException(self::ERR_ARCHIVE_CORRUPT, Response::HTTP_BAD_REQUEST);
         }
 
-        return $srids;
+        if (null !== $realFolder) {
+            $realPath = $entry->getRealPath();
+            if (false === $realPath || 0 !== strpos($realPath, $realFolder.DIRECTORY_SEPARATOR)) {
+                throw new FileUploaderException(self::ERR_ARCHIVE_CORRUPT, Response::HTTP_BAD_REQUEST);
+            }
+        }
     }
 }

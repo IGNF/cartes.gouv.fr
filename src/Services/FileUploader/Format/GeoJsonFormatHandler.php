@@ -19,6 +19,8 @@ final class GeoJsonFormatHandler implements UploadFormatHandlerInterface
      */
     private const MAX_BYTES_TO_PARSE = 20000000; // 20 MB
 
+    private const ERR_INVALID_PREFIX = 'GeoJSON invalide';
+
     public function supports(string $extension): bool
     {
         $ext = strtolower($extension);
@@ -28,13 +30,6 @@ final class GeoJsonFormatHandler implements UploadFormatHandlerInterface
 
     public function validateAndExtractSrid(FinalizedUpload $upload, array $baseValidExtensions): string
     {
-        // Le contrôleur passe une liste d'extensions "de base" autorisées (sans le '.').
-        // Ici on ne supporte que le GeoJSON en tant que fichier standalone: .geojson.
-        $allowed = array_map('strtolower', $baseValidExtensions);
-        if (!in_array('geojson', $allowed, true)) {
-            throw new FileUploaderException("L'extension du fichier {$upload->originalFilename} n'est pas correcte", Response::HTTP_BAD_REQUEST);
-        }
-
         $file = new \SplFileInfo($upload->absolutePath);
         $size = $file->getSize();
         if (false === $size || 0 === $size) {
@@ -51,7 +46,7 @@ final class GeoJsonFormatHandler implements UploadFormatHandlerInterface
 
         $contents = file_get_contents($upload->absolutePath);
         if (false === $contents) {
-            throw new FileUploaderException("Lecture du fichier {$upload->originalFilename} échouée", Response::HTTP_INTERNAL_SERVER_ERROR);
+            throw $this->readFailed($upload);
         }
 
         // Certains fichiers JSON commencent par un BOM UTF-8, qui ferait échouer json_decode().
@@ -62,17 +57,17 @@ final class GeoJsonFormatHandler implements UploadFormatHandlerInterface
         try {
             $decoded = json_decode($contents, true, 512, \JSON_THROW_ON_ERROR);
         } catch (\JsonException $e) {
-            throw new FileUploaderException('GeoJSON invalide (JSON non valide)', Response::HTTP_BAD_REQUEST);
+            throw $this->invalid('JSON non valide');
         }
 
         // On attend un objet JSON (associatif) en haut niveau, pas une liste.
         if (!is_array($decoded)) {
-            throw new FileUploaderException('GeoJSON invalide (doit être un objet JSON)', Response::HTTP_BAD_REQUEST);
+            throw $this->invalid('doit être un objet JSON');
         }
 
         $type = $decoded['type'] ?? null;
         if (!is_string($type) || '' === trim($type)) {
-            throw new FileUploaderException('GeoJSON invalide (champ "type" manquant)', Response::HTTP_BAD_REQUEST);
+            throw $this->invalid('champ "type" manquant');
         }
 
         $allowedTypes = [
@@ -87,7 +82,7 @@ final class GeoJsonFormatHandler implements UploadFormatHandlerInterface
             'GeometryCollection',
         ];
         if (!in_array($type, $allowedTypes, true)) {
-            throw new FileUploaderException('GeoJSON invalide (type non supporté)', Response::HTTP_BAD_REQUEST);
+            throw $this->invalid('type non supporté');
         }
 
         // Validations minimales de structure selon le type.
@@ -95,22 +90,22 @@ final class GeoJsonFormatHandler implements UploadFormatHandlerInterface
         switch ($type) {
             case 'FeatureCollection':
                 if (!array_key_exists('features', $decoded) || !is_array($decoded['features'])) {
-                    throw new FileUploaderException('GeoJSON invalide ("features" attendu)', Response::HTTP_BAD_REQUEST);
+                    throw $this->invalid('"features" attendu');
                 }
                 break;
             case 'Feature':
                 if (!array_key_exists('geometry', $decoded)) {
-                    throw new FileUploaderException('GeoJSON invalide ("geometry" attendu)', Response::HTTP_BAD_REQUEST);
+                    throw $this->invalid('"geometry" attendu');
                 }
                 break;
             case 'GeometryCollection':
                 if (!array_key_exists('geometries', $decoded) || !is_array($decoded['geometries'])) {
-                    throw new FileUploaderException('GeoJSON invalide ("geometries" attendu)', Response::HTTP_BAD_REQUEST);
+                    throw $this->invalid('"geometries" attendu');
                 }
                 break;
             default:
                 if (!array_key_exists('coordinates', $decoded)) {
-                    throw new FileUploaderException('GeoJSON invalide ("coordinates" attendu)', Response::HTTP_BAD_REQUEST);
+                    throw $this->invalid('"coordinates" attendu');
                 }
                 break;
         }
@@ -126,7 +121,7 @@ final class GeoJsonFormatHandler implements UploadFormatHandlerInterface
         // On vérifie que ça ressemble à un objet JSON (commence par '{' après espaces/BOM).
         $handle = fopen($upload->absolutePath, 'rb');
         if (false === $handle) {
-            throw new FileUploaderException("Lecture du fichier {$upload->originalFilename} échouée", Response::HTTP_INTERNAL_SERVER_ERROR);
+            throw $this->readFailed($upload);
         }
 
         try {
@@ -136,7 +131,7 @@ final class GeoJsonFormatHandler implements UploadFormatHandlerInterface
         }
 
         if (false === $head) {
-            throw new FileUploaderException("Lecture du fichier {$upload->originalFilename} échouée", Response::HTTP_INTERNAL_SERVER_ERROR);
+            throw $this->readFailed($upload);
         }
 
         $trim = ltrim($head);
@@ -146,7 +141,17 @@ final class GeoJsonFormatHandler implements UploadFormatHandlerInterface
             $trim = ltrim($trim);
         }
         if ('' === $trim || '{' !== $trim[0]) {
-            throw new FileUploaderException('GeoJSON invalide (doit commencer par un objet JSON)', Response::HTTP_BAD_REQUEST);
+            throw $this->invalid('doit commencer par un objet JSON');
         }
+    }
+
+    private function invalid(string $details): FileUploaderException
+    {
+        return new FileUploaderException(sprintf('%s (%s)', self::ERR_INVALID_PREFIX, $details), Response::HTTP_BAD_REQUEST);
+    }
+
+    private function readFailed(FinalizedUpload $upload): FileUploaderException
+    {
+        return new FileUploaderException("Lecture du fichier {$upload->originalFilename} échouée", Response::HTTP_INTERNAL_SERVER_ERROR);
     }
 }
