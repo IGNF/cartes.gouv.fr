@@ -208,10 +208,10 @@ class UploadApiService extends BaseEntrepotApiService
     /**
      * @param array<string> $tags
      */
-    public function removeTags(string $datastoreId, string $uploadId, $tags): array
+    public function removeTags(string $datastoreId, string $uploadId, array $tags): array
     {
         return $this->request('DELETE', "datastores/$datastoreId/uploads/$uploadId/tags", [], [
-            'tags' => $tags,
+            'tags' => join(',', $tags),
         ]);
     }
 

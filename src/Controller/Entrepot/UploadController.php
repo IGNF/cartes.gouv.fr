@@ -3,21 +3,14 @@
 namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\CommonTags;
-use App\Constants\EntrepotApi\ProcessingStatuses;
-use App\Constants\EntrepotApi\StoredDataStatuses;
-use App\Constants\EntrepotApi\UploadCheckTypes;
-use App\Constants\EntrepotApi\UploadStatuses;
 use App\Constants\EntrepotApi\UploadTags;
 use App\Constants\EntrepotApi\UploadTypes;
-use App\Constants\JobStatuses;
 use App\Controller\ApiControllerInterface;
 use App\Exception\ApiException;
 use App\Exception\AppException;
 use App\Exception\CartesApiException;
-use App\Services\EntrepotApi\ProcessingApiService;
-use App\Services\EntrepotApi\StoredDataApiService;
 use App\Services\EntrepotApi\UploadApiService;
-use App\Services\SandboxService;
+use App\Workflow\UploadIntegrationWorkflow;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -36,9 +29,6 @@ class UploadController extends AbstractController implements ApiControllerInterf
 {
     public function __construct(
         private UploadApiService $uploadApiService,
-        private SandboxService $datastoreService,
-        private ProcessingApiService $processingApiService,
-        private StoredDataApiService $storedDataApiService,
     ) {
     }
 
@@ -124,184 +114,48 @@ class UploadController extends AbstractController implements ApiControllerInterf
     public function integrationProgress(
         string $datastoreId,
         string $uploadId,
+        UploadIntegrationWorkflow $uploadIntegrationWorkflow,
         #[MapQueryParameter] bool $getOnlyProgress = false,
     ): JsonResponse {
-        $upload = $this->uploadApiService->get($datastoreId, $uploadId);
-
-        // construction de progress initial
-        $initialIntegProgress = [
-            UploadTags::INT_STEP_SEND_FILES_API => JobStatuses::WAITING,
-            UploadTags::INT_STEP_WAIT_CHECKS => JobStatuses::WAITING,
-            UploadTags::INT_STEP_PROCESSING => JobStatuses::WAITING,
-        ];
-
-        // lecture de progress si existe déjà dans les tags de l'upload, sinon on part du progress initial
-        $integCurrentStep = isset($upload['tags'][UploadTags::INTEGRATION_CURRENT_STEP]) ? intval($upload['tags'][UploadTags::INTEGRATION_CURRENT_STEP]) : 0;
-        $integProgress = isset($upload['tags'][UploadTags::INTEGRATION_PROGRESS]) ? json_decode($upload['tags'][UploadTags::INTEGRATION_PROGRESS], true) : $initialIntegProgress;
-
-        // clone de progress
-        $integCurrStepClone = $integCurrentStep;
-        $integProgressClone = $integProgress;
-
         try {
-            // on exécute les étapes de l'intégration si getOnlyProgress est à false
-            if (false === $getOnlyProgress && $integCurrentStep < count($integProgress)) {
-                [$integCurrentStep, $integProgress] = $this->runIntegrationStep($datastoreId, $upload, $integProgress, $integCurrentStep);
+            $upload = $this->uploadApiService->get($datastoreId, $uploadId);
+            $progress = $uploadIntegrationWorkflow->computeProgress($datastoreId, $upload);
+
+            if (false === $getOnlyProgress) {
+                $uploadIntegrationWorkflow->advanceIfPossible($datastoreId, $upload, $progress);
+
+                $upload = $this->uploadApiService->get($datastoreId, $uploadId);
+                $progress = $uploadIntegrationWorkflow->computeProgress($datastoreId, $upload);
             }
 
+            $currentStepIndex = $uploadIntegrationWorkflow->getCurrentStepIndex($progress);
+
+            $progressJson = json_encode($progress);
+            $stepString = (string) $currentStepIndex;
+            $existingProgressJson = $upload['tags'][UploadTags::INTEGRATION_PROGRESS] ?? null;
+            $existingStepString = isset($upload['tags'][UploadTags::INTEGRATION_CURRENT_STEP]) ? (string) $upload['tags'][UploadTags::INTEGRATION_CURRENT_STEP] : null;
+
             $uploadTags = [
-                UploadTags::INTEGRATION_CURRENT_STEP => $integCurrentStep,
-                UploadTags::INTEGRATION_PROGRESS => json_encode($integProgress),
+                UploadTags::INTEGRATION_PROGRESS => $progressJson,
+                UploadTags::INTEGRATION_CURRENT_STEP => $stepString,
             ];
 
             // mise à jour état des étapes de l'intégration uniquement si changement
-            if ($integCurrStepClone !== $integCurrentStep || $integProgressClone !== $integProgress) {
-                $upload = $this->uploadApiService->addTags($datastoreId, $uploadId, $uploadTags);
+            if ($existingProgressJson !== $progressJson || $existingStepString !== $stepString) {
+                $this->uploadApiService->addTags($datastoreId, $uploadId, $uploadTags);
+            }
+
+            // supprime livraison si intégration terminée
+            if (false === $getOnlyProgress && $uploadIntegrationWorkflow->isIntegrationCompleted($progress)) {
+                $this->uploadApiService->remove($datastoreId, $uploadId);
             }
 
             return $this->json($uploadTags);
-        } catch (ApiException $ex) {
-            return $this->json($ex->getDetails(), $ex->getCode());
+        } catch (ApiException|AppException $ex) {
+            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
+        } catch (\Exception $ex) {
+            throw new CartesApiException($ex->getMessage(), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
-    }
-
-    /**
-     * @param array<mixed> $upload
-     * @param array<mixed> $progress
-     */
-    public function runIntegrationStep(string $datastoreId, array $upload, array $progress, int $currentStep): array
-    {
-        $currentStepName = array_keys($progress)[$currentStep];
-        $currentStepStatus = isset($progress[$currentStepName]) ? $progress[$currentStepName] : JobStatuses::WAITING;
-
-        try {
-            switch ($currentStepName) {
-                case UploadTags::INT_STEP_SEND_FILES_API:
-                    switch ($currentStepStatus) {
-                        case JobStatuses::WAITING:
-                            // si l'étape est prête et en attente à être exécutée, on lance l'étape
-                            if (UploadStatuses::CLOSED === $upload['status']) {
-                                $this->uploadApiService->open($datastoreId, $upload['_id']);
-                            }
-
-                            $this->uploadApiService->addFile($datastoreId, $upload['_id'], $upload['tags'][UploadTags::DATA_UPLOAD_PATH]);
-
-                            $currentStepStatus = JobStatuses::IN_PROGRESS;
-                            break;
-                        case JobStatuses::IN_PROGRESS:
-                            // vérifier ici si l'étape a terminé && réussi ou échoué ?
-                            if (in_array($upload['status'], [UploadStatuses::CLOSED, UploadStatuses::CHECKING])) {
-                                $currentStepStatus = JobStatuses::SUCCESSFUL;
-                            }
-                            break;
-                        case JobStatuses::SUCCESSFUL:
-                            // action si l'étape a terminé en succès
-                            $currentStep++;
-                            break;
-                    }
-
-                    break;
-                case UploadTags::INT_STEP_WAIT_CHECKS:
-                    switch ($currentStepStatus) {
-                        case JobStatuses::WAITING:
-                            // ne rien faire
-                            if (UploadStatuses::CHECKING === $upload['status']) {
-                                $currentStepStatus = JobStatuses::IN_PROGRESS;
-                            }
-                            break;
-                        case JobStatuses::IN_PROGRESS:
-                            $uploadChecks = $this->uploadApiService->getCheckExecutions($datastoreId, $upload['_id']);
-
-                            if (0 == count($uploadChecks[UploadCheckTypes::ASKED]) && 0 == count($uploadChecks[UploadCheckTypes::IN_PROGRESS])) {
-                                // il ne reste plus de check dans les catégories "asked" ou "in_progress"
-                                if (0 == count($uploadChecks[UploadCheckTypes::FAILED])) {
-                                    // aucune check a échoué
-                                    $currentStepStatus = JobStatuses::SUCCESSFUL;
-                                } else {
-                                    $currentStepStatus = JobStatuses::FAILED;
-                                }
-                            }
-                            break;
-                        case JobStatuses::SUCCESSFUL:
-                            // action si l'étape a terminé en succès
-                            $currentStep++;
-                            break;
-                    }
-
-                    break;
-                case UploadTags::INT_STEP_PROCESSING:
-                    switch ($currentStepStatus) {
-                        case JobStatuses::WAITING:
-                            $processing = $this->datastoreService->getProcIntegrateVectorFilesInBase($datastoreId);
-
-                            $procExecBody = [
-                                'processing' => $processing,
-                                'inputs' => [
-                                    'upload' => [$upload['_id']],
-                                ],
-                                'output' => [
-                                    'stored_data' => [
-                                        'name' => $upload['name'],
-                                        'storage_tags' => ['VECTEUR'], // TODO : choisir VECTEUR ou RASTER en fonction du type de upload
-                                    ],
-                                ],
-                            ];
-
-                            $processingExec = $this->processingApiService->addExecution($datastoreId, $procExecBody);
-                            $vectorDb = $processingExec['output']['stored_data'];
-
-                            // ajout tags sur l'upload
-                            $this->uploadApiService->addTags($datastoreId, $upload['_id'], [
-                                'vectordb_id' => $vectorDb['_id'],
-                                'proc_int_id' => $processingExec['_id'],
-                            ]);
-
-                            // ajout tags sur la stored_data
-                            $tags = [
-                                'upload_id' => $upload['_id'],
-                                'proc_int_id' => $processingExec['_id'],
-                                CommonTags::DATASHEET_NAME => $upload['tags'][CommonTags::DATASHEET_NAME],
-                            ];
-                            if (isset($upload['tags'][CommonTags::PRODUCER])) {
-                                $tags[CommonTags::PRODUCER] = $upload['tags'][CommonTags::PRODUCER];
-                            }
-                            if (isset($upload['tags'][CommonTags::PRODUCTION_YEAR])) {
-                                $tags[CommonTags::PRODUCTION_YEAR] = $upload['tags'][CommonTags::PRODUCTION_YEAR];
-                            }
-                            $this->storedDataApiService->addTags($datastoreId, $vectorDb['_id'], $tags);
-
-                            // // TODO : mise à jour ?
-
-                            $this->processingApiService->launchExecution($datastoreId, $processingExec['_id']);
-                            $currentStepStatus = JobStatuses::IN_PROGRESS;
-                            break;
-
-                        case JobStatuses::IN_PROGRESS:
-                            $processingExec = $this->processingApiService->getExecution($datastoreId, $upload['tags']['proc_int_id']);
-                            $vectordb = $this->storedDataApiService->get($datastoreId, $upload['tags']['vectordb_id']);
-
-                            if (!in_array($processingExec['status'], [ProcessingStatuses::CREATED, ProcessingStatuses::WAITING, ProcessingStatuses::PROGRESS])) {
-                                if (ProcessingStatuses::SUCCESS == $processingExec['status'] && StoredDataStatuses::GENERATED == $vectordb['status']) {
-                                    $currentStepStatus = JobStatuses::SUCCESSFUL;
-                                } else {
-                                    $currentStepStatus = JobStatuses::FAILED;
-                                }
-                            }
-                            break;
-                        case JobStatuses::SUCCESSFUL:
-                            $currentStep++;
-                            break;
-                    }
-                    break;
-            }
-        } catch (\Throwable $th) {
-            $currentStepStatus = JobStatuses::FAILED;
-            throw $th;
-        }
-
-        $progress[$currentStepName] = $currentStepStatus;
-
-        return [$currentStep, $progress];
     }
 
     #[Route('/{uploadId}', name: 'delete', methods: ['DELETE'])]

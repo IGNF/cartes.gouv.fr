@@ -16,7 +16,7 @@ import { useTranslation } from "../../../../../i18n/i18n";
 
 type UnfinishedUploadListProps = {
     datastoreId: string;
-    uploadList?: Upload[];
+    uploadList: Upload[];
     nbPublications: number;
     datasheetName: string;
 };
@@ -25,8 +25,6 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
     const { t } = useTranslation("DatastoreManageStorage");
 
     const queryClient = useQueryClient();
-
-    const filteredUploadList = uploadList?.filter((upload) => upload.type === "VECTOR") ?? [];
 
     const isLastUpload = (uploadList: Upload[]): boolean => {
         return uploadList.length === 1 && nbPublications === 0;
@@ -54,10 +52,16 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
                 </h5>
             </div>
 
-            {filteredUploadList?.map((upload) => {
-                const integrationProgress = JSON.parse(upload.tags.integration_progress || "{}");
-                const steps = Object.entries(integrationProgress);
-                const failureCase = steps.some(([, status]) => status === "failed");
+            {uploadList.map((upload) => {
+                let failureCase = false;
+                if (upload.tags.integration_progress) {
+                    try {
+                        const progress = JSON.parse(upload.tags.integration_progress) as Record<string, string>;
+                        failureCase = Object.values(progress).includes("failed");
+                    } catch {
+                        // ignore
+                    }
+                }
 
                 return (
                     <div key={upload._id} className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mt-2v")}>
@@ -105,7 +109,7 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
                                     iconId="fr-icon-delete-fill"
                                     priority="secondary"
                                     onClick={() => {
-                                        if (isLastUpload(filteredUploadList)) {
+                                        if (isLastUpload(uploadList)) {
                                             deleteUploadConfirmModal.open();
                                         } else {
                                             deleteUnfinishedUpload.mutate(upload._id);
