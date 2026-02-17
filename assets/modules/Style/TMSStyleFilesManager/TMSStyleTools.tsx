@@ -1,7 +1,37 @@
+import type { ReadStyleResult, WriteStyleResult } from "geostyler-style";
 import { AnyLayer, Sources as MbSources, Style as MbStyle, VectorSource } from "mapbox-gl";
 
 import { Service, StyleFormatEnum } from "@/@types/app";
 import { getParserForFormat, mbParser } from "@/utils/geostyler";
+
+export class MbStyleParseError extends Error {
+    readonly layerName: string;
+    readonly styleFormat: StyleFormatEnum;
+    readonly result: ReadStyleResult | WriteStyleResult | undefined;
+
+    constructor(message: string, layerName: string, styleFormat: StyleFormatEnum, result?: ReadStyleResult | WriteStyleResult) {
+        super(message);
+        this.name = "MbStyleParseError";
+        this.layerName = layerName;
+        this.styleFormat = styleFormat;
+        this.result = result;
+    }
+}
+
+function getErrorMessage(message: string, result: ReadStyleResult | WriteStyleResult) {
+    let msg = message;
+    if (result.errors && result.errors?.length > 0) {
+        msg += `\nErreurs : ${result.errors?.map((e) => e.message).join(" ")}`;
+    }
+    if (result.warnings && result.warnings?.length > 0) {
+        msg += `\nAvertissements : ${result.warnings?.join(" ")}`;
+    }
+    if (result.unsupportedProperties) {
+        msg += `\nPropriétés non supportées : ${JSON.stringify(result.unsupportedProperties)}`;
+    }
+
+    return msg;
+}
 
 export default class TMSStyleTools {
     buildMbStyle(service: Service, style: string | MbStyle): MbStyle {
@@ -44,12 +74,31 @@ export default class TMSStyleTools {
     async #toMapboxLayers(service: Service, layerName: string, styleString: string, styleFormats: Record<string, StyleFormatEnum>): Promise<AnyLayer[]> {
         const parser = getParserForFormat(styleFormats[layerName]);
 
-        const { output } = await parser.readStyle(styleString);
-        if (!output) throw new Error(`Erreur lors de la lecture du style ${styleFormats[layerName]} pour la couche ${layerName}`);
+        const readResult = await parser.readStyle(styleString);
+        console.log("readResult", readResult);
+        if (!readResult.output || readResult.errors || readResult.unsupportedProperties || readResult.warnings) {
+            throw new MbStyleParseError(
+                getErrorMessage(`Erreur lors de la lecture du style ${styleFormats[layerName]} pour la couche ${layerName}`, readResult),
+                layerName,
+                styleFormats[layerName],
+                readResult
+            );
+        }
 
-        const { output: mbStyle } = await mbParser.writeStyle(output);
-        if (!mbStyle?.layers)
-            throw new Error(`Erreur lors de conversion du style vers Mapbox pour la couche ${layerName} depuis le format ${styleFormats[layerName]}`);
+        const writeResult = await mbParser.writeStyle(readResult.output);
+        const { output: mbStyle } = writeResult;
+        console.log("writeResult", writeResult);
+
+        if (!mbStyle?.layers || writeResult.errors || writeResult.unsupportedProperties || writeResult.warnings)
+            throw new MbStyleParseError(
+                getErrorMessage(
+                    `Erreur lors de conversion du style vers Mapbox pour la couche ${layerName} depuis le format ${styleFormats[layerName]}`,
+                    writeResult
+                ),
+                layerName,
+                styleFormats[layerName],
+                writeResult
+            );
 
         return mbStyle.layers.map((layer) => ({
             ...layer,
