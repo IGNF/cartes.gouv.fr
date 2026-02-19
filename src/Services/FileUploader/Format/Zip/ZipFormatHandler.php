@@ -4,8 +4,12 @@ namespace App\Services\FileUploader\Format\Zip;
 
 use App\Services\FileUploader\Dto\FinalizedUpload;
 use App\Services\FileUploader\Exception\FileUploaderException;
-use App\Services\FileUploader\Format\GeoJsonFormatHandler;
-use App\Services\FileUploader\Format\GpkgFormatHandler;
+use App\Services\FileUploader\Format\Catalog\SupportedUploadFormatsCatalog;
+use App\Services\FileUploader\Format\Csv\CsvFormatHandler;
+use App\Services\FileUploader\Format\GeoJson\GeoJsonFormatHandler;
+use App\Services\FileUploader\Format\Gpkg\GpkgFormatHandler;
+use App\Services\FileUploader\Format\Shapefile\ShapefileFormatHandler;
+use App\Services\FileUploader\Format\Sql\SqlFormatHandler;
 use App\Services\FileUploader\Format\UploadFormatHandlerInterface;
 use App\Services\FileUploader\Srid\SridCoherenceChecker;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
@@ -17,7 +21,11 @@ final class ZipFormatHandler implements UploadFormatHandlerInterface
 {
     private const MAX_FILES = 10000;
     private const MAX_ENTRY_SIZE_BYTES = 1000000000; // 1GB par entrée
-    private const MAX_RATIO = 20;
+    /**
+     * Facteur max d'expansion (taille décompressée / taille compressée) pour éviter les bombes ZIP.
+     */
+    private const MAX_EXPANSION_FACTOR_DEFAULT = 20;
+    private const MAX_EXPANSION_FACTOR_SHAPEFILE = 70;
 
     private const ERR_ARCHIVE_CORRUPT = 'Archive corrompu';
     private const ERR_NO_ACCEPTABLE_FILES = "L'archive ne contient aucun fichier acceptable";
@@ -28,6 +36,9 @@ final class ZipFormatHandler implements UploadFormatHandlerInterface
         private readonly Filesystem $filesystem,
         private readonly GpkgFormatHandler $gpkgFormatHandler,
         private readonly GeoJsonFormatHandler $geoJsonFormatHandler,
+        private readonly CsvFormatHandler $csvFormatHandler,
+        private readonly SqlFormatHandler $sqlFormatHandler,
+        private readonly ShapefileFormatHandler $shapefileFormatHandler,
         private readonly SridCoherenceChecker $sridCoherenceChecker,
         private readonly ZipUploadPolicy $zipUploadPolicy,
     ) {
@@ -40,23 +51,38 @@ final class ZipFormatHandler implements UploadFormatHandlerInterface
 
     public function validateAndExtractSrid(FinalizedUpload $upload, array $baseValidExtensions): string
     {
-        $allowed = array_map('strtolower', $baseValidExtensions);
-        if (!in_array('gpkg', $allowed, true) && !in_array('geojson', $allowed, true)) {
-            throw new FileUploaderException("L'extension du fichier {$upload->originalFilename} n'est pas correcte", Response::HTTP_BAD_REQUEST);
-        }
-
         $fileInfo = new \SplFileInfo($upload->absolutePath);
 
-        $this->cleanArchive($fileInfo, $allowed);
+        $this->cleanArchive($fileInfo);
         $family = $this->validateArchive($fileInfo);
 
         if ('gpkg' === $family) {
             return $this->validateGpkgFromArchive($upload, $fileInfo, $baseValidExtensions);
         }
 
-        $this->validateGeoJsonFromArchive($upload, $fileInfo, $baseValidExtensions);
+        if ('geojson' === $family) {
+            $this->validateGeoJsonFromArchive($upload, $fileInfo, $baseValidExtensions);
 
-        return 'EPSG:4326';
+            return 'EPSG:4326';
+        }
+
+        if ('csv' === $family) {
+            $this->validateCsvFromArchive($upload, $fileInfo, $baseValidExtensions);
+
+            return '';
+        }
+
+        if ('sql' === $family) {
+            $this->validateSqlFromArchive($upload, $fileInfo, $baseValidExtensions);
+
+            return '';
+        }
+
+        if ('shapefile' === $family) {
+            return $this->validateShapefileFromArchive($upload, $fileInfo, $baseValidExtensions);
+        }
+
+        throw new FileUploaderException(sprintf('Format ZIP non supporté: %s', $family), Response::HTTP_BAD_REQUEST);
     }
 
     /**
@@ -106,10 +132,8 @@ final class ZipFormatHandler implements UploadFormatHandlerInterface
 
     /**
      * Supprime les entrées dont l'extension n'est pas correcte (policy permissive + mutation).
-     *
-     * @param string[] $baseValidExtensions
      */
-    private function cleanArchive(\SplFileInfo $file, array $baseValidExtensions): void
+    private function cleanArchive(\SplFileInfo $file): void
     {
         $zip = new \ZipArchive();
         if (!$zip->open($file->getPathname())) {
@@ -132,7 +156,7 @@ final class ZipFormatHandler implements UploadFormatHandlerInterface
             }
 
             $extension = strtolower(pathinfo($entryName, PATHINFO_EXTENSION));
-            if (!in_array($extension, $baseValidExtensions, true)) {
+            if (!$this->zipUploadPolicy->isAllowedEntryName($entryName) && !$this->zipUploadPolicy->isAllowedExtension($extension)) {
                 $zip->deleteIndex($i);
                 ++$numDeletedFiles;
             }
@@ -147,7 +171,7 @@ final class ZipFormatHandler implements UploadFormatHandlerInterface
     /**
      * Contrôles ZIP existants (ZipSlip, nb max, taille max par entrée, ratio compression, unicité type).
      *
-     * @return 'gpkg'|'geojson'
+     * @return 'gpkg'|'geojson'|'csv'|'sql'|'shapefile'
      */
     private function validateArchive(\SplFileInfo $file): string
     {
@@ -157,7 +181,9 @@ final class ZipFormatHandler implements UploadFormatHandlerInterface
         }
 
         $numFiles = 0;
-        $extensions = [];
+        $entryNames = [];
+        $maxExpansionFactor = 0.0;
+        $maxExpansionEntryName = '';
 
         for ($i = 0; $i < $zip->numFiles; ++$i) {
             $entryName = $zip->getNameIndex($i);
@@ -190,7 +216,9 @@ final class ZipFormatHandler implements UploadFormatHandlerInterface
             }
 
             $extension = strtolower(pathinfo($entryName, PATHINFO_EXTENSION));
-            $extensions[] = $extension;
+            if ($this->zipUploadPolicy->isAllowedEntryName($entryName) || $this->zipUploadPolicy->isAllowedExtension($extension)) {
+                $entryNames[] = $entryName;
+            }
 
             $size = $stats['size'] ?? 0;
             if ($size > self::MAX_ENTRY_SIZE_BYTES) {
@@ -200,10 +228,10 @@ final class ZipFormatHandler implements UploadFormatHandlerInterface
 
             $compSize = $stats['comp_size'] ?? 0;
             if ($compSize) {
-                $ratio = $size / $compSize;
-                if ($ratio > self::MAX_RATIO) {
-                    $zip->close();
-                    throw new FileUploaderException('Le taux de compression excède '.self::MAX_RATIO, Response::HTTP_BAD_REQUEST);
+                $factor = $size / $compSize;
+                if ($factor > $maxExpansionFactor) {
+                    $maxExpansionFactor = $factor;
+                    $maxExpansionEntryName = $entryName;
                 }
             }
         }
@@ -211,10 +239,21 @@ final class ZipFormatHandler implements UploadFormatHandlerInterface
         $zip->close();
 
         try {
-            return $this->zipUploadPolicy->detectFamilyFromExtensions($extensions);
+            $family = $this->zipUploadPolicy->detectFamilyFromEntryNames($entryNames);
         } catch (ZipUploadPolicyException $e) {
             throw new FileUploaderException($e->getMessage(), Response::HTTP_BAD_REQUEST);
         }
+
+        $threshold = (SupportedUploadFormatsCatalog::FAMILY_SHAPEFILE === $family)
+            ? self::MAX_EXPANSION_FACTOR_SHAPEFILE
+            : self::MAX_EXPANSION_FACTOR_DEFAULT;
+
+        if ($maxExpansionFactor > $threshold) {
+            $suffix = '' !== $maxExpansionEntryName ? sprintf(' (%s)', $maxExpansionEntryName) : '';
+            throw new FileUploaderException(sprintf('Le facteur de compression excède %d%s', $threshold, $suffix), Response::HTTP_BAD_REQUEST);
+        }
+
+        return $family;
     }
 
     /**
@@ -250,6 +289,127 @@ final class ZipFormatHandler implements UploadFormatHandlerInterface
             if (!$validatedAny) {
                 throw new FileUploaderException(self::ERR_NO_ACCEPTABLE_FILES, Response::HTTP_BAD_REQUEST);
             }
+        } finally {
+            $this->filesystem->remove($folder);
+        }
+    }
+
+    /**
+     * @param array<int, string> $baseValidExtensions
+     */
+    private function validateCsvFromArchive(FinalizedUpload $upload, \SplFileInfo $file, array $baseValidExtensions): void
+    {
+        $folder = $this->extractZipToTempFolder($file);
+
+        try {
+            $iterator = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($folder, \RecursiveDirectoryIterator::SKIP_DOTS)
+            );
+
+            $realFolder = realpath($folder) ?: null;
+
+            $validatedAny = false;
+            foreach ($iterator as $entry) {
+                $this->assertSafeExtractedEntry($entry, $realFolder);
+
+                $extension = strtolower($entry->getExtension());
+                if ('csv' !== $extension) {
+                    continue;
+                }
+
+                $validatedAny = true;
+                $this->csvFormatHandler->validateAndExtractSrid(
+                    new FinalizedUpload($upload->uuid, $entry->getPathname(), $entry->getFilename()),
+                    $baseValidExtensions
+                );
+            }
+
+            if (!$validatedAny) {
+                throw new FileUploaderException(self::ERR_NO_ACCEPTABLE_FILES, Response::HTTP_BAD_REQUEST);
+            }
+        } finally {
+            $this->filesystem->remove($folder);
+        }
+    }
+
+    /**
+     * @param array<int, string> $baseValidExtensions
+     */
+    private function validateSqlFromArchive(FinalizedUpload $upload, \SplFileInfo $file, array $baseValidExtensions): void
+    {
+        $folder = $this->extractZipToTempFolder($file);
+
+        try {
+            $iterator = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($folder, \RecursiveDirectoryIterator::SKIP_DOTS)
+            );
+
+            $realFolder = realpath($folder) ?: null;
+
+            $validatedAny = false;
+            foreach ($iterator as $entry) {
+                $this->assertSafeExtractedEntry($entry, $realFolder);
+
+                $extension = strtolower($entry->getExtension());
+                if ('sql' !== $extension) {
+                    continue;
+                }
+
+                $validatedAny = true;
+                $this->sqlFormatHandler->validateAndExtractSrid(
+                    new FinalizedUpload($upload->uuid, $entry->getPathname(), $entry->getFilename()),
+                    $baseValidExtensions
+                );
+            }
+
+            if (!$validatedAny) {
+                throw new FileUploaderException(self::ERR_NO_ACCEPTABLE_FILES, Response::HTTP_BAD_REQUEST);
+            }
+        } finally {
+            $this->filesystem->remove($folder);
+        }
+    }
+
+    /**
+     * @param array<int, string> $baseValidExtensions
+     */
+    private function validateShapefileFromArchive(FinalizedUpload $upload, \SplFileInfo $file, array $baseValidExtensions): string
+    {
+        $folder = $this->extractZipToTempFolder($file);
+
+        try {
+            $iterator = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($folder, \RecursiveDirectoryIterator::SKIP_DOTS)
+            );
+
+            $realFolder = realpath($folder) ?: null;
+
+            $validatedAny = false;
+            $srids = [];
+            foreach ($iterator as $entry) {
+                $this->assertSafeExtractedEntry($entry, $realFolder);
+
+                $extension = strtolower($entry->getExtension());
+                if ('shp' !== $extension) {
+                    continue;
+                }
+
+                $validatedAny = true;
+                $srid = $this->shapefileFormatHandler->validateAndExtractSrid(
+                    new FinalizedUpload($upload->uuid, $entry->getPathname(), $entry->getFilename()),
+                    $baseValidExtensions
+                );
+
+                if ('' !== $srid) {
+                    $srids[] = $srid;
+                }
+            }
+
+            if (!$validatedAny) {
+                throw new FileUploaderException(self::ERR_NO_ACCEPTABLE_FILES, Response::HTTP_BAD_REQUEST);
+            }
+
+            return $this->sridCoherenceChecker->assertAndGetSingleSrid($srids);
         } finally {
             $this->filesystem->remove($folder);
         }

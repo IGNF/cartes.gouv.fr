@@ -25,7 +25,7 @@ import { useTranslation } from "../../../../../i18n/i18n";
 import FileUploader from "../../../../../modules/FileUploader";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import { routes, useRoute } from "../../../../../router/router";
-import { delta, getFileExtension, regex } from "../../../../../utils";
+import { delta, getFileExtension, looksLikeShapefileComponent, regex } from "../../../../../utils";
 import api from "../../../../api";
 import DatasheetUploadIntegrationDialog from "../DatasheetUploadIntegration/DatasheetUploadIntegrationDialog";
 
@@ -197,6 +197,13 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
         }
 
         const extension = getFileExtension(file.name);
+        const isShapefileComponent = looksLikeShapefileComponent(file.name);
+
+        if (isShapefileComponent) {
+            setDataFileError(t("upload_shapefile_zip_required_error", { filename: file.name }));
+            return false;
+        }
+
         if (!extension || !fileExtensions.includes(extension)) {
             setDataFileError(t("upload_extension_error", { filename: file.name }));
             return false;

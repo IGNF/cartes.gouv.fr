@@ -6,6 +6,7 @@ use App\Services\FileUploader\Chunk\ChunkMerger;
 use App\Services\FileUploader\Chunk\ChunkStorage;
 use App\Services\FileUploader\Dto\FinalizedUpload;
 use App\Services\FileUploader\Exception\FileUploaderException;
+use App\Services\FileUploader\Format\Catalog\SupportedUploadFormatsCatalog;
 use App\Services\FileUploader\Path\UploadPathResolver;
 use App\Services\FileUploader\Validation\UploadValidationService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -22,13 +23,12 @@ use Symfony\Component\Routing\Attribute\Route;
 )]
 class FileUploaderController extends AbstractController
 {
-    private const VALID_FILE_EXTENSIONS = ['gpkg', 'geojson'];
-
     public function __construct(
         private readonly ChunkStorage $chunkStorage,
         private readonly ChunkMerger $chunkMerger,
         private readonly UploadValidationService $uploadValidationService,
         private readonly UploadPathResolver $pathResolver,
+        private readonly SupportedUploadFormatsCatalog $formatsCatalog,
     ) {
     }
 
@@ -167,7 +167,7 @@ class FileUploaderController extends AbstractController
             // Validation du fichier + extraction SRID
             $result = $this->uploadValidationService->validate(
                 new FinalizedUpload($uuid, $filepath, $originalFilename),
-                self::VALID_FILE_EXTENSIONS
+                $this->formatsCatalog->getDirectExtensions()
             );
 
             return new JsonResponse($result->toArray());

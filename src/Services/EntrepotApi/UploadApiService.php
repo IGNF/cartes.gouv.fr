@@ -6,6 +6,7 @@ use App\Constants\EntrepotApi\UploadStatuses;
 use App\Constants\EntrepotApi\UploadTags;
 use App\Exception\ApiException;
 use App\Exception\AppException;
+use App\Services\FileUploader\Format\Catalog\SupportedUploadFormatsCatalog;
 use App\Services\FileUploader\Format\Zip\ZipUploadPolicy;
 use App\Services\FileUploader\Format\Zip\ZipUploadPolicyException;
 use Psr\Log\LoggerInterface;
@@ -103,6 +104,10 @@ class UploadApiService extends BaseEntrepotApiService
         $files = [];
         $extractedFolder = null;
         try {
+            if (in_array($extension, ['csv', 'sql'], true)) {
+                throw new AppException('Not implemented');
+            }
+
             if ('zip' != $extension) {
                 $files[] = [
                     'pathname' => $filepath,
@@ -131,41 +136,55 @@ class UploadApiService extends BaseEntrepotApiService
                 $gpkgFiles = [];
                 /** @var array<int, array{pathname: string, relativePath: string}> $geoJsonFiles */
                 $geoJsonFiles = [];
-                /** @var array<int, string> $extensionsFound */
-                $extensionsFound = [];
+                /** @var array<int, array{pathname: string, relativePath: string}> $allowedFiles */
+                $allowedFiles = [];
+                /** @var array<int, string> $allowedEntryNames */
+                $allowedEntryNames = [];
 
                 foreach ($iterator as $entry) {
-                    $ext = strtolower($entry->getExtension());
-                    if (!$this->zipUploadPolicy->isAllowedExtension($ext)) {
-                        continue;
-                    }
-
-                    $extensionsFound[] = $ext;
-
                     $entryPathname = $entry->getPathname();
                     $prefix = rtrim($folder, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR;
                     $relative = str_starts_with($entryPathname, $prefix) ? substr($entryPathname, strlen($prefix)) : basename($entryPathname);
                     $relative = str_replace(DIRECTORY_SEPARATOR, '/', $relative);
+
+                    if (!$this->zipUploadPolicy->isAllowedEntryName($relative) && !$this->zipUploadPolicy->isAllowedExtension(strtolower(pathinfo($relative, PATHINFO_EXTENSION)))) {
+                        continue;
+                    }
+
+                    $allowedEntryNames[] = $relative;
 
                     $item = [
                         'pathname' => $entryPathname,
                         'relativePath' => $relative,
                     ];
 
+                    $allowedFiles[] = $item;
+
+                    $ext = strtolower(pathinfo($relative, PATHINFO_EXTENSION));
                     if ('gpkg' === $ext) {
                         $gpkgFiles[] = $item;
-                    } else {
+                    } elseif ('geojson' === $ext) {
                         $geoJsonFiles[] = $item;
                     }
                 }
 
                 try {
-                    $family = $this->zipUploadPolicy->detectFamilyFromExtensions($extensionsFound);
+                    $family = $this->zipUploadPolicy->detectFamilyFromEntryNames($allowedEntryNames);
                 } catch (ZipUploadPolicyException $e) {
                     throw new AppException($e->getMessage());
                 }
 
-                $files = ZipUploadPolicy::FAMILY_GPKG === $family ? $gpkgFiles : $geoJsonFiles;
+                if (SupportedUploadFormatsCatalog::FAMILY_GPKG === $family) {
+                    $files = $gpkgFiles;
+                } elseif (SupportedUploadFormatsCatalog::FAMILY_GEOJSON === $family) {
+                    $files = $geoJsonFiles;
+                } elseif (SupportedUploadFormatsCatalog::FAMILY_SHAPEFILE === $family) {
+                    $files = $allowedFiles;
+                } elseif (in_array($family, [SupportedUploadFormatsCatalog::FAMILY_CSV, SupportedUploadFormatsCatalog::FAMILY_SQL], true)) {
+                    throw new AppException('Not implemented');
+                } else {
+                    throw new AppException(sprintf('Format ZIP non supporté: %s', $family));
+                }
             }
 
             foreach ($files as $file) {

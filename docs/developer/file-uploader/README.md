@@ -101,12 +101,25 @@ Règles principales :
     - Validation minimale de structure JSON/GeoJSON.
     - SRID forcé à `EPSG:4326` (RFC 7946).
 
+| format       | extension(s)                                                                           | zip obligatoire | multi-fichier | plusieurs fichiers autorisé à la fois |
+| ------------ | -------------------------------------------------------------------------------------- | --------------- | ------------- | ------------------------------------- |
+| `GeoPackage` | gpkg\*                                                                                 | non             | non           | oui                                   |
+| `GeoJSON`    | geojson\*                                                                              | non             | non           | oui                                   |
+| `Shapefile`  | shp*, shx*, dbf\*, prj, sbn, sbx, fbn, fbx, ain, aih, ixs, mxs, atx, shp.xml, cpg, qix | oui             | oui           | oui                                   |
+| `CSV`        | csv\*                                                                                  | non             | non           | oui                                   |
+| `SQL`        | sql\*                                                                                  | non             | non           | oui                                   |
+
+- Les extensions avec un asterisque sont obligatoires, les autres sont optionnelles.
+- Multi-fichier : le format est constitué de plusieurs fichiers (ex. shapefile).
+- Zip obligatoire : les fichiers doivent être obligatoirement dans un zip.
+- Dans un ZIP, une seule famille est autorisée : GeoPackage, GeoJSON ou Shapefile (pas de mélange).
+
 ### Politique ZIP (permissive + mutation)
 
-- Une archive `.zip` est acceptée, mais le serveur ne garde que les entrées `.gpkg` et `.geojson`.
+- Une archive `.zip` est acceptée, et le serveur ne conserve que les entrées faisant partie d'une famille supportée (GeoPackage, GeoJSON, Shapefile).
 - Les autres fichiers sont supprimés de l'archive (mutation) pour ne conserver que le contenu utile.
 - Des garde-fous existent pour limiter les comportements dangereux (chemins suspects, tailles/ratios trop élevés, etc.).
-- Le ZIP ne doit contenir qu'une seule « famille » de données : uniquement des `.gpkg` OU uniquement des `.geojson` (pas de mélange).
+- Le ZIP ne doit contenir qu'une seule « famille » de données : uniquement des `.gpkg` OU uniquement des `.geojson` OU uniquement un Shapefile (pas de mélange).
 - Les SRID sont extraits sur l'ensemble des `.gpkg` présents : le SRID doit rester cohérent entre plusieurs couches du gpkg.
 
 ## Envoi vers l'API Entrepôt

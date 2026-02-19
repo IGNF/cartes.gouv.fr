@@ -1,3 +1,4 @@
+import { ReactNode } from "react";
 import { declareComponentKeys } from "i18nifty";
 
 import { Translations } from "@/i18n/types";
@@ -14,8 +15,9 @@ const { i18n } = declareComponentKeys<
     | { K: "datasheet.name_already_exists_error"; P: { datasheetName: string }; R: string }
     | "datasheet.creation_running"
     | "upload"
-    | "upload_hint"
+    | { K: "upload_hint"; R: ReactNode }
     | "upload_nofile_error"
+    | { K: "upload_shapefile_zip_required_error"; P: { filename: string }; R: string }
     | { K: "upload_extension_error"; P: { filename: string }; R: string }
     | { K: "upload_max_size_error"; P: { maxSize: number }; R: string }
     | "upload_running"
@@ -52,8 +54,10 @@ export const DatasheetUploadFormFrTranslations: Translations<"fr">["DatasheetUpl
     upload: "Déposez votre fichier de données",
     // NB: la taille maximale doit correspondre à celle effectivement implémentée dans DatasheetUploadForm
     upload_hint:
-        "Taille maximale : 2 Go. Formats de fichiers autorisés : GeoPackage (.gpkg), GeoJSON (.geojson) ou archive .zip contenant uniquement des fichiers GeoPackage ou uniquement des fichiers GeoJSON",
+        "Taille maximale : 2 Go. Formats de fichiers autorisés : GeoPackage (.gpkg), GeoJSON (.geojson) ou archive .zip contenant uniquement une seule famille de données : GeoPackage, GeoJSON, ou Shapefile (.shp/.shx/.dbf + fichiers optionnels comme .prj, .cpg, .qix, .shp.xml).",
     upload_nofile_error: "Aucun fichier téléversé",
+    upload_shapefile_zip_required_error: ({ filename }) =>
+        `Le fichier ${filename} semble faire partie d’un Shapefile (format multi-fichiers). Téléversez une archive .zip contenant au minimum les fichiers .shp, .shx et .dbf (et éventuellement .prj, .cpg, .qix, .shp.xml).`,
     upload_extension_error: ({ filename }) => `L’extension du fichier ${filename} n'est pas correcte`,
     upload_max_size_error: ({ maxSize }) => `La taille maximale pour un fichier est de ${niceBytes(maxSize.toString())}`,
     upload_running: "Téléversement en cours ...",
@@ -89,6 +93,7 @@ export const DatasheetUploadFormEnTranslations: Translations<"en">["DatasheetUpl
     upload: undefined,
     upload_hint: undefined,
     upload_nofile_error: undefined,
+    upload_shapefile_zip_required_error: undefined,
     upload_extension_error: undefined,
     upload_max_size_error: undefined,
     upload_running: undefined,

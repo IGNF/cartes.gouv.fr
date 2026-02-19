@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Services\FileUploader\Format;
+namespace App\Services\FileUploader\Format\GeoJson;
 
 use App\Services\FileUploader\Dto\FinalizedUpload;
 use App\Services\FileUploader\Exception\FileUploaderException;
+use App\Services\FileUploader\Format\UploadFormatHandlerInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 use Symfony\Component\HttpFoundation\Response;
 
