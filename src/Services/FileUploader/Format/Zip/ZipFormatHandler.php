@@ -67,9 +67,7 @@ final class ZipFormatHandler implements UploadFormatHandlerInterface
         }
 
         if ('csv' === $family) {
-            $this->validateCsvFromArchive($upload, $fileInfo, $baseValidExtensions);
-
-            return '';
+            return $this->validateCsvFromArchive($upload, $fileInfo, $baseValidExtensions);
         }
 
         if ('sql' === $family) {
@@ -297,7 +295,7 @@ final class ZipFormatHandler implements UploadFormatHandlerInterface
     /**
      * @param array<int, string> $baseValidExtensions
      */
-    private function validateCsvFromArchive(FinalizedUpload $upload, \SplFileInfo $file, array $baseValidExtensions): void
+    private function validateCsvFromArchive(FinalizedUpload $upload, \SplFileInfo $file, array $baseValidExtensions): string
     {
         $folder = $this->extractZipToTempFolder($file);
 
@@ -309,6 +307,7 @@ final class ZipFormatHandler implements UploadFormatHandlerInterface
             $realFolder = realpath($folder) ?: null;
 
             $validatedAny = false;
+            $srids = [];
             foreach ($iterator as $entry) {
                 $this->assertSafeExtractedEntry($entry, $realFolder);
 
@@ -318,15 +317,21 @@ final class ZipFormatHandler implements UploadFormatHandlerInterface
                 }
 
                 $validatedAny = true;
-                $this->csvFormatHandler->validateAndExtractSrid(
+                $srid = $this->csvFormatHandler->validateAndExtractSrid(
                     new FinalizedUpload($upload->uuid, $entry->getPathname(), $entry->getFilename()),
                     $baseValidExtensions
                 );
+
+                if ('' !== $srid) {
+                    $srids[] = $srid;
+                }
             }
 
             if (!$validatedAny) {
                 throw new FileUploaderException(self::ERR_NO_ACCEPTABLE_FILES, Response::HTTP_BAD_REQUEST);
             }
+
+            return $this->sridCoherenceChecker->assertAndGetSingleSrid($srids);
         } finally {
             $this->filesystem->remove($folder);
         }

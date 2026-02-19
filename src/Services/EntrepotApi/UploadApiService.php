@@ -104,7 +104,7 @@ class UploadApiService extends BaseEntrepotApiService
         $files = [];
         $extractedFolder = null;
         try {
-            if (in_array($extension, ['csv', 'sql'], true)) {
+            if (in_array($extension, ['sql'], true)) {
                 throw new AppException('Not implemented');
             }
 
@@ -136,6 +136,8 @@ class UploadApiService extends BaseEntrepotApiService
                 $gpkgFiles = [];
                 /** @var array<int, array{pathname: string, relativePath: string}> $geoJsonFiles */
                 $geoJsonFiles = [];
+                /** @var array<int, array{pathname: string, relativePath: string}> $csvFiles */
+                $csvFiles = [];
                 /** @var array<int, array{pathname: string, relativePath: string}> $allowedFiles */
                 $allowedFiles = [];
                 /** @var array<int, string> $allowedEntryNames */
@@ -165,6 +167,8 @@ class UploadApiService extends BaseEntrepotApiService
                         $gpkgFiles[] = $item;
                     } elseif ('geojson' === $ext) {
                         $geoJsonFiles[] = $item;
+                    } elseif ('csv' === $ext) {
+                        $csvFiles[] = $item;
                     }
                 }
 
@@ -180,7 +184,9 @@ class UploadApiService extends BaseEntrepotApiService
                     $files = $geoJsonFiles;
                 } elseif (SupportedUploadFormatsCatalog::FAMILY_SHAPEFILE === $family) {
                     $files = $allowedFiles;
-                } elseif (in_array($family, [SupportedUploadFormatsCatalog::FAMILY_CSV, SupportedUploadFormatsCatalog::FAMILY_SQL], true)) {
+                } elseif (SupportedUploadFormatsCatalog::FAMILY_CSV === $family) {
+                    $files = $csvFiles;
+                } elseif (SupportedUploadFormatsCatalog::FAMILY_SQL === $family) {
                     throw new AppException('Not implemented');
                 } else {
                     throw new AppException(sprintf('Format ZIP non supporté: %s', $family));

@@ -106,6 +106,14 @@ final class ShapefileFormatHandler implements UploadFormatHandlerInterface
             return 'EPSG:4326';
         }
 
+        if (
+            false !== strpos($upper, 'PROJCS["RGF93_Lambert_93"')
+            || false !== strpos($upper, 'GEOGCS["GCS_RGF_1993"')
+            || false !== strpos($upper, 'DATUM["D_RGF_1993"')
+        ) {
+            return 'EPSG:2154';
+        }
+
         return null;
     }
 }

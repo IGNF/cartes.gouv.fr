@@ -1,5 +1,6 @@
-import { ReactNode } from "react";
+import { fr } from "@codegouvfr/react-dsfr";
 import { declareComponentKeys } from "i18nifty";
+import { ReactNode } from "react";
 
 import { Translations } from "@/i18n/types";
 import { niceBytes } from "@/utils";
@@ -53,8 +54,24 @@ export const DatasheetUploadFormFrTranslations: Translations<"fr">["DatasheetUpl
     "datasheet.creation_running": "Création de la fiche en cours ...",
     upload: "Déposez votre fichier de données",
     // NB: la taille maximale doit correspondre à celle effectivement implémentée dans DatasheetUploadForm
-    upload_hint:
-        "Taille maximale : 2 Go. Formats de fichiers autorisés : GeoPackage (.gpkg), GeoJSON (.geojson) ou archive .zip contenant uniquement une seule famille de données : GeoPackage, GeoJSON, ou Shapefile (.shp/.shx/.dbf + fichiers optionnels comme .prj, .cpg, .qix, .shp.xml).",
+    upload_hint: (
+        <>
+            <p className={fr.cx("fr-text--xs")}>Taille maximale : 2 Go.</p>
+            <p className={fr.cx("fr-text--xs", "fr-m-0")}>Formats de fichiers autorisés :</p>
+            <ul>
+                <li>GeoPackage (.gpkg ou .zip contenant au moins un fichier .gpkg)</li>
+                <li>GeoJSON (.geojson ou .zip contenant au moins un fichier .geojson)</li>
+                <li>
+                    CSV (.csv ou .zip contenant au moins un fichier .csv)
+                    <br />
+                    Le fichier doit contenir une colonne géométrie nommée json|geom|the_geom|wkb|wkt ou deux colonnes coordonnées lon|x|longitude +
+                    lat|y|latitude
+                </li>
+                <li>Shapefile (.zip contenant .shp, .shx, .dbf + fichiers optionnels comme .prj, .cpg, .qix, .shp.xml)</li>
+            </ul>
+            <p className={fr.cx("fr-text--xs")}>Vous ne pouvez pas mélanger plusieurs formats.</p>
+        </>
+    ),
     upload_nofile_error: "Aucun fichier téléversé",
     upload_shapefile_zip_required_error: ({ filename }) =>
         `Le fichier ${filename} semble faire partie d’un Shapefile (format multi-fichiers). Téléversez une archive .zip contenant au minimum les fichiers .shp, .shx et .dbf (et éventuellement .prj, .cpg, .qix, .shp.xml).`,

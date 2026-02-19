@@ -30,7 +30,7 @@ import api from "../../../../api";
 import DatasheetUploadIntegrationDialog from "../DatasheetUploadIntegration/DatasheetUploadIntegrationDialog";
 
 const maxFileSize = 2000000000; // 2 GB
-const fileExtensions = ["gpkg", "zip", "geojson"];
+const fileExtensions = ["gpkg", "zip", "geojson", "csv"];
 
 const fileUploader = new FileUploader();
 
@@ -240,10 +240,15 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                 fileUploader
                     .uploadComplete(uuid, file)
                     .then(async (data) => {
-                        let srid = data?.srid;
-                        srid = srid in ignfProjections ? ignfProjections[srid] : srid; // récupérer la proj EPSG correspondante si une proj IGNF est détectée
+                        const sridRaw = data?.srid;
+                        const sridMapped = typeof sridRaw === "string" && sridRaw !== "" && sridRaw in ignfProjections ? ignfProjections[sridRaw] : sridRaw;
 
-                        setFormValue("data_srid", srid, { shouldValidate: true });
+                        // on conserve la valeur actuelle (par défaut EPSG:2154) si le srid n'a pu être détecté
+                        if (typeof sridMapped === "string" && sridMapped.trim() !== "") {
+                            setFormValue("data_srid", sridMapped, { shouldValidate: true });
+                        } else {
+                            setFormValue("data_srid", "", { shouldValidate: false });
+                        }
                         setFormValue("data_technical_name", getDataTechNameSuggestion(file.name), { shouldValidate: true });
                         setFormValue("data_upload_path", data?.filename, { shouldValidate: true });
 
