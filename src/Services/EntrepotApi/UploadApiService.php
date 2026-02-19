@@ -6,9 +6,7 @@ use App\Constants\EntrepotApi\UploadStatuses;
 use App\Constants\EntrepotApi\UploadTags;
 use App\Exception\ApiException;
 use App\Exception\AppException;
-use App\Services\FileUploader\Format\Catalog\SupportedUploadFormatsCatalog;
 use App\Services\FileUploader\Format\Zip\ZipUploadPolicy;
-use App\Services\FileUploader\Format\Zip\ZipUploadPolicyException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
@@ -95,101 +93,94 @@ class UploadApiService extends BaseEntrepotApiService
      */
     public function addFile($datastoreId, $uploadId, $filename)
     {
-        $filepath = realpath($this->parameters->get('upload_path')."/$filename");
-        $infos = pathinfo($filepath);
+        $uploadRoot = realpath((string) $this->parameters->get('upload_path'));
+        if (false === $uploadRoot) {
+            throw new AppException('Chemin racine des uploads introuvable', 500, ['message' => 'Chemin racine des uploads introuvable']);
+        }
+        $uploadRoot = rtrim($uploadRoot, DIRECTORY_SEPARATOR);
 
-        $extension = $infos['extension'];
+        $filepath = realpath($uploadRoot."/$filename");
+        if (false === $filepath) {
+            throw new AppException('Fichier à envoyer introuvable', 400, ['message' => 'Fichier à envoyer introuvable']);
+        }
+
+        if (0 !== strpos($filepath, $uploadRoot.DIRECTORY_SEPARATOR)) {
+            throw new AppException('Chemin de fichier invalide', 400, ['message' => 'Chemin de fichier invalide']);
+        }
+
+        $infos = pathinfo($filepath);
+        $extension = strtolower((string) ($infos['extension'] ?? ''));
+        if ('' === $extension) {
+            throw new AppException('Extension du fichier à envoyer introuvable', 400, ['message' => 'Extension du fichier à envoyer introuvable']);
+        }
 
         /** @var array<int, array{pathname: string, relativePath: string}> $files */
         $files = [];
         $extractedFolder = null;
         try {
-            if ('zip' != $extension) {
+            if ('zip' !== $extension) {
                 $files[] = [
                     'pathname' => $filepath,
                     'relativePath' => basename($filepath),
                 ];
             } else {
-                // extracting zip file
                 $zip = new \ZipArchive();
-                if (!$zip->open($filepath)) {
+                if (true !== $zip->open($filepath)) {
                     throw new AppException('Ouverture du fichier ZIP échouée');
                 }
 
-                $folder = join([$infos['dirname'], DIRECTORY_SEPARATOR, $infos['filename']]);
+                $folder = $infos['dirname'].DIRECTORY_SEPARATOR.$infos['filename'].'_'.bin2hex(random_bytes(6));
                 $extractedFolder = $folder;
-                if (!$zip->extractTo($folder)) {
-                    throw new AppException('Décompression du fichier zip échouée');
+                $this->filesystem->mkdir($folder);
+
+                try {
+                    if (true !== $zip->extractTo($folder)) {
+                        throw new AppException('Décompression du fichier zip échouée');
+                    }
+                } finally {
+                    $zip->close();
                 }
-                $zip->close();
 
                 // add files to the upload
                 $iterator = new \RecursiveIteratorIterator(
                     new \RecursiveDirectoryIterator($folder, \RecursiveDirectoryIterator::SKIP_DOTS)
                 );
 
-                /** @var array<int, array{pathname: string, relativePath: string}> $gpkgFiles */
-                $gpkgFiles = [];
-                /** @var array<int, array{pathname: string, relativePath: string}> $geoJsonFiles */
-                $geoJsonFiles = [];
-                /** @var array<int, array{pathname: string, relativePath: string}> $csvFiles */
-                $csvFiles = [];
-                /** @var array<int, array{pathname: string, relativePath: string}> $sqlFiles */
-                $sqlFiles = [];
-                /** @var array<int, array{pathname: string, relativePath: string}> $allowedFiles */
-                $allowedFiles = [];
-                /** @var array<int, string> $allowedEntryNames */
-                $allowedEntryNames = [];
+                $realFolder = realpath($folder) ?: null;
 
                 foreach ($iterator as $entry) {
+                    if (!$entry->isFile()) {
+                        continue;
+                    }
+
+                    if (null !== $realFolder) {
+                        $realPath = $entry->getRealPath();
+                        if (false === $realPath || 0 !== strpos($realPath, $realFolder.DIRECTORY_SEPARATOR)) {
+                            throw new AppException('Archive corrompu');
+                        }
+                    }
+
                     $entryPathname = $entry->getPathname();
                     $prefix = rtrim($folder, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR;
                     $relative = str_starts_with($entryPathname, $prefix) ? substr($entryPathname, strlen($prefix)) : basename($entryPathname);
                     $relative = str_replace(DIRECTORY_SEPARATOR, '/', $relative);
 
+                    // Le ZIP a déjà été validé/"nettoyé" lors du finalize côté FileUploader.
+                    // On conserve ici les mêmes règles permissives que ZipFormatHandler (entryName OU extension) pour couvrir les suffixes spéciaux (.shp.xml, etc.).
                     if (!$this->zipUploadPolicy->isAllowedEntryName($relative) && !$this->zipUploadPolicy->isAllowedExtension(strtolower(pathinfo($relative, PATHINFO_EXTENSION)))) {
                         continue;
                     }
-
-                    $allowedEntryNames[] = $relative;
 
                     $item = [
                         'pathname' => $entryPathname,
                         'relativePath' => $relative,
                     ];
 
-                    $allowedFiles[] = $item;
-
-                    $ext = strtolower(pathinfo($relative, PATHINFO_EXTENSION));
-                    if ('gpkg' === $ext) {
-                        $gpkgFiles[] = $item;
-                    } elseif ('geojson' === $ext) {
-                        $geoJsonFiles[] = $item;
-                    } elseif ('csv' === $ext) {
-                        $csvFiles[] = $item;
-                    } elseif ('sql' === $ext) {
-                        $sqlFiles[] = $item;
-                    }
+                    $files[] = $item;
                 }
 
-                try {
-                    $family = $this->zipUploadPolicy->detectFamilyFromEntryNames($allowedEntryNames);
-                } catch (ZipUploadPolicyException $e) {
-                    throw new AppException($e->getMessage());
-                }
-
-                if (SupportedUploadFormatsCatalog::FAMILY_GPKG === $family) {
-                    $files = $gpkgFiles;
-                } elseif (SupportedUploadFormatsCatalog::FAMILY_GEOJSON === $family) {
-                    $files = $geoJsonFiles;
-                } elseif (SupportedUploadFormatsCatalog::FAMILY_SHAPEFILE === $family) {
-                    $files = $allowedFiles;
-                } elseif (SupportedUploadFormatsCatalog::FAMILY_CSV === $family) {
-                    $files = $csvFiles;
-                } elseif (SupportedUploadFormatsCatalog::FAMILY_SQL === $family) {
-                    $files = $sqlFiles;
-                } else {
-                    throw new AppException(sprintf('Format ZIP non supporté: %s', $family));
+                if (0 === count($files)) {
+                    throw new AppException('Aucun fichier valide trouvé dans le ZIP');
                 }
             }
 
@@ -199,11 +190,13 @@ class UploadApiService extends BaseEntrepotApiService
 
             // close the upload
             $this->close($datastoreId, $uploadId);
-        } catch (\Throwable $th) {
-            throw $th;
         } finally {
-            if (is_string($extractedFolder) && '' !== $extractedFolder) {
+            if (null !== $extractedFolder) {
                 $this->filesystem->remove($extractedFolder);
+            }
+
+            if ('zip' === $extension) {
+                $this->filesystem->remove($filepath);
             }
         }
     }
