@@ -67,6 +67,13 @@ export const DatasheetUploadFormFrTranslations: Translations<"fr">["DatasheetUpl
                     Le fichier doit contenir une colonne géométrie nommée json|geom|the_geom|wkb|wkt ou deux colonnes coordonnées lon|x|longitude +
                     lat|y|latitude
                 </li>
+                <li>
+                    SQL (.sql ou .zip contenant au moins un fichier .sql)
+                    <br />
+                    Seules les instructions suivantes sont autorisées : CREATE TABLE, CREATE VIEW, CREATE INDEX, CREATE SEQUENCE, ALTER TABLE, ALTER SEQUENCE.
+                    <br />
+                    Aucun nom de schéma ne doit être présent (ex : public.table interdit).
+                </li>
                 <li>Shapefile (.zip contenant .shp, .shx, .dbf + fichiers optionnels comme .prj, .cpg, .qix, .shp.xml)</li>
             </ul>
             <p className={fr.cx("fr-text--xs")}>Vous ne pouvez pas mélanger plusieurs formats.</p>

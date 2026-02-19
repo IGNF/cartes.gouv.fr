@@ -104,10 +104,6 @@ class UploadApiService extends BaseEntrepotApiService
         $files = [];
         $extractedFolder = null;
         try {
-            if (in_array($extension, ['sql'], true)) {
-                throw new AppException('Not implemented');
-            }
-
             if ('zip' != $extension) {
                 $files[] = [
                     'pathname' => $filepath,
@@ -138,6 +134,8 @@ class UploadApiService extends BaseEntrepotApiService
                 $geoJsonFiles = [];
                 /** @var array<int, array{pathname: string, relativePath: string}> $csvFiles */
                 $csvFiles = [];
+                /** @var array<int, array{pathname: string, relativePath: string}> $sqlFiles */
+                $sqlFiles = [];
                 /** @var array<int, array{pathname: string, relativePath: string}> $allowedFiles */
                 $allowedFiles = [];
                 /** @var array<int, string> $allowedEntryNames */
@@ -169,6 +167,8 @@ class UploadApiService extends BaseEntrepotApiService
                         $geoJsonFiles[] = $item;
                     } elseif ('csv' === $ext) {
                         $csvFiles[] = $item;
+                    } elseif ('sql' === $ext) {
+                        $sqlFiles[] = $item;
                     }
                 }
 
@@ -187,7 +187,7 @@ class UploadApiService extends BaseEntrepotApiService
                 } elseif (SupportedUploadFormatsCatalog::FAMILY_CSV === $family) {
                     $files = $csvFiles;
                 } elseif (SupportedUploadFormatsCatalog::FAMILY_SQL === $family) {
-                    throw new AppException('Not implemented');
+                    $files = $sqlFiles;
                 } else {
                     throw new AppException(sprintf('Format ZIP non supporté: %s', $family));
                 }

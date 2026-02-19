@@ -30,7 +30,7 @@ import api from "../../../../api";
 import DatasheetUploadIntegrationDialog from "../DatasheetUploadIntegration/DatasheetUploadIntegrationDialog";
 
 const maxFileSize = 2000000000; // 2 GB
-const fileExtensions = ["gpkg", "zip", "geojson", "csv"];
+const fileExtensions = ["gpkg", "zip", "geojson", "csv", "sql"];
 
 const fileUploader = new FileUploader();
 
@@ -246,8 +246,10 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                         // on conserve la valeur actuelle (par défaut EPSG:2154) si le srid n'a pu être détecté
                         if (typeof sridMapped === "string" && sridMapped.trim() !== "") {
                             setFormValue("data_srid", sridMapped, { shouldValidate: true });
+                            console.debug(`SRID détecté : ${sridMapped}`);
                         } else {
                             setFormValue("data_srid", "", { shouldValidate: false });
+                            console.debug("Aucun SRID détecté ou SRID non reconnu");
                         }
                         setFormValue("data_technical_name", getDataTechNameSuggestion(file.name), { shouldValidate: true });
                         setFormValue("data_upload_path", data?.filename, { shouldValidate: true });

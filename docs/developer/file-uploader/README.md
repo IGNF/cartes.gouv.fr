@@ -96,7 +96,7 @@ Le contrat (routes + forme du JSON) est volontairement stable car il est consomm
 Règles principales :
 
 - Taille maximale : 2 Go.
-- Extensions acceptées : `.gpkg`, `.geojson`, `.csv` et `.zip`.
+- Extensions acceptées : `.gpkg`, `.geojson`, `.csv`, `.sql` et `.zip`.
 - GeoPackage (`.gpkg`) :
     - Extraction des SRID via lecture SQLite (tables GeoPackage).
     - Les noms de tables doivent respecter: `^[a-zA-Z_][ A-Za-z0-9_]*$`.
@@ -114,6 +114,10 @@ Règles principales :
     - SRID :
         - si les colonnes explicites `lon|longitude` ET `lat|latitude` sont présentes, le serveur renvoie `EPSG:4326`,
         - sinon le serveur renvoie un SRID vide (le SRID est choisi côté UI).
+- SQL (`.sql`) :
+    - Validation minimale (côté serveur) : fichier non vide, lisible, sans caractère NUL.
+    - La validation sémantique du SQL est déléguée à l'API Entrepôt.
+    - SRID : non extrait (SRID vide, choix côté UI).
 
 | format       | extension(s)                                                                           | zip obligatoire | multi-fichier | plusieurs fichiers autorisé à la fois |
 | ------------ | -------------------------------------------------------------------------------------- | --------------- | ------------- | ------------------------------------- |
@@ -126,16 +130,14 @@ Règles principales :
 - Les extensions avec un asterisque sont obligatoires, les autres sont optionnelles.
 - Multi-fichier : le format est constitué de plusieurs fichiers (ex. shapefile).
 - Zip obligatoire : les fichiers doivent être obligatoirement dans un zip.
-- Dans un ZIP, une seule famille est autorisée : GeoPackage, GeoJSON, CSV ou Shapefile (pas de mélange).
-
-> Note: le format `SQL` est déclaré dans le catalogue d'extensions mais n'est pas intégralement supporté (validation et envoi vers l'API Entrepôt non implémentés).
+- Dans un ZIP, une seule famille est autorisée : GeoPackage, GeoJSON, CSV, SQL ou Shapefile (pas de mélange).
 
 ### Politique ZIP (permissive + mutation)
 
-- Une archive `.zip` est acceptée, et le serveur ne conserve que les entrées faisant partie d'une famille supportée (GeoPackage, GeoJSON, CSV, Shapefile).
+- Une archive `.zip` est acceptée, et le serveur ne conserve que les entrées faisant partie d'une famille supportée (GeoPackage, GeoJSON, CSV, SQL, Shapefile).
 - Les autres fichiers sont supprimés de l'archive (mutation) pour ne conserver que le contenu utile.
 - Des garde-fous existent pour limiter les comportements dangereux (chemins suspects, tailles/ratios trop élevés, etc.).
-- Le ZIP ne doit contenir qu'une seule « famille » de données : uniquement des `.gpkg` OU uniquement des `.geojson` OU uniquement des `.csv` OU uniquement un Shapefile (pas de mélange).
+- Le ZIP ne doit contenir qu'une seule « famille » de données : uniquement des `.gpkg` OU uniquement des `.geojson` OU uniquement des `.csv` OU uniquement des `.sql` OU uniquement un Shapefile (pas de mélange).
 - Les SRID sont extraits sur l'ensemble des `.gpkg` présents : le SRID doit rester cohérent entre plusieurs couches du gpkg.
 
 ## Envoi vers l'API Entrepôt
