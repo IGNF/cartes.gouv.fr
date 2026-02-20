@@ -2,23 +2,19 @@
 
 Ce document décrit le fonctionnement général du téléversement de fichiers (GeoPackage `.gpkg`, GeoJSON `.geojson`, CSV `.csv` et archive `.zip`) utilisé lors du dépôt d'une donnée.
 
-## Objectif
+## Objectifs
 
 - Permettre le téléversement de gros fichiers en découpant en morceaux (chunks) pour limiter l'impact des coupures réseau.
 - Valider le fichier final côté serveur (format, SRID, contraintes ZIP etc.) avant de le rendre disponible aux étapes suivantes.
 - Conserver les noms d'origine (nom du zip et chemins relatifs des fichiers extraits) lors de l'envoi vers l'API Entrepôt.
 
-## Parcours global (vue d'ensemble)
+## Vue d'ensemble
 
 1. Le navigateur découpe le fichier en chunks et envoie chaque chunk au backend.
 2. Quand tous les chunks sont envoyés, le navigateur appelle l'endpoint de finalisation.
 3. Le backend fusionne les chunks, valide le fichier final, puis répond avec un JSON minimal.
 4. Le frontend stocke la valeur de retour `filename` (utilisée ensuite comme `data_upload_path`).
 5. Plus tard, ce chemin est utilisé pour récupérer le fichier local et l'envoyer vers l'API Entrepôt.
-
-## Diagramme
-
-### Flux global
 
 ```mermaid
 flowchart TD
@@ -36,44 +32,7 @@ flowchart TD
     Svc --> API[API Entrepot]
 ```
 
----
-
-### Validation
-
-```mermaid
-flowchart TD
-    Begin["Debut"] --> DetectType["Detecter type de fichier"]
-
-    GpkgChecks["Verifs Gpkg<br>nom + extraction SRID"]
-    GeojsonChecks["Verifs Geojson<br>structure + SRID constant"]
-    CsvChecks["Verifs CSV<br>colonnes requises + SRID éventuel"]
-    ZipChecks["Verifs et nettoyage Zip<br>taille, ZipSlip"]
-    DetectFamily["Detecter famille Zip<br>gpkg, geojson, csv, shapefile"]
-
-    DetectType -->|gpkg| GpkgChecks
-    DetectType -->|geojson| GeojsonChecks
-    DetectType -->|csv| CsvChecks
-    DetectType -->|zip| ZipChecks
-
-    ZipChecks --> DetectFamily
-    DetectFamily --> IterateZip["Parcourir chaque fichier du Zip"]
-
-    IterateZip -->|famille gpkg| GpkgChecks
-    IterateZip -->|famille geojson| GeojsonChecks
-    IterateZip -->|famille csv| CsvChecks
-
-    Result["Resultat validation<br>filename + srid"]
-    GpkgChecks --> Result
-    GeojsonChecks --> Result
-    CsvChecks --> Result
-
-    GlobalSridCheck["Verif globale coherence SRIDs"]
-    Result --> GlobalSridCheck
-
-    GlobalSridCheck --> End["Fin"]
-```
-
-## Endpoints backend
+## API backend
 
 - `POST /_file_uploader/upload_chunk`
     - Reçoit un chunk et l'enregistre sur disque.
@@ -87,11 +46,38 @@ Le contrat (routes + forme du JSON) est volontairement stable car il est consomm
 
 ## Stockage et nommage
 
-- Les chunks sont stockés dans un répertoire dédié au `uuid` d'upload.
-- Lors de la finalisation, le backend reconstitue un fichier final et l'enregistre sous le nom d'origine fourni par l'utilisateur (afin d'avoir un nom lisible et stable pour la suite).
-- La valeur `filename` renvoyée est un chemin relatif (sous le répertoire d'uploads) et c'est cette valeur qui circule ensuite vers l'intégration Entrepôt.
+- Les chunks sont stockés dans un répertoire dédié au `uuid` d'upload (UUID v4).
+- Lors de la finalisation, le backend reconstitue un fichier final et l'enregistre sous un nom dérivé de `originalFilename`.
+    - Le nom est validé pour éviter toute traversée de répertoires (pas de séparateurs de chemin, pas de `.`/`..`).
+- La valeur `filename` renvoyée est un chemin relatif (sous le répertoire d'uploads) au format `<uuid>/<nom_fichier>`.
+- C'est cette valeur qui circule ensuite vers l'intégration Entrepôt via le tag `data_upload_path`.
 
 ## Validation côté serveur
+
+```mermaid
+flowchart TD
+    Begin["Debut"] --> DetectType["Détecter type de fichier"]
+
+    FileChecks["Vérifs en fonction<br>du format<br>*nom + extraction SRID*"]
+    ZipChecks["Vérifs et nettoyage Zip<br>taille, ZipSlip"]
+    DetectFamily["Détecter format du fichier<br>*Un seul format, pas de mélange*"]
+
+    DetectType -->FileChecks
+    DetectType -->|zip| ZipChecks
+
+    ZipChecks --> DetectFamily
+    DetectFamily --> IterateZip["Parcourir chaque fichier du Zip"]
+
+    IterateZip -->FileChecks
+
+    Result["Resultat validation<br>filename + srid"]
+    FileChecks --> Result
+
+    GlobalSridCheck["Verif globale coherence SRIDs"]
+    Result --> GlobalSridCheck
+
+    GlobalSridCheck --> End["Fin"]
+```
 
 Règles principales :
 
@@ -119,6 +105,8 @@ Règles principales :
     - La validation sémantique du SQL est déléguée à l'API Entrepôt.
     - SRID : non extrait (SRID vide, choix côté UI).
 
+Formats de fichiers en entrée :
+
 | format       | extension(s)                                                                           | zip obligatoire | multi-fichier | plusieurs fichiers autorisé à la fois |
 | ------------ | -------------------------------------------------------------------------------------- | --------------- | ------------- | ------------------------------------- |
 | `GeoPackage` | gpkg\*                                                                                 | non             | non           | oui                                   |
@@ -127,7 +115,7 @@ Règles principales :
 | `CSV`        | csv\*                                                                                  | non             | non           | oui                                   |
 | `SQL`        | sql\*                                                                                  | non             | non           | oui                                   |
 
-- Les extensions avec un asterisque sont obligatoires, les autres sont optionnelles.
+- Les extensions avec un astérisque sont obligatoires, les autres sont optionnelles.
 - Multi-fichier : le format est constitué de plusieurs fichiers (ex. shapefile).
 - Zip obligatoire : les fichiers doivent être obligatoirement dans un zip.
 - Dans un ZIP, une seule famille est autorisée : GeoPackage, GeoJSON, CSV, SQL ou Shapefile (pas de mélange).
@@ -144,7 +132,8 @@ Règles principales :
 
 Lorsqu'on envoie un ZIP:
 
-- Le serveur extrait l'archive localement et parcourt récursivement les fichiers de la famille détectée (`.gpkg`, `.geojson`, `.csv` ou shapefile).
+- Le serveur extrait l'archive localement dans un dossier temporaire unique.
+- Il parcourt récursivement les fichiers extraits et n'envoie que les entrées autorisées (règles `ZipUploadPolicy`: entryName OU extension autorisée).
 - Chaque fichier est envoyé à l'API Entrepôt en conservant son chemin relatif dans l'archive.
     - Exemple: une entrée `dossier/sous-dossier/data.gpkg` est envoyée comme `path=data/dossier/sous-dossier/data.gpkg`.
 
