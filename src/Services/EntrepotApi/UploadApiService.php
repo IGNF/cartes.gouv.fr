@@ -156,7 +156,7 @@ class UploadApiService extends BaseEntrepotApiService
                     if (null !== $realFolder) {
                         $realPath = $entry->getRealPath();
                         if (false === $realPath || 0 !== strpos($realPath, $realFolder.DIRECTORY_SEPARATOR)) {
-                            throw new AppException('Archive corrompu');
+                            throw new AppException('Archive corrompue');
                         }
                     }
 

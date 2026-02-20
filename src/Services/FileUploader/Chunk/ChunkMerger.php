@@ -38,6 +38,7 @@ final class ChunkMerger
             throw new FileUploaderException(self::ERR_MERGE_FAILED, Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
+        $mergeSucceeded = false;
         try {
             foreach ($files as $filename) {
                 $fullName = "$directory/$filename";
@@ -56,8 +57,14 @@ final class ChunkMerger
                     fclose($in);
                 }
             }
+
+            $mergeSucceeded = true;
         } finally {
             fclose($out);
+
+            if (!$mergeSucceeded && $this->filesystem->exists($tmpFinalPath)) {
+                $this->filesystem->remove($tmpFinalPath);
+            }
         }
 
         if ($this->filesystem->exists($finalPath)) {

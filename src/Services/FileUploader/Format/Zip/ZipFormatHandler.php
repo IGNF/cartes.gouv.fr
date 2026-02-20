@@ -27,7 +27,7 @@ final class ZipFormatHandler implements UploadFormatHandlerInterface
     private const MAX_EXPANSION_FACTOR_DEFAULT = 20;
     private const MAX_EXPANSION_FACTOR_SHAPEFILE = 70;
 
-    private const ERR_ARCHIVE_CORRUPT = 'Archive corrompu';
+    private const ERR_ARCHIVE_CORRUPT = 'Archive corrompue';
     private const ERR_NO_ACCEPTABLE_FILES = "L'archive ne contient aucun fichier acceptable";
     private const ERR_ZIP_OPEN_FAILED = "L'ouverture du fichier ZIP a échoué";
     private const ERR_ZIP_EXTRACT_FAILED = "L'extraction du fichier ZIP a échoué";
@@ -134,7 +134,7 @@ final class ZipFormatHandler implements UploadFormatHandlerInterface
     private function cleanArchive(\SplFileInfo $file): void
     {
         $zip = new \ZipArchive();
-        if (!$zip->open($file->getPathname())) {
+        if (true !== $zip->open($file->getPathname())) {
             throw new FileUploaderException("L'ouverture de l'archive {$file->getFilename()} a echoué", Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
@@ -174,8 +174,9 @@ final class ZipFormatHandler implements UploadFormatHandlerInterface
     private function validateArchive(\SplFileInfo $file): string
     {
         $zip = new \ZipArchive();
-        if (!$zip->open($file->getPathname())) {
-            throw new FileUploaderException("L'ouverture de l'archive {$file->getFilename()} a echoué", Response::HTTP_INTERNAL_SERVER_ERROR);
+        $openResult = $zip->open($file->getPathname());
+        if (true !== $openResult) {
+            throw new FileUploaderException("L'ouverture de l'archive {$file->getFilename()} a echoué (code {$openResult})", Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
         $numFiles = 0;
@@ -207,6 +208,10 @@ final class ZipFormatHandler implements UploadFormatHandlerInterface
             }
 
             $stats = $zip->statIndex($i);
+            if (false === $stats) {
+                $zip->close();
+                throw new FileUploaderException(self::ERR_ARCHIVE_CORRUPT, Response::HTTP_BAD_REQUEST);
+            }
             ++$numFiles;
             if ($numFiles > self::MAX_FILES) {
                 $zip->close();
@@ -424,16 +429,18 @@ final class ZipFormatHandler implements UploadFormatHandlerInterface
     {
         $infos = pathinfo($file->getPathname());
         $dirname = $infos['dirname'];
-        $tmpFolderName = $infos['filename'].'_tmp';
+        $tmpFolderName = $infos['filename'].'_tmp_'.bin2hex(random_bytes(6));
         $folder = "$dirname/$tmpFolderName";
 
         $zip = new \ZipArchive();
-        if (!$zip->open($file->getPathname())) {
-            throw new FileUploaderException(self::ERR_ZIP_OPEN_FAILED, Response::HTTP_INTERNAL_SERVER_ERROR);
+        $openResult = $zip->open($file->getPathname());
+        if (true !== $openResult) {
+            throw new FileUploaderException(self::ERR_ZIP_OPEN_FAILED." (code {$openResult})", Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
         try {
-            if (!$zip->extractTo($folder)) {
+            $this->filesystem->mkdir($folder);
+            if (true !== $zip->extractTo($folder)) {
                 throw new FileUploaderException(self::ERR_ZIP_EXTRACT_FAILED, Response::HTTP_INTERNAL_SERVER_ERROR);
             }
         } finally {
