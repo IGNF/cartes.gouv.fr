@@ -135,7 +135,7 @@ final class ZipFormatHandler implements UploadFormatHandlerInterface
     {
         $zip = new \ZipArchive();
         if (true !== $zip->open($file->getPathname())) {
-            throw new FileUploaderException("L'ouverture de l'archive {$file->getFilename()} a echoué", Response::HTTP_INTERNAL_SERVER_ERROR);
+            throw new FileUploaderException("L'ouverture de l'archive {$file->getFilename()} a échoué", Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
         $numDeletedFiles = 0;
@@ -176,7 +176,7 @@ final class ZipFormatHandler implements UploadFormatHandlerInterface
         $zip = new \ZipArchive();
         $openResult = $zip->open($file->getPathname());
         if (true !== $openResult) {
-            throw new FileUploaderException("L'ouverture de l'archive {$file->getFilename()} a echoué (code {$openResult})", Response::HTTP_INTERNAL_SERVER_ERROR);
+            throw new FileUploaderException("L'ouverture de l'archive {$file->getFilename()} a échoué (code {$openResult})", Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
         $numFiles = 0;
