@@ -13,7 +13,6 @@ final class ChunkMerger
 
     public function __construct(
         private readonly UploadPathResolver $pathResolver,
-        private readonly ChunkFilenameIndexParser $indexParser,
         private readonly Filesystem $filesystem,
     ) {
     }
@@ -86,8 +85,8 @@ final class ChunkMerger
     private function sortFiles(array $files): array
     {
         usort($files, function (string $filename1, string $filename2): int {
-            $index1 = $this->indexParser->parseIndex($filename1);
-            $index2 = $this->indexParser->parseIndex($filename2);
+            $index1 = ChunkFilename::parseIndex($filename1);
+            $index2 = ChunkFilename::parseIndex($filename2);
 
             return $index1 <=> $index2;
         });

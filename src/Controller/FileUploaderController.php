@@ -14,7 +14,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Uid\UuidV4;
 
 #[Route(
     '/_file_uploader',
@@ -43,10 +42,6 @@ class FileUploaderController extends AbstractController
 
             if (!is_string($uuid) || '' === trim($uuid)) {
                 throw new FileUploaderException('Le paramètre [uuid] est obligatoire', Response::HTTP_BAD_REQUEST);
-            }
-
-            if (!UuidV4::isValid($uuid)) {
-                throw new FileUploaderException('Le paramètre [uuid] est invalide', Response::HTTP_BAD_REQUEST);
             }
             if (!is_numeric($index)) {
                 throw new FileUploaderException('Le paramètre [index] est obligatoire', Response::HTTP_BAD_REQUEST);
@@ -82,20 +77,14 @@ class FileUploaderController extends AbstractController
             $uuid = $content['uuid'];
             $originalFilename = $content['originalFilename'];
 
-            if (!is_string($uuid) || '' === trim($uuid)) {
+            if (!is_string($uuid)) {
                 throw new FileUploaderException('Le paramètre [uuid] est invalide', Response::HTTP_BAD_REQUEST);
             }
-
-            if (!UuidV4::isValid($uuid)) {
-                throw new FileUploaderException('Le paramètre [uuid] est invalide', Response::HTTP_BAD_REQUEST);
-            }
-            if (!is_string($originalFilename) || '' === trim($originalFilename)) {
+            if (!is_string($originalFilename)) {
                 throw new FileUploaderException('Le paramètre [originalFilename] est invalide', Response::HTTP_BAD_REQUEST);
             }
 
-            if (str_contains($originalFilename, "\0") || str_contains($originalFilename, '/') || str_contains($originalFilename, '\\')) {
-                throw new FileUploaderException('Le paramètre [originalFilename] est invalide', Response::HTTP_BAD_REQUEST);
-            }
+            $originalFilename = $this->pathResolver->sanitizeFilename($originalFilename);
 
             $totalChunks = $content['totalChunks'] ?? null;
             $fileSize = $content['fileSize'] ?? null;
@@ -107,60 +96,8 @@ class FileUploaderController extends AbstractController
                 throw new FileUploaderException('Le paramètre [fileSize] est invalide', Response::HTTP_BAD_REQUEST);
             }
 
-            $directory = $this->pathResolver->getUploadDirectory($uuid);
-
-            if (!is_dir($directory)) {
-                throw new FileUploaderException('Aucun chunk trouvé pour cet upload', Response::HTTP_BAD_REQUEST);
-            }
-
-            $filesOnDisk = array_filter(scandir($directory) ?: [], function (string $filename) use ($directory) {
-                return !is_dir("$directory/$filename");
-            });
-
-            $files = [];
-            if (null !== $totalChunks) {
-                $expected = intval($totalChunks);
-                $missing = [];
-
-                for ($i = 1; $i <= $expected; ++$i) {
-                    $name = sprintf('%s_%d', $uuid, $i);
-                    if (!in_array($name, $filesOnDisk, true)) {
-                        $missing[] = $i;
-                        continue;
-                    }
-                    $files[] = $name;
-                }
-
-                if (!empty($missing)) {
-                    $preview = array_slice($missing, 0, 20);
-                    $suffix = count($missing) > 20 ? '…' : '';
-                    throw new FileUploaderException(sprintf('Des chunks sont manquants (%d/%d): %s%s', count($missing), $expected, implode(', ', $preview), $suffix), Response::HTTP_BAD_REQUEST);
-                }
-
-                $extra = [];
-                $pattern = '/^'.preg_quote($uuid, '/').'_\d+$/';
-                foreach ($filesOnDisk as $filename) {
-                    if (preg_match($pattern, $filename) && !in_array($filename, $files, true)) {
-                        $extra[] = $filename;
-                    }
-                }
-                if (!empty($extra)) {
-                    $preview = array_slice($extra, 0, 20);
-                    $suffix = count($extra) > 20 ? '…' : '';
-                    throw new FileUploaderException(sprintf('Des chunks inattendus ont été détectés (%d): %s%s', count($extra), implode(', ', $preview), $suffix), Response::HTTP_BAD_REQUEST);
-                }
-            } else {
-                $pattern = '/^'.preg_quote($uuid, '/').'_\d+$/';
-                foreach ($filesOnDisk as $filename) {
-                    if (preg_match($pattern, $filename)) {
-                        $files[] = $filename;
-                    }
-                }
-            }
-
-            if (empty($files)) {
-                throw new FileUploaderException('Aucun chunk trouvé pour cet upload', Response::HTTP_BAD_REQUEST);
-            }
+            $expectedTotalChunks = null !== $totalChunks ? intval($totalChunks) : null;
+            $files = $this->chunkStorage->assertAndListChunks($uuid, $expectedTotalChunks);
 
             // Fusion des fichiers (tri inclus)
             $filepath = $this->chunkMerger->merge($uuid, $originalFilename, $files);
