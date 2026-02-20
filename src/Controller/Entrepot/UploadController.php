@@ -67,6 +67,15 @@ class UploadController extends AbstractController implements ApiControllerInterf
         try {
             $content = json_decode($request->getContent(), true);
 
+            if (!is_array($content)) {
+                throw new AppException('Corps de requête invalide', JsonResponse::HTTP_BAD_REQUEST, ['message' => 'Corps de requête invalide']);
+            }
+
+            $dataUploadPath = $content['data_upload_path'] ?? null;
+            if (!is_string($dataUploadPath) || '' === trim($dataUploadPath)) {
+                throw new AppException('Chemin de fichier invalide', JsonResponse::HTTP_BAD_REQUEST, ['message' => 'Chemin de fichier invalide']);
+            }
+
             // déclaration de livraison
             $uploadData = [
                 'name' => $content['data_technical_name'],
@@ -78,7 +87,7 @@ class UploadController extends AbstractController implements ApiControllerInterf
 
             // ajout tags sur la livraison
             $tags = [
-                UploadTags::DATA_UPLOAD_PATH => $content['data_upload_path'],
+                UploadTags::DATA_UPLOAD_PATH => $dataUploadPath,
                 CommonTags::DATASHEET_NAME => $content['data_name'],
                 CommonTags::PRODUCER => $content['producer'],
                 CommonTags::PRODUCTION_YEAR => $content['production_year'],
@@ -88,9 +97,9 @@ class UploadController extends AbstractController implements ApiControllerInterf
             // retourne l'upload au frontend, qui se chargera de lancer l'intégration VECTOR-DB
             return $this->json($upload);
         } catch (AppException $ex) {
-            return $this->json($ex->getDetails(), $ex->getCode());
+            return $this->json($ex->getDetails(), $ex->getStatusCode());
         } catch (\Exception $ex) {
-            return $this->json(['message' => $ex->getMessage()], $ex->getCode());
+            return $this->json(['message' => $ex->getMessage()], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -114,9 +123,9 @@ class UploadController extends AbstractController implements ApiControllerInterf
 
             return $this->json($fileTree);
         } catch (AppException $ex) {
-            return $this->json($ex->getDetails(), $ex->getCode());
+            return $this->json($ex->getDetails(), $ex->getStatusCode());
         } catch (\Exception $ex) {
-            return $this->json(['message' => $ex->getMessage()], $ex->getCode());
+            return $this->json(['message' => $ex->getMessage()], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -160,8 +169,10 @@ class UploadController extends AbstractController implements ApiControllerInterf
             }
 
             return $this->json($uploadTags);
+        } catch (AppException $ex) {
+            return $this->json($ex->getDetails(), $ex->getStatusCode());
         } catch (ApiException $ex) {
-            return $this->json($ex->getDetails(), $ex->getCode());
+            return $this->json($ex->getDetails(), $ex->getStatusCode());
         }
     }
 
@@ -184,7 +195,12 @@ class UploadController extends AbstractController implements ApiControllerInterf
                                 $this->uploadApiService->open($datastoreId, $upload['_id']);
                             }
 
-                            $this->uploadApiService->addFile($datastoreId, $upload['_id'], $upload['tags'][UploadTags::DATA_UPLOAD_PATH]);
+                            $path = $upload['tags'][UploadTags::DATA_UPLOAD_PATH] ?? null;
+                            if (!is_string($path) || '' === trim($path)) {
+                                throw new AppException('Chemin de fichier invalide', JsonResponse::HTTP_BAD_REQUEST, ['message' => 'Chemin de fichier invalide']);
+                            }
+
+                            $this->uploadApiService->addFile($datastoreId, $upload['_id'], $path);
 
                             $currentStepStatus = JobStatuses::IN_PROGRESS;
                             break;

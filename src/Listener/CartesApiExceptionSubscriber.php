@@ -51,10 +51,13 @@ class CartesApiExceptionSubscriber implements EventSubscriberInterface
             'details' => [],
         ];
 
-        $code = $throwable->getCode();
-        $responseData['code'] = $code;
+        $code = $throwable->getStatusCode();
+        if ($code < 400 || $code > 599) {
+            $code = Response::HTTP_INTERNAL_SERVER_ERROR;
+        }
 
-        $responseData['status'] = Response::$statusTexts[$code];
+        $responseData['code'] = $code;
+        $responseData['status'] = Response::$statusTexts[$code] ?? Response::$statusTexts[Response::HTTP_INTERNAL_SERVER_ERROR];
         $responseData['message'] = $throwable->getMessage();
         $responseData['details'] = $throwable->getDetails();
 

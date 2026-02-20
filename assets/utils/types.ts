@@ -14,6 +14,20 @@ export const getFileExtension = (filename: string) => {
     return filename.split(".").pop()?.toLowerCase();
 };
 
+export const looksLikeShapefileComponent = (filename: string) => {
+    const extension = getFileExtension(filename);
+    const filenameLower = filename.toLowerCase();
+    return (
+        filenameLower.endsWith(".shp.xml") ||
+        extension === "shp" ||
+        extension === "shx" ||
+        extension === "dbf" ||
+        extension === "prj" ||
+        extension === "cpg" ||
+        extension === "qix"
+    );
+};
+
 export const getArrayRange = (start: number, stop: number, step: number = 1): number[] =>
     Array.from({ length: (stop - start) / step + 1 }, (_, index) => start + index * step);
 

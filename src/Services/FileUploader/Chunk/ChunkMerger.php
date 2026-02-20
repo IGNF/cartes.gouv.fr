@@ -1,0 +1,96 @@
+<?php
+
+namespace App\Services\FileUploader\Chunk;
+
+use App\Services\FileUploader\Exception\FileUploaderException;
+use App\Services\FileUploader\Path\UploadPathResolver;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\Response;
+
+final class ChunkMerger
+{
+    private const ERR_MERGE_FAILED = 'Merging files failed.';
+
+    public function __construct(
+        private readonly UploadPathResolver $pathResolver,
+        private readonly Filesystem $filesystem,
+    ) {
+    }
+
+    /**
+     * @param string[] $files nom des fichiers
+     */
+    public function merge(string $uuid, string $originalFilename, array $files): string
+    {
+        $directory = $this->pathResolver->getUploadDirectory($uuid);
+        $files = $this->sortFiles($files);
+
+        $finalPath = $this->pathResolver->getFinalPath($uuid, $originalFilename);
+        $tmpFinalPath = $finalPath.'.tmp';
+
+        if ($this->filesystem->exists($tmpFinalPath)) {
+            $this->filesystem->remove($tmpFinalPath);
+        }
+
+        $out = fopen($tmpFinalPath, 'wb');
+        if (false === $out) {
+            throw new FileUploaderException(self::ERR_MERGE_FAILED, Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        $mergeSucceeded = false;
+        try {
+            foreach ($files as $filename) {
+                $fullName = "$directory/$filename";
+
+                $in = fopen($fullName, 'rb');
+                if (false === $in) {
+                    throw new FileUploaderException(self::ERR_MERGE_FAILED, Response::HTTP_INTERNAL_SERVER_ERROR);
+                }
+
+                try {
+                    $copied = stream_copy_to_stream($in, $out);
+                    if (false === $copied) {
+                        throw new FileUploaderException(self::ERR_MERGE_FAILED, Response::HTTP_INTERNAL_SERVER_ERROR);
+                    }
+                } finally {
+                    fclose($in);
+                }
+            }
+
+            $mergeSucceeded = true;
+        } finally {
+            fclose($out);
+
+            if (!$mergeSucceeded && $this->filesystem->exists($tmpFinalPath)) {
+                $this->filesystem->remove($tmpFinalPath);
+            }
+        }
+
+        if ($this->filesystem->exists($finalPath)) {
+            $this->filesystem->remove($finalPath);
+        }
+
+        $this->filesystem->rename($tmpFinalPath, $finalPath);
+
+        $chunkPaths = [];
+        foreach ($files as $filename) {
+            $chunkPaths[] = "$directory/$filename";
+        }
+        $this->filesystem->remove($chunkPaths);
+
+        return $finalPath;
+    }
+
+    /** @param string[] $files @return string[] */
+    private function sortFiles(array $files): array
+    {
+        usort($files, function (string $filename1, string $filename2): int {
+            $index1 = ChunkFilename::parseIndex($filename1);
+            $index2 = ChunkFilename::parseIndex($filename2);
+
+            return $index1 <=> $index2;
+        });
+
+        return $files;
+    }
+}

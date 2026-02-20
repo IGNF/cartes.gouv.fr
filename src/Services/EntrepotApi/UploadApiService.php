@@ -6,9 +6,28 @@ use App\Constants\EntrepotApi\UploadStatuses;
 use App\Constants\EntrepotApi\UploadTags;
 use App\Exception\ApiException;
 use App\Exception\AppException;
+use App\Services\FileUploader\Format\Zip\ZipUploadPolicy;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class UploadApiService extends BaseEntrepotApiService
 {
+    public function __construct(
+        HttpClientInterface $httpClient,
+        ParameterBagInterface $parameters,
+        Filesystem $filesystem,
+        RequestStack $requestStack,
+        LoggerInterface $logger,
+        protected CacheInterface $cache,
+        private readonly ZipUploadPolicy $zipUploadPolicy,
+    ) {
+        parent::__construct($httpClient, $parameters, $filesystem, $requestStack, $cache, $logger);
+    }
+
     /**
      * @param array<mixed> $query
      */
@@ -74,72 +93,135 @@ class UploadApiService extends BaseEntrepotApiService
      */
     public function addFile($datastoreId, $uploadId, $filename)
     {
-        $filepath = realpath($this->parameters->get('upload_path')."/$filename");
+        $uploadRoot = realpath((string) $this->parameters->get('upload_path'));
+        if (false === $uploadRoot) {
+            throw new AppException('Chemin racine des uploads introuvable', 500, ['message' => 'Chemin racine des uploads introuvable']);
+        }
+        $uploadRoot = rtrim($uploadRoot, DIRECTORY_SEPARATOR);
+
+        $filepath = realpath($uploadRoot."/$filename");
+        if (false === $filepath) {
+            throw new AppException('Fichier à envoyer introuvable', 400, ['message' => 'Fichier à envoyer introuvable']);
+        }
+
+        if (0 !== strpos($filepath, $uploadRoot.DIRECTORY_SEPARATOR)) {
+            throw new AppException('Chemin de fichier invalide', 400, ['message' => 'Chemin de fichier invalide']);
+        }
+
         $infos = pathinfo($filepath);
+        $extension = strtolower((string) ($infos['extension'] ?? ''));
+        if ('' === $extension) {
+            throw new AppException('Extension du fichier à envoyer introuvable', 400, ['message' => 'Extension du fichier à envoyer introuvable']);
+        }
 
-        $extension = $infos['extension'];
-
+        /** @var array<int, array{pathname: string, relativePath: string}> $files */
         $files = [];
+        $extractedFolder = null;
         try {
-            if ('zip' != $extension) {
-                $files[] = $filepath;
+            if ('zip' !== $extension) {
+                $files[] = [
+                    'pathname' => $filepath,
+                    'relativePath' => basename($filepath),
+                ];
             } else {
-                // extracting zip file
                 $zip = new \ZipArchive();
-                if (!$zip->open($filepath)) {
+                if (true !== $zip->open($filepath)) {
                     throw new AppException('Ouverture du fichier ZIP échouée');
                 }
 
-                $folder = join([$infos['dirname'], DIRECTORY_SEPARATOR, $infos['filename']]);
-                if (!$zip->extractTo($folder)) {
-                    throw new AppException('Décompression du fichier zip échouée');
+                $folder = $infos['dirname'].DIRECTORY_SEPARATOR.$infos['filename'].'_'.bin2hex(random_bytes(6));
+                $extractedFolder = $folder;
+                $this->filesystem->mkdir($folder);
+
+                try {
+                    if (true !== $zip->extractTo($folder)) {
+                        throw new AppException('Décompression du fichier zip échouée');
+                    }
+                } finally {
+                    $zip->close();
                 }
-                $zip->close();
 
                 // add files to the upload
                 $iterator = new \RecursiveIteratorIterator(
                     new \RecursiveDirectoryIterator($folder, \RecursiveDirectoryIterator::SKIP_DOTS)
                 );
 
-                $filename = null;
+                $realFolder = realpath($folder) ?: null;
+
                 foreach ($iterator as $entry) {
-                    $files[] = $entry->getPathname();
+                    if (!$entry->isFile()) {
+                        continue;
+                    }
+
+                    if (null !== $realFolder) {
+                        $realPath = $entry->getRealPath();
+                        if (false === $realPath || 0 !== strpos($realPath, $realFolder.DIRECTORY_SEPARATOR)) {
+                            throw new AppException('Archive corrompue');
+                        }
+                    }
+
+                    $entryPathname = $entry->getPathname();
+                    $prefix = rtrim($folder, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR;
+                    $relative = str_starts_with($entryPathname, $prefix) ? substr($entryPathname, strlen($prefix)) : basename($entryPathname);
+                    $relative = str_replace(DIRECTORY_SEPARATOR, '/', $relative);
+
+                    // Le ZIP a déjà été validé/"nettoyé" lors du finalize côté FileUploader.
+                    // On conserve ici les mêmes règles permissives que ZipFormatHandler (entryName OU extension) pour couvrir les suffixes spéciaux (.shp.xml, etc.).
+                    if (!$this->zipUploadPolicy->isAllowedEntryName($relative) && !$this->zipUploadPolicy->isAllowedExtension(strtolower(pathinfo($relative, PATHINFO_EXTENSION)))) {
+                        continue;
+                    }
+
+                    $item = [
+                        'pathname' => $entryPathname,
+                        'relativePath' => $relative,
+                    ];
+
+                    $files[] = $item;
+                }
+
+                if (0 === count($files)) {
+                    throw new AppException('Aucun fichier valide trouvé dans le ZIP');
                 }
             }
 
-            foreach ($files as $filepath) {
-                $filename = basename($filepath);
-                $this->uploadFile($datastoreId, $uploadId, $filepath, $filename);
+            foreach ($files as $file) {
+                $this->uploadFile($datastoreId, $uploadId, $file['pathname'], $file['relativePath']);
             }
 
             // close the upload
             $this->close($datastoreId, $uploadId);
-        } catch (\Throwable $th) {
-            throw $th;
+        } finally {
+            if (null !== $extractedFolder) {
+                $this->filesystem->remove($extractedFolder);
+            }
+
+            if ('zip' === $extension) {
+                $this->filesystem->remove($filepath);
+            }
         }
     }
 
     /**
      * Adds a file and its md5 checksum to an existing and OPEN upload.
-     *
-     * @param string $datastoreId
-     * @param string $uploadId
-     * @param string $pathname
-     * @param string $filename
-     *
-     * @return void
      */
-    public function uploadFile($datastoreId, $uploadId, $pathname, $filename)
+    public function uploadFile(string $datastoreId, string $uploadId, string $pathname, string $relativePath): void
     {
         // envoi du fichier téléversé par l'utilisateur
         $this->sendFile('POST', "datastores/$datastoreId/uploads/$uploadId/data", $pathname, [], [
-            'path' => "data/{$filename}",
+            'path' => "data/{$relativePath}",
         ]);
 
         // calcul et envoi du md5 du fichier téléversé par l'utilisateur
         $md5 = \md5_file($pathname);
+        if (false === $md5) {
+            throw new AppException('Calcul du md5 échoué');
+        }
+
+        $md5Line = sprintf("%s  %s\n", $md5, "data/$relativePath");
         $md5filePath = "$pathname.md5";
-        file_put_contents($md5filePath, "$md5 data/$filename");
+        if (false === \file_put_contents($md5filePath, $md5Line, \LOCK_EX)) {
+            throw new AppException('Écriture du fichier md5 échouée');
+        }
 
         $this->sendFile('POST', "datastores/$datastoreId/uploads/$uploadId/md5", $md5filePath);
 

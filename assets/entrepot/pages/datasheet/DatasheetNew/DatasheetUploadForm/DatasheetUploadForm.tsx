@@ -5,7 +5,7 @@ import { Input } from "@codegouvfr/react-dsfr/Input";
 import { Select as SelectNext } from "@codegouvfr/react-dsfr/SelectNext";
 import { Upload } from "@codegouvfr/react-dsfr/Upload";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format as datefnsFormat } from "date-fns";
 import { FC, useEffect, useMemo, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -25,12 +25,12 @@ import { useTranslation } from "../../../../../i18n/i18n";
 import FileUploader from "../../../../../modules/FileUploader";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import { routes, useRoute } from "../../../../../router/router";
-import { delta, getFileExtension, regex } from "../../../../../utils";
+import { delta, getFileExtension, looksLikeShapefileComponent, regex } from "../../../../../utils";
 import api from "../../../../api";
 import DatasheetUploadIntegrationDialog from "../DatasheetUploadIntegration/DatasheetUploadIntegrationDialog";
 
 const maxFileSize = 2000000000; // 2 GB
-const fileExtensions = ["gpkg", "zip"];
+const fileExtensions = ["gpkg", "zip", "geojson", "csv", "sql"];
 
 const fileUploader = new FileUploader();
 
@@ -156,6 +156,8 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
 
     const selectedSrid = watch("data_srid");
 
+    const queryClient = useQueryClient();
+
     const addUploadMutation = useMutation({
         mutationFn: (formData: object) => {
             return api.upload.add(datastoreId, formData);
@@ -195,6 +197,13 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
         }
 
         const extension = getFileExtension(file.name);
+        const isShapefileComponent = looksLikeShapefileComponent(file.name);
+
+        if (isShapefileComponent) {
+            setDataFileError(t("upload_shapefile_zip_required_error", { filename: file.name }));
+            return false;
+        }
+
         if (!extension || !fileExtensions.includes(extension)) {
             setDataFileError(t("upload_extension_error", { filename: file.name }));
             return false;
@@ -221,6 +230,8 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
 
         const uuid = uuidv4();
         setFileUploadInProgress(true);
+        queryClient.cancelQueries({ queryKey: RQKeys.datastore_datasheet_list(datastoreId) });
+        queryClient.cancelQueries({ queryKey: RQKeys.catalogs_organizations() });
         setProgressMax(file.size);
 
         fileUploader
@@ -229,10 +240,14 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                 fileUploader
                     .uploadComplete(uuid, file)
                     .then(async (data) => {
-                        let srid = data?.srid;
-                        srid = srid in ignfProjections ? ignfProjections[srid] : srid; // récupérer la proj EPSG correspondante si une proj IGNF est détectée
+                        const sridRaw = data?.srid;
+                        const sridMapped = typeof sridRaw === "string" && sridRaw !== "" && sridRaw in ignfProjections ? ignfProjections[sridRaw] : sridRaw;
 
-                        setFormValue("data_srid", srid, { shouldValidate: true });
+                        if (typeof sridMapped === "string" && sridMapped.trim() !== "") {
+                            setFormValue("data_srid", sridMapped, { shouldValidate: true });
+                        } else {
+                            setFormValue("data_srid", "", { shouldValidate: false, shouldDirty: false });
+                        }
                         setFormValue("data_technical_name", getDataTechNameSuggestion(file.name), { shouldValidate: true });
                         setFormValue("data_upload_path", data?.filename, { shouldValidate: true });
 
@@ -256,6 +271,7 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
         queryKey: RQKeys.catalogs_organizations(),
         queryFn: ({ signal }) => api.catalogs.getAllOrganizations({ signal }),
         staleTime: delta.hours(10),
+        enabled: !fileUploadInProgress,
     });
 
     return (
@@ -292,7 +308,7 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                 hint={t("upload_hint")}
                 state={dataFileError === undefined ? "default" : "error"}
                 stateRelatedMessage={dataFileError}
-                nativeInputProps={{ onChange: postDataFile, ref: dataFileRef, accept: ".gpkg,.zip" }}
+                nativeInputProps={{ onChange: postDataFile, ref: dataFileRef, accept: fileExtensions.map((ext) => `.${ext}`).join(",") }}
                 className={fr.cx("fr-input-group")}
             />
             {fileUploadInProgress && <Progress label={t("upload_running")} value={progressValue} max={progressMax} />}
@@ -366,7 +382,10 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
             <ButtonsGroup
                 buttons={[
                     {
-                        linkProps: routes.datasheet_list({ datastoreId }).link,
+                        linkProps:
+                            datasheetName === undefined
+                                ? routes.datasheet_list({ datastoreId }).link
+                                : routes.datastore_datasheet_view({ datastoreId, datasheetName, activeTab: "dataset" }).link,
                         children: tCommon("cancel"),
                         priority: "secondary",
                     },
