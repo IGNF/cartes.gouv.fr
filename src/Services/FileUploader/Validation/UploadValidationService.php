@@ -28,7 +28,11 @@ final class UploadValidationService
         $filename = $file->getFilename();
 
         $size = $file->getSize();
-        if (!$size) {
+        if (false === $size) {
+            throw new FileUploaderException("Impossible de lire la taille du fichier $filename", Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        if (0 === $size) {
             throw new FileUploaderException("Le fichier $filename ne doit pas être vide", Response::HTTP_BAD_REQUEST);
         }
 

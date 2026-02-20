@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Uid\UuidV4;
 
 #[Route(
     '/_file_uploader',
@@ -42,6 +43,10 @@ class FileUploaderController extends AbstractController
 
             if (!is_string($uuid) || '' === trim($uuid)) {
                 throw new FileUploaderException('Le paramètre [uuid] est obligatoire', Response::HTTP_BAD_REQUEST);
+            }
+
+            if (!UuidV4::isValid($uuid)) {
+                throw new FileUploaderException('Le paramètre [uuid] est invalide', Response::HTTP_BAD_REQUEST);
             }
             if (!is_numeric($index)) {
                 throw new FileUploaderException('Le paramètre [index] est obligatoire', Response::HTTP_BAD_REQUEST);
@@ -80,7 +85,15 @@ class FileUploaderController extends AbstractController
             if (!is_string($uuid) || '' === trim($uuid)) {
                 throw new FileUploaderException('Le paramètre [uuid] est invalide', Response::HTTP_BAD_REQUEST);
             }
+
+            if (!UuidV4::isValid($uuid)) {
+                throw new FileUploaderException('Le paramètre [uuid] est invalide', Response::HTTP_BAD_REQUEST);
+            }
             if (!is_string($originalFilename) || '' === trim($originalFilename)) {
+                throw new FileUploaderException('Le paramètre [originalFilename] est invalide', Response::HTTP_BAD_REQUEST);
+            }
+
+            if (str_contains($originalFilename, "\0") || str_contains($originalFilename, '/') || str_contains($originalFilename, '\\')) {
                 throw new FileUploaderException('Le paramètre [originalFilename] est invalide', Response::HTTP_BAD_REQUEST);
             }
 

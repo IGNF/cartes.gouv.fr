@@ -243,13 +243,10 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                         const sridRaw = data?.srid;
                         const sridMapped = typeof sridRaw === "string" && sridRaw !== "" && sridRaw in ignfProjections ? ignfProjections[sridRaw] : sridRaw;
 
-                        // on conserve la valeur actuelle (par défaut EPSG:2154) si le srid n'a pu être détecté
                         if (typeof sridMapped === "string" && sridMapped.trim() !== "") {
                             setFormValue("data_srid", sridMapped, { shouldValidate: true });
-                            console.debug(`SRID détecté : ${sridMapped}`);
                         } else {
-                            setFormValue("data_srid", "", { shouldValidate: false });
-                            console.debug("Aucun SRID détecté ou SRID non reconnu");
+                            setFormValue("data_srid", "", { shouldValidate: false, shouldDirty: false });
                         }
                         setFormValue("data_technical_name", getDataTechNameSuggestion(file.name), { shouldValidate: true });
                         setFormValue("data_upload_path", data?.filename, { shouldValidate: true });
