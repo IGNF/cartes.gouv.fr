@@ -56,27 +56,38 @@ export const DatasheetUploadFormFrTranslations: Translations<"fr">["DatasheetUpl
     // NB: la taille maximale doit correspondre à celle effectivement implémentée dans DatasheetUploadForm
     upload_hint: (
         <>
-            <p className={fr.cx("fr-text--xs")}>Taille maximale : 2 Go.</p>
-            <p className={fr.cx("fr-text--xs", "fr-m-0")}>Formats de fichiers autorisés :</p>
-            <ul>
-                <li>GeoPackage (.gpkg ou .zip contenant au moins un fichier .gpkg)</li>
-                <li>GeoJSON (.geojson ou .zip contenant au moins un fichier .geojson)</li>
+            <p className={fr.cx("fr-text--xs")}>{`Taille maximale\u202f: 2 Go.`}</p>
+            <p className={fr.cx("fr-text--xs", "fr-mb-0")}>{`Formats de fichiers autorisés\u202f:`}</p>
+            <ul className={fr.cx("fr-mt-0")}>
                 <li>
-                    CSV (.csv ou .zip contenant au moins un fichier .csv)
-                    <br />
-                    Le fichier doit contenir une colonne géométrie nommée json|geom|the_geom|wkb|wkt ou deux colonnes coordonnées lon|x|longitude +
-                    lat|y|latitude
+                    <strong>GeoPackage</strong> (.gpkg ou .zip contenant au moins un fichier .gpkg)
                 </li>
                 <li>
-                    SQL (.sql ou .zip contenant au moins un fichier .sql)
-                    <br />
-                    Seules les instructions suivantes sont autorisées : CREATE TABLE, CREATE VIEW, CREATE INDEX, CREATE SEQUENCE, ALTER TABLE, ALTER SEQUENCE.
-                    <br />
-                    Aucun nom de schéma ne doit être présent (ex : public.table interdit).
+                    <strong>GeoJSON</strong> (.geojson ou .zip contenant au moins un fichier .geojson)
                 </li>
-                <li>Shapefile (.zip contenant .shp, .shx, .dbf + fichiers optionnels comme .prj, .cpg, .qix, .shp.xml)</li>
+                <li>
+                    <strong>CSV</strong> (.csv ou .zip contenant au moins un fichier .csv)
+                    <br />
+                    Le fichier doit contenir :
+                    <ul className={fr.cx("fr-my-0")}>
+                        <li className={fr.cx("fr-pb-0")}>une colonne géométrie nommée json, geom, the_geom, wkb ou wkt</li>
+                        <li className={fr.cx("fr-pb-0")}>
+                            ou, s’il s’agit de points, deux colonnes coordonnées nommées lon et lat, x et y ou longitude et latitude
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <strong>SQL</strong> (.sql ou .zip contenant au moins un fichier .sql)
+                    <br />
+                    {`Seules les instructions suivantes sont autorisées\u202f: CREATE TABLE, CREATE VIEW, CREATE INDEX, CREATE SEQUENCE, ALTER TABLE, ALTER SEQUENCE.`}
+                    <br />
+                    {`Aucun nom de schéma ne doit être présent (ex\u202f: public.table interdit).`}
+                </li>
+                <li>
+                    <strong>Shapefile</strong> (.zip contenant .shp, .shx, .dbf et optionnellement .prj, .cpg, .qix, .shp.xml)
+                </li>
             </ul>
-            <p className={fr.cx("fr-text--xs")}>Vous ne pouvez pas mélanger plusieurs formats.</p>
+            <p className={fr.cx("fr-text--xs")}>Vous ne pouvez pas mélanger plusieurs formats dans une archive .zip.</p>
         </>
     ),
     upload_nofile_error: "Aucun fichier téléversé",
