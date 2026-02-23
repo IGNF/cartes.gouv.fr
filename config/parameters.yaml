@@ -30,6 +30,7 @@ parameters:
     annexes_url: "%env(resolve:ANNEXES_URL)%"
 
     http_proxy: "%env(resolve:HTTP_PROXY)%"
+    no_proxy: "%env(resolve:NO_PROXY)%"
 
     var_data_path: "%kernel.project_dir%/var/data"
     upload_path: "%var_data_path%/uploaded_files"

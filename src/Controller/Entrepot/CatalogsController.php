@@ -35,7 +35,7 @@ class CatalogsController extends AbstractController implements ApiControllerInte
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         } catch (\Exception $ex) {
-            return $this->json(['message' => $ex->getMessage()], $ex->getCode());
+            return $this->json(['message' => $ex->getMessage()], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -49,7 +49,7 @@ class CatalogsController extends AbstractController implements ApiControllerInte
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         } catch (\Exception $ex) {
-            return $this->json(['message' => $ex->getMessage()], $ex->getCode());
+            return $this->json(['message' => $ex->getMessage()], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }
