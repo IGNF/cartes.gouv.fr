@@ -159,7 +159,13 @@ class UploadController extends AbstractController implements ApiControllerInterf
                 $this->uploadApiService->remove($datastoreId, $uploadId);
             }
 
-            return $this->json($uploadTags);
+            // retourne l'upload complet + tags de progression pour que le frontend ait les données
+            // même après suppression de l'upload (pour avoir accès à datasheet_name, vectordb_id, etc.)
+            return $this->json([
+                'upload' => $upload,
+                UploadTags::INTEGRATION_PROGRESS => $progressJson,
+                UploadTags::INTEGRATION_CURRENT_STEP => $stepString,
+            ]);
         } catch (ApiException|AppException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         } catch (\Exception $ex) {

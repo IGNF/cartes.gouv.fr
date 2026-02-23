@@ -190,13 +190,18 @@ class UploadApiService extends BaseEntrepotApiService
 
             // close the upload
             $this->close($datastoreId, $uploadId);
-        } finally {
+
+            // supprime le fichier téléversé et le dossier extrait si c'est un zip en cas de succès
             if (null !== $extractedFolder) {
                 $this->filesystem->remove($extractedFolder);
             }
-
             if ('zip' === $extension) {
                 $this->filesystem->remove($filepath);
+            }
+        } finally {
+            //  supprime le dossier extrait en cas d'exception
+            if (null !== $extractedFolder && file_exists($extractedFolder)) {
+                $this->filesystem->remove($extractedFolder);
             }
         }
     }

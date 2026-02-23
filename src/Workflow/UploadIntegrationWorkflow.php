@@ -93,6 +93,10 @@ class UploadIntegrationWorkflow
         switch ($currentStepName) {
             case UploadTags::INT_STEP_SEND_FILES_API:
                 if (!isset($upload['tags'][UploadTags::DATA_UPLOAD_PATH])) {
+                    throw new AppException('Missing data_upload_path tag on upload', JsonResponse::HTTP_BAD_REQUEST, ['message' => 'Missing required tag: data_upload_path']);
+                }
+
+                if (in_array($upload['status'], [UploadStatuses::CLOSED, UploadStatuses::CHECKING], true)) {
                     return;
                 }
 
