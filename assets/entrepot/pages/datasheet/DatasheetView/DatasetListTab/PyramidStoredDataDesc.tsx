@@ -1,7 +1,7 @@
 import { UseQueryResult, useQuery } from "@tanstack/react-query";
 import { FC, memo, useMemo } from "react";
 
-import type { Offering, PyramidRaster, PyramidVector, VectorDb } from "../../../../../@types/app";
+import type { DatasheetStoredDataItem, Offering, PyramidRaster, PyramidVector, VectorDb } from "../../../../../@types/app";
 import type { ProcessingExecutionStoredDataDto } from "../../../../../@types/entrepot";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import api from "../../../../api";
@@ -9,7 +9,7 @@ import Desc from "../Desc";
 
 type PyramidStoredDataDescProps = {
     datastoreId: string;
-    pyramid: PyramidVector | PyramidRaster;
+    pyramid: DatasheetStoredDataItem<PyramidVector> | DatasheetStoredDataItem<PyramidRaster>;
     dataUsesQuery: UseQueryResult<
         {
             stored_data_list: ProcessingExecutionStoredDataDto[];

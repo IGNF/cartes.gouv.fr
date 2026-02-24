@@ -103,16 +103,18 @@ class DatasheetController extends AbstractController implements ApiControllerInt
     public function getDetailed(string $datastoreId, string $datasheetName): JsonResponse
     {
         // recherche d'entités API qui représente une fiche de données : upload, stored_data, metadata
-        $uploadList = $this->uploadApiService->getAllDetailed($datastoreId, [
+        $uploadList = $this->uploadApiService->getAll($datastoreId, [
             'tags' => [
                 CommonTags::DATASHEET_NAME => $datasheetName,
             ],
+            'fields' => 'name,description,type,open,status,srs,contact,size,last_event,tags,creation,bbox',
         ]);
 
-        $storedDataList = $this->storedDataApiService->getAllDetailed($datastoreId, [
+        $storedDataList = $this->storedDataApiService->getAll($datastoreId, [
             'tags' => [
                 CommonTags::DATASHEET_NAME => $datasheetName,
             ],
+            'fields' => 'name,description,type,open,status,srs,contact,edition,size,last_event,tags,creation,bbox,public_activity',
         ]);
 
         $vectorDbList = array_filter($storedDataList, function ($storedData) {
@@ -238,6 +240,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         foreach ($storedDataList as $storedData) {
             $tmpOfferings = $this->configurationApiService->getAllOfferings($datastoreId, [
                 'stored_data' => $storedData['_id'],
+                // 'fields' => 'open,available,layer_name,type,status,endpoint,configuration,urls,creation,extra,update,public_activity',
             ]);
             $offerings = array_merge($offerings, $tmpOfferings);
         }

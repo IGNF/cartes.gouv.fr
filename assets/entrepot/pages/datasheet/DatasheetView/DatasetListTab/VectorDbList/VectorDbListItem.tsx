@@ -11,7 +11,7 @@ import { createPortal } from "react-dom";
 import { symToStr } from "tsafe/symToStr";
 
 import useDataUsesQuery from "@/hooks/queries/useDataUsesQuery";
-import { DatastoreEndpoint, StoredDataStatusEnum, VectorDb } from "../../../../../../@types/app";
+import { DatasheetStoredDataItem, DatastoreEndpoint, StoredDataStatusEnum, VectorDb } from "../../../../../../@types/app";
 import { EndpointDetailResponseDtoTypeEnum } from "../../../../../../@types/entrepot";
 import StoredDataStatusBadge from "../../../../../../components/Utils/Badges/StoredDataStatusBadge";
 import useToggle from "../../../../../../hooks/useToggle";
@@ -29,7 +29,7 @@ type ServiceTypes = "tms" | "wfs" | "wms-vector" | "pre-paquet";
 type VectorDbListItemProps = {
     datasheetName: string;
     datastoreId: string;
-    vectorDb: VectorDb;
+    vectorDb: DatasheetStoredDataItem<VectorDb>;
 };
 
 const { t: tCommon } = getTranslation("Common");
