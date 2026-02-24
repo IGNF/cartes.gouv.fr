@@ -174,6 +174,10 @@ class UploadIntegrationWorkflow
      */
     private function computeWaitChecksStatus(string $datastoreId, array $upload): string
     {
+        if (!in_array($upload['status'], [UploadStatuses::CLOSED, UploadStatuses::CHECKING], true)) {
+            return JobStatuses::WAITING;
+        }
+
         $uploadChecks = $this->uploadApiService->getCheckExecutions($datastoreId, $upload['_id']);
 
         $askedCount = count($uploadChecks[UploadCheckTypes::ASKED] ?? []);
@@ -202,7 +206,7 @@ class UploadIntegrationWorkflow
      * - FAILED : si un seul des deux tags est présent
      * - IN_PROGRESS : si l'exécution de processing est en CREATED, WAITING ou PROGRESS
      * - SUCCESSFUL : si l'exécution de processing est en SUCCESS et que la stored_data vectordb est en GENERATED
-     * - IN_PROGRESS : si l'exécution de processing est en SUCCESS et que la stored_data vectordb est en CREATED, GENERATING ou MODIFYING
+     * - IN_PROGRESS : si l'exécution de processing est en SUCCESS et que la stored_data vectordb est encore en CREATED, GENERATING ou MODIFYING
      * - FAILED : dans les autres cas
      *
      * @param array<mixed> $upload
