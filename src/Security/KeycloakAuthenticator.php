@@ -103,7 +103,7 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
         }
 
         if (!is_null($sessionExpired) && 1 === intval($sessionExpired)) {
-            $redirectUrl = $this->router->generate(self::HOME_ROUTE, ['session_expired_login_success' => 1], RouterInterface::ABSOLUTE_URL);
+            $redirectUrl = $this->router->generate(self::HOME_ROUTE, [], RouterInterface::ABSOLUTE_URL).'decouvrir?session_expired_login_success=1';
 
             $request->getSession()->remove('session_expired');
         } else {
