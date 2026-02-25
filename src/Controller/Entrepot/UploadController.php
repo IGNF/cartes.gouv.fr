@@ -15,6 +15,7 @@ use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -171,6 +172,84 @@ class UploadController extends AbstractController implements ApiControllerInterf
         } catch (\Exception $ex) {
             throw new CartesApiException($ex->getMessage(), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    #[Route('/{uploadId}/integration_progress_stream', name: 'integration_progress_stream', methods: ['GET'], options: ['expose' => true], condition: '')]
+    public function integrationProgressStream(
+        string $datastoreId,
+        string $uploadId,
+        UploadIntegrationWorkflow $uploadIntegrationWorkflow,
+        #[MapQueryParameter] bool $getOnlyProgress = false,
+    ): StreamedResponse {
+        $response = new StreamedResponse(function () use ($datastoreId, $uploadId, $uploadIntegrationWorkflow, $getOnlyProgress): void {
+            ini_set('zlib.output_compression', '0');
+            ini_set('output_buffering', '0');
+            ini_set('implicit_flush', '1');
+
+            while (ob_get_level() > 0) {
+                ob_end_flush();
+            }
+
+            set_time_limit(0);
+
+            $lastPayload = null;
+            $lastHeartbeat = time();
+            $pollIntervalUs = 5000000;
+
+            while (!connection_aborted()) {
+                try {
+                    $progress = $this->integrationProgress($datastoreId, $uploadId, $uploadIntegrationWorkflow, $getOnlyProgress);
+                    $progressJson = (string) $progress->getContent();
+                    $progressArray = json_decode($progressJson, true);
+
+                    $progressMap = [];
+                    $progressMapJson = is_array($progressArray) ? ($progressArray[UploadTags::INTEGRATION_PROGRESS] ?? null) : null;
+                    if (is_string($progressMapJson)) {
+                        $decodedProgress = json_decode($progressMapJson, true);
+                        if (is_array($decodedProgress)) {
+                            $progressMap = $decodedProgress;
+                        }
+                    }
+
+                    $isCompleted = $uploadIntegrationWorkflow->isIntegrationCompleted($progressMap);
+                    $shouldSend = $progressJson !== $lastPayload || $isCompleted;
+
+                    if ($shouldSend) {
+                        echo "event: progress\n";
+                        echo "data: {$progressJson}\n\n";
+                        $lastPayload = $progressJson;
+                    }
+
+                    if (time() - $lastHeartbeat >= 15) {
+                        echo ": ping\n\n";
+                        $lastHeartbeat = time();
+                    }
+
+                    if ($shouldSend || 0 === time() - $lastHeartbeat) {
+                        ob_flush();
+                        flush();
+                    }
+                } catch (ApiException|AppException $ex) {
+                    $errorPayload = json_encode(['message' => $ex->getMessage()]);
+                    echo "event: error\n";
+                    echo "data: {$errorPayload}\n\n";
+                    ob_flush();
+                    flush();
+                    break;
+                } catch (\Throwable $ex) {
+                    break;
+                }
+
+                usleep($pollIntervalUs);
+            }
+        });
+
+        $response->headers->set('Content-Type', 'text/event-stream');
+        $response->headers->set('Cache-Control', 'no-cache');
+        $response->headers->set('Connection', 'keep-alive');
+        $response->headers->set('X-Accel-Buffering', 'no');
+
+        return $response;
     }
 
     #[Route('/{uploadId}', name: 'delete', methods: ['DELETE'])]

@@ -57,6 +57,10 @@ const pingIntegrationProgress = (datastoreId: string, uploadId: string, otherOpt
     });
 };
 
+const getIntegrationStreamUrl = (datastoreId: string, uploadId: string, getOnlyProgress = false) => {
+    return SymfonyRouting.generate("cartesgouvfr_api_upload_integration_progress_stream", { datastoreId, uploadId, getOnlyProgress });
+};
+
 const remove = (datastoreId: string, uploadId: string) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_upload_delete", { datastoreId, uploadId });
     return jsonFetch<null>(url, { method: "DELETE" });
@@ -75,6 +79,7 @@ const upload = {
     get,
     getIntegrationProgress,
     pingIntegrationProgress,
+    getIntegrationStreamUrl,
     getFileTree,
     remove,
     getUploadReport,

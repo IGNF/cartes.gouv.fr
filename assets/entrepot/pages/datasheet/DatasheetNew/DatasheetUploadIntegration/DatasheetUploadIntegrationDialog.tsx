@@ -50,6 +50,12 @@ const parseIntegrationProgress = (rawProgress: string | undefined): Record<strin
 
 type IntegrationStatus = "at_least_one_failure" | "proc_int_launched" | "all_successful";
 
+type IntegrationStreamPayload = {
+    integration_progress?: string;
+    integration_current_step?: string;
+    upload?: Upload;
+};
+
 type DatasheetUploadIntegrationDialogProps = {
     datastoreId: string;
     datasheetName: string | undefined;
@@ -60,6 +66,8 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
     const { t } = useTranslation("DatasheetUploadIntegration");
 
     const [shouldPingIntProg, setShouldPingIntProg] = useState<boolean>(true);
+    const [useSse, setUseSse] = useState<boolean>(true);
+    const [sseData, setSseData] = useState<IntegrationStreamPayload | null>(null);
 
     const queryClient = useQueryClient();
 
@@ -72,14 +80,61 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
             pingIntProgQuery.data === undefined
                 ? api.upload.getIntegrationProgress(datastoreId, uploadId, { signal })
                 : api.upload.pingIntegrationProgress(datastoreId, uploadId, { signal }),
-        refetchInterval: shouldPingIntProg ? 3000 : false,
+        refetchInterval: shouldPingIntProg && !useSse ? 3000 : false,
         refetchIntervalInBackground: true,
-        enabled: shouldPingIntProg,
+        enabled: shouldPingIntProg && !useSse,
         staleTime: 0,
         refetchOnMount: "always",
     });
 
+    useEffect(() => {
+        setUseSse(typeof window !== "undefined" && "EventSource" in window);
+    }, []);
+
+    const sourceData = useSse ? sseData : pingIntProgQuery?.data;
+
+    useEffect(() => {
+        if (!useSse || !shouldPingIntProg) {
+            return;
+        }
+
+        const url = api.upload.getIntegrationStreamUrl(datastoreId, uploadId, !sourceData);
+        const eventSource = new EventSource(url);
+
+        const handleMessage = (event: MessageEvent<string>) => {
+            try {
+                const data = JSON.parse(event.data) as IntegrationStreamPayload;
+                setSseData(data);
+            } catch {
+                // erreur de parsing ignoree
+            }
+        };
+
+        eventSource.addEventListener("progress", handleMessage as EventListener);
+        eventSource.addEventListener("message", handleMessage as EventListener);
+
+        eventSource.onerror = (event) => {
+            console.error("SSE error", {
+                readyState: eventSource.readyState,
+                url,
+                event,
+            });
+
+            if (eventSource.readyState === EventSource.CLOSED) {
+                console.warn("SSE closed, falling back to polling", { url });
+                setUseSse(false);
+            }
+        };
+
+        return () => {
+            eventSource.removeEventListener("progress", handleMessage as EventListener);
+            eventSource.removeEventListener("message", handleMessage as EventListener);
+            eventSource.close();
+        };
+    }, [useSse, shouldPingIntProg, datastoreId, uploadId, sourceData]);
+
     // mise à jour de integrationProgress et integrationCurrentStep à chaque refetch de pingIntProgQuery
+
     const {
         integrationProgress,
         upload,
@@ -88,10 +143,10 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
         upload: Upload | undefined;
     } = useMemo(
         () => ({
-            upload: pingIntProgQuery?.data?.upload,
-            integrationProgress: parseIntegrationProgress(pingIntProgQuery?.data?.integration_progress),
+            upload: sourceData?.upload,
+            integrationProgress: parseIntegrationProgress(sourceData?.integration_progress),
         }),
-        [pingIntProgQuery?.data]
+        [sourceData]
     );
 
     const integrationStatus: IntegrationStatus | undefined = useMemo(() => {
