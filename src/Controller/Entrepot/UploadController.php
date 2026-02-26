@@ -255,7 +255,7 @@ class UploadController extends AbstractController implements ApiControllerInterf
                             if (isset($upload['tags']['email_notification']) && filter_var($upload['tags']['email_notification'], FILTER_VALIDATE_BOOLEAN)) {
                                 /** @var \App\Security\User */
                                 $user = $this->getUser();
-                                $userEmail = $user?->getEmail();
+                                $userEmail = $user->getEmail();
                                 $datasheetName = $upload['tags'][CommonTags::DATASHEET_NAME] ?? null;
 
                                 if ($userEmail && $datasheetName) {
