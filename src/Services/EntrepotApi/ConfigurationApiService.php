@@ -57,7 +57,7 @@ class ConfigurationApiService extends BaseEntrepotApiService
      */
     public function modify(string $datastoreId, string $configurationId, $body = [], ?array $initialConfiguration = null): array
     {
-        if (in_array('extra', $body)) {
+        if (array_key_exists('extra', $body)) {
             $initialConfiguration = $initialConfiguration ?? $this->get($datastoreId, $configurationId);
             $body['extra'] = array_merge($initialConfiguration['extra'] ?? [], $body['extra']);
         }
