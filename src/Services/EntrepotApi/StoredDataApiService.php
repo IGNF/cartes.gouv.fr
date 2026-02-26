@@ -63,7 +63,7 @@ class StoredDataApiService extends BaseEntrepotApiService
      */
     public function modify(string $datastoreId, string $storedDataId, array $body = [], ?array $initialStoredData = null): array
     {
-        if (in_array('extra', $body)) {
+        if (array_key_exists('extra', $body)) {
             $initialStoredData = $initialStoredData ?? $this->get($datastoreId, $storedDataId);
             $body['extra'] = array_merge($initialStoredData['extra'] ?? [], $body['extra']);
         }
