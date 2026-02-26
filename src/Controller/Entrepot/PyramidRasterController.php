@@ -93,13 +93,13 @@ class PyramidRasterController extends ServiceController implements ApiController
             $serviceEndpoint = $this->datastoreApiService->getEndpoint($datastoreId, $wmsvOffering['endpoint']['_id']);
             $endpointUrlBase = $serviceEndpoint['endpoint']['urls'][0]['url'] ?? null;
 
-            $legendFilePath = $this->fetchWmsvLegend($endpointUrlBase, $wmsvOffering);
-            $legendAnnexe = $this->saveLegendInAnnexe($datastoreId, $wmsvOffering['_id'], $legendFilePath, $wmsvConfiguration['tags'][CommonTags::DATASHEET_NAME]);
-            $legendAnnexeUrlAbs = $this->getParameter('annexes_url').'/'.$datastore['technical_name'].$legendAnnexe['paths'][0];
-
             if (null === $endpointUrlBase) {
                 throw new AppException('URL du service WMS-Vecteur non trouvée', Response::HTTP_BAD_REQUEST);
             }
+
+            $legendFilePath = $this->fetchWmsvLegend($endpointUrlBase, $wmsvOffering);
+            $legendAnnexe = $this->saveLegendInAnnexe($datastoreId, $wmsvOffering['_id'], $legendFilePath, $wmsvConfiguration['tags'][CommonTags::DATASHEET_NAME]);
+            $legendAnnexeUrlAbs = $this->getParameter('annexes_url').'/'.$datastore['technical_name'].$legendAnnexe['paths'][0];
 
             $zoomRange = $data['zoom_range'];
             $harvestLevels = array_map(fn ($v) => strval($v), array_reverse(range($zoomRange[0], $zoomRange[1], 1), false));
