@@ -3,6 +3,7 @@ import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useEffect, useMemo, useState } from "react";
 
+import { Upload } from "@/@types/app";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import { useTranslation } from "../../../../../i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
@@ -30,6 +31,23 @@ const getStepIcon = (status: string) => {
     return icon;
 };
 
+const parseIntegrationProgress = (rawProgress: string | undefined): Record<string, string> | null => {
+    if (!rawProgress) {
+        return null;
+    }
+
+    try {
+        const parsed = JSON.parse(rawProgress);
+        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+            return parsed as Record<string, string>;
+        }
+    } catch {
+        // ignore JSON parse errors
+    }
+
+    return null;
+};
+
 type IntegrationStatus = "at_least_one_failure" | "proc_int_launched" | "all_successful";
 
 type DatasheetUploadIntegrationDialogProps = {
@@ -46,7 +64,7 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
     const queryClient = useQueryClient();
 
     // définition des query
-    // query qui "ping" ou "poll" et récupère le progress en boucle (query désactivé au départ)
+    // query qui "ping" ou "poll" et récupère le progress en boucle
     const pingIntProgQuery = useQuery({
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
         queryKey: RQKeys.datastore_upload_integration(datastoreId, uploadId),
@@ -54,51 +72,52 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
             pingIntProgQuery.data === undefined
                 ? api.upload.getIntegrationProgress(datastoreId, uploadId, { signal })
                 : api.upload.pingIntegrationProgress(datastoreId, uploadId, { signal }),
-        refetchInterval: 3000,
+        refetchInterval: shouldPingIntProg ? 3000 : false,
         refetchIntervalInBackground: true,
         enabled: shouldPingIntProg,
         staleTime: 0,
         refetchOnMount: "always",
     });
 
-    // query qui récupère les informations sur l'upload
-    const uploadQuery = useQuery({
-        queryKey: RQKeys.datastore_upload(datastoreId, uploadId),
-        queryFn: ({ signal }) => api.upload.get(datastoreId, uploadId, { signal }),
-        enabled: !pingIntProgQuery.isFetching,
-    });
-
     // mise à jour de integrationProgress et integrationCurrentStep à chaque refetch de pingIntProgQuery
     const {
         integrationProgress,
-        integrationCurrentStep,
+        upload,
     }: {
         integrationProgress: Record<string, string> | null;
-        integrationCurrentStep: number;
+        upload: Upload | undefined;
     } = useMemo(
         () => ({
-            integrationProgress: pingIntProgQuery?.data?.integration_progress ? JSON.parse(pingIntProgQuery?.data?.integration_progress) : null,
-            integrationCurrentStep: pingIntProgQuery?.data?.integration_current_step ? parseInt(pingIntProgQuery?.data?.integration_current_step) : 0,
+            upload: pingIntProgQuery?.data?.upload,
+            integrationProgress: parseIntegrationProgress(pingIntProgQuery?.data?.integration_progress),
         }),
         [pingIntProgQuery?.data]
     );
 
     const integrationStatus: IntegrationStatus | undefined = useMemo(() => {
-        if (integrationProgress && Object.values(integrationProgress).includes("failed")) {
+        if (!integrationProgress) {
+            return undefined;
+        }
+
+        const stepStatuses = Object.values(integrationProgress);
+
+        if (stepStatuses.includes("failed")) {
             // au moins une étape a échoué
             return "at_least_one_failure";
         }
 
-        if (integrationProgress && integrationProgress?.["integration_processing"] === "in_progress") {
+        if (integrationProgress["integration_processing"] === "in_progress") {
             // le traitement d'intégration en bd a été lancé
             return "proc_int_launched";
         }
 
-        if (integrationProgress && Object.keys(integrationProgress).length === integrationCurrentStep) {
+        // Le backend garantit 3 étapes au total.
+        const allSuccessful = stepStatuses.length === 3 && stepStatuses.every((s) => s === "successful");
+        if (allSuccessful) {
             // toutes les étapes sont terminées avec succès
             return "all_successful";
         }
-    }, [integrationProgress, integrationCurrentStep]);
+    }, [integrationProgress]);
 
     useEffect(() => {
         switch (integrationStatus) {
@@ -111,21 +130,21 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
             case "all_successful":
                 setShouldPingIntProg(false);
 
-                if (uploadQuery?.data?.tags?.datasheet_name) {
+                if (upload?.tags?.datasheet_name) {
                     queryClient.invalidateQueries({
-                        queryKey: RQKeys.datastore_datasheet(datastoreId, uploadQuery?.data?.tags?.datasheet_name),
+                        queryKey: RQKeys.datastore_datasheet(datastoreId, upload?.tags?.datasheet_name),
                     });
                     routes
                         .datastore_datasheet_view({
                             datastoreId,
-                            datasheetName: uploadQuery?.data?.tags?.datasheet_name,
+                            datasheetName: upload?.tags?.datasheet_name,
                             activeTab: DatasheetViewActiveTabEnum.Dataset,
                         })
                         .push();
                 }
                 break;
         }
-    }, [integrationStatus, datastoreId, uploadQuery?.data?.tags.datasheet_name, queryClient]);
+    }, [integrationStatus, datastoreId, upload?.tags?.datasheet_name, queryClient]);
 
     return (
         <div className={fr.cx("fr-container")}>
@@ -170,21 +189,21 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
 
             {integrationStatus === "proc_int_launched" && <p>{t("continue_browsing_data_not_ready")}</p>}
 
-            {(integrationStatus === "all_successful" || integrationStatus === "proc_int_launched") && uploadQuery.data?.tags.datasheet_name !== undefined && (
+            {(integrationStatus === "all_successful" || integrationStatus === "proc_int_launched") && upload?.tags?.datasheet_name !== undefined && (
                 <div className={fr.cx("fr-grid-row")}>
                     <ButtonsGroup
                         buttons={[
                             {
                                 children: "Consulter la fiche de données",
                                 onClick: () => {
-                                    if (uploadQuery.data?.tags.datasheet_name) {
+                                    if (upload?.tags?.datasheet_name) {
                                         queryClient.refetchQueries({
-                                            queryKey: RQKeys.datastore_datasheet(datastoreId, uploadQuery.data?.tags.datasheet_name),
+                                            queryKey: RQKeys.datastore_datasheet(datastoreId, upload?.tags?.datasheet_name),
                                         });
                                         routes
                                             .datastore_datasheet_view({
                                                 datastoreId,
-                                                datasheetName: uploadQuery.data?.tags.datasheet_name,
+                                                datasheetName: upload?.tags?.datasheet_name,
                                                 activeTab: DatasheetViewActiveTabEnum.Dataset,
                                             })
                                             .push();
@@ -197,21 +216,21 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
                 </div>
             )}
 
-            {integrationStatus === "at_least_one_failure" && uploadQuery.data?.tags.datasheet_name !== undefined && (
+            {integrationStatus === "at_least_one_failure" && upload?.tags?.datasheet_name !== undefined && (
                 <div className={fr.cx("fr-grid-row")}>
                     <ButtonsGroup
                         buttons={[
                             {
                                 children: t("view_datasheet"),
                                 onClick: () => {
-                                    if (uploadQuery.data?.tags.datasheet_name) {
+                                    if (upload?.tags?.datasheet_name) {
                                         queryClient.refetchQueries({
-                                            queryKey: RQKeys.datastore_datasheet(datastoreId, uploadQuery.data?.tags.datasheet_name),
+                                            queryKey: RQKeys.datastore_datasheet(datastoreId, upload?.tags?.datasheet_name),
                                         });
                                         routes
                                             .datastore_datasheet_view({
                                                 datastoreId,
-                                                datasheetName: uploadQuery.data?.tags.datasheet_name,
+                                                datasheetName: upload?.tags?.datasheet_name,
                                                 activeTab: DatasheetViewActiveTabEnum.Dataset,
                                             })
                                             .push();
@@ -224,7 +243,7 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
                 </div>
             )}
 
-            {integrationStatus === "at_least_one_failure" && uploadQuery.data?.tags?.vectordb_id !== undefined && (
+            {integrationStatus === "at_least_one_failure" && upload?.tags?.vectordb_id !== undefined && (
                 <div className={fr.cx("fr-grid-row")}>
                     <ButtonsGroup
                         buttons={[
@@ -232,7 +251,7 @@ const DatasheetUploadIntegrationDialog: FC<DatasheetUploadIntegrationDialogProps
                                 children: t("check_error_report"),
                                 linkProps: routes.datastore_stored_data_details({
                                     datastoreId,
-                                    storedDataId: uploadQuery.data?.tags?.vectordb_id,
+                                    storedDataId: upload?.tags?.vectordb_id,
                                     datasheetName,
                                 }).link,
                             },
