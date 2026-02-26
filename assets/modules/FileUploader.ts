@@ -13,20 +13,21 @@ type UploadFileResponseType = {
 export default class FileUploader {
     #_urlUploadChunk = SymfonyRouting.generate("cartesgouvfr_file_uploader_upload_chunk");
     #_urlUploadComplete = SymfonyRouting.generate("cartesgouvfr_file_uploader_upload_complete");
+    #_uploadMetaByUuid = new Map<string, { totalChunks: number; fileSize: number; chunkSize: number }>();
 
     /**
      * Envoie le fichier en morceaux (voir FileUploadController de Symfony)
      */
-    uploadFile = async (uuid: string, file: File, setProgressValue: Dispatch<SetStateAction<number>>, maxChunkSize: number = DEFAULT_CHUNK_SIZE) => {
+    uploadFile = async (uuid: string, file: File, setProgressValue?: Dispatch<SetStateAction<number>>, maxChunkSize: number = DEFAULT_CHUNK_SIZE) => {
+        const chunkSize = Number.isFinite(maxChunkSize) && maxChunkSize > 0 ? maxChunkSize : DEFAULT_CHUNK_SIZE;
         let numBytes = 0;
+        const totalChunks = Math.ceil(file.size / chunkSize);
 
-        const uploadChunk = async (index, chunk) => {
-            const chunkFile = new File([chunk], "chunk");
-
+        const uploadChunk = async (index: number, chunk: Blob) => {
             const formData = new FormData();
             formData.append("uuid", uuid);
-            formData.append("index", index);
-            formData.append("chunk", chunkFile, `${uuid}_${index}`);
+            formData.append("index", String(index));
+            formData.append("chunk", chunk, `${uuid}_${index}`);
 
             return jsonFetch<UploadFileResponseType>(
                 this.#_urlUploadChunk,
@@ -43,7 +44,7 @@ export default class FileUploader {
             start = 0;
 
         while (start < file.size) {
-            const chunk = file.slice(start, start + maxChunkSize);
+            const chunk = file.slice(start, start + chunkSize);
 
             const response = await uploadChunk(index, chunk);
 
@@ -53,8 +54,10 @@ export default class FileUploader {
             }
 
             index += 1;
-            start += maxChunkSize;
+            start += chunkSize;
         }
+
+        this.#_uploadMetaByUuid.set(uuid, { totalChunks, fileSize: file.size, chunkSize });
     };
 
     /**
@@ -63,9 +66,13 @@ export default class FileUploader {
      * @returns
      */
     uploadComplete = (uuid: string, file: File) => {
+        const meta = this.#_uploadMetaByUuid.get(uuid);
+        const chunkSize = meta?.chunkSize ?? DEFAULT_CHUNK_SIZE;
         const body = {
             uuid: uuid,
             originalFilename: file.name,
+            totalChunks: meta?.totalChunks ?? Math.ceil(file.size / chunkSize),
+            fileSize: meta?.fileSize ?? file.size,
         };
         return jsonFetch<{ srid: string; filename: string }>(
             this.#_urlUploadComplete,
@@ -75,6 +82,8 @@ export default class FileUploader {
             body,
             false,
             true
-        );
+        ).finally(() => {
+            this.#_uploadMetaByUuid.delete(uuid);
+        });
     };
 }
