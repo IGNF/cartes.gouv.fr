@@ -371,7 +371,7 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                 </div>
             )}
 
-            <hr className={fr.cx("fr-mt-3w")}/>
+            <hr className={fr.cx("fr-mt-3w")} />
             <Checkbox
                 options={[
                     {

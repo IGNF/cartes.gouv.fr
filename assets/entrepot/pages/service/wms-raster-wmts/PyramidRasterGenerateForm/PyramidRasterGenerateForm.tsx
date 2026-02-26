@@ -206,7 +206,7 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
                                 {errors.zoom_range?.message !== undefined && <p className={fr.cx("fr-error-text")}>{errors.zoom_range?.message}</p>}
                             </>
                         )}
-                        <hr className={fr.cx("fr-mt-3w")}/>
+                        <hr className={fr.cx("fr-mt-3w")} />
                         <Checkbox
                             options={[
                                 {

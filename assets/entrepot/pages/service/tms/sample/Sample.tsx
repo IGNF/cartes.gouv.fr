@@ -84,7 +84,7 @@ const Sample: FC<SampleProps> = ({ visible, bottomZoomLevel, form }) => {
                     }}
                 />
             )}
-            <hr className={fr.cx("fr-mt-3w")}/>
+            <hr className={fr.cx("fr-mt-3w")} />
             <Checkbox
                 options={[
                     {
