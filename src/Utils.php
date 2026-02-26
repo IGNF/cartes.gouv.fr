@@ -90,8 +90,12 @@ class Utils
         $res = [];
 
         $parsed = parse_url($url);
+        if (!is_array($parsed) || !isset($parsed['query'])) {
+            return '';
+        }
+
         parse_str($parsed['query'], $res);
 
-        return $res['version'];
+        return isset($res['version']) ? (string) $res['version'] : '';
     }
 }
