@@ -28,7 +28,9 @@ class LogoutSubscriber implements EventSubscriberInterface
     public function onLogout(LogoutEvent $event): void
     {
         $session = $event->getRequest()->getSession();
-        $session->remove(KeycloakToken::SESSION_KEY);
+        $idToken = $session->get(KeycloakToken::SESSION_KEY)?->getValues()['id_token'] ?? null;
+
+        $session->invalidate();
 
         $redirectUrl = $this->urlGenerator->generate('cartesgouvfr_app', [], UrlGeneratorInterface::ABSOLUTE_URL);
 
@@ -50,6 +52,7 @@ class LogoutSubscriber implements EventSubscriberInterface
 
             $response = new RedirectResponse($keycloak->getLogoutUrl([
                 'post_logout_redirect_uri' => $redirectUrl,
+                'id_token_hint' => $idToken,
             ]));
         }
 

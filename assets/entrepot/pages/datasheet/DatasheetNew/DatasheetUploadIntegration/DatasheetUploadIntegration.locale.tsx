@@ -20,7 +20,7 @@ export const DatasheetUploadIntegrationFrTranslations: Translations<"fr">["Datas
             case "send_files_api":
                 return "Chargement des fichiers";
             case "wait_checks":
-                return "Vérifications standard et vecteur";
+                return "Vérifications";
             case "integration_processing":
                 return "Intégration en base de données";
             default:
