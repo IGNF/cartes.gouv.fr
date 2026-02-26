@@ -330,7 +330,6 @@ class PyramidRasterController extends ServiceController implements ApiController
         // config_[configuration_id]_style_[type_config]
         $tmpConfigUuid = Uuid::v4();
         $tmpStyleFileName = sprintf('config_%s_style_%s', "tmp_{$tmpConfigUuid}", $configType);
-        $finalStyleFileName = sprintf('config_%s_style_%s', $configurationId, $configType);
 
         $legendUrl = null;
         if (isset($pyramid['extra'], $pyramid['extra']['legend'], $pyramid['extra']['legend']['url'])) {
@@ -345,7 +344,7 @@ class PyramidRasterController extends ServiceController implements ApiController
             'max_scale_denominator' => intval($zoomLevels['bottom_level']),
         ];
 
-        if ($legendUrl !== null) {
+        if (null !== $legendUrl) {
             $legend['url'] = $legendUrl;
         }
 
@@ -362,14 +361,17 @@ class PyramidRasterController extends ServiceController implements ApiController
         $this->fs->mkdir($styleFileDir);
         $this->fs->dumpFile($styleFilePath, json_encode($rok4Style));
 
-        $existingStatics = $this->staticApiService->getAll($datastoreId, [
-            'type' => StaticFileTypes::ROK4_STYLE,
-            'name' => $finalStyleFileName,
-        ]);
-        if (count($existingStatics) > 0) {
-            $existingStatic = $existingStatics[0];
+        if (null !== $configurationId) {
+            $finalStyleFileName = sprintf('config_%s_style_%s', $configurationId, $configType);
+            $existingStatics = $this->staticApiService->getAll($datastoreId, [
+                'type' => StaticFileTypes::ROK4_STYLE,
+                'name' => $finalStyleFileName,
+            ]);
+            if (count($existingStatics) > 0) {
+                $existingStatic = $existingStatics[0];
 
-            return $this->staticApiService->replaceFile($datastoreId, $existingStatic['_id'], $styleFilePath);
+                return $this->staticApiService->replaceFile($datastoreId, $existingStatic['_id'], $styleFilePath);
+            }
         }
 
         return $this->staticApiService->add($datastoreId, $styleFilePath, $tmpStyleFileName, StaticFileTypes::ROK4_STYLE);
