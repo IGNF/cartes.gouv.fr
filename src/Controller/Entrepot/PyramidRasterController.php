@@ -332,17 +332,27 @@ class PyramidRasterController extends ServiceController implements ApiController
         $tmpStyleFileName = sprintf('config_%s_style_%s', "tmp_{$tmpConfigUuid}", $configType);
         $finalStyleFileName = sprintf('config_%s_style_%s', $configurationId, $configType);
 
+        $legendUrl = null;
+        if (isset($pyramid['extra'], $pyramid['extra']['legend'], $pyramid['extra']['legend']['url'])) {
+            $legendUrl = $pyramid['extra']['legend']['url'];
+        }
+
+        $legend = [
+            'format' => 'image/png',
+            'width' => 20,
+            'height' => 20,
+            'min_scale_denominator' => intval($zoomLevels['top_level']),
+            'max_scale_denominator' => intval($zoomLevels['bottom_level']),
+        ];
+
+        if ($legendUrl !== null) {
+            $legend['url'] = $legendUrl;
+        }
+
         $rok4Style = [
             'identifier' => $pyramid['name'],
             'title' => $pyramid['name'],
-            'legend' => [
-                'format' => 'image/png',
-                'url' => $pyramid['extra']['legend']['url'],
-                'width' => 20,
-                'height' => 20,
-                'min_scale_denominator' => intval($zoomLevels['top_level']),
-                'max_scale_denominator' => intval($zoomLevels['bottom_level']),
-            ],
+            'legend' => $legend,
         ];
 
         $styleFilesDir = $this->getParameter('style_files_path');
