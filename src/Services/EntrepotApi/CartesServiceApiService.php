@@ -209,21 +209,14 @@ class CartesServiceApiService
         $this->configurationApiService->remove($datastoreId, $configurationId);
 
         if (true === $removeStyleFiles) {
-            // récup tous les fichiers statiques liés à la config
-            $staticFilesIdList = array_map(function ($relation) {
-                return $relation['style'];
-            }, $configuration['type_infos']['used_data'][0]['relations']);
-
-            foreach ($staticFilesIdList as $staticId) {
-                $this->staticApiService->delete($datastoreId, $staticId);
-            }
+            $this->removeStyleFiles($datastoreId, $configuration);
         }
     }
 
     /**
      * @param array<mixed> $offering
      */
-    public function wmsRasterUnpublish(string $datastoreId, array $offering): void
+    public function wmsRasterUnpublish(string $datastoreId, array $offering, bool $removeStyleFiles = true): void
     {
         // suppression de l'offering
         $this->configurationApiService->removeOffering($datastoreId, $offering['_id']);
@@ -239,6 +232,10 @@ class CartesServiceApiService
             }
         }
         $this->configurationApiService->remove($datastoreId, $configurationId);
+
+        if (true === $removeStyleFiles) {
+            $this->removeStyleFiles($datastoreId, $configuration);
+        }
     }
 
     /**
@@ -267,12 +264,13 @@ class CartesServiceApiService
     }
 
     /**
-     * Suppression des styles (les fichiers annexes) liés à une configuration.
+     * Suppression des styles (les fichiers annexes et statiques) liés à une configuration.
      *
      * @param array<mixed> $configuration
      */
     private function removeStyleFiles(string $datastoreId, array $configuration): void
     {
+        // WFS et TMS
         $styles = $this->cartesStylesApiService->getStyles($datastoreId, $configuration);
 
         foreach ($styles as $style) {
@@ -281,6 +279,11 @@ class CartesServiceApiService
                     $this->annexeApiService->remove($datastoreId, $layer['annexe_id']);
                 }
             }
+        }
+
+        // WMS-VECTOR
+        foreach ($configuration['type_infos']['used_data'][0]['relations'] as $relation) {
+            $this->staticApiService->delete($datastoreId, $relation['style']);
         }
     }
 

@@ -78,3 +78,16 @@ export type Styles = {
     }
 ]
 ```
+
+## légende GetLegendGraphic du WMS-Vecteur associée à la pyramide raster générée par moissonnage
+
+```json
+{
+    "extra": {
+        "legend": {
+            "url": "url absolue de l'annexe",
+            "annexe_id": "identifiant de l'annexe"
+        }
+    }
+}
+```

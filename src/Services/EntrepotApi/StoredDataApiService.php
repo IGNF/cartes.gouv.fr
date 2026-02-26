@@ -57,11 +57,18 @@ class StoredDataApiService extends BaseEntrepotApiService
         return $this->request('GET', "datastores/$datastoreId/stored_data/$storedDataId");
     }
 
-    public function modifyName(string $datastoreId, string $storedDataId, string $newName): array
+    /**
+     * @param array<mixed>      $body
+     * @param array<mixed>|null $initialStoredData
+     */
+    public function modify(string $datastoreId, string $storedDataId, array $body = [], ?array $initialStoredData = null): array
     {
-        return $this->request('PATCH', "datastores/$datastoreId/stored_data/$storedDataId", [
-            'name' => $newName,
-        ]);
+        if (in_array('extra', $body)) {
+            $initialStoredData = $initialStoredData ?? $this->get($datastoreId, $storedDataId);
+            $body['extra'] = array_merge($initialStoredData['extra'] ?? [], $body['extra']);
+        }
+
+        return $this->request('PATCH', "datastores/$datastoreId/stored_data/$storedDataId", $body);
     }
 
     public function remove(string $datastoreId, string $storedDataId): void

@@ -11,6 +11,7 @@ class CartesStoredDataApiService
         private ProcessingApiService $processingApiService,
         private ConfigurationApiService $configurationApiService,
         private CartesServiceApiService $cartesServiceApiService,
+        private AnnexeApiService $annexeApiService,
     ) {
     }
 
@@ -19,6 +20,8 @@ class CartesStoredDataApiService
      */
     public function delete(string $datastoreId, string $storedDataId): void
     {
+        $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId);
+
         // Suppression des offerings et configurations associées
         $offerings = $this->configurationApiService->getAllOfferings($datastoreId, ['stored_data' => $storedDataId]);
         foreach ($offerings as $offering) {
@@ -47,6 +50,10 @@ class CartesStoredDataApiService
             if (in_array($procExec['status'], $blockingProcessingStatuses)) {
                 $this->processingApiService->abortExecution($datastoreId, $procExec['_id']);
             }
+        }
+
+        if (isset($storedData['extra']['legend']['annexe_id'])) {
+            $this->annexeApiService->remove($datastoreId, $storedData['extra']['legend']['annexe_id']);
         }
 
         // Suppression de la donnée stockée

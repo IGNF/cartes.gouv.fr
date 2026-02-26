@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Constants\EntrepotApi\ConfigurationTypes;
 use App\Services\EntrepotApi\AnnexeApiService;
 use App\Services\EntrepotApi\ConfigurationApiService;
+use App\Utils;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -86,7 +87,7 @@ class CapabilitiesService
 
     public function getGetCapUrl(string $endpointUrl, string $offeringUrl, string $serviceType): string
     {
-        $version = $this->getServiceVersion($offeringUrl);
+        $version = Utils::get_version_from_service_url($offeringUrl);
 
         return sprintf('%s?SERVICE=%s&VERSION=%s&request=GetCapabilities', $endpointUrl, $serviceType, $version);
     }
@@ -220,15 +221,5 @@ class CapabilitiesService
         }
 
         return $doc->saveXML();
-    }
-
-    private function getServiceVersion(string $url): string
-    {
-        $res = [];
-
-        $parsed = parse_url($url);
-        parse_str($parsed['query'], $res);
-
-        return $res['version'];
     }
 }
