@@ -53,6 +53,7 @@ const { i18n } = declareComponentKeys<
     | { K: "last_refresh_date"; P: { dataUpdatedAt: number }; R: string }
     | { K: "nb_results"; P: { displayed: number; total: number }; R: string }
     | "sandbox"
+    | "email_notification"
 >()("Common");
 export type I18n = typeof i18n;
 
@@ -111,6 +112,7 @@ export const commonFrTranslations: Translations<"fr">["Common"] = {
         return `${displayed} résultats affichés sur ${total}`;
     },
     sandbox: "Espace Découverte",
+    email_notification: "Être notifié par courriel à la fin de la génération",
 };
 
 export const commonEnTranslations: Translations<"en">["Common"] = {
@@ -164,4 +166,5 @@ export const commonEnTranslations: Translations<"en">["Common"] = {
     last_refresh_date: undefined,
     nb_results: undefined,
     sandbox: undefined,
+    email_notification: undefined,
 };

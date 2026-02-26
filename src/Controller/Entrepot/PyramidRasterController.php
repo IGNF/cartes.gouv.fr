@@ -98,6 +98,24 @@ class PyramidRasterController extends ServiceController implements ApiController
                 ],
             ];
 
+            if (isset($data['email_notification']) && $data['email_notification'] === true) {
+                /** @var \App\Security\User */
+                $user = $this->getUser();
+                $userEmail = $user?->getEmail();
+                $datasheetName = $vectordb['tags'][CommonTags::DATASHEET_NAME] ?? null;
+
+                if ($userEmail && $datasheetName) {
+                    $requestBody['callback'] = [
+                        'type' => 'email',
+                        'to_address' => [$userEmail],
+                        'entity_url' => sprintf(
+                            'https://cartes.gouv.fr/tableau-de-bord/entrepots/{{ datastore }}/donnees/{{ output }}/details?datasheetName=%s',
+                            urlencode($datasheetName)
+                        ),
+                    ];
+                }
+            }
+
             $processingExecution = $this->processingApiService->addExecution($datastoreId, $requestBody);
             $pyramidId = $processingExecution['output']['stored_data']['_id'];
 

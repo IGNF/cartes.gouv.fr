@@ -33,6 +33,7 @@ const { i18n } = declareComponentKeys<
     | "production_year_invalid_error"
     | "upload_file"
     | "data_infos_title"
+    | "email_notification"
 >()("DatasheetUploadForm");
 export type I18n = typeof i18n;
 
@@ -71,6 +72,7 @@ export const DatasheetUploadFormFrTranslations: Translations<"fr">["DatasheetUpl
     production_year_invalid_error: "L’année de production est invalide",
     upload_file: "Déposer votre fichier",
     data_infos_title: "Les données suivantes ont été détectées. Modifiez les si besoin",
+    email_notification: "Être notifié par courriel à la fin de l'intégration en base de données",
 };
 
 export const DatasheetUploadFormEnTranslations: Translations<"en">["DatasheetUploadForm"] = {
@@ -105,4 +107,5 @@ export const DatasheetUploadFormEnTranslations: Translations<"en">["DatasheetUpl
     production_year_invalid_error: undefined,
     upload_file: undefined,
     data_infos_title: undefined,
+    email_notification: undefined,
 };

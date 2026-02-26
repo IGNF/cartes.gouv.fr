@@ -12,6 +12,7 @@ export type SampleType = {
     is_sample: booleanValue;
     center: number[];
     area: string | undefined;
+    email_notification: boolean;
 };
 
 type SampleProps = {
@@ -21,6 +22,7 @@ type SampleProps = {
 };
 
 const Sample: FC<SampleProps> = ({ visible, bottomZoomLevel, form }) => {
+    const { t: tCommon } = useTranslation("Common");
     const { t } = useTranslation("PyramidVectorGenerateForm");
 
     const { setValue: setFormValue, getValues: getFormValues } = form;
@@ -29,6 +31,7 @@ const Sample: FC<SampleProps> = ({ visible, bottomZoomLevel, form }) => {
         is_sample: "false",
         center: olDefaults.center,
         area: undefined,
+        email_notification: true,
     });
 
     useEffect(() => {
@@ -48,6 +51,10 @@ const Sample: FC<SampleProps> = ({ visible, bottomZoomLevel, form }) => {
             const b = !(sample.is_sample === "true");
             setSample({ ...sample, is_sample: b.toString() as booleanValue });
         }
+    };
+
+    const toggleNotification = () => {
+        setSample((prev) => ({ ...prev, email_notification: !prev.email_notification }));
     };
 
     return (
@@ -77,6 +84,18 @@ const Sample: FC<SampleProps> = ({ visible, bottomZoomLevel, form }) => {
                     }}
                 />
             )}
+            <hr className={fr.cx("fr-mt-3w")}/>
+            <Checkbox
+                options={[
+                    {
+                        label: tCommon("email_notification"),
+                        nativeInputProps: {
+                            checked: sample?.email_notification === true,
+                            onChange: () => toggleNotification(),
+                        },
+                    },
+                ]}
+            />
         </div>
     );
 };

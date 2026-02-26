@@ -26,6 +26,7 @@ const format = (technicalName, vectorDbId, values) => {
         composition: composition,
         tippecanoe: values.tippecanoe,
         vectordb_id: vectorDbId,
+        email_notification: values.sample.email_notification === true,
     };
     if (values.sample.is_sample === "true") {
         result["area"] = values.sample.area;

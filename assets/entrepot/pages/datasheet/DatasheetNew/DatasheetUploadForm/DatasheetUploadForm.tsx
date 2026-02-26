@@ -1,5 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Button from "@codegouvfr/react-dsfr/Button";
+import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { Select as SelectNext } from "@codegouvfr/react-dsfr/SelectNext";
@@ -124,6 +125,7 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                 .max(new Date().getFullYear(), t("production_year_max_error"))
                 .positive(t("production_year_invalid_error"))
                 .integer(t("production_year_invalid_error")),
+            email_notification: yup.boolean(),
         })
         .required();
 
@@ -151,10 +153,16 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
             data_srid: "EPSG:2154",
             producer: "",
             production_year: new Date().getFullYear(),
+            email_notification: true,
         },
     });
 
     const selectedSrid = watch("data_srid");
+    const emailNotification = watch("email_notification");
+
+    const toggleNotification = () => {
+        setFormValue("email_notification", !emailNotification);
+    };
 
     const addUploadMutation = useMutation({
         mutationFn: (formData: object) => {
@@ -362,6 +370,19 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                     <input type="hidden" {...register("data_upload_path")} />
                 </div>
             )}
+
+            <hr className={fr.cx("fr-mt-3w")}/>
+            <Checkbox
+                options={[
+                    {
+                        label: t("email_notification"),
+                        nativeInputProps: {
+                            checked: emailNotification,
+                            onChange: toggleNotification,
+                        },
+                    },
+                ]}
+            />
 
             <ButtonsGroup
                 buttons={[

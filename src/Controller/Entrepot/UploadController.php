@@ -83,6 +83,11 @@ class UploadController extends AbstractController implements ApiControllerInterf
                 CommonTags::PRODUCER => $content['producer'],
                 CommonTags::PRODUCTION_YEAR => $content['production_year'],
             ];
+            
+            if (isset($content['email_notification'])) {
+                $tags['email_notification'] = (bool) $content['email_notification'];
+            }
+            
             $upload = $this->uploadApiService->addTags($datastoreId, $upload['_id'], $tags);
 
             // retourne l'upload au frontend, qui se chargera de lancer l'intégration VECTOR-DB
@@ -246,6 +251,24 @@ class UploadController extends AbstractController implements ApiControllerInterf
                                     ],
                                 ],
                             ];
+
+                            if (isset($upload['tags']['email_notification']) && filter_var($upload['tags']['email_notification'], FILTER_VALIDATE_BOOLEAN)) {
+                                /** @var \App\Security\User */
+                                $user = $this->getUser();
+                                $userEmail = $user?->getEmail();
+                                $datasheetName = $upload['tags'][CommonTags::DATASHEET_NAME] ?? null;
+
+                                if ($userEmail && $datasheetName) {
+                                    $procExecBody['callback'] = [
+                                        'type' => 'email',
+                                        'to_address' => [$userEmail],
+                                        'entity_url' => sprintf(
+                                            'https://cartes.gouv.fr/tableau-de-bord/entrepots/{{ datastore }}/donnees/{{ output }}/details?datasheetName=%s',
+                                            urlencode($datasheetName)
+                                        ),
+                                    ];
+                                }
+                            }
 
                             $processingExec = $this->processingApiService->addExecution($datastoreId, $procExecBody);
                             $vectorDb = $processingExec['output']['stored_data'];
