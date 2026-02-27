@@ -117,23 +117,6 @@ export type DatasheetUploadItem = Pick<
     bbox?: BoundingBox | null;
 };
 
-// export type DatasheetServiceItem = Pick<
-//     Offering,
-//     | "_id"
-//     | "open"
-//     | "available"
-//     | "layer_name"
-//     | "type"
-//     | "status"
-//     | "endpoint"
-//     | "configuration"
-//     | "urls"
-//     | "creation"
-//     | "extra"
-//     | "update"
-//     | "public_activity"
-// >;
-
 export type DatasheetDetailed = Datasheet & {
     vector_db_list: DatasheetStoredDataItem<VectorDb>[] | undefined;
     pyramid_vector_list: DatasheetStoredDataItem<PyramidVector>[] | undefined;
