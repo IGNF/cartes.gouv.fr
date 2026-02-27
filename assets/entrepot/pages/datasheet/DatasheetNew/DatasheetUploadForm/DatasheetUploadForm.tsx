@@ -158,11 +158,6 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
     });
 
     const selectedSrid = watch("data_srid");
-    const emailNotification = watch("email_notification");
-
-    const toggleNotification = () => {
-        setFormValue("email_notification", !emailNotification);
-    };
 
     const queryClient = useQueryClient();
 
@@ -393,8 +388,7 @@ const DatasheetUploadForm: FC<DatasheetUploadFormProps> = ({ datastoreId }) => {
                     {
                         label: t("email_notification"),
                         nativeInputProps: {
-                            checked: emailNotification,
-                            onChange: toggleNotification,
+                            ...register("email_notification"),
                         },
                     },
                 ]}

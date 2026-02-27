@@ -87,11 +87,6 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
     } = form;
 
     const zoomRange = watch("zoom_range");
-    const emailNotification = watch("email_notification");
-
-    const toggleNotification = () => {
-        setFormValue("email_notification", !emailNotification);
-    };
 
     const generatePyramidRasterMutation = useMutation<PyramidRaster, CartesApiException>({
         mutationFn: () => {
@@ -212,8 +207,7 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
                                 {
                                     label: tCommon("email_notification"),
                                     nativeInputProps: {
-                                        checked: emailNotification,
-                                        onChange: toggleNotification,
+                                        ...register("email_notification"),
                                     },
                                 },
                             ]}

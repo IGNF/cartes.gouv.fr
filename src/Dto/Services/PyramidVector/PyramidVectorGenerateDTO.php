@@ -30,7 +30,7 @@ class PyramidVectorGenerateDTO
         public readonly array $composition,
         
         #[SerializedName('email_notification')]
-        public readonly bool $email_notification,
+        public readonly bool $email_notification = true,
     ) {
     }
 }

@@ -25,7 +25,7 @@ const Sample: FC<SampleProps> = ({ visible, bottomZoomLevel, form }) => {
     const { t: tCommon } = useTranslation("Common");
     const { t } = useTranslation("PyramidVectorGenerateForm");
 
-    const { setValue: setFormValue, getValues: getFormValues } = form;
+    const { setValue: setFormValue, getValues: getFormValues, register } = form;
 
     const [sample, setSample] = useState<SampleType>({
         is_sample: "false",
@@ -51,10 +51,6 @@ const Sample: FC<SampleProps> = ({ visible, bottomZoomLevel, form }) => {
             const b = !(sample.is_sample === "true");
             setSample({ ...sample, is_sample: b.toString() as booleanValue });
         }
-    };
-
-    const toggleNotification = () => {
-        setSample((prev) => ({ ...prev, email_notification: !prev.email_notification }));
     };
 
     return (
@@ -90,8 +86,7 @@ const Sample: FC<SampleProps> = ({ visible, bottomZoomLevel, form }) => {
                     {
                         label: tCommon("email_notification"),
                         nativeInputProps: {
-                            checked: sample?.email_notification === true,
-                            onChange: () => toggleNotification(),
+                            ...register("sample.email_notification"),
                         },
                     },
                 ]}
