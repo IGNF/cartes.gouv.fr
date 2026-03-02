@@ -2,17 +2,17 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { FC, PropsWithChildren } from "react";
-import { ErrorBoundary as BaseErrorBoundary, type FallbackProps } from "react-error-boundary";
+import { ErrorBoundary as BaseErrorBoundary, type FallbackProps, getErrorMessage } from "react-error-boundary";
 
 import { routes } from "../../router/router";
 import AppLayout from "../Layout/AppLayout";
 import Main from "../Layout/Main";
 
-const Fallback: FC<FallbackProps> = ({ error, resetErrorBoundary }) => {
+function Fallback({ error, resetErrorBoundary }: FallbackProps) {
     return (
         <AppLayout>
             <Main title="Une erreur est survenue">
-                <Alert severity="error" title="Une erreur est survenue" description={error?.message} className={fr.cx("fr-my-3w")} />
+                <Alert severity="error" title="Une erreur est survenue" description={getErrorMessage(error) ?? undefined} className={fr.cx("fr-my-3w")} />
                 <Button
                     onClick={() => {
                         resetErrorBoundary();
@@ -24,7 +24,7 @@ const Fallback: FC<FallbackProps> = ({ error, resetErrorBoundary }) => {
             </Main>
         </AppLayout>
     );
-};
+}
 
 const ErrorBoundary: FC<PropsWithChildren> = ({ children }) => {
     return (

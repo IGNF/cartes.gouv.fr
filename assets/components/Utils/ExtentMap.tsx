@@ -139,7 +139,7 @@ const ExtentMap: FC<ExtentMapProps> = ({ extents, bbox }) => {
             }),
         });
 
-        if (extentLayerExtent !== undefined && extentValid === true) {
+        if (extentLayerExtent && extentValid === true) {
             mapRef.current.getView().fit(extentLayerExtent);
         }
 
