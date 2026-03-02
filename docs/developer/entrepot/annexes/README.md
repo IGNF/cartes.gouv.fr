@@ -140,9 +140,11 @@ Détail des contraintes :
 
 Des messages d'erreurs génériques sont prévus pour les cas obligatoire, inférieur/supérieur à etc. Mais il est conseillé de préciser le format attendu du champ dans le texte d'aide si c'est un format particulier.
 
-## légende GetLegendGraphic de WMS-Vecteur
+## une légende pour les services WMTS et WMS-Raster obtenus par moissonnage de WMS-Vecteur
 
-Au moment de la demande de génération d'une pyramide raster par moissonnage d'un flux WMS-Vecteur, la légende automatique est téléchargée et sauvegardée dans un annexe. Cet annexe est référencé dans les extra de la stored_data (pyramide). Une fois la pyramide raster générée, cette légende sera référencée dans le fichier de style ROK4 à fournir pour la création de la configuration d'un service WMS-Raster ou WMTS
+Au moment de la demande de génération d'une pyramide raster par moissonnage d'un flux WMS-Vecteur, la légende automatique (requête `GetLegendGraphic` du WMS-Vecteur) est téléchargée et sauvegardée dans un annexe. Cette annexe est référencée dans les [extra](../extra.md) de la nouvelle `stored_data` (la pyramide raster).
+
+Ensuite, une fois la pyramide raster générée, cette légende sera référencée dans le [fichier de style ROK4](../statics.md) fourni pour la création de la configuration d'un service WMS-Raster ou WMTS.
 
 Syntaxe du path :
 
