@@ -16,7 +16,6 @@ type DatastoreSelectionInfo = {
 };
 const useDatastoreSelection = () => {
     const user = useAuthStore((state) => state.user);
-    let datastoreList: DatastoreSelectionInfo[] = [];
 
     const communitiesMember = user?.communities_member ?? [];
 
@@ -38,7 +37,7 @@ const useDatastoreSelection = () => {
     });
 
     // création de la liste des entrepôts
-    datastoreList = communitiesMember
+    const datastoreList: DatastoreSelectionInfo[] = communitiesMember
         .filter((cm) => cm.community !== undefined && cm.community.datastore !== undefined)
         .map((cm) => ({
             _id: cm.community!.datastore,
