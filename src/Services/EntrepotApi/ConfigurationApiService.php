@@ -52,10 +52,16 @@ class ConfigurationApiService extends BaseEntrepotApiService
     }
 
     /**
-     * @param array<mixed> $body
+     * @param array<mixed>      $body
+     * @param array<mixed>|null $initialConfiguration
      */
-    public function modify(string $datastoreId, string $configurationId, $body = []): array
+    public function modify(string $datastoreId, string $configurationId, $body = [], ?array $initialConfiguration = null): array
     {
+        if (array_key_exists('extra', $body)) {
+            $initialConfiguration = $initialConfiguration ?? $this->get($datastoreId, $configurationId);
+            $body['extra'] = array_merge($initialConfiguration['extra'] ?? [], $body['extra']);
+        }
+
         return $this->request('PATCH', "datastores/$datastoreId/configurations/$configurationId", $body);
     }
 

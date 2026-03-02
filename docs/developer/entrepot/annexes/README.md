@@ -139,3 +139,22 @@ Détail des contraintes :
 | `maximum`   | valeur maximale      | number/integer            |
 
 Des messages d'erreurs génériques sont prévus pour les cas obligatoire, inférieur/supérieur à etc. Mais il est conseillé de préciser le format attendu du champ dans le texte d'aide si c'est un format particulier.
+
+## une légende pour les services WMTS et WMS-Raster obtenus par moissonnage de WMS-Vecteur
+
+Au moment de la demande de génération d'une pyramide raster par moissonnage d'un flux WMS-Vecteur, la légende automatique (requête `GetLegendGraphic` du WMS-Vecteur) est téléchargée et sauvegardée dans un annexe. Cette annexe est référencée dans les [extra](../extra.md#legende-getlegendgraphic-du-wms-vecteur-associee-a-la-pyramide-raster-generee-par-moissonnage) de la nouvelle `stored_data` (la pyramide raster).
+
+Ensuite, une fois la pyramide raster générée, cette légende sera référencée dans le [fichier de style ROK4](../statics.md#rok4-style) fourni pour la création de la configuration d'un service WMS-Raster ou WMTS.
+
+Syntaxe du path :
+
+```
+/legend/[storedDataId].png
+```
+
+Labels :
+
+| label            | description               |        |
+| ---------------- | ------------------------- | ------ |
+| `datasheet_name` | nom de la fiche de donnée | string |
+| `type`           | valeur fixe : "legend"    | string |
