@@ -58,10 +58,20 @@ class CartesServiceApiService
         ]);
     }
 
-    public function getService(string $datastoreId, string $offeringId): array
+    /**
+     * @param array<mixed>|null $offering
+     * @param array<mixed>|null $configuration
+     */
+    public function getService(string $datastoreId, string $offeringId, bool $migrateStyles = true, ?array $offering = null, ?array $configuration = null): array
     {
-        $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId);
-        $offering['configuration'] = $this->configurationApiService->get($datastoreId, $offering['configuration']['_id']);
+        if (null === $offering) {
+            $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId);
+        }
+
+        if (null === $configuration) {
+            $configuration = $this->configurationApiService->get($datastoreId, $offering['configuration']['_id']);
+        }
+        $offering['configuration'] = $configuration;
 
         // traitement spécial pour WMTS-TMS
         if (OfferingTypes::WMTSTMS === $offering['type']) {
@@ -88,7 +98,7 @@ class CartesServiceApiService
 
         $styles = [];
         if (OfferingTypes::WFS === $offering['type'] || OfferingTypes::WMTSTMS === $offering['type']) {
-            $styles = $this->cartesStylesApiService->getStyles($datastoreId, $offering['configuration']);
+            $styles = $this->cartesStylesApiService->getStyles($datastoreId, $offering['configuration'], $migrateStyles);
         }
         $offering['configuration']['styles'] = $styles;
 

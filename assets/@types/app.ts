@@ -90,11 +90,38 @@ export enum DatasheetDocumentTypeEnum {
     Link = "link",
 }
 
+export type DatasheetStoredDataItem<SD extends StoredData = StoredData> = Pick<
+    SD,
+    | "_id"
+    | "name"
+    | "description"
+    | "type"
+    | "open"
+    | "status"
+    | "srs"
+    | "contact"
+    | "edition"
+    | "size"
+    | "last_event"
+    | "tags"
+    | "creation"
+    | "public_activity"
+> & {
+    bbox?: BoundingBox | null;
+};
+
+export type DatasheetUploadItem = Pick<
+    Upload,
+    "_id" | "name" | "description" | "type" | "open" | "status" | "srs" | "contact" | "size" | "last_event" | "tags" | "creation"
+> & {
+    bbox?: BoundingBox | null;
+};
+
 export type DatasheetDetailed = Datasheet & {
-    vector_db_list: VectorDb[] | undefined;
-    pyramid_vector_list: PyramidVector[] | undefined;
-    pyramid_raster_list: PyramidRaster[] | undefined;
-    upload_list: Upload[] | undefined;
+    vector_db_list: DatasheetStoredDataItem<VectorDb>[] | undefined;
+    pyramid_vector_list: DatasheetStoredDataItem<PyramidVector>[] | undefined;
+    pyramid_raster_list: DatasheetStoredDataItem<PyramidRaster>[] | undefined;
+    upload_list: DatasheetUploadItem[] | undefined;
     service_list: Service[] | undefined;
 };
 

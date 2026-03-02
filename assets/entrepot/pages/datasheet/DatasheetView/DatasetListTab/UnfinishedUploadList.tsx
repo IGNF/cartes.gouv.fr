@@ -7,7 +7,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import api from "../../../../api";
 import { routes } from "../../../../../router/router";
-import { CheckStatusEnum, type DatasheetDetailed, Upload } from "../../../../../@types/app";
+import { CheckStatusEnum, type DatasheetDetailed, type DatasheetUploadItem } from "../../../../../@types/app";
 import ReportStatusBadge from "../../../data_details/ReportTab/ReportStatusBadge";
 import { deleteUploadConfirmModal } from "../DatasheetView/DatasheetView";
 import Wait from "../../../../../components/Utils/Wait";
@@ -16,7 +16,7 @@ import { useTranslation } from "../../../../../i18n/i18n";
 
 type UnfinishedUploadListProps = {
     datastoreId: string;
-    uploadList: Upload[];
+    uploadList: DatasheetUploadItem[];
     nbPublications: number;
     datasheetName: string;
 };
@@ -26,7 +26,7 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
 
     const queryClient = useQueryClient();
 
-    const isLastUpload = (uploadList: Upload[]): boolean => {
+    const isLastUpload = (uploadList: DatasheetUploadItem[]): boolean => {
         return uploadList.length === 1 && nbPublications === 0;
     };
 

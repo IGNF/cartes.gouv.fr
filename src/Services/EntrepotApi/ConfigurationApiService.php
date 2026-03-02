@@ -119,13 +119,10 @@ class ConfigurationApiService extends BaseEntrepotApiService
      */
     public function getAllOfferingsDetailed(string $datastoreId, array $query = []): array
     {
-        $offerings = $this->getAllOfferings($datastoreId, $query);
-
-        foreach ($offerings as &$offering) {
-            $offering = $this->getOffering($datastoreId, $offering['_id']);
-        }
-
-        return $offerings;
+        return $this->getAllOfferings($datastoreId, [
+            ...$query,
+            'fields' => 'open,available,layer_name,type,status,endpoint,configuration,urls,creation,extra,update,public_activity', // tous les attributs sont présents, donc pas besoin de GET détaillé pour chaque offering
+        ]);
     }
 
     public function getOffering(string $datastoreId, string $offeringId): array

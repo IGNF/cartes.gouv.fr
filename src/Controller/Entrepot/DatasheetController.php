@@ -103,16 +103,18 @@ class DatasheetController extends AbstractController implements ApiControllerInt
     public function getDetailed(string $datastoreId, string $datasheetName): JsonResponse
     {
         // recherche d'entités API qui représente une fiche de données : upload, stored_data, metadata
-        $uploadList = $this->uploadApiService->getAllDetailed($datastoreId, [
+        $uploadList = $this->uploadApiService->getAll($datastoreId, [
             'tags' => [
                 CommonTags::DATASHEET_NAME => $datasheetName,
             ],
+            'fields' => 'name,description,type,open,status,srs,contact,size,last_event,tags,creation,bbox',
         ]);
 
-        $storedDataList = $this->storedDataApiService->getAllDetailed($datastoreId, [
+        $storedDataList = $this->storedDataApiService->getAll($datastoreId, [
             'tags' => [
                 CommonTags::DATASHEET_NAME => $datasheetName,
             ],
+            'fields' => 'name,description,type,open,status,srs,contact,edition,size,last_event,tags,creation,bbox,public_activity',
         ]);
 
         $vectorDbList = array_filter($storedDataList, function ($storedData) {
@@ -169,6 +171,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             'tags' => [
                 CommonTags::DATASHEET_NAME => $datasheetName,
             ],
+            'fields' => 'status', // on n'a besoin que de l'_id qui est toujours présent, mais on ne peut pas demander "_id" via "fields", donc "status" parce que c'est un champ léger et qui est toujours présent
         ]);
 
         $services = $this->_getServices($datastoreId, $storedDataList);
@@ -227,26 +230,36 @@ class DatasheetController extends AbstractController implements ApiControllerInt
     }
 
     /**
-     * Récupère les services (offerings) de la fiche de données.
+     * Récupère les services (offerings) liés aux stored_data de la fiche de données.
      *
      * @param mixed[] $storedDataList
      */
     private function _getServices(string $datastoreId, array $storedDataList): array
     {
-        $offerings = [];
+        if (0 === count($storedDataList)) {
+            return [];
+        }
+
+        /** @var array<mixed> $offeringsById clé : offeringId, valeur : offering */
+        $offeringsById = [];
 
         foreach ($storedDataList as $storedData) {
-            $tmpOfferings = $this->configurationApiService->getAllOfferings($datastoreId, [
+            $tmpOfferings = $this->configurationApiService->getAllOfferingsDetailed($datastoreId, [
                 'stored_data' => $storedData['_id'],
             ]);
-            $offerings = array_merge($offerings, $tmpOfferings);
+
+            foreach ($tmpOfferings as $offering) {
+                $offeringsById[$offering['_id']] = $offering;
+            }
         }
 
-        foreach ($offerings as &$offering) {
-            $offering = $this->cartesServiceApiService->getService($datastoreId, $offering['_id']);
+        foreach ($offeringsById as $offeringId => $offering) {
+            if (isset($offering['configuration']['_id'])) {
+                $offeringsById[$offeringId] = $this->cartesServiceApiService->getService($datastoreId, $offeringId, false, $offering);
+            }
         }
 
-        return $offerings;
+        return array_values($offeringsById);
     }
 
     #[Route('/{datasheetName}', name: 'delete', methods: ['DELETE'])]

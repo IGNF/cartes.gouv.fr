@@ -6,7 +6,7 @@ import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createPortal } from "react-dom";
 
-import { DatasheetDetailed, StoredData, StoredDataTypeEnum } from "@/@types/app";
+import { DatasheetDetailed, DatasheetStoredDataItem, StoredDataTypeEnum } from "@/@types/app";
 import LoadingIcon from "@/components/Utils/LoadingIcon";
 import LoadingText from "@/components/Utils/LoadingText";
 import Wait from "@/components/Utils/Wait";
@@ -20,7 +20,7 @@ import { offeringTypeDisplayName } from "@/utils";
 type StoredDataDeleteConfirmDialogProps = {
     modal: ReturnType<typeof createModal>;
     datastoreId: string;
-    storedData: StoredData;
+    storedData: DatasheetStoredDataItem;
     datasheetName: string;
 };
 
