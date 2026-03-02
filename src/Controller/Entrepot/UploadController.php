@@ -82,6 +82,11 @@ class UploadController extends AbstractController implements ApiControllerInterf
                 CommonTags::PRODUCER => $content['producer'],
                 CommonTags::PRODUCTION_YEAR => $content['production_year'],
             ];
+            
+            if (isset($content['email_notification'])) {
+                $tags['email_notification'] = (bool) $content['email_notification'];
+            }
+            
             $upload = $this->uploadApiService->addTags($datastoreId, $upload['_id'], $tags);
 
             // retourne l'upload au frontend, qui se chargera de lancer l'intégration VECTOR-DB

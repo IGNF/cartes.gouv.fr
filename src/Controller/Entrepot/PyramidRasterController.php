@@ -25,6 +25,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 #[Route(
     '/api/datastores/{datastoreId}/pyramid-raster',
@@ -44,6 +45,7 @@ class PyramidRasterController extends ServiceController implements ApiController
         private CartesServiceApiService $cartesServiceApiService,
         CapabilitiesService $capabilitiesService,
         CartesMetadataApiService $cartesMetadataApiService,
+        private UrlGeneratorInterface $urlGenerator,
     ) {
         parent::__construct($datastoreApiService, $configurationApiService, $cartesServiceApiService, $capabilitiesService, $cartesMetadataApiService, $sandboxService);
     }
@@ -97,6 +99,27 @@ class PyramidRasterController extends ServiceController implements ApiController
                     'harvest_area' => $data['wmsv_config_bbox'],
                 ],
             ];
+
+            if (isset($data['email_notification']) && $data['email_notification'] === true) {
+                /** @var \App\Security\User */
+                $user = $this->getUser();
+                $userEmail = $user->getEmail();
+                $datasheetName = $vectordb['tags'][CommonTags::DATASHEET_NAME] ?? null;
+
+                if ($userEmail && $datasheetName) {
+                    $baseUrl = $this->urlGenerator->generate('cartesgouvfr_app', [], UrlGeneratorInterface::ABSOLUTE_URL);
+
+                    $requestBody['callback'] = [
+                        'type' => 'email',
+                        'to_address' => [$userEmail],
+                        'entity_url' => sprintf(
+                            '%stableau-de-bord/entrepots/{{ datastore }}/donnees/{{ output }}/details?datasheetName=%s',
+                            $baseUrl,
+                            urlencode($datasheetName)
+                        ),
+                    ];
+                }
+            }
 
             $processingExecution = $this->processingApiService->addExecution($datastoreId, $requestBody);
             $pyramidId = $processingExecution['output']['stored_data']['_id'];

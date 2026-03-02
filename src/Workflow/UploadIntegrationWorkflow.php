@@ -14,7 +14,9 @@ use App\Services\EntrepotApi\ProcessingApiService;
 use App\Services\EntrepotApi\StoredDataApiService;
 use App\Services\EntrepotApi\UploadApiService;
 use App\Services\SandboxService;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class UploadIntegrationWorkflow
 {
@@ -23,6 +25,8 @@ class UploadIntegrationWorkflow
         private UploadApiService $uploadApiService,
         private ProcessingApiService $processingApiService,
         private StoredDataApiService $storedDataApiService,
+        private Security $security,
+        private UrlGeneratorInterface $urlGenerator,
     ) {
     }
 
@@ -277,6 +281,27 @@ class UploadIntegrationWorkflow
                 ],
             ],
         ];
+
+        if (isset($upload['tags']['email_notification']) && filter_var($upload['tags']['email_notification'], FILTER_VALIDATE_BOOLEAN)) {
+            /** @var \App\Security\User|null */
+            $user = $this->security->getUser();
+            $userEmail = $user->getEmail();
+            $datasheetName = $upload['tags'][CommonTags::DATASHEET_NAME] ?? null;
+
+            if ($userEmail && $datasheetName) {
+                $baseUrl = $this->urlGenerator->generate('cartesgouvfr_app', [], UrlGeneratorInterface::ABSOLUTE_URL);
+
+                $procExecBody['callback'] = [
+                    'type' => 'email',
+                    'to_address' => [$userEmail],
+                    'entity_url' => sprintf(
+                        '%stableau-de-bord/entrepots/{{ datastore }}/donnees/{{ output }}/details?datasheetName=%s',
+                        $baseUrl,
+                        urlencode($datasheetName)
+                    ),
+                ];
+            }
+        }
 
         $processingExec = $this->processingApiService->addExecution($datastoreId, $procExecBody);
         $vectorDb = $processingExec['output']['stored_data'];

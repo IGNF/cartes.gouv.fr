@@ -4,6 +4,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Input from "@codegouvfr/react-dsfr/Input";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
+import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useCallback, useState } from "react";
@@ -35,6 +36,7 @@ const STEPS = {
 type PyramidRasterGenerateFormType = {
     technical_name: string;
     zoom_range: number[];
+    email_notification: boolean;
 };
 
 type PyramidRasterGenerateFormProps = {
@@ -71,6 +73,7 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
         defaultValues: {
             technical_name: "",
             zoom_range: [4, 16],
+            email_notification: true,
         },
     });
 
@@ -198,6 +201,17 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
                                 {errors.zoom_range?.message !== undefined && <p className={fr.cx("fr-error-text")}>{errors.zoom_range?.message}</p>}
                             </>
                         )}
+                        <hr className={fr.cx("fr-mt-3w")} />
+                        <Checkbox
+                            options={[
+                                {
+                                    label: tCommon("email_notification"),
+                                    nativeInputProps: {
+                                        ...register("email_notification"),
+                                    },
+                                },
+                            ]}
+                        />
                     </div>
 
                     <ButtonsGroup
