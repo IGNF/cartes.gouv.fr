@@ -97,10 +97,6 @@ class PyramidRasterController extends ServiceController implements ApiController
                 throw new AppException('URL du service WMS-Vecteur non trouvée', Response::HTTP_BAD_REQUEST);
             }
 
-            $legendFilePath = $this->fetchWmsvLegend($endpointUrlBase, $wmsvOffering);
-            $legendAnnexe = $this->saveLegendInAnnexe($datastoreId, $wmsvOffering['_id'], $legendFilePath, $wmsvConfiguration['tags'][CommonTags::DATASHEET_NAME]);
-            $legendAnnexeUrlAbs = $this->getParameter('annexes_url').'/'.$datastore['technical_name'].$legendAnnexe['paths'][0];
-
             $zoomRange = $data['zoom_range'];
             $harvestLevels = array_map(fn ($v) => strval($v), array_reverse(range($zoomRange[0], $zoomRange[1], 1), false));
 
@@ -162,6 +158,10 @@ class PyramidRasterController extends ServiceController implements ApiController
             if (isset($vectordb['tags'][CommonTags::PRODUCTION_YEAR])) {
                 $pyramidTags[CommonTags::PRODUCTION_YEAR] = $vectordb['tags'][CommonTags::PRODUCTION_YEAR];
             }
+
+            $legendFilePath = $this->fetchWmsvLegend($endpointUrlBase, $wmsvOffering);
+            $legendAnnexe = $this->saveLegendInAnnexe($datastoreId, $pyramidId, $legendFilePath, $wmsvConfiguration['tags'][CommonTags::DATASHEET_NAME]);
+            $legendAnnexeUrlAbs = $this->getParameter('annexes_url').'/'.$datastore['technical_name'].$legendAnnexe['paths'][0];
 
             $this->storedDataApiService->addTags($datastoreId, $pyramidId, $pyramidTags);
             $this->storedDataApiService->modify($datastoreId, $pyramidId, [
@@ -302,9 +302,9 @@ class PyramidRasterController extends ServiceController implements ApiController
         return $legendFilePath;
     }
 
-    private function saveLegendInAnnexe(string $datastoreId, string $offeringId, string $legendFilePath, string $datasheetName): array
+    private function saveLegendInAnnexe(string $datastoreId, string $storedDataId, string $legendFilePath, string $datasheetName): array
     {
-        $path = "/legend/{$offeringId}/legend.png";
+        $path = "/legend/{$storedDataId}/legend.png";
 
         $existingAnnexes = $this->annexeApiService->getAll($datastoreId, null, $path);
         if (count($existingAnnexes) > 0) {
