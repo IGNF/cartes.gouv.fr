@@ -18,6 +18,7 @@ import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
 import { filterGeometricRelations } from "../../../../helpers";
 import useScrollToTopEffect from "../../../../hooks/useScrollToTopEffect";
+import useServiceQuery from "../../../../hooks/queries/useServiceQuery";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../modules/jsonFetch";
@@ -178,14 +179,7 @@ const WfsServiceForm: FC<WfsServiceFormProps> = ({ datastoreId, vectorDbId, offe
         enabled: !(createServiceMutation.isPending || editServiceMutation.isPending),
     });
 
-    const offeringQuery = useQuery<Service | null, CartesApiException>({
-        queryKey: RQKeys.datastore_offering(datastoreId, offeringId ?? "xxxx"),
-        queryFn: ({ signal }) => {
-            if (offeringId) {
-                return api.service.getService(datastoreId, offeringId, { signal });
-            }
-            return Promise.resolve(null);
-        },
+    const offeringQuery = useServiceQuery(datastoreId, offeringId ?? "xxxx", {
         enabled: editMode && !(createServiceMutation.isPending || editServiceMutation.isPending),
         staleTime: Infinity,
     });

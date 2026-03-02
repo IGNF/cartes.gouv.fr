@@ -1,13 +1,10 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Tabs from "@codegouvfr/react-dsfr/Tabs";
-import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
-import { CartesStyle, OfferingTypeEnum, Service, StoredDataTypeEnum } from "@/@types/app";
+import { CartesStyle, OfferingTypeEnum, StoredDataTypeEnum } from "@/@types/app";
 import RMap from "@/components/Utils/RMap";
-import api from "@/entrepot/api";
-import RQKeys from "@/modules/entrepot/RQKeys";
-import { CartesApiException } from "@/modules/jsonFetch";
+import useServiceQuery from "@/hooks/queries/useServiceQuery";
 import getWebService from "@/modules/WebServices/WebServices";
 import BaseLayer from "ol/layer/Base";
 import ServiceShareInfo from "./ServiceShareInfo";
@@ -22,11 +19,7 @@ type ServiceViewContent = {
 function ServiceViewContent(props: ServiceViewContent) {
     const { datastoreId, offeringId, datasheetName } = props;
 
-    const serviceQuery = useQuery<Service, CartesApiException>({
-        queryKey: RQKeys.datastore_offering(datastoreId, offeringId),
-        queryFn: ({ signal }) => api.service.getService(datastoreId, offeringId, { signal }),
-        staleTime: 60000,
-    });
+    const serviceQuery = useServiceQuery(datastoreId, offeringId);
 
     const { data: service } = serviceQuery;
 
