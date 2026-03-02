@@ -2,22 +2,24 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
+import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import Input from "@codegouvfr/react-dsfr/Input";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
-import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FC, useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
-import type { PyramidRaster, Service } from "../../../../../@types/app";
+import type { PyramidRaster } from "../../../../../@types/app";
 import type { ConfigurationWmsVectorDetailsContent } from "../../../../../@types/entrepot";
+import Main from "../../../../../components/Layout/Main";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import Wait from "../../../../../components/Utils/Wait";
 import ZoomRange from "../../../../../components/Utils/ZoomRange";
 import olDefaults from "../../../../../data/ol-defaults.json";
+import useServiceQuery from "../../../../../hooks/queries/useServiceQuery";
 import useScrollToTopEffect from "../../../../../hooks/useScrollToTopEffect";
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
@@ -26,7 +28,6 @@ import { routes } from "../../../../../router/router";
 import { bboxToWkt } from "../../../../../utils";
 import api from "../../../../api";
 import { DatasheetViewActiveTabEnum } from "../../../datasheet/DatasheetView/DatasheetView/DatasheetView";
-import Main from "../../../../../components/Layout/Main";
 
 const STEPS = {
     TECHNICAL_NAME: 1,
@@ -50,11 +51,7 @@ const PyramidRasterGenerateForm: FC<PyramidRasterGenerateFormProps> = ({ datasto
 
     const [currentStep, setCurrentStep] = useState(STEPS.TECHNICAL_NAME);
 
-    const serviceQuery = useQuery<Service, CartesApiException>({
-        queryKey: RQKeys.datastore_offering(datastoreId, offeringId),
-        queryFn: () => api.service.getService(datastoreId, offeringId),
-        staleTime: 60000,
-    });
+    const serviceQuery = useServiceQuery(datastoreId, offeringId);
 
     const queryClient = useQueryClient();
 

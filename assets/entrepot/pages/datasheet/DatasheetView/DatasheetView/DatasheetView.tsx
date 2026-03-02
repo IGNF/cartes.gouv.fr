@@ -6,7 +6,7 @@ import { ButtonsGroup } from "@codegouvfr/react-dsfr/ButtonsGroup";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FC, lazy, Suspense, useMemo } from "react";
+import { FC, lazy, Suspense, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { symToStr } from "tsafe/symToStr";
 
@@ -83,6 +83,15 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
         retry: false,
         enabled: !datasheetDeleteMutation.isPending,
     });
+
+    useEffect(() => {
+        // On précharge les données des services parce qu'on les a déjà à ce niveau-là
+        if (datasheetQuery.data?.service_list) {
+            datasheetQuery.data.service_list.forEach((service) => {
+                queryClient.setQueryData(RQKeys.datastore_offering(datastoreId, service._id), service);
+            });
+        }
+    }, [datasheetQuery.data?.service_list, datastoreId, queryClient]);
 
     const metadataQuery = useQuery<Metadata, CartesApiException>({
         queryKey: RQKeys.datastore_datasheet_metadata(datastoreId, datasheetName),

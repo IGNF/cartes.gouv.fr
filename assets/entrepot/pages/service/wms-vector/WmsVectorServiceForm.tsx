@@ -26,6 +26,7 @@ import Main from "../../../../components/Layout/Main";
 import LoadingIcon from "../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../components/Utils/LoadingText";
 import Wait from "../../../../components/Utils/Wait";
+import useServiceQuery from "../../../../hooks/queries/useServiceQuery";
 import useScrollToTopEffect from "../../../../hooks/useScrollToTopEffect";
 import { useTranslation } from "../../../../i18n/i18n";
 import RQKeys from "../../../../modules/entrepot/RQKeys";
@@ -192,14 +193,7 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
         enabled: currentStep === STEPS.METADATAS_DESCRIPTION && !(createServiceMutation.isPending || editServiceMutation.isPending),
     });
 
-    const offeringQuery = useQuery<Service | null, CartesApiException>({
-        queryKey: RQKeys.datastore_offering(datastoreId, offeringId ?? "xxxx"),
-        queryFn: ({ signal }) => {
-            if (offeringId) {
-                return api.service.getService(datastoreId, offeringId, { signal });
-            }
-            return Promise.resolve(null);
-        },
+    const offeringQuery = useServiceQuery(datastoreId, offeringId ?? "xxxx", {
         enabled: editMode && !(createServiceMutation.isPending || editServiceMutation.isPending),
         staleTime: Infinity,
     });
