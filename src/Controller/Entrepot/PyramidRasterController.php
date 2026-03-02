@@ -278,7 +278,7 @@ class PyramidRasterController extends ServiceController implements ApiController
             'service' => 'WMS',
             'request' => 'GetLegendGraphic',
             'format' => 'image/png',
-            'width' => 20,
+            'width' => 20, // largeur et hauteur des symboles
             'height' => 20,
             'layer' => $wmsvOffering['layer_name'],
             'version' => Utils::get_version_from_service_url($wmsvOffering['urls'][0]['url']),
