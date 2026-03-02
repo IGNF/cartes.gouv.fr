@@ -1,6 +1,6 @@
 # Installation et configuration
 
-Le portail est construit sur le framework PHP Symfony. Il nécessite l'installation d'un moteur php >=8.2, nodejs >=24, npm et composer.
+Le portail est construit sur le framework PHP Symfony. Il nécessite l'installation d'un moteur php >=8.2, de Node.js (version définie dans `.nvmrc`), npm et composer.
 
 Ci-dessous, les instructions d'installation pour les 2 environnements testés.
 
@@ -20,7 +20,7 @@ Alias /cartes.gouv.fr "C:/xampp/htdocs/cartes.gouv.fr/public"
 
 3. Installer les extensions PHP requises : `cli`, `opcache`, `xml`, `zip`, `curl`, `intl`, `xsl` et `sqlite3`
 4. Installer [composer](https://getcomposer.org)
-5. Installer nodejs avec [nvm-windows](https://github.com/coreybutler/nvm-windows) ou volta
+5. Installer nodejs avec [nvm-windows](https://github.com/coreybutler/nvm-windows) ou volta, puis utiliser la version du projet définie dans `.nvmrc`
 6. Mettre à jour npm :
 
 ```bash
@@ -40,7 +40,6 @@ npm install --global npm
 5. Installer les dépendances Javascript (`npm clean-install`)
 
 6. Compiler les assets (voir détails des commandes suivantes dans le fichier [package.json](./../../package.json)) :
-
     - `npm run dev` : lancer le serveur de développement vite avec hot-reload, pour le développement en local
     - `npm run build` : générer les assets en mode production
     - `npm run build:dev` : générer les assets en mode développement
