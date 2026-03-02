@@ -304,7 +304,7 @@ class PyramidRasterController extends ServiceController implements ApiController
 
     private function saveLegendInAnnexe(string $datastoreId, string $storedDataId, string $legendFilePath, string $datasheetName): array
     {
-        $path = "/legend/{$storedDataId}/legend.png";
+        $path = "/legend/{$storedDataId}.png";
 
         $existingAnnexes = $this->annexeApiService->getAll($datastoreId, null, $path);
         if (count($existingAnnexes) > 0) {

@@ -149,7 +149,7 @@ Ensuite, une fois la pyramide raster générée, cette légende sera référenc�
 Syntaxe du path :
 
 ```
-/legend/[storedDataId]/legend.png
+/legend/[storedDataId].png
 ```
 
 Labels :
