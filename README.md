@@ -18,7 +18,7 @@ Toutes les briques de cartes.gouv.fr :
 | Explorer les cartes                     | [IGNF/cartes.gouv.fr-entree-carto](https://github.com/IGNF/cartes.gouv.fr-entree-carto)                  | T2 2024              |
 | Téléchargement                          | [IGNF/cartes.gouv.fr-telechargement](https://github.com/IGNF/cartes.gouv.fr-telechargement)              | T2 2025              |
 | Aide                                    | [IGNF/cartes.gouv.fr-documentation](https://github.com/IGNF/cartes.gouv.fr-documentation)                | T3 2025              |
-| Pages éditoriales                       | [IGNF/cartes.gouv.fr-edito](https://github.com/IGNF/cartes.gouv.fr-edito)                                | à venir T1 2026      |
+| Pages éditoriales                       | [IGNF/cartes.gouv.fr-edito](https://github.com/IGNF/cartes.gouv.fr-edito)                                | T1 2026              |
 | Extraction                              | à ouvrir                                                                                                 | à venir courant 2026 |
 | Guichet collaboratif                    | [IGNF/cartes.gouv.fr-guichet-collaboratif](https://github.com/IGNF/cartes.gouv.fr-guichet-collaboratif/) | à venir courant 2026 |
 | Editeur                                 | [IGNF/cartes.gouv.fr-editeur-carto](https://github.com/IGNF/cartes.gouv.fr-editeur-carto)                | à venir courant 2027 |
@@ -26,27 +26,28 @@ Toutes les briques de cartes.gouv.fr :
 ## Fonctionnalités gérées dans ce dépôt
 
 - Gestion des **clés d'accès** aux services restreints
-- Formulaire de demande pour rejoindre une communauté publique
+- Formulaire de demande pour rejoindre une communauté publique, avec formulaire personnalisable par communauté
 - Formulaire de contact, en particulier pour demander la création d'un nouvel espace de travail
 - Processus d'alimentation et diffusion de données vecteur :
-    - Livraison de données avec intégration en base de données
+    - Livraison de données avec suivi des vérifications et intégration en base de données
     - Publication de services **WFS** puis ajout (optionnel) de **styles** associés
     - Publication de services **WMS-vecteur** (WMS "à la volée", il s'agit bien d'un flux image mais les images ne sont pas précalculées), avec interface de personnalisation de style
     - Génération de **pyramides de tuiles vectorielles** et publication de services **TMS** puis ajout (optionnel) de styles associés
     - Génération de **pyramides de tuiles d'images** et publications de services **WMS-raster** et **WMTS**
     - Publication de **métadonnées** sur le catalogue, obligatoire dès le premier service publié
-    - Ajout de documents associés à une fiche de données
+    - Ajout de documents associés à une fiche de données, ajout d'une vignette
     - Configuration de styles associés aux services de diffusion vecteur (styles à appliquer côté client)
 - Gestion des entrepôts et communautés :
     - Gestion des membres et de leurs droits
-    - Visualisation de l'utilisation des quotas alloués pour chaque service et type de stockage
+    - Visualisation de l'utilisation des quotas alloués pour chaque type de service et type de stockage
     - Gestion des **permissions** associées aux services publiés sur des points d'accès restreints
+    - Formulaire de demande d'accès à un service de diffusion privé
 - Espace **Découverte** pour tester les fonctionnalités
 
 À venir :
 
 - Diversification des formats d'entrée
-- Notifications en fin de traitements longs
+- Notifications par email en fin de traitements longs
 - Ajout de légendes sur les services cartographies
 - Amélioration du remplissage des métadonnées et de l'index de recherche
 - Parcours de diffusion en service de téléchargement
@@ -58,7 +59,7 @@ Toutes les briques de cartes.gouv.fr :
 
 cartes.gouv.fr n'utilise pas de stockage propre. Toutes les informations visibles proviennent de l'[API Entrepôt](https://data.geopf.fr/api/swagger-ui/index.html). Mais pour obtenir un affichage cohérent, cartes.gouv.fr utilise des étiquettes (`tags`) sur les entités de l'entrepôt.
 
-Si vous avez utilisé l'API Entrepôt directement ou avec une autre application cliente, vous ne verrez pas vos données sur cartes.gouv.fr si vous n'avez pas utilisé le tag `datasheet_name` pour associer livraisons (`upload`), données stockées (`stored_data`) et services de diffusion (`configuration`) derrière le concept virtuel de **fiche de données**. Une fiche de données correspond à plusieurs livraisons, données stockées et services de diffusion mais à une seule métadonnée.
+Si vous avez utilisé l'API Entrepôt directement ou avec une autre application cliente, vous ne verrez pas vos données sur cartes.gouv.fr si vous n'avez pas utilisé le tag `datasheet_name` pour associer livraisons (`upload`), données stockées (`stored_data`) et services de diffusion (`configuration`) derrière le concept virtuel de **fiche de données**. Une fiche de données correspond à plusieurs livraisons, données stockées, annexes et services de diffusion mais à une seule métadonnée.
 
 Pour en savoir plus, consultez la [documentation développeur sur l'utilisation de l'API Entrepôt par cartes.gouv.fr](docs/developer/entrepot/README.md).
 
