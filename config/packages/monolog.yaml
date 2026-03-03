@@ -44,19 +44,23 @@ when@prod:
 
         handlers:
             main:
+                type: filter
+                handler: main_stdout
+                min_level: info
+                max_level: warning
+            main_stdout:
                 type: stream
                 path: php://stdout
-                level: info
-                formatter: monolog.formatter.logstash
-            mailer:
-                type: rotating_file
-                path: "%kernel.logs_dir%/mailer.log"
-                channels: mailer
-            nested:
+                formatter: monolog.formatter.json
+            errors_stderr:
                 type: stream
                 path: php://stderr
                 level: error
                 formatter: monolog.formatter.json
+            mailer:
+                type: rotating_file
+                path: "%kernel.logs_dir%/mailer.log"
+                channels: mailer
             console:
                 type: console
                 process_psr_3_messages: false
@@ -65,3 +69,4 @@ when@prod:
                 type: stream
                 channels: [deprecation]
                 path: php://stderr
+                formatter: monolog.formatter.json
