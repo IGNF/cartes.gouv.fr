@@ -4,27 +4,26 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b0a77abb26ce4d1c36919a233e236a01",
+    "content-hash": "4962a95077641bbfac980cc231919948",
     "packages": [
         {
             "name": "async-aws/core",
-            "version": "1.27.1",
+            "version": "1.28.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/async-aws/core.git",
-                "reference": "5b8e35c8df94990161e2c9750c9ba1683d0b48b8"
+                "reference": "e8b02ac30b17afaf1352cbd352dceb789d792d39"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/async-aws/core/zipball/5b8e35c8df94990161e2c9750c9ba1683d0b48b8",
-                "reference": "5b8e35c8df94990161e2c9750c9ba1683d0b48b8",
+                "url": "https://api.github.com/repos/async-aws/core/zipball/e8b02ac30b17afaf1352cbd352dceb789d792d39",
+                "reference": "e8b02ac30b17afaf1352cbd352dceb789d792d39",
                 "shasum": ""
             },
             "require": {
                 "ext-hash": "*",
-                "ext-json": "*",
                 "ext-simplexml": "*",
-                "php": "^7.2.5 || ^8.0",
+                "php": "^8.2",
                 "psr/cache": "^1.0 || ^2.0 || ^3.0",
                 "psr/log": "^1.0 || ^2.0 || ^3.0",
                 "symfony/deprecation-contracts": "^2.1 || ^3.0",
@@ -36,10 +35,15 @@
                 "async-aws/s3": "<1.1",
                 "symfony/http-client": "5.2.0"
             },
+            "require-dev": {
+                "phpunit/phpunit": "^11.5.42",
+                "symfony/error-handler": "^7.3.2 || ^8.0",
+                "symfony/phpunit-bridge": "^7.3.2 || ^8.0"
+            },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.27-dev"
+                    "dev-master": "1.28-dev"
                 }
             },
             "autoload": {
@@ -60,7 +64,7 @@
                 "sts"
             ],
             "support": {
-                "source": "https://github.com/async-aws/core/tree/1.27.1"
+                "source": "https://github.com/async-aws/core/tree/1.28.1"
             },
             "funding": [
                 {
@@ -72,20 +76,20 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-09-08T07:05:54+00:00"
+            "time": "2026-02-16T10:24:54+00:00"
         },
         {
             "name": "async-aws/s3",
-            "version": "2.10.0",
+            "version": "3.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/async-aws/s3.git",
-                "reference": "9c826ab620dbdc99528f0ad0b728ef9d478714db"
+                "reference": "68664f2db5d990b7e8863624791366d6e8925398"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/async-aws/s3/zipball/9c826ab620dbdc99528f0ad0b728ef9d478714db",
-                "reference": "9c826ab620dbdc99528f0ad0b728ef9d478714db",
+                "url": "https://api.github.com/repos/async-aws/s3/zipball/68664f2db5d990b7e8863624791366d6e8925398",
+                "reference": "68664f2db5d990b7e8863624791366d6e8925398",
                 "shasum": ""
             },
             "require": {
@@ -94,12 +98,17 @@
                 "ext-filter": "*",
                 "ext-hash": "*",
                 "ext-simplexml": "*",
-                "php": "^7.2.5 || ^8.0"
+                "php": "^8.2"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^11.5.42",
+                "symfony/error-handler": "^7.3.2 || ^8.0",
+                "symfony/phpunit-bridge": "^7.3.2 || ^8.0"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "2.10-dev"
+                    "dev-master": "3.1-dev"
                 }
             },
             "autoload": {
@@ -120,7 +129,7 @@
                 "sdk"
             ],
             "support": {
-                "source": "https://github.com/async-aws/s3/tree/2.10.0"
+                "source": "https://github.com/async-aws/s3/tree/3.1.0"
             },
             "funding": [
                 {
@@ -132,31 +141,35 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-08-11T10:03:27+00:00"
+            "time": "2026-02-16T10:24:54+00:00"
         },
         {
             "name": "async-aws/simple-s3",
-            "version": "2.1.1",
+            "version": "3.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/async-aws/simple-s3.git",
-                "reference": "3edb3676244960a36b801c0141401d2f58b5f617"
+                "reference": "e51f78df03e3cb91d389962c7b71d61e1b825a37"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/async-aws/simple-s3/zipball/3edb3676244960a36b801c0141401d2f58b5f617",
-                "reference": "3edb3676244960a36b801c0141401d2f58b5f617",
+                "url": "https://api.github.com/repos/async-aws/simple-s3/zipball/e51f78df03e3cb91d389962c7b71d61e1b825a37",
+                "reference": "e51f78df03e3cb91d389962c7b71d61e1b825a37",
                 "shasum": ""
             },
             "require": {
-                "async-aws/s3": "^2.0",
-                "ext-json": "*",
-                "php": "^7.2.5 || ^8.0"
+                "async-aws/s3": "^3.0",
+                "php": "^8.2"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^11.5.42",
+                "symfony/error-handler": "^7.3.2 || ^8.0",
+                "symfony/phpunit-bridge": "^7.3.2 || ^8.0"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "2.1-dev"
+                    "dev-master": "3.0-dev"
                 }
             },
             "autoload": {
@@ -177,7 +190,7 @@
                 "sdk"
             ],
             "support": {
-                "source": "https://github.com/async-aws/simple-s3/tree/2.1.1"
+                "source": "https://github.com/async-aws/simple-s3/tree/3.0.1"
             },
             "funding": [
                 {
@@ -189,55 +202,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-10-09T08:09:09+00:00"
-        },
-        {
-            "name": "cweagans/composer-patches",
-            "version": "1.7.3",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/cweagans/composer-patches.git",
-                "reference": "e190d4466fe2b103a55467dfa83fc2fecfcaf2db"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/cweagans/composer-patches/zipball/e190d4466fe2b103a55467dfa83fc2fecfcaf2db",
-                "reference": "e190d4466fe2b103a55467dfa83fc2fecfcaf2db",
-                "shasum": ""
-            },
-            "require": {
-                "composer-plugin-api": "^1.0 || ^2.0",
-                "php": ">=5.3.0"
-            },
-            "require-dev": {
-                "composer/composer": "~1.0 || ~2.0",
-                "phpunit/phpunit": "~4.6"
-            },
-            "type": "composer-plugin",
-            "extra": {
-                "class": "cweagans\\Composer\\Patches"
-            },
-            "autoload": {
-                "psr-4": {
-                    "cweagans\\Composer\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "BSD-3-Clause"
-            ],
-            "authors": [
-                {
-                    "name": "Cameron Eagans",
-                    "email": "me@cweagans.net"
-                }
-            ],
-            "description": "Provides a way to patch Composer packages.",
-            "support": {
-                "issues": "https://github.com/cweagans/composer-patches/issues",
-                "source": "https://github.com/cweagans/composer-patches/tree/1.7.3"
-            },
-            "time": "2022-12-20T22:53:13+00:00"
+            "time": "2026-02-16T10:24:54+00:00"
         },
         {
             "name": "doctrine/deprecations",
@@ -901,16 +866,16 @@
         },
         {
             "name": "knpuniversity/oauth2-client-bundle",
-            "version": "v2.20.1",
+            "version": "v2.20.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/knpuniversity/oauth2-client-bundle.git",
-                "reference": "d59e4dc61484e777b6f19df2efcf8b1bcc03828a"
+                "reference": "9ce4fcea69dbbf4d19ee7368b8d623ec2d73d3c7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/knpuniversity/oauth2-client-bundle/zipball/d59e4dc61484e777b6f19df2efcf8b1bcc03828a",
-                "reference": "d59e4dc61484e777b6f19df2efcf8b1bcc03828a",
+                "url": "https://api.github.com/repos/knpuniversity/oauth2-client-bundle/zipball/9ce4fcea69dbbf4d19ee7368b8d623ec2d73d3c7",
+                "reference": "9ce4fcea69dbbf4d19ee7368b8d623ec2d73d3c7",
                 "shasum": ""
             },
             "require": {
@@ -955,9 +920,9 @@
             ],
             "support": {
                 "issues": "https://github.com/knpuniversity/oauth2-client-bundle/issues",
-                "source": "https://github.com/knpuniversity/oauth2-client-bundle/tree/v2.20.1"
+                "source": "https://github.com/knpuniversity/oauth2-client-bundle/tree/v2.20.2"
             },
-            "time": "2025-12-04T15:46:43+00:00"
+            "time": "2026-02-12T17:07:18+00:00"
         },
         {
             "name": "league/flysystem",
@@ -1044,20 +1009,20 @@
         },
         {
             "name": "league/flysystem-async-aws-s3",
-            "version": "3.30.1",
+            "version": "3.31.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thephpleague/flysystem-async-aws-s3.git",
-                "reference": "9297d83ace1dbba4147e91b408f5c2538abca36e"
+                "reference": "6928568d3fe24afc4d7d583fc1844d0c1d07651b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thephpleague/flysystem-async-aws-s3/zipball/9297d83ace1dbba4147e91b408f5c2538abca36e",
-                "reference": "9297d83ace1dbba4147e91b408f5c2538abca36e",
+                "url": "https://api.github.com/repos/thephpleague/flysystem-async-aws-s3/zipball/6928568d3fe24afc4d7d583fc1844d0c1d07651b",
+                "reference": "6928568d3fe24afc4d7d583fc1844d0c1d07651b",
                 "shasum": ""
             },
             "require": {
-                "async-aws/s3": "^1.5 || ^2.0",
+                "async-aws/s3": "^1.5 || ^2.0 || ^3.0",
                 "league/flysystem": "^3.10.0",
                 "league/mime-type-detection": "^1.0.0",
                 "php": "^8.0.2"
@@ -1096,32 +1061,32 @@
                 "storage"
             ],
             "support": {
-                "source": "https://github.com/thephpleague/flysystem-async-aws-s3/tree/3.30.1"
+                "source": "https://github.com/thephpleague/flysystem-async-aws-s3/tree/3.31.0"
             },
-            "time": "2025-10-20T15:27:33+00:00"
+            "time": "2026-01-23T15:30:45+00:00"
         },
         {
             "name": "league/flysystem-bundle",
-            "version": "3.6.0",
+            "version": "3.6.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thephpleague/flysystem-bundle.git",
-                "reference": "88376670b35f11846bed7dca2efb82d993be22d0"
+                "reference": "123ab96910177751faf3b6cc85eecc360ec12a1f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thephpleague/flysystem-bundle/zipball/88376670b35f11846bed7dca2efb82d993be22d0",
-                "reference": "88376670b35f11846bed7dca2efb82d993be22d0",
+                "url": "https://api.github.com/repos/thephpleague/flysystem-bundle/zipball/123ab96910177751faf3b6cc85eecc360ec12a1f",
+                "reference": "123ab96910177751faf3b6cc85eecc360ec12a1f",
                 "shasum": ""
             },
             "require": {
                 "league/flysystem": "^3.0",
-                "php": ">=8.0",
-                "symfony/config": "^5.4 || ^6.0 || ^7.0 || ^8.0",
-                "symfony/dependency-injection": "^5.4 || ^6.0 || ^7.0 || ^8.0",
+                "php": ">=8.2",
+                "symfony/config": "^6.0 || ^7.0 || ^8.0",
+                "symfony/dependency-injection": "^6.0 || ^7.0 || ^8.0",
                 "symfony/deprecation-contracts": "^2.1 || ^3",
-                "symfony/http-kernel": "^5.4 || ^6.0 || ^7.0 || ^8.0",
-                "symfony/options-resolver": "^5.4 || ^6.0 || ^7.0 || ^8.0"
+                "symfony/http-kernel": "^6.0 || ^7.0 || ^8.0",
+                "symfony/options-resolver": "^6.0 || ^7.0 || ^8.0"
             },
             "require-dev": {
                 "doctrine/mongodb-odm": "^2.0",
@@ -1136,10 +1101,10 @@
                 "league/flysystem-sftp-v3": "^3.1",
                 "league/flysystem-webdav": "^3.29",
                 "platformcommunity/flysystem-bunnycdn": "^3.3",
-                "symfony/dotenv": "^5.4 || ^6.0 || ^7.0 || ^8.0",
-                "symfony/framework-bundle": "^5.4 || ^6.0 || ^7.0 || ^8.0",
-                "symfony/phpunit-bridge": "^5.4 || ^6.0 || ^7.0 || ^8.0",
-                "symfony/var-dumper": "^5.4 || ^6.0 || ^7.0 || ^8.0"
+                "symfony/dotenv": "^6.0 || ^7.0 || ^8.0",
+                "symfony/framework-bundle": "^6.0 || ^7.0 || ^8.0",
+                "symfony/phpunit-bridge": "^6.0 || ^7.0 || ^8.0",
+                "symfony/var-dumper": "^6.0 || ^7.0 || ^8.0"
             },
             "type": "symfony-bundle",
             "autoload": {
@@ -1166,9 +1131,9 @@
             ],
             "support": {
                 "issues": "https://github.com/thephpleague/flysystem-bundle/issues",
-                "source": "https://github.com/thephpleague/flysystem-bundle/tree/3.6.0"
+                "source": "https://github.com/thephpleague/flysystem-bundle/tree/3.6.2"
             },
-            "time": "2025-08-21T17:25:13+00:00"
+            "time": "2026-02-05T15:26:57+00:00"
         },
         {
             "name": "league/flysystem-local",
@@ -3805,16 +3770,16 @@
         },
         {
             "name": "symfony/http-client",
-            "version": "v6.4.30",
+            "version": "v6.4.34",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/http-client.git",
-                "reference": "a67de2002d72f76ce7c57f830c4df503febc8d77"
+                "reference": "0dc71f52e5d35bb045fd0f82b1a80c027971d551"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/http-client/zipball/a67de2002d72f76ce7c57f830c4df503febc8d77",
-                "reference": "a67de2002d72f76ce7c57f830c4df503febc8d77",
+                "url": "https://api.github.com/repos/symfony/http-client/zipball/0dc71f52e5d35bb045fd0f82b1a80c027971d551",
+                "reference": "0dc71f52e5d35bb045fd0f82b1a80c027971d551",
                 "shasum": ""
             },
             "require": {
@@ -3879,7 +3844,7 @@
                 "http"
             ],
             "support": {
-                "source": "https://github.com/symfony/http-client/tree/v6.4.30"
+                "source": "https://github.com/symfony/http-client/tree/v6.4.34"
             },
             "funding": [
                 {
@@ -3899,7 +3864,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-12-04T16:42:50+00:00"
+            "time": "2026-02-18T07:27:25+00:00"
         },
         {
             "name": "symfony/http-client-contracts",
@@ -10190,7 +10155,7 @@
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": "^7.4||^8.2",
+        "php": "^8.2",
         "ext-ctype": "*",
         "ext-iconv": "*"
     },
