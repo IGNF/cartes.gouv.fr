@@ -1,18 +1,18 @@
 import { FC, JSX, Suspense, useMemo } from "react";
 
+import DiscoverPublish from "@/pages/discover/publish/DiscoverPublish";
 import AppLayout from "../components/Layout/AppLayout";
+import Main from "../components/Layout/Main";
 import LoadingText from "../components/Utils/LoadingText";
+import PageNotFoundWithLayout from "../pages/error/PageNotFoundWithLayout";
 import RedirectToLogin from "../pages/RedirectToLogin";
 import { useAuthStore } from "../stores/AuthStore";
-import { groups, knownRoutes, routes, useRoute } from "./router";
-import GroupCommunity from "./GroupCommunity";
-import GroupDatastore from "./GroupDatastore";
 import GroupApp from "./GroupApp";
-import PageNotFoundWithLayout from "../pages/error/PageNotFoundWithLayout";
-import Main from "../components/Layout/Main";
-import GroupEspaceCo from "./GroupEspaceCo";
+import GroupCommunity from "./GroupCommunity";
 import GroupConfig from "./GroupConfig";
-import Discover from "@/pages/discover/Discover";
+import GroupDatastore from "./GroupDatastore";
+import GroupEspaceCo from "./GroupEspaceCo";
+import { groups, knownRoutes, routes, useRoute } from "./router";
 
 const RouterRenderer: FC = () => {
     const route = useRoute();
@@ -54,9 +54,9 @@ const RouterRenderer: FC = () => {
             fallback={
                 // fallback permet d'afficher LoadingText pendant que les textes de traductions se chargent
                 // par contre, traitement particulier pour la page d'accueil, on affiche tout de suite le contenu de la page d'accueil. Le contenu sera mis à jour une fois les textes de traductions seront chargés
-                route.name === routes.discover().name ? (
+                route.name === routes.discover_publish().name ? (
                     <AppLayout>
-                        <Discover />
+                        <DiscoverPublish />
                     </AppLayout>
                 ) : (
                     <AppLayout>

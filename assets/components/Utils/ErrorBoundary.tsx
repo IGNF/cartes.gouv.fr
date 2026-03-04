@@ -16,7 +16,7 @@ function Fallback({ error, resetErrorBoundary }: FallbackProps) {
                 <Button
                     onClick={() => {
                         resetErrorBoundary();
-                        routes.discover().push();
+                        routes.discover_publish().push();
                     }}
                 >
                     {"Retour à l'accueil"}

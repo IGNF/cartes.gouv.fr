@@ -12,8 +12,6 @@ import { routes } from "../../../../router/router";
 import PrivateServiceExplanation from "./PrivateServiceExplanation";
 import ServiceViewContent from "./ServiceViewContent";
 
-import "../../../../sass/pages/service_view.scss";
-
 type ServiceViewProps = {
     datastoreId: string;
     offeringId: string;

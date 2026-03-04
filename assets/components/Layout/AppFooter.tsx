@@ -2,15 +2,15 @@ import { headerFooterDisplayItem } from "@codegouvfr/react-dsfr/Display";
 import Footer from "@codegouvfr/react-dsfr/Footer";
 import { memo } from "react";
 
+import { externalUrls } from "@/router/externalUrls";
 import { FooterConsentManagementItem, FooterPersonalDataPolicyItem } from "../../config/consentManagement";
-import { routes } from "../../router/router";
 
 const AppFooter = () => {
     return (
         <Footer
             accessibility="partially compliant"
             accessibilityLinkProps={{
-                ...routes.accessibility().link,
+                href: externalUrls.accessibility,
             }}
             brandTop={
                 <>
@@ -24,7 +24,9 @@ const AppFooter = () => {
             "
             bottomItems={[
                 {
-                    linkProps: routes.terms_of_service().link,
+                    linkProps: {
+                        href: externalUrls.terms_of_service,
+                    },
                     text: "Conditions générales d’utilisation",
                 },
                 <FooterPersonalDataPolicyItem key="footer-personal-data-policy-item" />,
@@ -33,14 +35,14 @@ const AppFooter = () => {
                 headerFooterDisplayItem,
             ]}
             homeLinkProps={{
-                ...routes.discover().link,
+                href: externalUrls.discover_cartesgouvfr,
                 title: "Accueil - cartes.gouv.fr",
             }}
             termsLinkProps={{
-                ...routes.legal_notice().link,
+                href: externalUrls.legal_notice,
             }}
             websiteMapLinkProps={{
-                ...routes.sitemap().link,
+                href: externalUrls.sitemap,
             }}
             partnersLogos={{
                 main: {
