@@ -6,20 +6,6 @@ export const appRoot = SymfonyRouting.getBaseUrl();
 
 // Routes non protégées
 const publicRoutes = {
-    home: defineRoute(
-        {
-            authentication_failed: param.query.optional.number,
-            session_expired_login_success: param.query.optional.number,
-        },
-        () => (appRoot === "" ? "/" : appRoot)
-    ),
-    discover: defineRoute(
-        {
-            authentication_failed: param.query.optional.number,
-            session_expired_login_success: param.query.optional.number,
-        },
-        () => `${appRoot}/decouvrir`
-    ),
     discover_publish: defineRoute(
         {
             authentication_failed: param.query.optional.number,
@@ -27,37 +13,7 @@ const publicRoutes = {
         },
         () => `${appRoot}/publier-une-donnee`
     ),
-    present_service_maps: defineRoute(`${appRoot}/decouvrir/explorer-les-cartes`),
-    present_service_catalogue: defineRoute(`${appRoot}/decouvrir/rechercher-une-donnee`),
-    present_service_publish: defineRoute(`${appRoot}/decouvrir/publier-une-donnee`),
     page_not_found: defineRoute(`${appRoot}/404`),
-    news_list: defineRoute(
-        {
-            page: param.query.optional.number.default(0),
-        },
-        () => `${appRoot}/actualites`
-    ),
-    news_list_by_tag: defineRoute(
-        {
-            tag: param.path.optional.string,
-            page: param.query.optional.number.default(0),
-        },
-        (p) => `${appRoot}/actualites/liste/${p.tag}`
-    ),
-    news_article: defineRoute(
-        {
-            slug: param.path.string,
-        },
-        (p) => `${appRoot}/actualites/${p.slug}`
-    ),
-    sitemap: defineRoute(`${appRoot}/plan-du-site`),
-    accessibility: defineRoute(`${appRoot}/accessibilite`),
-    legal_notice: defineRoute(`${appRoot}/mentions-legales`),
-    personal_data: defineRoute(`${appRoot}/donnees-personnelles`),
-    offers: defineRoute(`${appRoot}/offres`),
-    join_cartesgouvfr_community: defineRoute(`${appRoot}/nous-rejoindre`),
-    terms_of_service: defineRoute(`${appRoot}/cgu`),
-    service_status: defineRoute(`${appRoot}/niveau-de-service`),
     login_disabled: defineRoute(`${appRoot}/connexion-desactivee`),
 };
 

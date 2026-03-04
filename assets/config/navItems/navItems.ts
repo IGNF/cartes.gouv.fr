@@ -1,58 +1,61 @@
 import { MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation";
 
-import { routes } from "../../router/router";
+import { externalUrls } from "@/router/externalUrls";
 
-// dans ce cas précise, getTranslation ne marche pas parce que les traductions sont pas encore chargées, on est donc obglié de passer la fonction t en paramètre
-export const defaultNavItems = (routeName: string): MainNavigationProps.Item[] => {
+export const defaultNavItems = (): MainNavigationProps.Item[] => {
     const navItems: MainNavigationProps.Item[] = [
         {
             text: "Découvrir cartes.gouv.fr",
-            linkProps: routes.discover().link,
-            isActive: routeName === routes.discover().name,
+            linkProps: {
+                href: externalUrls.discover_cartesgouvfr,
+            },
         },
         {
             menuLinks: [
                 {
-                    linkProps: routes.present_service_maps().link,
+                    linkProps: {
+                        href: externalUrls.present_service_maps,
+                    },
                     text: "Explorer les cartes",
-                    isActive: routeName === routes.present_service_maps().name,
                 },
                 {
-                    linkProps: routes.present_service_catalogue().link,
+                    linkProps: {
+                        href: externalUrls.present_service_catalogue,
+                    },
                     text: "Rechercher une donnée",
-                    isActive: routeName === routes.present_service_catalogue().name,
                 },
                 {
-                    linkProps: routes.present_service_publish().link,
+                    linkProps: {
+                        href: externalUrls.present_service_publish,
+                    },
                     text: "Publier une donnée",
-                    isActive: routeName === routes.present_service_publish().name,
                 },
             ],
             text: "Services",
-            isActive:
-                routeName === routes.present_service_maps().name ||
-                routeName === routes.present_service_catalogue().name ||
-                routeName === routes.present_service_publish().name,
         },
         {
             text: "Offres",
-            linkProps: routes.offers().link,
-            isActive: routeName === routes.offers().name,
+            linkProps: {
+                href: externalUrls.offers,
+            },
         },
         {
             text: "Actualités",
-            linkProps: routes.news_list().link,
-            isActive: routeName === routes.news_list().name,
+            linkProps: {
+                href: externalUrls.news_list,
+            },
         },
         {
             text: "Communautés",
-            linkProps: routes.join_cartesgouvfr_community().link,
-            isActive: routeName === routes.join_cartesgouvfr_community().name,
+            linkProps: {
+                href: externalUrls.join_cartesgouvfr_community,
+            },
         },
         {
-            linkProps: routes.service_status().link,
+            linkProps: {
+                href: externalUrls.service_status,
+            },
             text: "Niveau de service",
-            isActive: routeName === routes.service_status().name,
         },
     ];
 

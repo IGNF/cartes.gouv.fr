@@ -1,7 +1,7 @@
 import { KeyValueListFrTranslations } from "@/components/Input/KeyValueList.locale";
+import { CommunityInfoFrTranslations } from "@/entrepot/pages/communities/CommunityInfo/CommunityInfo.locale";
 import { StoredDataDeleteConfirmDialogFrTranslations } from "@/entrepot/pages/datasheet/DatasheetView/DatasetListTab/StoredDataDeleteConfirmDialog.locale";
 import { DatastoreAddFrTranslations } from "@/entrepot/pages/datastore/DatastoreAdd/DatastoreAdd.locale";
-import { CommunityInfoFrTranslations } from "@/entrepot/pages/communities/CommunityInfo/CommunityInfo.locale";
 import { EspaceCoCommunityListFrTranslations } from "@/espaceco/pages/communities/CommunityList.locale";
 import { ReuseCommunityConfigFrTranslations } from "@/espaceco/pages/communities/ReuseCommunityConfig.locale";
 import { SearchCommunityFrTranslations } from "@/espaceco/pages/communities/SearchCommunity.locale";
@@ -13,7 +13,6 @@ import { AddMemberFrTranslations } from "../../entrepot/pages/communities/AddMem
 import { CommunityMembersFrTranslations } from "../../entrepot/pages/communities/CommunityMembers/CommunityMembers.locale";
 import { RightsFrTranslations } from "../../entrepot/pages/communities/Rights.locale";
 import { AlertsFrTranslations } from "../../entrepot/pages/config/Alerts.locale";
-import { DashboardProFrTranslations } from "../../entrepot/pages/dashboard/DashboardPro.locale";
 import { DatasheetListFrTranslations } from "../../entrepot/pages/datasheet/DatasheetList/DatasheetList.locale";
 import { DatasheetUploadFormFrTranslations } from "../../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadForm/DatasheetUploadForm.locale";
 import { DatasheetUploadIntegrationFrTranslations } from "../../entrepot/pages/datasheet/DatasheetNew/DatasheetUploadIntegration/DatasheetUploadIntegration.locale";
@@ -80,7 +79,6 @@ export const translations: Translations<"fr"> = {
     CommunityInfo: CommunityInfoFrTranslations,
     DatastoreAdd: DatastoreAddFrTranslations,
     DatasheetUploadIntegration: DatasheetUploadIntegrationFrTranslations,
-    DashboardPro: DashboardProFrTranslations,
     MyAccessKeys: MyAccessKeysFrTranslations,
     UserKeysListTab: UserKeysListTabFrTranslations,
     UserKey: UserKeyFrTranslations,

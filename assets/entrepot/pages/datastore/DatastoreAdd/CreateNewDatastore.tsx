@@ -25,6 +25,7 @@ import { jsonFetch } from "@/modules/jsonFetch";
 import SymfonyRouting from "@/modules/Routing";
 import { routes } from "@/router/router";
 import { removeDiacritics } from "@/utils";
+import { externalLink } from "@/router/externalUrls";
 
 const successModal = createModal({
     id: "datastore-creation-success-modal",
@@ -150,7 +151,7 @@ export default function CreateNewDatastore({ classes }: CreateNewDatastoreProps)
                         }}
                         className={fr.cx("fr-mb-4v")}
                     />
-                    <Link {...routes.offers().link} target="_blank" className={fr.cx("fr-link", "fr-text--xs")}>
+                    <Link {...externalLink("offers")} className={fr.cx("fr-link", "fr-text--xs")}>
                         {t("disover_offers")}
                     </Link>
                 </div>

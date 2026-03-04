@@ -12,7 +12,6 @@ import { useTranslation } from "../../../../../../i18n/i18n";
 //import getKeywordsExtraCommands from "./EmailPlannerControls";
 
 import HtmlEditor from "../../../../../../components/Input/HtmlEditor";
-import "../../../../../../sass/components/react-md-editor.scss";
 import EmailPlannerControls from "./EmailPlannerControls";
 
 type PersonalEmailPlannerProps = {

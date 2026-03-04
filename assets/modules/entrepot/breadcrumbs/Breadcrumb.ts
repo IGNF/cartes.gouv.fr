@@ -45,37 +45,6 @@ const getBreadcrumb = (route: Route<typeof routes>, datastore?: Datastore, commu
     };
 
     switch (route.name) {
-        case "sitemap":
-        case "accessibility":
-        case "legal_notice":
-        case "personal_data":
-        case "offers":
-        case "join_cartesgouvfr_community":
-        case "terms_of_service":
-        case "service_status":
-        case "news_list":
-        case "news_list_by_tag":
-            addBreadcrumbTranslations({
-                lang: "fr",
-                messages: { home: "Accueil" },
-            });
-            return { homeLinkProps: routes.discover().link, segments: [], currentPageLabel: t(route.name) };
-        // case "news_article":
-        //     // géré dans le composant NewsArticle
-        // case "service_status":
-        //     return { ...defaultProps, currentPageLabel: t(route.name) };
-
-        // case "news_list":
-        // case "news_list_by_tag":
-        //     return { ...defaultProps, currentPageLabel: t("news") };
-        // case "news_article":
-        //     // géré dans le composant NewsArticle
-        //     return { ...defaultProps, currentPageLabel: t("news") };
-
-        // case "dashboard":
-        //     return { ...dashboardProps, segments: [], currentPageLabel: t(route.name) };
-
-        // case "accesses_request":
         case "my_account":
         case "my_access_keys":
         case "my_permissions":

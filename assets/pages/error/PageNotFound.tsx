@@ -5,7 +5,6 @@ import { FC } from "react";
 
 import Main from "@/components/Layout/Main";
 import { externalUrls } from "@/router/externalUrls";
-import { routes } from "@/router/router";
 
 import ovoidSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/background/ovoid.svg?no-inline";
 import technicalErrorSvgUrl from "@codegouvfr/react-dsfr/dsfr/artwork/pictograms/system/technical-error.svg?no-inline";
@@ -43,7 +42,7 @@ const PageNotFound: FC = () => {
                         buttons={[
                             {
                                 children: "Page d’accueil",
-                                linkProps: routes.discover().link,
+                                linkProps: { href: externalUrls.discover_cartesgouvfr },
                             },
                             {
                                 children: "Nous écrire",

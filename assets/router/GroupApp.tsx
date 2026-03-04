@@ -2,27 +2,12 @@ import { lazy, useMemo } from "react";
 import { Route } from "type-route";
 
 import useNavItems from "@/hooks/useNavItems";
-import Discover from "@/pages/discover/Discover";
 import DiscoverPublish from "@/pages/discover/publish/DiscoverPublish";
-import PresentationServiceCatalogue from "@/pages/services/Catalogue/PresentationServiceCatalogue";
-import PresentationServiceMaps from "@/pages/services/Maps/PresentationServiceMaps";
-import PresentationServicePublish from "@/pages/services/Publish/PresentationServicePublish";
 import AppLayout, { AppLayoutProps } from "../components/Layout/AppLayout";
 import PageNotFoundWithLayout from "../pages/error/PageNotFoundWithLayout";
 import { routes } from "./router";
 
-const Offer = lazy(() => import("../pages/Offer"));
-const Join = lazy(() => import("../pages/Join"));
-const NewsList = lazy(() => import("../pages/news/NewsList"));
-const NewsArticle = lazy(() => import("../pages/news/NewsArticle"));
-const Sitemap = lazy(() => import("../pages/footer/Sitemap"));
-const Accessibility = lazy(() => import("../pages/footer/Accessibility"));
-const LegalNotice = lazy(() => import("../pages/footer/LegalNotice"));
-const PersonalData = lazy(() => import("../pages/footer/PersonalData"));
-const TermsOfService = lazy(() => import("../pages/footer/TermsOfService"));
-const ServiceStatus = lazy(() => import("../pages/assistance/ServiceStatus"));
 const LoginDisabled = lazy(() => import("../pages/LoginDisabled/LoginDisabled"));
-
 const Me = lazy(() => import("../entrepot/pages/users/me/Me"));
 const MyAccessKeys = lazy(() => import("../entrepot/pages/users/access-keys/MyAccessKeys"));
 const UserKeyForm = lazy(() => import("../entrepot/pages/users/keys/UserKeyForm"));
@@ -47,47 +32,10 @@ function GroupApp(props: IGroupAppProps) {
 
     const content: { render: JSX.Element; layoutProps?: AppLayoutProps } | undefined = useMemo(() => {
         switch (route.name) {
-            case "home":
-                routes.discover().replace();
-                return {
-                    render: <Discover />,
-                };
-            case "discover":
-                return {
-                    render: <Discover />,
-                };
             case "discover_publish":
                 return {
                     render: <DiscoverPublish />,
                 };
-            case "present_service_maps":
-                return { render: <PresentationServiceMaps /> };
-            case "present_service_catalogue":
-                return { render: <PresentationServiceCatalogue /> };
-            case "present_service_publish":
-                return { render: <PresentationServicePublish /> };
-            case "offers":
-                return { render: <Offer /> };
-            case "join_cartesgouvfr_community":
-                return { render: <Join /> };
-            case "news_list":
-                return { render: <NewsList page={route.params.page} /> };
-            case "news_list_by_tag":
-                return { render: <NewsList page={route.params.page} tag={route.params.tag} /> };
-            case "news_article":
-                return { render: <NewsArticle slug={route.params.slug} /> };
-            case "sitemap":
-                return { render: <Sitemap /> };
-            case "accessibility":
-                return { render: <Accessibility /> };
-            case "legal_notice":
-                return { render: <LegalNotice /> };
-            case "personal_data":
-                return { render: <PersonalData /> };
-            case "terms_of_service":
-                return { render: <TermsOfService /> };
-            case "service_status":
-                return { render: <ServiceStatus /> };
             case "login_disabled":
                 return { render: <LoginDisabled /> };
             case "my_account":
@@ -117,6 +65,10 @@ function GroupApp(props: IGroupAppProps) {
             case "datastore_selection":
                 return {
                     render: <DatastoreSelection />,
+                };
+            case "page_not_found":
+                return {
+                    render: <PageNotFoundWithLayout />,
                 };
         }
     }, [route]);

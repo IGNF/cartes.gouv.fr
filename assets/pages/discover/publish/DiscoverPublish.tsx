@@ -18,7 +18,7 @@ export default function DiscoverPublish() {
 
     useEffect(() => {
         if (user !== null && params?.["authentication_failed"] !== undefined) {
-            routes.discover().replace();
+            routes.discover_publish().replace();
         }
 
         if (user !== null && params?.["session_expired_login_success"] === 1) {

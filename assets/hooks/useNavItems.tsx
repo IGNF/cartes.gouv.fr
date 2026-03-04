@@ -8,7 +8,7 @@ export default function useNavItems(): UseNavItemsReturn {
     const route = useRoute();
 
     if (groups.public.has(route)) {
-        return defaultNavItems(route.name);
+        return defaultNavItems();
     }
 
     return undefined;
