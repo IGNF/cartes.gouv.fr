@@ -1,13 +1,14 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Accordion from "@codegouvfr/react-dsfr/Accordion";
 import Alert from "@codegouvfr/react-dsfr/Alert";
+import Button from "@codegouvfr/react-dsfr/Button";
 import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import Input from "@codegouvfr/react-dsfr/Input";
 import Table from "@codegouvfr/react-dsfr/Table";
 import Tag from "@codegouvfr/react-dsfr/Tag";
 import { Upload } from "@codegouvfr/react-dsfr/Upload";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
 import { FC, FormEvent, useState } from "react";
 import { useDebounceCallback } from "usehooks-ts";
 
@@ -24,11 +25,19 @@ const MyDocuments: FC = () => {
     const [filter, setFilter] = useState<object>({});
     const debouncedSetFilter = useDebounceCallback(setFilter, 500);
 
-    const documentsQuery = useQuery<DocumentDetailsResponseDto[], CartesApiException>({
+    const documentsQuery = useInfiniteQuery<DocumentDetailsResponseDto[], CartesApiException>({
         queryKey: RQKeys.my_documents(filter),
-        queryFn: async ({ signal }) => {
-            const url = SymfonyRouting.generate("cartesgouvfr_api_user_me_documents_get_list", { ...filter, detailed: true });
+        queryFn: async ({ pageParam, signal }) => {
+            const url = SymfonyRouting.generate("cartesgouvfr_api_user_me_documents_get_list", { ...filter, detailed: true, page: pageParam, limit: 10 });
+
             return await jsonFetch(url, { signal });
+        },
+        initialPageParam: 1,
+        getNextPageParam: (lastPage, allPages) => {
+            if (lastPage.length === 0) {
+                return undefined;
+            }
+            return allPages.length + 1;
         },
     });
 
@@ -137,7 +146,7 @@ const MyDocuments: FC = () => {
 
             <Alert title="Interface de test de requêtes de documents personnels" severity="info" className={fr.cx("fr-my-4v")} />
 
-            <h2>Liste de documents {documentsQuery.isFetching ? <LoadingIcon largeIcon={true} /> : `(${documentsQuery?.data?.length ?? 0})`}</h2>
+            <h2>Liste de documents {documentsQuery.isFetching && <LoadingIcon largeIcon={true} />}</h2>
             <h3>Filtres</h3>
             <Input
                 label="Nom"
@@ -152,60 +161,74 @@ const MyDocuments: FC = () => {
                     onChange: (e) => debouncedSetFilter((prev) => ({ ...prev, labels: e.target.value })),
                 }}
             />
-            {documentsQuery.data !== undefined && documentsQuery.data.length > 0 && (
-                <Table
-                    headers={["Nom", "Description", "Labels", "Taille", "Mime type", "Extra", "Actions"]}
-                    data={documentsQuery.data.map((doc) => [
-                        doc.name,
-                        doc.description,
-                        <ul key={`labels-${doc._id}`} className={fr.cx("fr-tags-group")}>
-                            {doc.labels?.map((label) => (
-                                <Tag key={`doc-${doc._id}-label-${label}`}>{label}</Tag>
-                            ))}
-                        </ul>,
-                        niceBytes(doc.size.toString()),
-                        doc.mime_type,
-                        JSON.stringify(doc.extra),
-                        <ButtonsGroup
-                            key={doc._id}
-                            buttons={[
-                                {
-                                    children: "Consulter",
-                                    priority: "secondary",
-                                    linkProps: {
-                                        href: doc.public_url,
-                                        target: "_blank",
-                                        rel: "noreferrer",
-                                    },
-                                    className: fr.cx({ "fr-hidden": !doc.public_url }),
-                                },
-                                {
-                                    children: "Remplacer",
-                                    priority: "secondary",
-                                    onClick: () => {
-                                        setCurrentDocumentId(doc._id);
-                                        // setReplaceAccordionExpanded(true);
-                                    },
-                                },
-                                {
-                                    children: "Modifier",
-                                    priority: "secondary",
-                                    onClick: () => {
-                                        setCurrentDocumentId(doc._id);
-                                        // setReplaceAccordionExpanded(true);
-                                    },
-                                },
-                                {
-                                    children: "Supprimer",
-                                    onClick: () => handleDeleteDocument(doc._id, doc.name),
-                                    priority: "secondary",
-                                },
-                            ]}
-                            inlineLayoutWhen="sm and up"
-                            buttonsSize="small"
-                        />,
-                    ])}
-                />
+            {documentsQuery.data !== undefined && documentsQuery.data.pages.length > 0 && (
+                <>
+                    <Table
+                        headers={["Nom", "Description", "Labels", "Taille", "Mime type", "Extra", "Actions"]}
+                        data={documentsQuery.data.pages
+                            .map((group) =>
+                                group.map((doc) => [
+                                    doc.name,
+                                    doc.description,
+                                    <ul key={`labels-${doc._id}`} className={fr.cx("fr-tags-group")}>
+                                        {doc.labels?.map((label) => (
+                                            <Tag key={`doc-${doc._id}-label-${label}`}>{label}</Tag>
+                                        ))}
+                                    </ul>,
+                                    niceBytes(doc.size.toString()),
+                                    doc.mime_type,
+                                    <pre key={`pre-${doc._id}`}>
+                                        <code>{JSON.stringify(doc.extra, null, 2)}</code>
+                                    </pre>,
+                                    <ButtonsGroup
+                                        key={doc._id}
+                                        buttons={[
+                                            {
+                                                children: "Consulter",
+                                                priority: "secondary",
+                                                linkProps: {
+                                                    href: doc.public_url,
+                                                    target: "_blank",
+                                                    rel: "noreferrer",
+                                                },
+                                                className: fr.cx({ "fr-hidden": !doc.public_url }),
+                                            },
+                                            {
+                                                children: "Remplacer",
+                                                priority: "secondary",
+                                                onClick: () => {
+                                                    setCurrentDocumentId(doc._id);
+                                                    // setReplaceAccordionExpanded(true);
+                                                },
+                                            },
+                                            {
+                                                children: "Modifier",
+                                                priority: "secondary",
+                                                onClick: () => {
+                                                    setCurrentDocumentId(doc._id);
+                                                    // setReplaceAccordionExpanded(true);
+                                                },
+                                            },
+                                            {
+                                                children: "Supprimer",
+                                                onClick: () => handleDeleteDocument(doc._id, doc.name),
+                                                priority: "secondary",
+                                            },
+                                        ]}
+                                        inlineLayoutWhen="sm and up"
+                                        buttonsSize="small"
+                                    />,
+                                ])
+                            )
+                            .flat()}
+                    />
+                    <div>
+                        <Button onClick={() => documentsQuery.fetchNextPage()} disabled={!documentsQuery.hasNextPage || documentsQuery.isFetching}>
+                            {documentsQuery.isFetchingNextPage ? "Loading more..." : documentsQuery.hasNextPage ? "Load More" : "Nothing more to load"}
+                        </Button>
+                    </div>
+                    <div>{documentsQuery.isFetching && !documentsQuery.isFetchingNextPage ? "Fetching..." : null}</div>
+                </>
             )}
 
             <div className={fr.cx("fr-accordions-group")}>
