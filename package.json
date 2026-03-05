@@ -78,7 +78,7 @@
         "sass-embedded": "^1.83.4",
         "sharp": "^0.34.5",
         "stream": "^0.0.3",
-        "svgo": "^4.0.0",
+        "svgo": "^4.0.1",
         "tsafe": "^1.6.5",
         "tss-react": "^4.9.12",
         "type-route": "^1.0.1",
