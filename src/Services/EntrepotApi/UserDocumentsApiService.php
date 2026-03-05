@@ -7,22 +7,13 @@ class UserDocumentsApiService extends BaseEntrepotApiService
     /**
      * @param array<mixed>|null $query
      */
-    public function getAll(?array $query = []): array
+    public function getList(?array $query = []): array
     {
-        return $this->requestAll('users/me/documents', $query);
-    }
-
-    /**
-     * @param array<mixed>|null $query
-     */
-    public function getAllDetailed(?array $query = []): array
-    {
-        $list = $this->getAll($query);
-        foreach ($list as &$item) {
-            $item = $this->get($item['_id']);
+        if ($query['detailed'] ?? false) {
+            $query['fields'] = 'name,size,description,labels,extra,public_url,mime_type'; // creation,update sont toujours retournés par l'API, on ne peut pas les demander/retirer via fields
         }
 
-        return $list;
+        return $this->request('GET', 'users/me/documents', [], $query, [], false, true, true);
     }
 
     public function get(string $documentId): array
