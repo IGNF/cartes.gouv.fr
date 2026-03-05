@@ -4,7 +4,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { FC, PropsWithChildren } from "react";
 import { ErrorBoundary as BaseErrorBoundary, type FallbackProps, getErrorMessage } from "react-error-boundary";
 
-import { routes } from "../../router/router";
+import { externalUrls } from "@/router/externalUrls";
 import AppLayout from "../Layout/AppLayout";
 import Main from "../Layout/Main";
 
@@ -16,7 +16,7 @@ function Fallback({ error, resetErrorBoundary }: FallbackProps) {
                 <Button
                     onClick={() => {
                         resetErrorBoundary();
-                        routes.discover_publish().push();
+                        window.location.assign(externalUrls.discover_cartesgouvfr);
                     }}
                 >
                     {"Retour à l'accueil"}
