@@ -54,6 +54,7 @@ const privateRoutes = {
         },
         (p) => `${appRoot}/demande-acces/${p.fileIdentifier}`
     ),
+    datastore_quota_checker: defineRoute("/quota-checker"),
 };
 
 const communityRoute = defineRoute(

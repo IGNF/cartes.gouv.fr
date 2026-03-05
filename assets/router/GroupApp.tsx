@@ -20,6 +20,7 @@ const DatastoreAdd = lazy(() => import("../entrepot/pages/datastore/DatastoreAdd
 // const DashboardPro = lazy(() => import("../entrepot/pages/dashboard/DashboardPro"));
 const Dashboard = lazy(() => import("../entrepot/pages/dashboard/Dashboard"));
 const DatastoreSelection = lazy(() => import("../entrepot/pages/datastore/DatastoreSelection/DatastoreSelection"));
+const DatastoreQuotaChecker = lazy(() => import("../entrepot/pages/datastore/DatastoreQuotaChecker/DatastoreQuotaChecker"));
 
 interface IGroupAppProps {
     route: Route<typeof routes>;
@@ -69,6 +70,10 @@ function GroupApp(props: IGroupAppProps) {
             case "page_not_found":
                 return {
                     render: <PageNotFoundWithLayout />,
+                };
+            case "datastore_quota_checker":
+                return {
+                    render: <DatastoreQuotaChecker />,
                 };
         }
     }, [route]);
