@@ -2,13 +2,13 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { FC, memo } from "react";
 import { symToStr } from "tsafe/symToStr";
 
-import { PyramidVector } from "../../../../../../@types/app";
+import { DatasheetStoredDataItem, PyramidVector } from "../../../../../../@types/app";
 import PyramidVectorListItem from "./PyramidVectorListItem";
 
 type PyramidVectorListProps = {
     datasheetName: string;
     datastoreId: string;
-    pyramidList: PyramidVector[] | undefined;
+    pyramidList: DatasheetStoredDataItem<PyramidVector>[] | undefined;
 };
 
 const PyramidVectorList: FC<PyramidVectorListProps> = ({ datasheetName, datastoreId, pyramidList }) => {

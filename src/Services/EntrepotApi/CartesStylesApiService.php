@@ -30,7 +30,7 @@ class CartesStylesApiService
      *
      * @return array<mixed>
      */
-    public function getStyles(string $datastoreId, array $configuration): array
+    public function getStyles(string $datastoreId, array $configuration, bool $migrateStyles = true): array
     {
         $styles = null;
 
@@ -51,14 +51,20 @@ class CartesStylesApiService
                 $content = $this->annexeApiService->download($datastoreId, $styleAnnexes[0]['_id']);
                 $styles = json_decode($content, true);
 
-                $this->updateStyles($datastoreId, $configuration['_id'], $styles);
+                if ($migrateStyles) {
+                    $this->updateStyles($datastoreId, $configuration['_id'], $styles);
+                }
             }
 
-            $this->annexeApiService->remove($datastoreId, $styleAnnexes[0]['_id']);
+            if ($migrateStyles) {
+                $this->annexeApiService->remove($datastoreId, $styleAnnexes[0]['_id']);
+            }
         }
 
         // migration des styles pour ajout de technical_name si absent
-        $styles = $this->migrateStylesTechnicalName($datastoreId, $configuration['_id'], $styles);
+        if ($migrateStyles) {
+            $styles = $this->migrateStylesTechnicalName($datastoreId, $configuration['_id'], $styles);
+        }
 
         return $styles ?? [];
     }

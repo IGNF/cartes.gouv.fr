@@ -7,7 +7,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import api from "../../../../api";
 import { routes } from "../../../../../router/router";
-import { CheckStatusEnum, type DatasheetDetailed, Upload } from "../../../../../@types/app";
+import { CheckStatusEnum, type DatasheetDetailed, type DatasheetUploadItem } from "../../../../../@types/app";
 import ReportStatusBadge from "../../../data_details/ReportTab/ReportStatusBadge";
 import { deleteUploadConfirmModal } from "../DatasheetView/DatasheetView";
 import Wait from "../../../../../components/Utils/Wait";
@@ -16,7 +16,7 @@ import { useTranslation } from "../../../../../i18n/i18n";
 
 type UnfinishedUploadListProps = {
     datastoreId: string;
-    uploadList?: Upload[];
+    uploadList: DatasheetUploadItem[];
     nbPublications: number;
     datasheetName: string;
 };
@@ -26,9 +26,7 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
 
     const queryClient = useQueryClient();
 
-    const filteredUploadList = uploadList?.filter((upload) => upload.type === "VECTOR") ?? [];
-
-    const isLastUpload = (uploadList: Upload[]): boolean => {
+    const isLastUpload = (uploadList: DatasheetUploadItem[]): boolean => {
         return uploadList.length === 1 && nbPublications === 0;
     };
 
@@ -54,10 +52,16 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
                 </h5>
             </div>
 
-            {filteredUploadList?.map((upload) => {
-                const integrationProgress = JSON.parse(upload.tags.integration_progress || "{}");
-                const steps = Object.entries(integrationProgress);
-                const failureCase = steps.some(([, status]) => status === "failed");
+            {uploadList.map((upload) => {
+                let failureCase = false;
+                if (upload.tags.integration_progress) {
+                    try {
+                        const progress = JSON.parse(upload.tags.integration_progress) as Record<string, string>;
+                        failureCase = Object.values(progress).includes("failed");
+                    } catch {
+                        // ignore
+                    }
+                }
 
                 return (
                     <div key={upload._id} className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mt-2v")}>
@@ -105,7 +109,7 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
                                     iconId="fr-icon-delete-fill"
                                     priority="secondary"
                                     onClick={() => {
-                                        if (isLastUpload(filteredUploadList)) {
+                                        if (isLastUpload(uploadList)) {
                                             deleteUploadConfirmModal.open();
                                         } else {
                                             deleteUnfinishedUpload.mutate(upload._id);

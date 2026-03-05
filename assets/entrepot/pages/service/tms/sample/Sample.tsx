@@ -12,6 +12,7 @@ export type SampleType = {
     is_sample: booleanValue;
     center: number[];
     area: string | undefined;
+    email_notification: boolean;
 };
 
 type SampleProps = {
@@ -21,14 +22,16 @@ type SampleProps = {
 };
 
 const Sample: FC<SampleProps> = ({ visible, bottomZoomLevel, form }) => {
+    const { t: tCommon } = useTranslation("Common");
     const { t } = useTranslation("PyramidVectorGenerateForm");
 
-    const { setValue: setFormValue, getValues: getFormValues } = form;
+    const { setValue: setFormValue, getValues: getFormValues, register } = form;
 
     const [sample, setSample] = useState<SampleType>({
         is_sample: "false",
         center: olDefaults.center,
         area: undefined,
+        email_notification: true,
     });
 
     useEffect(() => {
@@ -77,6 +80,17 @@ const Sample: FC<SampleProps> = ({ visible, bottomZoomLevel, form }) => {
                     }}
                 />
             )}
+            <hr className={fr.cx("fr-mt-3w")} />
+            <Checkbox
+                options={[
+                    {
+                        label: tCommon("email_notification"),
+                        nativeInputProps: {
+                            ...register("sample.email_notification"),
+                        },
+                    },
+                ]}
+            />
         </div>
     );
 };

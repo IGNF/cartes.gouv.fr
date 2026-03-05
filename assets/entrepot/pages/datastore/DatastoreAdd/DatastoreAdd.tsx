@@ -7,7 +7,7 @@ import DatastoreMain from "@/components/Layout/DatastoreMain";
 import { useTranslation } from "@/i18n";
 import { routes, useRoute } from "@/router/router";
 import CreateNewDatastore from "./CreateNewDatastore";
-import JoinExistingDatastore from "./JoinExistingDatastore";
+import JoinExistingDatastore from "./JoinExistingDatastore/JoinExistingDatastore";
 
 export default function DatastoreAdd() {
     const { t } = useTranslation("DatastoreAdd");

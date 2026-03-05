@@ -7,7 +7,14 @@ import { FC, memo, ReactNode, useMemo, useRef } from "react";
 import { useToggle } from "usehooks-ts";
 
 import useDataUsesQuery from "@/hooks/queries/useDataUsesQuery";
-import { DatastoreEndpoint, EndpointTypeEnum, OfferingTypeEnum, PyramidRaster, StoredDataStatusEnum } from "../../../../../../@types/app";
+import {
+    DatasheetStoredDataItem,
+    DatastoreEndpoint,
+    EndpointTypeEnum,
+    OfferingTypeEnum,
+    PyramidRaster,
+    StoredDataStatusEnum,
+} from "../../../../../../@types/app";
 import StoredDataStatusBadge from "../../../../../../components/Utils/Badges/StoredDataStatusBadge";
 import { useTranslation } from "../../../../../../i18n/i18n";
 import RQKeys from "../../../../../../modules/entrepot/RQKeys";
@@ -39,7 +46,7 @@ const isAvailable = (endpoints: DatastoreEndpoint | DatastoreEndpoint[]): boolea
 
 type PyramidRasterListItemProps = {
     datasheetName: string;
-    pyramid: PyramidRaster;
+    pyramid: DatasheetStoredDataItem<PyramidRaster>;
     datastoreId: string;
 };
 

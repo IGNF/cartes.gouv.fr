@@ -2,20 +2,15 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import Button from "@codegouvfr/react-dsfr/Button";
-import { useQuery } from "@tanstack/react-query";
 import { FC } from "react";
 
-import { OfferingStatusEnum, OfferingTypeEnum, type Service } from "../../../../@types/app";
+import { OfferingStatusEnum, OfferingTypeEnum } from "../../../../@types/app";
 import Main from "../../../../components/Layout/Main";
 import LoadingText from "../../../../components/Utils/LoadingText";
-import RQKeys from "../../../../modules/entrepot/RQKeys";
-import { type CartesApiException } from "../../../../modules/jsonFetch";
+import useServiceQuery from "../../../../hooks/queries/useServiceQuery";
 import { routes } from "../../../../router/router";
-import api from "../../../api";
 import PrivateServiceExplanation from "./PrivateServiceExplanation";
 import ServiceViewContent from "./ServiceViewContent";
-
-import "../../../../sass/pages/service_view.scss";
 
 type ServiceViewProps = {
     datastoreId: string;
@@ -24,11 +19,7 @@ type ServiceViewProps = {
 };
 
 const ServiceView: FC<ServiceViewProps> = ({ datastoreId, offeringId, datasheetName }) => {
-    const serviceQuery = useQuery<Service, CartesApiException>({
-        queryKey: RQKeys.datastore_offering(datastoreId, offeringId),
-        queryFn: ({ signal }) => api.service.getService(datastoreId, offeringId, { signal }),
-        staleTime: 60000,
-    });
+    const serviceQuery = useServiceQuery(datastoreId, offeringId);
 
     return (
         <Main title={`Visualisation données ${datasheetName ?? serviceQuery.data?.layer_name}`}>

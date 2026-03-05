@@ -184,13 +184,16 @@ class ContactController extends AbstractController
             $mailParams = [
                 'sendDate' => $now,
                 'community' => $data['community'],
-                'message' => $data['message'],
             ];
+
+            if (isset($data['other_info'])) {
+                $mailParams['other_info'] = $data['other_info'];
+            }
 
             $this->mailerLogger->info(sprintf('User (%s) : Demande pour rejoindre %s', $userEmail, $data['community']['name']), [
                 'userEmail' => $userEmail,
                 'community' => $data['community'],
-                'message' => $data['message'],
+                'other_info' => $data['other_info'] ?? null,
             ]);
 
             // Envoi du mail à l'adresse de contact de la communauté

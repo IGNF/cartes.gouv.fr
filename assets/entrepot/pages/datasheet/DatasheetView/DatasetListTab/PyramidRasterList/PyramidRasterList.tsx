@@ -2,13 +2,13 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { FC, memo } from "react";
 import { symToStr } from "tsafe/symToStr";
 
-import { PyramidRaster } from "../../../../../../@types/app";
+import { DatasheetStoredDataItem, PyramidRaster } from "../../../../../../@types/app";
 import PyramidRasterListItem from "./PyramidRasterListItem";
 
 type PyramidRasterListProps = {
     datasheetName: string;
     datastoreId: string;
-    pyramidList: PyramidRaster[] | undefined;
+    pyramidList: DatasheetStoredDataItem<PyramidRaster>[] | undefined;
 };
 
 const PyramidRasterList: FC<PyramidRasterListProps> = ({ datasheetName, datastoreId, pyramidList }) => {

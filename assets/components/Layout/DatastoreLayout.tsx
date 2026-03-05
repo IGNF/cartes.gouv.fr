@@ -23,7 +23,7 @@ const DatastoreLayout: FC<PropsWithChildren<DatastoreLayoutProps>> = (props) => 
     const { accessRight, datastoreId, children, ...rest } = props;
 
     const { user } = useAuthStore();
-    const { data, error, failureReason, isFetching, isLoading, status } = useQuery<Datastore, CartesApiException>({
+    const { data, error, failureReason, isFetching, isLoading, isPending, status } = useQuery<Datastore, CartesApiException>({
         queryKey: RQKeys.datastore(datastoreId),
         queryFn: ({ signal }) => api.datastore.get(datastoreId, { signal }),
         staleTime: 3600000,
@@ -40,7 +40,7 @@ const DatastoreLayout: FC<PropsWithChildren<DatastoreLayoutProps>> = (props) => 
         return canUserAccess(user.id, communityMember, accessRight);
     }, [accessRight, user?.communities_member, datastoreId, user?.id]);
 
-    if (isLoading) {
+    if (isLoading || isPending) {
         return (
             <AppLayout {...rest}>
                 <Main>

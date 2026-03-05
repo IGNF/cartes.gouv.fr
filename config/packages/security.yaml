@@ -17,6 +17,7 @@ security:
                 - App\Security\KeycloakAuthenticator
             logout:
                 path: cartesgouvfr_security_logout
+                invalidate_session: false
                 # where to redirect after logout
                 target: cartesgouvfr_app
 

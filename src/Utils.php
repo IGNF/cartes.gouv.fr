@@ -84,4 +84,18 @@ class Utils
     {
         return str_starts_with($content, '<?xml') ? 'application/xml' : 'application/json';
     }
+
+    public static function get_version_from_service_url(string $url): string
+    {
+        $res = [];
+
+        $parsed = parse_url($url);
+        if (!is_array($parsed) || !isset($parsed['query'])) {
+            return '';
+        }
+
+        parse_str($parsed['query'], $res);
+
+        return isset($res['version']) ? (string) $res['version'] : '';
+    }
 }

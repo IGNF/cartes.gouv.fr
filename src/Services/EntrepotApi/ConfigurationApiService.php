@@ -52,10 +52,16 @@ class ConfigurationApiService extends BaseEntrepotApiService
     }
 
     /**
-     * @param array<mixed> $body
+     * @param array<mixed>      $body
+     * @param array<mixed>|null $initialConfiguration
      */
-    public function modify(string $datastoreId, string $configurationId, $body = []): array
+    public function modify(string $datastoreId, string $configurationId, $body = [], ?array $initialConfiguration = null): array
     {
+        if (array_key_exists('extra', $body)) {
+            $initialConfiguration = $initialConfiguration ?? $this->get($datastoreId, $configurationId);
+            $body['extra'] = array_merge($initialConfiguration['extra'] ?? [], $body['extra']);
+        }
+
         return $this->request('PATCH', "datastores/$datastoreId/configurations/$configurationId", $body);
     }
 
@@ -113,13 +119,10 @@ class ConfigurationApiService extends BaseEntrepotApiService
      */
     public function getAllOfferingsDetailed(string $datastoreId, array $query = []): array
     {
-        $offerings = $this->getAllOfferings($datastoreId, $query);
-
-        foreach ($offerings as &$offering) {
-            $offering = $this->getOffering($datastoreId, $offering['_id']);
-        }
-
-        return $offerings;
+        return $this->getAllOfferings($datastoreId, [
+            ...$query,
+            'fields' => 'open,available,layer_name,type,status,endpoint,configuration,urls,creation,extra,update,public_activity', // tous les attributs sont présents, donc pas besoin de GET détaillé pour chaque offering
+        ]);
     }
 
     public function getOffering(string $datastoreId, string $offeringId): array

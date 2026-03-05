@@ -1,5 +1,9 @@
+import { fr } from "@codegouvfr/react-dsfr";
 import { declareComponentKeys } from "i18nifty";
-import { Translations } from "../../../../../i18n/types";
+import { ReactNode } from "react";
+
+import { Translations } from "@/i18n/types";
+import { niceBytes } from "@/utils";
 
 const { i18n } = declareComponentKeys<
     | { K: "title"; P: { datasheetName: string | undefined }; R: string }
@@ -12,8 +16,9 @@ const { i18n } = declareComponentKeys<
     | { K: "datasheet.name_already_exists_error"; P: { datasheetName: string }; R: string }
     | "datasheet.creation_running"
     | "upload"
-    | "upload_hint"
+    | { K: "upload_hint"; R: ReactNode }
     | "upload_nofile_error"
+    | { K: "upload_shapefile_zip_required_error"; P: { filename: string }; R: string }
     | { K: "upload_extension_error"; P: { filename: string }; R: string }
     | { K: "upload_max_size_error"; P: { maxSize: number }; R: string }
     | "upload_running"
@@ -33,6 +38,7 @@ const { i18n } = declareComponentKeys<
     | "production_year_invalid_error"
     | "upload_file"
     | "data_infos_title"
+    | "email_notification"
 >()("DatasheetUploadForm");
 export type I18n = typeof i18n;
 
@@ -46,13 +52,50 @@ export const DatasheetUploadFormFrTranslations: Translations<"fr">["DatasheetUpl
     "datasheet.name_regex_error":
         "Le nom de la fiche de donnée ne peut contenir que des caractères alphanumériques, espaces blancs et certains caractères spéciaux",
     "datasheet.name_already_exists_error": ({ datasheetName }) => `Une fiche de donnée existe déjà avec le nom "${datasheetName}"`,
-    "datasheet.creation_running": "Création de la fiche en cours ...",
+    "datasheet.creation_running": "Création de la livraison en cours...",
     upload: "Déposez votre fichier de données",
     // NB: la taille maximale doit correspondre à celle effectivement implémentée dans DatasheetUploadForm
-    upload_hint: "Taille maximale : 1 Go. Formats de fichiers autorisés : Geopackage ou archive zip contenant un Geopackage (recommandé)",
+    upload_hint: (
+        <>
+            <p className={fr.cx("fr-text--xs")}>{`Taille maximale\u202f: 2 Go.`}</p>
+            <p className={fr.cx("fr-text--xs", "fr-mb-0")}>{`Formats de fichiers autorisés\u202f:`}</p>
+            <ul className={fr.cx("fr-mt-0")}>
+                <li>
+                    <strong>GeoPackage</strong> (.gpkg ou .zip contenant au moins un fichier .gpkg)
+                </li>
+                <li>
+                    <strong>GeoJSON</strong> (.geojson ou .zip contenant au moins un fichier .geojson)
+                </li>
+                <li>
+                    <strong>CSV</strong> (.csv ou .zip contenant au moins un fichier .csv)
+                    <br />
+                    Le fichier doit contenir :
+                    <ul className={fr.cx("fr-my-0")}>
+                        <li className={fr.cx("fr-pb-0")}>une colonne géométrie nommée json, geom, the_geom, wkb ou wkt</li>
+                        <li className={fr.cx("fr-pb-0")}>
+                            ou, s’il s’agit de points, deux colonnes coordonnées nommées lon et lat, x et y ou longitude et latitude
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <strong>SQL</strong> (.sql ou .zip contenant au moins un fichier .sql)
+                    <br />
+                    {`Seules les instructions suivantes sont autorisées\u202f: CREATE TABLE, CREATE VIEW, CREATE INDEX, CREATE SEQUENCE, ALTER TABLE, ALTER SEQUENCE.`}
+                    <br />
+                    {`Aucun nom de schéma ne doit être présent (ex\u202f: public.table interdit).`}
+                </li>
+                <li>
+                    <strong>Shapefile</strong> (.zip contenant .shp, .shx, .dbf et optionnellement .prj, .cpg, .qix, .shp.xml)
+                </li>
+            </ul>
+            <p className={fr.cx("fr-text--xs")}>Vous ne pouvez pas mélanger plusieurs formats dans une archive .zip.</p>
+        </>
+    ),
     upload_nofile_error: "Aucun fichier téléversé",
+    upload_shapefile_zip_required_error: ({ filename }) =>
+        `Le fichier ${filename} semble faire partie d’un Shapefile (format multi-fichiers). Téléversez une archive .zip contenant au minimum les fichiers .shp, .shx et .dbf (et éventuellement .prj, .cpg, .qix, .shp.xml).`,
     upload_extension_error: ({ filename }) => `L’extension du fichier ${filename} n'est pas correcte`,
-    upload_max_size_error: ({ maxSize }) => `La taille maximale pour un fichier est de ${maxSize}`,
+    upload_max_size_error: ({ maxSize }) => `La taille maximale pour un fichier est de ${niceBytes(maxSize.toString())}`,
     upload_running: "Téléversement en cours ...",
     technical_name: "Nom technique de votre donnée",
     technical_name_hint: "Ce nom technique est invisible par votre utilisateur final. Il apparaitra uniquement dans votre espace de travail",
@@ -71,6 +114,7 @@ export const DatasheetUploadFormFrTranslations: Translations<"fr">["DatasheetUpl
     production_year_invalid_error: "L’année de production est invalide",
     upload_file: "Déposer votre fichier",
     data_infos_title: "Les données suivantes ont été détectées. Modifiez les si besoin",
+    email_notification: "Être notifié par courriel à la fin de l'intégration en base de données",
 };
 
 export const DatasheetUploadFormEnTranslations: Translations<"en">["DatasheetUploadForm"] = {
@@ -86,6 +130,7 @@ export const DatasheetUploadFormEnTranslations: Translations<"en">["DatasheetUpl
     upload: undefined,
     upload_hint: undefined,
     upload_nofile_error: undefined,
+    upload_shapefile_zip_required_error: undefined,
     upload_extension_error: undefined,
     upload_max_size_error: undefined,
     upload_running: undefined,
@@ -105,4 +150,5 @@ export const DatasheetUploadFormEnTranslations: Translations<"en">["DatasheetUpl
     production_year_invalid_error: undefined,
     upload_file: undefined,
     data_infos_title: undefined,
+    email_notification: undefined,
 };

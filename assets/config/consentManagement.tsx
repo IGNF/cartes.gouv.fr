@@ -1,6 +1,6 @@
+import { externalUrls } from "@/router/externalUrls";
 import { createConsentManagement } from "@codegouvfr/react-dsfr/consentManagement";
 import { startEulerianAnalytics } from "@codegouvfr/react-dsfr/eulerianAnalytics";
-import { routes } from "../router/router";
 
 const prEulerianApi = startEulerianAnalytics({
     domain: "acwg.cartes.gouv.fr", // domaine de tracking Eulerian
@@ -23,7 +23,7 @@ export const { ConsentBannerAndConsentManagement, FooterConsentManagementItem, F
         },
     }),
     personalDataPolicyLinkProps: {
-        href: routes.personal_data().href,
+        href: externalUrls.personal_data,
     },
 
     consentCallback: async ({ finalityConsent }) => {

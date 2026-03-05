@@ -154,12 +154,9 @@ const AddMember: FC<AddMemberProps> = ({ communityId, communityMemberIds, userId
                                     checked: field.value?.includes?.(upRight),
                                     onChange: (checked) => {
                                         const oldRights = field.value ?? [];
-                                        let newRights: string[] = [];
-                                        if (checked) {
-                                            newRights = Array.from(new Set([...oldRights, upRight]));
-                                        } else {
-                                            newRights = oldRights.filter((r: string) => r !== upRight);
-                                        }
+                                        const newRights: string[] = checked
+                                            ? Array.from(new Set([...oldRights, upRight]))
+                                            : oldRights.filter((r: string) => r !== upRight);
                                         field.onChange(newRights);
                                     },
                                 };

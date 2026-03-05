@@ -6,7 +6,7 @@ import { FC, memo, useMemo } from "react";
 import { useToggle } from "usehooks-ts";
 
 import useDataUsesQuery from "@/hooks/queries/useDataUsesQuery";
-import { PyramidVector, StoredDataStatusEnum } from "../../../../../../@types/app";
+import { DatasheetStoredDataItem, PyramidVector, StoredDataStatusEnum } from "../../../../../../@types/app";
 import StoredDataStatusBadge from "../../../../../../components/Utils/Badges/StoredDataStatusBadge";
 import { getTranslation, useTranslation } from "../../../../../../i18n/i18n";
 import { routes } from "../../../../../../router/router";
@@ -16,7 +16,7 @@ import StoredDataDeleteConfirmDialog from "../StoredDataDeleteConfirmDialog";
 
 type PyramidVectorListItemProps = {
     datasheetName: string;
-    pyramid: PyramidVector;
+    pyramid: DatasheetStoredDataItem<PyramidVector>;
     datastoreId: string;
 };
 

@@ -4,25 +4,22 @@
     "minimum-stability": "stable",
     "prefer-stable": true,
     "require": {
-        "php": "^7.4||^8.2",
+        "php": "^8.2",
         "ext-ctype": "*",
         "ext-iconv": "*",
-        "async-aws/simple-s3": "^2.1",
-        "cweagans/composer-patches": "^1.7",
+        "async-aws/simple-s3": "^3.0",
         "friendsofsymfony/jsrouting-bundle": "^3.2",
         "knpuniversity/oauth2-client-bundle": "^2.14",
         "league/flysystem-async-aws-s3": "^3.28",
         "league/flysystem-bundle": "^3.4",
         "pentatrion/vite-bundle": "^8.0",
-        "phpdocumentor/reflection-docblock": "^5.3",
-        "phpdocumentor/type-resolver": "^1.10",
         "phpstan/phpdoc-parser": "^2.1",
-        "stevenmaguire/oauth2-keycloak": "^5.0",
+        "stevenmaguire/oauth2-keycloak": "^6.0",
         "symfony/asset": "6.4.*",
         "symfony/console": "6.4.*",
         "symfony/dotenv": "6.4.*",
         "symfony/expression-language": "6.4.*",
-        "symfony/flex": "^2",
+        "symfony/flex": "^2.10",
         "symfony/form": "6.4.*",
         "symfony/framework-bundle": "6.4.*",
         "symfony/http-client": "6.4.*",
@@ -44,9 +41,9 @@
         "symfony/validator": "6.4.*",
         "symfony/web-link": "6.4.*",
         "symfony/yaml": "6.4.*",
-        "twig/extra-bundle": "^2.12|^3.0",
+        "twig/extra-bundle": "^3.0",
         "twig/intl-extra": "^3.6",
-        "twig/twig": "^2.12|^3.0"
+        "twig/twig": "^3.0"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.18",
@@ -65,8 +62,7 @@
         "allow-plugins": {
             "php-http/discovery": true,
             "symfony/flex": true,
-            "symfony/runtime": true,
-            "cweagans/composer-patches": true
+            "symfony/runtime": true
         },
         "sort-packages": true
     },
@@ -123,12 +119,6 @@
         "symfony": {
             "allow-contrib": false,
             "require": "6.4.*"
-        },
-        "patches": {
-            "friendsofsymfony/jsrouting-bundle": {
-                "Désactive l'injection de code de FosRouting (cf. ./patches/fosjsrouting.patch)": "./patches/fosjsrouting.patch"
-            }
-        },
-        "composer-exit-on-patch-failure": true
+        }
     }
 }

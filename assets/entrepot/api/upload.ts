@@ -39,7 +39,7 @@ const get = (datastoreId: string, uploadId: string, otherOptions: RequestInit = 
     });
 };
 
-type IntegrationProgress = { integration_progress?: string; integration_current_step?: string };
+type IntegrationProgress = { integration_progress?: string; integration_current_step?: string; upload?: Upload };
 
 const getIntegrationProgress = (datastoreId: string, uploadId: string, otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_upload_integration_progress", { datastoreId, uploadId, getOnlyProgress: true });

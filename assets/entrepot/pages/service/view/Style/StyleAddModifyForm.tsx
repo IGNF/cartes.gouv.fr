@@ -5,7 +5,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useMutation, useQueries, useQuery, useQueryClient, UseQueryOptions } from "@tanstack/react-query";
+import { useMutation, useQueries, useQueryClient, UseQueryOptions } from "@tanstack/react-query";
 import { FC, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
@@ -17,6 +17,7 @@ import LoadingIcon from "@/components/Utils/LoadingIcon";
 import LoadingText from "@/components/Utils/LoadingText";
 import Wait from "@/components/Utils/Wait";
 import { StyleFormProvider } from "@/contexts/StyleFormContext";
+import useServiceQuery from "@/hooks/queries/useServiceQuery";
 import TMSStyleTools from "@/modules/Style/TMSStyleFilesManager/TMSStyleTools";
 import { routes } from "@/router/router";
 import { decodeKeys, encodeKey, encodeKeys, getFileExtension, removeDiacritics } from "@/utils";
@@ -133,11 +134,7 @@ const StyleAddModifyForm: FC<StyleAddModifyFormProps> = (props) => {
 
     const queryClient = useQueryClient();
 
-    const serviceQuery = useQuery<Service, CartesApiException>({
-        queryKey: RQKeys.datastore_offering(datastoreId, offeringId),
-        queryFn: ({ signal }) => api.service.getService(datastoreId, offeringId, { signal }),
-        staleTime: 600000,
-    });
+    const serviceQuery = useServiceQuery(datastoreId, offeringId, { staleTime: 600000 });
     const { data: service } = serviceQuery;
 
     const styles: CartesStyle[] = useMemo(() => service?.configuration.styles ?? [], [service]);

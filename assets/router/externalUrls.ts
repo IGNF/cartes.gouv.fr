@@ -2,7 +2,7 @@ import { RegisteredLinkProps } from "@codegouvfr/react-dsfr/link";
 
 import { catalogueUrl } from "@/env";
 import SymfonyRouting from "@/modules/Routing";
-import { appRoot, routes } from "./router";
+import { appRoot } from "./router";
 
 export const externalUrls = {
     help: appRoot + "/aide/",
@@ -16,7 +16,19 @@ export const externalUrls = {
     catalogue: catalogueUrl ?? appRoot + "/rechercher-une-donnee",
     maps: appRoot + "/explorer-les-cartes",
     contact_us: appRoot + "/aide/fr/nous-ecrire",
-    discover_cartesgouvfr: routes.discover().link.href,
+    discover_cartesgouvfr: appRoot + "/decouvrir",
+    present_service_maps: appRoot + "/decouvrir/explorer-les-cartes",
+    present_service_catalogue: appRoot + "/decouvrir/rechercher-une-donnee",
+    present_service_publish: appRoot + "/decouvrir/publier-une-donnee",
+    offers: appRoot + "/offres",
+    join_cartesgouvfr_community: appRoot + "/nous-rejoindre",
+    news_list: appRoot + "/actualites",
+    service_status: appRoot + "/niveau-de-service",
+    personal_data: appRoot + "/donnees-personnelles",
+    accessibility: appRoot + "/accessibilite",
+    terms_of_service: appRoot + "/cgu",
+    legal_notice: appRoot + "/mentions-legales",
+    sitemap: appRoot + "/plan-du-site",
     login: SymfonyRouting.generate("cartesgouvfr_security_login"),
     logout: SymfonyRouting.generate("cartesgouvfr_security_logout"),
 } as const;
