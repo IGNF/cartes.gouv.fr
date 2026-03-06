@@ -4,10 +4,11 @@ import { cx } from "@codegouvfr/react-dsfr/tools/cx";
 import { FC, useMemo } from "react";
 
 import { CommunityResponseDTO } from "../../../@types/espaceco";
+import useUserMe from "../../hooks/useUserMe";
 import useToggle from "../../../hooks/useToggle";
 import { useTranslation } from "../../../i18n/i18n";
 import placeholder1x1 from "../../../img/placeholder.1x1.png";
-import { routes } from "../../../router/router";
+import { appRoot, routes } from "../../../router/router";
 
 import "../../../sass/pages/espaceco/community.scss";
 
@@ -19,13 +20,38 @@ type CommunityListItemProps = {
 const CommunityListItem: FC<CommunityListItemProps> = ({ className, community }) => {
     const { t } = useTranslation("EspaceCoCommunityList");
     const { t: tCommon } = useTranslation("Common");
+    const { data: me } = useUserMe();
 
     const [showDescription, toggleShowDescription] = useToggle(false);
-    const buttonProps = useMemo(() => {
+    const modifyButtonProps = useMemo(() => {
         return community.active
             ? { link: routes.espaceco_manage_community({ communityId: community.id }).link, title: tCommon("modify") }
             : { link: routes.espaceco_create_community({ communityId: community.id }).link, title: t("append_community") };
     }, [community, t, tCommon]);
+
+    const communityRole = useMemo(() => {
+        return me?.communities_member.find((m) => m.community_id === community.id)?.role;
+    }, [me, community.id]);
+
+    const isMember = useMemo(() => {
+        return communityRole === "member" || communityRole === "admin";
+    }, [communityRole]);
+
+    const isAdmin = useMemo(() => {
+        return communityRole === "admin";
+    }, [communityRole]);
+
+    const guichetButtonProps = useMemo(() => {
+        if (!community.active || !isMember) {
+            return null;
+        }
+        return {
+            link: {
+                href: `${appRoot}/guichet-collaboratif/${community.id}`,
+            },
+            title: t("open_community"),
+        };
+    }, [community.active, community.id, isMember, t]);
 
     return (
         <>
@@ -54,9 +80,16 @@ const CommunityListItem: FC<CommunityListItemProps> = ({ className, community })
                     </div>
                 </div>
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-col-5", "fr-px-2v")}>
-                    <Button priority="secondary" size="small" linkProps={buttonProps.link}>
-                        {buttonProps.title}
-                    </Button>
+                    {guichetButtonProps && (
+                        <Button priority="secondary" size="small" linkProps={guichetButtonProps.link} className={fr.cx("fr-mr-1v")}>
+                            {guichetButtonProps.title}
+                        </Button>
+                    )}
+                    {isAdmin && (
+                        <Button priority="secondary" size="small" linkProps={modifyButtonProps.link}>
+                            {modifyButtonProps.title}
+                        </Button>
+                    )}
                 </div>
             </div>
 

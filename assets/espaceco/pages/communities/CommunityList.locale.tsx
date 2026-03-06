@@ -7,6 +7,8 @@ import { Translations } from "../../../i18n/types";
 const { i18n } = declareComponentKeys<
     | "title"
     | "filters"
+    | "open_community"
+    | "open_community_link"
     | "all_public_communities"
     | "communities_as_member"
     | "pending_membership"
@@ -22,6 +24,8 @@ export type I18n = typeof i18n;
 export const EspaceCoCommunityListFrTranslations: Translations<"fr">["EspaceCoCommunityList"] = {
     title: "Liste des guichets",
     filters: "Filtres",
+    open_community: "Ouvrir",
+    open_community_link: "Accèder au guichet :",
     all_public_communities: "Tous les guichets publics",
     communities_as_member: "Guichets dont je suis membre",
     pending_membership: "Adhésions en cours",
@@ -43,6 +47,8 @@ export const EspaceCoCommunityListFrTranslations: Translations<"fr">["EspaceCoCo
 export const EspaceCoCommunityListEnTranslations: Translations<"en">["EspaceCoCommunityList"] = {
     title: "List of communities",
     filters: "Filters",
+    open_community: "Access",
+    open_community_link: "Access to community:",
     all_public_communities: undefined,
     communities_as_member: undefined,
     pending_membership: undefined,
