@@ -10,6 +10,7 @@ use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
@@ -31,13 +32,27 @@ class UserDocumentsController extends AbstractController implements ApiControlle
     }
 
     #[Route('', name: 'get_list', methods: ['GET'])]
-    public function getAll(Request $request, #[MapQueryParameter] ?bool $detailed): Response
+    public function getList(Request $request, #[MapQueryParameter] ?bool $detailed): Response
     {
         try {
-            return $this->json(
-                true === $detailed
-                ? $this->userDocumentsApiService->getAllDetailed($request->query->all())
-                 : $this->userDocumentsApiService->getAll($request->query->all()));
+            $query = $request->query->all();
+            unset($query['detailed']);
+
+            $apiResponse = $this->userDocumentsApiService->getList([
+                ...$query,
+                'detailed' => $detailed,
+            ]);
+
+            $response = new JsonResponse($apiResponse['content'], Response::HTTP_OK);
+
+            if (isset($apiResponse['headers']['content-range'])) {
+                $response->headers->set('content-range', $apiResponse['headers']['content-range']);
+            }
+            if (isset($apiResponse['headers']['link'])) {
+                $response->headers->set('link', $apiResponse['headers']['link']);
+            }
+
+            return $response;
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
         }
