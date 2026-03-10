@@ -2,11 +2,13 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
-import Table from "@codegouvfr/react-dsfr/Table";
+import Pagination from "@codegouvfr/react-dsfr/Pagination";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useState } from "react";
 import { createPortal } from "react-dom";
 
+import { usePagination } from "@/hooks/usePagination";
+import { routes, useRoute } from "@/router/router";
 import type { Datastore, StaticFile } from "../../../../../@types/app";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../../components/Utils/LoadingText";
@@ -14,6 +16,8 @@ import Wait from "../../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import api from "../../../../api";
+import DataCard from "../DataCard";
+import { DatastoreManageStorageTab } from "../types";
 
 const confirmDialogModal = createModal({
     id: "confirm-delete-statics-modal",
@@ -28,6 +32,10 @@ const StaticsUsage: FC<StaticsUsageProps> = ({ datastore }) => {
     const { t } = useTranslation("DatastoreManageStorage");
     const { t: tCommon } = useTranslation("Common");
 
+    const route = useRoute();
+    const page = route.params?.["page"] ?? 1;
+    const limit = route.params?.["limit"] ?? 10;
+
     const queryClient = useQueryClient();
 
     const [currentStaticId, setCurrentStaticId] = useState<string | undefined>();
@@ -36,6 +44,8 @@ const StaticsUsage: FC<StaticsUsageProps> = ({ datastore }) => {
         queryKey: RQKeys.datastore_statics_list(datastore._id),
         queryFn: ({ signal }) => api.statics.getList(datastore._id, {}, { signal }),
     });
+
+    const { paginatedItems: staticsList, totalPages } = usePagination(staticsListQuery.data ?? [], page, limit);
 
     const deleteStaticMutation = useMutation({
         mutationFn: (staticId: string) => api.statics.remove(datastore._id, staticId),
@@ -63,27 +73,36 @@ const StaticsUsage: FC<StaticsUsageProps> = ({ datastore }) => {
                 <Alert severity="error" title={deleteStaticMutation.error.message} as="h2" closable onClose={staticsListQuery.refetch} />
             )}
 
-            {staticsListQuery.data && staticsListQuery.data.length > 0 && (
-                <Table
-                    noCaption
-                    noScroll
-                    bordered
-                    className={fr.cx("fr-mt-4v")}
-                    data={staticsListQuery.data.map((staticFile) => [
-                        staticFile.name,
-                        staticFile.type,
-                        <Button
-                            key={staticFile._id}
-                            priority="tertiary no outline"
-                            iconId="fr-icon-delete-line"
-                            onClick={() => {
-                                setCurrentStaticId(staticFile._id);
-                                confirmDialogModal.open();
-                            }}
-                        >
-                            {tCommon("delete")}
-                        </Button>,
-                    ])}
+            {staticsList.length > 0 &&
+                staticsList.map((staticFile) => (
+                    <DataCard
+                        key={staticFile._id}
+                        name={staticFile.name}
+                        type={staticFile.type}
+                        buttons={
+                            <Button
+                                size="small"
+                                key={staticFile._id}
+                                priority="tertiary no outline"
+                                iconId="fr-icon-delete-line"
+                                onClick={() => {
+                                    setCurrentStaticId(staticFile._id);
+                                    confirmDialogModal.open();
+                                }}
+                            >
+                                {tCommon("delete")}
+                            </Button>
+                        }
+                    />
+                ))}
+
+            {totalPages > 1 && (
+                <Pagination
+                    defaultPage={page}
+                    count={totalPages}
+                    getPageLinkProps={(pageNumber: number) =>
+                        routes.datastore_manage_storage({ datastoreId: datastore._id, limit, page: pageNumber, tab: DatastoreManageStorageTab.STATICS }).link
+                    }
                 />
             )}
 

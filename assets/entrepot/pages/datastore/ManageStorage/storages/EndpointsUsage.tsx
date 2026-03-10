@@ -2,12 +2,11 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
-import Table from "@codegouvfr/react-dsfr/Table";
-import Tag from "@codegouvfr/react-dsfr/Tag";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
+import MenuList from "@/components/Utils/MenuList";
 import { Datastore, EndpointTypeEnum, Metadata, Offering, OfferingTypeEnum } from "../../../../../@types/app";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../../components/Utils/LoadingText";
@@ -18,6 +17,7 @@ import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../../modules/jsonFetch";
 import { routes } from "../../../../../router/router";
 import api from "../../../../api";
+import DataCard from "../DataCard";
 
 const confirmUnpublishOfferingModal = createModal({
     id: "confirm-unpublish-offering-modal",
@@ -131,31 +131,31 @@ const EndpointsUsage: FC<EndpointsUsageProps> = ({ datastore }) => {
                                 <section key={endpoint.endpoint._id}>
                                     <h2>{endpoint.endpoint.name}</h2>
                                     <Progress label={`${endpoint.use.toString()} / ${endpoint.quota.toString()}`} value={endpoint.use} max={endpoint.quota} />
-                                    <Table
-                                        caption={`${endpoint.endpoint.name} - ${endpoint.use.toString()} / ${endpoint.quota.toString()}`}
-                                        noCaption
-                                        noScroll
-                                        bordered
-                                        className={fr.cx("fr-mt-4v")}
-                                        data={offeringsListQuery.data
-                                            .filter((offering) => offering?.endpoint?._id === endpoint.endpoint._id)
-                                            .map((offering) => [
-                                                offering.layer_name,
-                                                offering.type,
-                                                <Button
-                                                    key={offering._id}
-                                                    priority="tertiary no outline"
-                                                    iconId="fr-icon-delete-line"
-                                                    onClick={() => {
-                                                        setCurrentOffering(offering);
-                                                        confirmUnpublishOfferingModal.open();
-                                                    }}
-                                                    nativeButtonProps={confirmUnpublishOfferingModal.buttonProps}
-                                                >
-                                                    {tCommon("unpublish")}
-                                                </Button>,
-                                            ])}
-                                    />
+
+                                    {offeringsListQuery.data
+                                        .filter((offering) => offering?.endpoint?._id === endpoint.endpoint._id)
+                                        .map((offering) => (
+                                            <DataCard
+                                                key={offering._id}
+                                                name={offering.layer_name}
+                                                type={offering.type}
+                                                buttons={
+                                                    <Button
+                                                        key={offering._id}
+                                                        priority="tertiary no outline"
+                                                        iconId="fr-icon-delete-line"
+                                                        onClick={() => {
+                                                            setCurrentOffering(offering);
+                                                            confirmUnpublishOfferingModal.open();
+                                                        }}
+                                                        nativeButtonProps={confirmUnpublishOfferingModal.buttonProps}
+                                                        size="small"
+                                                    >
+                                                        {tCommon("unpublish")}
+                                                    </Button>
+                                                }
+                                            />
+                                        ))}
                                 </section>
                             )
                     )}
@@ -165,42 +165,54 @@ const EndpointsUsage: FC<EndpointsUsageProps> = ({ datastore }) => {
                     <section key={endpoint.endpoint._id}>
                         <h2>{endpoint.endpoint.name}</h2>
                         <Progress label={`${endpoint.use.toString()} / ${endpoint.quota.toString()}`} value={endpoint.use} max={endpoint.quota} />
-                        <Table
-                            caption={`${endpoint.endpoint.name} - ${endpoint.use.toString()} / ${endpoint.quota.toString()}`}
-                            noCaption
-                            noScroll
-                            bordered
-                            className={fr.cx("fr-mt-4v")}
-                            data={metadataListQuery.data
-                                .filter((metadata) => metadata.endpoints?.[0]?._id === endpoint.endpoint._id)
-                                .map((metadata) => [
-                                    metadata.file_identifier,
-                                    metadata.type,
-                                    metadata?.tags?.datasheet_name && (
-                                        <Tag
-                                            key={`tag-metadata-${metadata._id}`}
-                                            linkProps={
-                                                routes.datastore_datasheet_view({ datastoreId: datastore._id, datasheetName: metadata.tags.datasheet_name })
-                                                    .link
-                                            }
-                                        >
-                                            {metadata.tags.datasheet_name}
-                                        </Tag>
-                                    ),
-                                    <Button
-                                        key={metadata._id}
-                                        priority="tertiary no outline"
-                                        iconId="fr-icon-delete-line"
-                                        onClick={() => {
-                                            setCurrentMetadata(metadata);
-                                            confirmDeleteMetadataModal.open();
-                                        }}
-                                        nativeButtonProps={confirmDeleteMetadataModal.buttonProps}
-                                    >
-                                        {tCommon("delete")}
-                                    </Button>,
-                                ])}
-                        />
+
+                        {metadataListQuery.data
+                            .filter((metadata) => metadata.endpoints?.[0]?._id === endpoint.endpoint._id)
+                            .map((metadata) => (
+                                <DataCard
+                                    key={metadata._id}
+                                    name={metadata.file_identifier}
+                                    type={metadata.type}
+                                    buttons={
+                                        <>
+                                            {metadata.tags.datasheet_name && (
+                                                <Button
+                                                    size="small"
+                                                    iconId="fr-icon-arrow-right-s-line"
+                                                    iconPosition="right"
+                                                    priority="tertiary no outline"
+                                                    linkProps={
+                                                        routes.datastore_datasheet_view({
+                                                            datastoreId: datastore._id,
+                                                            datasheetName: metadata.tags.datasheet_name,
+                                                        }).link
+                                                    }
+                                                >
+                                                    {tCommon("see_2")}
+                                                </Button>
+                                            )}
+                                            <MenuList
+                                                menuOpenButtonProps={{
+                                                    size: "small",
+                                                    iconId: "ri-more-2-line",
+                                                    iconPosition: "right",
+                                                    priority: "tertiary no outline",
+                                                }}
+                                                items={[
+                                                    {
+                                                        text: tCommon("delete"),
+                                                        iconId: "fr-icon-delete-line",
+                                                        onClick: () => {
+                                                            setCurrentMetadata(metadata);
+                                                            confirmDeleteMetadataModal.open();
+                                                        },
+                                                    },
+                                                ]}
+                                            />
+                                        </>
+                                    }
+                                />
+                            ))}
                     </section>
                 ))}
 

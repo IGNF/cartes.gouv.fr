@@ -15,6 +15,7 @@ use App\Services\EntrepotApi\UploadApiService;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
@@ -38,26 +39,46 @@ class StoredDataController extends AbstractController implements ApiControllerIn
     }
 
     #[Route('', name: 'get_list', methods: ['GET'])]
-    public function getStoredDataList(
+    public function getList(
         string $datastoreId,
-        #[MapQueryParameter] ?string $type = null,
+        Request $request,
+        #[MapQueryParameter] ?bool $detailed = false,
+        #[MapQueryParameter] ?bool $all = false,
     ): JsonResponse {
         try {
-            $query = [];
-            if (null !== $type) {
-                $query['type'] = $type;
+            $query = $request->query->all();
+            unset($query['detailed']);
+            unset($query['all']);
+
+            if ($all) {
+                return $this->json(
+                    $detailed
+                    ? $this->storedDataApiService->getAllDetailed($datastoreId, $query)
+                    : $this->storedDataApiService->getAll($datastoreId, $query)
+                );
             }
 
-            $storedDataList = $this->storedDataApiService->getAllDetailed($datastoreId, $query);
+            $apiResponse = $detailed
+                ? $this->storedDataApiService->getListDetailed($datastoreId, $query)
+                : $this->storedDataApiService->getList($datastoreId, $query);
 
-            return $this->json($storedDataList);
+            $response = new JsonResponse($apiResponse['content'], Response::HTTP_OK);
+
+            if (isset($apiResponse['headers']['content-range'])) {
+                $response->headers->set('content-range', $apiResponse['headers']['content-range']);
+            }
+            if (isset($apiResponse['headers']['link'])) {
+                $response->headers->set('link', $apiResponse['headers']['link']);
+            }
+
+            return $response;
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
         }
     }
 
     #[Route('/{storedDataId}', name: 'get', methods: ['GET'])]
-    public function getStoredData(string $datastoreId, string $storedDataId): JsonResponse
+    public function get(string $datastoreId, string $storedDataId): JsonResponse
     {
         try {
             $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId);

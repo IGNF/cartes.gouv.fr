@@ -22,6 +22,7 @@ const { i18n } = declareComponentKeys<
     | "cancel"
     | "delete"
     | "see"
+    | "see_2"
     | "yes"
     | "no"
     | "accept"
@@ -77,6 +78,7 @@ export const commonFrTranslations: Translations<"fr">["Common"] = {
     cancel: "Annuler",
     delete: "Supprimer",
     see: "Consulter",
+    see_2: "Voir",
     yes: "Oui",
     no: "Non",
     accept: "Accepter",
@@ -135,6 +137,7 @@ export const commonEnTranslations: Translations<"en">["Common"] = {
     cancel: "Cancel",
     delete: "Delete",
     see: "Check",
+    see_2: "View",
     yes: "Yes",
     no: "No",
     accept: "Accept",

@@ -23,6 +23,27 @@ class StoredDataApiService extends BaseEntrepotApiService
     }
 
     /**
+     * @param array<mixed>|null $query
+     */
+    public function getList(string $datastoreId, ?array $query = []): array
+    {
+        return $this->request('GET', "datastores/$datastoreId/stored_data", [], $query, [], false, true, true);
+    }
+
+    /**
+     * @param array<mixed>|null $query
+     */
+    public function getListDetailed(string $datastoreId, ?array $query = []): array
+    {
+        $storedDataList = $this->getList($datastoreId, $query);
+        foreach ($storedDataList['content'] as &$storedData) {
+            $storedData = $this->get($datastoreId, $storedData['_id']);
+        }
+
+        return $storedDataList;
+    }
+
+    /**
      * @param array<mixed> $query
      */
     public function getAll(string $datastoreId, array $query = []): array

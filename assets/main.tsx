@@ -25,3 +25,5 @@ root.render(
 );
 
 console.info(`cartes.gouv.fr: ${__GIT_TAG__}`);
+
+document.getElementsByClassName("sf-toolbar")?.[0]?.classList.remove("sf-display-none");
