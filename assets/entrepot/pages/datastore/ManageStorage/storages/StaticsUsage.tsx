@@ -2,18 +2,19 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import Pagination from "@codegouvfr/react-dsfr/Pagination";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, usePrefetchQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useState } from "react";
 import { createPortal } from "react-dom";
 
-import { usePagination } from "@/hooks/usePagination";
-import { routes, useRoute } from "@/router/router";
+import { CartesApiException } from "@/modules/jsonFetch";
+import { routes, useRoutePaginationParams } from "@/router/router";
 import type { Datastore, StaticFile } from "../../../../../@types/app";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import Wait from "../../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
+import { decodeContentRange, delta, PaginatedListResponse } from "../../../../../utils";
 import api from "../../../../api";
 import DataCard from "../DataCard";
 import { DatastoreManageStorageTab } from "../types";
@@ -27,30 +28,53 @@ type StaticsUsageProps = {
     datastore: Datastore;
 };
 
+async function fetchStaticsList(datastoreId: string, queryParams: object = {}, signal?: AbortSignal) {
+    const res = await api.statics.getList(datastoreId, queryParams, { signal });
+
+    return {
+        items: res.data,
+        contentRange: decodeContentRange(res.headers.get("content-range") ?? "", queryParams?.["limit"] ?? 10),
+    };
+}
+
 const StaticsUsage: FC<StaticsUsageProps> = ({ datastore }) => {
     const { t } = useTranslation("DatastoreManageStorage");
     const { t: tCommon } = useTranslation("Common");
 
-    const route = useRoute();
-    const page = route.params?.["page"] ?? 1;
-    const limit = route.params?.["limit"] ?? 10;
+    const { page, limit } = useRoutePaginationParams();
 
-    const queryClient = useQueryClient();
-
-    const [currentStaticId, setCurrentStaticId] = useState<string | undefined>();
-
-    const staticsListQuery = useQuery({
-        queryKey: RQKeys.datastore_statics_list(datastore._id),
-        queryFn: ({ signal }) => api.statics.getList(datastore._id, {}, { signal }),
+    const queryParams = { page, limit };
+    const staticsListQuery = useQuery<PaginatedListResponse<StaticFile>, CartesApiException>({
+        queryKey: RQKeys.datastore_statics_list(datastore._id, queryParams),
+        queryFn: ({ signal }) => fetchStaticsList(datastore._id, queryParams, signal),
+        staleTime: delta.minutes(1),
     });
 
-    const { paginatedItems: staticsList, totalPages } = usePagination(staticsListQuery.data ?? [], page, limit);
+    const { data: { items: staticsList, contentRange } = { items: [], contentRange: undefined } } = staticsListQuery;
+
+    usePrefetchQuery({
+        queryKey: RQKeys.datastore_statics_list(datastore._id, { ...queryParams, page: page + 1 }),
+        queryFn: ({ signal }) => fetchStaticsList(datastore._id, { ...queryParams, page: page + 1 }, signal),
+        staleTime: delta.minutes(1),
+    });
+
+    const queryClient = useQueryClient();
+    const [currentStaticId, setCurrentStaticId] = useState<string | undefined>();
 
     const deleteStaticMutation = useMutation({
         mutationFn: (staticId: string) => api.statics.remove(datastore._id, staticId),
         onSuccess() {
-            queryClient.setQueryData(RQKeys.datastore_statics_list(datastore._id), (staticsList: StaticFile[]) => {
-                return staticsList.filter((staticFile) => staticFile._id !== currentStaticId);
+            queryClient.setQueryData(RQKeys.datastore_statics_list(datastore._id, queryParams), (prevData: PaginatedListResponse<StaticFile> | undefined) => {
+                return prevData
+                    ? {
+                          ...prevData,
+                          items: prevData.items.filter((staticFile) => staticFile._id !== currentStaticId),
+                      }
+                    : undefined;
+            });
+            queryClient.invalidateQueries({
+                queryKey: RQKeys.datastore_statics_list(datastore._id),
+                exact: false,
             });
 
             setCurrentStaticId(undefined);
@@ -62,7 +86,7 @@ const StaticsUsage: FC<StaticsUsageProps> = ({ datastore }) => {
 
     return (
         <>
-            <p>{t("storage.statics.explanation")}</p>
+            <p className={fr.cx("fr-text--xs")}>{t("storage.statics.explanation")}</p>
 
             {staticsListQuery.isFetching && <LoadingText message={t("storage.statics.loading")} as="p" withSpinnerIcon className={fr.cx("fr-mt-4v")} />}
 
@@ -92,10 +116,10 @@ const StaticsUsage: FC<StaticsUsageProps> = ({ datastore }) => {
                     />
                 ))}
 
-            {totalPages > 1 && (
+            {contentRange && contentRange?.totalPages > 1 && (
                 <Pagination
                     defaultPage={page}
-                    count={totalPages}
+                    count={contentRange?.totalPages}
                     getPageLinkProps={(pageNumber: number) =>
                         routes.datastore_manage_storage({ datastoreId: datastore._id, limit, page: pageNumber, tab: DatastoreManageStorageTab.STATICS }).link
                     }

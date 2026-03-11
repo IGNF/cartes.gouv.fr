@@ -48,16 +48,33 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
      * @param array<string>|null $labels
      */
     #[Route('', name: 'get_list', methods: ['GET'])]
-    public function getAnnexeList(
+    public function getList(
         string $datastoreId,
         #[MapQueryParameter] ?string $path,
         #[MapQueryParameter] ?array $labels,
         #[MapQueryParameter('mime_type')] ?string $mimeType,
+        #[MapQueryParameter] ?bool $all,
+        Request $request,
     ): JsonResponse {
         try {
-            $annexeList = $this->annexeApiService->getAll($datastoreId, $mimeType, $path, $labels);
+            $query = $request->query->all();
+            unset($query['all']);
 
-            return $this->json($annexeList);
+            if ($all) {
+                return $this->json($this->annexeApiService->getAll($datastoreId, $mimeType, $path, $labels));
+            }
+
+            $apiResponse = $this->annexeApiService->getList($datastoreId, $query);
+            $response = new JsonResponse($apiResponse['content'], Response::HTTP_OK);
+
+            if (isset($apiResponse['headers']['content-range'])) {
+                $response->headers->set('content-range', $apiResponse['headers']['content-range']);
+            }
+            if (isset($apiResponse['headers']['link'])) {
+                $response->headers->set('link', $apiResponse['headers']['link']);
+            }
+
+            return $response;
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
         }

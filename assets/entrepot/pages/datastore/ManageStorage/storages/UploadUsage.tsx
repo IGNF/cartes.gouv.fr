@@ -1,12 +1,12 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import Pagination from "@codegouvfr/react-dsfr/Pagination";
+import { useMutation, usePrefetchQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
-import { usePagination } from "@/hooks/usePagination";
-import Pagination from "@codegouvfr/react-dsfr/Pagination";
+import { CartesApiException } from "@/modules/jsonFetch";
 import { Datastore, Upload } from "../../../../../@types/app";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../../components/Utils/LoadingText";
@@ -14,9 +14,8 @@ import Progress from "../../../../../components/Utils/Progress";
 import Wait from "../../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
-import { CartesApiException } from "../../../../../modules/jsonFetch";
-import { routes, useRoute } from "../../../../../router/router";
-import { niceBytes } from "../../../../../utils";
+import { routes, useRoutePaginationParams } from "../../../../../router/router";
+import { decodeContentRange, delta, niceBytes, PaginatedListResponse } from "../../../../../utils";
 import api from "../../../../api";
 import DataCard from "../DataCard";
 import { DatastoreManageStorageTab } from "../types";
@@ -26,6 +25,15 @@ const confirmDialogModal = createModal({
     isOpenedByDefault: false,
 });
 
+async function fetchUploadList(datastoreId: string, queryParams: object = {}, signal?: AbortSignal) {
+    const res = await api.upload.getList(datastoreId, queryParams, { signal });
+
+    return {
+        items: res.data,
+        contentRange: decodeContentRange(res.headers.get("content-range") ?? "", queryParams?.["limit"] ?? 10),
+    };
+}
+
 type UploadUsageProps = {
     datastore: Datastore;
 };
@@ -33,21 +41,26 @@ const UploadUsage: FC<UploadUsageProps> = ({ datastore }) => {
     const { t } = useTranslation("DatastoreManageStorage");
     const { t: tCommon } = useTranslation("Common");
 
-    const route = useRoute();
-    const page = route.params?.["page"] ?? 1;
-    const limit = route.params?.["limit"] ?? 10;
+    const { page, limit } = useRoutePaginationParams();
 
     const uploadUsage = useMemo(() => {
         return datastore?.storages.uploads;
     }, [datastore]);
 
-    const uploadListQuery = useQuery<Upload[], CartesApiException>({
-        queryKey: RQKeys.datastore_upload_list(datastore._id),
-        queryFn: ({ signal }) => api.upload.getList(datastore._id, undefined, { signal }),
-        staleTime: 60000,
+    type TmpUpload = Pick<Upload, "_id" | "name" | "type" | "size" | "tags">;
+    const queryParams = { page, limit, fields: ["name", "type", "size", "tags"] };
+    const uploadListQuery = useQuery<PaginatedListResponse<TmpUpload>, CartesApiException>({
+        queryKey: RQKeys.datastore_upload_list(datastore._id, queryParams),
+        queryFn: ({ signal }) => fetchUploadList(datastore._id, queryParams, signal),
+        staleTime: delta.minutes(1),
     });
+    const { data: { items: uploadsList, contentRange } = { items: [], contentRange: undefined } } = uploadListQuery;
 
-    const { paginatedItems: uploadsList, totalPages } = usePagination(uploadListQuery.data ?? [], page, limit);
+    usePrefetchQuery({
+        queryKey: RQKeys.datastore_upload_list(datastore._id, { ...queryParams, page: page + 1 }),
+        queryFn: ({ signal }) => fetchUploadList(datastore._id, { ...queryParams, page: page + 1 }, signal),
+        staleTime: delta.minutes(1),
+    });
 
     const queryClient = useQueryClient();
 
@@ -56,8 +69,17 @@ const UploadUsage: FC<UploadUsageProps> = ({ datastore }) => {
     const deleteUploadMutation = useMutation({
         mutationFn: (uploadId: string) => api.upload.remove(datastore._id, uploadId),
         onSuccess() {
-            queryClient.setQueryData(RQKeys.datastore_upload_list(datastore._id), (uploadsList: Upload[]) => {
-                return uploadsList.filter((annexe) => annexe._id !== currentUploadId);
+            queryClient.setQueryData(RQKeys.datastore_upload_list(datastore._id, queryParams), (prevData: PaginatedListResponse<Upload> | undefined) => {
+                return prevData
+                    ? {
+                          ...prevData,
+                          items: prevData.items.filter((upload) => upload._id !== currentUploadId),
+                      }
+                    : undefined;
+            });
+            queryClient.invalidateQueries({
+                queryKey: RQKeys.datastore_upload_list(datastore._id),
+                exact: false,
             });
 
             setCurrentUploadId(undefined);
@@ -69,14 +91,22 @@ const UploadUsage: FC<UploadUsageProps> = ({ datastore }) => {
 
     return (
         <>
-            <p>{t("storage.upload.explanation")}</p>
+            <p className={fr.cx("fr-text--xs")}>{t("storage.upload.explanation")}</p>
 
             {uploadUsage ? (
-                <Progress
-                    label={`${niceBytes(uploadUsage.use.toString())} / ${niceBytes(uploadUsage.quota.toString())}`}
-                    value={uploadUsage.use}
-                    max={uploadUsage.quota}
-                />
+                <div className={fr.cx("fr-grid-row")}>
+                    <div className={fr.cx("fr-col-12", "fr-col-md-6", "fr-col-lg-4")}>
+                        <Progress
+                            label={
+                                <>
+                                    {niceBytes(uploadUsage.use.toString())} / <strong>{niceBytes(uploadUsage.quota.toString())}</strong>
+                                </>
+                            }
+                            value={uploadUsage.use}
+                            max={uploadUsage.quota}
+                        />
+                    </div>
+                </div>
             ) : (
                 <p>{t("storage.not_found")}</p>
             )}
@@ -106,25 +136,23 @@ const UploadUsage: FC<UploadUsageProps> = ({ datastore }) => {
                                 },
                                 children: tCommon("delete"),
                             },
-                            {
+                            upload.tags?.datasheet_name && {
                                 iconId: "fr-icon-arrow-right-s-line",
                                 priority: "tertiary no outline",
-                                linkProps: upload.tags?.datasheet_name
-                                    ? routes.datastore_datasheet_view({
-                                          datastoreId: datastore._id,
-                                          datasheetName: upload.tags.datasheet_name,
-                                      }).link
-                                    : undefined,
+                                linkProps: routes.datastore_datasheet_view({
+                                    datastoreId: datastore._id,
+                                    datasheetName: upload.tags.datasheet_name,
+                                }).link,
                                 children: tCommon("see_2"),
                             },
                         ]}
                     />
                 ))}
 
-            {totalPages > 1 && (
+            {contentRange && contentRange?.totalPages > 1 && (
                 <Pagination
                     defaultPage={page}
-                    count={totalPages}
+                    count={contentRange?.totalPages}
                     getPageLinkProps={(pageNumber: number) =>
                         routes.datastore_manage_storage({ datastoreId: datastore._id, limit, page: pageNumber, tab: DatastoreManageStorageTab.UPLOAD }).link
                     }
@@ -134,7 +162,7 @@ const UploadUsage: FC<UploadUsageProps> = ({ datastore }) => {
             {createPortal(
                 <confirmDialogModal.Component
                     title={t("storage.upload.deletion.confirmation", {
-                        uploadName: uploadListQuery.data?.find((upload) => upload._id === currentUploadId)?.name,
+                        uploadName: uploadsList?.find((upload) => upload._id === currentUploadId)?.name,
                         uploadId: currentUploadId,
                     })}
                     buttons={[

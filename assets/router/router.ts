@@ -344,3 +344,11 @@ export const groups = {
     config: configGroup,
     espaceco: espacecoGroup,
 };
+
+export const useRoutePaginationParams = () => {
+    const route = useRoute();
+    const page = route.params?.["page"] ?? 1;
+    const limit = route.params?.["limit"] ?? 10;
+
+    return { page, limit };
+};

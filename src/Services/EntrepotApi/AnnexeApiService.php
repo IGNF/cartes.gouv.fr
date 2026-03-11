@@ -5,6 +5,14 @@ namespace App\Services\EntrepotApi;
 class AnnexeApiService extends BaseEntrepotApiService
 {
     /**
+     * @param array<mixed> $query
+     */
+    public function getList(string $datastoreId, array $query = []): array
+    {
+        return $this->request('GET', "datastores/$datastoreId/annexes", [], $query, [], false, true, true);
+    }
+
+    /**
      * @param array<string> $labels
      */
     public function getAll(string $datastoreId, ?string $mimeType = null, ?string $path = null, ?array $labels = null): array

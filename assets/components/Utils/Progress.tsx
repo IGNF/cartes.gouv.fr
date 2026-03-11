@@ -1,10 +1,10 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import { FC, memo, useMemo } from "react";
+import { FC, memo, ReactNode, useMemo } from "react";
 
 import "./../../sass/components/progress.scss";
 
 type ProgressProps = {
-    label: string;
+    label: string | ReactNode;
     value: number;
     max?: number;
 };
@@ -19,7 +19,7 @@ const Progress: FC<ProgressProps> = ({ label, value, max = 100 }) => {
     return (
         <div className={fr.cx("fr-my-2v")}>
             <div className={fr.cx("fr-input-group")}>
-                {label && <label className={fr.cx("fr-label")}>{label}</label>}
+                {label && <label className={fr.cx("fr-label", "fr-mb-4v")}>{label}</label>}
                 <div className="progress">
                     <div className="progress-bar" style={{ width: percent }}>
                         {percent}

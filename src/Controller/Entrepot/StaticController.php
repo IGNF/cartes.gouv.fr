@@ -11,6 +11,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route(
@@ -28,14 +29,30 @@ class StaticController extends AbstractController implements ApiControllerInterf
     }
 
     #[Route('', name: 'get_list', methods: ['GET'])]
-    public function getStaticsList(
+    public function getList(
         string $datastoreId,
         Request $request,
+        #[MapQueryParameter] ?bool $all,
     ): JsonResponse {
         try {
-            $staticsList = $this->staticApiService->getAll($datastoreId, $request->query->all());
+            $query = $request->query->all();
+            unset($query['all']);
 
-            return $this->json($staticsList);
+            if ($all) {
+                return $this->json($this->staticApiService->getAll($datastoreId, $query));
+            }
+
+            $apiResponse = $this->staticApiService->getList($datastoreId, $query);
+            $response = new JsonResponse($apiResponse['content'], Response::HTTP_OK);
+
+            if (isset($apiResponse['headers']['content-range'])) {
+                $response->headers->set('content-range', $apiResponse['headers']['content-range']);
+            }
+            if (isset($apiResponse['headers']['link'])) {
+                $response->headers->set('link', $apiResponse['headers']['link']);
+            }
+
+            return $response;
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
         }

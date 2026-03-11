@@ -1,9 +1,22 @@
+import { AnnexStandardListResponseDto } from "@/@types/entrepot";
+import { Annexe, DatasheetThumbnailAnnexe } from "../../@types/app";
 import SymfonyRouting from "../../modules/Routing";
 import { apiFetch, jsonFetch } from "../../modules/jsonFetch";
-import { Annexe, DatasheetThumbnailAnnexe } from "../../@types/app";
 
-const getList = (datastoreId: string, otherOptions: RequestInit = {}) => {
-    const url = SymfonyRouting.generate("cartesgouvfr_api_annexe_get_list", { datastoreId });
+const getList = async (datastoreId: string, query: object = {}, otherOptions: RequestInit = {}) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_annexe_get_list", { datastoreId, ...query });
+    const res = await apiFetch(url, {
+        ...otherOptions,
+    });
+
+    return {
+        data: (await res.json()) as AnnexStandardListResponseDto[],
+        headers: res.headers,
+    };
+};
+
+const getAll = (datastoreId: string, otherOptions: RequestInit = {}) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_annexe_get_list", { datastoreId, all: true });
     return jsonFetch<Annexe[]>(url, {
         ...otherOptions,
     });
@@ -64,6 +77,7 @@ const remove = (datastoreId: string, annexeId: string) => {
 
 export default {
     getList,
+    getAll,
     getFileContent,
     add,
     modify,

@@ -2,10 +2,11 @@ import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import Pagination from "@codegouvfr/react-dsfr/Pagination";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FC, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
+import useStoredDataListQuery from "@/hooks/queries/useStoredDataListQuery";
 import { usePagination } from "@/hooks/usePagination";
 import { Datastore, StoredData } from "../../../../../@types/app";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
@@ -14,8 +15,7 @@ import Progress from "../../../../../components/Utils/Progress";
 import Wait from "../../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
-import { CartesApiException } from "../../../../../modules/jsonFetch";
-import { routes, useRoute } from "../../../../../router/router";
+import { routes, useRoutePaginationParams } from "../../../../../router/router";
 import { niceBytes } from "../../../../../utils";
 import api from "../../../../api";
 import DataCard from "../DataCard";
@@ -33,20 +33,14 @@ const FilesystemUsage: FC<FilesystemUsageProps> = ({ datastore }) => {
     const { t } = useTranslation("DatastoreManageStorage");
     const { t: tCommon } = useTranslation("Common");
 
-    const route = useRoute();
-    const page = route.params?.["page"] ?? 1;
-    const limit = route.params?.["limit"] ?? 10;
+    const { page, limit } = useRoutePaginationParams();
 
     const filesystemUsage = useMemo(() => {
         return datastore?.storages.data?.find((data) => data.storage.type === "FILESYSTEM");
     }, [datastore?.storages.data]);
 
     const queryParams = { detailed: true };
-    const storedDataListQuery = useQuery<StoredData[], CartesApiException>({
-        queryKey: RQKeys.datastore_stored_data_list(datastore._id, queryParams),
-        queryFn: ({ signal }) => api.storedData.getAll<StoredData[]>(datastore._id, queryParams, { signal }),
-        staleTime: 60000,
-    });
+    const storedDataListQuery = useStoredDataListQuery(datastore._id, queryParams);
 
     const storedDataListInFilesystem = useMemo(() => {
         return storedDataListQuery?.data?.filter((storedData) => storedData.storage.type === "FILESYSTEM") ?? [];
@@ -74,14 +68,22 @@ const FilesystemUsage: FC<FilesystemUsageProps> = ({ datastore }) => {
 
     return (
         <>
-            <p>{t("storage.filesystem.explanation")}</p>
+            <p className={fr.cx("fr-text--xs")}>{t("storage.filesystem.explanation")}</p>
 
             {filesystemUsage ? (
-                <Progress
-                    label={`${niceBytes(filesystemUsage.use.toString())} / ${niceBytes(filesystemUsage.quota.toString())}`}
-                    value={filesystemUsage.use}
-                    max={filesystemUsage.quota}
-                />
+                <div className={fr.cx("fr-grid-row")}>
+                    <div className={fr.cx("fr-col-12", "fr-col-md-6", "fr-col-lg-4")}>
+                        <Progress
+                            label={
+                                <>
+                                    {niceBytes(filesystemUsage.use.toString())} / <strong>{niceBytes(filesystemUsage.quota.toString())}</strong>
+                                </>
+                            }
+                            value={filesystemUsage.use}
+                            max={filesystemUsage.quota}
+                        />
+                    </div>
+                </div>
             ) : (
                 <p>{t("storage.not_found")}</p>
             )}
@@ -115,15 +117,13 @@ const FilesystemUsage: FC<FilesystemUsageProps> = ({ datastore }) => {
                                 },
                                 children: tCommon("delete"),
                             },
-                            {
+                            storedData.tags.datasheet_name !== undefined && {
                                 iconId: "fr-icon-arrow-right-s-line",
                                 priority: "tertiary no outline",
-                                linkProps: storedData.tags.datasheet_name
-                                    ? routes.datastore_datasheet_view({
-                                          datastoreId: datastore._id,
-                                          datasheetName: storedData.tags.datasheet_name,
-                                      }).link
-                                    : undefined,
+                                linkProps: routes.datastore_datasheet_view({
+                                    datastoreId: datastore._id,
+                                    datasheetName: storedData.tags.datasheet_name,
+                                }).link,
                                 children: tCommon("see_2"),
                             },
                         ]}

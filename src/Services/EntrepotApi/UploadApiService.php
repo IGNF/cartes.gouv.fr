@@ -29,6 +29,35 @@ class UploadApiService extends BaseEntrepotApiService
     }
 
     /**
+     * @param array<mixed>|null $query
+     */
+    public function getList(string $datastoreId, ?array $query = []): array
+    {
+        if (!array_key_exists('sort', $query)) { // par défaut, trier par la date du dernier évènement décroissante
+            $query['sort'] = 'last_event,desc';
+        }
+
+        if (array_key_exists('fields', $query) && is_array($query['fields']) && !empty($query['fields'])) {
+            $query['fields'] = implode(',', $query['fields']);
+        }
+
+        return $this->request('GET', "datastores/$datastoreId/uploads", [], $query, [], false, true, true);
+    }
+
+    /**
+     * @param array<mixed>|null $query
+     */
+    public function getListDetailed(string $datastoreId, ?array $query = []): array
+    {
+        $uploadList = $this->getList($datastoreId, $query);
+        foreach ($uploadList['content'] as &$upload) {
+            $upload = $this->get($datastoreId, $upload['_id']);
+        }
+
+        return $uploadList;
+    }
+
+    /**
      * @param array<mixed> $query
      */
     public function getAll(string $datastoreId, array $query = []): array

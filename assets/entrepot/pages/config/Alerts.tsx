@@ -83,7 +83,7 @@ const Alerts: FC = () => {
     // Load annex list and find annex matching the given path
     const { data } = useQuery<Annexe[], CartesApiException>({
         queryKey: RQKeys.datastore_annexe_list(datastore?._id),
-        queryFn: ({ signal }) => api.annexe.getList(datastore?._id, { signal }),
+        queryFn: ({ signal }) => api.annexe.getAll(datastore?._id, { signal }),
     });
     const annexe = useMemo(() => data?.find((annexe) => annexe.paths.includes(annexePath)), [data]);
 

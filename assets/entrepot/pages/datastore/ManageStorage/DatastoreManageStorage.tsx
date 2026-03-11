@@ -17,6 +17,7 @@ import S3Usage from "./storages/S3Usage";
 import StaticsUsage from "./storages/StaticsUsage";
 import UploadUsage from "./storages/UploadUsage";
 import { DatastoreManageStorageTab } from "./types";
+import useStoredDataListQuery from "@/hooks/queries/useStoredDataListQuery";
 
 const DatastoreManageStorage: FC = () => {
     const { t } = useTranslation("DatastoreManageStorage");
@@ -27,6 +28,13 @@ const DatastoreManageStorage: FC = () => {
     const currentTab = route.params?.["tab"] ?? DatastoreManageStorageTab.POSTGRESQL;
 
     const hasFilesystemStorage = datastore?.storages.data?.find((data) => data.storage.type === "FILESYSTEM") !== undefined;
+
+    // NOTE : pour garder le même query actif tant qu'on est sur les onglets qui affichent des données stockées
+    // TODO : supprimer quand on pourra filtrer par le stockage et on pourra donc paginer côté serveur
+    const queryParams = { detailed: true };
+    useStoredDataListQuery(datastore._id, queryParams, {
+        enabled: [DatastoreManageStorageTab.POSTGRESQL, DatastoreManageStorageTab.S3, DatastoreManageStorageTab.FILESYSTEM].includes(currentTab),
+    });
 
     return (
         <DatastoreMain title={t("title", { datastoreName: datastore?.is_sandbox === true ? tCommon("sandbox") : datastore?.name })} datastoreId={datastore._id}>

@@ -1,5 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import ButtonsGroup, { ButtonsGroupProps } from "@codegouvfr/react-dsfr/ButtonsGroup";
+import { ButtonProps } from "@codegouvfr/react-dsfr/Button";
+import ButtonsGroup from "@codegouvfr/react-dsfr/ButtonsGroup";
 import Tag from "@codegouvfr/react-dsfr/Tag";
 import { ReactNode } from "react";
 import { tss } from "tss-react";
@@ -8,12 +9,13 @@ interface DataCardProps {
     name: ReactNode;
     type: ReactNode;
     size?: ReactNode;
-    buttons?: ButtonsGroupProps["buttons"];
+    buttons?: (ButtonProps | null | undefined | false)[];
 }
 export default function DataCard(props: DataCardProps) {
     const { name, type, size, buttons } = props;
 
     const { classes, cx } = useStyles();
+    const _buttons = buttons?.filter((btn): btn is ButtonProps => Boolean(btn));
 
     return (
         <div className={cx(fr.cx("fr-grid-row", "fr-grid-row--gutters", "fr-p-1v", "fr-m-0", "fr-my-4v"), classes.row)}>
@@ -30,13 +32,17 @@ export default function DataCard(props: DataCardProps) {
                     </ul>
                 )}
             </div>
-            {buttons && (
+            {_buttons && isNonEmptyButtonsArray(_buttons) && (
                 <div className={cx(fr.cx("fr-col", "fr-col--bottom"), classes.colButtons)}>
-                    <ButtonsGroup buttons={buttons} buttonsSize="small" buttonsIconPosition="right" inlineLayoutWhen="md and up" />
+                    <ButtonsGroup buttons={_buttons} buttonsSize="small" buttonsIconPosition="right" inlineLayoutWhen="md and up" />
                 </div>
             )}
         </div>
     );
+}
+
+function isNonEmptyButtonsArray(buttons: (ButtonProps | null | undefined | false)[]): buttons is [ButtonProps, ...ButtonProps[]] {
+    return buttons.length > 0;
 }
 
 const useStyles = tss.withName("DataCard").create({
