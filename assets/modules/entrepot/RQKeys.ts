@@ -53,7 +53,7 @@ const RQKeys = {
 
     datastore_offering: (datastoreId: string, offeringId: string): string[] => ["datastore", datastoreId, "offering", offeringId],
 
-    datastore_annexe_list: (datastoreId: string, queryParams: object = {}): string[] => {
+    datastore_annexe_list: (datastoreId: string, queryParams?: object): string[] => {
         const keys = ["datastore", datastoreId, "annexe"];
         if (queryParams) keys.push(JSON.stringify(queryParams));
         return keys;

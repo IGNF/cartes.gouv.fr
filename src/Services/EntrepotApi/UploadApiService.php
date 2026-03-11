@@ -57,6 +57,7 @@ class UploadApiService extends BaseEntrepotApiService
         foreach ($uploadList['content'] as &$upload) {
             $upload = $this->get($datastoreId, $upload['_id']);
         }
+        unset($upload);
 
         return $uploadList;
     }

@@ -51,6 +51,7 @@ class StoredDataApiService extends BaseEntrepotApiService
         foreach ($storedDataList['content'] as &$storedData) {
             $storedData = $this->get($datastoreId, $storedData['_id']);
         }
+        unset($storedData);
 
         return $storedDataList;
     }
