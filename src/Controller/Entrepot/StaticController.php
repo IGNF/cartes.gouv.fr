@@ -3,6 +3,7 @@
 namespace App\Controller\Entrepot;
 
 use App\Controller\ApiControllerInterface;
+use App\Controller\Traits\PaginatedHeadersTrait;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\EntrepotApi\StaticApiService;
@@ -23,6 +24,8 @@ use Symfony\Component\Routing\Attribute\Route;
 #[OA\Tag(name: '[entrepot] statics')]
 class StaticController extends AbstractController implements ApiControllerInterface
 {
+    use PaginatedHeadersTrait;
+
     public function __construct(
         private StaticApiService $staticApiService,
     ) {
@@ -44,13 +47,7 @@ class StaticController extends AbstractController implements ApiControllerInterf
 
             $apiResponse = $this->staticApiService->getList($datastoreId, $query);
             $response = new JsonResponse($apiResponse['content'], Response::HTTP_OK);
-
-            if (isset($apiResponse['headers']['content-range'])) {
-                $response->headers->set('content-range', $apiResponse['headers']['content-range']);
-            }
-            if (isset($apiResponse['headers']['link'])) {
-                $response->headers->set('link', $apiResponse['headers']['link']);
-            }
+            $this->setPaginatedHeaders($response, $apiResponse['headers'] ?? []);
 
             return $response;
         } catch (ApiException $ex) {

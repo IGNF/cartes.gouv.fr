@@ -6,6 +6,7 @@ use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\UploadTags;
 use App\Constants\EntrepotApi\UploadTypes;
 use App\Controller\ApiControllerInterface;
+use App\Controller\Traits\PaginatedHeadersTrait;
 use App\Exception\ApiException;
 use App\Exception\AppException;
 use App\Exception\CartesApiException;
@@ -28,6 +29,8 @@ use Symfony\Component\Routing\Attribute\Route;
 #[OA\Tag(name: '[entrepot] upload')]
 class UploadController extends AbstractController implements ApiControllerInterface
 {
+    use PaginatedHeadersTrait;
+
     public function __construct(
         private UploadApiService $uploadApiService,
     ) {
@@ -58,13 +61,7 @@ class UploadController extends AbstractController implements ApiControllerInterf
                 : $this->uploadApiService->getList($datastoreId, $query);
 
             $response = new JsonResponse($apiResponse['content'], Response::HTTP_OK);
-
-            if (isset($apiResponse['headers']['content-range'])) {
-                $response->headers->set('content-range', $apiResponse['headers']['content-range']);
-            }
-            if (isset($apiResponse['headers']['link'])) {
-                $response->headers->set('link', $apiResponse['headers']['link']);
-            }
+            $this->setPaginatedHeaders($response, $apiResponse['headers'] ?? []);
 
             return $response;
         } catch (ApiException $ex) {

@@ -33,6 +33,8 @@ class UploadApiService extends BaseEntrepotApiService
      */
     public function getList(string $datastoreId, ?array $query = []): array
     {
+        $query ??= [];
+
         if (!array_key_exists('sort', $query)) { // par défaut, trier par la date du dernier évènement décroissante
             $query['sort'] = 'last_event,desc';
         }
@@ -49,6 +51,8 @@ class UploadApiService extends BaseEntrepotApiService
      */
     public function getListDetailed(string $datastoreId, ?array $query = []): array
     {
+        $query ??= [];
+
         $uploadList = $this->getList($datastoreId, $query);
         foreach ($uploadList['content'] as &$upload) {
             $upload = $this->get($datastoreId, $upload['_id']);

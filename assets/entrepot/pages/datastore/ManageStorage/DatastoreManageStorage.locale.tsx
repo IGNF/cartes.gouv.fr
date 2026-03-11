@@ -181,7 +181,7 @@ export const DatastoreManageStorageFrTranslations: Translations<"fr">["Datastore
     "storage.statics.deletion.confirmation": ({ staticId }) => `Êtes-vous sûr de vouloir supprimer le fichier statique ${staticId} ?`,
     "storage.statics.deletion.in_progress": "Suppression du fichier statique en cours",
     "storage.statics.explanation":
-        "Espace est occupé par des fichiers statiques. Il s'agit généralement des fichiers de styles au format SLD ou FTL déposés lors de la publication d'un service WMS-VECTOR.",
+        "Espace occupé par des fichiers statiques. Il s'agit généralement des fichiers de styles au format SLD ou FTL déposés lors de la publication d'un service WMS-VECTOR.",
 };
 export const DatastoreManageStorageEnTranslations: Translations<"en">["DatastoreManageStorage"] = {
     title: undefined,

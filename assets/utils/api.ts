@@ -39,12 +39,14 @@ export const decodeContentRange = (contentRange: string, limit: number): Content
 
     const first = parseInt(parts[0], 10);
     const last = parseInt(parts[1], 10);
-    const totalPages = Math.ceil(total / limit);
+
+    const safeLimit = Number.isFinite(limit) && limit > 0 ? limit : 1;
+    const totalPages = Math.ceil(total / safeLimit);
 
     return { first, last, total, totalPages };
 };
 
 export type PaginatedListResponse<T> = {
     items: T[];
-    contentRange: ContentRangeType;
+    contentRange?: ContentRangeType;
 };

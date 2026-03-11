@@ -136,7 +136,7 @@ const UploadUsage: FC<UploadUsageProps> = ({ datastore }) => {
                                 },
                                 children: tCommon("delete"),
                             },
-                            upload.tags?.datasheet_name && {
+                            upload.tags?.datasheet_name !== undefined && {
                                 iconId: "fr-icon-arrow-right-s-line",
                                 priority: "tertiary no outline",
                                 linkProps: routes.datastore_datasheet_view({

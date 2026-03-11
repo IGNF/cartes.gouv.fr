@@ -27,6 +27,16 @@ class StoredDataApiService extends BaseEntrepotApiService
      */
     public function getList(string $datastoreId, ?array $query = []): array
     {
+        $query ??= [];
+
+        if (!array_key_exists('sort', $query)) { // par défaut, trier par la date du dernier évènement décroissante
+            $query['sort'] = 'last_event,desc';
+        }
+
+        if (array_key_exists('fields', $query) && is_array($query['fields']) && !empty($query['fields'])) {
+            $query['fields'] = implode(',', $query['fields']);
+        }
+
         return $this->request('GET', "datastores/$datastoreId/stored_data", [], $query, [], false, true, true);
     }
 
@@ -35,6 +45,8 @@ class StoredDataApiService extends BaseEntrepotApiService
      */
     public function getListDetailed(string $datastoreId, ?array $query = []): array
     {
+        $query ??= [];
+
         $storedDataList = $this->getList($datastoreId, $query);
         foreach ($storedDataList['content'] as &$storedData) {
             $storedData = $this->get($datastoreId, $storedData['_id']);

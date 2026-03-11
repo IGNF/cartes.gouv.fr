@@ -4,6 +4,7 @@ namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\CommonTags;
 use App\Controller\ApiControllerInterface;
+use App\Controller\Traits\PaginatedHeadersTrait;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\CswMetadataHelper;
@@ -33,6 +34,8 @@ use Symfony\Component\Uid\Uuid;
 #[OA\Tag(name: '[entrepot] annexes')]
 class AnnexeController extends AbstractController implements ApiControllerInterface
 {
+    use PaginatedHeadersTrait;
+
     public function __construct(
         private AnnexeApiService $annexeApiService,
         private DatastoreApiService $datastoreApiService,
@@ -66,13 +69,7 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
 
             $apiResponse = $this->annexeApiService->getList($datastoreId, $query);
             $response = new JsonResponse($apiResponse['content'], Response::HTTP_OK);
-
-            if (isset($apiResponse['headers']['content-range'])) {
-                $response->headers->set('content-range', $apiResponse['headers']['content-range']);
-            }
-            if (isset($apiResponse['headers']['link'])) {
-                $response->headers->set('link', $apiResponse['headers']['link']);
-            }
+            $this->setPaginatedHeaders($response, $apiResponse['headers'] ?? []);
 
             return $response;
         } catch (ApiException $ex) {

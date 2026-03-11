@@ -5,6 +5,7 @@ namespace App\Controller\Entrepot;
 use App\Constants\EntrepotApi\ProcessingStatuses;
 use App\Constants\EntrepotApi\StoredDataStatuses;
 use App\Controller\ApiControllerInterface;
+use App\Controller\Traits\PaginatedHeadersTrait;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\EntrepotApi\CartesStoredDataApiService;
@@ -29,6 +30,8 @@ use Symfony\Component\Routing\Attribute\Route;
 #[OA\Tag(name: '[entrepot] stored_data')]
 class StoredDataController extends AbstractController implements ApiControllerInterface
 {
+    use PaginatedHeadersTrait;
+
     public function __construct(
         private StoredDataApiService $storedDataApiService,
         private ConfigurationApiService $configurationApiService,
@@ -63,13 +66,7 @@ class StoredDataController extends AbstractController implements ApiControllerIn
                 : $this->storedDataApiService->getList($datastoreId, $query);
 
             $response = new JsonResponse($apiResponse['content'], Response::HTTP_OK);
-
-            if (isset($apiResponse['headers']['content-range'])) {
-                $response->headers->set('content-range', $apiResponse['headers']['content-range']);
-            }
-            if (isset($apiResponse['headers']['link'])) {
-                $response->headers->set('link', $apiResponse['headers']['link']);
-            }
+            $this->setPaginatedHeaders($response, $apiResponse['headers'] ?? []);
 
             return $response;
         } catch (ApiException $ex) {
