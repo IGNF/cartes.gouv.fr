@@ -99,7 +99,6 @@ const UploadUsage: FC<UploadUsageProps> = ({ datastore }) => {
                         buttons={[
                             {
                                 iconId: "fr-icon-delete-line",
-                                iconPosition: "right",
                                 priority: "tertiary no outline",
                                 onClick: () => {
                                     setCurrentUploadId(upload._id);
@@ -109,7 +108,6 @@ const UploadUsage: FC<UploadUsageProps> = ({ datastore }) => {
                             },
                             {
                                 iconId: "fr-icon-arrow-right-s-line",
-                                iconPosition: "right",
                                 priority: "tertiary no outline",
                                 linkProps: upload.tags?.datasheet_name
                                     ? routes.datastore_datasheet_view({
@@ -120,53 +118,6 @@ const UploadUsage: FC<UploadUsageProps> = ({ datastore }) => {
                                 children: tCommon("see_2"),
                             },
                         ]}
-                        // buttons={
-                        //     <>
-                        //         <Button
-                        //             size="small"
-                        //             iconId="fr-icon-delete-line"
-                        //             iconPosition="right"
-                        //             priority="tertiary no outline"
-                        //             onClick={() => {
-                        //                 setCurrentUploadId(upload._id);
-                        //                 confirmDialogModal.open();
-                        //             }}
-                        //         >
-                        //             {tCommon("delete")}
-                        //         </Button>
-                        //         {upload.tags.datasheet_name && (
-                        //             <Button
-                        //                 size="small"
-                        //                 iconId="fr-icon-arrow-right-s-line"
-                        //                 iconPosition="right"
-                        //                 priority="tertiary no outline"
-                        //                 linkProps={
-                        //                     routes.datastore_datasheet_view({ datastoreId: datastore._id, datasheetName: upload.tags.datasheet_name }).link
-                        //                 }
-                        //             >
-                        //                 {tCommon("see_2")}
-                        //             </Button>
-                        //         )}
-                        //         {/* <MenuList
-                        //             menuOpenButtonProps={{
-                        //                 size: "small",
-                        //                 iconId: "ri-more-2-line",
-                        //                 iconPosition: "right",
-                        //                 priority: "tertiary no outline",
-                        //             }}
-                        //             items={[
-                        //                 {
-                        //                     text: tCommon("delete"),
-                        //                     iconId: "fr-icon-delete-line",
-                        //                     onClick: () => {
-                        //                         setCurrentUploadId(upload._id);
-                        //                         confirmDialogModal.open();
-                        //                     },
-                        //                 },
-                        //             ]}
-                        //         /> */}
-                        //     </>
-                        // }
                     />
                 ))}
 

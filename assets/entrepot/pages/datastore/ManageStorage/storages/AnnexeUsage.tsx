@@ -1,13 +1,10 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import Button from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
-import Tag from "@codegouvfr/react-dsfr/Tag";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
-import MenuList from "@/components/Utils/MenuList";
 import { usePagination } from "@/hooks/usePagination";
 import Pagination from "@codegouvfr/react-dsfr/Pagination";
 import { Annexe, Datastore } from "../../../../../@types/app";
@@ -108,50 +105,28 @@ const AnnexeUsage: FC<AnnexeUsageProps> = ({ datastore }) => {
                             name={annexe.paths[0] ?? "-"}
                             type={annexe.mime_type}
                             size={annexe.size ? niceBytes(annexe.size?.toString()) : t("data.size.unknown")}
-                            tags={
-                                <>
-                                    <Tag small>{annexe.published ? tCommon("published") : tCommon("not_published")}</Tag>
-                                    {labels.length > 0 &&
-                                        labels.map((label) => (
-                                            <Tag key={`annexe-${annexe._id}-label-${label}`} small>
-                                                {label}
-                                            </Tag>
-                                        ))}
-                                </>
-                            }
-                            buttons={
-                                <>
-                                    {datasheetName && (
-                                        <Button
-                                            size="small"
-                                            iconId="fr-icon-arrow-right-s-line"
-                                            iconPosition="right"
-                                            priority="tertiary no outline"
-                                            linkProps={routes.datastore_datasheet_view({ datastoreId: datastore._id, datasheetName: datasheetName }).link}
-                                        >
-                                            {tCommon("see_2")}
-                                        </Button>
-                                    )}
-                                    <MenuList
-                                        menuOpenButtonProps={{
-                                            size: "small",
-                                            iconId: "ri-more-2-line",
-                                            iconPosition: "right",
-                                            priority: "tertiary no outline",
-                                        }}
-                                        items={[
-                                            {
-                                                text: tCommon("delete"),
-                                                iconId: "fr-icon-delete-line",
-                                                onClick: () => {
-                                                    setCurrentAnnexeId(annexe._id);
-                                                    confirmDialogModal.open();
-                                                },
-                                            },
-                                        ]}
-                                    />
-                                </>
-                            }
+                            buttons={[
+                                {
+                                    iconId: "fr-icon-delete-line",
+                                    priority: "tertiary no outline",
+                                    onClick: () => {
+                                        setCurrentAnnexeId(annexe._id);
+                                        confirmDialogModal.open();
+                                    },
+                                    children: tCommon("delete"),
+                                },
+                                {
+                                    iconId: "fr-icon-arrow-right-s-line",
+                                    priority: "tertiary no outline",
+                                    linkProps: datasheetName
+                                        ? routes.datastore_datasheet_view({
+                                              datastoreId: datastore._id,
+                                              datasheetName: datasheetName,
+                                          }).link
+                                        : undefined,
+                                    children: tCommon("see_2"),
+                                },
+                            ]}
                         />
                     );
                 })}

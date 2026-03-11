@@ -1,13 +1,11 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import Button from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import Pagination from "@codegouvfr/react-dsfr/Pagination";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
-import MenuList from "@/components/Utils/MenuList";
 import { usePagination } from "@/hooks/usePagination";
 import { Datastore, StoredData } from "../../../../../@types/app";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
@@ -107,41 +105,28 @@ const FilesystemUsage: FC<FilesystemUsageProps> = ({ datastore }) => {
                         name={storedData.name}
                         type={t("stored_data.type.title", { type: storedData.type })}
                         size={storedData.size ? niceBytes(storedData.size?.toString()) : t("data.size.unknown")}
-                        buttons={
-                            <>
-                                {storedData.tags.datasheet_name && (
-                                    <Button
-                                        size="small"
-                                        iconId="fr-icon-arrow-right-s-line"
-                                        iconPosition="right"
-                                        priority="tertiary no outline"
-                                        linkProps={
-                                            routes.datastore_datasheet_view({ datastoreId: datastore._id, datasheetName: storedData.tags.datasheet_name }).link
-                                        }
-                                    >
-                                        {tCommon("see_2")}
-                                    </Button>
-                                )}
-                                <MenuList
-                                    menuOpenButtonProps={{
-                                        size: "small",
-                                        iconId: "ri-more-2-line",
-                                        iconPosition: "right",
-                                        priority: "tertiary no outline",
-                                    }}
-                                    items={[
-                                        {
-                                            text: tCommon("delete"),
-                                            iconId: "fr-icon-delete-line",
-                                            onClick: () => {
-                                                setCurrentStoredDataId(storedData._id);
-                                                confirmDialogModal.open();
-                                            },
-                                        },
-                                    ]}
-                                />
-                            </>
-                        }
+                        buttons={[
+                            {
+                                iconId: "fr-icon-delete-line",
+                                priority: "tertiary no outline",
+                                onClick: () => {
+                                    setCurrentStoredDataId(storedData._id);
+                                    confirmDialogModal.open();
+                                },
+                                children: tCommon("delete"),
+                            },
+                            {
+                                iconId: "fr-icon-arrow-right-s-line",
+                                priority: "tertiary no outline",
+                                linkProps: storedData.tags.datasheet_name
+                                    ? routes.datastore_datasheet_view({
+                                          datastoreId: datastore._id,
+                                          datasheetName: storedData.tags.datasheet_name,
+                                      }).link
+                                    : undefined,
+                                children: tCommon("see_2"),
+                            },
+                        ]}
                     />
                 ))}
 

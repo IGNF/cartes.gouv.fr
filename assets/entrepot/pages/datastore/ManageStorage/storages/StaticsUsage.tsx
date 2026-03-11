@@ -1,6 +1,5 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import Button from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import Pagination from "@codegouvfr/react-dsfr/Pagination";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -79,20 +78,17 @@ const StaticsUsage: FC<StaticsUsageProps> = ({ datastore }) => {
                         key={staticFile._id}
                         name={staticFile.name}
                         type={staticFile.type}
-                        buttons={
-                            <Button
-                                size="small"
-                                key={staticFile._id}
-                                priority="tertiary no outline"
-                                iconId="fr-icon-delete-line"
-                                onClick={() => {
+                        buttons={[
+                            {
+                                iconId: "fr-icon-delete-line",
+                                priority: "tertiary no outline",
+                                onClick: () => {
                                     setCurrentStaticId(staticFile._id);
                                     confirmDialogModal.open();
-                                }}
-                            >
-                                {tCommon("delete")}
-                            </Button>
-                        }
+                                },
+                                children: tCommon("delete"),
+                            },
+                        ]}
                     />
                 ))}
 

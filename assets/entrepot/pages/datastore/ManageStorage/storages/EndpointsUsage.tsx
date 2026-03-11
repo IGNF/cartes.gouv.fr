@@ -1,12 +1,10 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import Button from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
-import MenuList from "@/components/Utils/MenuList";
 import { Datastore, EndpointTypeEnum, Metadata, Offering, OfferingTypeEnum } from "../../../../../@types/app";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../../components/Utils/LoadingText";
@@ -139,21 +137,33 @@ const EndpointsUsage: FC<EndpointsUsageProps> = ({ datastore }) => {
                                                 key={offering._id}
                                                 name={offering.layer_name}
                                                 type={offering.type}
-                                                buttons={
-                                                    <Button
-                                                        key={offering._id}
-                                                        priority="tertiary no outline"
-                                                        iconId="fr-icon-delete-line"
-                                                        onClick={() => {
+                                                // buttons={
+                                                //     <Button
+                                                //         key={offering._id}
+                                                //         priority="tertiary no outline"
+                                                //         iconId="fr-icon-delete-line"
+                                                //         onClick={() => {
+                                                //             setCurrentOffering(offering);
+                                                //             confirmUnpublishOfferingModal.open();
+                                                //         }}
+                                                //         nativeButtonProps={confirmUnpublishOfferingModal.buttonProps}
+                                                //         size="small"
+                                                //     >
+                                                //         {tCommon("unpublish")}
+                                                //     </Button>
+                                                // }
+                                                buttons={[
+                                                    {
+                                                        iconId: "fr-icon-delete-line",
+                                                        priority: "tertiary no outline",
+                                                        onClick: () => {
                                                             setCurrentOffering(offering);
                                                             confirmUnpublishOfferingModal.open();
-                                                        }}
-                                                        nativeButtonProps={confirmUnpublishOfferingModal.buttonProps}
-                                                        size="small"
-                                                    >
-                                                        {tCommon("unpublish")}
-                                                    </Button>
-                                                }
+                                                        },
+                                                        children: tCommon("unpublish"),
+                                                        nativeButtonProps: confirmUnpublishOfferingModal.buttonProps,
+                                                    },
+                                                ]}
                                             />
                                         ))}
                                 </section>
@@ -173,44 +183,28 @@ const EndpointsUsage: FC<EndpointsUsageProps> = ({ datastore }) => {
                                     key={metadata._id}
                                     name={metadata.file_identifier}
                                     type={metadata.type}
-                                    buttons={
-                                        <>
-                                            {metadata.tags.datasheet_name && (
-                                                <Button
-                                                    size="small"
-                                                    iconId="fr-icon-arrow-right-s-line"
-                                                    iconPosition="right"
-                                                    priority="tertiary no outline"
-                                                    linkProps={
-                                                        routes.datastore_datasheet_view({
-                                                            datastoreId: datastore._id,
-                                                            datasheetName: metadata.tags.datasheet_name,
-                                                        }).link
-                                                    }
-                                                >
-                                                    {tCommon("see_2")}
-                                                </Button>
-                                            )}
-                                            <MenuList
-                                                menuOpenButtonProps={{
-                                                    size: "small",
-                                                    iconId: "ri-more-2-line",
-                                                    iconPosition: "right",
-                                                    priority: "tertiary no outline",
-                                                }}
-                                                items={[
-                                                    {
-                                                        text: tCommon("delete"),
-                                                        iconId: "fr-icon-delete-line",
-                                                        onClick: () => {
-                                                            setCurrentMetadata(metadata);
-                                                            confirmDeleteMetadataModal.open();
-                                                        },
-                                                    },
-                                                ]}
-                                            />
-                                        </>
-                                    }
+                                    buttons={[
+                                        {
+                                            iconId: "fr-icon-delete-line",
+                                            priority: "tertiary no outline",
+                                            onClick: () => {
+                                                setCurrentMetadata(metadata);
+                                                confirmDeleteMetadataModal.open();
+                                            },
+                                            children: tCommon("delete"),
+                                        },
+                                        {
+                                            iconId: "fr-icon-arrow-right-s-line",
+                                            priority: "tertiary no outline",
+                                            linkProps: metadata.tags.datasheet_name
+                                                ? routes.datastore_datasheet_view({
+                                                      datastoreId: datastore._id,
+                                                      datasheetName: metadata.tags.datasheet_name,
+                                                  }).link
+                                                : undefined,
+                                            children: tCommon("see_2"),
+                                        },
+                                    ]}
                                 />
                             ))}
                     </section>
