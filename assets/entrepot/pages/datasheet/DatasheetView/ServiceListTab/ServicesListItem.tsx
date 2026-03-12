@@ -20,6 +20,9 @@ import { offeringTypeDisplayName } from "../../../../../utils";
 import api from "../../../../api";
 import ListItem from "../ListItem";
 import ServiceDesc from "./ServiceDesc";
+import { useAuthStore } from "@/stores/AuthStore";
+import { useDatastore } from "@/contexts/datastore";
+import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 
 type ServicesListItemProps = {
     service: Service;
@@ -61,6 +64,14 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
 
     const [showDescription, toggleShowDescription] = useToggle(false);
 
+    //rights
+    const user = useAuthStore((state) => state.user);
+    const { datastore } = useDatastore();
+    const communityID = datastore.community._id;
+    const community = user?.communities_member.find((member) => member.community?._id === communityID)?.community;
+    const userRights = user?.communities_member.find((member) => member.community?._id === communityID)?.rights;
+    const isSupervisor = community?.supervisor === user?.id;
+
     return (
         <>
             <ListItem
@@ -89,11 +100,13 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                             }
                         },
                     },
-                    [OfferingTypeEnum.WFS, OfferingTypeEnum.WMTSTMS].includes(service.type) && {
-                        text: "Gérer les styles",
-                        iconId: "ri-flashlight-line",
-                        linkProps: routes.datastore_service_view({ datastoreId, datasheetName, offeringId: service._id }).link,
-                    },
+                    [OfferingTypeEnum.WFS, OfferingTypeEnum.WMTSTMS].includes(service.type) &&
+                        (isSupervisor ||
+                            (userRights?.includes(CommunityMemberDtoRightsEnum.ANNEX) && userRights?.includes(CommunityMemberDtoRightsEnum.BROADCAST))) && {
+                            text: "Gérer les styles",
+                            iconId: "ri-flashlight-line",
+                            linkProps: routes.datastore_service_view({ datastoreId, datasheetName, offeringId: service._id }).link,
+                        },
                     // {
                     //     text: "Mettre à jour la légende",
                     //     iconId: "ri-list-check",
@@ -105,61 +118,62 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                         linkProps: routes.datastore_manage_permissions({ datastoreId }).link,
                         disabled: service.open === true,
                     },
-                    [OfferingTypeEnum.WMSVECTOR, OfferingTypeEnum.WMSRASTER, OfferingTypeEnum.WFS, OfferingTypeEnum.WMTSTMS].includes(service.type) && {
-                        text: "Modifier les informations de publication",
-                        iconId: "ri-edit-box-line",
-                        linkProps: (() => {
-                            switch (service.type) {
-                                case OfferingTypeEnum.WMSVECTOR:
-                                    return routes.datastore_wms_vector_service_edit({
-                                        datastoreId,
-                                        vectorDbId: service.configuration.type_infos.used_data[0].stored_data,
-                                        offeringId: service._id,
-                                        datasheetName,
-                                    }).link;
+                    [OfferingTypeEnum.WMSVECTOR, OfferingTypeEnum.WMSRASTER, OfferingTypeEnum.WFS, OfferingTypeEnum.WMTSTMS].includes(service.type) &&
+                        (isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.BROADCAST)) && {
+                            text: "Modifier les informations de publication",
+                            iconId: "ri-edit-box-line",
+                            linkProps: (() => {
+                                switch (service.type) {
+                                    case OfferingTypeEnum.WMSVECTOR:
+                                        return routes.datastore_wms_vector_service_edit({
+                                            datastoreId,
+                                            vectorDbId: service.configuration.type_infos.used_data[0].stored_data,
+                                            offeringId: service._id,
+                                            datasheetName,
+                                        }).link;
 
-                                case OfferingTypeEnum.WMSRASTER:
-                                    return routes.datastore_pyramid_raster_wms_raster_service_edit({
-                                        datastoreId,
-                                        pyramidId: service.configuration.type_infos.used_data[0].stored_data,
-                                        offeringId: service._id,
-                                        datasheetName,
-                                    }).link;
+                                    case OfferingTypeEnum.WMSRASTER:
+                                        return routes.datastore_pyramid_raster_wms_raster_service_edit({
+                                            datastoreId,
+                                            pyramidId: service.configuration.type_infos.used_data[0].stored_data,
+                                            offeringId: service._id,
+                                            datasheetName,
+                                        }).link;
 
-                                case OfferingTypeEnum.WFS:
-                                    return routes.datastore_wfs_service_edit({
-                                        datastoreId,
-                                        vectorDbId: service.configuration.type_infos.used_data[0].stored_data,
-                                        offeringId: service._id,
-                                        datasheetName,
-                                    }).link;
+                                    case OfferingTypeEnum.WFS:
+                                        return routes.datastore_wfs_service_edit({
+                                            datastoreId,
+                                            vectorDbId: service.configuration.type_infos.used_data[0].stored_data,
+                                            offeringId: service._id,
+                                            datasheetName,
+                                        }).link;
 
-                                case OfferingTypeEnum.WMTSTMS:
-                                    switch (service.configuration.pyramid?.type) {
-                                        case StoredDataTypeEnum.ROK4PYRAMIDVECTOR:
-                                            return routes.datastore_pyramid_vector_tms_service_edit({
-                                                datastoreId,
-                                                pyramidId: service.configuration.type_infos.used_data[0].stored_data,
-                                                offeringId: service._id,
-                                                datasheetName,
-                                            }).link;
-                                        case StoredDataTypeEnum.ROK4PYRAMIDRASTER:
-                                            return routes.datastore_pyramid_raster_wmts_service_edit({
-                                                datastoreId,
-                                                pyramidId: service.configuration.type_infos.used_data[0].stored_data,
-                                                offeringId: service._id,
-                                                datasheetName,
-                                            }).link;
+                                    case OfferingTypeEnum.WMTSTMS:
+                                        switch (service.configuration.pyramid?.type) {
+                                            case StoredDataTypeEnum.ROK4PYRAMIDVECTOR:
+                                                return routes.datastore_pyramid_vector_tms_service_edit({
+                                                    datastoreId,
+                                                    pyramidId: service.configuration.type_infos.used_data[0].stored_data,
+                                                    offeringId: service._id,
+                                                    datasheetName,
+                                                }).link;
+                                            case StoredDataTypeEnum.ROK4PYRAMIDRASTER:
+                                                return routes.datastore_pyramid_raster_wmts_service_edit({
+                                                    datastoreId,
+                                                    pyramidId: service.configuration.type_infos.used_data[0].stored_data,
+                                                    offeringId: service._id,
+                                                    datasheetName,
+                                                }).link;
 
-                                        default:
-                                            return routes.page_not_found().link;
-                                    }
+                                            default:
+                                                return routes.page_not_found().link;
+                                        }
 
-                                default:
-                                    return routes.page_not_found().link;
-                            }
-                        })(),
-                    },
+                                    default:
+                                        return routes.page_not_found().link;
+                                }
+                            })(),
+                        },
                     service.type === OfferingTypeEnum.WMSVECTOR && {
                         text: "Créer un service raster WMS/WMTS",
                         iconId: "ri-add-box-line",
@@ -171,7 +185,7 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                     //     iconId: "fr-icon-refresh-line",
                     //     onClick: () => console.warn("Action non implémentée"),
                     // },
-                    {
+                    (isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.BROADCAST)) && {
                         text: "Dépublier",
                         iconId: "ri-arrow-go-back-line",
                         onClick: () => unpublishServiceConfirmModal.open(),

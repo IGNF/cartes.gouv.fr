@@ -25,6 +25,10 @@ import { routes, useRoute } from "../../../../../router/router";
 import api from "../../../../api";
 import DatasheetThumbnail from "../DatasheetThumbnail";
 
+import { useAuthStore } from "@/stores/AuthStore";
+import { useDatastore } from "@/contexts/datastore";
+import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
+
 const DatasetListTab = lazy(() => import("../DatasetListTab/DatasetListTab"));
 const DocumentsTab = lazy(() => import("../DocumentsTab/DocumentsTab"));
 const MetadataTab = lazy(() => import("../MetadataTab/MetadataTab"));
@@ -135,6 +139,14 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
         }),
     });
 
+    //rights
+    const user = useAuthStore((state) => state.user);
+    const { datastore } = useDatastore();
+    const communityID = datastore.community._id;
+    const community = user?.communities_member.find((member) => member.community?._id === communityID)?.community;
+    const userRights = user?.communities_member.find((member) => member.community?._id === communityID)?.rights;
+    const isSupervisor = community?.supervisor === user?.id;
+
     return (
         <Main title={`Données ${datasheetName}`}>
             <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-4w")}>
@@ -179,26 +191,34 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
             {datasheetQuery.data !== undefined && (
                 <>
                     <div className={fr.cx("fr-grid-row", "fr-mb-4w")}>
-                        <div className={fr.cx("fr-col-2")}>
-                            <DatasheetThumbnail datastoreId={datastoreId} datasheetName={datasheetName} datasheet={datasheetQuery.data} />
-                        </div>
+                        {(isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.ANNEX)) && (
+                            <div className={fr.cx("fr-col-2")}>
+                                <DatasheetThumbnail datastoreId={datastoreId} datasheetName={datasheetName} datasheet={datasheetQuery.data} />
+                            </div>
+                        )}
                         <div className={fr.cx("fr-col")}>
                             {/* TODO : désactivé car on n'a pas ces infos */}
                             <p className={fr.cx("fr-mb-2v")}>{/* <strong>Création de la fiche de données : </strong>13 Mar. 2023 */}</p>
                             <p className={fr.cx("fr-mb-2v")}>{/* <strong>Mise à jour : </strong>17 Mar. 2023 */}</p>
                         </div>
-                        <div className={fr.cx("fr-col-3")}>
-                            <ButtonsGroup
-                                buttons={[
-                                    {
-                                        children: t("datasheet.remove"),
-                                        onClick: () => deleteDataConfirmModal.open(),
-                                        iconId: "fr-icon-delete-fill",
-                                        priority: "secondary",
-                                    },
-                                ]}
-                            />
-                        </div>
+                        {(isSupervisor ||
+                            (userRights?.includes(CommunityMemberDtoRightsEnum.ANNEX) &&
+                                userRights?.includes(CommunityMemberDtoRightsEnum.UPLOAD) &&
+                                userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING) &&
+                                userRights?.includes(CommunityMemberDtoRightsEnum.BROADCAST))) && (
+                            <div className={fr.cx("fr-col-3")}>
+                                <ButtonsGroup
+                                    buttons={[
+                                        {
+                                            children: t("datasheet.remove"),
+                                            onClick: () => deleteDataConfirmModal.open(),
+                                            iconId: "fr-icon-delete-fill",
+                                            priority: "secondary",
+                                        },
+                                    ]}
+                                />
+                            </div>
+                        )}
                     </div>
 
                     <div className={fr.cx("fr-grid-row")}>
@@ -239,7 +259,13 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                                                 return <MetadataTab datastoreId={datastoreId} metadataQuery={metadataQuery} />;
 
                                             case DatasheetViewActiveTabEnum.Dataset:
-                                                return <DatasetListTab datastoreId={datastoreId} datasheet={datasheetQuery.data} />;
+                                                return (
+                                                    <DatasetListTab
+                                                        datastoreId={datastoreId}
+                                                        datasheet={datasheetQuery.data}
+                                                        datasheet_services_list={datasheetQuery.data.service_list ?? []}
+                                                    />
+                                                );
 
                                             case DatasheetViewActiveTabEnum.Services:
                                                 return (

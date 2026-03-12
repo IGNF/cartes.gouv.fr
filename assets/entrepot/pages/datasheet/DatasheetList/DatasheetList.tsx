@@ -29,6 +29,8 @@ import { SortByEnum } from "./DatasheetList.types";
 import DatasheetListItem from "./DatasheetListItem";
 import NoData from "./NoData";
 import SandboxDatastoreExplanation from "./SandboxDatastoreExplanation";
+import { useAuthStore } from "@/stores/AuthStore";
+import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 
 const filterTests = {
     [FilterEnum.ENABLED]: (d: Datasheet) => d.nb_publications > 0,
@@ -74,6 +76,13 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
 
     const { classes, cx } = useStyles();
 
+    //rights
+    const user = useAuthStore((state) => state.user);
+    const communityID = datastore.community._id;
+    const community = user?.communities_member.find((member) => member.community?._id === communityID)?.community;
+    const userRights = user?.communities_member.find((member) => member.community?._id === communityID)?.rights;
+    const isSupervisor = community?.supervisor === user?.id;
+
     return (
         <DatastoreMain title={t("title", { datastoreName: datastore?.is_sandbox === true ? tCommon("sandbox") : datastore?.name })} datastoreId={datastoreId}>
             <PageTitle title={t("title", { datastoreName: datastore?.is_sandbox === true ? tCommon("sandbox") : datastore?.name })}>
@@ -96,18 +105,22 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
                             <Badge severity="info" noIcon={true}>
                                 {filteredItems.length ?? 0}
                             </Badge>
-                            <Button
-                                linkProps={
-                                    datasheetCreationImpossible
-                                        ? { href: undefined, "aria-hidden": true }
-                                        : routes.datastore_datasheet_upload({ datastoreId: datastoreId }).link
-                                }
-                                iconId="fr-icon-add-line"
-                                iconPosition="right"
-                                className={fr.cx("fr-ml-auto", datasheetCreationImpossible && "fr-hidden")}
-                            >
-                                {t("create_datasheet")}
-                            </Button>
+                            {(isSupervisor ||
+                                (userRights?.includes(CommunityMemberDtoRightsEnum.UPLOAD) &&
+                                    userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING))) && (
+                                <Button
+                                    linkProps={
+                                        datasheetCreationImpossible
+                                            ? { href: undefined, "aria-hidden": true }
+                                            : routes.datastore_datasheet_upload({ datastoreId: datastoreId }).link
+                                    }
+                                    iconId="fr-icon-add-line"
+                                    iconPosition="right"
+                                    className={fr.cx("fr-ml-auto", datasheetCreationImpossible && "fr-hidden")}
+                                >
+                                    {t("create_datasheet")}
+                                </Button>
+                            )}
                         </div>
                     </div>
 

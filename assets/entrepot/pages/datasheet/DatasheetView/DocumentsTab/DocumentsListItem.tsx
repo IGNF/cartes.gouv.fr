@@ -18,6 +18,10 @@ import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import api from "../../../../api";
 
+import { useAuthStore } from "@/stores/AuthStore";
+import { useDatastore } from "@/contexts/datastore";
+import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
+
 type DocumentsListItemProps = {
     document: DatasheetDocument;
     datastoreId: string;
@@ -87,6 +91,14 @@ const DocumentsListItem: FC<DocumentsListItemProps> = ({ document, datastoreId, 
         },
     });
 
+    //rights
+    const user = useAuthStore((state) => state.user);
+    const { datastore } = useDatastore();
+    const communityID = datastore.community._id;
+    const community = user?.communities_member.find((member) => member.community?._id === communityID)?.community;
+    const userRights = user?.communities_member.find((member) => member.community?._id === communityID)?.rights;
+    const isSupervisor = community?.supervisor === user?.id;
+
     return (
         <>
             <div className={fr.cx("fr-p-2v", "fr-mt-2v")} style={{ backgroundColor: fr.colors.decisions.background.contrast.grey.default }}>
@@ -133,25 +145,27 @@ const DocumentsListItem: FC<DocumentsListItemProps> = ({ document, datastoreId, 
                             >
                                 {tCommon("see")}
                             </Button>
-                            <MenuList
-                                menuOpenButtonProps={{
-                                    iconId: "fr-icon-menu-2-fill",
-                                    title: "Autres actions",
-                                    priority: "secondary",
-                                }}
-                                items={[
-                                    {
-                                        text: tCommon("modify"),
-                                        iconId: "ri-edit-box-line",
-                                        onClick: documentEditModal.open,
-                                    },
-                                    {
-                                        text: tCommon("delete"),
-                                        iconId: "fr-icon-delete-line",
-                                        onClick: confirmDeleteDocumentModal.open,
-                                    },
-                                ]}
-                            />
+                            {(isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.ANNEX)) && (
+                                <MenuList
+                                    menuOpenButtonProps={{
+                                        iconId: "fr-icon-menu-2-fill",
+                                        title: "Autres actions",
+                                        priority: "secondary",
+                                    }}
+                                    items={[
+                                        {
+                                            text: tCommon("modify"),
+                                            iconId: "ri-edit-box-line",
+                                            onClick: documentEditModal.open,
+                                        },
+                                        {
+                                            text: tCommon("delete"),
+                                            iconId: "fr-icon-delete-line",
+                                            onClick: confirmDeleteDocumentModal.open,
+                                        },
+                                    ]}
+                                />
+                            )}
                         </div>
                     </div>
                 </div>
