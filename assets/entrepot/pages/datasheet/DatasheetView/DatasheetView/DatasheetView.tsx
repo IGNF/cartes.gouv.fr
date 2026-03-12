@@ -259,13 +259,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                                                 return <MetadataTab datastoreId={datastoreId} metadataQuery={metadataQuery} />;
 
                                             case DatasheetViewActiveTabEnum.Dataset:
-                                                return (
-                                                    <DatasetListTab
-                                                        datastoreId={datastoreId}
-                                                        datasheet={datasheetQuery.data}
-                                                        datasheet_services_list={datasheetQuery.data.service_list ?? []}
-                                                    />
-                                                );
+                                                return <DatasetListTab datastoreId={datastoreId} datasheet={datasheetQuery.data} />;
 
                                             case DatasheetViewActiveTabEnum.Services:
                                                 return (
