@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import { createWriteStream } from "fs";
 import { mkdir, readFile, rm, writeFile } from "fs/promises";
 import { HttpsProxyAgent } from "https-proxy-agent";
@@ -13,7 +13,7 @@ import { pipeline } from "stream/promises";
 import { fileURLToPath } from "url";
 import { promisify } from "util";
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 const ARTICLES_CMS_BASE_URL = process.env.ARTICLES_CMS_BASE_URL;
 const ARTICLES_CMS_USERNAME = process.env.ARTICLES_CMS_USERNAME;
@@ -312,7 +312,7 @@ const readHistory = async () => {
 const appendRunHistory = async (entry) => {
     const history = await readHistory();
     history.runs.unshift(entry);
-    history.runs = history.runs.slice(-MAX_HISTORY_ENTRIES);
+    history.runs = history.runs.slice(0, MAX_HISTORY_ENTRIES);
 
     await ensureDirectoryExists(RUN_HISTORY_FILE);
     await writeFile(RUN_HISTORY_FILE, JSON.stringify(history, null, 2), { flag: "w" });
@@ -324,10 +324,11 @@ const isHistoryMissingOnRemote = (error) => {
 };
 
 const pullHistoryFromS3 = async () => {
-    const command = `rclone copyto ${RUN_HISTORY_REMOTE_FILE} ${RUN_HISTORY_FILE}`;
+    const args = ["copyto", RUN_HISTORY_REMOTE_FILE, RUN_HISTORY_FILE];
+    const command = `rclone ${args.join(" ")}`;
 
     try {
-        await execAsync(command);
+        await execFileAsync("rclone", args);
         logger.info(`Pulled history file from ${RUN_HISTORY_REMOTE_FILE}`);
 
         return {
@@ -352,10 +353,11 @@ const pullHistoryFromS3 = async () => {
 };
 
 const pushHistoryToS3 = async () => {
-    const command = `rclone copyto ${RUN_HISTORY_FILE} ${RUN_HISTORY_REMOTE_FILE}`;
+    const args = ["copyto", RUN_HISTORY_FILE, RUN_HISTORY_REMOTE_FILE];
+    const command = `rclone ${args.join(" ")}`;
 
     try {
-        await execAsync(command);
+        await execFileAsync("rclone", args);
         logger.info(`Pushed history file to ${RUN_HISTORY_REMOTE_FILE}`);
 
         return {
@@ -373,10 +375,12 @@ const pushHistoryToS3 = async () => {
 };
 
 const syncS3 = async () => {
-    const command = `rclone sync ${OUTPUT_DIR} ${RCLONE_S3_REMOTE}:${S3_BUCKET_NAME}/articles`;
+    const destination = `${RCLONE_S3_REMOTE}:${S3_BUCKET_NAME}/articles`;
+    const args = ["sync", OUTPUT_DIR, destination];
+    const command = `rclone ${args.join(" ")}`;
 
     try {
-        await execAsync(command);
+        await execFileAsync("rclone", args);
         logger.info(`Synchronised ${OUTPUT_DIR} to ${RCLONE_S3_REMOTE}:${S3_BUCKET_NAME}/articles`);
 
         return {
