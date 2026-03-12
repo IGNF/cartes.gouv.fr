@@ -57,8 +57,8 @@ const stats = {
     files: {
         downloaded: 0,
         failed: 0,
-    }
-}
+    },
+};
 
 const CONCURRENCY_LIMIT = 1;
 const CONCURRENCY_DELAY = 200;
@@ -588,7 +588,7 @@ const processSingleArticle = async (slug) => {
     await appendRunHistory({
         executedAt: executedAt.toISOString(),
         durationMs: new Date().getTime() - executedAt.getTime(),
-        stats
+        stats,
     });
 
     const historyPushResult = await pushHistoryToS3();
