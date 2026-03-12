@@ -3,7 +3,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { FC, memo, useMemo } from "react";
 import { symToStr } from "tsafe/symToStr";
 
-import { DatasheetDetailed, Service } from "../../../../../@types/app";
+import { DatasheetDetailed } from "../../../../../@types/app";
 import { routes } from "../../../../../router/router";
 import PyramidVectorList from "./PyramidVectorList/PyramidVectorList";
 import UnfinishedUploadList from "./UnfinishedUploadList";
@@ -16,7 +16,6 @@ import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 type DataListTabProps = {
     datastoreId: string;
     datasheet: DatasheetDetailed;
-    datasheet_services_list: Service[];
 };
 
 const DatasetListTab: FC<DataListTabProps> = ({ datastoreId, datasheet }) => {
@@ -54,8 +53,6 @@ const DatasetListTab: FC<DataListTabProps> = ({ datastoreId, datasheet }) => {
     const community = user?.communities_member.find((member) => member.community?._id === communityID)?.community;
     const userRights = user?.communities_member.find((member) => member.community?._id === communityID)?.rights;
     const isSupervisor = community?.supervisor === user?.id;
-
-    console.log(datastore);
 
     return (
         <>
