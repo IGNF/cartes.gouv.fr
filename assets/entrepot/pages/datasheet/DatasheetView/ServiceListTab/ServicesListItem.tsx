@@ -174,11 +174,12 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
                                 }
                             })(),
                         },
-                    service.type === OfferingTypeEnum.WMSVECTOR && {
-                        text: "Créer un service raster WMS/WMTS",
-                        iconId: "ri-add-box-line",
-                        linkProps: routes.datastore_pyramid_raster_generate({ datastoreId, offeringId: service._id, datasheetName }).link,
-                    },
+                    service.type === OfferingTypeEnum.WMSVECTOR &&
+                        (isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING)) && {
+                            text: "Créer un service raster WMS/WMTS",
+                            iconId: "ri-add-box-line",
+                            linkProps: routes.datastore_pyramid_raster_generate({ datastoreId, offeringId: service._id, datasheetName }).link,
+                        },
                     // NOTE : reporté cf. issue #249
                     // {
                     //     text: "Remplacer les données",

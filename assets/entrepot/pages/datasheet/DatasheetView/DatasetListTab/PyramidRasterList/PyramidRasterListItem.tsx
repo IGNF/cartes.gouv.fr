@@ -25,6 +25,10 @@ import PyramidStoredDataDesc from "../PyramidStoredDataDesc";
 import StoredDataDeleteConfirmDialog from "../StoredDataDeleteConfirmDialog";
 import { PyramidRasterServiceChoiceDialog, type PyramidRasterServiceChoiceDialogOpenFn } from "./PyramidRasterServiceChoiceDialog";
 
+import { useAuthStore } from "@/stores/AuthStore";
+import { useDatastore } from "@/contexts/datastore";
+import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
+
 const getHintText = (endpoints: DatastoreEndpoint[]): ReactNode => (
     <ul className={fr.cx("fr-raw-list")}>
         {endpoints.map((endpoint) => (
@@ -89,62 +93,72 @@ const PyramidRasterListItem: FC<PyramidRasterListItemProps> = ({ datasheetName, 
 
     const serviceChoiceDialogApiRef = useRef<{ open?: PyramidRasterServiceChoiceDialogOpenFn }>({});
 
+    //rights
+    const user = useAuthStore((state) => state.user);
+    const { datastore } = useDatastore();
+    const communityID = datastore.community._id;
+    const community = user?.communities_member.find((member) => member.community?._id === communityID)?.community;
+    const userRights = user?.communities_member.find((member) => member.community?._id === communityID)?.rights;
+    const isSupervisor = community?.supervisor === user?.id;
+
     return (
         <>
             <ListItem
                 actionButton={
-                    <Button
-                        onClick={async () => {
-                            const openFn = serviceChoiceDialogApiRef.current.open;
-                            if (openFn === undefined) return;
+                    (isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.BROADCAST)) && (
+                        <Button
+                            onClick={async () => {
+                                const openFn = serviceChoiceDialogApiRef.current.open;
+                                if (openFn === undefined) return;
 
-                            const { response: serviceType } = await openFn({
-                                title: t("choose_service_type"),
-                                options: [
-                                    {
-                                        id: OfferingTypeEnum.WMSRASTER,
-                                        text: t("wms_raster_label"),
-                                        hintText: (
-                                            <>
-                                                {t("wms_raster_hint_text")}
-                                                {getHintText(wmsRasterEndpoints)}
-                                            </>
-                                        ),
-                                        disabled: wmsRasterEndpoints.length === 0 || !isAvailable(wmsRasterEndpoints),
-                                    },
-                                    {
-                                        id: OfferingTypeEnum.WMTSTMS,
-                                        text: t("wmts_label"),
-                                        hintText: (
-                                            <>
-                                                {t("wmts_hint_text")}
-                                                {getHintText(wmtsEndpoints)}
-                                            </>
-                                        ),
-                                        disabled: wmtsEndpoints.length === 0 || !isAvailable(wmtsEndpoints),
-                                    },
-                                ],
-                            });
+                                const { response: serviceType } = await openFn({
+                                    title: t("choose_service_type"),
+                                    options: [
+                                        {
+                                            id: OfferingTypeEnum.WMSRASTER,
+                                            text: t("wms_raster_label"),
+                                            hintText: (
+                                                <>
+                                                    {t("wms_raster_hint_text")}
+                                                    {getHintText(wmsRasterEndpoints)}
+                                                </>
+                                            ),
+                                            disabled: wmsRasterEndpoints.length === 0 || !isAvailable(wmsRasterEndpoints),
+                                        },
+                                        {
+                                            id: OfferingTypeEnum.WMTSTMS,
+                                            text: t("wmts_label"),
+                                            hintText: (
+                                                <>
+                                                    {t("wmts_hint_text")}
+                                                    {getHintText(wmtsEndpoints)}
+                                                </>
+                                            ),
+                                            disabled: wmtsEndpoints.length === 0 || !isAvailable(wmtsEndpoints),
+                                        },
+                                    ],
+                                });
 
-                            if (serviceType === undefined) return;
+                                if (serviceType === undefined) return;
 
-                            switch (serviceType) {
-                                case OfferingTypeEnum.WMSRASTER:
-                                    routes.datastore_pyramid_raster_wms_raster_service_new({ datastoreId, pyramidId: pyramid._id, datasheetName }).push();
-                                    break;
-                                case OfferingTypeEnum.WMTSTMS:
-                                    routes.datastore_pyramid_raster_wmts_service_new({ datastoreId, pyramidId: pyramid._id, datasheetName }).push();
-                                    break;
-                                default:
-                                    throw new Error(`Publication ${serviceType} n'est pas encore implémentée`);
-                            }
-                        }}
-                        className={fr.cx("fr-mr-2v")}
-                        priority="secondary"
-                        disabled={pyramid.status !== StoredDataStatusEnum.GENERATED}
-                    >
-                        {t("publish_pyramid_raster")}
-                    </Button>
+                                switch (serviceType) {
+                                    case OfferingTypeEnum.WMSRASTER:
+                                        routes.datastore_pyramid_raster_wms_raster_service_new({ datastoreId, pyramidId: pyramid._id, datasheetName }).push();
+                                        break;
+                                    case OfferingTypeEnum.WMTSTMS:
+                                        routes.datastore_pyramid_raster_wmts_service_new({ datastoreId, pyramidId: pyramid._id, datasheetName }).push();
+                                        break;
+                                    default:
+                                        throw new Error(`Publication ${serviceType} n'est pas encore implémentée`);
+                                }
+                            }}
+                            className={fr.cx("fr-mr-2v")}
+                            priority="secondary"
+                            disabled={pyramid.status !== StoredDataStatusEnum.GENERATED}
+                        >
+                            {t("publish_pyramid_raster")}
+                        </Button>
+                    )
                 }
                 badge={<StoredDataStatusBadge status={pyramid.status} />}
                 buttonTitle={t("show_linked_datas")}

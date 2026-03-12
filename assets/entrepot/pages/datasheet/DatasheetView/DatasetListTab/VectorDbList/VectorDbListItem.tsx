@@ -286,7 +286,10 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
                                 nativeInputProps: {
                                     checked: serviceType === "tms",
                                     onChange: () => setServiceType("tms"),
-                                    disabled: tmsEndpoints?.length === 0 || !isAvailable("WMTS-TMS"),
+                                    disabled:
+                                        tmsEndpoints?.length === 0 ||
+                                        !isAvailable("WMTS-TMS") ||
+                                        (!isSupervisor && !userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING)),
                                 },
                             },
                             {
