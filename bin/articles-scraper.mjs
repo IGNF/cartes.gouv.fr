@@ -2,16 +2,16 @@
 
 import { exec } from "child_process";
 import { createWriteStream } from "fs";
-import { mkdir, rm, writeFile } from "fs/promises";
+import { mkdir, readFile, rm, writeFile } from "fs/promises";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import { JSDOM } from "jsdom";
 import fetch from "node-fetch";
+import { styleText, format as utilFormat } from "node:util";
 import { dirname, join, normalize, resolve } from "path";
 import { format, resolveConfig } from "prettier";
 import { pipeline } from "stream/promises";
 import { fileURLToPath } from "url";
 import { promisify } from "util";
-import { styleText, format as utilFormat } from "node:util";
 
 const execAsync = promisify(exec);
 
@@ -32,6 +32,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const OUTPUT_DIR = resolve(join(__dirname, "..", "var", "data", "articles"));
+const RUN_HISTORY_FILE = resolve(join(__dirname, "..", "var", "data", "articles-scraper-cronjob-history.json"));
+const RUN_HISTORY_REMOTE_FILE = `${RCLONE_S3_REMOTE}:${S3_BUCKET_NAME}/articles/articles-scraper-cronjob-history.json`;
+const MAX_HISTORY_ENTRIES = 10;
 
 const HTTP_PROXY = process.env.HTTP_PROXY;
 
@@ -45,8 +48,17 @@ const logger = {
     success: (...args) => console.log(styleText("bgGreen", formatArgs(args))),
 };
 
-let nbDownloadedFiles = 0;
-let nbDownloadedFilesFailed = 0;
+const stats = {
+    articles: {
+        detected: 0,
+        downloaded: 0,
+        failed: 0,
+    },
+    files: {
+        downloaded: 0,
+        failed: 0,
+    }
+}
 
 const CONCURRENCY_LIMIT = 1;
 const CONCURRENCY_DELAY = 200;
@@ -244,11 +256,11 @@ const downloadFile = async (originalFilePath) => {
         await pipeline(response.body, createWriteStream(newFilePath));
 
         logger.log(`File saved to ${newFilePath}`);
-        nbDownloadedFiles++;
+        stats.files.downloaded++;
         return newFilePath;
     } catch (error) {
         logger.error(`Failed to download ${url.href}: ${error.message}`);
-        nbDownloadedFilesFailed++;
+        stats.files.failed++;
         throw error;
     }
 };
@@ -278,9 +290,107 @@ const prettify = async (string) => {
     });
 };
 
+const readHistory = async () => {
+    try {
+        const historyContent = await readFile(RUN_HISTORY_FILE, "utf8");
+        const parsedHistory = JSON.parse(historyContent);
+
+        if (Array.isArray(parsedHistory?.runs)) {
+            return parsedHistory;
+        }
+    } catch (error) {
+        if (error?.code !== "ENOENT") {
+            logger.warn(`Unable to read ${RUN_HISTORY_FILE}, recreating history file.`);
+        }
+    }
+
+    return {
+        runs: [],
+    };
+};
+
+const appendRunHistory = async (entry) => {
+    const history = await readHistory();
+    history.runs.unshift(entry);
+    history.runs = history.runs.slice(-MAX_HISTORY_ENTRIES);
+
+    await ensureDirectoryExists(RUN_HISTORY_FILE);
+    await writeFile(RUN_HISTORY_FILE, JSON.stringify(history, null, 2), { flag: "w" });
+};
+
+const isHistoryMissingOnRemote = (error) => {
+    const stderr = String(error?.stderr ?? "");
+    return /not found|no such file|object does not exist|failed to copy/i.test(stderr);
+};
+
+const pullHistoryFromS3 = async () => {
+    const command = `rclone copyto ${RUN_HISTORY_REMOTE_FILE} ${RUN_HISTORY_FILE}`;
+
+    try {
+        await execAsync(command);
+        logger.info(`Pulled history file from ${RUN_HISTORY_REMOTE_FILE}`);
+
+        return {
+            command,
+            exitCode: 0,
+        };
+    } catch (error) {
+        if (isHistoryMissingOnRemote(error)) {
+            logger.info(`No history file found on ${RUN_HISTORY_REMOTE_FILE}, starting with local empty history.`);
+            return {
+                command,
+                exitCode: Number.isInteger(error?.code) ? error.code : 1,
+            };
+        }
+
+        logger.warn(`Failed to pull history from ${RUN_HISTORY_REMOTE_FILE}, continuing with local fallback.`);
+        return {
+            command,
+            exitCode: Number.isInteger(error?.code) ? error.code : 1,
+        };
+    }
+};
+
+const pushHistoryToS3 = async () => {
+    const command = `rclone copyto ${RUN_HISTORY_FILE} ${RUN_HISTORY_REMOTE_FILE}`;
+
+    try {
+        await execAsync(command);
+        logger.info(`Pushed history file to ${RUN_HISTORY_REMOTE_FILE}`);
+
+        return {
+            command,
+            exitCode: 0,
+        };
+    } catch (error) {
+        logger.error(`Failed to push history file to ${RUN_HISTORY_REMOTE_FILE}`);
+
+        return {
+            command,
+            exitCode: Number.isInteger(error?.code) ? error.code : 1,
+        };
+    }
+};
+
 const syncS3 = async () => {
-    await execAsync(`rclone sync ${OUTPUT_DIR} ${RCLONE_S3_REMOTE}:${S3_BUCKET_NAME}/articles`);
-    logger.info(`Synchronised ${OUTPUT_DIR} with S3`);
+    const command = `rclone sync ${OUTPUT_DIR} ${RCLONE_S3_REMOTE}:${S3_BUCKET_NAME}/articles`;
+
+    try {
+        await execAsync(command);
+        logger.info(`Synchronised ${OUTPUT_DIR} to ${RCLONE_S3_REMOTE}:${S3_BUCKET_NAME}/articles`);
+
+        return {
+            command,
+            exitCode: 0,
+        };
+    } catch (error) {
+        logger.error(`Sync failed for command: ${command}`);
+
+        return {
+            command,
+            exitCode: Number.isInteger(error?.code) ? error.code : 1,
+        };
+    }
 };
 
 const cleanOutputDir = async () => {
@@ -413,6 +523,11 @@ const processSingleArticle = async (slug) => {
 };
 
 (async () => {
+    const executedAt = new Date();
+    let didScrapeFail = false;
+
+    await pullHistoryFromS3();
+
     try {
         await cleanOutputDir();
 
@@ -423,6 +538,7 @@ const processSingleArticle = async (slug) => {
         const { firstPage, lastPage } = await getPageNumbers(ARTICLES_CMS_BASE_URL);
         const pagesRange = getArrayRange(firstPage, lastPage); // [0,1,2,3,...,n]
         const articleSlugsList = (await withConcurrency(pagesRange, (page) => processArticlesIndex(ARTICLES_CMS_BASE_URL, page))).flat();
+        stats.articles.detected = articleSlugsList.length;
 
         //  la liste paginée des articles par tag (index pour chaque tag)
         const response = await fetch(ARTICLES_CMS_BASE_URL, getFetchOptions());
@@ -439,21 +555,53 @@ const processSingleArticle = async (slug) => {
         });
 
         // les articles individuels
-        await withConcurrency(articleSlugsList, (slug) => processSingleArticle(slug));
+        await withConcurrency(articleSlugsList, async (slug) => {
+            try {
+                await processSingleArticle(slug);
+                stats.articles.downloaded++;
+            } catch (error) {
+                stats.articles.failed++;
+                logger.warn(`Failed to process article ${slug}: ${error?.message ?? "unknown error"}`);
+            }
+        });
 
-        logger.info(`Downloaded ${nbDownloadedFiles} file(s) successfully.`);
-        if (nbDownloadedFilesFailed > 0) {
-            logger.warn(`Failed to download ${nbDownloadedFilesFailed} file(s).`);
+        if (stats.articles.failed > 0) {
+            logger.warn(`Failed to download ${stats.articles.failed} article(s).`);
+        }
+
+        logger.info(`Downloaded ${stats.files.downloaded} file(s) successfully.`);
+        if (stats.files.failed > 0) {
+            logger.warn(`Failed to download ${stats.files.failed} file(s).`);
         } else {
             logger.success("All files downloaded successfully.");
         }
     } catch (error) {
+        didScrapeFail = true;
         logger.error("Script failed:", error);
     }
 
-    await syncS3();
+    const syncResult = await syncS3();
+    if (syncResult.exitCode !== 0) {
+        didScrapeFail = true;
+    }
+
+    await appendRunHistory({
+        executedAt: executedAt.toISOString(),
+        durationMs: new Date().getTime() - executedAt.getTime(),
+        stats
+    });
+
+    const historyPushResult = await pushHistoryToS3();
+    if (historyPushResult.exitCode !== 0) {
+        logger.warn("History file sync to S3 failed after local update.");
+        didScrapeFail = true;
+    }
 
     if (process.env.APP_ENV === "prod") {
         await cleanOutputDir();
+    }
+
+    if (didScrapeFail) {
+        process.exitCode = 1;
     }
 })();
