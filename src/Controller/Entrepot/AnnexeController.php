@@ -4,6 +4,7 @@ namespace App\Controller\Entrepot;
 
 use App\Constants\EntrepotApi\CommonTags;
 use App\Controller\ApiControllerInterface;
+use App\Controller\Traits\PaginatedHeadersTrait;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\CswMetadataHelper;
@@ -33,6 +34,8 @@ use Symfony\Component\Uid\Uuid;
 #[OA\Tag(name: '[entrepot] annexes')]
 class AnnexeController extends AbstractController implements ApiControllerInterface
 {
+    use PaginatedHeadersTrait;
+
     public function __construct(
         private AnnexeApiService $annexeApiService,
         private DatastoreApiService $datastoreApiService,
@@ -48,16 +51,27 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
      * @param array<string>|null $labels
      */
     #[Route('', name: 'get_list', methods: ['GET'])]
-    public function getAnnexeList(
+    public function getList(
         string $datastoreId,
         #[MapQueryParameter] ?string $path,
         #[MapQueryParameter] ?array $labels,
         #[MapQueryParameter('mime_type')] ?string $mimeType,
+        #[MapQueryParameter] ?bool $all,
+        Request $request,
     ): JsonResponse {
         try {
-            $annexeList = $this->annexeApiService->getAll($datastoreId, $mimeType, $path, $labels);
+            $query = $request->query->all();
+            unset($query['all']);
 
-            return $this->json($annexeList);
+            if ($all) {
+                return $this->json($this->annexeApiService->getAll($datastoreId, $mimeType, $path, $labels));
+            }
+
+            $apiResponse = $this->annexeApiService->getList($datastoreId, $query);
+            $response = new JsonResponse($apiResponse['content'], Response::HTTP_OK);
+            $this->setPaginatedHeaders($response, $apiResponse['headers'] ?? []);
+
+            return $response;
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
         }

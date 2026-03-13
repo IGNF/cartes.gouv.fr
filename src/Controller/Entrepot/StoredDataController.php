@@ -5,6 +5,7 @@ namespace App\Controller\Entrepot;
 use App\Constants\EntrepotApi\ProcessingStatuses;
 use App\Constants\EntrepotApi\StoredDataStatuses;
 use App\Controller\ApiControllerInterface;
+use App\Controller\Traits\PaginatedHeadersTrait;
 use App\Exception\ApiException;
 use App\Exception\CartesApiException;
 use App\Services\EntrepotApi\CartesStoredDataApiService;
@@ -15,6 +16,7 @@ use App\Services\EntrepotApi\UploadApiService;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
@@ -28,6 +30,8 @@ use Symfony\Component\Routing\Attribute\Route;
 #[OA\Tag(name: '[entrepot] stored_data')]
 class StoredDataController extends AbstractController implements ApiControllerInterface
 {
+    use PaginatedHeadersTrait;
+
     public function __construct(
         private StoredDataApiService $storedDataApiService,
         private ConfigurationApiService $configurationApiService,
@@ -38,26 +42,40 @@ class StoredDataController extends AbstractController implements ApiControllerIn
     }
 
     #[Route('', name: 'get_list', methods: ['GET'])]
-    public function getStoredDataList(
+    public function getList(
         string $datastoreId,
-        #[MapQueryParameter] ?string $type = null,
+        Request $request,
+        #[MapQueryParameter] ?bool $detailed = false,
+        #[MapQueryParameter] ?bool $all = false,
     ): JsonResponse {
         try {
-            $query = [];
-            if (null !== $type) {
-                $query['type'] = $type;
+            $query = $request->query->all();
+            unset($query['detailed']);
+            unset($query['all']);
+
+            if ($all) {
+                return $this->json(
+                    $detailed
+                    ? $this->storedDataApiService->getAllDetailed($datastoreId, $query)
+                    : $this->storedDataApiService->getAll($datastoreId, $query)
+                );
             }
 
-            $storedDataList = $this->storedDataApiService->getAllDetailed($datastoreId, $query);
+            $apiResponse = $detailed
+                ? $this->storedDataApiService->getListDetailed($datastoreId, $query)
+                : $this->storedDataApiService->getList($datastoreId, $query);
 
-            return $this->json($storedDataList);
+            $response = new JsonResponse($apiResponse['content'], Response::HTTP_OK);
+            $this->setPaginatedHeaders($response, $apiResponse['headers'] ?? []);
+
+            return $response;
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
         }
     }
 
     #[Route('/{storedDataId}', name: 'get', methods: ['GET'])]
-    public function getStoredData(string $datastoreId, string $storedDataId): JsonResponse
+    public function get(string $datastoreId, string $storedDataId): JsonResponse
     {
         try {
             $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId);

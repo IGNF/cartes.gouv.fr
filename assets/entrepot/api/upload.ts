@@ -1,15 +1,22 @@
 import SymfonyRouting from "../../modules/Routing";
-import { jsonFetch } from "../../modules/jsonFetch";
+import { apiFetch, jsonFetch } from "../../modules/jsonFetch";
 import { UploadReport } from "../../@types/app";
-import { Upload, UploadTree, UploadTypeEnum } from "../../@types/app";
+import { Upload, UploadTree } from "../../@types/app";
 
-const getList = (datastoreId: string, type?: UploadTypeEnum, otherOptions: RequestInit = {}) => {
-    const params = { datastoreId };
-    if (type !== undefined) {
-        params["type"] = type.valueOf();
-    }
+const getList = async (datastoreId: string, query: object = {}, otherOptions: RequestInit = {}) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_upload_get_list", { datastoreId, ...query });
+    const res = await apiFetch(url, {
+        ...otherOptions,
+    });
 
-    const url = SymfonyRouting.generate("cartesgouvfr_api_upload_get_list", params);
+    return {
+        data: (await res.json()) as Upload[],
+        headers: res.headers,
+    };
+};
+
+const getAll = async (datastoreId: string, query: object = {}, otherOptions: RequestInit = {}) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_upload_get_list", { datastoreId, all: true, ...query });
     return jsonFetch<Upload[]>(url, {
         ...otherOptions,
     });
@@ -71,6 +78,7 @@ const getUploadReport = (datastoreId: string, uploadId: string, otherOptions: Re
 
 const upload = {
     getList,
+    getAll,
     add,
     get,
     getIntegrationProgress,

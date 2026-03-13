@@ -2,8 +2,20 @@ import { StaticFile } from "@/@types/app";
 import SymfonyRouting from "../../modules/Routing";
 import { apiFetch, jsonFetch } from "../../modules/jsonFetch";
 
-const getList = (datastoreId: string, queryParams: object = {}, otherOptions: RequestInit = {}) => {
+const getList = async (datastoreId: string, queryParams: object = {}, otherOptions: RequestInit = {}) => {
     const url = SymfonyRouting.generate("cartesgouvfr_api_statics_get_list", { datastoreId, ...queryParams });
+    const res = await apiFetch(url, {
+        ...otherOptions,
+    });
+
+    return {
+        data: (await res.json()) as StaticFile[],
+        headers: res.headers,
+    };
+};
+
+const getAll = (datastoreId: string, queryParams: object = {}, otherOptions: RequestInit = {}) => {
+    const url = SymfonyRouting.generate("cartesgouvfr_api_statics_get_list", { datastoreId, ...queryParams, all: true });
     return jsonFetch<StaticFile[]>(url, {
         method: "GET",
         ...otherOptions,
@@ -23,6 +35,7 @@ const download = async (datastoreId: string, staticFileId: string) => {
 
 const statics = {
     download,
+    getAll,
     getList,
     remove,
 };

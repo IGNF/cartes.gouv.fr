@@ -11,14 +11,13 @@ export type ContentRangeType = {
     first: number;
     last: number;
     total: number;
+    totalPages: number;
 };
 
 /**
  * Decode content-range des headers après une requête get de l'API
- * @param contentRange string
- * @returns
  */
-export const decodeContentRange = (contentRange: string): ContentRangeType => {
+export const decodeContentRange = (contentRange: string, limit: number): ContentRangeType => {
     const isInteger = (str: string): boolean => {
         if (typeof str !== "string") return false;
         return !isNaN(parseInt(str, 10));
@@ -38,5 +37,16 @@ export const decodeContentRange = (contentRange: string): ContentRangeType => {
     if (parts.length !== 2) throw new Error(formatError);
     if (!isInteger(parts[0]) && !isInteger(parts[1])) throw new Error(formatError);
 
-    return { first: parseInt(parts[0], 10), last: parseInt(parts[1], 10), total: total };
+    const first = parseInt(parts[0], 10);
+    const last = parseInt(parts[1], 10);
+
+    const safeLimit = Number.isFinite(limit) && limit > 0 ? limit : 1;
+    const totalPages = Math.ceil(total / safeLimit);
+
+    return { first, last, total, totalPages };
+};
+
+export type PaginatedListResponse<T> = {
+    items: T[];
+    contentRange?: ContentRangeType;
 };

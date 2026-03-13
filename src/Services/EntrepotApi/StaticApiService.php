@@ -7,6 +7,14 @@ class StaticApiService extends BaseEntrepotApiService
     /**
      * @param array<mixed> $query
      */
+    public function getList(string $datastoreId, array $query = []): array
+    {
+        return $this->request('GET', "datastores/$datastoreId/statics", [], $query, [], false, true, true);
+    }
+
+    /**
+     * @param array<mixed> $query
+     */
     public function getAll(string $datastoreId, $query = []): array
     {
         return $this->requestAll("datastores/$datastoreId/statics", $query);

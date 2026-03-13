@@ -9,6 +9,8 @@ class UserDocumentsApiService extends BaseEntrepotApiService
      */
     public function getList(?array $query = []): array
     {
+        $query ??= [];
+
         if ($query['detailed'] ?? false) {
             $query['fields'] = 'name,size,description,labels,extra,public_url,mime_type'; // creation,update sont toujours retournés par l'API, on ne peut pas les demander/retirer via fields
         }

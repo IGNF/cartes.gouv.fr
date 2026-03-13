@@ -1,24 +1,24 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import Button from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
-import Table from "@codegouvfr/react-dsfr/Table";
-import Tag from "@codegouvfr/react-dsfr/Tag";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FC, ReactNode, useMemo, useState } from "react";
+import Pagination from "@codegouvfr/react-dsfr/Pagination";
+import { useMutation, usePrefetchQuery, useQuery, useQueryClient } from "@tanstack/react-query";
+import { FC, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
-import api from "../../../../api";
+import { CartesApiException } from "@/modules/jsonFetch";
+import { Annexe, Datastore } from "../../../../../@types/app";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import LoadingText from "../../../../../components/Utils/LoadingText";
 import Progress from "../../../../../components/Utils/Progress";
 import Wait from "../../../../../components/Utils/Wait";
 import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
-import { CartesApiException } from "../../../../../modules/jsonFetch";
-import { routes } from "../../../../../router/router";
-import { Annexe, Datastore } from "../../../../../@types/app";
-import { niceBytes } from "../../../../../utils";
+import { routes, useRoutePaginationParams } from "../../../../../router/router";
+import { decodeContentRange, delta, niceBytes, PaginatedListResponse } from "../../../../../utils";
+import api from "../../../../api";
+import DataCard from "../DataCard";
+import { DatastoreManageStorageTab } from "../types";
 
 const TAGS_PREFIX = {
     DATASHEET_NAME: "datasheet_name=",
@@ -30,6 +30,15 @@ const confirmDialogModal = createModal({
     isOpenedByDefault: false,
 });
 
+async function fetchAnnexeList(datastoreId: string, queryParams: object = {}, signal?: AbortSignal) {
+    const res = await api.annexe.getList(datastoreId, queryParams, { signal });
+
+    return {
+        items: res.data,
+        contentRange: decodeContentRange(res.headers.get("content-range") ?? "", queryParams?.["limit"] ?? 10),
+    };
+}
+
 type AnnexeUsageProps = {
     datastore: Datastore;
 };
@@ -37,14 +46,24 @@ const AnnexeUsage: FC<AnnexeUsageProps> = ({ datastore }) => {
     const { t } = useTranslation("DatastoreManageStorage");
     const { t: tCommon } = useTranslation("Common");
 
+    const { page, limit } = useRoutePaginationParams();
+
     const annexeUsage = useMemo(() => {
         return datastore?.storages.annexes;
     }, [datastore]);
 
-    const annexeListQuery = useQuery<Annexe[], CartesApiException>({
-        queryKey: RQKeys.datastore_annexe_list(datastore._id),
-        queryFn: ({ signal }) => api.annexe.getList(datastore._id, { signal }),
-        staleTime: 60000,
+    const queryParams = { page, limit };
+    const annexeListQuery = useQuery<PaginatedListResponse<Annexe>, CartesApiException>({
+        queryKey: RQKeys.datastore_annexe_list(datastore._id, queryParams),
+        queryFn: ({ signal }) => fetchAnnexeList(datastore._id, queryParams, signal),
+        staleTime: delta.minutes(1),
+    });
+    const { data: { items: annexesList, contentRange } = { items: [], contentRange: undefined } } = annexeListQuery;
+
+    usePrefetchQuery({
+        queryKey: RQKeys.datastore_annexe_list(datastore._id, { ...queryParams, page: page + 1 }),
+        queryFn: ({ signal }) => fetchAnnexeList(datastore._id, { ...queryParams, page: page + 1 }, signal),
+        staleTime: delta.minutes(1),
     });
 
     const queryClient = useQueryClient();
@@ -54,8 +73,17 @@ const AnnexeUsage: FC<AnnexeUsageProps> = ({ datastore }) => {
     const deleteAnnexeMutation = useMutation({
         mutationFn: (annexeId: string) => api.annexe.remove(datastore._id, annexeId),
         onSuccess() {
-            queryClient.setQueryData(RQKeys.datastore_annexe_list(datastore._id), (annexesList: Annexe[]) => {
-                return annexesList.filter((annexe) => annexe._id !== currentAnnexeId);
+            queryClient.setQueryData(RQKeys.datastore_annexe_list(datastore._id, queryParams), (prevData: PaginatedListResponse<Annexe> | undefined) => {
+                return prevData
+                    ? {
+                          ...prevData,
+                          items: prevData.items.filter((annexe) => annexe._id !== currentAnnexeId),
+                      }
+                    : undefined;
+            });
+            queryClient.invalidateQueries({
+                queryKey: RQKeys.datastore_annexe_list(datastore._id),
+                exact: false,
             });
 
             setCurrentAnnexeId(undefined);
@@ -67,14 +95,22 @@ const AnnexeUsage: FC<AnnexeUsageProps> = ({ datastore }) => {
 
     return (
         <>
-            <p>{t("storage.annexe.explanation")}</p>
+            <p className={fr.cx("fr-text--xs")}>{t("storage.annexe.explanation")}</p>
 
             {annexeUsage ? (
-                <Progress
-                    label={`${niceBytes(annexeUsage.use.toString())} / ${niceBytes(annexeUsage.quota.toString())}`}
-                    value={annexeUsage.use}
-                    max={annexeUsage.quota}
-                />
+                <div className={fr.cx("fr-grid-row")}>
+                    <div className={fr.cx("fr-col-12", "fr-col-md-6", "fr-col-lg-4")}>
+                        <Progress
+                            label={
+                                <>
+                                    {niceBytes(annexeUsage.use.toString())} / <strong>{niceBytes(annexeUsage.quota.toString())}</strong>
+                                </>
+                            }
+                            value={annexeUsage.use}
+                            max={annexeUsage.quota}
+                        />
+                    </div>
+                </div>
             ) : (
                 <p>{t("storage.not_found")}</p>
             )}
@@ -87,50 +123,48 @@ const AnnexeUsage: FC<AnnexeUsageProps> = ({ datastore }) => {
                 <Alert severity="error" title={deleteAnnexeMutation.error.message} as="h2" closable onClose={annexeListQuery.refetch} />
             )}
 
-            {annexeListQuery.data && annexeListQuery.data.length > 0 && (
-                <Table
-                    noCaption
-                    noScroll
-                    bordered
-                    className={fr.cx("fr-mt-4v")}
-                    data={annexeListQuery.data.map((annexe) => [
-                        annexe.paths[0] ?? "",
-                        annexe.mime_type,
-                        annexe.size ? niceBytes(annexe.size?.toString()) : t("data.size.unknown"),
-                        <ul key={`annexe-${annexe._id}-labels-list`} className={fr.cx("fr-tags-group")}>
-                            {annexe.labels?.sort().map((label) => {
-                                const key = `annexe-${annexe._id}-label-${label}`;
-                                let tag: ReactNode = null;
+            {annexesList.length > 0 &&
+                annexesList.map((annexe) => {
+                    const labels = annexe.labels?.sort() ?? [];
+                    const datasheetName = labels.find((label) => label.startsWith(TAGS_PREFIX.DATASHEET_NAME))?.replace(TAGS_PREFIX.DATASHEET_NAME, "");
 
-                                const datasheetName = label.startsWith(TAGS_PREFIX.DATASHEET_NAME) ? label.replace(TAGS_PREFIX.DATASHEET_NAME, "") : undefined;
-                                if (datasheetName !== undefined) {
-                                    tag = (
-                                        <Tag linkProps={routes.datastore_datasheet_view({ datastoreId: datastore._id, datasheetName }).link}>
-                                            {datasheetName}
-                                        </Tag>
-                                    );
-                                }
-
-                                const type = label.startsWith(TAGS_PREFIX.TYPE) ? label.replace(TAGS_PREFIX.TYPE, "") : undefined;
-                                if (type !== undefined) {
-                                    tag = <Tag>{t("storage.annexe.labels.type", { type })}</Tag>;
-                                }
-
-                                return <li key={key}>{tag ? tag : <Tag>{label}</Tag>}</li>;
-                            })}
-                        </ul>,
-                        <Button
+                    return (
+                        <DataCard
                             key={annexe._id}
-                            priority="tertiary no outline"
-                            iconId="fr-icon-delete-line"
-                            onClick={() => {
-                                setCurrentAnnexeId(annexe._id);
-                                confirmDialogModal.open();
-                            }}
-                        >
-                            {tCommon("delete")}
-                        </Button>,
-                    ])}
+                            name={annexe.paths?.[0] ?? "-"}
+                            type={annexe.mime_type}
+                            size={annexe.size ? niceBytes(annexe.size?.toString()) : t("data.size.unknown")}
+                            buttons={[
+                                {
+                                    iconId: "fr-icon-delete-line",
+                                    priority: "tertiary no outline",
+                                    onClick: () => {
+                                        setCurrentAnnexeId(annexe._id);
+                                        confirmDialogModal.open();
+                                    },
+                                    children: tCommon("delete"),
+                                },
+                                datasheetName !== undefined && {
+                                    iconId: "fr-icon-arrow-right-s-line",
+                                    priority: "tertiary no outline",
+                                    linkProps: routes.datastore_datasheet_view({
+                                        datastoreId: datastore._id,
+                                        datasheetName: datasheetName,
+                                    }).link,
+                                    children: tCommon("see_2"),
+                                },
+                            ]}
+                        />
+                    );
+                })}
+
+            {contentRange && contentRange?.totalPages > 1 && (
+                <Pagination
+                    defaultPage={page}
+                    count={contentRange?.totalPages}
+                    getPageLinkProps={(pageNumber: number) =>
+                        routes.datastore_manage_storage({ datastoreId: datastore._id, limit, page: pageNumber, tab: DatastoreManageStorageTab.ANNEXE }).link
+                    }
                 />
             )}
 

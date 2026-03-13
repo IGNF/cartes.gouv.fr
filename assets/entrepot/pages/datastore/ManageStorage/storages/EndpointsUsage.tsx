@@ -1,9 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
-import Button from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
-import Table from "@codegouvfr/react-dsfr/Table";
-import Tag from "@codegouvfr/react-dsfr/Tag";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
@@ -18,6 +15,7 @@ import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import { CartesApiException } from "../../../../../modules/jsonFetch";
 import { routes } from "../../../../../router/router";
 import api from "../../../../api";
+import DataCard from "../DataCard";
 
 const confirmUnpublishOfferingModal = createModal({
     id: "confirm-unpublish-offering-modal",
@@ -106,7 +104,7 @@ const EndpointsUsage: FC<EndpointsUsageProps> = ({ datastore }) => {
 
     return (
         <>
-            <p>{t("storage.endpoints.explanation")}</p>
+            <p className={fr.cx("fr-text--xs")}>{t("storage.endpoints.explanation")}</p>
 
             {(offeringsListQuery.isFetching || metadataListQuery.isFetching) && (
                 <LoadingText message={t("storage.endpoints.loading")} as="p" withSpinnerIcon className={fr.cx("fr-mt-4v")} />
@@ -130,32 +128,42 @@ const EndpointsUsage: FC<EndpointsUsageProps> = ({ datastore }) => {
                             offeringsListQuery.data && (
                                 <section key={endpoint.endpoint._id}>
                                     <h2>{endpoint.endpoint.name}</h2>
-                                    <Progress label={`${endpoint.use.toString()} / ${endpoint.quota.toString()}`} value={endpoint.use} max={endpoint.quota} />
-                                    <Table
-                                        caption={`${endpoint.endpoint.name} - ${endpoint.use.toString()} / ${endpoint.quota.toString()}`}
-                                        noCaption
-                                        noScroll
-                                        bordered
-                                        className={fr.cx("fr-mt-4v")}
-                                        data={offeringsListQuery.data
-                                            .filter((offering) => offering?.endpoint?._id === endpoint.endpoint._id)
-                                            .map((offering) => [
-                                                offering.layer_name,
-                                                offering.type,
-                                                <Button
-                                                    key={offering._id}
-                                                    priority="tertiary no outline"
-                                                    iconId="fr-icon-delete-line"
-                                                    onClick={() => {
-                                                        setCurrentOffering(offering);
-                                                        confirmUnpublishOfferingModal.open();
-                                                    }}
-                                                    nativeButtonProps={confirmUnpublishOfferingModal.buttonProps}
-                                                >
-                                                    {tCommon("unpublish")}
-                                                </Button>,
-                                            ])}
-                                    />
+
+                                    <div className={fr.cx("fr-grid-row")}>
+                                        <div className={fr.cx("fr-col-12", "fr-col-md-6", "fr-col-lg-4")}>
+                                            <Progress
+                                                label={
+                                                    <>
+                                                        {endpoint.use.toString()} / <strong>{endpoint.quota.toString()}</strong>
+                                                    </>
+                                                }
+                                                value={endpoint.use}
+                                                max={endpoint.quota}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {offeringsListQuery.data
+                                        .filter((offering) => offering?.endpoint?._id === endpoint.endpoint._id)
+                                        .map((offering) => (
+                                            <DataCard
+                                                key={offering._id}
+                                                name={offering.layer_name}
+                                                type={offering.type}
+                                                buttons={[
+                                                    {
+                                                        iconId: "fr-icon-delete-line",
+                                                        priority: "tertiary no outline",
+                                                        onClick: () => {
+                                                            setCurrentOffering(offering);
+                                                            confirmUnpublishOfferingModal.open();
+                                                        },
+                                                        children: tCommon("unpublish"),
+                                                        nativeButtonProps: confirmUnpublishOfferingModal.buttonProps,
+                                                    },
+                                                ]}
+                                            />
+                                        ))}
                                 </section>
                             )
                     )}
@@ -164,43 +172,49 @@ const EndpointsUsage: FC<EndpointsUsageProps> = ({ datastore }) => {
                 metadataEndpoints.map((endpoint) => (
                     <section key={endpoint.endpoint._id}>
                         <h2>{endpoint.endpoint.name}</h2>
-                        <Progress label={`${endpoint.use.toString()} / ${endpoint.quota.toString()}`} value={endpoint.use} max={endpoint.quota} />
-                        <Table
-                            caption={`${endpoint.endpoint.name} - ${endpoint.use.toString()} / ${endpoint.quota.toString()}`}
-                            noCaption
-                            noScroll
-                            bordered
-                            className={fr.cx("fr-mt-4v")}
-                            data={metadataListQuery.data
-                                .filter((metadata) => metadata.endpoints?.[0]?._id === endpoint.endpoint._id)
-                                .map((metadata) => [
-                                    metadata.file_identifier,
-                                    metadata.type,
-                                    metadata?.tags?.datasheet_name && (
-                                        <Tag
-                                            key={`tag-metadata-${metadata._id}`}
-                                            linkProps={
-                                                routes.datastore_datasheet_view({ datastoreId: datastore._id, datasheetName: metadata.tags.datasheet_name })
-                                                    .link
-                                            }
-                                        >
-                                            {metadata.tags.datasheet_name}
-                                        </Tag>
-                                    ),
-                                    <Button
-                                        key={metadata._id}
-                                        priority="tertiary no outline"
-                                        iconId="fr-icon-delete-line"
-                                        onClick={() => {
-                                            setCurrentMetadata(metadata);
-                                            confirmDeleteMetadataModal.open();
-                                        }}
-                                        nativeButtonProps={confirmDeleteMetadataModal.buttonProps}
-                                    >
-                                        {tCommon("delete")}
-                                    </Button>,
-                                ])}
-                        />
+                        <div className={fr.cx("fr-grid-row")}>
+                            <div className={fr.cx("fr-col-12", "fr-col-md-6", "fr-col-lg-4")}>
+                                <Progress
+                                    label={
+                                        <>
+                                            {endpoint.use.toString()} / <strong>{endpoint.quota.toString()}</strong>
+                                        </>
+                                    }
+                                    value={endpoint.use}
+                                    max={endpoint.quota}
+                                />
+                            </div>
+                        </div>
+
+                        {metadataListQuery.data
+                            .filter((metadata) => metadata.endpoints?.[0]?._id === endpoint.endpoint._id)
+                            .map((metadata) => (
+                                <DataCard
+                                    key={metadata._id}
+                                    name={metadata.file_identifier}
+                                    type={metadata.type}
+                                    buttons={[
+                                        {
+                                            iconId: "fr-icon-delete-line",
+                                            priority: "tertiary no outline",
+                                            onClick: () => {
+                                                setCurrentMetadata(metadata);
+                                                confirmDeleteMetadataModal.open();
+                                            },
+                                            children: tCommon("delete"),
+                                        },
+                                        metadata.tags.datasheet_name !== undefined && {
+                                            iconId: "fr-icon-arrow-right-s-line",
+                                            priority: "tertiary no outline",
+                                            linkProps: routes.datastore_datasheet_view({
+                                                datastoreId: datastore._id,
+                                                datasheetName: metadata.tags.datasheet_name,
+                                            }).link,
+                                            children: tCommon("see_2"),
+                                        },
+                                    ]}
+                                />
+                            ))}
                     </section>
                 ))}
 

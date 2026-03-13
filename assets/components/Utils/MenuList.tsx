@@ -6,6 +6,7 @@ import { ListItemIcon, ListItemText, Menu, MenuItem } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import { FC, memo, MouseEvent, useId, useMemo, useState } from "react";
 import { symToStr } from "tsafe/symToStr";
+import { useStyles } from "tss-react";
 
 type MenuListItemCommon = {
     autoClose?: boolean;
@@ -71,6 +72,8 @@ const MenuList: FC<MenuListProps> = ({ menuOpenButtonProps, items = [], disabled
 
     const atLeastOneIcon = useMemo<boolean>(() => _items.filter((item) => item.iconId !== undefined).length > 0, [_items]);
 
+    const { css, cx } = useStyles();
+
     return (
         <>
             <Button {..._menuOpenBtnProps} />
@@ -94,6 +97,14 @@ const MenuList: FC<MenuListProps> = ({ menuOpenButtonProps, items = [], disabled
                         vertical: "top",
                         horizontal: "right",
                     }}
+                    classes={{
+                        list: css({
+                            padding: 0,
+                        }),
+                        paper: css({
+                            boxShadow: `0 4px 12px 0 ${fr.colors.decisions.border.default.grey.default}`,
+                        }),
+                    }}
                 >
                     {disabled === false &&
                         _items.map((item, i) => {
@@ -107,15 +118,30 @@ const MenuList: FC<MenuListProps> = ({ menuOpenButtonProps, items = [], disabled
                                         item.onClick?.(e);
                                     }}
                                     disabled={item.disabled}
+                                    className={css({
+                                        padding: "0.5rem 1rem 0.5rem 0.75rem",
+
+                                        boxShadow: `0 0 0 1px ${fr.colors.decisions.border.default.grey.default}`,
+                                        "&:hover": {
+                                            backgroundColor: fr.colors.decisions.background.actionLow.blueFrance.default,
+                                        },
+                                    })}
                                 >
                                     {item.iconId && (
-                                        <ListItemIcon>
-                                            <i className={fr.cx(item.iconId)} />
-                                        </ListItemIcon>
+                                        <ListItemIcon
+                                            className={cx(
+                                                fr.cx(item.iconId),
+                                                css({
+                                                    color: fr.colors.decisions.text.actionHigh.blueFrance.default,
+                                                })
+                                            )}
+                                        />
                                     )}
                                     {item.text && (
                                         <ListItemText inset={atLeastOneIcon && !item.iconId}>
-                                            <Typography noWrap>{item.text}</Typography>
+                                            <Typography noWrap color="primary">
+                                                {item.text}
+                                            </Typography>
                                         </ListItemText>
                                     )}
                                 </MenuItem>

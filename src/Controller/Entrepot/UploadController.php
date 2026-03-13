@@ -6,6 +6,7 @@ use App\Constants\EntrepotApi\CommonTags;
 use App\Constants\EntrepotApi\UploadTags;
 use App\Constants\EntrepotApi\UploadTypes;
 use App\Controller\ApiControllerInterface;
+use App\Controller\Traits\PaginatedHeadersTrait;
 use App\Exception\ApiException;
 use App\Exception\AppException;
 use App\Exception\CartesApiException;
@@ -15,6 +16,7 @@ use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -27,25 +29,41 @@ use Symfony\Component\Routing\Attribute\Route;
 #[OA\Tag(name: '[entrepot] upload')]
 class UploadController extends AbstractController implements ApiControllerInterface
 {
+    use PaginatedHeadersTrait;
+
     public function __construct(
         private UploadApiService $uploadApiService,
     ) {
     }
 
     #[Route('', name: 'get_list', methods: ['GET'])]
-    public function getUploadList(
+    public function getList(
         string $datastoreId,
-        #[MapQueryParameter] ?string $type = null,
+        Request $request,
+        #[MapQueryParameter] ?bool $detailed = false,
+        #[MapQueryParameter] ?bool $all = false,
     ): JsonResponse {
         try {
-            $query = [];
-            if (null !== $type) {
-                $query['type'] = $type;
+            $query = $request->query->all();
+            unset($query['detailed']);
+            unset($query['all']);
+
+            if ($all) {
+                return $this->json(
+                    $detailed
+                    ? $this->uploadApiService->getAllDetailed($datastoreId, $query)
+                    : $this->uploadApiService->getAll($datastoreId, $query)
+                );
             }
 
-            $uploadList = $this->uploadApiService->getAllDetailed($datastoreId, $query);
+            $apiResponse = $detailed
+                ? $this->uploadApiService->getListDetailed($datastoreId, $query)
+                : $this->uploadApiService->getList($datastoreId, $query);
 
-            return $this->json($uploadList);
+            $response = new JsonResponse($apiResponse['content'], Response::HTTP_OK);
+            $this->setPaginatedHeaders($response, $apiResponse['headers'] ?? []);
+
+            return $response;
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
         }
@@ -82,11 +100,11 @@ class UploadController extends AbstractController implements ApiControllerInterf
                 CommonTags::PRODUCER => $content['producer'],
                 CommonTags::PRODUCTION_YEAR => $content['production_year'],
             ];
-            
+
             if (isset($content['email_notification'])) {
                 $tags['email_notification'] = (bool) $content['email_notification'];
             }
-            
+
             $upload = $this->uploadApiService->addTags($datastoreId, $upload['_id'], $tags);
 
             // retourne l'upload au frontend, qui se chargera de lancer l'intégration VECTOR-DB

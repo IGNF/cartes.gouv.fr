@@ -83,7 +83,14 @@ const datastoreRoute = defineRoute(
     (p) => `${appRoot}/tableau-de-bord/entrepots/${p.datastoreId}`
 );
 const datastoreRoutes = {
-    datastore_manage_storage: datastoreRoute.extend("/consommation"),
+    datastore_manage_storage: datastoreRoute.extend(
+        {
+            tab: param.query.optional.string.default("postgresql"),
+            page: param.query.optional.number.default(1),
+            limit: param.query.optional.number.default(10),
+        },
+        () => "/consommation"
+    ),
 
     // permissions
     datastore_manage_permissions: datastoreRoute.extend(
@@ -336,4 +343,12 @@ export const groups = {
     datastore: datastoreGroup,
     config: configGroup,
     espaceco: espacecoGroup,
+};
+
+export const useRoutePaginationParams = () => {
+    const route = useRoute();
+    const page = route.params?.["page"] ?? 1;
+    const limit = route.params?.["limit"] ?? 10;
+
+    return { page, limit };
 };

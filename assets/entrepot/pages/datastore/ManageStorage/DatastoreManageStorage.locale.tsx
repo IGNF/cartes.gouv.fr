@@ -115,7 +115,7 @@ export const DatastoreManageStorageFrTranslations: Translations<"fr">["Datastore
         `Êtes-vous sûr de vouloir supprimer la donnée stockée ${storedDataName} (${storedDataId}) ?`,
     "storage.postgresql.deletion.in_progress": "Suppression de la donnée stockée en cours",
     "storage.postgresql.explanation":
-        "Il s'agit de l’espace occupé par des données sur les serveurs PostgreSQL de votre espace de travail. Il s'agit de données intermédiaires qui ne sont pas directement visibles de vos utilisateurs.",
+        "Espace occupé par les données sur les serveurs PostgreSQL. Ces données intermédiaires ne sont pas directement visibles de vos utilisateurs.",
     "storage.s3.label": (
         <span>
             Stockage <br /> de masse
@@ -125,8 +125,7 @@ export const DatastoreManageStorageFrTranslations: Translations<"fr">["Datastore
     "storage.s3.deletion.confirmation": ({ storedDataName, storedDataId }) =>
         `Êtes-vous sûr de vouloir supprimer la donnée stockée ${storedDataName} (${storedDataId}) ?`,
     "storage.s3.deletion.in_progress": "Suppression de la donnée stockée en cours",
-    "storage.s3.explanation":
-        "Cet espace est utilisé pour le stockage des pyramides de tuiles vectorielles utilisables par les services TMS ou images utilisables par les services WMS-raster et WMTS. Il est plus performant que le stockage sous forme de fichiers.",
+    "storage.s3.explanation": "Espace occupé par les pyramides de tuiles vectorielles et les images utilisées pour les services TMS, WMS-raster et WMTS.",
     "storage.upload.label": (
         <span>
             Données <br /> déposées
@@ -136,7 +135,7 @@ export const DatastoreManageStorageFrTranslations: Translations<"fr">["Datastore
     "storage.upload.deletion.confirmation": ({ uploadName, uploadId }) => `Êtes-vous sûr de vouloir supprimer la donnée déposée ${uploadName} (${uploadId}) ?`,
     "storage.upload.deletion.in_progress": "Suppression de la donnée déposée en cours",
     "storage.upload.explanation":
-        "Il s'agit de l’espace occupé par les fichiers de données bruts que vous avez téléversés (fichiers zip, geopackage...). Ces fichiers sont normalement supprimés dès l’intégration en base réussie de vos données. Il est possible qu'il reste des traces de fichiers dans cet espace lorsque les intégrations en base ont échoué.",
+        "Espace occupé par les fichiers de données bruts que vous avez téléversés (fichiers zip, geopackage...). Ces fichiers sont supprimés dès l’intégration en base réussie de vos données. Il est possible qu'il reste des traces de fichiers lorsque les intégrations en base ont échoué.",
 
     "storage.annexe.label": (
         <span>
@@ -147,7 +146,7 @@ export const DatastoreManageStorageFrTranslations: Translations<"fr">["Datastore
     "storage.annexe.deletion.confirmation": ({ annexeId }) => `Êtes-vous sûr de vouloir supprimer l’annexe ${annexeId} ?`,
     "storage.annexe.deletion.in_progress": "Suppression de l’annexe en cours",
     "storage.annexe.explanation":
-        "Cet espace est occupé par les fichiers mis à disposition de vos utilisateurs via des adresses publiques. Il s'agit généralement des fichiers de style au format JSON qui servent à symboliser vos pyramides de tuiles vectorielles.",
+        "Espace occupé par les fichiers mis à disposition de vos utilisateurs via des adresses publiques. Il s'agit généralement des fichiers de style au format JSON qui servent à symboliser vos pyramides de tuiles vectorielles.",
     "storage.annexe.labels.type": ({ type }) => {
         switch (type) {
             case "style":
@@ -167,7 +166,7 @@ export const DatastoreManageStorageFrTranslations: Translations<"fr">["Datastore
     "storage.endpoints.deletion.confirmation": ({ offeringName, offeringId }) => `Êtes-vous sûr de vouloir dépublier le flux ${offeringName} (${offeringId}) ?`,
     "storage.endpoints.deletion.in_progress": "Suppression du flux en cours",
     "storage.endpoints.explanation":
-        "Il s'agit du nombre de couches ou services publiés par point de publication dans votre espace de travail. Le nombre de points de publication listés dépend de la configuration de votre espace de travail. Cette configuration peut éventuellement limiter le type de service que vous pouvez publier ainsi que leur caractère public ou privé. Le point de publication CSW concerne les métadonnées.",
+        "Couches et services publiés par point de publication dans votre entrepôt. Le nombre de points de publication listés dépend de la configuration de votre entrepôt. Cette configuration peut éventuellement limiter le type de service que vous pouvez publier ainsi que leur caractère public ou privé. Le point de publication CSW concerne les métadonnées.",
 
     "storage.endpoints.metadata.deletion.confirmation": ({ metadataIdentifier, metadataId }) =>
         `Êtes-vous sûr de vouloir supprimer la métadonnée ${metadataIdentifier} (${metadataId}) ?`,
@@ -182,7 +181,7 @@ export const DatastoreManageStorageFrTranslations: Translations<"fr">["Datastore
     "storage.statics.deletion.confirmation": ({ staticId }) => `Êtes-vous sûr de vouloir supprimer le fichier statique ${staticId} ?`,
     "storage.statics.deletion.in_progress": "Suppression du fichier statique en cours",
     "storage.statics.explanation":
-        "Cet espace est occupé par des fichiers statiques. Il s'agit généralement des fichiers de styles au format SLD ou FTL déposés lors de la publication d'un service WMS-VECTOR.",
+        "Espace occupé par des fichiers statiques. Il s'agit généralement des fichiers de styles au format SLD ou FTL déposés lors de la publication d'un service WMS-VECTOR.",
 };
 export const DatastoreManageStorageEnTranslations: Translations<"en">["DatastoreManageStorage"] = {
     title: undefined,

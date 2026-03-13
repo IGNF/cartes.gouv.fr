@@ -210,7 +210,7 @@ const WmsVectorServiceForm: FC<WmsVectorServiceFormProps> = ({ datastoreId, vect
     };
     const staticFilesQuery = useQuery({
         queryKey: RQKeys.datastore_statics_list(datastoreId, staticFilesParams),
-        queryFn: () => api.statics.getList(datastoreId, staticFilesParams),
+        queryFn: () => api.statics.getAll(datastoreId, staticFilesParams),
         enabled: !!configId,
     });
 
