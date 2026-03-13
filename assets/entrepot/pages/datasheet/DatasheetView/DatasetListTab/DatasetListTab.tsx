@@ -3,12 +3,15 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { FC, memo, useMemo } from "react";
 import { symToStr } from "tsafe/symToStr";
 
-import { type DatasheetDetailed } from "../../../../../@types/app";
+import { DatasheetDetailed } from "../../../../../@types/app";
 import { routes } from "../../../../../router/router";
 import PyramidVectorList from "./PyramidVectorList/PyramidVectorList";
 import UnfinishedUploadList from "./UnfinishedUploadList";
 import VectorDbList from "./VectorDbList/VectorDbList";
 import PyramidRasterList from "./PyramidRasterList/PyramidRasterList";
+import { useAuthStore } from "@/stores/AuthStore";
+import { useDatastore } from "@/contexts/datastore";
+import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 
 type DataListTabProps = {
     datastoreId: string;
@@ -43,13 +46,24 @@ const DatasetListTab: FC<DataListTabProps> = ({ datastoreId, datasheet }) => {
     const nbPublications =
         (datasheet.vector_db_list?.length || 0) + (datasheet.pyramid_vector_list?.length || 0) + (datasheet.pyramid_raster_list?.length || 0);
 
+    //rights
+    const user = useAuthStore((state) => state.user);
+    const { datastore } = useDatastore();
+    const communityID = datastore.community._id;
+    const community = user?.communities_member.find((member) => member.community?._id === communityID)?.community;
+    const userRights = user?.communities_member.find((member) => member.community?._id === communityID)?.rights;
+    const isSupervisor = community?.supervisor === user?.id;
+
     return (
         <>
-            <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-grid-row--middle")}>
-                <Button iconId="fr-icon-add-line" linkProps={routes.datastore_datasheet_upload({ datastoreId, datasheetName: datasheet.name }).link}>
-                    Ajouter un fichier de données
-                </Button>
-            </div>
+            {(isSupervisor || (userRights?.includes(CommunityMemberDtoRightsEnum.UPLOAD) && userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING))) && (
+                <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-grid-row--middle")}>
+                    <Button iconId="fr-icon-add-line" linkProps={routes.datastore_datasheet_upload({ datastoreId, datasheetName: datasheet.name }).link}>
+                        Ajouter un fichier de données
+                    </Button>
+                </div>
+            )}
+
             {unfinishedUploads.length > 0 && (
                 <div className={fr.cx("fr-grid-row", "fr-grid-row--center", "fr-grid-row--middle")}>
                     <div className={fr.cx("fr-col")}>

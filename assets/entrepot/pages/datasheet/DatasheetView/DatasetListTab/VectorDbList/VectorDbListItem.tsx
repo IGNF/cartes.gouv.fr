@@ -24,6 +24,10 @@ import ListItem from "../../ListItem";
 import StoredDataDeleteConfirmDialog from "../StoredDataDeleteConfirmDialog";
 import VectorDbDesc from "./VectorDbDesc";
 
+import { useAuthStore } from "@/stores/AuthStore";
+import { useDatastore } from "@/contexts/datastore";
+import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
+
 type ServiceTypes = "tms" | "wfs" | "wms-vector" | "pre-paquet";
 
 type VectorDbListItemProps = {
@@ -198,6 +202,14 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
         [vectorDb._id]
     );
 
+    //rights
+    const user = useAuthStore((state) => state.user);
+    const { datastore } = useDatastore();
+    const communityID = datastore.community._id;
+    const community = user?.communities_member.find((member) => member.community?._id === communityID)?.community;
+    const userRights = user?.communities_member.find((member) => member.community?._id === communityID)?.rights;
+    const isSupervisor = community?.supervisor === user?.id;
+
     return (
         <>
             <ListItem
@@ -229,7 +241,10 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
                         iconId: "fr-icon-file-text-fill",
                         linkProps: routes.datastore_stored_data_details({ datastoreId, datasheetName, storedDataId: vectorDb._id }).link,
                     },
-                    {
+                    ((userRights?.includes(CommunityMemberDtoRightsEnum.BROADCAST) &&
+                        userRights?.includes(CommunityMemberDtoRightsEnum.ANNEX) &&
+                        userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING)) ||
+                        isSupervisor) && {
                         text: tCommon("delete"),
                         iconId: "fr-icon-delete-line",
                         onClick: () => confirmRemoveVectorDbModal.open(),
@@ -271,7 +286,10 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
                                 nativeInputProps: {
                                     checked: serviceType === "tms",
                                     onChange: () => setServiceType("tms"),
-                                    disabled: tmsEndpoints?.length === 0 || !isAvailable("WMTS-TMS"),
+                                    disabled:
+                                        tmsEndpoints?.length === 0 ||
+                                        !isAvailable("WMTS-TMS") ||
+                                        (!isSupervisor && !userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING)),
                                 },
                             },
                             {
@@ -280,7 +298,10 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
                                 nativeInputProps: {
                                     checked: serviceType === "wfs",
                                     onChange: () => setServiceType("wfs"),
-                                    disabled: wfsEndpoints?.length === 0 || !isAvailable("WFS"),
+                                    disabled:
+                                        wfsEndpoints?.length === 0 ||
+                                        !isAvailable("WFS") ||
+                                        (!isSupervisor && !userRights?.includes(CommunityMemberDtoRightsEnum.BROADCAST)),
                                 },
                             },
                             {
@@ -289,7 +310,10 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
                                 nativeInputProps: {
                                     checked: serviceType === "wms-vector",
                                     onChange: () => setServiceType("wms-vector"),
-                                    disabled: wmsVectorEndpoints?.length === 0 || !isAvailable("WMS-VECTOR"),
+                                    disabled:
+                                        wmsVectorEndpoints?.length === 0 ||
+                                        !isAvailable("WMS-VECTOR") ||
+                                        (!isSupervisor && !userRights?.includes(CommunityMemberDtoRightsEnum.BROADCAST)),
                                 },
                             },
                         ]}
