@@ -4,7 +4,6 @@ namespace App\Services\EntrepotApi;
 
 use App\Exception\ApiException;
 use App\Services\AbstractApiService;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpClient\Exception\JsonException;
@@ -22,14 +21,10 @@ class BaseEntrepotApiService extends AbstractApiService
         Filesystem $filesystem,
         RequestStack $requestStack,
         protected CacheInterface $cache,
-        LoggerInterface $logger,
     ) {
-        parent::__construct($httpClient, $parameters, $filesystem, $requestStack, $logger, 'api_entrepot_url');
+        parent::__construct($httpClient, $parameters, $filesystem, $requestStack, 'api_entrepot_url');
     }
 
-    /**
-     * @SuppressWarnings(ElseExpression)
-     */
     protected function handleResponse(ResponseInterface $response, bool $expectJson): mixed
     {
         $content = null;
@@ -44,18 +39,17 @@ class BaseEntrepotApiService extends AbstractApiService
             }
 
             return $content;
-        } else {
-            // TODO : error_description est un tableau, pas string
-            $errorMsg = 'Entrepot API Error';
-            try {
-                $errorResponse = $response->toArray(false);
-                if (array_key_exists('error_description', $errorResponse)) {
-                    $errorMsg = is_array($errorResponse['error_description']) ? implode(', ', $errorResponse['error_description']) : $errorResponse['error_description'];
-                }
-            } catch (JsonException $ex) {
-                $errorResponse = $response->getContent(false);
-            }
-            throw new ApiException($errorMsg, $statusCode, $errorResponse);
         }
+        // TODO : error_description est un tableau, pas string
+        $errorMsg = 'Entrepot API Error';
+        try {
+            $errorResponse = $response->toArray(false);
+            if (array_key_exists('error_description', $errorResponse)) {
+                $errorMsg = is_array($errorResponse['error_description']) ? implode(', ', $errorResponse['error_description']) : $errorResponse['error_description'];
+            }
+        } catch (JsonException $ex) {
+            $errorResponse = $response->getContent(false);
+        }
+        throw new ApiException($errorMsg, $statusCode, $errorResponse);
     }
 }

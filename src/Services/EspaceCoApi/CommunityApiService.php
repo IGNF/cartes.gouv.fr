@@ -2,7 +2,6 @@
 
 namespace App\Services\EspaceCoApi;
 
-use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -16,11 +15,10 @@ class CommunityApiService extends BaseEspaceCoApiService
         ParameterBagInterface $parameters,
         Filesystem $filesystem,
         RequestStack $requestStack,
-        LoggerInterface $logger,
         private UserApiService $userApiService,
         private GridApiService $gridApiService,
     ) {
-        parent::__construct($httpClient, $parameters, $filesystem, $requestStack, $logger);
+        parent::__construct($httpClient, $parameters, $filesystem, $requestStack);
     }
 
     public function getCommunities(string $name, int $page, int $limit, string $sort): array

@@ -4,11 +4,9 @@ namespace App\Services;
 
 use App\Security\KeycloakToken;
 use League\OAuth2\Client\Token\AccessToken;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Mime\Part\DataPart;
 use Symfony\Component\Mime\Part\Multipart\FormDataPart;
 use Symfony\Component\Security\Core\Exception\AuthenticationExpiredException;
@@ -27,7 +25,6 @@ abstract class AbstractApiService
         protected ParameterBagInterface $parameters,
         protected Filesystem $filesystem,
         private RequestStack $requestStack,
-        private LoggerInterface $logger,
         string $api,
     ) {
         $this->apiClient = $httpClient->withOptions([
@@ -95,24 +92,69 @@ abstract class AbstractApiService
     protected function requestAll(string $url, array $query = [], array $headers = []): array
     {
         $query['page'] = 1;
-        $query['limit'] = 50;
+        $query['limit'] = 100;
 
-        $response = $this->request('GET', $url, [], $query, $headers, false, true, true);
+        $firstPageResponse = $this->request('GET', $url, [], $query, $headers, false, true, true);
+        $allResources = $firstPageResponse['content'];
 
-        $allResources = $response['content'];
+        if (!isset($firstPageResponse['headers']['content-range'][0])) {
+            return $allResources;
+        }
 
-        if (isset($response['headers']['content-range'][0])) {
-            $contentRange = $response['headers']['content-range'][0];
-            $pageCount = $this->getResultsPageCount($contentRange, $query['limit']);
+        $contentRange = $firstPageResponse['headers']['content-range'][0];
+        $pageCount = $this->getResultsPageCount($contentRange, $query['limit']);
 
-            // on a déjà le contenu de la page 1, donc on commence à 2 et on va jusqu'à $pageCount
-            for ($i = 2; $i <= $pageCount; ++$i) {
-                $query['page'] = $i;
-                $allResources = array_merge($allResources, $this->request('GET', $url, [], $query, $headers));
+        if ($pageCount <= 1) {
+            return $allResources;
+        }
+
+        $responses = [];
+        $responsePageMap = [];
+
+        // La page 1 est déjà récupérée, on lance les pages restantes en parallèle.
+        for ($i = 2; $i <= $pageCount; ++$i) {
+            $pageQuery = $query;
+            $pageQuery['page'] = $i;
+
+            $response = $this->requestAsync('GET', $url, [], $pageQuery, $headers);
+            $responses[] = $response;
+            $responsePageMap[spl_object_id($response)] = $i;
+        }
+
+        /** @var array<int,array<mixed>> $resourcesByPage */
+        $resourcesByPage = [];
+        foreach ($this->apiClient->stream($responses) as $response => $chunk) {
+            if (!$chunk->isLast()) {
+                continue;
             }
+
+            $responseId = spl_object_id($response);
+            if (!isset($responsePageMap[$responseId])) {
+                continue;
+            }
+
+            $page = $responsePageMap[$responseId];
+            $resourcesByPage[$page] = $this->handleResponse($response, true);
+        }
+
+        ksort($resourcesByPage);
+        foreach ($resourcesByPage as $resources) {
+            $allResources = array_merge($allResources, $resources);
         }
 
         return $allResources;
+    }
+
+    /**
+     * @param iterable<mixed> $body
+     * @param array<mixed>    $query
+     * @param array<mixed>    $headers
+     */
+    protected function requestAsync(string $method, string $url, iterable $body = [], array $query = [], array $headers = [], bool $fileUpload = false): ResponseInterface
+    {
+        $options = $this->prepareOptions($body, $query, $headers, $fileUpload);
+
+        return $this->apiClient->request($method, $url, $options);
     }
 
     /**
@@ -126,16 +168,7 @@ abstract class AbstractApiService
      */
     protected function request(string $method, string $url, iterable $body = [], array $query = [], array $headers = [], bool $fileUpload = false, bool $expectJson = true, bool $includeHeaders = false): mixed
     {
-        $options = $this->prepareOptions($body, $query, $headers, $fileUpload);
-
-        $response = $this->apiClient->request($method, $url, $options);
-
-        $responseInfo = $response->getInfo();
-        $finalUrl = array_key_exists('url', $responseInfo) ? $responseInfo['url'] : null;
-
-        $debugBody = $fileUpload ? '[file upload]' : $body;
-        $debugContent = $fileUpload ? null : $response->getContent(false);
-        $this->logger->debug(self::class, [$method, $url, $debugBody, $query, $debugContent, $finalUrl]);
+        $response = $this->requestAsync($method, $url, $body, $query, $headers, $fileUpload);
 
         $responseContent = $this->handleResponse($response, $expectJson);
 
@@ -149,10 +182,46 @@ abstract class AbstractApiService
         return $responseContent;
     }
 
-    /**
-     * @SuppressWarnings(ElseExpression)
-     */
     abstract protected function handleResponse(ResponseInterface $response, bool $expectJson): mixed;
+
+    /**
+     * @param array<int|string,ResponseInterface> $responsesByKey
+     *
+     * @return array<mixed>
+     */
+    protected function handleAsyncResponses(array $responsesByKey, bool $expectJson = true): array
+    {
+        if ([] === $responsesByKey) {
+            return [];
+        }
+
+        $resolved = [];
+        $responseKeyMap = [];
+        $responseList = [];
+
+        foreach ($responsesByKey as $key => $response) {
+            $responseList[] = $response;
+            $responseKeyMap[spl_object_id($response)] = $key;
+        }
+
+        foreach ($this->apiClient->stream($responseList) as $response => $chunk) {
+            if (!$chunk->isLast()) {
+                continue;
+            }
+
+            $responseId = spl_object_id($response);
+            if (!isset($responseKeyMap[$responseId])) {
+                continue;
+            }
+
+            $key = $responseKeyMap[$responseId];
+            $resolved[$key] = $this->handleResponse($response, $expectJson);
+        }
+
+        ksort($resolved);
+
+        return $resolved;
+    }
 
     /**
      * @param iterable<mixed> $body
@@ -162,7 +231,6 @@ abstract class AbstractApiService
      * @return array<mixed>
      *
      * @SuppressWarnings(BooleanArgumentFlag)
-     * @SuppressWarnings(ElseExpression)
      */
     protected function prepareOptions(iterable $body = [], array $query = [], array $headers = [], bool $fileUpload = false): array
     {
@@ -203,7 +271,6 @@ abstract class AbstractApiService
 
     private function getKeycloakToken(): AccessToken
     {
-        /** @var SessionInterface */
         $session = $this->requestStack->getSession();
 
         /** @var ?AccessToken */

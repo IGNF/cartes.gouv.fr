@@ -7,7 +7,6 @@ use App\Constants\EntrepotApi\UploadTags;
 use App\Exception\ApiException;
 use App\Exception\AppException;
 use App\Services\FileUploader\Format\Zip\ZipUploadPolicy;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -21,11 +20,10 @@ class UploadApiService extends BaseEntrepotApiService
         ParameterBagInterface $parameters,
         Filesystem $filesystem,
         RequestStack $requestStack,
-        LoggerInterface $logger,
         protected CacheInterface $cache,
         private readonly ZipUploadPolicy $zipUploadPolicy,
     ) {
-        parent::__construct($httpClient, $parameters, $filesystem, $requestStack, $cache, $logger);
+        parent::__construct($httpClient, $parameters, $filesystem, $requestStack, $cache);
     }
 
     /**

@@ -2,12 +2,12 @@
 
 namespace App\Services\EntrepotApi;
 
-use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Contracts\HttpClient\ResponseInterface;
 
 class StoredDataApiService extends BaseEntrepotApiService
 {
@@ -16,10 +16,9 @@ class StoredDataApiService extends BaseEntrepotApiService
         ParameterBagInterface $parameters,
         Filesystem $filesystem,
         RequestStack $requestStack,
-        LoggerInterface $logger,
         protected CacheInterface $cache,
     ) {
-        parent::__construct($httpClient, $parameters, $filesystem, $requestStack, $cache, $logger);
+        parent::__construct($httpClient, $parameters, $filesystem, $requestStack, $cache);
     }
 
     /**
@@ -79,8 +78,15 @@ class StoredDataApiService extends BaseEntrepotApiService
     {
         $storedDataList = $this->getAll($datastoreId, $query);
 
-        foreach ($storedDataList as &$storedData) {
-            $storedData = $this->get($datastoreId, $storedData['_id']);
+        $responses = [];
+        foreach ($storedDataList as $index => $storedData) {
+            $responses[$index] = $this->getAsync($datastoreId, $storedData['_id']);
+        }
+
+        $resolved = $this->handleAsyncResponses($responses, true);
+
+        foreach ($resolved as $index => $payload) {
+            $storedDataList[$index] = $payload;
         }
 
         return $storedDataList;
@@ -89,6 +95,11 @@ class StoredDataApiService extends BaseEntrepotApiService
     public function get(string $datastoreId, string $storedDataId): array
     {
         return $this->request('GET', "datastores/$datastoreId/stored_data/$storedDataId");
+    }
+
+    public function getAsync(string $datastoreId, string $storedDataId): ResponseInterface
+    {
+        return $this->requestAsync('GET', "datastores/$datastoreId/stored_data/$storedDataId");
     }
 
     /**
