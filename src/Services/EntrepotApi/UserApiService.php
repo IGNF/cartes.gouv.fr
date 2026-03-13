@@ -3,7 +3,6 @@
 namespace App\Services\EntrepotApi;
 
 use App\Exception\ApiException;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -17,11 +16,10 @@ class UserApiService extends BaseEntrepotApiService
         ParameterBagInterface $parameters,
         Filesystem $filesystem,
         RequestStack $requestStack,
-        LoggerInterface $logger,
         private DatastoreApiService $datastoreApiService,
         protected CacheInterface $cache,
     ) {
-        parent::__construct($httpClient, $parameters, $filesystem, $requestStack, $cache, $logger);
+        parent::__construct($httpClient, $parameters, $filesystem, $requestStack, $cache);
     }
 
     public function getMe(): array

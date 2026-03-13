@@ -2,25 +2,11 @@
 
 namespace App\Services\EspaceCoApi;
 
-use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Mime\Part\DataPart;
 use Symfony\Component\Mime\Part\Multipart\FormDataPart;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class CommunityDocumentApiService extends BaseEspaceCoApiService
 {
-    public function __construct(HttpClientInterface $httpClient,
-        ParameterBagInterface $parameters,
-        Filesystem $filesystem,
-        RequestStack $requestStack,
-        LoggerInterface $logger,
-    ) {
-        parent::__construct($httpClient, $parameters, $filesystem, $requestStack, $logger);
-    }
-
     /**
      * @param array<string> $fields
      */

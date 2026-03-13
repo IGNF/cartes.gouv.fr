@@ -2,7 +2,6 @@
 
 namespace App\Services\EspaceCoApi;
 
-use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -17,9 +16,8 @@ class StyleApiService extends BaseEspaceCoApiService
         ParameterBagInterface $parameters,
         Filesystem $filesystem,
         RequestStack $requestStack,
-        LoggerInterface $logger,
     ) {
-        parent::__construct($httpClient, $parameters, $filesystem, $requestStack, $logger);
+        parent::__construct($httpClient, $parameters, $filesystem, $requestStack);
 
         $this->apiClient = $httpClient->withOptions([
             'base_uri' => str_replace('/api', '/style', $parameters->get('api_espaceco_url')).'/',

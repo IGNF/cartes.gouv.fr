@@ -4,7 +4,6 @@ namespace App\Services\EspaceCoApi;
 
 use App\Exception\ApiException;
 use App\Services\AbstractApiService;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -19,14 +18,10 @@ class BaseEspaceCoApiService extends AbstractApiService
         ParameterBagInterface $parameters,
         Filesystem $filesystem,
         RequestStack $requestStack,
-        LoggerInterface $logger,
     ) {
-        parent::__construct($httpClient, $parameters, $filesystem, $requestStack, $logger, 'api_espaceco_url');
+        parent::__construct($httpClient, $parameters, $filesystem, $requestStack, 'api_espaceco_url');
     }
 
-    /**
-     * @SuppressWarnings(ElseExpression)
-     */
     protected function handleResponse(ResponseInterface $response, bool $expectJson): mixed
     {
         $content = null;
@@ -41,9 +36,8 @@ class BaseEspaceCoApiService extends AbstractApiService
             }
 
             return $content;
-        } else {
-            $errorResponse = $response->toArray(false);
-            throw new ApiException($errorResponse['message'], $statusCode);
         }
+        $errorResponse = $response->toArray(false);
+        throw new ApiException($errorResponse['message'], $statusCode);
     }
 }
