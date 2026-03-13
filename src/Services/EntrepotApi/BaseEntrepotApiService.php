@@ -5,7 +5,6 @@ namespace App\Services\EntrepotApi;
 use App\Exception\ApiException;
 use App\Security\KeycloakTokenManager;
 use App\Services\AbstractApiService;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpClient\Exception\JsonException;
@@ -22,14 +21,10 @@ class BaseEntrepotApiService extends AbstractApiService
         Filesystem $filesystem,
         KeycloakTokenManager $tokenManager,
         protected CacheInterface $cache,
-        LoggerInterface $logger,
     ) {
-        parent::__construct($httpClient, $parameters, $filesystem, $tokenManager, $logger, 'api_entrepot_url');
+        parent::__construct($httpClient, $parameters, $filesystem, $tokenManager, 'api_entrepot_url');
     }
 
-    /**
-     * @SuppressWarnings(ElseExpression)
-     */
     protected function handleResponse(ResponseInterface $response, bool $expectJson): mixed
     {
         $content = null;

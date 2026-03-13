@@ -8,7 +8,6 @@ use App\Exception\ApiException;
 use App\Exception\AppException;
 use App\Security\KeycloakTokenManager;
 use App\Services\FileUploader\Format\Zip\ZipUploadPolicy;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Contracts\Cache\CacheInterface;
@@ -21,11 +20,10 @@ class UploadApiService extends BaseEntrepotApiService
         ParameterBagInterface $parameters,
         Filesystem $filesystem,
         KeycloakTokenManager $tokenManager,
-        LoggerInterface $logger,
         protected CacheInterface $cache,
         private readonly ZipUploadPolicy $zipUploadPolicy,
     ) {
-        parent::__construct($httpClient, $parameters, $filesystem, $tokenManager, $cache, $logger);
+        parent::__construct($httpClient, $parameters, $filesystem, $tokenManager, $cache);
     }
 
     /**

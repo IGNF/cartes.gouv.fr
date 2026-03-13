@@ -134,18 +134,16 @@ class DatasheetController extends AbstractController implements ApiControllerInt
         });
         $pyramidRasterList = array_values($pyramidRasterList);
 
-        $metadataList = $this->metadataApiService->getAll($datastoreId, [
-            'tags' => [
-                CommonTags::DATASHEET_NAME => $datasheetName,
-            ],
-        ]);
+        if (0 === count($uploadList) && 0 === count($storedDataList)) {
+            $metadataList = $this->metadataApiService->getAll($datastoreId, [
+                'tags' => [
+                    CommonTags::DATASHEET_NAME => $datasheetName,
+                ],
+            ]);
 
-        if (
-            0 === count($uploadList)
-            && 0 === count($storedDataList)
-            && 0 === count($metadataList)
-        ) {
-            throw new CartesApiException("La fiche de donnée [$datasheetName] n'existe pas", Response::HTTP_NOT_FOUND);
+            if (0 === count($metadataList)) {
+                throw new CartesApiException("La fiche de donnée [$datasheetName] n'existe pas", Response::HTTP_NOT_FOUND);
+            }
         }
 
         $datastore = $this->datastoreApiService->get($datastoreId);

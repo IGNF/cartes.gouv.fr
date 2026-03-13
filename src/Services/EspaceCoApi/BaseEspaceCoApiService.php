@@ -5,7 +5,6 @@ namespace App\Services\EspaceCoApi;
 use App\Exception\ApiException;
 use App\Security\KeycloakTokenManager;
 use App\Services\AbstractApiService;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,15 +18,10 @@ class BaseEspaceCoApiService extends AbstractApiService
         ParameterBagInterface $parameters,
         Filesystem $filesystem,
         KeycloakTokenManager $tokenManager,
-
-        LoggerInterface $logger,
     ) {
-        parent::__construct($httpClient, $parameters, $filesystem, $tokenManager, $logger, 'api_espaceco_url');
+        parent::__construct($httpClient, $parameters, $filesystem, $tokenManager, 'api_espaceco_url');
     }
 
-    /**
-     * @SuppressWarnings(ElseExpression)
-     */
     protected function handleResponse(ResponseInterface $response, bool $expectJson): mixed
     {
         $content = null;
