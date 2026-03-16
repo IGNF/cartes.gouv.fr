@@ -10,7 +10,9 @@ import { FC, Fragment, ReactNode, memo, useCallback, useMemo, useState } from "r
 import { createPortal } from "react-dom";
 import { symToStr } from "tsafe/symToStr";
 
+import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import useDataUsesQuery from "@/hooks/queries/useDataUsesQuery";
+import useCommunityRights from "@/hooks/useCommunityRights";
 import { DatasheetStoredDataItem, DatastoreEndpoint, StoredDataStatusEnum, VectorDb } from "../../../../../../@types/app";
 import { EndpointDetailResponseDtoTypeEnum } from "../../../../../../@types/entrepot";
 import StoredDataStatusBadge from "../../../../../../components/Utils/Badges/StoredDataStatusBadge";
@@ -23,10 +25,6 @@ import api from "../../../../../api";
 import ListItem from "../../ListItem";
 import StoredDataDeleteConfirmDialog from "../StoredDataDeleteConfirmDialog";
 import VectorDbDesc from "./VectorDbDesc";
-
-import { useAuthStore } from "@/stores/AuthStore";
-import { useDatastore } from "@/contexts/datastore";
-import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 
 type ServiceTypes = "tms" | "wfs" | "wms-vector" | "pre-paquet";
 
@@ -202,13 +200,7 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
         [vectorDb._id]
     );
 
-    //rights
-    const user = useAuthStore((state) => state.user);
-    const { datastore } = useDatastore();
-    const communityID = datastore.community._id;
-    const community = user?.communities_member.find((member) => member.community?._id === communityID)?.community;
-    const userRights = user?.communities_member.find((member) => member.community?._id === communityID)?.rights;
-    const isSupervisor = community?.supervisor === user?.id;
+    const { userRights, isSupervisor } = useCommunityRights();
 
     return (
         <>
