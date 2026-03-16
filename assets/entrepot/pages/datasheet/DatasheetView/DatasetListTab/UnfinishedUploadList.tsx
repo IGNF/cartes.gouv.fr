@@ -89,7 +89,7 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
 
                         <div className={fr.cx("fr-col")}>
                             <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-grid-row--middle")}>
-                                {failureCase && (
+                                {failureCase ? (
                                     <Button
                                         className={fr.cx("fr-mr-2w")}
                                         linkProps={
@@ -102,40 +102,39 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
                                     >
                                         {"Voir le rapport"}
                                     </Button>
-                                )}
-
-                                {!failureCase &&
+                                ) : (
                                     (isSupervisor ||
                                         (userRights?.includes(CommunityMemberDtoRightsEnum.UPLOAD) &&
                                             userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING))) && (
-                                        <>
-                                            <Button
-                                                className={fr.cx("fr-mr-2w")}
-                                                linkProps={
-                                                    routes.datastore_datasheet_upload_integration({
-                                                        datastoreId,
-                                                        uploadId: upload._id,
-                                                        datasheetName: upload.tags.datasheet_name,
-                                                    }).link
-                                                }
-                                            >
-                                                {"Reprendre l'intégration"}
-                                            </Button>
-                                            <Button
-                                                iconId="fr-icon-delete-fill"
-                                                priority="secondary"
-                                                onClick={() => {
-                                                    if (isLastUpload(uploadList)) {
-                                                        deleteUploadConfirmModal.open();
-                                                    } else {
-                                                        deleteUnfinishedUpload.mutate(upload._id);
-                                                    }
-                                                }}
-                                            >
-                                                {"Supprimer"}
-                                            </Button>
-                                        </>
-                                    )}
+                                        <Button
+                                            className={fr.cx("fr-mr-2w")}
+                                            linkProps={
+                                                routes.datastore_datasheet_upload_integration({
+                                                    datastoreId,
+                                                    uploadId: upload._id,
+                                                    datasheetName: upload.tags.datasheet_name,
+                                                }).link
+                                            }
+                                        >
+                                            {"Reprendre l'intégration"}
+                                        </Button>
+                                    )
+                                )}
+                                {(isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.UPLOAD)) && (
+                                    <Button
+                                        iconId="fr-icon-delete-fill"
+                                        priority="secondary"
+                                        onClick={() => {
+                                            if (isLastUpload(uploadList)) {
+                                                deleteUploadConfirmModal.open();
+                                            } else {
+                                                deleteUnfinishedUpload.mutate(upload._id);
+                                            }
+                                        }}
+                                    >
+                                        {"Supprimer"}
+                                    </Button>
+                                )}
                             </div>
                         </div>
                     </div>
