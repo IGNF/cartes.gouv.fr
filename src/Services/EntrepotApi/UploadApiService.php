@@ -8,10 +8,12 @@ use App\Exception\ApiException;
 use App\Exception\AppException;
 use App\Security\KeycloakTokenManager;
 use App\Services\FileUploader\Format\Zip\ZipUploadPolicy;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Contracts\HttpClient\ResponseInterface;
 
 class UploadApiService extends BaseEntrepotApiService
 {
@@ -20,10 +22,11 @@ class UploadApiService extends BaseEntrepotApiService
         ParameterBagInterface $parameters,
         Filesystem $filesystem,
         KeycloakTokenManager $tokenManager,
+        LoggerInterface $logger,
         protected CacheInterface $cache,
         private readonly ZipUploadPolicy $zipUploadPolicy,
     ) {
-        parent::__construct($httpClient, $parameters, $filesystem, $tokenManager, $cache);
+        parent::__construct($httpClient, $parameters, $filesystem, $tokenManager, $logger, $cache);
     }
 
     /**
@@ -52,10 +55,10 @@ class UploadApiService extends BaseEntrepotApiService
         $query ??= [];
 
         $uploadList = $this->getList($datastoreId, $query);
-        foreach ($uploadList['content'] as &$upload) {
-            $upload = $this->get($datastoreId, $upload['_id']);
-        }
-        unset($upload);
+        $uploadList['content'] = $this->fetchAllDetailsAsync(
+            $uploadList['content'],
+            fn (array $upload): ResponseInterface => $this->getAsync($datastoreId, $upload['_id'])
+        );
 
         return $uploadList;
     }
@@ -83,16 +86,20 @@ class UploadApiService extends BaseEntrepotApiService
     {
         $uploads = $this->getAll($datastoreId, $query);
 
-        foreach ($uploads as &$upload) {
-            $upload = $this->get($datastoreId, $upload['_id']);
-        }
-
-        return $uploads;
+        return $this->fetchAllDetailsAsync(
+            $uploads,
+            fn (array $upload): ResponseInterface => $this->getAsync($datastoreId, $upload['_id'])
+        );
     }
 
     public function get(string $datastoreId, string $uploadId): array
     {
         return $this->request('GET', "datastores/$datastoreId/uploads/$uploadId");
+    }
+
+    public function getAsync(string $datastoreId, string $uploadId): ResponseInterface
+    {
+        return $this->requestAsync('GET', "datastores/$datastoreId/uploads/$uploadId");
     }
 
     /**

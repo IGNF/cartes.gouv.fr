@@ -2,13 +2,17 @@
 
 namespace App\Services;
 
+use App\Exception\ApiException;
 use App\Security\KeycloakTokenManager;
 use League\OAuth2\Client\Token\AccessToken;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mime\Part\DataPart;
 use Symfony\Component\Mime\Part\Multipart\FormDataPart;
 use Symfony\Component\Security\Core\Exception\AuthenticationExpiredException;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
@@ -24,6 +28,7 @@ abstract class AbstractApiService
         protected ParameterBagInterface $parameters,
         protected Filesystem $filesystem,
         private KeycloakTokenManager $tokenManager,
+        private LoggerInterface $logger,
         string $api,
     ) {
         $this->apiClient = $httpClient->withOptions([
@@ -60,13 +65,7 @@ abstract class AbstractApiService
      */
     protected function sendFile(string $method, string $url, string $filepath, array $formFields = [], array $query = [], string $fileFieldName = 'file'): array
     {
-        $formFields[$fileFieldName] = DataPart::fromPath($filepath); // ajout du fichier dans $formFields
-        $formData = new FormDataPart($formFields);
-
-        $body = $formData->bodyToIterable();
-        $headers = $formData->getPreparedHeaders()->toArray();
-
-        return $this->request($method, $url, $body, $query, $headers, true);
+        return $this->sendFiles($method, $url, [$fileFieldName => $filepath], $formFields, $query);
     }
 
     /**
@@ -107,36 +106,18 @@ abstract class AbstractApiService
             return $allResources;
         }
 
-        $responses = [];
-        $responsePageMap = [];
+        $responsesByPage = [];
 
         // La page 1 est déjà récupérée, on lance les pages restantes en parallèle.
         for ($i = 2; $i <= $pageCount; ++$i) {
             $pageQuery = $query;
             $pageQuery['page'] = $i;
 
-            $response = $this->requestAsync('GET', $url, [], $pageQuery, $headers);
-            $responses[] = $response;
-            $responsePageMap[spl_object_id($response)] = $i;
+            $responsesByPage[$i] = $this->requestAsync('GET', $url, [], $pageQuery, $headers);
         }
 
         /** @var array<int,array<mixed>> $resourcesByPage */
-        $resourcesByPage = [];
-        foreach ($this->apiClient->stream($responses) as $response => $chunk) {
-            if (!$chunk->isLast()) {
-                continue;
-            }
-
-            $responseId = spl_object_id($response);
-            if (!isset($responsePageMap[$responseId])) {
-                continue;
-            }
-
-            $page = $responsePageMap[$responseId];
-            $resourcesByPage[$page] = $this->handleResponse($response, true);
-        }
-
-        ksort($resourcesByPage);
+        $resourcesByPage = $this->handleAsyncResponses($responsesByPage);
         foreach ($resourcesByPage as $resources) {
             $allResources = array_merge($allResources, $resources);
         }
@@ -167,9 +148,12 @@ abstract class AbstractApiService
      */
     protected function request(string $method, string $url, iterable $body = [], array $query = [], array $headers = [], bool $fileUpload = false, bool $expectJson = true, bool $includeHeaders = false): mixed
     {
-        $response = $this->requestAsync($method, $url, $body, $query, $headers, $fileUpload);
-
-        $responseContent = $this->handleResponse($response, $expectJson);
+        try {
+            $response = $this->requestAsync($method, $url, $body, $query, $headers, $fileUpload);
+            $responseContent = $this->handleResponse($response, $expectJson);
+        } catch (TransportExceptionInterface $exception) {
+            throw $this->createTransportException($method, $url, $query, $exception);
+        }
 
         if ($includeHeaders) {
             return [
@@ -181,14 +165,43 @@ abstract class AbstractApiService
         return $responseContent;
     }
 
-    abstract protected function handleResponse(ResponseInterface $response, bool $expectJson): mixed;
+    protected function handleResponse(ResponseInterface $response, bool $expectJson): mixed
+    {
+        $statusCode = $response->getStatusCode();
+
+        if ($statusCode >= 200 && $statusCode < 300) {
+            return $this->handleSuccessResponse($response, $expectJson);
+        }
+
+        $errorResponse = $this->extractErrorResponse($response);
+        $errorMessage = $this->extractErrorMessage($errorResponse, $response);
+
+        throw $this->createApiException($errorMessage, $statusCode, $errorResponse);
+    }
+
+    protected function handleSuccessResponse(ResponseInterface $response, bool $expectJson): mixed
+    {
+        $statusCode = $response->getStatusCode();
+
+        if (Response::HTTP_NO_CONTENT === $statusCode || '' === $response->getContent()) {
+            return [];
+        }
+
+        return $expectJson ? $response->toArray() : $response->getContent();
+    }
+
+    abstract protected function extractErrorResponse(ResponseInterface $response): mixed;
+
+    abstract protected function extractErrorMessage(mixed $errorResponse, ResponseInterface $response): string;
+
+    abstract protected function createApiException(string $message, int $statusCode, mixed $details = []): ApiException;
 
     /**
      * @param array<int|string,ResponseInterface> $responsesByKey
      *
      * @return array<mixed>
      */
-    protected function handleAsyncResponses(array $responsesByKey, bool $expectJson = true): array
+    protected function handleAsyncResponses(array $responsesByKey, bool $expectJson = true, bool $continueOnError = false): array
     {
         if ([] === $responsesByKey) {
             return [];
@@ -204,22 +217,76 @@ abstract class AbstractApiService
         }
 
         foreach ($this->apiClient->stream($responseList) as $response => $chunk) {
+            $responseId = spl_object_id($response);
+            $key = $responseKeyMap[$responseId] ?? null;
+
+            if ($chunk->isTimeout()) {
+                $exception = new ApiException('Timeout de stream lors de la résolution asynchrone', Response::HTTP_SERVICE_UNAVAILABLE, [
+                    'key' => $key,
+                ]);
+
+                if (!$continueOnError) {
+                    throw $exception;
+                }
+
+                $this->logger->warning('Timeout de stream détecté lors de la résolution asynchrone', [
+                    'key' => $key,
+                ]);
+
+                continue;
+            }
+
             if (!$chunk->isLast()) {
                 continue;
             }
 
-            $responseId = spl_object_id($response);
             if (!isset($responseKeyMap[$responseId])) {
                 continue;
             }
 
-            $key = $responseKeyMap[$responseId];
-            $resolved[$key] = $this->handleResponse($response, $expectJson);
+            try {
+                $resolved[$key] = $this->handleResponse($response, $expectJson);
+            } catch (\Throwable $exception) {
+                if (!$continueOnError) {
+                    throw $exception;
+                }
+
+                $this->logger->warning('Requête asynchrone ignorée après échec', [
+                    'key' => $key,
+                    'error' => $exception->getMessage(),
+                ]);
+            }
         }
 
         ksort($resolved);
 
         return $resolved;
+    }
+
+    /**
+     * @param array<mixed>                                 $items
+     * @param callable(mixed,int|string):ResponseInterface $asyncFetcher
+     *
+     * @return array<mixed>
+     */
+    protected function fetchAllDetailsAsync(array $items, callable $asyncFetcher, bool $continueOnError = false): array
+    {
+        if ([] === $items) {
+            return [];
+        }
+
+        $responsesByKey = [];
+
+        foreach ($items as $key => $item) {
+            $responsesByKey[$key] = $asyncFetcher($item, $key);
+        }
+
+        $resolved = $this->handleAsyncResponses($responsesByKey, true, $continueOnError);
+        foreach ($resolved as $key => $payload) {
+            $items[$key] = $payload;
+        }
+
+        return $items;
     }
 
     /**
@@ -271,5 +338,19 @@ abstract class AbstractApiService
     private function getKeycloakToken(): AccessToken
     {
         return $this->tokenManager->getToken() ?? throw new AuthenticationExpiredException();
+    }
+
+    /**
+     * @param array<mixed> $query
+     */
+    private function createTransportException(string $method, string $url, array $query, TransportExceptionInterface $exception): ApiException
+    {
+        $message = sprintf('Erreur réseau lors de l\'appel API %s %s: %s', $method, $url, $exception->getMessage());
+
+        return new ApiException($message, Response::HTTP_SERVICE_UNAVAILABLE, [
+            'method' => $method,
+            'url' => $url,
+            'query' => $query,
+        ], $exception);
     }
 }

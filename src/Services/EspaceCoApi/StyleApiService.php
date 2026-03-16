@@ -3,6 +3,7 @@
 namespace App\Services\EspaceCoApi;
 
 use App\Security\KeycloakTokenManager;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -16,8 +17,9 @@ class StyleApiService extends BaseEspaceCoApiService
         ParameterBagInterface $parameters,
         Filesystem $filesystem,
         KeycloakTokenManager $tokenManager,
+        LoggerInterface $logger,
     ) {
-        parent::__construct($httpClient, $parameters, $filesystem, $tokenManager);
+        parent::__construct($httpClient, $parameters, $filesystem, $tokenManager, $logger);
 
         $this->apiClient = $httpClient->withOptions([
             'base_uri' => str_replace('/api', '/style', $parameters->get('api_espaceco_url')).'/',

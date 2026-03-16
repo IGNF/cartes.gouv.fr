@@ -2,6 +2,8 @@
 
 namespace App\Services\EntrepotApi;
 
+use Symfony\Contracts\HttpClient\ResponseInterface;
+
 class ProcessingApiService extends BaseEntrepotApiService
 {
     /**
@@ -50,16 +52,20 @@ class ProcessingApiService extends BaseEntrepotApiService
     {
         $processingExecutions = $this->getAllExecutions($datastoreId, $query);
 
-        foreach ($processingExecutions as &$procExec) {
-            $procExec = $this->getExecution($datastoreId, $procExec['_id']);
-        }
-
-        return $processingExecutions;
+        return $this->fetchAllDetailsAsync(
+            $processingExecutions,
+            fn (array $procExec): ResponseInterface => $this->getExecutionAsync($datastoreId, $procExec['_id'])
+        );
     }
 
     public function getExecution(string $datastoreId, string $processingExecutionId): array
     {
         return $this->request('GET', "datastores/$datastoreId/processings/executions/$processingExecutionId");
+    }
+
+    public function getExecutionAsync(string $datastoreId, string $processingExecutionId): ResponseInterface
+    {
+        return $this->requestAsync('GET', "datastores/$datastoreId/processings/executions/$processingExecutionId");
     }
 
     public function getExecutionLogs(string $datastoreId, string $processingExecutionId): array

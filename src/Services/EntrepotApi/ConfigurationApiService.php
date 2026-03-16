@@ -2,6 +2,8 @@
 
 namespace App\Services\EntrepotApi;
 
+use Symfony\Contracts\HttpClient\ResponseInterface;
+
 class ConfigurationApiService extends BaseEntrepotApiService
 {
     /**
@@ -23,16 +25,20 @@ class ConfigurationApiService extends BaseEntrepotApiService
     {
         $configurations = $this->getAll($datastoreId, $query);
 
-        foreach ($configurations as &$configuration) {
-            $configuration = $this->get($datastoreId, $configuration['_id']);
-        }
-
-        return $configurations;
+        return $this->fetchAllDetailsAsync(
+            $configurations,
+            fn (array $configuration): ResponseInterface => $this->getAsync($datastoreId, $configuration['_id'])
+        );
     }
 
     public function get(string $datastoreId, string $configurationId): array
     {
         return $this->request('GET', "datastores/$datastoreId/configurations/$configurationId");
+    }
+
+    public function getAsync(string $datastoreId, string $configurationId): ResponseInterface
+    {
+        return $this->requestAsync('GET', "datastores/$datastoreId/configurations/$configurationId");
     }
 
     /**

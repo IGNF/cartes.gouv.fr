@@ -5,9 +5,9 @@ namespace App\Services\EspaceCoApi;
 use App\Exception\ApiException;
 use App\Security\KeycloakTokenManager;
 use App\Services\AbstractApiService;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
@@ -18,26 +18,27 @@ class BaseEspaceCoApiService extends AbstractApiService
         ParameterBagInterface $parameters,
         Filesystem $filesystem,
         KeycloakTokenManager $tokenManager,
+        LoggerInterface $logger,
     ) {
-        parent::__construct($httpClient, $parameters, $filesystem, $tokenManager, 'api_espaceco_url');
+        parent::__construct($httpClient, $parameters, $filesystem, $tokenManager, $logger, 'api_espaceco_url');
     }
 
-    protected function handleResponse(ResponseInterface $response, bool $expectJson): mixed
+    protected function extractErrorResponse(ResponseInterface $response): mixed
     {
-        $content = null;
-        $statusCode = $response->getStatusCode();
+        return $response->toArray(false);
+    }
 
-        if ($statusCode >= 200 && $statusCode < 300) { // requête réussie
-            if (Response::HTTP_NO_CONTENT === $statusCode || '' === $response->getContent()) {
-                $content = [];
-            } else {
-                // si on attend une réponse au format JSON
-                $content = $expectJson ? $response->toArray() : $response->getContent();
-            }
-
-            return $content;
+    protected function extractErrorMessage(mixed $errorResponse, ResponseInterface $response): string
+    {
+        if (is_array($errorResponse) && array_key_exists('message', $errorResponse) && is_string($errorResponse['message'])) {
+            return $errorResponse['message'];
         }
-        $errorResponse = $response->toArray(false);
-        throw new ApiException($errorResponse['message'], $statusCode);
+
+        return 'EspaceCo API Error';
+    }
+
+    protected function createApiException(string $message, int $statusCode, mixed $details = []): ApiException
+    {
+        return new ApiException($message, $statusCode, is_string($details) ? ['message' => $details] : $details);
     }
 }

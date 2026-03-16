@@ -2,25 +2,10 @@
 
 namespace App\Services\EntrepotApi;
 
-use App\Security\KeycloakTokenManager;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Contracts\Cache\CacheInterface;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
 class StoredDataApiService extends BaseEntrepotApiService
 {
-    public function __construct(
-        HttpClientInterface $httpClient,
-        ParameterBagInterface $parameters,
-        Filesystem $filesystem,
-        KeycloakTokenManager $tokenManager,
-        protected CacheInterface $cache,
-    ) {
-        parent::__construct($httpClient, $parameters, $filesystem, $tokenManager, $cache);
-    }
-
     /**
      * @param array<mixed>|null $query
      */
@@ -47,10 +32,10 @@ class StoredDataApiService extends BaseEntrepotApiService
         $query ??= [];
 
         $storedDataList = $this->getList($datastoreId, $query);
-        foreach ($storedDataList['content'] as &$storedData) {
-            $storedData = $this->get($datastoreId, $storedData['_id']);
-        }
-        unset($storedData);
+        $storedDataList['content'] = $this->fetchAllDetailsAsync(
+            $storedDataList['content'],
+            fn (array $storedData): ResponseInterface => $this->getAsync($datastoreId, $storedData['_id'])
+        );
 
         return $storedDataList;
     }
@@ -78,18 +63,10 @@ class StoredDataApiService extends BaseEntrepotApiService
     {
         $storedDataList = $this->getAll($datastoreId, $query);
 
-        $responses = [];
-        foreach ($storedDataList as $index => $storedData) {
-            $responses[$index] = $this->getAsync($datastoreId, $storedData['_id']);
-        }
-
-        $resolved = $this->handleAsyncResponses($responses, true);
-
-        foreach ($resolved as $index => $payload) {
-            $storedDataList[$index] = $payload;
-        }
-
-        return $storedDataList;
+        return $this->fetchAllDetailsAsync(
+            $storedDataList,
+            fn (array $storedData): ResponseInterface => $this->getAsync($datastoreId, $storedData['_id'])
+        );
     }
 
     public function get(string $datastoreId, string $storedDataId): array
