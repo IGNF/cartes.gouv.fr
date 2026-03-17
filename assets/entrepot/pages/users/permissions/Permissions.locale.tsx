@@ -31,9 +31,9 @@ export const PermissionsFrTranslations: Translations<"fr">["Permissions"] = {
     no_permissions: "Vous n’avez pas de permissions.",
     explain_no_permissions: (
         <>
-            {"Les permissions sont des autorisation de producteurs de données publiques ou privées qui vous sont accordées pour exploiter leurs données."}
+            {"Les permissions sont des autorisations de producteurs de données publiques ou privées qui vous sont accordées pour exploiter leurs données."}
             <br />
-            <p>{"Pour obtenir ces permissions, rejoingnez des espaces de travail."}</p>
+            <p>{"Pour obtenir ces permissions, rejoignez des espaces de travail."}</p>
         </>
     ),
     consult_documentation: "Consulter la documentation",
