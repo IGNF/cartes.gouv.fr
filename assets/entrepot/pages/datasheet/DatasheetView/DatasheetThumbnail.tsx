@@ -68,9 +68,10 @@ type DatasheetThumbnailProps = {
     datastoreId: string;
     datasheetName: string;
     datasheet?: Datasheet;
+    canEditThumbnail?: boolean;
 };
 
-const DatasheetThumbnail: FC<DatasheetThumbnailProps> = ({ datastoreId, datasheetName, datasheet }) => {
+const DatasheetThumbnail: FC<DatasheetThumbnailProps> = ({ datastoreId, datasheetName, datasheet, canEditThumbnail }) => {
     const queryClient = useQueryClient();
     const { t: tCommon } = useTranslation("Common");
     const { t } = useTranslation("DatasheetView");
@@ -213,7 +214,7 @@ const DatasheetThumbnail: FC<DatasheetThumbnailProps> = ({ datastoreId, datashee
                     src={datasheet?.thumbnail?.url === undefined ? placeholder1x1 : datasheet?.thumbnail?.url}
                     alt={`Vignette de la fiche de données ${datasheetName}`}
                 />
-                {(datasheet?.thumbnail?._id === undefined || thumbnailIsHovered) && (
+                {(datasheet?.thumbnail?._id === undefined || thumbnailIsHovered) && canEditThumbnail && (
                     <div className="frx-btn--hover-icon">
                         <Button
                             title={t("thumbnail_action", { action: action })}

@@ -14,9 +14,8 @@ import ListItem from "../../ListItem";
 import PyramidStoredDataDesc from "../PyramidStoredDataDesc";
 import StoredDataDeleteConfirmDialog from "../StoredDataDeleteConfirmDialog";
 
-import { useAuthStore } from "@/stores/AuthStore";
-import { useDatastore } from "@/contexts/datastore";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
+import useCommunityRights from "@/hooks/useCommunityRights";
 
 type PyramidVectorListItemProps = {
     datasheetName: string;
@@ -44,13 +43,7 @@ const PyramidVectorListItem: FC<PyramidVectorListItemProps> = ({ datasheetName, 
         enabled: showDescription || isOpenConfirmRemovePyramidModal,
     });
 
-    //rights
-    const user = useAuthStore((state) => state.user);
-    const { datastore } = useDatastore();
-    const communityID = datastore.community._id;
-    const community = user?.communities_member.find((member) => member.community?._id === communityID)?.community;
-    const userRights = user?.communities_member.find((member) => member.community?._id === communityID)?.rights;
-    const isSupervisor = community?.supervisor === user?.id;
+    const { userRights, isSupervisor } = useCommunityRights();
 
     return (
         <>

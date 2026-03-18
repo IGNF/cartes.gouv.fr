@@ -18,9 +18,8 @@ import { useTranslation } from "../../../../../i18n/i18n";
 import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import api from "../../../../api";
 
-import { useAuthStore } from "@/stores/AuthStore";
-import { useDatastore } from "@/contexts/datastore";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
+import useCommunityRights from "@/hooks/useCommunityRights";
 
 type DocumentsListItemProps = {
     document: DatasheetDocument;
@@ -91,13 +90,7 @@ const DocumentsListItem: FC<DocumentsListItemProps> = ({ document, datastoreId, 
         },
     });
 
-    //rights
-    const user = useAuthStore((state) => state.user);
-    const { datastore } = useDatastore();
-    const communityID = datastore.community._id;
-    const community = user?.communities_member.find((member) => member.community?._id === communityID)?.community;
-    const userRights = user?.communities_member.find((member) => member.community?._id === communityID)?.rights;
-    const isSupervisor = community?.supervisor === user?.id;
+    const { userRights, isSupervisor } = useCommunityRights();
 
     return (
         <>

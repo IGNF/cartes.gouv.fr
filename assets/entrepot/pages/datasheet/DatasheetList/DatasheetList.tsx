@@ -29,8 +29,8 @@ import { SortByEnum } from "./DatasheetList.types";
 import DatasheetListItem from "./DatasheetListItem";
 import NoData from "./NoData";
 import SandboxDatastoreExplanation from "./SandboxDatastoreExplanation";
-import { useAuthStore } from "@/stores/AuthStore";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
+import useCommunityRights from "@/hooks/useCommunityRights";
 
 const filterTests = {
     [FilterEnum.ENABLED]: (d: Datasheet) => d.nb_publications > 0,
@@ -76,12 +76,7 @@ const DatasheetList: FC<DatasheetListProps> = ({ datastoreId }) => {
 
     const { classes, cx } = useStyles();
 
-    //rights
-    const user = useAuthStore((state) => state.user);
-    const communityID = datastore.community._id;
-    const community = user?.communities_member.find((member) => member.community?._id === communityID)?.community;
-    const userRights = user?.communities_member.find((member) => member.community?._id === communityID)?.rights;
-    const isSupervisor = community?.supervisor === user?.id;
+    const { userRights, isSupervisor } = useCommunityRights();
 
     return (
         <DatastoreMain title={t("title", { datastoreName: datastore?.is_sandbox === true ? tCommon("sandbox") : datastore?.name })} datastoreId={datastoreId}>

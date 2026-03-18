@@ -25,9 +25,8 @@ import { routes, useRoute } from "../../../../../router/router";
 import api from "../../../../api";
 import DatasheetThumbnail from "../DatasheetThumbnail";
 
-import { useAuthStore } from "@/stores/AuthStore";
-import { useDatastore } from "@/contexts/datastore";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
+import useCommunityRights from "@/hooks/useCommunityRights";
 
 const DatasetListTab = lazy(() => import("../DatasetListTab/DatasetListTab"));
 const DocumentsTab = lazy(() => import("../DocumentsTab/DocumentsTab"));
@@ -139,13 +138,7 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
         }),
     });
 
-    //rights
-    const user = useAuthStore((state) => state.user);
-    const { datastore } = useDatastore();
-    const communityID = datastore.community._id;
-    const community = user?.communities_member.find((member) => member.community?._id === communityID)?.community;
-    const userRights = user?.communities_member.find((member) => member.community?._id === communityID)?.rights;
-    const isSupervisor = community?.supervisor === user?.id;
+    const { userRights, isSupervisor } = useCommunityRights();
 
     return (
         <Main title={`Données ${datasheetName}`}>
@@ -191,11 +184,14 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
             {datasheetQuery.data !== undefined && (
                 <>
                     <div className={fr.cx("fr-grid-row", "fr-mb-4w")}>
-                        {(isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.ANNEX)) && (
-                            <div className={fr.cx("fr-col-2")}>
-                                <DatasheetThumbnail datastoreId={datastoreId} datasheetName={datasheetName} datasheet={datasheetQuery.data} />
-                            </div>
-                        )}
+                        <div className={fr.cx("fr-col-2")}>
+                            <DatasheetThumbnail
+                                datastoreId={datastoreId}
+                                datasheetName={datasheetName}
+                                datasheet={datasheetQuery.data}
+                                canEditThumbnail={isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.ANNEX)}
+                            />
+                        </div>
                         <div className={fr.cx("fr-col")}>
                             {/* TODO : désactivé car on n'a pas ces infos */}
                             <p className={fr.cx("fr-mb-2v")}>{/* <strong>Création de la fiche de données : </strong>13 Mar. 2023 */}</p>

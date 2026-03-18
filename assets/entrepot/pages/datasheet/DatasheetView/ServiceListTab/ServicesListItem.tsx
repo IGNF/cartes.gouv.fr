@@ -20,9 +20,8 @@ import { offeringTypeDisplayName } from "../../../../../utils";
 import api from "../../../../api";
 import ListItem from "../ListItem";
 import ServiceDesc from "./ServiceDesc";
-import { useAuthStore } from "@/stores/AuthStore";
-import { useDatastore } from "@/contexts/datastore";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
+import useCommunityRights from "@/hooks/useCommunityRights";
 
 type ServicesListItemProps = {
     service: Service;
@@ -64,13 +63,7 @@ const ServicesListItem: FC<ServicesListItemProps> = ({ service, datasheetName, d
 
     const [showDescription, toggleShowDescription] = useToggle(false);
 
-    //rights
-    const user = useAuthStore((state) => state.user);
-    const { datastore } = useDatastore();
-    const communityID = datastore.community._id;
-    const community = user?.communities_member.find((member) => member.community?._id === communityID)?.community;
-    const userRights = user?.communities_member.find((member) => member.community?._id === communityID)?.rights;
-    const isSupervisor = community?.supervisor === user?.id;
+    const { userRights, isSupervisor } = useCommunityRights();
 
     return (
         <>

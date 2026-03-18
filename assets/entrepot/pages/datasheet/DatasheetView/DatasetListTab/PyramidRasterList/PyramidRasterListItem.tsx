@@ -25,9 +25,8 @@ import PyramidStoredDataDesc from "../PyramidStoredDataDesc";
 import StoredDataDeleteConfirmDialog from "../StoredDataDeleteConfirmDialog";
 import { PyramidRasterServiceChoiceDialog, type PyramidRasterServiceChoiceDialogOpenFn } from "./PyramidRasterServiceChoiceDialog";
 
-import { useAuthStore } from "@/stores/AuthStore";
-import { useDatastore } from "@/contexts/datastore";
 import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
+import useCommunityRights from "@/hooks/useCommunityRights";
 
 const getHintText = (endpoints: DatastoreEndpoint[]): ReactNode => (
     <ul className={fr.cx("fr-raw-list")}>
@@ -93,13 +92,7 @@ const PyramidRasterListItem: FC<PyramidRasterListItemProps> = ({ datasheetName, 
 
     const serviceChoiceDialogApiRef = useRef<{ open?: PyramidRasterServiceChoiceDialogOpenFn }>({});
 
-    //rights
-    const user = useAuthStore((state) => state.user);
-    const { datastore } = useDatastore();
-    const communityID = datastore.community._id;
-    const community = user?.communities_member.find((member) => member.community?._id === communityID)?.community;
-    const userRights = user?.communities_member.find((member) => member.community?._id === communityID)?.rights;
-    const isSupervisor = community?.supervisor === user?.id;
+    const { userRights, isSupervisor } = useCommunityRights();
 
     return (
         <>
