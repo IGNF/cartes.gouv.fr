@@ -23,6 +23,8 @@ abstract class AbstractApiService
     private const FILE_UPLOAD_IDLE_TIMEOUT_SECONDS = 1200;
     private const FILE_UPLOAD_MAX_DURATION_SECONDS = 7200;
 
+    private const ASYNC_MAX_IN_FLIGHT = 20;
+
     public function __construct(
         HttpClientInterface $httpClient,
         protected ParameterBagInterface $parameters,
@@ -35,8 +37,10 @@ abstract class AbstractApiService
             'base_uri' => $parameters->get($api).'/',
             'proxy' => $parameters->get('http_proxy'),
             'no_proxy' => $parameters->get('no_proxy'),
-            'verify_peer' => false,
-            'verify_host' => false,
+
+            // NOTE : c'était comme ça depuis l'API plage, actuellement ça n'a plus l'air de poser problème, donc je désactive et on verra si besoin de le réactiver plus tard
+            // 'verify_peer' => false,
+            // 'verify_host' => false,
         ]);
     }
 
@@ -99,27 +103,24 @@ abstract class AbstractApiService
             return $allResources;
         }
 
-        $contentRange = $firstPageResponse['headers']['content-range'][0];
-        $pageCount = $this->getResultsPageCount($contentRange, $query['limit']);
-
+        $pageCount = $this->getResultsPageCount($firstPageResponse['headers']['content-range'][0], (int) $query['limit']);
         if ($pageCount <= 1) {
             return $allResources;
         }
 
-        $responsesByPage = [];
+        $pages = range(2, $pageCount);
+        foreach (array_chunk($pages, self::ASYNC_MAX_IN_FLIGHT) as $pageChunk) {
+            $responsesByPage = [];
+            foreach ($pageChunk as $page) {
+                $pageQuery = $query;
+                $pageQuery['page'] = $page;
+                $responsesByPage[$page] = $this->requestAsync('GET', $url, [], $pageQuery, $headers);
+            }
 
-        // La page 1 est déjà récupérée, on lance les pages restantes en parallèle.
-        for ($i = 2; $i <= $pageCount; ++$i) {
-            $pageQuery = $query;
-            $pageQuery['page'] = $i;
-
-            $responsesByPage[$i] = $this->requestAsync('GET', $url, [], $pageQuery, $headers);
-        }
-
-        /** @var array<int,array<mixed>> $resourcesByPage */
-        $resourcesByPage = $this->handleAsyncResponses($responsesByPage);
-        foreach ($resourcesByPage as $resources) {
-            $allResources = array_merge($allResources, $resources);
+            $resourcesByPage = $this->resolveAll($responsesByPage);
+            foreach ($resourcesByPage as $resources) {
+                $allResources = array_merge($allResources, $resources);
+            }
         }
 
         return $allResources;
@@ -143,8 +144,6 @@ abstract class AbstractApiService
      * @param iterable<mixed> $body
      * @param array<mixed>    $query
      * @param array<mixed>    $headers
-     *
-     * @SuppressWarnings(BooleanArgumentFlag)
      */
     protected function request(string $method, string $url, iterable $body = [], array $query = [], array $headers = [], bool $fileUpload = false, bool $expectJson = true, bool $includeHeaders = false): mixed
     {
@@ -197,11 +196,35 @@ abstract class AbstractApiService
     abstract protected function createApiException(string $message, int $statusCode, mixed $details = []): ApiException;
 
     /**
+     * Résout une seule réponse asynchrone. Équivalent synchrone de la consommation d'une ResponseInterface.
+     */
+    public function resolve(ResponseInterface $response, bool $expectJson = true, bool $includeHeaders = false): mixed
+    {
+        try {
+            $responseContent = $this->handleResponse($response, $expectJson);
+        } catch (TransportExceptionInterface $exception) {
+            throw new ApiException(sprintf('Erreur réseau lors de l\'appel API: %s', $exception->getMessage()), Response::HTTP_SERVICE_UNAVAILABLE, ['url' => $response->getInfo('url')], $exception);
+        }
+
+        if ($includeHeaders) {
+            return [
+                'content' => $responseContent,
+                'headers' => $response->getHeaders(false),
+            ];
+        }
+
+        return $responseContent;
+    }
+
+    /**
+     * Résout plusieurs réponses asynchrones en parallèle (similaire à Promise.all en JavaScript).
+     * Les réponses doivent provenir de la même instance de service.
+     *
      * @param array<int|string,ResponseInterface> $responsesByKey
      *
      * @return array<mixed>
      */
-    protected function handleAsyncResponses(array $responsesByKey, bool $expectJson = true, bool $continueOnError = false): array
+    public function resolveAll(array $responsesByKey, bool $expectJson = true, bool $continueOnError = false): array
     {
         if ([] === $responsesByKey) {
             return [];
@@ -275,15 +298,17 @@ abstract class AbstractApiService
             return [];
         }
 
-        $responsesByKey = [];
+        $keys = array_keys($items);
+        foreach (array_chunk($keys, self::ASYNC_MAX_IN_FLIGHT) as $keyChunk) {
+            $responsesByKey = [];
+            foreach ($keyChunk as $key) {
+                $responsesByKey[$key] = $asyncFetcher($items[$key], $key);
+            }
 
-        foreach ($items as $key => $item) {
-            $responsesByKey[$key] = $asyncFetcher($item, $key);
-        }
-
-        $resolved = $this->handleAsyncResponses($responsesByKey, true, $continueOnError);
-        foreach ($resolved as $key => $payload) {
-            $items[$key] = $payload;
+            $resolved = $this->resolveAll($responsesByKey, true, $continueOnError);
+            foreach ($resolved as $key => $payload) {
+                $items[$key] = $payload;
+            }
         }
 
         return $items;

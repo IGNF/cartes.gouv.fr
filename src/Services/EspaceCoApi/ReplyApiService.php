@@ -25,6 +25,6 @@ class ReplyApiService extends BaseEspaceCoApiService
      */
     public function modify(string $reportId, string $replyId, array $body): array
     {
-        return $this->request('PATCh', "reports/$reportId/replies/$replyId", $body);
+        return $this->request('PATCH', "reports/$reportId/replies/$replyId", $body);
     }
 }

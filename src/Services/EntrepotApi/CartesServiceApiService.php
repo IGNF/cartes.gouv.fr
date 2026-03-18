@@ -24,6 +24,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Contracts\HttpClient\ResponseInterface;
 
 /**
  * `Service` sur cartes.gouv.fr qui représente un `offering` et une `configuration` de l'`API Entrepôt`, ainsi que les fichiers de style (`styles`), `tms_metadata` et url de partage (`share_url`).
@@ -106,6 +107,43 @@ class CartesServiceApiService
         $offering['share_url'] = $this->getShareUrl($datastoreId, $offering);
 
         return $offering;
+    }
+
+    /**
+     * @param array<string,array<mixed>> $offeringsById
+     *
+     * @return array<string,array<mixed>>
+     */
+    public function getServicesFromOfferings(string $datastoreId, array $offeringsById, bool $migrateStyles = true): array
+    {
+        if ([] === $offeringsById) {
+            return [];
+        }
+
+        /** @var array<string,ResponseInterface> $configurationResponsesByOfferingId */
+        $configurationResponsesByOfferingId = [];
+        foreach ($offeringsById as $offeringId => $offering) {
+            if (!isset($offering['configuration']['_id']) || !is_string($offering['configuration']['_id'])) {
+                continue;
+            }
+
+            $configurationResponsesByOfferingId[$offeringId] = $this->configurationApiService->getAsync($datastoreId, $offering['configuration']['_id']);
+        }
+
+        /** @var array<string,array<mixed>> $configurationsByOfferingId */
+        $configurationsByOfferingId = $this->configurationApiService->resolveAll($configurationResponsesByOfferingId);
+
+        foreach ($offeringsById as $offeringId => $offering) {
+            $offeringsById[$offeringId] = $this->getService(
+                $datastoreId,
+                $offeringId,
+                $migrateStyles,
+                $offering,
+                $configurationsByOfferingId[$offeringId] ?? null
+            );
+        }
+
+        return $offeringsById;
     }
 
     /**

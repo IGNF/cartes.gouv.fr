@@ -136,6 +136,11 @@ class ConfigurationApiService extends BaseEntrepotApiService
         return $this->request('GET', "datastores/$datastoreId/offerings/$offeringId");
     }
 
+    public function getOfferingAsync(string $datastoreId, string $offeringId): ResponseInterface
+    {
+        return $this->requestAsync('GET', "datastores/$datastoreId/offerings/$offeringId");
+    }
+
     public function addOffering(string $datastoreId, string $configurationId, string $endpointId, bool $open = true): array
     {
         $body = [

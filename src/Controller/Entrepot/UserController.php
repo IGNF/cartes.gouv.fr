@@ -181,31 +181,6 @@ class UserController extends AbstractController implements ApiControllerInterfac
         }
     }
 
-    #[Route('/me/datastores', name: 'datastores_list', methods: ['GET'])]
-    public function getUserDatastores(ServiceAccount $serviceAccount): JsonResponse
-    {
-        try {
-            // Peut etre null si SANDBOX_COMMUNITY_ID n'est pas defini dans .env
-            // ou si cette valeur est erronee
-            $sandboxCommunity = $serviceAccount->getSandboxCommunity();
-
-            $myDatastores = $this->userApiService->getMyDatastores();
-            if (!is_null($sandboxCommunity)) {
-                $myDatastores = array_values(array_filter($myDatastores, function ($myDatastore) use ($sandboxCommunity) {
-                    return $myDatastore['_id'] != $sandboxCommunity['datastore']['_id'];
-                }));
-
-                $sandboxCommunity['datastore']['is_sandbox'] = true;
-                $sandboxCommunity['datastore']['name'] = 'Découverte';
-                array_unshift($myDatastores, $sandboxCommunity['datastore']);
-            }
-
-            return $this->json($myDatastores);
-        } catch (ApiException $ex) {
-            throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
-        }
-    }
-
     #[Route('/me/add_to_sandbox', name: 'add_to_sandbox', methods: ['PUT'])]
     public function addMemberToSandbox(ServiceAccount $serviceAccount): JsonResponse
     {

@@ -2,7 +2,6 @@
 
 namespace App\Services\EntrepotApi;
 
-use App\Exception\ApiException;
 use App\Security\KeycloakTokenManager;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -17,9 +16,8 @@ class UserApiService extends BaseEntrepotApiService
         ParameterBagInterface $parameters,
         Filesystem $filesystem,
         KeycloakTokenManager $tokenManager,
-        private DatastoreApiService $datastoreApiService,
         LoggerInterface $logger,
-        protected CacheInterface $cache,
+        CacheInterface $cache,
     ) {
         parent::__construct($httpClient, $parameters, $filesystem, $tokenManager, $logger, $cache);
     }
@@ -27,34 +25,6 @@ class UserApiService extends BaseEntrepotApiService
     public function getMe(): array
     {
         return $this->request('GET', 'users/me');
-    }
-
-    /**
-     * @SuppressWarnings(ShortVariable)
-     */
-    public function getMyDatastores(): array
-    {
-        $me = $this->getMe();
-
-        $datastoresList = [];
-        $communitiesMember = $me['communities_member'];
-        foreach ($communitiesMember as $communityMember) {
-            $community = $communityMember['community'];
-            if (isset($community['datastore'])) {
-                $datastoresList[] = $community['datastore'];
-            }
-        }
-
-        $datastores = [];
-        foreach ($datastoresList as $datastoreId) {
-            try {
-                $datastores[] = $this->datastoreApiService->get($datastoreId);
-            } catch (ApiException $ex) {
-                // Rien à faire de particulier. On ignore silencieusement l'erreur et pour l'utilisateur c'est comme si ce datastore n'existait pas.
-            }
-        }
-
-        return $datastores;
     }
 
     /**

@@ -251,11 +251,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             }
         }
 
-        foreach ($offeringsById as $offeringId => $offering) {
-            if (isset($offering['configuration']['_id'])) {
-                $offeringsById[$offeringId] = $this->cartesServiceApiService->getService($datastoreId, $offeringId, false, $offering);
-            }
-        }
+        $offeringsById = $this->cartesServiceApiService->getServicesFromOfferings($datastoreId, $offeringsById, false);
 
         return array_values($offeringsById);
     }
