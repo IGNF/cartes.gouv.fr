@@ -80,15 +80,15 @@ class PyramidRasterController extends ServiceController implements ApiController
             $datastore = $this->datastoreApiService->get($datastoreId);
             $processingId = $this->sandboxService->getProcGeneratePyramidRaster($datastoreId);
 
-            $wmsvOffering = $this->configurationApiService->getOffering($datastoreId, $data['wmsv_offering_id']);
-            $wmsvConfiguration = $this->configurationApiService->get($datastoreId, $wmsvOffering['configuration']['_id']);
+            $wmsvOffering = $this->configurationApiService->getOffering($datastoreId, $data['wmsv_offering_id'])->json();
+            $wmsvConfiguration = $this->configurationApiService->get($datastoreId, $wmsvOffering['configuration']['_id'])->json();
 
             $vectorDbId = $wmsvConfiguration['type_infos']['used_data'][0]['stored_data'] ?? null;
             if (null === $vectorDbId) {
                 throw new AppException(sprintf('Donnée stockée du type %s référencée par le service WMS-Vecteur non trouvée', StoredDataTypes::VECTOR_DB), Response::HTTP_BAD_REQUEST);
             }
 
-            $vectordb = $this->storedDataApiService->get($datastoreId, $vectorDbId);
+            $vectordb = $this->storedDataApiService->get($datastoreId, $vectorDbId)->json();
 
             $serviceEndpoint = $this->datastoreApiService->getEndpoint($datastoreId, $wmsvOffering['endpoint']['_id']);
             $endpointUrlBase = $serviceEndpoint['endpoint']['urls'][0]['url'] ?? null;
@@ -142,7 +142,7 @@ class PyramidRasterController extends ServiceController implements ApiController
                 }
             }
 
-            $processingExecution = $this->processingApiService->addExecution($datastoreId, $requestBody);
+            $processingExecution = $this->processingApiService->addExecution($datastoreId, $requestBody)->json();
             $pyramidId = $processingExecution['output']['stored_data']['_id'];
 
             $pyramidTags = [
@@ -163,7 +163,7 @@ class PyramidRasterController extends ServiceController implements ApiController
             $legendAnnexe = $this->saveLegendInAnnexe($datastoreId, $pyramidId, $legendFilePath, $wmsvConfiguration['tags'][CommonTags::DATASHEET_NAME]);
             $legendAnnexeUrlAbs = $this->getParameter('annexes_url').'/'.$datastore['technical_name'].$legendAnnexe['paths'][0];
 
-            $this->storedDataApiService->addTags($datastoreId, $pyramidId, $pyramidTags);
+            $this->storedDataApiService->addTags($datastoreId, $pyramidId, $pyramidTags)->wait();
             $this->storedDataApiService->modify($datastoreId, $pyramidId, [
                 'extra' => [
                     'legend' => [
@@ -171,8 +171,8 @@ class PyramidRasterController extends ServiceController implements ApiController
                         'annexe_id' => $legendAnnexe['_id'],
                     ],
                 ],
-            ]);
-            $this->processingApiService->launchExecution($datastoreId, $processingExecution['_id']);
+            ])->wait();
+            $this->processingApiService->launchExecution($datastoreId, $processingExecution['_id'])->wait();
 
             return new JsonResponse();
         } catch (ApiException|AppException $ex) {
@@ -193,7 +193,7 @@ class PyramidRasterController extends ServiceController implements ApiController
                 throw new AppException(sprintf("Le type %s n'est pas accepté. Les types acceptés sont %s.", $type, join(', ', $acceptedTypes)), Response::HTTP_BAD_REQUEST);
             }
 
-            $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId);
+            $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId)->json();
 
             // création de requête pour la config
             $typeInfos = $this->getConfigTypeInfos($dto, $datastoreId, $pyramid, $type);
@@ -205,7 +205,7 @@ class PyramidRasterController extends ServiceController implements ApiController
             $finalStyleFileName = sprintf('config_%s_style_%s', $offering['configuration']['_id'], $configType);
             $this->staticApiService->modifyInfo($datastoreId, $typeInfos['styles'][0], [
                 'name' => $finalStyleFileName,
-            ]);
+            ])->wait();
 
             return $this->json($offering);
         } catch (ApiException|AppException $ex) {
@@ -228,11 +228,11 @@ class PyramidRasterController extends ServiceController implements ApiController
             }
 
             // récup config et offering existants
-            $oldOffering = $this->configurationApiService->getOffering($datastoreId, $offeringId);
-            $oldConfiguration = $this->configurationApiService->get($datastoreId, $oldOffering['configuration']['_id']);
+            $oldOffering = $this->configurationApiService->getOffering($datastoreId, $offeringId)->json();
+            $oldConfiguration = $this->configurationApiService->get($datastoreId, $oldOffering['configuration']['_id'])->json();
             $oldOffering['configuration'] = $oldConfiguration;
 
-            $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId);
+            $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId)->json();
 
             // création de requête pour la config
             $typeInfos = $this->getConfigTypeInfos($dto, $datastoreId, $pyramid, $type, $oldConfiguration['_id']);

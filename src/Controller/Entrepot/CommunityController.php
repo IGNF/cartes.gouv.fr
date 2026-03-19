@@ -35,7 +35,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
     public function get(string $communityId): JsonResponse
     {
         try {
-            $community = $this->communityApiService->get($communityId);
+            $community = $this->communityApiService->get($communityId)->json();
             $community['is_sandbox'] = $this->sandboxService->isSandboxCommunity($community['_id']);
 
             return new JsonResponse($community);
@@ -49,7 +49,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
     {
         try {
             $data = json_decode($request->getContent(), true);
-            $community = $this->communityApiService->modifyCommunity($communityId, $data);
+            $community = $this->communityApiService->modifyCommunity($communityId, $data)->json();
             $community['is_sandbox'] = $this->sandboxService->isSandboxCommunity($community['_id']);
 
             return new JsonResponse($community);
@@ -74,7 +74,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
     public function updateMember(string $communityId, Request $request): JsonResponse
     {
         try {
-            $me = $this->userApiService->getMe();
+            $me = $this->userApiService->getMe()->json();
 
             // Suis-je membre de cette communaute
             $communityMember = array_values(array_filter($me['communities_member'], function ($member) use ($communityId) {
@@ -106,7 +106,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
             // Verification des droits
             $this->_checkRights($rights);
 
-            $this->communityApiService->addOrModifyUserRights($communityId, $userId, ['rights' => $rights]);
+            $this->communityApiService->addOrModifyUserRights($communityId, $userId, ['rights' => $rights])->wait();
 
             return new JsonResponse([
                 'user' => $userId,
@@ -121,7 +121,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
     public function removeMember(string $communityId, Request $request): JsonResponse
     {
         try {
-            $me = $this->userApiService->getMe();
+            $me = $this->userApiService->getMe()->json();
 
             // Suis-je membre de cette communaute
             $communityMember = array_values(array_filter($me['communities_member'], function ($member) use ($communityId) {
@@ -139,7 +139,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
                 throw new CartesApiException("Vous n'avez pas les droits pour supprimer un membre de cette communauté", JsonResponse::HTTP_BAD_REQUEST);
             }
 
-            $this->communityApiService->removeUserRights($communityId, $userId);
+            $this->communityApiService->removeUserRights($communityId, $userId)->wait();
 
             return new JsonResponse(['user' => $userId]);
         } catch (ApiException $ex) {

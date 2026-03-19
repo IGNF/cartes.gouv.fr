@@ -48,7 +48,7 @@ class CartesStylesApiService
         if (count($styleAnnexes)) {
             // on ne lit l'annexe styles que si elle n'est pas déjà dans extra
             if (null === $styles) {
-                $content = $this->annexeApiService->download($datastoreId, $styleAnnexes[0]['_id']);
+                $content = $this->annexeApiService->download($datastoreId, $styleAnnexes[0]['_id'])->text();
                 $styles = json_decode($content, true);
 
                 if ($migrateStyles) {
@@ -57,7 +57,7 @@ class CartesStylesApiService
             }
 
             if ($migrateStyles) {
-                $this->annexeApiService->remove($datastoreId, $styleAnnexes[0]['_id']);
+                $this->annexeApiService->remove($datastoreId, $styleAnnexes[0]['_id'])->wait();
             }
         }
 
@@ -104,9 +104,9 @@ class CartesStylesApiService
                             $layer['url'] = str_replace($originalFilename, $newFilename, $layer['url']);
 
                             if (isset($layer['annexe_id'])) {
-                                $annexe = $this->annexeApiService->get($datastoreId, $layer['annexe_id']);
+                                $annexe = $this->annexeApiService->get($datastoreId, $layer['annexe_id'])->json();
                                 $newAnnexePath = str_replace($originalFilename, $newFilename, $annexe['paths'][0]);
-                                $this->annexeApiService->modify($datastoreId, $layer['annexe_id'], [$newAnnexePath]);
+                                $this->annexeApiService->modify($datastoreId, $layer['annexe_id'], [$newAnnexePath])->wait();
                             }
                         }
                     }
@@ -131,7 +131,7 @@ class CartesStylesApiService
     public function updateStyles(string $datastoreId, string $configurationId, array $styles): void
     {
         $extra = ['styles' => $styles];
-        $this->configurationApiService->modify($datastoreId, $configurationId, ['extra' => $extra]);
+        $this->configurationApiService->modify($datastoreId, $configurationId, ['extra' => $extra])->wait();
     }
 
     /**
@@ -185,8 +185,8 @@ class CartesStylesApiService
 
         $requestBody['metadata'] = $metadataList;
 
-        $this->configurationApiService->replace($datastoreId, $configuration['_id'], $requestBody);
-        $this->configurationApiService->syncOffering($datastoreId, $offeringId);
+        $this->configurationApiService->replace($datastoreId, $configuration['_id'], $requestBody)->wait();
+        $this->configurationApiService->syncOffering($datastoreId, $offeringId)->wait();
     }
 
     /**
@@ -220,7 +220,7 @@ class CartesStylesApiService
         if (null !== $existingAnnexeId) {
             $this->annexeApiService->replaceFile($datastoreId, $existingAnnexeId, $filePath);
 
-            return $this->annexeApiService->modify($datastoreId, $existingAnnexeId, [$annexePath]);
+            return $this->annexeApiService->modify($datastoreId, $existingAnnexeId, [$annexePath])->json();
         }
 
         // on crée une nouvelle annexe parce qu'il n'y avait pas d'annexe existante

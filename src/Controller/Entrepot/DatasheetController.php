@@ -272,7 +272,7 @@ class DatasheetController extends AbstractController implements ApiControllerInt
             // suppr des uploads
             if (isset($datasheet['upload_list'])) {
                 foreach ($datasheet['upload_list'] as $upload) {
-                    $this->uploadApiService->remove($datastoreId, $upload['_id']);
+                    $this->uploadApiService->remove($datastoreId, $upload['_id'])->wait();
                 }
             }
 
@@ -306,17 +306,17 @@ class DatasheetController extends AbstractController implements ApiControllerInt
                 $metadata = $metadataList[0];
 
                 foreach ($metadata['endpoints'] as $metadataEndpoint) {
-                    $this->metadataApiService->unpublish($datastoreId, $metadata['file_identifier'], $metadataEndpoint['_id']);
+                    $this->metadataApiService->unpublish($datastoreId, $metadata['file_identifier'], $metadataEndpoint['_id'])->wait();
                 }
 
-                $this->metadataApiService->delete($datastoreId, $metadata['_id']);
+                $this->metadataApiService->delete($datastoreId, $metadata['_id'])->wait();
             }
 
             // TODO : autres données à supprimer
             // Suppression des annexes : vignette, documents associés à la fiche de données etc
             $annexes = $this->annexeApiService->getAll($datastoreId, null, null, ["datasheet_name=$datasheetName"]);
             foreach ($annexes as $annexe) {
-                $this->annexeApiService->remove($datastoreId, $annexe['_id']);
+                $this->annexeApiService->remove($datastoreId, $annexe['_id'])->wait();
             }
 
             return new JsonResponse(null, Response::HTTP_NO_CONTENT);

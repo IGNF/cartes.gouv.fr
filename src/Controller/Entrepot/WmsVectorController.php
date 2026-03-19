@@ -72,7 +72,7 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
             foreach ($styleFilesByTable as $tableName => $staticFileId) {
                 $this->staticApiService->modifyInfo($datastoreId, $staticFileId, [
                     'name' => sprintf('config_%s_style_wmsv_%s', $configuration['_id'], $tableName),
-                ]);
+                ])->wait();
             }
 
             return $this->json($offering);
@@ -98,8 +98,8 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
 
         try {
             // récup config et offering existants
-            $oldOffering = $this->configurationApiService->getOffering($datastoreId, $offeringId);
-            $oldConfiguration = $this->configurationApiService->get($datastoreId, $oldOffering['configuration']['_id']);
+            $oldOffering = $this->configurationApiService->getOffering($datastoreId, $offeringId)->json();
+            $oldConfiguration = $this->configurationApiService->get($datastoreId, $oldOffering['configuration']['_id'])->json();
             $oldOffering['configuration'] = $oldConfiguration;
 
             // ajout ou mise à jour des fichiers de styles SLD
@@ -234,7 +234,7 @@ class WmsVectorController extends ServiceController implements ApiControllerInte
         // suppr des fichiers statiques existant qui ne sont plus utilisés après la mise à jour
         foreach ($oldStyleFilesByTable as $tableName => $staticFileId) {
             if (!array_key_exists($tableName, $styleFilesByTable)) {
-                $this->staticApiService->delete($datastoreId, $staticFileId);
+                $this->staticApiService->delete($datastoreId, $staticFileId)->wait();
             }
         }
     }

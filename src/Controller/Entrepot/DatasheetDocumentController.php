@@ -48,7 +48,7 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
         try {
             $listAnnexe = $this->getListAnnexe($datastoreId, $datasheetName);
 
-            $docsListJson = $this->annexeApiService->download($datastoreId, $listAnnexe['_id']);
+            $docsListJson = $this->annexeApiService->download($datastoreId, $listAnnexe['_id'])->text();
             $documentsList = json_decode($docsListJson, true);
 
             return $this->json($documentsList);
@@ -72,7 +72,7 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
             /** @var array<mixed> $listAnnexe entité annexe de l'API entrepôt */
             $listAnnexe = $this->getListAnnexe($datastoreId, $datasheetName);
 
-            $docsListJson = $this->annexeApiService->download($datastoreId, $listAnnexe['_id']);
+            $docsListJson = $this->annexeApiService->download($datastoreId, $listAnnexe['_id'])->text();
             $documentsList = json_decode($docsListJson, true);
 
             $newDocument = [
@@ -137,7 +137,7 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
 
             $listAnnexe = $this->getListAnnexe($datastoreId, $datasheetName);
 
-            $docsListJson = $this->annexeApiService->download($datastoreId, $listAnnexe['_id']);
+            $docsListJson = $this->annexeApiService->download($datastoreId, $listAnnexe['_id'])->text();
             $documentsList = json_decode($docsListJson, true);
 
             $documentsList = array_map(function ($document) use ($documentId, $data) {
@@ -174,7 +174,7 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
         try {
             $listAnnexe = $this->getListAnnexe($datastoreId, $datasheetName);
 
-            $docsListJson = $this->annexeApiService->download($datastoreId, $listAnnexe['_id']);
+            $docsListJson = $this->annexeApiService->download($datastoreId, $listAnnexe['_id'])->text();
             $initialDocumentsList = json_decode($docsListJson, true);
 
             // document à supprimer
@@ -189,7 +189,7 @@ class DatasheetDocumentController extends AbstractController implements ApiContr
             if (null !== $document) {
                 switch ($document['type']) {
                     case 'file':
-                        $this->annexeApiService->remove($datastoreId, $document['id']);
+                        $this->annexeApiService->remove($datastoreId, $document['id'])->wait();
                         break;
                 }
 

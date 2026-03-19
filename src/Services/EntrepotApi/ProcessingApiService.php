@@ -2,39 +2,47 @@
 
 namespace App\Services\EntrepotApi;
 
-use Symfony\Contracts\HttpClient\ResponseInterface;
+use App\ApiClient\ApiClient;
+use App\ApiClient\PendingResponse;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
-class ProcessingApiService extends BaseEntrepotApiService
+final class ProcessingApiService
 {
+    public function __construct(
+        #[Autowire(service: 'app.api_client.entrepot')]
+        private readonly ApiClient $api,
+    ) {
+    }
+
     /**
      * @param array<mixed> $query
      */
     public function getAll(string $datastoreId, array $query = []): array
     {
-        return $this->requestAll("datastores/$datastoreId/processings", $query);
+        return $this->api->requestAll("datastores/$datastoreId/processings", $query);
     }
 
-    public function get(string $datastoreId, string $processingId): array
+    public function get(string $datastoreId, string $processingId): PendingResponse
     {
-        return $this->request('GET', "datastores/$datastoreId/processings/$processingId");
+        return $this->api->get("datastores/$datastoreId/processings/$processingId");
     }
 
     /**
      * @param array<mixed> $body
      */
-    public function addExecution(string $datastoreId, array $body = []): array
+    public function addExecution(string $datastoreId, array $body = []): PendingResponse
     {
-        return $this->request('POST', "datastores/$datastoreId/processings/executions", $body);
+        return $this->api->post("datastores/$datastoreId/processings/executions", $body);
     }
 
-    public function launchExecution(string $datastoreId, string $executionId): void
+    public function launchExecution(string $datastoreId, string $executionId): PendingResponse
     {
-        $this->request('POST', "datastores/$datastoreId/processings/executions/$executionId/launch");
+        return $this->api->post("datastores/$datastoreId/processings/executions/$executionId/launch");
     }
 
-    public function abortExecution(string $datastoreId, string $executionId): void
+    public function abortExecution(string $datastoreId, string $executionId): PendingResponse
     {
-        $this->request('POST', "datastores/$datastoreId/processings/executions/$executionId/abort");
+        return $this->api->post("datastores/$datastoreId/processings/executions/$executionId/abort");
     }
 
     /**
@@ -42,7 +50,7 @@ class ProcessingApiService extends BaseEntrepotApiService
      */
     public function getAllExecutions(string $datastoreId, array $query = []): array
     {
-        return $this->requestAll("datastores/$datastoreId/processings/executions", $query);
+        return $this->api->requestAll("datastores/$datastoreId/processings/executions", $query);
     }
 
     /**
@@ -52,29 +60,24 @@ class ProcessingApiService extends BaseEntrepotApiService
     {
         $processingExecutions = $this->getAllExecutions($datastoreId, $query);
 
-        return $this->fetchAllDetailsAsync(
+        return $this->api->fetchAllDetailsAsync(
             $processingExecutions,
-            fn (array $procExec): ResponseInterface => $this->getExecutionAsync($datastoreId, $procExec['_id'])
+            fn (array $procExec): PendingResponse => $this->getExecution($datastoreId, $procExec['_id'])
         );
     }
 
-    public function getExecution(string $datastoreId, string $processingExecutionId): array
+    public function getExecution(string $datastoreId, string $processingExecutionId): PendingResponse
     {
-        return $this->request('GET', "datastores/$datastoreId/processings/executions/$processingExecutionId");
+        return $this->api->get("datastores/$datastoreId/processings/executions/$processingExecutionId");
     }
 
-    public function getExecutionAsync(string $datastoreId, string $processingExecutionId): ResponseInterface
+    public function getExecutionLogs(string $datastoreId, string $processingExecutionId): PendingResponse
     {
-        return $this->requestAsync('GET', "datastores/$datastoreId/processings/executions/$processingExecutionId");
+        return $this->api->get("datastores/$datastoreId/processings/executions/$processingExecutionId/logs");
     }
 
-    public function getExecutionLogs(string $datastoreId, string $processingExecutionId): array
+    public function removeExecution(string $datastoreId, string $processingExecutionId): PendingResponse
     {
-        return $this->request('GET', "datastores/$datastoreId/processings/executions/$processingExecutionId/logs", [], [], [], false, true);
-    }
-
-    public function removeExecution(string $datastoreId, string $processingExecutionId): void
-    {
-        $this->request('DELETE', "datastores/$datastoreId/processings/executions/$processingExecutionId");
+        return $this->api->delete("datastores/$datastoreId/processings/executions/$processingExecutionId");
     }
 }

@@ -20,7 +20,7 @@ class CartesStoredDataApiService
      */
     public function delete(string $datastoreId, string $storedDataId): void
     {
-        $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId);
+        $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId)->json();
 
         // Suppression des offerings et configurations associées
         $offerings = $this->configurationApiService->getAllOfferings($datastoreId, ['stored_data' => $storedDataId]);
@@ -35,10 +35,10 @@ class CartesStoredDataApiService
         ]);
         foreach ($processingExecutions as &$procExec) {
             if (in_array($procExec['status'], $blockingProcessingStatuses)) {
-                $this->processingApiService->abortExecution($datastoreId, $procExec['_id']);
+                $this->processingApiService->abortExecution($datastoreId, $procExec['_id'])->wait();
 
-                $procExec = $this->processingApiService->getExecution($datastoreId, $procExec['_id']);
-                $this->storedDataApiService->remove($datastoreId, $procExec['output']['stored_data']['_id']); // suppression de la donnée stockée créée par le traitement
+                $procExec = $this->processingApiService->getExecution($datastoreId, $procExec['_id'])->json();
+                $this->storedDataApiService->remove($datastoreId, $procExec['output']['stored_data']['_id'])->wait(); // suppression de la donnée stockée créée par le traitement
             }
         }
 
@@ -48,15 +48,15 @@ class CartesStoredDataApiService
         ]);
         foreach ($processingExecutions as &$procExec) {
             if (in_array($procExec['status'], $blockingProcessingStatuses)) {
-                $this->processingApiService->abortExecution($datastoreId, $procExec['_id']);
+                $this->processingApiService->abortExecution($datastoreId, $procExec['_id'])->wait();
             }
         }
 
         if (isset($storedData['extra']['legend']['annexe_id'])) {
-            $this->annexeApiService->remove($datastoreId, $storedData['extra']['legend']['annexe_id']);
+            $this->annexeApiService->remove($datastoreId, $storedData['extra']['legend']['annexe_id'])->wait();
         }
 
         // Suppression de la donnée stockée
-        $this->storedDataApiService->remove($datastoreId, $storedDataId);
+        $this->storedDataApiService->remove($datastoreId, $storedDataId)->wait();
     }
 }

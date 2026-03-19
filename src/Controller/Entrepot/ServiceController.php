@@ -76,8 +76,8 @@ class ServiceController extends AbstractController implements ApiControllerInter
         try {
             $datastore = $this->datastoreApiService->get($datastoreId);
 
-            $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId);
-            $configuration = $this->configurationApiService->get($datastoreId, $offering['configuration']['_id']);
+            $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId)->json();
+            $configuration = $this->configurationApiService->get($datastoreId, $offering['configuration']['_id'])->json();
 
             $this->cartesServiceApiService->unpublish($datastoreId, $offeringId);
 

@@ -54,7 +54,7 @@ class PyramidVectorController extends ServiceController implements ApiController
             // TODO
             // $samplePyramidId = $request->query->get('samplePyramidId', null);
 
-            $vectordb = $this->storedDataApiService->get($datastoreId, $dto->vectordb_id);
+            $vectordb = $this->storedDataApiService->get($datastoreId, $dto->vectordb_id)->json();
 
             // TODO Suppression de l'upload ?
 
@@ -94,7 +94,7 @@ class PyramidVectorController extends ServiceController implements ApiController
                 'parameters' => $parameters,
             ];
 
-            if ($dto->email_notification === true) {
+            if (true === $dto->email_notification) {
                 /** @var \App\Security\User */
                 $user = $this->getUser();
                 $userEmail = $user->getEmail();
@@ -114,9 +114,9 @@ class PyramidVectorController extends ServiceController implements ApiController
                     ];
                 }
             }
-            
+
             // Ajout d'une execution de traitement
-            $processingExecution = $this->processingApiService->addExecution($datastoreId, $requestBody);
+            $processingExecution = $this->processingApiService->addExecution($datastoreId, $requestBody)->json();
             $pyramidId = $processingExecution['output']['stored_data']['_id'];
 
             $pyramidTags = [
@@ -134,8 +134,8 @@ class PyramidVectorController extends ServiceController implements ApiController
                 $pyramidTags[CommonTags::PRODUCTION_YEAR] = $vectordb['tags'][CommonTags::PRODUCTION_YEAR];
             }
 
-            $this->storedDataApiService->addTags($datastoreId, $pyramidId, $pyramidTags);
-            $this->processingApiService->launchExecution($datastoreId, $processingExecution['_id']);
+            $this->storedDataApiService->addTags($datastoreId, $pyramidId, $pyramidTags)->wait();
+            $this->processingApiService->launchExecution($datastoreId, $processingExecution['_id'])->wait();
 
             return new JsonResponse();
         } catch (ApiException $ex) {
@@ -150,7 +150,7 @@ class PyramidVectorController extends ServiceController implements ApiController
         #[MapRequestPayload] PyramidVectorTmsServiceDTO $dto,
     ): JsonResponse {
         try {
-            $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId);
+            $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId)->json();
 
             // TODO Suppression de l'Upload ?
             // TODO Suppression de la base de donnees
@@ -177,11 +177,11 @@ class PyramidVectorController extends ServiceController implements ApiController
     ): JsonResponse {
         try {
             // récup config et offering existants
-            $oldOffering = $this->configurationApiService->getOffering($datastoreId, $offeringId);
-            $oldConfiguration = $this->configurationApiService->get($datastoreId, $oldOffering['configuration']['_id']);
+            $oldOffering = $this->configurationApiService->getOffering($datastoreId, $offeringId)->json();
+            $oldConfiguration = $this->configurationApiService->get($datastoreId, $oldOffering['configuration']['_id'])->json();
             $oldOffering['configuration'] = $oldConfiguration;
 
-            $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId);
+            $pyramid = $this->storedDataApiService->get($datastoreId, $pyramidId)->json();
 
             // création de requête pour la config
             $typeInfos = $this->getConfigTypeInfos($dto, $pyramid);

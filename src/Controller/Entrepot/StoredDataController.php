@@ -65,8 +65,8 @@ class StoredDataController extends AbstractController implements ApiControllerIn
                 ? $this->storedDataApiService->getListDetailed($datastoreId, $query)
                 : $this->storedDataApiService->getList($datastoreId, $query);
 
-            $response = new JsonResponse($apiResponse['content'], Response::HTTP_OK);
-            $this->setPaginatedHeaders($response, $apiResponse['headers'] ?? []);
+            $response = new JsonResponse($apiResponse->content, Response::HTTP_OK);
+            $this->setPaginatedHeaders($response, $apiResponse->headers);
 
             return $response;
         } catch (ApiException $ex) {
@@ -78,7 +78,7 @@ class StoredDataController extends AbstractController implements ApiControllerIn
     public function get(string $datastoreId, string $storedDataId): JsonResponse
     {
         try {
-            $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId);
+            $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId)->json();
 
             return $this->json($storedData);
         } catch (ApiException $ex) {
@@ -103,7 +103,7 @@ class StoredDataController extends AbstractController implements ApiControllerIn
             ]);
             foreach ($procExecList as &$procExec) {
                 if (ProcessingStatuses::SUCCESS === $procExec['status']) {
-                    $procExec = $this->processingApiService->getExecution($datastoreId, $procExec['_id']);
+                    $procExec = $this->processingApiService->getExecution($datastoreId, $procExec['_id'])->json();
 
                     if (isset($procExec['output']['stored_data']['status']) && StoredDataStatuses::DELETED !== $procExec['output']['stored_data']['status']) {
                         $storedDataList[] = $procExec['output']['stored_data'];
@@ -128,20 +128,20 @@ class StoredDataController extends AbstractController implements ApiControllerIn
     public function getReport(string $datastoreId, string $storedDataId): JsonResponse
     {
         try {
-            $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId);
+            $storedData = $this->storedDataApiService->get($datastoreId, $storedDataId)->json();
 
             // récupération de détails sur l'upload s'il y en a un qui a servi à créer la stored_data
             if (isset($storedData['tags']['upload_id'])) {
-                $inputUpload = $this->uploadApiService->get($datastoreId, $storedData['tags']['upload_id']);
+                $inputUpload = $this->uploadApiService->get($datastoreId, $storedData['tags']['upload_id'])->json();
                 $inputUpload['file_tree'] = $this->uploadApiService->getFileTree($datastoreId, $inputUpload['_id']);
                 $inputUpload['checks'] = [];
-                $uploadChecks = $this->uploadApiService->getCheckExecutions($datastoreId, $inputUpload['_id']);
+                $uploadChecks = $this->uploadApiService->getCheckExecutions($datastoreId, $inputUpload['_id'])->json();
 
                 foreach ($uploadChecks as &$checkType) {
                     foreach ($checkType as &$checkExecution) {
-                        $checkExecution = array_merge($checkExecution, $this->uploadApiService->getCheckExecution($datastoreId, $checkExecution['_id']));
+                        $checkExecution = array_merge($checkExecution, $this->uploadApiService->getCheckExecution($datastoreId, $checkExecution['_id'])->json());
                         try {
-                            $checkExecution['logs'] = $this->uploadApiService->getCheckExecutionLogs($datastoreId, $checkExecution['_id']);
+                            $checkExecution['logs'] = $this->uploadApiService->getCheckExecutionLogs($datastoreId, $checkExecution['_id'])->json();
                         } catch (ApiException $ex) {
                         }
                         $inputUpload['checks'][] = $checkExecution;
@@ -155,9 +155,9 @@ class StoredDataController extends AbstractController implements ApiControllerIn
 
             // récupération de l'exécution de traitement d'intégration en base de données
             if ($procIntegrationId) {
-                $procIntegrationExec = $this->processingApiService->getExecution($datastoreId, $procIntegrationId);
+                $procIntegrationExec = $this->processingApiService->getExecution($datastoreId, $procIntegrationId)->json();
                 try {
-                    $procIntegrationExec['logs'] = $this->processingApiService->getExecutionLogs($datastoreId, $procIntegrationId);
+                    $procIntegrationExec['logs'] = $this->processingApiService->getExecutionLogs($datastoreId, $procIntegrationId)->json();
                 } catch (ApiException $ex) {
                 }
 
@@ -166,9 +166,9 @@ class StoredDataController extends AbstractController implements ApiControllerIn
 
             // récupération de l'exécution de traitement de création de pyramide vecteur
             if ($procPyramidCreationId) {
-                $procPyramidCreationExec = $this->processingApiService->getExecution($datastoreId, $procPyramidCreationId);
+                $procPyramidCreationExec = $this->processingApiService->getExecution($datastoreId, $procPyramidCreationId)->json();
                 try {
-                    $procPyramidCreationExec['logs'] = $this->processingApiService->getExecutionLogs($datastoreId, $procPyramidCreationId);
+                    $procPyramidCreationExec['logs'] = $this->processingApiService->getExecutionLogs($datastoreId, $procPyramidCreationId)->json();
                 } catch (ApiException $ex) {
                 }
                 $procExections[] = $procPyramidCreationExec;

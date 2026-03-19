@@ -2,9 +2,8 @@
 
 namespace App\ApiClient;
 
-use App\Security\KeycloakToken;
+use App\Security\KeycloakTokenManager;
 use League\OAuth2\Client\Token\AccessToken;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Exception\AuthenticationExpiredException;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
@@ -14,7 +13,7 @@ final class AuthenticatedHttpClient implements HttpClientInterface
 {
     public function __construct(
         private HttpClientInterface $inner,
-        private RequestStack $requestStack,
+        private KeycloakTokenManager $tokenManager,
     ) {
     }
 
@@ -48,15 +47,6 @@ final class AuthenticatedHttpClient implements HttpClientInterface
 
     private function getKeycloakToken(): AccessToken
     {
-        $session = $this->requestStack->getSession();
-
-        /** @var ?AccessToken */
-        $accessToken = $session->get(KeycloakToken::SESSION_KEY);
-
-        if (null === $accessToken) {
-            throw new AuthenticationExpiredException();
-        }
-
-        return $accessToken;
+        return $this->tokenManager->getToken() ?? throw new AuthenticationExpiredException();
     }
 }

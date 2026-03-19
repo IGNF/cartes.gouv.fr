@@ -49,8 +49,8 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             $styleFiles = $data['style_files'];
 
             $datastore = $this->datastoreApiService->get($datastoreId);
-            $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId);
-            $configuration = $this->configurationApiService->get($datastoreId, $offering['configuration']['_id']);
+            $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId)->json();
+            $configuration = $this->configurationApiService->get($datastoreId, $offering['configuration']['_id'])->json();
             $datasheetName = $configuration['tags'][CommonTags::DATASHEET_NAME];
 
             $styles = $this->cartesStylesApiService->getStyles($datastoreId, $configuration);
@@ -105,9 +105,9 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             $styleFiles = $data['style_files'];
 
             $datastore = $this->datastoreApiService->get($datastoreId);
-            $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId);
+            $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId)->json();
             $configId = $offering['configuration']['_id'];
-            $configuration = $this->configurationApiService->get($datastoreId, $configId);
+            $configuration = $this->configurationApiService->get($datastoreId, $configId)->json();
             $datasheetName = $configuration['tags'][CommonTags::DATASHEET_NAME];
 
             // Recuperation des styles de la configuration
@@ -173,10 +173,10 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             $data = json_decode($request->getContent(), true);
             $styleTechnicalName = $data['style_technical_name'];
 
-            $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId);
+            $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId)->json();
 
             $configId = $offering['configuration']['_id'];
-            $configuration = $this->configurationApiService->get($datastoreId, $configId);
+            $configuration = $this->configurationApiService->get($datastoreId, $configId)->json();
             $datasheetName = $configuration['tags'][CommonTags::DATASHEET_NAME];
 
             // Recuperation des styles de la configuration
@@ -193,7 +193,7 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             // Suppression de toutes les annexes liees au style
             foreach ($style[0]['layers'] as $layer) {
                 $annexeId = $layer['annexe_id'];
-                $this->annexeApiService->remove($datastoreId, $annexeId);
+                $this->annexeApiService->remove($datastoreId, $annexeId)->wait();
             }
 
             // On enleve le style
@@ -233,10 +233,10 @@ class StyleController extends AbstractController implements ApiControllerInterfa
             $data = json_decode($request->getContent(), true);
             $styleTechnicalName = $data['style_technical_name'];
 
-            $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId);
+            $offering = $this->configurationApiService->getOffering($datastoreId, $offeringId)->json();
 
             $configId = $offering['configuration']['_id'];
-            $configuration = $this->configurationApiService->get($datastoreId, $configId);
+            $configuration = $this->configurationApiService->get($datastoreId, $configId)->json();
 
             // Recuperation des styles de la configuration
             $styles = $this->cartesStylesApiService->getStyles($datastoreId, $configuration);

@@ -46,8 +46,8 @@ class StaticController extends AbstractController implements ApiControllerInterf
             }
 
             $apiResponse = $this->staticApiService->getList($datastoreId, $query);
-            $response = new JsonResponse($apiResponse['content'], Response::HTTP_OK);
-            $this->setPaginatedHeaders($response, $apiResponse['headers'] ?? []);
+            $response = new JsonResponse($apiResponse->content, Response::HTTP_OK);
+            $this->setPaginatedHeaders($response, $apiResponse->headers);
 
             return $response;
         } catch (ApiException $ex) {
@@ -59,7 +59,7 @@ class StaticController extends AbstractController implements ApiControllerInterf
     public function delete(string $datastoreId, string $staticFileId): JsonResponse
     {
         try {
-            $this->staticApiService->delete($datastoreId, $staticFileId);
+            $this->staticApiService->delete($datastoreId, $staticFileId)->wait();
 
             return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
         } catch (ApiException $ex) {
@@ -71,7 +71,7 @@ class StaticController extends AbstractController implements ApiControllerInterf
     public function getFileContent(string $datastoreId, string $staticFileId): Response
     {
         try {
-            $xmlFileContent = $this->staticApiService->downloadFile($datastoreId, $staticFileId);
+            $xmlFileContent = $this->staticApiService->downloadFile($datastoreId, $staticFileId)->text();
 
             return new Response($xmlFileContent, Response::HTTP_OK, [
                 'Content-Type' => 'application/xml',

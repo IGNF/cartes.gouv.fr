@@ -68,8 +68,8 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
             }
 
             $apiResponse = $this->annexeApiService->getList($datastoreId, $query);
-            $response = new JsonResponse($apiResponse['content'], Response::HTTP_OK);
-            $this->setPaginatedHeaders($response, $apiResponse['headers'] ?? []);
+            $response = new JsonResponse($apiResponse->content, Response::HTTP_OK);
+            $this->setPaginatedHeaders($response, $apiResponse->headers);
 
             return $response;
         } catch (ApiException $ex) {
@@ -90,7 +90,7 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
                     $data['paths'] ?? null,
                     $data['labels'] ?? null,
                     $data['published'] ?? null
-                )
+                )->json()
             );
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails());
@@ -120,7 +120,7 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
     public function getFileContent(string $datastoreId, string $annexeId): Response
     {
         try {
-            $fileContent = $this->annexeApiService->download($datastoreId, $annexeId);
+            $fileContent = $this->annexeApiService->download($datastoreId, $annexeId)->text();
 
             $response = new Response($fileContent);
             $response->headers->set('Content-Type', Utils::guess_content_type($fileContent));
@@ -179,7 +179,7 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
             $annexes = $this->annexeApiService->getAll($datastoreId, null, null, $labels);
 
             if (count($annexes)) {  // Elle existe, on la supprime sinon le path ne change pas
-                $this->annexeApiService->remove($datastoreId, $annexes[0]['_id']);
+                $this->annexeApiService->remove($datastoreId, $annexes[0]['_id'])->wait();
             }
 
             $annexe = $this->annexeApiService->add($datastoreId, $file->getRealPath(), [$path], $labels);
@@ -191,7 +191,7 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
                 return new JsonResponse($annexe);
             }
 
-            $xmlFileContent = $this->metadataApiService->downloadFile($datastoreId, $metadata['_id']);
+            $xmlFileContent = $this->metadataApiService->downloadFile($datastoreId, $metadata['_id'])->text();
             $cswMetadata = $this->metadataHelper->fromXml($xmlFileContent);
             $cswMetadata->thumbnailUrl = $annexe['url'];
 
@@ -215,7 +215,7 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
             return $response;
         }
 
-        $xmlFileContent = $this->metadataApiService->downloadFile($datastoreId, $metadata['_id']);
+        $xmlFileContent = $this->metadataApiService->downloadFile($datastoreId, $metadata['_id'])->text();
         $cswMetadata = $this->metadataHelper->fromXml($xmlFileContent);
         $cswMetadata->thumbnailUrl = null;
 
@@ -229,7 +229,7 @@ class AnnexeController extends AbstractController implements ApiControllerInterf
     public function deleteAnnexe(string $datastoreId, string $annexeId): JsonResponse
     {
         try {
-            $this->annexeApiService->remove($datastoreId, $annexeId);
+            $this->annexeApiService->remove($datastoreId, $annexeId)->wait();
 
             return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
         } catch (ApiException $ex) {

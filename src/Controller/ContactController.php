@@ -75,7 +75,7 @@ class ContactController extends AbstractController
             ];
 
             if ($user instanceof User) {
-                $userApi = $this->userApiService->getMe();
+                $userApi = $this->userApiService->getMe()->json();
                 $supportMailParams['userId'] = $userApi['_id'];
             }
 
@@ -116,7 +116,7 @@ class ContactController extends AbstractController
         $supervisor = [];   // Liste des community dont l'utilisateur courant est "supervisor"
         $member = [];       // Liste des community dont l'utilisateur courant est simple membre
         if ($user instanceof User) {
-            $userApi = $this->userApiService->getMe();
+            $userApi = $this->userApiService->getMe()->json();
             foreach ($userApi['communities_member'] as $communityMember) {
                 $community = $communityMember['community'];
                 if ($userApi['_id'] === $community['supervisor']) {

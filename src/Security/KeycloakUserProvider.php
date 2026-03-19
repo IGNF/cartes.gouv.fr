@@ -66,7 +66,7 @@ class KeycloakUserProvider implements UserProviderInterface
             $item->expiresAfter(60);
 
             try {
-                return $this->userApiService->getMe();
+                return $this->userApiService->getMe()->json();
             } catch (TimeoutException $ex) {
                 $this->logger->debug('{class}: Failed to fetch logged-in user', ['class' => self::class]);
                 throw new UserNotFoundException('Failed to fetch logged-in user', Response::HTTP_UNAUTHORIZED, $ex);

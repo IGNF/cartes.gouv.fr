@@ -36,7 +36,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
         /** @var User */
         $user = $this->getUser();
 
-        $user->updateFromApiInfo($this->userApiService->getMe());
+        $user->updateFromApiInfo($this->userApiService->getMe()->json());
 
         return $this->json($user);
     }
@@ -81,7 +81,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
     #[Route('/me/permissions/{permissionId}', name: 'permission', methods: ['GET'])]
     public function getPermission(string $permissionId): JsonResponse
     {
-        $permission = $this->userApiService->getPermission($permissionId);
+        $permission = $this->userApiService->getPermission($permissionId)->json();
 
         return $this->json($permission);
     }
@@ -106,12 +106,12 @@ class UserController extends AbstractController implements ApiControllerInterfac
             }
 
             // Ajout de la cle
-            $key = $this->userApiService->addKey($body);
+            $key = $this->userApiService->addKey($body)->json();
 
             // Ajout des acces
             foreach ($dto->accesses as $access) {
                 $accessBody = (array) $access;
-                $this->userApiService->addAccess($key['_id'], $accessBody);
+                $this->userApiService->addAccess($key['_id'], $accessBody)->wait();
             }
 
             $keyWithAccesses = $this->_getUserKeyWithAccesses($key['_id']);
@@ -132,7 +132,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
                 return !(null === $value || ('' === $value && !in_array($key, ['user_agent', 'referer'])) || in_array($key, $filter));
             }, ARRAY_FILTER_USE_BOTH);
 
-            $key = $this->userApiService->getMyKey($keyId);
+            $key = $this->userApiService->getMyKey($keyId)->json();
 
             // Nom identique, on supprime du body
             if ($dto->name === $key['name']) {
@@ -152,13 +152,13 @@ class UserController extends AbstractController implements ApiControllerInterfac
             // Suppression de tous les accces pour cette cle
             $accesses = $this->userApiService->getKeyAccesses($keyId);
             foreach ($accesses as $access) {
-                $this->userApiService->removeAccess($keyId, $access['_id']);
+                $this->userApiService->removeAccess($keyId, $access['_id'])->wait();
             }
 
             // Ajout des nouveaux access
             foreach ($dto->accesses as $access) {
                 $accessBody = (array) $access;
-                $this->userApiService->addAccess($key['_id'], $accessBody);
+                $this->userApiService->addAccess($key['_id'], $accessBody)->wait();
             }
 
             $updatedKey['accesses'] = $this->userApiService->getKeyAccesses($key['_id']);
@@ -173,7 +173,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
     public function removeKey(string $keyId): JsonResponse
     {
         try {
-            $this->userApiService->removeKey($keyId);
+            $this->userApiService->removeKey($keyId)->wait();
 
             return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
         } catch (ApiException $ex) {
@@ -193,7 +193,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
     public function leaveCommunity(string $communityId): JsonResponse
     {
         try {
-            $this->userApiService->leaveCommunity($communityId);
+            $this->userApiService->leaveCommunity($communityId)->wait();
 
             return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
         } catch (ApiException $ex) {
@@ -203,7 +203,7 @@ class UserController extends AbstractController implements ApiControllerInterfac
 
     private function _getUserKeyWithAccesses(string $keyId): array
     {
-        $key = $this->userApiService->getMyKey($keyId);
+        $key = $this->userApiService->getMyKey($keyId)->json();
         $key['accesses'] = $this->userApiService->getKeyAccesses($key['_id']);
 
         return $key;

@@ -2,18 +2,29 @@
 
 namespace App\Services\EntrepotApi;
 
+use App\ApiClient\ApiClient;
+use App\ApiClient\PendingResponse;
 use App\Exception\ApiException;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 
-class DatastoreApiService extends BaseEntrepotApiService
+final class DatastoreApiService
 {
+    public function __construct(
+        #[Autowire(service: 'app.api_client.entrepot')]
+        private readonly ApiClient $api,
+        private readonly CacheInterface $cache,
+    ) {
+    }
+
     public function get(string $datastoreId): array
     {
         return $this->cache->get("datastore-$datastoreId", function (ItemInterface $item) use ($datastoreId) {
             $item->expiresAfter(60);
 
-            return $this->request('GET', "datastores/$datastoreId");
+            return $this->api->get("datastores/$datastoreId")->json();
         });
     }
 
@@ -76,32 +87,32 @@ class DatastoreApiService extends BaseEntrepotApiService
      */
     public function getPermissions(string $datastoreId, array $query = []): array
     {
-        return $this->requestAll("datastores/$datastoreId/permissions", $query);
+        return $this->api->requestAll("datastores/$datastoreId/permissions", $query);
     }
 
-    public function getPermission(string $datastoreId, string $permissionId): array
+    public function getPermission(string $datastoreId, string $permissionId): PendingResponse
     {
-        return $this->request('GET', "datastores/$datastoreId/permissions/$permissionId");
-    }
-
-    /**
-     * @param array<mixed> $body
-     */
-    public function addPermission(string $datastoreId, array $body): array
-    {
-        return $this->request('POST', "datastores/$datastoreId/permissions", $body);
+        return $this->api->get("datastores/$datastoreId/permissions/$permissionId");
     }
 
     /**
      * @param array<mixed> $body
      */
-    public function updatePermission(string $datastoreId, string $permissionId, array $body): array
+    public function addPermission(string $datastoreId, array $body): PendingResponse
     {
-        return $this->request('PATCH', "datastores/$datastoreId/permissions/$permissionId", $body);
+        return $this->api->post("datastores/$datastoreId/permissions", $body);
     }
 
-    public function removePermission(string $datastoreId, string $permissionId): array
+    /**
+     * @param array<mixed> $body
+     */
+    public function updatePermission(string $datastoreId, string $permissionId, array $body): PendingResponse
     {
-        return $this->request('DELETE', "datastores/$datastoreId/permissions/$permissionId");
+        return $this->api->patch("datastores/$datastoreId/permissions/$permissionId", $body);
+    }
+
+    public function removePermission(string $datastoreId, string $permissionId): PendingResponse
+    {
+        return $this->api->delete("datastores/$datastoreId/permissions/$permissionId");
     }
 }

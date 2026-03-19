@@ -2,117 +2,109 @@
 
 namespace App\Services\EntrepotApi;
 
-use Symfony\Contracts\HttpClient\ResponseInterface;
+use App\ApiClient\ApiClient;
+use App\ApiClient\PaginatedResponse;
+use App\ApiClient\PendingResponse;
+use App\Utils;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
-class StoredDataApiService extends BaseEntrepotApiService
+final class StoredDataApiService
 {
-    /**
-     * @param array<mixed>|null $query
-     */
-    public function getList(string $datastoreId, ?array $query = []): array
-    {
-        $query ??= [];
-
-        if (!array_key_exists('sort', $query)) { // par défaut, trier par la date du dernier évènement décroissante
-            $query['sort'] = 'last_event,desc';
-        }
-
-        if (array_key_exists('fields', $query) && is_array($query['fields']) && !empty($query['fields'])) {
-            $query['fields'] = implode(',', $query['fields']);
-        }
-
-        return $this->request('GET', "datastores/$datastoreId/stored_data", [], $query, [], false, true, true);
+    public function __construct(
+        #[Autowire(service: 'app.api_client.entrepot')]
+        private readonly ApiClient $api,
+    ) {
     }
 
     /**
      * @param array<mixed>|null $query
      */
-    public function getListDetailed(string $datastoreId, ?array $query = []): array
+    public function getList(string $datastoreId, ?array $query = []): PaginatedResponse
     {
-        $query ??= [];
+        $query = Utils::normalize_query($query ?? []);
 
-        $storedDataList = $this->getList($datastoreId, $query);
-        $storedDataList['content'] = $this->fetchAllDetailsAsync(
-            $storedDataList['content'],
-            fn (array $storedData): ResponseInterface => $this->getAsync($datastoreId, $storedData['_id'])
+        return $this->api->get("datastores/$datastoreId/stored_data", $query)
+            ->jsonWithHeaders();
+    }
+
+    /**
+     * @param array<mixed>|null $query
+     */
+    public function getListDetailed(string $datastoreId, ?array $query = []): PaginatedResponse
+    {
+        $page = $this->getList($datastoreId, $query);
+        $detailed = $this->api->fetchAllDetailsAsync(
+            $page->content,
+            fn (array $storedData): PendingResponse => $this->api->get("datastores/$datastoreId/stored_data/{$storedData['_id']}")
         );
 
-        return $storedDataList;
+        return new PaginatedResponse($detailed, $page->headers);
     }
 
     /**
      * @param array<mixed> $query
+     *
+     * @return array<mixed>
      */
     public function getAll(string $datastoreId, array $query = []): array
     {
-        if (!array_key_exists('sort', $query)) { // par défaut, trier par la date du dernier évènement décroissante
-            $query['sort'] = 'last_event,desc';
-        }
+        $query = Utils::normalize_query($query);
 
-        if (array_key_exists('fields', $query) && is_array($query['fields']) && !empty($query['fields'])) {
-            $query['fields'] = implode(',', $query['fields']);
-        }
-
-        return $this->requestAll("datastores/$datastoreId/stored_data", $query);
+        return $this->api->requestAll("datastores/$datastoreId/stored_data", $query);
     }
 
     /**
-     * @param mixed[] $query
+     * @param array<mixed> $query
+     *
+     * @return array<mixed>
      */
     public function getAllDetailed(string $datastoreId, array $query = []): array
     {
         $storedDataList = $this->getAll($datastoreId, $query);
 
-        return $this->fetchAllDetailsAsync(
+        return $this->api->fetchAllDetailsAsync(
             $storedDataList,
-            fn (array $storedData): ResponseInterface => $this->getAsync($datastoreId, $storedData['_id'])
+            fn (array $storedData): PendingResponse => $this->api->get("datastores/$datastoreId/stored_data/{$storedData['_id']}")
         );
     }
 
-    public function get(string $datastoreId, string $storedDataId): array
+    public function get(string $datastoreId, string $storedDataId): PendingResponse
     {
-        return $this->request('GET', "datastores/$datastoreId/stored_data/$storedDataId");
-    }
-
-    public function getAsync(string $datastoreId, string $storedDataId): ResponseInterface
-    {
-        return $this->requestAsync('GET', "datastores/$datastoreId/stored_data/$storedDataId");
+        return $this->api->get("datastores/$datastoreId/stored_data/$storedDataId");
     }
 
     /**
      * @param array<mixed>      $body
      * @param array<mixed>|null $initialStoredData
      */
-    public function modify(string $datastoreId, string $storedDataId, array $body = [], ?array $initialStoredData = null): array
+    public function modify(string $datastoreId, string $storedDataId, array $body = [], ?array $initialStoredData = null): PendingResponse
     {
         if (array_key_exists('extra', $body)) {
-            $initialStoredData = $initialStoredData ?? $this->get($datastoreId, $storedDataId);
+            $initialStoredData ??= $this->get($datastoreId, $storedDataId)->json();
             $body['extra'] = array_merge($initialStoredData['extra'] ?? [], $body['extra']);
         }
 
-        return $this->request('PATCH', "datastores/$datastoreId/stored_data/$storedDataId", $body);
+        return $this->api->patch("datastores/$datastoreId/stored_data/$storedDataId", $body);
     }
 
-    public function remove(string $datastoreId, string $storedDataId): void
+    public function remove(string $datastoreId, string $storedDataId): PendingResponse
     {
-        $this->request('DELETE', "datastores/$datastoreId/stored_data/$storedDataId");
+        return $this->api->delete("datastores/$datastoreId/stored_data/$storedDataId");
     }
 
     /**
      * @param array<mixed> $tags
      */
-    public function addTags(string $datastoreId, string $storedDataId, array $tags): array
+    public function addTags(string $datastoreId, string $storedDataId, array $tags): PendingResponse
     {
-        return $this->request('POST', "datastores/$datastoreId/stored_data/$storedDataId/tags", $tags);
+        return $this->api->post("datastores/$datastoreId/stored_data/$storedDataId/tags", $tags);
     }
 
     /**
      * @param array<string> $tags
      */
-    public function removeTags(string $datastoreId, string $storedDataId, $tags): array
+    public function removeTags(string $datastoreId, string $storedDataId, array $tags): PendingResponse
     {
-        return $this->request('DELETE', "datastores/$datastoreId/stored_data/$storedDataId/tags", [], [
-            'tags' => $tags,
-        ]);
+        return $this->api->delete("datastores/$datastoreId/stored_data/$storedDataId/tags", ['tags' => $tags]);
     }
 }

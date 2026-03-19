@@ -25,27 +25,26 @@ class Utils
             }
 
             return true;
-        } else {
-            // arrays indexés
-            $aCopy = $a;
-            $bCopy = $b;
+        }
+        // arrays indexés
+        $aCopy = $a;
+        $bCopy = $b;
 
-            foreach ($aCopy as &$item) {
-                $found = false;
-                foreach ($bCopy as $i => $bItem) {
-                    if (self::array_deep_equals($item, $bItem)) {
-                        unset($bCopy[$i]);
-                        $found = true;
-                        break;
-                    }
-                }
-                if (!$found) {
-                    return false;
+        foreach ($aCopy as &$item) {
+            $found = false;
+            foreach ($bCopy as $i => $bItem) {
+                if (self::array_deep_equals($item, $bItem)) {
+                    unset($bCopy[$i]);
+                    $found = true;
+                    break;
                 }
             }
-
-            return empty($bCopy);
+            if (!$found) {
+                return false;
+            }
         }
+
+        return empty($bCopy);
     }
 
     /**
@@ -97,5 +96,25 @@ class Utils
         parse_str($parsed['query'], $res);
 
         return isset($res['version']) ? (string) $res['version'] : '';
+    }
+
+    /**
+     * @param array<mixed>|null $query
+     *
+     * @return array<mixed>
+     */
+    public static function normalize_query(?array $query): array
+    {
+        $query = $query ?? [];
+
+        if (!array_key_exists('sort', $query)) {
+            $query['sort'] = 'last_event,desc';
+        }
+
+        if (isset($query['fields']) && is_array($query['fields']) && [] !== $query['fields']) {
+            $query['fields'] = implode(',', $query['fields']);
+        }
+
+        return $query;
     }
 }

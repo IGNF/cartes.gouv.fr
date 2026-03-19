@@ -2,29 +2,21 @@
 
 namespace App\Services\EntrepotApi;
 
-use App\Security\KeycloakTokenManager;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Contracts\Cache\CacheInterface;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
+use App\ApiClient\ApiClient;
+use App\ApiClient\PendingResponse;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
-class UserApiService extends BaseEntrepotApiService
+final class UserApiService
 {
     public function __construct(
-        HttpClientInterface $httpClient,
-        ParameterBagInterface $parameters,
-        Filesystem $filesystem,
-        KeycloakTokenManager $tokenManager,
-        LoggerInterface $logger,
-        CacheInterface $cache,
+        #[Autowire(service: 'app.api_client.entrepot')]
+        private readonly ApiClient $api,
     ) {
-        parent::__construct($httpClient, $parameters, $filesystem, $tokenManager, $logger, $cache);
     }
 
-    public function getMe(): array
+    public function getMe(): PendingResponse
     {
-        return $this->request('GET', 'users/me');
+        return $this->api->get('users/me');
     }
 
     /**
@@ -32,7 +24,7 @@ class UserApiService extends BaseEntrepotApiService
      */
     public function getMyCommunityRights(string $communityId): ?array
     {
-        $me = $this->getMe();
+        $me = $this->getMe()->json();
 
         foreach ($me['communities_member'] as $communityRights) {
             if ($communityRights['community']['_id'] == $communityId) {
@@ -43,37 +35,37 @@ class UserApiService extends BaseEntrepotApiService
         return null;
     }
 
-    public function getMyKey(string $keyId): array
+    public function getMyKey(string $keyId): PendingResponse
     {
-        return $this->request('GET', "users/me/keys/$keyId");
+        return $this->api->get("users/me/keys/$keyId");
     }
 
     public function getMyKeys(): array
     {
-        return $this->requestAll('users/me/keys');
+        return $this->api->requestAll('users/me/keys');
     }
 
     public function getKeyAccesses(string $keyId): array
     {
-        return $this->requestAll("users/me/keys/$keyId/accesses");
+        return $this->api->requestAll("users/me/keys/$keyId/accesses");
     }
 
     public function getMyPermissions(): array
     {
-        return $this->requestAll('users/me/permissions');
+        return $this->api->requestAll('users/me/permissions');
     }
 
-    public function getPermission(string $permissionId): array
+    public function getPermission(string $permissionId): PendingResponse
     {
-        return $this->request('GET', "users/me/permissions/$permissionId");
+        return $this->api->get("users/me/permissions/$permissionId");
     }
 
     /**
      * @param array<mixed> $body
      */
-    public function addKey(array $body): array
+    public function addKey(array $body): PendingResponse
     {
-        return $this->request('POST', 'users/me/keys', $body);
+        return $this->api->post('users/me/keys', $body);
     }
 
     /**
@@ -81,31 +73,31 @@ class UserApiService extends BaseEntrepotApiService
      */
     public function updateKey(string $keyId, array $body): array
     {
-        $this->request('PATCH', "users/me/keys/$keyId", $body);
+        $this->api->patch("users/me/keys/$keyId", $body)->wait();
 
-        return $this->getMyKey($keyId);
+        return $this->getMyKey($keyId)->json();
     }
 
-    public function removeKey(string $keyId): array
+    public function removeKey(string $keyId): PendingResponse
     {
-        return $this->request('DELETE', "users/me/keys/$keyId");
+        return $this->api->delete("users/me/keys/$keyId");
     }
 
     /**
      * @param array<mixed> $body
      */
-    public function addAccess(string $keyId, array $body): array
+    public function addAccess(string $keyId, array $body): PendingResponse
     {
-        return $this->request('POST', "users/me/keys/$keyId/accesses", $body);
+        return $this->api->post("users/me/keys/$keyId/accesses", $body);
     }
 
-    public function removeAccess(string $keyId, string $accessId): array
+    public function removeAccess(string $keyId, string $accessId): PendingResponse
     {
-        return $this->request('DELETE', "users/me/keys/$keyId/accesses/$accessId");
+        return $this->api->delete("users/me/keys/$keyId/accesses/$accessId");
     }
 
-    public function leaveCommunity(string $communityId): array
+    public function leaveCommunity(string $communityId): PendingResponse
     {
-        return $this->request('DELETE', "users/me/communities/$communityId");
+        return $this->api->delete("users/me/communities/$communityId");
     }
 }

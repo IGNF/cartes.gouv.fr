@@ -2,65 +2,52 @@
 
 namespace App\Services\EntrepotApi;
 
+use App\ApiClient\ApiClient;
+use App\ApiClient\PaginatedResponse;
+use App\ApiClient\PendingResponse;
 use App\Constants\EntrepotApi\UploadStatuses;
 use App\Constants\EntrepotApi\UploadTags;
 use App\Exception\ApiException;
 use App\Exception\AppException;
-use App\Security\KeycloakTokenManager;
 use App\Services\FileUploader\Format\Zip\ZipUploadPolicy;
-use Psr\Log\LoggerInterface;
+use App\Utils;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Contracts\Cache\CacheInterface;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
-use Symfony\Contracts\HttpClient\ResponseInterface;
 
-class UploadApiService extends BaseEntrepotApiService
+final class UploadApiService
 {
     public function __construct(
-        HttpClientInterface $httpClient,
-        ParameterBagInterface $parameters,
-        Filesystem $filesystem,
-        KeycloakTokenManager $tokenManager,
-        LoggerInterface $logger,
-        protected CacheInterface $cache,
+        #[Autowire(service: 'app.api_client.entrepot')]
+        private readonly ApiClient $api,
+        private readonly ParameterBagInterface $parameters,
+        private readonly Filesystem $filesystem,
         private readonly ZipUploadPolicy $zipUploadPolicy,
     ) {
-        parent::__construct($httpClient, $parameters, $filesystem, $tokenManager, $logger, $cache);
     }
 
     /**
      * @param array<mixed>|null $query
      */
-    public function getList(string $datastoreId, ?array $query = []): array
+    public function getList(string $datastoreId, ?array $query = []): PaginatedResponse
     {
-        $query ??= [];
+        $query = Utils::normalize_query($query);
 
-        if (!array_key_exists('sort', $query)) { // par défaut, trier par la date du dernier évènement décroissante
-            $query['sort'] = 'last_event,desc';
-        }
-
-        if (array_key_exists('fields', $query) && is_array($query['fields']) && !empty($query['fields'])) {
-            $query['fields'] = implode(',', $query['fields']);
-        }
-
-        return $this->request('GET', "datastores/$datastoreId/uploads", [], $query, [], false, true, true);
+        return $this->api->get("datastores/$datastoreId/uploads", $query)->jsonWithHeaders();
     }
 
     /**
      * @param array<mixed>|null $query
      */
-    public function getListDetailed(string $datastoreId, ?array $query = []): array
+    public function getListDetailed(string $datastoreId, ?array $query = []): PaginatedResponse
     {
-        $query ??= [];
-
-        $uploadList = $this->getList($datastoreId, $query);
-        $uploadList['content'] = $this->fetchAllDetailsAsync(
-            $uploadList['content'],
-            fn (array $upload): ResponseInterface => $this->getAsync($datastoreId, $upload['_id'])
+        $page = $this->getList($datastoreId, $query);
+        $detailed = $this->api->fetchAllDetailsAsync(
+            $page->content,
+            fn (array $upload): PendingResponse => $this->get($datastoreId, $upload['_id'])
         );
 
-        return $uploadList;
+        return new PaginatedResponse($detailed, $page->headers);
     }
 
     /**
@@ -68,69 +55,45 @@ class UploadApiService extends BaseEntrepotApiService
      */
     public function getAll(string $datastoreId, array $query = []): array
     {
-        if (!array_key_exists('sort', $query)) { // par défaut, trier par la date du dernier évènement décroissante
-            $query['sort'] = 'last_event,desc';
-        }
+        $query = Utils::normalize_query($query);
 
-        if (array_key_exists('fields', $query) && is_array($query['fields']) && !empty($query['fields'])) {
-            $query['fields'] = implode(',', $query['fields']);
-        }
-
-        return $this->requestAll("datastores/$datastoreId/uploads", $query);
+        return $this->api->requestAll("datastores/$datastoreId/uploads", $query);
     }
 
     /**
-     * @param mixed[] $query
+     * @param array<mixed> $query
      */
     public function getAllDetailed(string $datastoreId, array $query = []): array
     {
         $uploads = $this->getAll($datastoreId, $query);
 
-        return $this->fetchAllDetailsAsync(
+        return $this->api->fetchAllDetailsAsync(
             $uploads,
-            fn (array $upload): ResponseInterface => $this->getAsync($datastoreId, $upload['_id'])
+            fn (array $upload): PendingResponse => $this->get($datastoreId, $upload['_id'])
         );
     }
 
-    public function get(string $datastoreId, string $uploadId): array
+    public function get(string $datastoreId, string $uploadId): PendingResponse
     {
-        return $this->request('GET', "datastores/$datastoreId/uploads/$uploadId");
-    }
-
-    public function getAsync(string $datastoreId, string $uploadId): ResponseInterface
-    {
-        return $this->requestAsync('GET', "datastores/$datastoreId/uploads/$uploadId");
+        return $this->api->get("datastores/$datastoreId/uploads/$uploadId");
     }
 
     /**
      * Déclare une nouvelle livraison.
      *
      * @param array<mixed> $uploadData
-     *
-     * @return array<mixed>
      */
-    public function add(string $datastoreId, $uploadData)
+    public function add(string $datastoreId, array $uploadData): PendingResponse
     {
-        try {
-            return $this->request('POST', "datastores/$datastoreId/uploads", [
-                'name' => $uploadData['name'],
-                'description' => $uploadData['description'],
-                'type' => $uploadData['type'],
-                'srs' => $uploadData['srs'],
-            ]);
-        } catch (ApiException $ex) {
-            throw new ApiException('Création de la livraison échouée');
-        }
+        return $this->api->post("datastores/$datastoreId/uploads", [
+            'name' => $uploadData['name'],
+            'description' => $uploadData['description'],
+            'type' => $uploadData['type'],
+            'srs' => $uploadData['srs'],
+        ]);
     }
 
-    /**
-     * @param string $datastoreId
-     * @param string $uploadId
-     * @param string $filename
-     *
-     * @return void
-     */
-    public function addFile($datastoreId, $uploadId, $filename)
+    public function addFile(string $datastoreId, string $uploadId, string $filename): void
     {
         $uploadRoot = realpath((string) $this->parameters->get('upload_path'));
         if (false === $uploadRoot) {
@@ -251,9 +214,9 @@ class UploadApiService extends BaseEntrepotApiService
     public function uploadFile(string $datastoreId, string $uploadId, string $pathname, string $relativePath): void
     {
         // envoi du fichier téléversé par l'utilisateur
-        $this->sendFile('POST', "datastores/$datastoreId/uploads/$uploadId/data", $pathname, [], [
+        $this->api->sendFile('POST', "datastores/$datastoreId/uploads/$uploadId/data", $pathname, [], [
             'path' => "data/{$relativePath}",
-        ]);
+        ])->wait();
 
         // calcul et envoi du md5 du fichier téléversé par l'utilisateur
         $md5 = \md5_file($pathname);
@@ -267,21 +230,18 @@ class UploadApiService extends BaseEntrepotApiService
             throw new AppException('Écriture du fichier md5 échouée');
         }
 
-        $this->sendFile('POST', "datastores/$datastoreId/uploads/$uploadId/md5", $md5filePath);
+        $this->api->sendFile('POST', "datastores/$datastoreId/uploads/$uploadId/md5", $md5filePath)->wait();
 
         $this->filesystem->remove($pathname);
         $this->filesystem->remove($md5filePath);
     }
 
     /**
-     * @param string $datastoreId
-     * @param string $uploadId
-     *
-     * @return array
+     * @return array<mixed>
      */
-    public function getFileTree($datastoreId, $uploadId)
+    public function getFileTree(string $datastoreId, string $uploadId): array
     {
-        $upload = $this->get($datastoreId, $uploadId);
+        $upload = $this->get($datastoreId, $uploadId)->json();
         if (UploadStatuses::DELETED == $upload['status'] || UploadStatuses::OPEN == $upload['status']) {
             if (array_key_exists(UploadTags::FILE_TREE, $upload['tags'])) {
                 return json_decode($upload['tags'][UploadTags::FILE_TREE], true);
@@ -290,99 +250,87 @@ class UploadApiService extends BaseEntrepotApiService
             return [];
         }
 
-        return $this->request('GET', "datastores/$datastoreId/uploads/$uploadId/tree");
+        return $this->api->get("datastores/$datastoreId/uploads/$uploadId/tree")->json();
     }
 
     /**
      * Opens an existing upload only if it isn't already OPEN.
-     *
-     * @param string $datastoreId
-     * @param string $uploadId
-     *
-     * @return void
      */
-    public function open($datastoreId, $uploadId)
+    public function open(string $datastoreId, string $uploadId): void
     {
-        if (UploadStatuses::OPEN != $this->get($datastoreId, $uploadId)['status']) {
-            $this->request('POST', "datastores/$datastoreId/uploads/$uploadId/open");
+        if (UploadStatuses::OPEN != $this->get($datastoreId, $uploadId)->json()['status']) {
+            $this->api->post("datastores/$datastoreId/uploads/$uploadId/open")->wait();
         }
     }
 
     /**
      * Closes an existing upload only if it isn't already CLOSED.
-     *
-     * @param string $datastoreId
-     * @param string $uploadId
-     *
-     * @return void
      */
-    public function close($datastoreId, $uploadId)
+    public function close(string $datastoreId, string $uploadId): void
     {
-        if (UploadStatuses::CLOSED != $this->get($datastoreId, $uploadId)['status']) {
-            $this->request('POST', "datastores/$datastoreId/uploads/$uploadId/close");
+        if (UploadStatuses::CLOSED != $this->get($datastoreId, $uploadId)->json()['status']) {
+            $this->api->post("datastores/$datastoreId/uploads/$uploadId/close")->wait();
         }
     }
 
     /**
      * @param array<mixed> $tags
      */
-    public function addTags(string $datastoreId, string $uploadId, $tags): array
+    public function addTags(string $datastoreId, string $uploadId, array $tags): PendingResponse
     {
-        return $this->request('POST', "datastores/$datastoreId/uploads/$uploadId/tags", $tags);
+        return $this->api->post("datastores/$datastoreId/uploads/$uploadId/tags", $tags);
     }
 
     /**
      * @param array<string> $tags
      */
-    public function removeTags(string $datastoreId, string $uploadId, array $tags): array
+    public function removeTags(string $datastoreId, string $uploadId, array $tags): PendingResponse
     {
-        return $this->request('DELETE', "datastores/$datastoreId/uploads/$uploadId/tags", [], [
-            'tags' => join(',', $tags),
-        ]);
+        return $this->api->delete("datastores/$datastoreId/uploads/$uploadId/tags", ['tags' => join(',', $tags)]);
     }
 
-    public function remove(string $datastoreId, string $uploadId): mixed
+    public function remove(string $datastoreId, string $uploadId): PendingResponse
     {
-        // sauvegarde dans les tags de l'aborescence de fichiers de la livraison avant de la supprimer, parce qu'une fois supprimée elle ne sera plus récupérable
+        // sauvegarde dans les tags de l'arborescence de fichiers de la livraison avant de la supprimer, parce qu'une fois supprimée elle ne sera plus récupérable
         try {
             $fileTree = $this->getFileTree($datastoreId, $uploadId);
             $this->addTags($datastoreId, $uploadId, [
                 UploadTags::FILE_TREE => json_encode($fileTree),
-            ]);
+            ])->wait();
         } catch (ApiException $ex) {
             // ne rien faire, tant pis si la récupération de l'arborescence a échoué
         }
 
-        return $this->request('DELETE', "datastores/$datastoreId/uploads/$uploadId");
+        return $this->api->delete("datastores/$datastoreId/uploads/$uploadId");
     }
 
-    public function getEvents(string $datastoreId, string $uploadId): array
+    public function getEvents(string $datastoreId, string $uploadId): PendingResponse
     {
-        return $this->request('GET', "datastores/$datastoreId/uploads/$uploadId/events");
+        return $this->api->get("datastores/$datastoreId/uploads/$uploadId/events");
     }
 
-    public function getCheckExecutions(string $datastoreId, string $uploadId): array
+    public function getCheckExecutions(string $datastoreId, string $uploadId): PendingResponse
     {
-        return $this->request('GET', "datastores/$datastoreId/uploads/$uploadId/checks");
+        return $this->api->get("datastores/$datastoreId/uploads/$uploadId/checks");
     }
 
-    public function getChecks(string $datastoreId): array
+    public function getChecks(string $datastoreId): PendingResponse
     {
-        return $this->request('GET', "datastores/$datastoreId/checks");
+        return $this->api->get("datastores/$datastoreId/checks");
     }
 
-    public function getCheck(string $datastoreId, string $checkId): array
+    public function getCheck(string $datastoreId, string $checkId): PendingResponse
     {
-        return $this->request('GET', "datastores/$datastoreId/checks/$checkId");
+        return $this->api->get("datastores/$datastoreId/checks/$checkId");
     }
 
-    public function getCheckExecution(string $datastoreId, string $checkExecutionId): array
+    public function getCheckExecution(string $datastoreId, string $checkExecutionId): PendingResponse
     {
-        return $this->request('GET', "datastores/$datastoreId/checks/executions/$checkExecutionId");
+        return $this->api->get("datastores/$datastoreId/checks/executions/$checkExecutionId");
     }
 
-    public function getCheckExecutionLogs(string $datastoreId, string $checkExecutionId): array
+    public function getCheckExecutionLogs(string $datastoreId, string $checkExecutionId): PendingResponse
     {
-        return $this->request('GET', "datastores/$datastoreId/checks/executions/$checkExecutionId/logs", [], [], [], false, true);
+        return $this->api->get("datastores/$datastoreId/checks/executions/$checkExecutionId/logs");
     }
 }

@@ -4,9 +4,9 @@ namespace App\ApiClient;
 
 use App\ApiClient\ErrorParser\EntrepotErrorParser;
 use App\ApiClient\ErrorParser\EspaceCoErrorParser;
+use App\Security\KeycloakTokenManager;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 final class ApiClientFactory
@@ -14,7 +14,7 @@ final class ApiClientFactory
     public function __construct(
         private HttpClientInterface $httpClient,
         private ParameterBagInterface $parameters,
-        private RequestStack $requestStack,
+        private KeycloakTokenManager $tokenManager,
         private LoggerInterface $logger,
     ) {
     }
@@ -47,7 +47,7 @@ final class ApiClientFactory
             // 'verify_host' => false,
         ]);
 
-        $authenticated = new AuthenticatedHttpClient($scoped, $this->requestStack);
+        $authenticated = new AuthenticatedHttpClient($scoped, $this->tokenManager);
 
         return new ApiClient($authenticated, new EspaceCoErrorParser(), $this->logger);
     }
@@ -60,6 +60,6 @@ final class ApiClientFactory
             'no_proxy' => $this->parameters->get('no_proxy'),
         ]);
 
-        return new AuthenticatedHttpClient($scoped, $this->requestStack);
+        return new AuthenticatedHttpClient($scoped, $this->tokenManager);
     }
 }
