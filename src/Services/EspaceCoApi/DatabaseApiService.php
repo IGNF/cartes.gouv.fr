@@ -2,8 +2,18 @@
 
 namespace App\Services\EspaceCoApi;
 
-class DatabaseApiService extends BaseEspaceCoApiService
+use App\ApiClient\ApiClient;
+use App\ApiClient\PendingResponse;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+
+final class DatabaseApiService
 {
+    public function __construct(
+        #[Autowire(service: 'app.api_client.espaceco')]
+        private readonly ApiClient $api,
+    ) {
+    }
+
     /**
      * @param array<mixed> $fields
      */
@@ -11,7 +21,7 @@ class DatabaseApiService extends BaseEspaceCoApiService
     {
         $query = empty($fields) ? [] : ['fields' => $fields];
 
-        return $this->requestAll('databases', $query);
+        return $this->api->requestAll('databases', $query);
     }
 
     /**
@@ -24,50 +34,50 @@ class DatabaseApiService extends BaseEspaceCoApiService
             $query['fields'] = $fields;
         }
 
-        return $this->requestAll('databases', $query);
+        return $this->api->requestAll('databases', $query);
     }
 
     /**
      * @param array<mixed> $fields
      */
-    public function getDatabase(int $databaseId, ?array $fields = []): array
+    public function getDatabase(int $databaseId, ?array $fields = []): PendingResponse
     {
         $query = empty($fields) ? [] : ['fields' => $fields];
 
-        return $this->request('GET', "databases/$databaseId", [], $query);
+        return $this->api->get("databases/$databaseId", $query);
     }
 
     /**
      * @param array<string> $fields
      */
-    public function getTable(int $databaseId, int $tableId, ?array $fields = []): array
+    public function getTable(int $databaseId, int $tableId, ?array $fields = []): PendingResponse
     {
         $query = empty($fields) ? [] : ['fields' => $fields];
 
-        return $this->request('GET', "databases/$databaseId/tables/$tableId", [], $query);
+        return $this->api->get("databases/$databaseId/tables/$tableId", $query);
     }
 
     /**
      * @param array<string> $fields
      */
-    public function getColumn(int $databaseId, int $tableId, int $columnId, ?array $fields = []): array
+    public function getColumn(int $databaseId, int $tableId, int $columnId, ?array $fields = []): PendingResponse
     {
         $query = empty($fields) ? [] : ['fields' => $fields];
 
-        return $this->request('GET', "databases/$databaseId/tables/$tableId/columns/$columnId", [], $query);
+        return $this->api->get("databases/$databaseId/tables/$tableId/columns/$columnId", $query);
     }
 
     /**
      * @param array<string> $fields
      */
-    public function getColumnByName(int $databaseId, int $tableId, string $column, ?array $fields = []): array
+    public function getColumnByName(int $databaseId, int $tableId, string $column, ?array $fields = []): PendingResponse
     {
         $query = ['name' => $column];
         if (!empty($fields)) {
             $query['fields'] = $fields;
         }
 
-        return $this->request('GET', "databases/$databaseId/tables/$tableId/columns", [], $query);
+        return $this->api->get("databases/$databaseId/tables/$tableId/columns", $query);
     }
 
     /**
@@ -77,6 +87,6 @@ class DatabaseApiService extends BaseEspaceCoApiService
     {
         $query = empty($fields) ? [] : ['fields' => $fields];
 
-        return $this->requestAll("databases/$databaseId/tables", $query);
+        return $this->api->requestAll("databases/$databaseId/tables", $query);
     }
 }

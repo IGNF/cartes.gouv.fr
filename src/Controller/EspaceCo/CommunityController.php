@@ -70,7 +70,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
     public function getCommunity(int $communityId, #[MapQueryParameter] ?array $fields = []): JsonResponse
     {
         try {
-            $community = $this->communityApiService->getCommunity($communityId, $fields);
+            $community = $this->communityApiService->getCommunity($communityId, $fields)->json();
             $this->_complete($community);
 
             return new JsonResponse($community);
@@ -98,7 +98,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
         #[MapQueryParameter] ?int $limit = 10,
     ): JsonResponse {
         try {
-            $me = $this->userApiService->getMe();
+            $me = $this->userApiService->getMe()->json();
             $members = array_map(function ($member) {
                 return ['id' => $member['community_id'], 'name' => $member['community_name'], 'role' => $member['role']];
             }, $me['communities_member']);
@@ -112,7 +112,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
 
             $communities = [];
             foreach ($members as $member) {
-                $community = $this->communityApiService->getCommunity($member['id']);
+                $community = $this->communityApiService->getCommunity($member['id'])->json();
                 $communities[] = $community;
             }
 
@@ -192,7 +192,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
     {
         try {
             $datas = json_decode($request->getContent(), true);
-            $community = $this->communityApiService->updateCommunity($communityId, $datas);
+            $community = $this->communityApiService->updateCommunity($communityId, $datas)->json();
 
             return new JsonResponse($community);
         } catch (ApiException $ex) {
@@ -206,12 +206,12 @@ class CommunityController extends AbstractController implements ApiControllerInt
         #[MapRequestPayload] AddMembersDTO $dto): JsonResponse
     {
         try {
-            $community = $this->communityApiService->getCommunity($communityId);
+            $community = $this->communityApiService->getCommunity($communityId)->json();
 
             $members = [];
             foreach ($dto->members as $userId) {
                 $email = filter_var($userId, FILTER_VALIDATE_EMAIL);
-                $member = $this->communityApiService->addMember($communityId, $userId);
+                $member = $this->communityApiService->addMember($communityId, $userId)->json();
                 if ($email && 'invited' === $member['role']) {
                     $this->_sendEmail($email, $community);
                 } else {
@@ -261,7 +261,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
             $this->communityApiService->updateLogo($communityId, $tempFilePath);
             $this->fs->remove($tempFileDir);
 
-            $community = $this->communityApiService->getCommunity($communityId, ['logo_url']);
+            $community = $this->communityApiService->getCommunity($communityId, ['logo_url'])->json();
 
             return new JsonResponse(['logo_url' => $community['logo_url']]);
         } catch (ApiException $ex) {
@@ -273,7 +273,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
     public function removeLogo(int $communityId): JsonResponse
     {
         try {
-            $this->communityApiService->removeLogo($communityId);
+            $this->communityApiService->removeLogo($communityId)->wait();
 
             return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
         } catch (ApiException $ex) {
@@ -285,7 +285,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
     public function removeMember(int $communityId, int $userId): JsonResponse
     {
         try {
-            $this->communityApiService->removeMember($communityId, $userId);
+            $this->communityApiService->removeMember($communityId, $userId)->wait();
 
             return new JsonResponse(['user_id' => $userId]);
         } catch (ApiException $ex) {
@@ -313,7 +313,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
      */
     private function _search(string $name, bool $pending): array
     {
-        $me = $this->userApiService->getMe();
+        $me = $this->userApiService->getMe()->json();
         $members = array_map(function ($member) {
             return ['id' => $member['community_id'], 'name' => $member['community_name'], 'role' => $member['role']];
         }, $me['communities_member']);
@@ -331,7 +331,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
 
         $communities = [];
         foreach ($members as $member) {
-            $community = $this->communityApiService->getCommunity($member['id']);
+            $community = $this->communityApiService->getCommunity($member['id'])->json();
             $communities[] = $community;
         }
 
@@ -399,7 +399,7 @@ class CommunityController extends AbstractController implements ApiControllerInt
         $allGrids = [];
         foreach ($tmpGrids as $gridName) {
             try {
-                $grid = $this->gridApiService->get($gridName);
+                $grid = $this->gridApiService->get($gridName)->json();
                 if (!$grid['deleted']) {
                     $allGrids[$grid['name']] = $grid;
                 }

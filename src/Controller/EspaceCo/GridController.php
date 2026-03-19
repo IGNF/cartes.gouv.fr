@@ -53,7 +53,7 @@ class GridController extends AbstractController implements ApiControllerInterfac
     public function get(string $name, #[MapQueryParameter] ?array $fields = []): JsonResponse
     {
         try {
-            $response = $this->gridApiService->get($name, $fields ?? []);
+            $response = $this->gridApiService->get($name, $fields ?? [])->json();
 
             return new JsonResponse($response);
         } catch (ApiException $ex) {

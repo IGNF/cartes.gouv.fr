@@ -82,7 +82,7 @@ class CommunityLayerController extends AbstractController implements ApiControll
         try {
             $data = json_decode($request->getContent(), true);
             foreach ($data['layer_tools'] as $layerId => $tools) {
-                $this->layerApiService->updateLayer($communityId, $layerId, $tools);
+                $this->layerApiService->updateLayer($communityId, $layerId, $tools)->wait();
             }
 
             return $this->getAll($communityId, $data['fields']);
@@ -96,11 +96,11 @@ class CommunityLayerController extends AbstractController implements ApiControll
      */
     private function _complete(array &$ftLayer): void
     {
-        $db = $this->databaseApiService->getDatabase($ftLayer['database'], ['name', 'title']);
+        $db = $this->databaseApiService->getDatabase($ftLayer['database'], ['name', 'title'])->json();
         $ftLayer['database_name'] = $db['name'];
         $ftLayer['database_title'] = $db['title'];
 
-        $table = $this->databaseApiService->getTable($ftLayer['database'], $ftLayer['table'], ['name', 'title', 'geometry_name', 'columns']);
+        $table = $this->databaseApiService->getTable($ftLayer['database'], $ftLayer['table'], ['name', 'title', 'geometry_name', 'columns'])->json();
         $ftLayer['table_name'] = $table['name'];
         $ftLayer['table_title'] = $table['title'];
 

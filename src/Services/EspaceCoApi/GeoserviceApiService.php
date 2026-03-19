@@ -2,17 +2,25 @@
 
 namespace App\Services\EspaceCoApi;
 
-class GeoserviceApiService extends BaseEspaceCoApiService
+use App\ApiClient\ApiClient;
+use App\ApiClient\PendingResponse;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+
+final class GeoserviceApiService
 {
+    public function __construct(
+        #[Autowire(service: 'app.api_client.espaceco')]
+        private readonly ApiClient $api,
+    ) {
+    }
+
     /**
      * @param array<string> $fields
-     *
-     * @return array<mixed>
      */
-    public function getGeoservice(int $geoserviceId, ?array $fields = []): array
+    public function getGeoservice(int $geoserviceId, ?array $fields = []): PendingResponse
     {
         $query = empty($fields) ? [] : ['fields' => $fields];
 
-        return $this->request('GET', "geoservices/$geoserviceId", [], $query);
+        return $this->api->get("geoservices/$geoserviceId", $query);
     }
 }

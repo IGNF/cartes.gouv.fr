@@ -33,7 +33,9 @@ class TransactionController extends AbstractController implements ApiControllerI
     {
         try {
             $query = $request->query->all();
-            ['content' => $content, 'headers' => $headers] = $this->transactionApiService->getList($databaseId, $query);
+            $result = $this->transactionApiService->getList($databaseId, $query);
+            $content = $result->content;
+            $headers = $result->headers;
 
             $response = new JsonResponse($content, Response::HTTP_PARTIAL_CONTENT);
             $response->headers->set('Content-Range', $headers['content-range'][0]);
@@ -50,7 +52,7 @@ class TransactionController extends AbstractController implements ApiControllerI
         try {
             $body = json_decode($request->getContent(), true);
 
-            $report = $this->transactionApiService->add($databaseId, $body);
+            $report = $this->transactionApiService->add($databaseId, $body)->json();
 
             return $this->json($report);
         } catch (ApiException $ex) {
@@ -62,7 +64,7 @@ class TransactionController extends AbstractController implements ApiControllerI
     public function get(string $databaseId, string $transactionId): JsonResponse
     {
         try {
-            return $this->json($this->transactionApiService->get($databaseId, $transactionId));
+            return $this->json($this->transactionApiService->get($databaseId, $transactionId)->json());
         } catch (ApiException $ex) {
             throw new CartesApiException($ex->getMessage(), $ex->getStatusCode(), $ex->getDetails(), $ex);
         }

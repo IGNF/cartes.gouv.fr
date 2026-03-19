@@ -60,7 +60,7 @@ class PermissionController extends AbstractController implements ApiControllerIn
                 }
 
                 if ($tableId) {
-                    $table = $this->databaseApiService->getTable($permission['database'], $tableId);
+                    $table = $this->databaseApiService->getTable($permission['database'], $tableId)->json();
                     if ($isOK) {
                         if (!array_key_exists($table['full_name'], $tables)) {
                             $tables[$table['full_name']] = $table;
@@ -107,7 +107,7 @@ class PermissionController extends AbstractController implements ApiControllerIn
                         $tables[] = $table['full_name'];
                     }
                 } elseif (!is_null($tableId) && !$isOK) { // Permission sur une table non désirée
-                    $table = $this->databaseApiService->getTable($permission['database'], $tableId, ['full_name']);
+                    $table = $this->databaseApiService->getTable($permission['database'], $tableId, ['full_name'])->json();
                     $fullName = $table['full_name'];
                     if (!in_array($fullName, $tablesToremove)) {
                         $tablesToremove[] = $fullName;
@@ -174,7 +174,7 @@ class PermissionController extends AbstractController implements ApiControllerIn
                     $oldPermissionConfig = $oldPermissionsByKey[$key];
                     $newPermission = $newPermissionsByKey[$key];
                     if ($newPermission['level'] != $oldPermissionConfig['level']) {
-                        $this->permissionApiService->update($oldPermissionConfig['id'], ['level' => $newPermission['level']]);
+                        $this->permissionApiService->update($oldPermissionConfig['id'], ['level' => $newPermission['level']])->wait();
                     }
                 }
             }
@@ -182,14 +182,14 @@ class PermissionController extends AbstractController implements ApiControllerIn
             $diff = array_diff_key($oldPermissionsByKey, $newPermissionsByKey);
             if (0 != count($diff)) {    // Suppressions
                 foreach ($oldPermissionsByKey as $key => $config) {
-                    $this->permissionApiService->remove($config['id']);
+                    $this->permissionApiService->remove($config['id'])->wait();
                 }
             }
 
             $diff = array_diff_key($newPermissionsByKey, $oldPermissionsByKey);
             if (0 != count($diff)) {    // Ajouts
                 foreach ($newPermissionsByKey as $key => $config) {
-                    $this->permissionApiService->add($config);
+                    $this->permissionApiService->add($config)->wait();
                 }
             }
 

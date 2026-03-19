@@ -25,7 +25,7 @@ class WfsController extends AbstractController implements ApiControllerInterface
     public function request(Request $request, WfsApiService $wfsApiService, ?string $databaseName = null): Response
     {
         try {
-            $wfs = $wfsApiService->wfsRequest($request->query->all(), $databaseName);
+            $wfs = $wfsApiService->wfsRequest($request->query->all(), $databaseName)->text();
 
             $contentType = str_starts_with($wfs, '<?xml') ? 'application/xml' : 'application/json';
 

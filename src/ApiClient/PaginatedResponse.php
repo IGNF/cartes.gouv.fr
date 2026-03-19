@@ -18,4 +18,16 @@ final readonly class PaginatedResponse
     {
         return $this->headers['content-range'][0] ?? null;
     }
+
+    public function getPageCount(int $limit): ?int
+    {
+        $contentRange = $this->getContentRange();
+        if (null === $contentRange) {
+            return null;
+        }
+
+        $total = (int) explode('/', $contentRange)[1];
+
+        return (int) ceil($total / $limit);
+    }
 }

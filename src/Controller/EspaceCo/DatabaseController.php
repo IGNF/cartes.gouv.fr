@@ -50,7 +50,7 @@ class DatabaseController extends AbstractController implements ApiControllerInte
         #[MapQueryParameter] array $fields = []): JsonResponse
     {
         try {
-            $database = $this->databaseApiService->getDatabase($databaseId, $fields);
+            $database = $this->databaseApiService->getDatabase($databaseId, $fields)->json();
 
             return new JsonResponse($database);
         } catch (ApiException $ex) {
@@ -87,7 +87,7 @@ class DatabaseController extends AbstractController implements ApiControllerInte
         #[MapQueryParameter] array $fields = []): JsonResponse
     {
         try {
-            $table = $this->databaseApiService->getTable($databaseId, $tableId, $fields);
+            $table = $this->databaseApiService->getTable($databaseId, $tableId, $fields)->json();
 
             return new JsonResponse($table);
         } catch (ApiException $ex) {

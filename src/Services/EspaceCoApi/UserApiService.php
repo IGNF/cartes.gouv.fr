@@ -2,17 +2,27 @@
 
 namespace App\Services\EspaceCoApi;
 
-class UserApiService extends BaseEspaceCoApiService
+use App\ApiClient\ApiClient;
+use App\ApiClient\PendingResponse;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+
+final class UserApiService
 {
-    public function getMe(): array
+    public function __construct(
+        #[Autowire(service: 'app.api_client.espaceco')]
+        private readonly ApiClient $api,
+    ) {
+    }
+
+    public function getMe(): PendingResponse
     {
-        return $this->request('GET', 'users/me');
+        return $this->api->get('users/me');
     }
 
     public function getSharedThemes(): array
     {
-        $result = $this->request('GET', 'users/me', [], ['fields' => 'shared_themes']);
-        if (is_array($result) && array_key_exists('shared_themes', $result)) {
+        $result = $this->api->get('users/me', ['fields' => 'shared_themes'])->json();
+        if (array_key_exists('shared_themes', $result)) {
             return $result['shared_themes'];
         }
 
@@ -22,13 +32,13 @@ class UserApiService extends BaseEspaceCoApiService
     /**
      * @param array<mixed> $query
      */
-    public function getUser(int $userId, array $query = []): array
+    public function getUser(int $userId, array $query = []): PendingResponse
     {
-        return $this->request('GET', "users/$userId", [], $query);
+        return $this->api->get("users/$userId", $query);
     }
 
-    public function search(string $search): array
+    public function search(string $search): PendingResponse
     {
-        return $this->request('GET', 'users', [], ['search' => $search, 'fields' => ['id', 'username', 'firstname', 'surname']]);
+        return $this->api->get('users', ['search' => $search, 'fields' => ['id', 'username', 'firstname', 'surname']]);
     }
 }

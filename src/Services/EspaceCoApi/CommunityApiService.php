@@ -2,39 +2,31 @@
 
 namespace App\Services\EspaceCoApi;
 
-use App\Security\KeycloakTokenManager;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Mime\Part\DataPart;
-use Symfony\Component\Mime\Part\Multipart\FormDataPart;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
+use App\ApiClient\ApiClient;
+use App\ApiClient\PendingResponse;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
-class CommunityApiService extends BaseEspaceCoApiService
+final class CommunityApiService
 {
-    public function __construct(HttpClientInterface $httpClient,
-        ParameterBagInterface $parameters,
-        Filesystem $filesystem,
-        KeycloakTokenManager $tokenManager,
-        LoggerInterface $logger,
-        private UserApiService $userApiService,
-        private GridApiService $gridApiService,
+    public function __construct(
+        #[Autowire(service: 'app.api_client.espaceco')]
+        private readonly ApiClient $api,
+        private readonly UserApiService $userApiService,
+        private readonly GridApiService $gridApiService,
     ) {
-        parent::__construct($httpClient, $parameters, $filesystem, $tokenManager, $logger);
     }
 
     public function getCommunities(string $name, int $page, int $limit, string $sort): array
     {
-        $response = $this->request('GET', 'communities', [], ['name' => $name, 'page' => $page, 'limit' => $limit, 'sort' => $sort], [], false, true, true);
+        $response = $this->api->get('communities', ['name' => $name, 'page' => $page, 'limit' => $limit, 'sort' => $sort])->jsonWithHeaders();
 
-        $contentRange = $response['headers']['content-range'][0];
-        $totalPages = $this->getResultsPageCount($contentRange, $limit);
+        $totalPages = $response->getPageCount($limit) ?? 1;
 
         $previousPage = 1 === $page ? null : $page - 1;
         $nextPage = $page + 1 > $totalPages ? null : $page + 1;
 
         return [
-            'content' => $response['content'],
+            'content' => $response->content,
             'totalPages' => $totalPages,
             'previousPage' => $previousPage,
             'nextPage' => $nextPage,
@@ -43,21 +35,19 @@ class CommunityApiService extends BaseEspaceCoApiService
 
     public function getCommunitiesName(): array
     {
-        $communities = $this->requestAll('communities', ['fields' => ['name'], 'sort' => 'name:ASC']);
+        $communities = $this->api->requestAll('communities', ['fields' => ['name'], 'sort' => 'name:ASC']);
 
         return array_map(fn ($community) => $community['name'], $communities);
     }
 
     /**
      * @param array<mixed> $fields
-     *
-     * @return array<mixed>
      */
-    public function getCommunity(int $communityId, ?array $fields = []): array
+    public function getCommunity(int $communityId, ?array $fields = []): PendingResponse
     {
         $query = empty($fields) ? [] : ['fields' => $fields];
 
-        return $this->request('GET', "communities/$communityId", [], $query);
+        return $this->api->get("communities/$communityId", $query);
     }
 
     /**
@@ -65,24 +55,21 @@ class CommunityApiService extends BaseEspaceCoApiService
      */
     public function addCommunity(array $datas, ?string $logoFilePath): array
     {
-        $formFields = $datas;
         if ($logoFilePath) {
-            $formFields['logo'] = DataPart::fromPath($logoFilePath);
+            $response = $this->api->sendFile('POST', 'communities', $logoFilePath, $datas, [], 'logo')->json();
+        } else {
+            $response = $this->api->post('communities', $datas)->json();
         }
 
-        $formData = new FormDataPart($formFields);
-        $body = $formData->bodyToIterable();
-        $headers = $formData->getPreparedHeaders()->toArray();
-
-        return $this->request('POST', 'communities', $body, [], $headers, true);
+        return $response;
     }
 
     /**
      * @param array<mixed> $datas
      */
-    public function updateCommunity(int $communityId, array $datas): array
+    public function updateCommunity(int $communityId, array $datas): PendingResponse
     {
-        return $this->request('PATCH', "communities/$communityId", $datas);
+        return $this->api->patch("communities/$communityId", $datas);
     }
 
     /**
@@ -95,11 +82,11 @@ class CommunityApiService extends BaseEspaceCoApiService
         $query = ['fields' => 'user_id, grids, role, active, date'];
         $query['roles'] = count($roles) ? $roles : ['member', 'admin'];
 
-        $members = $this->requestAll("communities/$communityId/members", $query);
+        $members = $this->api->requestAll("communities/$communityId/members", $query);
 
         $gridsRequested = [];
         foreach ($members as &$member) {
-            $user = $this->userApiService->getUser($member['user_id'], ['fields' => ['username', 'firstname', 'surname']]);
+            $user = $this->userApiService->getUser($member['user_id'], ['fields' => ['username', 'firstname', 'surname']])->json();
             $member = array_merge($member, $user);
 
             // Ajout des grids
@@ -117,14 +104,14 @@ class CommunityApiService extends BaseEspaceCoApiService
         return $members;
     }
 
-    public function addMember(int $communityId, int $userId): array
+    public function addMember(int $communityId, int $userId): PendingResponse
     {
-        return $this->request('POST', "communities/$communityId/members/$userId", ['user_id' => $userId]);
+        return $this->api->post("communities/$communityId/members/$userId", ['user_id' => $userId]);
     }
 
     public function updateMember(int $communityId, int $userId, string $field, mixed $value): array
     {
-        $member = $this->request('PATCH', "communities/$communityId/members/$userId", [$field => $value]);
+        $member = $this->api->patch("communities/$communityId/members/$userId", [$field => $value])->json();
         if ('grids' === $field) {   // On recupere les grids, pas seulement leur nom
             $member['grids'] = $this->_transformGrids($member['grids']);
         }
@@ -132,19 +119,19 @@ class CommunityApiService extends BaseEspaceCoApiService
         return $member;
     }
 
-    public function removeMember(int $communityId, int $userId): array
+    public function removeMember(int $communityId, int $userId): PendingResponse
     {
-        return $this->request('DELETE', "communities/$communityId/members/$userId");
+        return $this->api->delete("communities/$communityId/members/$userId");
     }
 
     public function updateLogo(int $communityId, string $filePath): array
     {
-        return $this->sendFile('POST', "communities/$communityId/logo", $filePath, [], [], 'logo');
+        return $this->api->sendFile('POST', "communities/$communityId/logo", $filePath, [], [], 'logo')->json();
     }
 
-    public function removeLogo(int $communityId): array
+    public function removeLogo(int $communityId): PendingResponse
     {
-        return $this->request('DELETE', "communities/$communityId/logo");
+        return $this->api->delete("communities/$communityId/logo");
     }
 
     /**
@@ -160,8 +147,8 @@ class CommunityApiService extends BaseEspaceCoApiService
             if (array_key_exists($name, $gridsRequested)) {
                 $grid = $gridsRequested[$name];
             } else {
-                $g = $this->gridApiService->get($name);
-                if (!$g['deleted']) {
+                $g = $this->gridApiService->get($name)->json();
+                if (!($g['deleted'] ?? false)) {
                     $grid = $g;
                 }
             }

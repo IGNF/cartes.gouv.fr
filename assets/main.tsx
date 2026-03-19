@@ -10,7 +10,7 @@ import App from "@/App";
 if (import.meta.env?.APP_ENV?.toLowerCase() === "prod") {
     disableReactDevTools();
 } else {
-    document.getElementsByClassName("sf-toolbar")?.[0]?.classList.remove("sf-display-none");
+    document.getElementsByClassName("sf-toolbar")?.[0]?.classList?.remove("sf-display-none");
 }
 
 startReactDsfr({ defaultColorScheme: "light" });
@@ -27,5 +27,3 @@ root.render(
 );
 
 console.info(`cartes.gouv.fr: ${__GIT_TAG__}`);
-
-document.getElementsByClassName("sf-toolbar")?.[0]?.classList.remove("sf-display-none");

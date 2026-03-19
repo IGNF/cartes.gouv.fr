@@ -146,13 +146,11 @@ final class ApiClient
             ->jsonWithHeaders();
 
         $allResources = $firstPage->content;
-        $contentRange = $firstPage->getContentRange();
 
-        if (null === $contentRange) {
+        $pageCount = $firstPage->getPageCount((int) $query['limit']);
+        if (null === $pageCount) {
             return $allResources;
         }
-
-        $pageCount = $this->getResultsPageCount($contentRange, (int) $query['limit']);
 
         if ($pageCount <= 1) {
             return $allResources;
@@ -248,13 +246,5 @@ final class ApiClient
         }
 
         return $httpOptions;
-    }
-
-    private function getResultsPageCount(string $contentRange, int $limit): int
-    {
-        $parts = explode('/', $contentRange);
-        $total = (int) ($parts[1] ?? 0);
-
-        return (int) ceil($total / $limit);
     }
 }

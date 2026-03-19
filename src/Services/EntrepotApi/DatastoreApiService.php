@@ -22,7 +22,7 @@ final class DatastoreApiService
     public function get(string $datastoreId): array
     {
         return $this->cache->get("datastore-$datastoreId", function (ItemInterface $item) use ($datastoreId) {
-            $item->expiresAfter(60);
+            $item->expiresAfter(120);
 
             return $this->api->get("datastores/$datastoreId")->json();
         });

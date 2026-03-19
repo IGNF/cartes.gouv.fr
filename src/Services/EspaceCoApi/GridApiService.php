@@ -2,8 +2,18 @@
 
 namespace App\Services\EspaceCoApi;
 
-class GridApiService extends BaseEspaceCoApiService
+use App\ApiClient\ApiClient;
+use App\ApiClient\PendingResponse;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+
+final class GridApiService
 {
+    public function __construct(
+        #[Autowire(service: 'app.api_client.espaceco')]
+        private readonly ApiClient $api,
+    ) {
+    }
+
     public function getAll(string $text, ?string $searchBy, ?string $fields, ?string $adm, int $page, int $limit): array
     {
         $query = ['text' => $text, 'page' => $page, 'limit' => $limit];
@@ -17,16 +27,15 @@ class GridApiService extends BaseEspaceCoApiService
             $query['adm'] = $adm;
         }
 
-        $response = $this->request('GET', 'grids', [], $query, [], false, true, true);
+        $response = $this->api->get('grids', $query)->jsonWithHeaders();
 
-        $contentRange = $response['headers']['content-range'][0];
-        $totalPages = $this->getResultsPageCount($contentRange, $limit);
+        $totalPages = $response->getPageCount($limit) ?? 1;
 
         $previousPage = 1 === $page ? null : $page - 1;
         $nextPage = $page + 1 > $totalPages ? null : $page + 1;
 
         return [
-            'content' => $response['content'],
+            'content' => $response->content,
             'totalPages' => $totalPages,
             'previousPage' => $previousPage,
             'nextPage' => $nextPage,
@@ -36,8 +45,8 @@ class GridApiService extends BaseEspaceCoApiService
     /**
      * @param array<string> $fields
      */
-    public function get(string $gridName, array $fields = []): array
+    public function get(string $gridName, array $fields = []): PendingResponse
     {
-        return $this->request('GET', "grids/$gridName", [], ['fields' => $fields]);
+        return $this->api->get("grids/$gridName", ['fields' => $fields]);
     }
 }
