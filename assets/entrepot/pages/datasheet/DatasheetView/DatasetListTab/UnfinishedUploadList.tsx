@@ -113,7 +113,9 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
                                         </Button>
                                     )
                                 )}
-                                {(isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.UPLOAD)) && (
+                                {(isSupervisor ||
+                                    (userRights?.includes(CommunityMemberDtoRightsEnum.UPLOAD) &&
+                                        userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING))) && (
                                     <Button
                                         iconId="fr-icon-delete-fill"
                                         priority="secondary"
