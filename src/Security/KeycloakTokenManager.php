@@ -23,10 +23,8 @@ final class KeycloakTokenManager
     {
         $request = $this->requestStack->getCurrentRequest();
 
-        /** @var ?AccessToken */
-        $cached = $request?->attributes->get(self::REQUEST_ATTR);
-        if ($cached instanceof AccessToken) {
-            return $cached;
+        if ($request?->attributes->has(self::REQUEST_ATTR)) {
+            return $request->attributes->get(self::REQUEST_ATTR);
         }
 
         $session = $this->requestStack->getSession();
@@ -43,7 +41,8 @@ final class KeycloakTokenManager
     /**
      * Persiste un token (nouveau ou rafraîchi) en session ET met à jour
      * le cache de l'attribut de requête pour que la requête courante le voie immédiatement.
-     * N'appelle PAS save() — la session doit rester ouverte pour que l'écriture persiste.
+     * N'appelle PAS save() — on laisse le SessionListener (ou un save explicite ailleurs)
+     * gérer la sauvegarde en fin de requête, afin de ne pas manipuler le verrou de session ici.
      */
     public function setToken(AccessToken $token): void
     {
