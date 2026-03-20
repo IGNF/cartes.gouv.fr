@@ -25,6 +25,9 @@ import { routes, useRoute } from "../../../../../router/router";
 import api from "../../../../api";
 import DatasheetThumbnail from "../DatasheetThumbnail";
 
+import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
+import useCommunityRights from "@/hooks/useCommunityRights";
+
 const DatasetListTab = lazy(() => import("../DatasetListTab/DatasetListTab"));
 const DocumentsTab = lazy(() => import("../DocumentsTab/DocumentsTab"));
 const MetadataTab = lazy(() => import("../MetadataTab/MetadataTab"));
@@ -135,6 +138,8 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
         }),
     });
 
+    const { userRights, isSupervisor } = useCommunityRights();
+
     return (
         <Main title={`Données ${datasheetName}`}>
             <div className={fr.cx("fr-grid-row", "fr-grid-row--middle", "fr-mb-4w")}>
@@ -180,25 +185,36 @@ const DatasheetView: FC<DatasheetViewProps> = ({ datastoreId, datasheetName }) =
                 <>
                     <div className={fr.cx("fr-grid-row", "fr-mb-4w")}>
                         <div className={fr.cx("fr-col-2")}>
-                            <DatasheetThumbnail datastoreId={datastoreId} datasheetName={datasheetName} datasheet={datasheetQuery.data} />
+                            <DatasheetThumbnail
+                                datastoreId={datastoreId}
+                                datasheetName={datasheetName}
+                                datasheet={datasheetQuery.data}
+                                canEditThumbnail={isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.ANNEX)}
+                            />
                         </div>
                         <div className={fr.cx("fr-col")}>
                             {/* TODO : désactivé car on n'a pas ces infos */}
                             <p className={fr.cx("fr-mb-2v")}>{/* <strong>Création de la fiche de données : </strong>13 Mar. 2023 */}</p>
                             <p className={fr.cx("fr-mb-2v")}>{/* <strong>Mise à jour : </strong>17 Mar. 2023 */}</p>
                         </div>
-                        <div className={fr.cx("fr-col-3")}>
-                            <ButtonsGroup
-                                buttons={[
-                                    {
-                                        children: t("datasheet.remove"),
-                                        onClick: () => deleteDataConfirmModal.open(),
-                                        iconId: "fr-icon-delete-fill",
-                                        priority: "secondary",
-                                    },
-                                ]}
-                            />
-                        </div>
+                        {(isSupervisor ||
+                            (userRights?.includes(CommunityMemberDtoRightsEnum.ANNEX) &&
+                                userRights?.includes(CommunityMemberDtoRightsEnum.UPLOAD) &&
+                                userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING) &&
+                                userRights?.includes(CommunityMemberDtoRightsEnum.BROADCAST))) && (
+                            <div className={fr.cx("fr-col-3")}>
+                                <ButtonsGroup
+                                    buttons={[
+                                        {
+                                            children: t("datasheet.remove"),
+                                            onClick: () => deleteDataConfirmModal.open(),
+                                            iconId: "fr-icon-delete-fill",
+                                            priority: "secondary",
+                                        },
+                                    ]}
+                                />
+                            </div>
+                        )}
                     </div>
 
                     <div className={fr.cx("fr-grid-row")}>

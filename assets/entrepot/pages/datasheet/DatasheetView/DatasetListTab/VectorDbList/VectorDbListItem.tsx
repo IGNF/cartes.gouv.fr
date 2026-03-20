@@ -10,7 +10,9 @@ import { FC, Fragment, ReactNode, memo, useCallback, useMemo, useState } from "r
 import { createPortal } from "react-dom";
 import { symToStr } from "tsafe/symToStr";
 
+import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
 import useDataUsesQuery from "@/hooks/queries/useDataUsesQuery";
+import useCommunityRights from "@/hooks/useCommunityRights";
 import { DatasheetStoredDataItem, DatastoreEndpoint, StoredDataStatusEnum, VectorDb } from "../../../../../../@types/app";
 import { EndpointDetailResponseDtoTypeEnum } from "../../../../../../@types/entrepot";
 import StoredDataStatusBadge from "../../../../../../components/Utils/Badges/StoredDataStatusBadge";
@@ -198,6 +200,8 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
         [vectorDb._id]
     );
 
+    const { userRights, isSupervisor } = useCommunityRights();
+
     return (
         <>
             <ListItem
@@ -229,7 +233,10 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
                         iconId: "fr-icon-file-text-fill",
                         linkProps: routes.datastore_stored_data_details({ datastoreId, datasheetName, storedDataId: vectorDb._id }).link,
                     },
-                    {
+                    ((userRights?.includes(CommunityMemberDtoRightsEnum.BROADCAST) &&
+                        userRights?.includes(CommunityMemberDtoRightsEnum.ANNEX) &&
+                        userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING)) ||
+                        isSupervisor) && {
                         text: tCommon("delete"),
                         iconId: "fr-icon-delete-line",
                         onClick: () => confirmRemoveVectorDbModal.open(),
@@ -271,7 +278,10 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
                                 nativeInputProps: {
                                     checked: serviceType === "tms",
                                     onChange: () => setServiceType("tms"),
-                                    disabled: tmsEndpoints?.length === 0 || !isAvailable("WMTS-TMS"),
+                                    disabled:
+                                        tmsEndpoints?.length === 0 ||
+                                        !isAvailable("WMTS-TMS") ||
+                                        (!isSupervisor && !userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING)),
                                 },
                             },
                             {
@@ -280,7 +290,10 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
                                 nativeInputProps: {
                                     checked: serviceType === "wfs",
                                     onChange: () => setServiceType("wfs"),
-                                    disabled: wfsEndpoints?.length === 0 || !isAvailable("WFS"),
+                                    disabled:
+                                        wfsEndpoints?.length === 0 ||
+                                        !isAvailable("WFS") ||
+                                        (!isSupervisor && !userRights?.includes(CommunityMemberDtoRightsEnum.BROADCAST)),
                                 },
                             },
                             {
@@ -289,7 +302,10 @@ const VectorDbListItem: FC<VectorDbListItemProps> = ({ datasheetName, datastoreI
                                 nativeInputProps: {
                                     checked: serviceType === "wms-vector",
                                     onChange: () => setServiceType("wms-vector"),
-                                    disabled: wmsVectorEndpoints?.length === 0 || !isAvailable("WMS-VECTOR"),
+                                    disabled:
+                                        wmsVectorEndpoints?.length === 0 ||
+                                        !isAvailable("WMS-VECTOR") ||
+                                        (!isSupervisor && !userRights?.includes(CommunityMemberDtoRightsEnum.BROADCAST)),
                                 },
                             },
                         ]}

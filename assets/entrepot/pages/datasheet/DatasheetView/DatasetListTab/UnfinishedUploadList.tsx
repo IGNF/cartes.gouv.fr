@@ -13,6 +13,8 @@ import { deleteUploadConfirmModal } from "../DatasheetView/DatasheetView";
 import Wait from "../../../../../components/Utils/Wait";
 import LoadingIcon from "../../../../../components/Utils/LoadingIcon";
 import { useTranslation } from "../../../../../i18n/i18n";
+import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
+import useCommunityRights from "@/hooks/useCommunityRights";
 
 type UnfinishedUploadListProps = {
     datastoreId: string;
@@ -42,6 +44,8 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
             queryClient.refetchQueries({ queryKey: RQKeys.datastore_datasheet(datastoreId, datasheetName) });
         },
     });
+
+    const { userRights, isSupervisor } = useCommunityRights();
 
     return (
         <>
@@ -92,32 +96,40 @@ const UnfinishedUploadList: FC<UnfinishedUploadListProps> = ({ datastoreId, uplo
                                         {"Voir le rapport"}
                                     </Button>
                                 ) : (
+                                    (isSupervisor ||
+                                        (userRights?.includes(CommunityMemberDtoRightsEnum.UPLOAD) &&
+                                            userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING))) && (
+                                        <Button
+                                            className={fr.cx("fr-mr-2w")}
+                                            linkProps={
+                                                routes.datastore_datasheet_upload_integration({
+                                                    datastoreId,
+                                                    uploadId: upload._id,
+                                                    datasheetName: upload.tags.datasheet_name,
+                                                }).link
+                                            }
+                                        >
+                                            {"Reprendre l'intégration"}
+                                        </Button>
+                                    )
+                                )}
+                                {(isSupervisor ||
+                                    (userRights?.includes(CommunityMemberDtoRightsEnum.UPLOAD) &&
+                                        userRights?.includes(CommunityMemberDtoRightsEnum.PROCESSING))) && (
                                     <Button
-                                        className={fr.cx("fr-mr-2w")}
-                                        linkProps={
-                                            routes.datastore_datasheet_upload_integration({
-                                                datastoreId,
-                                                uploadId: upload._id,
-                                                datasheetName: upload.tags.datasheet_name,
-                                            }).link
-                                        }
+                                        iconId="fr-icon-delete-fill"
+                                        priority="secondary"
+                                        onClick={() => {
+                                            if (isLastUpload(uploadList)) {
+                                                deleteUploadConfirmModal.open();
+                                            } else {
+                                                deleteUnfinishedUpload.mutate(upload._id);
+                                            }
+                                        }}
                                     >
-                                        {"Reprendre l'intégration"}
+                                        {"Supprimer"}
                                     </Button>
                                 )}
-                                <Button
-                                    iconId="fr-icon-delete-fill"
-                                    priority="secondary"
-                                    onClick={() => {
-                                        if (isLastUpload(uploadList)) {
-                                            deleteUploadConfirmModal.open();
-                                        } else {
-                                            deleteUnfinishedUpload.mutate(upload._id);
-                                        }
-                                    }}
-                                >
-                                    {"Supprimer"}
-                                </Button>
                             </div>
                         </div>
                     </div>

@@ -14,6 +14,9 @@ import ListItem from "../../ListItem";
 import PyramidStoredDataDesc from "../PyramidStoredDataDesc";
 import StoredDataDeleteConfirmDialog from "../StoredDataDeleteConfirmDialog";
 
+import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
+import useCommunityRights from "@/hooks/useCommunityRights";
+
 type PyramidVectorListItemProps = {
     datasheetName: string;
     pyramid: DatasheetStoredDataItem<PyramidVector>;
@@ -40,20 +43,24 @@ const PyramidVectorListItem: FC<PyramidVectorListItemProps> = ({ datasheetName, 
         enabled: showDescription || isOpenConfirmRemovePyramidModal,
     });
 
+    const { userRights, isSupervisor } = useCommunityRights();
+
     return (
         <>
             <ListItem
                 actionButton={
-                    <Button
-                        onClick={() => {
-                            routes.datastore_pyramid_vector_tms_service_new({ datastoreId, pyramidId: pyramid._id, datasheetName }).push();
-                        }}
-                        className={fr.cx("fr-mr-2v")}
-                        priority="secondary"
-                        disabled={pyramid.status !== StoredDataStatusEnum.GENERATED}
-                    >
-                        {t("publish_tms_service")}
-                    </Button>
+                    (isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.BROADCAST)) && (
+                        <Button
+                            onClick={() => {
+                                routes.datastore_pyramid_vector_tms_service_new({ datastoreId, pyramidId: pyramid._id, datasheetName }).push();
+                            }}
+                            className={fr.cx("fr-mr-2v")}
+                            priority="secondary"
+                            disabled={pyramid.status !== StoredDataStatusEnum.GENERATED}
+                        >
+                            {t("publish_tms_service")}
+                        </Button>
+                    )
                 }
                 badge={<StoredDataStatusBadge status={pyramid.status} />}
                 buttonTitle={t("show_linked_datas")}

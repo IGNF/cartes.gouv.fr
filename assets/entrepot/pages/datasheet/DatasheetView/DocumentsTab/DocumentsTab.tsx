@@ -20,6 +20,8 @@ import RQKeys from "../../../../../modules/entrepot/RQKeys";
 import { getFileExtension } from "../../../../../utils";
 import api from "../../../../api";
 import DocumentsListItem from "./DocumentsListItem";
+import { CommunityMemberDtoRightsEnum } from "@/@types/entrepot";
+import useCommunityRights from "@/hooks/useCommunityRights";
 
 const documentAddModal = createModal({
     id: "datasheet-document-add-modal",
@@ -157,19 +159,23 @@ const DocumentsTab: FC<DocumentsTabProps> = ({ datastoreId, datasheetName }) => 
         },
     });
 
+    const { userRights, isSupervisor } = useCommunityRights();
+
     return (
         <>
-            <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-grid-row--middle")}>
-                <Button
-                    iconId="fr-icon-add-line"
-                    onClick={() => {
-                        resetForm();
-                        documentAddModal.open();
-                    }}
-                >
-                    {t("documents_tab.add_document")}
-                </Button>
-            </div>
+            {(isSupervisor || userRights?.includes(CommunityMemberDtoRightsEnum.ANNEX)) && (
+                <div className={fr.cx("fr-grid-row", "fr-grid-row--right", "fr-grid-row--middle")}>
+                    <Button
+                        iconId="fr-icon-add-line"
+                        onClick={() => {
+                            resetForm();
+                            documentAddModal.open();
+                        }}
+                    >
+                        {t("documents_tab.add_document")}
+                    </Button>
+                </div>
+            )}
 
             {documentsListQuery.isLoading && <LoadingText message={t("documents_tab.documents_list.is_loading")} withSpinnerIcon={true} as="p" />}
 
