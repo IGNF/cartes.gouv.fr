@@ -3,11 +3,11 @@
 namespace App\Services\EspaceCoApi;
 
 use App\Exception\ApiException;
+use App\Security\KeycloakTokenManager;
 use App\Services\AbstractApiService;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
@@ -18,10 +18,11 @@ class BaseEspaceCoApiService extends AbstractApiService
         HttpClientInterface $httpClient,
         ParameterBagInterface $parameters,
         Filesystem $filesystem,
-        RequestStack $requestStack,
+        KeycloakTokenManager $tokenManager,
+
         LoggerInterface $logger,
     ) {
-        parent::__construct($httpClient, $parameters, $filesystem, $requestStack, $logger, 'api_espaceco_url');
+        parent::__construct($httpClient, $parameters, $filesystem, $tokenManager, $logger, 'api_espaceco_url');
     }
 
     /**
@@ -41,9 +42,8 @@ class BaseEspaceCoApiService extends AbstractApiService
             }
 
             return $content;
-        } else {
-            $errorResponse = $response->toArray(false);
-            throw new ApiException($errorResponse['message'], $statusCode);
         }
+        $errorResponse = $response->toArray(false);
+        throw new ApiException($errorResponse['message'], $statusCode);
     }
 }

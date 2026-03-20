@@ -2,10 +2,10 @@
 
 namespace App\Services\EspaceCoApi;
 
+use App\Security\KeycloakTokenManager;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Mime\Part\DataPart;
 use Symfony\Component\Mime\Part\Multipart\FormDataPart;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -15,12 +15,12 @@ class CommunityApiService extends BaseEspaceCoApiService
     public function __construct(HttpClientInterface $httpClient,
         ParameterBagInterface $parameters,
         Filesystem $filesystem,
-        RequestStack $requestStack,
+        KeycloakTokenManager $tokenManager,
         LoggerInterface $logger,
         private UserApiService $userApiService,
         private GridApiService $gridApiService,
     ) {
-        parent::__construct($httpClient, $parameters, $filesystem, $requestStack, $logger);
+        parent::__construct($httpClient, $parameters, $filesystem, $tokenManager, $logger);
     }
 
     public function getCommunities(string $name, int $page, int $limit, string $sort): array

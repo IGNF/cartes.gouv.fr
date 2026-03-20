@@ -2,10 +2,10 @@
 
 namespace App\Services\EspaceCoApi;
 
+use App\Security\KeycloakTokenManager;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class CommunityLayerApiService extends BaseEspaceCoApiService
@@ -13,10 +13,10 @@ class CommunityLayerApiService extends BaseEspaceCoApiService
     public function __construct(HttpClientInterface $httpClient,
         ParameterBagInterface $parameters,
         Filesystem $filesystem,
-        RequestStack $requestStack,
+        KeycloakTokenManager $tokenManager,
         LoggerInterface $logger,
     ) {
-        parent::__construct($httpClient, $parameters, $filesystem, $requestStack, $logger);
+        parent::__construct($httpClient, $parameters, $filesystem, $tokenManager, $logger);
     }
 
     /**
