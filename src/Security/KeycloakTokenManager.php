@@ -23,16 +23,24 @@ final class KeycloakTokenManager
     {
         $request = $this->requestStack->getCurrentRequest();
 
-        if ($request?->attributes->has(self::REQUEST_ATTR)) {
+        if (null === $request) {
+            return null;
+        }
+
+        if ($request->attributes->has(self::REQUEST_ATTR)) {
             return $request->attributes->get(self::REQUEST_ATTR);
         }
 
-        $session = $this->requestStack->getSession();
+        if (!$request->hasSession()) {
+            return null;
+        }
+
+        $session = $request->getSession();
 
         /** @var ?AccessToken */
         $token = $session->get(self::SESSION_KEY);
 
-        $request?->attributes->set(self::REQUEST_ATTR, $token);
+        $request->attributes->set(self::REQUEST_ATTR, $token);
         $session->save();
 
         return $token;
@@ -46,7 +54,17 @@ final class KeycloakTokenManager
      */
     public function setToken(AccessToken $token): void
     {
-        $this->requestStack->getSession()->set(self::SESSION_KEY, $token);
-        $this->requestStack->getCurrentRequest()?->attributes->set(self::REQUEST_ATTR, $token);
+        $request = $this->requestStack->getCurrentRequest();
+
+        if (null === $request) {
+            throw new \RuntimeException('Impossible de persister le token Keycloak : aucune requête HTTP en cours.');
+        }
+
+        if (!$request->hasSession()) {
+            throw new \RuntimeException('Impossible de persister le token Keycloak : aucune session disponible pour la requête courante.');
+        }
+
+        $request->getSession()->set(self::SESSION_KEY, $token);
+        $request->attributes->set(self::REQUEST_ATTR, $token);
     }
 }

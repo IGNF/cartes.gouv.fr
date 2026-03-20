@@ -4,7 +4,10 @@ namespace App\Security;
 
 use App\Controller\ApiControllerInterface;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
+use KnpU\OAuth2ClientBundle\Client\OAuth2ClientInterface;
+use KnpU\OAuth2ClientBundle\Client\Provider\KeycloakClient;
 use KnpU\OAuth2ClientBundle\Security\Authenticator\OAuth2Authenticator;
+use League\OAuth2\Client\Token\AccessToken;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -65,11 +68,11 @@ class KeycloakAuthenticator extends OAuth2Authenticator implements Authenticatio
      */
     public function authenticate(Request $request): Passport
     {
-        /** @var \KnpU\OAuth2ClientBundle\Client\OAuth2ClientInterface|\KnpU\OAuth2ClientBundle\Client\Provider\KeycloakClient $keycloakClient */
+        /** @var OAuth2ClientInterface|KeycloakClient */
         $keycloakClient = $this->clientRegistry->getClient('keycloak');
 
         try {
-            /** @var \League\OAuth2\Client\Token\AccessToken $accessToken */
+            /** @var AccessToken */
             $accessToken = $this->fetchAccessToken($keycloakClient);
         } catch (\UnexpectedValueException $ex) {
             $message = "Authentication failed, unable to get token from keycloak : {$ex->getMessage()}";

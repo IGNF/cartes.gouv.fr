@@ -4,7 +4,9 @@ namespace App\Security;
 
 use App\Services\EntrepotApi\UserApiService;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
+use KnpU\OAuth2ClientBundle\Client\Provider\KeycloakClient;
 use Psr\Log\LoggerInterface;
+use Stevenmaguire\OAuth2\Client\Provider\KeycloakResourceOwner;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpClient\Exception\TimeoutException;
 use Symfony\Component\HttpFoundation\Response;
@@ -39,7 +41,7 @@ class KeycloakUserProvider implements UserProviderInterface
             return User::getTestUser();
         }
 
-        /** @var \KnpU\OAuth2ClientBundle\Client\Provider\KeycloakClient $keycloakClient */
+        /** @var KeycloakClient */
         $keycloakClient = $this->clientRegistry->getClient('keycloak');
 
         $accessToken = $this->tokenManager->getToken();
@@ -49,7 +51,7 @@ class KeycloakUserProvider implements UserProviderInterface
         }
 
         try {
-            /** @var \Stevenmaguire\OAuth2\Client\Provider\KeycloakResourceOwner $keycloakUser */
+            /** @var KeycloakResourceOwner */
             $keycloakUser = $this->cache->get('keycloak-user-'.sha1((string) $accessToken), function (ItemInterface $item) use ($accessToken, $keycloakClient) {
                 $item->expiresAfter(60);
 
